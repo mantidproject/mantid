@@ -289,6 +289,10 @@ private:
       return createInputWorkspaceEvent();
     else if (workspaceType == "histo-ragged")
       return createInputWorkspaceHistoRagged();
+    else if (workspaceType == "histo-detector")
+      return createInputWithDetectors("histo");
+    else if (workspaceType == "event-detector")
+      return createInputWithDetectors("event");
     throw std::runtime_error("Undefined workspace type");
   }
 
@@ -332,6 +336,37 @@ private:
     return ws;
   }
 
+  MatrixWorkspace_sptr createInputWithDetectors(std::string workspaceType) const
+  {
+    MatrixWorkspace_sptr ws;
+
+    // Set the type of underlying workspace
+    if (workspaceType == "histo") {
+      ws = createInputWorkspaceHisto();
+    } else if (workspaceType == "histo") {
+      ws = WorkspaceCreationHelper::CreateEventWorkspace(int(nSpec), int(nBins), 50, 0.0, 1., 2);
+      ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    } else {
+      throw std::runtime_error("Undefined workspace type (with detector ids)");
+    }
+
+    // Add an instrument
+    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument("TestInstrument"));
+    ws->setInstrument(inst);
+    // We get a 1:1 map by default so the detector ID should match the spectrum number
+    for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
+    {
+      // Create a detector for each spectra
+      Mantid::Geometry::Detector * det = new Mantid::Geometry::Detector("pixel", static_cast<detid_t>(i), inst.get());
+      inst->add(det);
+      inst->markAsDetector(det);
+      ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+    }
+    return ws;
+  }
+
+
+
   struct Parameters
   {
     Parameters(const std::string& workspaceType = "histo")
@@ -344,6 +379,7 @@ private:
     int StartWorkspaceIndex;
     int EndWorkspaceIndex;
     std::vector<size_t> WorkspaceIndexList;
+    std::vector<detid_t> DetectorList;
     std::string wsType;
 
     // ---- x range ----
@@ -443,6 +479,32 @@ private:
       }
    }
 
+    // ---- detector list ----
+    Parameters& setDetectorList()
+    {
+      DetectorList.resize(3);
+      DetectorList[0] = 0;
+      DetectorList[1] = 1;
+      DetectorList[2] = 3;
+      return *this;
+    }
+    void testDetectorList(const MatrixWorkspace& ws) const
+    {
+      TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
+      if (wsType == "histo-detector")
+      {
+        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[0], 1.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[0], 3.0);
+      }
+      else if (wsType == "event-detector")
+      {
+        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
+        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 2);
+        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 4);
+      }
+   }
+
     // ---- invalid inputs ----
     void setInvalidXRange()
     {
@@ -489,6 +551,10 @@ private:
     if (!params.WorkspaceIndexList.empty())
     {
       TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndexList", params.WorkspaceIndexList) );
+    }
+    if (!params.DetectorList.empty())
+    {
+      TS_ASSERT_THROWS_NOTHING( alg.setProperty("DetectorList", params.DetectorList) );
     }
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
