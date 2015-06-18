@@ -292,6 +292,7 @@ set ( INC_FILES
 	inc/MantidAPI/Workspace_fwd.h
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
+	inc/MantidAPI/WorkspaceGroup_fwd.h
 	inc/MantidAPI/WorkspaceHistory.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
