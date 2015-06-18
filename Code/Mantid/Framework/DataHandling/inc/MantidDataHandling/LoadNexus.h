@@ -8,7 +8,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/Property.h"
 #include <climits>
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

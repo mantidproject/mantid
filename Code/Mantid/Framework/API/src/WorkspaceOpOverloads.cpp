@@ -12,7 +12,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include <numeric>
 
