@@ -128,7 +128,7 @@ void FitOptionsBrowser::createCommonProperties()
     m_intManager->setMinimum(m_maxIterations,0);
     m_browser->addProperty(m_maxIterations);
 
-    addProperty("MaxIterations", &FitOptionsBrowser::getMaxIterations, &FitOptionsBrowser::setMaxIterations);
+    addProperty("MaxIterations", m_maxIterations, &FitOptionsBrowser::getIntProperty, &FitOptionsBrowser::setIntProperty);
   }
 
   // Set up the minimizer property.
@@ -157,10 +157,8 @@ void FitOptionsBrowser::createCommonProperties()
     {
       m_enumManager->setValue(m_minimizer,i);
     }
-
     m_browser->addProperty(m_minimizerGroup);
-
-    addProperty("Minimizer", &FitOptionsBrowser::getMinimizer, &FitOptionsBrowser::setMinimizer);
+    addProperty("Minimizer", m_minimizer, &FitOptionsBrowser::getMinimizer, &FitOptionsBrowser::setMinimizer);
   }
 
   // Create cost function property
@@ -170,17 +168,14 @@ void FitOptionsBrowser::createCommonProperties()
     std::vector<std::string> costOptions =
       Mantid::API::CostFunctionFactory::Instance().getKeys();
     QStringList costFunctions;
-
     // Store them in the m_minimizer enum property
     for(auto it = costOptions.begin(); it != costOptions.end(); ++it)
     {
       costFunctions << QString::fromStdString(*it);
     }
     m_enumManager->setEnumNames(m_costFunction,costFunctions);
-
     m_browser->addProperty(m_costFunction);
-
-    addProperty("CostFunction", &FitOptionsBrowser::getCostFunction, &FitOptionsBrowser::setCostFunction);
+    addProperty("CostFunction", m_costFunction, &FitOptionsBrowser::getStringEnumProperty, &FitOptionsBrowser::setStringEnumProperty);
   }
 
 }
@@ -191,7 +186,7 @@ void FitOptionsBrowser::createNormalFitProperties()
   m_output = m_stringManager->addProperty("Output");
   {
     m_browser->addProperty(m_output);
-    addProperty("Output", &FitOptionsBrowser::getOutput, &FitOptionsBrowser::setOutput);
+    addProperty("Output", m_output, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
     m_normalProperties << m_output;
   }
 
@@ -199,7 +194,7 @@ void FitOptionsBrowser::createNormalFitProperties()
   m_ignoreInvalidData = m_boolManager->addProperty("Ignore Invalid Data");
   {
     m_browser->addProperty(m_ignoreInvalidData);
-    addProperty("IgnoreInvalidData", &FitOptionsBrowser::getIgnoreInvalidData, &FitOptionsBrowser::setIgnoreInvalidData);
+    addProperty("IgnoreInvalidData", m_ignoreInvalidData, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
     m_normalProperties << m_ignoreInvalidData;
   }
 }
@@ -213,7 +208,7 @@ void FitOptionsBrowser::createSequentialFitProperties()
     types << "Sequential" << "Individual";
     m_enumManager->setEnumNames(m_fitType,types);
     m_enumManager->setValue(m_fitType,0);
-    addProperty("FitType", &FitOptionsBrowser::getFitType, &FitOptionsBrowser::setFitType);
+    addProperty("FitType", m_fitType, &FitOptionsBrowser::getStringEnumProperty, &FitOptionsBrowser::setStringEnumProperty);
     m_sequentialProperties << m_fitType;
   }
 
@@ -221,17 +216,18 @@ void FitOptionsBrowser::createSequentialFitProperties()
   m_outputWorkspace = m_stringManager->addProperty("OutputWorkspace");
   {
     m_browser->addProperty(m_outputWorkspace);
-    addProperty("OutputWorkspace", &FitOptionsBrowser::getOutputWorkspace, &FitOptionsBrowser::setOutputWorkspace);
+    addProperty("OutputWorkspace", m_outputWorkspace, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
     m_sequentialProperties << m_outputWorkspace;
   }
 }
 
-void FitOptionsBrowser::addProperty(const QString& name, 
-  QString (FitOptionsBrowser::*getter)()const, 
-  void (FitOptionsBrowser::*setter)(const QString&))
+void FitOptionsBrowser::addProperty(const QString& name, QtProperty* prop,
+                                    QString (FitOptionsBrowser::*getter)(QtProperty*)const, 
+  void (FitOptionsBrowser::*setter)(QtProperty*,const QString&))
 {
-  m_getters[name] = getter;
-  m_setters[name] = setter;
+  m_propertyNameMap[name] = prop;
+  m_getters[prop] = getter;
+  m_setters[prop] = setter;
 }
 
 
@@ -414,15 +410,16 @@ QtProperty* FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property* 
  */
 void FitOptionsBrowser::copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) const
 {
-    for(auto p = m_getters.constBegin(); p != m_getters.constEnd(); ++p)
+  for(auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p)
+  {
+    auto propertyName = p.key().toStdString();
+    if (fit.existsProperty(propertyName))
     {
-      auto propertyName = p.key().toStdString();
-      if (fit.existsProperty(propertyName))
-      {
-        auto f = p.value();
-        fit.setPropertyValue(propertyName, (this->*f)().toStdString() );
-      }
+      auto prop = p.value();
+      auto f = m_getters[prop];
+      fit.setPropertyValue(propertyName, (this->*f)(prop).toStdString() );
     }
+  }
 }
 
 /**
@@ -431,12 +428,13 @@ void FitOptionsBrowser::copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) 
  */
 QString FitOptionsBrowser::getProperty(const QString& name) const
 {
-  if ( !m_getters.contains(name) )
+  if ( !m_propertyNameMap.contains(name) )
   {
     throw std::runtime_error("Property " + name.toStdString() + " isn't supported by the browser.");
   }
-  auto f = m_getters[name];
-  return (this->*f)();
+  auto prop = m_propertyNameMap[name];
+  auto f = m_getters[prop];
+  return (this->*f)(prop);
 }
 
 /**
@@ -446,18 +444,19 @@ QString FitOptionsBrowser::getProperty(const QString& name) const
  */
 void FitOptionsBrowser::setProperty(const QString& name, const QString& value)
 {
-  if ( !m_getters.contains(name) )
+  if ( !m_propertyNameMap.contains(name) )
   {
     throw std::runtime_error("Property " + name.toStdString() + " isn't supported by the browser.");
   }
-  auto f = m_setters[name];
-  (this->*f)(value);
+  auto prop = m_propertyNameMap[name];
+  auto f = m_setters[prop];
+  (this->*f)(prop,value);
 }
 
 /**
  * Get the value of the Minimizer property.
  */
-QString FitOptionsBrowser::getMinimizer() const
+QString FitOptionsBrowser::getMinimizer(QtProperty*) const
 {
   int i = m_enumManager->value(m_minimizer);
   QString minimStr = m_enumManager->enumNames(m_minimizer)[i];
@@ -505,136 +504,95 @@ QString FitOptionsBrowser::getMinimizer() const
  * Set new value to the Minimizer property.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setMinimizer(const QString& value)
+void FitOptionsBrowser::setMinimizer(QtProperty*, const QString& value)
 {
   QStringList terms = value.split(',');
   int i = m_enumManager->enumNames(m_minimizer).indexOf(terms[0]);
   m_enumManager->setValue(m_minimizer,i);
 }
 
+// ------------------------- Generic setters and getters ------------------------------//
+
 /**
- * Get the value of the CostFunction property.
+ * Get the value of an integer algorithm property.
+ * @param prop :: The corresponding QtProperty.
  */
-QString FitOptionsBrowser::getCostFunction() const
+QString FitOptionsBrowser::getIntProperty(QtProperty* prop) const
 {
-  int i = m_enumManager->value(m_costFunction);
-  return m_enumManager->enumNames(m_costFunction)[i];
+  return QString::number(m_intManager->value(prop));
 }
 
 /**
- * Set new value to the CostFunction property.
+ * Set a new value of an integer algorithm property.
+ * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setCostFunction(const QString& value)
+void FitOptionsBrowser::setIntProperty(QtProperty* prop, const QString& value)
 {
-  int i = m_enumManager->enumNames(m_costFunction).indexOf(value);
-  m_enumManager->setValue(m_costFunction,i);
+  m_intManager->setValue(prop,value.toInt());
 }
 
 /**
- * Get the value of the MaxIterations property.
+ * Get the value of a bool algorithm property.
+ * @param prop :: The corresponding QtProperty.
  */
-QString FitOptionsBrowser::getMaxIterations() const
+QString FitOptionsBrowser::getBoolProperty(QtProperty* prop) const
 {
-  return QString::number(m_intManager->value(m_maxIterations));
+  return QString::number(m_boolManager->value(prop));
 }
 
 /**
- * Set new value to the MaxIterations property.
+ * Set a new value of a bool algorithm property.
+ * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setMaxIterations(const QString& value)
+void FitOptionsBrowser::setBoolProperty(QtProperty* prop, const QString& value)
 {
-  m_intManager->setValue(m_maxIterations,value.toInt());
+  bool boolValue = (value == "1") || (value.lower() == "true");
+  m_boolManager->setValue( prop, boolValue );
 }
 
 /**
- * Get the value of the Output property.
+ * Get the value of a string algorithm property with predefined set of values.
+ * @param prop :: The corresponding QtProperty.
  */
-QString FitOptionsBrowser::getOutput() const
+QString FitOptionsBrowser::getStringEnumProperty(QtProperty* prop) const
 {
-  return m_stringManager->value(m_output);
+  int i = m_enumManager->value(prop);
+  return m_enumManager->enumNames(prop)[i];
 }
 
 /**
- * Set new value to the Output property.
+ * Set a new value of a string algorithm property with predefined set of values.
+ * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setOutput(const QString& value)
+void FitOptionsBrowser::setStringEnumProperty(QtProperty* prop, const QString& value)
 {
-  m_stringManager->setValue(m_output,value);
+  int i = m_enumManager->enumNames(prop).indexOf(value);
+  m_enumManager->setValue(prop,i);
 }
 
 /**
- * Get the value of the IgnoreInvalidData property.
+ * Get the value of a string algorithm property.
+ * @param prop :: The corresponding QtProperty.
  */
-QString FitOptionsBrowser::getIgnoreInvalidData() const
+QString FitOptionsBrowser::getStringProperty(QtProperty* prop) const
 {
-  return QString::number(m_boolManager->value(m_ignoreInvalidData));
+  return m_stringManager->value(prop);
 }
 
 /**
- * Set new value to the IgnoreInvalidData property.
+ * Set a new value of a string algorithm property.
+ * @param prop :: The corresponding QtProperty.
  * @param value :: The new value.
  */
-void FitOptionsBrowser::setIgnoreInvalidData(const QString& value)
+void FitOptionsBrowser::setStringProperty(QtProperty* prop, const QString& value)
 {
-  bool boolValue = (value == "1") || (value == "true");
-  m_boolManager->setValue( m_ignoreInvalidData, boolValue );
+  m_stringManager->setValue(prop, value);
 }
 
-/**
- * Get the value of the FitType property (PlotPeakByLogValue algorithm).
- */
-QString FitOptionsBrowser::getFitType() const
-{
-  auto value = m_enumManager->value(m_fitType);
-  if (value == 0)
-  {
-    return "Sequential";
-  }
-  else
-  {
-    return "Individual";
-  }
-}
-
-/**
- * Set new value to the FitType property (PlotPeakByLogValue algorithm).
- * @param value :: The new value.
- */
-void FitOptionsBrowser::setFitType(const QString& value)
-{
-  if (value == "Sequential")
-  {
-    m_enumManager->setValue(m_fitType,0);
-  }
-  else if (value == "Individual")
-  {
-    m_enumManager->setValue(m_fitType,1);
-  }
-  else
-  {
-    throw std::runtime_error("Undefined value for property FitType.");
-  }
-}
-
-/**
- * Get the value of the OutputWorkspace property (PlotPeakByLogValue algorithm).
- */
-QString FitOptionsBrowser::getOutputWorkspace() const
-{
-  return m_stringManager->value(m_outputWorkspace);
-}
-
-/**
- * Set new value to the OutputWorkspace property (PlotPeakByLogValue algorithm).
- * @param value :: The new value.
- */
-void FitOptionsBrowser::setOutputWorkspace(const QString& value)
-{
-  m_stringManager->setValue(m_outputWorkspace,value);
-}
+// ------------------------------------------------------------------------------------//
 
 /**
  * Save the last property values in settings.
@@ -642,10 +600,11 @@ void FitOptionsBrowser::setOutputWorkspace(const QString& value)
  */
 void FitOptionsBrowser::saveSettings(QSettings& settings) const
 {
-  for(auto p = m_getters.constBegin(); p != m_getters.constEnd(); ++p)
+  for(auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p)
   {
-    auto f = p.value();
-    settings.setValue( p.key(), (this->*f)() );
+    auto prop = p.value();
+    auto f = m_getters[prop];
+    settings.setValue( p.key(), (this->*f)(prop) );
   }
 }
 
@@ -655,13 +614,14 @@ void FitOptionsBrowser::saveSettings(QSettings& settings) const
  */
 void FitOptionsBrowser::loadSettings(const QSettings& settings)
 {
-  for(auto p = m_setters.constBegin(); p != m_setters.constEnd(); ++p)
+  for(auto p = m_propertyNameMap.constBegin(); p != m_propertyNameMap.constEnd(); ++p)
   {
     QString value = settings.value( p.key() ).toString();
     if ( !value.isEmpty() )
     {
-      auto f = p.value();
-      (this->*f)( value );
+      auto prop = p.value();
+      auto f = m_setters[prop];
+      (this->*f)(prop, value);
     }
   }
 }
