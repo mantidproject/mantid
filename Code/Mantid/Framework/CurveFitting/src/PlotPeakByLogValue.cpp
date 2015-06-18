@@ -26,6 +26,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -227,7 +228,13 @@ void PlotPeakByLogValue::exec() {
       double logValue = 0;
       if (logName.empty()) {
         API::Axis *axis = data.ws->getAxis(1);
-        logValue = (*axis)(j);
+        if(dynamic_cast<BinEdgeAxis *>(axis)) {
+          double lowerEdge((*axis)(j));
+          double upperEdge((*axis)(j+1));
+          logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
+        }
+        else
+          logValue = (*axis)(j);
       } else if (logName != "SourceName") {
         Kernel::Property *prop = data.ws->run().getLogData(logName);
         if (!prop) {
