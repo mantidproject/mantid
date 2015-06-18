@@ -4,6 +4,7 @@
 #include "ui_PreviewPlot.h"
 
 #include "WidgetDllOption.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/MantidWidget.h"
 
@@ -60,6 +61,7 @@ namespace MantidWidgets
 
     Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
     Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
+    Q_PROPERTY(bool showErrorBars READ errorBarsAreShown WRITE showErrorBars)
 
   public:
     PreviewPlot(QWidget *parent = NULL, bool init = true);
@@ -69,6 +71,7 @@ namespace MantidWidgets
     void setCanvasColour(const QColor & colour);
 
     bool legendIsShown();
+    bool errorBarsAreShown();
 
     void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
 
@@ -101,6 +104,7 @@ namespace MantidWidgets
 
   public slots:
     void showLegend(bool show);
+    void showErrorBars(bool show);
     void togglePanTool(bool enabled);
     void toggleZoomTool(bool enabled);
     void resetView();
@@ -115,6 +119,7 @@ namespace MantidWidgets
     {
       Mantid::API::MatrixWorkspace_sptr ws;
       QwtPlotCurve *curve;
+      MantidQt::MantidWidgets::ErrorCurve *errorCurve;
       QLabel *label;
       QColor colour;
       size_t wsIndex;
@@ -126,8 +131,8 @@ namespace MantidWidgets
     void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
     void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
-    QwtPlotCurve * addCurve(Mantid::API::MatrixWorkspace_sptr ws, const size_t specIndex, const QColor & curveColour);
-    void removeCurve(QwtPlotCurve *curve);
+    void addCurve(PlotCurveConfiguration& curveConfig, Mantid::API::MatrixWorkspace_sptr ws, const size_t specIndex, const QColor & curveColour);
+    void removeCurve(QwtPlotItem *curve);
 
     QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
 
@@ -171,6 +176,9 @@ namespace MantidWidgets
 
     /// Menu action for showing/hiding plot legend
     QAction *m_showLegendAction;
+
+    /// Menu action for showing/hiding error bars
+    QAction *m_showErrorsAction;
 
   };
 

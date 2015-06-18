@@ -34,9 +34,14 @@ namespace
 PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent),
   m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
   m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
-  m_init(init), m_curves(),
-  m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
-  m_contextMenu(new QMenu(this)), m_showLegendAction(NULL)
+  m_init(init),
+  m_curves(),
+  m_magnifyTool(NULL),
+  m_panTool(NULL),
+  m_zoomTool(NULL),
+  m_contextMenu(new QMenu(this)),
+  m_showLegendAction(NULL),
+  m_showErrorsAction(NULL)
 {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
@@ -109,6 +114,12 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   connect(m_showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
   m_contextMenu->addAction(m_showLegendAction);
 
+  // Create the show errors option
+  m_showErrorsAction = new QAction("Show Errors", m_contextMenu);
+  m_showErrorsAction->setCheckable(true);
+  connect(m_showErrorsAction, SIGNAL(toggled(bool)), this, SLOT(showErrorBars(bool)));
+  m_contextMenu->addAction(m_showErrorsAction);
+
   connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
   connect(this, SIGNAL(needToHardReplot()), this, SLOT(hardReplot()));
 }
@@ -159,6 +170,17 @@ void PreviewPlot::setCanvasColour(const QColor & colour)
 bool PreviewPlot::legendIsShown()
 {
   return m_showLegendAction->isChecked();
+}
+
+
+/**
+ * Checks to see if the plot curves have error bars shown.
+ *
+ * @returns True if error bars are shown
+ */
+bool PreviewPlot::errorBarsAreShown()
+{
+  return m_showErrorsAction->isChecked();
 }
 
 
@@ -232,7 +254,7 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
     removeSpectrum(curveName);
 
   // Create the curve
-  QwtPlotCurve * curve = addCurve(ws, specIndex, curveColour);
+  addCurve(m_curves[curveName], ws, specIndex, curveColour);
 
   // Create the curve label
   QLabel *label = new QLabel(curveName);
@@ -244,7 +266,6 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
   label->setVisible(legendIsShown());
 
   m_curves[curveName].ws = ws;
-  m_curves[curveName].curve = curve;
   m_curves[curveName].label = label;
   m_curves[curveName].colour = curveColour;
   m_curves[curveName].wsIndex = specIndex;
@@ -303,6 +324,7 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
   if(m_curves.contains(curveName))
   {
     removeCurve(m_curves[curveName].curve);
+    removeCurve(m_curves[curveName].errorCurve);
     m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
     delete m_curves[curveName].label;
   }
@@ -410,6 +432,18 @@ void PreviewPlot::showLegend(bool show)
 
 
 /**
+ * Shows or hides error bars on all curves.
+ *
+ * @param show If the legend should be shown
+ */
+void PreviewPlot::showErrorBars(bool show)
+{
+  m_showErrorsAction->setChecked(show);
+  emit needToHardReplot();
+}
+
+
+/**
  * Toggles the pan plot tool.
  *
  * @param enabled If the tool should be enabled
@@ -487,6 +521,7 @@ void PreviewPlot::clear()
   for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
   {
     removeCurve(it.value().curve);
+    removeCurve(it.value().errorCurve);
     m_uiForm.loLegend->removeWidget(it.value().label);
     delete it.value().label;
   }
@@ -516,7 +551,8 @@ void PreviewPlot::hardReplot()
   for(auto it = keys.begin(); it != keys.end(); ++it)
   {
     removeCurve(m_curves[*it].curve);
-    m_curves[*it].curve = addCurve(m_curves[*it].ws, m_curves[*it].wsIndex, m_curves[*it].colour);
+    removeCurve(m_curves[*it].errorCurve);
+    addCurve(m_curves[*it], m_curves[*it].ws, m_curves[*it].wsIndex, m_curves[*it].colour);
   }
 
   emit needToReplot();
@@ -568,13 +604,13 @@ void PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf)
 /**
  * Creates a new curve and adds it to the plot.
  *
+ * @param curveConfig Curve configuration to add to
  * @param ws Worksapce pointer
  * @param specIndex Index of histogram to plot
  * @param curveColour Colour of curve
- * @return Pointer to new curve
  */
-QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specIndex,
-   const QColor & curveColour)
+void PreviewPlot::addCurve(PlotCurveConfiguration& curveConfig,
+    MatrixWorkspace_sptr ws, const size_t specIndex, const QColor & curveColour)
 {
   // Check the spectrum index is in range
   if(specIndex >= ws->getNumberHistograms())
@@ -623,12 +659,21 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   QwtArrayData wsData(dataX, dataY);
 
   // Create the new curve
-  QwtPlotCurve * curve = new QwtPlotCurve();
-  curve->setData(wsData);
-  curve->setPen(curveColour);
-  curve->attach(m_uiForm.plot);
+  curveConfig.curve = new QwtPlotCurve();
+  curveConfig.curve->setData(wsData);
+  curveConfig.curve->setPen(curveColour);
+  curveConfig.curve->attach(m_uiForm.plot);
 
-  return curve;
+  // Create error bars if needed
+  if(errorBarsAreShown())
+  {
+    curveConfig.errorCurve = new ErrorCurve(curveConfig.curve, ws->readE(specIndex));
+    curveConfig.errorCurve->attach(m_uiForm.plot);
+  }
+  else
+  {
+    curveConfig.errorCurve = NULL;
+  }
 }
 
 
@@ -637,7 +682,7 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
  *
  * @param curve Curve to remove
  */
-void PreviewPlot::removeCurve(QwtPlotCurve * curve)
+void PreviewPlot::removeCurve(QwtPlotItem * curve)
 {
   if(!curve)
     return;
