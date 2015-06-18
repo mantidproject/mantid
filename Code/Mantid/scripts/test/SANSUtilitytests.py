@@ -343,7 +343,7 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self.assertTrue(complete)
         self.assertTrue(not ws_name in mtd)
 
-    def test_non_Q1D_and_Qxy_history_and_non_Incident_Monitor_WS_is_not_valid_and_produces_error_message(self):
+    def test_non_Q1D_and_Qxy_history_is_not_valid_and_produces_error_message(self):
         # Arrange
         ws_name = 'ws'
         self._setup_workspace(ws_name, 'Histogram')
@@ -353,21 +353,6 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         message.strip()
         self.assertTrue(message)
         self.assertTrue(not complete)
-
-        self._removeWorkspace(ws_name)
-        self.assertTrue(not ws_name in mtd)
-
-    def test_Incident_Monitor_WS_is_detected_as_valid(self):
-        # Arrange
-        ws_name = 'ws' + su.INCIDENT_MONITOR_TAG;
-        self._setup_workspace(ws_name, 'Histogram')
-        # Act
-        message, complete = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = ws_name)
-
-        # Assert
-        message.strip()
-        self.assertTrue(not message)
-        self.assertTrue(complete)
 
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
