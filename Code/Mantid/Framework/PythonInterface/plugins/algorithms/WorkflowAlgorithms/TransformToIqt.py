@@ -215,7 +215,7 @@ class TransformToIqt(PythonAlgorithm):
         sample_logs = [
                 ('iqt_sample_workspace', self._sample),
                 ('iqt_resolution_workspace', self._resolution),
-                ('iqt_binning', '%d,%d,%d' % (self._e_min, self._e_width, self._e_max))
+                ('iqt_binning', '%f,%f,%f' % (self._e_min, self._e_width, self._e_max))
             ]
 
         AddSampleLogMultiple(Workspace=self._output_workspace,
