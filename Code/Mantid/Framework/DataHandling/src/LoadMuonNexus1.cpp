@@ -20,12 +20,15 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include <Poco/Path.h>
 #include <limits>
 #include <cmath>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_array.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -235,6 +238,7 @@ void LoadMuonNexus1::exec() {
       localWorkspace->setComment(notes);
     }
     addPeriodLog(localWorkspace,period);
+    addGoodFrames(localWorkspace,period,nxload.t_nper);
 
     size_t counter = 0;
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
@@ -648,14 +652,6 @@ LoadMuonNexus1::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace) {
     g_log.warning("run/duration is not available, dur log not added.");
   }
 
-  // Get number of good frames
-  NXEntry runInstrumentBeam = root.openEntry("run/instrument/beam");
-  NXInfo infoGoodTotalFrames = runInstrumentBeam.getDataSetInfo("frames_good");
-  if (infoGoodTotalFrames.stat != NX_ERROR) {
-    int dum = root.getInt("run/instrument/beam/frames_good");
-    runDetails.addProperty("goodfrm", dum);
-  }
-
   // Get sample parameters
   NXEntry runSample = root.openEntry("run/sample");
 
@@ -669,6 +665,9 @@ LoadMuonNexus1::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace) {
     runDetails.addProperty("sample_magn_field",
                            static_cast<double>(magn_field));
   }
+
+
+
 }
 
 /// Run the LoadLog Child Algorithm
@@ -737,6 +736,79 @@ void LoadMuonNexus1::addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace, 
     run.removeLogData("period 1");
     runLogs.addPeriodLog(static_cast<int>(period) + 1, run);
   }
+}
+
+void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
+                                   int64_t period, int nperiods) {
+
+  // Get handle to nexus file
+  ::NeXus::File handle(m_filename, NXACC_READ);
+
+  // For single-period datasets, read /run/instrument/beam/frames_good
+  if ( nperiods == 1 ) {
+
+    try {
+
+      handle.openPath("run/instrument/beam");
+      handle.openData("frames_good");
+
+      // read frames_period_daq
+      boost::scoped_array<int> dataVals(new int[1]);
+      handle.getData(dataVals.get());
+
+      auto &run = localWorkspace->mutableRun();
+      run.addProperty("goodfrm", dataVals[0]);
+
+    } catch (::NeXus::Exception &) {
+      g_log.warning("Could not read /run/instrument/beam/frames_good");
+    }
+
+  } else {
+    // For multi-period datasets, read entries in
+    // /run/instrument/beam/frames_period_daq
+    try {
+
+      handle.openPath("run/instrument/beam/");
+      handle.openData("frames_period_daq");
+
+      ::NeXus::Info info = handle.getInfo();
+      // Check that frames_period_daq contains values for
+      // every period
+      if (period >= info.dims[0]) {
+        std::ostringstream error;
+        error << "goodfrm not found for period " << period;
+        throw std::runtime_error(error.str());
+      }
+      if (nperiods != info.dims[0]) {
+        std::ostringstream error;
+        error << "Inconsistent number of period entries found (";
+        error << info.dims[0];
+        error << "!=" << nperiods << ")";
+        throw std::runtime_error(error.str());
+      }
+
+      // read frames_period_daq
+      boost::scoped_array<int> dataVals(new int[info.dims[0]]);
+      handle.getData(dataVals.get());
+
+      auto &run = localWorkspace->mutableRun();
+      if (period == 0) {
+        // If this is the first period
+        // localWorkspace will not contain goodfrm
+        run.addProperty("goodfrm", dataVals[0]);
+
+      } else {
+        // If period > 0, we need to remove
+        // previous goodfrm log value
+        run.removeLogData("goodfrm");
+        run.addProperty("goodfrm", dataVals[period]);
+      }
+    } catch (::NeXus::Exception &) {
+      g_log.warning("Could not read /run/instrument/beam/frames_period_daq");
+    }
+  } // else
+
+  handle.close();
 }
 
 /**
