@@ -231,9 +231,9 @@ public:
                                             QwtDataY(1, 0.143444, 1E-3),
                                             QwtDataY(2, 0.128856, 1E-3)),
                                       AllOf(Property(&std::vector<double>::size,3),
-                                            VectorValue(0,1.282E-3,1E-6),
-                                            VectorValue(1,1.281E-3,1E-6),
-                                            VectorValue(2,1.277E-3,1E-6))));
+                                            VectorValue(0,1.278E-3,1E-6),
+                                            VectorValue(1,1.278E-3,1E-6),
+                                            VectorValue(2,1.274E-3,1E-6))));
     m_view->requestLoading();
   }
 
