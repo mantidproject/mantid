@@ -1,8 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as sapi
-
 
 class EnginXCalibrate(PythonAlgorithm):
     def category(self):
@@ -94,20 +92,7 @@ class EnginXCalibrate(PythonAlgorithm):
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            self._generateOutputParTable(tblName)
-
-    def _generateOutputParTable(self, name):
-        """
-        Produces a table workspace with the two calibration parameters
-
-        @param name :: the name to use for the table workspace that is created here
-        """
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-        tbl.addColumn('double', 'difc')
-        tbl.addColumn('double', 'zero')
-        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
-
-        self.log().information("Output parameters added into a table workspace: %s" % name)
-
+            EnginXUtils.generateOutputParFitTable(tblName, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % name)
 
 AlgorithmFactory.subscribe(EnginXCalibrate)

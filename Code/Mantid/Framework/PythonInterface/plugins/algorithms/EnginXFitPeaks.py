@@ -125,6 +125,9 @@ class EnginXFitPeaks(PythonAlgorithm):
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
         """
+
+        import EnginXUtils
+
         # mandatory outputs
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
@@ -132,19 +135,8 @@ class EnginXFitPeaks(PythonAlgorithm):
         # optional outputs
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            self._generateOutputParFitTable(tblName)
-
-    def _generateOutputParFitTable(self, name):
-        """
-        Produces a table workspace with the two fitted parameters
-        @param name :: the name to use for the table workspace that is created here
-        """
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-        tbl.addColumn('double', 'difc')
-        tbl.addColumn('double', 'zero')
-        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
-
-        self.log().information("Output parameters added into a table workspace: %s" % name)
+            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % name)
 
     def _fitAllPeaks(self, inWS, wsIndex, foundPeaks, expectedPeaksD):
         """

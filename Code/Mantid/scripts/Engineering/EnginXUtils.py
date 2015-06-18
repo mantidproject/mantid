@@ -2,12 +2,13 @@
 import os
 
 from mantid.api import *
-from mantid.simpleapi import *
+import mantid.simpleapi as sapi
 
 def getDetIDsForBank(bank):
     """ Returns detector IDs corresponding to the specified EnginX bank number
     """
-    groupingFilePath = os.path.join(config.getInstrumentDirectory(), 'Grouping', 'ENGINX_Grouping.xml')
+    groupingFilePath = os.path.join(sapi.config.getInstrumentDirectory(),
+                                    'Grouping', 'ENGINX_Grouping.xml')
 
     alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
     alg.setProperty('InputFile', groupingFilePath)
@@ -22,7 +23,7 @@ def getDetIDsForBank(bank):
         if grouping.readY(i)[0] == bank:
             detIDs.add(grouping.getDetector(i).getID())
 
-    DeleteWorkspace(grouping)
+    sapi.DeleteWorkspace(grouping)
 
     if len(detIDs) == 0:
         raise Exception('Unknown bank')
@@ -42,3 +43,14 @@ def getWsIndicesForBank(bank, ws):
             return False
 
     return [i for i in range(0, ws.getNumberHistograms()) if isIndexInBank(i)]
+
+def  generateOutputParTable(self, name, difc, zero):
+    """
+    Produces a table workspace with the two fitted calibration parameters
+
+    @param name :: the name to use for the table workspace that is created here
+        """
+    tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
+    tbl.addColumn('double', 'difc')
+    tbl.addColumn('double', 'zero')
+    tbl.addRow([float(difc), float(zero)])
