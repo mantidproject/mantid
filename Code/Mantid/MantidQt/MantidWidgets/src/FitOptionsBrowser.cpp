@@ -100,11 +100,11 @@ void FitOptionsBrowser::createBrowser()
 void FitOptionsBrowser::createProperties()
 {
   createCommonProperties();
-  if (m_fittingType == Normal || m_fittingType == NormalAndSequential)
+  if (m_fittingType == Simultaneous || m_fittingType == SimultaneousAndSequential)
   {
-    createNormalFitProperties();
+    createSimultaneousFitProperties();
   }
-  if (m_fittingType == Sequential || m_fittingType == NormalAndSequential)
+  if (m_fittingType == Sequential || m_fittingType == SimultaneousAndSequential)
   {
     createSequentialFitProperties();
   }
@@ -112,11 +112,11 @@ void FitOptionsBrowser::createProperties()
 
 void FitOptionsBrowser::createCommonProperties()
 {
-  if (m_fittingType == NormalAndSequential)
+  if (m_fittingType == SimultaneousAndSequential)
   {
     m_fittingTypeProp = m_enumManager->addProperty("Fitting");
     QStringList types;
-    types << "Normal" << "Sequential";
+    types << "Simultaneous" << "Sequential";
     m_enumManager->setEnumNames(m_fittingTypeProp, types);
     m_browser->addProperty(m_fittingTypeProp);
   }
@@ -180,14 +180,14 @@ void FitOptionsBrowser::createCommonProperties()
 
 }
 
-void FitOptionsBrowser::createNormalFitProperties()
+void FitOptionsBrowser::createSimultaneousFitProperties()
 {
   // Create Output property
   m_output = m_stringManager->addProperty("Output");
   {
     m_browser->addProperty(m_output);
     addProperty("Output", m_output, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
-    m_normalProperties << m_output;
+    m_simultaneousProperties << m_output;
   }
 
   // Create Ignore property
@@ -195,7 +195,7 @@ void FitOptionsBrowser::createNormalFitProperties()
   {
     m_browser->addProperty(m_ignoreInvalidData);
     addProperty("IgnoreInvalidData", m_ignoreInvalidData, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
-    m_normalProperties << m_ignoreInvalidData;
+    m_simultaneousProperties << m_ignoreInvalidData;
   }
 }
 
@@ -218,6 +218,14 @@ void FitOptionsBrowser::createSequentialFitProperties()
     m_browser->addProperty(m_outputWorkspace);
     addProperty("OutputWorkspace", m_outputWorkspace, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
     m_sequentialProperties << m_outputWorkspace;
+  }
+
+  // Create CreateOutput property
+  auto prop = m_boolManager->addProperty("Create Output");
+  {
+    m_browser->addProperty(prop);
+    addProperty("CreateOutput", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
+    m_sequentialProperties << prop;
   }
 }
 
@@ -313,7 +321,7 @@ void FitOptionsBrowser::switchFitType()
  */
 void FitOptionsBrowser::displayNormalFitProperties()
 {
-  foreach(QtProperty* prop, m_normalProperties)
+  foreach(QtProperty* prop, m_simultaneousProperties)
   {
     m_browser->addProperty(prop);
   }
@@ -332,7 +340,7 @@ void FitOptionsBrowser::displaySequentialFitProperties()
   {
     m_browser->addProperty(prop);
   }
-  foreach(QtProperty* prop, m_normalProperties)
+  foreach(QtProperty* prop, m_simultaneousProperties)
   {
     m_browser->removeProperty(prop);
   }
@@ -628,12 +636,32 @@ void FitOptionsBrowser::loadSettings(const QSettings& settings)
 
 /**
  * Get the current fitting type, ie which algorithm to use:
- *    Normal for Fit and Sequential for PlotPeakByLogValue.
+ *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
  */
 FitOptionsBrowser::FittingType FitOptionsBrowser::getCurrentFittingType() const
 {
   auto value = m_enumManager->value(m_fittingTypeProp);
   return static_cast<FitOptionsBrowser::FittingType>(value);
+}
+
+/**
+ * Set the current fitting type, ie which algorithm to use:
+ *    Simultaneous for Fit and Sequential for PlotPeakByLogValue.
+ */
+void FitOptionsBrowser::setCurrentFittingType(FitOptionsBrowser::FittingType fitType)
+{
+  m_enumManager->setValue(m_fittingTypeProp, fitType);
+}
+
+void FitOptionsBrowser::lockCurrentFittingType(FitOptionsBrowser::FittingType fitType)
+{
+  m_enumManager->setValue(m_fittingTypeProp, fitType);
+  m_fittingTypeProp->setEnabled(false);
+}
+
+void FitOptionsBrowser::unlockCurrentFittingType()
+{
+  m_fittingTypeProp->setEnabled(true);
 }
 
 } // MantidWidgets

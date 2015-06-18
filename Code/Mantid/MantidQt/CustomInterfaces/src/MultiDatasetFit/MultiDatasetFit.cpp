@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtMantidWidgets/FitOptionsBrowser.h"
@@ -88,7 +89,7 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
-      NULL, MantidQt::MantidWidgets::FitOptionsBrowser::NormalAndSequential);
+      NULL, MantidQt::MantidWidgets::FitOptionsBrowser::SimultaneousAndSequential);
   splitter->addWidget(m_fitOptionsBrowser);
 
   m_uiForm.browserLayout->addWidget( splitter );
@@ -173,6 +174,8 @@ void MultiDatasetFit::fitSequential()
 
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
 
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace") + "_Workspaces";
+
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
 
@@ -227,7 +230,7 @@ void MultiDatasetFit::fitSimultaneous()
       fit->setPropertyValue("Output",m_outputWorkspaceName);
       m_fitOptionsBrowser->setProperty("Output","out");
     }
-    m_outputWorkspaceName += "_Workspace";
+    m_outputWorkspaceName += "_Workspaces";
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -259,7 +262,7 @@ void MultiDatasetFit::fit()
 
   auto fittingType = m_fitOptionsBrowser->getCurrentFittingType();
   
-  if (fittingType == MantidWidgets::FitOptionsBrowser::Normal)
+  if (fittingType == MantidWidgets::FitOptionsBrowser::Simultaneous)
   {
     fitSimultaneous();
   }
@@ -327,9 +330,34 @@ void MultiDatasetFit::finishFit(bool error)
     m_plotController->clear();
     m_plotController->update();
     Mantid::API::IFunction_sptr fun;
-    if (m_fitOptionsBrowser->getCurrentFittingType() == MantidWidgets::FitOptionsBrowser::Normal)
+    if (m_fitOptionsBrowser->getCurrentFittingType() == MantidWidgets::FitOptionsBrowser::Simultaneous)
     {
       fun = m_fitRunner->getAlgorithm()->getProperty("Function");
+      updateParameters( *fun );
+    }
+    else 
+    {
+      auto paramsWSName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString();
+      if (!Mantid::API::AnalysisDataService::Instance().doesExist(paramsWSName)) return;
+      auto nSpectra = getNumberOfSpectra();
+      if (nSpectra == 0) return;
+      fun = m_functionBrowser->getGlobalFunction();
+      auto nParams = fun->nParams() / nSpectra;
+      auto params = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::ITableWorkspace>(paramsWSName);
+      if (nParams * 2 + 2 != params->columnCount())
+      {
+        throw std::logic_error("Output table workspace has unexpected number of columns.");
+      }
+      for(size_t index = 0; index < nSpectra; ++index)
+      {
+        std::string prefix = "f" + boost::lexical_cast<std::string>(index) + ".";
+        for(size_t ip = 0; ip < nParams; ++ip)
+        {
+          auto colIndex = ip * 2 + 1;
+          auto column = params->getColumn(colIndex);
+          fun->setParameter(prefix + column->name(), column->toDouble(index));
+        }
+      }
       updateParameters( *fun );
     }
   }

@@ -44,20 +44,23 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitOptionsBrowser: public QWidget
   Q_OBJECT
 public:
   /// Support for fitting algorithms:
-  ///   Normal:     Fit
-  ///   Sequential: PlotPeakByLogValue
-  ///   NormalAndSequential: both Fit and PlotPeakByLogValue, toggled with
+  ///   Simultaneous: Fit
+  ///   Sequential:   PlotPeakByLogValue
+  ///   SimultaneousAndSequential: both Fit and PlotPeakByLogValue, toggled with
   ///       "Fitting" property.
-  enum FittingType {Normal = 0, Sequential, NormalAndSequential};
+  enum FittingType {Simultaneous = 0, Sequential, SimultaneousAndSequential};
 
   /// Constructor
-  FitOptionsBrowser(QWidget *parent = NULL, FittingType fitType = Normal);
+  FitOptionsBrowser(QWidget *parent = NULL, FittingType fitType = Simultaneous);
   QString getProperty(const QString& name) const;
   void setProperty(const QString& name, const QString& value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) const;
   void saveSettings(QSettings& settings) const;
   void loadSettings(const QSettings& settings);
   FittingType getCurrentFittingType() const;
+  void setCurrentFittingType(FittingType fitType);
+  void lockCurrentFittingType(FittingType fitType);
+  void unlockCurrentFittingType();
 
 private slots:
 
@@ -68,7 +71,7 @@ private:
   void createBrowser();
   void createProperties();
   void createCommonProperties();
-  void createNormalFitProperties();
+  void createSimultaneousFitProperties();
   void createSequentialFitProperties();
   void updateMinimizer();
   void switchFitType();
@@ -149,7 +152,7 @@ private:
   /// The Fitting Type
   FittingType m_fittingType;
   /// Store special properties of the normal Fit
-  QList<QtProperty*> m_normalProperties;
+  QList<QtProperty*> m_simultaneousProperties;
   /// Store special properties of the sequential Fit
   QList<QtProperty*> m_sequentialProperties;
 };
