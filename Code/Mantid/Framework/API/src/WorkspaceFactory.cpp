@@ -133,17 +133,11 @@ void WorkspaceFactoryImpl::initializeFromParent(
     const size_t oldAxisLength = parent->getAxis(i)->length();
 
     if (!differentSize || newAxisLength == oldAxisLength) {
-      // Need to delete the existing axis created in init above
-      delete child->m_axes[i];
-      // Now set to a copy of the parent workspace's axis
-      child->m_axes[i] = parent->m_axes[i]->clone(child.get());
+      child->replaceAxis(i, parent->getAxis(i)->clone(child.get()));
     } else {
       if (!parent->getAxis(i)->isSpectra()) // WHY???
-      {
-        delete child->m_axes[i];
-        // Call the 'different length' clone variant
-        child->m_axes[i] = parent->m_axes[i]->clone(newAxisLength, child.get());
-      }
+        child->replaceAxis(
+            i, parent->getAxis(i)->clone(newAxisLength, child.get()));
     }
   }
 
