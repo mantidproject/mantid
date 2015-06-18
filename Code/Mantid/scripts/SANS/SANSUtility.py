@@ -668,28 +668,24 @@ def delete_zero_error_free_workspace(input_workspace_name):
 
 def is_valid_ws_for_removing_zero_errors(input_workspace_name):
     '''
-    Check if a workspace has been created via Q1D or Qxy
+    Check if a workspace has been created via Q1D or Qxy.
     @param ws :: The input workspace
     '''
     isValid = False
     message = ""
 
-    if input_workspace_name.endswith(INCIDENT_MONITOR_TAG):
-        isValid = True
-    else:
-        ws = mtd[input_workspace_name]
-        workspaceHistory= ws.getHistory()
-        histories = workspaceHistory.getAlgorithmHistories()
-        for history in histories:
-            name = history.name()
-            if name == 'Q1D' or name == 'Qxy':
-                isValid = True
-                break
+    ws = mtd[input_workspace_name]
+    workspaceHistory= ws.getHistory()
+    histories = workspaceHistory.getAlgorithmHistories()
+    for history in histories:
+        name = history.name()
+        if name == 'Q1D' or name == 'Qxy':
+            isValid = True
+            break
 
     if not isValid:
         message = ("Workspace does not seem valid for zero error removal."
-                   "It must have been reduced with Q1D or Qxy"
-                   "or it has to be an incident monitor workspace."
+                   "It must have been reduced with Q1D or Qxy."
                   )
 
     return message, isValid

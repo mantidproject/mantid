@@ -1187,8 +1187,8 @@ def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
 
 def IsValidWsForRemovingZeroErrors(input_workspace_name):
     """
-        We need to check that the input workspace either has been reduced, ie had Q1D or Qxy applied to it
-        or that it is an incident monitor workspace.
+        We need to check that the workspace has been reduced, ie that it has had the Q1D or Qxy algorithm
+        applied to it.
         @param input_workspace_name :  name of the input workspace
         @return: success message
     """
