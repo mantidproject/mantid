@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <stdexcept>
@@ -8,6 +10,9 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+
+typedef std::map<Mantid::specid_t, Mantid::Kernel::V3D> SpectraDistanceMap;
+typedef Mantid::Geometry::IDetector_const_sptr DetConstPtr;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -152,6 +157,144 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
     }
   }
   return ws;
+}
+
+/**
+ * A map detector ID and Q ranges
+ * This method looks unnecessary as it could be calculated on the fly but
+ * the parallelization means that lazy instantation slows it down due to the
+ * necessary CRITICAL sections required to update the cache. The Q range
+ * values are required very frequently so the total time is more than
+ * offset by this precaching step
+ */
+void ReflectometryTransformQxQz::initAngularCachesNonPSD(
+    const API::MatrixWorkspace_const_sptr &workspace) {
+  const size_t nhist = workspace->getNumberHistograms();
+  m_theta = std::vector<double>(nhist);
+  m_thetaWidths = std::vector<double>(nhist);
+  // Force phi widths to zero
+  m_phi = std::vector<double>(nhist, 0.0);
+  m_phiWidths = std::vector<double>(nhist, 0.0);
+
+  auto inst = workspace->getInstrument();
+  const auto samplePos = inst->getSample()->getPos();
+  const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
+
+  for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
+  {
+    IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(i);
+      // Check to see if there is an EFixed, if not skip it
+      // TODO when are we or aren't we indirect?
+      if (false/* indirect */) {
+        std::vector<double> param = det->getNumberParameter("EFixed");
+        if (param.empty())
+          det.reset();
+      }
+    } catch (Kernel::Exception::NotFoundError &) {
+      // Catch if no detector. Next line tests whether this happened - test
+      // placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a
+      // catch
+      // in an openmp block.
+    }
+    // If no detector found, skip onto the next spectrum
+    if (!det || det->isMonitor()) {
+      m_theta[i] = -1.0; // Indicates a detector to skip
+      m_thetaWidths[i] = -1.0;
+      continue;
+    }
+    const double theta = workspace->detectorTwoTheta(det);
+    m_theta[i] = theta;
+
+    /**
+     * Determine width from shape geometry. A group is assumed to contain
+     * detectors with the same shape & r, theta value, i.e. a ring mapped-group
+     * The shape is retrieved and rotated to match the rotation of the detector.
+     * The angular width is computed using the l2 distance from the sample
+     */
+    if (auto group = boost::dynamic_pointer_cast<const DetectorGroup>(det)) {
+      // assume they all have same shape and same r,theta
+      auto dets = group->getDetectors();
+      det = dets[0];
+    }
+    const auto pos = det->getPos();
+    double l2(0.0), t(0.0), p(0.0);
+    pos.getSpherical(l2, t, p);
+    // Get the shape
+    auto shape =
+        det->shape(); // Defined in its own reference frame with centre at 0,0,0
+    auto rot = det->getRotation();
+    BoundingBox bbox = shape->getBoundingBox();
+    auto maxPoint(bbox.maxPoint());
+    rot.rotate(maxPoint);
+    double boxWidth = maxPoint[upDir];
+
+    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
+  }
+}
+
+/**
+ * Function that retrieves the two-theta and azimuthal angles from a given
+ * detector. It then looks up the nearest neighbours. Using those detectors,
+ * it calculates the two-theta and azimuthal angle widths.
+ * @param workspace : the workspace containing the needed detector information
+ */
+void ReflectometryTransformQxQz::initAngularCachesPSD(
+    const API::MatrixWorkspace_const_sptr &workspace) {
+  // Trigger a build of the nearst neighbors outside the OpenMP loop
+  const int numNeighbours = 4;
+  const size_t nHistos = workspace->getNumberHistograms();
+
+  m_theta = std::vector<double>(nHistos);
+  m_thetaWidths = std::vector<double>(nHistos);
+  m_phi = std::vector<double>(nHistos);
+  m_phiWidths = std::vector<double>(nHistos);
+
+  for (size_t i = 0; i < nHistos; ++i) {
+    DetConstPtr detector = workspace->getDetector(i);
+    specid_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
+    SpectraDistanceMap neighbours =
+        workspace->getNeighboursExact(inSpec, numNeighbours, true);
+
+    // Convert from spectrum numbers to workspace indices
+    double thetaWidth = -DBL_MAX;
+    double phiWidth = -DBL_MAX;
+
+    // Find theta and phi widths
+    double theta = workspace->detectorTwoTheta(detector);
+    double phi = detector->getPhi();
+
+    specid_t deltaPlus1 = inSpec + 1;
+    specid_t deltaMinus1 = inSpec - 1;
+    specid_t deltaPlusT = inSpec + m_detNeighbourOffset;
+    specid_t deltaMinusT = inSpec - m_detNeighbourOffset;
+
+    for (SpectraDistanceMap::iterator it = neighbours.begin();
+         it != neighbours.end(); ++it) {
+      specid_t spec = it->first;
+      if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
+          spec == deltaMinusT) {
+        DetConstPtr detector_n = workspace->getDetector(spec - 1);
+        double theta_n = workspace->detectorTwoTheta(detector_n) / 2.0;
+        double phi_n = detector_n->getPhi();
+
+        double dTheta = std::fabs(theta - theta_n);
+        double dPhi = std::fabs(phi - phi_n);
+        if (dTheta > thetaWidth) {
+          thetaWidth = dTheta;
+        }
+        if (dPhi > phiWidth) {
+          phiWidth = dPhi;
+        }
+      }
+    }
+    m_theta[i] = theta;
+    m_phi[i] = phi;
+    m_thetaWidths[i] = thetaWidth;
+    m_phiWidths[i] = phiWidth;
+  }
 }
 
 } // namespace Mantid
