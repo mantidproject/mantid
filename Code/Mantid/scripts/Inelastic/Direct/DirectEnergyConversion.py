@@ -1052,15 +1052,16 @@ class DirectEnergyConversion(object):
                 src_name = None
                 mon1_peak = 0
             else:
-                mon_1_spec_ID = ei_mon_spectra[1]
+                mon_1_spec_ID = ei_mon_spectra[0]
                 if isinstance(mon_1_spec_ID,collections.Iterable):
                     fix_ei = True # This could be a HACK
                     mon_1_spec_ID = mon_1_spec_ID[0]
+                #-----------
                 mon_2_spec_ID = ei_mon_spectra[1]
                 if isinstance(mon_2_spec_ID,collections.Iterable):
                     fix_ei = True # This could be a HACK
-                    mon_2_spec_ID = mon_2_spec_ID[0]
-
+                    mon_2_spec_ID = mon_2_spec_ID[1]
+                #-----------
 
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
