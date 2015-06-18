@@ -1,5 +1,5 @@
 import os, sys
-os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -569,24 +569,56 @@ class DirectEnergyConversionTest(unittest.TestCase):
                                 X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
                                  RelativePosition=False)
         ConvertUnits(InputWorkspace=monitor_ws, OutputWorkspace='monitor_ws', Target='TOF')
+        # Rebin to "formally" make common bin boundaries as it is not considered as such now 
+        #(Is is a bug?) 
+        xx = monitor_ws.readX(0)
+        x_min = min(xx[0],xx[-1])
+        x_max= max(xx[0],xx[-1])
+        x_step = (x_max-x_min)/(len(xx)-1)
+        monitor_ws = Rebin(monitor_ws,Params=[x_min,x_step,x_max])
         monitor_ws = mtd['monitor_ws']
+        #
+        # keep this workspace for second test below -- clone and give
+        # special name for RunDescriptor to recognize as monitor workspace for 
+        # fake data workspace we will provide
+        _TMPmonitor_ws_monitors = CloneWorkspace(monitor_ws)
 
         # Estimate energy from two monitors
         ei,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1,Monitor2Spec=4,
                   EnergyEstimate=62.2,FixEi=False)
-        self.assertAlmostEqual(ei,62.15108,3)
+        self.assertAlmostEqual(ei,62.1449,3)
 
-
+        # Provide instrument parameter, necessary to define
+        # DirectEnergyConversion class properly
+        SetInstrumentParameter(monitor_ws,ParameterName='fix_ei',ParameterType='Number',Value='0')
+        SetInstrumentParameter(monitor_ws,DetectorList=[1,2,3,6],ParameterName='DelayTime',\
+                               ParameterType='Number',Value='0.5') 
+        # initiate test reducer
         tReducer = DirectEnergyConversion(monitor_ws.getInstrument())
         tReducer.prop_man.ei_mon_spectra= ([1,2,3],6)
+        tReducer.prop_man.normalise_method = 'current'
         ei_mon_spectra  = tReducer.prop_man.ei_mon_spectra
-        ei_mon_spectra  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+        ei_mon_spectra,monitor_ws  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+        #
+        # Check GetEi with summed monitors run separately
+        ei1,mon1_peak,mon1_index,tzero = \
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1,Monitor2Spec=6,
+                  EnergyEstimate=62.2,FixEi=False)
+        self.assertAlmostEqual(ei1,ei,2)
+
+        # Second test Check get_ei as part of the reduction
+        tReducer.prop_man.ei_mon_spectra= ([1,2,3],[4,5,6])
+        tReducer.prop_man.fix_ei = False
+        # DataWorkspace == monitor_ws data workspace is not used anyway. The only thing we
+        # use it for is to retrieve monitor workspace from Mantid using its name
+        ei2,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
+        self.assertAlmostEqual(ei2,64.95,2)
 
 
 
 
 if __name__=="__main__":
-   test = DirectEnergyConversionTest('test_sum_monitors')
-   test.test_sum_monitors()
-   #unittest.main()
+   #test = DirectEnergyConversionTest('test_sum_monitors')
+   #test.test_sum_monitors()
+   unittest.main()

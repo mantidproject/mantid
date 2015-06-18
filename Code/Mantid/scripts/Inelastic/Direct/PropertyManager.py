@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 from Direct.NonIDF_Properties import *
 
-from collections import OrderedDict
+from collections import OrderedDict,Iterable
 
 
 class PropertyManager(NonIDF_Properties):
@@ -308,9 +308,18 @@ class PropertyManager(NonIDF_Properties):
                 break
             if case(): # default, could also just omit condition or 'if True'
                 pass
-
-        used_mon.add(self.ei_mon1_spec)
-        used_mon.add(self.ei_mon2_spec)
+        #
+        def add_ei_monitors(used_mon,ei_mon_list):
+            if isinstance(ei_mon_list,Iterable) :
+                for mon_sp in ei_mon_list:
+                    used_mon.add(mon_sp )
+            else:
+                used_mon.add(ei_mon_list)
+            return used_mon
+        #
+        ei_monitors = self.ei_mon_spectra
+        used_mon = add_ei_monitors(used_mon,ei_monitors[0])
+        used_mon = add_ei_monitors(used_mon,ei_monitors[1])
 
         return used_mon
     #

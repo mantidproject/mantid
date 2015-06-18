@@ -8,12 +8,14 @@ import copy
 import math
 import time
 import numpy as np
+import collections
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
 from Direct.RunDescriptor    import RunDescriptor
 from Direct.ReductionHelpers import extract_non_system_names
+
 
 
 def setup_reducer(inst_name,reload_instrument=False):
@@ -671,6 +673,11 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
     def sum_monitors_spectra(self,monitor_ws,ei_mon_spectra):
         """Sum monitors spectra for all spectra, specified in the spectra list(s)
+           and create monitor workspace containing only the spectra summed and organized
+           according to ei_mon_spectea tuple.
+
+           Returns tuple of two spectra, containing in the new monitor workspace and
+           pointer to the new workspace itself
         """
         spectra_list1=ei_mon_spectra[0]
         spectra_list2=ei_mon_spectra[1]
@@ -682,22 +689,36 @@ class DirectEnergyConversion(object):
             spectra_list2 = [spectra_list2]
         spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
         monitor_ws_name = monitor_ws.name()
-        MergeRuns(InputWorkspaces=['spectr_ws1','spectr_ws2'],OutputWorkspace=monitor_ws_name)
-        return (spec_num1,spec_num2),mtd[monitor_ws_name]
+        DeleteWorkspace(monitor_ws_name)
+        AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+        if 'spectr_ws1' in mtd:
+            DeleteWorkspace('spectr_ws1')
+        if 'spectr_ws2' in mtd:
+            DeleteWorkspace('spectr_ws2')
+        monitor_ws = mtd[monitor_ws_name]
+        # Weird operation. It looks like the spectra numbers obtained from 
+        # Append operation depend on instrument. Looks like a bug in AppendSpectra
+        spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
+        spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
+
+        return (spec_num1,spec_num2),monitor_ws
 
     def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
         """Method moves all detectors of the spectra list into the same position and
            sums the specified spectra in the workspace"""
         detPos=None
-        wsIDs=[]
+        wsIDs=list()
         for spec_num in spectra_list:
             specID = workspace.getIndexFromSpectrumNumber(spec_num)
             if detPos is None:
                 first_detector = workspace.getDetector(specID)
                 detPos = first_detector.getPos()
             else:
-                MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',
-                                DetectorID=specID,X=detPos.getX(),Y=detPos.getY(),
+                psp = workspace.getSpectrum(specID)
+                detIDs = psp.getDetectorIDs()
+                for detID in detIDs:
+                    MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',
+                                DetectorID=detID,X=detPos.getX(),Y=detPos.getY(),
                                 Z=detPos.getZ(),RelativePosition=False)
             wsIDs.append(specID)
 
@@ -1031,12 +1052,21 @@ class DirectEnergyConversion(object):
                 src_name = None
                 mon1_peak = 0
             else:
-                mon_2_spec_ID = int(ei_mon_spectra[0])
+                mon_1_spec_ID = ei_mon_spectra[1]
+                if isinstance(mon_1_spec_ID,collections.Iterable):
+                    fix_ei = True # This could be a HACK
+                    mon_1_spec_ID = mon_1_spec_ID[0]
+                mon_2_spec_ID = ei_mon_spectra[1]
+                if isinstance(mon_2_spec_ID,collections.Iterable):
+                    fix_ei = True # This could be a HACK
+                    mon_2_spec_ID = mon_2_spec_ID[0]
+
+
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,tzero = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_2_spec_ID,
-                        Monitor2Spec=int(ei_mon_spectra[1]),
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
+                        Monitor2Spec=mon_2_spec_ID,
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
