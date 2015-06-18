@@ -86,13 +86,16 @@ class EnginXCalibrate(PythonAlgorithm):
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
         """
+
+        import EnginXUtils
+
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            EnginXUtils.generateOutputParFitTable(tblName, difc, zero)
-            self.log().information("Output parameters added into a table workspace: %s" % name)
+            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
 AlgorithmFactory.subscribe(EnginXCalibrate)
