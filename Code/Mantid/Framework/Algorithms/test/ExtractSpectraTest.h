@@ -84,37 +84,37 @@ public:
   void test_spectrum_list()
   {
     Parameters params;
-    params.setSpectrumList();
+    params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_index_and_spectrum_list()
   {
     Parameters params;
-    params.setSpectrumList().setIndexRange();
+    params.setWorkspaceIndexList().setIndexRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_x_range_and_spectrum_list()
   {
     Parameters params;
-    params.setSpectrumList().setXRange();
+    params.setWorkspaceIndexList().setXRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     params.testXRange(*ws);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_invalid_x_range()
@@ -169,37 +169,37 @@ public:
   void test_spectrum_list_event()
   {
     Parameters params("event");
-    params.setSpectrumList();
+    params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_index_and_spectrum_list_event()
   {
     Parameters params("event");
-    params.setSpectrumList().setIndexRange();
+    params.setWorkspaceIndexList().setIndexRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_x_range_and_spectrum_list_event()
   {
     Parameters params("event");
-    params.setSpectrumList().setXRange();
+    params.setWorkspaceIndexList().setXRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     params.testXRange(*ws);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_invalid_x_range_event()
@@ -256,13 +256,13 @@ public:
   void test_spectrum_list_ragged()
   {
     Parameters params("histo-ragged");
-    params.setSpectrumList();
+    params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void xtest_invalid_x_range_ragged()
@@ -336,14 +336,14 @@ private:
   {
     Parameters(const std::string& workspaceType = "histo")
         : XMin(EMPTY_DBL()), XMax(EMPTY_DBL()), StartWorkspaceIndex(0),
-        EndWorkspaceIndex(EMPTY_INT()), SpectrumList(), wsType(workspaceType)
+        EndWorkspaceIndex(EMPTY_INT()), WorkspaceIndexList(), wsType(workspaceType)
     {
     }
     double XMin;
     double XMax;
     int StartWorkspaceIndex;
     int EndWorkspaceIndex;
-    std::vector<int> SpectrumList;
+    std::vector<size_t> WorkspaceIndexList;
     std::string wsType;
 
     // ---- x range ----
@@ -418,15 +418,15 @@ private:
     }
 
     // ---- spectrum list ----
-    Parameters& setSpectrumList()
+    Parameters& setWorkspaceIndexList()
     {
-      SpectrumList.resize(3);
-      SpectrumList[0] = 0;
-      SpectrumList[1] = 2;
-      SpectrumList[2] = 4;
+      WorkspaceIndexList.resize(3);
+      WorkspaceIndexList[0] = 0;
+      WorkspaceIndexList[1] = 2;
+      WorkspaceIndexList[2] = 4;
       return *this;
     }
-    void testSpectrumList(const MatrixWorkspace& ws) const
+    void testWorkspaceIndexList(const MatrixWorkspace& ws) const
     {
       TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo")
@@ -486,9 +486,9 @@ private:
     {
       TS_ASSERT_THROWS_NOTHING( alg.setProperty("EndWorkspaceIndex", params.EndWorkspaceIndex) );
     }
-    if (!params.SpectrumList.empty())
+    if (!params.WorkspaceIndexList.empty())
     {
-      TS_ASSERT_THROWS_NOTHING( alg.setProperty("SpectrumList", params.SpectrumList) );
+      TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndexList", params.WorkspaceIndexList) );
     }
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );

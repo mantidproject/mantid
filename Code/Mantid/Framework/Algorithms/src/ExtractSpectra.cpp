@@ -87,8 +87,8 @@ void ExtractSpectra::init() {
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
   declareProperty(
-      new ArrayProperty<specid_t>("SpectrumList"),
-      "A comma-separated list of individual spectra to read.  Only used if\n"
+      new ArrayProperty<size_t>("WorkspaceIndexList"),
+      "A comma-separated list of individual workspace indices to read.  Only used if\n"
       "explicitly set.");
 }
 
@@ -177,7 +177,7 @@ void ExtractSpectra::execHistogram() {
         ->copyInfoFrom(*m_inputWorkspace->getSpectrum(i));
 
     if (!m_commonBoundaries)
-      this->cropRagged(outputWorkspace, i, j);
+      this->cropRagged(outputWorkspace, static_cast<int>(i), j);
 
     // Propagate bin masking if there is any
     if (m_inputWorkspace->hasMaskedBins(i)) {
@@ -376,7 +376,7 @@ void ExtractSpectra::checkProperties() {
   if (!m_commonBoundaries)
     m_maxX = static_cast<int>(m_inputWorkspace->readX(0).size());
 
-  m_spectrumList = getProperty("SpectrumList");
+  m_spectrumList = getProperty("WorkspaceIndexList");
 
   if (m_spectrumList.empty()) {
     int minSpec = getProperty("StartWorkspaceIndex");
@@ -402,7 +402,7 @@ void ExtractSpectra::checkProperties() {
                               "to EndWorkspaceIndex");
     }
     m_spectrumList.reserve(maxSpec - minSpec + 1);
-    for (specid_t i = minSpec; i <= maxSpec; ++i) {
+    for (size_t i = minSpec; i <= maxSpec; ++i) {
       m_spectrumList.push_back(i);
     }
   }
