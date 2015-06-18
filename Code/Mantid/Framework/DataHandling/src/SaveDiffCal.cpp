@@ -12,7 +12,6 @@
 namespace Mantid {
 namespace DataHandling {
 
-using Mantid::Kernel::Direction;
 using Mantid::API::FileProperty;
 using Mantid::API::PropertyMode;
 using Mantid::API::WorkspaceProperty;
@@ -22,6 +21,7 @@ using Mantid::DataObjects::GroupingWorkspace;
 using Mantid::DataObjects::GroupingWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace;
 using Mantid::DataObjects::MaskWorkspace_const_sptr;
+using Mantid::Kernel::Direction;
 
 using namespace H5;
 
@@ -75,7 +75,7 @@ void SaveDiffCal::init() {
       "Optional: An Workspace workspace giving which detectors are masked.");
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".hd5"),
-                  "Path to the .hd5 file that will be created.");
+                  "Path to the .h5 file that will be created.");
 }
 
 namespace { // anonymous
@@ -219,7 +219,7 @@ void SaveDiffCal::exec() {
   this->writeDoubleFieldFromTable(calibrationGroup, "difa");
   this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
 
-  this->writeDoubleFieldFromTable(calibrationGroup, "detid");
+  this->writeIntFieldFromTable(calibrationGroup, "detid");
   //  writeArray(calibrationGroup, "dasid", std::vector<int>()); // TODO
 
   this->writeIntFieldFromSVWS(calibrationGroup, "group", groupingWS);
