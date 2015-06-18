@@ -2,7 +2,6 @@
 from mantid.simpleapi import *
 import numpy as np
 import os.path
-import math
 
 PRECISION = 0.020
 
