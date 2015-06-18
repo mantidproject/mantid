@@ -3,6 +3,12 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+
+namespace H5 {
+class H5File;
+class Group;
+}
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -42,6 +48,18 @@ public:
 private:
   void init();
   void exec();
+  void getInstrument(H5::H5File &file);
+  std::vector<int32_t> readInt32Array(H5::Group &group, const std::string &name);
+  std::vector<double> readDoubleArray(H5::Group &group, const std::string &name);
+  void makeGroupingWorkspace(std::vector<int32_t> &detids, std::vector<int32_t> &groups);
+  void makeMaskWorkspace(std::vector<int32_t> &detids, std::vector<int32_t> &use);
+  void makeCalWorkspace(std::vector<int32_t> &detids, std::vector<double> &difc,
+                        std::vector<double> &difa, std::vector<double> &tzero,
+                        std::vector<int32_t> &dasids, std::vector<double> &offsets);
+
+  std::string m_filename;
+  std::string m_workspaceName;
+  Geometry::Instrument_const_sptr m_instrument;
 };
 
 } // namespace DataHandling
