@@ -276,6 +276,57 @@ public:
       auto ws = runAlgorithm(params, false);
     }
   }
+
+  void test_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+
+    void test_index_and_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setDetectorList().setIndexRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+  void test_x_range_and_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setDetectorList().setXRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    params.testXRange(*ws);
+    params.testDetectorList(*ws);
+  }
+
+  void test_spectrum_list_and_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setWorkspaceIndexList().setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+
   // ---- test histo-ragged ----
 
   void test_x_range_ragged()
@@ -392,21 +443,15 @@ private:
     // Set the type of underlying workspace
     if (workspaceType == "histo") {
       ws = createInputWorkspaceHisto();
-    } else if (workspaceType == "histo") {
-      ws = WorkspaceCreationHelper::CreateEventWorkspace(int(nSpec), int(nBins), 50, 0.0, 1., 2);
-      ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
+      {
+        // Create a detector for each spectra
+        ws->getSpectrum(i)->setDetectorID(static_cast<detid_t>(i + 1));
+      }
+    } else if (workspaceType == "event") {
+      ws = createInputWorkspaceEvent();
     } else {
       throw std::runtime_error("Undefined workspace type (with detector ids)");
-    }
-
-    // Add an instrument
-    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument("TestInstrument"));
-    ws->setInstrument(inst);
-    // We get a 1:1 map by default so the detector ID should match the spectrum number
-    for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
-    {
-      // Create a detector for each spectra
-      ws->getSpectrum(i)->setDetectorID(static_cast<detid_t>(i));
     }
     return ws;
   }
@@ -529,9 +574,9 @@ private:
     Parameters& setDetectorList()
     {
       DetectorList.resize(3);
-      DetectorList[0] = 0;
-      DetectorList[1] = 1;
-      DetectorList[2] = 3;
+      DetectorList[0] = 1;  // Translates into WSindex = 0
+      DetectorList[1] = 3;  // Translates into WSindex = 2
+      DetectorList[2] = 5;  // Translates into WSindex = 4
       return *this;
     }
     void testDetectorList(const MatrixWorkspace& ws) const
@@ -540,14 +585,14 @@ private:
       if (wsType == "histo-detector")
       {
         TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readY(1)[0], 1.0);
-        TS_ASSERT_EQUALS(ws.readY(2)[0], 3.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[0], 4.0);
       }
       else if (wsType == "event-detector")
       {
         TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
-        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 2);
-        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 4);
+        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
+        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 5);
       }
    }
 
