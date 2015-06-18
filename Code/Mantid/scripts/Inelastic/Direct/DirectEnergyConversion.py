@@ -674,10 +674,10 @@ class DirectEnergyConversion(object):
     def sum_monitors_spectra(self,monitor_ws,ei_mon_spectra):
         """Sum monitors spectra for all spectra, specified in the spectra list(s)
            and create monitor workspace containing only the spectra summed and organized
-           according to ei_mon_spectea tuple.
+           according to ei_mon_spectra tuple.
 
-           Returns tuple of two spectra, containing in the new monitor workspace and
-           pointer to the new workspace itself
+           Returns tuple of two spectra numbers, containing in the
+           new summed monitors workspace and pointer to the new workspace itself.
         """
         spectra_list1=ei_mon_spectra[0]
         spectra_list2=ei_mon_spectra[1]

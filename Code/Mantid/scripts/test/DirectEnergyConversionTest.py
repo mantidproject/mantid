@@ -569,8 +569,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
                                 X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
                                  RelativePosition=False)
         ConvertUnits(InputWorkspace=monitor_ws, OutputWorkspace='monitor_ws', Target='TOF')
-        # Rebin to "formally" make common bin boundaries as it is not considered as such now 
-        #(Is is a bug?) 
+        # Rebin to "formally" make common bin boundaries as it is not considered as such
+        #any more after converting units (Is this a bug?)
         xx = monitor_ws.readX(0)
         x_min = min(xx[0],xx[-1])
         x_max= max(xx[0],xx[-1])
@@ -579,8 +579,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         monitor_ws = mtd['monitor_ws']
         #
         # keep this workspace for second test below -- clone and give
-        # special name for RunDescriptor to recognize as monitor workspace for 
-        # fake data workspace we will provide
+        # special name for RunDescriptor to recognize as monitor workspace for
+        # fake data workspace we will provide.
         _TMPmonitor_ws_monitors = CloneWorkspace(monitor_ws)
 
         # Estimate energy from two monitors
@@ -601,7 +601,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         ei_mon_spectra  = tReducer.prop_man.ei_mon_spectra
         ei_mon_spectra,monitor_ws  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
         #
-        # Check GetEi with summed monitors run separately
+        # Check GetEi with summed monitors. Try to run separately.
         ei1,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1,Monitor2Spec=6,
                   EnergyEstimate=62.2,FixEi=False)
