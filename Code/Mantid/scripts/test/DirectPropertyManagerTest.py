@@ -192,7 +192,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra")
 
-       ## weird way to prohibit this assignment
+        ## weird way to prohibit this assignment
+        # But it works and I was not able to find any other way!
         try:
             propman.ei_mon_spectra[1] = 100
             Success=True
@@ -202,7 +203,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(10000,propman.ei_mon_spectra[0])
         self.assertEqual(2000,propman.ei_mon_spectra[1])
 
-
+        # This works as should
         propman.ei_mon_spectra = (100,200)
         self.assertEqual(100,propman.ei_mon_spectra[0])
         self.assertEqual(200,propman.ei_mon_spectra[1])

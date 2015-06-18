@@ -789,8 +789,8 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
 class EiMonSpectra(prop_helpers.ComplexProperty):
     """Property defines list of spectra, used to calculate incident energy.
-       it defines two monitor spectra for GetEi algorithm to work
-       or two spectra lists to sum and obtain two combined spectra
+       It defines two monitor spectra for GetEi algorithm to work
+       or two spectra lists to sum and obtain workspace with two combined spectra
        for GetEi algorithm to work.
     """
     def __init__(self):
