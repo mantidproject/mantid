@@ -139,6 +139,55 @@ public:
     }
   }
 
+  void test_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+  void test_index_and_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setDetectorList().setIndexRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+  void test_x_range_and_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setDetectorList().setXRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    params.testXRange(*ws);
+    params.testDetectorList(*ws);
+  }
+
+  void test_spectrum_list_and_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setWorkspaceIndexList().setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+
 
   // ---- test event ----
 
@@ -357,10 +406,7 @@ private:
     for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
     {
       // Create a detector for each spectra
-      Mantid::Geometry::Detector * det = new Mantid::Geometry::Detector("pixel", static_cast<detid_t>(i), inst.get());
-      inst->add(det);
-      inst->markAsDetector(det);
-      ws->getSpectrum(i)->addDetectorID(static_cast<detid_t>(i));
+      ws->getSpectrum(i)->setDetectorID(static_cast<detid_t>(i));
     }
     return ws;
   }
