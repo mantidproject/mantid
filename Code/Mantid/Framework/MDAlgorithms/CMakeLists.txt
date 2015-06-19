@@ -96,7 +96,6 @@ set ( SRC_FILES
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/QueryMDWorkspace.cpp
-	src/ReflectometryTransform.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
@@ -215,7 +214,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/QueryMDWorkspace.h
-	inc/MantidMDAlgorithms/ReflectometryTransform.h
 	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
 	inc/MantidMDAlgorithms/ReflectometryTransformP.h
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h

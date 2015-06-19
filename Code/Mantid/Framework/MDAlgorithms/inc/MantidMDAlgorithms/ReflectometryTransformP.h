@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "MantidMDAlgorithms/ReflectometryTransform.h"
+#include "MantidDataObjects/ReflectometryTransform.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -85,7 +85,8 @@ public:
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ReflectometryTransformP : public ReflectometryTransform {
+class DLLExport ReflectometryTransformP
+    : public DataObjects::ReflectometryTransform {
 private:
   const double m_pSumMin;
   const double m_pSumMax;

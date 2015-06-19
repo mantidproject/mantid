@@ -8,7 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include "MantidMDAlgorithms/ReflectometryTransform.h"
+#include "MantidDataObjects/ReflectometryTransform.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -21,8 +21,7 @@ private:
   double m_theta;
 
 public:
-  CalculateReflectometryK(double theta)
-      : m_theta(theta) {}
+  CalculateReflectometryK(double theta) : m_theta(theta) {}
   ~CalculateReflectometryK(){};
   double execute(const double &wavelength) {
     double wavenumber = 2 * M_PI / wavelength;
@@ -56,7 +55,8 @@ public:
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ReflectometryTransformKiKf : public ReflectometryTransform {
+class DLLExport ReflectometryTransformKiKf
+    : public DataObjects::ReflectometryTransform {
 private:
   const double m_kiMin;
   const double m_kiMax;

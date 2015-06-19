@@ -41,6 +41,7 @@ set ( SRC_FILES
 	src/PeakShapeSphericalFactory.cpp
 	src/PeaksWorkspace.cpp
 	src/RebinnedOutput.cpp
+	src/ReflectometryTransform.cpp
 	src/SpecialWorkspace2D.cpp
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
@@ -104,6 +105,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/PeakShapeSphericalFactory.h
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/RebinnedOutput.h
+	inc/MantidDataObjects/ReflectometryTransform.h
 	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/SplittersWorkspace.h
 	inc/MantidDataObjects/TableColumn.h

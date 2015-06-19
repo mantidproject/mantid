@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 
-#include "MantidMDAlgorithms/ReflectometryTransform.h"
+#include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidDataObjects/CalculateReflectometryQxQz.h"
 #include "MantidKernel/ClassMacros.h"
 
@@ -37,7 +37,8 @@ namespace MDAlgorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ReflectometryTransformQxQz : public ReflectometryTransform {
+class DLLExport ReflectometryTransformQxQz
+    : public DataObjects::ReflectometryTransform {
 private:
   const double m_qxMin;
   const double m_qxMax;

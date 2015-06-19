@@ -1,15 +1,14 @@
-#include "MantidMDAlgorithms/ReflectometryTransform.h"
+#include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
-namespace MDAlgorithms {
+namespace DataObjects {
 
 ReflectometryTransform::ReflectometryTransform(int numberOfBinsQx,
                                                int numberOfBinsQz)

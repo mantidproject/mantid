@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_REFLECTOMETRYMDTRANFORM_H_
-#define MANTID_MDALGORITHMS_REFLECTOMETRYMDTRANFORM_H_
+#ifndef MANTID_DATAOBJECTS_REFLECTOMETRYMDTRANFORM_H_
+#define MANTID_DATAOBJECTS_REFLECTOMETRYMDTRANFORM_H_
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
@@ -11,7 +11,7 @@ namespace Mantid {
 namespace API {
 class MatrixWorkspace;
 }
-namespace MDAlgorithms {
+namespace DataObjects {
 
 /** ReflectometryMDTransform : Abstract type for reflectometry transforms to
  MDWorkspaces. This is a Strategy Design Pattern.
