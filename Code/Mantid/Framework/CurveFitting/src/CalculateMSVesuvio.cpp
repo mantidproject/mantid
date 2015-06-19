@@ -273,7 +273,8 @@ void CalculateMSVesuvio::cacheInputs() {
   if (detPixelGroup) {
     // If is a detector group then take shape of first pixel
     // All detectors in same bansk should be same shape anyway
-    pixelShape = detPixelGroup->getDetectors()[0]->shape();
+    if (detPixelGroup->nDets() > 0)
+      pixelShape = detPixelGroup->getDetectors()[0]->shape();
   } else {
     pixelShape = detPixel->shape();
   }
