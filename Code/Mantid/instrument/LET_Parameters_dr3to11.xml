@@ -341,7 +341,7 @@
 </parameter>
 <!-- Vanaduim mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
 <parameter name="vanadium-mass">
-  <value val="8.47"/>
+  <value val="20.79"/>
 </parameter>
 <!-- if this value set to true, modo-vanadium run is not analyzed and masks obtained for arbitrary units are used for mono-vanadium -->
 <parameter name="use_sam_msk_on_monovan" type = "bool">
