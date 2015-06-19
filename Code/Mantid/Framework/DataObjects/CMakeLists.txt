@@ -62,6 +62,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/AffineMatrixParameterParser.h
 	inc/MantidDataObjects/BoxControllerNeXusIO.h
 	inc/MantidDataObjects/CalculateReflectometryQBase.h
+	inc/MantidDataObjects/CalculateReflectometryQxQz.h
 	inc/MantidDataObjects/CoordTransformAffine.h
 	inc/MantidDataObjects/CoordTransformAffineParser.h
 	inc/MantidDataObjects/CoordTransformAligned.h

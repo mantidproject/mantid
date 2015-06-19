@@ -2,65 +2,12 @@
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 
 #include "MantidMDAlgorithms/ReflectometryTransform.h"
-#include "MantidDataObjects/CalculateReflectometryQBase.h"
+#include "MantidDataObjects/CalculateReflectometryQxQz.h"
 #include "MantidKernel/ClassMacros.h"
 
 namespace Mantid {
 
 namespace MDAlgorithms {
-
-/**
- Converts from inputs of wavelength, incident theta and final theta to Qx for
- reflectometry experiments
- */
-class CalculateReflectometryQxQz : public DataObjects::CalculateReflectometryQBase {
-private:
-  double m_cos_theta_i;
-  double m_sin_theta_i;
-  double m_dirQx;
-  double m_dirQz;
-
-public:
-  /**
-   Constructor
-   @param thetaIncident: incident theta value in degrees
-   */
-  CalculateReflectometryQxQz(const double &thetaIncident)
-    : m_cos_theta_i(cos(thetaIncident * to_radians_factor)),
-      m_sin_theta_i(sin(thetaIncident * to_radians_factor)),
-      m_dirQx(0.0), m_dirQz(0.0) {}
-
-  /**
-   Setter for the final theta value require for the calculation. Internally
-   pre-calculates and caches to cos theta for speed.
-   @param thetaFinal: final theta value in degrees
-   */
-  void setThetaFinal(const double &thetaFinal) {
-    const double c_cos_theta_f = cos(thetaFinal * to_radians_factor);
-    m_dirQx = (c_cos_theta_f - m_cos_theta_i);
-    const double c_sin_theta_f = sin(thetaFinal * to_radians_factor);
-    m_dirQz = (c_sin_theta_f + m_sin_theta_i);
-  }
-
-  /**
-   Executes the calculation to determine Qx
-   @param wavelength : wavelenght in Anstroms
-   */
-  double calculateX(const double &wavelength) const {
-    double wavenumber = 2 * M_PI / wavelength;
-    return wavenumber * m_dirQx;
-
-  }
-
-  /**
-   Executes the calculation to determine Qz
-   @param wavelength : wavelenght in Anstroms
-   */
-  double calculateZ(const double &wavelength) const {
-    double wavenumber = 2 * M_PI / wavelength;
-    return wavenumber * m_dirQz;
-  }
-};
 
 /** ReflectometryTranformQxQz : Type of ReflectometyTransform. Used to convert
  from an input R vs Wavelength workspace to a 2D MDEvent workspace with
