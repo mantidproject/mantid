@@ -107,7 +107,7 @@
 </parameter>
 <!-- -->
 <parameter name="ei-mon2-spec"  type="string">
-  <value val="61638,61639,61640,61641"/>
+  <value val="69638,69639,69640,69641"/>
   <description is="Second spectra number (monitor's spectra number) to use when measuring incident energy,
      or comma separated list of such numbers.
      Should be spectra with well defined energy peak or monitor's spectra.
