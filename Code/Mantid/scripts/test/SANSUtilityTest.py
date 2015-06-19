@@ -303,5 +303,139 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         self.assertEquals([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
         self.assertEquals([[1, 1]],                 su._merge_to_ranges([1]))
 
+class TestZeroErrorFreeWorkspace(unittest.TestCase):
+    def _setup_workspace(self, name, type):
+        ws = CreateSampleWorkspace(OutputWorkspace = name, WorkspaceType=type, Function='One Peak',NumBanks=1,BankPixelWidth=2,NumEvents=0,XMin=0.5,XMax=1,BinWidth=1,PixelSpacing=1,BankDistanceFromSample=1)
+        if type == 'Histogram':
+            errors = ws.dataE
+            # For first and third spectra set to 0.0
+            errors(0)[0] = 0.0
+            errors(2)[0] = 0.0
+
+    def _removeWorkspace(self, name):
+        if name in mtd:
+            mtd.remove(name)
+
+    def test_that_non_existent_ws_creates_error_message(self):
+        # Arrange
+        ws_name = 'original'
+        ws_clone_name = 'clone'
+        # Act
+        message, complete = su.create_zero_error_free_workspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        # Assert
+        message.strip()
+        self.assertTrue(message)
+        self.assertTrue(not complete)
+
+    def test_that_bad_zero_error_removal_creates_error_message(self):
+        # Arrange
+        ws_name = 'original'
+        ws_clone_name = 'clone'
+        self._setup_workspace(ws_name, 'Event')
+        # Act
+        message, complete= su.create_zero_error_free_workspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        # Assert
+        message.strip()
+        self.assertTrue(message)
+        self.assertTrue(not ws_clone_name in mtd)
+        self.assertTrue(not complete)
+
+        self._removeWorkspace(ws_name)
+        self.assertTrue(not ws_name in mtd)
+
+    def test_that_zeros_are_removed_correctly(self):
+        # Arrange
+        ws_name = 'original'
+        ws_clone_name = 'clone'
+        self._setup_workspace(ws_name, 'Histogram')
+        # Act
+        message, complete = su.create_zero_error_free_workspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        # Assert
+        message.strip()
+        print message
+       # self.assertTrue(not message)
+        #self.assertTrue(complete)
+        self.assertTrue(mtd[ws_name] != mtd[ws_clone_name])
+
+        self._removeWorkspace(ws_name)
+        self._removeWorkspace(ws_clone_name)
+        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(not ws_clone_name in mtd)
+
+    def test_throws_for_non_Workspace2D(self):
+        # Arrange
+        ws_name = 'test'
+        type ='Event'
+        self._setup_workspace(ws_name, type)
+        ws = mtd[ws_name]
+
+        # Act and Assert
+        self.assertRaises(ValueError, su.remove_zero_errors_from_workspace, ws)
+
+        self._removeWorkspace(ws_name)
+        self.assertTrue(not ws_name in mtd)
+
+    def test_removes_zero_errors_correctly(self):
+        # Arrange
+        ws_name = 'test'
+        type ='Histogram'
+        self._setup_workspace(ws_name, type)
+        ws = mtd[ws_name]
+
+        # Act and Assert
+        errors = ws.dataE
+        self.assertTrue(errors(0)[0] == 0.0)
+        self.assertTrue(errors(1)[0] != 0.0)
+        self.assertTrue(errors(2)[0] == 0.0)
+        self.assertTrue(errors(3)[0] != 0.0)
+
+        su.remove_zero_errors_from_workspace(ws)
+
+        self.assertTrue(errors(0)[0] == su.ZERO_ERROR_DEFAULT)
+        self.assertTrue(errors(1)[0] != 0.0)
+        self.assertTrue(errors(1)[0] != su.ZERO_ERROR_DEFAULT)
+        self.assertTrue(errors(2)[0] == su.ZERO_ERROR_DEFAULT)
+        self.assertTrue(errors(3)[0] != 0.0)
+        self.assertTrue(errors(3)[0] != su.ZERO_ERROR_DEFAULT)
+
+        self._removeWorkspace(ws_name)
+        self.assertTrue(not ws_name in mtd)
+
+    def test_that_deletion_of_non_existent_ws_creates_error_message(self):
+        # Arrange
+        ws_name = 'ws'
+        # Act
+        message, complete = su.delete_zero_error_free_workspace(input_workspace_name = ws_name)
+        # Assert
+        message.strip()
+        self.assertTrue(message)
+        self.assertTrue(not complete)
+
+    def test_that_deletion_of_extent_ws_is_successful(self):
+        # Arrange
+        ws_name = 'ws'
+        self._setup_workspace(ws_name, 'Histogram')
+        # Act + Assert
+        self.assertTrue(ws_name in mtd)
+        message, complete = su.delete_zero_error_free_workspace(input_workspace_name = ws_name)
+        message.strip()
+        self.assertTrue(not message)
+        self.assertTrue(complete)
+        self.assertTrue(not ws_name in mtd)
+
+    def test_non_Q1D_and_Qxy_history_is_not_valid_and_produces_error_message(self):
+        # Arrange
+        ws_name = 'ws'
+        self._setup_workspace(ws_name, 'Histogram')
+        # Act
+        message, complete = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = ws_name)
+        # Assert
+        message.strip()
+        self.assertTrue(message)
+        self.assertTrue(not complete)
+
+        self._removeWorkspace(ws_name)
+        self.assertTrue(not ws_name in mtd)
+
 if __name__ == "__main__":
     unittest.main()

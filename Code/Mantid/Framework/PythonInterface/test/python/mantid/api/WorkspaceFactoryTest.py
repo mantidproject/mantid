@@ -13,7 +13,7 @@ class WorkspaceFactoryTest(unittest.TestCase):
                                        XLength=xlength, YLength=ylength)
 
     def _verify(self, wksp, nhist, xlength, ylength):
-        self.assertEquals(type(wksp), MatrixWorkspace)
+        self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEquals(wksp.id(), "Workspace2D")
         self.assertEquals(wksp.getNumberHistograms(), nhist)
         self.assertEquals(len(wksp.readX(0)), xlength)

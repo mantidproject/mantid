@@ -60,6 +60,8 @@ public slots:
   void enableRange();
   void updateRange(int index);
   void showDataErrors(bool);
+  void resetRange();
+  void zoomToRange();
 private slots:
   void tableUpdated();
   void prevPlot();
@@ -71,9 +73,6 @@ private:
   void disableAllTools();
   template<class Tool>
   void enableTool(Tool* tool, int cursor);
-  bool eventFilter(QObject *widget, QEvent *evn);
-  void resetRange();
-  void zoomToRange();
   boost::shared_ptr<DatasetPlotData> getData(int i);
 
   /// The plot widget

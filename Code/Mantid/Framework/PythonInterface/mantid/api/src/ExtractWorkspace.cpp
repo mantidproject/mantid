@@ -1,0 +1,54 @@
+//-----------------------------------------------------------------------------
+// Includes
+//-----------------------------------------------------------------------------
+#include "MantidPythonInterface/api/ExtractWorkspace.h"
+
+#include <boost/python/extract.hpp>
+#include <boost/weak_ptr.hpp>
+
+namespace Mantid {
+namespace PythonInterface {
+
+using namespace API;
+
+using boost::python::extract;
+
+//-----------------------------------------------------------------------------
+// Public methods
+//-----------------------------------------------------------------------------
+/**
+ * @param pyvalue Python object from which to extract
+ */
+ExtractWorkspace::ExtractWorkspace(const boost::python::api::object &pyvalue)
+    : m_value() {
+  // Test for a weak pointer first
+  typedef boost::weak_ptr<Workspace> Workspace_wptr;
+  extract<Workspace_wptr&> extractWeak(pyvalue);
+  if (extractWeak.check()) {
+    m_value = extractWeak().lock();
+  }
+  extract<Workspace_sptr&> extractShared(pyvalue);
+  if (extractShared.check()) {
+    m_value = extractShared();
+  }
+}
+
+/**
+ * Check whether the extract can pull out the workspace type
+ * @return True if it can be converted, false otherwise
+ */
+bool ExtractWorkspace::check() const { return m_value.get() != NULL; }
+
+/**
+ * @return The extracted shared_ptr or throws std::invalid_argument
+ */
+const API::Workspace_sptr ExtractWorkspace::operator()() const {
+  if (check()) {
+    return m_value;
+  } else {
+    throw std::invalid_argument(
+        "Unable to extract boost::shared_ptr<Workspace> from Python object");
+  }
+}
+}
+}

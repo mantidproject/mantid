@@ -84,37 +84,37 @@ public:
   void test_spectrum_list()
   {
     Parameters params;
-    params.setSpectrumList();
+    params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_index_and_spectrum_list()
   {
     Parameters params;
-    params.setSpectrumList().setIndexRange();
+    params.setWorkspaceIndexList().setIndexRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_x_range_and_spectrum_list()
   {
     Parameters params;
-    params.setSpectrumList().setXRange();
+    params.setWorkspaceIndexList().setXRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     params.testXRange(*ws);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_invalid_x_range()
@@ -138,6 +138,55 @@ public:
       auto ws = runAlgorithm(params, false);
     }
   }
+
+  void test_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+  void test_index_and_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setDetectorList().setIndexRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+  void test_x_range_and_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setDetectorList().setXRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    params.testXRange(*ws);
+    params.testDetectorList(*ws);
+  }
+
+  void test_spectrum_list_and_detector_list()
+  {
+    Parameters params("histo-detector");
+    params.setWorkspaceIndexList().setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
 
 
   // ---- test event ----
@@ -169,37 +218,37 @@ public:
   void test_spectrum_list_event()
   {
     Parameters params("event");
-    params.setSpectrumList();
+    params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_index_and_spectrum_list_event()
   {
     Parameters params("event");
-    params.setSpectrumList().setIndexRange();
+    params.setWorkspaceIndexList().setIndexRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_x_range_and_spectrum_list_event()
   {
     Parameters params("event");
-    params.setSpectrumList().setXRange();
+    params.setWorkspaceIndexList().setXRange();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     params.testXRange(*ws);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void test_invalid_x_range_event()
@@ -227,6 +276,57 @@ public:
       auto ws = runAlgorithm(params, false);
     }
   }
+
+  void test_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+
+    void test_index_and_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setDetectorList().setIndexRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+  void test_x_range_and_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setDetectorList().setXRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    params.testXRange(*ws);
+    params.testDetectorList(*ws);
+  }
+
+  void test_spectrum_list_and_detector_list_event()
+  {
+    Parameters params("event-detector");
+    params.setWorkspaceIndexList().setDetectorList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDetectorList(*ws);
+  }
+
+
   // ---- test histo-ragged ----
 
   void test_x_range_ragged()
@@ -256,13 +356,13 @@ public:
   void test_spectrum_list_ragged()
   {
     Parameters params("histo-ragged");
-    params.setSpectrumList();
+    params.setWorkspaceIndexList();
 
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList(*ws);
+    params.testWorkspaceIndexList(*ws);
   }
 
   void xtest_invalid_x_range_ragged()
@@ -289,6 +389,10 @@ private:
       return createInputWorkspaceEvent();
     else if (workspaceType == "histo-ragged")
       return createInputWorkspaceHistoRagged();
+    else if (workspaceType == "histo-detector")
+      return createInputWithDetectors("histo");
+    else if (workspaceType == "event-detector")
+      return createInputWithDetectors("event");
     throw std::runtime_error("Undefined workspace type");
   }
 
@@ -332,18 +436,41 @@ private:
     return ws;
   }
 
+  MatrixWorkspace_sptr createInputWithDetectors(std::string workspaceType) const
+  {
+    MatrixWorkspace_sptr ws;
+
+    // Set the type of underlying workspace
+    if (workspaceType == "histo") {
+      ws = createInputWorkspaceHisto();
+      for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
+      {
+        // Create a detector for each spectra
+        ws->getSpectrum(i)->setDetectorID(static_cast<detid_t>(i + 1));
+      }
+    } else if (workspaceType == "event") {
+      ws = createInputWorkspaceEvent();
+    } else {
+      throw std::runtime_error("Undefined workspace type (with detector ids)");
+    }
+    return ws;
+  }
+
+
+
   struct Parameters
   {
     Parameters(const std::string& workspaceType = "histo")
         : XMin(EMPTY_DBL()), XMax(EMPTY_DBL()), StartWorkspaceIndex(0),
-        EndWorkspaceIndex(EMPTY_INT()), SpectrumList(), wsType(workspaceType)
+        EndWorkspaceIndex(EMPTY_INT()), WorkspaceIndexList(), wsType(workspaceType)
     {
     }
     double XMin;
     double XMax;
     int StartWorkspaceIndex;
     int EndWorkspaceIndex;
-    std::vector<int> SpectrumList;
+    std::vector<size_t> WorkspaceIndexList;
+    std::vector<detid_t> DetectorList;
     std::string wsType;
 
     // ---- x range ----
@@ -418,15 +545,15 @@ private:
     }
 
     // ---- spectrum list ----
-    Parameters& setSpectrumList()
+    Parameters& setWorkspaceIndexList()
     {
-      SpectrumList.resize(3);
-      SpectrumList[0] = 0;
-      SpectrumList[1] = 2;
-      SpectrumList[2] = 4;
+      WorkspaceIndexList.resize(3);
+      WorkspaceIndexList[0] = 0;
+      WorkspaceIndexList[1] = 2;
+      WorkspaceIndexList[2] = 4;
       return *this;
     }
-    void testSpectrumList(const MatrixWorkspace& ws) const
+    void testWorkspaceIndexList(const MatrixWorkspace& ws) const
     {
       TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo")
@@ -436,6 +563,32 @@ private:
         TS_ASSERT_EQUALS(ws.readY(2)[0], 4.0);
       }
       else if (wsType == "event")
+      {
+        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
+        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
+        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 5);
+      }
+   }
+
+    // ---- detector list ----
+    Parameters& setDetectorList()
+    {
+      DetectorList.resize(3);
+      DetectorList[0] = 1;  // Translates into WSindex = 0
+      DetectorList[1] = 3;  // Translates into WSindex = 2
+      DetectorList[2] = 5;  // Translates into WSindex = 4
+      return *this;
+    }
+    void testDetectorList(const MatrixWorkspace& ws) const
+    {
+      TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
+      if (wsType == "histo-detector")
+      {
+        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[0], 4.0);
+      }
+      else if (wsType == "event-detector")
       {
         TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
         TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
@@ -486,9 +639,13 @@ private:
     {
       TS_ASSERT_THROWS_NOTHING( alg.setProperty("EndWorkspaceIndex", params.EndWorkspaceIndex) );
     }
-    if (!params.SpectrumList.empty())
+    if (!params.WorkspaceIndexList.empty())
     {
-      TS_ASSERT_THROWS_NOTHING( alg.setProperty("SpectrumList", params.SpectrumList) );
+      TS_ASSERT_THROWS_NOTHING( alg.setProperty("WorkspaceIndexList", params.WorkspaceIndexList) );
+    }
+    if (!params.DetectorList.empty())
+    {
+      TS_ASSERT_THROWS_NOTHING( alg.setProperty("DetectorList", params.DetectorList) );
     }
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );

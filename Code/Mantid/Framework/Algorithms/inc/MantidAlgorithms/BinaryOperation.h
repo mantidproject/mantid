@@ -7,7 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"

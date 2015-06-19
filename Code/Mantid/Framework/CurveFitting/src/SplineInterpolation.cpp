@@ -154,7 +154,7 @@ SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
       WorkspaceFactory::Instance().create(mws, numSpec);
 
   // Use the vertical axis form the workspace to interpolate on the output WS
-  Axis *vAxis = iws->getAxis(1)->clone(NULL);
+  Axis *vAxis = iws->getAxis(1)->clone(mws.get());
   outputWorkspace->replaceAxis(1, vAxis);
 
   return outputWorkspace;

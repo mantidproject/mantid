@@ -1,14 +1,14 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
+#include "MantidPythonInterface/kernel/Policies/AsType.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
 using namespace boost::python;
 using namespace Mantid::API;
-namespace Policies = Mantid::PythonInterface::Policies;
+using namespace Mantid::PythonInterface::Policies;
 
 namespace {
 /**
@@ -31,11 +31,11 @@ namespace {
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  **/
-MatrixWorkspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
-                                         const MatrixWorkspace_sptr &parent,
-                                         size_t NVectors = size_t(-1),
-                                         size_t XLength = size_t(-1),
-                                         size_t YLength = size_t(-1)) {
+Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl &self,
+                                   const MatrixWorkspace_sptr &parent,
+                                   size_t NVectors = size_t(-1),
+                                   size_t XLength = size_t(-1),
+                                   size_t YLength = size_t(-1)) {
   return self.create(parent, NVectors, XLength, YLength);
 }
 
@@ -62,23 +62,21 @@ void export_WorkspaceFactory() {
   class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl",
                                                    no_init)
       .def("create", &createFromParentPtr,
-           createFromParent_Overload(createFromParentDoc,
-                                     (arg("parent"), arg("NVectors") = -1,
-                                      arg("XLength") = -1, arg("YLength") = -1))
-               [return_value_policy<Policies::ToSharedPtrWithDowncast>()])
+           createFromParent_Overload(
+               createFromParentDoc, (arg("parent"), arg("NVectors") = -1,
+                                     arg("XLength") = -1, arg("YLength") = -1)))
 
       .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create,
-           return_value_policy<Policies::ToSharedPtrWithDowncast>(),
-           createFromScratchDoc,
+           createFromScratchDoc, return_value_policy<AsType<Workspace_sptr>>(),
            (arg("className"), arg("NVectors"), arg("XLength"), arg("YLength")))
 
       .def("createTable", &WorkspaceFactoryImpl::createTable,
            createTable_Overload("Creates an empty TableWorkspace",
-                                (arg("className") = "TableWorkspace")))
+                                (arg("className") = "TableWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("createPeaks", &WorkspaceFactoryImpl::createPeaks,
            createPeaks_Overload("Creates an empty PeaksWorkspace",
-                                (arg("className") = "PeaksWorkspace")))
+                                (arg("className") = "PeaksWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("Instance", &WorkspaceFactory::Instance,
            return_value_policy<reference_existing_object>(),

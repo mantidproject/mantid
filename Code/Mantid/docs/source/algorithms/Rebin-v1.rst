@@ -176,21 +176,21 @@ Output:
    # create some event workspace
    ws = CreateSampleWorkspace(WorkspaceType="Event")
 
-   print "What type is the workspace before 1st rebin: " + str(type(ws))
+   print "What type is the workspace before 1st rebin: " + ws.id()
    # rebin from min to max with size bin = 2 preserving event workspace (default behaviour)
    ws = Rebin(ws, 2)
-   print "What type is the workspace after 1st rebin: " + str(type(ws))
+   print "What type is the workspace after 1st rebin: " + ws.id()
    ws = Rebin(ws, 2, PreserveEvents=False)
-   print "What type is the workspace after 2nd rebin: " + str(type(ws))
+   print "What type is the workspace after 2nd rebin: " + ws.id()
    # note you can also check the type of a workspace using: print isinstance(ws, IEventWorkspace)
 
 Output:
 
 .. testoutput:: ExEventRebin
 
-   What type is the workspace before 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
-   What type is the workspace after 1st rebin: <class 'mantid.api._api.IEventWorkspace'>
-   What type is the workspace after 2nd rebin: <class 'mantid.api._api.MatrixWorkspace'>
+   What type is the workspace before 1st rebin: EventWorkspace
+   What type is the workspace after 1st rebin: EventWorkspace
+   What type is the workspace after 2nd rebin: Workspace2D
 
   
 .. categories::

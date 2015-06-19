@@ -87,7 +87,7 @@ public:
         "-y,x-y,z; y,x,-z; -x,-y,-z");
     Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
 
-    SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
+    SpaceGroup spaceGroup(166, "R-3m", *(group * centering));
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.5, 0.0, 0.0);
     for (size_t i = 0; i < byOperator.size(); ++i) {
@@ -110,13 +110,13 @@ public:
     /* This is just a check that isAllowedReflection behaves correctly,
      * there is a system test in place that checks more examples.
      *
-     * This test uses space group 167, R-3c, like above.
+     * This test uses space group 166, R-3m, like above.
      */
     Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
         "-y,x-y,z; y,x,-z; -x,-y,-z");
     Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
 
-    SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
+    SpaceGroup spaceGroup(166, "R-3m", *(group * centering));
 
     // Reflections hkl: -h + k + l = 3n
     V3D goodHKL(1, 4, 3); // -1 + 4 + 3 = 6 = 3 * 2
@@ -138,7 +138,7 @@ public:
 
     // Reflections h-hl: h + l = 3n
     V3D goodHmHL(3, -3, 6); // 3 + 9 = 9 = 3 * 3
-    V3D badHmHL(3, -3, 7); // 3 + 7 = 10
+    V3D badHmHL(3, -3, 7);  // 3 + 7 = 10
     TS_ASSERT(spaceGroup.isAllowedReflection(goodHmHL));
     TS_ASSERT(!spaceGroup.isAllowedReflection(badHmHL));
 
@@ -155,7 +155,82 @@ public:
     TS_ASSERT(!spaceGroup.isAllowedReflection(badHH0));
   }
 
+  void testSiteSymmetryGroupR3c() {
+    /* Like the test above, this test checks that getSiteSymmetryGroup works
+     * correctly. A system test checks different space groups and different
+     * positions.
+     *
+     * This test uses space group 167, R-3c. Reference data from
+     *
+     * The Bilbao Crystallographic Server
+     * (http://www.cryst.ehu.es/cgi-bin/cryst/programs//find_comp_op)
+     *
+     * M. I. Aroyo et al, "Crystallography online: Bilbao Crystallographic
+     * Server" Bulg. Chem. Commun. 43(2) 183-197 (2011).
+     *
+     * M. I. Aroyo et al, "Bilbao Crystallographic Server I: Databases and
+     * crystallographic computing programs" Z. Krist. 221, 1, 15-27 (2006)
+     *
+     * M. I. Aroyo et al, "Bilbao Crystallographic Server II: Representations
+     * of crystallographic point groups and space groups"
+     * Acta Cryst. A62, 115-128 (2006)
+     */
+    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
+        "-y,x-y,z; y,x,-z+1/2; -x,-y,-z");
+    Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
+
+    SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
+    size_t sgOrder = spaceGroup.order();
+
+    // Position 6a
+    V3D w6a(0, 0, 1. / 4.);
+    Group_const_sptr siteSymmGrp6a = spaceGroup.getSiteSymmetryGroup(w6a);
+    checkSiteSymmetryGroupPositions(w6a, siteSymmGrp6a, "6a", sgOrder / 6);
+
+    // 6b
+    V3D w6b(0, 0, 0);
+    Group_const_sptr siteSymmGrp6b = spaceGroup.getSiteSymmetryGroup(w6b);
+    checkSiteSymmetryGroupPositions(w6b, siteSymmGrp6b, "6b", sgOrder / 6);
+
+    // 12c
+    V3D w12c(0, 0, 0.342352);
+    Group_const_sptr siteSymmGrp12c = spaceGroup.getSiteSymmetryGroup(w12c);
+    checkSiteSymmetryGroupPositions(w12c, siteSymmGrp12c, "12c", sgOrder / 12);
+
+    // 18d
+    V3D w18d(1. / 2., 0, 0);
+    Group_const_sptr siteSymmGrp18d = spaceGroup.getSiteSymmetryGroup(w18d);
+    checkSiteSymmetryGroupPositions(w18d, siteSymmGrp18d, "18d", sgOrder / 18);
+
+    // 18e
+    V3D w18e(0.32411, 0, 1. / 4.);
+    Group_const_sptr siteSymmGrp18e = spaceGroup.getSiteSymmetryGroup(w18e);
+    checkSiteSymmetryGroupPositions(w18e, siteSymmGrp18e, "18e", sgOrder / 18);
+
+    // 36f
+    V3D w36f(0.32411, 0.73232, 0.5232);
+    Group_const_sptr siteSymmGrp36f = spaceGroup.getSiteSymmetryGroup(w36f);
+    checkSiteSymmetryGroupPositions(w36f, siteSymmGrp36f, "36f", sgOrder / 36);
+  }
+
 private:
+  void checkSiteSymmetryGroupPositions(const V3D &position,
+                                       const Group_const_sptr &siteSymmGroup,
+                                       const std::string &wPosName,
+                                       size_t siteSymmGroupOrder) {
+    std::vector<V3D> equivalents = (*siteSymmGroup) * position;
+    for (auto eq = equivalents.begin(); eq != equivalents.end(); ++eq) {
+      TSM_ASSERT_EQUALS("Problem with Wyckoff-position " + wPosName +
+                            ". Expected " + position.toString() + ", got " +
+                            (*eq).toString() + ".",
+                        *eq, position);
+    }
+
+    TSM_ASSERT_EQUALS("Problem with Wyckoff-position " + wPosName +
+                          ", order of site symmetry group is incorrect.",
+                      siteSymmGroup->order(), siteSymmGroupOrder);
+  }
+
   class TestableSpaceGroup : public SpaceGroup {
     friend class SpaceGroupTest;
 
