@@ -173,10 +173,10 @@ private:
   /// Object performing raw calculation to determine Qx
   mutable CalculateReflectometryQz m_QzCalculation;
 
-  /// Array for the two theta angles
-  std::vector<double> m_theta;
-  /// Array for the azimuthal angles
-  std::vector<double> m_thetaWidths;
+  /// Two theta angles cache
+  mutable std::vector<double> m_theta;
+  /// Two theta widths cache
+  mutable std::vector<double> m_thetaWidths;
 
 public:
   /// Constructor
@@ -195,7 +195,8 @@ public:
             Mantid::API::BoxController_sptr boxController) const;
 
 private:
-  void initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace);
+  void
+  initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace) const;
 
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)

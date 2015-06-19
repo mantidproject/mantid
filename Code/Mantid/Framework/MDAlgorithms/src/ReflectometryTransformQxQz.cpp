@@ -168,7 +168,7 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
  * offset by this precaching step
  */
 void ReflectometryTransformQxQz::initAngularCaches(
-    const API::MatrixWorkspace_const_sptr &workspace) {
+    const API::MatrixWorkspace_const_sptr &workspace) const {
   const size_t nhist = workspace->getNumberHistograms();
   m_theta = std::vector<double>(nhist);
   m_thetaWidths = std::vector<double>(nhist);
