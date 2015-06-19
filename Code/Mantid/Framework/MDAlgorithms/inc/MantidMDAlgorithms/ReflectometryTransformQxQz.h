@@ -193,6 +193,9 @@ public:
   virtual Mantid::API::IMDEventWorkspace_sptr
   executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
             Mantid::API::BoxController_sptr boxController) const;
+  // Execuate transformation using normalised polynomial binning
+  virtual Mantid::API::MatrixWorkspace_sptr
+  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
 private:
   void

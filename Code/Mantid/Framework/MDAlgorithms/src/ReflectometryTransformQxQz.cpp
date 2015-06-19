@@ -1,9 +1,11 @@
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/V2D.h"
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -220,6 +222,63 @@ void ReflectometryTransformQxQz::initAngularCaches(
 
     m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
   }
+}
+
+MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
+    MatrixWorkspace_const_sptr inputWS) const {
+  auto outWS = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+
+  // Prepare the required theta values
+  initAngularCaches(inputWS);
+
+  // Create the output workspace as a distribution
+  outWS->initialize(m_nbinsz, m_nbinsx, m_nbinsx);
+
+  const size_t nHistos = inputWS->getNumberHistograms();
+  const size_t nBins = inputWS->blocksize();
+
+  CalculateReflectometryQxQz qcThetaLower(m_inTheta);
+  CalculateReflectometryQxQz qcThetaUpper(m_inTheta);
+
+  for (size_t i = 0; i < nHistos; ++i) {
+    IDetector_const_sptr detector = inputWS->getDetector(i);
+    if (!detector || detector->isMasked() || detector->isMonitor()) {
+      continue;
+    }
+
+    // Compute polygon points
+    const double theta = this->m_theta[i];
+    const double thetaWidth = this->m_thetaWidths[i];
+    const double thetaHalfWidth = 0.5 * thetaWidth;
+    const double thetaLower = theta - thetaHalfWidth;
+    const double thetaUpper = theta + thetaHalfWidth;
+
+    qcThetaLower.setThetaFinal(thetaLower);
+    qcThetaUpper.setThetaFinal(thetaUpper);
+
+    const MantidVec &X = inputWS->readX(0);
+
+    for (size_t j = 0; j < nBins; ++j) {
+      const double lamLower = X[j];
+      const double lamUpper = X[j + 1];
+
+      //fractional rebin
+      const V2D ll(qcThetaLower.calculateX(lamLower),
+                   qcThetaLower.calculateZ(lamLower));
+      const V2D lr(qcThetaLower.calculateX(lamUpper),
+                   qcThetaLower.calculateZ(lamUpper));
+      const V2D ul(qcThetaUpper.calculateX(lamLower),
+                   qcThetaUpper.calculateZ(lamLower));
+      const V2D ur(qcThetaUpper.calculateX(lamUpper),
+                   qcThetaUpper.calculateZ(lamUpper));
+
+      Quadrilateral inputQ(ll, lr, ur, ul);
+      /* double qOut; */
+      /* rebinToFractionalOutput(inputQ, inputWS, i, j, outWS, qOut); */
+
+    }
+  }
+  return outWS;
 }
 
 } // namespace Mantid
