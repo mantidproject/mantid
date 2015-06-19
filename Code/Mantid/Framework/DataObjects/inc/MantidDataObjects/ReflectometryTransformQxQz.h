@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
-#define MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
+#ifndef MANTID_DATAOBJECTS_REFLECTOMETRYTRANFORMQXQZ_H_
+#define MANTID_DATAOBJECTS_REFLECTOMETRYTRANFORMQXQZ_H_
 
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidDataObjects/CalculateReflectometryQxQz.h"
@@ -7,7 +7,7 @@
 
 namespace Mantid {
 
-namespace MDAlgorithms {
+namespace DataObjects {
 
 /** ReflectometryTranformQxQz : Type of ReflectometyTransform. Used to convert
  from an input R vs Wavelength workspace to a 2D MDEvent workspace with
@@ -37,8 +37,7 @@ namespace MDAlgorithms {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ReflectometryTransformQxQz
-    : public DataObjects::ReflectometryTransform {
+class DLLExport ReflectometryTransformQxQz : public ReflectometryTransform {
 private:
   const double m_qxMin;
   const double m_qxMax;
