@@ -115,7 +115,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
         alg = self.createChildAlgorithm('EnginXFitPeaks')
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
-        alg.setProperty('ExpectedPeaks', self.getProperty('ExpectedPeaks').value)
+        alg.setProperty('ExpectedPeaks', expectedPeaksD)
         alg.execute()
 
         difc = alg.getProperty('Difc').value
