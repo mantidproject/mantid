@@ -205,6 +205,12 @@ void SaveDiffCal::exec() {
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
   std::string filename = getProperty("Filename");
 
+  // sanity check the workspaces
+  size_t numRows = m_calibrationWS->rowCount();
+  if (numRows == 0) throw std::runtime_error("Cannot save empty table");
+  if (numRows != groupingWS->getNumberHistograms() || numRows != maskWS->getNumberHistograms())
+      throw std::runtime_error("Input workspaces must have matched sizes");
+
   // delete the file if it already exists
   if (Poco::File(filename).exists()) {
     Poco::File(filename).remove();
