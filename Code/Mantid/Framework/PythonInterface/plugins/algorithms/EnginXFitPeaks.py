@@ -1,7 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as sapi
 
 import math
 
@@ -31,8 +30,8 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
                              "Load from file a list of dSpacing values to be translated into TOF to "
-                             "find expected peaks.")
-
+                             "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
+                             "options are given.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
@@ -47,10 +46,14 @@ class EnginXFitPeaks(PythonAlgorithm):
     		doc = "Fitted Zero value")
 
     def PyExec(self):
-        # Get peaks in dSpacing from file
-        expectedPeaksD = self._readInExpectedPeaks()
 
-        if expectedPeaksD < 1:
+        import EnginXUtils
+
+        # Get peaks in dSpacing from file
+        expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                         self.getProperty('ExpectedPeaks').value)
+
+        if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         # Get expected peaks in TOF for the detector
@@ -84,47 +87,16 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         return defaultPeaks
 
-    def _readInExpectedPeaks(self):
-        """ Reads in expected peaks from the .csv file """
-        readInArray = []
-        exPeakArray = []
-        updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
-        if updateFileName != "":
-            with open(updateFileName) as f:
-                for line in f:
-                    readInArray.append([float(x) for x in line.split(',')])
-            for a in readInArray:
-                for b in a:
-                    exPeakArray.append(b)
-            if exPeakArray == []:
-                print "File could not be read. Defaults being used."
-                expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            else:
-                print "using file"
-                expectedPeaksD = sorted(exPeakArray)
-
-            if None == expectedPeaksD:
-                raise ValueError("Could not read any expected peaks from file: %s" % updateFileName)
-        else:
-            expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            if None == expectedPeaksD:
-                raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
-                                 "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
-                                 "was not given either.")
-
-        return expectedPeaksD
-
     def _produceOutputs(self, difc, zero):
         """
-        Fills in the output properties as requested. NOTE: this method and the methods that this calls
-        might/should be merged with similar methods in other EnginX algorithms (like EnginXCalibrate)
-        and possibly moved into EnginXUtils.py. That depends on how the EnginX algorithms evolve overall.
-        In principle, when EnginXCalibrate is updated with a similar 'OutputParametersTableName' optional
-        output property, it should use the 'OutputParametersTableName' of this (EnginXFitPeaks) algorithm.
+        Fills in the output properties as requested via the input properties.
 
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
         """
+
+        import EnginXUtils
+
         # mandatory outputs
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
@@ -132,19 +104,8 @@ class EnginXFitPeaks(PythonAlgorithm):
         # optional outputs
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            self._generateOutputParFitTable(tblName)
-
-    def _generateOutputParFitTable(self, name):
-        """
-        Produces a table workspace with the two fitted parameters
-        @param name :: the name to use for the table workspace that is created here
-        """
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-        tbl.addColumn('double', 'difc')
-        tbl.addColumn('double', 'zero')
-        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
-
-        self.log().information("Output parameters added into a table workspace: %s" % name)
+            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
     def _fitAllPeaks(self, inWS, wsIndex, foundPeaks, expectedPeaksD):
         """
@@ -286,6 +247,8 @@ class EnginXFitPeaks(PythonAlgorithm):
         detector. Implemented by using the Mantid algorithm ConvertUnits. A
         simple user script to do what this function does would be
         as follows:
+
+        import mantid.simpleapi as sapi
 
         yVals = [1] * (len(expectedPeaks) - 1)
         wsFrom = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
