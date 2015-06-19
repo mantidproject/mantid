@@ -84,6 +84,7 @@ void MultiDatasetFit::initLayout()
   splitter->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
+  connect(m_functionBrowser,SIGNAL(globalsChanged()),this,SLOT(checkFittingType()));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
   connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
   connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
@@ -547,6 +548,21 @@ void MultiDatasetFit::saveSettings() const
   m_fitOptionsBrowser->saveSettings( settings );
   settings.setValue("ShowDataErrors",m_uiForm.cbShowDataErrors->isChecked());
   settings.setValue("ApplyRangeToAll",m_uiForm.cbApplyRangeToAll->isChecked());
+}
+
+/// Make sure that simultaneous fitting is on
+/// when the function has at least one global parameter.
+void MultiDatasetFit::checkFittingType()
+{
+  auto globals = m_functionBrowser->getGlobalParameters();
+  if (globals.isEmpty())
+  {
+    m_fitOptionsBrowser->unlockCurrentFittingType();
+  }
+  else
+  {
+    m_fitOptionsBrowser->lockCurrentFittingType(MantidWidgets::FitOptionsBrowser::Simultaneous);
+  }
 }
 
 } // CustomInterfaces

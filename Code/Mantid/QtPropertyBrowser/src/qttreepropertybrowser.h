@@ -159,6 +159,7 @@ Q_SIGNALS:
 
     void collapsed(QtBrowserItem *item);
     void expanded(QtBrowserItem *item);
+    void optionChanged(QtProperty*, const QString&, bool);
 
 protected:
     virtual void itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem);

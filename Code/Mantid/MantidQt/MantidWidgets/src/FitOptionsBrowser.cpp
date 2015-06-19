@@ -653,12 +653,19 @@ void FitOptionsBrowser::setCurrentFittingType(FitOptionsBrowser::FittingType fit
   m_enumManager->setValue(m_fittingTypeProp, fitType);
 }
 
+/**
+ * Lock the browser in a particular fitting type state. Disable the switch option.
+ * @param fitType :: Fitting type to lock the browser in.
+ */
 void FitOptionsBrowser::lockCurrentFittingType(FitOptionsBrowser::FittingType fitType)
 {
   m_enumManager->setValue(m_fittingTypeProp, fitType);
   m_fittingTypeProp->setEnabled(false);
 }
 
+/**
+ * Make the fitting type changeable again.
+ */
 void FitOptionsBrowser::unlockCurrentFittingType()
 {
   m_fittingTypeProp->setEnabled(true);

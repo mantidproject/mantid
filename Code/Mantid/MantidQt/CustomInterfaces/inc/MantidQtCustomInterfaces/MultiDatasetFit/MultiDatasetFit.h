@@ -88,6 +88,7 @@ private slots:
   void enableZoom();
   void enablePan();
   void enableRange();
+  void checkFittingType();
 
 protected:
   virtual void initLayout();
