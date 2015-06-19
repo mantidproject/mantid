@@ -7,7 +7,7 @@
 #include "ui_StepScan.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IAlgorithm.h"
 
 namespace MantidQt

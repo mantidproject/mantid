@@ -11,7 +11,7 @@ Overview
   :align: right
   :width: 350
 
-TODO
+Provides Bayesian analysis routines primarily for use with QENS data.
 
 Action Buttons
 --------------
@@ -226,6 +226,10 @@ Width
 
 QMin & QMax
   The Q range to perform fitting within.
+
+Fitting Parameters
+  Provides the option to change the defautl fitting parameters passed to the
+  chosen function.
 
 Verbose
   Provides more information on the Results Log.

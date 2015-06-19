@@ -14,6 +14,14 @@
 
 namespace MantidQt
 {
+namespace MantidWidgets
+{
+  class ErrorCurve;
+}
+}
+
+namespace MantidQt
+{
 namespace CustomInterfaces
 {
 
@@ -43,6 +51,7 @@ namespace CustomInterfaces
   {
   public:
     ALCPeakFittingView(QWidget* widget);
+    ~ALCPeakFittingView();
 
     // -- IALCPeakFitting interface ----------------------------------------------------------------
 
@@ -53,7 +62,7 @@ namespace CustomInterfaces
   public slots:
 
     void initialize();
-    void setDataCurve(const QwtData& data);
+    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
     void setFittedCurve(const QwtData& data);
     void setFunction(const IFunction_const_sptr& newFunction);
     void setParameter(const QString& funcIndex, const QString& paramName, double value);
@@ -73,6 +82,9 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fittedCurve;
+
+    /// Error curves
+    MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve;
 
     /// Peak picker tool - only one on the plot at any given moment
     MantidWidgets::PeakPicker* m_peakPicker;

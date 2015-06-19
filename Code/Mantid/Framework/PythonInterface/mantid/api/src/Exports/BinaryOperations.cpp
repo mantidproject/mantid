@@ -1,25 +1,23 @@
 #include "MantidPythonInterface/api/BinaryOperations.h"
-#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidPythonInterface/kernel/Policies/AsType.h"
 
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-namespace Policies = Mantid::PythonInterface::Policies;
-
 void export_BinaryOperations() {
   using namespace Mantid::API;
-  using boost::python::return_value_policy;
+  using namespace Mantid::PythonInterface::Policies;
+  using namespace boost::python;
 
-  // Operator overloads dispatch through the above structure. The typedefs save
-  // some typing
+  // Typedefs the various function types
   typedef IMDWorkspace_sptr (*binary_fn_md_md)(
       const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,
       const std::string &, bool, bool);
@@ -47,28 +45,31 @@ void export_BinaryOperations() {
       const WorkspaceGroup_sptr, double, const std::string &,
       const std::string &, bool, bool);
 
+  // Always a return a Workspace_sptr
+  typedef return_value_policy<AsType<Workspace_sptr>> ReturnWorkspaceSptr;
+
   // Binary operations that return a workspace
   using boost::python::def;
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
 
   def("performBinaryOp", (binary_fn_md_md)&performBinaryOp,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
   def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
   def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
   def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
   def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
 
   def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
   def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
   def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble,
-      return_value_policy<Policies::ToSharedPtrWithDowncast>());
+      ReturnWorkspaceSptr());
 }
 
 namespace Mantid {

@@ -1,6 +1,8 @@
 #ifndef MANTID_API_WORKSPACE_FWD_H_
 #define MANTID_API_WORKSPACE_FWD_H_
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid {
 namespace API {
 /**

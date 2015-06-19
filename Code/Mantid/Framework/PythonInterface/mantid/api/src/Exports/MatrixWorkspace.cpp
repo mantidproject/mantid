@@ -5,33 +5,33 @@
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/numeric.hpp>
+#include <boost/python/overloads.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface::Converters;
+using namespace Mantid::PythonInterface::Policies;
+using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
-
-namespace Converters = Mantid::PythonInterface::Converters;
-namespace Policies = Mantid::PythonInterface::Policies;
-namespace Registry = Mantid::PythonInterface::Registry;
 
 namespace {
 /// Typedef for data access, i.e. dataX,Y,E members
 typedef Mantid::MantidVec &(MatrixWorkspace::*data_modifier)(const std::size_t);
 
 /// return_value_policy for read-only numpy array
-typedef return_value_policy<
-    Policies::VectorRefToNumpy<Converters::WrapReadOnly>> return_readonly_numpy;
+typedef return_value_policy<VectorRefToNumpy<WrapReadOnly>>
+    return_readonly_numpy;
 /// return_value_policy for read-write numpy array
-typedef return_value_policy<Policies::VectorRefToNumpy<
-    Converters::WrapReadWrite>> return_readwrite_numpy;
+typedef return_value_policy<VectorRefToNumpy<WrapReadWrite>>
+    return_readwrite_numpy;
 
 //------------------------------- Overload macros ---------------------------
 // Overloads for binIndexOf function which has 1 optional argument
@@ -165,7 +165,7 @@ void export_MatrixWorkspace() {
            "Returns workspace index correspondent to the given spectrum "
            "number. Throws if no such spectrum is present in the workspace")
       .def("getDetector", &MatrixWorkspace::getDetector,
-           return_value_policy<Policies::RemoveConstSharedPtr>(),
+           return_value_policy<RemoveConstSharedPtr>(),
            args("self", "workspaceIndex"), "Return the Detector or "
                                            "DetectorGroup that is linked to "
                                            "the given workspace index")
@@ -290,16 +290,5 @@ void export_MatrixWorkspace() {
            "Performs a comparison operation on two workspaces, using the "
            "CheckWorkspacesMatch algorithm");
 
-  //-------------------------------------------------------------------------------------------------
-
-  static const int NUM_IDS = 7;
-  static const char *WORKSPACE_IDS[NUM_IDS] = {
-      "GroupingWorkspace",   "MaskWorkspace",      "OffsetsWorkspace",
-      "RebinnedOutput",      "SpecialWorkspace2D", "Workspace2D",
-      "WorkspaceSingleValue"};
-
-  Registry::DataItemInterface<MatrixWorkspace> entry;
-  for (int i = 0; i < NUM_IDS; ++i) {
-    entry.castFromID(WORKSPACE_IDS[i]);
-  };
+  RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

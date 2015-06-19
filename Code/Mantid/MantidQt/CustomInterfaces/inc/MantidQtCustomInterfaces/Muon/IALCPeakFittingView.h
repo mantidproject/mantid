@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
@@ -62,7 +62,9 @@ namespace CustomInterfaces
 
     /// Update the data curve displayed
     /// @param data :: New curve data
-    virtual void setDataCurve(const QwtData& data) = 0;
+    /// @param errors :: New curve errors
+    virtual void setDataCurve(const QwtData &data,
+                              const std::vector<double> &errors) = 0;
 
     /// Update the fitted curve displayed
     /// @param data :: New curve data

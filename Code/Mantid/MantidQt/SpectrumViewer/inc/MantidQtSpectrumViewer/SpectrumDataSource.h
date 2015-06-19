@@ -5,7 +5,7 @@
 #include <cstddef>
 #include <vector>
 #include <string>
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 

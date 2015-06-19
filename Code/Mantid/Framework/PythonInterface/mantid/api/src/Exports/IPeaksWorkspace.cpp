@@ -1,7 +1,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 #include <boost/python/return_internal_reference.hpp>
 #include <boost/optional.hpp>
@@ -9,7 +9,7 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::DataItemInterface;
+using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
 namespace {
@@ -67,5 +67,5 @@ void export_IPeaksWorkspace() {
 
   //-------------------------------------------------------------------------------------------------
 
-  DataItemInterface<IPeaksWorkspace>().castFromID("PeaksWorkspace");
+  RegisterWorkspacePtrToPython<IPeaksWorkspace>();
 }

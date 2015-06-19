@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_MDEVENTFACTORY_H_
 #define MANTID_DATAOBJECTS_MDEVENTFACTORY_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDEvent.h"

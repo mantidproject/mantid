@@ -10,7 +10,7 @@
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"

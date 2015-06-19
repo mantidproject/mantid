@@ -1,8 +1,13 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakEditMode.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidQtSliceViewer/ZoomableOnDemand.h"
+#include "MantidKernel/V3D.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -13,6 +18,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace MantidQt {
@@ -20,6 +26,52 @@ namespace SliceViewer {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeaksPresenter");
+
+/**
+ * makeVertexesFromBox. Convert a box into a form of vertexes that PeaksOnSurface understands.
+ * @param box : transformed PeakBoundingBox
+ * @return : vertex vector
+ */
+std::vector<std::vector<double> > makeVertexesFromBox(const PeakBoundingBox &box, Mantid::Geometry::PeakTransform const * const transform) {
+
+  typedef std::vector<double> DoubleVec;
+  // Make vertexes in a counter clockwise ordering
+  std::vector<DoubleVec > vertexes(4);
+
+  V3D plotVertex1(box.left(), box.bottom(), box.slicePoint());
+  V3D vertex1 = transform->transformBack(plotVertex1);
+
+  V3D plotVertex2(box.left(), box.top(), box.slicePoint());
+  V3D vertex2 = transform->transformBack(plotVertex2);
+
+  V3D plotVertex3(box.right(), box.top(), box.slicePoint());
+  V3D vertex3 = transform->transformBack(plotVertex3);
+
+  V3D plotVertex4(box.right(), box.bottom(), box.slicePoint());
+  V3D vertex4 = transform->transformBack(plotVertex4);
+
+  vertexes[0]=vertex1;
+  vertexes[1]=vertex2;
+  vertexes[2]=vertex3;
+  vertexes[3]=vertex4;
+  return vertexes;
+}
+
+/**
+ * Determine if we can add peaks a peaks workspace.
+ * @param peaksWS : To possibly add to
+ * @param frame : Frame of base MDWorkspace
+ * @return True only if we can add to the peaks workspace.
+ */
+bool canAddPeaksTo(IPeaksWorkspace const * const peaksWS,  Mantid::Kernel::SpecialCoordinateSystem frame){
+    /*
+     - PeaksWS Must have an oriented lattice, otherwise we can't add a self-consistent peak.
+     - PeaksWS Must not be integrated, because we have no concept of radius until each individual peak is integrated.
+     - The MDWorkspace must be in the HKL frame otherwise we cannot interpret plot cursor coordinates.
+     */
+  return peaksWS->sample().hasOrientedLattice() && !peaksWS->hasIntegratedPeaks() && frame == Mantid::Kernel::HKL;
+}
+
 }
 
 /**
@@ -41,6 +93,7 @@ coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
   }
 }
 
+
 /**
  * Produce the views for the internally held peaks workspace.
  * Indexes to peaks in the peaks workspace are used to reference the
@@ -48,7 +101,16 @@ coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
  * All the views must be recreated.
  */
 void ConcretePeaksPresenter::produceViews() {
-  m_viewPeaks = m_viewFactory->createView(m_transform);
+
+  PeakOverlayView_sptr newView = m_viewFactory->createView(this, m_transform);
+  PeakOverlayView_sptr oldView = m_viewPeaks;
+  if (oldView) {
+    newView->takeSettingsFrom(oldView.get());
+  }
+  m_viewPeaks = newView;
+
+  // We reapply any cached edit mode settings we had before.
+  this->peakEditMode(m_editMode);
 }
 
 /**
@@ -118,9 +180,11 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
     : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-      m_owningPresenter(NULL), m_isHidden(false) {
+      m_owningPresenter(NULL), m_isHidden(false), m_editMode(SliceViewer::None), m_hasAddPeaksMode(canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
+
+
 
   this->initialize();
 }
@@ -162,6 +226,21 @@ void ConcretePeaksPresenter::initialize() {
 void ConcretePeaksPresenter::update() { m_viewPeaks->updateView(); }
 
 /**
+ * Set/update the internal visible peak mask list.
+ * @param indexes : Indexes of peaks that can be seen.
+ */
+void ConcretePeaksPresenter::setVisiblePeaks(const std::vector<size_t>& indexes)
+{
+    std::vector<bool> visible(this->m_peaksWS->getNumberPeaks(), false); // assume all invisible
+    for (size_t i = 0; i < indexes.size(); ++i) {
+        visible[indexes[i]] = true; // make the visible indexes visible. Masking type operation.
+    }
+    m_viewablePeaks = visible;
+
+    m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
+}
+
+/**
  * Find the peaks in the region.
  * Update the view with all those peaks that could be viewable.
  *
@@ -169,47 +248,9 @@ void ConcretePeaksPresenter::update() { m_viewPeaks->updateView(); }
  *user changes the effective radius of the peaks markers.
  */
 void ConcretePeaksPresenter::doFindPeaksInRegion() {
-  PeakBoundingBox transformedViewableRegion =
-      m_slicePoint.makeSliceBox(1e-6); // TODO, could actually be calculated as
-                                       // a single plane with z = 0 thickness.
-  transformedViewableRegion.transformBox(m_transform);
 
-  // Don't bother to find peaks in the region if there are no peaks to find.
-  if (this->m_peaksWS->getNumberPeaks() >= 1) {
-
-    double effectiveRadius =
-        m_viewPeaks
-            ->getRadius(); // Effective radius of each peak representation.
-
-    Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-            this->m_peaksWS);
-
-    Mantid::API::IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("PeaksInRegion");
-    alg->setChild(true);
-    alg->setRethrows(true);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", peaksWS);
-    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
-    alg->setProperty("Extents", transformedViewableRegion.toExtents());
-    alg->setProperty("CheckPeakExtents", true);
-    alg->setProperty("PeakRadius", effectiveRadius);
-    alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
-    alg->execute();
-    ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
-    std::vector<bool> viewablePeaks(outTable->rowCount());
-    for (size_t i = 0; i < outTable->rowCount(); ++i) {
-      viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
-    }
-    m_viewablePeaks = viewablePeaks;
-
-  }
-  else{
-    // No peaks will be viewable
-    m_viewablePeaks = std::vector<bool>();
-  }
-  m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
+  auto indexes = findVisiblePeakIndexes(m_slicePoint, false /*We want to consider effective radius when deciding what to show*/);
+  setVisiblePeaks(indexes);
 }
 
 /**
@@ -384,16 +425,15 @@ bool ConcretePeaksPresenter::isHidden() const { return m_isHidden; }
  * @param other
  * @return
  */
-bool ConcretePeaksPresenter::contentsDifferent(const PeaksPresenter *  other) const
-{
-    const SetPeaksWorkspaces otherWorkspaces =
-        other->presentedWorkspaces();
+bool
+ConcretePeaksPresenter::contentsDifferent(const PeaksPresenter *other) const {
+  const SetPeaksWorkspaces otherWorkspaces = other->presentedWorkspaces();
 
-    // Look for this workspace in the others workspace list.
-    auto iterator = otherWorkspaces.find(this->m_peaksWS);
+  // Look for this workspace in the others workspace list.
+  auto iterator = otherWorkspaces.find(this->m_peaksWS);
 
-    const bool different = (iterator == otherWorkspaces.end());
-    return different;
+  const bool different = (iterator == otherWorkspaces.end());
+  return different;
 }
 
 /**
@@ -451,7 +491,8 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) && m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
+      m_viewPeaks->positionOnly()) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -459,7 +500,8 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) && m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
+      m_viewPeaks->positionOnly()) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;
@@ -485,5 +527,154 @@ void ConcretePeaksPresenter::zoomToPeak(const int peakIndex) {
     zoomable->zoomToPeak(this, peakIndex);
   }
 }
+
+void ConcretePeaksPresenter::peakEditMode(EditMode mode){
+    if(mode == DeletePeaks) {
+        m_viewPeaks->peakDeletionMode();
+    } else if(mode == AddPeaks){
+        m_viewPeaks->peakAdditionMode();
+    } else {
+        m_viewPeaks->peakDisplayMode();
+    }
+    // Cache the current edit mode.
+    m_editMode = mode;
+}
+
+bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
+
+  Left left(box.left());
+  Right right(box.right());
+  Bottom bottom(box.bottom());
+  Top top(box.top());
+  SlicePoint slicePoint(box.slicePoint());
+  if (slicePoint() < 0) { // indicates that it should not be used.
+    slicePoint = SlicePoint(m_slicePoint.slicePoint());
+  }
+
+  PeakBoundingBox accurateBox(
+      left, right, top, bottom,
+      slicePoint /*Use the current slice position, previously unknown.*/);
+
+  // Tranform box from plot coordinates into orderd HKL, Qx,Qy,Qz etc, then find the visible peaks.
+  std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(accurateBox, true /*Point only mode. We want to not consider effective radius when deciding what delete if possible.*/);
+
+  // If we have things to remove, do that in one-step.
+  if (!deletionIndexList.empty()) {
+
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+    // Sort the Peaks in-place.
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("DeleteTableRows");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("TableWorkspace", peaksWS);
+    alg->setProperty("Rows", deletionIndexList);
+    alg->execute();
+
+    // Reproduce the views. Proxy representations recreated for all peaks.
+    this->produceViews();
+
+    // Refind visible peaks and Set the proxy representations to be visible or not.
+    doFindPeaksInRegion();
+
+    // Upstream controls need to be regenerated.
+    this->informOwnerUpdate();
+  }
+  return !deletionIndexList.empty();
+}
+
+bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX, double plotCoordsPointY)
+{
+    V3D plotCoordsPoint(plotCoordsPointX, plotCoordsPointY, m_slicePoint.slicePoint());
+    V3D hkl = m_transform->transformBack(plotCoordsPoint);
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("AddPeakHKL");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("Workspace", peaksWS);
+    alg->setProperty("HKL", std::vector<double>(hkl));
+    alg->execute();
+
+    // Reproduce the views. Proxy representations recreated for all peaks.
+    this->produceViews();
+
+    // Refind visible peaks and Set the proxy representations to be visible or not.
+    doFindPeaksInRegion();
+
+    // Upstream controls need to be regenerated.
+    this->informOwnerUpdate();
+
+    return alg->isExecuted();
+}
+
+bool ConcretePeaksPresenter::hasPeakAddMode() const
+{
+    return m_hasAddPeaksMode;
+}
+
+std::vector<size_t>
+ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box, const bool pointOnlyMode) {
+  std::vector<size_t> indexes;
+  // Don't bother to find peaks in the region if there are no peaks to find.
+  if (this->m_peaksWS->getNumberPeaks() >= 1) {
+
+    double radius =
+        m_viewPeaks
+            ->getRadius(); // Effective radius of each peak representation.
+
+    /*
+     If we are position only, there is really no proper radius. This should really be handled internally by the PeakIntersection algorithm.
+    */
+    if(pointOnlyMode && m_viewPeaks->positionOnly()){
+        radius =1e-6;
+    }
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+
+    std::vector<std::vector<double>> vertexes =
+        makeVertexesFromBox(box, m_transform.get());
+
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("PeaksOnSurface");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", peaksWS);
+    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_on_surface");
+    alg->setProperty("Vertex1", vertexes[0]);
+    alg->setProperty("Vertex2", vertexes[1]);
+    alg->setProperty("Vertex3", vertexes[2]);
+    alg->setProperty("Vertex4", vertexes[3]);
+    alg->setProperty("PeakRadius",
+                     radius);
+    alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
+    alg->execute();
+    ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
+
+    for (size_t i = 0; i < outTable->rowCount(); ++i) {
+      const bool insideRegion = outTable->cell<Boolean>(i, 1);
+      if (insideRegion) {
+        indexes.push_back(i);
+      }
+    }
+  }
+  return indexes;
+}
+
+
+
 }
 }
+

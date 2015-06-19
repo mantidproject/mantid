@@ -96,6 +96,14 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
   }
 
   /**
+   * Ensure the stored type is always a Workspace_sptr
+   * This allows a reference to a Workspace_sptr to be used withh boost::python::extract
+   */
+  static Mantid::API::Workspace_sptr value(const TypedWorkspaceProperty& self) {
+    return self.operator()();
+  }
+
+  /**
    * Defines the necessary exports for a WorkspaceProperty<WorkspaceType>. This
    * includes a
    * PropertyWithValue<WorkspaceType_sptr> whose name is formed by appending
@@ -140,7 +148,11 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
                               args("name", "defaultValue", "direction",
                                    "optional", "locking", "validator")))
         .def("isOptional", &TypedWorkspaceProperty::isOptional,
-             "Returns true if the property has been marked as optional");
+             "Returns true if the property has been marked as optional")
+
+        .add_property("value", &value)
+        ;
+
   }
 };
 }

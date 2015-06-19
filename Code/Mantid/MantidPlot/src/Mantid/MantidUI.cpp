@@ -41,6 +41,8 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 
 
 #include <QMessageBox>

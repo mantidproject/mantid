@@ -4,7 +4,7 @@
 #include "ui_IqtFit.h"
 #include "IDATab.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid
 {

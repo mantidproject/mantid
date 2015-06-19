@@ -1,4 +1,5 @@
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"

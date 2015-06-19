@@ -135,6 +135,7 @@ protected:
   API::WorkspaceGroup_sptr m_fitplots;
 
   double m_fwhmMultiples;
+  double m_maxRelativeFwhm;
 
 private:
   void init();

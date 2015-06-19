@@ -4,7 +4,7 @@
 #include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
 #include "MantidICat/CatalogSearchParam.h"
 #include "MantidAPI/CatalogSession.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
 
 namespace Mantid {

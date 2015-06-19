@@ -941,6 +941,45 @@ public:
 
   }
 
+  void test_edit_command()
+  {
+
+    // Prepare subject objects.
+    Mantid::API::IPeaksWorkspace_sptr peaksWSA = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    SetPeaksWorkspaces setA;
+    setA.insert(peaksWSA);
+    auto* pSubjectA = new NiceMock<MockPeaksPresenter>;
+    PeaksPresenter_sptr subjectA(pSubjectA);
+    EXPECT_CALL(*pSubjectA, presentedWorkspaces()).WillRepeatedly(Return(setA));
+    EXPECT_CALL(*pSubjectA, contentsDifferent(_)).WillOnce(Return(true));
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWSB = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+    SetPeaksWorkspaces setB;
+    setA.insert(peaksWSB);
+    auto* pSubjectB = new NiceMock<MockPeaksPresenter>;
+    PeaksPresenter_sptr subjectB(pSubjectB);
+    EXPECT_CALL(*pSubjectB, presentedWorkspaces()).WillRepeatedly(Return(setB));
+    EXPECT_CALL(*pSubjectB, contentsDifferent(_)).WillOnce(Return(true));
+
+    // Set a background colour on the composite.
+    CompositePeaksPresenter composite(&_fakeZoomableView);
+    composite.addPeaksPresenter(subjectA);
+    composite.addPeaksPresenter(subjectB);
+
+    /* Now we are going to say that we only want to add peaks to the first peaks workspace of the first presenter.
+       so lets prep the presenters for this
+     */
+    EXPECT_CALL(*pSubjectA, peakEditMode(AddPeaks)).Times(AtLeast(1));
+    EXPECT_CALL(*pSubjectB, peakEditMode(MantidQt::SliceViewer::None)).Times(AtLeast(1));
+    // Execute it.
+    composite.editCommand(AddPeaks, peaksWSA);
+
+    // Check that we used the subjects correctly
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubjectA));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubjectB));
+  }
+
+
 
 
 };

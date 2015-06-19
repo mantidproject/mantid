@@ -1,6 +1,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
