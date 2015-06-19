@@ -167,14 +167,11 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
  * values are required very frequently so the total time is more than
  * offset by this precaching step
  */
-void ReflectometryTransformQxQz::initAngularCachesNonPSD(
+void ReflectometryTransformQxQz::initAngularCaches(
     const API::MatrixWorkspace_const_sptr &workspace) {
   const size_t nhist = workspace->getNumberHistograms();
   m_theta = std::vector<double>(nhist);
   m_thetaWidths = std::vector<double>(nhist);
-  // Force phi widths to zero
-  m_phi = std::vector<double>(nhist, 0.0);
-  m_phiWidths = std::vector<double>(nhist, 0.0);
 
   auto inst = workspace->getInstrument();
   const auto samplePos = inst->getSample()->getPos();
@@ -185,13 +182,6 @@ void ReflectometryTransformQxQz::initAngularCachesNonPSD(
     IDetector_const_sptr det;
     try {
       det = workspace->getDetector(i);
-      // Check to see if there is an EFixed, if not skip it
-      // TODO when are we or aren't we indirect?
-      if (false/* indirect */) {
-        std::vector<double> param = det->getNumberParameter("EFixed");
-        if (param.empty())
-          det.reset();
-      }
     } catch (Kernel::Exception::NotFoundError &) {
       // Catch if no detector. Next line tests whether this happened - test
       // placed
@@ -232,68 +222,6 @@ void ReflectometryTransformQxQz::initAngularCachesNonPSD(
     double boxWidth = maxPoint[upDir];
 
     m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
-  }
-}
-
-/**
- * Function that retrieves the two-theta and azimuthal angles from a given
- * detector. It then looks up the nearest neighbours. Using those detectors,
- * it calculates the two-theta and azimuthal angle widths.
- * @param workspace : the workspace containing the needed detector information
- */
-void ReflectometryTransformQxQz::initAngularCachesPSD(
-    const API::MatrixWorkspace_const_sptr &workspace) {
-  // Trigger a build of the nearst neighbors outside the OpenMP loop
-  const int numNeighbours = 4;
-  const size_t nHistos = workspace->getNumberHistograms();
-
-  m_theta = std::vector<double>(nHistos);
-  m_thetaWidths = std::vector<double>(nHistos);
-  m_phi = std::vector<double>(nHistos);
-  m_phiWidths = std::vector<double>(nHistos);
-
-  for (size_t i = 0; i < nHistos; ++i) {
-    DetConstPtr detector = workspace->getDetector(i);
-    specid_t inSpec = workspace->getSpectrum(i)->getSpectrumNo();
-    SpectraDistanceMap neighbours =
-        workspace->getNeighboursExact(inSpec, numNeighbours, true);
-
-    // Convert from spectrum numbers to workspace indices
-    double thetaWidth = -DBL_MAX;
-    double phiWidth = -DBL_MAX;
-
-    // Find theta and phi widths
-    double theta = workspace->detectorTwoTheta(detector);
-    double phi = detector->getPhi();
-
-    specid_t deltaPlus1 = inSpec + 1;
-    specid_t deltaMinus1 = inSpec - 1;
-    specid_t deltaPlusT = inSpec + m_detNeighbourOffset;
-    specid_t deltaMinusT = inSpec - m_detNeighbourOffset;
-
-    for (SpectraDistanceMap::iterator it = neighbours.begin();
-         it != neighbours.end(); ++it) {
-      specid_t spec = it->first;
-      if (spec == deltaPlus1 || spec == deltaMinus1 || spec == deltaPlusT ||
-          spec == deltaMinusT) {
-        DetConstPtr detector_n = workspace->getDetector(spec - 1);
-        double theta_n = workspace->detectorTwoTheta(detector_n) / 2.0;
-        double phi_n = detector_n->getPhi();
-
-        double dTheta = std::fabs(theta - theta_n);
-        double dPhi = std::fabs(phi - phi_n);
-        if (dTheta > thetaWidth) {
-          thetaWidth = dTheta;
-        }
-        if (dPhi > phiWidth) {
-          phiWidth = dPhi;
-        }
-      }
-    }
-    m_theta[i] = theta;
-    m_phi[i] = phi;
-    m_thetaWidths[i] = thetaWidth;
-    m_phiWidths[i] = phiWidth;
   }
 }
 

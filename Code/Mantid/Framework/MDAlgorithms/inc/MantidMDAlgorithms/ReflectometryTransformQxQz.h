@@ -118,18 +118,10 @@ private:
   /// Object performing raw calculation to determine Qx
   mutable CalculateReflectometryQz m_QzCalculation;
 
-  /// Single value theta width
-  double m_thetaWidth;
   /// Array for the two theta angles
   std::vector<double> m_theta;
   /// Array for the azimuthal angles
-  std::vector<double> m_phi;
-  /// Array for the theta widths
   std::vector<double> m_thetaWidths;
-  /// Array for the azimuthal widths
-  std::vector<double> m_phiWidths;
-  /// Offset for finding neighbor in nearest tube
-  int m_detNeighbourOffset;
 
 public:
   /// Constructor
@@ -148,8 +140,7 @@ public:
             Mantid::API::BoxController_sptr boxController) const;
 
 private:
-  void initAngularCachesNonPSD(const API::MatrixWorkspace_const_sptr &workspace);
-  void initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace);
+  void initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace);
 
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)
