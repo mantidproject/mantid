@@ -180,7 +180,7 @@ fi
 datafiles=$*
 all_hashed_files=""
 for datafile in $datafiles; do
-  hashed_content=$(add_test_data $datafile)
+  hashed_content=$(add_test_data ${GIT_PREFIX}$datafile)
   all_hashed_files="$all_hashed_files $hashed_content"
 done
 
