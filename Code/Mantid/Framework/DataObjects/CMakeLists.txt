@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/EventWorkspaceMRU.cpp
 	src/Events.cpp
 	src/FakeMD.cpp
+	src/FractionalRebinning.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
 	src/MDBin.cpp
@@ -74,6 +75,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/Events.h
 	inc/MantidDataObjects/FakeMD.h
+	inc/MantidDataObjects/FractionalRebinning.h
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/MDBin.h

@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/Vertex2D.h"
@@ -113,7 +114,8 @@ void SofQWPolygon::exec() {
       const V2D ul(dE_j, (this->*qCalculator)(efixed, dE_j, thetaUpper, 0.0));
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
-      rebinToOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+      DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j,
+                                                      outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
@@ -130,7 +132,8 @@ void SofQWPolygon::exec() {
   }
   /* PARALLEL_CHECK_INTERUPT_REGION */
 
-  normaliseOutput(outputWS, inputWS);
+  DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS,
+                                                    m_progress);
 
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
