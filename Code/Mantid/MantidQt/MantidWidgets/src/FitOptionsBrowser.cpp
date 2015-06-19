@@ -43,6 +43,7 @@ namespace MantidWidgets
 /**
  * Constructor
  * @param parent :: The parent widget.
+ * @param fitType :: The type of the underlying fitting algorithm.
  */
 FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
   :QWidget(parent),
