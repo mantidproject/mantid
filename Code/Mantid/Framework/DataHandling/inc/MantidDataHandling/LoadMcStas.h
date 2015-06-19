@@ -5,7 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
