@@ -84,7 +84,7 @@ References
 The data used in this algorithm comes from the following paper.
 
 #. Varley F. Sears, *Neutron scattering lengths and cross sections*, Neutron News **3:3** (1992) 26
-   `doi: 10.1080/10448639208218770`_
+   `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
 
       
 .. categories::
