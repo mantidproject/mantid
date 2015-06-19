@@ -67,6 +67,7 @@ void LoadDiffCal::init() {
   std::vector<std::string> exts;
   exts.push_back(".h5");
   exts.push_back(".hd5");
+  exts.push_back(".hdf");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
                   "Path to the .h5 file.");
 
