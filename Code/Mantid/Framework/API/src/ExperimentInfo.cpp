@@ -947,8 +947,8 @@ void ExperimentInfo::loadExperimentInfoNexus(const std::string& nxFilename,
 
 //--------------------------------------------------------------------------------------------
 /** Load the instrument from an open NeXus file.
- * @param file :: open NeXus file
  * @param nxFilename :: the filename of the nexus file
+ * @param file :: open NeXus file
  * @param[out] parameterStr :: special string for all the parameters.
  *             Feed that to ExperimentInfo::readParameterMap() after the
  * instrument is done.

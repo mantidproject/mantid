@@ -691,9 +691,11 @@ public:
      ExperimentInfo ei;
 
     // We get an instrument group from a test file in the form that would occur in an ISIS Nexus file
+    // with an embedded instrument definition and parameters
 
     // Create the root Nexus class
-    std::string path = FileFinder::Instance().getFullPath("LOQinstrument.h5");
+    std::string testFile = "LOQinstrument.h5";
+    std::string path = FileFinder::Instance().getFullPath(testFile);
 
    
     // Get nexus file for this and move it to ISIS Nexus group 'raw_data_1'
@@ -701,7 +703,7 @@ public:
 
     // Load the Nexus IDF info
     std::string params;
-    TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus( &nxFile, params));
+    TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus( testFile, &nxFile, params));
     Instrument_const_sptr inst = ei.getInstrument();
     TS_ASSERT_EQUALS( inst->getName(), "LOQ" );  // Check instrument name
     TS_ASSERT_EQUALS( params.size() , 613 );     // Check size of parameter string
