@@ -31,8 +31,8 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
                              "Load from file a list of dSpacing values to be translated into TOF to "
-                             "find expected peaks.")
-
+                             "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
+                             "options are given.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
@@ -54,7 +54,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                          self.getProperty('ExpectedPeaks').value)
 
-        if expectedPeaksD < 1:
+        if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         # Get expected peaks in TOF for the detector

@@ -62,12 +62,15 @@ def readInExpectedPeaks(filename, expectedGiven):
     if filename != "":
         exPeakArray = []
         readInArray = []
-        with open(filename) as f:
-            for line in f:
-                readInArray.append([float(x) for x in line.split(',')])
-        for a in readInArray:
-            for b in a:
-                exPeakArray.append(b)
+        try:
+            with open(filename) as f:
+                for line in f:
+                    readInArray.append([float(x) for x in line.split(',')])
+            for a in readInArray:
+                for b in a:
+                    exPeakArray.append(b)
+        except RuntimeError, ex:
+            raise RuntimeError("Error while reading file of expected peaks '%s': %s" % (filename, ex))
 
         if not exPeakArray:
             # "File could not be read. Defaults in alternative option used."
