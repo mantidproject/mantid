@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
 	src/BoxControllerNeXusIO.cpp
+	src/CalculateReflectometryQBase.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
 	src/CoordTransformAligned.cpp
@@ -60,6 +61,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/AffineMatrixParameter.h
 	inc/MantidDataObjects/AffineMatrixParameterParser.h
 	inc/MantidDataObjects/BoxControllerNeXusIO.h
+	inc/MantidDataObjects/CalculateReflectometryQBase.h
 	inc/MantidDataObjects/CoordTransformAffine.h
 	inc/MantidDataObjects/CoordTransformAffineParser.h
 	inc/MantidDataObjects/CoordTransformAligned.h

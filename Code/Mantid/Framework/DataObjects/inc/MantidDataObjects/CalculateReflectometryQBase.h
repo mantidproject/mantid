@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_CALCULATE_REFLECTOMETRYQ_BASE_H_
-#define MANTID_MDALGORITHMS_CALCULATE_REFLECTOMETRYQ_BASE_H_
+#ifndef MANTID_DATAOBJECTS_CALCULATE_REFLECTOMETRYQ_BASE_H_
+#define MANTID_DATAOBJECTS_CALCULATE_REFLECTOMETRYQ_BASE_H_
 
 #include "MantidKernel/System.h"
 
@@ -10,7 +10,7 @@ class IMDDimension;
 }
 }
 
-namespace MDAlgorithms {
+namespace DataObjects {
 /**
 Base class for reflectometry Q transformations
 */

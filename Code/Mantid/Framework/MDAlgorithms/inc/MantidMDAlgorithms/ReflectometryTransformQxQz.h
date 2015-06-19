@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 
 #include "MantidMDAlgorithms/ReflectometryTransform.h"
-#include "MantidMDAlgorithms/CalculateReflectometryQBase.h"
+#include "MantidDataObjects/CalculateReflectometryQBase.h"
 #include "MantidKernel/ClassMacros.h"
 
 namespace Mantid {
@@ -13,7 +13,7 @@ namespace MDAlgorithms {
  Converts from inputs of wavelength, incident theta and final theta to Qx for
  reflectometry experiments
  */
-class CalculateReflectometryQxQz : public CalculateReflectometryQBase {
+class CalculateReflectometryQxQz : public DataObjects::CalculateReflectometryQBase {
 private:
   double m_cos_theta_i;
   double m_sin_theta_i;
