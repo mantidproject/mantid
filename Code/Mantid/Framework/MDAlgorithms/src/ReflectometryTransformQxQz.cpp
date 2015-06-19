@@ -11,9 +11,6 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-typedef std::map<Mantid::specid_t, Mantid::Kernel::V3D> SpectraDistanceMap;
-typedef Mantid::Geometry::IDetector_const_sptr DetConstPtr;
-
 namespace Mantid {
 namespace MDAlgorithms {
 
