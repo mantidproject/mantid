@@ -61,7 +61,7 @@ namespace MantidWidgets
 
     Q_PROPERTY(QColor canvasColour READ canvasColour WRITE setCanvasColour)
     Q_PROPERTY(bool showLegend READ legendIsShown WRITE showLegend)
-    Q_PROPERTY(bool showErrorBars READ errorBarsAreShown WRITE showErrorBars)
+    Q_PROPERTY(QStringList curveErrorBars READ getShownErrorBars WRITE setDefaultShownErrorBars)
 
   public:
     PreviewPlot(QWidget *parent = NULL, bool init = true);
@@ -71,7 +71,7 @@ namespace MantidWidgets
     void setCanvasColour(const QColor & colour);
 
     bool legendIsShown();
-    bool errorBarsAreShown();
+    QStringList getShownErrorBars();
 
     void setAxisRange(QPair<double, double> range, int axisID = QwtPlot::xBottom);
 
@@ -104,7 +104,7 @@ namespace MantidWidgets
 
   public slots:
     void showLegend(bool show);
-    void showErrorBars(bool show);
+    void setDefaultShownErrorBars(const QStringList & curveNames);
     void togglePanTool(bool enabled);
     void toggleZoomTool(bool enabled);
     void resetView();
@@ -120,12 +120,19 @@ namespace MantidWidgets
       Mantid::API::MatrixWorkspace_sptr ws;
       QwtPlotCurve *curve;
       MantidQt::MantidWidgets::ErrorCurve *errorCurve;
+      QAction *showErrorsAction;
       QLabel *label;
       QColor colour;
       size_t wsIndex;
 
       PlotCurveConfiguration():
-        curve(NULL), label(NULL), colour(), wsIndex(0) {}
+        curve(NULL),
+        errorCurve(NULL),
+        showErrorsAction(NULL),
+        label(NULL),
+        colour(),
+        wsIndex(0)
+      {}
     };
 
     void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);
@@ -177,8 +184,14 @@ namespace MantidWidgets
     /// Menu action for showing/hiding plot legend
     QAction *m_showLegendAction;
 
-    /// Menu action for showing/hiding error bars
-    QAction *m_showErrorsAction;
+    /// Menu group for error bar show/hide
+    QAction *m_showErrorsMenuAction;
+    QMenu *m_showErrorsMenu;
+
+    /// Cache of error bar options
+    // Persists error bar options when curves of same name are removed and
+    // readded
+    QMap<QString, bool> m_errorBarOptionCache;
 
   };
 

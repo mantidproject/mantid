@@ -41,7 +41,9 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_zoomTool(NULL),
   m_contextMenu(new QMenu(this)),
   m_showLegendAction(NULL),
-  m_showErrorsAction(NULL)
+  m_showErrorsMenuAction(NULL),
+  m_showErrorsMenu(NULL),
+  m_errorBarOptionCache()
 {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
@@ -115,10 +117,10 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_contextMenu->addAction(m_showLegendAction);
 
   // Create the show errors option
-  m_showErrorsAction = new QAction("Show Errors", m_contextMenu);
-  m_showErrorsAction->setCheckable(true);
-  connect(m_showErrorsAction, SIGNAL(toggled(bool)), this, SLOT(showErrorBars(bool)));
-  m_contextMenu->addAction(m_showErrorsAction);
+  m_showErrorsMenuAction = new QAction("Error Bars:", m_contextMenu);
+  m_showErrorsMenu = new QMenu(m_contextMenu);
+  m_showErrorsMenuAction->setMenu(m_showErrorsMenu);
+  m_contextMenu->addAction(m_showErrorsMenuAction);
 
   connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
   connect(this, SIGNAL(needToHardReplot()), this, SLOT(hardReplot()));
@@ -174,13 +176,21 @@ bool PreviewPlot::legendIsShown()
 
 
 /**
- * Checks to see if the plot curves have error bars shown.
+ * Gets a list of curves that have their error bars shown.
  *
- * @returns True if error bars are shown
+ * @return List of curve names with error bars shown
  */
-bool PreviewPlot::errorBarsAreShown()
+QStringList PreviewPlot::getShownErrorBars()
 {
-  return m_showErrorsAction->isChecked();
+  QStringList curvesWithErrors;
+
+  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+  {
+    if(it.value().showErrorsAction->isChecked())
+      curvesWithErrors << it.key();
+  }
+
+  return curvesWithErrors;
 }
 
 
@@ -252,6 +262,14 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
   // Remove the existing curve if it exists
   if(m_curves.contains(curveName))
     removeSpectrum(curveName);
+
+  // Add the error bar option
+  m_curves[curveName].showErrorsAction = new QAction(curveName, m_showErrorsMenuAction);
+  m_curves[curveName].showErrorsAction->setCheckable(true);
+  if(m_errorBarOptionCache.contains(curveName))
+    m_curves[curveName].showErrorsAction->setChecked(m_errorBarOptionCache[curveName]);
+  connect(m_curves[curveName].showErrorsAction, SIGNAL(toggled(bool)), this, SIGNAL(needToHardReplot()));
+  m_showErrorsMenu->addAction(m_curves[curveName].showErrorsAction);
 
   // Create the curve
   addCurve(m_curves[curveName], ws, specIndex, curveColour);
@@ -326,6 +344,9 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
     removeCurve(m_curves[curveName].curve);
     removeCurve(m_curves[curveName].errorCurve);
     m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
+    m_errorBarOptionCache[curveName] = m_curves[curveName].showErrorsAction->isChecked();
+    m_showErrorsMenu->removeAction(m_curves[curveName].showErrorsAction);
+    delete m_curves[curveName].showErrorsAction;
     delete m_curves[curveName].label;
   }
 
@@ -432,13 +453,21 @@ void PreviewPlot::showLegend(bool show)
 
 
 /**
- * Shows or hides error bars on all curves.
+ * Show error bars for the given curves and set a marker that if any curves
+ * added with a given name will have error bars.
  *
- * @param show If the legend should be shown
+ * @param curveNames List of curve names to show error bars of
  */
-void PreviewPlot::showErrorBars(bool show)
+void PreviewPlot::setDefaultShownErrorBars(const QStringList & curveNames)
 {
-  m_showErrorsAction->setChecked(show);
+  for(auto it = curveNames.begin(); it != curveNames.end(); ++it)
+  {
+    m_errorBarOptionCache[*it] = true;
+
+    if(m_curves.contains(*it))
+      m_curves[*it].showErrorsAction->setChecked(true);
+  }
+
   emit needToHardReplot();
 }
 
@@ -665,7 +694,7 @@ void PreviewPlot::addCurve(PlotCurveConfiguration& curveConfig,
   curveConfig.curve->attach(m_uiForm.plot);
 
   // Create error bars if needed
-  if(errorBarsAreShown())
+  if(curveConfig.showErrorsAction->isChecked())
   {
     curveConfig.errorCurve = new ErrorCurve(curveConfig.curve, ws->readE(specIndex));
     curveConfig.errorCurve->attach(m_uiForm.plot);
