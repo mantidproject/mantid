@@ -1,7 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as sapi
 
 import math
 
@@ -248,6 +247,8 @@ class EnginXFitPeaks(PythonAlgorithm):
         detector. Implemented by using the Mantid algorithm ConvertUnits. A
         simple user script to do what this function does would be
         as follows:
+
+        import mantid.simpleapi as sapi
 
         yVals = [1] * (len(expectedPeaks) - 1)
         wsFrom = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
