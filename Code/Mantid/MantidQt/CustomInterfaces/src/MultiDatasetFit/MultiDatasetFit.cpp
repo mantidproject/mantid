@@ -178,7 +178,7 @@ void MultiDatasetFit::fitSequential()
 
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
 
-    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace") + "_Workspaces";
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString() + "_Workspaces";
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -343,7 +343,7 @@ void MultiDatasetFit::finishFit(bool error)
     {
       auto paramsWSName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString();
       if (!Mantid::API::AnalysisDataService::Instance().doesExist(paramsWSName)) return;
-      auto nSpectra = getNumberOfSpectra();
+      size_t nSpectra = getNumberOfSpectra();
       if (nSpectra == 0) return;
       fun = m_functionBrowser->getGlobalFunction();
       auto nParams = fun->nParams() / nSpectra;
