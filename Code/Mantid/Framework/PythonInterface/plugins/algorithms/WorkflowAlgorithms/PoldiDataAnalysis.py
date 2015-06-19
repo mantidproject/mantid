@@ -81,6 +81,10 @@ class PoldiDataAnalysis(PythonAlgorithm):
                              doc=('If this is activated, plot the sum of residuals and calculated spectrum together '
                                   'with the theoretical spectrum and the residuals.'))
 
+        self.declareProperty("OutputIntegratedIntensities", False, direction=Direction.Input,
+                             doc=("If this option is checked the peak intensities of the 2D-fit will be integrated, "
+                                  "otherwise they will be the maximum intensity."))
+
         self.declareProperty('OutputRawFitParameters', False, direction=Direction.Input,
                              doc=('Activating this option produces an output workspace which contains the raw '
                                   'fit parameters.'))
@@ -97,6 +101,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.profileFunction = self.getProperty("ProfileFunction").value
         self.useGlobalParameters = self.getProperty("TieProfileParameters").value
         self.maximumRelativeFwhm = self.getProperty("MaximumRelativeFwhm").value
+        self.outputIntegratedIntensities = self.getProperty("OutputIntegratedIntensities").value
 
         self.globalParameters = ''
         if self.useGlobalParameters:
@@ -233,6 +238,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
                         OutputWorkspace=spectrum2DName,
                         Calculated1DSpectrum=spectrum1DName,
                         RefinedPoldiPeakWorkspace=refinedPeaksName,
+                        OutputIntegratedIntensities=self.outputIntegratedIntensities,
                         RefinedCellParameters=refinedCellName,
                         RawFitParameters=rawFitParametersWorkspaceName)
 
