@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-locals
+# pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 import stresstesting
 from mantid.simpleapi import *
 import numpy as np
@@ -112,6 +112,15 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
         self.assertLessThan(np.abs(cell_a_err), 5.0e-5)
         self.assertLessThan(np.abs(cell_a - 5.4311946) / cell_a_err, 1.5)
 
+        DeleteWorkspace(si_refs)
+        DeleteWorkspace(indexed)
+        DeleteWorkspace(peaks)
+        DeleteWorkspace(si)
+        DeleteWorkspace(fit2d)
+        DeleteWorkspace(fit1d)
+        DeleteWorkspace(fit_plots)
+        DeleteWorkspace(peaks_ref_2d)
+
 
 class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
     def runTest(self):
@@ -142,3 +151,9 @@ class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
 
             # The numerical peak integration is done with a precision of 1e-10
             self.assertDelta(integratedGaussian, rowIntegrated['Intensity'], 1e-10)
+
+        DeleteWorkspace(fit2d)
+        DeleteWorkspace(fit1d)
+        DeleteWorkspace(si)
+        DeleteWorkspace(peaks)
+        DeleteWorkspace(fit_plots)
