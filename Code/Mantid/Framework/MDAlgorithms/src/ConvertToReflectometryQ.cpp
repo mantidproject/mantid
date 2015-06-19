@@ -15,7 +15,7 @@
 #include "MantidDataObjects/MDEventFactory.h"
 
 #include "MantidMDAlgorithms/ReflectometryTransformKiKf.h"
-#include "MantidDataObjects/ReflectometryTransformQxQz.h"
+#include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
 
 #include <boost/shared_ptr.hpp>

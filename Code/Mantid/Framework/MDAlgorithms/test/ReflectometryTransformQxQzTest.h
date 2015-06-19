@@ -2,14 +2,14 @@
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
 
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/ReflectometryTransformQxQz.h"
+#include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 
 #include <cxxtest/TestSuite.h>
 
 #include <cmath>
 
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class ReflectometryTransformQxQzTest : public CxxTest::TestSuite
 {

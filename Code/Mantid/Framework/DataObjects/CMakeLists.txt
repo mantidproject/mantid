@@ -46,7 +46,6 @@ set ( SRC_FILES
 	src/SplittersWorkspace.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
-	src/ReflectometryTransformQxQz.cpp
 	src/VectorColumn.cpp
 	src/Workspace2D.cpp
 	src/WorkspaceSingleValue.cpp
@@ -111,7 +110,6 @@ set ( INC_FILES
 	inc/MantidDataObjects/SplittersWorkspace.h
 	inc/MantidDataObjects/TableColumn.h
 	inc/MantidDataObjects/TableWorkspace.h
-	inc/MantidDataObjects/ReflectometryTransformQxQz.h
 	inc/MantidDataObjects/VectorColumn.h
 	inc/MantidDataObjects/Workspace2D.h
 	inc/MantidDataObjects/WorkspaceSingleValue.h
@@ -169,7 +167,6 @@ set ( TEST_FILES
 	TableColumnTest.h
 	TableWorkspacePropertyTest.h
 	TableWorkspaceTest.h
-	ReflectometryTransformQxQzTest.h
 	TofEventTest.h
 	VectorColumnTest.h
 	WeightedEventNoTimeTest.h

@@ -1,4 +1,4 @@
-#include "MantidDataObjects/ReflectometryTransformQxQz.h"
+#include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -9,11 +9,12 @@
 #include <stdexcept>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
-namespace DataObjects {
+namespace MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
