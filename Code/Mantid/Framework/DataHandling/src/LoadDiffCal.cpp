@@ -298,6 +298,7 @@ void LoadDiffCal::exec() {
 
     // read in everything from the file
     H5File file(m_filename, H5F_ACC_RDONLY);
+    H5::Exception::dontPrint();
     getInstrument(file);
 
     Progress progress(this, 0.1, 0.4, 8);
