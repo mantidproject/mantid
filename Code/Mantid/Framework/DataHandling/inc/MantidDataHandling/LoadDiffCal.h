@@ -51,11 +51,11 @@ private:
   void getInstrument(H5::H5File &file);
   std::vector<int32_t> readInt32Array(H5::Group &group, const std::string &name);
   std::vector<double> readDoubleArray(H5::Group &group, const std::string &name);
-  void makeGroupingWorkspace(std::vector<int32_t> &detids, std::vector<int32_t> &groups);
-  void makeMaskWorkspace(std::vector<int32_t> &detids, std::vector<int32_t> &use);
-  void makeCalWorkspace(std::vector<int32_t> &detids, std::vector<double> &difc,
-                        std::vector<double> &difa, std::vector<double> &tzero,
-                        std::vector<int32_t> &dasids, std::vector<double> &offsets);
+  void makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups);
+  void makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use);
+  void makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,
+                        const std::vector<double> &difa, const std::vector<double> &tzero,
+                        const std::vector<int32_t> &dasids, const std::vector<double> &offsets);
 
   std::string m_filename;
   std::string m_workspaceName;

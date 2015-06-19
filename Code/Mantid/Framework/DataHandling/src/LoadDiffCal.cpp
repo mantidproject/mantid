@@ -186,7 +186,7 @@ void LoadDiffCal::getInstrument(H5File &file) {
                         << "\" from \"" << m_instrument->getFilename() << "\"\n";
 }
 
-void LoadDiffCal::makeGroupingWorkspace(std::vector<int32_t> &detids, std::vector<int32_t> &groups) {
+void LoadDiffCal::makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups) {
     bool makeWS = getProperty("MakeGroupingWorkspace");
     if (!makeWS) {
         g_log.information("Not making a GroupingWorkspace");
@@ -214,7 +214,7 @@ void LoadDiffCal::makeGroupingWorkspace(std::vector<int32_t> &detids, std::vecto
     setProperty("OutputGroupingWorkspace", wksp);
 }
 
-void LoadDiffCal::makeMaskWorkspace(std::vector<int32_t> &detids, std::vector<int32_t> &use) {
+void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use) {
     bool makeWS = getProperty("MakeMaskWorkspace");
     if (!makeWS) {
         g_log.information("Not making a MaskWorkspace");
@@ -244,9 +244,9 @@ void LoadDiffCal::makeMaskWorkspace(std::vector<int32_t> &detids, std::vector<in
     setProperty("OutputMaskWorkspace", wksp);
 }
 
-void LoadDiffCal::makeCalWorkspace(std::vector<int32_t> &detids, std::vector<double> &difc,
-                                   std::vector<double> &difa, std::vector<double> &tzero,
-                                   std::vector<int32_t> &dasids, std::vector<double> &offsets) {
+void LoadDiffCal::makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,
+                                   const std::vector<double> &difa, const std::vector<double> &tzero,
+                                   const std::vector<int32_t> &dasids, const std::vector<double> &offsets) {
     bool makeWS = getProperty("MakeCalWorkspace");
     if (!makeWS) {
         g_log.information("Not making a calibration workspace");
