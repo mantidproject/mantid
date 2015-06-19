@@ -6,6 +6,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtMantidWidgets/FitOptionsBrowser.h"
@@ -74,6 +75,7 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.btnNext);
   connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
+  connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(setLogNames()));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
   connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
 
@@ -91,6 +93,7 @@ void MultiDatasetFit::initLayout()
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
       NULL, MantidQt::MantidWidgets::FitOptionsBrowser::SimultaneousAndSequential);
+  connect(m_fitOptionsBrowser,SIGNAL(changedToSequentialFitting()),this,SLOT(setLogNames()));
   splitter->addWidget(m_fitOptionsBrowser);
 
   m_uiForm.browserLayout->addWidget( splitter );
@@ -562,6 +565,35 @@ void MultiDatasetFit::checkFittingType()
   else
   {
     m_fitOptionsBrowser->lockCurrentFittingType(MantidWidgets::FitOptionsBrowser::Simultaneous);
+  }
+}
+
+/**
+ * Collect names of the logs in the data workspaces and pass them on to m_fitOptionsBrowser.
+ */
+void MultiDatasetFit::setLogNames()
+{
+  if (getNumberOfSpectra() > 0)
+  {
+    try
+    {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(getWorkspaceName(0));
+      const std::vector<Mantid::Kernel::Property*> logs = ws->run().getLogData();
+      QStringList logNames;
+      for(int i=0;i<static_cast<int>(logs.size());++i)
+      {
+        if (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>*>(logs[i]))
+        {
+          logNames << QString::fromStdString(logs[i]->name());
+        }
+      }
+      if (!logNames.isEmpty())
+      {
+        m_fitOptionsBrowser->setLogNames(logNames);
+      }
+    }
+    catch (...) 
+    {/*Maybe the data table hasn't updated yet*/}
   }
 }
 

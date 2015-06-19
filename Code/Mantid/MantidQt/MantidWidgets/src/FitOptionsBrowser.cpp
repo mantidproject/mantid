@@ -215,7 +215,6 @@ void FitOptionsBrowser::createSequentialFitProperties()
   // Create OutputWorkspace property
   m_outputWorkspace = m_stringManager->addProperty("OutputWorkspace");
   {
-    m_browser->addProperty(m_outputWorkspace);
     addProperty("OutputWorkspace", m_outputWorkspace, &FitOptionsBrowser::getStringProperty, &FitOptionsBrowser::setStringProperty);
     m_sequentialProperties << m_outputWorkspace;
   }
@@ -223,9 +222,37 @@ void FitOptionsBrowser::createSequentialFitProperties()
   // Create CreateOutput property
   auto prop = m_boolManager->addProperty("Create Output");
   {
-    m_browser->addProperty(prop);
     addProperty("CreateOutput", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
     m_sequentialProperties << prop;
+  }
+
+  // Create OutputCompositeMembers property
+  prop = m_boolManager->addProperty("Output Composite Members");
+  {
+    addProperty("OutputCompositeMembers", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
+    m_sequentialProperties << prop;
+  }
+
+  // Create ConvolveMembers property
+  prop = m_boolManager->addProperty("Convolve Members");
+  {
+    addProperty("ConvolveMembers", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
+    m_sequentialProperties << prop;
+  }
+
+  // Create PassWSIndexToFunction property
+  prop = m_boolManager->addProperty("Pass WS Index To Function");
+  {
+    addProperty("PassWSIndexToFunction", prop, &FitOptionsBrowser::getBoolProperty, &FitOptionsBrowser::setBoolProperty);
+    m_sequentialProperties << prop;
+  }
+
+  // Create LogValue property
+  m_logValue = m_enumManager->addProperty("Log Value");
+  {
+    //m_enumManager->setValue(m_logValue,0);
+    addProperty("LogValue", m_logValue, &FitOptionsBrowser::getStringEnumProperty, &FitOptionsBrowser::setStringEnumProperty);
+    m_sequentialProperties << m_logValue;
   }
 }
 
@@ -344,6 +371,7 @@ void FitOptionsBrowser::displaySequentialFitProperties()
   {
     m_browser->removeProperty(prop);
   }
+  emit changedToSequentialFitting();
 }
 
 /**
@@ -669,6 +697,33 @@ void FitOptionsBrowser::lockCurrentFittingType(FitOptionsBrowser::FittingType fi
 void FitOptionsBrowser::unlockCurrentFittingType()
 {
   m_fittingTypeProp->setEnabled(true);
+}
+
+/**
+ * Define log names to use with the LogValue property.
+ * @param logNames :: The log names
+ */
+void FitOptionsBrowser::setLogNames(const QStringList& logNames)
+{
+  auto i = m_enumManager->value(m_logValue);
+  if (!logNames.isEmpty() && logNames.front().isEmpty())
+  {
+    m_enumManager->setEnumNames(m_logValue, logNames);
+  }
+  else
+  {
+    QStringList names = logNames;
+    names.insert(0,"");
+    m_enumManager->setEnumNames(m_logValue, names);
+  }
+  if (i < logNames.size())
+  {
+    m_enumManager->setValue(m_logValue, i);
+  }
+  else
+  {
+    m_enumManager->setValue(m_logValue, 0);
+  }
 }
 
 } // MantidWidgets

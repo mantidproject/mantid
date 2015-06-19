@@ -61,6 +61,10 @@ public:
   void setCurrentFittingType(FittingType fitType);
   void lockCurrentFittingType(FittingType fitType);
   void unlockCurrentFittingType();
+  void setLogNames(const QStringList& logNames);
+
+signals:
+  void changedToSequentialFitting();
 
 private slots:
 
@@ -136,6 +140,8 @@ private:
   QtProperty* m_fitType;
   /// OutputWorkspace property
   QtProperty* m_outputWorkspace;
+  /// LogValue property
+  QtProperty* m_logValue;
 
   /// Precision of doubles in m_doubleManager
   int m_decimals;

@@ -89,6 +89,7 @@ private slots:
   void enablePan();
   void enableRange();
   void checkFittingType();
+  void setLogNames();
 
 protected:
   virtual void initLayout();
