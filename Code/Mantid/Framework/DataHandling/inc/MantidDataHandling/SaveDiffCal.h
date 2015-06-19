@@ -47,6 +47,7 @@ public:
 private:
   void init();
   void exec();
+  std::map<std::string, std::string> validateInputs();
 
   void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromTable(H5::Group &group, const std::string &name);

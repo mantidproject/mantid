@@ -78,6 +78,32 @@ void SaveDiffCal::init() {
                   "Path to the .h5 file that will be created.");
 }
 
+std::map<std::string, std::string> SaveDiffCal::validateInputs() {
+    std::map<std::string, std::string> result;
+
+    ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
+    if (!bool(calibrationWS)) {
+        result["CalibrationWorkspace"] = "Cannot save empty table";
+    } else {
+      size_t numRows = calibrationWS->rowCount();
+      if (numRows == 0) {
+        result["CalibrationWorkspace"] = "Cannot save empty table";
+      } else {
+        GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
+        if (bool(groupingWS) && numRows != groupingWS->getNumberHistograms()) {
+          result["GroupingWorkspace"] = "Must have same number of spectra as the table has rows";
+        }
+        MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
+        if (bool(maskWS) && numRows != maskWS->getNumberHistograms()) {
+          result["MaskWorkspace"] = "Must have same number of spectra as the table has rows";
+        }
+      }
+    }
+
+    return result;
+}
+
+
 namespace { // anonymous
 
 DataSpace getDataSpace(const size_t length) {
@@ -204,12 +230,6 @@ void SaveDiffCal::exec() {
   GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
   std::string filename = getProperty("Filename");
-
-  // sanity check the workspaces
-  size_t numRows = m_calibrationWS->rowCount();
-  if (numRows == 0) throw std::runtime_error("Cannot save empty table");
-  if (numRows != groupingWS->getNumberHistograms() || numRows != maskWS->getNumberHistograms())
-      throw std::runtime_error("Input workspaces must have matched sizes");
 
   // delete the file if it already exists
   if (Poco::File(filename).exists()) {

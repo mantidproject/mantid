@@ -101,7 +101,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaskWorkspace", maskWS) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Filename", FILENAME) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("CalibrationWorkspace", calWS));
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
     TS_ASSERT( !alg.isExecuted() );
   }
 
