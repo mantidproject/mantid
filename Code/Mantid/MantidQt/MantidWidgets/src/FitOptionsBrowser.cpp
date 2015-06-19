@@ -595,6 +595,7 @@ void FitOptionsBrowser::setBoolProperty(QtProperty* prop, const QString& value)
 QString FitOptionsBrowser::getStringEnumProperty(QtProperty* prop) const
 {
   int i = m_enumManager->value(prop);
+  if (i < 0) return "";
   return m_enumManager->enumNames(prop)[i];
 }
 
@@ -606,7 +607,8 @@ QString FitOptionsBrowser::getStringEnumProperty(QtProperty* prop) const
 void FitOptionsBrowser::setStringEnumProperty(QtProperty* prop, const QString& value)
 {
   int i = m_enumManager->enumNames(prop).indexOf(value);
-  m_enumManager->setValue(prop,i);
+  if (i >= 0)
+    m_enumManager->setValue(prop,i);
 }
 
 /**
