@@ -36,7 +36,7 @@ ReflectometryTransformQxQz::ReflectometryTransformQxQz(
     double qxMin, double qxMax, double qzMin, double qzMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
     : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz), m_qxMin(qxMin),
-      m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax),
+      m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_inTheta(incidentTheta),
       m_QxCalculation(incidentTheta), m_QzCalculation(incidentTheta) {
   if (qxMin >= qxMax) {
     throw std::invalid_argument("min qx bounds must be < max qx bounds");

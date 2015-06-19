@@ -113,6 +113,8 @@ private:
   const double m_qxMax;
   const double m_qzMin;
   const double m_qzMax;
+  const double m_inTheta;
+
   /// Object performing raw calculation to determine Qx
   mutable CalculateReflectometryQx m_QxCalculation;
   /// Object performing raw calculation to determine Qx
