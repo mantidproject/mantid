@@ -79,7 +79,6 @@ set ( SRC_FILES
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
 	src/Math/Vertex2D.cpp
-	src/Math/Vertex2DList.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
 	src/Objects/InstrumentRayTracer.cpp
@@ -117,11 +116,11 @@ set ( OPENCASCADE_SRC
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
-  src/Instrument/ObjCompAssembly.cpp 
+  src/Instrument/ObjCompAssembly.cpp
   src/Rendering/OCGeometryHandler.cpp
   src/Rendering/OCGeometryRenderer.cpp
 )
-        
+
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
 	inc/MantidGeometry/Crystal/BraggScatterer.h
@@ -218,7 +217,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/Vertex2D.h
-	inc/MantidGeometry/Math/Vertex2DList.h
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
@@ -308,7 +306,7 @@ set ( TEST_FILES
         PeakTransformHKLTest.h
         PeakTransformQLabTest.h
         PeakTransformQSampleTest.h
-        PeakTransformSelectorTest.h	
+        PeakTransformSelectorTest.h
         PlaneTest.h
 	PointGroupFactoryTest.h
 	PointGroupTest.h
@@ -345,7 +343,6 @@ set ( TEST_FILES
 	TripleTest.h
 	UnitCellTest.h
 	V3RTest.h
-	Vertex2DListTest.h
 	Vertex2DTest.h
 	XMLInstrumentParameterTest.h
 )
@@ -387,12 +384,12 @@ enable_precompiled_headers( inc/MantidGeometry/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( Geometry ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
-set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
+set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-endif () 
+endif ()
 
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
