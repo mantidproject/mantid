@@ -18,8 +18,6 @@
 #include <boost/regex.hpp>
 #include <Poco/DirectoryIterator.h>
 
-#include <iomanip>
-#include <iostream>
 #include <set>
 
 using namespace Mantid::API;
@@ -593,22 +591,23 @@ public:
 
   void test_nexus()
   {
+    std::string filename = "ExperimentInfoTest1.nxs";
     NexusTestHelper th(true);
-    th.createFile("ExperimentInfoTest1.nxs");
+    th.createFile(filename);
     ExperimentInfo ws;
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("GEM");
     inst1->setFilename("GEM_Definition.xml");
     inst1->setXmlText("");
     ws.setInstrument(inst1);
-
+    
     TS_ASSERT_THROWS_NOTHING( ws.saveExperimentInfoNexus(th.file); );
 
     // ------------------------ Re-load the contents ----------------------
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, parameterStr) );
+    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(filename, th.file, parameterStr) );
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS( inst->getName(), "GEM" );
     TS_ASSERT( inst->getFilename().find("GEM_Definition.xml",0) != std::string::npos );
@@ -618,8 +617,9 @@ public:
 
   void test_nexus_empty_instrument()
   {
+    std::string filename = "ExperimentInfoTest2.nxs";
     NexusTestHelper th(true);
-    th.createFile("ExperimentInfoTest2.nxs");
+    th.createFile(filename);
     ExperimentInfo ws;
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("");
@@ -633,7 +633,7 @@ public:
     ExperimentInfo ws2;
     std::string parameterStr;
     th.reopenFile();
-    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(th.file, parameterStr) );
+    TS_ASSERT_THROWS_NOTHING( ws2.loadExperimentInfoNexus(filename, th.file, parameterStr) );
     Instrument_const_sptr inst = ws2.getInstrument();
     TS_ASSERT_EQUALS( inst->getName(), "" );
     TS_ASSERT_EQUALS( parameterStr, "" );
@@ -641,8 +641,9 @@ public:
 
   void testNexus_W_matrix()
   {
+      std::string filename = "ExperimentInfoWMatrixTest.nxs";
       NexusTestHelper th(true);
-      th.createFile("ExperimentInfoWMatrixTest.nxs");
+      th.createFile(filename);
       ExperimentInfo ei;
 
       DblMatrix WTransf(3,3,true);
@@ -665,7 +666,7 @@ public:
 
       ExperimentInfo other;
       std::string InstrParameters;
-      TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(th.file,InstrParameters));
+      TS_ASSERT_THROWS_NOTHING(other.loadExperimentInfoNexus(filename, th.file,InstrParameters));
 
       std::vector<double> wMatrRestored=other.run().getPropertyValueAsType<std::vector<double> >("W_MATRIX");
 

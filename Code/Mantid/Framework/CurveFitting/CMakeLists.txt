@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/DynamicKuboToyabe.cpp
 	src/EndErfc.cpp
 	src/EstimatePeakErrors.cpp
+	src/EvaluateFunction.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
@@ -152,6 +153,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/EstimatePeakErrors.h
+	inc/MantidCurveFitting/EvaluateFunction.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
@@ -264,6 +266,7 @@ set ( TEST_FILES
 	DynamicKuboToyabeTest.h
 	EndErfcTest.h
 	EstimatePeakErrorsTest.h
+	EvaluateFunctionTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h

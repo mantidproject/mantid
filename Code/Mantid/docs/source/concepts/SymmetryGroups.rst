@@ -195,7 +195,7 @@ Symmetry elements
 
 Sometimes it's easier to describe symmetry in terms of the symmetry element that is associated to an operation. Several notation systems exist for these elements, but Hermann-Mauguin symbols are most commonly used in crystallography. Information on how to read these symbols can be found in ITA. Except identity, inversions and translations, all symmetry elements have a characteristic axis. In case of mirror and glide planes, this axis is perpendicular to the plane.
 
-Section 11.2 in the same book describes how to derive symmetry elements from matrix and vector pairs. The algorithms from that text are implemented in Mantid as well, so after a symmetry operation has been created using the factory, another factory can be used to generate the symmetry element corresponding to the operation. The resulting object can be queried for its Hermann-Mauguin symbol and its axis. For identity, inversion and translation this returns ``[0, 0, 0]``.
+Section 11.2 in the same book describes how to derive symmetry elements from matrix and vector pairs. The algorithms from that text are implemented in Mantid as well, so after a symmetry operation has been created using the factory, another factory can be used to generate the symmetry element corresponding to the operation. The resulting object can be queried for its Hermann-Mauguin symbol, its axis and its rotation sense (only for rotation axes). For identity, inversion and translation this returns ``[0, 0, 0]``.
 
 .. testcode :: ExSymmetryElement
 
@@ -206,6 +206,7 @@ Section 11.2 in the same book describes how to derive symmetry elements from mat
 
     print "The element corresponding to 'x,y,-z' has the following symbol:", element.getHMSymbol()
     print "The mirror plane is perpendicular to:", element.getAxis()
+    print "Sense of rotation (or None):", element.getRotationSense()
     
 In this case, it's a mirror plane perpendicular to the :math:`z`-axis:
     
@@ -213,6 +214,7 @@ In this case, it's a mirror plane perpendicular to the :math:`z`-axis:
 
     The element corresponding to 'x,y,-z' has the following symbol: m
     The mirror plane is perpendicular to: [0,0,1]
+    Sense of rotation (or None): None
     
 Symmetry groups
 ---------------

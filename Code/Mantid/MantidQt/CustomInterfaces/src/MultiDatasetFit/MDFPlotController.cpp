@@ -57,32 +57,12 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
   connect(m_rangeSelector,SIGNAL(selectionChanged(double, double)),this,SLOT(updateFittingRange(double, double)));
 
   disableAllTools();
-
-  m_plot->canvas()->installEventFilter(this);
-  
 }
 
 /// Destructor.
 PlotController::~PlotController()
 {
   m_plotData.clear();
-}
-
-/// Event fiter for intercepting mouse events of the plot
-bool PlotController::eventFilter(QObject *, QEvent *evn)
-{
-  if ( evn->type() == QEvent::MouseButtonDblClick )
-  {
-    if ( isRangeSelectorEnabled() )
-    {
-      resetRange();
-    }
-    else if ( isZoomEnabled() )
-    {
-      zoomToRange();
-    }
-  }
-  return false;
 }
 
 /// Slot. Respond to changes in the data table.
@@ -243,7 +223,11 @@ void PlotController::zoomToRange()
   QwtDoubleRect rect = m_zoomer->zoomRect();
   rect.setX( m_rangeSelector->getMinimum() );
   rect.setRight( m_rangeSelector->getMaximum() );
-  m_zoomer->zoom( rect );
+  // In case the scales were set by the panning tool we need to
+  // reset the zoomer first.
+  m_zoomer->zoom(-1);
+  // Set new zoom level.
+  m_zoomer->zoom(rect);
 }
 
 /// Disable all plot tools. It is a helper method 

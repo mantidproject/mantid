@@ -3,7 +3,9 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/Logger.h"
 
 #include <QSettings>
 #include <QVector>

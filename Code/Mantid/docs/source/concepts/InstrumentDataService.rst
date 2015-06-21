@@ -12,6 +12,15 @@ are created during a user session. Whenever an instrument definition is
 loaded it is saved in the IDS and further workspaces that refer to the
 same instrument share the same definition.
 
+How does it work?
+-----------------
+The Instrument data service is similar to all of the other :ref:`Data Services <Data Service>`
+in mantid and is implemented as a simple dictionary object holding keys referring to shared pointers to the base
+instrument definitions.  The key is a compound string made up of the Instrument name with a sha1 hash of the text
+of the instrument definition appended.  For those detail minded among you, the has is derived specifically by
+first converting any lines endings within the definition to linux line endings, and then trimming any white space
+from the start and end of the definition before calculating the sha1 checksum.
+
 Extracting an instrument from the Instrument Data Service
 ---------------------------------------------------------
 
@@ -20,13 +29,20 @@ to do as it is all handled by the framework internals. Normally you
 would access the instrument relating to a workspace directly though that
 workspace.
 
-``workspace->getInstrument();``
 
-However if you really did want to access the instrument from the IDS (as
-a :ref:`Shared Pointer <Shared Pointer>`), although this would then lack
-any workspace specific alterations or properties.
+**Example: Getting the instrument from a workspace**
 
-``boost::shared_ptr``\ \ `` intrument = workspace->getInstrument();``
+.. testcode:: GetInstrument
+
+    ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
+    inst = ws.getInstrument()
+    print inst.getSource().getPos()
+
+Output:
+
+.. testoutput:: GetInstrument
+
+    [0,0,-10]
 
 
 

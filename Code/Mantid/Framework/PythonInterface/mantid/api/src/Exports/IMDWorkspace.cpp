@@ -1,12 +1,12 @@
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/self.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::DataItemInterface;
+using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
 void export_IMDWorkspace() {
@@ -33,5 +33,5 @@ void export_IMDWorkspace() {
            &IMDWorkspace::getSpecialCoordinateSystem, args("self"),
            "Returns the special coordinate system of the workspace");
 
-  DataItemInterface<IMDWorkspace>();
+  RegisterWorkspacePtrToPython<IMDWorkspace>();
 }

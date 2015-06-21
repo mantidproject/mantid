@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #ifdef _WIN32
 #pragma warning(disable : 4250)

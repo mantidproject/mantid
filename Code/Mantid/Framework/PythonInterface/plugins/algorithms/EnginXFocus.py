@@ -29,7 +29,9 @@ class EnginXFocus(PythonAlgorithm):
 
     def PyExec(self):
     	# Load the run file
+        self.log().information("Loading input file: %s" % self.getProperty("Filename").value)
         ws = self._loadRun()
+        self.log().information("Input file loaded")
 
     	# Leave the data for the bank we are interested in only
         ws = self._cropData(ws)

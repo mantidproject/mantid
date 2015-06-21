@@ -1,6 +1,7 @@
 #include "MantidDataObjects/MementoTableWorkspace.h"
 
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {

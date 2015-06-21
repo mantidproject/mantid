@@ -72,6 +72,7 @@ if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace
 
     def test_withNoInputWorkspace(self):
         c = RunPythonScript(Code="output = CreateSingleValuedWorkspace(DataValue='1')")
+        self.assertEqual(c.name(), "c")
         self.assertEqual(c.readY(0)[0], 1)
 
     def test_algorithm_executes_once_for_whole_input_group_and_not_once_per_group_member(self):
@@ -113,4 +114,3 @@ if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace
 
 if __name__ == '__main__':
     unittest.main()
-

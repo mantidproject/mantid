@@ -93,7 +93,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -834,6 +834,17 @@
               <widget class="QCheckBox" name="saveNIST_Qxy_check">
                <property name="text">
                 <string>NIST Qxy</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="zeroErrorCheckBox">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Errors with a value of 0 will be inflated to have to a value of 10^6. Only reduced workspaces can have this method applied to them. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Inflate
+Zero Error</string>
                </property>
               </widget>
              </item>

@@ -5,6 +5,8 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+#include <map>
+
 using namespace Mantid::API;
 using namespace boost::python;
 

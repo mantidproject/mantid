@@ -5,7 +5,7 @@ add_subdirectory( kernel )
 add_subdirectory( geometry )
 add_subdirectory( api )
 
-set ( TEST_PY_FILES 
+set ( TEST_PY_FILES
   ImportModuleTest.py
   SimpleAPITest.py
   SimpleAPILoadTest.py

@@ -7,9 +7,11 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+
 namespace Mantid {
 namespace Algorithms {
+
 /** Takes   workspaces as input and groups the workspaces.
 
 Required Properties:

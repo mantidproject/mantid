@@ -52,7 +52,6 @@ set ( SRC_FILES
     src/MultiDatasetFit/MDFLocalParameterEditor.cpp
     src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
     src/MultiDatasetFit/MDFEditLocalParameterDialog.cpp
-    src/MultiDatasetFit/MDFErrorCurve.cpp
 	src/Muon/ALCBaselineModellingModel.cpp
 	src/Muon/ALCBaselineModellingPresenter.cpp
 	src/Muon/ALCBaselineModellingView.cpp
@@ -150,7 +149,6 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
     inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
     inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
-    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFErrorCurve.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h

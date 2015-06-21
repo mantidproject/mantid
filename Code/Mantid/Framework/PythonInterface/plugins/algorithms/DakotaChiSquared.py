@@ -47,13 +47,11 @@ class DakotaChiSquared(PythonAlgorithm):
         __w1=mantid.simpleapi.Load(f1)
         __w2=mantid.simpleapi.Load(f2)
 
-	    #validate inputs
-        if type(__w1)!= mantid.api.MatrixWorkspace:
-            mantid.kernel.logger.error('Wrong workspace type for data file')
-            raise ValueError( 'Wrong workspace type for data file')
-        if type(__w2)!= mantid.api.MatrixWorkspace:
-            mantid.kernel.logger.error('Wrong workspace type for calculated file')
-            raise ValueError( 'Wrong workspace type for calculated file')
+        #validate inputs as histograms
+        if isinstance(__w1, mantid.api.IEventWorkspace):
+            raise ValueError( 'Wrong workspace type for data file. Expected histogram file but found event')
+        if isinstance(__w2, mantid.api.IEventWorkspace):
+            raise ValueError( 'Wrong workspace type for calculated file. Expected histogram file but found event')
         if __w1.blocksize()!=__w2.blocksize() or __w1.getNumberHistograms()!=__w2.getNumberHistograms():
             mantid.kernel.logger.error('The file sizes are different')
             raise ValueError( 'The file sizes are different')

@@ -23,7 +23,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidDataObjects/MDEvent.h"
 

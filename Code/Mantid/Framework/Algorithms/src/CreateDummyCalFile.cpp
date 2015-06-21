@@ -14,8 +14,6 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
 
@@ -63,55 +61,10 @@ void CreateDummyCalFile::exec() {
 
   // Get some stuff from the input workspace
   Instrument_const_sptr inst = inputW->getInstrument();
+  if (!inst)
+    throw std::invalid_argument("The InputWorkspace does not have an instrument definition");
+
   std::string instname = inst->getName();
-
-  // Check that the instrument is in store
-  // Get only the first 3 letters
-  std::string instshort = instname;
-  std::transform(instshort.begin(), instshort.end(), instshort.begin(),
-                 toupper);
-  instshort = instshort + "_Definition.xml";
-  // Determine the search directory for XML instrument definition files (IDFs)
-  std::string directoryName =
-      Kernel::ConfigService::Instance().getInstrumentDirectory();
-
-  // Set up the DOM parser and parse xml file
-  DOMParser pParser;
-  Poco::AutoPtr<Document> pDoc;
-  try {
-    pDoc = pParser.parse(directoryName + instshort);
-  } catch (...) {
-    g_log.error("Unable to parse file " + m_filename);
-    throw Kernel::Exception::FileError("Unable to parse File:", m_filename);
-  }
-  // Get pointer to root element
-  Element *pRootElem = pDoc->documentElement();
-  if (!pRootElem->hasChildNodes()) {
-    g_log.error("XML file: " + m_filename + "contains no root element.");
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML instrument file", m_filename);
-  }
-
-  // Handle used in the singleton constructor for instrument file should append
-  // the value
-  // of the last-modified tag inside the file to determine if it is already in
-  // memory so that
-  // changes to the instrument file will cause file to be reloaded.
-  auto temp =
-      instshort +
-      pRootElem->getAttribute(
-          "last-modified"); // Generate the mangled name by hand (old-style)
-
-  // If instrument not in store, insult the user
-  if (!API::InstrumentDataService::Instance().doesExist(temp)) {
-    Mantid::Geometry::IDFObject idf(directoryName + instshort);
-    temp = idf.getMangledName(); // new style.
-    if (!API::InstrumentDataService::Instance().doesExist(temp)) {
-      g_log.error("Instrument " + instshort + " is not present in data store.");
-      throw std::runtime_error("Instrument " + instshort +
-                               " is not present in data store.");
-    }
-  }
 
   // Get the names of groups
   groups = instname;

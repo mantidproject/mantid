@@ -69,7 +69,6 @@ set ( SRC_FILES
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
-  src/Registry/DowncastRegistry.cpp
   src/Environment/ErrorHandling.cpp
   src/Environment/Threading.cpp
   src/Environment/WrapperHelpers.cpp
@@ -93,13 +92,15 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Environment/Threading.h
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
+  ${HEADER_DIR}/kernel/Policies/RemoveConst.h
+  ${HEADER_DIR}/kernel/Policies/ToWeakPtr.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h
-  ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
+  ${HEADER_DIR}/kernel/Registry/RegisterWorkspacePtrToPython.h
   ${HEADER_DIR}/kernel/DataServiceExporter.h
   ${HEADER_DIR}/kernel/IsNone.h
   ${HEADER_DIR}/kernel/PropertyWithValueExporter.h

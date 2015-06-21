@@ -31,9 +31,10 @@ using namespace Mantid::API;
  *  @param parent :: used by QT
  *  @param suggFname :: sets the initial entry in the filename box
  *  @param defSavs :: sets which boxes are ticked
+ *  @param saveAsZeroErrorFree :: if the workspace should be saved with the zero errors replaced by a default value or not
  */
-SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs) :
-  API::MantidDialog(parent)
+SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs, bool saveAsZeroErrorFree) :
+  API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree)
 {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle("Save Workspaces");
@@ -213,7 +214,7 @@ void SaveWorkspaces::closeEvent(QCloseEvent* event)
   emit closing();
   event->accept();
 }
-QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const QString & algorithm, QString fileBase, bool toAppend)
+QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const QString & algorithm, QString fileBase, bool toAppend, QHash<QString, QString> workspaceMap)
 {
   if ( wspaces.count() < 1 )
   {
@@ -229,7 +230,11 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
   QString saveCommands;
   for (int j =0; j < wspaces.count(); ++j)
   {
-    saveCommands += algorithm + "('"+wspaces[j]->text()+"','";
+    if (workspaceMap.count(wspaces[j]->text())) {
+      saveCommands += algorithm + "('"+ workspaceMap[wspaces[j]->text()]+"','";
+    } else {
+      saveCommands += algorithm + "('"+ wspaces[j]->text()+"','";
+    }
 
     QString outFile = fileBase;
     if (outFile.isEmpty())
@@ -306,6 +311,9 @@ QString SaveWorkspaces::getSaveAlgExt(const QString & algName)
 */
 void SaveWorkspaces::saveSel()
 {
+  // For each selected workspace, provide an zero-error free clone
+  QHash<QString, QString> workspaceMap = provideZeroFreeWorkspaces(m_workspaces);
+
   QString saveCommands;
   for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
   {//the key to a pointer to the check box that the user may have clicked
@@ -324,7 +332,7 @@ void SaveWorkspaces::saveSel()
       try
       {
         saveCommands += saveList(m_workspaces->selectedItems(), i.value(),
-          m_fNameEdit->text(), toAppend);
+          m_fNameEdit->text(), toAppend, workspaceMap);
       }
       catch(std::logic_error &)
       {
@@ -335,7 +343,12 @@ void SaveWorkspaces::saveSel()
   }//end loop over formats
 
   saveCommands += "print 'success'";
-  QString status(runPythonCode(saveCommands).trimmed()); 
+  QString status(runPythonCode(saveCommands).trimmed());
+
+  if (m_saveAsZeroErrorFree) {
+    removeZeroFreeWorkspaces(workspaceMap);
+  }
+
   if ( status != "success" )
   {
     QMessageBox::critical(this, "Error saving workspace", "One of the workspaces could not be saved in one of the selected formats");
@@ -373,5 +386,54 @@ void SaveWorkspaces::saveFileBrowse()
     
     QString directory = QFileInfo(oFile).path();
     prevValues.setValue("dir", directory);
+  }
+}
+
+/**
+ * Goes through all selected workspaces and maps them to a zero-error free clone,
+ * if the user has selected to do this otherwise the value of the hash is set to
+ * the same as the key
+ * @param workspaces :: a QListWIdget which contains the selected workspaces
+ * @returns a hash which maps the original workspace to the zero-error free workspace
+ */
+QHash<QString, QString> SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget * workspaces) {
+  auto wsList = workspaces->selectedItems();
+  QHash<QString, QString> workspaceMap;
+  for (auto it = wsList.begin(); it != wsList.end(); ++it) {
+    auto wsName = (*it)->text();
+    auto cloneName = wsName;
+    if (m_saveAsZeroErrorFree) {
+       cloneName += "_clone_temp";
+       emit createZeroErrorFreeWorkspace(wsName, cloneName);
+    }
+
+    if (AnalysisDataService::Instance().doesExist(cloneName.toStdString())) {
+      workspaceMap.insert(wsName, cloneName);
+    }
+  }
+
+  return workspaceMap;
+}
+
+/**
+ * Remove all the zero-error free workspaces
+ * @param workspaces :: a map containing the names of all zero-error-free workspaces.
+ */
+void SaveWorkspaces::removeZeroFreeWorkspaces(QHash<QString, QString> workspaces) {
+  auto zeroFreeWorkspaceNames = workspaces.values();
+  for (auto it = zeroFreeWorkspaceNames.begin(); it != zeroFreeWorkspaceNames.end(); ++it) {
+    emit deleteZeroErrorFreeWorkspace((*it));
+  }
+}
+
+/**
+ * Reacts to a user change wether the workspace is to be saved as zero-error-free or not
+ * @param state :: 0 if we don't save with the zero-error correction, otherwise anything else
+ */
+void SaveWorkspaces::onSaveAsZeroErrorFreeChanged(int state) {
+  if (state == 0) {
+    m_saveAsZeroErrorFree = false;
+  } else {
+    m_saveAsZeroErrorFree = true;
   }
 }

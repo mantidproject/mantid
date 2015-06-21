@@ -1,5 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/CreateChunkingFromInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"

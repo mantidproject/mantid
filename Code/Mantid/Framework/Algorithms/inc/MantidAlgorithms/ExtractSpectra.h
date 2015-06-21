@@ -68,8 +68,8 @@ private:
   bool m_histogram;
   /// Flag indicating whether XMin and/or XMax has been set
   bool m_croppingInX;
-  /// The list of spectra to extract.
-  std::vector<specid_t> m_spectrumList;
+  /// The list of workspaces to extract.
+  std::vector<size_t> m_workspaceIndexList;
 };
 
 } // namespace Algorithms

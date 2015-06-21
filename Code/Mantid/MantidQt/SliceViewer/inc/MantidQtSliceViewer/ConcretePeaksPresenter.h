@@ -5,7 +5,7 @@
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidAPI/MDGeometry.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
