@@ -111,6 +111,14 @@ public:
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
+  void test_ConvertToBinBoundary_EmptyInputVector() {
+    std::vector<double> bin_centers;
+    std::vector<double> bin_edges;
+    VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
+
+    TS_ASSERT_EQUALS(bin_edges.size(), 0);
+  }
+
   void test_ConvertToBinBoundary_Size2InputVector() {
     std::vector<double> bin_centers = {0.5, 1.5};
     std::vector<double> bin_edges;
