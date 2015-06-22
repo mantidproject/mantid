@@ -3,14 +3,6 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-// #include "MantidAPI/WorkspaceGroup_fwd.h"
-
-/* namespace Mantid { */
-/* namespace API { */
-/* class IRemoteJobManager; */
-/* struct IRemoteJobManager::RemoteJobInfo; */
-/* } */
-/* } */
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,8 +37,8 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class ITomographyIfaceView {
 
 public:
-  ITomographyIfaceView() {}
-  virtual ~ITomographyIfaceView() {}
+  ITomographyIfaceView(){};
+  virtual ~ITomographyIfaceView(){};
 
   /**
    * Display a warning to the user (for example as a pop-up window).
@@ -69,8 +61,6 @@ public:
    */
   virtual void userError(const std::string &err,
                          const std::string &description) = 0;
-
-  virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
    * Set the compute resources available (remote and/or local). Note
@@ -99,10 +89,33 @@ public:
   virtual void setReconstructionTools(const std::vector<std::string> &tools,
                                       const std::vector<bool> &enabled) = 0;
 
-  /// Save settings (normally when closing the interface)
+  /**
+   * Gives messages that this View wants to send to the logging
+   * system.
+   *
+   * @return list of messages to log, one by one.
+   */
+  virtual std::vector<std::string> logMsgs() const = 0;
+
+  /**
+   * Save settings (normally when closing the interface). This refers
+   * to purely GUI settings, such as window max/min status and  geometry,
+   * preferences and niceties of the user interface.
+   */
   virtual void saveSettings() const = 0;
 
+  /**
+   * Username entered by the user
+   *
+   * @return username to log in to the compute resource
+   */
   virtual std::string getUsername() const = 0;
+
+  /**
+   * Password entered by the user
+   *
+   * @return password to authenticate / log in to the compute resource
+   */
   virtual std::string getPassword() const = 0;
 
   virtual std::vector<std::string> processingJobsIDs() const = 0;
@@ -116,32 +129,110 @@ public:
    */
   virtual std::string currentComputeResource() const = 0;
 
+  /**
+   * What's the reconstruction tool currently used and/or set up by
+   * the user.
+   *
+   * @return name of the tool as a human readable string
+   */
   virtual std::string currentReconTool() const = 0;
 
-  /// updates buttons and banners related to the current login status
+  /**
+   * Updates buttons and banners related to the current login
+   * status. For example, when we are logged in, the 'log in' button
+   * should be disabled, but some other widget may be enabled or some
+   * way displaying the 'in' status.
+   *
+   * @param loggedIn if we're logged in.
+   */
   virtual void updateLoginControls(bool loggedIn) = 0;
 
+  /**
+   * To enable/disable the actions that require being logged in. This
+   * can include for example: submit jobs, get or refresh status of
+   * jobs, setup parameters for the remote compute resource, logout,
+   * etc.
+   *
+   * @param enable True to enable, or allow the user to use buttons
+   * and widgets to trigger those actions.
+   */
   virtual void enableLoggedActions(bool enable) = 0;
 
+  /**
+   * Whether to enable (allow the user to open or use) the tool
+   * specific configuration dialog.
+   *
+   * @param on enable the button or mechanism to open the dialog
+   */
   virtual void enableConfigTool(bool on) = 0;
 
+  /**
+   * Set the state of the 'reconstruct' button or similar to start
+   * reconstruction jobs.
+   *
+   * @param on whether to enable / allow the user to run it
+   */
   virtual void enableRunReconstruct(bool on) = 0;
 
+  /**
+   * Path to the image (2D) being shown on the interface.
+   *
+   * @return path as a string
+   */
   virtual std::string showImagePath() = 0;
-  /// draw an image on the visualization tab/interface
-  virtual void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) = 0;
+
+  /**
+   * Draw an image on the visualization tab/interface, from a path to
+   * a recognized image format. Here recognized format means something
+   * that is supported natively by the widgets library, in practice
+   * Qt. Normally you can expect that .tiff and .png images are
+   * supported.
+   *
+   * @param path path to the image file.
+   */
   virtual void showImage(const std::string &path) = 0;
 
-  /// Show a tool specific configuration dialog for the user to set it up
+  /**
+   * Draw an image on the visualization tab/interface, from a matrix
+   * workspace (for example when elsewhere you load a FITS or similar
+   * format that is loaded through a Mantid algorithm, say LoadFITS,
+   * and you want to display it here). This should check dimensions
+   * and workspace structure and shows user warning/error messages
+   * appropriately. But in principle it should not raise any
+   * exceptions under reasonable circumstances. It assumes that the
+   * workspace contains an image in the form in which LoadFITS loads
+   * FITS images (or spectrum per row, all of them with the same
+   * number of data points (columns)).
+   *
+   * @param ws Workspace where a FITS or similar image has been loaded
+   * with LoadFITS or similar algorithm.
+   */
+  virtual void showImage(const Mantid::API::MatrixWorkspace_sptr &ws) = 0;
+
+  /**
+   * Show a tool specific configuration dialog for the user to set it up
+   *
+   * @param name human readable name of the tool, as a string
+   */
   virtual void showToolConfig(const std::string &name) = 0;
 
-  /// Refresh the table, tree etc. that display info on the running/finished
-  /// jobs
+  /**
+   * Refresh the table, tree etc. that displays info on the running/finished
+   *jobs.
+   *
+   * @param status Job information, as produced for example by the
+   * Mantid remote algorithms.
+   */
   virtual void updateJobsInfoDisplay(const std::vector<
       Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) = 0;
 
-  /// Keep alive period for the remote compute resources. 0 == disabled by
-  /// default
+  /**
+   * If using the keep alive mechanism, what's the period for the
+   * query to the remote compute resources? 0 == disabled (by default)
+   *
+   * @return period (in seconds) for the keep alive mechanism, when
+   * using it; 0 otherwise.
+   */
   virtual int keepAlivePeriod() { return 0; }
 };
 

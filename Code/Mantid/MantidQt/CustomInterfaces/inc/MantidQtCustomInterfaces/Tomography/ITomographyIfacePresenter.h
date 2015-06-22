@@ -52,7 +52,13 @@ public:
     ShutDown               ///< closing the interface
   };
 
-  // notifications sent through the presenter when something changes in the view
+  /**
+   * Notifications sent through the presenter when something changes
+   * in the view. This plays the role of signals emitted by the view
+   * to this presenter.
+   *
+   * @param notif Type of notification to process.
+   */
   virtual void notify(ITomographyIfacePresenter::Notification notif) = 0;
 };
 
