@@ -78,7 +78,6 @@ set ( SRC_FILES
 	src/Math/Quadrilateral.cpp
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
-	src/Math/Vertex2D.cpp
 	src/Math/mathSupport.cpp
 	src/Objects/BoundingBox.cpp
 	src/Objects/InstrumentRayTracer.cpp
@@ -216,7 +215,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Quadrilateral.h
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
-	inc/MantidGeometry/Math/Vertex2D.h
 	inc/MantidGeometry/Math/mathSupport.h
 	inc/MantidGeometry/Objects/BoundingBox.h
 	inc/MantidGeometry/Objects/InstrumentRayTracer.h
@@ -343,7 +341,6 @@ set ( TEST_FILES
 	TripleTest.h
 	UnitCellTest.h
 	V3RTest.h
-	Vertex2DTest.h
 	XMLInstrumentParameterTest.h
 )
 
