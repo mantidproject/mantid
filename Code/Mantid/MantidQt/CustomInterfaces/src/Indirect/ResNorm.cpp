@@ -31,6 +31,8 @@ ResNorm::ResNorm(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
   // Connect data selector to handler method
   connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString &)), this,
           SLOT(handleVanadiumInputReady(const QString &)));
+  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
+          SLOT(handleResolutionInputReady(const QString &)));
 
   // Connect the preview spectrum selector
   connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
@@ -101,19 +103,24 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (error)
     return;
 
+  WorkspaceGroup_sptr fitWorkspaces =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          m_pythonExportWsName + "_Fit_Workspaces");
+  QString fitWsName("");
+  if (fitWorkspaces)
+    fitWsName =
+        QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+
   // MantidPlot plotting
   QString plotOptions(m_uiForm.cbPlot->currentText());
   if (plotOptions == "Intensity" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Intensity");
   if (plotOptions == "Stretch" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
+  if (plotOptions == "Fit" || plotOptions == "All")
+    plotSpectrum(fitWsName);
 
   // Interface plotting
-  WorkspaceGroup_sptr fitWorkspaces =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          m_pythonExportWsName + "_Fit_Workspaces");
-  QString fitWsName =
-      QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
   m_uiForm.ppPlot->addSpectrum("Fit", fitWsName, 1, Qt::red);
 }
 
@@ -165,6 +172,15 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
 }
 
 /**
+ * Plots the loaded resolution file on the mini plot.
+ *
+ * @param filename Name of the workspace to plot
+ */
+void ResNorm::handleResolutionInputReady(const QString &filename) {
+  m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
+}
+
+/**
  * Updates the property manager when the lower guide is moved on the mini plot
  *
  * @param min :: The new value of the lower guide
@@ -208,13 +224,23 @@ void ResNorm::updateProperties(QtProperty *prop, double val) {
 void ResNorm::previewSpecChanged(int value) {
   m_previewSpec = value;
 
+  // Update vanadium plot
   if (m_uiForm.dsVanadium->isValid())
     m_uiForm.ppPlot->addSpectrum(
         "Vanadium", m_uiForm.dsVanadium->getCurrentDataName(), m_previewSpec);
 
-  // TODO
-  /* if (AnalysisDataService::Instance().doesExist("Fit")) */
-  /* m_uiForm.ppPlot->addSpectrum("Fit", "Fit", m_previewSpec, Qt::red); */
+  // Update fit plot
+  std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
+  if (AnalysisDataService::Instance().doesExist(fitWsGroupName)) {
+    WorkspaceGroup_sptr fitWorkspaces =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            fitWsGroupName);
+    if (fitWorkspaces) {
+      QString fitWsName =
+          QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
+      m_uiForm.ppPlot->addSpectrum("Fit", fitWsName, 1, Qt::red);
+    }
+  }
 }
 
 } // namespace CustomInterfaces

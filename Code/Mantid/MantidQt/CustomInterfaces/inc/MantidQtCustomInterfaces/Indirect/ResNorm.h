@@ -27,6 +27,8 @@ namespace MantidQt
       void handleAlgorithmComplete(bool error);
 			/// Handle when the vanadium input is ready
 			void handleVanadiumInputReady(const QString& filename);
+			/// Handle when the resolution input is ready
+			void handleResolutionInputReady(const QString& filename);
 			/// Slot for when the min range on the range selector changes
 			void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes
