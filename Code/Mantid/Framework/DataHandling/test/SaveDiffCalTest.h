@@ -19,7 +19,7 @@ using namespace Mantid::DataHandling;
 
 namespace {
 const size_t NUM_BANK = 5;
-const std::string FILENAME="SaveDiffCalTest.cal";
+const std::string FILENAME="SaveDiffCalTest.h5";
 }
 
 class SaveDiffCalTest : public CxxTest::TestSuite {
