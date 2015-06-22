@@ -700,34 +700,12 @@ def extract_spectra(ws, det_ids, output_ws_name):
     A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
     of ws indices to keep.  Everything else is ignored.
     
-    This is necessary until ticket #10024 is completed.
     @param ws :: the workspace from which to extract spectra
     @param det_ids :: the detector IDs corresponding to the spectra to extract
     @param output_ws_name :: the name of the resulting workspace
     @returns :: a workspace containing the extracted spectra
     """
-
-    ws_index_ranges = _merge_to_ranges(yield_ws_indices_from_det_ids(ws, det_ids))
-
-    crop_alg = AlgorithmManager.createUnmanaged("CropWorkspace")
-    crop_alg.setChild(True)
-    crop_alg.initialize()
-    def crop_workspace(ws, ws_index_range):
-        output_ws_name = "__" + ws.name() + "_%i_%i" % (ws_index_range[0], ws_index_range[1])
-        crop_alg.setProperty("InputWorkspace", ws)
-        crop_alg.setProperty("OutputWorkspace", output_ws_name)
-        crop_alg.setProperty("StartWorkspaceIndex", ws_index_range[0])
-        crop_alg.setProperty("EndWorkspaceIndex", ws_index_range[1])
-        crop_alg.execute()
-        return crop_alg.getProperty("OutputWorkspace").value
-
-    # Extract and conjoin all the spectra.
-    ws_list = [crop_workspace(ws, ws_index_range) for ws_index_range in ws_index_ranges]
-    conjoined = _conjoin_ws_list(ws_list)
-
-    # Explicitly add the result to the ADS with the requested name.
-    mtd.addOrReplace(output_ws_name, conjoined)
-
+    ExtractSpectra(InputWorkspace=ws,OutputWorkspace=output_ws_name, DetectorList=det_ids)
     return mtd[output_ws_name]
 
 def get_masked_det_ids(ws):
