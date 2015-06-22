@@ -133,13 +133,13 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
  */
 bool read_mem_info(size_t &sys_avail, size_t &sys_total) {
   std::ifstream file("/proc/meminfo");
-  std::string line;
+  string line;
   int values_found(0);
   // Need to set this to zero
   sys_avail = 0;
   while (getline(file, line)) {
     std::istringstream is(line);
-    std::string tag;
+    string tag;
     long value(0);
     is >> tag >> value;
     if (!is)
@@ -414,7 +414,7 @@ size_t MemoryStats::availMem() const { return this->avail_memory; }
  * Returns the memory usage of the current process in kiB
  * @returns An unsigned containing the memory used by the current process in kiB
  */
-std::size_t MemoryStats::residentMem() const { return this->res_usage; }
+size_t MemoryStats::residentMem() const { return this->res_usage; }
 
 /**
  * Returns the virtual memory usage of the current process in kiB
@@ -422,7 +422,7 @@ std::size_t MemoryStats::residentMem() const { return this->res_usage; }
  * process in kiB
  */
 
-std::size_t MemoryStats::virtualMem() const { return this->vm_usage; }
+size_t MemoryStats::virtualMem() const { return this->vm_usage; }
 
 /**
  * Returns the reserved memory that has not been factored into the available
@@ -435,7 +435,7 @@ std::size_t MemoryStats::virtualMem() const { return this->vm_usage; }
  * memory calculation
  * @returns An extra area of memory that can still be allocated.
  */
-std::size_t MemoryStats::reservedMem() const {
+size_t MemoryStats::reservedMem() const {
 #ifdef _WIN32
   MEMORY_BASIC_INFORMATION info; // Windows structure
   char *addr = NULL;
@@ -497,7 +497,7 @@ std::ostream &operator<<(std::ostream &out, const MemoryStats &stats) {
  * This was adopted from
  *http://nadeausoftware.com/articles/2012/07/c_c_tip_how_get_process_resident_set_size_physical_memory_use
  */
-size_t getPeakRSS() {
+size_t MemoryStats::getPeakRSS() const {
 #if defined(_WIN32)
   /* Windows -------------------------------------------------- */
   PROCESS_MEMORY_COUNTERS info;
@@ -543,7 +543,7 @@ size_t getPeakRSS() {
  * This was adopted from
  *http://nadeausoftware.com/articles/2012/07/c_c_tip_how_get_process_resident_set_size_physical_memory_use
  */
-size_t getCurrentRSS() {
+size_t MemoryStats::getCurrentRSS() const {
 #if defined(_WIN32)
   /* Windows -------------------------------------------------- */
   PROCESS_MEMORY_COUNTERS info;
@@ -566,7 +566,7 @@ size_t getCurrentRSS() {
   FILE *fp = NULL;
   if ((fp = fopen("/proc/self/statm", "r")) == NULL)
     return (size_t)0L; /* Can't open? */
-  if (fscanf(fp, "%*s%ld", &rss) != 1) {
+  if (fscanf(fp, "%*s%20ld", &rss) != 1) {
     fclose(fp);
     return (size_t)0L; /* Can't read? */
   }
