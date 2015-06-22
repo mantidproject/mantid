@@ -107,7 +107,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                               self._spectra_range[0],
                                                               self._spectra_range[1],
                                                               self._sum_files,
-                                                              load_opts)
+                                                              load_opts=load_opts)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
