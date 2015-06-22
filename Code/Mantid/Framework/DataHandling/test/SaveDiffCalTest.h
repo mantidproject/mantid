@@ -117,7 +117,7 @@ public:
     TS_ASSERT( alg.isInitialized() );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("GroupingWorkspace", groupWS) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaskWorkspace", maskWS) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Filename", "SaveDiffCalTest.cal") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Filename", FILENAME) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("CalibrationWorkspace", calWS));
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
