@@ -162,6 +162,12 @@ std::vector<int32_t> LoadDiffCal::readInt32Array(Group & group, const std::strin
 }
 
 void LoadDiffCal::getInstrument(H5File &file) {
+    // don't bother if there isn't a mask or grouping requested
+    bool makeMask = getProperty("MakeMaskWorkspace");
+    bool makeGrouping = getProperty("MakeGroupingWorkspace");
+    if ((!makeMask) & (!makeGrouping)) return;
+
+
     std::string idf = readString(file, "/calibration/instrument/instrument_source");
     std::string instrumentName = readString(file, "/calibration/instrument/name");
 
