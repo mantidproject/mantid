@@ -376,9 +376,14 @@ void convertToBinCentre(const std::vector<double> &bin_edges,
 void convertToBinBoundary(const std::vector<double> &bin_centers,
                           std::vector<double> &bin_edges) {
   const std::vector<double>::size_type n = bin_centers.size();
-  if (bin_edges.size() != (n + 1)) {
-    bin_edges.resize(n + 1);
+
+  // Special case empty input: output is also empty
+  if (n == 0) {
+    bin_edges.resize(0);
+    return;
   }
+
+  bin_edges.resize(n + 1);
 
   for (size_t i = 0; i < n - 1; ++i) {
     bin_edges[i + 1] = 0.5 * (bin_centers[i] + bin_centers[i + 1]);
