@@ -3,7 +3,7 @@
 
 #include "ui_ConvFit.h"
 #include "IDATab.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
 
 namespace MantidQt

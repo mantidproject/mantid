@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"

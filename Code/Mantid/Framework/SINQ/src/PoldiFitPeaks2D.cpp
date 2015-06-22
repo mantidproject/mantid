@@ -398,18 +398,27 @@ PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
   errorAlg->execute();
 
   double centre = profileFunction->centre();
-  double height = profileFunction->height();
   double fwhmValue = profileFunction->fwhm();
 
   ITableWorkspace_sptr errorTable = errorAlg->getProperty("OutputWorkspace");
-
   double centreError = errorTable->cell<double>(0, 2);
-  double heightError = errorTable->cell<double>(1, 2);
   double fwhmError = errorTable->cell<double>(2, 2);
 
   UncertainValue d(centre, centreError);
-  UncertainValue intensity(height, heightError);
   UncertainValue fwhm(fwhmValue, fwhmError);
+
+  UncertainValue intensity;
+
+  bool useIntegratedIntensities = getProperty("OutputIntegratedIntensities");
+  if (useIntegratedIntensities) {
+    double integratedIntensity = profileFunction->intensity();
+    double integratedIntensityError = errorTable->cell<double>(3, 2);
+    intensity = UncertainValue(integratedIntensity, integratedIntensityError);
+  } else {
+    double height = profileFunction->height();
+    double heightError = errorTable->cell<double>(1, 2);
+    intensity = UncertainValue(height, heightError);
+  }
 
   // Create peak with extracted parameters and supplied hkl
   PoldiPeak_sptr peak =
@@ -1214,6 +1223,11 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<Workspace>("RefinedPoldiPeakWorkspace",
                                                    "", Direction::Output),
                   "Table workspace with fitted peaks.");
+
+  declareProperty("OutputIntegratedIntensities", false,
+                  "If this option is checked, the peaks in the algorithm's "
+                  "output will have integrated intensities instead of the "
+                  "maximum.");
 
   declareProperty(new WorkspaceProperty<Workspace>(
       "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));

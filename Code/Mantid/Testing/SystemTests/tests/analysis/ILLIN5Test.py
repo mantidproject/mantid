@@ -67,7 +67,7 @@ class ILLIN5Tests(unittest.TestCase):
 
     def _do_ads_check(self, name):
         self.assertTrue(name in mtd)
-        self.assertTrue(type(mtd[name]) == MatrixWorkspace)
+        self.assertTrue(isinstance(mtd[name], MatrixWorkspace))
 
 #====================================================================================
 

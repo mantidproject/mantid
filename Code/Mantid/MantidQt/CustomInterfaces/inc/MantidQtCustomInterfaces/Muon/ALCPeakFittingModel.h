@@ -5,6 +5,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 using namespace Mantid::API;
 

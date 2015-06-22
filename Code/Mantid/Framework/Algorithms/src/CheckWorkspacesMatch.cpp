@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"

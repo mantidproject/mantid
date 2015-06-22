@@ -107,7 +107,7 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
                                              Mantid::EMPTY_INT(), index_bounds),
-                  "I0 monitor index");
+                  "I0 monitor workspace index");
   declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
                                                      "", Direction::Input),
                   "Processing commands to select and add spectrum to make a "
@@ -145,6 +145,9 @@ void ReflectometryReductionOneAuto::init() {
                   Direction::Input);
   declareProperty("ThetaOut", Mantid::EMPTY_DBL(),
                   "Calculated final theta in degrees.", Direction::Output);
+
+  declareProperty("NormalizeByIntegratedMonitors", true,
+                  "Normalize by dividing by the integrated monitors.");
 
   declareProperty("CorrectDetectorPositions", true,
                   "Correct detector positions using ThetaIn (if given)");
@@ -324,6 +327,7 @@ void ReflectometryReductionOneAuto::exec() {
 
   bool correct_positions = this->getProperty("CorrectDetectorPositions");
   bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
+  bool norm_by_int_mons = getProperty("NormalizeByIntegratedMonitors");
   const std::string correction_algorithm = getProperty("CorrectionAlgorithm");
 
   // Pass the arguments and execute the main algorithm.
@@ -336,6 +340,7 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("OutputWorkspace", output_workspace_name);
     refRedOne->setProperty("OutputWorkspaceWavelength",
                            output_workspace_lam_name);
+    refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
     refRedOne->setProperty("I0MonitorIndex", i0_monitor_index);
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);

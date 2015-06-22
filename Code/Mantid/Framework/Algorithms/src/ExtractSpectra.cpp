@@ -87,9 +87,15 @@ void ExtractSpectra::init() {
       "The index number of the last entry in the Workspace to be loaded\n"
       "(default: last entry in the Workspace)");
   declareProperty(
-      new ArrayProperty<specid_t>("SpectrumList"),
-      "A comma-separated list of individual spectra to read.  Only used if\n"
-      "explicitly set.");
+      new ArrayProperty<size_t>("WorkspaceIndexList"),
+      "A comma-separated list of individual workspace indices to read.  Only used if\n"
+      "explicitly set. The WorkspaceIndexList is only used if the DetectorList is empty.");
+
+    declareProperty(
+      new ArrayProperty<detid_t>("DetectorList"),
+      "A comma-separated list of individual detector IDs to read.  Only used if\n"
+      "explicitly set. When specifying the WorkspaceIndexList and DetectorList property,\n"
+      "the latter is being selected.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -122,7 +128,7 @@ void ExtractSpectra::execHistogram() {
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-    m_inputWorkspace, m_spectrumList.size(), m_maxX - m_minX,
+    m_inputWorkspace, m_workspaceIndexList.size(), m_maxX - m_minX,
       m_maxX - m_minX - m_histogram);
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo
@@ -139,13 +145,13 @@ void ExtractSpectra::execHistogram() {
 
   cow_ptr<MantidVec> newX;
   if (m_commonBoundaries) {
-    const MantidVec &oldX = m_inputWorkspace->readX(m_spectrumList.front());
+    const MantidVec &oldX = m_inputWorkspace->readX(m_workspaceIndexList.front());
     newX.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
-  Progress prog(this, 0.0, 1.0, (m_spectrumList.size()));
-  // Loop over the required spectra, copying in the desired bins
-  for (int j = 0; j < static_cast<int>(m_spectrumList.size()); ++j) {
-    auto i = m_spectrumList[j];
+  Progress prog(this, 0.0, 1.0, (m_workspaceIndexList.size()));
+  // Loop over the required workspace indices, copying in the desired bins
+  for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
+    auto i = m_workspaceIndexList[j];
     // Preserve/restore sharing if X vectors are the same
     if (m_commonBoundaries) {
       outputWorkspace->setX(j, newX);
@@ -177,7 +183,7 @@ void ExtractSpectra::execHistogram() {
         ->copyInfoFrom(*m_inputWorkspace->getSpectrum(i));
 
     if (!m_commonBoundaries)
-      this->cropRagged(outputWorkspace, i, j);
+      this->cropRagged(outputWorkspace, static_cast<int>(i), j);
 
     // Propagate bin masking if there is any
     if (m_inputWorkspace->hasMaskedBins(i)) {
@@ -216,7 +222,7 @@ void ExtractSpectra::execEvent() {
   this->checkProperties();
   cow_ptr<MantidVec> XValues_new;
   if (m_commonBoundaries) {
-    const MantidVec &oldX = m_inputWorkspace->readX(m_spectrumList.front());
+    const MantidVec &oldX = m_inputWorkspace->readX(m_workspaceIndexList.front());
     XValues_new.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
   size_t ntcnew = m_maxX - m_minX;
@@ -241,7 +247,7 @@ void ExtractSpectra::execEvent() {
   EventWorkspace_sptr outputWorkspace =
       boost::dynamic_pointer_cast<EventWorkspace>(
           API::WorkspaceFactory::Instance().create(
-              "EventWorkspace", m_spectrumList.size(), ntcnew,
+              "EventWorkspace", m_workspaceIndexList.size(), ntcnew,
               ntcnew - m_histogram));
   eventW->sortAll(TOF_SORT, NULL);
   outputWorkspace->sortAll(TOF_SORT, NULL);
@@ -249,13 +255,13 @@ void ExtractSpectra::execEvent() {
   API::WorkspaceFactory::Instance().initializeFromParent(m_inputWorkspace,
                                                          outputWorkspace, true);
 
-  Progress prog(this, 0.0, 1.0, 2 * m_spectrumList.size());
+  Progress prog(this, 0.0, 1.0, 2 * m_workspaceIndexList.size());
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
-  // Loop over the required spectra, copying in the desired bins
+  // Loop over the required workspace indices, copying in the desired bins
   PARALLEL_FOR2(m_inputWorkspace, outputWorkspace)
-  for (int j = 0; j < static_cast<int>(m_spectrumList.size()); ++j) {
+  for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
     PARALLEL_START_INTERUPT_REGION
-    auto i = m_spectrumList[j];
+    auto i = m_workspaceIndexList[j];
     const EventList &el = eventW->getEventList(i);
     // The output event list
     EventList &outEL = outputWorkspace->getOrAddEventList(j);
@@ -376,34 +382,43 @@ void ExtractSpectra::checkProperties() {
   if (!m_commonBoundaries)
     m_maxX = static_cast<int>(m_inputWorkspace->readX(0).size());
 
-  m_spectrumList = getProperty("SpectrumList");
+  // The hierarchy of inputs is (one is being selected):
+  // 1. DetectorList
+  // 2. WorkspaceIndexList
+  // 3. Start and stop index
+  std::vector<detid_t> detectorList = getProperty("DetectorList");
+  if (!detectorList.empty()) {
+    m_inputWorkspace->getIndicesFromDetectorIDs(detectorList, m_workspaceIndexList);
+  } else {
+    m_workspaceIndexList = getProperty("WorkspaceIndexList");
 
-  if (m_spectrumList.empty()) {
-    int minSpec = getProperty("StartWorkspaceIndex");
-    const int numberOfSpectra =
-        static_cast<int>(m_inputWorkspace->getNumberHistograms());
-    int maxSpec = getProperty("EndWorkspaceIndex");
-    if (isEmpty(maxSpec))
-      maxSpec = numberOfSpectra - 1;
+    if (m_workspaceIndexList.empty()) {
+      int minSpec = getProperty("StartWorkspaceIndex");
+      const int numberOfSpectra =
+          static_cast<int>(m_inputWorkspace->getNumberHistograms());
+      int maxSpec = getProperty("EndWorkspaceIndex");
+      if (isEmpty(maxSpec))
+        maxSpec = numberOfSpectra - 1;
 
-    // Check 'StartSpectrum' is in range 0-numberOfSpectra
-    if (minSpec > numberOfSpectra - 1) {
-      g_log.error("StartWorkspaceIndex out of range!");
-      throw std::out_of_range("StartSpectrum out of range!");
-    }
-    if (maxSpec > numberOfSpectra - 1) {
-      g_log.error("EndWorkspaceIndex out of range!");
-      throw std::out_of_range("EndWorkspaceIndex out of range!");
-    }
-    if (maxSpec < minSpec) {
-      g_log.error("StartWorkspaceIndex must be less than or equal to "
-                  "EndWorkspaceIndex");
-      throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
-                              "to EndWorkspaceIndex");
-    }
-    m_spectrumList.reserve(maxSpec - minSpec + 1);
-    for (specid_t i = minSpec; i <= maxSpec; ++i) {
-      m_spectrumList.push_back(i);
+      // Check 'StartSpectrum' is in range 0-numberOfSpectra
+      if (minSpec > numberOfSpectra - 1) {
+        g_log.error("StartWorkspaceIndex out of range!");
+        throw std::out_of_range("StartSpectrum out of range!");
+      }
+      if (maxSpec > numberOfSpectra - 1) {
+        g_log.error("EndWorkspaceIndex out of range!");
+        throw std::out_of_range("EndWorkspaceIndex out of range!");
+      }
+      if (maxSpec < minSpec) {
+        g_log.error("StartWorkspaceIndex must be less than or equal to "
+                    "EndWorkspaceIndex");
+        throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
+                                "to EndWorkspaceIndex");
+      }
+      m_workspaceIndexList.reserve(maxSpec - minSpec + 1);
+      for (size_t i = static_cast<size_t>(minSpec); i <= static_cast<size_t>(maxSpec); ++i) {
+        m_workspaceIndexList.push_back(i);
+      }
     }
   }
 }

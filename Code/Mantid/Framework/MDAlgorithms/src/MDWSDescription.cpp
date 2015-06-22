@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"

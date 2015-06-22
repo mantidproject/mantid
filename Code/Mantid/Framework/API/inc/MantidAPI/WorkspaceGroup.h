@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
@@ -144,11 +145,6 @@ private:
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;
 };
-
-/// Shared pointer to a workspace group class
-typedef boost::shared_ptr<WorkspaceGroup> WorkspaceGroup_sptr;
-/// Shared pointer to a workspace group class (const version)
-typedef boost::shared_ptr<const WorkspaceGroup> WorkspaceGroup_const_sptr;
 
 } // namespace API
 } // namespace Mantid

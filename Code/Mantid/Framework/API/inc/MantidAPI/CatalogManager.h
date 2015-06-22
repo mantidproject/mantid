@@ -4,6 +4,9 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/ICatalog.h"
 
+#include <map>
+#include <string>
+
 namespace Mantid {
 namespace API {
 /**

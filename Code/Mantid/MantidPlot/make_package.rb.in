@@ -204,12 +204,12 @@ end
 #Copy over python libraries not included with OSX. 
 #currently missing epics
 path = "/Library/Python/2.7/site-packages"
-directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil"]
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil","jsonschema","functools32","ptyprocess"]
 directories.each do |directory|
   addPythonLibrary("#{path}/#{directory}")
 end
 
-files = ["gnureadline.so","readline.py","pyparsing.py"]
+files = ["gnureadline.so","readline.py","pyparsing.py","mistune.py","mistune.so"]
 files.each do |file|
   copyFile("#{path}/#{file}")
 end

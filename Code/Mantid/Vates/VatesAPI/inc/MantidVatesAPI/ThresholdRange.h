@@ -4,7 +4,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 /** Abstract type promises to supply a minimum and maximum set of threshold range values.
 

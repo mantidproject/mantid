@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 using namespace Mantid::API;
@@ -171,26 +172,34 @@ namespace CustomInterfaces
 
   MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const
   {
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    extract->setProperty("WorkspaceIndex", 0);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-    return result;
+    if (m_data) {
+      IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+      extract->setChild(true);
+      extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+      extract->setProperty("WorkspaceIndex", 0);
+      extract->setProperty("OutputWorkspace", "__NotUsed__");
+      extract->execute();
+      MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+      return result;
+    } else {
+      return MatrixWorkspace_const_sptr();
+    }
   }
 
   MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const
   {
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    extract->setProperty("WorkspaceIndex", 2);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-    return result;
+    if (m_data && (m_data->getNumberHistograms()==3) ) {
+      IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+      extract->setChild(true);
+      extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+      extract->setProperty("WorkspaceIndex", 2);
+      extract->setProperty("OutputWorkspace", "__NotUsed__");
+      extract->execute();
+      MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+      return result;
+    } else {
+      return MatrixWorkspace_const_sptr();
+    }
   }
 
 } // namespace CustomInterfaces

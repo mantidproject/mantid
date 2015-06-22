@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 
@@ -142,6 +143,16 @@ public:
   void test_exportModel()
   {
     TS_ASSERT_THROWS_NOTHING(m_model->exportModel());
+  }
+
+  void test_noData()
+  {
+    // Set a null shared pointer
+    MatrixWorkspace_const_sptr data = MatrixWorkspace_const_sptr();
+    m_model->setData(data);
+
+    TS_ASSERT_THROWS_NOTHING(m_model->data());
+    TS_ASSERT_THROWS_NOTHING(m_model->correctedData());
   }
 
 };

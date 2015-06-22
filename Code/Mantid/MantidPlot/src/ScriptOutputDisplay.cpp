@@ -22,7 +22,7 @@ ScriptOutputDisplay::ScriptOutputDisplay(QWidget * parent) :
   QTextEdit(parent), m_copy(NULL), m_clear(NULL), m_save(NULL)
 {
   setReadOnly(true);
-  setLineWrapMode(QTextEdit::FixedColumnWidth);
+  setLineWrapMode(QTextEdit::WidgetWidth);
   setLineWrapColumnOrWidth(105);
   setAutoFormatting(QTextEdit::AutoNone);
   // Change to fix width font so that table formatting isn't screwed up

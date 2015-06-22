@@ -4,6 +4,8 @@
 #include "MantidCurveFitting/GaussianComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace CurveFitting {
 DECLARE_FUNCTION(GaussianComptonProfile)

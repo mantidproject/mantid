@@ -22,7 +22,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata,
-                         extract_child_ws_for_added_eventdata)
+                         extract_child_ws_for_added_eventdata, INCIDENT_MONITOR_TAG)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -1163,7 +1163,7 @@ class NormalizeToMonitor(ReductionStep):
 
         sanslog.notice('Normalizing to monitor ' + str(normalization_spectrum))
 
-        self.output_wksp = str(workspace) + '_incident_monitor'
+        self.output_wksp = str(workspace) + INCIDENT_MONITOR_TAG
         mon = reducer.get_sample().get_monitor(normalization_spectrum-1)
         if reducer.event2hist.scale != 1:
             mon *= reducer.event2hist.scale

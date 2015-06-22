@@ -175,7 +175,8 @@ class MANTID_GEOMETRY_DLL SymmetryElementRotation
 public:
   enum RotationSense {
     Positive,
-    Negative
+    Negative,
+    None
   };
 
   SymmetryElementRotation(const std::string &symbol, const V3R &axis,

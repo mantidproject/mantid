@@ -187,14 +187,6 @@ ConfigServiceImpl::ConfigServiceImpl()
     }
   }
 
-  // Assert that the appdata and the instrument subdirectory exists
-  std::string appDataDir = getAppDataDir();
-  Poco::Path path(appDataDir);
-  path.pushDirectory("instrument");
-  Poco::File file(path);
-  // createdirectories will fail gracefully if it is already present
-  file.createDirectories();
-
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
   m_ConfigPaths.insert(
@@ -203,6 +195,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
+  m_ConfigPaths.insert(std::make_pair("instrumentDefinition.vtpDirectory", true));
   m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
@@ -253,6 +246,16 @@ ConfigServiceImpl::ConfigServiceImpl()
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 #endif
+
+  // Assert that the appdata and the instrument subdirectory exists
+  std::string appDataDir = getAppDataDir();
+  Poco::Path path(appDataDir);
+  path.pushDirectory("instrument");
+  Poco::File file(path);
+  // createdirectories will fail gracefully if it is already present
+  file.createDirectories();
+  Poco::File vtpDir(getVTPFileDirectory());
+  vtpDir.createDirectories();
 }
 
 /** Private Destructor
@@ -1634,7 +1637,24 @@ ConfigServiceImpl::getInstrumentDirectories() const {
 const std::string ConfigServiceImpl::getInstrumentDirectory() const {
   return m_InstrumentDirs[m_InstrumentDirs.size() - 1];
 }
-
+/**
+ * Return the search directory for vtp files
+ * @returns a path
+ */
+const std::string ConfigServiceImpl::getVTPFileDirectory() {
+  // Determine the search directory for XML instrument definition files (IDFs)
+  std::string directoryName = getString("instrumentDefinition.vtpDirectory");
+  
+  if (directoryName.empty())
+  {
+    Poco::Path path(getAppDataDir());
+    path.makeDirectory();
+    path.pushDirectory("instrument");
+    path.pushDirectory("geometryCache");
+    directoryName = path.toString();
+  }
+  return directoryName;
+}
 /**
  * Fills the internal cache of instrument definition directories
  */

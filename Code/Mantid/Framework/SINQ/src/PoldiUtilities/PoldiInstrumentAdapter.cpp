@@ -1,5 +1,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiChopperFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSourceSpectrum.h"

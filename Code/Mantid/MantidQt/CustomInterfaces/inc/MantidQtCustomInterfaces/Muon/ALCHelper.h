@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ALCHELPER_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 
 #include "qwt_data.h"
@@ -17,6 +17,9 @@ namespace ALCHelper
 {
   /// Create Qwt curve data from a workspace
   boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws, size_t wsIndex);
+
+  /// Create error vector from a workspace
+  std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws, size_t wsIndex);
 
   /// Create Qwt curve data from a function
   boost::shared_ptr<QwtData> curveDataFromFunction(IFunction_const_sptr func,

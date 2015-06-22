@@ -238,26 +238,92 @@ Please note that for hexagonal and trigonal space groups, where translations of 
     2: [0.333333,0.666667,0.75]
     3: [0.666667,0.333333,0.25]
     4: [0.666667,0.333333,0.75]
-    
-Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method:
+
+Closely related to the generation of equivalent coordinates is the site symmetry group, which leaves a point unchanged:
+
+.. testcode:: ExSiteSymmetryGroupInBuilt
+
+    from mantid.geometry import SpaceGroupFactory, SymmetryElementFactory, SymmetryElement
+
+    def getFullElementSymbol(symmetryElement):
+    # Dictionary for mapping enum values to short strings
+        rotationSenseDict = {
+                                SymmetryElement.RotationSense.Positive: '+',
+                                SymmetryElement.RotationSense.Negative: '-',
+                                SymmetryElement.RotationSense.None: ''
+                            }
+        hmSymbol = element.getHMSymbol()
+        rotationSense = rotationSenseDict[element.getRotationSense()]
+        axis = str(element.getAxis())
+
+        return hmSymbol + rotationSense + ' ' + axis
+
+
+
+    sg = SpaceGroupFactory.createSpaceGroup("P 6/m")
+
+    position = [1./3., 2./3., 0.25]
+    siteSymmetryGroup = sg.getSiteSymmetryGroup(position)
+
+    print "Order of the site symmetry group:", siteSymmetryGroup.getOrder()
+    print "Group elements:"
+    for i, op in enumerate(siteSymmetryGroup.getSymmetryOperations()):
+        element = SymmetryElementFactory.createSymElement(op)
+        print str(i + 1) + ":", op.getIdentifier(), "(" + getFullElementSymbol(element) + ")"
+
+The group contains three symmetry operations:
+
+.. testoutput:: ExSiteSymmetryGroupInBuilt
+
+    Order of the site symmetry group: 3
+    Group elements:
+    1: -x+y,-x,z (3- [0,0,1])
+    2: -y,x-y,z (3+ [0,0,1])
+    3: x,y,z (1 [0,0,0])
+
+An extended example below shows an algorithm to derive the site symmetry group.
+
+Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method, but the point group can also be conveniently created directly from the space group object:
 
 .. testcode:: ExPointGroupFromSpaceGroup
 
     from mantid.geometry import PointGroupFactory, SpaceGroupFactory
 
     # Create space group Fd-3m (for example silicon or diamond)
-    sg = SpaceGroupFactory.createSpaceGroup("F d -3 m")
-    
-    pg = PointGroupFactory.createPointGroupFromSpaceGroup(sg)
-    
-    print "Space group no.", sg.getNumber(), "has point group:", pg.getHMSymbol()
+    sg_diamond = SpaceGroupFactory.createSpaceGroup("F d -3 m")
+    pg_diamond = PointGroupFactory.createPointGroupFromSpaceGroup(sg_diamond)
+
+    print "Space group no.", sg_diamond.getNumber(), "has point group:", pg_diamond.getHMSymbol()
+
+    # Related space group F-43m (sphalerite)
+    sg_zincblende = SpaceGroupFactory.createSpaceGroup("F -4 3 m")
+    pg_zincblende = sg_zincblende.getPointGroup()
+
+    print "Space group no.", sg_zincblende.getNumber(), "has point group:", pg_zincblende.getHMSymbol()
     
 The script prints the point group of the space group in question:
     
 .. testoutput:: ExPointGroupFromSpaceGroup
 
     Space group no. 227 has point group: m-3m
-    
+    Space group no. 216 has point group: -43m
+
+Sometimes it's useful to reverse the above process - which is not exactly possible, because several space groups may map to the same point group. The space group factory does however provide a way to get all space group symbols that belong to a certain point group:
+
+.. testcode:: ExSpaceGroupFactoryPointGroup
+
+    from mantid.geometry import PointGroupFactory, SpaceGroupFactory
+
+    pg = PointGroupFactory.createPointGroup("m-3")
+
+    print "Space groups with point group m-3:", SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+
+The example produces the following output:
+
+.. testoutput:: ExSpaceGroupFactoryPointGroup
+
+    Space groups with point group m-3: ['F d -3','F m -3','I a -3','I m -3','P a -3','P m -3','P n -3']
+
 While PointGroup offers useful methods to handle reflections, some information can only be obtained from the space group. The presence of translational symmetry causes the contributions from symmetrically equivalent atoms to the structure factor of certain reflections to cancel out completely so that it can not be observed. These systematically absent reflections are characteristic for each space group, a fact that can be used to determine the space group from measured reflection intensities. The following script shows how to check a few reflections:
 
 .. testcode:: ExSpaceGroupReflectionIsAllowed
@@ -457,7 +523,7 @@ Building on the example above which showed how to check whether a reflection is 
 
 .. testcode:: ExSpaceGroupCheck
 
-    from mantid.geometry import SpaceGroupFactory
+    from mantid.geometry import SpaceGroupFactory, PointGroupFactory
 
     # Small helper function that distinguishes three cases:
     #   0: The reflection is observed and allowed or not observed and not allowed
@@ -500,11 +566,10 @@ Building on the example above which showed how to check whether a reflection is 
     # Check space groups and store results in a list
     spaceGroupMatchList = []
 
-    # Cubic space groups start at number 195 and go to 230.
-    # Those that belong to Laue class m-3m start at 221, so 10 space groups need to be checked.
-    for n in range(221, 231):
-        # In this example only the first space group is used if more than one are registered for this number.
-        sgSymbol = SpaceGroupFactory.subscribedSpaceGroupSymbols(n)[0]
+    # As described above, point group m-3m is assumed
+    pg = PointGroupFactory.createPointGroup("m-3m")
+    possibleSpaceGroups = SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+    for sgSymbol in possibleSpaceGroups:
         sgObject = SpaceGroupFactory.createSpaceGroup(sgSymbol)
 
         # For each (hkl, observed) pair obtain whether this matches the space group's conditions

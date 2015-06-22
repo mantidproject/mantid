@@ -84,6 +84,10 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
   else if (!inputWS->run().hasProperty("chopper4_TDC"))
     errors["InputWorkspace"] = "Workspace is missing chopper4 TDCs.";
 
+  // Must include the chopper4 MotorSpeed.
+  else if (!inputWS->run().hasProperty("BL9:Chop:Skf4:MotorSpeed"))
+    errors["InputWorkspace"] = "Workspace is missing chopper4 Motor Speed.";
+
   // Check if input workspace is sorted.
   else if (inputWS->getSortType() == UNSORTED)
     errors["InputWorkspace"] = "The workspace needs to be a sorted.";
@@ -161,10 +165,10 @@ void CorelliCrossCorrelate::exec() {
   for (unsigned long i = 0; i < tdc.size(); ++i)
     tdc[i] += offset;
 
-  // Determine period from TDC.
-  double period = static_cast<double>(tdc[tdc.size() - 1].totalNanoseconds() -
-                                      tdc[1].totalNanoseconds()) /
-                  double(tdc.size() - 2);
+  // Determine period from chopper frequency.
+  auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(
+      inputWS->run().getProperty("BL9:Chop:Skf4:MotorSpeed"));
+  double period = 1e9 / static_cast<double>(motorSpeed->timeAverageValue());
   g_log.information() << "Frequency = " << 1e9 / period
                       << "Hz Period = " << period << "ns\n";
 

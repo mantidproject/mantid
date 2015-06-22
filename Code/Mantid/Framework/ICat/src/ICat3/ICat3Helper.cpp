@@ -8,6 +8,7 @@ GCC_DIAG_OFF(literal-suffix)
 #endif
 #include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include <iomanip>
 #include <time.h>
