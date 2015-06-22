@@ -147,7 +147,7 @@ public:
 
   void test_noData()
   {
-    // Set an empty workspace
+    // Set a null shared pointer
     MatrixWorkspace_const_sptr data = MatrixWorkspace_const_sptr();
     m_model->setData(data);
 
