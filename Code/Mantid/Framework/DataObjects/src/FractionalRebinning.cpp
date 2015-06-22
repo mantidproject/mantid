@@ -6,6 +6,8 @@
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidKernel/V2D.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 namespace Mantid {
 
 using namespace API;
