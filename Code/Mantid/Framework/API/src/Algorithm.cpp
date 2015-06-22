@@ -10,7 +10,7 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/MemoryManager.h"
+//#include "MantidAPI/MemoryManager.h"
 
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/DateAndTime.h"
@@ -18,8 +18,8 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Timer.h"
 
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string/split.hpp>
+//#include <boost/algorithm/string/trim.hpp>
+//#include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/weak_ptr.hpp>
 

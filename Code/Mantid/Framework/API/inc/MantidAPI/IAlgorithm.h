@@ -15,12 +15,18 @@ template <class T> class ActiveResult;
 namespace Mantid {
 namespace API {
 
+//forward declaration for typedef
+class IAlgorithm;
+
 /** As we have multiple interfaces to the same logical algorithm (Algorithm &
  * AlgorithmProxy)
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */
 typedef void *AlgorithmID;
+
+typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
+typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
@@ -57,7 +63,7 @@ class MANTID_API_DLL IAlgorithm : virtual public Kernel::IPropertyManager {
 public:
   /// Virtual destructor (always needed for abstract classes)
   virtual ~IAlgorithm() {}
-
+  
   /// function to return a name of the algorithm, must be overridden in all
   /// algorithms
   virtual const std::string name() const = 0;
@@ -177,8 +183,7 @@ public:
   virtual std::string toString() const = 0;
 };
 
-typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;
-typedef boost::shared_ptr<const IAlgorithm> IAlgorithm_const_sptr;
+
 
 } // namespace API
 } // namespace Mantid

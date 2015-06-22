@@ -215,6 +215,7 @@ public:
       TS_ASSERT_EQUALS("InputWorkspace", alg->workspaceMethodInputProperty());
     }
 
+
 };
 
 #endif /*ALGORITHMPROXYTEST_H_*/

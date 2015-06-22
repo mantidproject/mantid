@@ -10,6 +10,8 @@
 #include <Poco/ActiveResult.h>
 #include <Poco/Void.h>
 
+#include <boost/make_shared.hpp>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid {
@@ -20,7 +22,7 @@ namespace API {
 //----------------------------------------------------------------------
 
 /// Constructor
-AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
+AlgorithmProxy::AlgorithmProxy(const Algorithm_sptr& alg)
     : PropertyManagerOwner(),
       m_executeAsync(new Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy>(
           this, &AlgorithmProxy::executeAsyncImpl)),
@@ -36,6 +38,7 @@ AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
   copyPropertiesFrom(*alg);
 }
 
+
 /// Virtual destructor
 AlgorithmProxy::~AlgorithmProxy() { delete m_executeAsync; }
 
@@ -47,6 +50,7 @@ void AlgorithmProxy::initialize() { return; }
 AlgorithmID AlgorithmProxy::getAlgorithmID() const {
   return AlgorithmID(const_cast<AlgorithmProxy *>(this));
 }
+
 
 /** Perform whole-input validation */
 std::map<std::string, std::string> AlgorithmProxy::validateInputs() {
@@ -229,14 +233,17 @@ void AlgorithmProxy::afterPropertySet(const std::string &name) {
 * @param initOnly If true then the algorithm will only having its init step run,
 * otherwise observers will
 * also be added and rethrows will be true
+* @param forceRecreation If true then the algorithm will be recreated even if already cached
 */
-void AlgorithmProxy::createConcreteAlg(bool initOnly) {
-  m_alg = boost::dynamic_pointer_cast<Algorithm>(
-      AlgorithmManager::Instance().createUnmanaged(name(), version()));
-  m_alg->initializeFromProxy(*this);
-  if (!initOnly) {
-    m_alg->setRethrows(this->m_rethrow);
-    addObservers();
+void AlgorithmProxy::createConcreteAlg(bool initOnly,bool forceRecreation) {
+ if (forceRecreation || (!m_alg)) {
+    m_alg = boost::dynamic_pointer_cast<Algorithm>(
+        AlgorithmManager::Instance().createUnmanaged(name(), version()));
+    m_alg->initializeFromProxy(*this);
+    if (!initOnly) {
+      m_alg->setRethrows(this->m_rethrow);
+      addObservers();
+    }
   }
 }
 
