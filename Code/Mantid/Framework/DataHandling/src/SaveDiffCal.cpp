@@ -6,6 +6,8 @@
 
 #include <H5Cpp.h>
 #include <H5FaccProp.h>
+#include <H5Group.h>
+#include <H5Location.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
@@ -128,7 +130,7 @@ DSetCreatPropList getPropList(const std::size_t length) {
   return propList;
 }
 
-void writeStrAttribute(H5Location &location, const std::string &name,
+void writeStrAttribute(H5::H5Location &location, const std::string &name,
                        const std::string &value) {
   StrType attrType(0, H5T_VARIABLE);
   DataSpace attrSpace(H5S_SCALAR);
@@ -136,7 +138,7 @@ void writeStrAttribute(H5Location &location, const std::string &name,
   groupAttr.write(attrType, value);
 }
 
-void writeArray(Group &group, const std::string &name,
+void writeArray(H5::Group &group, const std::string &name,
                 const std::string &value) {
   StrType dataType(0, value.length() + 1);
   DataSpace dataSpace = getDataSpace(1);
@@ -144,7 +146,7 @@ void writeArray(Group &group, const std::string &name,
   data.write(value, dataType);
 }
 
-void writeArray(Group &group, const std::string &name,
+void writeArray(H5::Group &group, const std::string &name,
                 const std::vector<double> &values) {
   DataType dataType(PredType::NATIVE_DOUBLE);
   DataSpace dataSpace = getDataSpace(values);
@@ -155,7 +157,7 @@ void writeArray(Group &group, const std::string &name,
   data.write(&(values[0]), dataType);
 }
 
-void writeArray(Group &group, const std::string &name,
+void writeArray(H5::Group &group, const std::string &name,
                 const std::vector<int32_t> &values) {
   DataType dataType(PredType::NATIVE_INT32);
   DataSpace dataSpace = getDataSpace(values);
