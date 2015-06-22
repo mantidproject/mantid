@@ -9,7 +9,11 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#ifdef _WIN32
+#include <cpp/H5Cpp.h>
+#else
 #include <H5Cpp.h>
+#endif
 
 namespace Mantid {
 namespace DataHandling {

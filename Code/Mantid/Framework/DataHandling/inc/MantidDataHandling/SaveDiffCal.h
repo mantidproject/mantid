@@ -6,7 +6,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 
-#include <H5Cpp.h>
+namespace H5 {
+class Group;
+}
 
 namespace Mantid {
 namespace DataHandling {
