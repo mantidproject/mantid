@@ -1221,12 +1221,12 @@ void LoadEventNexus::exec() {
 
   // If the run was paused at any point, filter out those events (SNS only, I
   // think)
-  filterDuringPause(m_ws->m_ws);
+  filterDuringPause(m_ws->getSingleHeldWorkspace());
 
   // add filename
   m_ws->mutableRun().addProperty("Filename", m_filename);
   // Save output
-  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", m_ws->m_ws);
+  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", m_ws->getSingleHeldWorkspace());
   // Load the monitors
   if (load_monitors) {
     prog.report("Loading monitors");
@@ -2315,7 +2315,9 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
       g_log.information() << "Copying log data into monitors workspace from the "
                           << "data workspace." << std::endl;
       try {
-        copyLogs(dataWS, m_ws->m_ws);
+        auto to = m_ws->getSingleHeldWorkspace();
+        auto from = dataWS;
+        copyLogs(from, to);
         g_log.information() << "Log data copied." << std::endl;
       } catch(std::runtime_error&) {
         g_log.error() << "Could not copy log data into monitors workspace. Some "
@@ -2330,9 +2332,9 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         new WorkspaceProperty<IEventWorkspace>("MonitorWorkspace", mon_wsname,
                                                Direction::Output),
         "Monitors from the Event NeXus file");
-    this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", m_ws->m_ws);
+    this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", m_ws->getSingleHeldWorkspace());
     // Set the internal monitor workspace pointer as well
-    dataWS->setMonitorWorkspace(m_ws->m_ws);
+    dataWS->setMonitorWorkspace(m_ws->getSingleHeldWorkspace());
     // If the run was paused at any point, filter out those events (SNS only, I
     // think)
     filterDuringPause(m_ws);

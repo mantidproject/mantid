@@ -44,9 +44,12 @@ public:
 };
 
 class CompositeWorkspace : public Mantid::DataObjects::EventWorkspace {
-
-public:
+private:
+  std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
   DataObjects::EventWorkspace_sptr m_ws;
+public:
+
+  DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_ws;}
 
   CompositeWorkspace(DataObjects::EventWorkspace_sptr ws): m_ws(ws){}
 
