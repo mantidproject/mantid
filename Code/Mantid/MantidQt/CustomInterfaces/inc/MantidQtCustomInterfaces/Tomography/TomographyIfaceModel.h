@@ -74,25 +74,34 @@ public:
   void usingTool(const std::string &tool) { m_currentTool = tool; }
   std::string usingTool() const { return m_currentTool; }
 
+  /// ping the (remote) compute resource
   bool doPing(const std::string &compRes);
+  /// Log into the (remote or local) compute resource
   void doLogin(const std::string &compRes, const std::string &user,
                const std::string &pw);
+  /// Log out from the (remote or local) compute resource
   void doLogout(const std::string &compRes, const std::string &username);
+  /// Query the status of running (and recent) jobs
   void doQueryJobStatus(const std::string &compRes,
                         std::vector<std::string> &ids,
                         std::vector<std::string> &names,
                         std::vector<std::string> &status,
                         std::vector<std::string> &cmds);
+  /// Submit a new job to the (remote or local) compute resource
   void doSubmitReconstructionJob(const std::string &compRes);
+  /// Cancel a previously submitted job
   void doCancelJobs(const std::string &compRes,
                     const std::vector<std::string> &id);
+  /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
   /// loads an image/picture in FITS format
   Mantid::API::WorkspaceGroup_sptr loadFITSImage(const std::string &path);
 
+  /// Log this message through the system logging
   void logMsg(const std::string &msg);
 
+  /// for clean destruction
   void cleanup();
 
   std::string localComputeResource() const { return m_localCompName; }
@@ -117,6 +126,7 @@ public:
   static const std::string g_customCmdTool;
 
 private:
+  /// retrieve info from compute resource into status table
   void getJobStatusInfo(const std::string &compRes);
 
   std::string validateCompResource(const std::string &res);

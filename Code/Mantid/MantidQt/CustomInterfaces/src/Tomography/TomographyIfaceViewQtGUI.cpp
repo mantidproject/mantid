@@ -50,11 +50,13 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
  */
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_processingJobsIDs(),
-      m_currentComputeRes(""), m_currentReconTool(""),
-      m_pathFITS(m_pathSCARFbase + "data/fits"),
-      m_pathFlat(m_pathSCARFbase + "data/flat"),
-      m_pathDark(m_pathSCARFbase + "data/dark"),
-      m_settingsGroup("CustomInterfaces/Tomography"), m_currentParamPath() {
+      m_currentComputeRes(""), m_currentReconTool(""), m_imgPath(""),
+      m_pathFITS(m_pathSCARFbase + "data/sample"),
+      m_pathFlat(m_pathSCARFbase + "data/ob"),
+      m_pathDark(m_pathSCARFbase + "data/di"), m_logMsgs(), m_toolsSettings(),
+      m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
+      m_availPlugins(), m_currPlugins(), m_currentParamPath(),
+      m_statusMutex(NULL), m_presenter(NULL) {
 
   // TODO: find a better place for this Savu stuff - see other TODOs
   m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
@@ -65,7 +67,10 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
   m_statusMutex = new QMutex();
 }
 
-TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() { delete m_statusMutex; }
+TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {
+  if (m_statusMutex)
+    delete m_statusMutex;
+}
 
 void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.setupUi(this);
@@ -80,8 +85,12 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // presenter that knows how to handle a ITomographyIfaceView should take care
   // of all the logic
   // note the view needs to now the concrete presenter,
-  // ITomographyIfacePresenter pure vitual
+  // (ITomographyIfacePresenter is pure vitual)
   m_presenter = boost::make_shared<TomographyIfacePresenter>(this);
+
+  // it will know what compute resources and tools we have available:
+  // This view doesn't even know the names of compute resources, etc.
+  m_presenter->notify(ITomographyIfacePresenter::SetupResourcesAndTools);
 }
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
@@ -172,8 +181,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
   m_ui.pushButton_run_job_cancel->setEnabled(false);
   m_ui.pushButton_run_job_visualize->setEnabled(false);
 
-  m_presenter->notify(ITomographyIfacePresenter::SetupResourcesAndTools);
-
   // Button signals
   connect(m_ui.pushButton_browse_image, SIGNAL(released()), this,
           SLOT(browseImageClicked()));
@@ -206,19 +213,19 @@ void TomographyIfaceViewQtGUI::setComputeResources(
     const std::vector<bool> &enabled) {
   // set up the compute resource
   QComboBox *cr = m_ui.comboBox_run_compute_resource;
-  if (cr && resources.size() == enabled.size()) {
-    cr->clear();
+  if (!cr || resources.size() != enabled.size())
+    return;
 
-    for (size_t ri = 0; ri < resources.size(); ri++) {
-      cr->addItem(QString::fromStdString(resources[ri]));
+  cr->clear();
 
-      if (!enabled[ri]) {
-        cr->addItem(QString::fromStdString(resources[ri]));
-        // trick to display the text in a disabled row
-        QModelIndex idx = cr->model()->index(static_cast<int>(ri), 0);
-        QVariant disabled(0);
-        cr->model()->setData(idx, disabled, Qt::UserRole - 1);
-      }
+  for (size_t ri = 0; ri < resources.size(); ri++) {
+    cr->addItem(QString::fromStdString(resources[ri]));
+
+    if (!enabled[ri]) {
+      // trick to display the text in a disabled row
+      QModelIndex idx = cr->model()->index(static_cast<int>(ri), 0);
+      QVariant disabled(0);
+      cr->model()->setData(idx, disabled, Qt::UserRole - 1);
     }
   }
 }
@@ -228,18 +235,19 @@ void TomographyIfaceViewQtGUI::setReconstructionTools(
 
   // set up the reconstruction tool
   QComboBox *rt = m_ui.comboBox_run_tool;
-  if (rt && tools.size() == enabled.size()) {
-    rt->clear();
+  if (!rt || tools.size() != enabled.size())
+    return;
 
-    for (size_t ti = 0; ti < tools.size(); ti++) {
-      rt->addItem(QString::fromStdString(tools[ti]));
+  rt->clear();
 
-      if (!enabled[ti]) {
-        // trick to display it in a disabled row
-        QModelIndex idx = rt->model()->index(static_cast<int>(ti), 0);
-        QVariant disabled(0);
-        rt->model()->setData(idx, disabled, Qt::UserRole - 1);
-      }
+  for (size_t ti = 0; ti < tools.size(); ti++) {
+    rt->addItem(QString::fromStdString(tools[ti]));
+
+    if (!enabled[ti]) {
+      // trick to display it in a disabled row
+      QModelIndex idx = rt->model()->index(static_cast<int>(ti), 0);
+      QVariant disabled(0);
+      rt->model()->setData(idx, disabled, Qt::UserRole - 1);
     }
   }
 }
@@ -416,14 +424,23 @@ void TomographyIfaceViewQtGUI::updateLoginControls(bool loggedIn) {
   updateCompResourceStatus(loggedIn);
 }
 
+/**
+ * Slot for when the 'login' or similar button is clicked (released)
+ */
 void TomographyIfaceViewQtGUI::SCARFLoginClicked() {
   m_presenter->notify(ITomographyIfacePresenter::LogInRequested);
 }
 
+/**
+ * Slot for when the 'logout' or similar button is clicked (released)
+ */
 void TomographyIfaceViewQtGUI::SCARFLogoutClicked() {
   m_presenter->notify(ITomographyIfacePresenter::LogOutRequested);
 }
 
+/**
+ * Slot for when the user requests to open the tool specific setup dialog.
+ */
 void TomographyIfaceViewQtGUI::toolSetupClicked() {
   QComboBox *rt = m_ui.comboBox_run_tool;
   if (!rt)
@@ -432,6 +449,11 @@ void TomographyIfaceViewQtGUI::toolSetupClicked() {
   m_presenter->notify(ITomographyIfacePresenter::SetupReconTool);
 }
 
+/**
+ * Displays and gets the results of a tool specific configuration dialog.
+ *
+ * @param name Name of the (tomographic reconstruction) tool
+ */
 void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
   if (g_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
@@ -505,10 +527,16 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
   // TODO: 'CCPi CGLS' tool maybe in the future. Tool not ready.
 }
 
+/**
+ * Slot - when the user clicks the 'reconstruct data' or similar button.
+ */
 void TomographyIfaceViewQtGUI::reconstructClicked() {
   m_presenter->notify(ITomographyIfacePresenter::RunReconstruct);
 }
 
+/**
+ * Slot - when the user clicks the 'visualize job results' or similar button.
+ */
 void TomographyIfaceViewQtGUI::runVisualizeClicked() {
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
   const int idCol = 2;
@@ -531,7 +559,9 @@ void TomographyIfaceViewQtGUI::runVisualizeClicked() {
   }
 }
 
-/// processes (cancels) all the jobs selected in the table
+/**
+ * Slot - when the user clicks the 'cancel job' or similar button.
+ */
 void TomographyIfaceViewQtGUI::jobCancelClicked() {
   m_processingJobsIDs.clear();
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
@@ -553,10 +583,16 @@ void TomographyIfaceViewQtGUI::jobCancelClicked() {
   m_presenter->notify(ITomographyIfacePresenter::CancelJobFromTable);
 }
 
+/**
+ * Slot - when the user clicks the 'refresh job list/table' or similar button.
+ */
 void TomographyIfaceViewQtGUI::jobTableRefreshClicked() {
   m_presenter->notify(ITomographyIfacePresenter::RefreshJobs);
 }
 
+/**
+ * Slot - user clicks the 'open/browse image' or similar button.
+ */
 void TomographyIfaceViewQtGUI::browseImageClicked() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
@@ -885,6 +921,7 @@ void TomographyIfaceViewQtGUI::closeEvent(QCloseEvent *event) {
 
   if (answer == QMessageBox::AcceptRole) {
     // TODO? cleanup();
+    m_presenter->notify(ITomographyIfacePresenter::ShutDown);
     event->accept();
   } else {
     event->ignore();

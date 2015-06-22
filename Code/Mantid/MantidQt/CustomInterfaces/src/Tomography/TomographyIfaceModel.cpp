@@ -31,11 +31,13 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
  */
 TomographyIfaceModel::TomographyIfaceModel()
     : m_loggedIn(""), m_facility("ISIS"), m_localCompName("Local"),
-      m_computeRes(), m_computeResStatus(), m_SCARFtools(),
+      m_computeRes(), m_computeResStatus(), m_reconTools(),
+      m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(),
       m_pathSCARFbase("/work/imat/recon/"),
-      m_pathFITS(m_pathSCARFbase + "data/fits"),
-      m_pathFlat(m_pathSCARFbase + "data/flat"),
-      m_pathDark(m_pathSCARFbase + "data/dark") {
+      m_pathFITS(m_pathSCARFbase + "data/sample"),
+      m_pathFlat(m_pathSCARFbase + "data/ob"),
+      m_pathDark(m_pathSCARFbase + "data/di"), m_toolsSettings(),
+      m_statusMutex(NULL) {
 
   m_computeRes.push_back(g_SCARFName);
   m_computeRes.push_back(m_localCompName);
@@ -51,13 +53,12 @@ TomographyIfaceModel::TomographyIfaceModel()
   m_statusMutex = new QMutex();
 }
 
-TomographyIfaceModel::~TomographyIfaceModel() { delete m_statusMutex; }
+TomographyIfaceModel::~TomographyIfaceModel() {
+  if (m_statusMutex)
+    delete m_statusMutex;
+}
 
 void TomographyIfaceModel::cleanup() {}
-
-/*
-void TomographyIfaceModel::logger() { return g_log; }
-*/
 
 /**
  * Check that the selected compute resource is listed as supported and
@@ -132,6 +133,7 @@ void TomographyIfaceModel::setupComputeResource() {
         "please update it.");
   }
 
+  // this implies a nearly empty / no functionality interface
   if (m_computeRes.size() < 1) {
     return;
   }
@@ -164,6 +166,9 @@ void TomographyIfaceModel::setupComputeResource() {
  * where they're going to run. This is very dependent on how the
  * facility and compute resource is adminstered and what the resource
  * provides.
+ *
+ * @param compRes compute resource for which the tools have to be set
+ * up. If empty, the default resource is assumed
  */
 void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
   m_reconToolsStatus.clear();
@@ -176,7 +181,7 @@ void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
   } else {
     throw std::runtime_error("Cannot setup this interface for the facility: " +
                              m_facility +
-                             ". There is not information about tools for it. ");
+                             ". There is no information about tools for it. ");
   }
   // others would/could come here
 

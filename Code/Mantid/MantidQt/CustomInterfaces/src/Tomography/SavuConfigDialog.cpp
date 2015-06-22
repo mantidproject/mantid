@@ -271,7 +271,7 @@ void TomographyIfaceViewQtGUI::menuOpenClicked() {
 }
 
 void TomographyIfaceViewQtGUI::menuSaveClicked() {
-  if (m_currentParamPath == "") {
+  if (m_currentParamPath.empty()) {
     menuSaveAsClicked();
     return;
   }

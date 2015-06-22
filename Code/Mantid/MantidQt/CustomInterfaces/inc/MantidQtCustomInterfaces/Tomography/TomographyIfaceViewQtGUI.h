@@ -66,6 +66,7 @@ public:
 
   void userError(const std::string &err, const std::string &description);
 
+  /// Messages that need to be logged
   std::vector<std::string> logMsgs() const { return m_logMsgs; }
 
   void setComputeResources(const std::vector<std::string> &resources,
@@ -160,9 +161,6 @@ private:
   void doSetupSectionRun();
   void doSetupGeneralWidgets();
 
-  void setupComputeResource();
-  void setupRunTool();
-
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
   /// save settings (before closing)
@@ -222,15 +220,14 @@ private:
   std::string m_imgPath;
 
   static const std::string g_SCARFName;
+  // a general (all tools in principle) default output path
+  static const std::string g_defOutPath;
 
   static const std::string g_TomoPyTool;
   static const std::string g_AstraTool;
   static const std::string g_CCPiTool;
   static const std::string g_SavuTool;
   static const std::string g_customCmdTool;
-
-  // a default output path
-  static const std::string g_defOutPath;
 
   /// file paths, base dir on scarf
   std::string m_pathSCARFbase;
@@ -241,6 +238,7 @@ private:
   /// path to dark image
   std::string m_pathDark;
 
+  // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;
 
   /// Settings for the third party (tomographic reconstruction) tools
@@ -274,17 +272,17 @@ private:
   // path name for persistent settings
   std::string m_settingsGroup;
 
-  // presenter as in the model-view-presenter
-  boost::shared_ptr<ITomographyIfacePresenter> m_presenter;
-
-  // mutex for the job status info update operations
-  QMutex *m_statusMutex;
-
   // TODO? move to TomographyIfaceModel or TomographyIfaceSavuModel.h
   // plugins for Savu config files
   Mantid::API::ITableWorkspace_sptr m_availPlugins;
   Mantid::API::ITableWorkspace_sptr m_currPlugins;
   std::string m_currentParamPath;
+
+  // mutex for the job status info update operations
+  QMutex *m_statusMutex;
+
+  // presenter as in the model-view-presenter
+  boost::shared_ptr<ITomographyIfacePresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces

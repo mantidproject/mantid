@@ -28,8 +28,10 @@ TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
 TomographyIfacePresenter::~TomographyIfacePresenter() {
   cleanup();
 
-  delete m_keepAliveTimer;
-  delete m_keepAliveThread;
+  if (m_keepAliveTimer)
+    delete m_keepAliveTimer;
+  if (m_keepAliveThread)
+    delete m_keepAliveThread;
 }
 
 /**
@@ -127,15 +129,12 @@ void TomographyIfacePresenter::processSetup() {
     m_view->setReconstructionTools(m_model->reconTools(),
                                    m_model->reconToolsStatus());
   } catch (std::runtime_error &e) {
-    m_view->userError("Fatal error",
-                      "Failed to initialize remote compute resource(s). This "
-                      "custom interface will not work. Error description: " +
-                          std::string(e.what()));
-    //   m_model->logger().error()
-    //       << "Failed to initialize remote compute resource(s). This "
-    //          "custom interface will not work. Error description: " <<
-    //          e.what()
-    //       << std::endl;
+    const std::string msg =
+        "Failed to initialize remote compute resource(s). This "
+        "custom interface will not work. Error description: " +
+        std::string(e.what());
+    m_view->userError("Fatal error", msg);
+    m_model->logMsg(msg);
   }
 }
 
@@ -201,6 +200,8 @@ void TomographyIfacePresenter::processLogin() {
   }
 
   startKeepAliveMechanism(m_view->keepAlivePeriod());
+  // show table for the first time
+  processRefreshJobs();
 }
 
 void TomographyIfacePresenter::processLogout() {
@@ -230,9 +231,7 @@ void TomographyIfacePresenter::processRunRecon() {
     try {
       m_model->doSubmitReconstructionJob(resource);
     } catch (std::exception &e) {
-      m_view->userWarning("Issue when trying to start a job",
-                          "Detailed error description: " +
-                              std::string(e.what()));
+      m_view->userWarning("Issue when trying to start a job", e.what());
     }
 
     processRefreshJobs();
@@ -257,22 +256,21 @@ void TomographyIfacePresenter::processVisualizeJobs() {
   doVisualize(m_view->processingJobsIDs());
 }
 
-void TomographyIfacePresenter::doVisualize(
-    const std::vector<std::string> & /*ids*/) {
+void
+TomographyIfacePresenter::doVisualize(const std::vector<std::string> &ids) {
+  m_model->logMsg(" Visualizing results from job: " + ids.front());
   // TODO: open dialog, send to Paraview, etc.
-  // g_log.information() << " Visualizing one job: " << ids.front() <<
-  // std::endl;
 }
 
 void TomographyIfacePresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
   for (size_t i = 0; i < msgs.size(); i++) {
-    // g_log.information() << msgs << std::endl;
+    m_model->logMsg(msgs[i]);
     break;
   }
 }
 
-void TomographyIfacePresenter::processShutDown() {}
+void TomographyIfacePresenter::processShutDown() { cleanup(); }
 
 void TomographyIfacePresenter::processViewImg() {
   std::string ip = m_view->showImagePath();
