@@ -234,17 +234,22 @@ void ReflectometryTransformQxQz::initAngularCaches(
 }
 
 MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
-    MatrixWorkspace_const_sptr inputWS) const {
-  auto outWS = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    MatrixWorkspace_const_sptr inputWS,
+    const std::vector<double> &vertBinning) const {
+
+  std::vector<double> outBins; // To be filled with the vertical bin boundaries
+  RebinnedOutput_sptr outWS =
+      setUpOutputWorkspace(inputWS, vertBinning, outBins);
 
   // Prepare the required theta values
   initAngularCaches(inputWS);
 
-  // Create the output workspace as a distribution
-  outWS->initialize(m_nbinsz, m_nbinsx, m_nbinsx);
-
   const size_t nHistos = inputWS->getNumberHistograms();
   const size_t nBins = inputWS->blocksize();
+
+  // Holds the spectrum-detector mapping
+  std::vector<specid_t> specNumberMapping;
+  std::vector<detid_t> detIDMapping;
 
   CalculateReflectometryQxQz qcThetaLower(m_inTheta);
   CalculateReflectometryQxQz qcThetaUpper(m_inTheta);
@@ -271,7 +276,7 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];
 
-      //fractional rebin
+      // fractional rebin
       const V2D ll(qcThetaLower.calculateX(lamLower),
                    qcThetaLower.calculateZ(lamLower));
       const V2D lr(qcThetaLower.calculateX(lamUpper),
@@ -282,11 +287,28 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
                    qcThetaUpper.calculateZ(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
-      /* double qOut; */
-      /* rebinToFractionalOutput(inputQ, inputWS, i, j, outWS, qOut); */
+      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
+                                                   outBins);
 
+      // Find which q bin this point lies in
+      const auto qIndex =
+          std::upper_bound(outBins.begin(), outBins.end(), lr.Y()) -
+          outBins.begin();
+      if (qIndex != 0 && qIndex < static_cast<int>(outBins.size())) {
+        // Add this spectra-detector pair to the mapping
+        specNumberMapping.push_back(
+            outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+        detIDMapping.push_back(detector->getID());
+      }
     }
   }
+  outWS->finalize();
+  FractionalRebinning::normaliseOutput(outWS, inputWS);
+
+  // Set the output spectrum-detector mapping
+  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
+  outWS->updateSpectraUsing(outputDetectorMap);
+
   return outWS;
 }
 
