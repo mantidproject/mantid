@@ -619,6 +619,16 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Calcualte chi-square for single domain data
+ * @brief FitOneSinglePeak::calChiSquareSD
+ * @param fitfunc
+ * @param dataws
+ * @param wsindex
+ * @param xmin
+ * @param xmax
+ * @return
+ */
 double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
                                         MatrixWorkspace_sptr dataws,
                                         size_t wsindex, double xmin,
