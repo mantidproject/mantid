@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/ResNorm.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;
 
@@ -120,8 +122,8 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (plotOptions == "Fit" || plotOptions == "All")
     plotSpectrum(fitWsName);
 
-  // Interface plotting
-  m_uiForm.ppPlot->addSpectrum("Fit", fitWsName, 1, Qt::red);
+  // Update preview plot
+  previewSpecChanged(m_previewSpec);
 }
 
 /**
@@ -142,7 +144,9 @@ void ResNorm::loadSettings(const QSettings &settings) {
  * @param filename :: The name of the workspace to plot
  */
 void ResNorm::handleVanadiumInputReady(const QString &filename) {
+  // Plot the vanadium
   m_uiForm.ppPlot->addSpectrum("Vanadium", filename, m_previewSpec);
+
   QPair<double, double> res;
   QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Vanadium");
 
@@ -177,6 +181,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
  * @param filename Name of the workspace to plot
  */
 void ResNorm::handleResolutionInputReady(const QString &filename) {
+  // Plot the resolution
   m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
 }
 
@@ -231,14 +236,29 @@ void ResNorm::previewSpecChanged(int value) {
 
   // Update fit plot
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
+  std::string fitParamsName(m_pythonExportWsName + "_Fit");
   if (AnalysisDataService::Instance().doesExist(fitWsGroupName)) {
     WorkspaceGroup_sptr fitWorkspaces =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             fitWsGroupName);
-    if (fitWorkspaces) {
-      QString fitWsName =
-          QString::fromStdString(fitWorkspaces->getItem(m_previewSpec)->name());
-      m_uiForm.ppPlot->addSpectrum("Fit", fitWsName, 1, Qt::red);
+    ITableWorkspace_sptr fitParams =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            fitParamsName);
+    if (fitWorkspaces && fitParams) {
+      Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
+      std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->name());
+      MatrixWorkspace_const_sptr fitWs =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+              fitWsName);
+
+      MatrixWorkspace_sptr fit = WorkspaceFactory::Instance().create(fitWs, 1);
+      fit->setX(0, fitWs->readX(1));
+      fit->getSpectrum(0)->setData(fitWs->readY(1), fitWs->readE(1));
+
+      for (size_t i = 0; i < fit->blocksize(); i++)
+        fit->dataY(0)[i] /= scaleFactors->cell<double>(m_previewSpec);
+
+      m_uiForm.ppPlot->addSpectrum("Fit", fit, 0, Qt::red);
     }
   }
 }
