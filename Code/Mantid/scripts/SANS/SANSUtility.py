@@ -74,14 +74,14 @@ def GetInstrumentDetails(instrum):
 
     return det.n_columns, first_spectrum, last_spectrum
 
-def InfinitePlaneXML(id, plane_pt, normal_pt):
-    return '<infinite-plane id="' + str(id) + '">' + \
+def InfinitePlaneXML(id_name, plane_pt, normal_pt):
+    return '<infinite-plane id="' + str(id_name) + '">' + \
         '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
         '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
         '</infinite-plane>'
 
-def InfiniteCylinderXML(id, centre, radius, axis):
-    return  '<infinite-cylinder id="' + str(id) + '">' + \
+def InfiniteCylinderXML(id_name, centre, radius, axis):
+    return  '<infinite-cylinder id="' + str(id_name) + '">' + \
     '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
     '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
     '<radius val="' + str(radius) + '" />' + \
@@ -98,11 +98,16 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
-    while phimax > 360 : phimax -= 360
-    while phimax < 0 : phimax += 360
-    while phimin > 360 : phimin -= 360
-    while phimin < 0 : phimin += 360
-    while phimax<phimin : phimax += 360
+    while phimax > 360 :
+        phimax -= 360
+    while phimax < 0 :
+        phimax += 360
+    while phimin > 360 :
+        phimin -= 360
+    while phimin < 0 :
+        phimin += 360
+    while phimax<phimin :
+        phimax += 360
 
     #Convert to radians
     phimin = math.pi*phimin/180.0
@@ -375,17 +380,20 @@ def sliceParser(str_to_parser):
 
     def _parse_lower(inpstr):
         val = _check_match(inpstr, lowbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [val[0], MARK]
 
     def _parse_upper(inpstr):
         val = _check_match(inpstr, upbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [MARK, val[0]]
 
     def _parse_start_step_stop(inpstr):
         val = _check_match(inpstr, sss_pat, 3)
-        if not val: return val
+        if not val:
+            return val
         start = val[0]
         step = val[1]
         stop = val[2]
@@ -662,38 +670,6 @@ def get_full_path_for_added_event_data(file_name):
     full_path_name = os.path.join(path, base)
 
     return full_path_name
-    
-def _conjoin_ws_list(ws_list):
-    """
-    A more generic version of ConjoinWorkspaces.  Accepts an arbitrarily long
-    list of workspaces rather than just two.
-    @param ws_list :: the list of workspaces to conjoin.
-    @returns :: a workspace containing the extracted spectra
-    """
-    conjoin_alg = AlgorithmManager.createUnmanaged("ConjoinWorkspaces")
-    conjoin_alg.setChild(True)
-    conjoin_alg.initialize()
-    def conjoin(left, right):
-        conjoin_alg.setProperty("InputWorkspace1", left)
-        conjoin_alg.setProperty("InputWorkspace2", right)
-        conjoin_alg.execute()
-        return conjoin_alg.getProperty("InputWorkspace1").value
-
-    return reduce(conjoin, ws_list)
-
-def yield_ws_indices_from_det_ids(ws, det_ids):
-    """
-    Converts detector IDs to workspace indices and yields them one-by-one.
-    We have to do this manually until ticket #10025 is completed.
-
-    @param ws :: the workspace from which to extract spectra
-    @param det_ids :: the detector IDs corresponding to the spectra to extract
-    """
-    for ws_index in range(ws.getNumberHistograms()):
-        spectrum = ws.getSpectrum(ws_index)
-        for det_id in spectrum.getDetectorIDs():
-            if det_id in det_ids:
-                yield(ws_index)
 
 def extract_spectra(ws, det_ids, output_ws_name):
     """
@@ -847,8 +823,8 @@ def parseLogFile(logfile):
         'Front_Det_Rot':0.0}
     if logfile == None:
         return tuple(logkeywords.values())
-    file = open(logfile, 'rU')
-    for line in file:
+    file_log = open(logfile, 'rU')
+    for line in file_log:
         entry = line.split()[1]
         if entry in logkeywords.keys():
             logkeywords[entry] = float(line.split()[2])
