@@ -111,6 +111,18 @@ public:
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
+  void test_ConvertToBinBoundary_Size2InputVector() {
+    std::vector<double> bin_centers = {0.5, 1.5};
+    std::vector<double> bin_edges;
+
+    VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
+
+    TS_ASSERT_EQUALS(bin_edges.size(), 3);
+    TS_ASSERT_DELTA(bin_edges[0], 0.0, 1e-12);
+    TS_ASSERT_DELTA(bin_edges[1], 1.0, 1e-12);
+    TS_ASSERT_DELTA(bin_edges[2], 2.0, 1e-12);
+  }
+
   // TODO: More tests of other methods
 
   void test_splitStringIntoVector()
