@@ -611,6 +611,24 @@ public:
     TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(), 1476.0);
   }
 
+void test_extract_nperiod_data() {
+  LoadEventNexus loader;
+
+  loader.setChild(true);
+  loader.initialize();
+  loader.setPropertyValue("OutputWorkspace", "dummy");
+  loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+  loader.execute();
+  IEventWorkspace_sptr outWS = loader.getProperty("OutputWorkspace");
+  auto run = outWS->run();
+  const bool hasNPeriods = run.hasProperty("nperiods");
+  TSM_ASSERT("Should have nperiods now we have run LoadNexusLogs", hasNPeriods);
+  if (hasNPeriods) {
+    const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
+    TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
+  }
+}
+
 private:
   std::string wsSpecFilterAndEventMonitors;
 };

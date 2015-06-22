@@ -1208,7 +1208,7 @@ void LoadEventNexus::exec() {
   Progress prog(this, 0.0, 0.3, reports);
 
   // Load the detector events
-  m_ws = boost::make_shared<CompositeWorkspace>(createEmptyEventWorkspace()); // Algorithm currently relies on an
+  m_ws = boost::make_shared<DecoratorWorkspace>(); // Algorithm currently relies on an
                                     // object-level workspace ptr
   loadEvents(&prog, false);         // Do not load monitor blocks
 
@@ -1392,7 +1392,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
-      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true);
+      int nPeriods = 1;
+      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true, nPeriods);
+      m_ws->setNPeriods(nPeriods); // This is how many workspaces we are going to make.
       run_start = m_ws->getFirstPulseTime();
       m_logs_loaded_correctly = true;
     } else {
@@ -1746,7 +1748,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 * Create a blank event workspace
 * @returns A shared pointer to a new empty EventWorkspace object
 */
-EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace() {
+EventWorkspace_sptr DecoratorWorkspace::createEmptyEventWorkspace() const {
   // Create the output workspace
   EventWorkspace_sptr eventWS(new EventWorkspace());
   // Make sure to initialize.
@@ -2290,7 +2292,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     // Note the reuse of the m_ws member variable below. Means I need to grab a
     // copy of its current value.
     auto dataWS = m_ws;
-    m_ws = boost::make_shared<CompositeWorkspace>(createEmptyEventWorkspace()); // Algorithm currently relies on an
+    m_ws = boost::make_shared<DecoratorWorkspace>(); // Algorithm currently relies on an
                                       // object-level workspace ptr
     // add filename
     m_ws->mutableRun().addProperty("Filename", m_filename);
@@ -2842,7 +2844,7 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
 boost::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
                                  API::MatrixWorkspace_sptr localWorkspace,
-                                 API::Algorithm &alg, bool returnpulsetimes) {
+                                 API::Algorithm &alg, bool returnpulsetimes, int& nPeriods) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -2857,6 +2859,11 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadLogs->execute();
+
+    if(localWorkspace->run().hasProperty("nperiods")){
+        nPeriods  = localWorkspace->run().getPropertyValueAsType<int>("nperiods");
+    }
+
 
     // If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> *log =

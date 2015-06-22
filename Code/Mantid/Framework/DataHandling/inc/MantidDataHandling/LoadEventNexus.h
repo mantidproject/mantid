@@ -43,19 +43,23 @@ public:
   Kernel::DateAndTime *pulseTimes;
 };
 
-class CompositeWorkspace : public Mantid::DataObjects::EventWorkspace {
+class DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
 private:
   std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
   DataObjects::EventWorkspace_sptr m_ws;
+  DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
+
 public:
+
+  void setNPeriods(size_t nPeriods){
+      m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(nPeriods);
+      // TODO. Initialize all in m_WsVec. copy logs. etc.
+  }
 
   DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_ws;}
 
-  CompositeWorkspace(DataObjects::EventWorkspace_sptr ws): m_ws(ws){}
+  DecoratorWorkspace(): m_ws(createEmptyEventWorkspace()){}
 
-  CompositeWorkspace(){}
-
-  // TODO add methods here:
   std::vector<API::MatrixWorkspace> VecWorkspace;
 
   Geometry::Instrument_const_sptr getInstrument() const
@@ -127,7 +131,7 @@ public:
   }
 };
 
-typedef boost::shared_ptr<CompositeWorkspace> CompositeWorkspace_sptr;
+typedef boost::shared_ptr<DecoratorWorkspace> DecoratorWorkspace_sptr;
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -193,7 +197,7 @@ public:
   static boost::shared_ptr<BankPulseTimes>
   runLoadNexusLogs(const std::string &nexusfilename,
                    API::MatrixWorkspace_sptr localWorkspace, Algorithm &alg,
-                   bool returnpulsetimes);
+                   bool returnpulsetimes, int& size_t);
 
   static void loadEntryMetadata(const std::string &nexusfilename,
                                 Mantid::API::MatrixWorkspace_sptr WS,
@@ -230,7 +234,7 @@ public:
   std::string m_filename;
 
   /// The workspace being filled out
-  CompositeWorkspace_sptr m_ws;
+  DecoratorWorkspace_sptr m_ws;
 
   /// Filter by a minimum time-of-flight
   double filter_tof_min;
