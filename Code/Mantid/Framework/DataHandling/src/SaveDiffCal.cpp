@@ -221,6 +221,15 @@ void SaveDiffCal::generateDetidToIndex() {
   }
 }
 
+bool SaveDiffCal::tableHasColumn(const std::string name) const {
+    const std::vector<std::string> names = m_calibrationWS->getColumnNames();
+    for (auto it = names.begin(); it != names.end(); ++it) {
+      if (name == (*it)) return true;
+    }
+
+    return false;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -246,12 +255,18 @@ void SaveDiffCal::exec() {
   this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
 
   this->writeIntFieldFromTable(calibrationGroup, "detid");
-  //  writeArray(calibrationGroup, "dasid", std::vector<int>()); // TODO
+  if (this->tableHasColumn("dasid")) // optional field
+      this->writeIntFieldFromTable(calibrationGroup, "dasid");
+  else
+      g_log.information("Not writing out values for \"dasid\"");
 
   this->writeIntFieldFromSVWS(calibrationGroup, "group", groupingWS);
   this->writeIntFieldFromSVWS(calibrationGroup, "use", maskWS);
 
-  //  writeArray(calibrationGroup, "offset", std::vector<double>()); // TODO
+  if (this->tableHasColumn("offset")) // optional field
+      this->writeDoubleFieldFromTable(calibrationGroup, "offset");
+  else
+      g_log.information("Not writing out values for \"offset\"");
 
   // get the instrument information
   std::string instrumentName;
