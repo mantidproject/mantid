@@ -42,7 +42,8 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(const std::string& value) : m_value(value){};
+  WorkspacePropertyValueIs(const std::string &value)
+      : m_value(value) {};
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -1337,23 +1338,25 @@ bool Algorithm::processGroups() {
       if (Property *prop =
               dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
-        std::string outName = outputBaseName + "_" + prop->value();
+        const std::string inName = prop->value();
+        std::string outName;
+        if (m_groupsHaveSimilarNames)
+          outName = inName + "_" + Strings::toString(entry + 1);
+        else
+          outName = outputBaseName + "_" + inName;
 
-        WorkspacePropertyValueIs comp(prop->value());
         auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
-                                      m_inputWorkspaceProps.end(), comp);
+                                      m_inputWorkspaceProps.end(), WorkspacePropertyValueIs(inName));
 
         // Overwrite workspaces in any input property if they have the same
         // name as an output (i.e. copy name button in algorithm dialog used)
         // (only need to do this for a single input, multiple will be handled
         // by ADS)
-        if (inputProp != m_inputWorkspaceProps.end())
-          outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]
-                        ->name();
-
+        if (inputProp != m_inputWorkspaceProps.end()) {
+          const auto & inputGroup = m_groups[inputProp - m_inputWorkspaceProps.begin()];
+          if ( !inputGroup.empty()) outName = inputGroup[entry]->name();
+        }
         // Except if all inputs had similar names, then the name is "out_1"
-        else if (m_groupsHaveSimilarNames)
-          outName = prop->value() + "_" + Strings::toString(entry + 1);
 
         // Set in the output
         alg->setPropertyValue(prop->name(), outName);
