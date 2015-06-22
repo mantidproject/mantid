@@ -23,6 +23,8 @@ namespace MantidQt
 			void loadSettings(const QSettings& settings);
 
 		private slots:
+      /// Handle completion of the algorithm
+      void handleAlgorithmComplete(bool error);
 			/// Handle when the vanadium input is ready
 			void handleVanadiumInputReady(const QString& filename);
 			/// Slot for when the min range on the range selector changes
