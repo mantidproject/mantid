@@ -28,7 +28,6 @@ set ( TEST_PY_FILES
       test/ReflectometryQuickAuxiliaryTest.py
       test/RunDescriptorTest.py
       test/SansIsisGuiSettings.py
-      test/SANSUtilitytests.py
       test/SANSUtilityTest.py
       test/SettingsTest.py
       test/ReductionSettingsTest.py
