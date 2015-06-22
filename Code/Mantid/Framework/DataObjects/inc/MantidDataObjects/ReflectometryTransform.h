@@ -1,6 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_REFLECTOMETRYMDTRANFORM_H_
 #define MANTID_DATAOBJECTS_REFLECTOMETRYMDTRANFORM_H_
 
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
@@ -46,8 +47,7 @@ protected:
   const size_t m_nbinsz;
 
   boost::shared_ptr<DataObjects::MDEventWorkspace2Lean>
-  createMDWorkspace(Geometry::IMDDimension_sptr,
-                    Geometry::IMDDimension_sptr,
+  createMDWorkspace(Geometry::IMDDimension_sptr, Geometry::IMDDimension_sptr,
                     API::BoxController_sptr boxController) const;
 
 public:
@@ -66,16 +66,17 @@ public:
 };
 
 /// Create a new x-axis for the output workspace
-MantidVec createXAxis(Mantid::API::MatrixWorkspace *const ws,
-                      const double gradQx, const double cxToUnit,
-                      const size_t nBins, const std::string &caption,
-                      const std::string &units);
+MANTID_DATAOBJECTS_DLL MantidVec
+    createXAxis(Mantid::API::MatrixWorkspace *const ws, const double gradQx,
+                const double cxToUnit, const size_t nBins,
+                const std::string &caption, const std::string &units);
 
 /// Create a new y(vertical)-axis for the output workspace
-void createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
-                        const MantidVec &xAxisVec, const double gradQz,
-                        const double cyToUnit, const size_t nBins,
-                        const std::string &caption, const std::string &units);
+MANTID_DATAOBJECTS_DLL void
+createVerticalAxis(Mantid::API::MatrixWorkspace *const ws,
+                   const MantidVec &xAxisVec, const double gradQz,
+                   const double cyToUnit, const size_t nBins,
+                   const std::string &caption, const std::string &units);
 
 // Helper typedef for scoped pointer of this type.
 typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
