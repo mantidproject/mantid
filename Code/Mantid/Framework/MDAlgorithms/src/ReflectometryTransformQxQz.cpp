@@ -1,11 +1,19 @@
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
+
+#include "MantidAPI/BinEdgeAxis.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
+#include "MantidKernel/VectorHelper.h"
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -280,6 +288,54 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
     }
   }
   return outWS;
+}
+
+/** Creates the output workspace, setting the axes according to the input
+ * binning parameters
+ *  @param[in]  inputWorkspace The input workspace
+ *  @param[in]  binParams The bin parameters from the user
+ *  @param[out] newAxis        The 'vertical' axis defined by the given
+ * parameters
+ *  @return A pointer to the newly-created workspace
+ */
+RebinnedOutput_sptr ReflectometryTransformQxQz::setUpOutputWorkspace(
+    API::MatrixWorkspace_const_sptr inputWorkspace,
+    const std::vector<double> &binParams, std::vector<double> &newAxis) const {
+
+  // Create vector to hold the new X axis values
+  MantidVecPtr xAxis;
+  xAxis.access() = inputWorkspace->readX(0);
+
+  const int xLength = static_cast<int>(xAxis->size());
+  // Fill a vector with the ('y') axis bin boundaries
+  const int yLength =
+      VectorHelper::createAxisFromRebinParams(binParams, newAxis);
+
+  // Create the output workspace
+  MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
+      "RebinnedOutput", yLength - 1, xLength, xLength - 1);
+  RebinnedOutput_sptr outputWorkspace =
+      boost::static_pointer_cast<RebinnedOutput>(temp);
+  WorkspaceFactory::Instance().initializeFromParent(inputWorkspace,
+                                                    outputWorkspace, true);
+
+  // Create a binned numeric axis to replace the default vertical one
+  outputWorkspace->replaceAxis(1, new BinEdgeAxis(newAxis));
+
+  // Set the axis values
+  for (int i = 0; i < yLength - 1; ++i)
+    outputWorkspace->setX(i, xAxis);
+
+  // Set the axis units
+  outputWorkspace->getAxis(0)->title() = "qz";
+  outputWorkspace->getAxis(1)->title() = "qx";
+  outputWorkspace->getAxis(1)->unit() =
+      UnitFactory::Instance().create("1/Angstroms");
+
+  outputWorkspace->setYUnit("1/Angstroms");
+  outputWorkspace->setYUnitLabel("Intensity");
+
+  return outputWorkspace;
 }
 
 } // namespace Mantid

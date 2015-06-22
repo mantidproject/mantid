@@ -1,6 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 #define MANTID_MDALGORITHMS_REFLECTOMETRYTRANFORMQXQZ_H_
 
+#include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidDataObjects/CalculateReflectometryQxQz.h"
 #include "MantidKernel/ClassMacros.h"
@@ -68,11 +69,18 @@ public:
             Mantid::API::BoxController_sptr boxController) const;
   // Execuate transformation using normalised polynomial binning
   virtual Mantid::API::MatrixWorkspace_sptr
-  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs,
+                  const std::vector<double> &vertBinning) const;
 
 private:
   void
   initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace) const;
+
+  /// Create the output workspace
+  DataObjects::RebinnedOutput_sptr
+  setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+                       const std::vector<double> &binParams,
+                       std::vector<double> &newAxis) const;
 
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)
