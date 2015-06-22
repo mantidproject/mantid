@@ -12,11 +12,11 @@ namespace DataObjects {
  */
 class CalculateReflectometryQxQz {
 private:
+  const double to_radians_factor;
   double m_cos_theta_i;
   double m_sin_theta_i;
   double m_dirQx;
   double m_dirQz;
-  const double to_radians_factor;
 
 public:
   /**
@@ -24,9 +24,10 @@ public:
    @param thetaIncident: incident theta value in degrees
    */
   CalculateReflectometryQxQz(const double &thetaIncident)
-    : m_cos_theta_i(cos(thetaIncident * to_radians_factor)),
-      m_sin_theta_i(sin(thetaIncident * to_radians_factor)),
-      m_dirQx(0.0), m_dirQz(0.0), to_radians_factor(M_PI / 180) {}
+      : to_radians_factor(M_PI / 180),
+        m_cos_theta_i(cos(thetaIncident * to_radians_factor)),
+        m_sin_theta_i(sin(thetaIncident * to_radians_factor)), m_dirQx(0.0),
+        m_dirQz(0.0) {}
 
   /**
    Setter for the final theta value require for the calculation. Internally
