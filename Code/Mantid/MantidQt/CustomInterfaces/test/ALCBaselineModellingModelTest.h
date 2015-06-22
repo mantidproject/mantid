@@ -145,6 +145,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(m_model->exportModel());
   }
 
+  void test_noData()
+  {
+    // Set an empty workspace
+    MatrixWorkspace_const_sptr data = MatrixWorkspace_const_sptr();
+    m_model->setData(data);
+
+    TS_ASSERT_THROWS_NOTHING(m_model->data());
+    TS_ASSERT_THROWS_NOTHING(m_model->correctedData());
+  }
+
 };
 
 
