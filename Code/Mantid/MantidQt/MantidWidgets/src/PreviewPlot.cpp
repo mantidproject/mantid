@@ -243,6 +243,9 @@ void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr ws,
                               const size_t specIndex,
                               const QColor &curveColour) {
+  if (curveName.isEmpty())
+    return;
+
   // Remove the existing curve if it exists
   if (m_curves.contains(curveName))
     removeSpectrum(curveName);
@@ -290,6 +293,9 @@ void PreviewPlot::addSpectrum(const QString &curveName,
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
                               const size_t specIndex,
                               const QColor &curveColour) {
+  if (wsName.isEmpty())
+    return;
+
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
