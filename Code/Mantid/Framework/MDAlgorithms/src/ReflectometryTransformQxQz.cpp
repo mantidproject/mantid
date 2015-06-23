@@ -204,7 +204,8 @@ void ReflectometryTransformQxQz::initAngularCaches(
       m_thetaWidths[i] = -1.0;
       continue;
     }
-    const double theta = workspace->detectorTwoTheta(det);
+    // We have to convert theta from radians to degrees
+    const double theta = workspace->detectorTwoTheta(det) * 180.0 / M_PI;
     m_theta[i] = theta;
 
     /**
@@ -276,8 +277,8 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
     }
 
     // Compute polygon points
-    const double theta = this->m_theta[i];
-    const double thetaWidth = this->m_thetaWidths[i];
+    const double theta = m_theta[i];
+    const double thetaWidth = m_thetaWidths[i];
     const double thetaHalfWidth = 0.5 * thetaWidth;
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
