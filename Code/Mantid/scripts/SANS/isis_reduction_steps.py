@@ -1388,8 +1388,11 @@ class TransmissionCalc(ReductionStep):
 
         if self.radius:
             # Mask out a cylinder with the given radius in a copy of the workspace.
+            # The centre position of the Cylinder does not require a shift, as all
+            # components have been shifted already, when the workspaces were loaded
             CloneWorkspace(InputWorkspace=workspace, OutputWorkspace="__temp")
-            centre_x, centre_y = reducer.get_beam_center()
+            centre_x = 0.0
+            centre_y = 0.0
             MaskWithCylinder("__temp", self.radius, centre_x, centre_y, "")
 
             # Extract the masked detector ID's and then clean up.
