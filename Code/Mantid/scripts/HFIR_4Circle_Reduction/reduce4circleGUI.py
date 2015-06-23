@@ -31,7 +31,7 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-from ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
