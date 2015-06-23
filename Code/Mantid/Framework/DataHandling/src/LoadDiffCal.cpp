@@ -123,7 +123,8 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset, const DataType &desiredDataT
     } else if (PredType::NATIVE_FLOAT == dataType) {
         std::vector<float> temp(dataSpace.getSelectNpoints());
         dataset.read(&temp[0], dataType, dataSpace);
-        result.assign(temp.begin(), temp.end());
+        for( auto it = temp.begin(); it != temp.end(); ++it)
+          result.push_back(static_cast<int32_t>(*it));
     } else {
         throw DataTypeIException();
     }
