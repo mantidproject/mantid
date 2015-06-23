@@ -5,6 +5,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 // Qt classes forward declarations
 class QMutex;
@@ -69,7 +70,7 @@ public:
   }
 
   /// Username last logged in, if any.
-  std::string loggedIn() const { return m_loggedIn; }
+  std::string loggedIn() const { return m_loggedInUser; }
   // TODO: add companion currentComputeResource where LoggedIn() is in
   void usingTool(const std::string &tool) { m_currentTool = tool; }
   std::string usingTool() const { return m_currentTool; }
@@ -95,6 +96,11 @@ public:
   /// Get fresh status information on running/recent jobs
   void doRefreshJobsInfo(const std::string &compRes);
 
+  /// Update to the current setings given by the user
+  void updateReconToolsSettings(const TomoReconToolsUserSettings &ts) {
+    m_toolsSettings = ts;
+  }
+
   /// loads an image/picture in FITS format
   Mantid::API::WorkspaceGroup_sptr loadFITSImage(const std::string &path);
 
@@ -106,7 +112,6 @@ public:
 
   std::string localComputeResource() const { return m_localCompName; }
 
-
   // current paths set by the user
   // TODO: make path settings struct available to this and View Interface
   std::string currentPathSCARF() const { return ""; }
@@ -114,7 +119,6 @@ public:
   std::string currentPathFlat() const { return ""; }
   std::string currentPathDark() const { return ""; }
   std::string currentPathSavuConfig() const { return ""; }
-
 
   std::string m_currentTool;
 
@@ -145,7 +149,8 @@ private:
 
   /// username last logged in (empty if not in login status), from local
   /// perspective
-  std::string m_loggedIn;
+  std::string m_loggedInUser;
+  std::string m_loggedInComp;
 
   /// facility for the remote compute resource
   const std::string m_facility;
@@ -178,18 +183,8 @@ private:
   // Name of the remote compute resource
   static const std::string g_SCARFName;
 
-  /// Settings for the third party (tomographic reconstruction) tools
-  struct UserToolsSettings {
-    // This is just too basic at the moment. We probably want to store
-    // here the real settings objects, and rather than this horror have a
-    // dictionary of tools-settings
-    std::string tomoPy;
-    std::string astra;
-    std::string CCPi;
-    std::string savu;
-    std::string custom;
-  };
-  UserToolsSettings m_toolsSettings;
+  // Settings for the third party (tomographic reconstruction) tools
+  TomoReconToolsUserSettings m_toolsSettings;
 
   // mutex for the job status info update operations
   QMutex *m_statusMutex;

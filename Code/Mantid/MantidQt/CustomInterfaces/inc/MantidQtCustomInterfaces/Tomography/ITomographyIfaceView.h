@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -98,13 +99,6 @@ public:
   virtual std::vector<std::string> logMsgs() const = 0;
 
   /**
-   * Save settings (normally when closing the interface). This refers
-   * to purely GUI settings, such as window max/min status and  geometry,
-   * preferences and niceties of the user interface.
-   */
-  virtual void saveSettings() const = 0;
-
-  /**
    * Username entered by the user
    *
    * @return username to log in to the compute resource
@@ -119,6 +113,13 @@ public:
   virtual std::string getPassword() const = 0;
 
   virtual std::vector<std::string> processingJobsIDs() const = 0;
+
+  /**
+   * Get the current reconstruction tooll settings set by the user.
+   *
+   * @return Settings for the set of supported tools.
+   */
+  virtual TomoReconToolsUserSettings reconToolsSettings() const = 0;
 
   /**
    * Gets the compute resource that is currently selected by the user.
@@ -225,6 +226,13 @@ public:
    */
   virtual void updateJobsInfoDisplay(const std::vector<
       Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) = 0;
+
+  /**
+   * Save settings (normally when closing the interface). This refers
+   * to purely GUI settings, such as window max/min status and  geometry,
+   * preferences and niceties of the user interface.
+   */
+  virtual void saveSettings() const = 0;
 
   /**
    * If using the keep alive mechanism, what's the period for the

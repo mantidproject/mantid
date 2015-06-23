@@ -30,9 +30,9 @@ const std::string TomographyIfaceModel::g_customCmdTool = "Custom command";
  * compute resource.
  */
 TomographyIfaceModel::TomographyIfaceModel()
-    : m_loggedIn(""), m_facility("ISIS"), m_localCompName("Local"),
-      m_computeRes(), m_computeResStatus(), m_reconTools(),
-      m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(),
+    : m_loggedInUser(""), m_loggedInComp(""), m_facility("ISIS"),
+      m_localCompName("Local"), m_computeRes(), m_computeResStatus(),
+      m_reconTools(), m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(),
       m_pathSCARFbase("/work/imat/recon/"),
       m_pathFITS(m_pathSCARFbase + "data/sample"),
       m_pathFlat(m_pathSCARFbase + "data/ob"),
@@ -58,7 +58,13 @@ TomographyIfaceModel::~TomographyIfaceModel() {
     delete m_statusMutex;
 }
 
-void TomographyIfaceModel::cleanup() {}
+void TomographyIfaceModel::cleanup() {
+  const std::string user = loggedIn();
+  if (!user.empty()) {
+    doLogout(m_loggedInComp, user);
+    m_loggedInUser = "";
+  }
+}
 
 /**
  * Check that the selected compute resource is listed as supported and
@@ -219,7 +225,8 @@ void TomographyIfaceModel::doLogin(const std::string &compRes,
         " with username " + user + ": " + e.what());
   }
 
-  m_loggedIn = user;
+  m_loggedInUser = user;
+  m_loggedInComp = compRes;
 }
 
 void TomographyIfaceModel::doLogout(const std::string &compRes,
@@ -237,7 +244,7 @@ void TomographyIfaceModel::doLogout(const std::string &compRes,
         compRes + " with username " + username + ": " + e.what());
   }
 
-  m_loggedIn = "";
+  m_loggedInUser = "";
 }
 
 /**
@@ -372,7 +379,7 @@ void TomographyIfaceModel::doRefreshJobsInfo(const std::string &compRes) {
 }
 
 void TomographyIfaceModel::getJobStatusInfo(const std::string &compRes) {
-  if (m_loggedIn.empty())
+  if (m_loggedInUser.empty())
     return;
 
   std::vector<std::string> ids, names, status, cmds;
@@ -451,27 +458,24 @@ void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
   // For now we only know how to 'aproximately' run commands on SCARF
   if (g_SCARFName == comp) {
     const std::string tool = usingTool();
+    std::string cmd;
 
+    // TODO this is still incomplete, not all tools ready
     if (tool == g_TomoPyTool) {
-      checkWarningToolNotSetup(tool, m_toolsSettings.tomoPy);
-      // this should get something like:
+      cmd = m_toolsSettings.tomoPy.toCommand();
+      // this will make something like:
       // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
       // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
       // base +
       //      currentPathDark() + " " + "--white " + base + currentPathFlat();
-
-      // TODO this is very unreliable, it will go away better when the
-      // settings are properly stored as toool-settings objects
-      splitCmdLine(m_toolsSettings.tomoPy, run, opt);
     } else if (tool == g_AstraTool) {
-      checkWarningToolNotSetup(tool, m_toolsSettings.astra);
-      // this should produce something like this:
+      cmd = m_toolsSettings.astra.toCommand();
+      // this will produce something like this:
       // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
       // opt = base + currentPathFITS();
-      splitCmdLine(m_toolsSettings.astra, run, opt);
+      splitCmdLine(cmd, run, opt);
     } else if (tool == g_customCmdTool) {
-      checkWarningToolNotSetup(tool, m_toolsSettings.custom);
-      splitCmdLine(m_toolsSettings.custom, run, opt);
+      cmd = m_toolsSettings.custom.toCommand();
     } else {
       throw std::runtime_error(
           "Unable to use this tool. "
@@ -480,6 +484,9 @@ void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
                  "misconfigured or there has been an unexpected "
                  "failure.");
     }
+
+    checkWarningToolNotSetup(tool, cmd);
+    splitCmdLine(cmd, run, opt);
   } else {
     run = "error_do_not_know_what_to_do";
     opt = "no_options_known";

@@ -2,6 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEPRESENTERTEST_H
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 
 #include <cxxtest/TestSuite.h>
@@ -19,12 +20,12 @@ public:
                            const std::vector<bool> &enabled) {}
   void setReconstructionTools(const std::vector<std::string> &tools,
                               const std::vector<bool> &enabled) {}
-  void saveSettings() const { }
+  void saveSettings() const {}
 
   std::string getUsername() const {}
   std::string getPassword() const {}
 
-  std::vector<std::string> processingJobsIDs() const { }
+  std::vector<std::string> processingJobsIDs() const {}
   std::string currentComputeResource() const {}
 
   std::string currentReconTool() const {}
@@ -47,6 +48,9 @@ public:
 
   void updateJobsInfoDisplay(const std::vector<
       Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) {}
+
+  MantidQt::CustomInterfaces::TomoReconToolsUserSettings
+  reconToolsSettings() const {}
 };
 
 class TomographyIfacePresenterTest : public CxxTest::TestSuite {

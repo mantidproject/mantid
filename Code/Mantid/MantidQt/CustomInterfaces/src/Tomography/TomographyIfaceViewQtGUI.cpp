@@ -9,8 +9,6 @@
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
 
-#include <boost/make_shared.hpp>
-
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
@@ -18,7 +16,6 @@ using namespace MantidQt::CustomInterfaces;
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QMutex>
 #include <QPainter>
 #include <QSettings>
 
@@ -56,21 +53,16 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
       m_pathDark(m_pathSCARFbase + "data/di"), m_logMsgs(), m_toolsSettings(),
       m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
       m_availPlugins(), m_currPlugins(), m_currentParamPath(),
-      m_statusMutex(NULL), m_presenter(NULL) {
+      m_presenter(NULL) {
 
   // TODO: find a better place for this Savu stuff - see other TODOs
   m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
   m_availPlugins->addColumns("str", "name", 4);
   m_currPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
   m_currPlugins->addColumns("str", "name", 4);
-
-  m_statusMutex = new QMutex();
 }
 
-TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {
-  if (m_statusMutex)
-    delete m_statusMutex;
-}
+TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {}
 
 void TomographyIfaceViewQtGUI::initLayout() {
   m_ui.setupUi(this);
@@ -84,9 +76,8 @@ void TomographyIfaceViewQtGUI::initLayout() {
 
   // presenter that knows how to handle a ITomographyIfaceView should take care
   // of all the logic
-  // note the view needs to now the concrete presenter,
-  // (ITomographyIfacePresenter is pure vitual)
-  m_presenter = boost::make_shared<TomographyIfacePresenter>(this);
+  // note the view needs to now the concrete presenter
+  m_presenter.reset(new TomographyIfacePresenter(this));
 
   // it will know what compute resources and tools we have available:
   // This view doesn't even know the names of compute resources, etc.
@@ -473,10 +464,9 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       double maxAngle = m_uiTomoPy.doubleSpinBox_angle_max->value();
       double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
 
-      ToolConfigTomoPy settings(run.toStdString(), g_defOutPath,
-                                currentPathDark(), currentPathFlat(),
-                                currentPathFITS(), cor, minAngle, maxAngle);
-      m_toolsSettings.tomoPy = settings.toCommand();
+      m_toolsSettings.tomoPy = ToolConfigTomoPy(
+          run.toStdString(), g_defOutPath, currentPathDark(), currentPathFlat(),
+          currentPathFITS(), cor, minAngle, maxAngle);
     }
   } else if (g_AstraTool == name) {
     TomoToolConfigAstra astra;
@@ -494,11 +484,9 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       double minAngle = m_uiAstra.doubleSpinBox_angle_min->value();
       double maxAngle = m_uiAstra.doubleSpinBox_angle_max->value();
 
-      ToolConfigAstraToolbox settings(run.toStdString(), cor, minAngle,
-                                      maxAngle, g_defOutPath, currentPathDark(),
-                                      currentPathFlat(), currentPathFITS());
-
-      m_toolsSettings.astra = settings.toCommand();
+      m_toolsSettings.astra = ToolConfigAstraToolbox(
+          run.toStdString(), cor, minAngle, maxAngle, g_defOutPath,
+          currentPathDark(), currentPathFlat(), currentPathFITS());
     }
   } else if (g_SavuTool == name) {
     // TODO: savu not ready. This is a temporary kludge, it just shows
@@ -520,8 +508,8 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       QString run = m_uiCustom.lineEdit_runnable->text();
       QString opts = m_uiCustom.textEdit_cl_opts->toPlainText();
 
-      ToolConfigCustom settings(run.toStdString(), opts.toStdString());
-      m_toolsSettings.custom = settings.toCommand();
+      m_toolsSettings.custom =
+          ToolConfigCustom(run.toStdString(), opts.toStdString());
     }
   }
   // TODO: 'CCPi CGLS' tool maybe in the future. Tool not ready.
@@ -622,20 +610,6 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
   m_presenter->notify(ITomographyIfacePresenter::ViewImg);
 }
 
-void TomographyIfaceViewQtGUI::showImage(const std::string &path) {
-  QString qpath = QString::fromStdString(path);
-  QImage rawImg(qpath);
-  QPainter painter;
-  QPixmap pix(rawImg.width(), rawImg.height());
-  painter.begin(&pix);
-  painter.drawImage(0, 0, rawImg);
-  painter.end();
-  m_ui.label_image->setPixmap(pix);
-  m_ui.label_image->show();
-
-  m_ui.label_image_name->setText(qpath);
-}
-
 /**
  * Update the job status and general info table/tree from the info
  * stored in this class' data members, which ideally should have
@@ -648,21 +622,18 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
   bool sort = t->isSortingEnabled();
   t->setRowCount(static_cast<int>(status.size()));
 
-  {
-    QMutexLocker lockit(m_statusMutex);
-    for (size_t i = 0; i < status.size(); ++i) {
-      int ii = static_cast<int>(i);
-      t->setItem(ii, 0,
-                 new QTableWidgetItem(QString::fromStdString(g_SCARFName)));
-      t->setItem(ii, 1,
-                 new QTableWidgetItem(QString::fromStdString(status[i].name)));
-      t->setItem(ii, 2,
-                 new QTableWidgetItem(QString::fromStdString(status[i].id)));
-      t->setItem(ii, 3, new QTableWidgetItem(
-                            QString::fromStdString(status[i].status)));
-      t->setItem(ii, 4, new QTableWidgetItem(
-                            QString::fromStdString(status[i].cmdLine)));
-    }
+  for (size_t i = 0; i < status.size(); ++i) {
+    int ii = static_cast<int>(i);
+    t->setItem(ii, 0,
+               new QTableWidgetItem(QString::fromStdString(g_SCARFName)));
+    t->setItem(ii, 1,
+               new QTableWidgetItem(QString::fromStdString(status[i].name)));
+    t->setItem(ii, 2,
+               new QTableWidgetItem(QString::fromStdString(status[i].id)));
+    t->setItem(ii, 3,
+               new QTableWidgetItem(QString::fromStdString(status[i].status)));
+    t->setItem(ii, 4,
+               new QTableWidgetItem(QString::fromStdString(status[i].cmdLine)));
   }
 
   t->setSortingEnabled(sort);
@@ -754,16 +725,22 @@ void TomographyIfaceViewQtGUI::processPathBrowseClick(QLineEdit *le,
   }
 }
 
-/**
- * draw an image on screen using Qt's QPixmap and QImage. It assumes
- * that the workspace contains an image in the form in which LoadFITS
- * loads FITS images. Checks dimensions and workspace structure and
- * shows user warning/error messages appropriately. But in principle
- * it should not raise any exceptions under reasonable circumstances.
- *
- * @param ws Workspace where a FITS image has been loaded with LoadFITS
- */
+void TomographyIfaceViewQtGUI::showImage(const std::string &path) {
+  QString qpath = QString::fromStdString(path);
+  QImage rawImg(qpath);
+  QPainter painter;
+  QPixmap pix(rawImg.width(), rawImg.height());
+  painter.begin(&pix);
+  painter.drawImage(0, 0, rawImg);
+  painter.end();
+  m_ui.label_image->setPixmap(pix);
+  m_ui.label_image->show();
+
+  m_ui.label_image_name->setText(qpath);
+}
+
 void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
+  // This draw an image on screen using Qt's QPixmap and QImage.
   // From logs we expect a name "run_title", width "Axis1" and height "Axis2"
   const size_t MAXDIM = 2048 * 16;
   size_t width;

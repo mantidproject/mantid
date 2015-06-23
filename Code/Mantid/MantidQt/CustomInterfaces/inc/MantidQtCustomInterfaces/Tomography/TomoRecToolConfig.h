@@ -61,7 +61,7 @@ public:
    * present it is used in its simplest form: platform and machine
    * dependent full path to an execuatable or script.
    */
-  TomoRecToolConfig(const std::string &runnable) : m_runnable(runnable) {}
+  TomoRecToolConfig(const std::string &runnable="") : m_runnable(runnable) {}
 
   virtual ~TomoRecToolConfig() {}
 
@@ -100,9 +100,6 @@ public:
 
 protected:
   std::string m_runnable;
-
-private:
-  TomoRecToolConfig(TomoRecToolConfig &);
 };
 
 } // namespace CustomInterfaces

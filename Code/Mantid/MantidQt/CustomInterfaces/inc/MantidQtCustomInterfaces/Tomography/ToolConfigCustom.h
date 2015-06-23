@@ -41,8 +41,12 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class ToolConfigCustom : public TomoRecToolConfig {
 public:
+  ToolConfigCustom() {}
+
   ToolConfigCustom(const std::string &runnable, const std::string &cmdOptions)
       : TomoRecToolConfig(runnable), m_opts(cmdOptions) {}
+
+  ~ToolConfigCustom() {}
 
 protected:
   virtual std::string makeCmdLineOptions() const { return m_opts; }
@@ -50,8 +54,6 @@ protected:
   virtual std::string makeExecutable() const { return m_runnable; };
 
 private:
-  ToolConfigCustom(ToolConfigCustom &);
-
   std::string m_opts;
 };
 

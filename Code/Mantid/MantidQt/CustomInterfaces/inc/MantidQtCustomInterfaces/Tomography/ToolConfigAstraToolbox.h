@@ -37,12 +37,16 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class ToolConfigAstraToolbox : public TomoRecToolConfig {
 public:
+  ToolConfigAstraToolbox() { }
+
   ToolConfigAstraToolbox(const std::string &runnable, double centerRot,
                          double angleMin, double angleMax,
                          const std::string &pathOut,
                          const std::string &pathDark,
                          const std::string &pathOpen,
                          const std::string &pathSample);
+
+  ~ToolConfigAstraToolbox() { }
 
 protected:
   virtual std::string makeCmdLineOptions() const;

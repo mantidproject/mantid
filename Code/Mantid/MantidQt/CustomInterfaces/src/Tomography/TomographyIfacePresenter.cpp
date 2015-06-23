@@ -8,9 +8,9 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 
 #include <QFileInfo>
+#include <QMutex>
 #include <QString>
 #include <QThread>
 #include <QTimer>
@@ -22,16 +22,27 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
-    : m_view(view), m_model(boost::make_shared<TomographyIfaceModel>()),
-      m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {}
+    : m_view(view), m_model(new TomographyIfaceModel()),
+      m_statusMutex(NULL), m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
+  if (!m_view) {
+    throw std::runtime_error("Severe inconsistency found. Presenter created "
+                             "with an empty/null view (tomography interface). "
+                             "Cannot continue.");
+  }
+  m_statusMutex = new QMutex();
+}
 
 TomographyIfacePresenter::~TomographyIfacePresenter() {
   cleanup();
 
-  if (m_keepAliveTimer)
-    delete m_keepAliveTimer;
   if (m_keepAliveThread)
     delete m_keepAliveThread;
+
+  if (m_keepAliveTimer)
+    delete m_keepAliveTimer;
+
+  if (m_statusMutex)
+    delete m_statusMutex;
 }
 
 /**
@@ -42,11 +53,6 @@ void TomographyIfacePresenter::cleanup() {
   killKeepAliveMechanism();
   m_model->cleanup();
 
-  // TODO: move this logout into TomographyIfaceModel::cleanup()
-  const std::string user = m_model->loggedIn();
-  if (!user.empty()) {
-    m_model->doLogout(m_view->currentComputeResource(), user);
-  }
   m_view->saveSettings();
 }
 
@@ -188,6 +194,7 @@ void TomographyIfacePresenter::processLogin() {
   }
 
   m_view->updateLoginControls(true);
+  m_view->enableLoggedActions(!m_model->loggedIn().empty());
 
   try {
     m_model->doRefreshJobsInfo(compRes);
@@ -218,6 +225,7 @@ void TomographyIfacePresenter::processLogout() {
 void TomographyIfacePresenter::processSetupReconTool() {
   if (TomographyIfaceModel::g_CCPiTool != m_view->currentReconTool()) {
     m_view->showToolConfig(m_view->currentReconTool());
+    m_model->updateReconToolsSettings(m_view->reconToolsSettings());
   }
 }
 
@@ -239,10 +247,18 @@ void TomographyIfacePresenter::processRunRecon() {
 }
 
 void TomographyIfacePresenter::processRefreshJobs() {
+  if (m_model->loggedIn().empty())
+    return;
+
   const std::string &comp = m_view->currentComputeResource();
   m_model->doRefreshJobsInfo(comp);
-  // update widgets from that info
-  m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+
+  {
+    // update widgets from that info
+    QMutexLocker lockit(m_statusMutex);
+
+    m_view->updateJobsInfoDisplay(m_model->jobsStatus());
+  }
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
@@ -331,7 +347,7 @@ void TomographyIfacePresenter::startKeepAliveMechanism(int period) {
     delete m_keepAliveTimer;
   m_keepAliveTimer = new QTimer(NULL); // no-parent so it can be moveToThread
 
-  m_keepAliveTimer->setInterval(1000 * period);
+  m_keepAliveTimer->setInterval(1000 * period); // interval in ms
   m_keepAliveTimer->moveToThread(m_keepAliveThread);
   // direct connection from the thread
   connect(m_keepAliveTimer, SIGNAL(timeout()), SLOT(processRefreshJobs()),

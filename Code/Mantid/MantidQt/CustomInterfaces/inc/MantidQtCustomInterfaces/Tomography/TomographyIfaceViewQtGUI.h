@@ -10,6 +10,7 @@
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "ui_TomographyIfaceQtGUI.h"
 
+#include <boost/scoped_ptr.hpp>
 #include <json/json.h>
 
 // Qt classes forward declarations
@@ -99,11 +100,16 @@ public:
     return m_processingJobsIDs;
   }
 
+  /// Get the current reconstruction tooll settings set by the user
+  TomoReconToolsUserSettings reconToolsSettings() const {
+    return m_toolsSettings;
+  }
+
   std::string currentComputeResource() const { return m_currentComputeRes; }
   std::string currentReconTool() const { return m_currentReconTool; }
 
   /// get the path to the image that the user has requested to visualize
-  std::string visImagePath();
+  std::string visImagePath() const;
 
   std::string showImagePath() { return m_imgPath; }
   void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg);
@@ -242,17 +248,7 @@ private:
   std::vector<std::string> m_logMsgs;
 
   /// Settings for the third party (tomographic reconstruction) tools
-  struct UserToolsSettings {
-    // This is just too basic at the moment. We probably want to store
-    // here the real settings objects, and rather than this horror have a
-    // dictionary of tools-settings
-    std::string tomoPy;
-    std::string astra;
-    std::string CCPi;
-    std::string savu;
-    std::string custom;
-  };
-  UserToolsSettings m_toolsSettings;
+  TomoReconToolsUserSettings m_toolsSettings;
 
   // Basic representation of user settings, read/written on startup/close.
   // TODO: this could be done more sophisticated, with a class using
@@ -278,11 +274,8 @@ private:
   Mantid::API::ITableWorkspace_sptr m_currPlugins;
   std::string m_currentParamPath;
 
-  // mutex for the job status info update operations
-  QMutex *m_statusMutex;
-
   // presenter as in the model-view-presenter
-  boost::shared_ptr<ITomographyIfacePresenter> m_presenter;
+  boost::scoped_ptr<ITomographyIfacePresenter> m_presenter;
 };
 
 } // namespace CustomInterfaces

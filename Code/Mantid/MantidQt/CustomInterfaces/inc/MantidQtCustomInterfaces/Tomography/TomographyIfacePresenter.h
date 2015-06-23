@@ -5,7 +5,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
 
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <QMutex>
 #include <QObject>
 
@@ -89,10 +89,13 @@ public:
 
 private:
   /// Associated view for this presenter (MVP pattern)
-  const boost::shared_ptr<ITomographyIfaceView> m_view;
+  ITomographyIfaceView  * const m_view;
 
   /// Associated model for this presenter (MVP pattern)
-  const boost::shared_ptr<TomographyIfaceModel> m_model;
+  const boost::scoped_ptr<TomographyIfaceModel> m_model;
+
+  // mutex for the job status info update operations on the view
+  QMutex *m_statusMutex;
 
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;

@@ -36,10 +36,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class ToolConfigTomoPy : public TomoRecToolConfig {
 public:
+  ToolConfigTomoPy() { }
+
   ToolConfigTomoPy(const std::string &runnable, const std::string &pathOut,
                    const std::string &pathDark, const std::string &pathOpen,
                    const std::string &pathSample, double centerRot,
                    double angleMin, double angleMax);
+
+  ~ToolConfigTomoPy() { }
 
 protected:
   virtual std::string makeCmdLineOptions() const;
