@@ -1,10 +1,14 @@
 #include "MantidDataObjects/ReflectometryTransform.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+
 #include "MantidKernel/UnitFactory.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace Mantid {
@@ -105,5 +109,73 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   UNUSED_ARG(inputWs);
   throw std::runtime_error("executeNormPoly not implemented.");
 }
+
+/**
+ * A map detector ID and Q ranges
+ * This method looks unnecessary as it could be calculated on the fly but
+ * the parallelization means that lazy instantation slows it down due to the
+ * necessary CRITICAL sections required to update the cache. The Q range
+ * values are required very frequently so the total time is more than
+ * offset by this precaching step
+ */
+void ReflectometryTransform::initAngularCaches(
+    const API::MatrixWorkspace_const_sptr &workspace) const {
+  const size_t nhist = workspace->getNumberHistograms();
+  m_theta = std::vector<double>(nhist);
+  m_thetaWidths = std::vector<double>(nhist);
+
+  auto inst = workspace->getInstrument();
+  const auto samplePos = inst->getSample()->getPos();
+  const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
+
+  for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
+  {
+    IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(i);
+    } catch (Kernel::Exception::NotFoundError &) {
+      // Catch if no detector. Next line tests whether this happened - test
+      // placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a
+      // catch
+      // in an openmp block.
+    }
+    // If no detector found, skip onto the next spectrum
+    if (!det || det->isMonitor()) {
+      m_theta[i] = -1.0; // Indicates a detector to skip
+      m_thetaWidths[i] = -1.0;
+      continue;
+    }
+    // We have to convert theta from radians to degrees
+    const double theta = workspace->detectorTwoTheta(det) * 180.0 / M_PI;
+    m_theta[i] = theta;
+
+    /**
+     * Determine width from shape geometry. A group is assumed to contain
+     * detectors with the same shape & r, theta value, i.e. a ring mapped-group
+     * The shape is retrieved and rotated to match the rotation of the detector.
+     * The angular width is computed using the l2 distance from the sample
+     */
+    if (auto group = boost::dynamic_pointer_cast<const DetectorGroup>(det)) {
+      // assume they all have same shape and same r,theta
+      auto dets = group->getDetectors();
+      det = dets[0];
+    }
+    const auto pos = det->getPos();
+    double l2(0.0), t(0.0), p(0.0);
+    pos.getSpherical(l2, t, p);
+    // Get the shape
+    auto shape =
+        det->shape(); // Defined in its own reference frame with centre at 0,0,0
+    auto rot = det->getRotation();
+    BoundingBox bbox = shape->getBoundingBox();
+    auto maxPoint(bbox.maxPoint());
+    rot.rotate(maxPoint);
+    double boxWidth = maxPoint[upDir];
+
+    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
+  }
+}
+
 }
 }

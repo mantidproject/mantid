@@ -46,9 +46,17 @@ protected:
   const size_t m_nbinsx;
   const size_t m_nbinsz;
 
+  /// Two theta angles cache
+  mutable std::vector<double> m_theta;
+  /// Two theta widths cache
+  mutable std::vector<double> m_thetaWidths;
+
   boost::shared_ptr<DataObjects::MDEventWorkspace2Lean>
   createMDWorkspace(Geometry::IMDDimension_sptr, Geometry::IMDDimension_sptr,
                     API::BoxController_sptr boxController) const;
+
+  void
+  initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace) const;
 
 public:
   // Execute the strategy to produce a transformed, output MDWorkspace

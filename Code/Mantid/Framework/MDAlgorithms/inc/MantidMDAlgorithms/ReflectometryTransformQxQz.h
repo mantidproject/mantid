@@ -47,11 +47,6 @@ private:
   const double m_qzMax;
   const double m_inTheta;
 
-  /// Two theta angles cache
-  mutable std::vector<double> m_theta;
-  /// Two theta widths cache
-  mutable std::vector<double> m_thetaWidths;
-
 public:
   /// Constructor
   ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin,
@@ -67,13 +62,11 @@ public:
   virtual Mantid::API::IMDEventWorkspace_sptr
   executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
             Mantid::API::BoxController_sptr boxController) const;
-  // Execuate transformation using normalised polynomial binning
+  /// Execuate transformation using normalised polynomial binning
   virtual Mantid::API::MatrixWorkspace_sptr
   executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
 private:
-  void
-  initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace) const;
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)
 };
