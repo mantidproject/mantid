@@ -26,17 +26,9 @@ Constructor
 ReflectometryTransformP::ReflectometryTransformP(
     double pSumMin, double pSumMax, double pDiffMin, double pDiffMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz),
-      m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin),
-      m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta),
-      m_pDiffCalculation(incidentTheta) {
-  if (pSumMin >= m_pSumMax) {
-    throw std::invalid_argument("min sum p bounds must be < max sum p bounds");
-  }
-  if (pDiffMin >= pDiffMax) {
-    throw std::invalid_argument(
-        "min diff p bounds must be < max diff p bounds");
-  }
+    : ReflectometryTransform(pSumMin, pSumMax, pDiffMin, pDiffMax,
+                             numberOfBinsQx, numberOfBinsQz),
+      m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
@@ -52,12 +44,12 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::executeMD(
     BoxController_sptr boxController) const {
   MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(
       new MDHistoDimension("Pz_i + Pz_f", "sum_pz", "(Ang^-1)",
-                           static_cast<Mantid::coord_t>(m_pSumMin),
-                           static_cast<Mantid::coord_t>(m_pSumMax), m_nbinsx));
+                           static_cast<Mantid::coord_t>(m_d0Min),
+                           static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
   MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(
       new MDHistoDimension("Pz_i - Pz_f", "diff_pz", "(Ang^-1)",
-                           static_cast<Mantid::coord_t>(m_pDiffMin),
-                           static_cast<Mantid::coord_t>(m_pDiffMax), m_nbinsz));
+                           static_cast<Mantid::coord_t>(m_d1Min),
+                           static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
 
   auto ws = createMDWorkspace(pSumDim, pDiffDim, boxController);
 
@@ -97,25 +89,25 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(
     Mantid::API::MatrixWorkspace_const_sptr inputWs) const {
   auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
 
-  ws->initialize(m_nbinsz, m_nbinsx,
-                 m_nbinsx); // Create the output workspace as a distribution
+  ws->initialize(m_d1NumBins, m_d0NumBins,
+                 m_d0NumBins); // Create the output workspace as a distribution
 
   // Mapping so that Psum and Pdiff values calculated can be added to the matrix
   // workspace at the correct index.
   const double gradPSum =
-      double(m_nbinsx) / (m_pSumMax - m_pSumMin); // The x - axis
+      double(m_d0NumBins) / (m_d0Max - m_d0Min); // The x - axis
   const double gradPDiff =
-      double(m_nbinsz) / (m_pDiffMax - m_pDiffMin); // Actually the y-axis
-  const double cxToIndex = -gradPSum * m_pSumMin;
-  const double cyToIndex = -gradPDiff * m_pDiffMin;
-  const double cxToPSum = m_pSumMin - (1 / gradPSum);
-  const double cyToPDiff = m_pDiffMin - (1 / gradPDiff);
+      double(m_d1NumBins) / (m_d1Max - m_d1Min); // Actually the y-axis
+  const double cxToIndex = -gradPSum * m_d0Min;
+  const double cyToIndex = -gradPDiff * m_d1Min;
+  const double cxToPSum = m_d0Min - (1 / gradPSum);
+  const double cyToPDiff = m_d1Min - (1 / gradPDiff);
 
   // Create an X - Axis.
-  MantidVec xAxisVec = createXAxis(ws.get(), gradPSum, cxToPSum, m_nbinsx,
+  MantidVec xAxisVec = createXAxis(ws.get(), gradPSum, cxToPSum, m_d0NumBins,
                                    "Pi + Pf", "1/Angstroms");
   // Create a Y (vertical) Axis
-  createVerticalAxis(ws.get(), xAxisVec, gradPDiff, cyToPDiff, m_nbinsz,
+  createVerticalAxis(ws.get(), xAxisVec, gradPDiff, cyToPDiff, m_d1NumBins,
                      "Pi - Pf", "1/Angstroms");
 
   // Loop over all entries in the input workspace and calculate Psum and Pdiff
@@ -136,9 +128,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(
       double _pSum = m_pSumCalculation.execute(wavelength);
       double _pDiff = m_pDiffCalculation.execute(wavelength);
 
-      if (_pSum >= m_pSumMin && _pSum <= m_pSumMax && _pDiff >= m_pDiffMin &&
-          _pDiff <=
-              m_pDiffMax) // Check that the calculated ki and kf are in range
+      if (_pSum >= m_d0Min && _pSum <= m_d0Max && _pDiff >= m_d1Min &&
+          _pDiff <= m_d1Max) // Check that the calculated ki and kf are in range
       {
         const int outIndexX = (int)((gradPSum * _pSum) + cxToIndex);
         const int outIndexZ = (int)((gradPDiff * _pDiff) + cyToIndex);

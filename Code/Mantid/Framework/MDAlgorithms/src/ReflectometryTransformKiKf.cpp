@@ -25,15 +25,9 @@ namespace MDAlgorithms {
 ReflectometryTransformKiKf::ReflectometryTransformKiKf(
     double kiMin, double kiMax, double kfMin, double kfMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz), m_kiMin(kiMin),
-      m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax),
+    : ReflectometryTransform(kiMin, kiMax, kfMin, kfMax, numberOfBinsQx,
+                             numberOfBinsQz),
       m_KiCalculation(incidentTheta) {
-  if (kiMin >= kiMax) {
-    throw std::invalid_argument("min ki bounds must be < max ki bounds");
-  }
-  if (kfMin >= kfMax) {
-    throw std::invalid_argument("min kf bounds must be < max kf bounds");
-  }
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
@@ -54,11 +48,11 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController) const {
   MDHistoDimension_sptr kiDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Ki", "ki", "(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin),
-      static_cast<Mantid::coord_t>(m_kiMax), m_nbinsx));
+      "Ki", "ki", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
+      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
   MDHistoDimension_sptr kfDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Kf", "kf", "(Ang^-1)", static_cast<Mantid::coord_t>(m_kfMin),
-      static_cast<Mantid::coord_t>(m_kfMax), m_nbinsz));
+      "Kf", "kf", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
+      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
 
   auto ws = createMDWorkspace(kiDim, kfDim, boxController);
 
@@ -97,24 +91,25 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformKiKf::execute(
     Mantid::API::MatrixWorkspace_const_sptr inputWs) const {
   auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
 
-  ws->initialize(m_nbinsz, m_nbinsx,
-                 m_nbinsx); // Create the output workspace as a distribution
+  ws->initialize(m_d1NumBins, m_d0NumBins,
+                 m_d0NumBins); // Create the output workspace as a distribution
 
   // Mapping so that ki and kf values calculated can be added to the matrix
   // workspace at the correct index.
-  const double gradKi = double(m_nbinsx) / (m_kiMax - m_kiMin); // The x - axis
+  const double gradKi =
+      double(m_d0NumBins) / (m_d0Max - m_d0Min); // The x - axis
   const double gradKf =
-      double(m_nbinsz) / (m_kfMax - m_kfMin); // Actually the y-axis
-  const double cxToIndex = -gradKi * m_kiMin;
-  const double czToIndex = -gradKf * m_kfMin;
-  const double cxToKi = m_kiMin - (1 / gradKi);
-  const double czToKf = m_kfMin - (1 / gradKf);
+      double(m_d1NumBins) / (m_d1Max - m_d1Min); // Actually the y-axis
+  const double cxToIndex = -gradKi * m_d0Min;
+  const double czToIndex = -gradKf * m_d1Min;
+  const double cxToKi = m_d0Min - (1 / gradKi);
+  const double czToKf = m_d1Min - (1 / gradKf);
 
   // Create an X - Axis.
   MantidVec xAxisVec =
-      createXAxis(ws.get(), gradKi, cxToKi, m_nbinsx, "ki", "1/Angstroms");
+      createXAxis(ws.get(), gradKi, cxToKi, m_d0NumBins, "ki", "1/Angstroms");
   // Create a Y (vertical) Axis
-  createVerticalAxis(ws.get(), xAxisVec, gradKf, czToKf, m_nbinsz, "kf",
+  createVerticalAxis(ws.get(), xAxisVec, gradKf, czToKf, m_d1NumBins, "kf",
                      "1/Angstroms");
 
   // Loop over all entries in the input workspace and calculate ki and kf for
@@ -134,8 +129,8 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformKiKf::execute(
       double _ki = m_KiCalculation.execute(wavelength);
       double _kf = kfCalculation.execute(wavelength);
 
-      if (_ki >= m_kiMin && _ki <= m_kiMax && _kf >= m_kfMin &&
-          _kf <= m_kfMax) // Check that the calculated ki and kf are in range
+      if (_ki >= m_d0Min && _ki <= m_d0Max && _kf >= m_d1Min &&
+          _kf <= m_d1Max) // Check that the calculated ki and kf are in range
       {
         const int outIndexX = (int)((gradKi * _ki) + cxToIndex);
         const int outIndexZ = (int)((gradKf * _kf) + czToIndex);

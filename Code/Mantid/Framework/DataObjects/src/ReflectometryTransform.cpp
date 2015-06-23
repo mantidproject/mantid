@@ -14,9 +14,12 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace DataObjects {
 
-ReflectometryTransform::ReflectometryTransform(int numberOfBinsQx,
-                                               int numberOfBinsQz)
-    : m_nbinsx(numberOfBinsQx), m_nbinsz(numberOfBinsQz) {}
+ReflectometryTransform::ReflectometryTransform(double d0Min, double d0Max,
+                                               double d1Min, double d1Max,
+                                               size_t d0NumBins,
+                                               size_t d1NumBins)
+    : m_d0NumBins(d0NumBins), m_d1NumBins(d1NumBins), m_d0Min(d0Min),
+      m_d1Min(d1Min), m_d0Max(d0Max), m_d1Max(d1Max) {}
 
 ReflectometryTransform::~ReflectometryTransform() {}
 

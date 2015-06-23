@@ -58,10 +58,6 @@ public:
 class DLLExport ReflectometryTransformKiKf
     : public DataObjects::ReflectometryTransform {
 private:
-  const double m_kiMin;
-  const double m_kiMax;
-  const double m_kfMin;
-  const double m_kfMax;
   /// Object performing raw caclcation to determine Ki
   mutable CalculateReflectometryK m_KiCalculation;
 

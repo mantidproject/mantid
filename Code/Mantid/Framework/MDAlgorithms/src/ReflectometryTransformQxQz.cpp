@@ -7,9 +7,6 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V2D.h"
@@ -43,14 +40,9 @@ ReflectometryTransformQxQz::~ReflectometryTransformQxQz() {}
 ReflectometryTransformQxQz::ReflectometryTransformQxQz(
     double qxMin, double qxMax, double qzMin, double qzMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz), m_qxMin(qxMin),
-      m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_inTheta(incidentTheta) {
-  if (qxMin >= qxMax) {
-    throw std::invalid_argument("min qx bounds must be < max qx bounds");
-  }
-  if (qzMin >= qzMax) {
-    throw std::invalid_argument("min qz bounds must be < max qz bounds");
-  }
+    : ReflectometryTransform(qxMin, qxMax, qzMin, qzMax, numberOfBinsQx,
+                             numberOfBinsQz),
+      m_inTheta(incidentTheta) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
@@ -68,11 +60,11 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
                                       BoxController_sptr boxController) const {
 
   MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Qx", "qx", "(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin),
-      static_cast<Mantid::coord_t>(m_qxMax), m_nbinsx));
+      "Qx", "qx", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
+      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
   MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Qz", "qz", "(Ang^-1)", static_cast<Mantid::coord_t>(m_qzMin),
-      static_cast<Mantid::coord_t>(m_qzMax), m_nbinsz));
+      "Qz", "qz", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
+      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
 
   auto ws = createMDWorkspace(qxDim, qzDim, boxController);
 
@@ -115,24 +107,25 @@ MatrixWorkspace_sptr
 ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
   auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
 
-  ws->initialize(m_nbinsz, m_nbinsx,
-                 m_nbinsx); // Create the output workspace as a distribution
+  ws->initialize(m_d1NumBins, m_d0NumBins,
+                 m_d0NumBins); // Create the output workspace as a distribution
 
   // Mapping so that qx and qz values calculated can be added to the matrix
   // workspace at the correct index.
-  const double gradQx = double(m_nbinsx) / (m_qxMax - m_qxMin); // The x - axis
+  const double gradQx =
+      double(m_d0NumBins) / (m_d0Max - m_d0Min); // The x - axis
   const double gradQz =
-      double(m_nbinsz) / (m_qzMax - m_qzMin); // Actually the y-axis
-  const double cxToIndex = -gradQx * m_qxMin;
-  const double czToIndex = -gradQz * m_qzMin;
-  const double cxToQ = m_qxMin - (1 / gradQx);
-  const double czToQ = m_qzMin - (1 / gradQz);
+      double(m_d1NumBins) / (m_d1Max - m_d1Min); // Actually the y-axis
+  const double cxToIndex = -gradQx * m_d0Min;
+  const double czToIndex = -gradQz * m_d1Min;
+  const double cxToQ = m_d0Min - (1 / gradQx);
+  const double czToQ = m_d1Min - (1 / gradQz);
 
   // Create an X - Axis.
   MantidVec xAxisVec =
-      createXAxis(ws.get(), gradQx, cxToQ, m_nbinsx, "qx", "1/Angstroms");
+      createXAxis(ws.get(), gradQx, cxToQ, m_d0NumBins, "qx", "1/Angstroms");
   // Create a Y (vertical) Axis
-  createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_nbinsz, "qz",
+  createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_d1NumBins, "qz",
                      "1/Angstroms");
 
   CalculateReflectometryQxQz qCalc(m_inTheta);
@@ -154,8 +147,8 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
       const double _qx = qCalc.calculateX(wavelength);
       const double _qz = qCalc.calculateZ(wavelength);
 
-      if (_qx >= m_qxMin && _qx <= m_qxMax && _qz >= m_qzMin &&
-          _qz <= m_qzMax) // Check that the calculated qx and qz are in range
+      if (_qx >= m_d0Min && _qx <= m_d0Max && _qz >= m_d1Min &&
+          _qz <= m_d1Max) // Check that the calculated qx and qz are in range
       {
         const int outIndexX = int((gradQx * _qx) + cxToIndex);
         const int outIndexZ = int((gradQz * _qz) + czToIndex);
@@ -172,18 +165,18 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS) const {
 
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
-      "RebinnedOutput", m_nbinsz, m_nbinsx, m_nbinsx);
+      "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
 
-  const double widthQx = (m_qxMax - m_qxMin) / double(m_nbinsx);
-  const double widthQz = (m_qzMax - m_qzMin) / double(m_nbinsz);
+  const double widthQx = (m_d0Max - m_d0Min) / double(m_d0NumBins);
+  const double widthQz = (m_d1Max - m_d1Min) / double(m_d1NumBins);
 
   std::vector<double> xBinsVec;
   std::vector<double> zBinsVec;
   VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_qzMin)(widthQz)(m_qzMax), zBinsVec);
+      boost::assign::list_of(m_d1Min)(widthQz)(m_d1Max), zBinsVec);
   VectorHelper::createAxisFromRebinParams(
-      boost::assign::list_of(m_qxMin)(widthQx)(m_qxMax), xBinsVec);
+      boost::assign::list_of(m_d0Min)(widthQx)(m_d0Max), xBinsVec);
 
   // Put the correct bin boundaries into the workspace
   outWS->replaceAxis(1, new BinEdgeAxis(zBinsVec));

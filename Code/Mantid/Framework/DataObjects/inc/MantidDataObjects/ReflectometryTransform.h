@@ -43,8 +43,12 @@ namespace DataObjects {
 class DLLExport ReflectometryTransform {
 
 protected:
-  const size_t m_nbinsx;
-  const size_t m_nbinsz;
+  const size_t m_d0NumBins;
+  const size_t m_d1NumBins;
+  const double m_d0Min;
+  const double m_d1Min;
+  const double m_d0Max;
+  const double m_d1Max;
 
   /// Two theta angles cache
   mutable std::vector<double> m_theta;
@@ -74,7 +78,8 @@ public:
   executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
   virtual ~ReflectometryTransform();
-  ReflectometryTransform(int numberOfBinsQx, int numberOfBinsQz);
+  ReflectometryTransform(double d0Min, double d0Max, double d1Min, double d1Max,
+                         size_t d0NumBins, size_t d1NumBins);
 };
 
 /// Create a new x-axis for the output workspace

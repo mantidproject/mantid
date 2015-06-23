@@ -88,10 +88,6 @@ public:
 class DLLExport ReflectometryTransformP
     : public DataObjects::ReflectometryTransform {
 private:
-  const double m_pSumMin;
-  const double m_pSumMax;
-  const double m_pDiffMin;
-  const double m_pDiffMax;
   /// Object performing raw calculation to determine pzi + pzf
   mutable CalculateReflectometrySumP m_pSumCalculation;
   /// Object performing raw calculation to determine pzi - pzf
