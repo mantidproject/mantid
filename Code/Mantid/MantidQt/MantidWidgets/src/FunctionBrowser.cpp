@@ -165,6 +165,7 @@ void FunctionBrowser::createBrowser()
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
+  connect(m_browser, SIGNAL(optionChanged(QtProperty*, const QString&, bool)), this, SLOT(globalChanged(QtProperty*, const QString&, bool)));
 
   connect(m_attributeStringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
@@ -2189,6 +2190,13 @@ void FunctionBrowser::setColumnSizes(int s0, int s1, int s2)
   m_browser->setColumnSizes(s0, s1, s2);
 }
 
+/**
+ * Emit a signal when any of the Global options change.
+ */
+void FunctionBrowser::globalChanged(QtProperty*, const QString&, bool)
+{
+  emit globalsChanged();
+}
 
 } // MantidWidgets
 } // MantidQt
