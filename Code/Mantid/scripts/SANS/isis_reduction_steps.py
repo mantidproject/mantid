@@ -1380,7 +1380,9 @@ class TransmissionCalc(ReductionStep):
         The region of interest can be made up of a circle of detectors (with a given radius)
         around the beam centre, and/or one or more mask files, and/or the main detector bank.
         Note that the mask files wont actually be used for masking, we're just piggy-backing
-        on the functionality that they provide.
+        on the functionality that they provide. Note that in the case of a radius, we have
+        to ensure that we do not use a workspace which already has masked detectors, since
+        they would contribute to the ROI.
         """
         if self.main:
             main_bank_comp_name = reducer.instrument.get_low_angle_detector().name()
@@ -1414,7 +1416,7 @@ class TransmissionCalc(ReductionStep):
             through the sample
         """
         self.output_wksp = None
-        self.calculate_region_of_interest(reducer, workspace)
+
         #look for run files that contain transmission data
         test1, test2 = self._get_run_wksps(reducer)
         if test1 or test2:
@@ -1450,6 +1452,9 @@ class TransmissionCalc(ReductionStep):
             raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % self.CAN_SAMPLE_SUFFIXES[reducer.is_can()])
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
+
+        # Calculate the ROI. We use the trans_raw workspace as it does not contain any previous mask.
+        self.calculate_region_of_interest(reducer, trans_raw)
 
         select = 'can::' if reducer.is_can() else 'direct::'
 
