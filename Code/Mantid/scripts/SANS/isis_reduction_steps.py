@@ -2592,7 +2592,8 @@ class UserFile(ReductionStep):
                 reducer.transmission_calculator.main = True
                 return
             elif arguments.startswith("RADIUS"):
-                reducer.transmission_calculator.radius = float(arguments.split("=")[1])
+                # Convert the input (mm) into the correct units (m)
+                reducer.transmission_calculator.radius = float(arguments.split("=")[1])/1000.0
                 return
             elif arguments.startswith("MASK"):
                 reducer.transmission_calculator.mask_files += [arguments.split("=")[1]]
