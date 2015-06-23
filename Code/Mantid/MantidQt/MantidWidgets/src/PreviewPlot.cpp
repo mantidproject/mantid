@@ -511,6 +511,9 @@ void PreviewPlot::clear() {
     removeCurve(it.value().curve);
     removeCurve(it.value().errorCurve);
     m_uiForm.loLegend->removeWidget(it.value().label);
+    m_errorBarOptionCache[it.key()] = it.value().showErrorsAction->isChecked();
+    m_showErrorsMenu->removeAction(it.value().showErrorsAction);
+    delete it.value().showErrorsAction;
     delete it.value().label;
   }
 
