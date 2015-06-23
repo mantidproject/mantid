@@ -194,11 +194,11 @@ private:
   {
     using Mantid::API::MatrixWorkspace_sptr;
     const size_t checkIdx = 100;
-    // OS X seems to do a terrible job with keep the same precision here.
-#ifndef __APPLE__
-    const double tolerance(1e-8);
-#else
+    // OS X and GCC>=5 seems to do a terrible job with keep the same precision here.
+#if defined(__APPLE__) || (__GNUC__ >= 5)
     const double tolerance(1e-4);
+#else
+    const double tolerance(1e-8);
 #endif
 
     // Values for total scattering
