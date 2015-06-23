@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
