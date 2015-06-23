@@ -76,6 +76,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR (APPLE AND OSX_VERSION VERSION_LES
   set (HDF5_DIR "${CMAKE_MODULE_PATH}")
   find_package ( HDF5 COMPONENTS CXX HL REQUIRED
     CONFIGS hdf5-config.cmake )
+  add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
 else()
   find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
 endif()
