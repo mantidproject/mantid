@@ -191,6 +191,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
         inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
+        inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
         inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
         inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
         inc/MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h
