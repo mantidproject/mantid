@@ -120,7 +120,7 @@ public:
   }
 
   void test_ConvertToBinBoundary_Size1InputVector() {
-    std::vector<double> bin_centers = {0.4};
+    std::vector<double> bin_centers = boost::assign::list_of(0.4);
     std::vector<double> bin_edges;
     VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
 
@@ -131,7 +131,7 @@ public:
   }
 
   void test_ConvertToBinBoundary_Size2InputVector() {
-    std::vector<double> bin_centers = {0.5, 1.5};
+    std::vector<double> bin_centers = boost::assign::list_of(0.5)(1.5);
     std::vector<double> bin_edges;
 
     VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
