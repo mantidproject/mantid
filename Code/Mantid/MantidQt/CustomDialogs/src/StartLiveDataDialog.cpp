@@ -197,7 +197,7 @@ void StartLiveDataDialog::initLayout()
   connect(ui.cmbInstrument,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(initListenerPropLayout(const QString&)));
   connect(ui.cmbInstrument,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(updateUiElements(const QString&)));
 
-  QHBoxLayout * buttonLayout = this->createDefaultButtonLayout();
+  QLayout * buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
 }
 

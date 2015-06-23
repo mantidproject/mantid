@@ -229,6 +229,7 @@ public:
   bool isRecordingHistoryForChild() { return m_recordHistoryForChild; };
   void setAlwaysStoreInADS(const bool doStore);
   void setRethrows(const bool rethrow);
+  IAlgorithm_sptr clone() const;
 
   /** @name Asynchronous Execution */
   Poco::ActiveResult<bool> executeAsync();

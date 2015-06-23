@@ -163,7 +163,12 @@ void GenericDialog::accept()
   {
     //Store input for next time
     saveInput();
-    QDialog::accept();
+    if (!this->m_keepOpen) {
+      QDialog::accept();
+    }
+    else {
+       executeAlgorithmAsync();
+    }
   }
   else
   {

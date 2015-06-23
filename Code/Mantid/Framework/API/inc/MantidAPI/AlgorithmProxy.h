@@ -66,7 +66,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
 public:
-  AlgorithmProxy(Algorithm_sptr alg);
+  AlgorithmProxy(const Algorithm_sptr& alg);
   virtual ~AlgorithmProxy();
 
   /// The name of the algorithm
@@ -151,12 +151,10 @@ public:
   //@}
 
 private:
-  /// Private Copy constructor: NO COPY ALLOWED
-  AlgorithmProxy(const AlgorithmProxy &);
   /// Private assignment operator: NO ASSIGNMENT ALLOWED
   AlgorithmProxy &operator=(const AlgorithmProxy &);
 
-  void createConcreteAlg(bool initOnly = false);
+  void createConcreteAlg(bool initOnly = false, bool forceRecreation = false);
   void stopped();
   void addObservers();
   void dropWorkspaceReferences();
