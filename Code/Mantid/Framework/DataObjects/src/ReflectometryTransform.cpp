@@ -99,5 +99,11 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
     verticalAxis->setValue(i, qzIncrement);
   }
 }
+
+Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
+    Mantid::API::MatrixWorkspace_const_sptr inputWs) const {
+  UNUSED_ARG(inputWs);
+  throw std::runtime_error("executeNormPoly not implemented.");
+}
 }
 }

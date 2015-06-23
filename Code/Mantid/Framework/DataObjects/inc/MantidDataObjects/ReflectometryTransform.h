@@ -61,6 +61,10 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr
   execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
 
+  /// Execuate transformation using normalised polynomial binning
+  virtual Mantid::API::MatrixWorkspace_sptr
+  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+
   virtual ~ReflectometryTransform();
   ReflectometryTransform(int numberOfBinsQx, int numberOfBinsQz);
 };
