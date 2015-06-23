@@ -93,16 +93,18 @@ void LoadDiffCal::init() {
 namespace { // anonymous
 
 std::string readString(H5File &file, const std::string &path) {
-    try {
-        DataSet data = file.openDataSet(path);
-        std::string value;
-        data.read(value, data.getDataType(), data.getSpace());
-        return value;
-    } catch (H5::FileIException & e) {
-        return "";
-    }  catch (H5::GroupIException & e) {
-        return "";
-    }
+  try {
+    DataSet data = file.openDataSet(path);
+    std::string value;
+    data.read(value, data.getDataType(), data.getSpace());
+    return value;
+  } catch (H5::FileIException & e) {
+    UNUSED_ARG(e);
+    return "";
+  }  catch (H5::GroupIException & e) {
+    UNUSED_ARG(e);
+    return "";
+  }
 }
 
 template <typename NumT>
@@ -132,33 +134,37 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset, const DataType &desiredDataT
 } // anonymous namespace
 
 std::vector<double> LoadDiffCal::readDoubleArray(Group & group, const std::string &name) {
-    std::vector<double> result;
+  std::vector<double> result;
 
-    try {
-        DataSet dataset = group.openDataSet(name);
-        result = readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
-    }  catch (H5::GroupIException & e) {
-        g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-    } catch (H5::DataTypeIException & e) {
-        g_log.information() << "DataSet \"" << name << "\" should be double" << "\n";
-    }
+  try {
+    DataSet dataset = group.openDataSet(name);
+    result = readArrayCoerce<double>(dataset, PredType::NATIVE_DOUBLE);
+  }  catch (H5::GroupIException & e) {
+    UNUSED_ARG(e);
+    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
+  } catch (H5::DataTypeIException & e) {
+    UNUSED_ARG(e);
+    g_log.information() << "DataSet \"" << name << "\" should be double" << "\n";
+  }
 
-    return result;
+  return result;
 }
 
 std::vector<int32_t> LoadDiffCal::readInt32Array(Group & group, const std::string &name) {
-    std::vector<int32_t> result;
+  std::vector<int32_t> result;
 
-    try {
-        DataSet dataset = group.openDataSet(name);
-        result = readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
-    }  catch (H5::GroupIException & e) {
-        g_log.information() << "Failed to open dataset \"" << name << "\"\n";
-    } catch (H5::DataTypeIException & e) {
-        g_log.information() << "DataSet \"" << name << "\" should be int32" << "\n";
-    }
+  try {
+    DataSet dataset = group.openDataSet(name);
+    result = readArrayCoerce<int32_t>(dataset, PredType::NATIVE_INT32);
+  }  catch (H5::GroupIException & e) {
+    UNUSED_ARG(e);
+    g_log.information() << "Failed to open dataset \"" << name << "\"\n";
+  } catch (H5::DataTypeIException & e) {
+    UNUSED_ARG(e);
+    g_log.information() << "DataSet \"" << name << "\" should be int32" << "\n";
+  }
 
-    return result;
+  return result;
 }
 
 void LoadDiffCal::getInstrument(H5File &file) {
