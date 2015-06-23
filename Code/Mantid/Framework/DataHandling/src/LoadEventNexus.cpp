@@ -39,6 +39,31 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 
+namespace {
+
+/**
+ * Copy all logData properties from the 'from' workspace to the 'to'
+ * workspace. Does not use CopyLogs as a child algorithm (this is a
+ * simple copy and the workspace is not yet in the ADS).
+ *
+ * @param from source of log entries
+ * @param to workspace where to add the log entries
+ */
+void copyLogs(const EventWorkspace_sptr& from,
+                                  EventWorkspace_sptr& to)
+{
+  // from the logs, get all the properties that don't overwrite any
+  // prop. already set in the sink workspace (like 'filename').
+  auto props = from->mutableRun().getLogData();
+  for (size_t j=0; j<props.size(); j++) {
+    if (!to->mutableRun().hasProperty(props[j]->name())) {
+      to->mutableRun().addLogData(props[j]->clone());
+    }
+  }
+}
+
+}
+
 //===============================================================================================
 // BankPulseTimes
 //===============================================================================================
@@ -1763,6 +1788,17 @@ EventWorkspace_sptr DecoratorWorkspace::createEmptyEventWorkspace() const {
   return eventWS;
 }
 
+void DecoratorWorkspace::setNPeriods(size_t nPeriods) {
+
+  // Create vector where size is the number of periods and initialize workspaces in each.
+  m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(
+      nPeriods, createEmptyEventWorkspace());
+
+  for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    copyLogs(m_ws, m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
+  }
+}
+
 //-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
   void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename,
@@ -3006,26 +3042,7 @@ void LoadEventNexus::safeOpenFile(const std::string fname)
   }
 }
 
-/**
- * Copy all logData properties from the 'from' workspace to the 'to'
- * workspace. Does not use CopyLogs as a child algorithm (this is a
- * simple copy and the workspace is not yet in the ADS).
- *
- * @param from source of log entries
- * @param to workspace where to add the log entries
- */
-void LoadEventNexus::copyLogs(const EventWorkspace_sptr& from,
-                                  EventWorkspace_sptr& to)
-{
-  // from the logs, get all the properties that don't overwrite any
-  // prop. already set in the sink workspace (like 'filename').
-  auto props = from->mutableRun().getLogData();
-  for (size_t j=0; j<props.size(); j++) {
-    if (!to->mutableRun().hasProperty(props[j]->name())) {
-      to->mutableRun().addLogData(props[j]->clone());
-    }
-  }
-}
+
 
 } // namespace DataHandling
 } // namespace Mantid
