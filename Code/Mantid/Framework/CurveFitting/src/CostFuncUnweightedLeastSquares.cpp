@@ -24,20 +24,20 @@ void CostFuncUnweightedLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
   double variance = getResidualVariance();
   covar *= variance;
 
-  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "== Final covariance matrix (H^-1) ==" << std::endl;
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug() << "== Final covariance matrix (H^-1) ==" << std::endl;
 
-    std::ios::fmtflags prevState = g_log.information().flags();
-    g_log.information() << std::left << std::fixed;
+    std::ios::fmtflags prevState = g_log.debug().flags();
+    g_log.debug() << std::left << std::fixed;
 
     for (size_t i = 0; i < covar.size1(); ++i) {
       for (size_t j = 0; j < covar.size2(); ++j) {
-        g_log.information() << std::setw(10);
-        g_log.information() << covar.get(i, j) << "  ";
+        g_log.debug() << std::setw(10);
+        g_log.debug() << covar.get(i, j) << "  ";
       }
-      g_log.information() << std::endl;
+      g_log.debug() << std::endl;
     }
-    g_log.information().flags(prevState);
+    g_log.debug().flags(prevState);
   }
 }
 
@@ -62,20 +62,20 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
   double degreesOfFreedom = static_cast<double>(m_values->size() - nParams());
   double residualVariance = sum / degreesOfFreedom;
 
-  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "== Statistics of residuals ==" << std::endl;
-    std::ios::fmtflags prevState = g_log.information().flags();
-    g_log.information() << std::left << std::fixed << std::setw(10);
-    g_log.information() << "Residual sum of squares: " << sum << std::endl;
-    g_log.information() << "Residual variance: " << residualVariance
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug() << "== Statistics of residuals ==" << std::endl;
+    std::ios::fmtflags prevState = g_log.debug().flags();
+    g_log.debug() << std::left << std::fixed << std::setw(10);
+    g_log.debug() << "Residual sum of squares: " << sum << std::endl;
+    g_log.debug() << "Residual variance: " << residualVariance
                         << std::endl;
-    g_log.information() << "Residual standard deviation: "
+    g_log.debug() << "Residual standard deviation: "
                         << sqrt(residualVariance) << std::endl;
-    g_log.information() << "Degrees of freedom: "
+    g_log.debug() << "Degrees of freedom: "
                         << static_cast<size_t>(degreesOfFreedom) << std::endl;
-    g_log.information() << "Number of observations: " << m_values->size()
+    g_log.debug() << "Number of observations: " << m_values->size()
                         << std::endl;
-    g_log.information().flags(prevState);
+    g_log.debug().flags(prevState);
   }
 
   return residualVariance;
