@@ -46,105 +46,97 @@ public:
 class DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
 private:
   std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
-  DataObjects::EventWorkspace_sptr m_ws;
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
 
 public:
 
   void setNPeriods(size_t nPeriods);
 
-  DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_ws;} // TODO remove
+  DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_WsVec.front();} // TODO remove
 
-  DecoratorWorkspace(): m_ws(createEmptyEventWorkspace()){}
+  DecoratorWorkspace(): m_WsVec(1, createEmptyEventWorkspace()){}
 
   Geometry::Instrument_const_sptr getInstrument() const
   {
-      return m_ws->getInstrument(); // TODO, just take from the first workspace
+      return m_WsVec[0]->getInstrument(); // TODO, just take from the first workspace
   }
   const API::Run &run() const
   {
-      return m_ws->run(); // TODO, just take from the first workspace
+      return m_WsVec[0]->run();
   }
   API::Run &mutableRun()
   {
-      return m_ws->mutableRun(); // TODO, just take from the first workspace
+      return m_WsVec[0]->mutableRun();
   }
   Mantid::API::ISpectrum* getSpectrum(const size_t index)  {
-      return m_ws->getSpectrum(index); // TODO, just take from the first workspace
+      return m_WsVec[0]->getSpectrum(index);
   }
   virtual Mantid::API::Axis* getAxis(const size_t& i) const {
-      return m_ws->getAxis(i); // TODO, just take from the first workspace
+      return m_WsVec[0]->getAxis(i);
   }
   size_t getNumberHistograms() const  {
-      return m_ws->getNumberHistograms(); // TODO, just take from the first workspace
+      return m_WsVec[0]->getNumberHistograms();
   }
   virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const {
-      return m_ws->getEventList(workspace_index); // TODO, just take from the first workspace
+      return m_WsVec[0]->getEventList(workspace_index); // TODO need to know PERIOD number TOO
   }
   virtual DataObjects::EventList &getEventList(const std::size_t workspace_index){
-      return m_ws->getEventList(workspace_index); // TODO, just take from the first workspace
+      return m_WsVec[0]->getEventList(workspace_index); // TODO need to know PERIOD number TOO
   }
 
   void getSpectrumToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset) const  {
-      return m_ws->getSpectrumToWorkspaceIndexVector(out, offset); // TODO, just take from the first workspace
+      return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(out, offset);
   }
   void getDetectorIDToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset, bool dothrow) const{
-      return m_ws->getDetectorIDToWorkspaceIndexVector(out, offset, dothrow);  // TODO, just take from the first workspace
+      return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(out, offset, dothrow);
   }
 
   Kernel::DateAndTime getFirstPulseTime() const  {
-      return m_ws->getFirstPulseTime();
+      return m_WsVec[0]->getFirstPulseTime();
   }
   void setAllX(Kernel::cow_ptr<MantidVec>& x)  {
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->setAllX(x);
       }
-      return m_ws->setAllX(x); // TODO REMOVE
   }
   size_t getNumberEvents() const  {
-      return m_ws->getNumberEvents(); // TODO, just take from the first workspace
+      return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
   }
   void resizeTo(const size_t size)  {
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->resizeTo(size); // Creates the EventLists
       }
-      return m_ws->resizeTo(size); // TODO REMOVE
   }
   void padSpectra(const std::vector<int32_t>& padding)  {
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->padSpectra(padding); // Set detector ids and spectrum numbers
       }
-      return m_ws->padSpectra(padding); // TODO REMOVE
   }
   void setInstrument(const Geometry::Instrument_const_sptr& inst)  {
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->setInstrument(inst);
       }
-      return m_ws->setInstrument(inst); // TODO REMOVE
   }
   void setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace>& monitorWS)  {
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->setMonitorWorkspace(monitorWS); // TODO, do we really set the same monitor on all periods???
       }
-      return m_ws->setMonitorWorkspace(monitorWS); // TODO REMOVE
   }
   void updateSpectraUsing(const API::SpectrumDetectorMapping& map)  {
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->updateSpectraUsing(map);
       }
-      return m_ws->updateSpectraUsing(map); // TODO REMOVE
 
   }
 
   DataObjects::EventList* getEventListPtr(size_t i){
-      return m_ws->getEventListPtr(i);  // TODO, just take from the first workspace
+      return m_WsVec[0]->getEventListPtr(i);  // TODO, just take from the first workspace
   }
 
   void populateInstrumentParameters(){
       for(size_t i = 0; i < m_WsVec.size(); ++i){
            m_WsVec[i]->populateInstrumentParameters();
       }
-      return m_ws->populateInstrumentParameters(); // TODO REMOVE
   }
 };
 

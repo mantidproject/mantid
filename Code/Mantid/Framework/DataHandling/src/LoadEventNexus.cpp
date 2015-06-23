@@ -1413,13 +1413,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   DateAndTime run_start(0, 0);
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
-
+  int nPeriods = 1;
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
-      int nPeriods = 1;
+
       m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true, nPeriods);
-      m_ws->setNPeriods(nPeriods); // This is how many workspaces we are going to make.
+
       run_start = m_ws->getFirstPulseTime();
       m_logs_loaded_correctly = true;
     } else {
@@ -1437,6 +1437,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                    true);
     }
   }
+  m_ws->setNPeriods(nPeriods); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == NULL) {
@@ -1791,11 +1792,13 @@ EventWorkspace_sptr DecoratorWorkspace::createEmptyEventWorkspace() const {
 void DecoratorWorkspace::setNPeriods(size_t nPeriods) {
 
   // Create vector where size is the number of periods and initialize workspaces in each.
+  auto temp = m_WsVec[0];
   m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(
       nPeriods, createEmptyEventWorkspace());
 
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    copyLogs(m_ws, m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
+    copyLogs(temp, m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
+    m_WsVec[i]->setInstrument(temp->getInstrument());
   }
 }
 
