@@ -9,10 +9,13 @@
 #include <unistd.h>
 #include <fstream>
 #include <malloc.h>
+#include <stdio.h>
+#include <sys/resource.h>
 #endif
 #ifdef __APPLE__
 #include <malloc/malloc.h>
 #include <sys/sysctl.h>
+#include <mach/mach.h>
 #include <mach/mach_host.h>
 #include <mach/task.h>
 #endif
@@ -130,13 +133,13 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
  */
 bool read_mem_info(size_t &sys_avail, size_t &sys_total) {
   std::ifstream file("/proc/meminfo");
-  std::string line;
+  string line;
   int values_found(0);
   // Need to set this to zero
   sys_avail = 0;
   while (getline(file, line)) {
     std::istringstream is(line);
-    std::string tag;
+    string tag;
     long value(0);
     is >> tag >> value;
     if (!is)
@@ -411,7 +414,7 @@ size_t MemoryStats::availMem() const { return this->avail_memory; }
  * Returns the memory usage of the current process in kiB
  * @returns An unsigned containing the memory used by the current process in kiB
  */
-std::size_t MemoryStats::residentMem() const { return this->res_usage; }
+size_t MemoryStats::residentMem() const { return this->res_usage; }
 
 /**
  * Returns the virtual memory usage of the current process in kiB
@@ -419,7 +422,7 @@ std::size_t MemoryStats::residentMem() const { return this->res_usage; }
  * process in kiB
  */
 
-std::size_t MemoryStats::virtualMem() const { return this->vm_usage; }
+size_t MemoryStats::virtualMem() const { return this->vm_usage; }
 
 /**
  * Returns the reserved memory that has not been factored into the available
@@ -432,7 +435,7 @@ std::size_t MemoryStats::virtualMem() const { return this->vm_usage; }
  * memory calculation
  * @returns An extra area of memory that can still be allocated.
  */
-std::size_t MemoryStats::reservedMem() const {
+size_t MemoryStats::reservedMem() const {
 #ifdef _WIN32
   MEMORY_BASIC_INFORMATION info; // Windows structure
   char *addr = NULL;
@@ -484,6 +487,96 @@ std::ostream &operator<<(std::ostream &out, const MemoryStats &stats) {
     out << "total[" << stats.totalMemStr() << "] ";
   }
   return out;
+}
+
+/**
+ * @returns the peak (maximum so far) resident set size (physical
+ * memory use) measured in bytes, or zero if the value cannot be
+ * determined on this OS.
+ *
+ * This was adopted from
+ *http://nadeausoftware.com/articles/2012/07/c_c_tip_how_get_process_resident_set_size_physical_memory_use
+ */
+size_t MemoryStats::getPeakRSS() const {
+#if defined(_WIN32)
+  /* Windows -------------------------------------------------- */
+  PROCESS_MEMORY_COUNTERS info;
+  GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+  return (size_t)info.PeakWorkingSetSize;
+
+#elif(defined(_AIX) || defined(__TOS__AIX__)) ||                               \
+    (defined(__sun__) || defined(__sun) ||                                     \
+     defined(sun) && (defined(__SVR4) || defined(__svr4__)))
+  /* AIX and Solaris ------------------------------------------ */
+  struct psinfo psinfo;
+  int fd = -1;
+  if ((fd = open("/proc/self/psinfo", O_RDONLY)) == -1)
+    return (size_t)0L; /* Can't open? */
+  if (read(fd, &psinfo, sizeof(psinfo)) != sizeof(psinfo)) {
+    close(fd);
+    return (size_t)0L; /* Can't read? */
+  }
+  close(fd);
+  return (size_t)(psinfo.pr_rssize * 1024L);
+
+#elif defined(__unix__) || defined(__unix) || defined(unix) ||                 \
+    (defined(__APPLE__) && defined(__MACH__))
+  /* BSD, Linux, and OSX -------------------------------------- */
+  struct rusage rusage;
+  getrusage(RUSAGE_SELF, &rusage);
+#if defined(__APPLE__) && defined(__MACH__)
+  return (size_t)rusage.ru_maxrss;
+#else
+  return (size_t)(rusage.ru_maxrss * 1024L);
+#endif
+
+#else
+  /* Unknown OS ----------------------------------------------- */
+  return (size_t)0L; /* Unsupported. */
+#endif
+}
+
+/**
+ * @returns the current resident set size (physical memory use) measured
+ * in bytes, or zero if the value cannot be determined on this OS.
+ *
+ * This was adopted from
+ *http://nadeausoftware.com/articles/2012/07/c_c_tip_how_get_process_resident_set_size_physical_memory_use
+ */
+size_t MemoryStats::getCurrentRSS() const {
+#if defined(_WIN32)
+  /* Windows -------------------------------------------------- */
+  PROCESS_MEMORY_COUNTERS info;
+  GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+  return (size_t)info.WorkingSetSize;
+
+#elif defined(__APPLE__) && defined(__MACH__)
+  /* OSX ------------------------------------------------------ */
+  struct mach_task_basic_info info;
+  mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO, (task_info_t)&info,
+                &infoCount) != KERN_SUCCESS)
+    return (size_t)0L; /* Can't access? */
+  return (size_t)info.resident_size;
+
+#elif defined(__linux__) || defined(__linux) || defined(linux) ||              \
+    defined(__gnu_linux__)
+  /* Linux ---------------------------------------------------- */
+  long rss = 0L;
+  FILE *fp = NULL;
+  if ((fp = fopen("/proc/self/statm", "r")) == NULL)
+    return (size_t)0L; /* Can't open? */
+  if (fscanf(fp, "%*s%20ld", &rss) != 1) {
+    fclose(fp);
+    return (size_t)0L; /* Can't read? */
+  }
+  fclose(fp);
+  return (size_t)rss * (size_t)sysconf(_SC_PAGESIZE);
+
+#else
+  /* AIX, BSD, Solaris, and Unknown OS ------------------------ */
+  return (size_t)0L; /* Unsupported. */
+#endif
 }
 
 // -------------------------- concrete instantiations
