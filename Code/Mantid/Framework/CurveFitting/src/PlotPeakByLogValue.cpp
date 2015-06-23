@@ -158,9 +158,11 @@ void PlotPeakByLogValue::exec() {
     result->addColumn("str", "Source name");
     isDataName = true;
   } else if (logName.empty()) {
-    result->addColumn("double", "axis-1");
+    auto col = result->addColumn("double", "axis-1");
+    col->setPlotType(1); // X-values inplots
   } else {
-    result->addColumn("double", logName);
+    auto col = result->addColumn("double", logName);
+    col->setPlotType(1); // X-values inplots
   }
   // Create an instance of the fitting function to obtain the names of fitting
   // parameters

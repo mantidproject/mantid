@@ -134,9 +134,12 @@ public:
     setChecked( ! isChecked() );
     m_property->setOption( m_optionName, isChecked() );
     update();
+    emit optionChanged(m_property, m_optionName, isChecked());
   }
   void setChecked(bool on){m_checked = on;}
   bool isChecked() const {return m_checked;}
+signals:
+  void optionChanged(QtProperty*, const QString&, bool);
 private:
   QtProperty *m_property;
   QString m_optionName;
@@ -351,6 +354,9 @@ public:
 
     QTreeWidgetItem *editedItem() const { return m_editedItem; }
 
+signals:
+    void optionChanged(QtProperty*, const QString&, bool);
+
 private slots:
     void slotEditorDestroyed(QObject *object);
 
@@ -435,6 +441,7 @@ QWidget *QtPropertyEditorDelegate::createEditor(QWidget *parent,
       if ( property->hasOption(optionName) )
       {
         QWidget *editor = new PropertyOptionCheckBox(parent,property,optionName);
+        connect(editor,SIGNAL(optionChanged(QtProperty*, const QString&, bool)),this,SIGNAL(optionChanged(QtProperty*, const QString&, bool)));
         return editor;
       }
     }
@@ -591,6 +598,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &opti
     m_treeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
     m_delegate = new QtPropertyEditorDelegate(parent);
     m_delegate->setEditorPrivate(this);
+    QObject::connect(m_delegate,SIGNAL(optionChanged(QtProperty*, const QString&, bool)),parent,SIGNAL(optionChanged(QtProperty*, const QString&, bool)));
     m_treeWidget->setItemDelegate(m_delegate);
     m_treeWidget->header()->setMovable(false);
     m_treeWidget->header()->setResizeMode(QHeaderView::Stretch);
