@@ -61,7 +61,8 @@ getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS,
 MANTID_DATAOBJECTS_DLL void
 normaliseOutput(API::MatrixWorkspace_sptr outputWS,
                 API::MatrixWorkspace_const_sptr inputWS,
-                boost::shared_ptr<API::Progress> progress = 0);
+                boost::shared_ptr<API::Progress> progress =
+                    boost::shared_ptr<API::Progress>());
 
 /// Rebin the input quadrilateral to to output grid
 MANTID_DATAOBJECTS_DLL void
