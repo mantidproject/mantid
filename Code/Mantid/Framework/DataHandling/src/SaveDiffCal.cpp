@@ -4,11 +4,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
-#ifdef _WIN32
-#include <cpp/H5Cpp.h>
-#else
 #include <H5Cpp.h>
-#endif
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
