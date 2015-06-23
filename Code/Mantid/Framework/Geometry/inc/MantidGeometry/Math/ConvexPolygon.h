@@ -18,6 +18,10 @@ class V2D;
 }
 
 namespace Geometry {
+//---------------------------------------------------------------------------
+// Forward declarations
+//---------------------------------------------------------------------------
+class PolygonEdge;
 
 //---------------------------------------------------------------------------
 // Typedefs
@@ -61,6 +65,33 @@ class MANTID_GEOMETRY_DLL ConvexPolygon {
 public:
   /// Type of the point list
   typedef std::vector<Kernel::V2D> Vertices;
+
+  //-----------------------------------------------------------------
+  // Forward directional iterator inner class
+  //-----------------------------------------------------------------
+  class Iterator {
+  public:
+    /// Constructor
+    Iterator(const ConvexPolygon &polygon);
+
+    /// Dereference operator
+    const Kernel::V2D &operator*() const;
+    /// Prefix increment operator
+    void operator++();
+    /// Create a directed edge between this and the next point
+    PolygonEdge edge() const;
+
+  private:
+    /// Compute the next index
+    size_t nextIndex() const;
+
+    const ConvexPolygon &m_polygon;
+    size_t m_index;
+  };
+
+  //-----------------------------------------------------------------
+  // ConvexPolygon class
+  //-----------------------------------------------------------------
 
   /// Default constructor
   ConvexPolygon();

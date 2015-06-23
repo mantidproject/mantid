@@ -72,6 +72,7 @@ set ( SRC_FILES
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
 	src/Math/ConvexPolygon.cpp
+	src/Math/ConvexPolygonIterator.cpp
 	src/Math/LaszloIntersection.cpp
 	src/Math/PolyBase.cpp
 	src/Math/PolygonEdge.cpp
@@ -256,6 +257,7 @@ set ( TEST_FILES
 	ConeTest.h
 	ConventionalCellTest.h
 	ConvexPolygonTest.h
+	ConvexPolygonIteratorTest.h
 	CrystalStructureTest.h
 	CyclicGroupTest.h
 	CylinderTest.h

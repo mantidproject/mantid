@@ -2,16 +2,14 @@
 #define CONVEXPOLYGONTEST_H_
 
 #include "MantidGeometry/Math/ConvexPolygon.h"
-#include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/V2D.h"
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <cfloat>
 
 using Mantid::Kernel::V2D;
 using Mantid::Geometry::ConvexPolygon;
-using Mantid::Geometry::Vertex2D;
-using Mantid::Geometry::PolygonEdge;
 
 class ConvexPolygonTest : public CxxTest::TestSuite
 {
@@ -49,14 +47,6 @@ public:
     TS_ASSERT_EQUALS(rect[0], V2D());
     TS_ASSERT_EQUALS(rect[2], V2D(2.0, 1.0));
     TS_ASSERT_EQUALS(rect[3], V2D(2.0, 0.0));
-  }
-
-  void test_Invalid_Index_Access_Throws()
-  {
-    using Mantid::Kernel::Exception::IndexError;
-    ConvexPolygon triangle = makeEquilateralTriangle();
-    TS_ASSERT_THROWS(triangle[3], IndexError);
-    TS_ASSERT_THROWS(triangle[-1], IndexError);
   }
 
   void test_Point_Inside_Polygon_Returns_True()
@@ -116,6 +106,16 @@ public:
 
     TS_ASSERT_EQUALS(largeTriangle.contains(smallTriangle), true);
     TS_ASSERT_EQUALS(smallTriangle.contains(largeTriangle), false);
+  }
+  
+  // ------------------------ Failure cases --------------------------------
+
+  void test_Invalid_Index_Access_Throws()
+  {
+    using Mantid::Kernel::Exception::IndexError;
+    ConvexPolygon triangle = makeEquilateralTriangle();
+    TS_ASSERT_THROWS(triangle[3], IndexError);
+    TS_ASSERT_THROWS(triangle[-1], IndexError);
   }
 
 private:
