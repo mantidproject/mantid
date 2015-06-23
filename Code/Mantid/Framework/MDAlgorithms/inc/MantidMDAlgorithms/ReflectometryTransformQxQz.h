@@ -69,19 +69,11 @@ public:
             Mantid::API::BoxController_sptr boxController) const;
   // Execuate transformation using normalised polynomial binning
   virtual Mantid::API::MatrixWorkspace_sptr
-  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-                  const std::vector<double> &vertBinning) const;
+  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
 private:
   void
   initAngularCaches(const API::MatrixWorkspace_const_sptr &workspace) const;
-
-  /// Create the output workspace
-  DataObjects::RebinnedOutput_sptr
-  setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                       const std::vector<double> &binParams,
-                       std::vector<double> &newAxis) const;
-
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)
 };
