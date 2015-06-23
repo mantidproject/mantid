@@ -1662,18 +1662,19 @@ void FunctionBrowser::removeFunction()
     // Check if the current function in the browser is a
     // composite function
     auto topProp = props[0];
-    auto fun = Mantid::API::FunctionFactory::Instance().createFunction(topProp->propertyName().toStdString());
+    auto fun = Mantid::API::FunctionFactory::Instance().createFunction(
+        topProp->propertyName().toStdString());
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf) {
       // If it is a composite function
       // check that there are more than one function
       // which means more than two subproperties
-      size_t nFunctions = props[0]->subProperties().size() -1;
+      size_t nFunctions = props[0]->subProperties().size() - 1;
 
-      if ( nFunctions == 1 ) {
+      if (nFunctions == 1) {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
-        auto func =  getFunction(m_browser->properties()[0]->subProperties()[1]);
+        auto func = getFunction(m_browser->properties()[0]->subProperties()[1]);
         // Remove the composite function
         m_browser->removeProperty(topProp);
         // Add the temporary stored function
