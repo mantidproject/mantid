@@ -48,10 +48,6 @@ public:
                              int numberOfBinsQz = 100);
   /// Destructor
   virtual ~ReflectometryTransformQxQz();
-  /// Execuate transformation using normalised polynomial binning
-  virtual Mantid::API::MatrixWorkspace_sptr
-  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
-
 private:
   DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
   DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)

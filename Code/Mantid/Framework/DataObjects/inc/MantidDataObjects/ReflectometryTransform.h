@@ -81,7 +81,7 @@ public:
   execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
   /// Execuate transformation using normalised polynomial binning
-  virtual Mantid::API::MatrixWorkspace_sptr
+  Mantid::API::MatrixWorkspace_sptr
   executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
   virtual ~ReflectometryTransform();
