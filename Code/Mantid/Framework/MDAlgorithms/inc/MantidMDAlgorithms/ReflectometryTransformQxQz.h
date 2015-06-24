@@ -51,13 +51,6 @@ public:
                              int numberOfBinsQz = 100);
   /// Destructor
   virtual ~ReflectometryTransformQxQz();
-  /// Execute transformation
-  virtual Mantid::API::MatrixWorkspace_sptr
-  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
-  /// Execute MD transformation
-  virtual Mantid::API::IMDEventWorkspace_sptr
-  executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-            Mantid::API::BoxController_sptr boxController) const;
   /// Execuate transformation using normalised polynomial binning
   virtual Mantid::API::MatrixWorkspace_sptr
   executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;

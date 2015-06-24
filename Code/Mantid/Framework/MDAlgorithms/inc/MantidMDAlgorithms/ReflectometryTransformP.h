@@ -77,12 +77,6 @@ public:
                           double pDiffMax, double incidentTheta,
                           int numberOfBinsQx = 100, int numberOfBinsQz = 100);
   virtual ~ReflectometryTransformP();
-  virtual Mantid::API::IMDEventWorkspace_sptr
-  executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-            Mantid::API::BoxController_sptr boxController) const;
-  /// Execute transformation
-  virtual Mantid::API::MatrixWorkspace_sptr
-  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 };
 
 } // namespace MDAlgorithms

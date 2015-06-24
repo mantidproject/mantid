@@ -3,9 +3,13 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidDataObjects/CalculateReflectometry.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/V2D.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -113,6 +117,105 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
     double qzIncrement = ((1 / gradY) * ((double)i + 1) + cyToUnit);
     verticalAxis->setValue(i, qzIncrement);
   }
+}
+
+Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
+    Mantid::API::MatrixWorkspace_const_sptr inputWs,
+    BoxController_sptr boxController) const {
+  MDHistoDimension_sptr dim0 = MDHistoDimension_sptr(new MDHistoDimension(
+      m_d0Label, m_d0ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
+      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
+  MDHistoDimension_sptr dim1 = MDHistoDimension_sptr(new MDHistoDimension(
+      m_d1Label, m_d1ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
+      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
+
+  auto ws = createMDWorkspace(dim0, dim1, boxController);
+
+  auto spectraAxis = inputWs->getAxis(1);
+  for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
+    auto counts = inputWs->readY(index);
+    auto wavelengths = inputWs->readX(index);
+    auto errors = inputWs->readE(index);
+    const size_t nInputBins = wavelengths.size() - 1;
+    const double theta_final = spectraAxis->getValue(index);
+    m_calculator->setThetaFinal(theta_final);
+    // Loop over all bins in spectra
+    for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
+      const double &wavelength =
+          0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
+      double _d0 = m_calculator->calculateDim0(wavelength);
+      double _d1 = m_calculator->calculateDim1(wavelength);
+      double centers[2] = {_d0, _d1};
+
+      ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]),
+                                  float(errors[binIndex] * errors[binIndex]),
+                                  centers));
+    }
+  }
+  ws->splitAllIfNeeded(NULL);
+  ws->refreshCache();
+  return ws;
+}
+
+/**
+ * Convert to the output dimensions
+ * @param inputWs : Input Matrix workspace
+ * @return workspace group containing output matrix workspaces of ki and kf
+ */
+Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
+    Mantid::API::MatrixWorkspace_const_sptr inputWs) const {
+  auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+
+  ws->initialize(m_d1NumBins, m_d0NumBins,
+                 m_d0NumBins); // Create the output workspace as a distribution
+
+  // Mapping so that d0 and d1 values calculated can be added to the matrix
+  // workspace at the correct index.
+  const double gradD0 =
+      double(m_d0NumBins) / (m_d0Max - m_d0Min); // The x - axis
+  const double gradD1 =
+      double(m_d1NumBins) / (m_d1Max - m_d1Min); // Actually the y-axis
+  const double cxToIndex = -gradD0 * m_d0Min;
+  const double cyToIndex = -gradD1 * m_d1Min;
+  const double cxToD0 = m_d0Min - (1 / gradD0);
+  const double cyToD1 = m_d1Min - (1 / gradD1);
+
+  // Create an X - Axis.
+  MantidVec xAxisVec = createXAxis(ws.get(), gradD0, cxToD0, m_d0NumBins,
+                                   m_d0Label, "1/Angstroms");
+  // Create a Y (vertical) Axis
+  createVerticalAxis(ws.get(), xAxisVec, gradD1, cyToD1, m_d1NumBins,
+                     m_d1Label, "1/Angstroms");
+
+  // Loop over all entries in the input workspace and calculate d0 and d1
+  // for each.
+  auto spectraAxis = inputWs->getAxis(1);
+  for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
+    auto counts = inputWs->readY(index);
+    auto wavelengths = inputWs->readX(index);
+    auto errors = inputWs->readE(index);
+    const size_t nInputBins = wavelengths.size() - 1;
+    const double theta_final = spectraAxis->getValue(index);
+    m_calculator->setThetaFinal(theta_final);
+    // Loop over all bins in spectra
+    for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
+      const double wavelength =
+          0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
+      double _d0 = m_calculator->calculateDim0(wavelength);
+      double _d1 = m_calculator->calculateDim1(wavelength);
+
+      if (_d0 >= m_d0Min && _d0 <= m_d0Max && _d1 >= m_d1Min &&
+          _d1 <= m_d1Max) // Check that the calculated ki and kf are in range
+      {
+        const int outIndexX = (int)((gradD0 * _d0) + cxToIndex);
+        const int outIndexZ = (int)((gradD1 * _d1) + cyToIndex);
+
+        ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
+        ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];
+      }
+    }
+  }
+  return ws;
 }
 
 Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(

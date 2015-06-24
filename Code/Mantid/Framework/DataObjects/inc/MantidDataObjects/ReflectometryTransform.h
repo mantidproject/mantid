@@ -71,14 +71,14 @@ protected:
 
 public:
   // Execute the strategy to produce a transformed, output MDWorkspace
-  virtual Mantid::API::IMDEventWorkspace_sptr
+  Mantid::API::IMDEventWorkspace_sptr
   executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-            Mantid::API::BoxController_sptr boxController) const = 0;
+            Mantid::API::BoxController_sptr boxController) const;
 
   // Execute the strategy to produce a transformed, output group of Matrix (2D)
   // Workspaces
-  virtual Mantid::API::MatrixWorkspace_sptr
-  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
+  Mantid::API::MatrixWorkspace_sptr
+  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
   /// Execuate transformation using normalised polynomial binning
   virtual Mantid::API::MatrixWorkspace_sptr
