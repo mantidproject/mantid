@@ -241,9 +241,12 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       boost::assign::list_of(m_d0Min)(widthD0)(m_d0Max), xBinsVec);
 
   // Put the correct bin boundaries into the workspace
-  outWS->replaceAxis(1, new BinEdgeAxis(zBinsVec));
+  auto verticalAxis = new BinEdgeAxis(zBinsVec);
+  outWS->replaceAxis(1, verticalAxis);
   for (size_t i = 0; i < zBinsVec.size() - 1; ++i)
     outWS->setX(i, xBinsVec);
+
+  verticalAxis->title() = m_d1Label;
 
   // Prepare the required theta values
   initAngularCaches(inputWS);
@@ -308,6 +311,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
   outWS->updateSpectraUsing(outputDetectorMap);
+
+  outWS->getAxis(0)->title() = m_d0Label;
+  outWS->setYUnit("");
+  outWS->setYUnitLabel("Intensity");
 
   return outWS;
 }
