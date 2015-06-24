@@ -19,7 +19,11 @@ ReflectometryTransform::ReflectometryTransform(double d0Min, double d0Max,
                                                size_t d0NumBins,
                                                size_t d1NumBins)
     : m_d0NumBins(d0NumBins), m_d1NumBins(d1NumBins), m_d0Min(d0Min),
-      m_d1Min(d1Min), m_d0Max(d0Max), m_d1Max(d1Max) {}
+      m_d1Min(d1Min), m_d0Max(d0Max), m_d1Max(d1Max) {
+  if (d0Min >= d0Max || d1Min >= d1Max)
+    throw std::invalid_argument(
+        "The supplied minimum values must be less than the maximum values.");
+}
 
 ReflectometryTransform::~ReflectometryTransform() {}
 
