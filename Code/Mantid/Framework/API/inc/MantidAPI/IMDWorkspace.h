@@ -134,6 +134,7 @@ public:
 
 protected:
   IMDWorkspace(const IMDWorkspace &other) = default;
+  IMDWorkspace &operator=(const IMDWorkspace &other) = default;
   virtual const std::string toString() const;
 };
 
