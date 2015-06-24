@@ -26,7 +26,8 @@ Constructor
 ReflectometryTransformP::ReflectometryTransformP(
     double pSumMin, double pSumMax, double pDiffMin, double pDiffMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform(pSumMin, pSumMax, pDiffMin, pDiffMax,
+    : ReflectometryTransform("Pz_i + Pz_f", "sum_pz", pSumMin, pSumMax,
+                             "Pz_i - Pz_f", "diff_pz", pDiffMin, pDiffMax,
                              numberOfBinsQx, numberOfBinsQz),
       m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta) {
   if (incidentTheta < 0 || incidentTheta > 90) {
@@ -42,14 +43,12 @@ ReflectometryTransformP::~ReflectometryTransformP() {}
 Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController) const {
-  MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(
-      new MDHistoDimension("Pz_i + Pz_f", "sum_pz", "(Ang^-1)",
-                           static_cast<Mantid::coord_t>(m_d0Min),
-                           static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
-  MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(
-      new MDHistoDimension("Pz_i - Pz_f", "diff_pz", "(Ang^-1)",
-                           static_cast<Mantid::coord_t>(m_d1Min),
-                           static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
+  MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension(
+      m_d0Label, m_d0ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
+      static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
+  MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension(
+      m_d1Label, m_d1ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
+      static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
 
   auto ws = createMDWorkspace(pSumDim, pDiffDim, boxController);
 
@@ -105,10 +104,10 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(
 
   // Create an X - Axis.
   MantidVec xAxisVec = createXAxis(ws.get(), gradPSum, cxToPSum, m_d0NumBins,
-                                   "Pi + Pf", "1/Angstroms");
+                                   m_d0Label, "1/Angstroms");
   // Create a Y (vertical) Axis
   createVerticalAxis(ws.get(), xAxisVec, gradPDiff, cyToPDiff, m_d1NumBins,
-                     "Pi - Pf", "1/Angstroms");
+                     m_d1Label, "1/Angstroms");
 
   // Loop over all entries in the input workspace and calculate Psum and Pdiff
   // for each.

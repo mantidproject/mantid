@@ -25,8 +25,8 @@ namespace MDAlgorithms {
 ReflectometryTransformKiKf::ReflectometryTransformKiKf(
     double kiMin, double kiMax, double kfMin, double kfMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform(kiMin, kiMax, kfMin, kfMax, numberOfBinsQx,
-                             numberOfBinsQz),
+    : ReflectometryTransform("Ki", "ki", kiMin, kiMax, "Kf", "kf", kfMin, kfMax,
+                             numberOfBinsQx, numberOfBinsQz),
       m_KiCalculation(incidentTheta) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
@@ -48,10 +48,10 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController) const {
   MDHistoDimension_sptr kiDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Ki", "ki", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
+      m_d0Label, m_d0ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
       static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
   MDHistoDimension_sptr kfDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Kf", "kf", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
+      m_d1Label, m_d1ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
       static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
 
   auto ws = createMDWorkspace(kiDim, kfDim, boxController);
@@ -106,10 +106,10 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformKiKf::execute(
   const double czToKf = m_d1Min - (1 / gradKf);
 
   // Create an X - Axis.
-  MantidVec xAxisVec =
-      createXAxis(ws.get(), gradKi, cxToKi, m_d0NumBins, "ki", "1/Angstroms");
+  MantidVec xAxisVec = createXAxis(ws.get(), gradKi, cxToKi, m_d0NumBins,
+                                   m_d0Label, "1/Angstroms");
   // Create a Y (vertical) Axis
-  createVerticalAxis(ws.get(), xAxisVec, gradKf, czToKf, m_d1NumBins, "kf",
+  createVerticalAxis(ws.get(), xAxisVec, gradKf, czToKf, m_d1NumBins, m_d1Label,
                      "1/Angstroms");
 
   // Loop over all entries in the input workspace and calculate ki and kf for

@@ -40,8 +40,8 @@ ReflectometryTransformQxQz::~ReflectometryTransformQxQz() {}
 ReflectometryTransformQxQz::ReflectometryTransformQxQz(
     double qxMin, double qxMax, double qzMin, double qzMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
-    : ReflectometryTransform(qxMin, qxMax, qzMin, qzMax, numberOfBinsQx,
-                             numberOfBinsQz),
+    : ReflectometryTransform("Qx", "qx", qxMin, qxMax, "Qz", "qz", qzMin, qzMax,
+                             numberOfBinsQx, numberOfBinsQz),
       m_inTheta(incidentTheta) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
@@ -60,10 +60,10 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
                                       BoxController_sptr boxController) const {
 
   MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Qx", "qx", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
+      m_d0Label, m_d0ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d0Min),
       static_cast<Mantid::coord_t>(m_d0Max), m_d0NumBins));
   MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension(
-      "Qz", "qz", "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
+      m_d1Label, m_d1ID, "(Ang^-1)", static_cast<Mantid::coord_t>(m_d1Min),
       static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins));
 
   auto ws = createMDWorkspace(qxDim, qzDim, boxController);
@@ -123,10 +123,10 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
   const double czToQ = m_d1Min - (1 / gradQz);
 
   // Create an X - Axis.
-  MantidVec xAxisVec =
-      createXAxis(ws.get(), gradQx, cxToQ, m_d0NumBins, "qx", "1/Angstroms");
+  MantidVec xAxisVec = createXAxis(ws.get(), gradQx, cxToQ, m_d0NumBins,
+                                   m_d0Label, "1/Angstroms");
   // Create a Y (vertical) Axis
-  createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_d1NumBins, "qz",
+  createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_d1NumBins, m_d1Label,
                      "1/Angstroms");
 
   CalculateReflectometryQxQz qCalc;

@@ -49,6 +49,10 @@ protected:
   const double m_d1Min;
   const double m_d0Max;
   const double m_d1Max;
+  const std::string m_d0Label;
+  const std::string m_d1Label;
+  const std::string m_d0ID;
+  const std::string m_d1ID;
 
   /// Two theta angles cache
   mutable std::vector<double> m_theta;
@@ -78,7 +82,9 @@ public:
   executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
   virtual ~ReflectometryTransform();
-  ReflectometryTransform(double d0Min, double d0Max, double d1Min, double d1Max,
+  ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
+                         double d0Min, double d0Max, const std::string &d1Label,
+                         const std::string &d1ID, double d1Min, double d1Max,
                          size_t d0NumBins, size_t d1NumBins);
 };
 
