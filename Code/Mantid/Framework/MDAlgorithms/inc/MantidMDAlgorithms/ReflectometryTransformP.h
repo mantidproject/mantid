@@ -3,59 +3,44 @@
 
 #include <cmath>
 
+#include "MantidDataObjects/CalculateReflectometry.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 /**
-class CalculateReflectometryPBase: Base class for p-type transforms.
+class CalculateReflectometryP: p-type transformation calculator
 */
-class CalculateReflectometryPBase {
-protected:
-  double m_sinThetaInitial;
-  double m_sinThetaFinal;
-
-  CalculateReflectometryPBase(const double &thetaIncident) {
-    m_sinThetaInitial = sin(M_PI / 180.0 * thetaIncident);
-    m_sinThetaFinal = -DBL_MAX;
-  }
-  ~CalculateReflectometryPBase() {}
+class CalculateReflectometryP : public DataObjects::CalculateReflectometry {
+private:
+  double m_sin_theta_i;
+  double m_sin_theta_f;
 
 public:
-  void setThetaFinal(const double &thetaFinal) {
-    m_sinThetaFinal = sin(M_PI / 180.0 * thetaFinal);
-  }
-};
+  CalculateReflectometryP() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
+  ~CalculateReflectometryP(){};
 
-/**
-class CalculateReflectometryDiffP: Calculates difference between ki and kf.
-*/
-class CalculateReflectometryDiffP : public CalculateReflectometryPBase {
-public:
-  CalculateReflectometryDiffP(const double &thetaInitial)
-      : CalculateReflectometryPBase(thetaInitial) {}
-  double execute(const double &wavelength) {
+  void setThetaIncident(double thetaIncident) {
+    m_sin_theta_i = sin(to_radians_factor * thetaIncident);
+  }
+
+  void setThetaFinal(double thetaFinal) {
+    m_sin_theta_f = sin(to_radians_factor * thetaFinal);
+  }
+
+  double calculateDim0(double wavelength) const {
     double wavenumber = 2 * M_PI / wavelength;
-    double ki = wavenumber * m_sinThetaInitial;
-    double kf = wavenumber * m_sinThetaFinal;
-    return ki - kf;
-  }
-};
-
-/**
-class CalculateReflectometrySumP: Calculates sum of ki and kf.
-*/
-class CalculateReflectometrySumP : public CalculateReflectometryPBase {
-public:
-  CalculateReflectometrySumP(const double &thetaInitial)
-      : CalculateReflectometryPBase(thetaInitial) {}
-  ~CalculateReflectometrySumP(){};
-  double execute(const double &wavelength) {
-    double wavenumber = 2 * M_PI / wavelength;
-    double ki = wavenumber * m_sinThetaInitial;
-    double kf = wavenumber * m_sinThetaFinal;
+    double ki = wavenumber * m_sin_theta_i;
+    double kf = wavenumber * m_sin_theta_f;
     return ki + kf;
+  }
+
+  double calculateDim1(double wavelength) const {
+    double wavenumber = 2 * M_PI / wavelength;
+    double ki = wavenumber * m_sin_theta_i;
+    double kf = wavenumber * m_sin_theta_f;
+    return ki - kf;
   }
 };
 
@@ -88,10 +73,8 @@ public:
 class DLLExport ReflectometryTransformP
     : public DataObjects::ReflectometryTransform {
 private:
-  /// Object performing raw calculation to determine pzi + pzf
-  mutable CalculateReflectometrySumP m_pSumCalculation;
-  /// Object performing raw calculation to determine pzi - pzf
-  mutable CalculateReflectometryDiffP m_pDiffCalculation;
+  /// Object performing raw p calculation
+  mutable CalculateReflectometryP m_pCalculation;
 
 public:
   ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin,

@@ -28,11 +28,11 @@ ReflectometryTransformP::ReflectometryTransformP(
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
     : ReflectometryTransform("Pz_i + Pz_f", "sum_pz", pSumMin, pSumMax,
                              "Pz_i - Pz_f", "diff_pz", pDiffMin, pDiffMax,
-                             numberOfBinsQx, numberOfBinsQz),
-      m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta) {
+                             numberOfBinsQx, numberOfBinsQz) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
+  m_pCalculation.setThetaIncident(incidentTheta);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -59,14 +59,13 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::executeMD(
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double theta_final = spectraAxis->getValue(index);
-    m_pSumCalculation.setThetaFinal(theta_final);
-    m_pDiffCalculation.setThetaFinal(theta_final);
+    m_pCalculation.setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double &wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      double _qx = m_pSumCalculation.execute(wavelength);
-      double _qz = m_pDiffCalculation.execute(wavelength);
+      double _qx = m_pCalculation.calculateDim0(wavelength);
+      double _qz = m_pCalculation.calculateDim1(wavelength);
       double centers[2] = {_qx, _qz};
 
       ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]),
@@ -118,14 +117,13 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double theta_final = spectraAxis->getValue(index);
-    m_pSumCalculation.setThetaFinal(theta_final);
-    m_pDiffCalculation.setThetaFinal(theta_final);
+    m_pCalculation.setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      double _pSum = m_pSumCalculation.execute(wavelength);
-      double _pDiff = m_pDiffCalculation.execute(wavelength);
+      double _pSum = m_pCalculation.calculateDim0(wavelength);
+      double _pDiff = m_pCalculation.calculateDim1(wavelength);
 
       if (_pSum >= m_d0Min && _pSum <= m_d0Max && _pDiff >= m_d1Min &&
           _pDiff <= m_d1Max) // Check that the calculated ki and kf are in range
