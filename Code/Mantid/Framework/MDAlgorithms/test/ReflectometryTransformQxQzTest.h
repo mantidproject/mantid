@@ -106,24 +106,26 @@ public:
   void test_calculate_Qx() {
     // Set up calculation so that it collapses down to 2*M_PI/wavelength by
     // setting initial theta to M_PI/2 and final theta to zero
-    CalculateReflectometryQxQz calculator(90);
+    CalculateReflectometryQxQz calculator;
+    calculator.setThetaIncident(90);
     double qx;
     const double wavelength = 0.1;
     TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(0));
-    TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateX(wavelength));
+    TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim0(wavelength));
     TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
   }
 
   void test_recalculate_Qx() {
-    CalculateReflectometryQxQz calculator(0);
+    CalculateReflectometryQxQz calculator;
+    calculator.setThetaIncident(0);
     calculator.setThetaFinal(0);
     const double wavelength = 0.1;
-    TS_ASSERT_DELTA(0, calculator.calculateX(wavelength), 0.0001);
+    TS_ASSERT_DELTA(0, calculator.calculateDim0(wavelength), 0.0001);
 
     // Now reset the final theta and should be able to re-execute
     calculator.setThetaFinal(90);
-    TS_ASSERT_DELTA(-2 * M_PI / wavelength, calculator.calculateX(wavelength),
-                    0.0001);
+    TS_ASSERT_DELTA(-2 * M_PI / wavelength,
+                    calculator.calculateDim0(wavelength), 0.0001);
   }
 
   //---- End Tests for Qx Calculator ---- //
@@ -132,24 +134,26 @@ public:
 
   void test_calculate_Qz() {
     // Set up calculation so that it collapses down to 2*M_PI/wavelength
-    CalculateReflectometryQxQz calculator(0);
+    CalculateReflectometryQxQz calculator;
+    calculator.setThetaIncident(0);
     double qx;
     const double wavelength = 0.1;
     TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(90));
-    TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateZ(wavelength));
+    TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim1(wavelength));
     TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
   }
 
   void test_recalculate_Qz() {
-    CalculateReflectometryQxQz calculator(90);
+    CalculateReflectometryQxQz calculator;
+    calculator.setThetaIncident(90);
     calculator.setThetaFinal(90);
     const double wavelength = 0.1;
     TS_ASSERT_DELTA(2 * (2 * M_PI / wavelength),
-                    calculator.calculateZ(wavelength), 0.001);
+                    calculator.calculateDim1(wavelength), 0.001);
 
     // Now reset the final theta and should be able to re-execute
     calculator.setThetaFinal(0);
-    TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateZ(wavelength),
+    TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateDim1(wavelength),
                     0.001);
   }
 
