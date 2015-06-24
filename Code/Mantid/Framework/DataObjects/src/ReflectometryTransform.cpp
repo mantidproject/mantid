@@ -382,7 +382,7 @@ void ReflectometryTransform::initAngularCaches(
     rot.rotate(maxPoint);
     double boxWidth = maxPoint[upDir];
 
-    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2));
+    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2)) * 180.0 / M_PI;
   }
 }
 }
