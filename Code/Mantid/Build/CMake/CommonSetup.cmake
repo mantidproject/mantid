@@ -45,7 +45,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost REQUIRED date_time regex ) 
+find_package ( Boost REQUIRED date_time regex )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
@@ -74,10 +74,11 @@ set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR (APPLE AND OSX_VERSION VERSION_LESS 10.9))
   set (HDF5_DIR "${CMAKE_MODULE_PATH}")
-  find_package ( HDF5 COMPONENTS HL REQUIRED
+  find_package ( HDF5 COMPONENTS CXX HL REQUIRED
     CONFIGS hdf5-config.cmake )
+  add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
 else()
-  find_package ( HDF5 COMPONENTS HL REQUIRED )
+  find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
 endif()
 
 find_package ( PythonInterp )
@@ -115,7 +116,7 @@ if ( GIT_FOUND )
     string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
 
     # Get the date of the last commit
-    execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE 
+    execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
     string ( SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE )
@@ -251,7 +252,7 @@ endif ()
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
 elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  # Remove once clang warnings have been fixed. 
+  # Remove once clang warnings have been fixed.
   if ( NOT APPLE)
     include ( GNUSetup )
   endif ()
@@ -287,7 +288,7 @@ find_package ( GMock )
 if ( GMOCK_FOUND AND GTEST_FOUND )
   message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
 else ()
-  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." ) 
+  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." )
 endif()
 
 find_package ( PyUnitTest )
