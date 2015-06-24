@@ -85,6 +85,7 @@ public:
 
 protected:
   Workspace(const Workspace &other) = default;
+  Workspace &operator=(const Workspace &other) = default;
 
 private:
   void setName(const std::string &);
