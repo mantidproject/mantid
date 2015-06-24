@@ -135,6 +135,7 @@ void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id, QPushButton* cancelBt
   if ((cancelBtn) && (cancelBtn->text() == "Cancel"))
   {
     cancelBtn->setText("Cancelling");
+    cancelBtn->setEnabled(false);
     IAlgorithm_sptr a = Mantid::API::AlgorithmManager::Instance().getAlgorithm(id);
     if (!a.get()) return;
     a->cancel();

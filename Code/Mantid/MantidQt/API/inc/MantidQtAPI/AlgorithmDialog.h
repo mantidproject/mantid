@@ -204,7 +204,7 @@ protected:
   /// Create a row layout of buttons with specified text
   QLayout *createDefaultButtonLayout(const QString & helpText = QString("?"),
                      const QString & loadText = QString("Run"), 
-                     const QString & cancelText = QString("Cancel"), 
+                     const QString & cancelText = QString("Close"), 
                      const QString & keepOpenText = QString("Keep Open"));
 
   /// Create a help button for this algorithm
