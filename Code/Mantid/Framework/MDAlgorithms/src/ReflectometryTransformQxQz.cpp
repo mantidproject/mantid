@@ -68,7 +68,8 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
 
   auto ws = createMDWorkspace(qxDim, qzDim, boxController);
 
-  CalculateReflectometryQxQz qCalc(m_inTheta);
+  CalculateReflectometryQxQz qCalc;
+  qCalc.setThetaIncident(m_inTheta);
 
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
@@ -82,8 +83,8 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      double _qx = qCalc.calculateX(wavelength);
-      double _qz = qCalc.calculateZ(wavelength);
+      double _qx = qCalc.calculateDim0(wavelength);
+      double _qz = qCalc.calculateDim1(wavelength);
       double centers[2] = {_qx, _qz};
 
       ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]),
@@ -128,7 +129,8 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
   createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_d1NumBins, "qz",
                      "1/Angstroms");
 
-  CalculateReflectometryQxQz qCalc(m_inTheta);
+  CalculateReflectometryQxQz qCalc;
+  qCalc.setThetaIncident(m_inTheta);
 
   // Loop over all entries in the input workspace and calculate qx and qz for
   // each.
@@ -144,8 +146,8 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      const double _qx = qCalc.calculateX(wavelength);
-      const double _qz = qCalc.calculateZ(wavelength);
+      const double _qx = qCalc.calculateDim0(wavelength);
+      const double _qz = qCalc.calculateDim1(wavelength);
 
       if (_qx >= m_d0Min && _qx <= m_d0Max && _qz >= m_d1Min &&
           _qz <= m_d1Max) // Check that the calculated qx and qz are in range
@@ -193,8 +195,10 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
-  CalculateReflectometryQxQz qcThetaLower(m_inTheta);
-  CalculateReflectometryQxQz qcThetaUpper(m_inTheta);
+  CalculateReflectometryQxQz qcThetaLower;
+  CalculateReflectometryQxQz qcThetaUpper;
+  qcThetaLower.setThetaIncident(m_inTheta);
+  qcThetaUpper.setThetaIncident(m_inTheta);
 
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
@@ -219,14 +223,14 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
       const double lamUpper = X[j + 1];
 
       // fractional rebin
-      const V2D ll(qcThetaLower.calculateX(lamLower),
-                   qcThetaLower.calculateZ(lamLower));
-      const V2D lr(qcThetaLower.calculateX(lamUpper),
-                   qcThetaLower.calculateZ(lamUpper));
-      const V2D ul(qcThetaUpper.calculateX(lamLower),
-                   qcThetaUpper.calculateZ(lamLower));
-      const V2D ur(qcThetaUpper.calculateX(lamUpper),
-                   qcThetaUpper.calculateZ(lamUpper));
+      const V2D ll(qcThetaLower.calculateDim0(lamLower),
+                   qcThetaLower.calculateDim1(lamLower));
+      const V2D lr(qcThetaLower.calculateDim0(lamUpper),
+                   qcThetaLower.calculateDim1(lamUpper));
+      const V2D ul(qcThetaUpper.calculateDim0(lamLower),
+                   qcThetaUpper.calculateDim1(lamLower));
+      const V2D ur(qcThetaUpper.calculateDim0(lamUpper),
+                   qcThetaUpper.calculateDim1(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
