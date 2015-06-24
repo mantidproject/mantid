@@ -4,6 +4,10 @@
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
+#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
+#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
+
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
 
