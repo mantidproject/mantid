@@ -14,6 +14,8 @@ class MatrixWorkspace;
 }
 namespace DataObjects {
 
+class CalculateReflectometry;
+
 /** ReflectometryMDTransform : Abstract type for reflectometry transforms to
  MDWorkspaces. This is a Strategy Design Pattern.
 
@@ -53,6 +55,7 @@ protected:
   const std::string m_d1Label;
   const std::string m_d0ID;
   const std::string m_d1ID;
+  boost::shared_ptr<CalculateReflectometry> m_calculator;
 
   /// Two theta angles cache
   mutable std::vector<double> m_theta;
@@ -85,7 +88,8 @@ public:
   ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
                          double d0Min, double d0Max, const std::string &d1Label,
                          const std::string &d1ID, double d1Min, double d1Max,
-                         size_t d0NumBins, size_t d1NumBins);
+                         size_t d0NumBins, size_t d1NumBins,
+                         CalculateReflectometry *calc);
 };
 
 /// Create a new x-axis for the output workspace

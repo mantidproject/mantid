@@ -72,10 +72,6 @@ public:
 */
 class DLLExport ReflectometryTransformP
     : public DataObjects::ReflectometryTransform {
-private:
-  /// Object performing raw p calculation
-  mutable CalculateReflectometryP m_pCalculation;
-
 public:
   ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin,
                           double pDiffMax, double incidentTheta,

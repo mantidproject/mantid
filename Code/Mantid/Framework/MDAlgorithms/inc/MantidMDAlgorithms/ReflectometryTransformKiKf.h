@@ -73,10 +73,6 @@ public:
 */
 class DLLExport ReflectometryTransformKiKf
     : public DataObjects::ReflectometryTransform {
-private:
-  /// Object performing raw caclcation to determine Ki
-  mutable CalculateReflectometryK m_kCalculator;
-
 public:
   ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin,
                              double kfMax, double incidentTheta,

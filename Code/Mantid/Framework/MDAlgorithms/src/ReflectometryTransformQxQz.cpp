@@ -41,7 +41,8 @@ ReflectometryTransformQxQz::ReflectometryTransformQxQz(
     double qxMin, double qxMax, double qzMin, double qzMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
     : ReflectometryTransform("Qx", "qx", qxMin, qxMax, "Qz", "qz", qzMin, qzMax,
-                             numberOfBinsQx, numberOfBinsQz),
+                             numberOfBinsQx, numberOfBinsQz,
+                             new CalculateReflectometryQxQz()),
       m_inTheta(incidentTheta) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
@@ -68,8 +69,7 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
 
   auto ws = createMDWorkspace(qxDim, qzDim, boxController);
 
-  CalculateReflectometryQxQz qCalc;
-  qCalc.setThetaIncident(m_inTheta);
+  m_calculator->setThetaIncident(m_inTheta);
 
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
@@ -78,13 +78,13 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double theta_final = spectraAxis->getValue(index);
-    qCalc.setThetaFinal(theta_final);
+    m_calculator->setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      double _qx = qCalc.calculateDim0(wavelength);
-      double _qz = qCalc.calculateDim1(wavelength);
+      double _qx = m_calculator->calculateDim0(wavelength);
+      double _qz = m_calculator->calculateDim1(wavelength);
       double centers[2] = {_qx, _qz};
 
       ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]),
@@ -129,8 +129,7 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
   createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_d1NumBins, m_d1Label,
                      "1/Angstroms");
 
-  CalculateReflectometryQxQz qCalc;
-  qCalc.setThetaIncident(m_inTheta);
+  m_calculator->setThetaIncident(m_inTheta);
 
   // Loop over all entries in the input workspace and calculate qx and qz for
   // each.
@@ -141,13 +140,13 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double theta_final = spectraAxis->getValue(index);
-    qCalc.setThetaFinal(theta_final);
+    m_calculator->setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      const double _qx = qCalc.calculateDim0(wavelength);
-      const double _qz = qCalc.calculateDim1(wavelength);
+      const double _qx = m_calculator->calculateDim0(wavelength);
+      const double _qz = m_calculator->calculateDim1(wavelength);
 
       if (_qx >= m_d0Min && _qx <= m_d0Max && _qz >= m_d1Min &&
           _qz <= m_d1Max) // Check that the calculated qx and qz are in range

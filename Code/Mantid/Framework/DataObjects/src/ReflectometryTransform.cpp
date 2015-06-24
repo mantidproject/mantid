@@ -1,10 +1,12 @@
 #include "MantidDataObjects/ReflectometryTransform.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/BinEdgeAxis.h"
+#include "MantidDataObjects/CalculateReflectometry.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-
 #include "MantidKernel/UnitFactory.h"
+
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -17,10 +19,11 @@ namespace DataObjects {
 ReflectometryTransform::ReflectometryTransform(
     const std::string &d0Label, const std::string &d0ID, double d0Min,
     double d0Max, const std::string &d1Label, const std::string &d1ID,
-    double d1Min, double d1Max, size_t d0NumBins, size_t d1NumBins)
+    double d1Min, double d1Max, size_t d0NumBins, size_t d1NumBins,
+    CalculateReflectometry *calc)
     : m_d0NumBins(d0NumBins), m_d1NumBins(d1NumBins), m_d0Min(d0Min),
       m_d1Min(d1Min), m_d0Max(d0Max), m_d1Max(d1Max), m_d0Label(d0Label),
-      m_d1Label(d1Label), m_d0ID(d0ID), m_d1ID(d1ID) {
+      m_d1Label(d1Label), m_d0ID(d0ID), m_d1ID(d1ID), m_calculator(calc) {
   if (d0Min >= d0Max || d1Min >= d1Max)
     throw std::invalid_argument(
         "The supplied minimum values must be less than the maximum values.");

@@ -26,11 +26,12 @@ ReflectometryTransformKiKf::ReflectometryTransformKiKf(
     double kiMin, double kiMax, double kfMin, double kfMax,
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
     : ReflectometryTransform("Ki", "ki", kiMin, kiMax, "Kf", "kf", kfMin, kfMax,
-                             numberOfBinsQx, numberOfBinsQz) {
+                             numberOfBinsQx, numberOfBinsQz,
+                             new CalculateReflectometryK()) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
-  m_kCalculator.setThetaIncident(incidentTheta);
+  m_calculator->setThetaIncident(incidentTheta);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -63,13 +64,13 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::executeMD(
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double theta_final = spectraAxis->getValue(index);
-    m_kCalculator.setThetaFinal(theta_final);
+    m_calculator->setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double &wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      double _ki = m_kCalculator.calculateDim0(wavelength);
-      double _kf = m_kCalculator.calculateDim1(wavelength);
+      double _ki = m_calculator->calculateDim0(wavelength);
+      double _kf = m_calculator->calculateDim1(wavelength);
       double centers[2] = {_ki, _kf};
 
       ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]),
@@ -121,13 +122,13 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransformKiKf::execute(
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
     const double theta_final = spectraAxis->getValue(index);
-    m_kCalculator.setThetaFinal(theta_final);
+    m_calculator->setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
-      double _ki = m_kCalculator.calculateDim0(wavelength);
-      double _kf = m_kCalculator.calculateDim1(wavelength);
+      double _ki = m_calculator->calculateDim0(wavelength);
+      double _kf = m_calculator->calculateDim1(wavelength);
 
       if (_ki >= m_d0Min && _ki <= m_d0Max && _kf >= m_d1Min &&
           _kf <= m_d1Max) // Check that the calculated ki and kf are in range
