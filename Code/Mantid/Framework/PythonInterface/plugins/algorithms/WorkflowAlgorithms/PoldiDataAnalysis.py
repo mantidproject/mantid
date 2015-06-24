@@ -3,6 +3,7 @@ from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 
+
 class PoldiDataAnalysis(PythonAlgorithm):
     """
     This workflow algorithm uses all of the POLDI specific algorithms to perform a complete data analysis,
@@ -34,7 +35,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
             'Voigt': ['LorentzFWHM']
         }
 
-
         self.declareProperty(WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
                              doc='MatrixWorkspace with 2D POLDI data and valid POLDI instrument.')
 
@@ -44,8 +44,22 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.declareProperty("MinimumPeakSeparation", 10, direction=Direction.Input,
                              doc='Minimum number of points between neighboring peaks.')
 
+        self.declareProperty("MinimumPeakHeight", 0.0, direction=Direction.Input,
+                             doc=('Minimum height of peaks. If it is left at 0, the minimum peak height is calculated'
+                                  'from background noise.'))
+
+        self.declareProperty("MaximumRelativeFwhm", 0.02, direction=Direction.Input,
+                             doc=('Peaks with a relative FWHM larger than this are removed during the 1D fit.'))
+
+        self.declareProperty("ScatteringContributions", "1", direction=Direction.Input,
+                             doc=('If there is more than one compound, you may supply estimates of their scattering '
+                                  'contributions, which sometimes improves indexing.'))
+
         self.declareProperty(WorkspaceProperty("ExpectedPeaks", defaultValue="", direction=Direction.Input),
                              doc='TableWorkspace or WorkspaceGroup with expected peaks used for indexing.')
+
+        self.declareProperty("RemoveUnindexedPeaksFor2DFit", defaultValue=False, direction=Direction.Input,
+                             doc='Discard unindexed peaks for 2D fit, this is always the case if PawleyFit is active.')
 
         allowedProfileFunctions = StringListValidator(self._allowedFunctions)
         self.declareProperty("ProfileFunction", "Gaussian", validator=allowedProfileFunctions,
@@ -67,6 +81,10 @@ class PoldiDataAnalysis(PythonAlgorithm):
                              doc=('If this is activated, plot the sum of residuals and calculated spectrum together '
                                   'with the theoretical spectrum and the residuals.'))
 
+        self.declareProperty("OutputIntegratedIntensities", False, direction=Direction.Input,
+                             doc=("If this option is checked the peak intensities of the 2D-fit will be integrated, "
+                                  "otherwise they will be the maximum intensity."))
+
         self.declareProperty('OutputRawFitParameters', False, direction=Direction.Input,
                              doc=('Activating this option produces an output workspace which contains the raw '
                                   'fit parameters.'))
@@ -82,10 +100,15 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.expectedPeaks = self.getProperty("ExpectedPeaks").value
         self.profileFunction = self.getProperty("ProfileFunction").value
         self.useGlobalParameters = self.getProperty("TieProfileParameters").value
+        self.maximumRelativeFwhm = self.getProperty("MaximumRelativeFwhm").value
+        self.outputIntegratedIntensities = self.getProperty("OutputIntegratedIntensities").value
 
         self.globalParameters = ''
         if self.useGlobalParameters:
             self.globalParameters = ','.join(self._globalParameters[self.profileFunction])
+
+        if not self.workspaceHasCounts(self.inputWorkspace):
+            raise RuntimeError("Aborting analysis since workspace " + self.baseName + " does not contain any counts.")
 
         correlationSpectrum = self.runCorrelation()
         self.outputWorkspaces.append(correlationSpectrum)
@@ -101,6 +124,17 @@ class PoldiDataAnalysis(PythonAlgorithm):
         RenameWorkspace(outputWs, self.getProperty("OutputWorkspace").valueAsStr)
 
         self.setProperty("OutputWorkspace", outputWs)
+
+    def workspaceHasCounts(self, workspace):
+        integrated = Integration(workspace)
+        summed = SumSpectra(integrated)
+
+        counts = summed.readY(0)[0]
+
+        DeleteWorkspace(integrated)
+        DeleteWorkspace(summed)
+
+        return counts > 0
 
     def runCorrelation(self):
         correlationName = self.baseName + "_correlation"
@@ -155,6 +189,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         PoldiPeakSearch(InputWorkspace=correlationWorkspace,
                         MaximumPeakNumber=self.getProperty('MaximumPeakNumber').value,
                         MinimumPeakSeparation=self.getProperty('MinimumPeakSeparation').value,
+                        MinimumPeakHeight=self.getProperty('MinimumPeakHeight').value,
                         OutputWorkspace=peaksName)
 
         return AnalysisDataService.retrieve(peaksName)
@@ -165,6 +200,8 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         PoldiFitPeaks1D(InputWorkspace=correlationWorkspace,
                         PoldiPeakTable=rawPeaks,
+                        FwhmMultiples=3.0,
+                        MaximumRelativeFwhm=self.maximumRelativeFwhm,
                         PeakFunction=self.profileFunction,
                         OutputWorkspace=refinedPeaksName,
                         FitPlotsWorkspace=plotNames)
@@ -177,6 +214,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         PoldiIndexKnownCompounds(InputWorkspace=peaks,
                                  CompoundWorkspaces=self.expectedPeaks,
+                                 ScatteringContributions=self.getProperty("ScatteringContributions").value,
                                  OutputWorkspace=indexedPeaksName)
 
         indexedPeaks = AnalysisDataService.retrieve(indexedPeaksName)
@@ -184,7 +222,8 @@ class PoldiDataAnalysis(PythonAlgorithm):
         # Remove unindexed peaks from group for pawley fit
         unindexedPeaks = indexedPeaks.getItem(indexedPeaks.getNumberOfEntries() - 1)
         pawleyFit = self.getProperty('PawleyFit').value
-        if pawleyFit:
+        removeUnindexed = self.getProperty('RemoveUnindexedPeaksFor2DFit').value
+        if removeUnindexed or pawleyFit:
             indexedPeaks.remove(unindexedPeaks.getName())
 
         self._removeEmptyTablesFromGroup(indexedPeaks)
@@ -213,6 +252,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
                         OutputWorkspace=spectrum2DName,
                         Calculated1DSpectrum=spectrum1DName,
                         RefinedPoldiPeakWorkspace=refinedPeaksName,
+                        OutputIntegratedIntensities=self.outputIntegratedIntensities,
                         RefinedCellParameters=refinedCellName,
                         RawFitParameters=rawFitParametersWorkspaceName)
 
@@ -251,6 +291,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         if plotResults:
             from IndirectImport import import_mantidplot
+
             plot = import_mantidplot()
 
             plotWindow = plot.plotSpectrum(total, 0, type=1)

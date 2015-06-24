@@ -8,6 +8,7 @@
 using ::testing::Return;
 
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 
 using namespace  Mantid::Geometry;
@@ -159,6 +160,24 @@ public:
 
         symbols = factory.subscribedSpaceGroupSymbols(2);
         TS_ASSERT_EQUALS(symbols.size(), 2);
+    }
+
+    void testSubscribedSpaceGroupSymbolsForPointGroup() {
+        PointGroup_sptr pg = PointGroupFactory::Instance().createPointGroup("-1");
+
+        TestableSpaceGroupFactory factory;
+
+        TS_ASSERT_EQUALS(factory.subscribedSpaceGroupSymbols(pg).size(), 0);
+        TS_ASSERT(factory.m_pointGroupMap.empty());
+
+        factory.subscribeTabulatedSpaceGroup(2, "P-1", "x,y,z; -x,-y,-z");
+        TS_ASSERT_EQUALS(factory.subscribedSpaceGroupSymbols(pg).size(), 1);
+        TS_ASSERT(!factory.m_pointGroupMap.empty());
+
+        factory.subscribeTabulatedSpaceGroup(2, "F-1", "x,y,z; -x,-y,-z");
+        TS_ASSERT(factory.m_pointGroupMap.empty());
+        TS_ASSERT_EQUALS(factory.subscribedSpaceGroupSymbols(pg).size(), 2);
+        TS_ASSERT(!factory.m_pointGroupMap.empty());
     }
 
     void testUnsubscribeSymbol()

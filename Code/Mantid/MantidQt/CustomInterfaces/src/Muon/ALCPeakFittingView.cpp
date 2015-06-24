@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include <QMessageBox>
 
@@ -13,8 +14,18 @@ namespace CustomInterfaces
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget* widget)
   : m_widget(widget), m_ui(), m_dataCurve(new QwtPlotCurve()), m_fittedCurve(new QwtPlotCurve()),
-    m_peakPicker(NULL)
+    m_dataErrorCurve(NULL), m_peakPicker(NULL)
 {}
+
+ALCPeakFittingView::~ALCPeakFittingView()
+{
+  m_dataCurve->detach();
+  delete m_dataCurve;
+  if (m_dataErrorCurve) {
+    m_dataErrorCurve->detach();
+    delete m_dataErrorCurve;
+  }
+}
 
 IFunction_const_sptr ALCPeakFittingView::function(QString index) const
 {
@@ -62,9 +73,22 @@ void ALCPeakFittingView::initialize()
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
 }
 
-void ALCPeakFittingView::setDataCurve(const QwtData& data)
-{
+void ALCPeakFittingView::setDataCurve(const QwtData &data,
+                                      const std::vector<double> &errors) {
+
+  // Set data
   m_dataCurve->setData(data);
+
+  // Set errors
+  if (m_dataErrorCurve) {
+    m_dataErrorCurve->detach();
+    delete m_dataErrorCurve;
+  }
+  m_dataErrorCurve =
+      new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
+  m_dataErrorCurve->attach(m_ui.plot);
+
+  // Replot
   m_ui.plot->replot();
 }
 

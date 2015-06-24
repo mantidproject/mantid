@@ -25,13 +25,17 @@ def EndTime(prog):
     logger.notice('----------')
 
 
-def getInstrRun(ws_name):
+def get_run_number(ws_name):
     """
-    Get the instrument name and run number from a workspace.
+    Gets the run number for a given workspace.
 
-    @param ws_name - name of the workspace
-    @return tuple of form (instrument, run number)
+    Attempts to get from logs and falls back to parsing the workspace name for
+    something that looks like a run number.
+
+    @param ws_name Name of workspace
+    @return Parsed run number
     """
+
     workspace = mtd[ws_name]
     run_number = str(workspace.getRunNumber())
     if run_number == '0':
@@ -42,7 +46,20 @@ def getInstrRun(ws_name):
         else:
             raise RuntimeError("Could not find run number associated with workspace.")
 
-    instrument = workspace.getInstrument().getName()
+    return run_number
+
+
+def getInstrRun(ws_name):
+    """
+    Get the instrument name and run number from a workspace.
+
+    @param ws_name - name of the workspace
+    @return tuple of form (instrument, run number)
+    """
+
+    run_number = get_run_number(ws_name)
+
+    instrument = mtd[ws_name].getInstrument().getName()
     if instrument != '':
         facility = config.getFacility()
         instrument = facility.instrument(instrument).filePrefix(int(run_number))
@@ -326,17 +343,17 @@ def CheckHistSame(in1WS, name1, in2WS, name2):
         raise ValueError(error)
 
 
-def CheckXrange(x_range, type):
+def CheckXrange(x_range, range_type):
     if not ((len(x_range) == 2) or (len(x_range) == 4)):
-        raise ValueError(type + ' - Range must contain either 2 or 4 numbers')
+        raise ValueError(range_type + ' - Range must contain either 2 or 4 numbers')
 
     for lower, upper in zip(x_range[::2], x_range[1::2]):
         if math.fabs(lower) < 1e-5:
-            raise ValueError('%s - input minimum (%f) is zero' % (type, lower))
+            raise ValueError('%s - input minimum (%f) is zero' % (range_type, lower))
         if math.fabs(upper) < 1e-5:
-            raise ValueError('%s - input maximum (%f) is zero' % (type, upper))
+            raise ValueError('%s - input maximum (%f) is zero' % (range_type, upper))
         if upper < lower:
-            raise ValueError('%s - input maximum (%f) < minimum (%f)' % (type, upper, lower))
+            raise ValueError('%s - input maximum (%f) < minimum (%f)' % (range_type, upper, lower))
 
 
 def CheckElimits(erange, Xin):
@@ -380,7 +397,7 @@ def getInstrumentParameter(ws, param_name):
     return param
 
 
-def plotSpectra(ws, y_axis_title, indicies=[]):
+def plotSpectra(ws, y_axis_title, indicies=None):
     """
     Plot a selection of spectra given a list of indicies
 
@@ -388,6 +405,9 @@ def plotSpectra(ws, y_axis_title, indicies=[]):
     @param y_axis_title - label for the y axis
     @param indicies - list of spectrum indicies to plot
     """
+    if indicies is None:
+        indicies = []
+
     if len(indicies) == 0:
         num_spectra = mtd[ws].getNumberHistograms()
         indicies = range(num_spectra)

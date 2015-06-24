@@ -36,6 +36,9 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'MaskSANS2DReductionGUI.txt',
                 'MaskSANS2DReductionGUI_MaskFiles.txt',
                 'MaskSANS2DReductionGUI_LimitEventsTime.txt',
+                'MASK_SANS2D_FRONT_Edges_16Mar2015.xml',
+                'MASK_SANS2D_REAR_Bottom_3_tubes_16May2014.xml',
+                'MASK_SANS2D_REAR_Edges_16Mar2015.xml',
                 'MAP17269.raw', # Don't need to check multiple MAPS files
                 'MAP17589.raw',
                 'MER06399.raw', # Don't need to check multiple MERLIN files
@@ -57,6 +60,8 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'WSH_test.dat',
                 'SANS2D_multiPeriodTests.csv',
                 'SANS2D_periodTests.csv',
+                'SANS2DTube_ZerroErrorFreeTest.txt',
+                'SANS2DTUBES_ZeroErrorFree_batch.csv',
                 'DIRECTM1_15785_12m_31Oct12_v12.dat',
                 'MaskSANS2DReductionGUI.txt',
                 'sans2d_reduction_gui_batch.csv'

@@ -1,13 +1,15 @@
 #include "MantidAPI/Workspace.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
 
 using namespace Mantid::API;
-using Mantid::Kernel::DataItem;
-using Mantid::PythonInterface::Registry::DataItemInterface;
+using namespace Mantid::Kernel;
+using namespace Mantid::PythonInterface;
+using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 namespace {
@@ -40,7 +42,6 @@ void export_Workspace() {
            return_value_policy<reference_existing_object>(), args("self"),
            "Return read-only access to the workspace history");
 
-  //-------------------------------------------------------------------------------------------------
-
-  DataItemInterface<Workspace>();
+  // register pointers
+  RegisterWorkspacePtrToPython<Workspace>();
 }

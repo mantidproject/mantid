@@ -7,7 +7,7 @@ import numpy as np
 
 #-------------------------------------------------------------------------------
 
-def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opts=None):
+def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
@@ -15,7 +15,8 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opt
     @param ipf_filename FIle path/name for the instrument parameter file to load
     @param spec_min Minimum spectra ID to load
     @param spec_max Maximum spectra ID to load
-    @param sum Sum loaded files
+    @param sum_files Sum loaded files
+    @param load_logs Load log files when loading runs
     @param load_opts Additional options to be passed to load algorithm
 
     @return List of loaded workspace names and flag indicating chopped data
@@ -43,6 +44,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opt
         else:
             Load(Filename=filename,
                  OutputWorkspace=ws_name,
+                 LoadLogFiles=load_logs,
                  **load_opts)
 
         # Load the instrument parameters

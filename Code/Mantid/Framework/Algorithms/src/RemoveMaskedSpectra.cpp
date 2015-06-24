@@ -77,7 +77,7 @@ void RemoveMaskedSpectra::exec() {
   }
 
   // Find indices of the unmasked spectra.
-  std::vector<specid_t> indices;
+  std::vector<size_t> indices;
   makeIndexList(indices, maskedWorkspace.get());
 
   auto extract = createChildAlgorithm("ExtractSpectra", 0, 1);
@@ -85,7 +85,7 @@ void RemoveMaskedSpectra::exec() {
   extract->setRethrows(true);
 
   extract->setProperty("InputWorkspace", inputWorkspace);
-  extract->setProperty("SpectrumList", indices);
+  extract->setProperty("WorkspaceIndexList", indices);
 
   extract->execute();
 
@@ -98,12 +98,12 @@ void RemoveMaskedSpectra::exec() {
 /// @param indices :: A reference to a vector to fill with the indices.
 /// @param maskedWorkspace :: A workspace with masking information.
 void RemoveMaskedSpectra::makeIndexList(
-    std::vector<specid_t> &indices, const API::MatrixWorkspace *maskedWorkspace) {
+    std::vector<size_t> &indices, const API::MatrixWorkspace *maskedWorkspace) {
   auto mask = dynamic_cast<const DataObjects::MaskWorkspace *>(maskedWorkspace);
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
       if (mask->readY(i)[0] == 0.0) {
-        indices.push_back(static_cast<specid_t>(i));
+        indices.push_back(static_cast<size_t>(i));
       }
     }
   } else {
@@ -115,7 +115,7 @@ void RemoveMaskedSpectra::makeIndexList(
         continue;
       }
       if (!det->isMasked()) {
-        indices.push_back(static_cast<specid_t>(i));
+        indices.push_back(static_cast<size_t>(i));
       }
     }
   }

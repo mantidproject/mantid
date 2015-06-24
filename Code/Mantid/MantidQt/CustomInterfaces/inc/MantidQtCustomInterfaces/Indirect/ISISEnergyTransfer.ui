@@ -36,7 +36,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCalibrationFile" native="true">
         <property name="enabled">
          <bool>false</bool>
@@ -61,7 +61,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QCheckBox" name="ckUseCalib">
         <property name="toolTip">
          <string>Use calibration file to adjust for detector efficiency.</string>
@@ -83,6 +83,16 @@
          <string>Run Files</string>
         </property>
         <property name="multipleFiles" stdset="0">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="ckLoadLogFiles">
+        <property name="text">
+         <string>Load Log Files</string>
+        </property>
+        <property name="checked">
          <bool>true</bool>
         </property>
        </widget>
@@ -949,6 +959,41 @@
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>ckSumFiles</tabstop>
+  <tabstop>cbLoadLogFiles</tabstop>
+  <tabstop>ckUseCalib</tabstop>
+  <tabstop>spPlotTimeSpecMin</tabstop>
+  <tabstop>spPlotTimeSpecMax</tabstop>
+  <tabstop>pbPlotTime</tabstop>
+  <tabstop>ckBackgroundRemoval</tabstop>
+  <tabstop>spBackgroundStart</tabstop>
+  <tabstop>spBackgroundEnd</tabstop>
+  <tabstop>ckDetailedBalance</tabstop>
+  <tabstop>ckScaleMultiplier</tabstop>
+  <tabstop>spDetailedBalance</tabstop>
+  <tabstop>spScaleMultiplier</tabstop>
+  <tabstop>leEfixed</tabstop>
+  <tabstop>spSpectraMin</tabstop>
+  <tabstop>spSpectraMax</tabstop>
+  <tabstop>cbGroupingOptions</tabstop>
+  <tabstop>ckDoNotRebin</tabstop>
+  <tabstop>cbRebinType</tabstop>
+  <tabstop>spRebinLow</tabstop>
+  <tabstop>spRebinWidth</tabstop>
+  <tabstop>spRebinHigh</tabstop>
+  <tabstop>leRebinString</tabstop>
+  <tabstop>spNumberGroups</tabstop>
+  <tabstop>ckSaveSPE</tabstop>
+  <tabstop>ckSaveNexus</tabstop>
+  <tabstop>ckSaveNXSPE</tabstop>
+  <tabstop>ckSaveASCII</tabstop>
+  <tabstop>ckSaveAclimax</tabstop>
+  <tabstop>ckSaveDaveGrp</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckFold</tabstop>
+  <tabstop>ckCm1Units</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

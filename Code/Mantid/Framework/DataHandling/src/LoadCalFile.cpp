@@ -135,7 +135,7 @@ void LoadCalFile::init() {
   declareProperty(
       new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
-      "'_offsets', '_mask' appended to them.");
+      "'_cal', '_offsets', '_mask' appended to them.");
 }
 
 //----------------------------------------------------------------------------------------------

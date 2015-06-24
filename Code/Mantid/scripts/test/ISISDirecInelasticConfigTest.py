@@ -1,5 +1,5 @@
 import os
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 import unittest
 import shutil
 import datetime
@@ -73,13 +73,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
     def tearDown(self):
         # Clean-up user's folder structure
         if os.path.exists(self.rbdir):
-            shutil.rmtree(self.rbdir)
+            shutil.rmtree(self.rbdir,ignore_errors=True)
         if os.path.exists(self.UserScriptRepoDir):
-            shutil.rmtree(self.UserScriptRepoDir)
+            shutil.rmtree(self.UserScriptRepoDir,ignore_errors=True)
         if os.path.exists(self.MapMaskDir):
-            shutil.rmtree(self.MapMaskDir)
+            shutil.rmtree(self.MapMaskDir,ignore_errors=True)
         if os.path.exists(self.userRootDir):
-            shutil.rmtree(self.userRootDir)
+            shutil.rmtree(self.userRootDir,ignore_errors=True)
 
     def test_UserProperties(self):
         user = UserProperties()
@@ -259,13 +259,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         #--------------------------------------------------------------------
         # clean up
         if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
-            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'),ignore_errors=True)
         if os.path.exists(rbdir2):
-            shutil.rmtree(rbdir2)
+            shutil.rmtree(rbdir2,ignore_errors=True)
         if os.path.exists(rbdir3):
-            shutil.rmtree(rbdir3)
+            shutil.rmtree(rbdir3,ignore_errors=True)
         if os.path.exists(user1RootDir):
-            shutil.rmtree(user1RootDir)
+            shutil.rmtree(user1RootDir,ignore_errors=True)
 
 
 

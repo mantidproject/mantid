@@ -153,6 +153,7 @@ signals:
   void localParameterButtonClicked(const QString& parName);
 
   void functionStructureChanged();
+  void globalsChanged();
 
 public slots:
 
@@ -289,6 +290,7 @@ protected slots:
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty*);
   void parameterButtonClicked(QtProperty*);
+  void globalChanged(QtProperty*, const QString&, bool);
 
 protected:
   /// Manager for function group properties

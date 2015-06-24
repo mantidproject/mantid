@@ -17,102 +17,83 @@
 #include <vtkDataSet.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
+#include <vtkMatrix4x4.h>
+#include <vtkPVChangeOfBasisHelper.h>
+#include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 
-class vtkDataSetToScaledDataSetTest : public CxxTest::TestSuite
-{
+class vtkDataSetToScaledDataSetTest : public CxxTest::TestSuite {
 private:
-  vtkUnstructuredGrid *makeDataSet()
-  {
+  vtkUnstructuredGrid *makeDataSet() {
     FakeProgressAction progressUpdate;
-    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(8,
-                                                                     -10.0,
-                                                                     10.0,
-                                                                     1);
+    MDEventWorkspace3Lean::sptr ws =
+        MDEventsTestHelper::makeMDEW<3>(8, -10.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
                             VolumeNormalization);
     factory.initialize(ws);
     return vtkUnstructuredGrid::SafeDownCast(factory.create(progressUpdate));
   }
 
-  float *getRangeComp(vtkDataSet *ds, std::string fieldname)
-  {
-    vtkDataArray *arr = ds->GetFieldData()->GetArray(fieldname.c_str());
-    vtkFloatArray *farr = vtkFloatArray::SafeDownCast(arr);
-    static float vals[2];
-    farr->GetTupleValue(0, vals);
-    return vals;
-  }
+  vtkUnstructuredGrid *makeDataSetWithJsonMetadata() {
+    vtkUnstructuredGrid *data = makeDataSet();
 
-  unsigned char *getRangeActiveComp(vtkDataSet *ds, int index)
-  {
-    vtkDataArray *arr = ds->GetFieldData()->GetArray("LabelRangeActiveFlag");
-    vtkUnsignedCharArray *uarr = vtkUnsignedCharArray::SafeDownCast(arr);
-    static unsigned char vals[1];
-    uarr->GetTupleValue(index, vals);
-    return vals;
-  }
+    MetadataJsonManager manager;
+    std::string instrument = "OSIRIS";
+    manager.setInstrument(instrument);
+    std::string jsonString = manager.getSerializedJson();
 
-  vtkUnstructuredGrid  *makeDataSetWithJsonMetadata()
-  {
-     vtkUnstructuredGrid* data = makeDataSet();
-     
-      MetadataJsonManager manager;
-      std::string instrument = "OSIRIS";
-      manager.setInstrument(instrument);
-      std::string jsonString = manager.getSerializedJson();
-      
-      MetadataToFieldData convert;
-      VatesConfigurations config;
-      vtkFieldData* fieldData = data->GetFieldData();
-      convert(fieldData, jsonString, config.getMetadataIdJson().c_str());
+    MetadataToFieldData convert;
+    VatesConfigurations config;
+    vtkFieldData *fieldData = data->GetFieldData();
+    convert(fieldData, jsonString, config.getMetadataIdJson().c_str());
 
-      data->SetFieldData(fieldData);
+    data->SetFieldData(fieldData);
 
-      return data;
+    return data;
   }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static vtkDataSetToScaledDataSetTest *createSuite() { return new vtkDataSetToScaledDataSetTest(); }
-  static void destroySuite( vtkDataSetToScaledDataSetTest *suite ) { delete suite; }
+  static vtkDataSetToScaledDataSetTest *createSuite() {
+    return new vtkDataSetToScaledDataSetTest();
+  }
+  static void destroySuite(vtkDataSetToScaledDataSetTest *suite) {
+    delete suite;
+  }
 
-  void testThrowIfInputNull()
-  {
+  void testThrowIfInputNull() {
     vtkUnstructuredGrid *in = NULL;
     vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
     TS_ASSERT_THROWS(vtkDataSetToScaledDataSet scaler(in, out),
                      std::runtime_error);
   }
 
-  void testThrowIfOutputNull()
-  {
+  void testThrowIfOutputNull() {
     vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
     vtkUnstructuredGrid *out = NULL;
     TS_ASSERT_THROWS(vtkDataSetToScaledDataSet scaler(in, out),
                      std::runtime_error);
   }
 
-  void testExecThrowIfNoInit()
-  {
+  void testExecThrowIfNoInit() {
     vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
     vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
     vtkDataSetToScaledDataSet scaler(in, out);
     TS_ASSERT_THROWS(scaler.execute(), std::runtime_error);
   }
 
-  void testExecution()
-  {
+  void testExecution() {
     vtkUnstructuredGrid *in = makeDataSet();
     vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
     vtkDataSetToScaledDataSet scaler(in, out);
     scaler.initialize(0.1, 0.5, 0.2);
     TS_ASSERT_THROWS_NOTHING(scaler.execute());
+
     // Check bounds are scaled
     double *bb = out->GetBounds();
     TS_ASSERT_EQUALS(-1.0, bb[0]);
@@ -121,40 +102,46 @@ public:
     TS_ASSERT_EQUALS(5.0, bb[3]);
     TS_ASSERT_EQUALS(-2.0, bb[4]);
     TS_ASSERT_EQUALS(2.0, bb[5]);
-    // Check that the range metadata is set
-    float *rangeX = getRangeComp(out, "LabelRangeForX");
-    TS_ASSERT_EQUALS(-10.0, rangeX[0]);
-    TS_ASSERT_EQUALS(10.0, rangeX[1]);
-    float *rangeY = getRangeComp(out, "LabelRangeForY");
-    TS_ASSERT_EQUALS(-10.0, rangeY[0]);
-    TS_ASSERT_EQUALS(10.0, rangeY[1]);
-    float *rangeZ = getRangeComp(out, "LabelRangeForZ");
-    TS_ASSERT_EQUALS(-10.0, rangeZ[0]);
-    TS_ASSERT_EQUALS(10.0, rangeZ[1]);
-    // Check that the scaling transform metadata is set
-    float *transformX = getRangeComp(out, "LinearTransformForX");
-    TS_ASSERT_EQUALS(1.0/0.1, transformX[0]);
-    TS_ASSERT_EQUALS(0.0, transformX[1]);
-    float *transformY = getRangeComp(out, "LinearTransformForY");
-    TS_ASSERT_EQUALS(1.0/0.5, transformY[0]);
-    TS_ASSERT_EQUALS(0.0, transformY[1]);
-    float *transformZ = getRangeComp(out, "LinearTransformForZ");
-    TS_ASSERT_EQUALS(1.0/0.2, transformZ[0]);
-    TS_ASSERT_EQUALS(0.0, transformZ[1]);
-    // Check the active label range flags are set
-    unsigned char *activeX = getRangeActiveComp(out, 0);
-    TS_ASSERT_EQUALS(1, activeX[0]);
-    unsigned char *activeY = getRangeActiveComp(out, 1);
-    TS_ASSERT_EQUALS(1, activeY[0]);
-    unsigned char *activeZ = getRangeActiveComp(out, 2);
-    TS_ASSERT_EQUALS(1, activeZ[0]);
+
+    // Check that the Change-Of-Basis-Matrix is correct
+    vtkSmartPointer<vtkMatrix4x4> cobMatrix =
+        vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(out);
+    TS_ASSERT_EQUALS(0.1, cobMatrix->Element[0][0])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][1])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][2])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[0][3])
+
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[1][0])
+    TS_ASSERT_EQUALS(0.5, cobMatrix->Element[1][1])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[1][2])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[1][3])
+
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[2][0])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[2][1])
+    TS_ASSERT_EQUALS(0.2, cobMatrix->Element[2][2])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[2][3])
+
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[3][0])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[3][1])
+    TS_ASSERT_EQUALS(0.0, cobMatrix->Element[3][2])
+    TS_ASSERT_EQUALS(1.0, cobMatrix->Element[3][3])
+
+    // Check the bounding box element for axes
+    double bounds[6] = {0, 0, 0, 0, 0, 0};
+    vtkPVChangeOfBasisHelper::GetBoundingBoxInBasis(out, bounds);
+
+    TS_ASSERT_EQUALS(-10.0, bounds[0]);
+    TS_ASSERT_EQUALS(10.0, bounds[1]);
+    TS_ASSERT_EQUALS(-10.0, bounds[2]);
+    TS_ASSERT_EQUALS(10.0, bounds[3]);
+    TS_ASSERT_EQUALS(-10.0, bounds[4]);
+    TS_ASSERT_EQUALS(10.0, bounds[5]);
 
     in->Delete();
     out->Delete();
   }
 
-  void testJsonMetadataExtractionFromScaledDataSet()
-  {
+  void testJsonMetadataExtractionFromScaledDataSet() {
     // Arrange
     vtkUnstructuredGrid *in = makeDataSetWithJsonMetadata();
     vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
@@ -164,14 +151,14 @@ public:
     scaler.initialize(0.1, 0.5, 0.2);
     TS_ASSERT_THROWS_NOTHING(scaler.execute());
 
-    vtkFieldData* fieldData = out->GetFieldData();
+    vtkFieldData *fieldData = out->GetFieldData();
     MetadataJsonManager manager;
     VatesConfigurations config;
     FieldDataToMetadata convert;
 
     std::string jsonString = convert(fieldData, config.getMetadataIdJson());
     manager.readInSerializedJson(jsonString);
-    
+
     // Assert
     TS_ASSERT("OSIRIS" == manager.getInstrument());
 
@@ -179,6 +166,5 @@ public:
     out->Delete();
   }
 };
-
 
 #endif /* MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_ */

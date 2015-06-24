@@ -53,22 +53,22 @@
       <widget class="QComboBox" name="cbFunction">
        <item>
         <property name="text">
-         <string>Chudley-Elliott</string>
+         <string>ChudleyElliot</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Hall-Ross</string>
+         <string>HallRoss</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Fick Diffusion</string>
+         <string>FickDiffusion</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>Teixeira Water</string>
+         <string>TeixeiraWater</string>
         </property>
        </item>
       </widget>
@@ -120,6 +120,11 @@
        </property>
        <property name="showLegend" stdset="0">
         <bool>true</bool>
+       </property>
+       <property name="curveErrorBars" stdset="0">
+        <stringlist>
+         <string>Sample</string>
+        </stringlist>
        </property>
       </widget>
      </item>

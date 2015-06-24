@@ -30,6 +30,7 @@
 
 #Make the reduction module available
 from ISISCommandInterface import *
+import SANSUtility as su
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
 from mantid.kernel import Logger
@@ -100,7 +101,7 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None, combineDet=None):
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
@@ -228,6 +229,11 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     save_names.extend(w.getNames())
                 else:
                     save_names.append(n)
+
+            # If we want to remove zero-errors, we map the original workspace to a cleaned workspace clone,
+            # else we map it to itself.
+            save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
+
             for algor in saveAlgs.keys():
                 for workspace_name in save_names:
                     #add the file extension, important when saving different types of file so they don't over-write each other
@@ -247,12 +253,15 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                                     extra_param[prop] = _ws.getRun().getLogData(prop).value
                         # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
                         # available
-                        SaveCanSAS1D(workspace_name, workspace_name+ext, DetectorNames=detnames,
+                        SaveCanSAS1D(save_names_dict[workspace_name], workspace_name+ext, DetectorNames=detnames,
                                      **extra_param)
                     elif algor == "SaveRKH":
-                        SaveRKH(workspace_name, workspace_name+ext, Append=False)
+                        SaveRKH(save_names_dict[workspace_name], workspace_name+ext, Append=False)
                     else:
-                        exec(algor+'(workspace_name, workspace_name+ext)')
+                        exec(algor+"('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
+            # If we performed a zero-error correction, then we should get rid of the cloned workspaces
+            #if save_as_zero_error_free:
+            #    delete_cloned_workspaces(save_names_dict)
 
         if plotresults == 1:
             for final_name in names:
@@ -359,3 +368,39 @@ def delete_workspaces(workspaces):
             except:
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
+
+def get_mapped_workspaces(save_names, save_as_zero_error_free):
+    """
+        Get a workspace name map, which maps from the original
+        workspace to a zero-error-free cloned workspace if
+        save_as_zero_error_free is checked otherwise the
+        workspaces are mapped to themselves.
+        @param save_names: a list of workspace names
+        @param save_as_zero_error_free : if the user wants the zero-errors removed
+        @returns a map of workspaces
+    """
+    workspace_dictionary = {}
+    for name in save_names:
+        if save_as_zero_error_free:
+            cloned_name = name + '_cloned_temp'
+            dummy_message, complete = su.create_zero_error_free_workspace(input_workspace_name = name, output_workspace_name = cloned_name)
+            if complete:
+                workspace_dictionary[name] = cloned_name
+            else:
+                workspace_dictionary[name] = name
+        else:
+            workspace_dictionary[name] = name
+    return workspace_dictionary
+
+def delete_cloned_workspaces(save_names_dict):
+    """
+        If there are cloned workspaces in the worksapce map, then they are deleted
+        @param save_names_dict: a workspace name map
+    """
+    to_delete =[]
+    for key in save_names_dict:
+        if key != save_names_dict[key]:
+            to_delete.append(save_names_dict[key])
+    for element in to_delete:
+        su.delete_zero_error_free_workspace(input_workspace_name = element)
+

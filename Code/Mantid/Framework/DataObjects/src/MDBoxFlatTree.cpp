@@ -1,7 +1,5 @@
 #include "MantidKernel/Strings.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/MDEvent.h"
-#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -461,7 +459,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
       std::string parameterStr;
       try {
         // Get the sample, logs, instrument
-        ei->loadExperimentInfoNexus(file, parameterStr);
+        ei->loadExperimentInfoNexus(filename, file, parameterStr);
         // Now do the parameter map
         ei->readParameterMap(parameterStr);
         // And add it to the mutliple experiment info.

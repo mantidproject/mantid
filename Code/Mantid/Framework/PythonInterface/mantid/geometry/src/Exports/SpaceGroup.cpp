@@ -37,6 +37,17 @@ bool isAllowedReflection(SpaceGroup &self, const object &hkl) {
 
     return self.isAllowedReflection(hklV3d);
 }
+
+Mantid::Geometry::Group_sptr getSiteSymmetryGroup(
+        SpaceGroup &self,
+        const object &position) {
+    const Mantid::Kernel::V3D &posV3d = Converters::PyObjectToV3D(position)();
+
+    Mantid::Geometry::Group_sptr group = boost::const_pointer_cast<Group>(
+                self.getSiteSymmetryGroup(posV3d));
+
+    return group;
+}
 }
 
 void export_SpaceGroup() {
@@ -48,5 +59,11 @@ void export_SpaceGroup() {
       .def("getEquivalentPositions", &getEquivalentPositions,
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
-      .def("isAllowedReflection", &isAllowedReflection);
+      .def("isAllowedReflection", &isAllowedReflection,
+           "Returns True if the supplied reflection is allowed with respect to "
+           "space group symmetry operations.")
+      .def("getPointGroup", &SpaceGroup::getPointGroup,
+           "Returns the point group of the space group.")
+      .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,
+           "Returns the site symmetry group for supplied point coordinates.");
 }

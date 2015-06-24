@@ -1,10 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as sapi
-
 
 class EnginXCalibrate(PythonAlgorithm):
+
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
@@ -20,6 +19,12 @@ class EnginXCalibrate(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
+
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
+                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
+                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
+                             "options are given.")
 
         self.declareProperty("Bank", 1, "Which bank to calibrate")
 
@@ -41,24 +46,37 @@ class EnginXCalibrate(PythonAlgorithm):
 
     def PyExec(self):
 
+        import EnginXUtils
+
         ws = self._focusRun()
 
-        difc, zero = self._fitParams(ws)
+        # Get peaks in dSpacing from file
+        expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                         self.getProperty('ExpectedPeaks').value)
+
+        if len(expectedPeaksD) < 1:
+            raise ValueError("Cannot run this algorithm without any input expected peaks")
+
+        difc, zero = self._fitParams(ws, expectedPeaksD)
 
         self._produceOutputs(difc, zero)
 
-    def _fitParams(self, focusedWS):
+    def _fitParams(self, focusedWS, expectedPeaksD):
         """
         Fit the GSAS parameters that this algorithm produces: difc and zero
 
-        @param focusedWS: focused workspace to do the fitting on
+        @param focusedWS :: focused workspace to do the fitting on
+        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
 
         @returns a pair of parameters: difc and zero
         """
+
         fitPeaksAlg = self.createChildAlgorithm('EnginXFitPeaks')
         fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
         fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
-        fitPeaksAlg.setProperty('ExpectedPeaks', self.getProperty('ExpectedPeaks').value)
+        fitPeaksAlg.setProperty('ExpectedPeaks', expectedPeaksD)
+        # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
+        # EnginXFitPEaks, but better to check inputs early, before this
         fitPeaksAlg.execute()
 
         difc = fitPeaksAlg.getProperty('Difc').value
@@ -85,29 +103,21 @@ class EnginXCalibrate(PythonAlgorithm):
     def _produceOutputs(self, difc, zero):
         """
         Just fills in the output properties as requested
+
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
         """
+
+        import EnginXUtils
+
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            self._generateOutputParTable(tblName)
-
-    def _generateOutputParTable(self, name):
-        """
-        Produces a table workspace with the two calibration parameters
-
-        @param name :: the name to use for the table workspace that is created here
-        """
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-        tbl.addColumn('double', 'difc')
-        tbl.addColumn('double', 'zero')
-        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
-
-        self.log().information("Output parameters added into a table workspace: %s" % name)
+            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
 
 AlgorithmFactory.subscribe(EnginXCalibrate)

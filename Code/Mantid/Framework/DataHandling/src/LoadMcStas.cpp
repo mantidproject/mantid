@@ -1,21 +1,21 @@
-#include "MantidDataHandling/LoadMcStas.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidKernel/Unit.h"
-#include <nexus/NeXusFile.hpp>
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadMcStas.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/RegisterFileLoader.h"
 
-#include "MantidAPI/NumericAxis.h"
-#include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -187,9 +187,8 @@ void LoadMcStas::readEventData(
 
     progInitial.report("Loading instrument");
 
-    Geometry::InstrumentDefinitionParser parser;
     std::string instrumentName = "McStas";
-    parser.initialize(filename, instrumentName, instrumentXML);
+    Geometry::InstrumentDefinitionParser parser(filename, instrumentName, instrumentXML);
     std::string instrumentNameMangled = parser.getMangledName();
 
     // Check whether the instrument is already in the InstrumentDataService
