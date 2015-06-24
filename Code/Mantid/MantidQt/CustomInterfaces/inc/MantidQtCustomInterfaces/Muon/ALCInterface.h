@@ -65,6 +65,7 @@ namespace CustomInterfaces
     void switchStep(int newStepIndex);
 
     void exportResults();
+    void importResults();
 
   private:
 

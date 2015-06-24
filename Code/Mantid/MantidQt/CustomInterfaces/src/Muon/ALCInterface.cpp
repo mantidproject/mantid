@@ -39,6 +39,7 @@ namespace CustomInterfaces
     connect(m_ui.nextStep, SIGNAL(clicked()), SLOT(nextStep()));
     connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
     connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
+    connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
 
     auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
     m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
@@ -181,6 +182,36 @@ namespace CustomInterfaces
     } else {
       // Nothing to export, show error message
       QMessageBox::critical(this, "Error", "Nothing to export");
+    }
+  }
+
+  void ALCInterface::importResults() {
+
+    bool ok;
+    QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ",
+      QLineEdit::Normal, "ALCResults", &ok);
+
+    if (!ok) // Cancelled
+    {
+      return;
+    }
+
+    std::string groupName = label.toStdString();
+
+    int currentStep = m_ui.stepView->currentIndex();
+
+    if (currentStep == 0) {
+      // DataLoading step
+
+    } else if (currentStep == 1) {
+      // BaselineModelling step
+
+    } else if (currentStep == 2) {
+      // PeakFitting step
+
+    } else {
+      // Exception: we can never get here
+      throw std::runtime_error("Fatal error in ALC interface");
     }
   }
 
