@@ -307,7 +307,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  ITableWorkspace(const ITableWorkspace &other);
+  ITableWorkspace(const ITableWorkspace &other) : Workspace(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   ITableWorkspace &operator=(const ITableWorkspace &other);
 
