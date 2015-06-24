@@ -69,7 +69,8 @@ public:
   virtual double minY() const;
   /// Return the max Y value in the polygon
   virtual double maxY() const;
-
+  /// Return a new Polygon based on the current Quadrilateral
+  virtual ConvexPolygon toPoly() const;
 
 private:
   /// Default constructor

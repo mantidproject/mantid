@@ -47,6 +47,10 @@ public:
     TS_ASSERT_EQUALS(rect[0], V2D());
     TS_ASSERT_EQUALS(rect[2], V2D(2.0, 1.0));
     TS_ASSERT_EQUALS(rect[3], V2D(2.0, 0.0));
+
+    TS_ASSERT_EQUALS(rect.at(0), V2D());
+    TS_ASSERT_EQUALS(rect.at(2), V2D(2.0, 1.0));
+    TS_ASSERT_EQUALS(rect.at(3), V2D(2.0, 0.0));
   }
 
   void test_Point_Inside_Polygon_Returns_True()
@@ -110,12 +114,12 @@ public:
   
   // ------------------------ Failure cases --------------------------------
 
-  void test_Invalid_Index_Access_Throws()
+  void test_Invalid_Index_Access_Throws_For_At()
   {
     using Mantid::Kernel::Exception::IndexError;
     ConvexPolygon triangle = makeEquilateralTriangle();
-    TS_ASSERT_THROWS(triangle[3], IndexError);
-    TS_ASSERT_THROWS(triangle[-1], IndexError);
+    TS_ASSERT_THROWS(triangle.at(3), IndexError);
+    TS_ASSERT_THROWS(triangle.at(-1), IndexError);
   }
 
 private:

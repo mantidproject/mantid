@@ -137,5 +137,15 @@ double Quadrilateral::maxY() const {
                                               : m_upperRight.Y();
 }
 
+/// @return A new polygon based on the current Quadrilateral
+ConvexPolygon Quadrilateral::toPoly() const {
+  ConvexPolygon::Vertices points(4);
+  points[0] = m_lowerLeft;
+  points[1] = m_upperLeft;
+  points[2] = m_upperRight;
+  points[3] = m_lowerRight;
+  return ConvexPolygon(points);
+}
+
 } // namespace Mantid
 } // namespace Geometry

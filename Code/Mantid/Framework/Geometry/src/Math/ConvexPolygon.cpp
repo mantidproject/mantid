@@ -26,7 +26,7 @@ ConvexPolygon::ConvexPolygon()
 /**
  * @param vertices A list of points that form the polygon
  */
-ConvexPolygon::ConvexPolygon(const Vertices & vertices) : m_vertices(vertices) {
+ConvexPolygon::ConvexPolygon(const Vertices &vertices) : m_vertices(vertices) {
   setup();
 }
 
@@ -34,9 +34,7 @@ ConvexPolygon::ConvexPolygon(const Vertices & vertices) : m_vertices(vertices) {
  * Copy constructor
  * @param rhs :: The object to copy from
  */
-ConvexPolygon::ConvexPolygon(const ConvexPolygon &rhs) {
-  *this = rhs;
-}
+ConvexPolygon::ConvexPolygon(const ConvexPolygon &rhs) { *this = rhs; }
 
 /**
  * Copy-assignment operator
@@ -53,13 +51,10 @@ ConvexPolygon &ConvexPolygon::operator=(const ConvexPolygon &rhs) {
 /**
  * Destructor
  */
-ConvexPolygon::~ConvexPolygon() {
-}
+ConvexPolygon::~ConvexPolygon() {}
 
 /// @return True if polygon has 3 or more points
-bool ConvexPolygon::isValid() const {
-  return (npoints() > 2);
-}
+bool ConvexPolygon::isValid() const { return (npoints() > 2); }
 
 /// Clears all points
 void ConvexPolygon::clear() {
@@ -75,43 +70,55 @@ void ConvexPolygon::clear() {
  * point in anti-clockwise manner
  * @param pt A new point for the shape
  */
-void ConvexPolygon::insert(const V2D & pt) {
+void ConvexPolygon::insert(const V2D &pt) {
   m_vertices.push_back(pt);
   // Update extrema
-  if (pt.X() < m_minX) m_minX = pt.X();
-  else if (pt.X() > m_maxX) m_maxX = pt.X();
+  if (pt.X() < m_minX)
+    m_minX = pt.X();
+  else if (pt.X() > m_maxX)
+    m_maxX = pt.X();
 
-  if (pt.Y() < m_minY) m_minY = pt.Y();
-  else if (pt.Y() > m_maxY) m_maxY = pt.Y();
+  if (pt.Y() < m_minY)
+    m_minY = pt.Y();
+  else if (pt.Y() > m_maxY)
+    m_maxY = pt.Y();
 }
 
 /**
  * @param x X coordinate
  * @param y Y coordinate
  */
-void ConvexPolygon::insert(double x, double y) {
-  insert(V2D(x,y));
-}
+void ConvexPolygon::insert(double x, double y) { insert(V2D(x, y)); }
 
 /**
- * Return the vertex at the given index
+ * Return the vertex at the given index. The index is assumed to be valid. See
+ * at() for a
+ * bounds-checking version. Out-of-bounds access is undefined
  * @param index :: An index, starting at 0
  * @returns A reference to the polygon at that index
  * @throws Exception::IndexError if the index is out of range
  */
 const V2D &ConvexPolygon::operator[](const size_t index) const {
-  if(index < npoints()) {
+  return m_vertices[index];
+}
+
+/**
+ * Return the vertex at the given index. The index is checked for validity
+ * @param index :: An index, starting at 0
+ * @returns A reference to the polygon at that index
+ * @throws Exception::IndexError if the index is out of range
+ */
+const Kernel::V2D &ConvexPolygon::at(const size_t index) const {
+  if (index < npoints()) {
     return m_vertices[index];
   } else {
     throw Kernel::Exception::IndexError(index, npoints(),
-                                        "ConvexPolygon::operator[]");
+                                        "ConvexPolygon::at()");
   }
 }
 
 /// @eturn the number of vertices
-size_t ConvexPolygon::npoints() const {
-  return m_vertices.size();
-}
+size_t ConvexPolygon::npoints() const { return m_vertices.size(); }
 
 /**
  * Is a point inside this polygon
@@ -119,8 +126,8 @@ size_t ConvexPolygon::npoints() const {
  * @returns True if the point is inside the polygon
  */
 bool ConvexPolygon::contains(const Kernel::V2D &point) const {
-  for(size_t i = 0; i < npoints(); ++i) {
-    PolygonEdge edge(m_vertices[i], m_vertices[(i+1) % npoints()]);
+  for (size_t i = 0; i < npoints(); ++i) {
+    PolygonEdge edge(m_vertices[i], m_vertices[(i + 1) % npoints()]);
     if (classify(point, edge) == OnLeft) {
       return false;
     }
@@ -172,9 +179,9 @@ double ConvexPolygon::determinant() const {
   // the polygon.
   double lhs(0.0), rhs(0.0);
   const V2D *v_i(NULL), *v_ip1(NULL);
-  for(size_t i = 0; i < npoints(); ++i) {
+  for (size_t i = 0; i < npoints(); ++i) {
     v_i = &(m_vertices[i]);
-    v_ip1 = &(m_vertices[(i+1) % npoints()]);
+    v_ip1 = &(m_vertices[(i + 1) % npoints()]);
 
     lhs += v_ip1->X() * v_i->Y();
     rhs += v_i->X() * v_ip1->Y();
@@ -207,6 +214,11 @@ double ConvexPolygon::minY() const { return m_minY; }
 double ConvexPolygon::maxY() const { return m_maxY; }
 
 /**
+ * @return A copy of the current polygon
+ */
+ConvexPolygon ConvexPolygon::toPoly() const { return *this; }
+
+/**
  * Setup the meta-data: no of vertices, high/low points
  */
 void ConvexPolygon::setup() {
@@ -216,7 +228,7 @@ void ConvexPolygon::setup() {
   m_maxY = -DBL_MAX;
 
   auto iend = m_vertices.end();
-  for(auto iter = m_vertices.begin(); iter != iend; ++iter) {
+  for (auto iter = m_vertices.begin(); iter != iend; ++iter) {
     double x(iter->X()), y(iter->Y());
     if (x < m_minX)
       m_minX = x;

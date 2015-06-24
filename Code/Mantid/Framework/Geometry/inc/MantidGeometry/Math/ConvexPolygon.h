@@ -5,8 +5,8 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include <deque>
 #include <iosfwd>
-#include <vector>
 
 namespace Mantid {
 
@@ -64,7 +64,7 @@ class MANTID_GEOMETRY_DLL ConvexPolygon {
 
 public:
   /// Type of the point list
-  typedef std::vector<Kernel::V2D> Vertices;
+  typedef std::deque<Kernel::V2D> Vertices;
 
   //-----------------------------------------------------------------
   // Forward directional iterator inner class
@@ -113,9 +113,10 @@ public:
   void insert(const Kernel::V2D &pt);
   /// Insert a new vertex based on x,y values
   void insert(double x, double y);
-
   /// Index access.
   virtual const Kernel::V2D &operator[](const size_t index) const;
+  /// Bounds-checked index access
+  virtual const Kernel::V2D &at(const size_t index) const;
   /// Return the number of vertices
   virtual size_t npoints() const;
   /// Is a point inside this polygon
@@ -134,6 +135,8 @@ public:
   virtual double minY() const;
   /// Return the largest Y value in the polygon
   virtual double maxY() const;
+  /// Return a new Polygon based on the current type
+  virtual ConvexPolygon toPoly() const;
 
 private:
   /// Setup the meta-data
