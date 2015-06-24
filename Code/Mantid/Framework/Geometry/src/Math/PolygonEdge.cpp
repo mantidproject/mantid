@@ -22,7 +22,7 @@ namespace
  * Contructor taking two points, start and end
  */
 PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
-    : m_start(start), m_end(end) {}
+    : m_start(start), m_end(end), m_dir(m_end-m_start) {}
 
 /**
  * Create a point a given fraction along this edge
@@ -30,8 +30,7 @@ PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
  * @returns A point on the edge
  */
 Kernel::V2D PolygonEdge::point(const double fraction) const {
-  const V2D dir = (end() - start());
-  return V2D(start() + dir * fraction);
+  return start() + m_dir * fraction;
 }
 
 //-------------------------------------------------------------------------

@@ -51,6 +51,8 @@ public:
 
   /// Index access.
   virtual const Kernel::V2D &operator[](const size_t index) const;
+  /// Bounds-checked index access
+  virtual const Kernel::V2D &at(const size_t index) const;
   /// Return the number of vertices
   virtual size_t npoints() const { return 4; }
   /// Is a point inside this polygon
@@ -73,8 +75,6 @@ public:
   virtual ConvexPolygon toPoly() const;
 
 private:
-  /// Default constructor
-  Quadrilateral();
   /// Lower left
   Kernel::V2D m_lowerLeft;
   /// Lower right
