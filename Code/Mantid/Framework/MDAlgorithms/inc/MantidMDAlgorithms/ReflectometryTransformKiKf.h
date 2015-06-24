@@ -23,22 +23,47 @@ private:
   double m_sin_theta_f;
 
 public:
+  /**
+   Constructor
+   */
   CalculateReflectometryK() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
+
+  /**
+   Destructor
+   */
   ~CalculateReflectometryK(){};
 
+  /**
+   Setter for the incident theta value require for the calculation. Internally
+   pre-calculates and caches to cos theta for speed.
+   @param thetaIncident: incident theta value in degrees
+   */
   void setThetaIncident(double thetaIncident) {
     m_sin_theta_i = sin(to_radians_factor * thetaIncident);
   }
 
+  /**
+    Setter for the final theta value require for the calculation. Internally
+    pre-calculates and caches to cos theta for speed.
+    @param thetaFinal: final theta value in degrees
+    */
   void setThetaFinal(double thetaFinal) {
     m_sin_theta_f = sin(to_radians_factor * thetaFinal);
   }
 
+  /**
+   Executes the calculation to determine Ki
+   @param wavelength : wavelength in Angstroms
+   */
   double calculateDim0(double wavelength) const {
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_sin_theta_i;
   }
 
+  /**
+   Executes the calculation to determine Kf
+   @param wavelength : wavelength in Angstroms
+   */
   double calculateDim1(double wavelength) const {
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_sin_theta_f;

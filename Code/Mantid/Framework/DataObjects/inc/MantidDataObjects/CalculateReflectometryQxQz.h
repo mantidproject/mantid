@@ -22,7 +22,6 @@ private:
 public:
   /**
    Constructor
-   @param thetaIncident: incident theta value in degrees
    */
   CalculateReflectometryQxQz() : m_dirQx(0.0), m_dirQz(0.0) {}
 

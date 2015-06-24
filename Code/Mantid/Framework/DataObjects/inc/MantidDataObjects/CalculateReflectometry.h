@@ -17,7 +17,6 @@ protected:
 public:
   /**
    Constructor
-   @param thetaIncident: incident theta value in degrees
    */
   CalculateReflectometry() : to_radians_factor(M_PI / 180.0) {}
 
@@ -25,7 +24,7 @@ public:
 
   /**
    Setter for the final theta value require for the calculation.
-   @param thetaFinal: final theta value in degrees
+   @param thetaIncident: final theta value in degrees
    */
   virtual void setThetaIncident(double thetaIncident) = 0;
 
