@@ -26,11 +26,11 @@ public:
   @return Standard string name  */
   virtual const std::string id() const { return "OffsetsWorkspace"; }
 
-private:
-  /// Private copy constructor. NO COPY ALLOWED
-  OffsetsWorkspace(const OffsetsWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  OffsetsWorkspace &operator=(const OffsetsWorkspace &);
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  OffsetsWorkspace(const OffsetsWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  OffsetsWorkspace &operator=(const OffsetsWorkspace &other);
 };
 
 /// shared pointer to the OffsetsWorkspace class

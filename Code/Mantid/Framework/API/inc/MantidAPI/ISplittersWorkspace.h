@@ -66,6 +66,12 @@ public:
    * Remove one entry of a splitter
    */
   virtual bool removeSplitter(size_t splitterindex) = 0;
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  ISplittersWorkspace(const ISplittersWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  ISplittersWorkspace &operator=(const ISplittersWorkspace &other);
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

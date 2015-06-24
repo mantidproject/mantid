@@ -306,6 +306,11 @@ public:
   void modified();
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  ITableWorkspace(const ITableWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  ITableWorkspace &operator=(const ITableWorkspace &other);
+
   /**  Resize a column.
          @param c :: Pointer to the column
          @param size :: New column size

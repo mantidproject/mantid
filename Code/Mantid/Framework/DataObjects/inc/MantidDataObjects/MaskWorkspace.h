@@ -36,16 +36,16 @@ public:
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MaskWorkspace(const MaskWorkspace &other);
+
+  /// Protected copy assignment operator. Assignment not implemented.
+  MaskWorkspace &operator=(const MaskWorkspace &other);
+
   /// Return human-readable string
   virtual const std::string toString() const;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  MaskWorkspace(const MaskWorkspace &);
-
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  MaskWorkspace &operator=(const MaskWorkspace &);
-
   /// Clear original incorrect mask
   void clearMask();
 

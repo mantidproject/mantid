@@ -67,8 +67,6 @@ public:
 
   PeaksWorkspace();
 
-  PeaksWorkspace(const PeaksWorkspace &other);
-
   PeaksWorkspace *clone() const;
 
   /** Get access to shared pointer containing workspace porperties. This
@@ -180,6 +178,12 @@ public:
   // --- Nexus Methods ---
   // Save to Nexus
   void saveNexus(::NeXus::File *file) const;
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  PeaksWorkspace(const PeaksWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  PeaksWorkspace &operator=(const PeaksWorkspace &other);
 
 private:
   /// Initialize the table structure

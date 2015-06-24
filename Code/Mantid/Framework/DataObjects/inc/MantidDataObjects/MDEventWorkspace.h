@@ -40,6 +40,7 @@ public:
   typedef MDE MDEventType;
 
   MDEventWorkspace();
+  // TODO once we have a polymorphic clone this should be made protected
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   virtual ~MDEventWorkspace();
 
@@ -166,6 +167,9 @@ public:
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 protected:
+  /// Protected copy assignment operator. Assignment not implemented.
+  MDEventWorkspace &operator=(const MDEventWorkspace<MDE, nd> &other);
+
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;
 
