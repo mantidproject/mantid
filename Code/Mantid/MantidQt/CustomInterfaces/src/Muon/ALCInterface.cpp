@@ -205,7 +205,8 @@ namespace CustomInterfaces
 
         MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
 
-        // Do something with the retrieved workspace
+        // Set the retrieved data
+        m_dataLoading->setData(ws);
 
       } else {
         // Error message

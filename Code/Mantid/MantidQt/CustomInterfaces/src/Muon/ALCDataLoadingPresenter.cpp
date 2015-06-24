@@ -195,5 +195,12 @@ namespace CustomInterfaces
     }
    }
 
+   void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
+     // Set the data
+     m_loadedData = data;
+     // Plot the data
+     m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)),
+                           ALCHelper::curveErrorsFromWs(m_loadedData, 0));
+   }
 } // namespace CustomInterfaces
 } // namespace MantidQt
