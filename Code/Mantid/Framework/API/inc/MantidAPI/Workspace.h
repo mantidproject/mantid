@@ -54,7 +54,6 @@ class AnalysisDataServiceImpl;
 class MANTID_API_DLL Workspace : public Kernel::DataItem {
 public:
   Workspace();
-  Workspace(const Workspace &other);
   virtual ~Workspace();
 
   // DataItem interface
@@ -83,6 +82,9 @@ public:
   WorkspaceHistory &history() { return m_history; }
   /// Returns a reference to the WorkspaceHistory const
   const WorkspaceHistory &getHistory() const { return m_history; }
+
+protected:
+  Workspace(const Workspace &other);
 
 private:
   void setName(const std::string &);
