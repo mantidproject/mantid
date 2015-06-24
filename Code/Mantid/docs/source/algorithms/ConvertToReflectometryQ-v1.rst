@@ -66,4 +66,62 @@ into the output coordinates, and then searches for intersections with the
 output bins. The value added to each output bin is proportional to size of the
 overlap with the input bin, yielding smoother output.
 
+Usage
+-----
+
+**Example - Normalised Polygon transformation**
+
+.. testcode:: ExConvReflQSimple
+
+    workspace_name = "POLREF4699"
+    workspace_nexus_file = workspace_name + ".nxs"
+
+    Load(Filename=workspace_nexus_file,OutputWorkspace=workspace_name)
+    X = mtd[workspace_name]
+    X = ConvertUnits(InputWorkspace=X,Target="Wavelength",AlignBins="1")
+    # Reference intensity to normalise by
+    CropWorkspace(InputWorkspace=X,OutputWorkspace='Io',XMin=0.8,XMax=14.5,StartWorkspaceIndex=2,EndWorkspaceIndex=2)
+    # Crop out transmission and noisy data
+    CropWorkspace(InputWorkspace=X,OutputWorkspace='D',XMin=0.8,XMax=14.5,StartWorkspaceIndex=3)
+    Io=mtd['Io']
+    D=mtd['D']
+
+    # Peform the normalisation step
+    Divide(LHSWorkspace=D,RHSWorkspace=Io,OutputWorkspace='I',AllowDifferentNumberSpectra='1',ClearRHSWorkspace='1')
+    I=mtd['I'][0]
+
+    # Move the detector so that the detector channel matching the reflected beam is at 0,0
+    PIX = 1.1E-3 #m
+    SC = 75
+    avgDB = 29
+    zOffset = -PIX * ((SC - avgDB) * 0.5 + avgDB)
+    MoveInstrumentComponent(Workspace = I, ComponentName = "lineardetector", X = 0, Y = 0, Z = zOffset)
+
+    # Should now have signed theta vs Lambda
+    ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
+
+    # MD transformations
+    ConvertToReflectometryQ(
+        InputWorkspace='SignedTheta_vs_Wavelength',
+        OutputWorkspace='QxQy_NormPoly',
+        OutputAsMDWorkspace=False,
+        OutputDimensions='Q (lab frame)',
+        Method='NormalisedPolygon',
+        Extents='-0.0005,0.0005,0,0.12')
+    ConvertToReflectometryQ(
+        InputWorkspace='SignedTheta_vs_Wavelength',
+        OutputWorkspace='QxQy_Center',
+        OutputAsMDWorkspace=False,
+        OutputDimensions='Q (lab frame)',
+        Method='Centre',
+        Extents='-0.0005,0.0005,0,0.12')
+
+    print 'Done'
+
+Output:
+
+.. testoutput:: ExConvReflQSimple
+
+    Done
+
 .. categories::
