@@ -188,16 +188,75 @@ namespace CustomInterfaces
 
     std::string groupName = label.toStdString();
 
+    using namespace Mantid::API;
+
     int currentStep = m_ui.stepView->currentIndex();
 
     if (currentStep == 0) {
       // DataLoading step
 
+      std::string wsData = groupName + "_Loaded_Data";
+
+      if(AnalysisDataService::Instance().doesExist(wsData)) {
+
+        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+
+        // Do something with the retrieved workspace
+
+      } else {
+        // Error message
+        QMessageBox::critical(
+            this, "Error", "Workspace *_Loaded_Data was not found");
+      }
+
+
     } else if (currentStep == 1) {
       // BaselineModelling step
 
+      std::string wsData = groupName + "_Baseline_Workspace";
+      std::string wsModel = groupName + "_Baseline_Model";
+      std::string wsSections = groupName + "_Baseline_Sections";
+
+      if (AnalysisDataService::Instance().doesExist(wsData) &&
+          AnalysisDataService::Instance().doesExist(wsModel) &&
+          AnalysisDataService::Instance().doesExist(wsSections)) {
+
+        MatrixWorkspace_sptr dataWs =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+        ITableWorkspace_sptr modelWs =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsModel);
+        ITableWorkspace_sptr sectionsWs =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsSections);
+
+        // Do something with the retrieved workspaces
+
+      } else {
+        // Error message
+        QMessageBox::critical(
+            this, "Error", "Some of the *_Baseline_* workspaces were not found");
+      }
+
     } else if (currentStep == 2) {
       // PeakFitting step
+
+      std::string wsFit = groupName + "_Peaks_FitResults";
+      std::string wsData = groupName + "_Peaks_Workspace";
+
+      if (AnalysisDataService::Instance().doesExist(wsData) &&
+          AnalysisDataService::Instance().doesExist(wsFit)) {
+
+        MatrixWorkspace_sptr data =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+        ITableWorkspace_sptr fit =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsFit);
+
+        // Do something with the retrieved workspaces
+
+      } else {
+        // Error message
+        QMessageBox::critical(
+            this, "Error", "Some of the *_Peaks_* workspaces were not found");
+      }
 
     } else {
       // Exception: we can never get here
