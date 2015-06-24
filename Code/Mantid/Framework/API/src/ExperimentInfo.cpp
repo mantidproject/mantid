@@ -973,14 +973,9 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
     g_log.debug(std::string("Unable to load instrument_xml: ") + ex.what());
   }
 
-  try {
-    file->openGroup("instrument_parameter_map", "NXnote");
-    file->readData("data", parameterStr);
-    file->closeGroup();
-  } catch (NeXus::Exception &ex) {
-    g_log.debug(std::string("Unable to load instrument_parameter_map: ") + ex.what());
-    g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
-  }
+  // load parameters if found
+  loadInstrumentParametersNexus( file, parameterStr );
+
   // Close the instrument group
   file->closeGroup();
 
@@ -1040,6 +1035,27 @@ std::string ExperimentInfo::loadInstrumentXML(const std::string &filename) {
     g_log.debug() << e.what() << std::endl;
     throw;
   }
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the instrument parameters from an open NeXus file if found there.
+ * @param file :: open NeXus file in its Instrument group
+ * @param[out] parameterStr :: special string for all the parameters.
+ *             Feed that to ExperimentInfo::readParameterMap() after the
+ * instrument is done.
+ */
+void ExperimentInfo::loadInstrumentParametersNexus( ::NeXus::File *file, 
+                                                    std::string &parameterStr) {
+  try 
+  {
+    file->openGroup("instrument_parameter_map", "NXnote");
+    file->readData("data", parameterStr);
+    file->closeGroup();
+  } catch (NeXus::Exception &ex) {
+    g_log.debug(std::string("Unable to load instrument_parameter_map: ") + ex.what());
+    g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
+  }
+
 }
 
 //-------------------------------------------------------------------------------------------------
