@@ -8,9 +8,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -27,12 +24,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Geometry::IDetector_const_sptr;
-using Geometry::DetectorGroup;
-using Geometry::DetectorGroup_const_sptr;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
-using Geometry::Vertex2D;
 
 /// Default constructor
 SofQWNormalisedPolygon::SofQWNormalisedPolygon()

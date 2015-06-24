@@ -5,9 +5,6 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 
 namespace Mantid {
@@ -16,14 +13,9 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWPolygon)
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Geometry::IDetector_const_sptr;
-using Geometry::DetectorGroup;
-using Geometry::DetectorGroup_const_sptr;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
-using Geometry::Vertex2D;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 /// Default constructor
 SofQWPolygon::SofQWPolygon()
