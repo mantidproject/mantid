@@ -71,22 +71,12 @@ namespace CustomInterfaces
       {
         m_baselineModellingModel->setData(m_dataLoading->loadedData());
       }
-      else
-      {
-        QMessageBox::critical(this, "Error", "Please load some data first");
-        return;
-      }
     }
     if (nextWidget == m_ui.peakFittingView)
     {
       if (m_baselineModellingModel->correctedData())
       {
         m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
-      }
-      else
-      {
-        QMessageBox::critical(this, "Error", "Please fit a baseline first");
-        return;
       }
     }
 
