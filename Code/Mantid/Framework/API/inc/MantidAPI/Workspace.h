@@ -84,7 +84,7 @@ public:
   const WorkspaceHistory &getHistory() const { return m_history; }
 
 protected:
-  Workspace(const Workspace &other);
+  Workspace(const Workspace &other) = default;
 
 private:
   void setName(const std::string &);
