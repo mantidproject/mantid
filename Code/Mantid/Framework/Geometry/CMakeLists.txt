@@ -73,9 +73,9 @@ set ( SRC_FILES
 	src/Math/BnId.cpp
 	src/Math/ConvexPolygon.cpp
 	src/Math/ConvexPolygonIterator.cpp
-	src/Math/LaszloIntersection.cpp
 	src/Math/PolyBase.cpp
 	src/Math/PolygonEdge.cpp
+	src/Math/PolygonIntersection.cpp
 	src/Math/Quadrilateral.cpp
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
@@ -209,10 +209,10 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
 	inc/MantidGeometry/Math/ConvexPolygon.h
-	inc/MantidGeometry/Math/LaszloIntersection.h
 	inc/MantidGeometry/Math/MapSupport.h
 	inc/MantidGeometry/Math/PolyBase.h
 	inc/MantidGeometry/Math/PolygonEdge.h
+	inc/MantidGeometry/Math/PolygonIntersection.h
 	inc/MantidGeometry/Math/Quadrilateral.h
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
@@ -275,7 +275,6 @@ set ( TEST_FILES
 	InstrumentRayTracerTest.h
 	InstrumentTest.h
 	IsotropicAtomBraggScattererTest.h
-	LaszloIntersectionTest.h
 	LineIntersectVisitTest.h
 	LineTest.h
 	MDBoxImplicitFunctionTest.h
@@ -311,6 +310,7 @@ set ( TEST_FILES
 	PointGroupFactoryTest.h
 	PointGroupTest.h
 	PolygonEdgeTest.h
+	PolygonIntersectionTest.h
 	ProductOfCyclicGroupsTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
