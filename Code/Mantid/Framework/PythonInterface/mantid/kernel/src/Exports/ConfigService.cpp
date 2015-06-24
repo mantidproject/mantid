@@ -123,6 +123,12 @@ void export_ConfigService() {
            "Saves the keys that have changed from their default to the given "
            "filename")
 
+      .def("setFileLogLevel", &ConfigServiceImpl::setFileLogLevel,
+          "Sets the log level priority for the File log channel, logLevel 1 = Critical, 7 = Debug")
+
+      .def("setConsoleLogLevel", &ConfigServiceImpl::setConsoleLogLevel,
+          "Sets the log level priority for the Console log channel, logLevel 1 = Critical, 7 = Debug")
+
       .def("keys", &ConfigServiceImpl::keys)
 
       // Treat this as a dictionary
