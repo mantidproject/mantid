@@ -9,6 +9,12 @@ namespace Mantid {
 namespace Geometry {
 using Kernel::V2D;
 
+namespace
+{
+  // Smallest possible double value
+  const double EPSILON = std::numeric_limits<double>::epsilon();
+}
+
 //-----------------------------------------------------------------------------
 // Public methods
 //-----------------------------------------------------------------------------
@@ -108,22 +114,21 @@ PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
   if (classe == PolygonEdge::Collinear || classe == PolygonEdge::Parallel) {
     return classe;
   }
-  const double epsilon(std::numeric_limits<double>::epsilon());
   double lene = (edgeOne.end() - edgeOne.start()).norm();
-  if ((s < -epsilon * lene) || (s > 1.0 + epsilon * lene)) {
+  if ((s < -EPSILON * lene) || (s > 1.0 + EPSILON * lene)) {
     return PolygonEdge::SkewNoCross;
   }
   double t(0.0);
   orientation(edgeTwo, edgeOne, t);
   double lenf = (edgeTwo.start() - edgeTwo.end()).norm();
-  if (ltEquals(-epsilon * lenf, t) && ltEquals(t, 1.0 + epsilon * lenf)) {
-    if (ltEquals(t, epsilon * lenf)) {
+  if (ltEquals(-EPSILON * lenf, t) && ltEquals(t, 1.0 + EPSILON * lenf)) {
+    if (ltEquals(t, EPSILON * lenf)) {
       crossPoint = edgeTwo.start();
-    } else if (gtEquals(t, 1.0 - epsilon * lenf)) {
+    } else if (gtEquals(t, 1.0 - EPSILON * lenf)) {
       crossPoint = edgeTwo.end();
-    } else if (ltEquals(s, epsilon * lene)) {
+    } else if (ltEquals(s, EPSILON * lene)) {
       crossPoint = edgeOne.start();
-    } else if (gtEquals(s, 1.0 - epsilon * lene)) {
+    } else if (gtEquals(s, 1.0 - EPSILON * lene)) {
       crossPoint = edgeOne.end();
     } else {
       crossPoint = edgeTwo.point(t);
