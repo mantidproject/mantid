@@ -8,6 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+#include "MantidDataObjects/CalculateReflectometry.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
 
 namespace Mantid {
@@ -16,16 +17,31 @@ namespace MDAlgorithms {
 class CalculateReflectometryK: Calculation type for converting to ki or kf given
 a theta value (in degrees) and a wavelength
 */
-class CalculateReflectometryK {
+class CalculateReflectometryK : public DataObjects::CalculateReflectometry {
 private:
-  double m_theta;
+  double m_sin_theta_i;
+  double m_sin_theta_f;
 
 public:
-  CalculateReflectometryK(double theta) : m_theta(theta) {}
+  CalculateReflectometryK() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
   ~CalculateReflectometryK(){};
-  double execute(const double &wavelength) {
+
+  void setThetaIncident(double thetaIncident) {
+    m_sin_theta_i = sin(to_radians_factor * thetaIncident);
+  }
+
+  void setThetaFinal(double thetaFinal) {
+    m_sin_theta_f = sin(to_radians_factor * thetaFinal);
+  }
+
+  double calculateDim0(double wavelength) const {
     double wavenumber = 2 * M_PI / wavelength;
-    return wavenumber * sin(M_PI / 180.0 * m_theta);
+    return wavenumber * m_sin_theta_i;
+  }
+
+  double calculateDim1(double wavelength) const {
+    double wavenumber = 2 * M_PI / wavelength;
+    return wavenumber * m_sin_theta_f;
   }
 };
 
@@ -59,7 +75,7 @@ class DLLExport ReflectometryTransformKiKf
     : public DataObjects::ReflectometryTransform {
 private:
   /// Object performing raw caclcation to determine Ki
-  mutable CalculateReflectometryK m_KiCalculation;
+  mutable CalculateReflectometryK m_kCalculator;
 
 public:
   ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin,
