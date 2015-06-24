@@ -133,7 +133,7 @@ public:
   virtual MDNormalization displayNormalization() const;
 
 protected:
-  IMDWorkspace(const IMDWorkspace &other);
+  IMDWorkspace(const IMDWorkspace &other) = default;
   virtual const std::string toString() const;
 };
 
