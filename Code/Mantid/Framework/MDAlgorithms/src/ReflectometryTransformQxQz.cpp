@@ -42,11 +42,11 @@ ReflectometryTransformQxQz::ReflectometryTransformQxQz(
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
     : ReflectometryTransform("Qx", "qx", qxMin, qxMax, "Qz", "qz", qzMin, qzMax,
                              numberOfBinsQx, numberOfBinsQz,
-                             new CalculateReflectometryQxQz()),
-      m_inTheta(incidentTheta) {
+                             new CalculateReflectometryQxQz()) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
+  m_calculator->setThetaIncident(incidentTheta);
 }
 
 MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
@@ -81,11 +81,6 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
 
-  CalculateReflectometryQxQz qcThetaLower;
-  CalculateReflectometryQxQz qcThetaUpper;
-  qcThetaLower.setThetaIncident(m_inTheta);
-  qcThetaUpper.setThetaIncident(m_inTheta);
-
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {
@@ -99,9 +94,6 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
-    qcThetaLower.setThetaFinal(thetaLower);
-    qcThetaUpper.setThetaFinal(thetaUpper);
-
     const MantidVec &X = inputWS->readX(0);
 
     for (size_t j = 0; j < nBins; ++j) {
@@ -109,14 +101,16 @@ MatrixWorkspace_sptr ReflectometryTransformQxQz::executeNormPoly(
       const double lamUpper = X[j + 1];
 
       // fractional rebin
-      const V2D ll(qcThetaLower.calculateDim0(lamLower),
-                   qcThetaLower.calculateDim1(lamLower));
-      const V2D lr(qcThetaLower.calculateDim0(lamUpper),
-                   qcThetaLower.calculateDim1(lamUpper));
-      const V2D ul(qcThetaUpper.calculateDim0(lamLower),
-                   qcThetaUpper.calculateDim1(lamLower));
-      const V2D ur(qcThetaUpper.calculateDim0(lamUpper),
-                   qcThetaUpper.calculateDim1(lamUpper));
+      m_calculator->setThetaFinal(thetaLower);
+      const V2D ll(m_calculator->calculateDim0(lamLower),
+                   m_calculator->calculateDim1(lamLower));
+      const V2D lr(m_calculator->calculateDim0(lamUpper),
+                   m_calculator->calculateDim1(lamUpper));
+      m_calculator->setThetaFinal(thetaUpper);
+      const V2D ul(m_calculator->calculateDim0(lamLower),
+                   m_calculator->calculateDim1(lamLower));
+      const V2D ur(m_calculator->calculateDim0(lamUpper),
+                   m_calculator->calculateDim1(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,

@@ -40,9 +40,6 @@ namespace MDAlgorithms {
  */
 class DLLExport ReflectometryTransformQxQz
     : public DataObjects::ReflectometryTransform {
-private:
-  const double m_inTheta;
-
 public:
   /// Constructor
   ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin,
