@@ -15,11 +15,12 @@ class EnginXCalibrateFull(PythonAlgorithm):
         return "Calibrates every pixel position by performing single peak fitting."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
-    		"Calibration run to use")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "Workspace with the calibration run to use.")
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),\
-    		"A table with the detector IDs and calibrated detector positions in V3P format.")
+                             "A table with the detector IDs and calibrated detector positions in V3D format "
+                             "(3D vector with x, y, z values).")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
@@ -43,7 +44,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
-        ws = self._loadCalibrationRun()
+        ws = self.getProperty('InputWorkspace').value
 
         ws = self._prepareWsForFitting(ws)
 
@@ -66,14 +67,6 @@ class EnginXCalibrateFull(PythonAlgorithm):
             prog.report()
 
         self.setProperty("DetectorPositions", positionTable)
-
-    def _loadCalibrationRun(self):
-        """ Loads specified calibration run
-    	"""
-        alg = self.createChildAlgorithm('Load')
-        alg.setProperty('Filename', self.getProperty('Filename').value)
-        alg.execute()
-        return alg.getProperty('OutputWorkspace').value
 
     def _prepareWsForFitting(self, ws):
         """ Rebins the workspace and converts it to distribution

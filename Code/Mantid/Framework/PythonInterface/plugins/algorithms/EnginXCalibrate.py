@@ -14,8 +14,8 @@ class EnginXCalibrate(PythonAlgorithm):
         return "Calibrates a detector bank by performing a single peak fitting."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
-    		"Calibration run to use")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
+                             "Workspace with the calibration run to use.")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
@@ -48,7 +48,8 @@ class EnginXCalibrate(PythonAlgorithm):
 
         import EnginXUtils
 
-        ws = self._focusRun()
+        focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
+                                     self.getProperty('Bank').value)
 
         # Get peaks in dSpacing from file
         expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
@@ -57,7 +58,7 @@ class EnginXCalibrate(PythonAlgorithm):
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
-        difc, zero = self._fitParams(ws, expectedPeaksD)
+        difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
 
         self._produceOutputs(difc, zero)
 
@@ -84,13 +85,18 @@ class EnginXCalibrate(PythonAlgorithm):
 
         return difc, zero
 
-    def _focusRun(self):
+    def _focusRun(self, ws, bank):
         """
         Focuses the input workspace by running EnginXFocus which will produce a single spectrum workspace.
+
+        @param ws :: workspace to focus
+        @param bank :: the focussing will be applied on the detectors of this bank
+
+        @return focussed (summed) workspace
         """
         alg = self.createChildAlgorithm('EnginXFocus')
-        alg.setProperty('Filename', self.getProperty('Filename').value)
-        alg.setProperty('Bank', self.getProperty('Bank').value)
+        alg.setProperty('InputWorkspace', ws)
+        alg.setProperty('Bank', bank)
 
         detPos = self.getProperty('DetectorPositions').value
         if detPos:
