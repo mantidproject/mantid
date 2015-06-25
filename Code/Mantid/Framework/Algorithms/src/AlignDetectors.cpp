@@ -176,7 +176,9 @@ void AlignDetectors::init() {
                   "The name to use for the output workspace");
 
   std::vector<std::string> exts;
-  // exts.push_back(".hd5"); // TODO
+  exts.push_back(".h5");
+  exts.push_back(".hd5");
+  exts.push_back(".hdf");
   exts.push_back(".cal");
   declareProperty(
       new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, exts),
@@ -244,24 +246,27 @@ bool endswith(const std::string& str, const std::string &ending) {
 }
 
 void AlignDetectors::loadCalFile(MatrixWorkspace_sptr inputWS, const std::string & filename) {
+  IAlgorithm_sptr alg;
   if (endswith(filename, ".cal")) {
       // Load the .cal file
-      IAlgorithm_sptr alg = createChildAlgorithm("LoadCalFile");
+      alg = createChildAlgorithm("LoadCalFile");
       alg->setPropertyValue("CalFilename", filename);
       alg->setProperty("InputWorkspace", inputWS);
-      alg->setProperty<bool>("MakeGroupingWorkspace", false);
       alg->setProperty<bool>("MakeOffsetsWorkspace", true);
-      alg->setProperty<bool>("MakeMaskWorkspace", false);
-      alg->setPropertyValue("WorkspaceName", "temp");
-      alg->executeAsChildAlg();
-      m_calibrationWS = alg->getProperty("OutputCalWorkspace");
-//  } else if (endswith(filename, ".hd5")) { // TODO
-
+  } else if (endswith(filename, ".h5") || endswith(filename, ".hd5") || endswith(filename, ".hdf")) {
+      alg = createChildAlgorithm("LoadDiffCal");
+      alg->setPropertyValue("Filename", filename);
+      alg->setProperty<bool>("MakeCalWorkspace", true);
   } else {
       std::stringstream msg;
       msg << "Do not know how to load cal file: " << filename;
       throw std::runtime_error(msg.str());
   }
+  alg->setProperty<bool>("MakeGroupingWorkspace", false);
+  alg->setProperty<bool>("MakeMaskWorkspace", false);
+  alg->setPropertyValue("WorkspaceName", "temp");
+  alg->executeAsChildAlg();
+  m_calibrationWS = alg->getProperty("OutputCalWorkspace");
 }
 
 void AlignDetectors::getCalibrationWS(MatrixWorkspace_sptr inputWS) {
