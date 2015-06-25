@@ -27,8 +27,8 @@ DECLARE_ALGORITHM(AlignDetectors)
 namespace { // anonymous namespace
 
     /// Applies the equation d=(TOF-tzero)/difc
-    struct difc_only {
-      difc_only(const double difc) : factor(1./difc){
+    struct func_difc_only {
+      func_difc_only(const double difc) : factor(1./difc){
       }
 
       double operator()(const double tof) const {
@@ -40,8 +40,8 @@ namespace { // anonymous namespace
     };
 
     /// Applies the equation d=(TOF-tzero)/difc
-    struct difc_and_tzero {
-      difc_and_tzero(const double difc, const double tzero) : factor(1./difc), offset(-1.*tzero/difc){
+    struct func_difc_and_tzero {
+      func_difc_and_tzero(const double difc, const double tzero) : factor(1./difc), offset(-1.*tzero/difc){
       }
 
       double operator()(const double tof) const {
@@ -54,34 +54,20 @@ namespace { // anonymous namespace
       double offset;
     };
 
-    struct difa_positive {
-      difa_positive(const double difc, const double difa, const double tzero) {
+    struct func_difa {
+      func_difa(const double difc, const double difa, const double tzero) {
           factor1 = -0.5 * difc / difa;
           factor2 = 1. / difa;
           factor3 = (factor1 * factor1) - (tzero / difa);
       }
 
       double operator()(const double tof) const {
-        return factor1 + std::sqrt((tof*factor2) + factor3);
-      }
-
-      /// -0.5*difc/difa
-      double factor1;
-      /// 1/difa
-      double factor2;
-      /// (0.5*difc/difa)^2 - (tzero/difa)
-      double factor3;
-    };
-
-    struct difa_negative {
-      difa_negative(const double difc, const double difa, const double tzero) {
-          factor1 = -0.5 * difc / difa;
-          factor2 = 1. / difa;
-          factor3 = (factor1 * factor1) - (tzero / difa);
-      }
-
-      double operator()(const double tof) const {
-        return factor1 - std::sqrt((tof*factor2) + factor3);
+        double second = std::sqrt((tof*factor2) + factor3);
+        if (second < factor1)
+            return factor1-second;
+        else {
+            return factor1+second;
+        }
       }
 
       /// -0.5*difc/difa
@@ -121,14 +107,12 @@ namespace { // anonymous namespace
 
             if (difa == 0.) {
                 if (tzero == 0.) {
-                    return difc_only(difc);
+                    return func_difc_only(difc);
                 } else {
-                    return difc_and_tzero(difc, tzero);
+                    return func_difc_and_tzero(difc, tzero);
                 }
-            } else if (difa > 0.){
-                return difa_positive(difc, difa, tzero);
-            } else { // difa < 0.
-                return difa_negative(difc, difa, tzero);
+            } else { // difa != 0.
+                return func_difa(difc, difa, tzero);
             }
         }
 
@@ -360,12 +344,6 @@ void AlignDetectors::exec() {
       const MantidVec &xIn = inSpec->readX();
 
        std::transform( xIn.begin(), xIn.end(), xOut.begin(), toDspacing);
-//       std::bind2nd(std::multiplies<double>(), factor) );
-      // the above transform creates wrong output in parallel in debug in Visual
-      // Studio
-//      for (size_t k = 0; k < xOut.size(); ++k) {
-//        xOut[k] = xIn[k] * factor;
-//      }
 
       // Copy the Y&E data
       outputWS->dataY(i) = inSpec->readY();
@@ -444,7 +422,7 @@ void AlignDetectors::execEvent() {
     msg << "Something wrong with the calibration. Negative minimum d-spacing "
            "created. d_min = " << outputWS->getTofMin() << " d_max "
         << outputWS->getTofMax();
-    throw std::runtime_error(msg.str());
+    g_log.warning(msg.str());
   }
   outputWS->clearMRU();
 }
