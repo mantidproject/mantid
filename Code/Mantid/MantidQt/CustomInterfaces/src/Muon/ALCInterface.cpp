@@ -265,10 +265,10 @@ namespace CustomInterfaces
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
 
         // Check that ws contains one spectrum only
-        if (data->getNumberHistograms() != 1) {
+        if (data->getNumberHistograms() < 3) {
           QMessageBox::critical(this, "Error",
                                 "Workspace " + QString::fromStdString(wsData) +
-                                    " must contain one spectrum only");
+                                    " must contain at least three spectra");
           return;
         }
 
