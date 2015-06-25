@@ -5,27 +5,16 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/V2D.h"
 #include <deque>
 #include <iosfwd>
 
 namespace Mantid {
-
-//---------------------------------------------------------------------------
-// Forward declarations
-//---------------------------------------------------------------------------
-namespace Kernel {
-class V2D;
-}
-
 namespace Geometry {
 //---------------------------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------------------------
 class PolygonEdge;
-
-//---------------------------------------------------------------------------
-// Typedefs
-//---------------------------------------------------------------------------
 
 /**
 An implementation of a convex polygon. It contains a list of vertices that
