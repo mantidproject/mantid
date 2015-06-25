@@ -238,7 +238,7 @@ namespace CustomInterfaces
     } else if (currentStep == 2) {
       // PeakFitting step
 
-      std::string wsFit = groupName + "_Peaks_FitResults";
+      std::string wsData = groupName + "_Peaks_Workspace";
 
       if (AnalysisDataService::Instance().doesExist(wsData)) {
 
