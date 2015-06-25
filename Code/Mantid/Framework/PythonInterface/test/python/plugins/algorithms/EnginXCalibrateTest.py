@@ -6,19 +6,14 @@ class EnginXCalibrateTest(unittest.TestCase):
 
     _data_ws = None
 
-    @classmethod
-    def setUpClass(cls):
+    # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
+    # unittest of rhel6
+    def setUp(self):
         """
         Set up dependencies for one or more of the tests below.
         """
-        cls._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
-
-    @classmethod
-    def tearDownClass(cls):
-        """
-        Clean up tasks complementary to setUp, like removing workspaces
-        """
-        DeleteWorkspace(cls._data_ws)
+        if not self.__class__._data_ws:
+            self.__class__._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
 
     def test_issues_with_properties(self):
         """
