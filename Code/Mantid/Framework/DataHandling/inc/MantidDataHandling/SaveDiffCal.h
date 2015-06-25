@@ -58,6 +58,7 @@ private:
   void generateDetidToIndex();
   bool tableHasColumn(const std::string name) const;
 
+  std::size_t m_numValues;
   API::ITableWorkspace_sptr m_calibrationWS;
   std::map<detid_t, size_t> m_detidToIndex;
 };
