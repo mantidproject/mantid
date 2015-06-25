@@ -93,8 +93,8 @@ public:
     if (fittedFunc)
     {
       TS_ASSERT_EQUALS(fittedFunc->name(), "FlatBackground");
-      TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 2.35714, 1E-5);
-      TS_ASSERT_DELTA(fittedFunc->getError(0),0.53452,1E-5);
+      TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 2.13979, 1E-5);
+      TS_ASSERT_DELTA(fittedFunc->getError(0),0.66709,1E-5);
     }
 
     MatrixWorkspace_const_sptr corrected = m_model->correctedData();
@@ -105,10 +105,10 @@ public:
       TS_ASSERT_EQUALS(corrected->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(corrected->blocksize(), 9);
 
-      TS_ASSERT_DELTA(corrected->readY(0)[0], 97.64285, 1E-5);
-      TS_ASSERT_DELTA(corrected->readY(0)[2], -0.35714, 1E-5);
-      TS_ASSERT_DELTA(corrected->readY(0)[5], 0.64285, 1E-5);
-      TS_ASSERT_DELTA(corrected->readY(0)[8], 97.64285, 1E-5);
+      TS_ASSERT_DELTA(corrected->readY(0)[0], 97.86021, 1E-5);
+      TS_ASSERT_DELTA(corrected->readY(0)[2], -0.13979, 1E-5);
+      TS_ASSERT_DELTA(corrected->readY(0)[5], 0.86021, 1E-5);
+      TS_ASSERT_DELTA(corrected->readY(0)[8], 97.86021, 1E-5);
 
       TS_ASSERT_EQUALS (corrected->readE(0), data->readE(0));
     }
@@ -124,12 +124,11 @@ public:
 
       // Check table entries
       TS_ASSERT_EQUALS(parameters->String(0,0), "A0");
-      TS_ASSERT_DELTA (parameters->Double(0,1), 2.35714, 1E-5);
-      TS_ASSERT_DELTA (parameters->Double(0,2), 0.53452, 1E-5);
+      TS_ASSERT_DELTA (parameters->Double(0,1), 2.13978, 1E-5);
+      TS_ASSERT_DELTA (parameters->Double(0,2), 0.66709, 1E-5);
       TS_ASSERT_EQUALS(parameters->String(1,0), "Cost function value");
-      TS_ASSERT_DELTA (parameters->Double(1,1), 0.60044, 1E-5);
+      TS_ASSERT_DELTA (parameters->Double(1,1), 0.46627, 1E-5);
       TS_ASSERT_EQUALS(parameters->Double(1,2), 0);
-
     }
 
     TS_ASSERT_EQUALS(m_model->sections(), sections);
