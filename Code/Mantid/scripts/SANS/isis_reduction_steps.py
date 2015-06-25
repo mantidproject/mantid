@@ -1230,10 +1230,12 @@ class TransmissionCalc(ReductionStep):
         self.trans_mon = None
         self.trans_roi = []
 
-        # Contributions to the region of interest.
+        # Contributions to the region of interest. Note that radius, roi_files add to the region
+        # of interest, while mask_files are taboo for the region of interest
         self.radius = None
         self.roi_files = []
         self.main = False
+        self.mask_files =[]
 
         # use InterpolatingRebin
         self.interpolate = None
@@ -1403,11 +1405,19 @@ class TransmissionCalc(ReductionStep):
 
         if self.roi_files:
             idf_path = reducer.instrument.idf_path
-            for mask_file in self.roi_files:
-                self.trans_roi += get_masked_det_ids_from_mask_file(mask_file, idf_path)
+            for roi_file in self.roi_files:
+                self.trans_roi += get_masked_det_ids_from_mask_file(roi_file, idf_path)
 
+        masked_ids =[]
+        if self.mask_files:
+            idf_path = reducer.instrument.idf_path
+            for mask_file in self.mask_files:
+                masked_ids += get_masked_det_ids_from_mask_file(mask_file, idf_path)
+
+        # Detector ids which are not allowed and specified by "masked_ids" need to
+        # be removed from the trans_roi list
         # Remove duplicates and sort.
-        self.trans_roi = sorted(set(self.trans_roi))
+        self.trans_roi = sorted(set(self.trans_roi)-set_masked(ids))
 
     def execute(self, reducer, workspace):
         """
@@ -2606,6 +2616,8 @@ class UserFile(ReductionStep):
             elif arguments.startswith("ROI"):
                 reducer.transmission_calculator.roi_files += [arguments.split("=")[1]]
                 return
+            elif arguments.startswith("MASK"):
+                reducer.transmission_calculator.mask_files += [arguments.split("=")[1]]
         except Exception as e:
             return "Problem parsing TRANS line \"" + arguments + "\":\n" + str(e)
 
