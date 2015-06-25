@@ -179,6 +179,8 @@ void Rebin2D::rebinToOutput(const Geometry::Quadrilateral &inputQ,
                              en_start, en_end))
     return;
 
+  const auto & inY = inputWS->readY(i);
+  const auto & inE = inputWS->readE(i);
   // It seems to be more efficient to construct this once and clear it before each calculation
   // in the loop
   ConvexPolygon intersectOverlap;
@@ -192,7 +194,7 @@ void Rebin2D::rebinToOutput(const Geometry::Quadrilateral &inputQ,
       const V2D ul(X[ei], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
-      double yValue = inputWS->readY(i)[j];
+      double yValue = inY[j];
       if (boost::math::isnan(yValue)) {
         continue;
       }
@@ -200,7 +202,7 @@ void Rebin2D::rebinToOutput(const Geometry::Quadrilateral &inputQ,
       if(intersection(outputQ, inputQ, intersectOverlap)) {
         const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
-        double eValue = inputWS->readE(i)[j] * weight;
+        double eValue = inE[j] * weight;
         if (inputWS->isDistribution()) {
           const double overlapWidth = intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
@@ -238,6 +240,8 @@ void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
                              en_start, en_end))
     return;
 
+  const auto & inY = inputWS->readY(i);
+  const auto & inE = inputWS->readE(i);
   // Don't do the overlap removal if already RebinnedOutput.
   // This wreaks havoc on the data.
   const bool removeOverlap(inputWS->isDistribution() && inputWS->id() != "RebinnedOutput");
@@ -254,7 +258,7 @@ void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
       const V2D ul(X[ei], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
-      double yValue = inputWS->readY(i)[j];
+      double yValue = inY[j];
       if (boost::math::isnan(yValue)) {
         continue;
       }
@@ -262,7 +266,7 @@ void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
       if(intersection(outputQ, inputQ, intersectOverlap)) {
         const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
-        double eValue = inputWS->readE(i)[j] * weight;
+        double eValue = inE[j] * weight;
         if (removeOverlap) {
           const double overlapWidth = intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
