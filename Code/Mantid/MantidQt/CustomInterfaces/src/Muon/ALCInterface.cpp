@@ -233,7 +233,9 @@ namespace CustomInterfaces
         ITableWorkspace_sptr sectionsWs =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsSections);
 
-        // Do something with the retrieved workspaces
+        // Set the retrieved workspace
+        m_baselineModellingModel->setData(dataWs);
+        m_baselineModellingModel->setCorrectedData(dataWs);
 
       } else {
         // Error message

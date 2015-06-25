@@ -57,6 +57,9 @@ namespace CustomInterfaces
     /// Set the data we should fit baseline for
     void setData(MatrixWorkspace_const_sptr data);
 
+    /// Set the corrected data resulting from fit
+    void setCorrectedData(MatrixWorkspace_const_sptr data);
+
     /// Export data + baseline + corrected data as a single workspace
     MatrixWorkspace_sptr exportWorkspace();
 
@@ -81,7 +84,6 @@ namespace CustomInterfaces
     std::vector<Section> m_sections;
 
     // Setters for convenience
-    void setCorrectedData(MatrixWorkspace_const_sptr data);
     void setFittedFunction(IFunction_const_sptr function);
 
     /// Disables points which shouldn't be used for fitting
