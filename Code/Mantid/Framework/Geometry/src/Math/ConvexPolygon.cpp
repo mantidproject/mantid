@@ -38,7 +38,7 @@ ConvexPolygon::ConvexPolygon(const ConvexPolygon &rhs) { *this = rhs; }
 
 /**
  * Copy-assignment operator
- * @rhs RHS object
+ * @param rhs Source object to copy from
  */
 ConvexPolygon &ConvexPolygon::operator=(const ConvexPolygon &rhs) {
   if (this != &rhs) {
@@ -117,7 +117,7 @@ const Kernel::V2D &ConvexPolygon::at(const size_t index) const {
   }
 }
 
-/// @eturn the number of vertices
+/// @return the number of vertices
 size_t ConvexPolygon::npoints() const { return m_vertices.size(); }
 
 /**
