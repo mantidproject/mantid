@@ -67,7 +67,7 @@ public:
 
   void test_fit()
   {
-    std::vector<double> e = boost::assign::list_of(10)(1)(1.41)(10)(10)(1.73)(2)(2.5)(10);
+    std::vector<double> e = boost::assign::list_of(10.0)(1.0)(1.41)(10.0)(10.0)(1.73)(2.0)(2.5)(10.0);
     std::vector<double> y = boost::assign::list_of(100)(1)(2)(100)(100)(3)(4)(5)(100);
     std::vector<double> x = boost::assign::list_of(1)(2)(3)(4)(5)(6)(7)(8)(9);
 
