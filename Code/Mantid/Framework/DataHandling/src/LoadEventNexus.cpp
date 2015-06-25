@@ -89,7 +89,12 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNum
   numPulses = seconds.size();
   if (numPulses == 0)
     throw std::runtime_error("event_time_zero field has no data!");
-  periodNumbers = std::vector<int>(numPulses, FirstPeriod); // TODO we are fixing this at 1 period for all
+
+  // Ensure that we always have a consistency between nPulses and periodNumbers containers
+  if (numPulses != pNumbers.size()){
+      periodNumbers = std::vector<int>(numPulses, FirstPeriod);;
+  }
+
   pulseTimes = new DateAndTime[numPulses];
   for (size_t i = 0; i < numPulses; i++)
     pulseTimes[i] = start + seconds[i];
@@ -210,7 +215,7 @@ public:
           size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
           // Allocate it
           if (wi < numEventLists) {
-            outputWS.getEventList(wi).reserve(counts[pixID - m_min_id]);
+            outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
           }
           if (alg->getCancel())
             break; // User cancellation
@@ -225,6 +230,8 @@ public:
 
     // Default pulse time (if none are found)
     Mantid::Kernel::DateAndTime pulsetime;
+    int periodNumber = 0;
+    int periodIndex = 0;
     Mantid::Kernel::DateAndTime lastpulsetime(0);
 
     bool pulsetimesincreasing = true;
@@ -272,8 +279,11 @@ public:
             break;
         }
 
+
         // Save the pulse time at this index for creating those events
         pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
+        periodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
+        periodIndex = periodNumber - 1;
 
         // Determine if pulse times continue to increase
         if (pulsetime < lastpulsetime)
@@ -298,7 +308,7 @@ public:
             double weight = static_cast<double>(event_weight[i]);
             double errorSq = weight * weight;
             LoadEventNexus::WeightedEventVector_pt eventVector =
-                alg->weightedEventVectors[detId];
+                alg->weightedEventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
@@ -315,7 +325,7 @@ public:
           } else {
             // We have cached the vector of events for this detector ID
             std::vector<Mantid::DataObjects::TofEvent> *eventVector =
-                alg->eventVectors[detId];
+                alg->eventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
@@ -1295,7 +1305,8 @@ void LoadEventNexus::exec() {
 * @param vectors :: the array to create the map on
 */
 template <class T>
-void LoadEventNexus::makeMapToEventLists(std::vector<T> &vectors) {
+void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T> > &vectors) {
+  vectors.resize(m_ws->nPeriods());
   if (this->event_id_is_spec) {
     // Find max spectrum no
     Axis *ax1 = m_ws->getAxis(1);
@@ -1313,12 +1324,16 @@ void LoadEventNexus::makeMapToEventLists(std::vector<T> &vectors) {
     // the maximum
     // possible spectrum number
     eventid_max = maxSpecNo;
-    vectors.resize(maxSpecNo + 1, NULL);
-    for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
-      const ISpectrum *spec = m_ws->getSpectrum(i);
-      if (spec) {
-        getEventsFrom(m_ws->getEventList(i), vectors[spec->getSpectrumNo()]);
-      }
+    for(size_t i= 0; i < vectors.size(); ++i){
+        vectors[i].resize(maxSpecNo + 1, NULL);
+    }
+    for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
+        for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
+          const ISpectrum *spec = m_ws->getSpectrum(i);
+          if (spec) {
+            getEventsFrom(m_ws->getEventList(i, period), vectors[period][spec->getSpectrumNo()]);
+          }
+        }
     }
   } else {
     // To avoid going out of range in the vector, this is the MAX index that can
@@ -1328,14 +1343,18 @@ void LoadEventNexus::makeMapToEventLists(std::vector<T> &vectors) {
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default
-    vectors.resize(eventid_max + 1, NULL);
+    for(size_t i= 0; i < vectors.size(); ++i){
+        vectors[i].resize(eventid_max + 1, NULL);
+    }
 
     for (size_t j = size_t(pixelID_to_wi_offset);
          j < pixelID_to_wi_vector.size(); j++) {
       size_t wi = pixelID_to_wi_vector[j];
       // Save a POINTER to the vector
       if (wi < m_ws->getNumberHistograms()) {
-        getEventsFrom(m_ws->getEventList(wi), vectors[j - pixelID_to_wi_offset]);
+          for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
+              getEventsFrom(m_ws->getEventList(wi, period), vectors[period][j - pixelID_to_wi_offset]);
+          }
       }
     }
   }

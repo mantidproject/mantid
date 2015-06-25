@@ -59,13 +59,23 @@ public:
 
   void setNPeriods(size_t nPeriods);
 
+  void reserveEventListAt(size_t wi, size_t size){
+      for(size_t i = 0; i < m_WsVec.size(); ++i){
+           m_WsVec[i]->getEventList(wi).reserve(size);
+      }
+  }
+
+  size_t nPeriods() const {
+      return m_WsVec.size();
+  }
+
   DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_WsVec.front();} // TODO remove
 
   DecoratorWorkspace(): m_WsVec(1, createEmptyEventWorkspace()){}
 
   Geometry::Instrument_const_sptr getInstrument() const
   {
-      return m_WsVec[0]->getInstrument(); // TODO, just take from the first workspace
+      return m_WsVec[0]->getInstrument();
   }
   const API::Run &run() const
   {
@@ -87,6 +97,16 @@ public:
   virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const {
       return m_WsVec[0]->getEventList(workspace_index); // TODO need to know PERIOD number TOO
   }
+
+  const DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber) const {
+      return m_WsVec[periodNumber]->getEventList(workspace_index);
+  }
+
+  DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber)  {
+      return m_WsVec[periodNumber]->getEventList(workspace_index);
+  }
+
+
   virtual DataObjects::EventList &getEventList(const std::size_t workspace_index){
       return m_WsVec[0]->getEventList(workspace_index); // TODO need to know PERIOD number TOO
   }
@@ -302,7 +322,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
-  std::vector<EventVector_pt> eventVectors;
+  std::vector<std::vector<EventVector_pt> > eventVectors;
 
   /// Mutex to protect eventVectors from each task
   Poco::Mutex m_eventVectorMutex;
@@ -339,7 +359,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.
-  std::vector<WeightedEventVector_pt> weightedEventVectors;
+  std::vector<std::vector<WeightedEventVector_pt> > weightedEventVectors;
 
 private:
   /// Intialisation code
@@ -351,7 +371,7 @@ private:
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   /// Map detector IDs to event lists.
-  template <class T> void makeMapToEventLists(std::vector<T> &vectors);
+  template <class T> void makeMapToEventLists(std::vector<std::vector<T> > &vectors);
 
   void createWorkspaceIndexMaps(const bool monitors, const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
