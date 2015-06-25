@@ -219,19 +219,11 @@ namespace CustomInterfaces
       // BaselineModelling step
 
       std::string wsData = groupName + "_Baseline_Workspace";
-      std::string wsModel = groupName + "_Baseline_Model";
-      std::string wsSections = groupName + "_Baseline_Sections";
 
-      if (AnalysisDataService::Instance().doesExist(wsData) &&
-          AnalysisDataService::Instance().doesExist(wsModel) &&
-          AnalysisDataService::Instance().doesExist(wsSections)) {
+      if (AnalysisDataService::Instance().doesExist(wsData)) {
 
         MatrixWorkspace_sptr dataWs =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
-        ITableWorkspace_sptr modelWs =
-            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsModel);
-        ITableWorkspace_sptr sectionsWs =
-            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsSections);
 
         // Set the retrieved workspace
         m_baselineModellingModel->setData(dataWs);
@@ -247,15 +239,11 @@ namespace CustomInterfaces
       // PeakFitting step
 
       std::string wsFit = groupName + "_Peaks_FitResults";
-      std::string wsData = groupName + "_Peaks_Workspace";
 
-      if (AnalysisDataService::Instance().doesExist(wsData) &&
-          AnalysisDataService::Instance().doesExist(wsFit)) {
+      if (AnalysisDataService::Instance().doesExist(wsData)) {
 
         MatrixWorkspace_sptr data =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
-        ITableWorkspace_sptr fit =
-            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsFit);
 
         // Set the retrieved data
         m_peakFittingModel->setData(data);
