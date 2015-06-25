@@ -21,8 +21,12 @@ namespace DataHandling {
  */
 class BankPulseTimes {
 public:
+
+  /// Starting number for assigning periods.
+  static const unsigned int FirstPeriod;
+
   /// Constructor with NeXus::File
-  BankPulseTimes(::NeXus::File &file);
+  BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNumbers);
 
   /// Constructor with vector of DateAndTime
   BankPulseTimes(const std::vector<Kernel::DateAndTime> &times);
@@ -41,6 +45,9 @@ public:
 
   /// Array of the pulse times
   Kernel::DateAndTime *pulseTimes;
+
+  /// Vector of period numbers corresponding to each pulse
+  std::vector<int> periodNumbers;
 };
 
 class DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
@@ -383,6 +390,9 @@ private:
 
   /// to open the nexus file with specific exception handling/message
   void safeOpenFile(const std::string fname);
+
+  /// Fetch the periods corresponding to the frame
+  std::vector<int> fetchFramePeriods();
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;

@@ -68,12 +68,15 @@ void copyLogs(const EventWorkspace_sptr& from,
 // BankPulseTimes
 //===============================================================================================
 
+/// The first period
+const unsigned int BankPulseTimes::FirstPeriod = 1;
+
 //----------------------------------------------------------------------------------------------
 /** Constructor. Loads the pulse times from the bank entry of the file
 *
 * @param file :: nexus file open in the right bank entry
 */
-BankPulseTimes::BankPulseTimes(::NeXus::File &file) {
+BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNumbers) : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
   file.getAttr("offset", startTime);
@@ -86,6 +89,7 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file) {
   numPulses = seconds.size();
   if (numPulses == 0)
     throw std::runtime_error("event_time_zero field has no data!");
+  periodNumbers = std::vector<int>(numPulses, FirstPeriod); // TODO we are fixing this at 1 period for all
   pulseTimes = new DateAndTime[numPulses];
   for (size_t i = 0; i < numPulses; i++)
     pulseTimes[i] = start + seconds[i];
@@ -100,6 +104,7 @@ BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> &times) {
   if (numPulses == 0)
     return;
   pulseTimes = new DateAndTime[numPulses];
+  periodNumbers = std::vector<int>(numPulses, FirstPeriod); // TODO we are fixing this at 1 period for all
   for (size_t i = 0; i < numPulses; i++)
     pulseTimes[i] = times[i];
 }
@@ -452,20 +457,21 @@ public:
   * @param prog :: an optional Progress object
   * @param ioMutex :: a mutex shared for all Disk I-O tasks
   * @param scheduler :: the ThreadScheduler that runs this task.
+  * @param framePeriodNumbers :: Period numbers corresponding to each frame
   */
   LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
                        boost::shared_ptr<Mutex> ioMutex,
-                       ThreadScheduler *scheduler)
+                       ThreadScheduler *scheduler, const std::vector<int>& framePeriodNumbers)
       : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
         m_event_id(NULL), m_event_time_of_flight(NULL), m_have_weight(false),
-        m_event_weight(NULL) {
+        m_event_weight(NULL), m_framePeriodNumbers(framePeriodNumbers) {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
@@ -493,6 +499,8 @@ public:
       thisNumPulses = file.getInfo().dims[0];
     file.closeData();
 
+
+
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
     for (size_t i = 0; i < alg->m_bankPulseTimes.size(); i++) {
@@ -503,7 +511,7 @@ public:
     }
 
     // Not found? Need to load and add it
-    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file));
+    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file), m_framePeriodNumbers);
     alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
   }
 
@@ -949,6 +957,8 @@ private:
   bool m_have_weight;
   /// Event weights
   float *m_event_weight;
+  /// Frame period numbers
+  const std::vector<int> m_framePeriodNumbers;
 }; // END-DEF-CLASS LoadBankFromDiskTask
 
 //===============================================================================================
@@ -1392,6 +1402,33 @@ void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
                                             pixelID_to_wi_offset, true);
 }
 
+/**
+ * Fetch the period numbers corresponding to each frame.
+ * @return vector of period numbers, should have as many as we have frames. Indexes correspond to period numbers.
+ */
+std::vector<int> LoadEventNexus::fetchFramePeriods()
+{
+    std::vector<int> periodLog(1, BankPulseTimes::FirstPeriod); // One entry, all period 1. in call any of the below is missing.
+    try {
+      m_file->openGroup(m_top_entry_name, "NXentry");
+      m_file->openGroup("framelog", "NXcollection");
+      try {
+        m_file->openGroup("period_log", "NXlog");
+        m_file->openData("value");
+        std::vector<int> temp;
+        m_file->getData(periodLog);
+        periodLog = temp;
+        m_file->closeData();
+        m_file->closeGroup();
+      } catch (::NeXus::Exception &) {
+      }
+      m_file->closeGroup();
+      m_file->closeGroup();
+    } catch (::NeXus::Exception & ex) {
+    }
+    return periodLog;
+}
+
 //-----------------------------------------------------------------------------
 /**
 * Load events from the file.
@@ -1727,12 +1764,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     numProg += bankNames.size() * 3; // 3 = second proc task
   Progress *prog2 = new Progress(this, 0.3, 1.0, numProg);
 
+  const std::vector<int> periodLog =  fetchFramePeriods();
+
   for (size_t i = bank0; i < bankn; i++) {
     // We make tasks for loading
     if (bankNumEvents[i] > 0)
       pool.schedule(new LoadBankFromDiskTask(
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler));
+          prog2, diskIOMutex, scheduler, periodLog));
   }
   // Start and end all threads
   pool.joinAll();
