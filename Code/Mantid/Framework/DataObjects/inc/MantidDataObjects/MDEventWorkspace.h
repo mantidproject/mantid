@@ -168,7 +168,7 @@ public:
 
 protected:
   /// Protected copy assignment operator. Assignment not implemented.
-  MDEventWorkspace &operator=(const MDEventWorkspace<MDE, nd> &other);
+  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other);
 
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;
