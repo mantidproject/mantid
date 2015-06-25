@@ -257,7 +257,8 @@ namespace CustomInterfaces
         ITableWorkspace_sptr fit =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(wsFit);
 
-        // Do something with the retrieved workspaces
+        // Set the retrieved data
+        m_peakFittingModel->setData(data);
 
       } else {
         // Error message
