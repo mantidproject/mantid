@@ -206,6 +206,14 @@ namespace CustomInterfaces
         MatrixWorkspace_sptr ws =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
 
+        // Check that ws contains one spectrum only
+        if (ws->getNumberHistograms() != 1) {
+          QMessageBox::critical(this, "Error",
+                                "Workspace " + QString::fromStdString(wsData) +
+                                    " must contain one spectrum only");
+          return;
+        }
+
         // Set the retrieved data
         m_dataLoading->setData(ws);
 
@@ -227,6 +235,14 @@ namespace CustomInterfaces
         MatrixWorkspace_sptr dataWs =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
 
+        // Check that ws contains three spectra
+        if (dataWs->getNumberHistograms() != 3) {
+          QMessageBox::critical(this, "Error",
+                                "Workspace " + QString::fromStdString(wsData) +
+                                    " must contain three spectra");
+          return;
+        }
+
         // Set the retrieved workspace
         m_baselineModellingModel->setData(dataWs);
         m_baselineModellingModel->setCorrectedData(dataWs);
@@ -247,6 +263,14 @@ namespace CustomInterfaces
 
         MatrixWorkspace_sptr data =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+
+        // Check that ws contains one spectrum only
+        if (data->getNumberHistograms() != 1) {
+          QMessageBox::critical(this, "Error",
+                                "Workspace " + QString::fromStdString(wsData) +
+                                    " must contain one spectrum only");
+          return;
+        }
 
         // Set the retrieved data
         m_peakFittingModel->setData(data);
