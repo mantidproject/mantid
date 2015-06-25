@@ -24,11 +24,9 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DataProcessorAlgorithm::DataProcessorAlgorithm() : API::Algorithm() {
-  m_loadAlg = "Load";
-  m_accumulateAlg = "Plus";
-  m_loadAlgFileProp = "Filename";
-  m_useMPI = false;
+DataProcessorAlgorithm::DataProcessorAlgorithm() : API::Algorithm(),
+    m_useMPI(false), m_loadAlg("Load"), m_accumulateAlg("Plus"),
+    m_loadAlgFileProp("Filename"), m_propertyManagerPropertyName("ReductionProperties") {
   enableHistoryRecordingForChild(true);
 }
 
@@ -92,6 +90,10 @@ void DataProcessorAlgorithm::setAccumAlg(const std::string &alg) {
     throw std::invalid_argument(
         "Cannot set accumulate algorithm to empty string");
   m_accumulateAlg = alg;
+}
+
+void DataProcessorAlgorithm::setPropManagerPropName(const std::string &propName) {
+    m_propertyManagerPropertyName = propName;
 }
 
 ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk() {
@@ -240,19 +242,25 @@ Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
 
 /**
  * Get the property manager object of a given name from the property manager
- * data service, or create a new one.
- * @param propertyManager :: Name of the property manager to retrieve
+ * data service, or create a new one. If the PropertyManager name is missing (default) this will
+ * look at m_propertyManagerPropertyName to get the correct value;
+ *
+ * @param propertyManager :: Name of the property manager to retrieve.
  */
 boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
     const std::string &propertyManager) {
+  std::string propertyManagerName(propertyManager);
+  if (propertyManager.empty() && (!m_propertyManagerPropertyName.empty())) {
+      propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
+  }
   boost::shared_ptr<PropertyManager> processProperties;
-  if (PropertyManagerDataService::Instance().doesExist(propertyManager)) {
+  if (PropertyManagerDataService::Instance().doesExist(propertyManagerName)) {
     processProperties =
-        PropertyManagerDataService::Instance().retrieve(propertyManager);
+        PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
     getLogger().notice() << "Could not find property manager" << std::endl;
     processProperties = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(propertyManager,
+    PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
                                                         processProperties);
   }
   return processProperties;

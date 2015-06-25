@@ -52,6 +52,7 @@ protected:
   void setLoadAlg(const std::string &alg);
   void setLoadAlgFileProp(const std::string &filePropName);
   void setAccumAlg(const std::string &alg);
+  void setPropManagerPropName(const std::string &propName);
   ITableWorkspace_sptr determineChunk();
   void loadChunk();
   Workspace_sptr load(const std::string &inputData,
@@ -59,7 +60,7 @@ protected:
   std::vector<std::string> splitInput(const std::string &input);
   void forwardProperties();
   boost::shared_ptr<Kernel::PropertyManager>
-  getProcessProperties(const std::string &propertyManager);
+  getProcessProperties(const std::string &propertyManager=std::string());
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
   Workspace_sptr assemble(const std::string &partialWSName,
@@ -126,6 +127,9 @@ private:
   std::string m_accumulateAlg;
   /// An alternate filename property for the load algorithm
   std::string m_loadAlgFileProp;
+  /// The name of the parameter that names the property manager. The default
+  /// value is "ReductionProperties".
+  std::string m_propertyManagerPropertyName;
 };
 
 } // namespace API
