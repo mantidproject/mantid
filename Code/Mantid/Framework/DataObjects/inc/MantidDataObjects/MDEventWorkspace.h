@@ -168,7 +168,15 @@ public:
 
 protected:
   /// Protected copy assignment operator. Assignment not implemented.
-  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other);
+  /// Windows Visual Studio 2012 has trouble with declaration without definition
+  /// so we provide one that throws an error. This seems template related.
+  /// TODO: clean this up.
+  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) {
+    throw std::runtime_error("MDEventWorkspace::operator= not implemented.");
+    // this codepath should never be reached, prevent unused parameter warning:
+    setTitle(other.getTitle());
+    return *this;
+  }
 
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;
