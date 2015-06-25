@@ -58,7 +58,7 @@ public:
   //-----------------------------------------------------------------
   // Forward directional iterator inner class
   //-----------------------------------------------------------------
-  class Iterator {
+  class MANTID_GEOMETRY_DLL Iterator {
   public:
     /// Constructor
     Iterator(const ConvexPolygon &polygon);
