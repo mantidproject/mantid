@@ -86,6 +86,7 @@ set ( SRC_FILES
 	src/Tomography/TomographyIfaceModel.cpp
 	src/Tomography/TomographyIfacePresenter.cpp
         src/Tomography/TomographyIfaceViewQtGUI.cpp
+        src/Tomography/TomoPathsConfig.cpp
         src/Tomography/TomoToolConfigDialog.cpp
         src/Tomography/ToolConfig.cpp
 	src/UserInputValidator.cpp
@@ -191,6 +192,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
 	inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
         inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h
+        inc/MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h
         inc/MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h
         inc/MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h
         inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h

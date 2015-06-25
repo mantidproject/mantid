@@ -2,57 +2,10 @@
 #define MANTID_CUSTOMINTERFACES_TOMOGRAPHYIFACEPRESENTERTEST_H
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-
-class MockTomographyIfaceView
-    : public MantidQt::CustomInterfaces::ITomographyIfaceView {
-public:
-  void userWarning(const std::string &warn, const std::string &description) {}
-  void userError(const std::string &err, const std::string &description) {}
-
-  std::vector<std::string> logMsgs() const {}
-
-  void setComputeResources(const std::vector<std::string> &resources,
-                           const std::vector<bool> &enabled) {}
-  void setReconstructionTools(const std::vector<std::string> &tools,
-                              const std::vector<bool> &enabled) {}
-  void saveSettings() const {}
-
-  std::string getUsername() const {}
-  std::string getPassword() const {}
-
-  std::vector<std::string> processingJobsIDs() const {}
-  std::string currentComputeResource() const {}
-
-  std::string currentReconTool() const {}
-
-  /// updates buttons and banners related to the current login status
-  void updateLoginControls(bool loggedIn) {}
-
-  void enableLoggedActions(bool enable) {}
-
-  void enableConfigTool(bool on) {}
-
-  void enableRunReconstruct(bool on) {}
-
-  std::string showImagePath() {}
-
-  void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg) {}
-  void showImage(const std::string &path) {}
-
-  void showToolConfig(const std::string &name) {}
-
-  void updateJobsInfoDisplay(const std::vector<
-      Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) {}
-
-  MantidQt::CustomInterfaces::TomoReconToolsUserSettings
-  reconToolsSettings() const {}
-};
-
+#include "TomographyViewMock.h"
 class TomographyIfacePresenterTest : public CxxTest::TestSuite {
 
 public:

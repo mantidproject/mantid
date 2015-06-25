@@ -73,6 +73,10 @@ void TomographyIfacePresenter::notify(
     processToolChange();
     break;
 
+  case ITomographyIfacePresenter::TomoPathsChanged:
+    processTomoPathsChanged();
+    break;
+
   case ITomographyIfacePresenter::LogInRequested:
     processLogin();
     break;
@@ -127,6 +131,7 @@ void TomographyIfacePresenter::processSetup() {
     }
 
     m_model->setupRunTool("");
+    processTomoPathsChanged();
 
     m_view->enableLoggedActions(!m_model->loggedIn().empty());
 
@@ -167,6 +172,10 @@ void TomographyIfacePresenter::processToolChange() {
   }
 
   m_model->usingTool(tool);
+}
+
+void TomographyIfacePresenter::processTomoPathsChanged() {
+  m_model->updateTomoPathsConfig(m_view->currentPathsConfig());
 }
 
 void TomographyIfacePresenter::processLogin() {

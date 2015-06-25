@@ -5,6 +5,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 // Qt classes forward declarations
@@ -112,15 +113,7 @@ public:
 
   std::string localComputeResource() const { return m_localCompName; }
 
-  // current paths set by the user
-  // TODO: make path settings struct available to this and View Interface
-  std::string currentPathSCARF() const { return ""; }
-  std::string currentPathFITS() const { return ""; }
-  std::string currentPathFlat() const { return ""; }
-  std::string currentPathDark() const { return ""; }
-  std::string currentPathSavuConfig() const { return ""; }
-
-  std::string m_currentTool;
+  void updateTomoPathsConfig(const TomoPathsConfig &tc) { m_pathsConfig = tc; }
 
   // Names of image reconstruction tools
   static const std::string g_TomoPyTool;
@@ -140,7 +133,8 @@ private:
                                std::string &opt);
 
   void checkWarningToolNotSetup(const std::string &tool,
-                                const std::string &settings);
+                                const std::string &settings,
+                                const std::string &cmd, const std::string &opt);
 
   void splitCmdLine(const std::string &cmd, std::string &run,
                     std::string &opts);
@@ -171,17 +165,12 @@ private:
   /// reconstruction tools available on SCARF
   std::vector<std::string> m_SCARFtools;
 
-  /// file paths, base dir on scarf
-  std::string m_pathSCARFbase;
-  /// path to fits file (sample data)
-  std::string m_pathFITS;
-  /// path to flat/open beam/bright image
-  std::string m_pathFlat;
-  /// path to dark image
-  std::string m_pathDark;
-
   // Name of the remote compute resource
   static const std::string g_SCARFName;
+
+  std::string m_currentTool;
+
+  TomoPathsConfig m_pathsConfig;
 
   // Settings for the third party (tomographic reconstruction) tools
   TomoReconToolsUserSettings m_toolsSettings;

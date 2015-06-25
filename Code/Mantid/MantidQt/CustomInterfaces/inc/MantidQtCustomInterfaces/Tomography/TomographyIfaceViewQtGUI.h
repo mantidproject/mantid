@@ -67,7 +67,6 @@ public:
 
   void userError(const std::string &err, const std::string &description);
 
-  /// Messages that need to be logged
   std::vector<std::string> logMsgs() const { return m_logMsgs; }
 
   void setComputeResources(const std::vector<std::string> &resources,
@@ -90,7 +89,6 @@ public:
   /// possible for the user to run / submit a job
   void enableRunReconstruct(bool on);
 
-  ///
   void updateCompResourceStatus(bool online);
 
   void updateJobsInfoDisplay(
@@ -111,18 +109,13 @@ public:
   /// get the path to the image that the user has requested to visualize
   std::string visImagePath() const;
 
-  std::string showImagePath() { return m_imgPath; }
+  std::string showImagePath() const { return m_imgPath; }
   void showImage(const Mantid::API::MatrixWorkspace_sptr &wsg);
   void showImage(const std::string &path);
 
   int keepAlivePeriod() { return m_settings.useKeepAlive; }
 
-  // current paths set by the user
-  std::string currentPathSCARF() const;
-  std::string currentPathFITS() const;
-  std::string currentPathFlat() const;
-  std::string currentPathDark() const;
-  std::string currentPathSavuConfig() const;
+  TomoPathsConfig currentPathsConfig() const { return m_pathsConfig; }
 
 private slots:
   /// for buttons, run tab, and similar
@@ -235,14 +228,7 @@ private:
   static const std::string g_SavuTool;
   static const std::string g_customCmdTool;
 
-  /// file paths, base dir on scarf
-  std::string m_pathSCARFbase;
-  /// path to fits file (sample data)
-  std::string m_pathFITS;
-  /// path to flat/open beam/bright image
-  std::string m_pathFlat;
-  /// path to dark image
-  std::string m_pathDark;
+  TomoPathsConfig m_pathsConfig;
 
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;

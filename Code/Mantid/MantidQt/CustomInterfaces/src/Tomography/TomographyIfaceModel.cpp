@@ -33,11 +33,7 @@ TomographyIfaceModel::TomographyIfaceModel()
     : m_loggedInUser(""), m_loggedInComp(""), m_facility("ISIS"),
       m_localCompName("Local"), m_computeRes(), m_computeResStatus(),
       m_reconTools(), m_reconToolsStatus(), m_jobsStatus(), m_SCARFtools(),
-      m_pathSCARFbase("/work/imat/recon/"),
-      m_pathFITS(m_pathSCARFbase + "data/sample"),
-      m_pathFlat(m_pathSCARFbase + "data/ob"),
-      m_pathDark(m_pathSCARFbase + "data/di"), m_toolsSettings(),
-      m_statusMutex(NULL) {
+      m_toolsSettings(), m_statusMutex(NULL) {
 
   m_computeRes.push_back(g_SCARFName);
   m_computeRes.push_back(m_localCompName);
@@ -426,8 +422,7 @@ void TomographyIfaceModel::getJobStatusInfo(const std::string &compRes) {
  * properly
  */
 void TomographyIfaceModel::checkDataPathsSet() {
-  if (currentPathFITS().empty() || currentPathFlat().empty() ||
-      currentPathDark().empty()) {
+  if (!m_pathsConfig.validate()) {
     const std::string detail =
         "Please define the paths to your dataset images. "
         "You have not defined some of the following paths: sample, "
@@ -473,7 +468,6 @@ void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
       // this will produce something like this:
       // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
       // opt = base + currentPathFITS();
-      splitCmdLine(cmd, run, opt);
     } else if (tool == g_customCmdTool) {
       cmd = m_toolsSettings.custom.toCommand();
     } else {
@@ -485,8 +479,8 @@ void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
                  "failure.");
     }
 
-    checkWarningToolNotSetup(tool, cmd);
     splitCmdLine(cmd, run, opt);
+    checkWarningToolNotSetup(tool, cmd, run, opt);
   } else {
     run = "error_do_not_know_what_to_do";
     opt = "no_options_known";
@@ -504,15 +498,21 @@ void TomographyIfaceModel::makeRunnableWithOptions(const std::string &comp,
 }
 
 /**
- * A specific warning that can be shown for multiple tools
+ * This can produce a tool-specific warning that can be shown for
+ * different tools when they are not fully setup (any required
+ * parameter is missing).
  *
  * @param tool Name of the tool this warning applies to
  * @param settings current settings for the tool
+ * @param cmd command/script/executable derived from the settings
+ * @param opt options for that command/script/executable derived from the
+ * settings
  */
-void
-TomographyIfaceModel::checkWarningToolNotSetup(const std::string &tool,
-                                               const std::string &settings) {
-  if (settings.empty()) {
+void TomographyIfaceModel::checkWarningToolNotSetup(const std::string &tool,
+                                                    const std::string &settings,
+                                                    const std::string &cmd,
+                                                    const std::string &opt) {
+  if (tool.empty() || settings.empty() || cmd.empty() || opt.empty()) {
     const std::string detail =
         "Please define the settings of this tool. "
         "You have not defined any settings for this tool: " +

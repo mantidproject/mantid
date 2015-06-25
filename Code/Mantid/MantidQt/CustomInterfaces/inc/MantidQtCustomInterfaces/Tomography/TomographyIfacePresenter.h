@@ -49,7 +49,7 @@ class DLLExport TomographyIfacePresenter : public QObject,
   Q_OBJECT
 
 public:
-  /// Default constructor from the concrete view
+  /// Default constructor - normally used from the concrete view
   TomographyIfacePresenter(ITomographyIfaceView *view);
   virtual ~TomographyIfacePresenter();
 
@@ -64,6 +64,7 @@ protected:
   void processSetup();
   void processCompResourceChange();
   void processToolChange();
+  void processTomoPathsChanged();
   void processLogin();
   void processLogout();
   void processSetupReconTool();
@@ -73,7 +74,7 @@ protected slots:
   /// It may be run on user request, or periodically from a timer/thread
   void processRefreshJobs();
 
-public:
+protected:
   void processCancelJobs();
   void processVisualizeJobs();
   void processViewImg();

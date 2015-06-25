@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoPathsConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoReconToolsUserSettings.h"
 
 namespace MantidQt {
@@ -180,7 +181,7 @@ public:
    *
    * @return path as a string
    */
-  virtual std::string showImagePath() = 0;
+  virtual std::string showImagePath() const = 0;
 
   /**
    * Draw an image on the visualization tab/interface, from a path to
@@ -209,6 +210,13 @@ public:
    * with LoadFITS or similar algorithm.
    */
   virtual void showImage(const Mantid::API::MatrixWorkspace_sptr &ws) = 0;
+
+  /**
+   * Paths to the sample, open beam, etc. data (image) files.
+   *
+   * @return paths configuration object
+   */
+  virtual TomoPathsConfig currentPathsConfig() const = 0;
 
   /**
    * Show a tool specific configuration dialog for the user to set it up

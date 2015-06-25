@@ -48,12 +48,9 @@ DECLARE_SUBWINDOW(TomographyIfaceViewQtGUI)
 TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
     : UserSubWindow(parent), ITomographyIfaceView(), m_processingJobsIDs(),
       m_currentComputeRes(""), m_currentReconTool(""), m_imgPath(""),
-      m_pathFITS(m_pathSCARFbase + "data/sample"),
-      m_pathFlat(m_pathSCARFbase + "data/ob"),
-      m_pathDark(m_pathSCARFbase + "data/di"), m_logMsgs(), m_toolsSettings(),
-      m_settings(), m_settingsGroup("CustomInterfaces/Tomography"),
-      m_availPlugins(), m_currPlugins(), m_currentParamPath(),
-      m_presenter(NULL) {
+      m_logMsgs(), m_toolsSettings(), m_settings(),
+      m_settingsGroup("CustomInterfaces/Tomography"), m_availPlugins(),
+      m_currPlugins(), m_currentParamPath(), m_presenter(NULL) {
 
   // TODO: find a better place for this Savu stuff - see other TODOs
   m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
@@ -140,6 +137,11 @@ void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   connect(m_ui.pushButton_SCARF_logout, SIGNAL(released()), this,
           SLOT(SCARFLogoutClicked()));
 
+  // populate setup values from defaults
+  m_ui.lineEdit_path_FITS->setText(QString::fromStdString(m_pathsConfig.pathSamples()));
+  m_ui.lineEdit_path_flat->setText(QString::fromStdString(m_pathsConfig.pathOpenBeam()));
+  m_ui.lineEdit_path_dark->setText(QString::fromStdString(m_pathsConfig.pathDark()));
+
   // 'browse' buttons
   connect(m_ui.pushButton_fits_dir, SIGNAL(released()), this,
           SLOT(fitsPathBrowseClicked()));
@@ -192,11 +194,6 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
 
   connect(m_ui.comboBox_run_tool, SIGNAL(currentIndexChanged(int)), this,
           SLOT(runToolIndexChanged(int)));
-
-  m_ui.pushButton_reconstruct->setEnabled(false);
-  m_ui.pushButton_run_tool_setup->setEnabled(true);
-  m_ui.pushButton_run_job_cancel->setEnabled(false);
-  m_ui.pushButton_run_job_visualize->setEnabled(false);
 }
 
 void TomographyIfaceViewQtGUI::setComputeResources(
@@ -393,11 +390,11 @@ void TomographyIfaceViewQtGUI::runToolIndexChanged(int /* i */) {
 }
 
 void TomographyIfaceViewQtGUI::enableConfigTool(bool on) {
-  m_ui.pushButton_reconstruct->setEnabled(on);
+  m_ui.pushButton_run_tool_setup->setEnabled(on);
 }
 
 void TomographyIfaceViewQtGUI::enableRunReconstruct(bool on) {
-  m_ui.pushButton_run_tool_setup->setEnabled(on);
+  m_ui.pushButton_reconstruct->setEnabled(on);
 }
 
 /**
@@ -464,9 +461,10 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       double maxAngle = m_uiTomoPy.doubleSpinBox_angle_max->value();
       double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
 
+      TomoPathsConfig paths = currentPathsConfig();
       m_toolsSettings.tomoPy = ToolConfigTomoPy(
-          run.toStdString(), g_defOutPath, currentPathDark(), currentPathFlat(),
-          currentPathFITS(), cor, minAngle, maxAngle);
+          run.toStdString(), g_defOutPath, paths.pathDark(),
+          paths.pathOpenBeam(), paths.pathSamples(), cor, minAngle, maxAngle);
     }
   } else if (g_AstraTool == name) {
     TomoToolConfigAstra astra;
@@ -484,9 +482,10 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
       double minAngle = m_uiAstra.doubleSpinBox_angle_min->value();
       double maxAngle = m_uiAstra.doubleSpinBox_angle_max->value();
 
+      TomoPathsConfig paths = currentPathsConfig();
       m_toolsSettings.astra = ToolConfigAstraToolbox(
           run.toStdString(), cor, minAngle, maxAngle, g_defOutPath,
-          currentPathDark(), currentPathFlat(), currentPathFITS());
+          paths.pathDark(), paths.pathOpenBeam(), paths.pathSamples());
     }
   } else if (g_SavuTool == name) {
     // TODO: savu not ready. This is a temporary kludge, it just shows
@@ -660,32 +659,25 @@ std::string TomographyIfaceViewQtGUI::getPassword() const {
     return "none";
 }
 
-std::string TomographyIfaceViewQtGUI::currentPathSCARF() const {
-  return m_ui.lineEdit_SCARF_path->text().toStdString();
-}
-
-std::string TomographyIfaceViewQtGUI::currentPathFITS() const {
-  return m_ui.lineEdit_path_FITS->text().toStdString();
-}
-
-std::string TomographyIfaceViewQtGUI::currentPathFlat() const {
-  return m_ui.lineEdit_path_flat->text().toStdString();
-}
-
-std::string TomographyIfaceViewQtGUI::currentPathDark() const {
-  return m_ui.lineEdit_path_dark->text().toStdString();
-}
-
 void TomographyIfaceViewQtGUI::fitsPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
+  std::string str;
+  processPathBrowseClick(m_ui.lineEdit_path_FITS, str);
+  m_pathsConfig.updatePathSamples(str);
+  m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::flatPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
+  std::string str;
+  processPathBrowseClick(m_ui.lineEdit_path_flat, str);
+  m_pathsConfig.updatePathOpenBeam(str);
+  m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darkPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
+  std::string str;
+  processPathBrowseClick(m_ui.lineEdit_path_dark, str);
+  m_pathsConfig.updatePathDark(str);
+  m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 /**

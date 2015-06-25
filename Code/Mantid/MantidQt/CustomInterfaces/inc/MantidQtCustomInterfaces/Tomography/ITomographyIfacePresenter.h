@@ -40,6 +40,7 @@ public:
     SetupResourcesAndTools, ///< Setup what are available, normally at startup
     CompResourceChanged,    ///< 'current' compute resource changed
     ToolChanged,        ///< 'current' tomographic reconstruction tool changed
+    TomoPathsChanged,   ///< user manipulates tomography data paths
     LogInRequested,     ///< user hits 'log in' or similar
     LogOutRequested,    ///< user hits 'log out' or similar
     SetupReconTool,     ///< To start the setup (open dialog, etc.)
