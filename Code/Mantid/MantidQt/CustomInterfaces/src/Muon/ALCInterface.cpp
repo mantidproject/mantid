@@ -203,15 +203,17 @@ namespace CustomInterfaces
 
       if(AnalysisDataService::Instance().doesExist(wsData)) {
 
-        MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+        MatrixWorkspace_sptr ws =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
 
         // Set the retrieved data
         m_dataLoading->setData(ws);
 
       } else {
         // Error message
-        QMessageBox::critical(
-            this, "Error", "Workspace *_Loaded_Data was not found");
+        QMessageBox::critical(this, "Error",
+                              "Workspace " + QString::fromStdString(wsData) +
+                                  " was not found");
       }
 
 
@@ -231,8 +233,9 @@ namespace CustomInterfaces
 
       } else {
         // Error message
-        QMessageBox::critical(
-            this, "Error", "Some of the *_Baseline_* workspaces were not found");
+        QMessageBox::critical(this, "Error",
+                              "Workspace " + QString::fromStdString(wsData) +
+                                  " was not found");
       }
 
     } else if (currentStep == 2) {
@@ -250,8 +253,9 @@ namespace CustomInterfaces
 
       } else {
         // Error message
-        QMessageBox::critical(
-            this, "Error", "Some of the *_Peaks_* workspaces were not found");
+        QMessageBox::critical(this, "Error",
+                              "Workspace " + QString::fromStdString(wsData) +
+                                  " was not found");
       }
 
     } else {
