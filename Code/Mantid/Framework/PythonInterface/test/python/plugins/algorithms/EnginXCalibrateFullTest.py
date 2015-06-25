@@ -4,6 +4,22 @@ from mantid.api import *
 
 class EnginXCalibrateFullTest(unittest.TestCase):
 
+    _data_ws = None
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Set up dependencies for one or more of the tests below.
+        """
+        cls._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Clean up tasks complementary to setUp, like removing workspaces
+        """
+        DeleteWorkspace(cls._data_ws)
+
     def test_issues_with_properties(self):
         """
         Handle in/out property errors appropriately.
@@ -12,22 +28,22 @@ class EnginXCalibrateFullTest(unittest.TestCase):
         # No Filename property (required)
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          File='foo', Bank=1)
+                          Input='foo', Bank=1)
 
-        # Wrong filename
+        # Wrong workspace name
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          File='bar_file_is_not_there.not', Bank=2)
+                          Input='this_ws_is_not_there.not', Bank=2)
 
         # mispelled ExpectedPeaks
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          Filename='ENGINX00228061.nxs', Bank=2, Peaks='2')
+                          InputWorkspace=self.__class__._data_ws, Bank=2, Peaks='2')
 
         # all fine, except missing DetectorPositions (output)
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          Filename='ENGINX00228061.nxs', Bank=2)
+                          InputWorkspace=self.__class__._data_ws, Bank=2)
 
     def test_wrong_fit_fails_gracefully(self):
         """
@@ -38,7 +54,7 @@ class EnginXCalibrateFullTest(unittest.TestCase):
         # warnings and finally raise after a 'some peaks not found' error
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          Filename="ENGINX00228061.nxs", ExpectedPeaks=[0.01], Bank=1,
+                          InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.01], Bank=1,
                           DetectorPositions='out_det_positions_table')
 
 
@@ -54,7 +70,7 @@ class EnginXCalibrateFullTest(unittest.TestCase):
         det_peaks_tbl = CreateEmptyTableWorkspace()
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          Filename="ENGINX00228061.nxs", Bank=2,
+                          InputWorkspace=self.__class__._data_ws, Bank=2,
                           ExpectedPeaks='0.915, 1.257, 1.688',
                           DetectorPositions=tbl_name)
 

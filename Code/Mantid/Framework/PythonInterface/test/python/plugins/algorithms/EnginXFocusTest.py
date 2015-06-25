@@ -4,32 +4,53 @@ from mantid.api import *
 
 class EnginXFocusTest(unittest.TestCase):
 
+    _data_ws = None
+
+    @classmethod
+    def setUpClass(cls):
+        """
+        Set up dependencies for one or more of the tests below.
+        """
+        cls._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Clean up tasks complementary to setUp, like removing workspaces
+        """
+        DeleteWorkspace(cls._data_ws)
+
     def test_wrong_properties(self):
         """
         Tests proper error handling when passing wrong properties or not passing
         required ones.
         """
 
-        # No Filename property
+        # No InputWorkspace property
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          File='foo', Bank=1, OutputWorkspace='nop')
+                          Bank=1, OutputWorkspace='nop')
 
-        # Wrong filename
+        # Mispelled InputWorkspace prop
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          File='foo_is_not_there', Bank=1, OutputWorkspace='nop')
+                          InputWrkspace='anything_goes', Bank=1, OutputWorkspace='nop')
+
+        # Wrong InputWorkspace name
+        self.assertRaises(ValueError,
+                          EnginXFocus,
+                          InputWorkspace='foo_is_not_there', Bank=1, OutputWorkspace='nop')
 
         # mispelled bank
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          Filename='ENGINX00228061.nxs', bnk='2', OutputWorkspace='nop')
+                          InputWorkspace=self.__class__._data_ws, bnk='2', OutputWorkspace='nop')
 
         # mispelled DetectorsPosition
         tbl = CreateEmptyTableWorkspace()
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          Filename='ENGINX00228061.nxs', Detectors=tbl, OutputWorkspace='nop')
+                          InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace='nop')
 
 
     def _check_output_ok(self, ws, ws_name='', y_dim_max=1, yvalues=None):
@@ -72,7 +93,7 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out'
-        out = EnginXFocus(Filename='ENGINX00228061.nxs', Bank=1, OutputWorkspace=out_name)
+        out = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank=1, OutputWorkspace=out_name)
 
         yvals = [0.0037582279159681957, 0.00751645583194, 0.0231963801368, 0.0720786940576,
                  0.0615909620868, 0.00987979301753]
@@ -85,7 +106,7 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out_bank2'
-        out_bank2 = EnginXFocus(Filename="ENGINX00228061.nxs", Bank=2,
+        out_bank2 = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank=2,
                                 OutputWorkspace=out_name)
 
         yvals = [0, 0.0112746837479, 0.0394536605073, 0.0362013481777,
