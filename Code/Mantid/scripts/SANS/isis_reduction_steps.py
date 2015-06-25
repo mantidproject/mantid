@@ -1232,7 +1232,7 @@ class TransmissionCalc(ReductionStep):
 
         # Contributions to the region of interest.
         self.radius = None
-        self.mask_files = []
+        self.roi_files = []
         self.main = False
 
         # use InterpolatingRebin
@@ -1401,9 +1401,9 @@ class TransmissionCalc(ReductionStep):
             self.trans_roi += get_masked_det_ids(mtd["__temp"])
             DeleteWorkspace(Workspace="__temp")
 
-        if self.mask_files:
+        if self.roi_files:
             idf_path = reducer.instrument.idf_path
-            for mask_file in self.mask_files:
+            for mask_file in self.roi_files:
                 self.trans_roi += get_masked_det_ids_from_mask_file(mask_file, idf_path)
 
         # Remove duplicates and sort.
@@ -2603,8 +2603,8 @@ class UserFile(ReductionStep):
                 # Convert the input (mm) into the correct units (m)
                 reducer.transmission_calculator.radius = float(arguments.split("=")[1])/1000.0
                 return
-            elif arguments.startswith("MASK"):
-                reducer.transmission_calculator.mask_files += [arguments.split("=")[1]]
+            elif arguments.startswith("ROI"):
+                reducer.transmission_calculator.roi_files += [arguments.split("=")[1]]
                 return
         except Exception as e:
             return "Problem parsing TRANS line \"" + arguments + "\":\n" + str(e)
