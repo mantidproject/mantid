@@ -109,6 +109,8 @@ public:
       TS_ASSERT_DELTA(corrected->readY(0)[2], -0.35714, 1E-5);
       TS_ASSERT_DELTA(corrected->readY(0)[5], 0.64285, 1E-5);
       TS_ASSERT_DELTA(corrected->readY(0)[8], 97.64285, 1E-5);
+
+      TS_ASSERT_EQUALS (corrected->readE(0), data->readE(0));
     }
 
     ITableWorkspace_sptr parameters = m_model->parameterTable();
