@@ -154,16 +154,20 @@ namespace CustomInterfaces
     results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
 
     // Check if any of the above is not empty
+    bool nothingToExport = true;
     for (auto it=results.begin(); it!=results.end(); ++it) {
     
       if ( it->second ) {
-        AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+        nothingToExport = false;
         break;
       }
     }
 
     // There is something to export
-    if (AnalysisDataService::Instance().doesExist(groupName)) {
+    if (!nothingToExport) {
+
+      // Add output group to the ADS
+      AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
 
       for(auto it = results.begin(); it != results.end(); ++it)
       {
