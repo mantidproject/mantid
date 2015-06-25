@@ -9,6 +9,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include <cmath>
 #include <H5Cpp.h>
 
 namespace Mantid {
@@ -147,6 +148,15 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group & group, const std::strin
     UNUSED_ARG(e);
     g_log.information() << "DataSet \"" << name << "\" should be double" << "\n";
   }
+
+  for (size_t i=0; i<result.size(); ++i) {
+    if (std::abs(result[i]) < 1.e-10) {
+      result[i] = 0.;
+    } else if (result[i] != result[i]) { // check for NaN
+      result[i] = 0.;
+    }
+  }
+
 
   return result;
 }
