@@ -44,6 +44,7 @@ namespace CustomInterfaces
     m_parameterTable = fit->getProperty("OutputParameters");
 
     enableDisabledPoints(fitOutput,m_data);
+    setErrorsAfterFit(fitOutput);
 
     setCorrectedData(fitOutput);
     setFittedFunction(funcToFit);
@@ -107,6 +108,15 @@ namespace CustomInterfaces
     // Unwanted points were disabled by setting their errors to very high values.
     // We recover here the original errors stored in sourceWs
     destWs->dataE(0) = sourceWs->readE(0);
+  }
+
+  /**
+   * Set errors in Diff spectrum after a fit
+   * @param data :: [input/output] Workspace containing spectrum to set errors to
+   */
+  void ALCBaselineModellingModel::setErrorsAfterFit (MatrixWorkspace_sptr data) {
+
+    data->dataE(2)=data->readE(0);
   }
 
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
