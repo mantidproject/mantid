@@ -227,6 +227,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specIndex)
   {
+    if (workspaceNames.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
     pyInput += "plotSpectrum(['";
@@ -248,6 +251,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QString & workspaceName, int specIndex)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QStringList workspaceNames;
     workspaceNames << workspaceName;
     plotSpectrum(workspaceNames, specIndex);
@@ -266,6 +272,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd)
   {
+    if (workspaceNames.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
     pyInput += "plotSpectrum(['";
@@ -292,6 +301,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QString & workspaceName, int specStart, int specEnd)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QStringList workspaceNames;
     workspaceNames << workspaceName;
     plotSpectrum(workspaceNames, specStart, specEnd);
@@ -307,6 +319,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plot2D(const QString & workspaceName)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plot2D\n";
 
     pyInput += "plot2D('";
@@ -328,6 +343,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotTimeBin(const QStringList & workspaceNames, int specIndex)
   {
+    if (workspaceNames.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plotTimeBin\n";
 
     pyInput += "plotTimeBin(['";
@@ -349,6 +367,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotTimeBin(const QString & workspaceName, int specIndex)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QStringList workspaceNames;
     workspaceNames << workspaceName;
     plotTimeBin(workspaceNames, specIndex);
