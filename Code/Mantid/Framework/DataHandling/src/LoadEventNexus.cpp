@@ -1271,7 +1271,7 @@ void LoadEventNexus::exec() {
   // add filename
   m_ws->mutableRun().addProperty("Filename", m_filename);
   // Save output
-  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", m_ws->getSingleHeldWorkspace());
+  this->setProperty("OutputWorkspace", m_ws->combinedWorkspace());
   // Load the monitors
   if (load_monitors) {
     prog.report("Loading monitors");
@@ -1438,7 +1438,7 @@ std::vector<int> LoadEventNexus::fetchFramePeriods()
         m_file->openGroup("period_log", "NXlog");
         m_file->openData("value");
         std::vector<int> temp;
-        m_file->getData(periodLog);
+        m_file->getData(temp);
         periodLog = temp;
         m_file->closeData();
         m_file->closeGroup();
@@ -1855,9 +1855,10 @@ void DecoratorWorkspace::setNPeriods(size_t nPeriods) {
   // Create vector where size is the number of periods and initialize workspaces in each.
   auto temp = m_WsVec[0];
   m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(
-      nPeriods, createEmptyEventWorkspace());
+      nPeriods);
 
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    m_WsVec[i] =  createEmptyEventWorkspace();
     copyLogs(temp, m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
     m_WsVec[i]->setInstrument(temp->getInstrument());
   }

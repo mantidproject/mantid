@@ -620,15 +620,21 @@ void test_extract_nperiod_data() {
   loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
   loader.execute();
   Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
-  IEventWorkspace_sptr outEventWS = boost::dynamic_pointer_cast<IEventWorkspace>(outWS);
-  TSM_ASSERT("Invalid Output Workspace Type", outEventWS);
-  auto run = outEventWS->run();
-  const bool hasNPeriods = run.hasProperty("nperiods");
-  TSM_ASSERT("Should have nperiods now we have run LoadNexusLogs", hasNPeriods);
-  if (hasNPeriods) {
-    const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
-    TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
+  WorkspaceGroup_sptr outGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+  TSM_ASSERT("Invalid Output Workspace Type", outGroup);
+
+  IEventWorkspace_sptr firstWS = boost::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
+  auto run = firstWS->run();
+  const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
+  TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
+  TSM_ASSERT_EQUALS("Groups size should be same as nperiods", outGroup->size(), nPeriods);
+
+  for(size_t i = 0; i < outGroup->size(); ++i){
+      EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+      TS_ASSERT(ws);
+      TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
   }
+
 }
 
 private:

@@ -9,6 +9,7 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -69,7 +70,22 @@ public:
       return m_WsVec.size();
   }
 
-  DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_WsVec.front();} // TODO remove
+  DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_WsVec.front();}
+
+  API::Workspace_sptr combinedWorkspace(){
+      API::Workspace_sptr final;
+      if( this->nPeriods() == 1 ){
+          final = getSingleHeldWorkspace();
+      }
+      else{
+           auto wsg = boost::make_shared<API::WorkspaceGroup>();
+           for(size_t i = 0; i < m_WsVec.size(); ++i){
+               wsg->addWorkspace(m_WsVec[i]);
+           }
+           final = wsg;
+      }
+      return final;
+  }
 
   DecoratorWorkspace(): m_WsVec(1, createEmptyEventWorkspace()){}
 
