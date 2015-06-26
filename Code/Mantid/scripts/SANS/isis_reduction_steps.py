@@ -1353,23 +1353,25 @@ class TransmissionCalc(ReductionStep):
             if tmp.getDetector(ws_index).isMonitor():
                 spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
                 back_start_mon, back_end_mon = inst.get_TOFs(spectrum_number)
-                CalculateFlatBackground(
-                    InputWorkspace=tmpWS,
-                    OutputWorkspace= tmpWS,
-                    StartX=back_start_mon,
-                    EndX=back_end_mon,
-                    WorkspaceIndexList=ws_index,
-                    Mode='Mean')
+                if back_start_mon and back_end_mon:
+                    CalculateFlatBackground(
+                        InputWorkspace=tmpWS,
+                        OutputWorkspace= tmpWS,
+                        StartX=back_start_mon,
+                        EndX=back_end_mon,
+                        WorkspaceIndexList=ws_index,
+                        Mode='Mean')
 
         back_start_roi, back_end_roi = inst.get_TOFs_for_ROI()
-        CalculateFlatBackground(
-            InputWorkspace=tmpWS,
-            OutputWorkspace= tmpWS,
-            StartX=back_start_roi,
-            EndX=back_end_roi,
-            WorkspaceIndexList=ws_index,
-            Mode='Mean',
-            SkipMonitors =True)
+        if back_start_roi and back_end_roi:
+            CalculateFlatBackground(
+                InputWorkspace=tmpWS,
+                OutputWorkspace= tmpWS,
+                StartX=back_start_roi,
+                EndX=back_end_roi,
+                WorkspaceIndexList=ws_index,
+                Mode='Mean',
+                SkipMonitors =True)
 
         ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")
 
