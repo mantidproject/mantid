@@ -364,14 +364,6 @@ class DetectorBank(object):
                 for x in range(0, xdim):
                     std_i = start_spec + x + (y*det_dimension)
                     output += str(max_spec - (std_i - base)) + ','
-        elif self._orientation == 'HorizontalFlipped':
-            for y in range(ylow,ylow+ydim):
-                max_row = base + (y+1)*det_dimension - 1
-                min_row = base + (y)*det_dimension
-                for x in range(xlow,xlow+xdim):
-                    std_i = base + x + (y*det_dimension)
-                    diff_s = std_i - min_row
-                    output += str(max_row - diff_s) + ','
 
         return output.rstrip(",")
 
@@ -379,8 +371,7 @@ class DetectorBank(object):
     _ORIENTED = {
         'Horizontal' : None,        #most runs have the detectors in this state
         'Vertical' : None,
-        'Rotated' : None,
-        'HorizontalFlipped' : None} # This is for the empty instrument
+        'Rotated' : None}
 
     def set_orien(self, orien):
         """
