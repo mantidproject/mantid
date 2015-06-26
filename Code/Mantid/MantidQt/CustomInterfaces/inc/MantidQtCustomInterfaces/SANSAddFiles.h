@@ -36,6 +36,9 @@ private:
   QString m_outDir;
   ///The text that goes into the beginning of the output directory message
   static const QString OUT_MSG;
+
+  Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
+
   /// Cache for custom binning string
   QString m_customBinning;
   /// Text for label for custom binning
@@ -51,8 +54,6 @@ private:
   /// Set the histo gram input enabled or disabled
   void setInputEnabled(bool enabled);
 
-
-  Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
 
   void initLayout();
   void setToolTips();
