@@ -111,8 +111,11 @@ were analysed in the PeakFitting step and you went back to BaselineModelling to 
 set of runs, previous peaks would be kept in PeakFitting. Note that at this stage of development
 'Import results...' does not load fitting results or fitting sections.
 
+Description
+-----------
+
 Data Loading
-------------
+~~~~~~~~~~~~
 
 The Data Loading step, provides an interface for the 
 :ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm, 
@@ -127,7 +130,7 @@ of available log values.
    :width: 800
 
 Options
-~~~~~~~
+^^^^^^^
 
 First
   First run of the sequence of datasets.
@@ -167,7 +170,7 @@ Load
   chosen log value.
 
 Baseline Modelling
-------------------
+~~~~~~~~~~~~~~~~~~
 
 In the Baseline Modelling step, the user can fit the baseline by selecting which 
 sections of the data should be used in the fit, and what the baseline fit 
@@ -180,7 +183,7 @@ pick the desired fitting sections.
    :width: 800
 
 Options
-~~~~~~~
+^^^^^^^
 
 Function
   Right-click on the blank area to add a baseline function.
@@ -196,7 +199,7 @@ Fit
   Fits the data.
   
 Peak Fitting
-------------
+~~~~~~~~~~~~
 
 In the Peak Fitting step, data with the baseline subtracted are shown in 
 the right panel. The user can study the peaks of interest all with the same simple 
@@ -208,7 +211,7 @@ interface. To add a new peak, right-click on the Peaks region, then select
    :width: 800
 
 Options
-~~~~~~~
+^^^^^^^
 
 Peaks
   Right-click on the blank area to add a peak function.
