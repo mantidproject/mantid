@@ -104,15 +104,9 @@ private:
                                            std::vector<double> l2s,
                                            std::vector<double> phis);
 
-  double getPropertyFromPmOrSelf(const std::string &apname,
-                                 const std::string &pmpname,
-                                 boost::shared_ptr<Kernel::PropertyManager> pm);
-
   double
-  getVecPropertyFromPmOrSelf(const std::string &apname,
-                             std::vector<double> &avec,
-                             const std::string &pmpname,
-                             boost::shared_ptr<Kernel::PropertyManager> pm);
+  getVecPropertyFromPmOrSelf(const std::string &name,
+                             std::vector<double> &avec);
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;
