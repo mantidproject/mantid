@@ -46,8 +46,7 @@ void SANSBeamFluxCorrection::exec() {
   progress.report("Setting up beam flux correction");
 
   // Reduction property manager
-  const std::string reductionManagerName = getProperty("ReductionProperties");
-  m_reductionManager = getProcessProperties(reductionManagerName);
+  m_reductionManager = getProcessProperties();
 
   // If the beam flux correction algorithm isn't in the reduction properties,
   // add it

@@ -216,9 +216,6 @@ double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(
  * successfully
  */
 void AlignAndFocusPowder::exec() {
-  // Get the reduction property manager
-  boost::shared_ptr<PropertyManager> reductionManager = getProcessProperties();
-
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
