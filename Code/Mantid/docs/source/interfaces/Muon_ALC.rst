@@ -98,7 +98,8 @@ Import Results
 ~~~~~~~~~~~~~~
 
 The 'Import results...' button allows the user to load previously analysed data, ideally saved using
-'Export results...'. When clicked, this button searches for a workspace corresponding to the
+'Export results...'. When clicked, it propmts the user to enter a label for the workspace group from which
+data will be imported, which is defaulted to 'ALCResults'. The interface then searches for a workspace corresponding to the
 interface's step from which it was called. This means that if the user is currently in the
 DataLoading step, the interface will search for a workspace named <Label>_Loaded_Data. If
 it is used from the BaselineModelling step, the workspace named <Label>_Baseline_Workspace
