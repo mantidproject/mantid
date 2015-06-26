@@ -88,6 +88,9 @@ public:
   Mantid::API::ISpectrum* getSpectrum(const size_t index)  {
       return m_WsVec[0]->getSpectrum(index);
   }
+  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const{
+      return m_WsVec[0]->getSpectrum(index);
+  }
   virtual Mantid::API::Axis* getAxis(const size_t& i) const {
       return m_WsVec[0]->getAxis(i);
   }

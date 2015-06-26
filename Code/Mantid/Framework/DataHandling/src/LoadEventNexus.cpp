@@ -1285,6 +1285,9 @@ void LoadEventNexus::exec() {
     if (monitorsAsEvents) {
       // no matter whether the file has events or not, the user has requested to
       // load events from monitors
+      if(m_ws->nPeriods() > 1){
+          throw std::runtime_error("Loading multi-period monitors in event mode is not supported.");
+      }
       this->runLoadMonitorsAsEvents(&prog);
     } else {
       // this resorts to child algorithm 'LoadNexusMonitors', passing the
@@ -2184,11 +2187,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 
 //-----------------------------------------------------------------------------
 /**
-* Create the required spectra mapping. If the file contains an isis_vms_compat
-* block then
-* the mapping is read from there, otherwise a 1:1 map with the instrument is
-* created (along
-* with the associated spectra axis)
+* Deletes banks for a workspace given the bank names.
 * @param workspace :: The workspace to contain the spectra mapping
 * @param bankNames :: Bank names that are in Nexus file
 */
