@@ -1344,17 +1344,33 @@ class TransmissionCalc(ReductionStep):
                        Interpolation='Linear')
 
         tmp = mtd[tmpWS]
+
+        # We perform a FlatBackground correction. We do this in two parts.
+        # First we find the workspace indices which correspond to monitors
+        # and perform the correction on these indicies.
+        # Second we perform the correction on all indices which are not 
+        # monitors
         for ws_index in range(tmp.getNumberHistograms()):
-            spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
-            back_start, back_end = inst.get_TOFs(spectrum_number)
-            if back_start and back_end:
+            if tmp.getDetector(ws_index).isMonitor():
+                spectrum_number = tmp.getSpectrum(ws_index).getSpectrumNo()
+                back_start_mon, back_end_mon = inst.get_TOFs(spectrum_number)
                 CalculateFlatBackground(
                     InputWorkspace=tmpWS,
                     OutputWorkspace= tmpWS,
-                    StartX=back_start,
-                    EndX=back_end,
+                    StartX=back_start_mon,
+                    EndX=back_end_mon,
                     WorkspaceIndexList=ws_index,
                     Mode='Mean')
+
+        back_start_roi, back_end_roi = inst.get_TOFs_for_ROI()
+        CalculateFlatBackground(
+            InputWorkspace=tmpWS,
+            OutputWorkspace= tmpWS,
+            StartX=back_start_roi,
+            EndX=back_end_roi,
+            WorkspaceIndexList=ws_index,
+            Mode='Mean',
+            SkipMonitors =True)
 
         ConvertUnits(InputWorkspace=tmpWS,OutputWorkspace= tmpWS,Target="Wavelength")
 
@@ -1417,7 +1433,7 @@ class TransmissionCalc(ReductionStep):
         # Detector ids which are not allowed and specified by "masked_ids" need to
         # be removed from the trans_roi list
         # Remove duplicates and sort.
-        self.trans_roi = sorted(set(self.trans_roi)-set_masked(ids))
+        self.trans_roi = sorted(set(self.trans_roi)-set(masked_ids))
 
     def execute(self, reducer, workspace):
         """
@@ -1475,6 +1491,10 @@ class TransmissionCalc(ReductionStep):
 
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
+        # Here we set the det ids. The first entry is the incident monitor. There after we can either have
+        # 1. The transmission monitor or
+        # 2. A ROI (which are not monitors!) or
+        # 3. trans_specs (also monitors)
         trans_det_ids = [pre_sample]
         if self.trans_mon:
             trans_det_ids.append(self.trans_mon)
@@ -2549,8 +2569,8 @@ class UserFile(ReductionStep):
             @return any errors encountered or ''
         """
         #a list of the key words this function can read and the functions it calls in response
-        keys = ['MON/TIMES', 'M']
-        funcs = [self._read_default_back_region, self._read_back_region]
+        keys = ['MON/TIMES', 'M', 'TRANS']
+        funcs = [self._read_default_back_region, self._read_back_region, self._read_back_trans_roi]
         self._process(keys, funcs, arguments, reducer)
 
     def _read_back_region(self, arguments, reducer):
@@ -2603,6 +2623,26 @@ class UserFile(ReductionStep):
         else:
             reducer.inst.set_TOFs(None, None)
             return 'Only monitor specific backgrounds will be applied, no default is set due to incorrectly formatted background line:'
+
+    def _read_back_trans_roi(self, arguments, reducer):
+        """
+            Parses a line of the form BACK/TRANS to set the background for region of interest (ROI) data
+            @param arguments: the contents of the line after the first keyword
+            @param reducer: the object that contains all the settings
+            @return any errors encountered or ''
+        """
+        try:
+            # Get everything after TRANS. This should be two numbers essentially (start and end time)
+            arguments.strip()
+            times = arguments.split()
+            times = [t.strip() for t in times]
+            if len(times) == 2:
+                reducer.inst.set_TOFs_for_ROI(int(times[0]), int(times[1]))
+                return ''
+            raise ValueError('Expected two times for BACK/TRANS')
+        except Exception, reason:
+            # return a description of any problems and then continue to read the next line
+            return str(reason) + ' on line: '
 
     def _read_trans_line(self, arguments, reducer):
         try:
