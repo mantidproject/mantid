@@ -1951,14 +1951,14 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 }
 
 /** Sets the log level priority for the File log channel
-* @logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setFileLogLevel(int logLevel)
 {
   setFilterChannelLogLevel("fileFilterChannel",logLevel);
 }
 /** Sets the log level priority for the Console log channel
-* @logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
 void ConfigServiceImpl::setConsoleLogLevel(int logLevel)
 {
@@ -1967,8 +1967,8 @@ void ConfigServiceImpl::setConsoleLogLevel(int logLevel)
 
 
 /** Sets the Log level for a filter channel
-* @filterChannelName the channel name of the filter channel to change
-* @logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @param filterChannelName the channel name of the filter channel to change
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 * @throws std::invalid_argument if the channel name is incorrect or it is not a filterChannel
 */
 void ConfigServiceImpl::setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel)
