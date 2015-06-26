@@ -12,6 +12,8 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+import reduce4circleControl as r4c
+
 
 try:
     import mantid
@@ -82,6 +84,24 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_browseSaveDir, QtCore.SIGNAL('clicked()'),
                 self.doBrowseSaveDir)
 
+
+        # Event handling for tab 'calculate ub matrix'
+        self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
+                self.doFindPeak)
+
+        self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
+                self.doCalUBMatrix)
+
+        self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
+                self.doAcceptCalUB)
+
+        self.connect(self.ui.pushButton_resetCalUB, QtCore.SIGNAL('clicked()'),
+                self.doResetCalUB) 
+
+        # Event handling for tab 'refine ub matrix'
+        self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
+                self.doAddScanPtToRefineUB)
+
         # Validator
 
 
@@ -95,11 +115,31 @@ class MainWindow(QtGui.QMainWindow):
         self._homeSrcDir = os.getcwd()
         self._homeSaveDir = os.getcwd()
 
+        # Control
+        self._myControl = r4c.CWSCDReductionControl()
+
         return
 
     #---------------------------------------------------------------------------
     # Event handling methods
     #---------------------------------------------------------------------------
+    def doAcceptCalUB(self):
+        """ Accept the calculated UB matrix
+        """
+
+        return
+
+    def doAddScanPtToRefineUB(self):
+        """ Add scan/pt numbers to the list of data points for refining ub matrix
+
+        And the added scan number and pt numbers will be reflected in the (left sidebar)
+
+        """
+        raise NotImplementedError("ASAP")
+
+        return
+
+
     def doBrowseLocalSrcDataDir(self):
         """ Browse local source dir
         """
@@ -119,7 +159,27 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.lineEdit_dirSave.setText(targetdatadir)
 
-        return
+        return 
+    
+    
+    def doCalUBMatrix(self):
+        """ Calculate UB matrix by 2 or 3 reflections
+        """
+
+        return 
+
+    
+    def doFindPeak(self):
+        """ Find peak in a given scan/pt
+        """
+        scanNo = self._getInt(self.ui.lineEdit_scanNumber)
+        ptNo = self._getInt(self.ui.lineEdit_ptNumber)
+
+        self._myProject.findPeak(scanNo, ptNo)
+
+
+        return 
+
 
 
     def doLoad(self):
@@ -197,6 +257,13 @@ class MainWindow(QtGui.QMainWindow):
         self._plotRawXMLWksp(self._currPt)
 
         return
+
+    def doResetCalUB(self):
+        """ Reset/reject the UB matrix calculation
+        """
+
+        return
+
 
 
     def doTestURL(self):

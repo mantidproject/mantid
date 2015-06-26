@@ -43,7 +43,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -182,6 +182,19 @@
                </layout>
               </item>
              </layout>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
@@ -549,7 +562,7 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_7">
                   <item>
-                   <widget class="QTableView" name="tableView">
+                   <widget class="QTableView" name="tableView_refinedUB">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                       <horstretch>0</horstretch>
@@ -625,44 +638,57 @@
                  </widget>
                 </item>
                 <item row="1" column="1">
-                 <widget class="QLineEdit" name="lineEdit"/>
+                 <widget class="QLineEdit" name="lineEdit_bUnitCell"/>
                 </item>
                 <item row="1" column="2">
-                 <widget class="QLineEdit" name="lineEdit_2"/>
+                 <widget class="QLineEdit" name="lineEdit_cUnitCell"/>
                 </item>
                 <item row="1" column="3">
-                 <widget class="QLineEdit" name="lineEdit_3"/>
+                 <widget class="QLineEdit" name="lineEdit_alphaUnitCell"/>
                 </item>
                 <item row="2" column="1">
-                 <widget class="QLineEdit" name="lineEdit_4"/>
+                 <widget class="QLineEdit" name="lineEdit_bError"/>
                 </item>
                 <item row="1" column="4">
-                 <widget class="QLineEdit" name="lineEdit_5"/>
+                 <widget class="QLineEdit" name="lineEdit_betaUnitCell"/>
                 </item>
                 <item row="1" column="0">
-                 <widget class="QLineEdit" name="lineEdit_6"/>
+                 <widget class="QLineEdit" name="lineEdit_aUnitCell"/>
                 </item>
                 <item row="2" column="2">
-                 <widget class="QLineEdit" name="lineEdit_7"/>
+                 <widget class="QLineEdit" name="lineEdit_cError"/>
                 </item>
                 <item row="2" column="0">
-                 <widget class="QLineEdit" name="lineEdit_8"/>
+                 <widget class="QLineEdit" name="lineEdit_aError"/>
                 </item>
                 <item row="2" column="3">
-                 <widget class="QLineEdit" name="lineEdit_9"/>
+                 <widget class="QLineEdit" name="lineEdit_alphaError"/>
                 </item>
                 <item row="2" column="4">
-                 <widget class="QLineEdit" name="lineEdit_10"/>
+                 <widget class="QLineEdit" name="lineEdit_betaError"/>
                 </item>
                 <item row="1" column="5">
-                 <widget class="QLineEdit" name="lineEdit_11"/>
+                 <widget class="QLineEdit" name="lineEdit_gammaUnitCell"/>
                 </item>
                 <item row="2" column="5">
-                 <widget class="QLineEdit" name="lineEdit_12"/>
+                 <widget class="QLineEdit" name="lineEdit_gammaError"/>
                 </item>
                </layout>
               </item>
              </layout>
+            </item>
+            <item row="1" column="0">
+             <spacer name="verticalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </widget>
