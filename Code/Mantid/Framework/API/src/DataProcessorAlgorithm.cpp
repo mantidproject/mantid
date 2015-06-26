@@ -96,6 +96,49 @@ void DataProcessorAlgorithm::setPropManagerPropName(const std::string &propName)
     m_propertyManagerPropertyName = propName;
 }
 
+void DataProcessorAlgorithm::mapPropertyName(const std::string &nameInProp,
+                                            const std::string &nameInPropManager) {
+    m_nameToPMName[nameInProp] = nameInPropManager;
+}
+
+std::string DataProcessorAlgorithm::getPropertyValue(const std::string &name) const {
+  // explicitely specifying a property wins
+  if (!isDefault(name)) {
+    return Algorithm::getPropertyValue(name);
+  }
+
+  // return it if it is in the held property manager
+  auto mapping = m_nameToPMName.find(name);
+  if (mapping != m_nameToPMName.end()) {
+    auto pm = this->getProcessProperties();
+    if (pm->existsProperty(mapping->second)) {
+        return pm->getPropertyValue(mapping->second);
+    }
+  }
+
+  // let the parent class version win
+  return Algorithm::getPropertyValue(name);
+}
+
+PropertyManagerOwner::TypedValue DataProcessorAlgorithm::getProperty(const std::string &name) const {
+  // explicitely specifying a property wins
+  if (!isDefault(name)) {
+    return Algorithm::getProperty(name);
+  }
+
+  // return it if it is in the held property manager
+  auto mapping = m_nameToPMName.find(name);
+  if (mapping != m_nameToPMName.end()) {
+    auto pm = this->getProcessProperties();
+    if (pm->existsProperty(mapping->second)) {
+      return pm->getProperty(mapping->second);
+    }
+  }
+
+  // let the parent class version win
+  return Algorithm::getProperty(name);
+}
+
 ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk() {
   throw std::runtime_error(
       "DataProcessorAlgorithm::determineChunk is not implemented");
@@ -248,7 +291,7 @@ Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
  * @param propertyManager :: Name of the property manager to retrieve.
  */
 boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
-    const std::string &propertyManager) {
+    const std::string &propertyManager) const {
   std::string propertyManagerName(propertyManager);
   if (propertyManager.empty() && (!m_propertyManagerPropertyName.empty())) {
       propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
