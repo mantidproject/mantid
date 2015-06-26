@@ -37,7 +37,7 @@ namespace API {
 */
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
-  IEventWorkspace() {}
+  IEventWorkspace() : MatrixWorkspace() {}
   /// Return the workspace typeID
   virtual const std::string id() const { return "IEventWorkspace"; }
   virtual std::size_t getNumberEvents() const = 0;
