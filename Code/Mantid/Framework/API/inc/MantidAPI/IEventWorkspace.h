@@ -72,7 +72,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
-  virtual IEventWorkspace *doClone() const override = 0;
+  virtual IEventWorkspace *doClone() const = 0;
 
 };
 }

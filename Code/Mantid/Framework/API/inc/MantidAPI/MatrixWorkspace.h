@@ -451,7 +451,7 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
-  virtual MatrixWorkspace *doClone() const override = 0;
+  virtual MatrixWorkspace *doClone() const = 0;
 
   /// Create an MantidImage instance.
   MantidImage_sptr

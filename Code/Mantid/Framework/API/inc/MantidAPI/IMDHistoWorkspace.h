@@ -106,7 +106,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
-  virtual IMDHistoWorkspace *doClone() const override = 0;
+  virtual IMDHistoWorkspace *doClone() const = 0;
 };
 
 } // namespace API

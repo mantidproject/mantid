@@ -333,7 +333,7 @@ protected:
   void removeFromColumn(Column *c, size_t index) { c->remove(index); }
 
 private:
-  virtual ITableWorkspace *doClone() const override = 0;
+  virtual ITableWorkspace *doClone() const = 0;
 };
 
 // =====================================================================================

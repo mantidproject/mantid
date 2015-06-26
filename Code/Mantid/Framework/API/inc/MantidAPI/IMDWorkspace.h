@@ -146,7 +146,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
-  virtual IMDWorkspace *doClone() const override = 0;
+  virtual IMDWorkspace *doClone() const = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

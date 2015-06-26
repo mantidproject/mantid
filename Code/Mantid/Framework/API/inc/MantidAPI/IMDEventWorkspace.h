@@ -97,7 +97,7 @@ protected:
   bool m_fileNeedsUpdating;
 
 private:
-  virtual IMDEventWorkspace *doClone() const override = 0;
+  virtual IMDEventWorkspace *doClone() const = 0;
 };
 
 } // namespace MDEvents

@@ -161,7 +161,7 @@ protected:
   virtual const std::string toString() const;
 
 private:
-  virtual IPeaksWorkspace *doClone() const override = 0;
+  virtual IPeaksWorkspace *doClone() const = 0;
 };
 
 }
