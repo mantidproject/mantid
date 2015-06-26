@@ -123,6 +123,11 @@ public:
   /// Virtual destructor.
   virtual ~ITableWorkspace() {}
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<ITableWorkspace> clone() const {
+    return std::unique_ptr<ITableWorkspace>(doClone());
+  }
+
   /// Return the workspace typeID
   virtual const std::string id() const { return "ITableWorkspace"; }
   virtual const std::string toString() const;
@@ -143,9 +148,6 @@ public:
 
   /// Removes a column.
   virtual void removeColumn(const std::string &name) = 0;
-
-  /// Clones the table workspace
-  virtual ITableWorkspace *clone() const = 0;
 
   /// Number of columns in the workspace.
   virtual size_t columnCount() const = 0;
@@ -329,6 +331,9 @@ protected:
          @param index :: Index of the element to be removed.
    */
   void removeFromColumn(Column *c, size_t index) { c->remove(index); }
+
+private:
+  virtual ITableWorkspace *doClone() const override = 0;
 };
 
 // =====================================================================================

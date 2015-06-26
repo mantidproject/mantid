@@ -52,6 +52,11 @@ public:
 
   virtual ~MDHistoWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MDHistoWorkspace> clone() const {
+    return std::unique_ptr<MDHistoWorkspace>(doClone());
+  }
+
   void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
   void init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
 
@@ -379,13 +384,14 @@ public:
   /// Get the size of an element in the HistoWorkspace.
   static size_t sizeOfElement();
 
-  /// Virutal constructor.
-  boost::shared_ptr<IMDHistoWorkspace> clone() const;
-
   /// Preferred visual normalization method.
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 private:
+  virtual MDHistoWorkspace *doClone() const override {
+    return new MDHistoWorkspace(*this);
+  }
+
   void initVertexesArray();
 
   /// Number of dimensions in this workspace

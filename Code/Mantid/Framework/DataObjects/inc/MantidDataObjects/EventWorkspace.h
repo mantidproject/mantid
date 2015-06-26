@@ -47,6 +47,11 @@ public:
   // Destructor
   virtual ~EventWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<EventWorkspace> clone() const {
+    return std::unique_ptr<EventWorkspace>(doClone());
+  }
+
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &, const std::size_t &);
 
@@ -196,6 +201,10 @@ protected:
   EventWorkspace &operator=(const EventWorkspace &other);
 
 private:
+  virtual EventWorkspace *doClone() const override {
+    throw std::runtime_error("Cloning of EventWorkspace is not implemented.");
+  }
+
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */

@@ -72,6 +72,11 @@ public:
   IMDWorkspace();
   virtual ~IMDWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<IMDWorkspace> clone() const {
+    return std::unique_ptr<IMDWorkspace>(doClone());
+  }
+
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
   /// workspace
@@ -139,6 +144,9 @@ protected:
   IMDWorkspace &operator=(const IMDWorkspace &other);
 
   virtual const std::string toString() const;
+
+private:
+  virtual IMDWorkspace *doClone() const override = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

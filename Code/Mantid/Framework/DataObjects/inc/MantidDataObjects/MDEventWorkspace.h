@@ -44,6 +44,11 @@ public:
   MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   virtual ~MDEventWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MDEventWorkspace> clone() const {
+    return std::unique_ptr<MDEventWorkspace>(doClone());
+  }
+
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize();
 
@@ -185,6 +190,10 @@ protected:
   API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
 private:
+  virtual MDEventWorkspace *doClone() const override {
+    throw std::runtime_error("Cloning of MDEventWorkspace is not implemented.");
+  }
+
   Kernel::SpecialCoordinateSystem m_coordSystem;
 };
 

@@ -207,10 +207,6 @@ bool TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
   return true;
 }
 
-TableWorkspace *TableWorkspace::clone() const {
-  return new TableWorkspace(*this);
-}
-
 /**
  * Sort.
  * @param criteria : a vector with a list of pairs: column name, bool;

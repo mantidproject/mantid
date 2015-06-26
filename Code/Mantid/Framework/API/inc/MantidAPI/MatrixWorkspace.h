@@ -82,6 +82,11 @@ public:
   /// Delete
   virtual ~MatrixWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MatrixWorkspace> clone() const {
+    return std::unique_ptr<MatrixWorkspace>(doClone());
+  }
+
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const;
@@ -446,6 +451,8 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
+  virtual MatrixWorkspace *doClone() const override = 0;
+
   /// Create an MantidImage instance.
   MantidImage_sptr
   getImage(const MantidVec &(MatrixWorkspace::*read)(std::size_t const) const,

@@ -52,6 +52,11 @@ public:
   Workspace2D();
   virtual ~Workspace2D();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<Workspace2D> clone() const {
+    return std::unique_ptr<Workspace2D>(doClone());
+  }
+
   /// Returns the histogram number
   std::size_t getNumberHistograms() const;
 
@@ -109,6 +114,10 @@ protected:
   std::vector<Mantid::API::ISpectrum *> data;
 
 private:
+  virtual Workspace2D *doClone() const override {
+    throw std::runtime_error("Cloning of Workspace2D is not implemented.");
+  }
+
   virtual std::size_t getHistogramNumberHelper() const;
 };
 

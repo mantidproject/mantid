@@ -83,6 +83,10 @@ public:
   TableWorkspace(size_t nrows = 0);
   /// Virtual destructor.
   virtual ~TableWorkspace();
+  /// Returns a clone of the workspace
+  std::unique_ptr<TableWorkspace> clone() const {
+    return std::unique_ptr<TableWorkspace>(doClone());
+  }
   /// Return the workspace typeID
   virtual const std::string id() const { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
@@ -213,8 +217,6 @@ public:
   size_t insertRow(size_t index);
   /// Delets a row if it exists.
   void removeRow(size_t index);
-  /// Clone table workspace instance.
-  TableWorkspace *clone() const;
 
   /** This method finds the row and column index of an integer cell value in a
    * table workspace
@@ -294,6 +296,10 @@ protected:
   TableWorkspace &operator=(const TableWorkspace &other);
 
 private:
+  virtual TableWorkspace *doClone() const override {
+    return new TableWorkspace(*this);
+  }
+
   /// template method to find a given value in a table.
   template <typename Type>
   void findValue(const Type value, size_t &row, const size_t &colIndex) {
