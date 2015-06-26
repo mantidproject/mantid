@@ -303,7 +303,8 @@ def unwrap_monitor(workspace_name):
         try:
             FFTSmooth(InputWorkspace=monitor_workspace_name,
                       OutputWorkspace=monitor_workspace_name,
-                      WorkspaceIndex=0)
+                      WorkspaceIndex=0,
+                      IgnoreXBins=True)
         except ValueError:
             raise ValueError('Uneven bin widths are not supported.')
 
