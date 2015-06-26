@@ -1197,7 +1197,7 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
         return message
     else:
         return ""
-        
+
 ################################################################################
 # Input check functions
 
@@ -1214,13 +1214,16 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
     for time_shift_element in time_shift_container:
         try:
             float(time_shift_element)
-        except:
-            message = 'Error: Elements of the time shift list cannot be converted to a numeric value, e.g ' + time_shift_element
+        except Exception:
+            message = ('Error: Elements of the time shift list cannot be ' +
+                       'converted to a numeric value, e.g ' + time_shift_element)
             print message
             return message
 
     if number_of_files -1 != len(time_shift_container):
-        message = 'Error: Expected N-1 time shifts for N files, but read ' + str(len(time_shift_container)) + ' time shifts for ' + str(number_of_files) + ' files.'
+        message = ('Error: Expected N-1 time shifts for N files, but read ' +
+                  str(len(time_shift_container)) + ' time shifts for ' +
+                  str(number_of_files) + ' files.')
         print message
         return message
 

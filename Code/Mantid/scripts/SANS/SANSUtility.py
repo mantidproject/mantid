@@ -728,7 +728,7 @@ class CombineWorkspacesFactory(object):
     """
     Factory to determine how to add workspaces
     """
-    def __intit__():
+    def __init__(self):
         super(CombineWorkspacesFactory, self).__init__()
     def create_add_algorithm(self, isOverlay):
         """
@@ -739,10 +739,13 @@ class CombineWorkspacesFactory(object):
         else:
             return PlusWorkspaces()
 
-class PlusWorkspaces:
+class PlusWorkspaces(object):
     """
     Wrapper for the Plus algorithm
     """
+    def __init__(self):
+        super(PlusWorkspaces, self).__init__()
+
     def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
         """
         @param LHS_workspace :: the first workspace
@@ -750,14 +753,18 @@ class PlusWorkspaces:
         @param output_workspace :: the output workspace
         @param time_shift :: unused parameter
         """
+        dummy_shift = time_shift
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= RHS_workspace,OutputWorkspace= output_workspace)
 
-class OverlayWorkspaces:
+class OverlayWorkspaces(object):
     """
-    Overlays (in time) a workspace  on top of another workspace. The two 
+    Overlays (in time) a workspace  on top of another workspace. The two
     workspaces overlayed such that the first time entry of their proton_charge entry matches.
     This overlap can be shifted by the specified time_shift in seconds
     """
+    def __init__(self):
+        super(OverlayWorkspaces, self).__init__()
+
     def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
         """
         @param LHS_workspace :: the first workspace
@@ -783,7 +790,7 @@ class OverlayWorkspaces:
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
 
         # Remove the shifted workspace
-        if (mtd.doesExist(temp_ws_name)):
+        if mtd.doesExist(temp_ws_name):
             mtd.remove(temp_ws_name)
 
     def _extract_time_difference_in_seconds(self, ws1, ws2):
@@ -807,7 +814,7 @@ class OverlayWorkspaces:
 
 class TimeShifter(object):
     """
-    The time shifter stores all time shifts for all runs which are to be added. If there is 
+    The time shifter stores all time shifts for all runs which are to be added. If there is
     a mismatch the time shifts are set to 0.0 seconds.
     """
     def __init__(self, time_shifts):

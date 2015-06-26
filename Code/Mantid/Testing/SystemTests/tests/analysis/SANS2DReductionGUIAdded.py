@@ -18,16 +18,22 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
 
         # add files (SAMPLE and CAN)
         import SANSadd2
-        SANSadd2.add_runs(('22048','22048'),'SANS2D', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False)
-        SANSadd2.add_runs(('22023','22023'),'SANS2D', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False)
+        SANSadd2.add_runs(('22048','22048'),'SANS2D', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False)
+        SANSadd2.add_runs(('22023','22023'),'SANS2D', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False)
 
         # load values:
         i.SetCentre('155.45','-169.6','rear')
         i.SetCentre('155.45','-169.6','front')
-        SCATTER_SAMPLE, logvalues = i.AssignSample(r'SANS2D00022048-add.nxs', reload = True, period = 1)
-        SCATTER_SAMPLE, logvalues = i.AssignCan(r'SANS2D00022023-add.nxs', reload = True, period = 1)
-        i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs', period_t=1, period_d=1)
-        i.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs', period_t=1, period_d=1)
+        SCATTER_SAMPLE, logvalues = i.AssignSample(r'SANS2D00022048-add.nxs',
+                                                   reload = True, period = 1)
+        SCATTER_SAMPLE, logvalues = i.AssignCan(r'SANS2D00022023-add.nxs',
+                                                reload = True, period = 1)
+        i.TransmissionSample(r'SANS2D00022041.nxs', r'SANS2D00022024.nxs',
+                             period_t=1, period_d=1)
+        i.TransmissionCan(r'SANS2D00022024.nxs', r'SANS2D00022024.nxs',
+                          period_t=1, period_d=1)
 
         self.checkAfterLoad()
 
@@ -61,8 +67,12 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
 
         # add files (SAMPLE and CAN)
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False, saveAsEvent=True, isOverlay = True)
-        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False, saveAsEvent=True, isOverlay = True)
+        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False,
+                          saveAsEvent=True, isOverlay = True)
+        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False,
+                          saveAsEvent=True, isOverlay = True)
 
         i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
         i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
@@ -101,8 +111,12 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
         # add files (SAMPLE and CAN)
         time_shifts=[1]
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False, saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
-        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False, saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
+        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False,
+                          saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
+        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False,
+                          saveAsEvent=True, isOverlay = True, time_shifts = time_shifts)
 
         i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
         i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)
@@ -141,8 +155,12 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 
         # add files (SAMPLE and CAN)
         import SANSadd2
-        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False, saveAsEvent=True, isOverlay = False)
-        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs', rawTypes=('.add','.raw','.s*'), lowMem=False, saveAsEvent=True, isOverlay = False)
+        SANSadd2.add_runs(('28827','28797'),'SANS2DTUBES', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False,
+                          saveAsEvent=True, isOverlay = False)
+        SANSadd2.add_runs(('28823','28793'),'SANS2DTUBES', '.nxs',
+                          rawTypes=('.add','.raw','.s*'), lowMem=False,
+                          saveAsEvent=True, isOverlay = False)
 
         i.AssignSample(r'SANS2D00028797-add.nxs', reload = True)
         i.AssignCan(r'SANS2D00028793-add.nxs', reload = True)

@@ -69,9 +69,11 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                             DeleteWorkspace(workspaceName)
                     return ""
 
-                adder.add(LHS_workspace='AddFilesSumTempory',RHS_workspace= 'AddFilesNewTempory',output_workspace= 'AddFilesSumTempory', run_to_add = counter_run)
+                adder.add(LHS_workspace='AddFilesSumTempory',RHS_workspace= 'AddFilesNewTempory',
+                          output_workspace= 'AddFilesSumTempory', run_to_add = counter_run)
                 if isFirstDataSetEvent:
-                    adder.add(LHS_workspace='AddFilesSumTempory_monitors',RHS_workspace= 'AddFilesNewTempory_monitors',output_workspace= 'AddFilesSumTempory_monitors', run_to_add = counter_run)
+                    adder.add(LHS_workspace='AddFilesSumTempory_monitors',RHS_workspace= 'AddFilesNewTempory_monitors',
+                              output_workspace= 'AddFilesSumTempory_monitors', run_to_add = counter_run)
                 DeleteWorkspace("AddFilesNewTempory")
                 if isFirstDataSetEvent:
                     DeleteWorkspace("AddFilesNewTempory_monitors")
@@ -81,7 +83,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             error = 'Error opening file ' + userEntry+': ' + str(e)
             print error
             logger.notice(error)
-            if 'AddFilesSumTempory' in mtd  : DeleteWorkspace('AddFilesSumTempory')
+            if 'AddFilesSumTempory' in mtd :
+                DeleteWorkspace('AddFilesSumTempory')
             return ""
         except Exception as e:
             error = 'Error finding files: ' + str(e)
@@ -130,7 +133,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                 wsOut.setE(i,wsInMonitor.dataE(i))
             ConjoinWorkspaces(wsOut, wsInDetector, CheckOverlapping=True)
 
-            if 'AddFilesSumTempory_Rebin' in mtd : DeleteWorkspace('AddFilesSumTempory_Rebin')
+            if 'AddFilesSumTempory_Rebin' in mtd :
+                DeleteWorkspace('AddFilesSumTempory_Rebin')
 
 
         lastFile = os.path.splitext(lastFile)[0]
