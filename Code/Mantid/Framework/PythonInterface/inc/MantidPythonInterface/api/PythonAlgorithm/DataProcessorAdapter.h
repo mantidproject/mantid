@@ -80,8 +80,15 @@ public:
   void forwardPropertiesProxy() { this->forwardProperties(); }
 
   boost::shared_ptr<Kernel::PropertyManager>
-  getProcessPropertiesProxy(const std::string &propertyManager) {
+  getProcessPropertiesProxy(const std::string &propertyManager=std::string()) {
     return this->getProcessProperties(propertyManager);
+  }
+  void setPropManagerPropName(const std::string &propName) {
+    this->setPropManagerPropName(propName);
+  }
+
+  void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager) {
+    this->mapPropertyName(nameInProp, nameInPropManager);
   }
 
   API::Workspace_sptr assembleProxy(const std::string &partialWSName,
