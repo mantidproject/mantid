@@ -84,6 +84,9 @@ namespace CustomInterfaces
     void setCorrectedData(MatrixWorkspace_const_sptr data);
     void setFittedFunction(IFunction_const_sptr function);
 
+    // Set errors in the ws after the fit
+    void setErrorsAfterFit(MatrixWorkspace_sptr data);
+
     /// Disables points which shouldn't be used for fitting
     static void disableUnwantedPoints(MatrixWorkspace_sptr ws, const std::vector<Section>& sections);
 
