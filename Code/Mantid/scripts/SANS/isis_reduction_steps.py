@@ -22,7 +22,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
-                         extract_child_ws_for_added_eventdata, get_det_ids_in_component,
+                         extract_child_ws_for_added_eventdata,
                           MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG)
 import isis_instrument
 import isis_reducer
@@ -1234,7 +1234,6 @@ class TransmissionCalc(ReductionStep):
         # of interest, while mask_files are taboo for the region of interest
         self.radius = None
         self.roi_files = []
-        self.main = False
         self.mask_files =[]
 
         # use InterpolatingRebin
@@ -1402,10 +1401,6 @@ class TransmissionCalc(ReductionStep):
         to ensure that we do not use a workspace which already has masked detectors, since
         they would contribute to the ROI.
         """
-        if self.main:
-            main_bank_comp_name = reducer.instrument.get_low_angle_detector().name()
-            self.trans_roi += get_det_ids_in_component(mtd[workspace], main_bank_comp_name)
-
         if self.radius:
             # Mask out a cylinder with the given radius in a copy of the workspace.
             # The centre position of the Cylinder does not require a shift, as all
@@ -2646,10 +2641,7 @@ class UserFile(ReductionStep):
 
     def _read_trans_line(self, arguments, reducer):
         try:
-            if arguments.startswith("MAIN") or arguments.startswith("REAR"):
-                reducer.transmission_calculator.main = True
-                return
-            elif arguments.startswith("RADIUS"):
+            if arguments.startswith("RADIUS"):
                 # Convert the input (mm) into the correct units (m)
                 reducer.transmission_calculator.radius = float(arguments.split("=")[1])/1000.0
                 return
@@ -2658,6 +2650,7 @@ class UserFile(ReductionStep):
                 return
             elif arguments.startswith("MASK"):
                 reducer.transmission_calculator.mask_files += [arguments.split("=")[1]]
+                return
         except Exception as e:
             return "Problem parsing TRANS line \"" + arguments + "\":\n" + str(e)
 

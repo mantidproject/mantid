@@ -703,28 +703,6 @@ def get_masked_det_ids(ws):
         if det.isMasked():
             yield det.getID()
 
-def get_det_ids_in_component(ws, comp_name):
-    """
-    Given a component name, will recursively search its children for detectors,
-    and return a list of their IDs.
-
-    @param ws :: the workspace containing the component
-    @param comp_name :: the name of the component to search
-
-    @returns a list of found detector IDs
-    """
-    def detectors_in_component(comp):
-        dets = []
-        if isinstance(comp, mantid.geometry.Detector):
-            dets += [comp]
-        elif hasattr(comp, "nelements"):
-            for i in range(comp.nelements()):
-                dets += detectors_in_component(comp[i])
-        return dets
-    comp = ws.getInstrument().getComponentByName(comp_name)
-    return [det.getID() for det in detectors_in_component(comp)]
-
-
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
     Creates a cloned workspace where all zero-error values have been replaced with a large value
