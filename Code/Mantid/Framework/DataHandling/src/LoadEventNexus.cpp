@@ -1033,9 +1033,9 @@ void LoadEventNexus::init() {
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
       "sensitive if running on Linux).");
 
-  this->declareProperty(new WorkspaceProperty<IEventWorkspace>(
+  this->declareProperty(new WorkspaceProperty<Workspace>(
                             "OutputWorkspace", "", Direction::Output),
-                        "The name of the output EventWorkspace in which to "
+                        "The name of the output EventWorkspace or WorkspaceGroup in which to "
                         "load the EventNexus file.");
 
   declareProperty(new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(),

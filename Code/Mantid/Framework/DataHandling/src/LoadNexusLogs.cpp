@@ -285,8 +285,11 @@ void LoadNexusLogs::loadNPeriods(
       return;
   }
 
-
-  workspace->mutableRun().addProperty(new PropertyWithValue<int>("nperiods", value));
+  API::Run& run = workspace->mutableRun();
+  const std::string nPeriodsLabel = "nperiods";
+  if(!run.hasProperty(nPeriodsLabel)){
+      run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
+  }
 }
 
 /**

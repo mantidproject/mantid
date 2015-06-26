@@ -619,8 +619,10 @@ void test_extract_nperiod_data() {
   loader.setPropertyValue("OutputWorkspace", "dummy");
   loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
   loader.execute();
-  IEventWorkspace_sptr outWS = loader.getProperty("OutputWorkspace");
-  auto run = outWS->run();
+  Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+  IEventWorkspace_sptr outEventWS = boost::dynamic_pointer_cast<IEventWorkspace>(outWS);
+  TSM_ASSERT("Invalid Output Workspace Type", outEventWS);
+  auto run = outEventWS->run();
   const bool hasNPeriods = run.hasProperty("nperiods");
   TSM_ASSERT("Should have nperiods now we have run LoadNexusLogs", hasNPeriods);
   if (hasNPeriods) {
