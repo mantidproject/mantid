@@ -224,8 +224,9 @@ class DetectorBank(object):
         # hold rescale and shift object _RescaleAndShift
         self.rescaleAndShift = self._RescaleAndShift()
 
-        #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
-        self._orientation = 'HorizontalFlipped'
+        # The orientation is set by default to Horizontal (Note this used to be HorizontalFlipped,
+        # probably as part of some hack for specific run numbers of SANS2D)
+        self._orientation = 'Horizontal'
 
     def disable_y_and_rot_corrs(self):
         """
@@ -866,11 +867,7 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            # empty instrument number spectra differently.
-            if base_runno == 'emptyInstrument':
-                second.set_orien('HorizontalFlipped')
-            else:
-                second.set_orien('Horizontal')
+            second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too
         second.place_after(first)
