@@ -673,8 +673,18 @@ double DgsReduction::getParameter(std::string algParam, MatrixWorkspace_sptr ws,
 /** Execute the algorithm.
  */
 void DgsReduction::exec() {
-  // Reduction property manager
-  this->reductionManager = getProcessProperties();
+  // Reduction property manager - don't call getProcessProperties as
+  // it will reuse. This needs to create a fresh one every time
+  const std::string reductionManagerName =
+          this->getProperty("ReductionProperties");
+  if (reductionManagerName.empty()) {
+    g_log.error() << "ERROR: Reduction Property Manager name is empty"
+                  << std::endl;
+    return;
+  }
+  this->reductionManager = boost::make_shared<PropertyManager>();
+  PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
+                                                      this->reductionManager);
 
   // Put all properties except input files/workspaces into property manager.
   const std::vector<Property *> props = this->getProperties();
