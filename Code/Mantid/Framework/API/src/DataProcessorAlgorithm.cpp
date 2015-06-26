@@ -96,11 +96,25 @@ void DataProcessorAlgorithm::setPropManagerPropName(const std::string &propName)
     m_propertyManagerPropertyName = propName;
 }
 
+/**
+ * Declare mapping of property name to name in the PropertyManager. This is used by
+ * getPropertyValue(const string &) and getProperty(const string&).
+ *
+ * @param nameInProp Name of the property as declared in Algorithm::init().
+ * @param nameInPropManager Name of the property in the PropertyManager.
+ */
 void DataProcessorAlgorithm::mapPropertyName(const std::string &nameInProp,
                                             const std::string &nameInPropManager) {
     m_nameToPMName[nameInProp] = nameInPropManager;
 }
 
+/**
+ * Get the property held by this object. If the value is the default see if it
+ * contained in the PropertyManager. @see Algorithm::getPropertyValue(const string &)
+ *
+ * @param name
+ * @return
+ */
 std::string DataProcessorAlgorithm::getPropertyValue(const std::string &name) const {
   // explicitely specifying a property wins
   if (!isDefault(name)) {
@@ -120,6 +134,13 @@ std::string DataProcessorAlgorithm::getPropertyValue(const std::string &name) co
   return Algorithm::getPropertyValue(name);
 }
 
+/**
+ * Get the property held by this object. If the value is the default see if it
+ * contained in the PropertyManager. @see Algorithm::getProperty(const string&)
+ *
+ * @param name
+ * @return
+ */
 PropertyManagerOwner::TypedValue DataProcessorAlgorithm::getProperty(const std::string &name) const {
   // explicitely specifying a property wins
   if (!isDefault(name)) {
