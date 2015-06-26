@@ -51,10 +51,6 @@ public:
   /// Ctor
   IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {}
 
-  /// Copy constructor
-  IPeaksWorkspace(const IPeaksWorkspace &other)
-      : ITableWorkspace(other), ExperimentInfo(other) {}
-
   /// Destructor
   virtual ~IPeaksWorkspace();
 
@@ -151,6 +147,12 @@ public:
   virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IPeaksWorkspace(const IPeaksWorkspace &other)
+      : ITableWorkspace(other), ExperimentInfo(other) {}
+  /// Protected copy assignment operator. Assignment not implemented.
+  IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
+
   virtual const std::string toString() const;
 };
 

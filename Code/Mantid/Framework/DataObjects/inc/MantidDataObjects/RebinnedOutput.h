@@ -64,18 +64,17 @@ public:
   void setF(const std::size_t index, const MantidVecPtr &F);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  RebinnedOutput(const RebinnedOutput &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  RebinnedOutput &operator=(const RebinnedOutput &other);
+
   /// Called by initialize() in MatrixWorkspace
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength);
 
   /// A vector that holds the 1D vectors for the fractional area.
   std::vector<MantidVec> fracArea;
-
-private:
-  /// Private copy constructor. NO COPY ALLOWED
-  RebinnedOutput(const RebinnedOutput &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  RebinnedOutput &operator=(const RebinnedOutput &);
 };
 
 /// shared pointer to the RebinnedOutput class
