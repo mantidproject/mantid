@@ -80,6 +80,8 @@ public:
   virtual std::string asString(bool withDefaultValues = false,
                                char separator = ',') const;
 
+  bool isDefault(const std::string &name) const;
+
   /// Removes the property from management
   void removeProperty(const std::string &name, const bool delproperty = true);
   /// Clears all properties under management
