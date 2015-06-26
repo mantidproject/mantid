@@ -3,6 +3,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -315,8 +316,14 @@ boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
     const std::string &propertyManager) const {
   std::string propertyManagerName(propertyManager);
   if (propertyManager.empty() && (!m_propertyManagerPropertyName.empty())) {
-      propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
+    if (!existsProperty(m_propertyManagerPropertyName)) {
+      std::stringstream msg;
+      msg << "Failed to find property \"" << m_propertyManagerPropertyName << "\"";
+      throw Exception::NotFoundError(msg.str(), this->name());
+    }
+    propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
   }
+
   boost::shared_ptr<PropertyManager> processProperties;
   if (PropertyManagerDataService::Instance().doesExist(propertyManagerName)) {
     processProperties =
