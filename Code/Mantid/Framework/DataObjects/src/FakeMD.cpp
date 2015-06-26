@@ -2,6 +2,8 @@
 // Includes
 //--------------------------------------------------------------------------------------------------
 #include "MantidDataObjects/FakeMD.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
 #include "MantidKernel/ThreadPool.h"

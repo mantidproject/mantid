@@ -1155,6 +1155,49 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     return XNEW, YNEW
 
+
+###################### Utility functions ####################################################
+def CreateZeroErrorFreeClonedWorkspace(input_workspace_name, output_workspace_name):
+    """
+        Creates a zero-error-free workspace
+        @param input_workspace_name :  name of the workspace which might contain zero-error values
+        @param output_workspace_name : name of the workspace which will have no zero-error values
+        @return: success message
+    """
+    message, complete = su.create_zero_error_free_workspace(input_workspace_name = input_workspace_name,
+                                                            output_workspace_name = output_workspace_name)
+    if not complete:
+        return message
+    else:
+        return ""
+
+
+def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
+    """
+        Deletes a zero-error-free workspace
+        @param input_workspace_name :  name of the workspace which might contain zero-error values
+        @return: success message
+    """
+    message, complete = su.delete_zero_error_free_workspace(input_workspace_name = input_workspace_name)
+    if not complete:
+        return message
+    else:
+        return ""
+
+
+def IsValidWsForRemovingZeroErrors(input_workspace_name):
+    """
+        We need to check that the workspace has been reduced, ie that it has had the Q1D or Qxy algorithm
+        applied to it.
+        @param input_workspace_name :  name of the input workspace
+        @return: success message
+    """
+    message, valid = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = input_workspace_name)
+    if not valid:
+        return message
+    else:
+        return ""
+        
 ################################################################################
 # Input check functions
 
@@ -1180,7 +1223,6 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
         message = 'Error: Expected N-1 time shifts for N files, but read ' + str(len(time_shift_container)) + ' time shifts for ' + str(number_of_files) + ' files.'
         print message
         return message
-
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

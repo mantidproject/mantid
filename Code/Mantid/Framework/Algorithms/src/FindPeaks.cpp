@@ -375,7 +375,9 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
           break;
         }
       }
-      g_log.warning() << "i_min = " << i_min << " i_max = " << i_max << "\n";
+      g_log.notice()
+          << "Finding peaks from giving starting point, with interval i_min = "
+          << i_min << " i_max = " << i_max << std::endl;
       practical_x_max = vecX[i_max];
     }
     g_log.information() << "practical x-range = [" << practical_x_min << " -> "
@@ -1302,7 +1304,8 @@ void FindPeaks::estimateBackground(const MantidVec &X, const MantidVec &Y,
                                    std::vector<double> &vecbkgdparvalues) {
   // Validate input
   if (i_min >= i_max)
-    throw std::runtime_error("i_min cannot larger or equal to i_max");
+    throw std::runtime_error("when trying to estimate the background parameter "
+                             "values: i_min cannot larger or equal to i_max");
   if (vecbkgdparvalues.size() < 3)
     vecbkgdparvalues.resize(3, 0.);
 
@@ -1468,11 +1471,12 @@ void FindPeaks::addInfoRow(const size_t spectrum,
       a2 = bkgdfunction->getParameter("A2");
 
     t << a0 << a1 << a2;
-    g_log.warning() << "cen=" << peakcentre << " fwhm=" << fwhm
-                    << " height=" << height << " a0=" << a0 << " a0=" << a1
-                    << " a2=" << a2;
+
+    g_log.notice() << "Peak parameters found: cen=" << peakcentre
+                   << " fwhm=" << fwhm << " height=" << height << " a0=" << a0
+                   << " a1=" << a1 << " a2=" << a2;
   }
-  g_log.warning() << " chsq=" << mincost << "\n";
+  g_log.notice() << " chsq=" << mincost << "\n";
   // Minimum cost function value
   t << mincost;
 

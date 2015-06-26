@@ -76,7 +76,7 @@ Sum Files
   If selected the data from each raw file will be summed and from then on
   treated as a single run.
 
-Load Logs
+Load Log Files
   If selected the sample logs will be laoded from each of the run files.
 
 Grouping

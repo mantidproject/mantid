@@ -20,9 +20,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
 namespace Mantid {

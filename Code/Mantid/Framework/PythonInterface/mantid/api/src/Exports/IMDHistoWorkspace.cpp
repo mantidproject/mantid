@@ -1,13 +1,13 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidPythonInterface/kernel/Converters/CArrayToNDArray.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/numeric.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::DataItemInterface;
+using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
@@ -211,5 +211,5 @@ void export_IMDHistoWorkspace() {
 
   //-------------------------------------------------------------------------------------------------
 
-  DataItemInterface<IMDHistoWorkspace>().castFromID("MDHistoWorkspace");
+  RegisterWorkspacePtrToPython<IMDHistoWorkspace>();
 }

@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDIterator.h"

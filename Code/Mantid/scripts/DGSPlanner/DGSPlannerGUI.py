@@ -208,14 +208,14 @@ class DGSPlannerGUI(QtGui.QWidget):
                                                      Dimension4=dimensions[self.masterDict['dimIndex'][3]],
                                                      Dimension4Min=float2Input(self.masterDict['dimMin'][3]),
                                                      Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
-        intensity=__mdws[0].getSignalArray()*1. #to make it writeable
+        intensity=__mdws[0].getSignalArray()[0,0,:,:]*1. #to make it writeable
         if self.colorButton.isChecked():
             for i in range(__mdws.getNumberOfEntries())[1:]:
-                tempintensity=  __mdws[i].getSignalArray()
+                tempintensity=  __mdws[i].getSignalArray()[0,0,:,:]
                 intensity[numpy.where( tempintensity>0)]=i+1.
         else:
             for i in range(__mdws.getNumberOfEntries())[1:]:
-                tempintensity=  __mdws[i].getSignalArray()
+                tempintensity=  __mdws[i].getSignalArray()[0,0,:,:]
                 intensity[numpy.where( tempintensity>0)]=1.
         Z = numpy.transpose(intensity)
         x = numpy.linspace(__mdws[0].getDimension(0).getMinimum(), __mdws[0].getDimension(0).getMaximum(),intensity.shape[1] )

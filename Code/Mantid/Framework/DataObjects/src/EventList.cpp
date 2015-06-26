@@ -1,3 +1,4 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
@@ -2515,6 +2516,53 @@ void EventList::integrate(const double minX, const double maxX,
 // ----------- Conversion Functions (changing tof values)
 // ---------------------------------------
 // ==============================================================================================
+
+/**
+ * @param func Function to do the conversion.
+ * @param sorting How the events are sorted after the operation. 0 = unsorted (default),
+ * positive = unchanged, negative = reverse.
+ */
+void EventList::convertTof(std::function<double(double)> func, const int sorting) {
+    // fix the histogram parameter
+    MantidVec &x = this->refX.access();
+    transform(x.begin(), x.end(), x.begin(), func);
+
+    // do nothing if sorting > 0
+    if (sorting == 0) {
+        this->setSortOrder(UNSORTED);
+    } else if ((sorting < 0) && (this->getSortType() == TOF_SORT)) {
+        this->reverse();
+    }
+
+    if (this->getNumberEvents() <= 0)
+      return;
+
+    // Convert the list
+    switch (eventType) {
+    case TOF:
+      this->convertTofHelper(this->events, func);
+      break;
+    case WEIGHTED:
+      this->convertTofHelper(this->weightedEvents, func);
+      break;
+    case WEIGHTED_NOTIME:
+      this->convertTofHelper(this->weightedEventsNoTime, func);
+      break;
+    }
+}
+
+/**
+ * @param events
+ * @param func
+ */
+template <class T>
+void EventList::convertTofHelper(std::vector<T> &events, std::function<double(double)> func) {
+    // iterate through all events
+    typename std::vector<T>::iterator itev;
+    typename std::vector<T>::iterator itev_end = events.end(); // cache for speed
+    for (itev = events.begin(); itev != itev_end; itev++)
+      itev->m_tof = func(itev->m_tof);
+}
 
 // --------------------------------------------------------------------------
 /**

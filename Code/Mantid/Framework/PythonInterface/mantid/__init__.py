@@ -71,6 +71,7 @@ if _os.path.exists(_os.path.join(_bindir, 'Mantid.properties')):
 import mantid.kernel as kernel
 import mantid.geometry as geometry
 import mantid.api as api
+import mantid.dataobjects as dataobjects
 
 ###############################################################################
 # Make the aliases from each module accessible in a the mantid namspace

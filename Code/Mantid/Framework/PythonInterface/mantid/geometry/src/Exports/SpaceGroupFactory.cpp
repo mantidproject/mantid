@@ -18,6 +18,12 @@ std::vector<std::string> spaceGroupSymbolsForNumber(SpaceGroupFactoryImpl &self,
   return self.subscribedSpaceGroupSymbols(number);
 }
 
+std::vector<std::string>
+spaceGroupSymbolsForPointGroup(SpaceGroupFactoryImpl &self,
+                               const PointGroup_sptr &pointGroup) {
+  return self.subscribedSpaceGroupSymbols(pointGroup);
+}
+
 bool isSubscribedSymbol(SpaceGroupFactoryImpl &self,
                         const std::string &symbol) {
   return self.isSubscribed(symbol);
@@ -51,6 +57,7 @@ void export_SpaceGroupFactory() {
       .def("subscribedSpaceGroupSymbols", &spaceGroupSymbolsForNumber,
            "Returns all space group symbols that are registered under the "
            "given number.")
+      .def("getSpaceGroupsForPointGroup", &spaceGroupSymbolsForPointGroup)
       .def("Instance", &SpaceGroupFactory::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the SpaceGroupFactory singleton")

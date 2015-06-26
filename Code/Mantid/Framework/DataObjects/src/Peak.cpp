@@ -287,6 +287,12 @@ void Peak::setDetectorID(int id) {
     return;
   // Use the grand-parent whenever possible
   m_bankName = parent->getName();
+  // For CORELLI, one level above sixteenpack
+  if(m_bankName.compare("sixteenpack") == 0){
+    parent = parent->getParent();
+    m_bankName = parent->getName();
+  }
+
 
   // Special for rectangular detectors: find the row and column.
   RectangularDetector_const_sptr retDet =

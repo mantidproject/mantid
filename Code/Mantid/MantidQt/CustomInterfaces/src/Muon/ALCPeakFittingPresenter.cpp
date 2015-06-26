@@ -108,7 +108,8 @@ namespace CustomInterfaces
 
   void ALCPeakFittingPresenter::onDataChanged()
   {
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)));
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)),
+                         ALCHelper::curveErrorsFromWs(m_model->data(), 0));
   }
 
 } // namespace CustomInterfaces

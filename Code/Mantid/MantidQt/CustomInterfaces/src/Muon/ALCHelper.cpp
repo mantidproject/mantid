@@ -28,6 +28,17 @@ namespace ALCHelper
   }
 
   /**
+   * Creates vector of errors using E values from the workspace spectra.
+   * @param ws :: Workspace with E values to use
+   * @param wsIndex :: Workspace index to use
+   * @return Vector of errors
+   */
+  std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws, size_t wsIndex)
+  {
+    return ws->readE(wsIndex);
+  }
+
+  /**
    * Creates QwtData with Y values produced by the function for specified X values.
    * @param func :: Function to use
    * @param xValues :: X values which we want Y values for. QwtData will have those as well.

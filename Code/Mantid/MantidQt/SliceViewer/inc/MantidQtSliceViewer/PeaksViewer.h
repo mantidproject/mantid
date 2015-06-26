@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {

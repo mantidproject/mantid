@@ -1,6 +1,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -134,7 +135,7 @@ void LoadCalFile::init() {
   declareProperty(
       new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
-      "'_offsets', '_mask' appended to them.");
+      "'_cal', '_offsets', '_mask' appended to them.");
 }
 
 //----------------------------------------------------------------------------------------------

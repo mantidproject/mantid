@@ -6,6 +6,8 @@
 #include "MantidAPI/FileFinder.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include <vtkUnstructuredGrid.h>

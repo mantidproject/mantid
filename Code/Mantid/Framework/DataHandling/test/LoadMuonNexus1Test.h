@@ -745,7 +745,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006473.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "emu00006475.nxs") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWsEntry.name()) );
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
@@ -757,25 +757,27 @@ public:
     if (!outWs)
       return;
 
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outWs);
-    TS_ASSERT(ws);
+    auto gws = boost::dynamic_pointer_cast<WorkspaceGroup>(outWs);
+    TS_ASSERT(gws);
 
-    if (!ws)
+    if (!gws)
       return;
 
+    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    TS_ASSERT(ws);
     const Run& run = ws->run();
 
     // Check expected properties
-    checkProperty(run, "run_number", std::string("6473"));
-    checkProperty(run, "run_title", std::string("Cr2.7Co0.3Si T=200.0 F=5.0"));
-    checkProperty(run, "run_start", std::string("2006-11-21T07:04:30"));
-    checkProperty(run, "run_end", std::string("2006-11-21T09:29:28"));
-    checkProperty(run, "dur_secs", std::string("8697"));
+    checkProperty(run, "run_number", std::string("6475"));
+    checkProperty(run, "run_title", std::string("ptfe test T=280 F=20.0"));
+    checkProperty(run, "run_start", std::string("2006-11-21T15:36:11"));
+    checkProperty(run, "run_end", std::string("2006-11-21T17:10:18"));
+    checkProperty(run, "dur_secs", std::string("5647"));
     checkProperty(run, "nspectra", 32);
-    checkProperty(run, "goodfrm", 417485);
+    checkProperty(run, "goodfrm", 60800);
 
-    checkProperty(run, "sample_temp", 200.0);
-    checkProperty(run, "sample_magn_field", 5.0);
+    checkProperty(run, "sample_temp", 280.0);
+    checkProperty(run, "sample_magn_field", 20.0);
   }
   
 

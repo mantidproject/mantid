@@ -9,6 +9,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 #include <string>
 #include <vector>
@@ -17,26 +20,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
 
-namespace
-{
-  std::vector<std::string> loadTestWorkspaces(std::vector<std::string> filenames)
-  {
-    std::vector<Workspace_sptr> wsList;
-
-    Load loader;
-    loader.initialize();
-
-    for( auto filename = filenames.begin(); filename != filenames.end(); ++filename )
-    {
-      loader.setPropertyValue("Filename", *filename);
-      loader.setPropertyValue("OutputWorkspace", *filename);
-      TS_ASSERT_THROWS_NOTHING(loader.execute());
-    }
-
-    return filenames;
-  }
-}
 
 class CreateLogPropertyTableTest : public CxxTest::TestSuite
 {
@@ -50,13 +35,8 @@ public:
 
   void test_exec()
   {
-    const std::string filenamesArray[2] = {
-      "TSC10076", 
-      "OSI11886"};
-    std::vector<std::string> filenames;
-    filenames.assign(filenamesArray, filenamesArray+2);
-    
-    std::vector<std::string> wsNames = loadTestWorkspaces(filenames);
+    createSampleWorkspace("__CreateLogPropertyTable__A", 12345, 50000000000);
+    createSampleWorkspace("__CreateLogPropertyTable__B", 67890, 56000000000);
 
     CreateLogPropertyTable alg;
     alg.initialize();
@@ -67,7 +47,7 @@ public:
     std::vector<std::string> propNames;
     propNames.assign(propNamesArray, propNamesArray + 2);
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspaces", wsNames) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspaces", "__CreateLogPropertyTable__A, __CreateLogPropertyTable__B") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogPropertyNames", propNames) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "outputTest") );
 
@@ -76,16 +56,84 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("outputTest");
-    
+
     TS_ASSERT( table );
 
     TableRow row1 = table->getRow(0);
     TableRow row2 = table->getRow(1);
-    
-    TS_ASSERT_EQUALS( row1.cell<std::string>(0), "10076" );
-    TS_ASSERT_EQUALS( row1.cell<std::string>(1), "2008-12-10T10:35:23" );
-    TS_ASSERT_EQUALS( row2.cell<std::string>(0), "11886" );
-    TS_ASSERT_EQUALS( row2.cell<std::string>(1), "2000-03-12T08:54:42" );
+
+    TS_ASSERT_EQUALS( row1.cell<std::string>(0), "12345" );
+    TS_ASSERT_EQUALS( row1.cell<std::string>(1), "1990-01-01T00:00:50" );
+    TS_ASSERT_EQUALS( row2.cell<std::string>(0), "67890" );
+    TS_ASSERT_EQUALS( row2.cell<std::string>(1), "1990-01-01T00:00:56" );
+  }
+
+  void test_timeSeries()
+  {
+    createSampleWorkspace();
+
+    CreateLogPropertyTable alg;
+    alg.initialize();
+
+    std::string propNamesArray[3] = {
+      "run_number",
+      "run_start",
+      "FastSineLog"};
+    std::vector<std::string> propNames;
+    propNames.assign(propNamesArray, propNamesArray + 3);
+
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspaces", "__CreateLogPropertyTable__TestWorkspace") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogPropertyNames", propNames) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", "outputTest") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("TimeSeriesStatistic", "Minimum") );
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+
+    TS_ASSERT( alg.isExecuted() );
+
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("outputTest");
+
+    TS_ASSERT( table );
+
+    TableRow row1 = table->getRow(0);
+
+    TS_ASSERT_EQUALS( row1.cell<std::string>(0), "12345" );
+    TS_ASSERT_EQUALS( row1.cell<std::string>(1), "1990-01-01T00:00:03" );
+    TS_ASSERT_EQUALS( row1.cell<std::string>(2), "-1" );
+  }
+
+private:
+  void createSampleWorkspace(std::string wsName = "__CreateLogPropertyTable__TestWorkspace",
+      int runNumber = 12345, int64_t runStart = 3000000000)
+  {
+    using namespace WorkspaceCreationHelper;
+
+    MatrixWorkspace_sptr eventws = WorkspaceCreationHelper::Create2DWorkspace(1, 1);
+
+    int64_t runstoptime_ns = runStart + 1000000;
+    int64_t pulsetime_ns(100000);
+
+    // Run number
+    eventws->mutableRun().addProperty("run_number", runNumber);
+
+    // Run start log
+    DateAndTime runstarttime(runStart);
+    eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
+
+    // Sine log
+    TimeSeriesProperty<double> *sinlog = new TimeSeriesProperty<double>("FastSineLog");
+    double period = static_cast<double>(pulsetime_ns);
+    int64_t curtime_ns = runStart;
+    while (curtime_ns < runstoptime_ns)
+    {
+      DateAndTime curtime(curtime_ns);
+      double value = sin(M_PI*static_cast<double>(curtime_ns)/period*0.25);
+      sinlog->addValue(curtime, value);
+      curtime_ns += pulsetime_ns/4;
+    }
+    eventws->mutableRun().addProperty(sinlog, true);
+
+    AnalysisDataService::Instance().addOrReplace(wsName, eventws);
   }
 };
 

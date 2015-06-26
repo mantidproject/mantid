@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 

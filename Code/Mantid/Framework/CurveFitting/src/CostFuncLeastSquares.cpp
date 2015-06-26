@@ -440,33 +440,33 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
   if (m_hessian.isEmpty()) {
     valDerivHessian();
   }
-  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "== Hessian (H) ==\n";
-    std::ios::fmtflags prevState = g_log.information().flags();
-    g_log.information() << std::left << std::fixed;
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug() << "== Hessian (H) ==\n";
+    std::ios::fmtflags prevState = g_log.debug().flags();
+    g_log.debug() << std::left << std::fixed;
     for (size_t i = 0; i < m_hessian.size1(); ++i) {
       for (size_t j = 0; j < m_hessian.size2(); ++j) {
-        g_log.information() << std::setw(10);
-        g_log.information() << m_hessian.get(i, j) << "  ";
+        g_log.debug() << std::setw(10);
+        g_log.debug() << m_hessian.get(i, j) << "  ";
       }
-      g_log.information() << "\n";
+      g_log.debug() << "\n";
     }
-    g_log.information().flags(prevState);
+    g_log.debug().flags(prevState);
   }
   covar = m_hessian;
   covar.invert();
-  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "== Covariance matrix (H^-1) ==\n";
-    std::ios::fmtflags prevState = g_log.information().flags();
-    g_log.information() << std::left << std::fixed;
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug() << "== Covariance matrix (H^-1) ==\n";
+    std::ios::fmtflags prevState = g_log.debug().flags();
+    g_log.debug() << std::left << std::fixed;
     for (size_t i = 0; i < covar.size1(); ++i) {
       for (size_t j = 0; j < covar.size2(); ++j) {
-        g_log.information() << std::setw(10);
-        g_log.information() << covar.get(i, j) << "  ";
+        g_log.debug() << std::setw(10);
+        g_log.debug() << covar.get(i, j) << "  ";
       }
-      g_log.information() << "\n";
+      g_log.debug() << "\n";
     }
-    g_log.information().flags(prevState);
+    g_log.debug().flags(prevState);
   }
 }
 

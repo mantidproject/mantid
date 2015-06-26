@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_MASKWORKSPACE_H
 
 #include "MantidAPI/IMaskWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"

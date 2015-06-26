@@ -2,9 +2,10 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
 #include "MantidAPI/IRemoteJobManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h"
 

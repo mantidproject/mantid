@@ -39,18 +39,24 @@ Usage
 
 **Example - Calculate Difc and Zero:**
 
-.. testcode:: Ex
+.. testcode:: ExCalFull
 
-   table = EnginXCalibrateFull(Filename="ENGINX00213855focussed.nxs",
-                                     ExpectedPeaks=[1.097, 2.1], Bank=1)
+   ws_name = 'ws_focussed'
+   Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
+   table = EnginXCalibrateFull(InputWorkspace=ws_name,
+                               ExpectedPeaks=[1.097, 2.1], Bank=1)
 
    pos =  table.column(1)[0]
    print "Det ID:", table.column(0)[0]
    print "Calibrated position: (%.3f,%.3f,%.3f)" % (pos.getX(),pos.getY(),pos.getZ())
 
+.. testcleanup:: ExCalFull
+
+   DeleteWorkspace(ws_name)
+
 Output:
 
-.. testoutput:: Ex
+.. testoutput:: ExCalFull
 
    Det ID: 100001
    Calibrated position: (1.506,0.000,0.002)

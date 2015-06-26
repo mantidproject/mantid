@@ -57,6 +57,8 @@ public:
   std::size_t residentMem() const;
   std::size_t virtualMem() const;
   std::size_t reservedMem() const;
+  std::size_t getCurrentRSS() const;
+  std::size_t getPeakRSS() const;
   double getFreeRatio() const;
 
 private:

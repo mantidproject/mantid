@@ -1,12 +1,12 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IEventList.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/object.hpp>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::DataItemInterface;
+using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
 /**
@@ -31,7 +31,5 @@ void export_IEventWorkspace() {
       .def("clearMRU", &IEventWorkspace::clearMRU, args("self"),
            "Clear the most-recently-used lists");
 
-  DataItemInterface<IEventWorkspace>()
-      // map IDs to this interface
-      .castFromID("EventWorkspace");
+  RegisterWorkspacePtrToPython<IEventWorkspace>();
 }

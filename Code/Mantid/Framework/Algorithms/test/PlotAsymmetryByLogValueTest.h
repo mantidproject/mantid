@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -212,8 +213,8 @@ public:
 
     const Mantid::MantidVec& Y = outWs->readY(0);
 
-    TS_ASSERT_DELTA(Y[0], 0.15108, 0.00001);
-    TS_ASSERT_DELTA(Y[1], 0.14389, 0.00001);
+    TS_ASSERT_DELTA(Y[0], 0.15214, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.14492, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);
     AnalysisDataService::Instance().remove(deadTimeWs);
@@ -248,8 +249,8 @@ public:
 
     const Mantid::MantidVec& Y = outWs->readY(0);
 
-    TS_ASSERT_DELTA(Y[0], 0.150616, 0.00001);
-    TS_ASSERT_DELTA(Y[1], 0.143444, 0.00001);
+    TS_ASSERT_DELTA(Y[0], 0.151202, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.144008, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);
   }

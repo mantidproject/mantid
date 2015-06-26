@@ -94,6 +94,11 @@ namespace CustomInterfaces
     /// Add a SaveNexusProcessed step to the batch queue
     void addSaveWorkspaceToQueue(const QString & wsName, const QString & filename = "");
 
+    /// Gets the workspace suffix of a workspace name
+    QString getWorkspaceSuffix(const QString & wsName);
+    /// Gets the base name of a workspace
+    QString getWorkspaceBasename(const QString & wsName);
+
     /// Plot a spectrum plot with a given spectrum index
     void plotSpectrum(const QStringList & workspaceNames, int specIndex = 0);
     /// Plot a spectrum plot of a given workspace

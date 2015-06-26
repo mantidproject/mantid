@@ -1,4 +1,5 @@
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/SaveSavuTomoConfig.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"

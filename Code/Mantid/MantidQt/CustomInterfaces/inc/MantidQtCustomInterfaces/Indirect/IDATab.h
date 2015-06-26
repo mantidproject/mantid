@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
 

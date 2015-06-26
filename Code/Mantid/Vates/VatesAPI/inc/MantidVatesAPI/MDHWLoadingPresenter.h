@@ -7,7 +7,7 @@
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 
 #include <boost/scoped_ptr.hpp>
 

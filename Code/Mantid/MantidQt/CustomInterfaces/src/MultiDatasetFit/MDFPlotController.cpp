@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/make_shared.hpp>
 
@@ -57,32 +59,12 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
   connect(m_rangeSelector,SIGNAL(selectionChanged(double, double)),this,SLOT(updateFittingRange(double, double)));
 
   disableAllTools();
-
-  m_plot->canvas()->installEventFilter(this);
-  
 }
 
 /// Destructor.
 PlotController::~PlotController()
 {
   m_plotData.clear();
-}
-
-/// Event fiter for intercepting mouse events of the plot
-bool PlotController::eventFilter(QObject *, QEvent *evn)
-{
-  if ( evn->type() == QEvent::MouseButtonDblClick )
-  {
-    if ( isRangeSelectorEnabled() )
-    {
-      resetRange();
-    }
-    else if ( isZoomEnabled() )
-    {
-      zoomToRange();
-    }
-  }
-  return false;
 }
 
 /// Slot. Respond to changes in the data table.
@@ -135,12 +117,15 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
     QString wsName = m_table->item( index, wsColumn )->text();
     int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
     QString outputWorkspaceName = owner()->getOutputWorkspaceName();
-    if ( !outputWorkspaceName.isEmpty() )
-    {
-      outputWorkspaceName += QString("_%1").arg(index);
+    std::string outName = outputWorkspaceName.toStdString();
+    if (!outputWorkspaceName.isEmpty() &&
+        Mantid::API::AnalysisDataService::Instance().doesExist(outName)) {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName);
+      if (auto  group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+        outputWorkspaceName = QString::fromStdString(group->getItem(index)->name());
+      }
     }
-    try
-    {
+    try {
       data = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
       m_plotData.insert(index, data );
     }
@@ -243,7 +228,11 @@ void PlotController::zoomToRange()
   QwtDoubleRect rect = m_zoomer->zoomRect();
   rect.setX( m_rangeSelector->getMinimum() );
   rect.setRight( m_rangeSelector->getMaximum() );
-  m_zoomer->zoom( rect );
+  // In case the scales were set by the panning tool we need to
+  // reset the zoomer first.
+  m_zoomer->zoom(-1);
+  // Set new zoom level.
+  m_zoomer->zoom(rect);
 }
 
 /// Disable all plot tools. It is a helper method 

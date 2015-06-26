@@ -1771,6 +1771,7 @@ EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace() {
   file.openGroup(entry_name, "NXentry");
 
   // get the title
+  try {
   file.openData("title");
   if (file.getInfo().type == ::NeXus::CHAR) {
     string title = file.getStrData();
@@ -1778,6 +1779,10 @@ EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace() {
       WS->setTitle(title);
   }
   file.closeData();
+  } catch (std::exception&)
+  {
+    //don't set the title if the field is not loaded
+  }
 
   // get the notes
   try {

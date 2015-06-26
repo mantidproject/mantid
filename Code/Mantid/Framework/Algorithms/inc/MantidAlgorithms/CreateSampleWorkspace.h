@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 

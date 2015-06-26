@@ -14,6 +14,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -222,7 +223,6 @@ public:
     WorkspaceCreationHelper::removeWS("PlotPeakResult");
   }
 
-
   void testWorkspaceList_plotting_against_ws_names()
   {
     createData();
@@ -249,7 +249,32 @@ public:
 
     deleteData();
     WorkspaceCreationHelper::removeWS("PlotPeakResult");
+  }
 
+  void testSpectraList_plotting_against_bin_edge_axis()
+  {
+    auto ws = createTestWorkspace();
+    AnalysisDataService::Instance().add( "PLOTPEAKBYLOGVALUETEST_WS", ws );
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PLOTPEAKBYLOGVALUETEST_WS,i0;PLOTPEAKBYLOGVALUETEST_WS,i1");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.execute();
+
+    TWS_type result =  WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),12);
+
+    std::vector<std::string> tnames = result->getColumnNames();
+    TS_ASSERT_EQUALS(tnames.size(),12);
+    TS_ASSERT_EQUALS(tnames[0],"axis-1");
+
+    TS_ASSERT_EQUALS(result->Double(0,0),0.5);
+    TS_ASSERT_EQUALS(result->Double(1,0),3.0);
+
+    WorkspaceCreationHelper::removeWS("PlotPeakResult");
+    WorkspaceCreationHelper::removeWS("PLOTPEAKBYLOGVALUETEST_WS");
   }
 
   void test_passWorkspaceIndexToFunction()
@@ -549,6 +574,14 @@ private:
     }
     testWS->setX(0, xdata);
     testWS->setX(1, xdata);
+
+    std::vector<double> edges;
+    edges.push_back(0.0);
+    edges.push_back(1.0);
+    edges.push_back(5.0);
+    BinEdgeAxis *axis = new BinEdgeAxis(edges);
+    testWS->replaceAxis(1, axis);
+
     return testWS;
   }
 

@@ -4,6 +4,8 @@
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ITableWorkspace.h"
+
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 using Mantid::API::ITableWorkspace;
 using Mantid::API::ITableWorkspace_sptr;

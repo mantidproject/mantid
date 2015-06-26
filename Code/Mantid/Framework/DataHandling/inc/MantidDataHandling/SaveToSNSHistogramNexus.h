@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include <climits>
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/Workspace2D.h"

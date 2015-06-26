@@ -7,7 +7,7 @@
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 /**
     @class MatrixWSDataSource
