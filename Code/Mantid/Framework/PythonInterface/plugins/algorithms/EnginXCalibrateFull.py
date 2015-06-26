@@ -17,7 +17,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
-                             "Workspace with the calibration run to use. The calibration will applied on it.")
+                             "Workspace with the calibration run to use. The calibration will be applied on it.")
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
