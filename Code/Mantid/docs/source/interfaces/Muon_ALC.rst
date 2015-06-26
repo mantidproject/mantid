@@ -122,10 +122,9 @@ loaded, and an error message will be shown if any of them is missing. The
 user must supply the log data that will be used as X parameter from the list 
 of available log values.
 
-.. interface:: ALC
-  :widget: dataLoadingView
-  :align: center
-  :width: 800
+.. figure:: ../images/ALCDataLoading.png
+   :align: center
+   :width: 800
 
 Options
 ~~~~~~~
@@ -176,10 +175,9 @@ function should be. To select a baseline function, right-click on the *Function*
 region, then *Add function* and choose among the different possibilities. Then 
 pick the desired fitting sections. 
 
-.. interface:: ALC
-  :widget: baselineModellingView
-  :align: center
-  :width: 400
+.. figure:: ../images/ALCBaselineModelling.png
+   :align: center
+   :width: 800
 
 Options
 ~~~~~~~
@@ -205,10 +203,9 @@ the right panel. The user can study the peaks of interest all with the same simp
 interface. To add a new peak, right-click on the Peaks region, then select 
 *Add function* and choose among the different possibilities in the category Peak.
 
-.. interface:: ALC
-  :widget: peakFittingView
-  :align: center
-  :width: 600
+.. figure:: ../images/ALCPeakFitting.png
+   :align: center
+   :width: 800
 
 Options
 ~~~~~~~
