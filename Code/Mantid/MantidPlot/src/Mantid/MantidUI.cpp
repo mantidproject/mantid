@@ -2361,6 +2361,7 @@ bool MantidUI::createScriptInputDialog(const QString & alg_name, const QString &
   MantidQt::API::AlgorithmDialog *dlg =
     interfaceManager.createDialog(alg, m_appWindow->getScriptWindowHandle(),
                                   true, presets, optional_msg, enabled, disabled);
+  dlg->setShowKeepOpen(false);
   return (dlg->exec() == QDialog::Accepted);
 }
 
