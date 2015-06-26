@@ -494,7 +494,6 @@ class TestOverlayWorkspaces(unittest.TestCase):
 
         # Act and Assert
         overlayWorkspaces = su.OverlayWorkspaces()
-        overlayWorkspaces._extract_time_difference_in_seconds(
         self.assertRaises(RunTimeError, overlayWorkspaces._extract_time_difference_in_seconds, {'ws1': event_ws_1, 'ws2':event_ws_2})
 
         # Clean up 

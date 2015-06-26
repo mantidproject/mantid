@@ -98,11 +98,16 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
-    while phimax > 360 : phimax -= 360
-    while phimax < 0 : phimax += 360
-    while phimin > 360 : phimin -= 360
-    while phimin < 0 : phimin += 360
-    while phimax<phimin : phimax += 360
+    while phimax > 360 :
+        phimax -= 360
+    while phimax < 0 :
+        phimax += 360
+    while phimin > 360 :
+        phimin -= 360
+    while phimin < 0 :
+        phimin += 360
+    while phimax<phimin :
+        phimax += 360
 
     #Convert to radians
     phimin = math.pi*phimin/180.0
@@ -375,17 +380,20 @@ def sliceParser(str_to_parser):
 
     def _parse_lower(inpstr):
         val = _check_match(inpstr, lowbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [val[0], MARK]
 
     def _parse_upper(inpstr):
         val = _check_match(inpstr, upbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [MARK, val[0]]
 
     def _parse_start_step_stop(inpstr):
         val = _check_match(inpstr, sss_pat, 3)
-        if not val: return val
+        if not val:
+            return val
         start = val[0]
         step = val[1]
         stop = val[2]
@@ -690,14 +698,13 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     return message, isValid
 
-  
 class AddOperation(object):
     """
     The AddOperation allows to add two workspaces at a time.
     """
     def __init__(self,isOverlay, time_shifts):
         """
-        The AddOperation requires to know if the workspaces are to 
+        The AddOperation requires to know if the workspaces are to
         be plainly added or to be overlayed. Additional time shifts can be
         specified
         @param isOverlay :: true if the operation is an overlay operation

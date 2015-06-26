@@ -1214,7 +1214,7 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
     for time_shift_element in time_shift_container:
         try:
             float(time_shift_element)
-        except Exception:
+        except ValueError:
             message = ('Error: Elements of the time shift list cannot be ' +
                        'converted to a numeric value, e.g ' + time_shift_element)
             print message
