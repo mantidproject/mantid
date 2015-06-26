@@ -219,4 +219,15 @@ Peaks
 Fit
   Fits the data.
 
+Run the ALC interface
+---------------------
+
+The interface is available from the MantidPlot Interfaces menu: Interfaces -> Muon -> ALC.
+
+Feedback & Comments
+-------------------
+
+If you have any questions or comments about this interface or this help page, please
+contact the `Mantid team <http://www.mantidproject.org/Contact>`__ or the `Muon group <http://www.isis.stfc.ac.uk/groups/muons/muons3385.html>`__. 
+
 .. categories:: Interfaces Muon
