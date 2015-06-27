@@ -58,7 +58,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("DetectorPositions", posTbl)
-        ws = self._applyCalibrationTable(inWS, posTbl)
+        self._applyCalibrationTable(inWS, posTbl)
         self._outputDetPosFile(self.getPropertyValue('OutputDetectorPositionsFilename'), posTbl)
 
     def _prepareWsForFitting(self, ws):
@@ -206,9 +206,12 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
     def _applyCalibrationTable(self, ws, detPos):
         """
-        Refines the detector positions using the result of calibration (if one is specified)
+        Corrects the detector positions using the result of calibration (if one is specified).
+        The parameters of the instrument definition of the workspace are updated in place using the
+        geometry parameters given in the input table.
 
-        @param ws :: workspace to calibrate which should be consistent with the detPos table passed
+        @param ws :: workspace to calibrate which should be consistent with the detector positions
+        table passed
 
         @param detPos :: detector positions table to apply the calibration. It must have columns
         'Detector ID' and 'Detector Position'
@@ -218,7 +221,6 @@ class EnginXCalibrateFull(PythonAlgorithm):
         alg.setProperty('Workspace', ws)
         alg.setProperty('PositionTable', detPos)
         alg.execute()
-        return ws
 
     def _V3DFromSpherical(self, R, polar, azimuth):
         """
