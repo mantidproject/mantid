@@ -21,33 +21,43 @@ bank's detector indices, (using :ref:`algm-EnginXFitPeaks` as a child
 algorithm) and using the resulting difc values to calibrate the
 detector positions.
 
-This algorithm produces a table with calibration information that can
-be inspected and used in other algorithms. The algorithm also applies
-that calibration on the input workspace. After running this algorithm
-the resulting calibration can be checked by inspecting the output
-table values and/or visualizing the input workspace instrument in the
-instrument viewer.
+This algorithm produces a table with calibration information,
+including calibrated or corrected positions and parameters. This
+calibration information that can be inspected and can also be used in
+other algorithms. The algorithm also applies the calibration on the
+input workspace. After running this algorithm the resulting
+calibration can be checked by visualizing the input workspace
+instrument in the instrument viewer and/or inspecting the output table
+values.
 
-This algorithm produces a table with calibration information
-(calibrated or corrected positions and parameters). The calibrated
-detector positions are calculated as follows:
+The output table has one row per detector where each row gives the
+original position before calibration (as a V3D point, x-y-z values),
+the new calibrated position (as V3D) and the calibrated spherical
+co-ordinates (L2, :math:`2 \theta`, :math:`\phi`). It also gives the
+variation in the L2 position, and the 'difc' and 'zero' calibration
+parameters.
+
+The result of the calibration (the output table given in
+DetectorPositions) is accepted by both :ref:`algm-EnginXCalibrate` and
+:ref:`algm-EnginXFocus` which use the columns 'Detector ID' and
+'Detector Position' of the table to correct the detector positions
+before focussing. The DetectorPositions output table can also be used
+to apply the calibration calculated by this algorithm on any other
+workspace by using the algorithm :ref:`algm-AppplyCalibration`.
+
+In the output table the calibrated positions for every detector are
+found by calculating the *L2* values from the *difc* values as
+follows:
 
 .. math:: L2 = \left(\frac{Difc} { 252.816 * 2 * sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
 
-The output table gives, for every detector, the original position
-before calibration (as a V3D point, x-y-z values), the new calibrated
-position (as V3D), the calibrated spherical co-ordinates (L2, :math:`2
-\theta`, :math:`\phi`). It also gives the variation in the L2
-position, and the 'difc' and 'zero' calibration parameters.
+where the *difc* values are obtained from the fitting of expected
+peaks. See the algorithm :ref:`algm-EnginXFitPeaks` for details on how
+*difc* and other calibration parameters are calculated.
 
-The result of the calibration (the DetectorPositions output table) is
-accepted by both :ref:`algm-EnginXCalibrate` and
-:ref:`algm-EnginXFocus` which use the columns 'Detector ID' and
-'Detector Position' of the table to correct the detector positions
-before focussing.
-
-Expects the *long* calibration run, which provides a decent pattern
-for every pixel.
+This algorithm expects as input/output workspace the *long*
+calibration run, which provides a decent pattern for every detector or
+pixel.
 
 .. categories::
 
