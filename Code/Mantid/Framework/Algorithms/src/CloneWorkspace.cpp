@@ -97,11 +97,11 @@ void CloneWorkspace::exec() {
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(outputWS));
   } else if (inputPeaks) {
-    PeaksWorkspace_sptr outputWS(inputPeaks->clone());
+    PeaksWorkspace_sptr outputWS(inputPeaks->clone().release());
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(outputWS));
   } else if (tableWS) {
-    TableWorkspace_sptr outputWS(tableWS->clone());
+    TableWorkspace_sptr outputWS(tableWS->clone().release());
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(outputWS));
   } else

@@ -73,7 +73,7 @@ void PeakIntegration::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
   if (peaksW != inPeaksW)
-    peaksW = inPeaksW->clone();
+    peaksW.reset(inPeaksW->clone().release());
 
   double qspan = 0.12;
   m_IC = getProperty("IkedaCarpenterTOF");
