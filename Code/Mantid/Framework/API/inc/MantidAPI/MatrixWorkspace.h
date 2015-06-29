@@ -426,6 +426,11 @@ public:
   //=====================================================================================
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MatrixWorkspace(const MatrixWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  MatrixWorkspace &operator=(const MatrixWorkspace &other);
+
   MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory *factory = NULL);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
@@ -441,10 +446,6 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  MatrixWorkspace(const MatrixWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  MatrixWorkspace &operator=(const MatrixWorkspace &);
   /// Create an MantidImage instance.
   MantidImage_sptr
   getImage(const MantidVec &(MatrixWorkspace::*read)(std::size_t const) const,

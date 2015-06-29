@@ -91,7 +91,7 @@ class InterfaceManager;
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API AlgorithmDialog : public QDialog
+class EXPORT_OPT_MANTIDQT_API AlgorithmDialog : public QDialog, Mantid::API::AlgorithmObserver
 {
   
   Q_OBJECT
@@ -102,6 +102,12 @@ public:
   AlgorithmDialog(QWidget* parent = 0);
   /// Destructor
   virtual ~AlgorithmDialog();
+
+  /// Set if the keep open option is shown.
+  void setShowKeepOpen(const bool showOption);
+
+  /// Set if the keep open option is shown.
+  bool isShowKeepOpen() const;
 
   /// Create the layout of the widget. Can only be called once.
   void initializeLayout();
@@ -196,9 +202,10 @@ protected:
   void fillLineEdit(const QString & propName, QLineEdit* field);
 
   /// Create a row layout of buttons with specified text
-  QHBoxLayout *createDefaultButtonLayout(const QString & helpText = QString("?"),
+  QLayout *createDefaultButtonLayout(const QString & helpText = QString("?"),
                      const QString & loadText = QString("Run"), 
-                     const QString & cancelText = QString("Cancel"));
+                     const QString & cancelText = QString("Close"), 
+                     const QString & keepOpenText = QString("Keep Open"));
 
   /// Create a help button for this algorithm
   QPushButton* createHelpButton(const QString & helpText = QString("?")) const;
@@ -210,6 +217,10 @@ protected:
   /// Retrieve a text value for a property from a widget
   QString getValue(QWidget *widget);
 
+signals:
+  /// Emitted when alg completes and dialog is staying open
+  void algCompletedSignal();
+
 protected slots:
   
   /// A default slot that can be used for an OK button.
@@ -217,6 +228,13 @@ protected slots:
 
   /// Help button clicked;
   virtual void helpClicked();
+
+  /// Keep open checkbox clicked;
+  virtual void keepOpenChanged(int state);
+
+  
+  /// Keep the running algorithm has completed
+  virtual void algorithmCompleted();
 
   /// Executes the algorithm in a separate thread
   virtual void executeAlgorithmAsync();
@@ -235,6 +253,10 @@ protected:
   QString getPreviousValue(const QString& propName);
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString & property);
+  /// Handle completion of algorithm started while staying open
+  virtual void finishHandle(const Mantid::API::IAlgorithm *alg);
+  /// Handle completion of algorithm started while staying open
+  virtual void errorHandle(const Mantid::API::IAlgorithm *alg, const std::string &what);
 
 /// The following methods were made public for testing in GenericDialogDemo.cpp
 public:
@@ -280,7 +302,9 @@ protected:
   /// A list of property names that the user has requested to be disabled (overrides those in enabled)
   QStringList m_disabled;
   /// The message string to be displayed at the top of the widget; if it exists.
-  QString m_strMessage;
+  QString m_strMessage;  
+  /// Whether to keep the dialog box open after alg execution
+  bool m_keepOpen;
   /// Is the message string empty or not
   bool m_msgAvailable;
 
@@ -306,6 +330,11 @@ protected:
 
   /// A map to keep track of replace workspace button presses
   QHash<QPushButton*, int> m_wsbtn_tracker;
+
+  //the keep open checkbox control
+  QCheckBox* m_keepOpenCheckBox;
+
+  QPushButton* m_okButton;
 
   /// A list of AlgorithmObservers to add to the algorithm prior to execution
   std::vector<Mantid::API::AlgorithmObserver *> m_observers;
