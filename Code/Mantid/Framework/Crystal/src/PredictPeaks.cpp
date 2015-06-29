@@ -170,7 +170,7 @@ void PredictPeaks::exec() {
       boost::dynamic_pointer_cast<IMDEventWorkspace>(inBareWS);
   std::vector<Matrix<double>> gonioVec;
   m_gonio = Matrix<double>(3, 3, true);
-  Mantid::Kernel::DblMatrix gonioLast = Matrix<double>(3, 3, true);
+  Mantid::Kernel::DblMatrix gonioLast = Matrix<double>(3, 3, false);
   if (matrixWS) {
     inWS = matrixWS;
     // Retrieve the goniometer rotation matrix
