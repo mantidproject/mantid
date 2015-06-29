@@ -39,6 +39,20 @@ class EnginXFitPeaksTest(unittest.TestCase):
                           WorkspaceIndex=0, ExpectedPeaks='a')
 
 
+    def _approxRelErrorLessThan(self, val, ref, epsilon):
+        """
+        Checks that a value 'val' does not defer from a reference value 'ref' by 'epsilon'
+        or more . This plays the role of assertAlmostEqual, assertLess, etc. which are not
+        available in some ancient unittest versions.
+
+        @param val :: value obtained from a calculation or algorithm
+        @param ref :: (expected) reference value
+        @param epsilon :: comparison epsilon (error tolerance)
+
+        @returns if val differs from ref by less than epsilon
+        """
+        return (abs((ref-val)/ref) < epsilon)
+
     def _check_outputs_ok(self, tblName, numPeaks, cell00, cell01, cell10, cell14):
         """
         Checks that we get the expected types and values in the outputs.
@@ -70,10 +84,11 @@ class EnginXFitPeaksTest(unittest.TestCase):
         self.assertEquals(tbl.getColumnNames(), colNames)
 
         # some values
-        self.assertEquals(tbl.cell(0, 0), cell00)
-        self.assertEquals(tbl.cell(0, 1), cell01)
-        self.assertEquals(tbl.cell(1, 0), cell10)
-        self.assertEquals(tbl.cell(1, 4), cell14)
+        # note approx comparison - fitting results differences of ~5% between glinux/win/osx
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,0), cell00, 5e-3))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(0,1), cell01, 5e-3))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,0), cell10, 5e-3))
+        self.assertTrue(self._approxRelErrorLessThan(tbl.cell(1,4), cell14, 5e-3))
 
     def test_fitting_fails_ok(self):
         """
@@ -128,20 +143,6 @@ class EnginXFitPeaksTest(unittest.TestCase):
         self.assertRaises(RuntimeError,
                           EnginXFitPeaks,
                           sws, WorkspaceIndex=0, ExpectedPeaks='0.542')
-
-    def _approxRelErrorLessThan(self, val, ref, epsilon):
-        """
-        Checks that a value 'val' does not defer from a reference value 'ref' by 'epsilon'
-        or more . This plays the role of assertAlmostEqual, assertLess, etc. which are not
-        available in some ancient unittest versions.
-
-        @param val :: value obtained from a calculation or algorithm
-        @param ref :: (expected) reference value
-        @param epsilon :: comparison epsilon (error tolerance)
-
-        @returns if val differs from ref by less than epsilon
-        """
-        return (abs((ref-val)/ref) < epsilon)
 
     def test_runs_ok_2peaks(self):
         """
