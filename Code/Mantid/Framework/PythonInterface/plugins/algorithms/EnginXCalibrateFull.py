@@ -56,7 +56,13 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         for i in indices:
 
-            _, difc = self._fitPeaks(ws, i, expectedPeaksD)
+            try:
+                _, difc = self._fitPeaks(ws, i, expectedPeaksD)
+            except RuntimeError as re:
+                raise RuntimeError("Severe issue found when trying to fit peaks for the detector with ID %d. "
+                                   "This calibration algorithm cannot continue. Please check the expected "
+                                   "peaks provided. Details from "
+                                   "FindPeaks: %s"%(i, str(re)))
 
             det = ws.getDetector(i)
 
@@ -101,7 +107,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
         Fits expected peaks to the spectrum, and returns calibrated zero and difc values.
 
         @param wsIndex workspace index of the spectrum to fit
-        @param  expectedPeaksD :: expected peaks for the fitting, in d-spacing units
+        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
 
         @returns a pair of parameters: difc and zero
     	"""
