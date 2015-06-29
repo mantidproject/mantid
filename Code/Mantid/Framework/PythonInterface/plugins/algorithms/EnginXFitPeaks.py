@@ -137,7 +137,6 @@ class EnginXFitPeaks(PythonAlgorithm):
             raise RuntimeError("Unexpected inconsistency found. This method requires a tuple with the list "
                                "of found peaks and the list of expected peaks.")
         foundPeaks = peaks[0]
-        expectedPeaksD =  peaks[1]
         fittedPeaks = self._createFittedPeaksTable(peaksTableName)
 
         for i in range(foundPeaks.rowCount()):
@@ -188,7 +187,7 @@ class EnginXFitPeaks(PythonAlgorithm):
             paramTable = fitAlg.getProperty('OutputParameters').value
 
             fittedParams = {}
-            fittedParams['dSpacing'] = expectedPeaksD[i]
+            fittedParams['dSpacing'] = peaks[1][i]
             fittedParams['Chi'] = fitAlg.getProperty('OutputChi2overDoF').value
             self._addParametersToMap(fittedParams, paramTable)
 
