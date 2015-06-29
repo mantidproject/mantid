@@ -315,6 +315,10 @@ void LoadNexusLogs::loadLogs(
     } else if (log_class == "IXseblock") {
       loadSELog(file, itr->first, workspace);
     }
+    else if(log_class == "NXcollection"){
+        int jj = 0;
+        ++jj;
+    }
   }
   loadVetoPulses(file, workspace);
 

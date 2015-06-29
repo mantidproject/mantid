@@ -633,6 +633,16 @@ void test_extract_nperiod_data() {
       EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       TS_ASSERT(ws);
       TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
+
+      std::stringstream buffer;
+      buffer << "period " << i+1;
+      std::string periodBoolLog = buffer.str();
+
+      const int currentPeriod = ws->run().getPropertyValueAsType<int>("current_period");
+
+      TSM_ASSERT("Each period should have a boolean array for masking period numbers", ws->run().hasProperty(periodBoolLog));
+      TSM_ASSERT_EQUALS("Current period is not what was expected.", currentPeriod, i+1);
+
   }
 
 }

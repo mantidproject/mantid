@@ -1424,33 +1424,6 @@ void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
                                             pixelID_to_wi_offset, true);
 }
 
-/**
- * Fetch the period numbers corresponding to each frame.
- * @return vector of period numbers, should have as many as we have frames. Indexes correspond to period numbers.
- */
-std::vector<int> LoadEventNexus::fetchFramePeriods()
-{
-    std::vector<int> periodLog(1, BankPulseTimes::FirstPeriod); // One entry, all period 1. in call any of the below is missing.
-    try {
-      m_file->openGroup(m_top_entry_name, "NXentry");
-      m_file->openGroup("framelog", "NXcollection");
-      try {
-        m_file->openGroup("period_log", "NXlog");
-        m_file->openData("value");
-        std::vector<int> temp;
-        m_file->getData(temp);
-        periodLog = temp;
-        m_file->closeData();
-        m_file->closeGroup();
-      } catch (::NeXus::Exception &) {
-      }
-      m_file->closeGroup();
-      m_file->closeGroup();
-    } catch (::NeXus::Exception & ex) {
-    }
-    return periodLog;
-}
-
 //-----------------------------------------------------------------------------
 /**
 * Load events from the file.
@@ -1473,11 +1446,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
+  std::unique_ptr<const TimeSeriesProperty<int> > periodLog(new const TimeSeriesProperty<int>("period_log"));
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
 
-      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true, nPeriods);
+      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true, nPeriods, periodLog);
 
       run_start = m_ws->getFirstPulseTime();
       m_logs_loaded_correctly = true;
@@ -1496,7 +1470,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
                                    true);
     }
   }
-  m_ws->setNPeriods(nPeriods); // This is how many workspaces we are going to make.
+  m_ws->setNPeriods(nPeriods, periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == NULL) {
@@ -1786,14 +1760,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     numProg += bankNames.size() * 3; // 3 = second proc task
   Progress *prog2 = new Progress(this, 0.3, 1.0, numProg);
 
-  const std::vector<int> periodLog =  fetchFramePeriods();
+  const std::vector<int> periodLogVec =  periodLog->valuesAsVector();
 
   for (size_t i = bank0; i < bankn; i++) {
     // We make tasks for loading
     if (bankNumEvents[i] > 0)
       pool.schedule(new LoadBankFromDiskTask(
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler, periodLog));
+          prog2, diskIOMutex, scheduler, periodLogVec));
   }
   // Start and end all threads
   pool.joinAll();
@@ -1850,15 +1824,35 @@ EventWorkspace_sptr DecoratorWorkspace::createEmptyEventWorkspace() const {
   return eventWS;
 }
 
-void DecoratorWorkspace::setNPeriods(size_t nPeriods) {
+void DecoratorWorkspace::setNPeriods(size_t nPeriods, std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
 
   // Create vector where size is the number of periods and initialize workspaces in each.
   auto temp = m_WsVec[0];
   m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(
       nPeriods);
 
+  std::vector<int> periodNumbers = periodLog->valuesAsVector();
+  std::set<int> uniquePeriods(periodNumbers.begin(), periodNumbers.end());
+  const bool addBoolTimeSeries = (uniquePeriods.size() == nPeriods);
+
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    const int periodNumber = int(i+1);
     m_WsVec[i] =  createEmptyEventWorkspace();
+    if(addBoolTimeSeries) {
+        std::stringstream buffer;
+        buffer << "period " << periodNumber;
+        auto * periodBoolLog = new Kernel::TimeSeriesProperty<bool>(buffer.str());
+        for(int j = 0; j < int(periodLog->size()); ++j){
+            periodBoolLog->addValue(periodLog->nthTime(j), periodNumber == periodLog->nthValue(j));
+        }
+        Run& mutableRun =  m_WsVec[i]->mutableRun();
+        mutableRun.addProperty(periodBoolLog);
+
+        Kernel::PropertyWithValue<int> *currentPeriodProperty =
+            new Kernel::PropertyWithValue<int>("current_period", periodNumber);
+        mutableRun.addProperty(currentPeriodProperty);
+    }
+
     copyLogs(temp, m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
     m_WsVec[i]->setInstrument(temp->getInstrument());
   }
@@ -2935,13 +2929,15 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
 * @param alg :: Handle of the algorithm
 * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
 *otherwise NULL.
+* @param nPeriods : Number of periods (write to)
+* @param periodLog : Period logs DateAndTime to int map.
 *
 * @return Pulse times given in the DAS logs
 */
 boost::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
                                  API::MatrixWorkspace_sptr localWorkspace,
-                                 API::Algorithm &alg, bool returnpulsetimes, int& nPeriods) {
+                                 API::Algorithm &alg, bool returnpulsetimes, int& nPeriods, std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -2957,10 +2953,16 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
                                                      localWorkspace);
     loadLogs->execute();
 
-    if(localWorkspace->run().hasProperty("nperiods")){
-        nPeriods  = localWorkspace->run().getPropertyValueAsType<int>("nperiods");
+    const Run& run = localWorkspace->run();
+    // Get the number of periods
+    if(run.hasProperty("nperiods")){
+        nPeriods  = run.getPropertyValueAsType<int>("nperiods");
     }
-
+    // Get the period log. Map of DateAndTime to Period int values.
+    if(run.hasProperty("period_log")){
+        auto* temp = run.getProperty("period_log");
+        periodLog.reset(dynamic_cast<TimeSeriesProperty<int>*>(temp->clone()));
+    }
 
     // If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> *log =

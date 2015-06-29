@@ -108,7 +108,7 @@ public:
     TS_ASSERT_EQUALS(dlog->size(),172);
   }
 
-  void test_extract_nperiod_log(){
+  void test_extract_nperiod_log_from_event_nexus(){
 
       auto testWS = createTestWorkspace();
       auto run = testWS->run();
@@ -129,6 +129,32 @@ public:
           TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
       }
 
+  }
+
+  void test_extract_periods_log_from_event_nexus(){
+
+      auto testWS = createTestWorkspace();
+      auto run = testWS->run();
+      TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs", !run.hasProperty("nperiods"));
+      LoadNexusLogs loader;
+
+      loader.setChild(true);
+      loader.initialize();
+      loader.setProperty("Workspace", testWS);
+      loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+      loader.execute();
+      run = testWS->run();
+
+      const bool hasPeriods = run.hasProperty("period_log");
+      TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasPeriods);
+
+      auto* temp = run.getProperty("period_log");
+      auto * periodLog = dynamic_cast<TimeSeriesProperty<int>*>(temp);
+      TSM_ASSERT("Period log should be an int time series property", periodLog);
+
+      std::vector<int> periodValues = periodLog->valuesAsVector();
+      std::set<int> uniquePeriods(periodValues.begin(), periodValues.end());
+      TSM_ASSERT_EQUALS("Should have 4 periods in total", 4, uniquePeriods.size());
   }
 
 private:

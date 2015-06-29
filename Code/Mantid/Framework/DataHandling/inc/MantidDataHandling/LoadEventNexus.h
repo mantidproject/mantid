@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <memory>
 
 namespace Mantid {
 
@@ -58,7 +59,7 @@ private:
 
 public:
 
-  void setNPeriods(size_t nPeriods);
+  void setNPeriods(size_t nPeriods,  std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
 
   void reserveEventListAt(size_t wi, size_t size){
       for(size_t i = 0; i < m_WsVec.size(); ++i){
@@ -252,7 +253,7 @@ public:
   static boost::shared_ptr<BankPulseTimes>
   runLoadNexusLogs(const std::string &nexusfilename,
                    API::MatrixWorkspace_sptr localWorkspace, Algorithm &alg,
-                   bool returnpulsetimes, int& size_t);
+                   bool returnpulsetimes, int& size_t, std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
 
   static void loadEntryMetadata(const std::string &nexusfilename,
                                 Mantid::API::MatrixWorkspace_sptr WS,
@@ -429,9 +430,6 @@ private:
 
   /// to open the nexus file with specific exception handling/message
   void safeOpenFile(const std::string fname);
-
-  /// Fetch the periods corresponding to the frame
-  std::vector<int> fetchFramePeriods();
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;
