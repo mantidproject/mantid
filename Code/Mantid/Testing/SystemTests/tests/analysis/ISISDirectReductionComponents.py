@@ -281,7 +281,7 @@ class ISISLoadFilesLET(stresstesting.MantidStressTest):
         self.assertEqual(ws.getNumberHistograms(),40960)
         self.assertTrue(isinstance(mon_ws,Workspace))
         #
-        self.assertEqual(mon_ws.getNumberHistograms(),9)
+        self.assertEqual(mon_ws.getNumberHistograms(),27)
 
 
         self.valid = True

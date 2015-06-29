@@ -34,11 +34,11 @@ public:
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup,
                                    int64_t &ngroups) const;
 
-private:
-  /// Private copy constructor. NO COPY ALLOWED
-  GroupingWorkspace(const GroupingWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  GroupingWorkspace &operator=(const GroupingWorkspace &);
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  GroupingWorkspace(const GroupingWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  GroupingWorkspace &operator=(const GroupingWorkspace &other);
 };
 
 /// shared pointer to the GroupingWorkspace class

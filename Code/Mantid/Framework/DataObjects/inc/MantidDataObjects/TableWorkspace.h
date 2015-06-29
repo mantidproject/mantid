@@ -287,6 +287,12 @@ public:
   /// Sort this table. @see ITableWorkspace::sort
   void sort(std::vector<std::pair<std::string, bool>> &criteria);
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  TableWorkspace(const TableWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  TableWorkspace &operator=(const TableWorkspace &other);
+
 private:
   /// template method to find a given value in a table.
   template <typename Type>
@@ -398,11 +404,6 @@ private:
   /// shared pointer to the logManager, responsible for the workspace
   /// properties.
   API::LogManager_sptr m_LogManager;
-
-  // not asignable, not copy constructable, clonable
-  /// Copy constructor
-  TableWorkspace(const TableWorkspace &other);
-  TableWorkspace &operator=(const TableWorkspace &rhs);
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

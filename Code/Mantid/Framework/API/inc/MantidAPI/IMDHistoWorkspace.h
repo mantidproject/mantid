@@ -39,7 +39,6 @@ class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
 public:
   IMDHistoWorkspace();
-  IMDHistoWorkspace(const IMDHistoWorkspace &other);
   virtual ~IMDHistoWorkspace();
 
   /// See the MDHistoWorkspace definition for descriptions of these
@@ -96,6 +95,11 @@ public:
 
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMDHistoWorkspace(const IMDHistoWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other);
+
   virtual const std::string toString() const;
 };
 
