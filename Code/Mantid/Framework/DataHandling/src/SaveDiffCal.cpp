@@ -185,23 +185,34 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
   writeArray(group, name, std::vector<int32_t>(data));
 }
 
+// TODO should flip for mask
 void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     DataObjects::SpecialWorkspace2D_const_sptr ws) {
   auto detidCol = m_calibrationWS->getColumn("detid");
   std::vector<detid_t> detids;
   detidCol->numeric_fill(detids);
+  bool isMask = bool(boost::dynamic_pointer_cast<const MaskWorkspace>(ws));
 
   // output array defaults to all one (one group, use the pixel)
-  const int32_t DEFAULT_VALUE = 1;
+  const int32_t DEFAULT_VALUE = (isMask ? 0 : 1);
   std::vector<int32_t> values(m_numValues, DEFAULT_VALUE);
 
+  int32_t value;
   for (size_t i = 0; i < m_numValues; ++i) {
     auto spectrum = ws->getSpectrum(i);
     auto ids = spectrum->getDetectorIDs();
     auto found = m_detidToIndex.find(*(ids.begin()));
     if (found != m_detidToIndex.end()) {
-      values[found->second] = static_cast<int32_t>(ws->getValue(found->first));
+      value = static_cast<int32_t>(ws->getValue(found->first));
+      // in maskworkspace 0=use, 1=dontuse
+      if (isMask) {
+        if (value == 0)
+          value = 1;
+        else
+          value = 0;
+      }
+      values[found->second] = value;
     }
   }
 

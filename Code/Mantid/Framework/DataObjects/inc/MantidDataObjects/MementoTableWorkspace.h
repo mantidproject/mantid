@@ -40,6 +40,12 @@ public:
   MementoTableWorkspace(int nRows = 0);
   ~MementoTableWorkspace();
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MementoTableWorkspace(const MementoTableWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  MementoTableWorkspace &operator=(const MementoTableWorkspace &other);
+
 private:
   static bool expectedColumn(Mantid::API::Column_const_sptr expected,
                              Mantid::API::Column_const_sptr candidate);

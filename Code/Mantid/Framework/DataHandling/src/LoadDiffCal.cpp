@@ -255,8 +255,9 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const st
     for (size_t i=0; i<numDet; ++i) {
         bool shouldUse = (use[i] > 0);
         detid_t detid = static_cast<detid_t>(detids[i]);
-        wksp->setMasked(detid, shouldUse);
-        wksp->setValue(detid, (shouldUse ? 1. : 0.));
+        // in maskworkspace 0=use, 1=dontuse
+        wksp->setMasked(detid, !shouldUse);
+        wksp->setValue(detid, (shouldUse ? 0. : 1.));
         progress.report();
     }
 

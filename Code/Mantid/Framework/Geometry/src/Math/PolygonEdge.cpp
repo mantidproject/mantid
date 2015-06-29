@@ -9,6 +9,12 @@ namespace Mantid {
 namespace Geometry {
 using Kernel::V2D;
 
+namespace
+{
+  // Smallest possible double value
+  const double EPSILON = std::numeric_limits<double>::epsilon();
+}
+
 //-----------------------------------------------------------------------------
 // Public methods
 //-----------------------------------------------------------------------------
@@ -16,7 +22,7 @@ using Kernel::V2D;
  * Contructor taking two points, start and end
  */
 PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
-    : m_start(start), m_end(end) {}
+    : m_start(start), m_end(end), m_dir(m_end-m_start) {}
 
 /**
  * Create a point a given fraction along this edge
@@ -24,8 +30,7 @@ PolygonEdge::PolygonEdge(const Kernel::V2D &start, const Kernel::V2D &end)
  * @returns A point on the edge
  */
 Kernel::V2D PolygonEdge::point(const double fraction) const {
-  const V2D dir = (end() - start());
-  return V2D(start() + dir * fraction);
+  return start() + m_dir * fraction;
 }
 
 //-------------------------------------------------------------------------
@@ -39,7 +44,7 @@ Kernel::V2D PolygonEdge::point(const double fraction) const {
  */
 PointClassification classify(const V2D &pt, const PolygonEdge &edge) {
   V2D p2 = pt;
-  V2D a = edge.end() - edge.start();
+  const V2D &a = edge.direction();
   V2D b = p2 - edge.start();
   double sa = a.X() * b.Y() - b.X() * a.Y();
   if (sa > 0.0) {
@@ -75,8 +80,7 @@ PolygonEdge::Orientation orientation(const PolygonEdge &focusEdge,
                                      const PolygonEdge &refEdge, double &t) {
   V2D normalToRef((refEdge.end().Y() - refEdge.start().Y()),
                   (refEdge.start().X() - refEdge.end().X()));
-  V2D focusDir = focusEdge.end() - focusEdge.start();
-  double denom = normalToRef.scalar_prod(focusDir);
+  double denom = normalToRef.scalar_prod(focusEdge.direction());
   if (Kernel::equals(denom, 0.0)) {
     PointClassification edgeClass = classify(focusEdge.start(), refEdge);
     if (edgeClass == OnLeft || edgeClass == OnRight) {
@@ -108,22 +112,21 @@ PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
   if (classe == PolygonEdge::Collinear || classe == PolygonEdge::Parallel) {
     return classe;
   }
-  const double epsilon(std::numeric_limits<double>::epsilon());
-  double lene = (edgeOne.end() - edgeOne.start()).norm();
-  if ((s < -epsilon * lene) || (s > 1.0 + epsilon * lene)) {
+  double lene = edgeOne.direction().norm();
+  if ((s < -EPSILON * lene) || (s > 1.0 + EPSILON * lene)) {
     return PolygonEdge::SkewNoCross;
   }
   double t(0.0);
   orientation(edgeTwo, edgeOne, t);
-  double lenf = (edgeTwo.start() - edgeTwo.end()).norm();
-  if (ltEquals(-epsilon * lenf, t) && ltEquals(t, 1.0 + epsilon * lenf)) {
-    if (ltEquals(t, epsilon * lenf)) {
+  double lenf = edgeTwo.direction().norm();
+  if (ltEquals(-EPSILON * lenf, t) && ltEquals(t, 1.0 + EPSILON * lenf)) {
+    if (ltEquals(t, EPSILON * lenf)) {
       crossPoint = edgeTwo.start();
-    } else if (gtEquals(t, 1.0 - epsilon * lenf)) {
+    } else if (gtEquals(t, 1.0 - EPSILON * lenf)) {
       crossPoint = edgeTwo.end();
-    } else if (ltEquals(s, epsilon * lene)) {
+    } else if (ltEquals(s, EPSILON * lene)) {
       crossPoint = edgeOne.start();
-    } else if (gtEquals(s, 1.0 - epsilon * lene)) {
+    } else if (gtEquals(s, 1.0 - EPSILON * lene)) {
       crossPoint = edgeOne.end();
     } else {
       crossPoint = edgeTwo.point(t);
@@ -144,8 +147,8 @@ PolygonEdge::Orientation crossingPoint(const PolygonEdge &edgeOne,
 bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b,
                 PointClassification aclass,
                 PolygonEdge::Orientation crossType) {
-  V2D va = a.direction();
-  V2D vb = b.direction();
+  const auto & va = a.direction();
+  const auto & vb = b.direction();
   if (crossType != PolygonEdge::Collinear) {
     double ca = va.X() * vb.Y();
     double cb = vb.X() * va.Y();
