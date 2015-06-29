@@ -167,6 +167,9 @@ private:
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 
+  /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
+  void loadEmbeddedInstrumentInfoNexus( ::NeXus::File *file, std::string &instrumentName, std::string &instrumentXML );
+
   //Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string& filename);
   /// Detector grouping information
