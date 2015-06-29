@@ -8,9 +8,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
-#include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -27,12 +24,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using Geometry::IDetector_const_sptr;
-using Geometry::DetectorGroup;
-using Geometry::DetectorGroup_const_sptr;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
-using Geometry::Vertex2D;
 
 /// Default constructor
 SofQWNormalisedPolygon::SofQWNormalisedPolygon()
@@ -102,13 +93,13 @@ void SofQWNormalisedPolygon::exec() {
   }
 
   const MantidVec &X = inputWS->readX(0);
-
   int emode = m_EmodeProperties.m_emode;
-  /* PARALLEL_FOR2(inputWS, outputWS) */
+
+  PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nHistos);
        ++i) // signed for openmp
   {
-    /* PARALLEL_START_INTERUPT_REGION */
+    PARALLEL_START_INTERUPT_REGION
 
     DetConstPtr detector = inputWS->getDetector(i);
     if (detector->isMasked() || detector->isMonitor()) {
@@ -166,18 +157,20 @@ void SofQWNormalisedPolygon::exec() {
           std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
+        PARALLEL_CRITICAL(SofQWNormalisedPolygon_spectramap) {
         specNumberMapping.push_back(
             outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
         detIDMapping.push_back(detector->getID());
+        }
       }
     }
     if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
       g_log.debug(logStream.str());
     }
 
-    /* PARALLEL_END_INTERUPT_REGION */
+     PARALLEL_END_INTERUPT_REGION
   }
-  /* PARALLEL_CHECK_INTERUPT_REGION */
+  PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->finalize();
   this->normaliseOutput(outputWS, inputWS);
