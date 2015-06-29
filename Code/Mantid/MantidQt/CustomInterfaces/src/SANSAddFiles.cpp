@@ -55,8 +55,10 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
   m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning(""),
   m_customBinningText("Bin Settings: "), m_customBinningToolTip("Sets the bin options for custom binning"),
-  m_saveEventDataText("Time Shifts: "),
-  m_saveEventDataToolTip("Set optional, comma-separated time shifts in seconds. You can either specify non or N-1 time shifts for N files")
+  m_saveEventDataText("Additional Time Shifts: "),
+  m_saveEventDataToolTip("Set optional, comma-separated time shifts in seconds.\n"
+                         "You can either specify non or N-1 time shifts for N files.\n"
+                         "Note that the time shifts are relative to the time of the workspace which was added last.")
 {
   initLayout();
 
