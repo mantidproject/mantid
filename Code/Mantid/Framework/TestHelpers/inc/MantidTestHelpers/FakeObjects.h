@@ -132,7 +132,7 @@ public:
   }
 
 private:
-  virtual WorkspaceTester *doClone() const override {
+  virtual WorkspaceTester *doClone() const {
     throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
   }
   std::vector<SpectrumTester> vec;
@@ -236,7 +236,7 @@ public:
   }
 
 private:
-  virtual TableWorkspaceTester *doClone() const override {
+  virtual TableWorkspaceTester *doClone() const {
     throw std::runtime_error(
         "Cloning of TableWorkspaceTester is not implemented.");
   }

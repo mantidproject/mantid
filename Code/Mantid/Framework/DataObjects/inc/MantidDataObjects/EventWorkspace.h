@@ -201,7 +201,7 @@ protected:
   EventWorkspace &operator=(const EventWorkspace &other);
 
 private:
-  virtual EventWorkspace *doClone() const override {
+  virtual EventWorkspace *doClone() const {
     throw std::runtime_error("Cloning of EventWorkspace is not implemented.");
   }
 

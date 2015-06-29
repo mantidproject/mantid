@@ -296,7 +296,7 @@ protected:
   TableWorkspace &operator=(const TableWorkspace &other);
 
 private:
-  virtual TableWorkspace *doClone() const override {
+  virtual TableWorkspace *doClone() const {
     return new TableWorkspace(*this);
   }
 

@@ -117,7 +117,7 @@ protected:
   const WorkspaceGroup &operator=(const WorkspaceGroup &);
 
 private:
-  virtual WorkspaceGroup *doClone() const override {
+  virtual WorkspaceGroup *doClone() const {
     throw std::runtime_error("Cloning of WorkspaceGroup is not implemented.");
   }
   /// ADS removes a member of this group using this method. It doesn't send

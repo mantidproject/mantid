@@ -388,7 +388,7 @@ public:
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 private:
-  virtual MDHistoWorkspace *doClone() const override {
+  virtual MDHistoWorkspace *doClone() const {
     return new MDHistoWorkspace(*this);
   }
 

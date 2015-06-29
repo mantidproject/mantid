@@ -19,7 +19,7 @@ class MockWorkspace : public Workspace
   virtual size_t getMemorySize() const { return 1; }
 
 private:
-  virtual MockWorkspace *doClone() const override {
+  virtual MockWorkspace *doClone() const {
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };

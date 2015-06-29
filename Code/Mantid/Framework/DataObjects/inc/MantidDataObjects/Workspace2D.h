@@ -114,7 +114,7 @@ protected:
   std::vector<Mantid::API::ISpectrum *> data;
 
 private:
-  virtual Workspace2D *doClone() const override {
+  virtual Workspace2D *doClone() const {
     throw std::runtime_error("Cloning of Workspace2D is not implemented.");
   }
 

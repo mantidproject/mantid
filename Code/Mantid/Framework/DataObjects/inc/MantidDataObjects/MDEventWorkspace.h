@@ -190,7 +190,7 @@ protected:
   API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
 private:
-  virtual MDEventWorkspace *doClone() const override {
+  virtual MDEventWorkspace *doClone() const {
     throw std::runtime_error("Cloning of MDEventWorkspace is not implemented.");
   }
 

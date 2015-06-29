@@ -187,7 +187,7 @@ protected:
   PeaksWorkspace &operator=(const PeaksWorkspace &other);
 
 private:
-  virtual PeaksWorkspace *doClone() const override {
+  virtual PeaksWorkspace *doClone() const {
     return new PeaksWorkspace(*this);
   }
 

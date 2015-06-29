@@ -93,7 +93,7 @@ namespace
     {}
 
   private:
-    virtual MockIEventWorkspace *doClone() const override {
+    virtual MockIEventWorkspace *doClone() const {
       throw std::runtime_error(
           "Cloning of MockIEventWorkspace is not implemented.");
     }

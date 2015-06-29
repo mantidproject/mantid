@@ -81,7 +81,7 @@ protected:
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
 
 private:
-  virtual WorkspaceSingleValue *doClone() const override {
+  virtual WorkspaceSingleValue *doClone() const {
     throw std::runtime_error("Cloning of WorkspaceSingleValue is not implemented.");
   }
 
