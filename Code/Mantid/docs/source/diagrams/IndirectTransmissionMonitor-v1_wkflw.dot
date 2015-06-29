@@ -52,12 +52,12 @@ digraph TimeSlice {
     ExtractMonitor_CropWorkspace_D1     -> ExtractMonitor_IsSameTimeRegime
     ExtractMonitor_Start                -> ExtractMonitor_HaveMonitor2_1        [label="Monitor 2"]
     ExtractMonitor_HaveMonitor2_1       -> ExtractMonitor_CropWorkspace_M2      [label="Yes"]
-    ExtractMonitor_IsSameTimeRegime     -> ExtractMonitor_UnwrapMonitor         [label="Yes"]
+    ExtractMonitor_IsSameTimeRegime     -> ExtractMonitor_UnwrapMonitor         [label="No"]
     ExtractMonitor_UnwrapMonitor        -> ExtractMonitor_RemoveBins
     ExtractMonitor_RemoveBins           -> ExtractMonitor_FFTSmooth
-    ExtractMonitor_FFTSmooth            -> ExtractMonitor_CropWorkspace_M2      [label="Yes"]
+    ExtractMonitor_FFTSmooth            -> ExtractMonitor_CropWorkspace_M1_2    [label="Yes"]
     ExtractMonitor_CropWorkspace_M1     -> ExtractMonitor_IsSameTimeRegime
-    ExtractMonitor_IsSameTimeRegime     -> ExtractMonitor_ConvertUnitsMonitor1  [label="No"]
+    ExtractMonitor_IsSameTimeRegime     -> ExtractMonitor_ConvertUnitsMonitor1  [label="Yes"]
     ExtractMonitor_CropWorkspace_M1     -> ExtractMonitor_HaveMonitor2_2
     ExtractMonitor_HaveMonitor2_2       -> ExtractMonitor_End                   [label="No"]
     ExtractMonitor_HaveMonitor2_2       -> ExtractMonitor_ConvertUnitsMonitor2  [label="Yes"]
