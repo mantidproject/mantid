@@ -56,8 +56,7 @@ void ParDomain::leastSquaresVal(const CostFuncLeastSquares &leastSquares) {
  */
 void
 ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                                       bool evalFunction, bool evalDeriv,
-                                       bool evalHessian) {
+                                       bool evalDeriv, bool evalHessian) {
   const int n = static_cast<int>(getNDomains());
   PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;
@@ -81,9 +80,8 @@ ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
         funs[k] = leastSquares.getFittingFunction()->clone();
       }
     }
-    // std::cerr <<
-    leastSquares.addValDerivHessian(funs[k], domain, simpleValues, evalFunction,
-                                    evalDeriv, evalHessian);
+    leastSquares.addValDerivHessian(funs[k], domain, simpleValues, evalDeriv,
+                                    evalHessian);
   }
 }
 
