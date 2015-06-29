@@ -1528,8 +1528,8 @@ namespace MantidQt
 
     /**
      * Rename the output workspace to a form {runnumber}-{detector}-detector
-     * @param originalWorkspacename :: name of the original workspace
-     * @param dectectorName :: name of the detector
+     * @param originalWorkspaceName :: name of the original workspace
+     * @param detectorName :: name of the detector
      * @param integrationType :: the type of integration, i.e. H, V or T
      * @param min :: minimum as string
      * @param max :: maximum as string
