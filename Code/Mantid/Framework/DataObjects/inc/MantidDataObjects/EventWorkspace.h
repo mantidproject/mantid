@@ -138,7 +138,7 @@ public:
   virtual void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
   // Get an EventList object at the given workspace index number
-  EventList &getEventList(const std::size_t workspace_index);
+  virtual EventList &getEventList(const std::size_t workspace_index);
 
   // Get a const EventList object at the given workspace index number
   virtual const EventList &getEventList(const std::size_t workspace_index) const;

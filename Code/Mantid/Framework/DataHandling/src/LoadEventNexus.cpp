@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/DecoratorWorkspace.h"
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -75,6 +76,7 @@ const unsigned int BankPulseTimes::FirstPeriod = 1;
 /** Constructor. Loads the pulse times from the bank entry of the file
 *
 * @param file :: nexus file open in the right bank entry
+* @param pNumbers :: Period numbers to index into. Index via frame/pulse
 */
 BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNumbers) : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
@@ -1802,60 +1804,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);
-}
-
-//-----------------------------------------------------------------------------
-/**
-* Create a blank event workspace
-* @returns A shared pointer to a new empty EventWorkspace object
-*/
-EventWorkspace_sptr DecoratorWorkspace::createEmptyEventWorkspace() const {
-  // Create the output workspace
-  EventWorkspace_sptr eventWS(new EventWorkspace());
-  // Make sure to initialize.
-  //   We can use dummy numbers for arguments, for event workspace it doesn't
-  //   matter
-  eventWS->initialize(1, 1, 1);
-
-  // Set the units
-  eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  eventWS->setYUnit("Counts");
-
-  return eventWS;
-}
-
-void DecoratorWorkspace::setNPeriods(size_t nPeriods, std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
-
-  // Create vector where size is the number of periods and initialize workspaces in each.
-  auto temp = m_WsVec[0];
-  m_WsVec = std::vector<DataObjects::EventWorkspace_sptr>(
-      nPeriods);
-
-  std::vector<int> periodNumbers = periodLog->valuesAsVector();
-  std::set<int> uniquePeriods(periodNumbers.begin(), periodNumbers.end());
-  const bool addBoolTimeSeries = (uniquePeriods.size() == nPeriods);
-
-  for (size_t i = 0; i < m_WsVec.size(); ++i) {
-    const int periodNumber = int(i+1);
-    m_WsVec[i] =  createEmptyEventWorkspace();
-    if(addBoolTimeSeries) {
-        std::stringstream buffer;
-        buffer << "period " << periodNumber;
-        auto * periodBoolLog = new Kernel::TimeSeriesProperty<bool>(buffer.str());
-        for(int j = 0; j < int(periodLog->size()); ++j){
-            periodBoolLog->addValue(periodLog->nthTime(j), periodNumber == periodLog->nthValue(j));
-        }
-        Run& mutableRun =  m_WsVec[i]->mutableRun();
-        mutableRun.addProperty(periodBoolLog);
-
-        Kernel::PropertyWithValue<int> *currentPeriodProperty =
-            new Kernel::PropertyWithValue<int>("current_period", periodNumber);
-        mutableRun.addProperty(currentPeriodProperty);
-    }
-
-    copyLogs(temp, m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.
-    m_WsVec[i]->setInstrument(temp->getInstrument());
-  }
 }
 
 //-----------------------------------------------------------------------------

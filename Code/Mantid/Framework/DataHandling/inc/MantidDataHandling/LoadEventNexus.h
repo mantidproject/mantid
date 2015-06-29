@@ -17,6 +17,9 @@ namespace Mantid {
 
 namespace DataHandling {
 
+// Forward dec
+class DecoratorWorkspace;
+
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
  * this means that some banks have different lists of pulse times.
@@ -51,143 +54,6 @@ public:
   /// Vector of period numbers corresponding to each pulse
   std::vector<int> periodNumbers;
 };
-
-class DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
-private:
-  std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
-  DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
-
-public:
-
-  void setNPeriods(size_t nPeriods,  std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
-
-  void reserveEventListAt(size_t wi, size_t size){
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->getEventList(wi).reserve(size);
-      }
-  }
-
-  size_t nPeriods() const {
-      return m_WsVec.size();
-  }
-
-  DataObjects::EventWorkspace_sptr getSingleHeldWorkspace(){return m_WsVec.front();}
-
-  API::Workspace_sptr combinedWorkspace(){
-      API::Workspace_sptr final;
-      if( this->nPeriods() == 1 ){
-          final = getSingleHeldWorkspace();
-      }
-      else{
-           auto wsg = boost::make_shared<API::WorkspaceGroup>();
-           for(size_t i = 0; i < m_WsVec.size(); ++i){
-               wsg->addWorkspace(m_WsVec[i]);
-           }
-           final = wsg;
-      }
-      return final;
-  }
-
-  DecoratorWorkspace(): m_WsVec(1, createEmptyEventWorkspace()){}
-
-  Geometry::Instrument_const_sptr getInstrument() const
-  {
-      return m_WsVec[0]->getInstrument();
-  }
-  const API::Run &run() const
-  {
-      return m_WsVec[0]->run();
-  }
-  API::Run &mutableRun()
-  {
-      return m_WsVec[0]->mutableRun();
-  }
-  Mantid::API::ISpectrum* getSpectrum(const size_t index)  {
-      return m_WsVec[0]->getSpectrum(index);
-  }
-  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const{
-      return m_WsVec[0]->getSpectrum(index);
-  }
-  virtual Mantid::API::Axis* getAxis(const size_t& i) const {
-      return m_WsVec[0]->getAxis(i);
-  }
-  size_t getNumberHistograms() const  {
-      return m_WsVec[0]->getNumberHistograms();
-  }
-  virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const {
-      return m_WsVec[0]->getEventList(workspace_index); // TODO need to know PERIOD number TOO
-  }
-
-  const DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber) const {
-      return m_WsVec[periodNumber]->getEventList(workspace_index);
-  }
-
-  DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber)  {
-      return m_WsVec[periodNumber]->getEventList(workspace_index);
-  }
-
-
-  virtual DataObjects::EventList &getEventList(const std::size_t workspace_index){
-      return m_WsVec[0]->getEventList(workspace_index); // TODO need to know PERIOD number TOO
-  }
-
-  void getSpectrumToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset) const  {
-      return m_WsVec[0]->getSpectrumToWorkspaceIndexVector(out, offset);
-  }
-  void getDetectorIDToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset, bool dothrow) const{
-      return m_WsVec[0]->getDetectorIDToWorkspaceIndexVector(out, offset, dothrow);
-  }
-
-  Kernel::DateAndTime getFirstPulseTime() const  {
-      return m_WsVec[0]->getFirstPulseTime();
-  }
-  void setAllX(Kernel::cow_ptr<MantidVec>& x)  {
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->setAllX(x);
-      }
-  }
-  size_t getNumberEvents() const  {
-      return m_WsVec[0]->getNumberEvents(); // Should be the sum across all periods?
-  }
-  void resizeTo(const size_t size)  {
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->resizeTo(size); // Creates the EventLists
-      }
-  }
-  void padSpectra(const std::vector<int32_t>& padding)  {
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->padSpectra(padding); // Set detector ids and spectrum numbers
-      }
-  }
-  void setInstrument(const Geometry::Instrument_const_sptr& inst)  {
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->setInstrument(inst);
-      }
-  }
-  void setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace>& monitorWS)  {
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->setMonitorWorkspace(monitorWS); // TODO, do we really set the same monitor on all periods???
-      }
-  }
-  void updateSpectraUsing(const API::SpectrumDetectorMapping& map)  {
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->updateSpectraUsing(map);
-      }
-
-  }
-
-  DataObjects::EventList* getEventListPtr(size_t i){
-      return m_WsVec[0]->getEventListPtr(i);  // TODO, just take from the first workspace
-  }
-
-  void populateInstrumentParameters(){
-      for(size_t i = 0; i < m_WsVec.size(); ++i){
-           m_WsVec[i]->populateInstrumentParameters();
-      }
-  }
-};
-
-typedef boost::shared_ptr<DecoratorWorkspace> DecoratorWorkspace_sptr;
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -290,7 +156,7 @@ public:
   std::string m_filename;
 
   /// The workspace being filled out
-  DecoratorWorkspace_sptr m_ws;
+  boost::shared_ptr<DecoratorWorkspace> m_ws;
 
   /// Filter by a minimum time-of-flight
   double filter_tof_min;
