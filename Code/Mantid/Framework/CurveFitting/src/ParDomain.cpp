@@ -50,7 +50,6 @@ void ParDomain::leastSquaresVal(const CostFuncLeastSquares &leastSquares) {
  * Calculate the value, first and second derivatives of a least squares cost
  * function
  * @param leastSquares :: The least squares cost func to calculate the value for
- * @param evalFunction :: Flag to evaluate the value of the cost function
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
