@@ -6,6 +6,8 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
 
+#include <ostream>
+
 namespace Mantid {
 namespace Kernel {
 //-----------------------------------------------------------------------------
