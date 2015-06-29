@@ -46,6 +46,11 @@ public:
    */
   virtual ~ISplittersWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<ISplittersWorkspace> clone() const {
+    return std::unique_ptr<ISplittersWorkspace>(doClone());
+  }
+
   /*
    * Add a time splitter to table workspace
    */
@@ -69,9 +74,13 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  ISplittersWorkspace(const ISplittersWorkspace &other);
+  ISplittersWorkspace(const ISplittersWorkspace &other)
+      : ITableWorkspace(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   ISplittersWorkspace &operator=(const ISplittersWorkspace &other);
+
+private:
+  virtual ISplittersWorkspace *doClone() const = 0;
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

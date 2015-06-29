@@ -50,6 +50,11 @@ public:
   SplittersWorkspace();
   virtual ~SplittersWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<SplittersWorkspace> clone() const {
+    return std::unique_ptr<SplittersWorkspace>(doClone());
+  }
+
   void addSplitter(Kernel::SplittingInterval splitter);
 
   Kernel::SplittingInterval getSplitter(size_t index);
@@ -60,9 +65,15 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  SplittersWorkspace(const SplittersWorkspace &other);
+  SplittersWorkspace(const SplittersWorkspace &other)
+      : ITableWorkspace(other), TableWorkspace(other), ISplittersWorkspace(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   SplittersWorkspace &operator=(const SplittersWorkspace &other);
+
+private:
+  virtual SplittersWorkspace *doClone() const {
+    return new SplittersWorkspace(*this);
+  }
 };
 
 typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;
