@@ -53,7 +53,8 @@ private:
   void setHistogramUiLogic(QString label, QString toolTip, QString lineEditText,bool enabled);
   /// Set the histo gram input enabled or disabled
   void setInputEnabled(bool enabled);
-
+  /// Create Python string list
+  QString createPythonStringList(QString inputString);
 
   void initLayout();
   void setToolTips();

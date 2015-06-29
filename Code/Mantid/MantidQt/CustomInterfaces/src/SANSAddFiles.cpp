@@ -326,7 +326,7 @@ void SANSAddFiles::runPythonAddFiles()
     case SAVEASEVENTDATA:
       code_torun += ", saveAsEvent=True";
       code_torun += ", isOverlay=" + overlay;
-      code_torun += ", time_shifts='"+ m_SANSForm->eventToHistBinning->text() + "'";
+      code_torun += ", time_shifts="+ createPythonStringList(m_SANSForm->eventToHistBinning->text());
       break;
     default:
       break;
@@ -539,6 +539,36 @@ void SANSAddFiles::setInputEnabled(bool enabled) {
   m_SANSForm->eventToHistBinning->setEnabled(enabled);
   m_SANSForm->labelBinning->setEnabled(enabled);
 }
+
+/**
+ * Produces a Python string list of the format "['entry1', 'entry2', ...]"
+ * @param inputString :: This string has a format of "entry1, entry2, ..."
+ * @eretruns a Python list of strings
+ */
+QString SANSAddFiles::createPythonStringList(QString inputString) {
+  QString formattedString = "[";
+  QString finalizer = "]";
+  QString quotationMark = "'";
+  QString delimiter = ",";
+
+  if (inputString.isEmpty()) {
+    return formattedString + finalizer;
+  }
+
+  inputString.replace(" ", "");
+  auto inputStringList = inputString.split(delimiter);
+
+  for (auto it = inputStringList.begin(); it != inputStringList.end(); ++it) {
+
+    formattedString += quotationMark + *it + quotationMark + delimiter;
+  }
+
+  formattedString.remove(formattedString.length()-delimiter.length(), delimiter.length());
+  formattedString += finalizer;
+  return formattedString;
+}
+
+
 
 }//namespace CustomInterfaces
 }//namespace MantidQt
