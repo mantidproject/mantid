@@ -128,11 +128,10 @@ void CloneMDWorkspace::exec() {
   if (inWS) {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);
   } else if (inHistoWS) {
-    // Clone using the copy constructor
-    MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(*inHistoWS));
+    // Polymorphic clone().
+    IMDWorkspace_sptr outWS(inHistoWS->clone().release());
     // And set to the output. Easy.
-    this->setProperty("OutputWorkspace",
-                      boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
+    this->setProperty("OutputWorkspace", outWS);
   } else {
     // Call CloneWorkspace as a fall-back?
     throw std::runtime_error("CloneMDWorkspace can only clone a "

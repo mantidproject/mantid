@@ -47,9 +47,6 @@ public:
   MDHistoWorkspace(
       std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
 
-  // TODO once we have a polymorphic clone this should be made protected
-  MDHistoWorkspace(const MDHistoWorkspace &other);
-
   virtual ~MDHistoWorkspace();
 
   /// Returns a clone of the workspace
@@ -434,6 +431,8 @@ private:
   Kernel::SpecialCoordinateSystem m_coordSystem;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MDHistoWorkspace(const MDHistoWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
   MDHistoWorkspace &operator=(const MDHistoWorkspace &other);
 
