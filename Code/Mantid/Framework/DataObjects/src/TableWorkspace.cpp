@@ -32,7 +32,7 @@ TableWorkspace::TableWorkspace(size_t nrows)
 }
 
 TableWorkspace::TableWorkspace(const TableWorkspace &other)
-    : ITableWorkspace(), m_rowCount(0), m_LogManager(new API::LogManager) {
+    : ITableWorkspace(other), m_rowCount(0), m_LogManager(new API::LogManager) {
   setRowCount(other.m_rowCount);
 
   column_const_it it = other.m_columns.begin();
