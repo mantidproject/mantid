@@ -1,5 +1,5 @@
 digraph TimeSlice {
-  label="TimeSlice Flowchart"
+  label="IndirectTransmissionMonitor Flowchart"
   $global_style
 
   subgraph descision {
