@@ -12,7 +12,7 @@ class EnginXCalibrateTest(stresstesting.MantidStressTest):
     def runTest(self):
         calib_ws = Load(Filename = 'ENGINX00193749.nxs')
 
-        positions = EnginXCalibrateFull(InputWorkspace = calib_ws,
+        positions = EnginXCalibrateFull(Workspace = calib_ws,
                                       Bank = 1,
                                       ExpectedPeaks = '1.3529, 1.6316, 1.9132')
 
