@@ -196,19 +196,9 @@ namespace CustomInterfaces
     // Initially take the calibration workspace as the result
     m_pythonExportWsName = calibrationWsName.toStdString();
 
-    // Properties for algorithms that use data from calibration as an input
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalProps;
-    inputFromCalProps["InputWorkspace"] = calibrationWsName.toStdString();
-
     // Add save algorithm to queue if ticked
     if( m_uiForm.ckSave->isChecked() )
-    {
-      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
-      saveAlg->initialize();
-      saveAlg->setProperty("Filename", calibrationWsName.toStdString() + ".nxs");
-
-      m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromCalProps);
-    }
+      addSaveWorkspaceToQueue(calibrationWsName);
 
     // Configure the resolution algorithm
     if(m_uiForm.ckCreateResolution->isChecked())
@@ -270,16 +260,7 @@ namespace CustomInterfaces
         m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
 
         if(save)
-        {
-          IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
-          saveAlg->initialize();
-
-          BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromSmoothProps;
-          inputFromSmoothProps["InputWorkspace"] = calibrationWsName.toStdString();
-          saveAlg->setProperty("Filename", resolutionWsName.toStdString() + ".nxs");
-
-          m_batchAlgoRunner->addAlgorithm(saveAlg, inputFromSmoothProps);
-        }
+          addSaveWorkspaceToQueue(resolutionWsName);
       }
 
       // When creating resolution file take the resolution workspace as the result
