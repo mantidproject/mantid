@@ -99,7 +99,9 @@ Import Results
 ~~~~~~~~~~~~~~
 
 The 'Import results...' button allows the user to load previously analysed data, ideally saved using
-'Export results...'. When clicked, this button searches for a workspace corresponding to the
+'Export results...'. When clicked, it propmts the user to enter a label for the workspace group from which
+data will be imported, which is defaulted to 'ALCResults'. The interface then searches for a workspace
+corresponding to the
 interface's step from which it was called. This means that if the user is currently in the
 DataLoading step, the interface will search for a workspace named <Label>_Loaded_Data. If
 it is used from the BaselineModelling step, the workspace named <Label>_Baseline_Workspace
@@ -114,16 +116,26 @@ set of runs, previous peaks would be kept in PeakFitting. Note that at this stag
 Description
 -----------
 
+This section describes the three steps in the analysis: Data Loading, Baseline Modelling and Peak
+Fitting.
+
 Data Loading
 ~~~~~~~~~~~~
 
-The Data Loading step, provides an interface for the 
-:ref:`PlotAsymmetryByLogValue <algm-PlotAsymmetryByLogValue>` algorithm, 
-in which a sequence of runs are loaded through the fields 
-*First* and *Last*. All datasets with run number between these limits will be 
-loaded, and an error message will be shown if any of them is missing. The 
-user must supply the log data that will be used as X parameter from the list 
-of available log values.
+In the Data Loading step, a sequence of runs are loaded through the fields **First** and **Last**.
+All datasets with run number between these limits will be loaded, and a warning message
+will be shown if any of them is missing. The input files must be Muon Nexus files with
+names beginning with at least one letter and followed by a number. In addition, the user must supply
+the **Log** data that will be used as X parameter from the list of available log values.
+Some additional options may be specified: the **Dead Time Corrections**, if any, can be
+loaded from the input dataset itself or from a custom file specified by the user. The
+detector **Grouping** is defaulted to **Auto**, in which case the grouping information
+is read from the run data, although it can be customized by setting the list of spectra
+for the forward and backward groups. The user can also choose the **Period** number
+that corresponds to the red period, and the number corresponding to the green period,
+if the option **Subtract** is checked, and finally the type of **Calculation** together
+with the time limits. A click on the **Load** button results in the calculation of the
+asymmetry, displayed on the right panel.
 
 .. figure:: ../images/ALCDataLoading.png
    :align: center
@@ -131,18 +143,18 @@ of available log values.
 
 Options
 ^^^^^^^
-
 First
-  First run of the sequence of datasets.
+  The path to the first nexus file in the series.
 
 Last
-  Last run of the sequence of datasets.
+  The path to the last nexus file in the series.
 
 Log
-  Log value to use as X parameter
+  The name of the log value which will be used as the X-axis in the output workspace. The list of
+  possible logs is automatically populated when the first nexus file is browsed and selected.
 
 Function
-  The function to apply to the time series log: Mean/Min/Max/First/Last
+  The function to apply to the time series log: Mean/Min/Max/First/Last.
 
 Dead Time Correction
   Type of dead time corrections to apply. Options are *None*, in which case no 
@@ -169,14 +181,21 @@ Load
   Computes the asymmetry according to selected options and displays it against the 
   chosen log value.
 
+Loaded Data
+  Graph where the asymmetry as a function of the Log value is displayed. These are the
+  data passed to the BaselineModelling step.
+
 Baseline Modelling
 ~~~~~~~~~~~~~~~~~~
 
-In the Baseline Modelling step, the user can fit the baseline by selecting which 
+In the Baseline Modelling step, the user can fit a baseline by selecting which
 sections of the data should be used in the fit, and what the baseline fit 
-function should be. To select a baseline function, right-click on the *Function* 
-region, then *Add function* and choose among the different possibilities. Then 
-pick the desired fitting sections. 
+function should be. To select a baseline function, right-click on the **Function**
+region, then **Add function** and choose among the different possibilities. Then
+pick the desired fitting sections by right-clicking in the **Sections** area as
+many times as sections to use. Sections are also displayed on the **Baseline model**
+graph and can be easily modified by clicking and dragging the corresponding
+vertical lines.
 
 .. figure:: ../images/ALCBaselineModelling.png
    :align: center
@@ -190,21 +209,39 @@ Function
 
 Sections
   Right-click on the blank area to add as many sections as needed to 
-  select the ranges to fit.
+  select the different ranges to fit. Each section is coloured differently and
+  can be modified by dragging the vertical lines.
 
 ?
   Shows this help page.
 
 Fit
   Fits the data.
+
+Baseline model
+  Graph where the original data and the model are displayed, together with
+  the fitting ranges.
+
+Corrected data
+  Graph where the corrected data, i.e., the original data with the baseline
+  subtracted, are displayed. These are the data passed to the PeakFitting
+  step.
   
 Peak Fitting
 ~~~~~~~~~~~~
 
-In the Peak Fitting step, data with the baseline subtracted are shown in 
+In the Peak Fitting step, the data with the baseline subtracted are shown in 
 the right panel. The user can study the peaks of interest all with the same simple 
-interface. To add a new peak, right-click on the Peaks region, then select 
-*Add function* and choose among the different possibilities in the category Peak.
+interface. To add a new peak, right-click on the **Peaks** region, then select
+**Add function** and choose among the different possibilities in the category Peak.
+Add as many peaks as needed. To activate the peak picker tool, click on one of
+the functions in the browser and then left-click on the graph near the peak's
+center while holding the Shift key. This will move the picker tool associated
+with the highlighted function to the desired location. To set the peak width,
+click and drag while holding Crtl. You can then tune the heigth by clicking on
+the appropriate point in the graph while holding Shift. Repeat the same steps
+with the rest of the functions in the browser and hit **Fit** to fit the peaks.
+
 
 .. figure:: ../images/ALCPeakFitting.png
    :align: center
@@ -214,13 +251,16 @@ Options
 ^^^^^^^
 
 Peaks
-  Right-click on the blank area to add a peak function.
+  Right-click on the blank area to add as many peak functions as needed.
 
 ?
   Shows this help page.
 
 Fit
   Fits the data.
+
+Peak graph
+  Graph where the corrected data and the fitted peaks are displayed.
 
 Run the ALC interface
 ---------------------
