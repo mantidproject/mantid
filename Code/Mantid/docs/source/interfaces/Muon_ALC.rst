@@ -60,6 +60,56 @@ necessary to determine a baseline, perform a baseline subtraction and then
 fit the peaks. The Muon ALC interface integrates this sequence of
 operations hiding the complexity of the underlying algorithms.
 
+Global Options
+--------------
+
+Gloabl options are options visible and accesible from any step in the
+interface. Currently, there are two buttons that can be used at any point during the analysis.
+
+Export Results
+~~~~~~~~~~~~~~
+
+The 'Export results...' button allows the user to export intermediate results at any step. When clicked,
+it propmts the user to enter a label for the workspace group that will gather the ALC results. This
+label is defaulted to 'ALCResults'. In the DataLoading step, data are exported in a workspace named
+<Label>_Loaded_Data, which contains a single spectrum. In the BaselineModelling step, data and model
+are exported in a set of three workspaces: a workspace named <Label>_Baseline_Workspace, which contains
+three spectra corresponding to the original data, model and corrected data respectively, a TableWorkspace
+named <Label>_Baseline_Model with information on the fitting parameters, and a second TableWorkspace
+named <Label>_Baseline_Sections containing information on the sections used to fit the baseline. When
+exporting results in the PeakFitting steps, two workspaces will be created: a <Label>_Peaks_Workspace,
+that contains at least three spectra: the corrected data (i.e., the data after the baseline model
+subtraction), fitting function and difference curve. If more than one peak was fitted, individual peaks
+will be stored in subsequent spectra. The <Label>_Peaks_FitResults TableWorkspace provides information
+about the fitting parameters and errors.
+
+Note that the 'Export results...' button exports as much information as possible, which means that all
+the data stored in the interface will be exported when clicked, regardless of the current step. For
+example, if the user starts a new analysis and the button is used in the 'DataLoading' step, only the
+<Label>_Loaded_Data workspace will be created in the ADS. However, if the user proceeds with the analysis
+and clicks 'Export results...' at the 'BaselineModelling' step, the interface will export not only the
+<Label>_Baseline_* workspaces but also the <Label>_Loaded_Data workspace. In the same way, if the user
+has completed the peak fitting analysis and uses the button in the PeakFitting step, not only the
+<Label>_Peaks_* workspaces will be created, but also the <Label>_Baseline_* and the <Label>_Loaded_Data
+workspaces. Also, note that if 'Export results...' is used at a specific step but results from a previous
+analysis exist in a subsequent stage of the analysis, the latter will be exported as well.
+
+Import Results
+~~~~~~~~~~~~~~
+
+The 'Import results...' button allows the user to load previously analysed data, ideally saved using
+'Export results...'. When clicked, it propmts the user to enter a label for the workspace group from which
+data will be imported, which is defaulted to 'ALCResults'. The interface then searches for a workspace corresponding to the
+interface's step from which it was called. This means that if the user is currently in the
+DataLoading step, the interface will search for a workspace named <Label>_Loaded_Data. If
+it is used from the BaselineModelling step, the workspace named <Label>_Baseline_Workspace
+will be loaded. Finally, if PeakFitting is the current step in the analysis, the workspace
+<Label>_Peaks_Workspaces will be imported. Note that using the 'Import results...' button
+at a specific step does not produce the loading of data corresponding to previous or subsequent
+steps. In addition, data at subsequent steps will not be cleared. For instance, if some data
+were analysed in the PeakFitting step and you went back to BaselineModelling to import a new
+set of runs, previous peaks would be kept in PeakFitting. Note that at this stage of development
+'Import results...' does not load fitting results or fitting sections.
 
 Data Loading
 ------------
