@@ -38,10 +38,10 @@ variation in the L2 position, and the 'difc' and 'zero' calibration
 parameters.
 
 The result of the calibration (the output table given in
-DetectorPositions) is accepted by both :ref:`algm-EnginXCalibrate` and
+OutDetPosTable) is accepted by both :ref:`algm-EnginXCalibrate` and
 :ref:`algm-EnginXFocus` which use the columns 'Detector ID' and
 'Detector Position' of the table to correct the detector positions
-before focussing. The DetectorPositions output table can also be used
+before focussing. The OutDetPosTable output table can also be used
 to apply the calibration calculated by this algorithm on any other
 workspace by using the algorithm :ref:`algm-AppplyCalibration`.
 
@@ -107,7 +107,7 @@ Output:
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
    posTable = EnginXCalibrateFull(Workspace=ws_name,
                                   ExpectedPeaks=[1.097, 2.1], Bank=1,
-                                  OutputDetectorPositionsFilename=pos_filename)
+                                  OutDetPosFilename=pos_filename)
 
    detID = posTable.column(0)[0]
    pos =  posTable.column(2)[0]

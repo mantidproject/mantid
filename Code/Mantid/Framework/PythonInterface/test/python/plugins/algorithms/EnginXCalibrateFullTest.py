@@ -35,9 +35,9 @@ class EnginXCalibrateFullTest(unittest.TestCase):
                           EnginXCalibrateFull,
                           InputWorkspace=self.__class__._data_ws, Bank=2, Peaks='2')
 
-        # mispelled OutputDetectorPositionsFilename
+        # mispelled OutDetPosFilename
         self.assertRaises(RuntimeError,
-                          EnginXCalibrateFull, OutputDetectorPositionsFile='any.csv',
+                          EnginXCalibrateFull, OutDetPosFile='any.csv',
                           InputWorkspace=self.__class__._data_ws, Bank=2, Peaks='2')
 
         # all fine, except missing DetectorPositions (output)

@@ -19,16 +19,16 @@ class EnginXCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),\
+        self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
                              "calibration information. The table includes: the old positions in V3D format "
                              "(3D vector with x, y, z values), the new positions in V3D, the new positions "
                              "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
 
-        self.declareProperty(FileProperty("OutputDetectorPositionsFilename", "", FileAction.OptionalSave, [".csv"]),
+        self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
                              "Name of the file to save the pre-/post-calibrated detector positions - this "
                              "saves the same information that is provided in the output table workspace "
-                             "(DetectorPositions).")
+                             "(OutDetPosTable).")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
@@ -57,9 +57,9 @@ class EnginXCalibrateFull(PythonAlgorithm):
         posTbl = self._calculateCalibPositionsTbl(rebinWS, bank, expectedPeaksD)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
-        self.setProperty("DetectorPositions", posTbl)
+        self.setProperty("OutDetPosTable", posTbl)
         self._applyCalibrationTable(inWS, posTbl)
-        self._outputDetPosFile(self.getPropertyValue('OutputDetectorPositionsFilename'), posTbl)
+        self._outputDetPosFile(self.getPropertyValue('OutDetPosFilename'), posTbl)
 
     def _prepareWsForFitting(self, ws):
         """
