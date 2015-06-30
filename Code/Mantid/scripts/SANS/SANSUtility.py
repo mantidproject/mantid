@@ -690,6 +690,27 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     return message, isValid
 
+def is_convertible_to_int(input):
+    '''
+    Check if the input can be converted to int
+    @param input :: A string input
+    '''
+    try:
+        converted = int(input)
+    except ValueError:
+        return False
+    return True
+
+def is_convertible_to_float(input):
+    '''
+    Check if the input can be converted to float
+    @param input :: A string input
+    '''
+    try:
+        converted = float(input)
+    except ValueError:
+        return False
+    return True
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

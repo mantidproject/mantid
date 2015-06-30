@@ -275,6 +275,14 @@ private slots:
   void handleSlicePushButton();
   /// Open the help page of whichever tab the user is currently viewing.
   void openHelpPage();
+  /// Transmission setting for M3
+  void onTransmissionM3CheckboxChanged();
+  /// Transmission setting for M4
+  void onTransmissionM4CheckboxChanged();
+  /// Transmission setting for Radius
+  void onTransmissionRadiusCheckboxChanged();
+  /// Transmission setting for ROI files
+  void onTransmissionROIFilesCheckboxChanged();
 
 private:
   /// used to specify the range of validation to do
@@ -379,11 +387,11 @@ private:
   void setValidators();
 
   /// set logic for M3 or M4 selection
-  void setM3M4Logic(TransSettings setting);
+  void setM3M4Logic(TransSettings setting, bool isNowChecked);
   /// enable/disable all Radius, ROI and Mask specific entries
   void setRadiusRoiMaskInputsForTrans(bool state);
   /// set logic for beam stop selection
-  void setBeamStopLogic(TransSettings setting);
+  void setBeamStopLogic(TransSettings setting, bool isNowChecked);
   /// validate float input
   //void validateNumericInput(QString numericInput);
   /// validate file input
@@ -392,6 +400,8 @@ private:
   //void sendTransmissionSettings();
   /// get the transmission settings
   void setTransmissionSettingsFromUserFile();
+  /// initialize the connections for the transmission settings
+  void initTransmissionSettings();
 
   UserSubWindow * slicingWindow;
 

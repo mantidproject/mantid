@@ -1198,6 +1198,80 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
     else:
         return ""
 
+
+###################### Accessor functions
+def GetTransmissionMonitorSpectrum():
+    """
+        Gets the transmission monitor spectrum if one was set.
+        @return: tranmission monitor spectrum or empty string
+    """
+    spec = ReductionSingleton().transmission_calculator.trans_spec
+    if spec is not None:
+        return str(spec)
+    else:
+        return ""
+
+def SetTransmissionMonitorSpectrum(trans_spec):
+    """
+        Sets the transmission monitor spectrum.
+        @param trans_spec :: The spectrum to set.
+        @return: success message
+    """
+    if su.is_convertible_to_int(trans_spec):
+        ReductionSingleton().transmission_calculator.trans_spec = int(trans_spec)
+    else:
+        return 'Warning: Could not set the transmission monitor spectrum'
+
+def GetTransmissionMonitorSpectrumShift():
+    """
+        Gets the addditional shift for the transmission monitor spectrum.
+        This currently only exists for SANS2D
+        @return: tranmission monitor spectrum or empty string
+    """
+    inst =  ReductionSingleton().get_instrument()
+    if inst.name() != 'SANS2D' or inst.name() != 'SANS2DTUBES':
+        return ""
+
+    shift = inst.monitor_4_offset
+    if shift is not None:
+        return str(spec)
+    else:
+        return ""
+
+def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
+    """
+        Sets the transmission monitor spectrum shfit.
+        @param trans_spec_shift :: The spectrum shift to set.
+        @return: success message
+    """
+    if su.is_convertible_to_float(trans_spec_shift):
+        inst =  ReductionSingleton().get_instrument()
+        # Note that we are only setting the transmission monitor spectrum shift
+        # if we are dealing with a SANS2D instrument
+        if inst.name() != 'SANS2D' or inst.name() != 'SANS2DTUBES':
+            return
+        inst.monitor_4_offset = float(trans_spec_shift)
+    else:
+        return 'Warning: Could not set the transmission monitor spectrum shift.'
+
+def GetTransmissionRadius():
+    pass
+
+def SetTransmissionRadius():
+    pass
+
+def GetTransmissionROI():
+    pass
+
+def SetTransmissionROI():
+    pass
+
+def GetTransmissionMask():
+    pass
+
+def SetTransmissionMask():
+    pass
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

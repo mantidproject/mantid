@@ -316,6 +316,10 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
   connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
+
+  // Setup the Transmission Settings
+  initTransmissionSettings();
+
   // Set the validators
   setValidators();
 
@@ -3930,8 +3934,9 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString& wsName) {
 /**
  * Set the M3M4 check box and line edit field logic
  * @param setting :: the checked item
+ * @param isNowChecked :: What is the current check-state of the setting?
  */
-void SANSRunWindow::setM3M4Logic(TransSettings setting) {
+void SANSRunWindow::setM3M4Logic(TransSettings setting, bool isNowChecked) {
   switch (setting) {
     case TransSettings::M3:
       this->m_uiForm.trans_M4_check_box->setChecked(false);
@@ -3951,28 +3956,42 @@ void SANSRunWindow::setM3M4Logic(TransSettings setting) {
   this->m_uiForm.trans_roi_files_checkbox->setChecked(false);
 
   // Enable the M3M4 line edit field
-  this->m_uiForm.trans_M3M4_line_edit->setEnabled(true);
+  this->m_uiForm.trans_M3M4_line_edit->setEnabled(isNowChecked);
 }
 
 
 /**
  * Set beam stop logic for Radius, ROI and Mask
  * @param setting :: the checked item
+ * @param isNowChecked :: What is the current check-state of the setting?
  */
-void SANSRunWindow::setBeamStopLogic(TransSettings setting) {
-  if (setting != TransSettings::RADIUS || setting != TransSettings::ROI) {
+void SANSRunWindow::setBeamStopLogic(TransSettings setting, bool isNowChecked) {
+  if (setting == TransSettings::RADIUS) {
+    // If the other option is not on then reset all fields
+    if (!m_uiForm.trans_roi_files_checkbox->isChecked()) {
+      setRadiusRoiMaskInputsForTrans(isNowChecked);
+    } else {
+      m_uiForm.trans_radius_line_edit->setEnabled(isNowChecked);
+    }
+  }
+  else if (setting == TransSettings::ROI) {
+    // If the other option is not on then reset all fields
+    if (!m_uiForm.trans_radius_check_box->isChecked()) {
+      setRadiusRoiMaskInputsForTrans(isNowChecked);
+    } else {
+      m_uiForm.trans_roi_files_line_edit->setEnabled(false);
+    }
+  } else {
     return;
   }
 
-  // Enable the Radius, ROI and Mask inputs
-  setRadiusRoiMaskInputsForTrans(true);
-
-  // Disable teh M3M4 line edit field and uncheck the M3 and M4 box
-  this->m_uiForm.trans_M3M4_line_edit->setEnabled(false);
-  this->m_uiForm.trans_M3_check_box->setChecked(false);
-  this->m_uiForm.trans_M4_check_box->setChecked(false);
+  // Disable the M3M4 line edit field and uncheck the M3 and M4 box
+  if (isNowChecked) {
+    this->m_uiForm.trans_M3M4_line_edit->setEnabled(false);
+    this->m_uiForm.trans_M3_check_box->setChecked(false);
+    this->m_uiForm.trans_M4_check_box->setChecked(false);
+  }
 }
-
 
 
 /**
@@ -3989,7 +4008,10 @@ void SANSRunWindow::setRadiusRoiMaskInputsForTrans(bool state) {
  * Reads the transmission settings from the user file and sets it in the GUI
  */
 void SANSRunWindow::setTransmissionSettingsFromUserFile() {
-  // Read the M3, M4 and TRANSPEC settings
+
+
+  // Read the Transmission Monitor Spectrum Shift
+
 
   // Read the Radius settings
 
@@ -3997,7 +4019,67 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
 
   // Read the MASK settings
 
+
+  // Read Transmission Monitor Spectrum, we expect either 3 or 4
+  QString transmissionMonitorSpectrumRequest("\nprint i.GetTransmissionMonitorSpectrum()");
+  QString resultTransmissionMonitorSpectrum(runPythonCode(transmissionMonitorSpectrumRequest, false));
+  resultTransmissionMonitorSpectrum = resultTransmissionMonitorSpectrum.simplified();
+
+  if (resultTransmissionMonitorSpectrum == "3") {
+    this->m_uiForm.trans_M3_check_box->setChecked(true);
+    setM3M4Logic(TransSettings::M3, true);
+  } else if (resultTransmissionMonitorSpectrum == "4") {
+    this->m_uiForm.trans_M4_check_box->setChecked(true);
+    setM3M4Logic(TransSettings::M4, true);
+  } else {
+    // TODO Unset all
+  }
 }
+
+/**
+ * Initialize the transmission settings. We are setting up checkboxes
+ * and want to make use of the clicked signal in order to distinguish
+ * between user-induced and programmatic changes to the checkbox.
+ */
+void SANSRunWindow::initTransmissionSettings() {
+  QObject::connect(this->m_uiForm.trans_M3_check_box, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionM3CheckboxChanged()));
+  QObject::connect(this->m_uiForm.trans_M4_check_box, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionM4CheckboxChanged()));
+  QObject::connect(this->m_uiForm.trans_radius_check_box, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionRadiusCheckboxChanged()));
+  QObject::connect(this->m_uiForm.trans_roi_files_checkbox, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionROIFilesCheckboxChanged()));
+}
+
+/**
+ * React to a change of the M3 transmission monitor spectrum checkbox
+ */
+void SANSRunWindow::onTransmissionM3CheckboxChanged() {
+  setM3M4Logic(TransSettings::M3, this->m_uiForm.trans_M3_check_box->isChecked());
+}
+
+/**
+ * React to a change of the M3 transmission monitor spectrum checkbox
+ */
+void SANSRunWindow::onTransmissionM4CheckboxChanged() {
+  setM3M4Logic(TransSettings::M4, this->m_uiForm.trans_M4_check_box->isChecked());
+}
+
+/**
+ * React to the change of the Radius checkbox
+ */
+void SANSRunWindow::onTransmissionRadiusCheckboxChanged() {
+  setBeamStopLogic(TransSettings::RADIUS, this->m_uiForm.trans_radius_check_box->isChecked());
+}
+
+/**
+ * React to the change of the ROI file checkbox
+ */
+void SANSRunWindow::onTransmissionROIFilesCheckboxChanged() {
+  setBeamStopLogic(TransSettings::ROI, this->m_uiForm.trans_roi_files_checkbox->isChecked());
+}
+
 
 } //namespace CustomInterfaces
 
