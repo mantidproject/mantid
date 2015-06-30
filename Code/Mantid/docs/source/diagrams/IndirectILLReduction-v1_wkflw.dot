@@ -60,13 +60,16 @@ digraph IndirectILLReduction {
     MM_SaveNexusProcessed_RightRed  [label="SaveNexusProcessed"]
   }
 
+  subgraph processes {
+    $process_style
+    CE_Normal         [label="Calculate Energy"]
+    CE_Mirror_Right   [label="Calculate Energy (Right)"]
+    CE_Mirror_Left    [label="Calculate Energy (Left)"]
+    RunMirrorMode     [label="Mirror Mode"]
+  }
+
   CE_Start          [label="Calculate Energy"]
   MM_Start          [label="Mirror Mode"]
-
-  CE_Normal         [label="Calculate Energy"]
-  CE_Mirror_Right   [label="Calculate Energy (Right)"]
-  CE_Mirror_Left    [label="Calculate Energy (Left)"]
-  RunMirrorMode     [label="Mirror Mode"]
 
   subgraph calculate_energy {
     CE_Start                      -> CE_Scale_Monitor           [label="Monitor WS"]
