@@ -66,29 +66,29 @@ public:
   /*-------------------------------------------------------
    * EventWorkspace overriden methods
    *-------------------------------------------------------*/
-  Geometry::Instrument_const_sptr getInstrument() const override;
-  const API::Run &run() const override;
-  API::Run &mutableRun() override;
-  Mantid::API::ISpectrum* getSpectrum(const size_t index) override;
-  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const override;
-  virtual Mantid::API::Axis* getAxis(const size_t& i) const override;
-  size_t getNumberHistograms() const override;
-  virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const override;
+  Geometry::Instrument_const_sptr getInstrument() const;
+  const API::Run &run() const;
+  API::Run &mutableRun();
+  Mantid::API::ISpectrum* getSpectrum(const size_t index);
+  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  virtual Mantid::API::Axis* getAxis(const size_t& i) const;
+  size_t getNumberHistograms() const;
+  virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const;
 
-  virtual DataObjects::EventList &getEventList(const std::size_t workspace_index) override;
-  void getSpectrumToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset) const override;
+  virtual DataObjects::EventList &getEventList(const std::size_t workspace_index);
+  void getSpectrumToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset) const;
 
-  void getDetectorIDToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset, bool dothrow) const override;
-  Kernel::DateAndTime getFirstPulseTime() const override;
-  void setAllX(Kernel::cow_ptr<MantidVec>& x) override;
-  size_t getNumberEvents() const override;
-  void resizeTo(const size_t size) override;
-  void padSpectra(const std::vector<int32_t>& padding) override;
-  void setInstrument(const Geometry::Instrument_const_sptr& inst) override;
-  void setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace>& monitorWS) override;
-  void updateSpectraUsing(const API::SpectrumDetectorMapping& map) override;
-  DataObjects::EventList* getEventListPtr(size_t i) override;
-  void populateInstrumentParameters() override;
+  void getDetectorIDToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset, bool dothrow) const;
+  Kernel::DateAndTime getFirstPulseTime() const;
+  void setAllX(Kernel::cow_ptr<MantidVec>& x);
+  size_t getNumberEvents() const;
+  void resizeTo(const size_t size);
+  void padSpectra(const std::vector<int32_t>& padding);
+  void setInstrument(const Geometry::Instrument_const_sptr& inst);
+  void setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace>& monitorWS);
+  void updateSpectraUsing(const API::SpectrumDetectorMapping& map);
+  DataObjects::EventList* getEventListPtr(size_t i);
+  void populateInstrumentParameters();
 };
 
 typedef boost::shared_ptr<DecoratorWorkspace> DecoratorWorkspace_sptr;
