@@ -5,6 +5,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataHandling/DllConfig.h"
 
 #include <vector>
 
@@ -36,7 +37,7 @@ Original purpose to support LoadEventNexus for the MultiPeriod cases.
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
+class DLLExport DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
 
 private:
 
