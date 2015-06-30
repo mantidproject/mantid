@@ -170,6 +170,9 @@ private:
   /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
   void loadEmbeddedInstrumentInfoNexus( ::NeXus::File *file, std::string &instrumentName, std::string &instrumentXML );
 
+  /// Set the instrument given the name and XML leading from IDF file if XML string is empty
+  void setInstumentFromXML( const std::string& nxFilename, std::string &instrumentName, std::string &instrumentXML );
+
   //Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string& filename);
   /// Detector grouping information
