@@ -62,7 +62,15 @@ TomographyIfaceViewQtGUI::TomographyIfaceViewQtGUI(QWidget *parent)
 TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {}
 
 void TomographyIfaceViewQtGUI::initLayout() {
+  // setup container ui
   m_ui.setupUi(this);
+  // add tabs and set up their ui's
+  QWidget *tab1w = new QWidget();
+  m_uiTabSetup.setupUi(tab1w);
+  m_ui.tabMain->addTab(tab1w, QString("Run"));
+  QWidget *tab2w = new QWidget();
+  m_uiTabRun.setupUi(tab2w);
+  m_ui.tabMain->addTab(tab2w, QString("Setup"));
 
   readSettings();
 

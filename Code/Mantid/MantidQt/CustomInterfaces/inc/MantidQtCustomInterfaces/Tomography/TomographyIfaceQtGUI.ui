@@ -1264,13 +1264,13 @@
   <tabstop>pushButton_SCARF_login</tabstop>
   <tabstop>pushButton_SCARF_logout</tabstop>
   <tabstop>lineEdit_SCARF_path</tabstop>
-  <tabstop>spinBox_SCARFnumNodes</tabstop>
-  <tabstop>spinBox_SCARFnumCores</tabstop>
   <tabstop>lineEdit_path_FITS</tabstop>
   <tabstop>lineEdit_path_flat</tabstop>
   <tabstop>lineEdit_path_dark</tabstop>
-  <tabstop>tabWidget_comp_resource</tabstop>
   <tabstop>tabMain</tabstop>
+  <tabstop>tabWidget_comp_resource</tabstop>
+  <tabstop>spinBox_SCARFnumNodes</tabstop>
+  <tabstop>spinBox_SCARFnumCores</tabstop>
   <tabstop>spinBox_localNumCores</tabstop>
   <tabstop>pushButton_fits_dir</tabstop>
   <tabstop>pushButton_flat_dir</tabstop>

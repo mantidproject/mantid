@@ -9,6 +9,8 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 #include "ui_TomographyIfaceQtGUI.h"
+#include "ui_TomographyIfaceQtTabSetup.h"
+#include "ui_TomographyIfaceQtTabRun.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <json/json.h>
@@ -204,6 +206,10 @@ private:
 
   /// Interface definition with widgets for the main interface window
   Ui::TomoReconstruction m_ui;
+  // And its sections/tabs. Note that for compactness they're called simply 'tabs'
+  // but they could be separate dialogs, widgets, etc.
+  Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
+  Ui::TomographyIfaceQtTabRun m_uiTabRun;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
