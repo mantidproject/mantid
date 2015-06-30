@@ -905,6 +905,9 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().transmission_calculator.interpolate"
     ).trimmed() == "True");
 
+  // Transmission settings
+  setTransmissionSettingsFromUserFile();
+
   //Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.detector_file('rear')"));
@@ -3924,6 +3927,77 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString& wsName) {
     return isValid;
 }
 
+/**
+ * Set the M3M4 check box and line edit field logic
+ * @param setting :: the checked item
+ */
+void SANSRunWindow::setM3M4Logic(TransSettings setting) {
+  switch (setting) {
+    case TransSettings::M3:
+      this->m_uiForm.trans_M4_check_box->setChecked(false);
+      break;
+    case TransSettings::M4:
+      this->m_uiForm.trans_M3_check_box->setChecked(false);
+      break;
+    default:
+      return;
+  }
+
+  // Disable all ROI, Radius and Mask related options
+  setRadiusRoiMaskInputsForTrans(false);
+
+  // Uncheck the both Radius and ROI
+  this->m_uiForm.trans_radius_check_box->setChecked(false);
+  this->m_uiForm.trans_roi_files_checkbox->setChecked(false);
+
+  // Enable the M3M4 line edit field
+  this->m_uiForm.trans_M3M4_line_edit->setEnabled(true);
+}
+
+
+/**
+ * Set beam stop logic for Radius, ROI and Mask
+ * @param setting :: the checked item
+ */
+void SANSRunWindow::setBeamStopLogic(TransSettings setting) {
+  if (setting != TransSettings::RADIUS || setting != TransSettings::ROI) {
+    return;
+  }
+
+  // Enable the Radius, ROI and Mask inputs
+  setRadiusRoiMaskInputsForTrans(true);
+
+  // Disable teh M3M4 line edit field and uncheck the M3 and M4 box
+  this->m_uiForm.trans_M3M4_line_edit->setEnabled(false);
+  this->m_uiForm.trans_M3_check_box->setChecked(false);
+  this->m_uiForm.trans_M4_check_box->setChecked(false);
+}
+
+
+
+/**
+ * Sets the all radius, roi and mask related fields
+ * @param state :: the settings state
+ */
+void SANSRunWindow::setRadiusRoiMaskInputsForTrans(bool state) {
+  this->m_uiForm.trans_masking_line_edit->setEnabled(state);
+  this->m_uiForm.trans_radius_line_edit->setEnabled(state);
+  this->m_uiForm.trans_roi_files_line_edit->setEnabled(state);
+}
+
+/**
+ * Reads the transmission settings from the user file and sets it in the GUI
+ */
+void SANSRunWindow::setTransmissionSettingsFromUserFile() {
+  // Read the M3, M4 and TRANSPEC settings
+
+  // Read the Radius settings
+
+  // Read the ROI settings
+
+  // Read the MASK settings
+
+}
 
 } //namespace CustomInterfaces
 
