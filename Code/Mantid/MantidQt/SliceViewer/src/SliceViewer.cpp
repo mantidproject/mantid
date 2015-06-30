@@ -14,7 +14,6 @@
 #include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -37,12 +36,10 @@
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
-#include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
-#include "MantidQtMantidWidgets/InputController.h"
 
 #include <qwt_plot_panner.h>
 #include <Poco/AutoPtr.h>
@@ -238,12 +235,12 @@ void SliceViewer::saveSettings() {
 * @param mode the mode of the icon
 * @param state on or off state of the icon
 */
-void SliceViewer::setIconFromString(QWidget* btn, const std::string& iconName,
+void SliceViewer::setIconFromString(QAbstractButton* btn, const std::string& iconName,
     QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state = QIcon::State::Off)
 {
   QIcon icon;
   icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
-  btn->setIcon(icon.pixmap());
+  btn->setIcon(icon);
 }
 /** set an icon given the control and a string.
 * @param action the menu action to give the new icon
@@ -303,9 +300,7 @@ void SliceViewer::initMenus() {
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
-  {
-    setIconFromString(action,g_iconViewFull);
-  }
+  setIconFromString(action,g_iconViewFull);
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
@@ -941,7 +936,7 @@ void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
 
   if (checked) {
-    setIconFromString(ui.btnDoLine,g_iconCutOn,QIcon::Mode::Normal,QIcon::State::On);
+    setIconFromString(ui.btnDoLine,g_iconCutOn,QIcon::Mode::Normal,QIcon::State::Off);
     QString text;
     if (m_lineOverlay->getCreationMode())
       text = "Click and drag to draw an cut line.\n"
@@ -953,7 +948,7 @@ void SliceViewer::LineMode_toggled(bool checked) {
   if (!checked) {
     // clear the old line
     clearLine();
-    setIconFromString(ui.btnDoLine,g_iconCut);
+    setIconFromString(ui.btnDoLine,g_iconCut,QIcon::Mode::Normal,QIcon::State::On);
   }
   emit showLineViewer(checked);
 }

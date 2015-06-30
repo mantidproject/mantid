@@ -10,7 +10,6 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
-#include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
@@ -19,16 +18,10 @@
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
-#include <QtCore/QtCore>
-#include <QtGui/qdialog.h>
-#include <QtGui/QWidget>
 #include <qwt_color_map.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_plot.h>
-#include <qwt_raster_data.h>
-#include <qwt_scale_widget.h>
 #include <vector>
-#include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include <boost/shared_ptr.hpp>
 
@@ -211,7 +204,7 @@ private:
   void saveSettings();
   void setIconFromString(QAction* action, const std::string& iconName,
     QIcon::Mode mode, QIcon::State state);
-  void setIconFromString(QWidget* btn, const std::string& iconName,
+  void setIconFromString(QAbstractButton* btn, const std::string& iconName,
     QIcon::Mode mode, QIcon::State state);
   void initMenus();
   void initZoomer();
