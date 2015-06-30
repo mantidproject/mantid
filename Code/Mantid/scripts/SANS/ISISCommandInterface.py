@@ -1229,12 +1229,13 @@ def GetTransmissionMonitorSpectrumShift():
         @return: tranmission monitor spectrum or empty string
     """
     inst =  ReductionSingleton().get_instrument()
-    if inst.name() != 'SANS2D' or inst.name() != 'SANS2DTUBES':
+
+    if inst.name() != "SANS2D" and inst.name() != "SANS2DTUBES":
         return ""
 
     shift = inst.monitor_4_offset
     if shift is not None:
-        return str(spec)
+        return str(shift)
     else:
         return ""
 

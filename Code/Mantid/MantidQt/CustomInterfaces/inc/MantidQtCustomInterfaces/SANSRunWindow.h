@@ -388,10 +388,12 @@ private:
 
   /// set logic for M3 or M4 selection
   void setM3M4Logic(TransSettings setting, bool isNowChecked);
-  /// enable/disable all Radius, ROI and Mask specific entries
-  void setRadiusRoiMaskInputsForTrans(bool state);
   /// set logic for beam stop selection
   void setBeamStopLogic(TransSettings setting, bool isNowChecked);
+  /// set logic for radius and mask
+  void setRadiusAndMaskLogic(bool isNowChecked);
+  /// set logic for ROI and mask
+  void setROIAndMaskLogic(bool isNowChecked);
   /// validate float input
   //void validateNumericInput(QString numericInput);
   /// validate file input

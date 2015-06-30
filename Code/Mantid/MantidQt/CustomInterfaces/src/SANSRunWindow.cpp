@@ -3949,7 +3949,8 @@ void SANSRunWindow::setM3M4Logic(TransSettings setting, bool isNowChecked) {
   }
 
   // Disable all ROI, Radius and Mask related options
-  setRadiusRoiMaskInputsForTrans(false);
+  setRadiusAndMaskLogic(false);
+  setROIAndMaskLogic(false);
 
   // Uncheck the both Radius and ROI
   this->m_uiForm.trans_radius_check_box->setChecked(false);
@@ -3967,19 +3968,19 @@ void SANSRunWindow::setM3M4Logic(TransSettings setting, bool isNowChecked) {
  */
 void SANSRunWindow::setBeamStopLogic(TransSettings setting, bool isNowChecked) {
   if (setting == TransSettings::RADIUS) {
-    // If the other option is not on then reset all fields
-    if (!m_uiForm.trans_roi_files_checkbox->isChecked()) {
-      setRadiusRoiMaskInputsForTrans(isNowChecked);
-    } else {
-      m_uiForm.trans_radius_line_edit->setEnabled(isNowChecked);
+    setRadiusAndMaskLogic(isNowChecked);
+    // If we are turning off the radius checkbox and have then ROI checkbox
+    // enabled, then we don' want to turn off the mask
+    if (this->m_uiForm.trans_roi_files_checkbox->isChecked() && !isNowChecked) {
+      this->m_uiForm.trans_masking_line_edit->setEnabled(true);
     }
   }
   else if (setting == TransSettings::ROI) {
-    // If the other option is not on then reset all fields
-    if (!m_uiForm.trans_radius_check_box->isChecked()) {
-      setRadiusRoiMaskInputsForTrans(isNowChecked);
-    } else {
-      m_uiForm.trans_roi_files_line_edit->setEnabled(false);
+    setROIAndMaskLogic(isNowChecked);
+    // If we are turning off the radius checkbox and have then ROI checkbox
+    // enabled, then we don' want to turn off the mask
+    if (this->m_uiForm.trans_radius_check_box->isChecked() && !isNowChecked) {
+      this->m_uiForm.trans_masking_line_edit->setEnabled(true);
     }
   } else {
     return;
@@ -3993,25 +3994,10 @@ void SANSRunWindow::setBeamStopLogic(TransSettings setting, bool isNowChecked) {
   }
 }
 
-
-/**
- * Sets the all radius, roi and mask related fields
- * @param state :: the settings state
- */
-void SANSRunWindow::setRadiusRoiMaskInputsForTrans(bool state) {
-  this->m_uiForm.trans_masking_line_edit->setEnabled(state);
-  this->m_uiForm.trans_radius_line_edit->setEnabled(state);
-  this->m_uiForm.trans_roi_files_line_edit->setEnabled(state);
-}
-
 /**
  * Reads the transmission settings from the user file and sets it in the GUI
  */
 void SANSRunWindow::setTransmissionSettingsFromUserFile() {
-
-
-  // Read the Transmission Monitor Spectrum Shift
-
 
   // Read the Radius settings
 
@@ -4019,12 +4005,18 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
 
   // Read the MASK settings
 
+  // Read the Transmission Monitor Spectrum Shift
+  QString transmissionMonitorSpectrumShiftRequest("\nprint i.GetTransmissionMonitorSpectrumShift()");
+  QString resultTransmissionMonitorSpectrumShift(runPythonCode(transmissionMonitorSpectrumShiftRequest, false));
+  resultTransmissionMonitorSpectrumShift = resultTransmissionMonitorSpectrumShift.simplified();
+  if (resultTransmissionMonitorSpectrumShift != "") {
+    this->m_uiForm.trans_M3M4_line_edit->setText(resultTransmissionMonitorSpectrumShift);
+  }
 
   // Read Transmission Monitor Spectrum, we expect either 3 or 4
   QString transmissionMonitorSpectrumRequest("\nprint i.GetTransmissionMonitorSpectrum()");
   QString resultTransmissionMonitorSpectrum(runPythonCode(transmissionMonitorSpectrumRequest, false));
   resultTransmissionMonitorSpectrum = resultTransmissionMonitorSpectrum.simplified();
-
   if (resultTransmissionMonitorSpectrum == "3") {
     this->m_uiForm.trans_M3_check_box->setChecked(true);
     setM3M4Logic(TransSettings::M3, true);
@@ -4080,6 +4072,23 @@ void SANSRunWindow::onTransmissionROIFilesCheckboxChanged() {
   setBeamStopLogic(TransSettings::ROI, this->m_uiForm.trans_roi_files_checkbox->isChecked());
 }
 
+/**
+ * Set the radius and the mask logic
+ * @param isNowChecked :: The check state
+ */
+void SANSRunWindow::setRadiusAndMaskLogic(bool isNowChecked) {
+  this->m_uiForm.trans_masking_line_edit->setEnabled(isNowChecked);
+  this->m_uiForm.trans_radius_line_edit->setEnabled(isNowChecked);
+}
+
+/**
+ * Set the ROI and the mask logic
+ * @param isNowChecked :: The check state
+ */
+void SANSRunWindow::setROIAndMaskLogic(bool isNowChecked) {
+  this->m_uiForm.trans_masking_line_edit->setEnabled(isNowChecked);
+  this->m_uiForm.trans_roi_files_line_edit->setEnabled(isNowChecked);
+}
 
 } //namespace CustomInterfaces
 
