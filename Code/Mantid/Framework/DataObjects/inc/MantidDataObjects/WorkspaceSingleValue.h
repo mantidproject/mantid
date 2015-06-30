@@ -66,6 +66,9 @@ public:
                          MantidVec &Y, MantidVec &E,
                          bool skipError = false) const;
 
+  /// Returns the number of dimensions, 0 in this case.
+  virtual size_t getNumDims() const;
+
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   WorkspaceSingleValue(const WorkspaceSingleValue &other);

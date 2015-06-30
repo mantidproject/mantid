@@ -52,5 +52,11 @@ public:
     TS_ASSERT_EQUALS(v1,ws.dataE(0));
   }
 
+  void testgetNumDims()
+  {
+    WorkspaceSingleValue ws;
+    TS_ASSERT_EQUALS(0, ws.getNumDims());
+  }
+
 };
 #endif /*TESTWORKSPACESINGLEVALUE_*/
