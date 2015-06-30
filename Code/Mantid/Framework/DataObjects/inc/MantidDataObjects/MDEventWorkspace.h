@@ -40,8 +40,6 @@ public:
   typedef MDE MDEventType;
 
   MDEventWorkspace();
-  // TODO once we have a polymorphic clone this should be made protected
-  MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   virtual ~MDEventWorkspace();
 
   /// Returns a clone of the workspace
@@ -172,6 +170,8 @@ public:
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   /// Protected copy assignment operator. Assignment not implemented.
   /// Windows Visual Studio 2012 has trouble with declaration without definition
   /// so we provide one that throws an error. This seems template related.
@@ -191,7 +191,7 @@ protected:
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
 private:
   virtual MDEventWorkspace *doClone() const {
-    throw std::runtime_error("Cloning of MDEventWorkspace is not implemented.");
+    return new MDEventWorkspace(*this);
   }
 
   Kernel::SpecialCoordinateSystem m_coordSystem;

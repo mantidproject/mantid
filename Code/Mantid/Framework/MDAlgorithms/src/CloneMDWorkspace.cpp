@@ -108,10 +108,8 @@ CloneMDWorkspace::doClone(const typename MDEventWorkspace<MDE, nd>::sptr ws) {
                       boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
-    boost::shared_ptr<MDEventWorkspace<MDE, nd>> outWS(
-        new MDEventWorkspace<MDE, nd>(*ws));
-    this->setProperty("OutputWorkspace",
-                      boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
+    IMDWorkspace_sptr outWS(ws->clone().release());
+    setProperty("OutputWorkspace", outWS);
   }
 }
 
