@@ -96,14 +96,10 @@ void CloneWorkspace::exec() {
     IMDWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(outputWS));
-  } else if (inputPeaks) {
-    PeaksWorkspace_sptr outputWS(inputPeaks->clone().release());
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputWS));
-  } else if (tableWS) {
-    TableWorkspace_sptr outputWS(tableWS->clone().release());
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputWS));
+  } else if (inputPeaks || tableWS) {
+    // Workspace::clone() is polymorphic, we can use the same for all types
+    Workspace_sptr outputWS(inputWorkspace->clone().release());
+    setProperty("OutputWorkspace", outputWS);
   } else
     throw std::runtime_error("Expected a MatrixWorkspace, PeaksWorkspace, "
                              "MDEventWorkspace, or a MDHistoWorkspace. Cannot "
