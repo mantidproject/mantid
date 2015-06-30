@@ -209,6 +209,10 @@ protected:
 private:
   void loadSettings();
   void saveSettings();
+  void setIconFromString(QAction* action, const std::string& iconName,
+    QIcon::Mode mode, QIcon::State state);
+  void setIconFromString(QWidget* btn, const std::string& iconName,
+    QIcon::Mode mode, QIcon::State state);
   void initMenus();
   void initZoomer();
 
