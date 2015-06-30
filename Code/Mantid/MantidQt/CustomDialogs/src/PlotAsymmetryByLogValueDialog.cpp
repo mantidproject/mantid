@@ -103,6 +103,9 @@ void PlotAsymmetryByLogValueDialog::initLayout()
 
   // So user can enter a custom value
   m_uiForm.logBox->setEditable(true);
+
+  // Create and add the OK/Cancel/Help. buttons
+  m_uiForm.verticalLayout->addLayout(this->createDefaultButtonLayout());
 }
 
 /**
