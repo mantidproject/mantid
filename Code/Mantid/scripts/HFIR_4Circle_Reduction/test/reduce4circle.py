@@ -5,6 +5,12 @@ import sys
 import os
 import os.path
 
+
+# Import GUI from upper directory
+testdir = os.getcwd()
+libdir = os.path.join(testdir, os.pardir)
+sys.path.append(libdir)
+
 import reduce4circleControl as r4c
 
 
@@ -55,11 +61,11 @@ def setExperimentInfo(step):
     """
     wkflow = mydata.getObject()
 
-    wkflow.setServerURL('http://neutron....')
-    wkflow.setWebAccess(True)
-    wkflow.setLocalCache('./')
+    wkflow.setServerURL('http://neutron.ornl.gov/user_data/hb3a/')
+    wkflow.setWebAccessMode('download')
+    wkflow.setLocalCache('./temp/')
 
-    wkflow.setExpNumber(123)
+    wkflow.setExpNumber(355)
 
     return
 
@@ -68,8 +74,15 @@ def setExperimentInfo(step):
 def addPeak1(step):
     """ Add one peak
     """
-    scanno = 8
+    scanno = 38
     ptno = 11
+
+    # Download data
+    wkflow = mydata.getObject()
+    if wkflow.existDataFile(scanno, ptno)[0] is False: 
+        wkflow.downloadData(scanno, ptno)
+
+
     status, retobj = wkflow.findPeak(scanno, ptno)
     if status is True:
         peakinfo = retobj
