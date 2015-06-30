@@ -89,11 +89,11 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
         result["CalibrationWorkspace"] = "Cannot save empty table";
       } else {
         GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
-        if (bool(groupingWS) && numRows != groupingWS->getNumberHistograms()) {
+        if (bool(groupingWS) && numRows < groupingWS->getNumberHistograms()) {
           result["GroupingWorkspace"] = "Must have same number of spectra as the table has rows";
         }
         MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
-        if (bool(maskWS) && numRows != maskWS->getNumberHistograms()) {
+        if (bool(maskWS) && numRows < maskWS->getNumberHistograms()) {
           result["MaskWorkspace"] = "Must have same number of spectra as the table has rows";
         }
       }
@@ -172,6 +172,7 @@ void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
   auto column = m_calibrationWS->getColumn(name);
   std::vector<double> data;
   column->numeric_fill(data);
+  data.erase(data.begin()+m_numValues, data.end());
   writeArray(group, name, std::vector<double>(data));
 }
 
@@ -180,6 +181,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
   auto column = m_calibrationWS->getColumn(name);
   std::vector<int32_t> data;
   column->numeric_fill(data);
+  data.erase(data.begin()+m_numValues, data.end());
   writeArray(group, name, std::vector<int32_t>(data));
 }
 
@@ -194,11 +196,10 @@ void SaveDiffCal::writeIntFieldFromSVWS(
 
   // output array defaults to all one (one group, use the pixel)
   const int32_t DEFAULT_VALUE = (isMask ? 0 : 1);
-  std::vector<int32_t> values(detids.size(), DEFAULT_VALUE);
+  std::vector<int32_t> values(m_numValues, DEFAULT_VALUE);
 
-  size_t numSpectra = ws->size();
   int32_t value;
-  for (size_t i = 0; i < numSpectra; ++i) {
+  for (size_t i = 0; i < m_numValues; ++i) {
     auto spectrum = ws->getSpectrum(i);
     auto ids = spectrum->getDetectorIDs();
     auto found = m_detidToIndex.find(*(ids.begin()));
@@ -249,6 +250,14 @@ void SaveDiffCal::exec() {
   GroupingWorkspace_const_sptr groupingWS = getProperty("GroupingWorkspace");
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
   std::string filename = getProperty("Filename");
+
+  m_numValues = m_calibrationWS->rowCount();
+  if (bool(groupingWS) && groupingWS->getNumberHistograms() < m_numValues) {
+    m_numValues = groupingWS->getNumberHistograms();
+  }
+  if (bool(maskWS) && maskWS->getNumberHistograms() < m_numValues) {
+    m_numValues = maskWS->getNumberHistograms();
+  }
 
   // delete the file if it already exists
   if (Poco::File(filename).exists()) {
