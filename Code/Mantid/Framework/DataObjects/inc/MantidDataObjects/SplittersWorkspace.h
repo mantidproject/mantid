@@ -57,6 +57,12 @@ public:
   size_t getNumberSplitters() const;
 
   bool removeSplitter(size_t);
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  SplittersWorkspace(const SplittersWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  SplittersWorkspace &operator=(const SplittersWorkspace &other);
 };
 
 typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;

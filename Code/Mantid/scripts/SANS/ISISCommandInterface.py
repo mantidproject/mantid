@@ -985,8 +985,9 @@ def DisplayMask(mask_worksp=None):
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
 
         else:
-            instrument.load_empty(mask_worksp)
-            instrument.set_up_for_run('emptyInstrument')
+            msg = 'Cannot display the mask without a sample workspace'
+            _printMessage(msg, log = True, no_console=False)
+            return
 
     ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
     if counts_data:

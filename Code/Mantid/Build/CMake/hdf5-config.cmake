@@ -20,12 +20,12 @@ SET (HDF5_BUILD_SHARED_LIBS    ON)
 #-----------------------------------------------------------------------------
 # Directories
 #-----------------------------------------------------------------------------
-SET (HDF5_INCLUDE_DIRS "${THIRD_PARTY}/include/hdf5;${THIRD_PARTY}/include/hdf5/c++;${THIRD_PARTY}/include/hdf5/hl")
+SET (HDF5_INCLUDE_DIRS "${THIRD_PARTY}/include/hdf5;${THIRD_PARTY}/include/hdf5/cpp;${THIRD_PARTY}/include/hdf5/hl")
 
 IF (HDF5_BUILD_FORTRAN)
   MESSAGE (ERROR "Sorry - we don't supply the fortran bindings.")
 ENDIF (HDF5_BUILD_FORTRAN)
-  
+
 IF (HDF5_BUILD_CPP_LIB)
   SET (HDF5_INCLUDE_DIR_CPP ${HDF5_INCLUDE_DIRS} )
 ENDIF (HDF5_BUILD_CPP_LIB)

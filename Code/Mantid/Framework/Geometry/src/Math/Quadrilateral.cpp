@@ -14,9 +14,7 @@ using Kernel::V2D;
 Quadrilateral::Quadrilateral(const V2D &lowerLeft, const V2D &lowerRight,
                              const V2D &upperRight, const V2D &upperLeft)
     : ConvexPolygon(), m_lowerLeft(lowerLeft), m_lowerRight(lowerRight),
-      m_upperRight(upperRight), m_upperLeft(upperLeft) {
-  initialize();
-}
+      m_upperRight(upperRight), m_upperLeft(upperLeft) {}
 
 /**
  *  Special constructor for a rectangle
@@ -27,9 +25,7 @@ Quadrilateral::Quadrilateral(const double lowerX, const double upperX,
       m_lowerRight(upperX, lowerY), m_upperRight(upperX, upperY),
       m_upperLeft(lowerX, upperY)
 
-{
-  initialize();
-}
+{}
 
 /**
  * Copy constructor
@@ -38,10 +34,7 @@ Quadrilateral::Quadrilateral(const double lowerX, const double upperX,
 Quadrilateral::Quadrilateral(const Quadrilateral &other)
     : ConvexPolygon(), m_lowerLeft(other.m_lowerLeft),
       m_lowerRight(other.m_lowerRight), m_upperRight(other.m_upperRight),
-      m_upperLeft(other.m_upperLeft) {
-  // Base class does the work
-  initialize();
-}
+      m_upperLeft(other.m_upperLeft) {}
 
 /**
  * @param rhs The source object to copy from
@@ -52,14 +45,8 @@ Quadrilateral &Quadrilateral::operator=(const Quadrilateral &rhs) {
     m_lowerRight = rhs.m_lowerRight;
     m_upperRight = rhs.m_upperRight;
     m_upperLeft = rhs.m_upperLeft;
-    initialize();
   }
   return *this;
-}
-
-/// Destructor
-Quadrilateral::~Quadrilateral() {
-  m_head = NULL; // Important as the base class assumes a heap allocated object
 }
 
 /**
@@ -69,7 +56,6 @@ Quadrilateral::~Quadrilateral() {
  * @throws Exception::IndexError if the index is out of range
  */
 const V2D &Quadrilateral::operator[](const size_t index) const {
-  if (index < numVertices()) {
     switch (index) {
     case 0:
       return m_lowerLeft;
@@ -79,10 +65,36 @@ const V2D &Quadrilateral::operator[](const size_t index) const {
       return m_upperRight;
     case 3:
       return m_lowerRight;
-    }
+    default: throw Kernel::Exception::IndexError(index, npoints(),
+                                                 "Quadrilateral::operator[]");
   }
-  throw Kernel::Exception::IndexError(index, numVertices(),
-                                      "Quadrilateral::operator[]");
+}
+
+/**
+ * Return the vertex at the given index
+ * @param index :: An index, starting at 0
+ * @returns A reference to the polygon at that index
+ * @throws Exception::IndexError if the index is out of range
+ */
+const Kernel::V2D &Quadrilateral::at(const size_t index) const
+{
+  return (*this)[index];
+}
+
+/**
+ * @return True if the point is inside the polygon or on the edge
+ */
+bool Quadrilateral::contains(const Kernel::V2D &point) const {
+  return (minX() <= point.X() && point.X() <= maxX() && minY() <= point.Y() &&
+          point.Y() <= maxY());
+}
+
+/**
+ * @return True if the given polygon is completely encosed by this one
+ */
+bool Quadrilateral::contains(const ConvexPolygon &poly) const {
+  return (minX() <= poly.minX() && poly.maxX() <= maxX() &&
+          minY() <= poly.minY() && poly.maxY() <= maxY());
 }
 
 /**
@@ -110,20 +122,38 @@ double Quadrilateral::area() const {
  */
 double Quadrilateral::determinant() const { return 2.0 * area(); }
 
-//-----------------------------------------------------------------------------
-// Private member functions
-//-----------------------------------------------------------------------------
-/**
- * Initalize the object
- */
-void Quadrilateral::initialize() {
+/// @return The smallest X value for all points
+double Quadrilateral::minX() const {
+  return (m_lowerLeft.X() < m_upperLeft.X()) ? m_lowerLeft.X()
+                                             : m_upperLeft.X();
+}
 
-  m_head = &(m_lowerLeft);
-  m_head->insert(&m_lowerRight);
-  m_head->insert(&m_upperRight);
-  m_head->insert(&m_upperLeft);
+/// @return The largest X value for all points
+double Quadrilateral::maxX() const {
+  return (m_lowerRight.X() > m_upperRight.X()) ? m_lowerRight.X()
+                                               : m_upperRight.X();
+}
 
-  ConvexPolygon::setup();
+/// @return The smallest Y value for all points
+double Quadrilateral::minY() const {
+  return (m_lowerLeft.Y() < m_lowerRight.Y()) ? m_lowerLeft.Y()
+                                              : m_lowerRight.Y();
+}
+
+/// @return The largest Y value for all points
+double Quadrilateral::maxY() const {
+  return (m_upperLeft.Y() > m_upperRight.Y()) ? m_upperLeft.Y()
+                                              : m_upperRight.Y();
+}
+
+/// @return A new polygon based on the current Quadrilateral
+ConvexPolygon Quadrilateral::toPoly() const {
+  ConvexPolygon::Vertices points(4);
+  points[0] = m_lowerLeft;
+  points[1] = m_upperLeft;
+  points[2] = m_upperRight;
+  points[3] = m_lowerRight;
+  return ConvexPolygon(points);
 }
 
 } // namespace Mantid

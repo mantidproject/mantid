@@ -52,14 +52,14 @@ public:
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  SpecialWorkspace2D(const SpecialWorkspace2D &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &);
-
   bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  SpecialWorkspace2D(const SpecialWorkspace2D &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &other);
+
   virtual void init(const size_t &NVectors, const size_t &XLength,
                     const size_t &YLength);
 

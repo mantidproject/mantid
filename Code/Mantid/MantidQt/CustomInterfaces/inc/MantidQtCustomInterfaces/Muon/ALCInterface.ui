@@ -83,14 +83,21 @@
      </item>
      <item row="0" column="0">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
+        <item>
         <widget class="QPushButton" name="previousStep">
          <property name="text">
           <string>%PREV%</string>
          </property>
         </widget>
        </item>
-       <item>
+        <item>
+          <widget class="QPushButton" name="importResults">
+            <property name="text">
+              <string>Import results...</string>
+            </property>
+          </widget>
+        </item>
+        <item>
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
