@@ -69,7 +69,7 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if _os_env().startswith("Windows") and _numpy_ver() == "1.6.2":
+    if _os_env().startswith("Windows") and _numpy_ver() == "1.6.2" and "python_d" not in sys.executable:
         return True
     return False
 

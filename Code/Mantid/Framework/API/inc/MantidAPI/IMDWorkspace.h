@@ -70,7 +70,6 @@ enum MDNormalization {
 class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  IMDWorkspace(const IMDWorkspace &other);
   virtual ~IMDWorkspace();
 
   /// Get the number of points associated with the workspace.
@@ -134,6 +133,11 @@ public:
   virtual MDNormalization displayNormalization() const;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMDWorkspace(const IMDWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMDWorkspace &operator=(const IMDWorkspace &other);
+
   virtual const std::string toString() const;
 };
 

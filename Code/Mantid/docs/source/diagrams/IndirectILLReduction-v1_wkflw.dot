@@ -1,16 +1,16 @@
 digraph IndirectILLReduction {
   label="IndirectILLReduction Flowchart"
-  /* $global_style */
+  $global_style
 
   subgraph values{
-    /* $value_style */
+    $value_style
     CE_End          [label="Reduced Workspace"]
     MM_End          [label="Reduced Workspace"]
     MM_ScaleFactor  [label="0.5"]
   }
 
   subgraph descision {
-    /* $decision_style */
+    $decision_style
     Save_Red                      [label="Save?"]
     Save_LeftRed                  [label="Save?"]
     Save_RightRed                 [label="Save?"]
@@ -18,7 +18,7 @@ digraph IndirectILLReduction {
   }
 
   subgraph params {
-    /* $param_style */
+    $param_style
     Run
     Analyser
     Reflection
@@ -32,7 +32,7 @@ digraph IndirectILLReduction {
   }
 
   subgraph algorithms {
-    /* $algorithm_style */
+    $algorithm_style
     LoadILLIndirect
     LoadParameterFile
     GroupDetectors
@@ -60,13 +60,16 @@ digraph IndirectILLReduction {
     MM_SaveNexusProcessed_RightRed  [label="SaveNexusProcessed"]
   }
 
+  subgraph processes {
+    $process_style
+    CE_Normal         [label="Calculate Energy"]
+    CE_Mirror_Right   [label="Calculate Energy (Right)"]
+    CE_Mirror_Left    [label="Calculate Energy (Left)"]
+    RunMirrorMode     [label="Mirror Mode"]
+  }
+
   CE_Start          [label="Calculate Energy"]
   MM_Start          [label="Mirror Mode"]
-
-  CE_Normal         [label="Calculate Energy"]
-  CE_Mirror_Right   [label="Calculate Energy (Right)"]
-  CE_Mirror_Left    [label="Calculate Energy (Left)"]
-  RunMirrorMode     [label="Mirror Mode"]
 
   subgraph calculate_energy {
     CE_Start                      -> CE_Scale_Monitor           [label="Monitor WS"]

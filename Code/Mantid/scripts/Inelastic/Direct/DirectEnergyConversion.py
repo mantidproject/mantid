@@ -8,12 +8,14 @@ import copy
 import math
 import time
 import numpy as np
+import collections
 
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
 from Direct.RunDescriptor    import RunDescriptor
 from Direct.ReductionHelpers import extract_non_system_names
+
 
 
 def setup_reducer(inst_name,reload_instrument=False):
@@ -507,7 +509,8 @@ class DirectEnergyConversion(object):
                 else:
                     if results_name != out_ws_name:
                         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
-                        result = mtd[out_ws_name]
+                        results_name = out_ws_name
+                        result = mtd[results_name]
                     else:
                         result = deltaE_ws_sample
             else: # delete workspace if no output is requested
@@ -668,6 +671,69 @@ class DirectEnergyConversion(object):
         return mono_s
 
 #-------------------------------------------------------------------------------
+    def sum_monitors_spectra(self,monitor_ws,ei_mon_spectra):
+        """Sum monitors spectra for all spectra, specified in the spectra list(s)
+           and create monitor workspace containing only the spectra summed and organized
+           according to ei_mon_spectra tuple.
+
+           Returns tuple of two spectra numbers, containing in the
+           new summed monitors workspace and pointer to the new workspace itself.
+        """
+        spectra_list1=ei_mon_spectra[0]
+        spectra_list2=ei_mon_spectra[1]
+        if not isinstance(spectra_list1,list):
+            spectra_list1 = [spectra_list1]
+        spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
+
+        if not isinstance(spectra_list2,list):
+            spectra_list2 = [spectra_list2]
+        spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+        monitor_ws_name = monitor_ws.name()
+        DeleteWorkspace(monitor_ws_name)
+        AppendSpectra(InputWorkspace1='spectr_ws1',InputWorkspace2='spectr_ws2',OutputWorkspace=monitor_ws_name)
+        if 'spectr_ws1' in mtd:
+            DeleteWorkspace('spectr_ws1')
+        if 'spectr_ws2' in mtd:
+            DeleteWorkspace('spectr_ws2')
+        monitor_ws = mtd[monitor_ws_name]
+        # Weird operation. It looks like the spectra numbers obtained from
+        # AppendSpectra operation depend on instrument.
+        # Looks like a bug in AppendSpectra
+        spec_num1 = monitor_ws.getSpectrum(0).getSpectrumNo()
+        spec_num2 = monitor_ws.getSpectrum(1).getSpectrumNo()
+
+        return (spec_num1,spec_num2),monitor_ws
+
+    def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
+        """Method moves all detectors of the spectra list into the same position and
+           sums the specified spectra in the workspace"""
+        detPos=None
+        wsIDs=list()
+        for spec_num in spectra_list:
+            specID = workspace.getIndexFromSpectrumNumber(spec_num)
+            if detPos is None:
+                first_detector = workspace.getDetector(specID)
+                detPos = first_detector.getPos()
+            else:
+                psp = workspace.getSpectrum(specID)
+                detIDs = psp.getDetectorIDs()
+                for detID in detIDs:
+                    MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',
+                                DetectorID=detID,X=detPos.getX(),Y=detPos.getY(),
+                                Z=detPos.getZ(),RelativePosition=False)
+            wsIDs.append(specID)
+
+        if len(spectra_list) == 1:
+            ExtractSingleSpectrum(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            WorkspaceIndex=wsIDs[0])
+        else:
+            SumSpectra(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            ListOfWorkspaceIndices=wsIDs)
+        ws = mtd[target_ws_name]
+        sp = ws.getSpectrum(0)
+        spectrum_num = sp.getSpectrumNo()
+        return spectrum_num
+#-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """ Calculate incident energy of neutrons and the time of the of the
             peak in the monitor spectrum
@@ -690,12 +756,15 @@ class DirectEnergyConversion(object):
                  format(data_ws.name(),data_ws.getRunNumber()))
         separate_monitors = data_run.is_monws_separate()
         data_run.set_action_suffix('_shifted')
+        # sum monitor spectra if this is requested
+        if PropertyManager.ei_mon_spectra.need_to_sum_monitors(self.prop_man):
+            ei_mon_spectra,monitor_ws = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
 
 
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
-            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(ei_mon_spectra[0]),
-                  Monitor2Spec=int(ei_mon_spectra[1]),
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
+                  Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
 
         # Store found incident energy in the class itself
@@ -720,7 +789,7 @@ class DirectEnergyConversion(object):
                InstrumentParameter="DelayTime",Combine=True)
 
         # shift to monitor used to calculate energy transfer
-        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0]))
+        spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
@@ -772,11 +841,11 @@ class DirectEnergyConversion(object):
                 method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,external_monitors_ws)
                 break
             if case('current'):
-                out_ws=NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
+                NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
                 # NormalizationFactor log has been added by the algorithm themselves.
                 break
             if case(): # default
-                raise RuntimeError("""Normalization method {0} not found. 
+                raise RuntimeError("""Normalization method {0} not found.
                                    It must be one of monitor-1, monitor-2, current, or None""".\
                                    format(method))
         #endCase
@@ -813,7 +882,7 @@ class DirectEnergyConversion(object):
                    .format(ws.name(),run.run_number()))
 
 
-        range = self.norm_mon_integration_range
+        int_range = self.norm_mon_integration_range
         if self._debug_mode:
             kwargs = {'NormFactorWS':'NormMon1_WS' + data_ws.getName()}
         else:
@@ -823,12 +892,12 @@ class DirectEnergyConversion(object):
         if separate_monitors:
             kwargs['MonitorWorkspace'] = mon_ws
             kwargs['MonitorWorkspaceIndex'] = int(mon_ws.getIndexFromSpectrumNumber(int(mon_spect)))
-            range_min = float(range[0])
-            range_max = float(range[1])
+            range_min = float(int_range[0])
+            range_max = float(int_range[1])
         else:
             kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change c++ algorithm, which need float monitor ID
-            range_min = float(range[0] + range_offset)
-            range_max = float(range[1] + range_offset)
+            range_min = float(int_range[0] + range_offset)
+            range_max = float(int_range[1] + range_offset)
         kwargs['NormFactorWS'] = 'Monitor1_norm_ws'
 
         # Normalize to monitor 1
@@ -880,9 +949,9 @@ class DirectEnergyConversion(object):
 
         #Find TOF range, correspondent to incident energy monitor peak
         if self._mon2_norm_time_range: # range has been found during ei-calculations
-            range = self._mon2_norm_time_range
-            range_min = range[0] + range_offset
-            range_max = range[1] + range_offset
+            norm_range = self._mon2_norm_time_range
+            range_min = norm_range[0] + range_offset
+            range_max = norm_range[1] + range_offset
             self._mon2_norm_time_range = None
         else:
             mon_ws_name = mon_ws.name() #monitor's workspace and detector's workspace are e
@@ -984,12 +1053,22 @@ class DirectEnergyConversion(object):
                 src_name = None
                 mon1_peak = 0
             else:
-                mon_2_spec_ID = int(ei_mon_spectra[0])
+                mon_1_spec_ID = ei_mon_spectra[0]
+                if isinstance(mon_1_spec_ID,collections.Iterable):
+                    fix_ei = True # This could be a HACK
+                    mon_1_spec_ID = mon_1_spec_ID[0]
+                #-----------
+                mon_2_spec_ID = ei_mon_spectra[1]
+                if isinstance(mon_2_spec_ID,collections.Iterable):
+                    fix_ei = True # This could be a HACK
+                    mon_2_spec_ID = mon_2_spec_ID[1]
+                #-----------
+
                 # Calculate the incident energy and TOF when the particles access Monitor1
                 try:
                     ei,mon1_peak,mon1_index,tzero = \
-                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_2_spec_ID,
-                        Monitor2Spec=int(ei_mon_spectra[1]),
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_1_spec_ID,
+                        Monitor2Spec=mon_2_spec_ID,
                         EnergyEstimate=ei_guess,FixEi=fix_ei)
                     mon1_det = monitor_ws.getDetector(mon1_index)
                     mon1_pos = mon1_det.getPos()
@@ -1461,14 +1540,13 @@ class DirectEnergyConversion(object):
 # -------------------------------------------------------------------------------------------
 #         This actually does the conversion for the mono-sample and
 #         mono-vanadium runs
-#
 # -------------------------------------------------------------------------------------------
     def _do_mono_SNS(self, data_ws, result_name, ei_guess,\
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
-        # does not work -- retrieve from repo and fix
+        # does not work -- retrieve from repo and fix if this functionality is needed.
         raise NotImplementedError("Non currently implemented. Retrieve from repository"
                                   " if necessary and fix")
-        return
+        #return
 #-------------------------------------------------------------------------------
     def _do_mono_ISIS(self, data_run, ei_guess,\
                  white_run=None, map_file=None, spectra_masks=None, Tzero=None):
@@ -1705,7 +1783,7 @@ def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
     if masked_wksp is None:
         return (failed_spectra,0)
     try:
-        name = masked_wksp.name()
+        masked_wksp.name()
     except Exeption as ex:
         prop_man.log("***WARNING: cached mask workspace invalidated. Incorrect masking reported")
         return (failed_spectra,0)

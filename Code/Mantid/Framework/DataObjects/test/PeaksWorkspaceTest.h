@@ -73,10 +73,16 @@ public:
     checkPW(*pw);
   }
 
+  class TestablePeaksWorkspace : public PeaksWorkspace {
+  public:
+    TestablePeaksWorkspace(const PeaksWorkspace &other)
+        : PeaksWorkspace(other) {}
+  };
+
   void test_copyConstructor()
   {
     auto pw = buildPW();
-    auto pw2 = PeaksWorkspace_sptr(new PeaksWorkspace(*pw));
+    auto pw2 = PeaksWorkspace_sptr(new TestablePeaksWorkspace(*pw));
     checkPW(*pw2);
   }
 

@@ -2,6 +2,7 @@
 from mantid.kernel import *
 from mantid.api import *
 import math
+import EnginXUtils
 
 class EnginXCalibrateFull(PythonAlgorithm):
 
@@ -15,11 +16,19 @@ class EnginXCalibrateFull(PythonAlgorithm):
         return "Calibrates every pixel position by performing single peak fitting."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
-    		"Calibration run to use")
+        self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
+                             "Workspace with the calibration run to use. The calibration will be applied on it.")
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Output),\
-    		"A table with the detector IDs and calibrated detector positions in V3P format.")
+        self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
+                             "A table with the detector IDs and calibrated detector positions and additional "
+                             "calibration information. The table includes: the old positions in V3D format "
+                             "(3D vector with x, y, z values), the new positions in V3D, the new positions "
+                             "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
+
+        self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
+                             "Name of the file to save the pre-/post-calibrated detector positions - this "
+                             "saves the same information that is provided in the output table workspace "
+                             "(OutDetPosTable).")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
@@ -34,8 +43,6 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
     def PyExec(self):
 
-        import EnginXUtils
-
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
         expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                          self.getProperty('ExpectedPeaks').value)
@@ -43,41 +50,21 @@ class EnginXCalibrateFull(PythonAlgorithm):
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
-        ws = self._loadCalibrationRun()
+        inWS = self.getProperty('Workspace').value
+        bank = self.getProperty('Bank').value
 
-        ws = self._prepareWsForFitting(ws)
+        rebinWS = self._prepareWsForFitting(inWS)
+        posTbl = self._calculateCalibPositionsTbl(rebinWS, bank, expectedPeaksD)
 
-        positionTable = self._createPositionsTable()
-
-        indices = EnginXUtils.getWsIndicesForBank(self.getProperty('Bank').value, ws)
-
-        prog = Progress(self, 0, 1, len(indices))
-
-        for i in indices:
-
-            _, difc = self._fitPeaks(ws, i, expectedPeaksD)
-
-            det = ws.getDetector(i)
-
-            newPos = self._getCalibratedDetPos(difc, det, ws)
-
-            positionTable.addRow([det.getID(), newPos])
-
-            prog.report()
-
-        self.setProperty("DetectorPositions", positionTable)
-
-    def _loadCalibrationRun(self):
-        """ Loads specified calibration run
-    	"""
-        alg = self.createChildAlgorithm('Load')
-        alg.setProperty('Filename', self.getProperty('Filename').value)
-        alg.execute()
-        return alg.getProperty('OutputWorkspace').value
+        # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
+        self.setProperty("OutDetPosTable", posTbl)
+        self._applyCalibrationTable(inWS, posTbl)
+        self._outputDetPosFile(self.getPropertyValue('OutDetPosFilename'), posTbl)
 
     def _prepareWsForFitting(self, ws):
-        """ Rebins the workspace and converts it to distribution
-    	"""
+        """
+        Rebins the workspace and converts it to distribution
+        """
         rebinAlg = self.createChildAlgorithm('Rebin')
         rebinAlg.setProperty('InputWorkspace', ws)
         rebinAlg.setProperty('Params', '-0.0005') # The value is borrowed from OG routines
@@ -91,24 +78,50 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         return result
 
-    def _createPositionsTable(self):
-        """ Creates an empty table for storing detector positions
-    	"""
-        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
-        alg.execute()
-        table = alg.getProperty('OutputWorkspace').value
+    def _calculateCalibPositionsTbl(self, ws, bank, expectedPeaksD):
+        """
+        Makes a table of calibrated positions (and additional parameters). It goes through
+        the detectors of the workspace and calculates the difc and zero parameters by fitting
+        peaks, then calculates the coordinates and adds them in the returned table.
 
-        table.addColumn('int', 'Detector ID')
-        table.addColumn('V3D', 'Detector Position')
+        @param ws :: input workspace with an instrument definition
+        @param bank :: instrument bank to calibrate
+        @param expectedPeaksD :: expected peaks in d-spacing
 
-        return table
+        @return table that with the detector positions, with one row per detector
+
+        """
+        posTbl = self._createPositionsTable()
+
+        indices = EnginXUtils.getWsIndicesForBank(bank, ws)
+
+        prog = Progress(self, start=0, end=1, nreports=len(indices))
+
+        for i in indices:
+
+            zero, difc = self._fitPeaks(ws, i, expectedPeaksD)
+
+            det = ws.getDetector(i)
+            newPos, newL2 = self._getCalibratedDetPos(difc, det, ws)
+
+            # get old (pre-calibration) detector coordinates
+            oldL2 = det.getDistance(ws.getInstrument().getSample())
+            det2Theta = ws.detectorTwoTheta(det)
+            detPhi = det.getPhi()
+            oldPos = det.getPos()
+
+            posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
+                                  difc, zero])
+            prog.report()
+
+        return posTbl
 
     def _fitPeaks(self, ws, wsIndex, expectedPeaksD):
         """
         Fits expected peaks to the spectrum, and returns calibrated zero and difc values.
 
         @param wsIndex workspace index of the spectrum to fit
-        @param  expectedPeaksD :: expected peaks for the fitting, in d-spacing units
+        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
 
         @returns a pair of parameters: difc and zero
     	"""
@@ -122,6 +135,57 @@ class EnginXCalibrateFull(PythonAlgorithm):
         zero = alg.getProperty('Zero').value
 
         return (zero, difc)
+
+    def _createPositionsTable(self):
+        """
+        Helper method to create an empty table for storing detector positions
+
+        @return table with the expected output columns
+        """
+        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+        alg.execute()
+        table = alg.getProperty('OutputWorkspace').value
+
+        # Note: the colums 'Detector ID' and 'Detector Position' must have those
+        # exact names (expected by child alg. ApplyCalibration in EnginXFocus)
+        table.addColumn('int', 'Detector ID')
+        table.addColumn('V3D', 'Old Detector Position')
+        table.addColumn('V3D', 'Detector Position')
+        table.addColumn('float', 'L2')
+        table.addColumn('float', '2 \\theta')
+        table.addColumn('float', '\\phi')
+        table.addColumn('float', '\\delta L2 (calibrated - old)')
+        table.addColumn('float', 'difc')
+        table.addColumn('float', 'zero')
+
+        return table
+
+    def _outputDetPosFile(self, filename, tbl):
+        """
+        Writes a text (csv) file with the detector positions information that also goes into the
+        output DetectorPostions table workspace.
+
+        @param filename :: name of the file to write. If it is empty nothing is saved/written.
+        @param tbl :: detector positions table workspace
+        """
+        if not filename:
+            return
+
+        if 9 > tbl.columnCount():
+            return
+
+        self.log().information("Saving detector positions in file: %s" % filename)
+        with open(filename, "w") as f:
+            f.write('# detector ID, old position (x), old position (y), old position (z), '
+                    'calibrated position (x), calibrated position (y), calibrated position (z), '
+                    'calib. L2, calib. 2\\theta, calib. \\phi, delta L2 (calibrated - old), difc, zero\n')
+            for r in range(0, tbl.rowCount()):
+                f.write("%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n" %
+                        (tbl.cell(r,0),
+                         tbl.cell(r,1).getX(), tbl.cell(r,1).getY(), tbl.cell(r,1).getZ(),
+                         tbl.cell(r,2).getX(), tbl.cell(r,2).getY(), tbl.cell(r,2).getZ(),
+                         tbl.cell(r,3), tbl.cell(r,4), tbl.cell(r,5),
+                         tbl.cell(r,6), tbl.cell(r,7), tbl.cell(r,8)))
 
     def _getCalibratedDetPos(self, newDifc, det, ws):
         """
@@ -138,7 +202,25 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         newPos = self._V3DFromSpherical(newL2, detTwoTheta, detPhi)
 
-        return newPos
+        return (newPos, newL2)
+
+    def _applyCalibrationTable(self, ws, detPos):
+        """
+        Corrects the detector positions using the result of calibration (if one is specified).
+        The parameters of the instrument definition of the workspace are updated in place using the
+        geometry parameters given in the input table.
+
+        @param ws :: workspace to calibrate which should be consistent with the detector positions
+        table passed
+
+        @param detPos :: detector positions table to apply the calibration. It must have columns
+        'Detector ID' and 'Detector Position'
+        """
+        self.log().notice("Applying calibration on the input workspace")
+        alg = self.createChildAlgorithm('ApplyCalibration')
+        alg.setProperty('Workspace', ws)
+        alg.setProperty('PositionTable', detPos)
+        alg.execute()
 
     def _V3DFromSpherical(self, R, polar, azimuth):
         """

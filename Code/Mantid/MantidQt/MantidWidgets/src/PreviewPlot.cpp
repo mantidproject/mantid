@@ -243,6 +243,16 @@ void PreviewPlot::addSpectrum(const QString &curveName,
                               const MatrixWorkspace_sptr ws,
                               const size_t specIndex,
                               const QColor &curveColour) {
+  if (curveName.isEmpty()) {
+    g_log.warning("Cannot plot with empty curve name");
+    return;
+  }
+
+  if (!ws) {
+    g_log.warning("Cannot plot null workspace");
+    return;
+  }
+
   // Remove the existing curve if it exists
   if (m_curves.contains(curveName))
     removeSpectrum(curveName);
@@ -290,6 +300,11 @@ void PreviewPlot::addSpectrum(const QString &curveName,
 void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
                               const size_t specIndex,
                               const QColor &curveColour) {
+  if (wsName.isEmpty()) {
+    g_log.error("Cannot plot with empty workspace name");
+    return;
+  }
+
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
   auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -311,6 +326,11 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
  * @param ws Pointer to workspace
  */
 void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws) {
+  if (!ws) {
+    g_log.error("Cannot remove curve for null workspace");
+    return;
+  }
+
   QStringList curveNames = getCurvesForWorkspace(ws);
 
   for (auto it = curveNames.begin(); it != curveNames.end(); ++it)
@@ -323,6 +343,11 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws) {
  * @param curveName Name of curve
  */
 void PreviewPlot::removeSpectrum(const QString &curveName) {
+  if (curveName.isEmpty()) {
+    g_log.error("Cannot remove curve with empty name");
+    return;
+  }
+
   // Remove the curve object and legend label
   if (m_curves.contains(curveName)) {
     removeCurve(m_curves[curveName].curve);

@@ -101,10 +101,6 @@ MDGeometry::~MDGeometry() {
  */
 void MDGeometry::initGeometry(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
-  if (dimensions.size() == 0)
-    throw std::invalid_argument(
-        "MDGeometry::initGeometry() 0 valid dimensions were given!");
-
   // Copy the dimensions array
   m_dimensions = dimensions;
   // Make sure the basis vectors are big enough

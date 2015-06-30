@@ -11,6 +11,7 @@ import numpy as np
 
 import Direct.ReductionHelpers as prop_helpers
 import Direct.CommonFunctions as common
+from collections import Iterable
 
 #-----------------------------------------------------------------------------------------
 # Descriptors, providing overloads for complex properties in NonIDF_Properties
@@ -187,10 +188,12 @@ class IncidentEnergy(PropDescriptor):
         if isinstance(inc_en,list):
             for ind,en in enumerate(inc_en):
                 if en <= 0:
-                    return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" + "For input argument {0} got negative energy {1}".format(ind,en))
+                    return (False,2,"Incident energy have to be positive number or list of positive numbers.\n"
+                            "For input argument {0} got negative energy {1}".format(ind,en))
         else:
             if inc_en <= 0:
-                return (False,2,"Incident energy have to be positive number or list of positive numbers.\n" + "Got single negative incident energy {0} ".format(inc_en))
+                return (False,2,"Incident energy have to be positive number or list of positive numbers.\n"
+                        "Got single negative incident energy {0} ".format(inc_en))
         return (True,0,'')
 # end IncidentEnergy
 #-----------------------------------------------------------------------------------------
@@ -445,13 +448,14 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 
     def validate(self,instance,owner=None):
         """ function verifies if the energy range is consistent with incident energies """
-        range = self._relative_range
-        if len(range) != 2:
-            return(False,2,'mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values'.format(len(range)))
+        en_range = self._relative_range
+        if len(en_range) != 2:
+            return(False,2,'mon2_normalization_energy_range can be initialized by list of two values only.'
+                  ' Got {0} values'.format(len(range)))
 
         result = (True,0,'')
 
-        val1 = float(range[0])
+        val1 = float(en_range[0])
         if val1 < 0.1 or val1 > 0.9:
             message = "Lower mon2_norm_energy_range describes lower limit of energy to integrate neutron signal after the chopper.\n"\
                       "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val1)
@@ -461,7 +465,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
                 result = (False,1,message)
 
 
-        val2 = float(range[1])
+        val2 = float(en_range[1])
         if val2 < 1.1 or val2 > 1.9:
             message = "Upper mon2_norm_energy_range describes upper limit of energy to integrate neutron signal after the chopper.\n"\
                      "The limit is defined as (this value)*incident_energy. Are you sure you want to set this_value to {0}?\n".format(val2)
@@ -660,7 +664,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
     def __init__(self):
         prop_helpers.ComplexProperty.__init__(self,['use_hard_mask_only','run_diagnostics'])
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -726,7 +730,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             self._rel_range = True
             prop_helpers.ComplexProperty.__init__(self,['monovan_lo_frac','monovan_hi_frac'])
 
-    def __get__(self,instance,owner):
+    def __get__(self,instance,owner=None):
 
         if instance is None:
             return self
@@ -742,8 +746,8 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             if ei is None:
                 raise AttributeError('Attempted to obtain relative to ei monovan integration range, but incident energy has not been set')
             rel_range = prop_helpers.ComplexProperty.__get__(self,tDict)
-            range = [rel_range[0] * ei,rel_range[1] * ei]
-            return range
+            the_range = [rel_range[0] * ei,rel_range[1] * ei]
+            return the_range
         else: # absolute range
             return prop_helpers.ComplexProperty.__get__(self,tDict)
 
@@ -778,15 +782,117 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
         if instance.monovan_run is None:
             return (True,0,'')
 
-        range = sepf.__get__(instance,owner)
+        the_range = sepf.__get__(instance,owner)
         ei = instance.incident_energy
-        if range[0] >= range[1]:
-            return (False,2,'monovan integration range limits = [{0}:{1}] are wrong'.format(range[0],range[1]))
-        if range[0] < -100 * ei or range[0] > 100 * ei:
-            return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'.format(range[0],range[1]))
+        if the_range[0] >= the_range[1]:
+            return (False,2,'monovan integration range limits = [{0}:{1}] are wrong'.format(the_range[0],the_range[1]))
+        if the_range[0] < -100 * ei or the_range[0] > 100 * ei:
+            return (False,1,'monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect'\
+                            .format(the_range[0],the_range[1]))
         return (True,0,'')
-
 #end MonovanIntegrationRange
+
+class EiMonSpectra(prop_helpers.ComplexProperty):
+    """Property defines list of spectra, used to calculate incident energy.
+       It defines two monitor spectra for GetEi algorithm to work
+       or two spectra lists to sum and obtain workspace with two combined spectra
+       for GetEi algorithm to work.
+    """
+    def __init__(self):
+        """ Ei mon spectra is defined as function of two other complex properties"""
+        prop_helpers.ComplexProperty.__init__(self,['ei-mon1-spec','ei-mon2-spec'])
+
+    def __get__(self,instance,owner=None):
+        if instance is None:
+            return self
+
+        if isinstance(instance,dict):
+            tDict = instance
+        else:
+            tDict = instance.__dict__
+
+        mon_range = prop_helpers.ComplexProperty.__get__(self,tDict)
+
+        # Return monitors range, converted into the standard form.
+        # namely tuple of two monitors or monitors list
+        monitors = [0,0]
+        for index,mon_val in enumerate(mon_range):
+            monitors[index]=self._process_monitors_spectra(mon_val)
+        return (monitors[0],monitors[1])
+
+
+    def __set__(self,instance,value):
+        if value is None: # Do nothing
+            return
+
+        if isinstance(instance,dict):
+            dDict = instance
+        else:
+            tDict = instance.__dict__
+
+        if isinstance(value,str):
+            val =  value.translate(None,'[]').strip()
+            if val.find(':')>-1:
+                val = val.split(':')
+            else:
+                val = val.split(',')
+        else:
+            val = value
+        #end if
+        if len(val) != 2:
+            raise KeyError("ei_mon_spectra may be either tuple defining two spectra "\
+                "lists or string, which can be transformed to such lists. Got {0}"
+                .format(value))
+
+        # Handle self-assignment. Otherwise suppose that the values are meaningful
+        if val[0] == 'ei-mon1-spec':
+            val[0] = tDict['ei-mon1-spec']
+        if val[1] == 'ei-mon2-spec':
+            val[1] = tDict['ei-mon2-spec']
+        #
+        prop_helpers.ComplexProperty.__set__(self,tDict,val)
+
+    def need_to_sum_monitors(self,instance):
+        """Returns True if some monitors are defined as range of spectra to sum
+           False -- if all monitors are related to one spectra each.
+        """
+        tDict = instance.__dict__
+        mon_range = prop_helpers.ComplexProperty.__get__(self,tDict)
+        # Return monitors range, converted into the standard form.
+        need_to_sum =False
+        for mon_val in mon_range:
+            mon_list = self._process_monitors_spectra(mon_val)
+            if isinstance(mon_list,Iterable):
+                need_to_sum  = True
+                break
+        return need_to_sum
+
+    #
+    def _process_monitors_spectra(self,mon_range):
+        """A method to process any form of monitor spectra list
+           representation
+        Called on get rather then on set operation as monitor lists
+        can be set separately through ei-mon1-spec or 'ei-mon2-spec
+        properties and these properties are currently standard properties
+        """
+
+        if isinstance(mon_range,str):
+            mon_val = mon_range.split(',')
+        else:
+            mon_val = mon_range
+        if isinstance(mon_val,list) or isinstance(mon_val,tuple):
+            rez_spectra=[]
+            for mon in mon_val:
+                rez_spectra.append(int(mon))
+            if len(rez_spectra) == 1:
+                rez_spectra = rez_spectra[0]
+        else:
+            rez_spectra = int(mon_range)
+        return rez_spectra
+
+#    def validate(self,instance, owner):
+#        """ """
+#        return (True,0,'')
 
 #-----------------------------------------------------------------------------------------
 class SpectraToMonitorsList(PropDescriptor):
@@ -803,7 +909,7 @@ class SpectraToMonitorsList(PropDescriptor):
         self._spectra_to_monitors_list = None
 
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
         return self._spectra_to_monitors_list
@@ -853,7 +959,7 @@ class SaveFormat(PropDescriptor):
     def __init__(self):
         self._save_format = set()
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -915,7 +1021,7 @@ class DiagSpectra(PropDescriptor):
     def __init__(self):
         self._diag_spectra = None
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -956,7 +1062,7 @@ class BackbgroundTestRange(PropDescriptor):
     def __init__(self):
         self._background_test_range = None
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -977,15 +1083,15 @@ class BackbgroundTestRange(PropDescriptor):
 
     def validate(self,instance, owner=None):
         """ validate background test range """
-        range = self.__get__(instance,owner)
-        if range is None:
+        test_range = self.__get__(instance,owner)
+        if test_range is None:
             return (True,0,'')
-        if range[0] >= range[1]:
-            return (False,2,' Background test range: [{0}:{1}] is incorrect '.format(range[0],range[1]))
-        if range[0] < 0:
-            return (False,2,' Background test range is TOF range, so it can not be negative={0}'.format(range[0]))
-        if range[1] > 20000:
-            return (False,1,' Background test range is TOF range, its max value looks suspiciously big={0}'.format(range[1]))
+        if test_range[0] >= test_range[1]:
+            return (False,2,' Background test range: [{0}:{1}] is incorrect '.format(test_range[0],test_range[1]))
+        if test_range[0] < 0:
+            return (False,2,' Background test range is TOF range, so it can not be negative={0}'.format(test_range[0]))
+        if test_range[1] > 20000:
+            return (False,1,' Background test range is TOF range, its max value looks suspiciously big={0}'.format(test_range[1]))
         return (True,0,'')
 #end BackbgroundTestRange
 
@@ -1000,7 +1106,7 @@ class MultirepTOFSpectraList(PropDescriptor):
     def __init__(self):
         self._spectra_list = None
 
-    def __get__(self,instance,type=None):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -1044,7 +1150,7 @@ class MonoCorrectionFactor(PropDescriptor):
         self.cashed_values = {}
         self._mono_run_prop = monovan_run_prop
 
-    def __get__(self,instance,type):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -1109,7 +1215,7 @@ class MotorLogName(PropDescriptor):
     def __init__(self):
         self._log_names = []
 
-    def __get__(self,instance,type):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
         return self._log_names
@@ -1133,7 +1239,7 @@ class MotorOffset(PropDescriptor):
     """
     def __init__(self):
         self._offset = None
-    def __get__(self,instance,type):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
         return self._offset
@@ -1169,7 +1275,7 @@ class RotationAngle(PropDescriptor):
         self._log_ws_name = None
 
     #
-    def __get__(self,instance,type):
+    def __get__(self,instance,owner=None):
         if instance is None:
             return self
 
@@ -1232,6 +1338,7 @@ class RotationAngle(PropDescriptor):
     def dependencies(self):
         return ['motor_log_names','motor_offset']
 #end RotationAngle
+
 
 #-----------------------------------------------------------------------------------------
 # END Descriptors for PropertyManager itself

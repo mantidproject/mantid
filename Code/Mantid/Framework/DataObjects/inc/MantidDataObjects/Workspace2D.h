@@ -90,6 +90,11 @@ public:
                      bool parallelExecution = true);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  Workspace2D(const Workspace2D &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  Workspace2D &operator=(const Workspace2D &other);
+
   /// Called by initialize()
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength);
@@ -104,11 +109,6 @@ protected:
   std::vector<Mantid::API::ISpectrum *> data;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  Workspace2D(const Workspace2D &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  Workspace2D &operator=(const Workspace2D &);
-
   virtual std::size_t getHistogramNumberHelper() const;
 };
 
