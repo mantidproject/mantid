@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMdiSubWindow>
 #include <QtGui>
+#include <QList>
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -81,19 +82,18 @@ protected:
   void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
 private:
-  void init(SpectrumDataSource_sptr dataSource);
-  void updateHandlers(SpectrumDataSource_sptr dataSource);
+  void updateHandlers();
 
-  GraphDisplay* m_hGraph;
-  GraphDisplay* m_vGraph;
+  QList<MatrixWSDataSource_sptr> m_dataSource;
+  QList<boost::shared_ptr<GraphDisplay>> m_hGraph;
+  QList<boost::shared_ptr<GraphDisplay>> m_vGraph;
+  QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
+  QList<boost::shared_ptr<SVConnections>>   m_svConnections;
 
-  MatrixWSDataSource_sptr m_dataSource;
 
   Ui::SpectrumViewer *m_ui;
   SliderHandler      *m_sliderHandler;
   RangeHandler       *m_rangeHandler;
-  SpectrumDisplay    *m_spectrumDisplay;
-  SVConnections      *m_svConnections;
   EModeHandler       *m_emodeHandler;
 
 signals:
