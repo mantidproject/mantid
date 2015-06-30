@@ -545,7 +545,7 @@ void SANSAddFiles::setInputEnabled(bool enabled) {
 /**
  * Produces a Python string list of the format "['entry1', 'entry2', ...]"
  * @param inputString :: This string has a format of "entry1, entry2, ..."
- * @eretruns a Python list of strings
+ * @returns a Python list of strings
  */
 QString SANSAddFiles::createPythonStringList(QString inputString) {
   QString formattedString = "[";

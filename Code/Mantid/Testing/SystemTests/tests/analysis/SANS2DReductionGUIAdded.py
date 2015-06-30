@@ -52,7 +52,7 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         # we have double the sample and the can, this means that the reduced data will be
         # almost the same
         self.tolerance_is_reller = True
-        self.tolerance = 0.1
+        self.tolerance = 0.35
         return "trans_test_rear","SANSReductionGUI.nxs"
 
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
