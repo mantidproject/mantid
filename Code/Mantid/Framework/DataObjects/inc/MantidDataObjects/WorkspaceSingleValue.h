@@ -82,7 +82,7 @@ protected:
 
 private:
   virtual WorkspaceSingleValue *doClone() const {
-    throw std::runtime_error("Cloning of WorkspaceSingleValue is not implemented.");
+    return new WorkspaceSingleValue(*this);
   }
 
   // allocates space in a new workspace - does nothing in this case

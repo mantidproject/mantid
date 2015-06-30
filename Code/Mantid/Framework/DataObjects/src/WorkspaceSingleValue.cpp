@@ -21,6 +21,11 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
   isDistribution(true);
 }
 
+WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
+    : MatrixWorkspace(other), data(other.data) {
+  isDistribution(true);
+}
+
 /// Destructor
 WorkspaceSingleValue::~WorkspaceSingleValue() {}
 

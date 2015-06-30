@@ -43,6 +43,27 @@ MatrixWorkspace::MatrixWorkspace(
           (nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
 
+MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
+    : IMDWorkspace(other), ExperimentInfo(other) {
+  m_axes.resize(other.m_axes.size());
+  for (size_t i = 0; i < m_axes.size(); ++i)
+    m_axes[i] = other.m_axes[i]->clone(this);
+
+  m_isInitialized = other.m_isInitialized;
+  m_YUnit = other.m_YUnit;
+  m_YUnitLabel = other.m_YUnitLabel;
+  m_isDistribution = other.m_isDistribution;
+  m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
+  m_isCommonBinsFlag = other.m_isCommonBinsFlag;
+  m_masks = other.m_masks;
+  m_indexCalculator = other.m_indexCalculator;
+  // I think it is necessary to create our own copy of the factory, since we do
+  // not know who owns the factory in other and how its lifetime is controlled.
+  m_nearestNeighboursFactory.reset(new NearestNeighboursFactory);
+  // TODO: Do we need to init m_nearestNeighbours?
+  // TODO: Do we need to init m_monitorWorkspace?
+}
+
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
 // workspaces, so I moved this from protected to public.
