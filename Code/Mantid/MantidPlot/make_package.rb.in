@@ -128,6 +128,8 @@ if( "@MAKE_VATES@" == "ON" )
     p "fixed #{issues_found} issues this iteration!"
     break if issues_found == 0
   end
+  #fix libNonOrthogonalSource.dylib
+  `install_name_tool -id @rpath/libNonOrthogonalSource.dylib pvplugins/pvplugins/libNonOrthogonalSource.dylib`
 end
 
 #use install_name_tool to change dependencies form /usr/local to libraries in the package.
