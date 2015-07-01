@@ -46,9 +46,9 @@ private:
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
   /// private copy constructor. Not implemented.
-  EventWorkspace(const EventWorkspace &other);
+  DecoratorWorkspace(const DecoratorWorkspace &other);
   /// Private copy assignment operator. Assignment not implemented.
-  EventWorkspace &operator=(const EventWorkspace &other);
+  DecoratorWorkspace &operator=(const DecoratorWorkspace &other);
 
 public:
 
