@@ -109,7 +109,7 @@ private:
   /// initialize the setup
   void initialize();
   /// Find visible peak indexes. Those inside the bounding box, or interacting with the edges of the box.
-  std::vector<size_t> findVisiblePeakIndexes(const PeakBoundingBox &box, const bool pointOnlyMode);
+  std::vector<size_t> findVisiblePeakIndexes(const PeakBoundingBox &box);
   /// Set the visible peak list.
   void setVisiblePeaks(const std::vector<size_t>& indexes);
 };
