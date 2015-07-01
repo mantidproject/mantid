@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/Indirect/ApplyCorr.cpp
 	src/Indirect/CalcCorr.cpp
 	src/Indirect/ConvFit.cpp
+  src/Indirect/CorrectionsTab.cpp
   src/Indirect/DensityOfStates.cpp
 	src/Indirect/Elwin.cpp
 	src/Indirect/IDATab.cpp
@@ -15,6 +16,7 @@ set ( SRC_FILES
   src/Indirect/ILLEnergyTransfer.cpp
   src/Indirect/IndirectBayes.cpp
 	src/Indirect/IndirectBayesTab.cpp
+  src/Indirect/IndirectCorrections.cpp
 	src/Indirect/IndirectDataAnalysis.cpp
 	src/Indirect/IndirectDataReduction.cpp
 	src/Indirect/IndirectDataReductionTab.cpp
@@ -44,14 +46,14 @@ set ( SRC_FILES
 	src/Indirect/Stretch.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
-    src/MultiDatasetFit/MultiDatasetFit.cpp
-    src/MultiDatasetFit/MDFAddWorkspaceDialog.cpp
-    src/MultiDatasetFit/MDFDataController.cpp
-    src/MultiDatasetFit/MDFPlotController.cpp
-    src/MultiDatasetFit/MDFDatasetPlotData.cpp
-    src/MultiDatasetFit/MDFLocalParameterEditor.cpp
-    src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
-    src/MultiDatasetFit/MDFEditLocalParameterDialog.cpp
+  src/MultiDatasetFit/MultiDatasetFit.cpp
+  src/MultiDatasetFit/MDFAddWorkspaceDialog.cpp
+  src/MultiDatasetFit/MDFDataController.cpp
+  src/MultiDatasetFit/MDFPlotController.cpp
+  src/MultiDatasetFit/MDFDatasetPlotData.cpp
+  src/MultiDatasetFit/MDFLocalParameterEditor.cpp
+  src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
+  src/MultiDatasetFit/MDFEditLocalParameterDialog.cpp
 	src/Muon/ALCBaselineModellingModel.cpp
 	src/Muon/ALCBaselineModellingPresenter.cpp
 	src/Muon/ALCBaselineModellingView.cpp
@@ -102,12 +104,14 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
+	inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
   inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
   inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
   inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
+  inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h
  	inc/MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h
@@ -144,9 +148,9 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
 	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h
-    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
-    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
-    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
+  inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
+  inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+  inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
@@ -177,7 +181,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
-        inc/MantidQtCustomInterfaces/SampleTransmission.h
+  inc/MantidQtCustomInterfaces/SampleTransmission.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
@@ -202,12 +206,14 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
+                inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
+                inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h
@@ -237,12 +243,12 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h
-		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
-		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
-		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
-		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
-		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
-		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
                 inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
@@ -266,7 +272,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
-                inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
+                inc/MantidQtCustomInterfaces/SANSEventSlicing.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
                 inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
@@ -284,6 +290,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
+               inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.ui
@@ -309,8 +316,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.ui
-	       inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.ui
-	       inc/MantidQtCustomInterfaces/MultiDatasetFit/EditLocalParameterDialog.ui
+               inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.ui
+               inc/MantidQtCustomInterfaces/MultiDatasetFit/EditLocalParameterDialog.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
@@ -321,7 +328,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/ReflWindow.ui
                inc/MantidQtCustomInterfaces/SampleTransmission.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
-               inc/MantidQtCustomInterfaces/SANSRunWindow.ui  
+               inc/MantidQtCustomInterfaces/SANSRunWindow.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
                inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.ui
@@ -347,7 +354,7 @@ set ( TEST_FILES
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
 
-# Ugly hack to get around issue in Boost version 1.48.0 
+# Ugly hack to get around issue in Boost version 1.48.0
 # in conjunction with Qt 4.7.4 or greater
 set ( qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH} )
 if ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
@@ -361,7 +368,7 @@ qt4_add_resources ( RES_FILES icons/CustomInterfacesIcons.qrc )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )#${RES_FILES})
 
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
+qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 if(UNITY_BUILD)
@@ -379,11 +386,11 @@ set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomIn
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( CustomInterfaces PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
-endif () 
+endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces LINK_PRIVATE 
+target_link_libraries ( CustomInterfaces LINK_PRIVATE
             MantidQtAPI
             MantidWidgets
             QtPropertyBrowser

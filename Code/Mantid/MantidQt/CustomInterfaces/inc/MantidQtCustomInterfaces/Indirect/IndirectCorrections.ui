@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataAnalysis</class>
- <widget class="QMainWindow" name="IndirectDataAnalysis">
+ <class>IndirectCorrections</class>
+ <widget class="QMainWindow" name="IndirectCorrections">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indirect Data Analysis</string>
+   <string>Indirect Corrections</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -26,29 +26,19 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tabElwin">
+      <widget class="QWidget" name="tabCalcCorr">
        <attribute name="title">
-        <string>Elwin</string>
+        <string>Calculate Corrections</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabMSD">
+      <widget class="QWidget" name="tabApplyCorr">
        <attribute name="title">
-        <string>MSD Fit</string>
+        <string>Apply Corrections</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabIqt">
+      <widget class="QWidget" name="tabAbsorptionCorrections">
        <attribute name="title">
-        <string>I(Q, t)</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabIqtFit">
-       <attribute name="title">
-        <string>I(Q, t) Fit</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabConvFit">
-       <attribute name="title">
-        <string>ConvFit</string>
+        <string>Absorption Corrections</string>
        </attribute>
       </widget>
      </widget>
