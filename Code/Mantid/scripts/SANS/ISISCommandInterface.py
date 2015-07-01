@@ -1202,14 +1202,10 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
 ###################### Accessor functions
 def GetTransmissionMonitorSpectrum():
     """
-        Gets the transmission monitor spectrum if one was set.
+        Gets the transmission monitor spectrum
         @return: tranmission monitor spectrum or empty string
     """
-    spec = ReductionSingleton().transmission_calculator.trans_spec
-    if spec is not None:
-        return str(spec)
-    else:
-        return ""
+    return ReductionSingleton().transmission_calculator.trans_spec
 
 def SetTransmissionMonitorSpectrum(trans_spec):
     """
@@ -1225,18 +1221,12 @@ def GetTransmissionMonitorSpectrumShift():
     """
         Gets the addditional shift for the transmission monitor spectrum.
         This currently only exists for SANS2D
-        @return: tranmission monitor spectrum or empty string
+        @return: tranmission monitor spectrum
     """
     inst =  ReductionSingleton().get_instrument()
-
     if inst.name() != "SANS2D" and inst.name() != "SANS2DTUBES":
-        return ""
-
-    shift = inst.monitor_4_offset
-    if shift is not None:
-        return str(shift)
-    else:
-        return ""
+        return
+    return inst.monitor_4_offset
 
 def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
     """
@@ -1247,7 +1237,7 @@ def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
         inst =  ReductionSingleton().get_instrument()
         # Note that we are only setting the transmission monitor spectrum shift
         # if we are dealing with a SANS2D instrument
-        if inst.name() != 'SANS2D' or inst.name() != 'SANS2DTUBES':
+        if inst.name() != 'SANS2D' and inst.name() != 'SANS2DTUBES':
             return
         inst.monitor_4_offset = float(trans_spec_shift)
     else:

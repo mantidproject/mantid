@@ -153,6 +153,7 @@ namespace
 // Static key strings
 //----------------------------------------------
 const QString SANSRunWindow::m_pythonSuccessKeyword  = "pythonExecutionWasSuccessful";
+const QString SANSRundWindow::m_pythonEmptyKeyword = "None";
 
 //----------------------------------------------
 // Public member functions
@@ -4012,7 +4013,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMonitorSpectrumShiftRequest("\nprint i.GetTransmissionMonitorSpectrumShift()");
   QString resultTransmissionMonitorSpectrumShift(runPythonCode(transmissionMonitorSpectrumShiftRequest, false));
   resultTransmissionMonitorSpectrumShift = resultTransmissionMonitorSpectrumShift.simplified();
-  if (resultTransmissionMonitorSpectrumShift != "") {
+  if (resultTransmissionMonitorSpectrumShift != m_pythonEmptyKeyword) {
     this->m_uiForm.trans_M3M4_line_edit->setText(resultTransmissionMonitorSpectrumShift);
   }
 
