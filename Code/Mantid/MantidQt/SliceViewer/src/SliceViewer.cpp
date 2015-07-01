@@ -14,7 +14,6 @@
 #include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -37,12 +36,10 @@
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
-#include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
-#include "MantidQtMantidWidgets/InputController.h"
 
 #include <qwt_plot_panner.h>
 #include <Poco/AutoPtr.h>
@@ -231,8 +228,35 @@ void SliceViewer::saveSettings() {
                       static_cast<int>(this->getNormalization()));
   settings.endGroup();
 }
-
 //------------------------------------------------------------------------------
+/** set an icon given the control and a string.
+* @param btn the widget to give the new icon
+* @param iconName the path of the new icon
+* @param mode the mode of the icon
+* @param state on or off state of the icon
+*/
+void SliceViewer::setIconFromString(QAbstractButton* btn, const std::string& iconName,
+    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state = QIcon::State::Off)
+{
+  QIcon icon;
+  icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
+  btn->setIcon(icon);
+}
+/** set an icon given the control and a string.
+* @param action the menu action to give the new icon
+* @param iconName the path of the new icon
+* @param mode the mode of the icon
+* @param state on or off state of the icon
+*/
+void SliceViewer::setIconFromString(QAction* action,const std::string& iconName,
+    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state= QIcon::State::Off)
+{
+  QIcon icon;
+  icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
+  action->setIcon(icon);
+}
+
+  //------------------------------------------------------------------------------
 /** Create the menus */
 void SliceViewer::initMenus() {
   // ---------------------- Build the menu bar -------------------------
@@ -276,12 +300,7 @@ void SliceViewer::initMenus() {
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
-  {
-    QIcon icon;
-    icon.addFile(QString::fromStdString(g_iconViewFull), QSize(), QIcon::Normal,
-                 QIcon::Off);
-    action->setIcon(icon);
-  }
+  setIconFromString(action,g_iconViewFull);
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
@@ -383,20 +402,14 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
   {
-    QIcon icon;
-    icon.addFile(QString::fromStdString(g_iconZoomPlus), QSize(), QIcon::Normal,
-                 QIcon::Off);
-    action->setIcon(icon);
+    setIconFromString(action,g_iconZoomPlus);
   }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "&Full range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
   {
-    QIcon icon;
-    icon.addFile(QString::fromStdString(g_iconZoomMinus), QSize(),
-                 QIcon::Normal, QIcon::Off);
-    action->setIcon(icon);
+    setIconFromString(action,g_iconZoomMinus);
   }
   m_menuColorOptions->addAction(action);
 
@@ -922,11 +935,8 @@ void SliceViewer::refreshRebin() { this->rebinParamsChanged(); }
 void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
 
-  QIcon icon;
   if (checked) {
-    icon.addFile(QString::fromStdString(g_iconCutOn), QSize(), QIcon::Normal,
-                 QIcon::On);
-    ui.btnDoLine->setIcon(icon);
+    setIconFromString(ui.btnDoLine,g_iconCutOn,QIcon::Mode::Normal,QIcon::State::Off);
     QString text;
     if (m_lineOverlay->getCreationMode())
       text = "Click and drag to draw an cut line.\n"
@@ -938,9 +948,7 @@ void SliceViewer::LineMode_toggled(bool checked) {
   if (!checked) {
     // clear the old line
     clearLine();
-    icon.addFile(QString::fromStdString(g_iconCut), QSize(), QIcon::Normal,
-                 QIcon::Off);
-    ui.btnDoLine->setIcon(icon);
+    setIconFromString(ui.btnDoLine,g_iconCut,QIcon::Mode::Normal,QIcon::State::On);
   }
   emit showLineViewer(checked);
 }
@@ -966,8 +974,6 @@ void SliceViewer::clearLine() {
 //------------------------------------------------------------------------------
 /// Slot called when the snap to grid is checked
 void SliceViewer::SnapToGrid_toggled(bool checked) {
-
-  QIcon icon;
   if (checked) {
     SnapToGridDialog *dlg = new SnapToGridDialog(this);
     dlg->setSnap(m_lineOverlay->getSnapX(), m_lineOverlay->getSnapY());
@@ -975,21 +981,17 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
       m_lineOverlay->setSnapEnabled(true);
       m_lineOverlay->setSnapX(dlg->getSnapX());
       m_lineOverlay->setSnapY(dlg->getSnapY());
-      icon.addFile(QString::fromStdString(g_iconGridOn), QSize(), QIcon::Normal,
-                   QIcon::On);
+      setIconFromString(ui.btnSnapToGrid,g_iconGridOn, QIcon::Normal, QIcon::On);
     } else {
       // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
       m_lineOverlay->setSnapEnabled(false);
-      icon.addFile(QString::fromStdString(g_iconGrid), QSize(), QIcon::Normal,
-                   QIcon::Off);
+      setIconFromString(ui.btnSnapToGrid,g_iconGrid, QIcon::Normal, QIcon::Off);
     }
   } else {
     m_lineOverlay->setSnapEnabled(false);
-    icon.addFile(QString::fromStdString(g_iconGrid), QSize(), QIcon::Normal,
-                 QIcon::Off);
+    setIconFromString(ui.btnSnapToGrid,g_iconGrid, QIcon::Normal, QIcon::Off);
   }
-  ui.btnSnapToGrid->setIcon(icon);
 }
 
 //------------------------------------------------------------------------------
@@ -1003,11 +1005,8 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
 
-  QIcon icon;
   if (!m_rebinMode) {
-    icon.addFile(QString::fromStdString(g_iconRebin), QSize(), QIcon::Normal,
-                 QIcon::Off);
-    ui.btnRebinMode->setIcon(icon);
+    setIconFromString(ui.btnRebinMode,g_iconRebin, QIcon::Normal, QIcon::Off);
     // uncheck auto-rebin
     ui.btnAutoRebin->setChecked(false);
     // Remove the overlay WS
@@ -1015,9 +1014,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     this->updateDisplay();
   } else {
-    icon.addFile(QString::fromStdString(g_iconRebinOn), QSize(), QIcon::Normal,
-                 QIcon::On);
-    ui.btnRebinMode->setIcon(icon);
+    setIconFromString(ui.btnRebinMode,g_iconRebinOn, QIcon::Normal, QIcon::On);
     // Start the rebin
     this->rebinParamsChanged();
   }
@@ -2140,10 +2137,7 @@ void SliceViewer::disablePeakOverlays() {
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
 
-  QIcon icon;
-  icon.addFile(QString::fromStdString(g_iconPeakList), QSize(), QIcon::Normal,
-               QIcon::Off);
-  ui.btnPeakOverlay->setIcon(icon);
+  setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
   ui.btnPeakOverlay->setChecked(false);
 }
 
@@ -2219,11 +2213,8 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
-
-  QIcon icon;
-  icon.addFile(QString::fromStdString(g_iconPeakList), QSize(), QIcon::Normal,
-               QIcon::Off);
-  ui.btnPeakOverlay->setIcon(icon);
+  
+  setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
   ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
@@ -2249,17 +2240,11 @@ void SliceViewer::peakOverlay_clicked() {
   if (ret == MantidQt::MantidWidgets::SelectWorkspacesDialog::CustomButton) {
     disablePeakOverlays();
   }
-  QIcon icon;
   if (m_peaksPresenter->size() > 0) {
-    icon.addFile(QString::fromStdString(g_iconPeakListOn), QSize(),
-                 QIcon::Normal, QIcon::On);
-    ui.btnPeakOverlay->setIcon(icon);
+    setIconFromString(ui.btnPeakOverlay,g_iconPeakListOn, QIcon::Normal, QIcon::On);
     ui.btnPeakOverlay->setChecked(true);
   } else {
-
-    icon.addFile(QString::fromStdString(g_iconPeakList), QSize(), QIcon::Normal,
-                 QIcon::Off);
-    ui.btnPeakOverlay->setIcon(icon);
+    setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
     ui.btnPeakOverlay->setChecked(false);
   }
 }
