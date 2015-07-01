@@ -34,13 +34,13 @@ class EnginXFitPeaks(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty('OutParametersTableName', '', direction=Direction.Input,
+        self.declareProperty('OutParametersTable', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
                              'this algorithm (Difc and Zero parameters) for GSAS. '
                              'These two parameters are added as two columns in a single row. If not given, '
                              'the table workspace is not created.')
 
-        self.declareProperty('OutFittedPeaksTableName', '', direction=Direction.Input,
+        self.declareProperty('OutFittedPeaksTable', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the parameters of the peaks found and '
                              'fitted. If not given, the table workspace is not created.')
 
@@ -81,7 +81,7 @@ class EnginXFitPeaks(PythonAlgorithm):
                                "FindPeaks which this algorithm uses to check that the data has the the "
                                "expected peaks. " + txt)
 
-        peaksTableName = self.getPropertyValue("OutFittedPeaksTableName")
+        peaksTableName = self.getPropertyValue("OutFittedPeaksTable")
         difc, zero = self._fitAllPeaks(inWS, wsIndex, (foundPeaks, expectedPeaksD), peaksTableName)
         self._produceOutputs(difc, zero)
 
@@ -108,7 +108,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.setProperty('Zero', zero)
 
         # optional outputs
-        tblName = self.getPropertyValue("OutParametersTableName")
+        tblName = self.getPropertyValue("OutParametersTable")
         if '' != tblName:
             EnginXUtils.generateOutputParTable(tblName, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)

@@ -163,8 +163,8 @@ class EnginXFitPeaksTest(unittest.TestCase):
         ep2 = 1.09
         paramsTblName = 'test_difc_zero_table'
         difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
-                                    OutFittedPeaksTableName=peaksTblName,
-                                    OutParametersTableName=paramsTblName)
+                                    OutFittedPeaksTable=peaksTblName,
+                                    OutParametersTable=paramsTblName)
         pTable = mtd[paramsTblName]
         self.assertEquals(pTable.rowCount(), 1)
         self.assertEquals(pTable.columnCount(), 2)
@@ -179,7 +179,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0,0), expected_difc, 5e-3))
         self.assertTrue(self._approxRelErrorLessThan(pTable.cell(0,1), expected_zero, 5e-3))
 
-        # check 'OutFittedPeaksTableName' table workspace
+        # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 2, ep1, -8.193560670563205e-10,
                                ep2, 1.723902507582676e-07)
 
@@ -204,7 +204,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         ep2 = 0.83
         ep3 = 1.09
         difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
-                                    OutFittedPeaksTableName=peaksTblName)
+                                    OutFittedPeaksTable=peaksTblName)
 
         expected_difc = 17335.67250113934
         # assertLess would be nices, but only available in unittest >= 2.7
@@ -212,7 +212,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         expected_zero = 958.2547157813959
         self.assertTrue(self._approxRelErrorLessThan(zero, expected_zero, 5e-3))
 
-        # check 'OutFittedPeaksTableName' table workspace
+        # check 'OutFittedPeaksTable' table workspace
         self._check_outputs_ok(peaksTblName, 3, ep1, -8.193560670563205e-10,
                                ep2, 1.3304856478614542e-05)
 
