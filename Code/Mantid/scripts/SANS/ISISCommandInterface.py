@@ -1203,7 +1203,7 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
 def GetTransmissionMonitorSpectrum():
     """
         Gets the transmission monitor spectrum
-        @return: tranmission monitor spectrum or empty string
+        @return: tranmission monitor spectrum
     """
     return ReductionSingleton().transmission_calculator.trans_spec
 
@@ -1246,22 +1246,36 @@ def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
 def GetTransmissionRadius():
     pass
 
-def SetTransmissionRadius():
-    pass
-
-
+def SetTransmissionRadius(trans_radius):
+    """
+        Sets the transmission monitor spectrum.
+        @param trans_radius :: The radius to set
+    """
+    if su.is_convertible_to_float(trans_radius):
+        pass
+    # TODO ADD IMPL
 
 def GetTransmissionROI():
     pass
 
-def SetTransmissionROI():
-    pass
+def SetTransmissionROI(trans_roi_files):
+    """
+        Sets the transmission monitor region of interest.
+        @param trans_roi_files :: A string list of roi files
+    """
+    if su.check_for_valid_file_list(trans_roi_files):
+        pass
 
 def GetTransmissionMask():
     pass
 
-def SetTransmissionMask():
-    pass
+def SetTransmissionMask(trans_roi_files):
+    """
+        Sets the transmission mask if one was defined.
+        @param trans_mask_files : The mask files
+    """
+    if su.check_for_valid_file_list(trans_roi_files):
+        pass
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

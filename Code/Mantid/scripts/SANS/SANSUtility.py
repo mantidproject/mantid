@@ -693,7 +693,7 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 def is_convertible_to_int(input):
     '''
     Check if the input can be converted to int
-    @param input :: A string input
+    @param input :: a general input
     '''
     try:
         converted = int(input)
@@ -704,7 +704,7 @@ def is_convertible_to_int(input):
 def is_convertible_to_float(input):
     '''
     Check if the input can be converted to float
-    @param input :: A string input
+    @param input :: a general input
     '''
     try:
         converted = float(input)
@@ -712,6 +712,18 @@ def is_convertible_to_float(input):
         return False
     return True
 
+def is_valid_xml_file_list(input):
+    '''
+    Check if the input is a valid xml file list. We only check
+    the form and not the existence of the file
+    @param input :: a list input
+    '''
+    if not isinstance(input, list) or not input:
+        return False
+    for element in input:
+        if not isinstance(element, str) or not element.endswith('.xml'):
+            return False
+    return True
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

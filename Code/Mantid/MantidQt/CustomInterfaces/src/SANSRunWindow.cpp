@@ -153,7 +153,7 @@ namespace
 // Static key strings
 //----------------------------------------------
 const QString SANSRunWindow::m_pythonSuccessKeyword  = "pythonExecutionWasSuccessful";
-const QString SANSRundWindow::m_pythonEmptyKeyword = "None";
+const QString SANSRunWindow::m_pythonEmptyKeyword = "None";
 
 //----------------------------------------------
 // Public member functions
@@ -4028,7 +4028,11 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
     this->m_uiForm.trans_M4_check_box->setChecked(true);
     setM3M4Logic(TransSettings::M4, true);
   } else {
-    // TODO Unset all
+    this->m_uiForm.trans_M3_check_box->setChecked(false);
+    this->m_uiForm.trans_M4_check_box->setChecked(false);
+    setM3M4Logic(TransSettings::M3,false);
+    setM3M4Logic(TransSettings::M4, false);
+    g_log.notice("No transmission monitor, transmission radius nor trasmission ROI was set. The reducer will use the default value.");
   }
 }
 

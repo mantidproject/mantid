@@ -81,6 +81,7 @@ set ( SRC_FILES
 	src/SANSEventSlicing.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
+	src/SANSUtil.cpp
 	src/StepScan.cpp
 	src/TomoReconstruction/SavuConfigDialog.cpp
 	src/TomoReconstruction/TomoReconstruction.cpp
@@ -183,6 +184,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/SANSUtil.h
 	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
 	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h
@@ -341,6 +343,7 @@ set ( TEST_FILES
   MuonAnalysisHelperTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
+  SANSUtilTest.h
   UserInputValidatorTest.h
 )
 

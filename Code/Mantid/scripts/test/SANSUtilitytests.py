@@ -407,5 +407,29 @@ class TestConvertibleToFloat(unittest.TestCase):
         # Assert
         self.assertFalse(result)
 
+class TestValidXmlFileList(unittest.TestCase):
+    def test_finds_valid_xml_file_list(self):
+        # Arrange
+        input = ["test1.xml", "test2.xml", "test3.xml"]
+        # Act
+        result =su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_finds_invalid_xml_file_list(self):
+        # Arrange
+        input = ["test1.xml", "test2.ccl", "test3.xml"]
+        # Act
+        result =su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertFalse(result)
+
+    def test_finds_empty_list(self):
+        # Arrange
+        input = []
+        # Act
+        result = su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertFalse(result)
 if __name__ == "__main__":
     unittest.main()
