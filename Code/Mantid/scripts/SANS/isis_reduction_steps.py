@@ -2089,9 +2089,15 @@ class UserFile(ReductionStep):
                 self._readDetectorCorrections(upper_line[8:], reducer)
             elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
                 self._readFrontRescaleShiftSetup(det_specif, reducer)
-            else:
-                # for /DET/FRONT and /DET/REAR commands
+            elif (det_specif.startswith('FRONT') or
+                 det_specif.startswith('REAR') or
+                 det_specif.startswith('BOTH') or
+                 det_specif.startswith('MERGED') or
+                 det_specif.startswith('MERGED')):
+                # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
                 reducer.instrument.setDetector(det_specif)
+            else:
+                _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
 
         # There are two entries for Gravity: 1. ON/OFF (TRUE/FALSE)
         #                                    2. LEXTRA=xx.xx
