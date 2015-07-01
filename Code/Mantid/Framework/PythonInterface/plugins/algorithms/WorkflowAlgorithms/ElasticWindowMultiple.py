@@ -209,10 +209,11 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             logger.notice('Vertical axis is in run number')
             unit = ('Run No', 'last 3 digits')
 
-        q_ws_axis = mtd[self._q_workspace].getAxis(1)
+        # Create a new vertical axis for the Q and Q**2 workspaces
+        q_ws_axis = NumericAxis.create(len(input_workspace_names))
         q_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
 
-        q2_ws_axis = mtd[self._q2_workspace].getAxis(1)
+        q2_ws_axis = NumericAxis.create(len(input_workspace_names))
         q2_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
 
         # Set the vertical axis values
@@ -223,6 +224,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             else:
                 q_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
                 q2_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
+
+        # Add the new vertical axis to each workspace
+        mtd[self._q_workspace].replaceAxis(1, q_ws_axis)
+        mtd[self._q2_workspace].replaceAxis(1, q2_ws_axis)
 
         # Process the ELF workspace
         if self._elf_workspace != '':

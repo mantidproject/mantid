@@ -592,6 +592,8 @@ void NormaliseToMonitor::normaliseBinByBin(
 
   const size_t numHists = inputWorkspace->getNumberHistograms();
   MantidVec::size_type specLength = inputWorkspace->blocksize();
+  // Flag set when a division by 0 is found
+  bool hasZeroDivision = false;
   Progress prog(this, 0.0, 1.0, numHists);
   // Loop over spectra
   PARALLEL_FOR3(inputWorkspace, outputWorkspace, m_monitor)
@@ -636,6 +638,10 @@ void NormaliseToMonitor::normaliseBinByBin(
         const double &leftY = inY[k];
         const double &rightY = (*Y)[k];
 
+        if (rightY == 0.0) {
+          hasZeroDivision = true;
+        }
+
         // Calculate result and store in local variable to avoid overwriting
         // original data if
         // output workspace is same as one of the input ones
@@ -662,6 +668,9 @@ void NormaliseToMonitor::normaliseBinByBin(
     PARALLEL_END_INTERUPT_REGION
   } // end loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
+  if (hasZeroDivision) {
+    g_log.warning() << "Division by zero in some of the bins." << std::endl;
+  }
 }
 
 /** Calculates the overall normalization factor.

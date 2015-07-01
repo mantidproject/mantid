@@ -11,8 +11,14 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
 
+//#include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/FileFinder.h"
+
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -20,9 +26,12 @@
 
 #include <set>
 
+
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace NeXus;
 
 class FakeChopper : public Mantid::API::ChopperModel
 {
@@ -182,7 +191,7 @@ public:
     const std::string actualLogName = "SAMPLE_TEMP";
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    TS_ASSERT_THROWS(expt.getLog(instPar), Exception::NotFoundError);
+    TS_ASSERT_THROWS(expt.getLog(instPar), Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_GetLog_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists()
@@ -226,7 +235,7 @@ public:
     const std::string actualLogName = "SAMPLE_TEMP";
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar), Exception::NotFoundError);
+    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar), Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_GetLogAsSingleValue_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists()
@@ -674,6 +683,54 @@ public:
       {
           TS_ASSERT_DELTA(wTrVector[i],wMatrRestored[i],1.e-9);
       }
+
+  }
+
+  void test_nexus_intrument_info()
+  {
+     ExperimentInfo ei;
+
+    // We get an instrument group from a test file in the form that would occur in an ISIS Nexus file
+    // with an embedded instrument definition and parameters
+
+    // Create the root Nexus class
+    std::string testFile = "LOQinstrument.h5";
+    std::string path = FileFinder::Instance().getFullPath(testFile);
+
+   
+    // Get nexus file for this. 
+    ::NeXus::File nxFile(path, NXACC_READ);
+
+    // Load the Nexus IDF info
+    std::string params;
+    TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus( testFile, &nxFile, params));
+    Instrument_const_sptr inst = ei.getInstrument();
+    TS_ASSERT_EQUALS( inst->getName(), "LOQ" );  // Check instrument name
+    TS_ASSERT_EQUALS( params.size() , 613 );     // Check size of parameter string
+
+  }
+
+  void test_nexus_parameters()
+  {
+     ExperimentInfo ei;
+
+    // We get an instrument group from a test file in the form that would occur in an ISIS Nexus file
+    // with an embedded instrument definition and parameters
+
+    // Create the root Nexus class
+    std::string testFile = "LOQinstrument.h5";
+    std::string path = FileFinder::Instance().getFullPath(testFile);
+
+   
+    // Get nexus file for this.
+    ::NeXus::File nxFile(path, NXACC_READ);
+    // Open instrument group
+    nxFile.openGroup("instrument", "NXinstrument");
+
+    // Load the Nexus IDF info
+    std::string params;
+    TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentParametersNexus(&nxFile, params));
+    TS_ASSERT_EQUALS( params.size() , 613 );     // Check size of parameter string
 
   }
 

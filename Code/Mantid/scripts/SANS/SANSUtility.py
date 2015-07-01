@@ -147,15 +147,6 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
             for x in range(0, xdim):
                 std_i = start_spec + x + (y*det_dimension)
                 output += str(max_spec - (std_i - base)) + ','
-    elif orientation == Orientation.HorizontalFlipped:
-        start_spec = base + ylow*det_dimension + xlow
-        for y in range(0,ydim):
-            max_row = base + (y+1)*det_dimension - 1
-            min_row = base + (y)*det_dimension
-            for x in range(0,xdim):
-                std_i = start_spec + x + (y*det_dimension)
-                diff_s = std_i - min_row
-                output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
 
@@ -868,8 +859,6 @@ class Orientation(object):
     Horizontal = 1
     Vertical = 2
     Rotated = 3
-    # This is for the empty instrument
-    HorizontalFlipped = 4
 
 # A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
 @deprecated

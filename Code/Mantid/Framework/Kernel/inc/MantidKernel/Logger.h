@@ -9,7 +9,7 @@
 #include <Poco/Message.h>
 
 #include <iosfwd>
-#include <set>
+
 #include <string>
 
 //----------------------------------------------------------------------
@@ -71,6 +71,8 @@ public:
   // Our logger's priority types are the same as POCO's Message's types.
   typedef Poco::Message::Priority Priority;
 
+  static const std::string* PriorityNames;
+
   /// Constructor giving the logger name
   Logger(const std::string &name);
   /// Destructor
@@ -103,6 +105,12 @@ public:
   std::ostream &information();
   /// Logs at debug level
   std::ostream &debug();
+
+  /// Log a message at a given priority
+  void log(const std::string &message, Logger::Priority priority);
+
+  /// gets the correct log stream for a priority
+  std::ostream &getLogStream(Logger::Priority priority);
 
   /// Logs the given message at debug level, followed by the data in buffer.
   void dump(const std::string &msg, const void *buffer, std::size_t length);
@@ -146,10 +154,6 @@ private:
   /// Disable assignment
   Logger &operator=(const Logger &);
 
-  /// Log a message at a given priority
-  void log(const std::string &message, Logger::Priority priority);
-  /// gets the correct log stream for a priority
-  std::ostream &getLogStream(Logger::Priority priority);
   /// Return a log stream set with the given priority
   Priority applyLevelOffset(Priority proposedLevel);
 

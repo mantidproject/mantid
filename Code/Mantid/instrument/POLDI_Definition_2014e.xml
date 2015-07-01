@@ -3,8 +3,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
             name="POLDI"
-            valid-from="2014-09-08 18:00:00"
-            last-modified="2014-09-10 00:00:00">
+            valid-from="2014-09-05 09:26:00"
+            last-modified="2015-06-19 11:30:00">
     
     <type name="source" is="Source" />
     

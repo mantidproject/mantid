@@ -55,7 +55,7 @@ namespace Mantid
 
         // Provide ParaView's application core with a path to the running executable
         int argc = 1;
-        std::string exePath = configSvc.getDirectoryOfExecutable();
+        std::string exePath = configSvc.getPathToExecutable();
         std::vector<char> argvConversion(exePath.begin(), exePath.end());
         argvConversion.push_back('\0');
         char *argv[] = {&argvConversion[0]};

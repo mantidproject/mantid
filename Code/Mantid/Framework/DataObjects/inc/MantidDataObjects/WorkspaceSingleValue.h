@@ -66,12 +66,16 @@ public:
                          MantidVec &Y, MantidVec &E,
                          bool skipError = false) const;
 
-private:
-  /// Private copy constructor. NO COPY ALLOWED
-  WorkspaceSingleValue(const WorkspaceSingleValue &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &);
+  /// Returns the number of dimensions, 0 in this case.
+  virtual size_t getNumDims() const;
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  WorkspaceSingleValue(const WorkspaceSingleValue &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
+
+private:
   // allocates space in a new workspace - does nothing in this case
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength);

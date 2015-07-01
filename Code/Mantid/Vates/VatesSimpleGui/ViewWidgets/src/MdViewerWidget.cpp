@@ -239,7 +239,7 @@ void MdViewerWidget::setupUiAndConnections()
   QObject::connect(this->ui.resetViewsStateToAllData,
                    SIGNAL(released()),
                    this,
-                   SLOT(onResetViewToAll()));
+                   SLOT(onResetViewsStateToAllData()));
 
   // Setup rotation point button
   QObject::connect(this->ui.resetCenterToPointButton,

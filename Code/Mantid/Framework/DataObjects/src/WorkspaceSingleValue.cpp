@@ -65,6 +65,9 @@ void WorkspaceSingleValue::generateHistogram(const std::size_t index,
       "generateHistogram() not implemented for WorkspaceSingleValue.");
 }
 
+/// Our parent MatrixWorkspace has hardcoded 2, but we need 0.
+size_t WorkspaceSingleValue::getNumDims() const { return 0; }
+
 } // namespace DataObjects
 } // namespace Mantid
 
