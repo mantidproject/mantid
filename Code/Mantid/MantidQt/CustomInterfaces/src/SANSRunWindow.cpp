@@ -2319,6 +2319,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ")\n";
 
+  //Set the Transmision settings
+  writeTranssmissionSettingsToPythonScript(exec_reduce);
+
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to the center
   // Introduced for #5942
@@ -4089,6 +4092,34 @@ void SANSRunWindow::setROIAndMaskLogic(bool isNowChecked) {
   this->m_uiForm.trans_masking_line_edit->setEnabled(isNowChecked);
   this->m_uiForm.trans_roi_files_line_edit->setEnabled(isNowChecked);
 }
+
+/**
+ * Write the transmission settings to a python code string. If there
+ * is a transmission monitor set use it, otherwise check if there is
+ * a radius or a ROI being set.
+ * @param pythonCode :: The python code string
+ */
+void SANSRunWindow::writeTranssmissionSettingsToPythonScript(QString& pythonCode) {
+  auto m3 = this->m_uiForm.trans_M3_check_box->isChecked();
+  auto m4 = this->m_uiForm.trans_M4_check_box->isChecked();
+
+  if (m3 || m4) {
+    // Handle M3/M4 settings and the TRANSPEC
+    auto spectrum = m3 ? 3 : 4;
+    pythonCode+="i.SetTransmissionMonitorSpectrum(trans_spec=" + QString::number(spectrum) + ")\n";
+
+    auto transSpec = this->m_uiForm.trans_M3M4_line_edit->text();
+    if (!transSpec.isEmpty()) {
+      pythonCode+="i.SetTransmissionMonitorSpectrumShift(trans_spec_shift=" + transSpec + ")\n";
+    }
+  } else {
+    // Handle Radius, ROI and Mask
+    auto radius = this->m_uiForm.trans_radius_check_box->isChecked();
+    auto roiFiles = this->m_uiForm.trans_roi_files_checkbox->isChecked();
+    auto masks = this->m_uiForm.trans_masking_line_edit->text();
+  }
+}
+
 
 } //namespace CustomInterfaces
 

@@ -357,5 +357,9 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
 
+class TestConvertibleToInteger(unittest.TestCase):
+    def test_converts_to_integer_when_integer(self):
+        pass
+
 if __name__ == "__main__":
     unittest.main()

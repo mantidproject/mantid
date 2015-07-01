@@ -402,6 +402,8 @@ private:
   //void sendTransmissionSettings();
   /// get the transmission settings
   void setTransmissionSettingsFromUserFile();
+  /// write the transmission settings to a python script
+  void writeTranssmissionSettingsToPythonScript(QString& pythonCode);
   /// initialize the connections for the transmission settings
   void initTransmissionSettings();
 

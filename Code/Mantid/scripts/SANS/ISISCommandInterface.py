@@ -1215,12 +1215,11 @@ def SetTransmissionMonitorSpectrum(trans_spec):
     """
         Sets the transmission monitor spectrum.
         @param trans_spec :: The spectrum to set.
-        @return: success message
     """
     if su.is_convertible_to_int(trans_spec):
         ReductionSingleton().transmission_calculator.trans_spec = int(trans_spec)
     else:
-        return 'Warning: Could not set the transmission monitor spectrum'
+        sanslog.warning('Warning: Could convert the transmission monitor spectrum to int.')
 
 def GetTransmissionMonitorSpectrumShift():
     """
@@ -1243,7 +1242,6 @@ def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
     """
         Sets the transmission monitor spectrum shfit.
         @param trans_spec_shift :: The spectrum shift to set.
-        @return: success message
     """
     if su.is_convertible_to_float(trans_spec_shift):
         inst =  ReductionSingleton().get_instrument()
@@ -1253,13 +1251,15 @@ def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
             return
         inst.monitor_4_offset = float(trans_spec_shift)
     else:
-        return 'Warning: Could not set the transmission monitor spectrum shift.'
+        sanslog.warning('Warning: Could convert transmission monitor spectrum shift to float.')
 
 def GetTransmissionRadius():
     pass
 
 def SetTransmissionRadius():
     pass
+
+
 
 def GetTransmissionROI():
     pass
