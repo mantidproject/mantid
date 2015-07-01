@@ -45,6 +45,10 @@ private:
   std::vector<DataObjects::EventWorkspace_sptr> m_WsVec;
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
+  /// private copy constructor. Not implemented.
+  EventWorkspace(const EventWorkspace &other);
+  /// Private copy assignment operator. Assignment not implemented.
+  EventWorkspace &operator=(const EventWorkspace &other);
 
 public:
 
