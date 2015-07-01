@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.10
+Version:        1.11
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -31,6 +31,7 @@ Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
+Requires: python-matplotlib
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
