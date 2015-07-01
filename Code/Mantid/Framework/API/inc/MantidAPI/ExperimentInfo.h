@@ -121,6 +121,8 @@ public:
   virtual void loadExperimentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
   virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
+  /// Load the instrument from an open NeXus file without reading any parameters
+  virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file);
   /// Load instrument parameters from an open Nexus file in Instument group if found there
   virtual void loadInstrumentParametersNexus ( ::NeXus::File *file, std::string &parameterStr);
 

@@ -980,6 +980,35 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
 
 }
 
+//--------------------------------------------------------------------------------------------
+/** Load the instrument from an open NeXus file without reading any parameters (yet).
+ * @param nxFilename :: the filename of the nexus file
+ * @param file :: open NeXus file
+ * instrument is done.
+ * @throws Exception::NotFoundError If instrument definition is not in the nexus
+ * file and cannot
+ *                                  be loaded from the IDF.
+ */
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
+                                             ::NeXus::File *file ) {
+
+
+   // Open instrument group                                    
+  file->openGroup("instrument", "NXinstrument");
+
+   // Try to get the instrument embedded in the Nexus file
+  std::string instrumentName;
+  std::string instrumentXml;
+  loadEmbeddedInstrumentInfoNexus( file,  instrumentName,  instrumentXml);
+
+  // Close the instrument group
+  file->closeGroup();
+
+  // Set the instrument given the name and and XML obtained
+  setInstumentFromXML( nxFilename, instrumentName, instrumentXml );
+
+}
+
 //-------------------------------------------------------------------------------------------------
 /** Attempt to load an IDF embedded in the Nexus file.
  * @param file :: open NeXus file with instrument group open
