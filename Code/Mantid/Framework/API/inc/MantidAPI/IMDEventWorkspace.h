@@ -6,9 +6,9 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/IMDNode.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -32,7 +32,6 @@ class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace,
                                          public API::MultipleExperimentInfos {
 public:
   IMDEventWorkspace();
-  IMDEventWorkspace(const IMDEventWorkspace &other);
   virtual ~IMDEventWorkspace() {}
 
   /// Perform initialization after dimensions (and others) have been set.
@@ -82,6 +81,11 @@ public:
       const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMDEventWorkspace(const IMDEventWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMDEventWorkspace &operator=(const IMDEventWorkspace &other);
+
   virtual const std::string toString() const;
   /// Marker set to true when a file-backed workspace needs its back-end file
   /// updated (by calling SaveMD(UpdateFileBackEnd=1) )

@@ -22,6 +22,9 @@ int64_t MIN_NANOSECONDS = -4611686018427387903LL;
 
 /// Min allowed seconds in the time
 int64_t MIN_SECONDS = -4611686017LL;
+
+/// Number of nanoseconds in one second
+int64_t NANO_PER_SEC = 1000000000LL;
 }
 
 namespace DateAndTimeHelpers {
@@ -188,7 +191,7 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds) {
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = static_cast<int64_t>(seconds * 1000000000LL + nanoseconds);
+    _nanoseconds = seconds * NANO_PER_SEC + nanoseconds;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -204,7 +207,8 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = static_cast<int64_t>(seconds * 1000000000LL + nanoseconds);
+    _nanoseconds = static_cast<int64_t>(seconds) * NANO_PER_SEC +
+                   static_cast<int64_t>(nanoseconds);
 }
 
 //===========================================================================================
@@ -532,7 +536,7 @@ int DateAndTime::second() const { return to_ptime().time_of_day().seconds(); }
  * @return the nanoseconds
  */
 int DateAndTime::nanoseconds() const {
-  return static_cast<int>(_nanoseconds % 1000000000);
+  return static_cast<int>(_nanoseconds % NANO_PER_SEC);
 }
 
 //------------------------------------------------------------------------------------------------

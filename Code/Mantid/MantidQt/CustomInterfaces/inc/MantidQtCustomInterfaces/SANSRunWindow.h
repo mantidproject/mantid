@@ -16,7 +16,7 @@
 #include <QStringList>
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/ConfigService.h"
 #include <vector>
 
@@ -201,11 +201,17 @@ private:
   int addBatchLine(QString csv_line, QString separator = "");
   ///Save the batch file
   QString saveBatchGrid(const QString & filename = "");
+  /// Check that the workspace can have the zero errors removed
+  bool isValidWsForRemovingZeroErrors(QString& originalWorkspaceName);
   //@}
- 
   public slots:
      /// apply mask
   void applyMask(const QString& wsName,bool time_pixel);
+  /// Create a zero error free clone for the specified workspace
+  void createZeroErrorFreeClone(QString& originalWorkspaceName, QString& clonedWorkspaceName);
+  /// Destroy a zero error free cloned workspace
+  void deleteZeroErrorFreeClone(QString& clonedWorkspaceName);
+
 
 private slots:
   /// phi masking has changed 
@@ -348,6 +354,8 @@ private:
   QAction *m_batch_clear;
   //Time/Pixel mask string
   QString m_maskScript;
+  // Success keyword
+  static const QString m_pythonSuccessKeyword;
 
   /// Stores the URL of each tab's help page.
   QMap<Tab, QString> m_helpPageUrls;

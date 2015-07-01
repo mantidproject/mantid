@@ -183,6 +183,40 @@ namespace CustomInterfaces
 
 
   /**
+   * Gets the suffix of a workspace (i.e. part after last underscore (red, sqw)).
+   *
+   * @param wsName Name of workspace
+   * @return Suffix, or empty string if no underscore
+   */
+  QString IndirectTab:: getWorkspaceSuffix(const QString & wsName)
+  {
+    int lastUnderscoreIndex = wsName.lastIndexOf("_");
+    if(lastUnderscoreIndex == -1)
+      return QString();
+
+    return wsName.right(lastUnderscoreIndex);
+  }
+
+
+  /**
+   * Returns the basename of a workspace (i.e. the part before the last underscore)
+   *
+   * e.g. basename of irs26176_graphite002_red is irs26176_graphite002
+   *
+   * @param wsName Name of workspace
+   * @return Base name, or wsName if no underscore
+   */
+  QString IndirectTab:: getWorkspaceBasename(const QString & wsName)
+  {
+    int lastUnderscoreIndex = wsName.lastIndexOf("_");
+    if(lastUnderscoreIndex == -1)
+      return QString(wsName);
+
+    return wsName.left(lastUnderscoreIndex);
+  }
+
+
+  /**
    * Creates a spectrum plot of one or more workspaces at a given spectrum
    * index.
    *
@@ -193,6 +227,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specIndex)
   {
+    if (workspaceNames.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
     pyInput += "plotSpectrum(['";
@@ -214,6 +251,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QString & workspaceName, int specIndex)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QStringList workspaceNames;
     workspaceNames << workspaceName;
     plotSpectrum(workspaceNames, specIndex);
@@ -232,6 +272,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd)
   {
+    if (workspaceNames.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
     pyInput += "plotSpectrum(['";
@@ -239,7 +282,7 @@ namespace CustomInterfaces
     pyInput += "'], range(";
     pyInput += QString::number(specStart);
     pyInput += ",";
-    pyInput += QString::number(specEnd);
+    pyInput += QString::number(specEnd + 1);
     pyInput += "))\n";
 
     m_pythonRunner.runPythonCode(pyInput);
@@ -258,6 +301,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotSpectrum(const QString & workspaceName, int specStart, int specEnd)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QStringList workspaceNames;
     workspaceNames << workspaceName;
     plotSpectrum(workspaceNames, specStart, specEnd);
@@ -273,6 +319,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plot2D(const QString & workspaceName)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plot2D\n";
 
     pyInput += "plot2D('";
@@ -294,6 +343,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotTimeBin(const QStringList & workspaceNames, int specIndex)
   {
+    if (workspaceNames.isEmpty())
+      return;
+
     QString pyInput = "from mantidplot import plotTimeBin\n";
 
     pyInput += "plotTimeBin(['";
@@ -315,6 +367,9 @@ namespace CustomInterfaces
    */
   void IndirectTab::plotTimeBin(const QString & workspaceName, int specIndex)
   {
+    if (workspaceName.isEmpty())
+      return;
+
     QStringList workspaceNames;
     workspaceNames << workspaceName;
     plotTimeBin(workspaceNames, specIndex);

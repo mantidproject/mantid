@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 #define MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -34,11 +34,11 @@ public:
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup,
                                    int64_t &ngroups) const;
 
-private:
-  /// Private copy constructor. NO COPY ALLOWED
-  GroupingWorkspace(const GroupingWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  GroupingWorkspace &operator=(const GroupingWorkspace &);
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  GroupingWorkspace(const GroupingWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  GroupingWorkspace &operator=(const GroupingWorkspace &other);
 };
 
 /// shared pointer to the GroupingWorkspace class

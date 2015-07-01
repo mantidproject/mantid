@@ -221,7 +221,7 @@ class VesuvioTests(unittest.TestCase):
 
     def _do_ads_check(self, name):
         self.assertTrue(name in mtd)
-        self.assertTrue(type(mtd[name]) == MatrixWorkspace)
+        self.assertTrue(isinstance(mtd[name], MatrixWorkspace))
 
     def _do_size_check(self,name, expected_nhist):
         loaded_data = mtd[name]

@@ -1,7 +1,7 @@
 #ifndef _vtkEventNexusReader_h
 #define _vtkEventNexusReader_h
 #include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y

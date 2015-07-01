@@ -2,6 +2,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"

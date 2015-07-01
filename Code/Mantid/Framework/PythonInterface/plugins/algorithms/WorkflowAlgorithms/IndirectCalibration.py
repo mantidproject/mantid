@@ -88,11 +88,12 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def PyExec(self):
+        from IndirectCommon import get_run_number
 
         self._setup()
 
         runs = []
-        self._run_numbers = list()
+        self._run_numbers = []
         for in_file in self._input_files:
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
@@ -104,6 +105,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                      LoadLogFiles=False)
 
                 runs.append(root)
+                self._run_numbers.append(get_run_number(root))
             except (RuntimeError,ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 

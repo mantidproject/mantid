@@ -6,29 +6,25 @@
 
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/dict.hpp>
-#include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/copy_const_reference.hpp>
 
 using Mantid::Kernel::IPropertyManager;
-using Mantid::Kernel::Property;
 using Mantid::Kernel::PropertyManager;
-namespace Registry = Mantid::PythonInterface::Registry;
 
 using namespace boost::python;
 
-namespace {}
-
 void export_PropertyManager() {
-  register_ptr_to_python<boost::shared_ptr<PropertyManager>>();
-  class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>(
-      "PropertyManager");
+  typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
+
+  // The second argument defines the actual type held within the Python object.
+  // This means that when a PropertyManager is constructed in Python it actually used
+  // a shared_ptr to the object rather than a raw pointer. This knowledge is used by
+  // DataServiceExporter::extractCppValue to assume that it can always extract a shared_ptr
+  // type
+  class_<PropertyManager, PropertyManager_sptr, bases<IPropertyManager>,
+         boost::noncopyable>("PropertyManager");
 }
 
 #ifdef _MSC_VER

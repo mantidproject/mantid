@@ -3,6 +3,7 @@
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidCrystal/PeakClusterProjection.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/CompositeValidator.h"

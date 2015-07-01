@@ -13,8 +13,8 @@ class EnginXFocus(PythonAlgorithm):
         return "Focuses a run."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
-    		"Run to focus")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "Workspace with the run to focus.")
 
         self.declareProperty("Bank", 1, "Which bank to focus")
 
@@ -28,8 +28,8 @@ class EnginXFocus(PythonAlgorithm):
 
 
     def PyExec(self):
-    	# Load the run file
-        ws = self._loadRun()
+        # Get the run workspace
+        ws = self.getProperty('InputWorkspace').value
 
     	# Leave the data for the bank we are interested in only
         ws = self._cropData(ws)
@@ -51,14 +51,6 @@ class EnginXFocus(PythonAlgorithm):
         self._convertToDistr(ws)
 
         self.setProperty("OutputWorkspace", ws)
-
-    def _loadRun(self):
-        """ Loads the specified run
-    	"""
-        alg = self.createChildAlgorithm('Load')
-        alg.setProperty('Filename', self.getProperty("Filename").value)
-        alg.execute()
-        return alg.getProperty('OutputWorkspace').value
 
     def _applyCalibration(self, ws):
         """ Refines the detector positions using the result of calibration (if one is specified)
@@ -123,5 +115,6 @@ class EnginXFocus(PythonAlgorithm):
         alg.setProperty('InputWorkspace', ws)
         alg.execute()
         return alg.getProperty('OutputWorkspace').value
+
 
 AlgorithmFactory.subscribe(EnginXFocus)

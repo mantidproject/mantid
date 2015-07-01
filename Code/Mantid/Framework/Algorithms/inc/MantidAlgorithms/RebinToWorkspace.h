@@ -2,7 +2,7 @@
 #define ALGORITHMS_REBINTOWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 

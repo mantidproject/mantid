@@ -7,6 +7,7 @@
 
 #include "MantidCurveFitting/CalculateMSVesuvio.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -36,6 +37,19 @@ public:
   void test_exec_with_flat_plate_sample()
   {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+// seed has different effect in boost version 1.56 and newer
+#if (BOOST_VERSION / 100000) == 1 && (BOOST_VERSION / 100 % 1000) >= 56
+    checkOutputValuesAsExpected(alg, 0.0111204555, 0.0019484356);
+#else
+    checkOutputValuesAsExpected(alg, 0.0099824991, 0.0020558473);
+#endif
+  }
+
+  void test_exec_with_flat_plate_sample_with_grouped_detectors()
+  {
+    auto alg = createTestAlgorithm(createFlatPlateSampleWS(true, true));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 // seed has different effect in boost version 1.56 and newer
@@ -138,9 +152,9 @@ private:
     return alg;
   }
 
-  Mantid::API::MatrixWorkspace_sptr createFlatPlateSampleWS(const bool detShape = true)
+  Mantid::API::MatrixWorkspace_sptr createFlatPlateSampleWS(const bool detShape = true, const bool groupedDets = false)
   {
-    auto testWS = createTestWorkspace(detShape);
+    auto testWS = createTestWorkspace(detShape, groupedDets);
     // Sample shape
     const double halfHeight(0.05), halfWidth(0.05), halfThick(0.0025);
     std::ostringstream sampleShapeXML;
@@ -157,7 +171,7 @@ private:
   }
 
 
-  Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const bool detShape = true)
+  Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const bool detShape = true, const bool groupedDets = false)
   {
     using namespace Mantid::Geometry;
     using namespace Mantid::Kernel;
@@ -181,8 +195,25 @@ private:
         "<algebra val=\"shape\" />";
       const auto pos = ws2d->getDetector(0)->getPos();
       auto instrument = ComptonProfileTestHelpers::createTestInstrumentWithFoilChanger(1, pos, shapeXML);
+
+      if(groupedDets)
+      {
+        // Add another detector in the same position as the first
+        auto shape = ShapeFactory().createShape(shapeXML);
+        Mantid::Geometry::Detector *det2 = new Detector("det1", 2, shape, NULL);
+        det2->setPos(instrument->getDetector(1)->getPos());
+        instrument->add(det2);
+        instrument->markAsDetector(det2);
+
+        // Group the detectors
+        ws2d->getSpectrum(0)->addDetectorID(2);
+      }
+
       ws2d->setInstrument(instrument);
+
       ComptonProfileTestHelpers::addResolutionParameters(ws2d, 1);
+      if(groupedDets)
+        ComptonProfileTestHelpers::addResolutionParameters(ws2d, 2);
       ComptonProfileTestHelpers::addFoilResolution(ws2d, "foil-pos0");
     }
 
@@ -194,8 +225,13 @@ private:
   {
     using Mantid::API::MatrixWorkspace_sptr;
     const size_t checkIdx = 100;
+    // OS X and GCC>=5 seems to do a terrible job with keep the same precision here.
+#if defined(__APPLE__) || (__GNUC__ >= 5)
+    const double tolerance(1e-4);
+#else
     const double tolerance(1e-8);
-    
+#endif
+
     // Values for total scattering
     MatrixWorkspace_sptr totScatter = alg->getProperty("TotalScatteringWS");
     TS_ASSERT(totScatter);

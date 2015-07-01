@@ -2,8 +2,9 @@
 #define MANTID_API_IEVENTLIST_H_
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ISpectrum.h"
+#include <functional>
 
 namespace Mantid {
 namespace API {
@@ -57,6 +58,8 @@ public:
   /// Integrate the event list
   virtual double integrate(const double minX, const double maxX,
                            const bool entireRange) const = 0;
+  /// Convert the TOF values
+  virtual void convertTof(std::function<double(double)> func, const int sorting=0) = 0;
   /// Convert the TOF values
   virtual void convertTof(const double factor, const double offset = 0.) = 0;
   /// Scale the TOF values by a constant

@@ -419,6 +419,7 @@ class ReductionWrapper(object):
         self.reducer.prop_man.sum_runs = True
 
         timeToWait = self._wait_for_file
+        self._wait_for_file = 0
         if timeToWait > 0:
             run_files = PropertyManager.sample_run.get_run_list()
             num_files_to_sum = len(PropertyManager.sample_run)
@@ -432,6 +433,9 @@ class ReductionWrapper(object):
                 while n_found > 0:
                     last_found = found[-1]
                     self.reducer.prop_man.sample_run = last_found # request to reduce all up to last found
+                    # Note that here we run convert to energy instead of user (may be) reloaded reduction!
+                    # This would cause problem for user-defined reduction, which pre-process rather than
+                    # post-process resulting workspace
                     ws = self.reducer.convert_to_energy()
                  # reset search to whole file list again
                     self.reducer.prop_man.sample_run = run_files[num_files_to_sum - 1]
@@ -449,10 +453,10 @@ class ReductionWrapper(object):
             if n_found > 0:
             # cash sum can be dropped now if it has not been done before
                 self.reducer.prop_man.cashe_sum_ws = False
-                ws = self.reducer.convert_to_energy()
+                ws = self.reduce()
         else:
-            ws = self.reducer.convert_to_energy()
-
+            ws = self.reduce()
+        self._wait_for_file = timeToWait
         return ws
     #
     def run_reduction(self):

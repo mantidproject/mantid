@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name
 from Direct.NonIDF_Properties import *
 
-from collections import OrderedDict
+from collections import OrderedDict,Iterable
 
 
 class PropertyManager(NonIDF_Properties):
@@ -243,6 +243,8 @@ class PropertyManager(NonIDF_Properties):
     #
     mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,
                                                   NonIDF_Properties.monovan_run)
+    # list of spectra number used to identify ei
+    ei_mon_spectra = EiMonSpectra()
     # property responsible for summing runs
     sum_runs = SumRuns(NonIDF_Properties.sample_run)
     # properties responsible for rotation angle
@@ -306,9 +308,18 @@ class PropertyManager(NonIDF_Properties):
                 break
             if case(): # default, could also just omit condition or 'if True'
                 pass
-
-        used_mon.add(self.ei_mon1_spec)
-        used_mon.add(self.ei_mon2_spec)
+        #
+        def add_ei_monitors(used_mon,ei_mon_list):
+            if isinstance(ei_mon_list,Iterable) :
+                for mon_sp in ei_mon_list:
+                    used_mon.add(mon_sp )
+            else:
+                used_mon.add(ei_mon_list)
+            return used_mon
+        #
+        ei_monitors = self.ei_mon_spectra
+        used_mon = add_ei_monitors(used_mon,ei_monitors[0])
+        used_mon = add_ei_monitors(used_mon,ei_monitors[1])
 
         return used_mon
     #
@@ -418,6 +429,10 @@ class PropertyManager(NonIDF_Properties):
                 #end
                 if new_val != cur_val:
                     changed_descriptors.add(key)
+                    changed_throug_main = True
+                else: # property may be changed through descriptors
+                    changed_throug_main  = False
+
                 # dependencies removed either properties are equal or not
                 try:
                     dependencies = getattr(PropertyManager,key).dependencies()
@@ -426,7 +441,8 @@ class PropertyManager(NonIDF_Properties):
 
                 for dep_name in dependencies:
                     if dep_name in sorted_param:
-                        del sorted_param[dep_name]
+                        if changed_throug_main or (sorted_param[dep_name] == getattr(self,dep_name)):
+                            del sorted_param[dep_name]
             else: # remove property from old changes list not to reapply it again?
                 pass
         #end loop

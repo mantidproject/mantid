@@ -47,6 +47,7 @@ public:
   MDHistoWorkspace(
       std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
 
+  // TODO once we have a polymorphic clone this should be made protected
   MDHistoWorkspace(const MDHistoWorkspace &other);
 
   virtual ~MDHistoWorkspace();
@@ -427,6 +428,9 @@ private:
   Kernel::SpecialCoordinateSystem m_coordSystem;
 
 protected:
+  /// Protected copy assignment operator. Assignment not implemented.
+  MDHistoWorkspace &operator=(const MDHistoWorkspace &other);
+
   /// Linear array of masks for each bin
   bool *m_masks;
 };

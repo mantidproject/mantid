@@ -11,7 +11,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
+#include "MantidGeometry/Math/PolygonIntersection.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -23,8 +23,7 @@ DECLARE_ALGORITHM(Rebin2D)
 
 using namespace API;
 using namespace DataObjects;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
+using namespace Geometry;
 using Kernel::V2D;
 
 //--------------------------------------------------------------------------
@@ -115,7 +114,7 @@ void Rebin2D::exec() {
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
 
-  // PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(numYBins);
        ++i) // signed for openmp
   {
@@ -180,6 +179,11 @@ void Rebin2D::rebinToOutput(const Geometry::Quadrilateral &inputQ,
                              en_start, en_end))
     return;
 
+  const auto & inY = inputWS->readY(i);
+  const auto & inE = inputWS->readE(i);
+  // It seems to be more efficient to construct this once and clear it before each calculation
+  // in the loop
+  ConvexPolygon intersectOverlap;
   for (size_t qi = qstart; qi < qend; ++qi) {
     const double vlo = verticalAxis[qi];
     const double vhi = verticalAxis[qi + 1];
@@ -190,26 +194,25 @@ void Rebin2D::rebinToOutput(const Geometry::Quadrilateral &inputQ,
       const V2D ul(X[ei], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
-      double yValue = inputWS->readY(i)[j];
+      double yValue = inY[j];
       if (boost::math::isnan(yValue)) {
         continue;
       }
-      try {
-        ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
-        const double weight = overlap.area() / inputQ.area();
+      intersectOverlap.clear();
+      if(intersection(outputQ, inputQ, intersectOverlap)) {
+        const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
-        double eValue = inputWS->readE(i)[j] * weight;
-        const double overlapWidth = overlap.largestX() - overlap.smallestX();
+        double eValue = inE[j] * weight;
         if (inputWS->isDistribution()) {
+          const double overlapWidth = intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }
         eValue = eValue * eValue;
-        PARALLEL_CRITICAL(overlap) {
+        PARALLEL_CRITICAL(overlap_sum) {
           outputWS->dataY(qi)[ei] += yValue;
           outputWS->dataE(qi)[ei] += eValue;
         }
-      } catch (Geometry::NoIntersectionException &) {
       }
     }
   }
@@ -237,6 +240,14 @@ void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
                              en_start, en_end))
     return;
 
+  const auto & inY = inputWS->readY(i);
+  const auto & inE = inputWS->readE(i);
+  // Don't do the overlap removal if already RebinnedOutput.
+  // This wreaks havoc on the data.
+  const bool removeOverlap(inputWS->isDistribution() && inputWS->id() != "RebinnedOutput");
+  // It seems to be more efficient to construct this once and clear it before each calculation
+  // in the loop
+  ConvexPolygon intersectOverlap;
   for (size_t qi = qstart; qi < qend; ++qi) {
     const double vlo = verticalAxis[qi];
     const double vhi = verticalAxis[qi + 1];
@@ -247,19 +258,17 @@ void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
       const V2D ul(X[ei], vhi);
       const Quadrilateral outputQ(ll, lr, ur, ul);
 
-      double yValue = inputWS->readY(i)[j];
+      double yValue = inY[j];
       if (boost::math::isnan(yValue)) {
         continue;
       }
-      try {
-        ConvexPolygon overlap = intersectionByLaszlo(outputQ, inputQ);
-        const double weight = overlap.area() / inputQ.area();
+      intersectOverlap.clear();
+      if(intersection(outputQ, inputQ, intersectOverlap)) {
+        const double weight = intersectOverlap.area() / inputQ.area();
         yValue *= weight;
-        double eValue = inputWS->readE(i)[j] * weight;
-        const double overlapWidth = overlap.largestX() - overlap.smallestX();
-        // Don't do the overlap removal if already RebinnedOutput.
-        // This wreaks havoc on the data.
-        if (inputWS->isDistribution() && inputWS->id() != "RebinnedOutput") {
+        double eValue = inE[j] * weight;
+        if (removeOverlap) {
+          const double overlapWidth = intersectOverlap.maxX() - intersectOverlap.minX();
           yValue *= overlapWidth;
           eValue *= overlapWidth;
         }
@@ -269,7 +278,6 @@ void Rebin2D::rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
           outputWS->dataE(qi)[ei] += eValue;
           outputWS->dataF(qi)[ei] += weight;
         }
-      } catch (Geometry::NoIntersectionException &) {
       }
     }
   }
@@ -293,8 +301,8 @@ bool Rebin2D::getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS,
                                     size_t &qstart, size_t &qend,
                                     size_t &en_start, size_t &en_end) const {
   const MantidVec &xAxis = outputWS->readX(0);
-  const double xn_lo(inputQ.smallestX()), xn_hi(inputQ.largestX());
-  const double yn_lo(inputQ.smallestY()), yn_hi(inputQ.largestY());
+  const double xn_lo(inputQ.minX()), xn_hi(inputQ.maxX());
+  const double yn_lo(inputQ.minY()), yn_hi(inputQ.maxY());
 
   if (xn_hi < xAxis.front() || xn_lo > xAxis.back() ||
       yn_hi < verticalAxis.front() || yn_lo > verticalAxis.back())

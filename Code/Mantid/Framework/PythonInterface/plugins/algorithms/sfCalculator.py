@@ -2,7 +2,6 @@
 from mantid.simpleapi import *
 import numpy as np
 import os.path
-import math
 
 PRECISION = 0.020
 
@@ -205,7 +204,7 @@ class sfCalculator(object):
 
             tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + \
                         (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
-            tmp_value = math.np.sqrt(tmp_value)
+            tmp_value = np.sqrt(tmp_value)
             new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
         self.y_axis_error_ratio = new_y_axis_error_ratio
 
@@ -219,7 +218,6 @@ class sfCalculator(object):
             return True
         else:
             return False
-
 
     def _calculateFinalYAxis(self, bNumerator=True):
         """
@@ -501,7 +499,7 @@ class sfCalculator(object):
             dataDen = 1
 
         mean = dataNum / dataDen
-        mean_error = math.np.sqrt(dataDen)
+        mean_error = np.sqrt(dataDen)
 
         return (mean, mean_error)
 
@@ -523,7 +521,7 @@ class sfCalculator(object):
         sz = len(data_error)
         new_data_error = np.zeros(sz)
         for i in range(sz):
-            new_data_error[i] = math.np.sqrt(data_error[i]**2 + background_error**2)
+            new_data_error[i] = np.sqrt(data_error[i]**2 + background_error**2)
 
         return new_data_error
 
@@ -537,7 +535,7 @@ class sfCalculator(object):
             sum_peak += peak[i]
             sum_peak_error += peak_error[i]**2
 
-        sum_peak_error = math.np.sqrt(sum_peak_error)
+        sum_peak_error = np.sqrt(sum_peak_error)
         return [sum_peak, sum_peak_error]
 
     #pylint: disable=unused-argument
@@ -691,7 +689,7 @@ class sfCalculator(object):
 
             tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + \
                           (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
-            tmp_product = math.np.sqrt(tmp_product)
+            tmp_product = np.sqrt(tmp_product)
             new_y_axis_error_ratio[i] = tmp_product * product.y_axis_ratio[i]
         product.y_axis_error_ratio = new_y_axis_error_ratio
 

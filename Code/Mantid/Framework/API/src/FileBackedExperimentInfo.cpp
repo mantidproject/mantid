@@ -301,7 +301,7 @@ void FileBackedExperimentInfo::populateFromFile() const {
 
     std::string parameterStr;
     const_cast<FileBackedExperimentInfo *>(this)
-        ->loadExperimentInfoNexus(&nxFile, parameterStr);
+        ->loadExperimentInfoNexus(m_filename, &nxFile, parameterStr);
     const_cast<FileBackedExperimentInfo *>(this)
         ->readParameterMap(parameterStr);
   } catch (::NeXus::Exception &exc) {

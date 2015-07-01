@@ -1,7 +1,7 @@
 #ifndef _vtkPeaksSource_h
 #define _vtkPeaksSource_h
 
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 #include <string>

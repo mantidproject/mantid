@@ -189,12 +189,13 @@ public:
                                     const double maxX,
                                     const bool entireRange) const;
 
-private:
-  /// NO COPY ALLOWED
-  EventWorkspace(const EventWorkspace &);
-  /// NO ASSIGNMENT ALLOWED
-  EventWorkspace &operator=(const EventWorkspace &);
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  EventWorkspace(const EventWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  EventWorkspace &operator=(const EventWorkspace &other);
 
+private:
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.
    */

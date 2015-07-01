@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
 	src/LoadDetectorsGroupingFile.cpp
+	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
@@ -122,6 +123,7 @@ set ( SRC_FILES
 	src/SaveCanSAS1D2.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorsGrouping.cpp
+	src/SaveDiffCal.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
@@ -188,6 +190,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
+	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
@@ -272,6 +275,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCanSAS1D2.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
+	inc/MantidDataHandling/SaveDiffCal.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
@@ -339,6 +343,7 @@ set ( TEST_FILES
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
+	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusTest.h
@@ -418,6 +423,7 @@ set ( TEST_FILES
 	SaveCanSAS1dTest2.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
+	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h

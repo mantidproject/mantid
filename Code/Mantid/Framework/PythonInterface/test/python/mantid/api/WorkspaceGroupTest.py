@@ -42,6 +42,15 @@ class WorkspaceGroupTest(unittest.TestCase):
             member = group[i]
             self.assertTrue(isinstance(member, MatrixWorkspace))
 
+        # Clearing the data should leave the handle unusable
+        member = group[0]
+        mtd.remove("First")
+        try:
+            member.name()
+            self.fail("Handle for item extracted from WorkspaceGroup is still usable after ADS has been cleared, it should be a weak reference and raise an error.")
+        except RuntimeError, exc:
+            self.assertEquals(str(exc), 'Variable invalidated, data has been deleted.')
+
     def test_SimpleAlgorithm_Accepts_Group_Handle(self):
         from mantid.simpleapi import Scale
 

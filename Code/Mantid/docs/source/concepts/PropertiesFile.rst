@@ -96,24 +96,48 @@ Directory Properties
 Logging Properties
 ******************
 
-The details of configuring the logging functionality within Mantid will not be explained here. For those who want more details look into the POCO logging classes and the Log4J logging module that it closely emulates. There are several comments in the properties file itself that explain the configuration we provide by default.However there are some obvious areas that you may want to alter and those properties are detailed below.
+The details of configuring the logging functionality within Mantid will not be explained here. 
+For those who want more details look into the POCO logging classes and the Log4J logging module 
+that it closely emulates. There are several comments in the properties file itself that explain 
+the configuration we provide by default.  However there are some obvious areas that you may want 
+to alter and those properties are detailed below.
 
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|Property                                |Description                                        |Example value          |
-+========================================+===================================================+=======================+
-|logging.loggers.root.level              |Defines the lowest level of messages to be output  |debug, informtion,     |
-|                                        |by the system. The default is information, but this|notice, warning,       |
-|                                        |can be lowered to debug for more detailed feedback.|error, critical        |
-|                                        |                                                   |or fatal               |
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|logging.channels.fileFilterChannel.level|The lowest level messages to output to the log     |debug, informtion,     |
-|                                        |file. The default is warning, but this can be      |notice, warning,       |
-|                                        |lowered to debug for more detailed feedback. The   |error, critical        |
-|                                        |higher level of this and logging.loggers.root.level|or fatal               |
-|                                        |will apply.                                        |                       |
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|logging.channels.fileChannel.path       | The Path to the log file.                         |../logs/mantid.log     |
-+----------------------------------------+---------------------------------------------------+-----------------------+
++-------------------------------------------+---------------------------------------------------+-----------------------+
+|Property                                   |Description                                        |Example value          |
++===========================================+===================================================+=======================+
+|logging.loggers.root.level                 |Defines the lowest level of messages to be output  |debug, information,    |
+|                                           |by the system, and will override lower settings in |notice, warning,       |
+|                                           |filterChannels. The default is information, but    |error, critical        |
+|                                           |this can be lowered to debug for more detailed     |or fatal               |
+|                                           |feedback.                                          |                       |
+|                                           |                                                   |                       |
++-------------------------------------------+---------------------------------------------------+-----------------------+
+|logging.channels.fileFilterChannel.level   |The lowest level messages to output to the log     |debug, information,    |
+|                                           |file. The default is warning, but this can be      |notice, warning,       |
+|                                           |lowered to debug for more detailed feedback. The   |error, critical        |
+|                                           |higher level of this and logging.loggers.root.level|or fatal               |
+|                                           |will apply.                                        |                       |
++-------------------------------------------+---------------------------------------------------+-----------------------+
+|logging.channels.consoleFilterChannel.level|The lowest level messages to output to the console.|debug, information,    |
+|                                           | The default is warning, but this can be           |notice, warning,       |
+|                                           |lowered to debug for more detailed feedback. The   |error, critical        |
+|                                           |higher level of this and logging.loggers.root.level|or fatal               |
+|                                           |will apply.                                        |                       |
++-------------------------------------------+---------------------------------------------------+-----------------------+
+|logging.channels.fileChannel.path          | The Path to the log file.                         |../logs/mantid.log     |
++-------------------------------------------+---------------------------------------------------+-----------------------+
+The logging priority levels for the file logging and console logging can also be adjusted in python using the commands:
+
+.. testcode:: LoggingConfigExample
+
+  #Set the console to log at debug level on above (7=debug)
+  ConfigService.setConsoleLogLevel(7)
+  #Set the file to only log at critical level (2=critical)
+  ConfigService.setConsoleLogLevel(2)
+  
+.. testoutput:: AddSampleLogExample 
+
+
 
 MantidPlot Properties
 *********************

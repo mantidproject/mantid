@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 #define MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -26,11 +26,11 @@ public:
   @return Standard string name  */
   virtual const std::string id() const { return "OffsetsWorkspace"; }
 
-private:
-  /// Private copy constructor. NO COPY ALLOWED
-  OffsetsWorkspace(const OffsetsWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  OffsetsWorkspace &operator=(const OffsetsWorkspace &);
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  OffsetsWorkspace(const OffsetsWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  OffsetsWorkspace &operator=(const OffsetsWorkspace &other);
 };
 
 /// shared pointer to the OffsetsWorkspace class

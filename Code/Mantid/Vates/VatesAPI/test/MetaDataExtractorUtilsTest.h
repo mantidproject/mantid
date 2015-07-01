@@ -11,6 +11,7 @@
 #include <qwt_double_interval.h>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "boost/pointer_cast.hpp"
 
 using namespace Mantid::VATES;

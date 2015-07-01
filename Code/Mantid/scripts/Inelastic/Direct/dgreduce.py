@@ -30,7 +30,7 @@ def setup(instname=None,reload=False):
         instname = config['default.instrument']
 
 
-    if not Reducer is None :
+    if not (Reducer is None or Reducer.prop_man is None):
         old_name=Reducer.prop_man.instr_name
         if  old_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :

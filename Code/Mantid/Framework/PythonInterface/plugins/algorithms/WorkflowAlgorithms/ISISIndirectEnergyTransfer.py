@@ -27,7 +27,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
+        self.declareProperty(name='SumFiles', defaultValue=False,
+                             doc='Toggle input file summing or sequential processing')
+
+        self.declareProperty(name='LoadLogFiles', defaultValue=True,
+                             doc='Load log files when loading runs')
 
         self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '', direction=Direction.Input, optional=PropertyMode.Optional),
                              doc='Workspace contining calibration data')
@@ -90,7 +94,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                                               self._ipf_filename,
                                                               self._spectra_range[0],
                                                               self._spectra_range[1],
-                                                              self._sum_files)
+                                                              self._sum_files,
+                                                              self._load_logs)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -273,6 +278,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         # Get properties
         self._data_files = self.getProperty('InputFiles').value
         self._sum_files = self.getProperty('SumFiles').value
+        self._load_logs = self.getProperty('LoadLogFiles').value
         self._calibration_ws = _str_or_none(self.getPropertyValue('CalibrationWorkspace'))
 
         self._instrument_name = self.getPropertyValue('Instrument')

@@ -11,7 +11,7 @@ Overview
   :align: right
   :width: 350
 
-TODO
+Provides Bayesian analysis routines primarily for use with QENS data.
 
 Action Buttons
 --------------
@@ -29,8 +29,6 @@ Manage Directories
 ResNorm
 -------
 
-.. warning:: This interface is only available on Windows
-
 .. interface:: Bayes
   :widget: ResNorm
 
@@ -38,13 +36,14 @@ This tab creates a group 'normalisation' file by taking a resolution file and
 fitting it to all the groups in the resolution (vanadium) data file which has
 the same grouping as the sample data of interest.
 
-The routine varies the width of the resolution file to give a 'stretch factor'
+The routine fits the width of the resolution file to give a 'stretch factor'
 and the area provides an intensity normalisation factor.
 
-The fitted parameters are in the group workspace with suffix _ResNorm with
-additional suffices of Intensity & Stretch.
+The fitted parameters are in the group workspace with suffix *_ResNorm* with
+additional suffices of *_Intensity* & *_Stretch*.
 
-The fitted data are in the workspace ending in _ResNorm_Fit.
+The processing on this tab is provided by the :ref:`ResNorm <algm-ResNorm>`
+algorithm.
 
 Options
 ~~~~~~~
@@ -58,12 +57,6 @@ Resolution File
 
 EMin & EMax
   The energy range to perform fitting within.
-
-Van Binning
-  Vanadium binning to use.
-
-Verbose
-  Provides more information on the Results Log.
 
 Plot Result
   Plots the result workspaces.
@@ -140,9 +133,6 @@ Sample Binning
 Resolution Binning
   Resolution binning to use.
 
-Verbose
-  Provides more information on the Results Log.
-
 Plot Result
   Plots the result workspaces.
 
@@ -192,9 +182,6 @@ Sigma
 Beta
   Value of Beta to use.
 
-Verbose
-  Provides more information on the Results Log.
-
 Plot Result
   Plots the result workspaces.
 
@@ -227,8 +214,9 @@ Width
 QMin & QMax
   The Q range to perform fitting within.
 
-Verbose
-  Provides more information on the Results Log.
+Fitting Parameters
+  Provides the option to change the defautl fitting parameters passed to the
+  chosen function.
 
 Plot Result
   Plots the result workspaces.

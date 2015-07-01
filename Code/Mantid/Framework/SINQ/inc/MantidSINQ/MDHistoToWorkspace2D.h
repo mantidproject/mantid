@@ -31,7 +31,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 

@@ -1,7 +1,7 @@
 #ifndef _VTKPEAKSFILTER_h
 #define _VTKPEAKSFILTER_h
 #include "vtkUnstructuredGridAlgorithm.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include <boost/scoped_ptr.hpp>

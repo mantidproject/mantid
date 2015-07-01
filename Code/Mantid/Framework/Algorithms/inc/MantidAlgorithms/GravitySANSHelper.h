@@ -1,6 +1,8 @@
 #ifndef MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_
 #define MANTID_ALGORITHMS_GRAVITYSANSHELPER_H_
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/V3D.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
 namespace Algorithms {
