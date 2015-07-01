@@ -158,9 +158,9 @@ private:
   virtual void initLayout();
 
   void doSetupSectionSetup();
-  void doSetupSectionParameters();
   void doSetupSectionRun();
   void doSetupGeneralWidgets();
+  void doSetupSavu();
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();

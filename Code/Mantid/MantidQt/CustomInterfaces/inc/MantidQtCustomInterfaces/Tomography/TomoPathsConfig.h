@@ -86,17 +86,34 @@ public:
 
   void updatePathDark(const std::string &p) { m_pathDark = p; }
 
+  /**
+   * Path to a base directory (for data usually). All other paths
+   * could be absolute or relative to this one.
+   *
+   * @return path (full, directory) as a string.
+   */
+  std::string pathBase() const { return m_pathBase; }
+
+  void updatePathBase(const std::string &p) { m_pathBase = p; }
+
   std::string pathSavuConfig() const;
+
+  std::string pathScriptsTools() const { return m_pathScriptsTools; }
+
+  void updatePathScriptsTools(const std::string &p) { m_pathScriptsTools = p; }
 
 private:
   /// file paths, base dir on scarf
-  std::string m_pathSCARFbase;
+  std::string m_pathBase;
   /// path to fits file (sample data)
   std::string m_pathFITS;
   /// path to flat/open beam/bright image
   std::string m_pathFlat;
   /// path to dark image
   std::string m_pathDark;
+
+  /// path to scripts/binaries
+  std::string m_pathScriptsTools;
 };
 
 } // namespace CustomInterfaces

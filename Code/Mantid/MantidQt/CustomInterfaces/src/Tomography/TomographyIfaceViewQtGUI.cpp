@@ -64,13 +64,14 @@ TomographyIfaceViewQtGUI::~TomographyIfaceViewQtGUI() {}
 void TomographyIfaceViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
-  // add tabs and set up their ui's
+  // add tab contents and set up their ui's
   QWidget *tab1w = new QWidget();
-  m_uiTabSetup.setupUi(tab1w);
+  m_uiTabRun.setupUi(tab1w);
   m_ui.tabMain->addTab(tab1w, QString("Run"));
   QWidget *tab2w = new QWidget();
-  m_uiTabRun.setupUi(tab2w);
+  m_uiTabSetup.setupUi(tab2w);
   m_ui.tabMain->addTab(tab2w, QString("Setup"));
+  m_ui.tabMain->setCurrentIndex(0);
 
   readSettings();
 
@@ -90,72 +91,49 @@ void TomographyIfaceViewQtGUI::initLayout() {
 }
 
 void TomographyIfaceViewQtGUI::doSetupGeneralWidgets() {
-  connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
-  // note connection to the parent window, otherwise you'll be left
-  // with an empty frame window
-  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
-          SLOT(close()));
-}
-
-void TomographyIfaceViewQtGUI::doSetupSectionParameters() {
-  // geometry, etc. niceties
-  // on the left (just plugin names) 1/2, right: 2/3
-  QList<int> sizes;
-  sizes.push_back(100);
-  sizes.push_back(200);
-  m_uiSavu.splitterPlugins->setSizes(sizes);
-
-  // Setup Parameter editor tab
-  loadAvailablePlugins();
-  m_uiSavu.treeCurrentPlugins->setHeaderHidden(true);
-
-  // Lists/trees
-  connect(m_uiSavu.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(availablePluginSelected()));
-  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(currentPluginSelected()));
-  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
-          this, SLOT(expandedItem(QTreeWidgetItem *)));
-
-  // Buttons
-  connect(m_uiSavu.btnTransfer, SIGNAL(released()), this,
-          SLOT(transferClicked()));
-  connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
-  connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this,
-          SLOT(moveDownClicked()));
-  connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
-
-  // Connect slots
   // Menu Items
   connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(menuOpenClicked()));
   connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(menuSaveClicked()));
   connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
           SLOT(menuSaveAsClicked()));
+
+  connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
+  // note connection to the parent window, otherwise you'd be left
+  // with an empty frame window
+  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
+          SLOT(close()));
 }
 
 void TomographyIfaceViewQtGUI::doSetupSectionSetup() {
   // disable 'local' for now
-  m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
-  m_ui.tab_local->setEnabled(false);
+  m_uiTabSetup.tabWidget_comp_resource->setTabEnabled(false, 1);
+  m_uiTabSetup.tab_local->setEnabled(false);
 
-  m_ui.groupBox_run_config->setEnabled(false);
+  m_uiTabSetup.groupBox_run_config->setEnabled(false);
 
-  connect(m_ui.pushButton_SCARF_login, SIGNAL(released()), this,
+  connect(m_uiTabSetup.pushButton_SCARF_login, SIGNAL(released()), this,
           SLOT(SCARFLoginClicked()));
-  connect(m_ui.pushButton_SCARF_logout, SIGNAL(released()), this,
+  connect(m_uiTabSetup.pushButton_SCARF_logout, SIGNAL(released()), this,
           SLOT(SCARFLogoutClicked()));
 
   // populate setup values from defaults
-  m_ui.lineEdit_path_FITS->setText(QString::fromStdString(m_pathsConfig.pathSamples()));
-  m_ui.lineEdit_path_flat->setText(QString::fromStdString(m_pathsConfig.pathOpenBeam()));
-  m_ui.lineEdit_path_dark->setText(QString::fromStdString(m_pathsConfig.pathDark()));
+  m_uiTabSetup.lineEdit_path_FITS->setText(
+      QString::fromStdString(m_pathsConfig.pathSamples()));
+  m_uiTabSetup.lineEdit_path_flat->setText(
+      QString::fromStdString(m_pathsConfig.pathOpenBeam()));
+  m_uiTabSetup.lineEdit_path_dark->setText(
+      QString::fromStdString(m_pathsConfig.pathDark()));
+  m_uiTabSetup.lineEdit_SCARF_path->setText(
+      QString::fromStdString(m_pathsConfig.pathBase()));
+  m_uiTabSetup.lineEdit_scripts_base_dir->setText(
+      QString::fromStdString(m_pathsConfig.pathScriptsTools()));
 
   // 'browse' buttons
-  connect(m_ui.pushButton_fits_dir, SIGNAL(released()), this,
+  connect(m_uiTabSetup.pushButton_fits_dir, SIGNAL(released()), this,
           SLOT(fitsPathBrowseClicked()));
-  connect(m_ui.pushButton_flat_dir, SIGNAL(released()), this,
+  connect(m_uiTabSetup.pushButton_flat_dir, SIGNAL(released()), this,
           SLOT(flatPathBrowseClicked()));
-  connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
+  connect(m_uiTabSetup.pushButton_dark_dir, SIGNAL(released()), this,
           SLOT(darkPathBrowseClicked()));
 }
 
@@ -165,42 +143,43 @@ void TomographyIfaceViewQtGUI::doSetupSectionRun() {
   QList<int> sizes;
   sizes.push_back(420);
   sizes.push_back(80);
-  m_ui.splitter_run_main_vertical->setSizes(sizes);
+  m_uiTabRun.splitter_run_main_vertical->setSizes(sizes);
 
   sizes[0] = 470;
   sizes[1] = 30;
-  m_ui.splitter_image_resource->setSizes(sizes);
+  m_uiTabRun.splitter_image_resource->setSizes(sizes);
 
   sizes[0] = 400;
   sizes[1] = 100;
-  m_ui.splitter_run_jobs->setSizes(sizes);
+  m_uiTabRun.splitter_run_jobs->setSizes(sizes);
 
-  m_ui.label_image_name->setText("none");
+  m_uiTabRun.label_image_name->setText("none");
 
-  m_ui.pushButton_reconstruct->setEnabled(false);
-  m_ui.pushButton_run_tool_setup->setEnabled(false);
-  m_ui.pushButton_run_job_cancel->setEnabled(false);
-  m_ui.pushButton_run_job_visualize->setEnabled(false);
+  m_uiTabRun.pushButton_reconstruct->setEnabled(false);
+  m_uiTabRun.pushButton_run_tool_setup->setEnabled(false);
+  m_uiTabRun.pushButton_run_job_cancel->setEnabled(false);
+  m_uiTabRun.pushButton_run_job_visualize->setEnabled(false);
 
   // Button signals
-  connect(m_ui.pushButton_browse_image, SIGNAL(released()), this,
+  connect(m_uiTabRun.pushButton_browse_image, SIGNAL(released()), this,
           SLOT(browseImageClicked()));
-  connect(m_ui.pushButton_reconstruct, SIGNAL(released()), this,
+  connect(m_uiTabRun.pushButton_reconstruct, SIGNAL(released()), this,
           SLOT(reconstructClicked()));
-  connect(m_ui.pushButton_run_tool_setup, SIGNAL(released()), this,
+  connect(m_uiTabRun.pushButton_run_tool_setup, SIGNAL(released()), this,
           SLOT(toolSetupClicked()));
-  connect(m_ui.pushButton_run_refresh, SIGNAL(released()), this,
+  connect(m_uiTabRun.pushButton_run_refresh, SIGNAL(released()), this,
           SLOT(jobTableRefreshClicked()));
-  connect(m_ui.pushButton_run_job_visualize, SIGNAL(released()), this,
+  connect(m_uiTabRun.pushButton_run_job_visualize, SIGNAL(released()), this,
           SLOT(runVisualizeClicked()));
-  connect(m_ui.pushButton_run_job_cancel, SIGNAL(released()), this,
+  connect(m_uiTabRun.pushButton_run_job_cancel, SIGNAL(released()), this,
           SLOT(jobCancelClicked()));
 
   // update tools for a resource
-  connect(m_ui.comboBox_run_compute_resource, SIGNAL(currentIndexChanged(int)),
-          this, SLOT(compResourceIndexChanged(int)));
+  connect(m_uiTabRun.comboBox_run_compute_resource,
+          SIGNAL(currentIndexChanged(int)), this,
+          SLOT(compResourceIndexChanged(int)));
 
-  connect(m_ui.comboBox_run_tool, SIGNAL(currentIndexChanged(int)), this,
+  connect(m_uiTabRun.comboBox_run_tool, SIGNAL(currentIndexChanged(int)), this,
           SLOT(runToolIndexChanged(int)));
 }
 
@@ -208,7 +187,7 @@ void TomographyIfaceViewQtGUI::setComputeResources(
     const std::vector<std::string> &resources,
     const std::vector<bool> &enabled) {
   // set up the compute resource
-  QComboBox *cr = m_ui.comboBox_run_compute_resource;
+  QComboBox *cr = m_uiTabRun.comboBox_run_compute_resource;
   if (!cr || resources.size() != enabled.size())
     return;
 
@@ -226,11 +205,44 @@ void TomographyIfaceViewQtGUI::setComputeResources(
   }
 }
 
+// This is here while savu becomes available and we find a better place for savu
+// stuff
+void TomographyIfaceViewQtGUI::doSetupSavu() {
+  // geometry, etc. niceties
+  // on the left (just plugin names) 1/2, right: 2/3
+  QList<int> sizes;
+  sizes.push_back(100);
+  sizes.push_back(200);
+  m_uiSavu.splitterPlugins->setSizes(sizes);
+
+  // Setup Parameter editor tab
+  loadAvailablePlugins();
+  m_uiSavu.treeCurrentPlugins->setHeaderHidden(true);
+
+  // Connect slots
+
+  // Lists/trees
+  connect(m_uiSavu.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
+          SLOT(availablePluginSelected()));
+  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
+          SLOT(currentPluginSelected()));
+  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
+          this, SLOT(expandedItem(QTreeWidgetItem *)));
+
+  // Buttons
+  connect(m_uiSavu.btnTransfer, SIGNAL(released()), this,
+          SLOT(transferClicked()));
+  connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
+  connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this,
+          SLOT(moveDownClicked()));
+  connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
+}
+
 void TomographyIfaceViewQtGUI::setReconstructionTools(
     const std::vector<std::string> &tools, const std::vector<bool> &enabled) {
 
   // set up the reconstruction tool
-  QComboBox *rt = m_ui.comboBox_run_tool;
+  QComboBox *rt = m_uiTabRun.comboBox_run_tool;
   if (!rt || tools.size() != enabled.size())
     return;
 
@@ -258,21 +270,21 @@ void TomographyIfaceViewQtGUI::enableLoggedActions(bool enable) {
   // resource is used in the future (except when none of the tools
   // supported are available/detected on "Local")
   std::vector<QPushButton *> buttons;
-  buttons.push_back(m_ui.pushButton_run_refresh);
-  buttons.push_back(m_ui.pushButton_run_job_cancel);
+  buttons.push_back(m_uiTabRun.pushButton_run_refresh);
+  buttons.push_back(m_uiTabRun.pushButton_run_job_cancel);
   // no visualization yet, need vsi etc. support
-  // buttons.push_back(m_ui.pushButton_run_job_visualize);
-  buttons.push_back(m_ui.pushButton_reconstruct);
+  // buttons.push_back(m_uiTabSetup.pushButton_run_job_visualize);
+  buttons.push_back(m_uiTabRun.pushButton_reconstruct);
 
   for (size_t i = 0; i < buttons.size(); ++i) {
     buttons[i]->setEnabled(enable);
   }
 
   if (!enable) {
-    m_ui.pushButton_reconstruct->setToolTip(
+    m_uiTabRun.pushButton_reconstruct->setToolTip(
         "Start reconstruction job. You need to be logged in to use this");
   } else {
-    m_ui.pushButton_reconstruct->setToolTip("");
+    m_uiTabRun.pushButton_reconstruct->setToolTip("");
   }
 }
 
@@ -284,9 +296,9 @@ void TomographyIfaceViewQtGUI::enableLoggedActions(bool enable) {
  */
 void TomographyIfaceViewQtGUI::updateCompResourceStatus(bool online) {
   if (online)
-    m_ui.pushButton_remote_status->setText("Online");
+    m_uiTabRun.pushButton_remote_status->setText("Online");
   else
-    m_ui.pushButton_remote_status->setText("Offline");
+    m_uiTabRun.pushButton_remote_status->setText("Offline");
 }
 
 /**
@@ -316,7 +328,7 @@ void TomographyIfaceViewQtGUI::readSettings() {
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 
-  m_ui.lineEdit_SCARF_path->setText(
+  m_uiTabSetup.lineEdit_SCARF_path->setText(
       QString::fromStdString(m_settings.SCARFBasePath));
 }
 
@@ -326,7 +338,7 @@ void TomographyIfaceViewQtGUI::readSettings() {
 void TomographyIfaceViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
-  QString s = m_ui.lineEdit_SCARF_path->text();
+  QString s = m_uiTabSetup.lineEdit_SCARF_path->text();
   qs.setValue("SCARF-base-path", s);
   qs.setValue("on-close-ask-for-confirmation",
               m_settings.onCloseAskForConfirmation);
@@ -379,7 +391,7 @@ std::string TomographyIfaceViewQtGUI::createUniqueNameHidden() {
 
 /// needs to at least update the 'tool' combo box
 void TomographyIfaceViewQtGUI::compResourceIndexChanged(int /* i */) {
-  QComboBox *rt = m_ui.comboBox_run_compute_resource;
+  QComboBox *rt = m_uiTabRun.comboBox_run_compute_resource;
   if (!rt)
     return;
 
@@ -389,7 +401,7 @@ void TomographyIfaceViewQtGUI::compResourceIndexChanged(int /* i */) {
 }
 
 void TomographyIfaceViewQtGUI::runToolIndexChanged(int /* i */) {
-  QComboBox *rt = m_ui.comboBox_run_tool;
+  QComboBox *rt = m_uiTabRun.comboBox_run_tool;
   if (!rt)
     return;
 
@@ -398,11 +410,11 @@ void TomographyIfaceViewQtGUI::runToolIndexChanged(int /* i */) {
 }
 
 void TomographyIfaceViewQtGUI::enableConfigTool(bool on) {
-  m_ui.pushButton_run_tool_setup->setEnabled(on);
+  m_uiTabRun.pushButton_run_tool_setup->setEnabled(on);
 }
 
 void TomographyIfaceViewQtGUI::enableRunReconstruct(bool on) {
-  m_ui.pushButton_reconstruct->setEnabled(on);
+  m_uiTabRun.pushButton_reconstruct->setEnabled(on);
 }
 
 /**
@@ -413,8 +425,8 @@ void TomographyIfaceViewQtGUI::enableRunReconstruct(bool on) {
  * @param loggedIn Status (true when logged in)
  */
 void TomographyIfaceViewQtGUI::updateLoginControls(bool loggedIn) {
-  m_ui.pushButton_SCARF_login->setEnabled(!loggedIn);
-  m_ui.pushButton_SCARF_logout->setEnabled(loggedIn);
+  m_uiTabSetup.pushButton_SCARF_login->setEnabled(!loggedIn);
+  m_uiTabSetup.pushButton_SCARF_logout->setEnabled(loggedIn);
 
   enableLoggedActions(loggedIn);
   updateCompResourceStatus(loggedIn);
@@ -438,7 +450,7 @@ void TomographyIfaceViewQtGUI::SCARFLogoutClicked() {
  * Slot for when the user requests to open the tool specific setup dialog.
  */
 void TomographyIfaceViewQtGUI::toolSetupClicked() {
-  QComboBox *rt = m_ui.comboBox_run_tool;
+  QComboBox *rt = m_uiTabRun.comboBox_run_tool;
   if (!rt)
     return;
 
@@ -500,7 +512,7 @@ void TomographyIfaceViewQtGUI::showToolConfig(const std::string &name) {
     // the setup dialog so we can chat about it.
     TomoToolConfigSavu savu;
     m_uiSavu.setupUi(&savu);
-    doSetupSectionParameters();
+    doSetupSavu();
     savu.setWindowModality(Qt::ApplicationModal);
     savu.show();
     QEventLoop el;
@@ -533,7 +545,7 @@ void TomographyIfaceViewQtGUI::reconstructClicked() {
  * Slot - when the user clicks the 'visualize job results' or similar button.
  */
 void TomographyIfaceViewQtGUI::runVisualizeClicked() {
-  QTableWidget *tbl = m_ui.tableWidget_run_jobs;
+  QTableWidget *tbl = m_uiTabRun.tableWidget_run_jobs;
   const int idCol = 2;
   QTableWidgetItem *hdr = tbl->horizontalHeaderItem(idCol);
   if ("ID" != hdr->text())
@@ -559,7 +571,7 @@ void TomographyIfaceViewQtGUI::runVisualizeClicked() {
  */
 void TomographyIfaceViewQtGUI::jobCancelClicked() {
   m_processingJobsIDs.clear();
-  QTableWidget *tbl = m_ui.tableWidget_run_jobs;
+  QTableWidget *tbl = m_uiTabRun.tableWidget_run_jobs;
   const int idCol = 2;
   QTableWidgetItem *hdr = tbl->horizontalHeaderItem(idCol);
   if ("ID" != hdr->text())
@@ -625,7 +637,7 @@ void TomographyIfaceViewQtGUI::browseImageClicked() {
 void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
     const std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> &status) {
 
-  QTableWidget *t = m_ui.tableWidget_run_jobs;
+  QTableWidget *t = m_uiTabRun.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
   t->setRowCount(static_cast<int>(status.size()));
 
@@ -648,8 +660,8 @@ void TomographyIfaceViewQtGUI::updateJobsInfoDisplay(
 
 std::string TomographyIfaceViewQtGUI::getUsername() const {
   if (g_SCARFName ==
-      m_ui.comboBox_run_compute_resource->currentText().toStdString())
-    return m_ui.lineEdit_SCARF_username->text().toStdString();
+      m_uiTabRun.comboBox_run_compute_resource->currentText().toStdString())
+    return m_uiTabSetup.lineEdit_SCARF_username->text().toStdString();
   else
     return "invalid";
 }
@@ -661,29 +673,29 @@ std::string TomographyIfaceViewQtGUI::getUsername() const {
  */
 std::string TomographyIfaceViewQtGUI::getPassword() const {
   if (g_SCARFName ==
-      m_ui.comboBox_run_compute_resource->currentText().toStdString())
-    return m_ui.lineEdit_SCARF_password->text().toStdString();
+      m_uiTabRun.comboBox_run_compute_resource->currentText().toStdString())
+    return m_uiTabSetup.lineEdit_SCARF_password->text().toStdString();
   else
     return "none";
 }
 
 void TomographyIfaceViewQtGUI::fitsPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_ui.lineEdit_path_FITS, str);
+  processPathBrowseClick(m_uiTabSetup.lineEdit_path_FITS, str);
   m_pathsConfig.updatePathSamples(str);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::flatPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_ui.lineEdit_path_flat, str);
+  processPathBrowseClick(m_uiTabSetup.lineEdit_path_flat, str);
   m_pathsConfig.updatePathOpenBeam(str);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
 
 void TomographyIfaceViewQtGUI::darkPathBrowseClicked() {
   std::string str;
-  processPathBrowseClick(m_ui.lineEdit_path_dark, str);
+  processPathBrowseClick(m_uiTabSetup.lineEdit_path_dark, str);
   m_pathsConfig.updatePathDark(str);
   m_presenter->notify(ITomographyIfacePresenter::TomoPathsChanged);
 }
@@ -733,10 +745,10 @@ void TomographyIfaceViewQtGUI::showImage(const std::string &path) {
   painter.begin(&pix);
   painter.drawImage(0, 0, rawImg);
   painter.end();
-  m_ui.label_image->setPixmap(pix);
-  m_ui.label_image->show();
+  m_uiTabRun.label_image->setPixmap(pix);
+  m_uiTabRun.label_image->show();
 
-  m_ui.label_image_name->setText(qpath);
+  m_uiTabRun.label_image_name->setText(qpath);
 }
 
 void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
@@ -804,8 +816,8 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
     // black picture
     QPixmap pix(static_cast<int>(width), static_cast<int>(height));
     pix.fill(QColor(0, 0, 0));
-    m_ui.label_image->setPixmap(pix);
-    m_ui.label_image->show();
+    m_uiTabRun.label_image->setPixmap(pix);
+    m_uiTabRun.label_image->show();
     return;
   }
 
@@ -832,10 +844,10 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   painter.begin(&pix);
   painter.drawImage(0, 0, rawImg);
   painter.end();
-  m_ui.label_image->setPixmap(pix);
-  m_ui.label_image->show();
+  m_uiTabRun.label_image->setPixmap(pix);
+  m_uiTabRun.label_image->show();
 
-  m_ui.label_image_name->setText(QString::fromStdString(name));
+  m_uiTabRun.label_image_name->setText(QString::fromStdString(name));
 }
 
 /**
