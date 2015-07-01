@@ -13,6 +13,10 @@ Combines the data contained in an arbitrary number of input workspaces.
 If the input workspaces do not have common binning, the bins in the
 output workspace will cover the entire range of all the input
 workspaces, with the largest bin widths used in regions of overlap.
+The combination of each workspace is performed using the :ref:`algm-Plus` algorithm,
+this does not preform any weighting based on the duration of collection, or proton charge.
+If you wish to perform Merge runs that should not be equally weighted then they should be
+corrected individually prior to merging.
 
 The combination of each workspace is performed using the :ref:`algm-Plus` algorithm,
 this does not preform any weighting based on the duration of collection, or proton charge.
