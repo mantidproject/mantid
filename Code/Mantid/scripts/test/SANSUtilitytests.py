@@ -358,8 +358,54 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self.assertTrue(not ws_name in mtd)
 
 class TestConvertibleToInteger(unittest.TestCase):
-    def test_converts_to_integer_when_integer(self):
-        pass
+    def test_converts_true_to_integer_when_integer(self):
+        # Arrange
+        input = 3
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_converts_true_to_integer_when_convertible_string(self):
+        # Arrange
+        input = '34'
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test__converts_false_to_integer_when_non_convertible_string(self):
+        # Arrange
+        input = '34_gt'
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestConvertibleToFloat(unittest.TestCase):
+    def test_converts_true_to_float_when_float(self):
+        # Arrange
+        input = 3.8
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_convertible_true_to_float_when_convertible_string(self):
+        # Arrange
+        input = "4.78"
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_converts_false_to_float_when_convertible_string(self):
+        # Arrange
+        input = "4.78_tg"
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertFalse(result)
 
 if __name__ == "__main__":
     unittest.main()
