@@ -5,7 +5,8 @@ from mantid.api import *
 import math
 
 class EnginXFitPeaks(PythonAlgorithm):
-    expectedDimType = 'Time-of-flight'
+    EXPECTED_DIM_TYPE = 'Time-of-flight'
+    PEAK_TYPE = 'BackToBackExponential'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -33,11 +34,15 @@ class EnginXFitPeaks(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
+        self.declareProperty('OutParametersTable', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
                              'this algorithm (Difc and Zero parameters) for GSAS. '
                              'These two parameters are added as two columns in a single row. If not given, '
                              'the table workspace is not created.')
+
+        self.declareProperty('OutFittedPeaksTable', '', direction=Direction.Input,
+                             doc = 'Name for a table workspace with the parameters of the peaks found and '
+                             'fitted. If not given, the table workspace is not created.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")
@@ -59,9 +64,9 @@ class EnginXFitPeaks(PythonAlgorithm):
         # Get expected peaks in TOF for the detector
         inWS = self.getProperty("InputWorkspace").value
         dimType = inWS.getXDimension().getName()
-        if self.expectedDimType != dimType:
+        if self.EXPECTED_DIM_TYPE != dimType:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
-                             "the X dimension of the input workspace is: '%s'" % (self.expectedDimType, dimType))
+                             "the X dimension of the input workspace is: '%s'" % (self.EXPECTED_DIM_TYPE, dimType))
 
         wsIndex = self.getProperty("WorkspaceIndex").value
 
@@ -72,11 +77,12 @@ class EnginXFitPeaks(PythonAlgorithm):
         foundPeaks = self._peaksFromFindPeaks(inWS, expectedPeaksToF, wsIndex)
         if foundPeaks.rowCount() < len(expectedPeaksToF):
             txt = "Peaks effectively found: " + str(foundPeaks)[1:-1]
-            raise RuntimeError("Some peaks from the list of expected peaks were not found by the algorithm "
-                               "FindPeaks. " + txt)
+            self.log().warning("Some peaks from the list of expected peaks were not found by the algorithm "
+                               "FindPeaks which this algorithm uses to check that the data has the the "
+                               "expected peaks. " + txt)
 
-        difc, zero = self._fitAllPeaks(inWS, wsIndex, foundPeaks, expectedPeaksD)
-
+        peaksTableName = self.getPropertyValue("OutFittedPeaksTable")
+        difc, zero = self._fitAllPeaks(inWS, wsIndex, (foundPeaks, expectedPeaksD), peaksTableName)
         self._produceOutputs(difc, zero)
 
     def _getDefaultPeaks(self):
@@ -102,12 +108,12 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.setProperty('Zero', zero)
 
         # optional outputs
-        tblName = self.getPropertyValue("OutputParametersTableName")
+        tblName = self.getPropertyValue("OutParametersTable")
         if '' != tblName:
             EnginXUtils.generateOutputParTable(tblName, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
-    def _fitAllPeaks(self, inWS, wsIndex, foundPeaks, expectedPeaksD):
+    def _fitAllPeaks(self, inWS, wsIndex, peaks, peaksTableName):
         """
         This method is the core of EnginXFitPeaks. Ittries to fit as many peaks as there are in the list of
         expected peaks passed to the algorithm.
@@ -117,17 +123,22 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         @param inWS :: input workspace with spectra for fitting
         @param wsIndex :: workspace index of the spectrum where the given peaks should be fitted
-        @param foundPeaks :: list of peaks found by FindPeaks or similar algorithm
-        @param expectedPeaksD :: list of expected peaks provided as input to this algorithm (in dSpacing units)
+        @param peaks :: tuple made of two lists: foundPeaks (peaks found by FindPeaks or similar
+                        algorithm), and expectedPeaksD (expected peaks given as input to this algorithm
+                        (in dSpacing units)
+        @param peaksTableName :: name of an (output) table with peaks parameters. If empty, the table is anonymous
 
         @returns difc and zero parameters obtained from fitting a
         linear background (in _fitDSpacingToTOF) to the peaks fitted
         here individually
 
         """
-        fittedPeaks = self._createFittedPeaksTable()
+        if 2 != len(peaks):
+            raise RuntimeError("Unexpected inconsistency found. This method requires a tuple with the list "
+                               "of found peaks and the list of expected peaks.")
+        foundPeaks = peaks[0]
+        fittedPeaks = self._createFittedPeaksTable(peaksTableName)
 
-        peakType = 'BackToBackExponential'
         for i in range(foundPeaks.rowCount()):
 
             row = foundPeaks.row(i)
@@ -138,6 +149,11 @@ class EnginXFitPeaks(PythonAlgorithm):
             # Oh oh, this actually happens sometimes for some spectra of the system test dataset
             # and it should be clarified when the role of FindPeaks etc. is fixed (trac ticket #10907)
             if width <= 0.:
+                detailTxt = ("Cannot fit a peak with these initial parameters from FindPeaks, center: %s "
+                             ", width: %s, height: %s"%(centre, width, height))
+                self.log().notice('For workspace index ' + str(wsIndex) + ', a peak that is in the list of '
+                                  'expected peaks and was found by FindPeaks has not been fitted correctly. '
+                                  'It will be ignored. Details: ' + detailTxt)
                 continue
 
             # Sigma value of the peak, assuming Gaussian shape
@@ -146,7 +162,7 @@ class EnginXFitPeaks(PythonAlgorithm):
             # Approximate peak intensity, assuming Gaussian shape
             intensity = height * sigma * math.sqrt(2 * math.pi)
 
-            peak = FunctionFactory.createFunction(peakType)
+            peak = FunctionFactory.createFunction(self.PEAK_TYPE)
             peak.setParameter('X0', centre)
             peak.setParameter('S', sigma)
             peak.setParameter('I', intensity)
@@ -171,7 +187,7 @@ class EnginXFitPeaks(PythonAlgorithm):
             paramTable = fitAlg.getProperty('OutputParameters').value
 
             fittedParams = {}
-            fittedParams['dSpacing'] = expectedPeaksD[i]
+            fittedParams['dSpacing'] = peaks[1][i]
             fittedParams['Chi'] = fitAlg.getProperty('OutputChi2overDoF').value
             self._addParametersToMap(fittedParams, paramTable)
 
@@ -181,11 +197,14 @@ class EnginXFitPeaks(PythonAlgorithm):
         if 0 == fittedPeaks.rowCount():
             detailTxt = ("Could find " + str(len(foundPeaks)) + " peaks using the algorithm FindPeaks but " +
                          "then it was not possible to fit any peak starting from these peaks found and using '" +
-                         peakType + "' as peak function.")
-            raise RuntimeError('Could not fit any peak. Please check the list of expected peaks, as it does not '
+                         self.PEAK_TYPE + "' as peak function.")
+            self.log().warning('Could not fit any peak. Please check the list of expected peaks, as it does not '
                                'seem to be appropriate for the workspace given. More details: ' +
                                detailTxt)
 
+            raise RuntimeError('Could not fit any peak.  Failed to fit peaks with peak type ' +
+                               self.PEAK_TYPE + ' even though FindPeaks found ' + str(foundPeaks.rowCount()) +
+                               ' peaks in principle. See the logs for further details.')
         # Better than failing to fit the linear function
         if 1 == fittedPeaks.rowCount():
             raise RuntimeError('Could find only one peak. This is not enough to fit the output parameters '
@@ -193,6 +212,7 @@ class EnginXFitPeaks(PythonAlgorithm):
                                'appropriate for the workspace')
 
         difc, zero = self._fitDSpacingToTOF(fittedPeaks)
+
         return (difc, zero)
 
     def _peaksFromFindPeaks(self, inWS, expectedPeaksToF, wsIndex):
@@ -217,9 +237,21 @@ class EnginXFitPeaks(PythonAlgorithm):
         return foundPeaks
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
-        """ Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
-    		and zero values.
+        """
+        Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
+        and zero values. If the table passed has less than 2 peaks this raises an exception, as it
+        is not possible to fit the difc, zero parameters.
+
+        @param fittedPeaksTable :: table with one row per fitted peak, expecting column 'dSpacing'
+        as x values and column 'X0' as y values.
+
+        @return the pair of difc and zero values fitted to the peaks.
     	"""
+        numPeaks = fittedPeaksTable.rowCount()
+        if numPeaks < 2:
+            raise ValueError('Cannot fit a linear function with less than two peaks. Got a table of ' +
+                             'peaks with ' + str(numPeaks) + ' peaks')
+
         convertTableAlg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
         convertTableAlg.setProperty('InputWorkspace', fittedPeaksTable)
         convertTableAlg.setProperty('ColumnX', 'dSpacing')
@@ -349,18 +381,26 @@ class EnginXFitPeaks(PythonAlgorithm):
         ToFvalues = [dSpacingToTof(ep) for ep in dspValues]
         return ToFvalues
 
-    def _createFittedPeaksTable(self):
-        """ Creates a table where to put peak fitting results to
+    def _createFittedPeaksTable(self, tblName):
+        """
+        Creates a table where to put peak fitting results to
+
+        @param tblName :: name of the table workspace (can be empty)
     	"""
-        alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
-        alg.execute()
-        table = alg.getProperty('OutputWorkspace').value
+        table = None
+        if not tblName:
+            alg = self.createChildAlgorithm('CreateEmptyTableWorkspace')
+            alg.execute()
+            table = alg.getProperty('OutputWorkspace').value
+        else:
+            import mantid.simpleapi as sapi
+            table = sapi.CreateEmptyTableWorkspace(OutputWorkspace=tblName)
 
         table.addColumn('double', 'dSpacing')
 
-        for name in ['A0', 'A1', 'X0', 'A', 'B', 'S', 'I']:
-            table.addColumn('double', name)
-            table.addColumn('double', name + '_Err')
+        for param in ['A0', 'A1', 'X0', 'A', 'B', 'S', 'I']:
+            table.addColumn('double', param)
+            table.addColumn('double', param + '_Err')
 
         table.addColumn('double', 'Chi')
 
