@@ -18,6 +18,10 @@ else:
 import mantid
 import mantid.simpleapi as api
 
+         
+DebugMode = True
+
+
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
     """
@@ -68,10 +72,32 @@ class CWSCDReductionControl(object):
         return
 
 
-    def addPeakToCalUB(self, peakinfo):
+    def addPeakToCalUB(self, peakws, ipeak, matrixws):
         """ Add a peak to calculate ub matrix
         """
+        # Get HKL
+        try:
+            h = float(int(matrixws.run().getProperty('_h').value))
+            k = float(int(matrixws.run().getProperty('_k').value))
+            l = float(int(matrixws.run().getProperty('_l').value))
+        except Exception:
+            return (False, "Unable to locate _h, _k or _l in input matrix workspace.")
 
+        thepeak = peakws.getPeak(ipeak)
+        thepeak.setHKL(h, k, l)
+        
+
+        return
+
+
+    def calculateUBMatrix(self, peakws, a, b, c, alpha, beta, gamma):
+        """ Calculate UB matrix
+        """
+        api.CalculateUMatrix(PeaksWorkspace=peakws,
+                a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma)
+
+        ubmatrix = peakws.sample().getOrientedLattice().getUB()
+        print ubmatrix
 
         return
 
@@ -155,6 +181,99 @@ class CWSCDReductionControl(object):
         peakinfo = PeakInfo(peakws, 0) 
 
         return (True, peakinfo)
+
+    def indexPeaks(self, srcpeakws, targetpeakws):
+        """ Index peaks in a peak workspace by UB matrix
+
+        Arguments: 
+         - srcpeakws :: peak workspace containing UB matrix
+         - targetpeakws :: peak workspace to get peaks indexed
+
+        Return :: (Boolean, Object)
+          - Boolean = True,  Object = ???
+          - Boolean = False, Object = error message (str)
+        """
+        # Check input
+        if isinstance(peakws, PeakWorkspace) is False:
+            return (False, "Input workspace %s is not a PeakWorkspace" % (str(peakws)))
+
+        # Get UB matrix 
+        if DebugMode is True:
+            ubmatrix = peakws.sample().getOrientedLattice().getUB()
+            print "[DB] UB matrix is %s\n" % (str(ubmatrix))
+
+        # Copy sample/ub matrix to target 
+        api.CopySample(InputWorkspace=srcpeakws, 
+                OutputWorkspace=str(targetpeakws), 
+                CopyName=0, CopyMaterial=0, CopyEnvironment=0, 
+                CopyShape=0,CopyLattice=1,CopyOrientationOnly=0)
+
+
+        numindexed = CalculatePeaksHKL(PeaksWorkspace=targetpeakws, Overwrite=True)
+
+        print "[INFO] There are %d peaks that are indexed." % (numindexed)
+
+        return (True, "")
+
+
+    def loadSpiceFile(self, scanno):
+        """ 
+        """ 
+        # Form stardard names
+        spicefilename = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat'%(self._expNumber, scanno)) 
+        outwsname = 'Table_Exp%d_Scan%04d'%(self._expNumber, scanno)
+
+        # Load SPICE
+        try:
+            spicetablews, tempinfows = api.LoadSpiceAscii(Filename=spicefilename, 
+                    OutputWorkspace=outwsname, RunInfoWorkspace='TempInfo')
+        except RuntimeError as e:
+            return (False, 'Unable to load SPICE data %s due to %s' % (spicefilename, str(e)))
+
+        # Store
+        self._spiceTableDict[scanno] = spicetablews
+
+        return 
+
+
+    def loadSpiceXMLPtFile(self, scanno, ptno):
+        """ 
+        """
+        # TODO - Doc
+        xlmfilename = '/home/wzz/Projects/MantidTests/Tickets/HB3A_UBMatrix/Datafiles/HB3A_exp355_scan%04d_%04d.xml'%(scanno, pt)
+        LoadSpiceXML2DDet(Filename=xlmfilename, OutputWorkspace='s%04d_%04d'%(scanno, pt), DetectorGeometry='256,256', 
+            SpiceTableWorkspace='Table_355_%04d'%(scanno), PtNumber=pt)
+        # Rebin in momentum space: UB matrix only
+        Rebin(InputWorkspace='s%04d_%04d'%(scanno, pt), OutputWorkspace='s%04d_%04d'%(scanno, pt), Params='6,0.01,6.5')
+        # Set Goniometer
+        SetGoniometer(Workspace='s%04d_%04d'%(scanno, pt), Axis0='_omega,0,1,0,-1', Axis1='_chi,0,0,1,-1', Axis2='_phi,0,1,0,-1')
+
+
+    def importDataToMantid(self, scanno, ptno):
+        """
+        """
+        # Check existence of SPICE workspace
+        if self._spiceTableDict.has_key(scanno) is False:
+            self.loadSpiceFile(scanno)
+
+        # Check existence of matrix workspace 
+        if self._xmlMatrixWSDict.has_key((scanno, ptno)) is False:
+            self.loadSpiceXMLPtFile(scanno, ptno)
+
+
+    def groupWS(self):
+        """
+        """
+        inputws = ''
+        for pt in [11]:
+            
+            inputws += 's%04d_%04d'%(scanno, pt)
+            if pt != numrows:
+                inputws += ','
+        # ENDFOR
+        
+        GroupWorkspaces(InputWorkspaces=inputws, OutputWorkspace='Group_exp0355_scan%04d'%(scanno))
+
 
 
     def setServerURL(self, serverurl):

@@ -112,7 +112,33 @@ def addPeak2(step):
 def calUBMatrix(step):
     """ Calculate UB matrix
     """
-    wkflow.calUBMatrix()
+
+    # Set HKL to peak workspace
+    peakws = mtd['Combined']
+    
+    scan =38
+    pt = 11
+    matrixws = mtd['HB3A_exp355_scan%04d_%04d'%(scan, pt)]
+
+    wkflow.addPeakToCalUB(peakws, 0, matrixws)
+    
+    scan =83
+    pt = 11
+    matrixws = mtd['HB3A_exp355_scan%04d_%04d'%(scan, pt)]
+    
+    wkflow.addPeakToCalUB(peakws, 1, matrixws)
+
+    # Calculate UB matrix
+    a=3.9
+    b=a
+    c=a
+    alpha=90.
+    beta=alpha
+    gamma=alpha
+
+
+    wkflow.CalculateUBMatrix(peakws, a, b, c, alpha, beta, gamm)
+            
 
     return
 
