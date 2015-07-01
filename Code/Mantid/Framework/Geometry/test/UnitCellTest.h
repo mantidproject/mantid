@@ -133,7 +133,7 @@ public:
       std::stringstream msg;
       msg << cell;
       TS_ASSERT_EQUALS(msg.str(),
-                       "Lattice Parameters:    2.000    3.000    4.000   80.000   90.000  100.000");
+                       "Lattice Parameters:    2.000000    3.000000    4.000000   80.000000   90.000000  100.000000");
     }
 
     // w/ uncertainties
@@ -142,7 +142,7 @@ public:
       std::stringstream msg;
       msg << cell;
       TS_ASSERT_EQUALS(msg.str(),
-                       "Lattice Parameters:    2.000    3.000    4.000   80.000   90.000  100.000\nParameter Errors  :    1.000    2.000    3.000    4.000    5.000    6.000");
+                       "Lattice Parameters:    2.000000    3.000000    4.000000   80.000000   90.000000  100.000000\nParameter Errors  :    1.000000    2.000000    3.000000    4.000000    5.000000    6.000000");
     }
   }
 
