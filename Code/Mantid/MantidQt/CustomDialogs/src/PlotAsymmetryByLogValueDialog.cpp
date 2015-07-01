@@ -150,9 +150,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
   {
     alg->setPropertyValue("Filename",nexusFileName.toStdString());
     alg->setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueDialog_tmp");
-    alg->setPropertyValue("DeadTimeTable", ""); // Don't need it for now
-    alg->setPropertyValue("SpectrumMin","0");
-    alg->setPropertyValue("SpectrumMax","0");
+    alg->setPropertyValue("SpectrumList","1"); // Need to load at least one spectrum
     alg->execute();
     if (alg->isExecuted())
     {
