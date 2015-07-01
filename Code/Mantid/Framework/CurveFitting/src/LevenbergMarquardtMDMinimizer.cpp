@@ -74,11 +74,10 @@ bool LevenbergMarquardtMDMinimizer::iterate(size_t) {
   }
 
   // calculate the first and second derivatives of the cost function.
-  if (m_mu == 0.0) { // first time calculate everything
+  if (m_mu == 0.0 || m_rho > 0) {
+    // calculate everything first time or 
+    // if last iteration was good
     m_F = m_leastSquares->valDerivHessian();
-  } else if (m_rho > 0) { // last iteration was good: calculate new m_der and
-                          // m_hessian, dont't recalculate m_F
-    m_leastSquares->valDerivHessian(false);
   }
   // else if m_rho < 0 last iteration was bad: reuse m_der and m_hessian
 

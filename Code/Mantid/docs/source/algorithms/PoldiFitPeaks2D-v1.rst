@@ -158,6 +158,6 @@ The refined lattice parameter is printed at the end:
 
 .. testoutput:: ExSilicon2DPawley
 
-    Refined lattice parameter a = 5.43125 +/- 4e-05
+    Refined lattice parameter a = 5.43126 +/- 4e-05
 
 .. categories::
