@@ -121,7 +121,7 @@ namespace IDA
   /**
    * Handle algorithm completion.
    *
-   * @param bool error If the algorithm failed
+   * @param error If the algorithm failed
    */
   void Iqt::algorithmComplete(bool error)
   {
