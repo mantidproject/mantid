@@ -5,6 +5,7 @@ import math
 import EnginXUtils
 
 class EnginXCalibrateFull(PythonAlgorithm):
+    INDICES_PROP_NAME = 'DetectorIndices'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -18,6 +19,15 @@ class EnginXCalibrateFull(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
+
+        self.declareProperty("Bank", '', direction=Direction.Input,
+                             doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
+                             "equivalently,North or South. See also " + self.INDICES_PROP_NAME)
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the workspace indices for the detectors '
+                             'that should be considered in the calibration (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap.')
 
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
@@ -39,8 +49,6 @@ class EnginXCalibrateFull(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty("Bank", 1, "Which bank to calibrate")
-
     def PyExec(self):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
@@ -51,10 +59,11 @@ class EnginXCalibrateFull(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         inWS = self.getProperty('Workspace').value
-        bank = self.getProperty('Bank').value
+        WSIndices = EnginXUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
+                                                             self.getProperty(self.INDICES_PROP_NAME).value)
 
-        rebinWS = self._prepareWsForFitting(inWS)
-        posTbl = self._calculateCalibPositionsTbl(rebinWS, bank, expectedPeaksD)
+        rebinnedWS = self._prepareWsForFitting(inWS)
+        posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("OutDetPosTable", posTbl)
@@ -78,22 +87,21 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         return result
 
-    def _calculateCalibPositionsTbl(self, ws, bank, expectedPeaksD):
+    def _calculateCalibPositionsTbl(self, ws, indices, expectedPeaksD):
         """
         Makes a table of calibrated positions (and additional parameters). It goes through
         the detectors of the workspace and calculates the difc and zero parameters by fitting
         peaks, then calculates the coordinates and adds them in the returned table.
 
         @param ws :: input workspace with an instrument definition
-        @param bank :: instrument bank to calibrate
+        @param indices :: workspace indices to consider for calibration (for example all the
+        indices of a bank)
         @param expectedPeaksD :: expected peaks in d-spacing
 
-        @return table that with the detector positions, with one row per detector
+        @return table with the detector positions, one row per detector
 
         """
         posTbl = self._createPositionsTable()
-
-        indices = EnginXUtils.getWsIndicesForBank(bank, ws)
 
         prog = Progress(self, start=0, end=1, nreports=len(indices))
 

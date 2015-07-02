@@ -3,6 +3,8 @@ from mantid.kernel import *
 from mantid.api import *
 
 class EnginXFocus(PythonAlgorithm):
+    INDICES_PROP_NAME = 'DetectorIndices'
+
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
@@ -16,23 +18,34 @@ class EnginXFocus(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Workspace with the run to focus.")
 
-        self.declareProperty("Bank", 1, "Which bank to focus")
+        self.declareProperty("Bank", '', direction=Direction.Input,
+                             doc = "Which bank to focus. It can be specified as 1 or 2, or "
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME)
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input,\
+        self.declareProperty(ITableWorkspaceProperty('DetectorPositions', "", Direction.Input,\
                 PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the workspace indices for the detectors '
+                             'that should be considered in the focussing operation (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap.')
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                              "A workspace with focussed data")
 
 
-
     def PyExec(self):
+        import EnginXUtils
+
         # Get the run workspace
         ws = self.getProperty('InputWorkspace').value
 
+        indices = EnginXUtils.getWsIndicesFromInProperties(ws, self.getProperty('Bank').value,
+                                                           self.getProperty('DetectorIndices').value)
+
     	# Leave the data for the bank we are interested in only
-        ws = self._cropData(ws)
+        ws = self._cropData(ws, indices)
 
     	# Apply calibration
         self._applyCalibration(ws)
@@ -89,16 +102,18 @@ class EnginXFocus(PythonAlgorithm):
         alg.setProperty('Workspace', ws)
         alg.execute()
 
-    def _cropData(self, ws):
-        """ Crops the workspace so that only data for the specified bank is left.
+    def _cropData(self, ws, indices):
+        """
+        Produces a cropped workspace from the input workspace so that only
+        data for the specified bank is left.
 
-    	    NB: This assumes spectra for a bank are consequent.
-    	"""
+        NB: This assumes spectra for a bank are consequent.
 
-        import EnginXUtils
+        @param ws :: workspace to crop (not modified in-place)
+        @param bank :: workspace indices to keep in the workpace returned
 
-        indices = EnginXUtils.getWsIndicesForBank(self.getProperty('Bank').value, ws)
-
+        @returns cropped workspace, with only the spectra corresponding to the indices requested
+        """
     	# Leave only spectra between min and max
         alg = self.createChildAlgorithm('CropWorkspace')
         alg.setProperty('InputWorkspace', ws)

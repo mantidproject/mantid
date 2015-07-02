@@ -3,6 +3,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 class EnginXCalibrate(PythonAlgorithm):
+    INDICES_PROP_NAME = 'DetectorIndices'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -26,11 +27,18 @@ class EnginXCalibrate(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty("Bank", 1, "Which bank to calibrate")
+        self.declareProperty("Bank", '', direction=Direction.Input,
+                             doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME)
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
                 Direction.Input, PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the workspace indices for the detectors '
+                             'that should be considered in the calibration (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap.')
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the calibration parameters calculated '
@@ -39,17 +47,18 @@ class EnginXCalibrate(PythonAlgorithm):
                              'generated.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
-    		doc = "Calibrated Difc value for the bank")
+                             doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
 
         self.declareProperty("Zero", 0.0, direction = Direction.Output,\
-    		doc = "Calibrated Zero value for the bank")
+                             doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
 
     def PyExec(self):
 
         import EnginXUtils
 
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
-                                     self.getProperty('Bank').value)
+                                     self.getProperty('Bank').value,
+                                     self.getProperty(self.INDICES_PROP_NAME).value)
 
         # Get peaks in dSpacing from file
         expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
@@ -85,18 +94,21 @@ class EnginXCalibrate(PythonAlgorithm):
 
         return difc, zero
 
-    def _focusRun(self, ws, bank):
+    def _focusRun(self, ws, bank, indices):
         """
         Focuses the input workspace by running EnginXFocus which will produce a single spectrum workspace.
 
         @param ws :: workspace to focus
         @param bank :: the focussing will be applied on the detectors of this bank
+        @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
+        mutually exclusive)
 
         @return focussed (summed) workspace
         """
         alg = self.createChildAlgorithm('EnginXFocus')
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('Bank', bank)
+        alg.setProperty(self.INDICES_PROP_NAME, indices)
 
         detPos = self.getProperty('DetectorPositions').value
         if detPos:
