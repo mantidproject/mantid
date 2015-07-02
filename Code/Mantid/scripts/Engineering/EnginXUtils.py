@@ -106,7 +106,7 @@ def parseWsIndices(ws, detIndices):
     if indices[-1] >= maxIdx:
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
                          "workspace '" + ws.getName() +"' (" + str(ws.getNumberHistograms()) +
-                         ")has been given. Please check the list of indices.")
+                         ") has been given. Please check the list of indices.")
     return indices
 
 def getWsIndicesForBank(ws, bank):
