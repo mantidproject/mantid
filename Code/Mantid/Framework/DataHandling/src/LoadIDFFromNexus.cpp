@@ -66,7 +66,7 @@ void LoadIDFFromNexus::exec() {
   // Take instrument info from nexus file.
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile );
 
-  LoadParameters(  nxfile, localWorkspace );
+  LoadParameters(  &nxfile, localWorkspace );
 
   return;
 }
@@ -79,13 +79,13 @@ void LoadIDFFromNexus::exec() {
  *
  *  @throw FileError Thrown if unable to parse XML file
  */
-void LoadIDFFromNexus::LoadParameters( ::NeXus::File nxfile, const MatrixWorkspace_sptr localWorkspace ) {
+void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorkspace_sptr localWorkspace ) {
 
  // If the nexus file also contains a instrument parameter map entry this
  // is returned as parameterString
   std::string parameterString;
 
-  localWorkspace->loadInstrumentParametersNexus( &nxfile, parameterString );
+  localWorkspace->loadInstrumentParametersNexus( nxfile, parameterString );
   // at present loadInstrumentInfoNexus does not populate any instrument params
   // into the workspace including those that are defined in the IDF.
   // Here populate inst params defined in IDF
