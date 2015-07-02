@@ -60,8 +60,15 @@ MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
   // I think it is necessary to create our own copy of the factory, since we do
   // not know who owns the factory in other and how its lifetime is controlled.
   m_nearestNeighboursFactory.reset(new NearestNeighboursFactory);
-  // TODO: Do we need to init m_nearestNeighbours?
+  // m_nearestNeighbours seem to be built automatically when needed, so we do
+  // not copy here.
+
   // TODO: Do we need to init m_monitorWorkspace?
+
+  // This call causes copying of m_parmap (ParameterMap). The constructor of
+  // ExperimentInfo just kept a shared_ptr to the same map as in other, which
+  // is not enough as soon as the maps in one of the workspaces it edited.
+  instrumentParameters();
 }
 
 /// Destructor
