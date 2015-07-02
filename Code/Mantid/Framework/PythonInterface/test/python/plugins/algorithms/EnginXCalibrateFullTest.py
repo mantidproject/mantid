@@ -23,27 +23,33 @@ class EnginXCalibrateFullTest(unittest.TestCase):
         # No Filename property (required)
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          Input='foo', Bank=1)
+                          Input='foo', Bank='1')
 
         # Wrong workspace name
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          Input='this_ws_is_not_there.not', Bank=2)
+                          Input='this_ws_is_not_there.not', Bank='2')
 
         # mispelled ExpectedPeaks
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, Bank=2, Peaks='2')
+                          InputWorkspace=self.__class__._data_ws, Bank='2', Peaks='2')
 
         # mispelled OutDetPosFilename
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull, OutDetPosFile='any.csv',
-                          InputWorkspace=self.__class__._data_ws, Bank=2, Peaks='2')
+                          InputWorkspace=self.__class__._data_ws, Bank='2', Peaks='2')
 
         # all fine, except missing DetectorPositions (output)
         self.assertRaises(RuntimeError,
                           EnginXCalibrateFull,
-                          InputWorkspace=self.__class__._data_ws, Bank=2)
+                          InputWorkspace=self.__class__._data_ws, Bank='2')
+
+        # all fine, except Bank should be a string
+        self.assertRaises(RuntimeError,
+                          EnginXCalibrateFull,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=[0.6, 0.9],
+                          Bank=2)
 
     def test_wrong_fit_fails_gracefully(self):
         """
