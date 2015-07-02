@@ -56,35 +56,8 @@ void CloneWorkspace::exec() {
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(outputWS));
   } else if (inputMatrix) {
-    // Create the output workspace. This will copy many aspects fron the input
-    // one.
-    MatrixWorkspace_sptr outputWorkspace =
-        WorkspaceFactory::Instance().create(inputMatrix);
-
-    // ...but not the data, so do that here.
-
-    const int64_t numHists =
-        static_cast<int64_t>(inputMatrix->getNumberHistograms());
-    Progress prog(this, 0.0, 1.0, numHists);
-
-    PARALLEL_FOR2(inputMatrix, outputWorkspace)
-    for (int64_t i = 0; i < int64_t(numHists); ++i) {
-      PARALLEL_START_INTERUPT_REGION
-
-      outputWorkspace->setX(i, inputMatrix->refX(i));
-      outputWorkspace->dataY(i) = inputMatrix->readY(i);
-      outputWorkspace->dataE(i) = inputMatrix->readE(i);
-      // Be sure to not break sharing between Dx vectors by assigning pointers
-      outputWorkspace->getSpectrum(i)
-          ->setDx(inputMatrix->getSpectrum(i)->ptrDx());
-
-      prog.report();
-
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputWorkspace));
+    Workspace_sptr outputWS(inputWorkspace->clone().release());
+    setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
     // Call the CloneMDWorkspace algo to handle MDEventWorkspace
     IAlgorithm_sptr alg =
