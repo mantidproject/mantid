@@ -192,7 +192,7 @@ void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
     // configured / run
     if (g_CCPiTool == m_reconTools[i] ||
         // also, we cannot run Savu at present, and CCPi is not available
-        g_SavuTool == m_reconTools[i] || g_CCPiTool == m_reconTools[i]) {
+        g_SavuTool == m_reconTools[i]) {
       m_reconToolsStatus.push_back(false);
     } else {
       m_reconToolsStatus.push_back(true);
