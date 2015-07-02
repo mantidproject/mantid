@@ -232,7 +232,7 @@ public:
 
     // Default pulse time (if none are found)
     Mantid::Kernel::DateAndTime pulsetime;
-    int periodNumber = 0;
+    int periodNumber = 1;
     int periodIndex = 0;
     Mantid::Kernel::DateAndTime lastpulsetime(0);
 
@@ -284,7 +284,8 @@ public:
 
         // Save the pulse time at this index for creating those events
         pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
-        periodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
+        int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
+        periodNumber = logPeriodNumber > 0 ? logPeriodNumber : periodNumber; // Some historic files have recorded their logperiod numbers as zeros!
         periodIndex = periodNumber - 1;
 
         // Determine if pulse times continue to increase
