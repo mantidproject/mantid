@@ -231,7 +231,6 @@ void TomographyIfaceModel::doLogout(const std::string &compRes,
   alg->initialize();
   alg->setProperty("ComputeResource", compRes);
   alg->setProperty("UserName", username);
-
   try {
     alg->execute();
   } catch (std::runtime_error &e) {

@@ -52,8 +52,6 @@ TomographyIfacePresenter::~TomographyIfacePresenter() {
 void TomographyIfacePresenter::cleanup() {
   killKeepAliveMechanism();
   m_model->cleanup();
-
-  m_view->saveSettings();
 }
 
 void TomographyIfacePresenter::notify(
@@ -129,7 +127,6 @@ void TomographyIfacePresenter::processSetup() {
                           "remote compute resource the functionality of this "
                           "interface might be limited.");
     }
-
     m_model->setupRunTool("");
     processTomoPathsChanged();
 
@@ -271,6 +268,9 @@ void TomographyIfacePresenter::processRefreshJobs() {
 }
 
 void TomographyIfacePresenter::processCancelJobs() {
+  if (m_model->loggedIn().empty())
+    return;
+
   const std::string &resource = m_view->currentComputeResource();
   if (m_model->localComputeResource() != resource) {
     m_model->doCancelJobs(resource, m_view->processingJobsIDs());
@@ -295,7 +295,10 @@ void TomographyIfacePresenter::processLogMsg() {
   }
 }
 
-void TomographyIfacePresenter::processShutDown() { cleanup(); }
+void TomographyIfacePresenter::processShutDown() {
+  m_view->saveSettings();
+  cleanup();
+}
 
 void TomographyIfacePresenter::processViewImg() {
   std::string ip = m_view->showImagePath();
