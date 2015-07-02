@@ -109,6 +109,16 @@ class EnginXFocusTest(unittest.TestCase):
 
         self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
+    def test_runs_ok_south(self):
+        """
+        Same as before but with Bank='South' - equivalent to Bank='1'
+        """
+
+        out_name = 'out'
+        out = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='North', OutputWorkspace=out_name)
+
+        self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
+
     def test_runs_ok_indices(self):
         """
         Same as above but with detector (workspace) indices equivalent to bank 1
