@@ -11,9 +11,11 @@ namespace API {
  *  @param length :: The length of this axis
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
+// NumericAxis is set to length 0 since we do not need its internal storage. We
+// override public functions of NumericAxis that would access it.
 RefAxis::RefAxis(const std::size_t &length,
                  const MatrixWorkspace *const parentWorkspace)
-    : NumericAxis(length), m_parentWS(parentWorkspace), m_size(length) {}
+    : NumericAxis(0), m_parentWS(parentWorkspace), m_size(length) {}
 
 /** Private, specialised copy constructor. Needed because it's necessary to pass
  * in
