@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectDataAnalysis</class>
- <widget class="QMainWindow" name="IndirectDataAnalysis">
+ <class>IndirectCorrections</class>
+ <widget class="QMainWindow" name="IndirectCorrections">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>700</width>
-    <height>600</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indirect Data Analysis</string>
+   <string>Indirect Corrections</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="twIDATabs">
+     <widget class="QTabWidget" name="twTabs">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -26,29 +26,19 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tabElwin">
+      <widget class="QWidget" name="tabCalcCorr">
        <attribute name="title">
-        <string>Elwin</string>
+        <string>Calculate Corrections</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabMSD">
+      <widget class="QWidget" name="tabApplyCorr">
        <attribute name="title">
-        <string>MSD Fit</string>
+        <string>Apply Corrections</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabIqt">
+      <widget class="QWidget" name="tabAbsorptionCorrections">
        <attribute name="title">
-        <string>I(Q, t)</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabIqtFit">
-       <attribute name="title">
-        <string>I(Q, t) Fit</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabConvFit">
-       <attribute name="title">
-        <string>ConvFit</string>
+        <string>Absorption Corrections</string>
        </attribute>
       </widget>
      </widget>
@@ -151,7 +141,7 @@
   </widget>
  </widget>
  <tabstops>
-  <tabstop>twIDATabs</tabstop>
+  <tabstop>twTabs</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
   <tabstop>pbManageDirs</tabstop>

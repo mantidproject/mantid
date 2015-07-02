@@ -28,7 +28,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   ConvFit::ConvFit(QWidget * parent) :
-    IDATab(parent),
+    IndirectDataAnalysisTab(parent),
     m_stringManager(NULL), m_cfTree(NULL),
     m_fixedProps(),
     m_cfInputWS(), m_cfInputWSName(),
