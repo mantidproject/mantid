@@ -24,6 +24,7 @@ namespace IDA
     virtual void loadSettings(const QSettings & settings);
 
   private slots:
+    void algorithmComplete(bool error);
     void plotInput(const QString& wsname);
     void rsRangeChangedLazy(double min, double max);
     void updateRS(QtProperty* prop, double val);
