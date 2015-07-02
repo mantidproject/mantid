@@ -3,7 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectCorrections.h"
 
-// IDATab subclasses:
+// IndirectDataAnalysisTab subclasses:
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
@@ -44,9 +44,9 @@ namespace IDA
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
     // All tabs MUST appear here to be shown in interface.
     // We make the assumption that each map key corresponds to the order in which the tabs appear.
-    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twIDATabs->widget(CALC_CORR))));
-    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twIDATabs->widget(APPLY_CORR))));
-    m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twIDATabs->widget(ABSORPTION_CORRECTIONS))));
+    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twTabs->widget(CALC_CORR))));
+    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twTabs->widget(APPLY_CORR))));
+    m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS))));
   }
 
   /**
@@ -127,7 +127,7 @@ namespace IDA
    */
   void IndirectCorrections::run()
   {
-    const unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
+    const unsigned int currentTab = m_uiForm.twTabs->currentIndex();
     m_tabs[currentTab]->runTab();
   }
 
@@ -154,7 +154,7 @@ namespace IDA
    */
   void IndirectCorrections::exportTabPython()
   {
-    unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
+    unsigned int currentTab = m_uiForm.twTabs->currentIndex();
     m_tabs[currentTab]->exportPythonScript();
   }
 

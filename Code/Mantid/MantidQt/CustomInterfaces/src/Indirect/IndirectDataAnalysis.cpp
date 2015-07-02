@@ -3,7 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h"
 
-// IDATab subclasses:
+// IndirectDataAnalysisTab subclasses:
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"

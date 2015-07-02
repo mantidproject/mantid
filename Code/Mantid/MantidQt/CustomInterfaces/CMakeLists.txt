@@ -11,13 +11,13 @@ set ( SRC_FILES
   src/Indirect/CorrectionsTab.cpp
   src/Indirect/DensityOfStates.cpp
 	src/Indirect/Elwin.cpp
-	src/Indirect/IDATab.cpp
   src/Indirect/ILLCalibration.cpp
   src/Indirect/ILLEnergyTransfer.cpp
   src/Indirect/IndirectBayes.cpp
 	src/Indirect/IndirectBayesTab.cpp
   src/Indirect/IndirectCorrections.cpp
 	src/Indirect/IndirectDataAnalysis.cpp
+	src/Indirect/IndirectDataAnalysisTab.cpp
 	src/Indirect/IndirectDataReduction.cpp
 	src/Indirect/IndirectDataReductionTab.cpp
 	src/Indirect/IndirectDiffractionReduction.cpp
@@ -99,7 +99,6 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Homer.h
-	inc/MantidQtCustomInterfaces/Indirect/IDATab.h
 	inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
 	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
@@ -113,6 +112,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
   inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
+	inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysisTab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h
  	inc/MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h
@@ -201,7 +201,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Homer.h
-                inc/MantidQtCustomInterfaces/Indirect/IDATab.h
                 inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
@@ -215,6 +214,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h
+                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysisTab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDataReductionTab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectDiffractionReduction.h

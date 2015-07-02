@@ -36,20 +36,20 @@ namespace IDA
   static const unsigned int NUM_DECIMALS = 6;
 
   // Forward Declaration
-  class IDATab;
+  class IndirectDataAnalysisTab;
 
   /**
    * The IndirectDataAnalysis class is the main class that handles the interface and controls
    * its tabs.
    *
-   * Is a friend to the IDATab class.
+   * Is a friend to the IndirectDataAnalysisTab class.
    */
   class IndirectDataAnalysis : public MantidQt::API::UserSubWindow
   {
     Q_OBJECT
 
-    /// Allow IDATab to have access.
-    friend class IDATab;
+    /// Allow IndirectDataAnalysisTab to have access.
+    friend class IndirectDataAnalysisTab;
 
   public:
     /// The name of the interface as registered into the factory
@@ -96,7 +96,7 @@ namespace IDA
     Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
     /// Map of unsigned int (TabChoice enum values) to tabs.
-    std::map<unsigned int, IDATab*> m_tabs;
+    std::map<unsigned int, IndirectDataAnalysisTab*> m_tabs;
 
   };
 } // namespace IDA

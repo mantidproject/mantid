@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
+    <width>700</width>
     <height>700</height>
    </rect>
   </property>
@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="twIDATabs">
+     <widget class="QTabWidget" name="twTabs">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -141,7 +141,7 @@
   </widget>
  </widget>
  <tabstops>
-  <tabstop>twIDATabs</tabstop>
+  <tabstop>twTabs</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
   <tabstop>pbManageDirs</tabstop>
