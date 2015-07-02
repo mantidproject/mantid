@@ -598,9 +598,6 @@ class ISISInstrument(BaseInstrument):
             return True
         elif self.cur_detector().isAlias(detName):
             return True
-        #else:
-        #   sanslog.notice("setDetector: Detector not found")
-        #   sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
