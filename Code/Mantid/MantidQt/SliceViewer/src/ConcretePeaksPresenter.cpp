@@ -28,39 +28,6 @@ namespace {
 Mantid::Kernel::Logger g_log("PeaksPresenter");
 
 /**
- * makeVertexesFromBox. Convert a box into a form of vertexes that
- * PeaksOnSurface understands.
- * @param box : transformed PeakBoundingBox
- * @return : vertex vector
- */
-std::vector<std::vector<double>>
-makeVertexesFromBox(const PeakBoundingBox &box,
-                    Mantid::Geometry::PeakTransform const *const transform) {
-
-  typedef std::vector<double> DoubleVec;
-  // Make vertexes in a counter clockwise ordering
-  std::vector<DoubleVec> vertexes(4);
-
-  V3D plotVertex1(box.left(), box.bottom(), box.slicePoint());
-  V3D vertex1 = transform->transformBack(plotVertex1);
-
-  V3D plotVertex2(box.left(), box.top(), box.slicePoint());
-  V3D vertex2 = transform->transformBack(plotVertex2);
-
-  V3D plotVertex3(box.right(), box.top(), box.slicePoint());
-  V3D vertex3 = transform->transformBack(plotVertex3);
-
-  V3D plotVertex4(box.right(), box.bottom(), box.slicePoint());
-  V3D vertex4 = transform->transformBack(plotVertex4);
-
-  vertexes[0] = vertex1;
-  vertexes[1] = vertex2;
-  vertexes[2] = vertex3;
-  vertexes[3] = vertex4;
-  return vertexes;
-}
-
-/**
  * Determine if we can add peaks a peaks workspace.
  * @param peaksWS : To possibly add to
  * @param frame : Frame of base MDWorkspace
