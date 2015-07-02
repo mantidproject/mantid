@@ -68,7 +68,7 @@ namespace IDA
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                       Mantid::API::MatrixWorkspace_const_sptr right);
     /// Adds a unit conversion step to the algorithm queue
-    std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix = "UNIT");
+    std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix = "UNIT", std::string eMode = "");
 
     /// DoubleEditorFactory
     DoubleEditorFactory* m_dblEdFac;
