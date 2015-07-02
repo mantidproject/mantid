@@ -73,13 +73,13 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
         bank = bankAliases.get(bank, bank)
         indices = getWsIndicesForBank(ws, bank)
         if not indices:
-            return RuntimeError("Unable to find a meaningful list of workspace indices for the "
+            raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
                                 "bank passed: %s. Please check the inputs." % bank)
         return indices
     elif detIndices:
         indices = parseWsIndices(ws, detIndices)
         if not indices:
-            return RuntimeError("Unable to find a meaningful list of workspace indices for the "
+            raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
                                 "range(s) of detectors passed: %s. Please check the inputs." % detIndices)
         return indices
     else:
@@ -102,9 +102,11 @@ def parseWsIndices(ws, detIndices):
     # remove duplicates and sort
     indices = list(set(indices))
     indices.sort()
-    if indices[-1] >= ws.getNumberHistograms():
-        raise ValueError("A workspace index bigger than the number of histograms available in the "
-                         "workspace '" + ws.getName() +"'has been given. Please check the list of indices.")
+    maxIdx = ws.getNumberHistograms()
+    if indices[-1] >= maxIdx:
+        raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
+                         "workspace '" + ws.getName() +"' (" + str(ws.getNumberHistograms()) +
+                         ")has been given. Please check the list of indices.")
     return indices
 
 def getWsIndicesForBank(ws, bank):
