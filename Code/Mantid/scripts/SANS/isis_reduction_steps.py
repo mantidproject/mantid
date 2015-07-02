@@ -1468,6 +1468,8 @@ class TransmissionCalc(ReductionStep):
 
         reducer.deleteWorkspaces(files2delete)
 
+        # Convert the result from a histogram workspace set to point workspace
+        ConvertToPointData(InputWorkspace=result, OutputWorkspace=result)
         return result
 
     def get_trans_spec(self):
