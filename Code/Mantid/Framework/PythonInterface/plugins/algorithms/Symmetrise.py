@@ -5,7 +5,6 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspacePropert
 from mantid.kernel import Direction, IntArrayProperty
 import mantid.simpleapi as ms
 import math
-import os.path
 import numpy as np
 
 #pylint: disable=too-many-instance-attributes

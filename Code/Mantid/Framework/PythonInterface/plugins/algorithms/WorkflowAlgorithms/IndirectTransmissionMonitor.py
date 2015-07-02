@@ -2,10 +2,8 @@
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from mantid import config, logger
-from IndirectImport import import_mantidplot
+from mantid import logger
 import numpy
-import os.path
 
 
 class IndirectTransmissionMonitor(PythonAlgorithm):
