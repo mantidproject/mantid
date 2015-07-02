@@ -153,7 +153,7 @@ namespace
 // Static key strings
 //----------------------------------------------
 const QString SANSRunWindow::m_pythonSuccessKeyword  = "pythonExecutionWasSuccessful";
-
+const QString SANSRunWindow::m_pythonEmptyKeyword = "None";
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -3019,9 +3019,12 @@ void SANSRunWindow::handleInstrumentChange()
   QString detectorSelection = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.det_selection").trimmed();
   int ind = m_uiForm.detbank_sel->findText(detect);
-  if( ind != -1 )
-  {
-    m_uiForm.detbank_sel->setCurrentIndex(ind);
+  // We set the detector selection only if nothing is set yet.
+  // Previously, we didn't handle merged and both at this point
+  if (detectorSelection == m_pythonEmptyKeyword || detectorSelection.isEmpty()) {
+    if( ind != -1 ) {
+      m_uiForm.detbank_sel->setCurrentIndex(ind);
+    }
   }
 
   m_uiForm.beam_rmin->setText("60");
