@@ -71,6 +71,8 @@ public:
   void showColorScale( std::vector<QRgb> & positiveColorTable,
                        std::vector<QRgb> & negativeColorTable );
 
+  void initNewSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
+
 public slots:
   void closeViewer();
   void toggleHScroll();
@@ -95,6 +97,8 @@ public slots:
   void optimalColorScale();
   void multiColorScale();
   void spectrumColorScale();
+
+  void setSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
 
 private:
   /// Event filter for mouse wheel capture

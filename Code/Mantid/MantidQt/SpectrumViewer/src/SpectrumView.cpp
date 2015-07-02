@@ -36,7 +36,15 @@ SpectrumView::SpectrumView(QWidget *parent) :
   m_emodeHandler(NULL)
 {
   m_ui->setupUi(this);
+  //m_ui->x_min_input->setValidator(new QDoubleValidator(this));
+  connect(m_ui->imageTabs,SIGNAL(currentChanged(int)),this,SLOT(changeSpectrumDisplay(int)));
   updateHandlers();
+  setAcceptDrops(true);
+
+  // Watch for the deletion of the associated workspace
+  observeAfterReplace();
+  observePreDelete();
+  observeADSClear();
 }
 
 
@@ -58,9 +66,9 @@ SpectrumView::~SpectrumView()
 void SpectrumView::resizeEvent(QResizeEvent * event)
 {
   QMainWindow::resizeEvent(event);
-
-  for(auto svConnection = m_svConnections.begin(); svConnection != m_svConnections.end(); ++svConnection) {
-    (**svConnection).imageSplitterMoved();
+  if (m_svConnections)
+  {
+    m_svConnections->imageSplitterMoved();
   }
 }
 
@@ -82,11 +90,6 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   // the ref-viewer UI.
   dataSource -> setEModeHandler( m_emodeHandler );
 
-  // Watch for the deletion of the associated workspace
-  observeAfterReplace();
-  observePreDelete();
-  observeADSClear();
-
   // Connect WorkspaceObserver signals
   connect(this, SIGNAL(needToClose()), this, SLOT(closeWindow()));
   //connect(this, SIGNAL(needToUpdate()), this, SLOT(updateWorkspace()));
@@ -95,23 +98,46 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   std::string windowTitle = "SpectrumView (" + wksp->getTitle() + ")";
   this->setWindowTitle(QString::fromStdString(windowTitle).simplified());
 
-  auto hGraph = boost::make_shared<GraphDisplay>(m_ui->h_graphPlot,
-                                                   m_ui->h_graph_table, false);
-  m_hGraph.append(hGraph);
-  auto vGraph = boost::make_shared<GraphDisplay>(m_ui->v_graphPlot,
-                                                   m_ui->v_graph_table, true);
-  m_vGraph.append(vGraph);
+  auto spectrumPlot = m_ui->spectrumPlot;
+  bool isFirstPlot = m_spectrumDisplay.isEmpty();
 
-  auto spectrumDisplay = boost::make_shared<SpectrumDisplay>( m_ui->spectrumPlot,
+  if (isFirstPlot)
+  {
+    m_ui->imageTabs->setTabLabel(m_ui->imageTabs->currentWidget(),QString::fromStdString(wksp->name()));
+    m_hGraph = boost::make_shared<GraphDisplay>(m_ui->h_graphPlot,
+                                                     m_ui->h_graph_table, false);
+    m_vGraph = boost::make_shared<GraphDisplay>(m_ui->v_graphPlot,
+                                                     m_ui->v_graph_table, true);
+  }
+  else
+  {
+    spectrumPlot = new QwtPlot(this);
+    auto widget = new QWidget();
+    auto layout = new QHBoxLayout();
+    layout->addWidget(spectrumPlot);
+    widget->setLayout(layout);
+    m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->name()));
+  }
+
+  auto spectrumDisplay = boost::make_shared<SpectrumDisplay>( spectrumPlot,
                                            m_sliderHandler,
                                            m_rangeHandler,
-                                           hGraph.get(), vGraph.get(),
+                                           m_hGraph.get(), m_vGraph.get(),
                                            m_ui->image_table);
-
-  m_svConnections.append(boost::make_shared<SVConnections>( m_ui, this, spectrumDisplay.get(),
-                                       hGraph.get(), vGraph.get() ));
   spectrumDisplay->setDataSource( dataSource );
   m_spectrumDisplay.append(spectrumDisplay);
+
+  if (isFirstPlot)
+  {
+    m_svConnections = boost::make_shared<SVConnections>( m_ui, this, spectrumDisplay.get(),
+                                         m_hGraph.get(), m_vGraph.get() );
+    connect(this,SIGNAL(spectrumDisplayChanged(SpectrumDisplay*)),m_svConnections.get(),SLOT(setSpectrumDisplay(SpectrumDisplay*)));
+  }
+  else
+  {
+    spectrumPlot->canvas()->installEventFilter(m_svConnections.get());
+    m_svConnections->initNewSpectrumDisplay(spectrumDisplay.get());
+  }
 }
 
 
@@ -162,6 +188,39 @@ void SpectrumView::afterReplaceHandle(const std::string& wsName, const boost::sh
   {
     renderWorkspace(boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
   }
+}
+
+void SpectrumView::dropEvent(QDropEvent *de)
+{
+  auto words = de->mimeData()->text().split('"');
+  auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(words[1].toStdString());
+  renderWorkspace(ws);
+}
+
+void SpectrumView::dragMoveEvent(QDragMoveEvent *de)
+{
+  auto pos = m_ui->imageTabs->mapFrom(this,de->pos());
+  if ( m_ui->imageTabs->rect().contains(pos) )
+  {
+    de->accept();
+  }
+  else
+  {
+    de->ignore();
+  }
+}
+
+void SpectrumView::dragEnterEvent(QDragEnterEvent *de)
+{
+  if (de->mimeData()->objectName() == "MantidWorkspace") {
+    de->acceptProposedAction();
+  }
+}
+
+void SpectrumView::changeSpectrumDisplay(int tab)
+{
+  auto spectrumDisplay = m_spectrumDisplay[tab].get();
+  m_svConnections->setSpectrumDisplay(spectrumDisplay);
 }
 
 } // namespace SpectrumView

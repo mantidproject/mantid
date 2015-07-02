@@ -112,6 +112,8 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      // Gets the Y value pointed at
      double getPointedAtY();
 
+     QwtPlot* spectrumPlot() const {return m_spectrumPlot;}
+
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;
 

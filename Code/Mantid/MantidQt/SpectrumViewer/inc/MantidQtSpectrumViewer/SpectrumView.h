@@ -73,22 +73,30 @@ public:
   ~SpectrumView();
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
 
+signals:
+  void spectrumDisplayChanged(SpectrumDisplay*);
+
 protected slots:
   void closeWindow();
+  void changeSpectrumDisplay(int tab);
 
 protected:
   virtual void resizeEvent(QResizeEvent * event);
   void preDeleteHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
   void afterReplaceHandle(const std::string& wsName, const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dragEnterEvent(QDragEnterEvent *de);
+  void dropEvent(QDropEvent *de);
+
 private:
   void updateHandlers();
 
   QList<MatrixWSDataSource_sptr> m_dataSource;
-  QList<boost::shared_ptr<GraphDisplay>> m_hGraph;
-  QList<boost::shared_ptr<GraphDisplay>> m_vGraph;
   QList<boost::shared_ptr<SpectrumDisplay>> m_spectrumDisplay;
-  QList<boost::shared_ptr<SVConnections>>   m_svConnections;
+  boost::shared_ptr<GraphDisplay> m_hGraph;
+  boost::shared_ptr<GraphDisplay> m_vGraph;
+  boost::shared_ptr<SVConnections> m_svConnections;
 
 
   Ui::SpectrumViewer *m_ui;

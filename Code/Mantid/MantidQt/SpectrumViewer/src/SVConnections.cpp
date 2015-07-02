@@ -112,40 +112,10 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
   m_imagePicker->setRubberBandPen(QColor(Qt::gray));
 
-/* // point selections & connection works on mouse release
-*/
+ // point selections & connection works on mouse release
   m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
   m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
                                   QwtPicker::DragSelection  );
-/*
-  QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
-                    this, SLOT(imagePickerSelectedPoint()) );
-*/
-
-/*  // point selection works on mouse click, NO CROSSHAIRS...
-
-  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                  QwtPicker::ClickSelection  );
-  QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
-                    this, SLOT(imagePickerSelectedPoint()) );
-*/
-
-/*  // rect selection calls SLOT on mouse release
-
-  m_imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::MidButton);
-  m_imagePicker->setRubberBand(QwtPicker::RectRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::RectSelection |
-                                  QwtPicker::DragSelection  );
-  QObject::connect( m_imagePicker, SIGNAL(selected(const QwtPolygon &)),
-                    this, SLOT(imagePickerSelectedPoint()) );
-*/
-
-/*
-  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
-  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
-                                  QwtPicker::ClickSelection  );
-*/
   QObject::connect( m_imagePicker, SIGNAL(mouseMoved(const QPoint &)),
                     this, SLOT(imagePickerMoved(const QPoint &)) );
 
@@ -155,14 +125,14 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   QObject::connect(m_svUI->vgraphSplitter, SIGNAL(splitterMoved(int, int)),
                    this, SLOT(vgraphSplitterMoved()) );
 
-  QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
-                   this, SLOT(imageHorizontalRangeChanged()) );
+  //QObject::connect(m_svUI->x_min_input, SIGNAL( returnPressed() ),
+  //                 this, SLOT(imageHorizontalRangeChanged()) );
 
-  QObject::connect(m_svUI->x_max_input, SIGNAL( returnPressed() ),
-                   this, SLOT(imageHorizontalRangeChanged()) );
+  //QObject::connect(m_svUI->x_max_input, SIGNAL( returnPressed() ),
+  //                 this, SLOT(imageHorizontalRangeChanged()) );
 
-  QObject::connect(m_svUI->step_input, SIGNAL( returnPressed() ),
-                   this, SLOT(imageHorizontalRangeChanged()) );
+  //QObject::connect(m_svUI->step_input, SIGNAL( returnPressed() ),
+  //                 this, SLOT(imageHorizontalRangeChanged()) );
 
   QObject::connect(m_svUI->imageVerticalScrollBar, SIGNAL(valueChanged(int)),
                    this, SLOT(scrollBarMoved()) );
@@ -342,7 +312,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     // Ignore the event if the position is outside of the plot area
     if (newX < 0) return false;
     if (newY < 0) return false;
-    const QSize canvasSize = m_svUI->spectrumPlot->canvas()->size();
+    const QSize canvasSize = m_spectrumDisplay->spectrumPlot()->canvas()->size();
     if (newX > canvasSize.width()) return false;
     if (newY > canvasSize.height()) return false;
 
@@ -353,7 +323,7 @@ bool SVConnections::eventFilter(QObject *object, QEvent *event)
     // determine where the canvas is in global coords
     QPoint canvasPos = m_svUI->spectrumPlot->canvas()->mapToGlobal(QPoint(0,0));
     // move the cursor to the correct position
-    m_svUI->spectrumPlot->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_pickerX, canvasPos.y()+m_pickerY));
+    m_spectrumDisplay->spectrumPlot()->canvas()->cursor().setPos(QPoint(canvasPos.x()+m_pickerX, canvasPos.y()+m_pickerY));
 
     QPair<double, double> transPoints = m_spectrumDisplay->getPlotInvTransform(QPoint(newX, newY));
 
@@ -732,6 +702,25 @@ void SVConnections::showColorScale( std::vector<QRgb> & positiveColorTable,
 void SVConnections::openOnlineHelp()
 {
   MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("SpectrumViewer"));
+}
+
+void SVConnections::setSpectrumDisplay(SpectrumDisplay* spectrumDisplay)
+{
+  m_spectrumDisplay = spectrumDisplay;
+}
+
+void SVConnections::initNewSpectrumDisplay(SpectrumDisplay* spectrumDisplay)
+{
+  auto imagePicker = new TrackingPicker( spectrumDisplay->spectrumPlot()->canvas() );
+  imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
+  imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
+  imagePicker->setRubberBandPen(QColor(Qt::gray));
+
+  imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
+  imagePicker->setSelectionFlags(QwtPicker::PointSelection |
+                                  QwtPicker::DragSelection  );
+  QObject::connect( imagePicker, SIGNAL(mouseMoved(const QPoint &)),
+                    this, SLOT(imagePickerMoved(const QPoint &)) );
 }
 
 } // namespace SpectrumView
