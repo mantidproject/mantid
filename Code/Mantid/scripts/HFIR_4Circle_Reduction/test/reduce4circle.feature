@@ -7,6 +7,7 @@ Feature: Mantid developer
 
 	Scenario: Calculate UB matrix from 2 reflections
 		Given I input experiment number and select the mode to access data from server directly
+		Then I download data to a specified directory
 		Then I load one data set, find 1 peak from it and specify its HKL value
 		Then I load another data set, find 1 peak from it and specify its HKL value
 		Then I calculate UB matrix from the 2 reflections

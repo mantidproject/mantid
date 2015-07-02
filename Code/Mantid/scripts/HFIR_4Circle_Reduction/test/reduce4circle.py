@@ -70,6 +70,18 @@ def setExperimentInfo(step):
     return
 
 
+@step(u'I download data to a specified directory')
+def downloadData(step):
+    """ Download data
+    """
+    wkflow = mydata.getObject()
+
+    scanlist = [38, 83, 91]
+    wkflow.downloadSelectedDataSet(scanlist)
+
+    return
+
+
 @step(u'Then I load one data set, find 1 peak from it and specify its HKL value')
 def addPeak1(step):
     """ Add one peak
@@ -80,7 +92,8 @@ def addPeak1(step):
     # Download data
     wkflow = mydata.getObject()
     if wkflow.existDataFile(scanno, ptno)[0] is False: 
-        wkflow.downloadData(scanno, ptno)
+        wkflow.downloadSpiceFile(scanno)
+        wkflow.downloadSpiceDetXMLFile(scanno, ptno)
 
 
     status, retobj = wkflow.findPeak(scanno, ptno)

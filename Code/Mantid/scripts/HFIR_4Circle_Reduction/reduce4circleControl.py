@@ -69,6 +69,9 @@ class CWSCDReductionControl(object):
         self._expNumber = 0
         self._dataDir = "/tmp"
 
+        # Container for loaded workspaces 
+        self._spiceTableDict = {}
+
         return
 
 
@@ -102,12 +105,10 @@ class CWSCDReductionControl(object):
         return
 
 
-    def downloadData(self, scanno, ptno):
+    def downloadSpiceFile(self, scanno):
         """ Download a scan/pt data from internet
         """
         # Generate the URL for SPICE data file
-        if self._myServerURL.endswith('/') is False:
-            self._myServerURL + '/'
         spicerunfileurl = self._myServerURL + 'exp%d/Datafiles/'%(self._expNumber) + \
                 "HB3A_exp%04d_scan%04d.dat" % (self._expNumber, scanno)
 
@@ -125,13 +126,74 @@ class CWSCDReductionControl(object):
         if os.path.exists(spicefilename) is False:
             return (False, "Unable to locate downloaded file %s."%(spicefilename))
 
+        return (True, spicefilename)
+
+
+    def downloadSpiceDetXMLFile(self, scanno, ptno):
+        """
+        """
+        # TODO - Doc
         # Generate the URL for XML file
+        xmlfilename = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, 
+                self._expNumber, scanno, ptno)
+        xmlfileurl = '%sexp%d/Datafiles/%s' % (self._myServerURL, self._expNumber,
+                xmlfilename)
+        targetxmlfilename = os.path.join(self._dataDir, xmlfilename)
 
-        # TODO - Implement downloading XML file 
-        # Example: HB3A_exp399_scan0134_0082.xml
+        # Download
+        try:
+            api.DownloadFile(Address=xmlfileurl, 
+                             Filename=targetxmlfilename)
+        except Exception as e:
+            return (False, 'Unable to download Detector XML file %s dur to %s.' % (
+                xmlfilename, str(e)))
 
-        return (True, '')
-        
+        # Check file exist?
+        if os.path.exists(targetxmlfilename) is False:
+            return (False, "Unable to locate downloaded file %s."%(targetxmlfilename))
+
+        return (True, targetxmlfilename)
+
+
+    def downloadSelectedDataSet(self, scanlist):
+        """ Download data set
+        """
+        for scanno in scanlist:
+            # Form SPICE file
+            status, retobj = self.downloadSpiceFile(scanno)
+
+            # Reject if SPICE file cannot download
+            if status is False:
+                print retobj
+                continue
+            else:
+                spicefilename = retobj
+
+            # Load SPICE file
+            spicetable = self.loadSpiceFile(scanno, spicefilename)
+            ptnolist = self._getPtListFromTable(spicetable)
+            for ptno in ptnolist:
+                status, retobj = self.downloadSpiceDetXMLFile(scanno, ptno)
+                if status is False:
+                    print retobj
+            # ENDFOR
+        # ENDFOR (scanno)
+
+        return
+
+
+    def downloadAllDataSet(self):
+        """ Download all data set
+        """
+        # FIXME 
+        for scanno in xrange(1, sys.maxint):
+            status, retobj = self.downloadSpiceFile(scanno)
+            if status is False:
+                break
+
+
+
+        return
 
 
     def existDataFile(self, scanno, ptno):
@@ -216,11 +278,14 @@ class CWSCDReductionControl(object):
         return (True, "")
 
 
-    def loadSpiceFile(self, scanno):
+    def loadSpiceFile(self, scanno, spicefilename=None):
         """ 
-        """ 
+        """
+        # TODO - DOC!
         # Form stardard names
-        spicefilename = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat'%(self._expNumber, scanno)) 
+        if spicefilename is None:
+            spicefilename = os.path.join(self._dataDir, 
+                    'HB3A_exp%04d_scan%04d.dat'%(self._expNumber, scanno)) 
         outwsname = 'Table_Exp%d_Scan%04d'%(self._expNumber, scanno)
 
         # Load SPICE
@@ -233,7 +298,7 @@ class CWSCDReductionControl(object):
         # Store
         self._spiceTableDict[scanno] = spicetablews
 
-        return 
+        return spicetablews
 
 
     def loadSpiceXMLPtFile(self, scanno, ptno):
@@ -280,6 +345,8 @@ class CWSCDReductionControl(object):
         """ Set server's URL
         """
         self._myServerURL = str(serverurl)
+        if self._myServerURL.endswith('/') is False:
+            self._myServerURL + '/'
 
         urlgood = False
         try:
@@ -337,3 +404,18 @@ class CWSCDReductionControl(object):
         self._expNumber = expno
 
         return
+
+    """
+    Private Methods
+    """
+    def _getPtListFromTable(self, spicetable):
+        # TODO Doc
+        """
+        """
+        numrows = spicetable.rowCount()
+        ptlist = []
+        for irow in xrange(numrows):
+            ptno = int(spicetable.cell(irow, 0))
+            ptlist.append(ptno)
+
+        return ptlist
