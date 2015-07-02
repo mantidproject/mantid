@@ -38,10 +38,7 @@ void CloneWorkspace::exec() {
   TableWorkspace_const_sptr tableWS =
       boost::dynamic_pointer_cast<const TableWorkspace>(inputWorkspace);
 
-  if (inputEvent) {
-    Workspace_sptr outputWS(inputWorkspace->clone().release());
-    setProperty("OutputWorkspace", outputWS);
-  } else if (inputMatrix) {
+  if (inputEvent || inputMatrix) {
     Workspace_sptr outputWS(inputWorkspace->clone().release());
     setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
