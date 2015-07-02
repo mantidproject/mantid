@@ -1,4 +1,4 @@
-digraph TimeSlice {
+digraph IndirectTransmissionMonitor {
   label="IndirectTransmissionMonitor Flowchart"
   $global_style
 
