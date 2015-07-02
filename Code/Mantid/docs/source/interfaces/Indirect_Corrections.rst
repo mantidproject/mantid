@@ -1,5 +1,5 @@
-Indirect Data Analysis
-======================
+Indirect Corrections
+====================
 
 .. contents:: Table of Contents
   :local:

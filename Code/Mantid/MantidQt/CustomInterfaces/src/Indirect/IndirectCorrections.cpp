@@ -146,7 +146,7 @@ namespace IDA
    */
   void IndirectCorrections::help()
   {
-    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_DataAnalysis"));
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Corrections"));
   }
 
   /**
