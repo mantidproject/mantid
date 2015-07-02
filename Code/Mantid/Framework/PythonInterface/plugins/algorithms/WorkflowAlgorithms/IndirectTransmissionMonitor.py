@@ -13,8 +13,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
     _sample_ws_in = None
     _can_ws_in = None
     _out_ws = None
-    _plot = None
-    _save = None
 
 
     def category(self):
@@ -35,10 +33,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Save result workspace to nexus file in the default save directory')
 
     def PyExec(self):
         self._setup()
@@ -67,18 +61,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
-        # Save the tranmissin workspace group to a nexus file
-        if self._save:
-            workdir = config['defaultsave.directory']
-            path = os.path.join(workdir, self._out_ws + '.nxs')
-            SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=path)
-            logger.information('Output file created : ' + path)
-
-        # Plot spectra from transmission workspace
-        if self._plot:
-            mtd_plot = import_mantidplot()
-            mtd_plot.plotSpectrum(self._out_ws, 0)
-
 
     def _setup(self):
         """
@@ -88,8 +70,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self._sample_ws_in = self.getPropertyValue("SampleWorkspace")
         self._can_ws_in = self.getPropertyValue("CanWorkspace")
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-        self._plot = self.getProperty("Plot").value
-        self._save = self.getProperty("Save").value
 
 
     def _get_spectra_index(self, input_ws):

@@ -16,8 +16,6 @@ class IndirectResolution(DataProcessorAlgorithm):
     _background = None
     _rebin_string = None
     _scale_factor = None
-    _plot = None
-    _save = None
 
 
     def category(self):
@@ -53,20 +51,12 @@ class IndirectResolution(DataProcessorAlgorithm):
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor to scale resolution curve by')
 
-
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot resolution curve')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Save resolution workspace as a Nexus file')
-
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
                              doc='Output resolution workspace.')
 
 
     def PyExec(self):
-
-        #from IndirectCommon import getWSprefix
-
         self._setup()
 
         ISISIndirectEnergyTransfer(Instrument=self._instrument,
@@ -117,9 +107,6 @@ class IndirectResolution(DataProcessorAlgorithm):
         self._rebin_string = self.getProperty('RebinParam').value
         self._scale_factor = self.getProperty('ScaleFactor').value
 
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
-
 
     def _post_process(self):
         """
@@ -143,14 +130,6 @@ class IndirectResolution(DataProcessorAlgorithm):
                              LogValues=[log[1] for log in sample_logs])
 
         self.setProperty('OutputWorkspace', self._out_ws)
-
-        if self._save:
-            SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=self._out_ws + '.nxs')
-
-        if self._plot:
-            from IndirectImport import import_mantidplot
-            mtd_plot = import_mantidplot()
-            mtd_plot.plotSpectrum(self._out_ws, 0)
 
 
 AlgorithmFactory.subscribe(IndirectResolution)
