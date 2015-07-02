@@ -203,6 +203,8 @@ void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
 /**
  * Log into remote compute resource.
  *
+ * @param compRes Name of the compute resource where to login
+ * @param user Username
  * @param pw Password/authentication credentials as a string
  */
 void TomographyIfaceModel::doLogin(const std::string &compRes,

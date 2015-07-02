@@ -45,7 +45,7 @@ public:
   /**
    * Display a warning to the user (for example as a pop-up window).
    *
-   * @param err warning title, should be short and would normally be
+   * @param warn warning title, should be short and would normally be
    * shown as the title of the window or a big banner.
    *
    * @param description longer, free form description of the issue.
@@ -81,7 +81,7 @@ public:
   /**
    * Set the tools available on a compute resource.
    *
-   * @param resources identifiers of the tools that can or could be run.
+   * @param tools identifiers of the tools that can or could be run.
    * Order matters
    *
    * @param enabled tells if the tools are actually usable (which
