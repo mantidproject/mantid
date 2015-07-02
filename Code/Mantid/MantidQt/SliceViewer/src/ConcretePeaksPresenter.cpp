@@ -257,9 +257,7 @@ void ConcretePeaksPresenter::setVisiblePeaks(
  */
 void ConcretePeaksPresenter::doFindPeaksInRegion() {
 
-  auto indexes = findVisiblePeakIndexes(
-      m_slicePoint,
-      false /*We want to consider effective radius when deciding what to show*/);
+  auto indexes = findVisiblePeakIndexes(m_slicePoint);
   setVisiblePeaks(indexes);
 }
 
@@ -568,8 +566,7 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
   // Tranform box from plot coordinates into orderd HKL, Qx,Qy,Qz etc, then find
   // the visible peaks.
   std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(
-      accurateBox,
-      true /*Point only mode. We want to not consider effective radius when deciding what delete if possible.*/);
+      accurateBox);
 
   // If we have things to remove, do that in one-step.
   if (!deletionIndexList.empty()) {
@@ -636,8 +633,7 @@ bool ConcretePeaksPresenter::hasPeakAddMode() const {
 }
 
 std::vector<size_t>
-ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box,
-                                               const bool pointOnlyMode) {
+ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
   std::vector<size_t> indexes;
   // Don't bother to find peaks in the region if there are no peaks to find.
   if (this->m_peaksWS->getNumberPeaks() >= 1) {
