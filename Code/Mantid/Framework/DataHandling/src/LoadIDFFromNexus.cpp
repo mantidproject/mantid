@@ -72,7 +72,7 @@ void LoadIDFFromNexus::exec() {
 }
 
 
-/** Loads the parameters from the Nexus file if possible else from a parameter file
+/** Loads the parameters from the Nexus file if possible, else from a parameter file
  *  into the specified workspace
  * @param nxfile :: open NeXus file
  * @param localWorkspace :: workspace into which loading occurs
@@ -81,22 +81,17 @@ void LoadIDFFromNexus::exec() {
  */
 void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorkspace_sptr localWorkspace ) {
 
- // If the nexus file also contains a instrument parameter map entry this
- // is returned as parameterString
   std::string parameterString;
 
+  // First attempt to load parameters from nexus file.
   localWorkspace->loadInstrumentParametersNexus( nxfile, parameterString );
-  // at present loadInstrumentInfoNexus does not populate any instrument params
-  // into the workspace including those that are defined in the IDF.
-  // Here populate inst params defined in IDF
+
+  // loadInstrumentParametersNexus does not populate any instrument params
+  // so we do it here.
   localWorkspace->populateInstrumentParameters();
 
-  // if no parameter map in nexus file then attempt to load a 'fallback'
-  // parameter file from hard-disk. You may argue whether this should be
-  // done at all from an algorithm called LoadIDFFromNexus but that is
-  // for another day to possible change
   if (parameterString.empty()) {
-    // Create the 'fallback' parameter file name to look for
+    // No parameters have been found in Nexus file, so we look for them in a parameter file.
     std::vector<std::string> directoryNames =
         ConfigService::Instance().getInstrumentDirectories();
     const std::string instrumentName =
@@ -124,7 +119,7 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
                       << " not found or un-parsable. ";
       }
     }
-  } else {
+  } else { // We do have parameters from the Nexus file
     g_log.notice()
         << "Found Instrument parameter map entry in Nexus file, which is loaded"
         << std::endl;
