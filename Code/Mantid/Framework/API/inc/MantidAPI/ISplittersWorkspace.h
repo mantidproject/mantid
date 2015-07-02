@@ -1,7 +1,7 @@
 #ifndef MANTID_API_ISPLITTERSWORKSPACE_H_
 #define MANTID_API_ISPLITTERSWORKSPACE_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
 
@@ -34,7 +34,7 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ISplittersWorkspace : virtual public API::ITableWorkspace {
+class MANTID_API_DLL ISplittersWorkspace : virtual public API::ITableWorkspace {
 public:
   /*
    * Constructor
