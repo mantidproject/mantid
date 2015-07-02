@@ -632,6 +632,13 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box, const
         m_viewPeaks
             ->getRadius(); // Effective radius of each peak representation.
 
+    /*
+     If we are position only, there is really no proper radius. This should really be handled internally by the PeakIntersection algorithm.
+    */
+    if(pointOnlyMode && m_viewPeaks->positionOnly()){
+        radius =1e-6;
+    }
+
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
         boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
             this->m_peaksWS);
