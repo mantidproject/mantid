@@ -201,9 +201,7 @@ protected:
   EventWorkspace &operator=(const EventWorkspace &other);
 
 private:
-  virtual EventWorkspace *doClone() const {
-    throw std::runtime_error("Cloning of EventWorkspace is not implemented.");
-  }
+  virtual EventWorkspace *doClone() const { return new EventWorkspace(*this); }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.

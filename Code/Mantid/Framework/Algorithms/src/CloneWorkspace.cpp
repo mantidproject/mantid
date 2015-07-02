@@ -39,22 +39,8 @@ void CloneWorkspace::exec() {
       boost::dynamic_pointer_cast<const TableWorkspace>(inputWorkspace);
 
   if (inputEvent) {
-    // Handle an EventWorkspace as the input.
-    // Make a brand new EventWorkspace
-    EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create(
-            "EventWorkspace", inputEvent->getNumberHistograms(), 2, 1));
-
-    // Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputEvent, outputWS,
-                                                           false);
-
-    // You need to copy over the data as well.
-    outputWS->copyDataFrom((*inputEvent));
-
-    // Cast to the matrixOutputWS and save it
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(outputWS));
+    Workspace_sptr outputWS(inputWorkspace->clone().release());
+    setProperty("OutputWorkspace", outputWS);
   } else if (inputMatrix) {
     Workspace_sptr outputWS(inputWorkspace->clone().release());
     setProperty("OutputWorkspace", outputWS);
