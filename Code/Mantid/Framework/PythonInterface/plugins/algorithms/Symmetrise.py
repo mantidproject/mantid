@@ -103,7 +103,8 @@ class Symmetrise(PythonAlgorithm):
         logger.information('Output array LR split index = %d' % output_cut_index)
 
         # Create an empty workspace with enough storage for the new data
-        out_ws = WorkspaceFactory.Instance().create(cropped_input, cropped_input.getNumberHistograms(), new_array_len, new_array_len)
+        out_ws = WorkspaceFactory.Instance().create(cropped_input, cropped_input.getNumberHistograms(),
+                                                    int(new_array_len), int(new_array_len))
 
         # For each spectrum copy positive values to the negative
         for idx in range(out_ws.getNumberHistograms()):
