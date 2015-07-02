@@ -29,16 +29,13 @@ void CloneWorkspace::exec() {
   Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_const_sptr inputMatrix =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
-  EventWorkspace_const_sptr inputEvent =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
   IMDWorkspace_sptr inputMD =
       boost::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace);
-  PeaksWorkspace_const_sptr inputPeaks =
-      boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
-  TableWorkspace_const_sptr tableWS =
-      boost::dynamic_pointer_cast<const TableWorkspace>(inputWorkspace);
+  ITableWorkspace_const_sptr iTableWS =
+      boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
 
-  if (inputEvent || inputMatrix) {
+  if (inputMatrix || iTableWS) {
+    // Workspace::clone() is polymorphic, we can use the same for all types
     Workspace_sptr outputWS(inputWorkspace->clone().release());
     setProperty("OutputWorkspace", outputWS);
   } else if (inputMD) {
@@ -52,10 +49,6 @@ void CloneWorkspace::exec() {
     IMDWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
     setProperty("OutputWorkspace",
                 boost::dynamic_pointer_cast<Workspace>(outputWS));
-  } else if (inputPeaks || tableWS) {
-    // Workspace::clone() is polymorphic, we can use the same for all types
-    Workspace_sptr outputWS(inputWorkspace->clone().release());
-    setProperty("OutputWorkspace", outputWS);
   } else
     throw std::runtime_error("Expected a MatrixWorkspace, PeaksWorkspace, "
                              "MDEventWorkspace, or a MDHistoWorkspace. Cannot "
