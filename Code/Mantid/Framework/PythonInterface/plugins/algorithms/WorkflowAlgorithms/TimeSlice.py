@@ -55,8 +55,6 @@ class TimeSlice(PythonAlgorithm):
     _background_range = None
     _calib_ws = None
     _out_ws_group = None
-    _plot = None
-    _save = None
 
     def category(self):
         return 'PythonAlgorithms;Inelastic'
@@ -82,6 +80,9 @@ class TimeSlice(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Background range in time of flight')
+
+        self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
+                             doc='Suffix to append to raw file name for name of output workspace')
 
         self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',\
                              direction=Direction.Output),
@@ -119,8 +120,11 @@ class TimeSlice(PythonAlgorithm):
 
 
     def PyExec(self):
+        #from IndirectCommon import CheckXrange
+
         self._setup()
 
+        # CheckXrange(xRange, 'Time')
         out_ws_list = []
 
         for index, filename in enumerate(self._raw_files):
@@ -151,6 +155,7 @@ class TimeSlice(PythonAlgorithm):
         self._raw_files = self.getProperty('InputFiles').value
         self._spectra_range = self.getProperty('SpectraRange').value
         self._peak_range = self.getProperty('PeakRange').value
+        self._output_ws_name_suffix = self.getPropertyValue('OutputNameSuffix')
 
         self._background_range = self.getProperty('BackgroundRange').value
         if len(self._background_range) == 0:
@@ -232,7 +237,7 @@ class TimeSlice(PythonAlgorithm):
 
         # Construct output workspace name
         run = mtd[raw_file].getRun().getLogData('run_number').value
-        slice_file = raw_file[:3].lower() + run + '_slice'
+        slice_file = raw_file[:3].lower() + run + self._output_ws_name_suffix
 
         if self._background_range is None:
             Integration(InputWorkspace=raw_file,
