@@ -2089,12 +2089,11 @@ class UserFile(ReductionStep):
                 self._readDetectorCorrections(upper_line[8:], reducer)
             elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
                 self._readFrontRescaleShiftSetup(det_specif, reducer)
-            elif (det_specif.startswith('FRONT') or
-                 det_specif.startswith('REAR') or
-                 det_specif.startswith('BOTH') or
-                 det_specif.startswith('MERGED') or
-                 det_specif.startswith('MERGED')):
+            elif any(it == det_specif.strip() for it in ['FRONT','REAR','BOTH','MERGE','MERGED']):
                 # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
+                det_specif = det_specif.strip()
+                if det_specif == 'MERGE':
+                    det_specif = 'MERGED'
                 reducer.instrument.setDetector(det_specif)
             else:
                 _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)

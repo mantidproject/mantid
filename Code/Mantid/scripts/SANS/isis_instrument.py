@@ -596,13 +596,11 @@ class ISISInstrument(BaseInstrument):
         if self.other_detector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True
-        else:
-            #there are only two detectors, they must have selected the current one so no change is need
-            if self.cur_detector().isAlias(detName):
-                return True
-            else:
-                sanslog.notice("setDetector: Detector not found")
-                sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
+        elif self.cur_detector().isAlias(detName):
+            return True
+        #else:
+        #   sanslog.notice("setDetector: Detector not found")
+        #   sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
