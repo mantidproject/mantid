@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid import logger, mtd
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
-                       ITableWorkspaceProperty, PropertyMode
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        ITableWorkspaceProperty, PropertyMode, WorkspaceFactory)
 from mantid.kernel import Direction, IntArrayProperty
 import mantid.simpleapi as ms
 import math
@@ -32,7 +32,7 @@ class Symmetrise(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Sample', '', Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '', Direction.Input),
                              doc='Sample to run with')
 
         self.declareProperty(IntArrayProperty(name='SpectraRange'),
@@ -56,18 +56,25 @@ class Symmetrise(PythonAlgorithm):
     #pylint: disable=too-many-locals
     def PyExec(self):
         self._setup()
-        temp_ws_name = '__symm_temp'
 
-        # The number of spectra that will actually be changed
-        num_symm_spectra = self._spectra_range[1] - self._spectra_range[0] + 1
+        input_ws = mtd[self._sample]
+
+        min_spectrum_index = input_ws.getIndexFromSpectrumNumber(int(self._spectra_range[0]))
+        max_spectrum_index = input_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
+
+        # Crop to the required spectra range
+        cropped_input = ms.CropWorkspace(InputWorkspace=input_ws,
+                                         OutputWorkspace='__symm',
+                                         StartWorkspaceIndex=min_spectrum_index,
+                                         EndWorkspaceIndex=max_spectrum_index)
 
         # Find the smallest data array in the first spectra
-        len_x = len(mtd[self._sample].readX(0))
-        len_y = len(mtd[self._sample].readY(0))
-        len_e = len(mtd[self._sample].readE(0))
+        len_x = len(cropped_input.readX(0))
+        len_y = len(cropped_input.readY(0))
+        len_e = len(cropped_input.readE(0))
         sample_array_len = min(len_x, len_y, len_e)
 
-        sample_x = mtd[self._sample].readX(0)
+        sample_x = cropped_input.readX(0)
 
         # Get slice bounds of array
         try:
@@ -95,37 +102,15 @@ class Symmetrise(PythonAlgorithm):
         logger.information('New array length = %d' % new_array_len)
         logger.information('Output array LR split index = %d' % output_cut_index)
 
-        x_unit = mtd[self._sample].getAxis(0).getUnit().unitID()
-        v_unit = mtd[self._sample].getAxis(1).getUnit().unitID()
-        v_axis_data = mtd[self._sample].getAxis(1).extractValues()
-
-        # Take the values we need from the original vertical axis
-        min_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[0]))
-        max_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[1]))
-        new_v_axis_data = v_axis_data[min_spectrum_index:max_spectrum_index + 1]
-
         # Create an empty workspace with enough storage for the new data
-        zeros = np.zeros(new_array_len * num_symm_spectra)
-        ms.CreateWorkspace(OutputWorkspace=temp_ws_name,
-                           DataX=zeros, DataY=zeros, DataE=zeros,
-                           NSpec=int(num_symm_spectra),
-                           VerticalAxisUnit=v_unit, VerticalAxisValues=new_v_axis_data,
-                           UnitX=x_unit)
-
-        # Copy logs and properties from sample workspace
-        ms.CopyLogs(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
-        ms.CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
+        out_ws = WorkspaceFactory.Instance().create(cropped_input, cropped_input.getNumberHistograms(), new_array_len, new_array_len)
 
         # For each spectrum copy positive values to the negative
-        output_spectrum_index = 0
-        for spectrum_no in range(self._spectra_range[0], self._spectra_range[1] + 1):
-            # Get index of original spectra
-            spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(spectrum_no)
-
+        for idx in range(out_ws.getNumberHistograms()):
             # Strip any additional array cells
-            x_in = mtd[self._sample].readX(spectrum_index)[:sample_array_len]
-            y_in = mtd[self._sample].readY(spectrum_index)[:sample_array_len]
-            e_in = mtd[self._sample].readE(spectrum_index)[:sample_array_len]
+            x_in = cropped_input.readX(idx)[:sample_array_len]
+            y_in = cropped_input.readY(idx)[:sample_array_len]
+            e_in = cropped_input.readE(idx)[:sample_array_len]
 
             # Get some zeroed data to overwrite with copies from sample
             x_out = np.zeros(new_array_len)
@@ -143,17 +128,13 @@ class Symmetrise(PythonAlgorithm):
             e_out[output_cut_index:] = e_in[self._negative_min_index:self._positive_max_index]
 
             # Set output spectrum data
-            mtd[temp_ws_name].setX(output_spectrum_index, x_out)
-            mtd[temp_ws_name].setY(output_spectrum_index, y_out)
-            mtd[temp_ws_name].setE(output_spectrum_index, e_out)
+            out_ws.setX(idx, x_out)
+            out_ws.setY(idx, y_out)
+            out_ws.setE(idx, e_out)
 
-            # Set output spectrum number
-            mtd[temp_ws_name].getSpectrum(output_spectrum_index).setSpectrumNo(spectrum_no)
-            output_spectrum_index += 1
+            logger.information('Symmetrise spectrum %d' % idx)
 
-            logger.information('Symmetrise spectrum %d' % spectrum_no)
-
-        ms.RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._output_workspace)
+        ms.DeleteWorkspace(cropped_input)
 
         if self._save:
             self._save_output()
@@ -164,7 +145,7 @@ class Symmetrise(PythonAlgorithm):
         if self._props_output_workspace != '':
             self._generate_props_table()
 
-        self.setProperty('OutputWorkspace', self._output_workspace)
+        self.setProperty('OutputWorkspace', out_ws)
 
 
     def validateInputs(self):
@@ -174,7 +155,7 @@ class Symmetrise(PythonAlgorithm):
         from IndirectCommon import CheckHistZero
         issues = dict()
 
-        input_workspace_name = self.getPropertyValue('Sample')
+        input_workspace_name = self.getPropertyValue('InputWorkspace')
 
         # Validate spectra range
         spectra_range = self.getProperty('SpectraRange').value
@@ -235,7 +216,7 @@ class Symmetrise(PythonAlgorithm):
         """
         from IndirectCommon import CheckHistZero
 
-        self._sample = self.getPropertyValue('Sample')
+        self._sample = self.getPropertyValue('InputWorkspace')
 
         self._x_min = math.fabs(self.getProperty('XMin').value)
         self._x_max = math.fabs(self.getProperty('XMax').value)
