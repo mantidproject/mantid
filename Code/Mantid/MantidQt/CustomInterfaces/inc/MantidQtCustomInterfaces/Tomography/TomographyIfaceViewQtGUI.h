@@ -5,6 +5,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
@@ -50,8 +51,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class TomographyIfaceViewQtGUI : public MantidQt::API::UserSubWindow,
-                                 public ITomographyIfaceView {
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyIfaceViewQtGUI
+    : public MantidQt::API::UserSubWindow,
+      public ITomographyIfaceView {
   Q_OBJECT
 
 public:
