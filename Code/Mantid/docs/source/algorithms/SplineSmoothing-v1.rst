@@ -53,3 +53,5 @@ Output:
     This has created a spline for each spectra in the wsOut workspace
 
 .. categories::
+
+.. sourcelink::

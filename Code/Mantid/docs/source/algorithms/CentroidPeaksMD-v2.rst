@@ -111,3 +111,5 @@ FindPeaksMD algorithm.
    
    
    .. categories::
+
+.. sourcelink::

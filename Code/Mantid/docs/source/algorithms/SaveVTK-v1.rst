@@ -16,3 +16,5 @@ histograms. It should only be used for relatively small data sets as the
 resulting file can become quite large relatively quickly.
 
 .. categories::
+
+.. sourcelink::

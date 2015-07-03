@@ -32,3 +32,5 @@ Output:
 	This workspace has 3 dimensions and 409600 events.
 
 .. categories::
+
+.. sourcelink::

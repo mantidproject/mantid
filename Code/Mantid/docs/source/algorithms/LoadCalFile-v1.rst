@@ -50,3 +50,5 @@ Output:
     Workspace 4 type = TableWorkspace
 
 .. categories::
+
+.. sourcelink::

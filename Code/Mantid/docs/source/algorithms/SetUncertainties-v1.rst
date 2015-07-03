@@ -15,3 +15,5 @@ The uncertainties for the entire workspace will be recalculated according to the
 - ``SetError"sqrt"`` will recalculate all of the uncertainties to be the square root of the y value
 
 .. categories::
+
+.. sourcelink::

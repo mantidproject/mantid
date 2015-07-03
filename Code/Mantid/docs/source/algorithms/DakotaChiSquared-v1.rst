@@ -64,3 +64,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

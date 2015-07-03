@@ -110,3 +110,5 @@ Output:
     Resolution bins: 6
 
 .. categories::
+
+.. sourcelink::

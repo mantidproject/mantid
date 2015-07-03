@@ -72,3 +72,5 @@ data these values are simply missed out of the summing that is
 performed.
 
 .. categories::
+
+.. sourcelink::

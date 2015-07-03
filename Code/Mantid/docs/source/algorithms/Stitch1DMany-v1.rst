@@ -73,3 +73,5 @@ Output:
    :align: center
 
 .. categories::
+
+.. sourcelink::

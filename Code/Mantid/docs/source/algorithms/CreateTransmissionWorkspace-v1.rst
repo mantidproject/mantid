@@ -95,3 +95,5 @@ Output:
     0.0580
 
 .. categories::
+
+.. sourcelink::

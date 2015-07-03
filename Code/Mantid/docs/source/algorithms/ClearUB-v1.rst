@@ -45,3 +45,5 @@ Output:
    ClearUB has removed the oriented lattice.
 
 .. categories::
+
+.. sourcelink::

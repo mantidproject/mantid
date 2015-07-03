@@ -75,3 +75,5 @@ Output:
    Output: [-0.28634067  0.60594273  0.26255546]
 
 .. categories::
+
+.. sourcelink::

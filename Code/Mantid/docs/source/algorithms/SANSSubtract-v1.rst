@@ -28,3 +28,5 @@ written to disk. Two files will be produced, a 4 column ASCII file and a
 CanSAS XML file.
 
 .. categories::
+
+.. sourcelink::

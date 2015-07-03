@@ -52,3 +52,5 @@ Output:
    Mean of y values in second spectrum: [ 6.  7.  8.  9.]
 
 .. categories::
+
+.. sourcelink::

@@ -35,3 +35,5 @@ Output:
     A max chunck size of 0.0010 created 6 chunks.
 
 .. categories::
+
+.. sourcelink::

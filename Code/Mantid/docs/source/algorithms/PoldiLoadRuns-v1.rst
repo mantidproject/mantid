@@ -126,3 +126,5 @@ The data loaded in the first call to the algorithm have been overwritten with th
     Names of data workspaces: ['calibration_data_6904']
 
 .. categories::
+
+.. sourcelink::

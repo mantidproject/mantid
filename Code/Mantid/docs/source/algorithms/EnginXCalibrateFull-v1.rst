@@ -61,6 +61,8 @@ pixel.
 
 .. categories::
 
+.. sourcelink::
+
 Usage
 -----
 

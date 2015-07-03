@@ -50,3 +50,5 @@ Example 2: use different NPoints for groups of spectra
   smooth = SmoothData( ws, [3,5], GroupingWorkspace='gr')
 
 .. categories::
+
+.. sourcelink::

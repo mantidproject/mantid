@@ -115,3 +115,6 @@ Output:
    Output workspace contains 2 histograms
 
 .. categories::
+
+.. sourcelink::
+    :filename: PhaseQuadMuon

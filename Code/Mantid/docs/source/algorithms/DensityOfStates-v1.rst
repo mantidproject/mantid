@@ -83,3 +83,5 @@ Output:
     O
 
 .. categories::
+
+.. sourcelink::

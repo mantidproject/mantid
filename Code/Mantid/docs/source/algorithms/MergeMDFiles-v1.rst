@@ -37,3 +37,5 @@ See also: :ref:`algm-MergeMD`, for merging any MDWorkspaces in system
 memory (faster, but needs more memory).
 
 .. categories::
+
+.. sourcelink::

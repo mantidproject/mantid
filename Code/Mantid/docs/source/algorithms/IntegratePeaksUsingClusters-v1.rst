@@ -108,3 +108,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

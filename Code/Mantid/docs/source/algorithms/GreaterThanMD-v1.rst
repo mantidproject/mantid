@@ -20,3 +20,5 @@ For a MDHistoWorkspace and a scalar, the operation is performed on each
 element of the output.
 
 .. categories::
+
+.. sourcelink::

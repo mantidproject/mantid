@@ -37,6 +37,8 @@ workspace with that name, containing the two output parameters.
 
 .. categories::
 
+.. sourcelink::
+
 Usage
 -----
 
