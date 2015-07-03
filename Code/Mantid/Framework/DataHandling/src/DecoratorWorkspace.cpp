@@ -84,6 +84,7 @@ void DecoratorWorkspace::setNPeriods(size_t nPeriods, std::unique_ptr<const Time
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
     const int periodNumber = int(i+1);
     m_WsVec[i] =  createEmptyEventWorkspace();
+    m_WsVec[i]->copyExperimentInfoFrom(temp.get());
     if(addBoolTimeSeries) {
         std::stringstream buffer;
         buffer << "period " << periodNumber;
@@ -93,6 +94,7 @@ void DecoratorWorkspace::setNPeriods(size_t nPeriods, std::unique_ptr<const Time
         }
         Run& mutableRun =  m_WsVec[i]->mutableRun();
         mutableRun.addProperty(periodBoolLog);
+
 
         Kernel::PropertyWithValue<int> *currentPeriodProperty =
             new Kernel::PropertyWithValue<int>("current_period", periodNumber);
