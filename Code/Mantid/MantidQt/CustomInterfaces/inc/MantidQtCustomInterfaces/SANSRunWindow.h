@@ -356,7 +356,8 @@ private:
   QString m_maskScript;
   // Success keyword
   static const QString m_pythonSuccessKeyword;
-
+  /// Keyword for empty return value in python
+  static const QString m_pythonEmptyKeyword;
   /// Stores the URL of each tab's help page.
   QMap<Tab, QString> m_helpPageUrls;
   
