@@ -2,7 +2,6 @@
 #define MANTID_API_ISPLITTERSWORKSPACE_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
@@ -34,12 +33,12 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ISplittersWorkspace : virtual public API::ITableWorkspace {
+class MANTID_API_DLL ISplittersWorkspace {
 public:
   /*
    * Constructor
    */
-  ISplittersWorkspace() : API::ITableWorkspace() {}
+  ISplittersWorkspace() {}
 
   /*
    * Destructor
@@ -74,8 +73,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  ISplittersWorkspace(const ISplittersWorkspace &other)
-      : ITableWorkspace(other) {}
+  ISplittersWorkspace(const ISplittersWorkspace &other) { UNUSED_ARG(other) }
   /// Protected copy assignment operator. Assignment not implemented.
   ISplittersWorkspace &operator=(const ISplittersWorkspace &other);
 

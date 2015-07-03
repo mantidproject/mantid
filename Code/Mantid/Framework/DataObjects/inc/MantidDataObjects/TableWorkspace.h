@@ -77,7 +77,7 @@ namespace DataObjects {
 */
 
 class MANTID_DATAOBJECTS_DLL TableWorkspace
-    : virtual public API::ITableWorkspace {
+    : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);

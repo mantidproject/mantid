@@ -44,8 +44,8 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SplittersWorkspace : virtual public DataObjects::TableWorkspace,
-                                     virtual public API::ISplittersWorkspace {
+class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace,
+                                     public API::ISplittersWorkspace {
 public:
   SplittersWorkspace();
   virtual ~SplittersWorkspace();
@@ -66,7 +66,7 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   SplittersWorkspace(const SplittersWorkspace &other)
-      : ITableWorkspace(other), TableWorkspace(other), ISplittersWorkspace(other) {}
+      : TableWorkspace(other), ISplittersWorkspace(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   SplittersWorkspace &operator=(const SplittersWorkspace &other);
 

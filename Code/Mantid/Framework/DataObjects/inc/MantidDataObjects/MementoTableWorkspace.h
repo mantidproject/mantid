@@ -48,7 +48,7 @@ public:
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
   MementoTableWorkspace(const MementoTableWorkspace &other)
-      : ITableWorkspace(other), TableWorkspace(other) {}
+      : TableWorkspace(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   MementoTableWorkspace &operator=(const MementoTableWorkspace &other);
 
