@@ -1535,7 +1535,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
 
-  loadSampleDataISIScompatibility(*m_file, m_ws);
+  loadSampleDataISIScompatibility(*m_file, m_ws.get());
 
   // Close the 'top entry' group (raw_data_1 for NexusProcessed, etc.)
   m_file->closeGroup();
@@ -2820,7 +2820,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 * @param WS : pointer to the workspace
 */
 void LoadEventNexus::loadSampleDataISIScompatibility(
-    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr WS) {
+  ::NeXus::File &file, DecoratorWorkspace * const WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -2835,11 +2835,12 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
     file.readData("SPB", spb);
     file.readData("RSPB", rspb);
 
-    WS->mutableSample().setGeometryFlag(
+      
+    WS->setGeometryFlag(
         spb[2]); // the flag is in the third value
-    WS->mutableSample().setThickness(rspb[3]);
-    WS->mutableSample().setHeight(rspb[4]);
-    WS->mutableSample().setWidth(rspb[5]);
+    WS->setThickness(rspb[3]);
+    WS->setHeight(rspb[4]);
+    WS->setWidth(rspb[5]);
   } catch (::NeXus::Exception &ex) {
     // it means that the data was not as expected, report the problem
     std::stringstream s;

@@ -221,13 +221,33 @@ DataObjects::EventList* DecoratorWorkspace::getEventListPtr(size_t i){
     return m_WsVec[0]->getEventListPtr(i);  // TODO, just take from the first workspace
 }
 
-void DecoratorWorkspace::populateInstrumentParameters(){
-    for(size_t i = 0; i < m_WsVec.size(); ++i){
-         m_WsVec[i]->populateInstrumentParameters();
-    }
+void DecoratorWorkspace::populateInstrumentParameters() {
+  for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    m_WsVec[i]->populateInstrumentParameters();
+  }
 }
 
+void DecoratorWorkspace::setGeometryFlag(const int flag) {
+  for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    m_WsVec[i]->mutableSample().setGeometryFlag(flag);
+  }
+}
 
+void DecoratorWorkspace::setThickness(const float flag) {
+  for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    m_WsVec[i]->mutableSample().setThickness(flag);
+  }
+}
+void DecoratorWorkspace::setHeight(const float flag) {
+  for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    m_WsVec[i]->mutableSample().setHeight(flag);
+  }
+}
+void DecoratorWorkspace::setWidth(const float flag) {
+  for (size_t i = 0; i < m_WsVec.size(); ++i) {
+    m_WsVec[i]->mutableSample().setWidth(flag);
+  }
+}
 
 } // namespace DataHandling
 } // namespace Mantid

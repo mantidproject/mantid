@@ -8,6 +8,8 @@
 #include "MantidDataHandling/DllConfig.h"
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -65,7 +67,10 @@ public:
   API::Workspace_sptr combinedWorkspace();
   const DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber) const;
   virtual DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber);
-
+  void setGeometryFlag(const int flag);
+  void setThickness(const float flag);
+  void setHeight(const float flag);
+  void setWidth(const float flag);
 
   /*-------------------------------------------------------
    * EventWorkspace overriden methods
@@ -96,6 +101,7 @@ public:
 };
 
 typedef boost::shared_ptr<DecoratorWorkspace> DecoratorWorkspace_sptr;
+typedef std::unique_ptr<DecoratorWorkspace>DecoratorWorkspace_uptr;
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -145,7 +145,7 @@ public:
 
   static void
   loadSampleDataISIScompatibility(::NeXus::File &file,
-                                  Mantid::API::MatrixWorkspace_sptr WS);
+  DecoratorWorkspace * const WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument
