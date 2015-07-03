@@ -26,7 +26,6 @@ class EnginXCalibrateFull(PythonAlgorithm):
                              "(3D vector with x, y, z values), the new positions in V3D, the new positions "
                              "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
 
-        import EnginXUtils
         self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
