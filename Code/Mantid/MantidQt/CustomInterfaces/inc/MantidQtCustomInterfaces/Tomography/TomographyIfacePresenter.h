@@ -53,7 +53,7 @@ public:
   TomographyIfacePresenter(ITomographyIfaceView *view);
   virtual ~TomographyIfacePresenter();
 
-  virtual void notify(ITomographyIfacePresenter::Notification not);
+  virtual void notify(ITomographyIfacePresenter::Notification notif);
 
 protected:
   void initialize();
