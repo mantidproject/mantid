@@ -50,16 +50,6 @@ PeaksWorkspace::PeaksWorkspace()
 }
 
 //---------------------------------------------------------------------------------------------
-/** Virtual constructor. Clone method to duplicate the peaks workspace.
- *
- * @return PeaksWorkspace object
- */
-PeaksWorkspace *PeaksWorkspace::clone() const {
-  // Deep copy via copy construtor.
-  return new PeaksWorkspace(*this);
-}
-
-//---------------------------------------------------------------------------------------------
 /** Copy constructor
  *
  * @param other :: other PeaksWorkspace to copy from
@@ -69,16 +59,6 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
       m_coordSystem(other.m_coordSystem) {
   initColumns();
-}
-
-//---------------------------------------------------------------------------------------------
-/** Clone a shared pointer
- *
- * @return copy of the peaksworkspace
- */
-boost::shared_ptr<PeaksWorkspace> PeaksWorkspace::clone() {
-  // Copy construct and return
-  return boost::shared_ptr<PeaksWorkspace>(new PeaksWorkspace(*this));
 }
 
 //=====================================================================================

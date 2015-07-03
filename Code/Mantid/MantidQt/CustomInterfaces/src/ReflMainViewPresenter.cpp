@@ -1044,7 +1044,9 @@ namespace MantidQt
     {
       if(!m_wsName.empty())
       {
-        AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_ws->clone()));
+        AnalysisDataService::Instance().addOrReplace(
+            m_wsName,
+            boost::shared_ptr<ITableWorkspace>(m_ws->clone().release()));
         m_tableDirty = false;
       }
       else
@@ -1107,7 +1109,8 @@ namespace MantidQt
       ITableWorkspace_sptr origTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
 
       //We create a clone of the table for live editing. The original is not updated unless we explicitly save.
-      ITableWorkspace_sptr newTable = boost::shared_ptr<ITableWorkspace>(origTable->clone());
+      ITableWorkspace_sptr newTable =
+          boost::shared_ptr<ITableWorkspace>(origTable->clone().release());
       try
       {
         validateModel(newTable);
