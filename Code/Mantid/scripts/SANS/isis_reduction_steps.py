@@ -1214,6 +1214,9 @@ class TransmissionCalc(ReductionStep):
 
     DEFAULT_FIT = 'LOGARITHMIC'
 
+    # The y unit label for transmission data
+    YUNITLABEL_TRANSMISSION_RATIO = "Transmission"
+
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
@@ -1453,6 +1456,14 @@ class TransmissionCalc(ReductionStep):
                               TransmissionMonitor=post_sample,
                               RebinParams=reducer.to_wavelen.get_rebin(),
                               OutputUnfittedData=True, **options) # options FitMethod, PolynomialOrder if present
+
+        # Set the y axis label correctly for the transmission ratio data
+        fitted_trans_ws = mtd[fittedtransws]
+        unfitted_trans_ws = mtd[unfittedtransws]
+        if fitted_trans_ws:
+            fitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
+        if unfitted_trans_ws:
+            unfitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
 
         # Remove temporaries
         files2delete = [trans_tmp_out]
