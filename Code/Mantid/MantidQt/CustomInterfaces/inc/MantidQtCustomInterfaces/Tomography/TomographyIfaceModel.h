@@ -41,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TomographyIfaceModel {
+class TomographyIfaceModel {
   // For now, there is no need to  make this a Q_OBJECT (and derive from
   // QObject, but this class may become a "full" Q_OBJECT as soon as a Qt
   // model (table, tree, etc.), with its signals, is used here

@@ -50,8 +50,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TomographyIfaceViewQtGUI : public MantidQt::API::UserSubWindow,
-                                           public ITomographyIfaceView {
+class TomographyIfaceViewQtGUI : public MantidQt::API::UserSubWindow,
+                                 public ITomographyIfaceView {
   Q_OBJECT
 
 public:
@@ -206,7 +206,8 @@ private:
 
   /// Interface definition with widgets for the main interface window
   Ui::TomoReconstruction m_ui;
-  // And its sections/tabs. Note that for compactness they're called simply 'tabs'
+  // And its sections/tabs. Note that for compactness they're called simply
+  // 'tabs'
   // but they could be separate dialogs, widgets, etc.
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabRun m_uiTabRun;

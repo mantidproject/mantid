@@ -43,8 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TomographyIfacePresenter : public QObject,
-                                           public ITomographyIfacePresenter {
+class TomographyIfacePresenter : public QObject,
+                                 public ITomographyIfacePresenter {
   // Q_OBJECT for the 'keep alive' signals
   Q_OBJECT
 
@@ -90,7 +90,7 @@ protected:
 
 private:
   /// Associated view for this presenter (MVP pattern)
-  ITomographyIfaceView  * const m_view;
+  ITomographyIfaceView *const m_view;
 
   /// Associated model for this presenter (MVP pattern)
   const boost::scoped_ptr<TomographyIfaceModel> m_model;
