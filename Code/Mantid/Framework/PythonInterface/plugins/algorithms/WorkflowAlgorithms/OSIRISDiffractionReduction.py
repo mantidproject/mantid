@@ -1,4 +1,3 @@
-#pylint: disable=invalid-name,no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -6,21 +5,38 @@ from mantid.simpleapi import *
 import itertools
 
 
-time_regime_to_d_range = {\
-     1.17e4: tuple([ 0.7,  2.5]),\
-     2.94e4: tuple([ 2.1,  3.3]),\
-     4.71e4: tuple([ 3.1,  4.3]),\
-     6.48e4: tuple([ 4.1,  5.3]),\
-     8.25e4: tuple([ 5.2,  6.2]),\
-    10.02e4: tuple([ 6.2,  7.3]),\
-    11.79e4: tuple([ 7.3,  8.3]),\
-    13.55e4: tuple([ 8.3,  9.5]),\
-    15.32e4: tuple([ 9.4, 10.6]),\
-    17.09e4: tuple([10.4, 11.6]),\
-    18.86e4: tuple([11.0, 12.5])}\
+#pylint: disable=too-few-public-methods
+class DRange(object):
+    """
+    A class to represent a dRange.
+    """
+
+    def __init__(self, lower, upper):
+        self._range = [lower, upper]
+
+    def __getitem__(self, idx):
+        return self._range[idx]
+
+    def __str__(self):
+        return '%.3f - %.3f Angstrom' % (self._range[0], self._range[1])
 
 
-class DRangeToWsMap(object):
+TIME_REGIME_TO_DRANGE = {
+     1.17e4: DRange( 0.7,  2.5),
+     2.94e4: DRange( 2.1,  3.3),
+     4.71e4: DRange( 3.1,  4.3),
+     6.48e4: DRange( 4.1,  5.3),
+     8.25e4: DRange( 5.2,  6.2),
+    10.02e4: DRange( 6.2,  7.3),
+    11.79e4: DRange( 7.3,  8.3),
+    13.55e4: DRange( 8.3,  9.5),
+    15.32e4: DRange( 9.4, 10.6),
+    17.09e4: DRange(10.4, 11.6),
+    18.86e4: DRange(11.0, 12.5)
+}
+
+
+class DRangeToWorkspaceMap(object):
     """
     A "wrapper" class for a map, which maps workspaces from their corresponding
     time regimes.
@@ -29,18 +45,21 @@ class DRangeToWsMap(object):
     def __init__(self):
         self._map = {}
 
-    def addWs(self, ws_name):
+    def addWs(self, ws_name, d_range=None):
         """
         Takes in the given workspace and lists it alongside its time regime
         value.  If the time regime has yet to be created, it will create it,
         and if there is already a workspace listed beside the time regime, then
         the new ws will be appended to that list.
+
+        @param ws_name Name of workspace to add
+        @param d_range Optionally override the dRange
         """
-        ws = mtd[ws_name]
+        wrksp = mtd[ws_name]
 
         # Get the time regime of the workspace, and use it to find the DRange.
-        time_regime = ws.dataX(0)[0]
-        time_regimes = time_regime_to_d_range.keys()
+        time_regime = wrksp.dataX(0)[0]
+        time_regimes = TIME_REGIME_TO_DRANGE.keys()
         time_regimes.sort()
 
         for idx in range(len(time_regimes)):
@@ -53,7 +72,11 @@ class DRangeToWsMap(object):
                     time_regime = time_regimes[idx]
                     break
 
-        d_range = time_regime_to_d_range[time_regime]
+        if d_range is None:
+            d_range = TIME_REGIME_TO_DRANGE[time_regime]
+        else:
+            d_range = TIME_REGIME_TO_DRANGE[time_regimes[d_range]]
+
         logger.information('dRange for workspace %s is %s' % (ws_name, str(d_range)))
 
         # Add the workspace to the map, alongside its DRange.
@@ -63,11 +86,11 @@ class DRangeToWsMap(object):
             #check if x ranges matchs and existing run
             for ws_name in self._map[d_range]:
                 map_lastx = mtd[ws_name].readX(0)[-1]
-                ws_lastx = ws.readX(0)[-1]
+                ws_lastx = wrksp.readX(0)[-1]
 
                 #if it matches ignore it
                 if map_lastx == ws_lastx:
-                    DeleteWorkspace(ws)
+                    DeleteWorkspace(wrksp)
                     return
 
             self._map[d_range].append(ws_name)
@@ -85,28 +108,28 @@ class DRangeToWsMap(object):
         return self._map
 
 
-def average_ws_list(wsList):
+def average_ws_list(ws_list):
     """
     Returns the average of a list of workspaces.
     """
     # Assert we have some ws in the list, and if there is only one then return it.
-    if len(wsList) == 0:
+    if len(ws_list) == 0:
         raise RuntimeError("getAverageWs: Trying to take an average of nothing")
 
-    if len(wsList) == 1:
-        return wsList[0]
+    if len(ws_list) == 1:
+        return ws_list[0]
 
     # Generate the final name of the averaged workspace.
     avName = "avg"
-    for name in wsList:
+    for name in ws_list:
         avName += "_" + name
 
-    numWorkspaces = len(wsList)
+    numWorkspaces = len(ws_list)
 
     # Compute the average and put into "__temp_avg".
-    __temp_avg = mtd[wsList[0]]
+    __temp_avg = mtd[ws_list[0]]
     for i in range(1, numWorkspaces):
-        __temp_avg += mtd[wsList[i]]
+        __temp_avg += mtd[ws_list[i]]
 
     __temp_avg /= numWorkspaces
 
@@ -145,11 +168,6 @@ def get_intersetcion_of_ranges(range_list):
     NOTE: Assumes that no more than a maximum of two ranges will ever cross at
     the same point.  Also, all ranges should obey range[0] <= range[1].
     """
-    # Sanity check.
-    for myrange in range_list:
-        if len(myrange) != 2:
-            raise RuntimeError("Unable to find the intersection of a malformed range")
-
     # Find all combinations of ranges, and see where they intersect.
     rangeCombos = list(itertools.combinations(range_list, 2))
     intersections = []
@@ -163,13 +181,14 @@ def get_intersetcion_of_ranges(range_list):
     return intersections
 
 
-def is_in_ranges(range_list, n):
+def is_in_ranges(range_list, val):
     for myrange in range_list:
-        if myrange[0] < n < myrange[1]:
+        if myrange[0] < val < myrange[1]:
             return True
     return False
 
 
+#pylint: disable=no-init
 class OSIRISDiffractionReduction(PythonAlgorithm):
     """
     Handles the reduction of OSIRIS Diffraction Data.
@@ -181,6 +200,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _vanadium_runs = None
     _sam_ws_map = None
     _van_ws_map = None
+    _man_d_range = None
 
 
     def category(self):
@@ -206,11 +226,16 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc="Name to give the output workspace. If no name is provided, "+\
                                  "one will be generated based on the run numbers.")
 
+        self.declareProperty('DetectDRange', True,
+                             doc='Disable to override automatic dRange detection')
+        self.declareProperty('DRange', 0, validator=IntBoundedValidator(0, len(TIME_REGIME_TO_DRANGE)),
+                             doc='Drange to use when DetectDRange is disabled')
+
         self._cal = None
         self._output_ws_name = None
 
-        self._sam_ws_map = DRangeToWsMap()
-        self._van_ws_map = DRangeToWsMap()
+        self._sam_ws_map = DRangeToWorkspaceMap()
+        self._van_ws_map = DRangeToWorkspaceMap()
 
 
     def PyExec(self):
@@ -222,6 +247,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._sample_runs = self._find_runs(self.getPropertyValue("Sample"))
         self._vanadium_runs = self._find_runs(self.getPropertyValue("Vanadium"))
 
+        self._man_d_range = None
+        if not self.getProperty("DetectDRange").value:
+            self._man_d_range = self.getProperty("DRange").value
+
         self.execDiffOnly()
 
 
@@ -231,60 +260,60 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         Execute the algorithm in diffraction-only mode
         """
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
-        for fileName in self._sample_runs + self._vanadium_runs:
-            Load(Filename=fileName,
-                 OutputWorkspace=fileName,
+        for filename in self._sample_runs + self._vanadium_runs:
+            Load(Filename=filename,
+                 OutputWorkspace=filename,
                  SpectrumMin=3)
                  # SpectrumMax=962)
 
         for sam in self._sample_runs:
-            self._sam_ws_map.addWs(sam)
+            self._sam_ws_map.addWs(sam, self._man_d_range)
         for van in self._vanadium_runs:
-            self._van_ws_map.addWs(van)
+            self._van_ws_map.addWs(van, self._man_d_range)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
-        for dRange in self._sam_ws_map.getMap().iterkeys():
-            if dRange not in self._van_ws_map.getMap():
-                raise RuntimeError("There is no van file that covers the " + str(dRange) + " DRange.")
+        for d_range in self._sam_ws_map.getMap().iterkeys():
+            if d_range not in self._van_ws_map.getMap():
+                raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
 
         # Average together any sample workspaces with the same DRange.  This will mean our map of DRanges
         # to list of workspaces becomes a map of DRanges, each to a *single* workspace.
-        tempSamMap = DRangeToWsMap()
-        for dRange, wsList in self._sam_ws_map.getMap().iteritems():
-            tempSamMap.setItem(dRange, average_ws_list(wsList))
-        self._sam_ws_map = tempSamMap
+        temp_sam_map = DRangeToWorkspaceMap()
+        for d_range, ws_list in self._sam_ws_map.getMap().iteritems():
+            temp_sam_map.setItem(d_range, average_ws_list(ws_list))
+        self._sam_ws_map = temp_sam_map
 
         # Now do the same to the vanadium workspaces.
-        tempVanMap = DRangeToWsMap()
-        for dRange, wsList in self._van_ws_map.getMap().iteritems():
-            tempVanMap.setItem(dRange, average_ws_list(wsList))
-        self._van_ws_map = tempVanMap
+        temp_van_map = DRangeToWorkspaceMap()
+        for d_range, ws_list in self._van_ws_map.getMap().iteritems():
+            temp_van_map.setItem(d_range, average_ws_list(ws_list))
+        self._van_ws_map = temp_van_map
 
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
-        for dRange, ws in self._sam_ws_map.getMap().items() + self._van_ws_map.getMap().items():
-            NormaliseByCurrent(InputWorkspace=ws,
-                               OutputWorkspace=ws)
-            AlignDetectors(InputWorkspace=ws,
-                           OutputWorkspace=ws,
+        for d_range, wrksp in self._sam_ws_map.getMap().items() + self._van_ws_map.getMap().items():
+            NormaliseByCurrent(InputWorkspace=wrksp,
+                               OutputWorkspace=wrksp)
+            AlignDetectors(InputWorkspace=wrksp,
+                           OutputWorkspace=wrksp,
                            CalibrationFile=self._cal)
-            DiffractionFocussing(InputWorkspace=ws,
-                                 OutputWorkspace=ws,
+            DiffractionFocussing(InputWorkspace=wrksp,
+                                 OutputWorkspace=wrksp,
                                  GroupingFileName=self._cal)
-            CropWorkspace(InputWorkspace=ws,
-                          OutputWorkspace=ws,
-                          XMin=dRange[0],
-                          XMax=dRange[1])
+            CropWorkspace(InputWorkspace=wrksp,
+                          OutputWorkspace=wrksp,
+                          XMin=d_range[0],
+                          XMax=d_range[1])
 
         # Divide all sample files by the corresponding vanadium files.
-        for dRange in self._sam_ws_map.getMap().iterkeys():
-            samWs = self._sam_ws_map.getMap()[dRange]
-            vanWs = self._van_ws_map.getMap()[dRange]
-            samWs, vanWs = self._rebin_to_smallest(samWs, vanWs)
-            Divide(LHSWorkspace=samWs,
-                   RHSWorkspace=vanWs,
-                   OutputWorkspace=samWs)
-            ReplaceSpecialValues(InputWorkspace=samWs,
-                                 OutputWorkspace=samWs,
+        for d_range in self._sam_ws_map.getMap().iterkeys():
+            sam_ws = self._sam_ws_map.getMap()[d_range]
+            van_ws = self._van_ws_map.getMap()[d_range]
+            sam_ws, van_ws = self._rebin_to_smallest(sam_ws, van_ws)
+            Divide(LHSWorkspace=sam_ws,
+                   RHSWorkspace=van_ws,
+                   OutputWorkspace=sam_ws)
+            ReplaceSpecialValues(InputWorkspace=sam_ws,
+                                 OutputWorkspace=sam_ws,
                                  NaNValue=0.0,
                                  InfinityValue=0.0)
 
@@ -312,8 +341,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         dataY = []
         dataE = []
         for i in range(0, len(dataX)-1):
-            x = ( dataX[i] + dataX[i+1] ) / 2.0
-            if is_in_ranges(intersections, x):
+            x_val = (dataX[i] + dataX[i+1]) / 2.0
+            if is_in_ranges(intersections, x_val):
                 dataY.append(2)
                 dataE.append(2)
             else:
@@ -332,8 +361,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             result.setE(i,resultE)
 
         # Delete all workspaces we've created, except the result.
-        for ws in self._van_ws_map.getMap().values():
-            DeleteWorkspace(Workspace=ws)
+        for wrksp in self._van_ws_map.getMap().values():
+            DeleteWorkspace(Workspace=wrksp)
 
         self.setProperty("OutputWorkspace", result)
 
