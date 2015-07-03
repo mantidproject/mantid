@@ -228,7 +228,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.declareProperty('DetectDRange', True,
                              doc='Disable to override automatic dRange detection')
-        self.declareProperty('DRange', 0, validator=IntBoundedValidator(0, len(TIME_REGIME_TO_DRANGE)),
+
+        # Note that dRange numbers are offset to match the numbering in the OSIRIS manual
+        # http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf
+        self.declareProperty('DRange', 1, validator=IntBoundedValidator(1, len(TIME_REGIME_TO_DRANGE) + 1),
                              doc='Drange to use when DetectDRange is disabled')
 
         self._cal = None
@@ -249,7 +252,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self._man_d_range = None
         if not self.getProperty("DetectDRange").value:
-            self._man_d_range = self.getProperty("DRange").value
+            self._man_d_range = self.getProperty("DRange").value - 1
 
         self.execDiffOnly()
 
