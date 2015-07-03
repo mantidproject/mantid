@@ -1395,7 +1395,8 @@ class TransmissionCalc(ReductionStep):
         trans_raw, direct_raw = self._get_run_wksps(reducer)
 
         if not trans_raw:
-            raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % self.CAN_SAMPLE_SUFFIXES[reducer.is_can()])
+            raise RuntimeError('Attempting transmission correction with no specified transmission %s file'
+                               % self.CAN_SAMPLE_SUFFIXES[reducer.is_can()])
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
 
@@ -1790,10 +1791,32 @@ class ConvertToQISIS(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj, ExtraLength=self._grav_extra_length)
+                Q1D(DetBankWorkspace=workspace,
+                    OutputWorkspace= workspace,
+                    OutputBinning=self.binning,
+                    WavelengthAdj=wave_adj,
+                    PixelAdj=pixel_adj,
+                    AccountForGravity=self._use_gravity,
+                    RadiusCut=self.r_cut*1000.0,
+                    WaveCut=self.w_cut,
+                    OutputParts=self.outputParts,
+                    WavePixelAdj = wavepixeladj,
+                    ExtraLength=self._grav_extra_length)
             elif self._Q_alg == 'Qxy':
-                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, ExtraLength=self._grav_extra_length)
-                ReplaceSpecialValues(InputWorkspace=workspace,OutputWorkspace= workspace, NaNValue="0", InfinityValue="0")
+                Qxy(InputWorkspace=workspace,
+                    OutputWorkspace= workspace,
+                    MaxQxy= reducer.QXY2,
+                    DeltaQ= reducer.DQXY,
+                    WavelengthAdj=wave_adj,
+                    PixelAdj=pixel_adj,
+                    AccountForGravity=self._use_gravity,
+                    RadiusCut=self.r_cut*1000.0,
+                    WaveCut=self.w_cut,
+                    OutputParts=self.outputParts,
+                    ExtraLength=self._grav_extra_length)
+                ReplaceSpecialValues(InputWorkspace=workspace,
+                                     OutputWorkspace= workspace,
+                                     NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
