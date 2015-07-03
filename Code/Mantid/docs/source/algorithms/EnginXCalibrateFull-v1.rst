@@ -74,7 +74,7 @@ Usage
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
    posTable = EnginXCalibrateFull(Workspace=ws_name,
-                                  ExpectedPeaks=[1.097, 2.1], Bank=1)
+                                  ExpectedPeaks=[1.097, 2.1], Bank='1')
 
    detID = posTable.column(0)[0]
    calPos =  posTable.column(2)[0]
@@ -106,7 +106,7 @@ Output:
    pos_filename = 'detectors_pos.csv'
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
    posTable = EnginXCalibrateFull(Workspace=ws_name,
-                                  ExpectedPeaks=[1.097, 2.1], Bank=1,
+                                  ExpectedPeaks=[1.097, 2.1], Bank='1',
                                   OutDetPosFilename=pos_filename)
 
    detID = posTable.column(0)[0]
