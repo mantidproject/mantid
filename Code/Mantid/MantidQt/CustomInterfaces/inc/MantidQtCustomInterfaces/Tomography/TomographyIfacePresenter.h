@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYIFACEPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOGRAPHYIFACEPRESENTER_H_
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h"
@@ -43,8 +44,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class TomographyIfacePresenter : public QObject,
-                                 public ITomographyIfacePresenter {
+class MANTIDQT_CUSTOMINTERFACES_DLL TomographyIfacePresenter
+    : public QObject,
+      public ITomographyIfacePresenter {
   // Q_OBJECT for the 'keep alive' signals
   Q_OBJECT
 
