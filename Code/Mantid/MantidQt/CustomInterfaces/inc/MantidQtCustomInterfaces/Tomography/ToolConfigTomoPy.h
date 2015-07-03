@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "MantidKernel/System.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoRecToolConfig.h"
 
 namespace MantidQt {

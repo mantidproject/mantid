@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOPATHSCONFIG_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_TOMOPATHSCONFIG_H_
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
