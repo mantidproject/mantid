@@ -5,7 +5,7 @@ import math
 import EnginXUtils
 
 class EnginXCalibrateFull(PythonAlgorithm):
-    INDICES_PROP_NAME = 'DetectorIndices'
+    INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -20,20 +20,24 @@ class EnginXCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
 
-        self.declareProperty("Bank", '', direction=Direction.Input,
-                             doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
-                             "equivalently,North or South. See also " + self.INDICES_PROP_NAME)
-
-        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc = 'Sets the workspace indices for the detectors '
-                             'that should be considered in the calibration (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap.')
-
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
                              "calibration information. The table includes: the old positions in V3D format "
                              "(3D vector with x, y, z values), the new positions in V3D, the new positions "
                              "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
+
+        import EnginXUtils
+        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+                             direction=Direction.Input,
+                             doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
+                             "equivalently,North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "for a more flexible alternative to select specific detectors")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the spectrum numbers for the detectors '
+                             'that should be considered in the calibration (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
                              "Name of the file to save the pre-/post-calibrated detector positions - this "

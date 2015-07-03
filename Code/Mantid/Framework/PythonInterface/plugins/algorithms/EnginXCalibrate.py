@@ -3,7 +3,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 class EnginXCalibrate(PythonAlgorithm):
-    INDICES_PROP_NAME = 'DetectorIndices'
+    INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -27,18 +27,22 @@ class EnginXCalibrate(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty("Bank", '', direction=Direction.Input,
+        import EnginXUtils
+        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+                             direction=Direction.Input,
                              doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
-                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME)
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "for a more flexible alternative to select specific detectors")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the spectrum numbers for the detectors '
+                             'that should be considered in the calibration (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
                 Direction.Input, PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
-
-        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc = 'Sets the workspace indices for the detectors '
-                             'that should be considered in the calibration (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap.')
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the calibration parameters calculated '

@@ -3,7 +3,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 class EnginXFocus(PythonAlgorithm):
-    INDICES_PROP_NAME = 'DetectorIndices'
+    INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -18,21 +18,25 @@ class EnginXFocus(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Workspace with the run to focus.")
 
-        self.declareProperty("Bank", '', direction=Direction.Input,
-                             doc = "Which bank to focus. It can be specified as 1 or 2, or "
-                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME)
-
-        self.declareProperty(ITableWorkspaceProperty('DetectorPositions', "", Direction.Input,\
-                PropertyMode.Optional),\
-    		"Calibrated detector positions. If not specified, default ones are used.")
-
-        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
-                             doc = 'Sets the workspace indices for the detectors '
-                             'that should be considered in the focussing operation (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap.')
-
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                              "A workspace with focussed data")
+
+        import EnginXUtils
+        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+                             direction=Direction.Input,
+                             doc = "Which bank to focus: It can be specified as 1 or 2, or "
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "for a more flexible alternative to select specific detectors")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the spectrum numbers for the detectors '
+                             'that should be considered in the focussing operation (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
+
+        self.declareProperty(ITableWorkspaceProperty('DetectorPositions', '', Direction.Input,\
+                                                     PropertyMode.Optional),\
+                             "Calibrated detector positions. If not specified, default ones are used.")
 
 
     def PyExec(self):
@@ -42,7 +46,7 @@ class EnginXFocus(PythonAlgorithm):
         ws = self.getProperty('InputWorkspace').value
 
         indices = EnginXUtils.getWsIndicesFromInProperties(ws, self.getProperty('Bank').value,
-                                                           self.getProperty('DetectorIndices').value)
+                                                           self.getProperty(self.INDICES_PROP_NAME).value)
 
     	# Leave the data for the bank we are interested in only
         ws = self._cropData(ws, indices)

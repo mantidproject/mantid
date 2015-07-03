@@ -4,6 +4,8 @@ import os
 from mantid.api import *
 import mantid.simpleapi as sapi
 
+ENGINX_BANKS = ['', 'North', 'South', '1', '2']
+
 def readInExpectedPeaks(filename, expectedGiven):
     """
     Reads in expected peaks from the .csv file if requested. Otherwise fall back to the list of
@@ -77,7 +79,7 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
                                 "bank passed: %s. Please check the inputs." % bank)
         return indices
     elif detIndices:
-        indices = parseWsIndices(ws, detIndices)
+        indices = parseSpectrumIndices(ws, detIndices)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
                                 "range(s) of detectors passed: %s. Please check the inputs." % detIndices)
@@ -87,17 +89,17 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
                          "One of them is required")
 
 
-def parseWsIndices(ws, detIndices):
+def parseSpectrumIndices(ws, specNumbers):
     """
-    Get a usable list of indices from a user list that can look like: '8-10, 20-40, 100-110'
-    For that example this method will produce: [8,9,10,20, 21,... , 110]
+    Get a usable list of workspace indices from a user provided list of spectra that can look like:
+    '8-10, 20-40, 100-110'. For that example this method will produce: [7,8,9,19, 20,... , 109]
 
     @param workspace :: input workspace (with instrument)
-    @param detIndices :: range of indices (or list of ranges) as given to an algorithm
+    @param specNumbers :: range of spectrum numbers (or list of ranges) as given to an algorithm
 
-    @return list of indices ready to be used in mantid algorithms such as CropWorkspace
+    @return list of workspace indices, ready to be used in mantid algorithms such as CropWorkspace
     """
-    segments = [ s.split("-") for s in detIndices.split(",") ]
+    segments = [ s.split("-") for s in specNumbers.split(",") ]
     indices = [ idx for s in segments for idx in range(int(s[0]), int(s[-1])+1) ]
     # remove duplicates and sort
     indices = list(set(indices))
@@ -107,7 +109,8 @@ def parseWsIndices(ws, detIndices):
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
                          "workspace '" + ws.getName() +"' (" + str(ws.getNumberHistograms()) +
                          ") has been given. Please check the list of indices.")
-    return indices
+    # and finally traslate from 'spectrum numbers' to 'workspace indices'
+    return [ws.getIndexFromSpectrumNumber(sn) for sn in indices]
 
 def getWsIndicesForBank(ws, bank):
     """

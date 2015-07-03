@@ -57,13 +57,13 @@ class EnginXFocusTest(unittest.TestCase):
         self.assertRaises(RuntimeError,
                           EnginXFocus,
                           InputWorkspace=self.__class__._data_ws, Bank='2', DetectorPositions=tbl,
-                          DetectorIndices='0-10', OutputWorkspace='nop')
+                          SpectrumNumbers='1-10', OutputWorkspace='nop')
 
         # workspace index too big. This starts as a ValueError but the managers is raising a RuntimeError
         self.assertRaises(RuntimeError,
                           EnginXFocus,
                           InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
-                          DetectorIndices='999999999999999', OutputWorkspace='nop')
+                          SpectrumNumbers='999999999999999', OutputWorkspace='nop')
 
     def _check_output_ok(self, ws, ws_name='', y_dim_max=1, yvalues=None):
         """
@@ -124,7 +124,7 @@ class EnginXFocusTest(unittest.TestCase):
         Same as above but with detector (workspace) indices equivalent to bank 1
         """
         out_idx_name = 'out_idx'
-        out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws, DetectorIndices='0-1199',
+        out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws, SpectrumNumbers='1-1200',
                               OutputWorkspace=out_idx_name)
         self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
@@ -135,7 +135,7 @@ class EnginXFocusTest(unittest.TestCase):
         """
         out_idx_name = 'out_idx'
         out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws,
-                              DetectorIndices='0-100, 101-500, 400-1199',
+                              SpectrumNumbers='1-100, 101-500, 400-1200',
                               OutputWorkspace=out_idx_name)
         self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
