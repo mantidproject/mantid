@@ -41,3 +41,5 @@ Usage
     symm_ws = Symmetrise(Sample=sample_ws, XMin=0.05, XMax=8.0)
 
 .. categories::
+
+.. sourcelink::

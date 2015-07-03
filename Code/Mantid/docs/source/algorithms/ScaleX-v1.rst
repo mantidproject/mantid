@@ -51,3 +51,5 @@ Output:
     sigma=0.10
 
 .. categories::
+
+.. sourcelink::

@@ -285,3 +285,5 @@ This example produces 3-dimensional dataset, with a temperature axis.
    --------------------------------------------
 
 .. categories::
+
+.. sourcelink::

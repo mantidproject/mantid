@@ -51,3 +51,5 @@ Performance Notes
    because the data gets written out to disk twice otherwise.
 
 .. categories::
+
+.. sourcelink::

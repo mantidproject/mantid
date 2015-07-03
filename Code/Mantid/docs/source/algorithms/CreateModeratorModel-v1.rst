@@ -23,3 +23,5 @@ Available models with parameter names:
    -  R - The mixing coefficient
 
 .. categories::
+
+.. sourcelink::

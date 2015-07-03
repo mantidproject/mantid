@@ -39,3 +39,5 @@ This algorithm is rarely called directly. It is called by
 :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` or :ref:`EQSANSDirectBeamTransmission <algm-EQSANSDirectBeamTransmission>`.
 
 .. categories::
+
+.. sourcelink::

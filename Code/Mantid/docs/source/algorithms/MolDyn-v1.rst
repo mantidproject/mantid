@@ -42,3 +42,5 @@ Output:
     NaF_DISF_Sqw-total
 
 .. categories::
+
+.. sourcelink::

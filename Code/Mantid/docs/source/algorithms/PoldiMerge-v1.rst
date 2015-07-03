@@ -80,3 +80,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

@@ -85,3 +85,5 @@ Output:
   Virtual detectors are from ID = 1 to ID = 131072
 
 .. categories::
+
+.. sourcelink::

@@ -100,3 +100,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

@@ -82,3 +82,5 @@ The instrument view should look like
    :alt: MaskBTP.png
 
 .. categories::
+
+.. sourcelink::

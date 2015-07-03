@@ -112,3 +112,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

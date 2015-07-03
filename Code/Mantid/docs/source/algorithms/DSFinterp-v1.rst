@@ -84,3 +84,5 @@ for each channel and aggregates them into an interpolated structure factor.
    Interpolated structure factor :math:`S(K,E|Q)`, in logarithm scaling, at fixed :math:`Q=0.9A^{-1}`.
 
 .. categories::
+
+.. sourcelink::

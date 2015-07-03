@@ -40,3 +40,5 @@ Output:
    Logs left (should be empty):  []
    
 .. categories::
+
+.. sourcelink::

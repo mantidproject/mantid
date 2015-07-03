@@ -86,3 +86,5 @@ Output:
    Parameters from the table, Difc: 18400.0, Zero: 46.0
 
 .. categories::
+
+.. sourcelink::

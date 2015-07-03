@@ -71,3 +71,5 @@ Usage
     plotSpectrum('peak_vs_rad', [0,2,3], error_bars=True)
 
 .. categories::
+
+.. sourcelink::

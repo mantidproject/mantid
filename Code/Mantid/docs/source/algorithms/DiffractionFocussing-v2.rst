@@ -111,3 +111,5 @@ workspaces and only worked with CalFiles.
 .. |Example of RAW GEM data focused across the 5 detector banks| image:: /images/GEM_Focused.png
 
 .. categories::
+
+.. sourcelink::

@@ -57,3 +57,5 @@ References
 
 
 .. categories::
+
+.. sourcelink::

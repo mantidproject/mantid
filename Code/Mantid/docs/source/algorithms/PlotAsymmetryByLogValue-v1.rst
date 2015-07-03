@@ -160,3 +160,5 @@ Output:
    X values (sample magn. field): [ 290.  290.  290.]
 
 .. categories::
+
+.. sourcelink::

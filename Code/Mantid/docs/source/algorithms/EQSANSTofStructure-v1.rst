@@ -21,3 +21,5 @@ This algorithm is rarely called directly. It is called by
 
 
 .. categories::
+
+.. sourcelink::

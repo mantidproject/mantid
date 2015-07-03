@@ -31,3 +31,5 @@ section of the file; e.g. if these are 1 and 10 respectively only the
 first 10% of the events will be loaded.
 
 .. categories::
+
+.. sourcelink::

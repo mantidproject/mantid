@@ -51,3 +51,5 @@ Usage
    FindCenterOfMassPosition('workspace', Output='center', Version=1)
    
 .. categories::
+
+.. sourcelink::

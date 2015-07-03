@@ -14,3 +14,5 @@ spectra of an :ref:`EventWorkspace <EventWorkspace>`, by adding the given number
 of seconds as specified with ``TimeOffset``.
 
 .. categories::
+
+.. sourcelink::

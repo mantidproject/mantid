@@ -227,3 +227,5 @@ Output:
   The correct value in bin 90 is 0.03 compared to 0.30
 
 .. categories::
+
+.. sourcelink::

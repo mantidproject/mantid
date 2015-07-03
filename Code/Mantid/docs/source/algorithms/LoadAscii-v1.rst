@@ -38,3 +38,5 @@ This algorithm cannot load a file created by :ref:`algm-SaveAscii`
 if it has X errors written and several spectra.
 
 .. categories::
+
+.. sourcelink::

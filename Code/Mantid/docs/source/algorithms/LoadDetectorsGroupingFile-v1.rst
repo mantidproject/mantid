@@ -231,3 +231,5 @@ Output:
    Spectrum 125 belongs to group 3.0
 
 .. categories::
+
+.. sourcelink::

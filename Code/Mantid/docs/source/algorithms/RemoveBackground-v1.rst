@@ -232,3 +232,5 @@ Usage
 
   
 .. categories::
+
+.. sourcelink::

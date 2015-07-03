@@ -77,3 +77,5 @@ Output:
    The number of bins in the 2nd chop is 48.
 
 .. categories::
+
+.. sourcelink::

@@ -82,3 +82,5 @@ Output:
     removeFiles(vanadium)
 
 .. categories::
+
+.. sourcelink::

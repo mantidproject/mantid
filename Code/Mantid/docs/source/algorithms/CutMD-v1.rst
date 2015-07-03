@@ -162,3 +162,5 @@ Output:
    Half the volume should give half the signal = 50.00
    
 .. categories::
+
+.. sourcelink::

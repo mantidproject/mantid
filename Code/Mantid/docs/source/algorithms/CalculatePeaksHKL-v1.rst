@@ -45,3 +45,5 @@ Output:
   Number of Indexed Peaks:  1
 
 .. categories::
+
+.. sourcelink::

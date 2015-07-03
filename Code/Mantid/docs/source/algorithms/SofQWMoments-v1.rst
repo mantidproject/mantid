@@ -38,3 +38,5 @@ Usage
     SofQWMoments(ws, OutputWorkspace='Test')
 
 .. categories::
+
+.. sourcelink::
