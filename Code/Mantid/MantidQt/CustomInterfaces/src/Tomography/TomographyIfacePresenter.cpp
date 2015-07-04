@@ -218,6 +218,11 @@ void TomographyIfacePresenter::processLogin() {
 }
 
 void TomographyIfacePresenter::processLogout() {
+  if (m_model->loggedIn().empty()) {
+    m_model->logMsg("Cannot log out: not logged into any resource.");
+    return;
+  }
+
   try {
     m_model->doLogout(m_view->currentComputeResource(), m_view->getUsername());
   } catch (std::exception &e) {

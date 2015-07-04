@@ -182,12 +182,10 @@ public:
     testing::NiceMock<MockTomographyIfaceView> mockView;
     MantidQt::CustomInterfaces::TomographyIfacePresenter pres(&mockView);
 
-    // needs compute resource and username
-    EXPECT_CALL(mockView, getUsername()).Times(1).WillOnce(Return("user"));
-    EXPECT_CALL(mockView, currentComputeResource()).Times(1).WillOnce(
-        Return(g_scarfName));
-
-    EXPECT_CALL(mockView, updateLoginControls(testing::_)).Times(1);
+    // would need compute resource and username if logged in
+    EXPECT_CALL(mockView, getUsername()).Times(0);
+    EXPECT_CALL(mockView, currentComputeResource()).Times(0);
+    EXPECT_CALL(mockView, updateLoginControls(testing::_)).Times(0);
 
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
