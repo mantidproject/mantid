@@ -207,7 +207,7 @@ private:
   // end of Savu related methods
 
   /// Interface definition with widgets for the main interface window
-  Ui::TomoReconstruction m_ui;
+  Ui::TomographyIfaceQtGUI m_ui;
   // And its sections/tabs. Note that for compactness they're called simply
   // 'tabs'
   // but they could be separate dialogs, widgets, etc.

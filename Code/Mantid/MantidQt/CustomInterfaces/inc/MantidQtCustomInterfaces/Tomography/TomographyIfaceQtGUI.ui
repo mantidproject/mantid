@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>1059</width>
-    <height>705</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>IMAT Tomographic Reconstruction</string>
+   <string>IMAT Imaging and Tomography</string>
   </property>
   <widget class="QWidget" name="mainWidget">
    <layout class="QGridLayout" name="gridLayout_4">
