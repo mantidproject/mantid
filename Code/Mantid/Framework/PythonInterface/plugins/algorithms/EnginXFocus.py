@@ -12,7 +12,7 @@ class EnginXFocus(PythonAlgorithm):
         return "EnginXFocus"
 
     def summary(self):
-        return "Focuses a run."
+        return "Focuses a run by summing up all the spectra into a single one."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
@@ -31,7 +31,7 @@ class EnginXFocus(PythonAlgorithm):
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
                              doc = 'Sets the spectrum numbers for the detectors '
                              'that should be considered in the focussing operation (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(ITableWorkspaceProperty('DetectorPositions', '', Direction.Input,\

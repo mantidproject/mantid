@@ -14,7 +14,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
         return "EnginXCalibrateFull"
 
     def summary(self):
-        return "Calibrates every pixel position by performing single peak fitting."
+        return "Calibrates every detector/pixel position by performing single peak fitting."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
@@ -35,7 +35,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
                              doc = 'Sets the spectrum numbers for the detectors '
                              'that should be considered in the calibration (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
