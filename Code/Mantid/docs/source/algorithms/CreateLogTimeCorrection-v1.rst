@@ -77,3 +77,5 @@ Output:
   detector (ID: 102798) correction = 0.95036
 
 .. categories::
+
+.. sourcelink::

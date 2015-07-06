@@ -59,3 +59,5 @@ If one would use LoadDetectorsGroupingFile on cncs.xml one would get a workspace
    :alt: GenerateGroupingSNSInelastic.png
     
 .. categories::
+
+.. sourcelink::

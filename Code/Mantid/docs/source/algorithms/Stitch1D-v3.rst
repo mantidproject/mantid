@@ -82,3 +82,6 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::
+    :filename: Stitch1D

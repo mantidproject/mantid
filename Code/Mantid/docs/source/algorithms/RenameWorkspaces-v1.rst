@@ -83,3 +83,5 @@ Output:
    Workspaces in the ADS _after_ renaming: ['new_ws1_name', 'new_ws2_name', 'new_ws3_name']
 
 .. categories::
+
+.. sourcelink::

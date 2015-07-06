@@ -50,6 +50,9 @@ namespace CustomInterfaces
     /// @return Loaded data as MatrixWorkspace_sptr
     MatrixWorkspace_sptr exportWorkspace();
 
+    /// Sets some data
+    void setData (MatrixWorkspace_const_sptr data);
+
   private slots:
     /// Load new data and update the view accordingly
     void load();

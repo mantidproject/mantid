@@ -89,3 +89,5 @@ Output:
 .. seealso :: Algorithms :ref:`algm-CalibrateRectangularDetectors` and :ref:`algm-GetDetOffsetsMultiPeaks`
 
 .. categories::
+
+.. sourcelink::

@@ -17,3 +17,5 @@ workspace. It maintains events if the input is an
 :ref:`PeaksWorkspace <PeaksWorkspace>`.
 
 .. categories::
+
+.. sourcelink::

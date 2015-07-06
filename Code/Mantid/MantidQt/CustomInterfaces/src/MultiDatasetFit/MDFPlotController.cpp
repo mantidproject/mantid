@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/make_shared.hpp>
 
@@ -115,12 +117,15 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
     QString wsName = m_table->item( index, wsColumn )->text();
     int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
     QString outputWorkspaceName = owner()->getOutputWorkspaceName();
-    if ( !outputWorkspaceName.isEmpty() )
-    {
-      outputWorkspaceName += QString("_%1").arg(index);
+    std::string outName = outputWorkspaceName.toStdString();
+    if (!outputWorkspaceName.isEmpty() &&
+        Mantid::API::AnalysisDataService::Instance().doesExist(outName)) {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName);
+      if (auto  group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+        outputWorkspaceName = QString::fromStdString(group->getItem(index)->name());
+      }
     }
-    try
-    {
+    try {
       data = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
       m_plotData.insert(index, data );
     }

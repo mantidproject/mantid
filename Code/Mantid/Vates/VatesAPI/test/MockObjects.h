@@ -111,6 +111,12 @@ public:
   }
 
   virtual ~MockIMDWorkspace() {}
+
+private:
+  virtual MockIMDWorkspace *doClone() const {
+    throw std::runtime_error(
+        "Cloning of MockIMDWorkspace is not implemented.");
+  }
 };
 
 

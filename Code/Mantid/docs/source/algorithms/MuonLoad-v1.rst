@@ -66,3 +66,5 @@ Output:
    Integrated asymmetry for the run: 1.701
 
 .. categories::
+
+.. sourcelink::

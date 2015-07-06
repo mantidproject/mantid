@@ -14,10 +14,10 @@ Description
    This algorithm is being developed for a specific instrument. It might get changed or even 
    removed without a notification, should instrument scientists decide to do so.
 
-Performs a TOF to dSpacing conversion using calibrated pixel
-positions, focuses the values in dSpacing and then converts them back
-to TOF. The output workspace produced by this algorithm has one
-spectrum.
+Performs a Time-of-flight (TOF) to dSpacing conversion using
+calibrated pixel positions, focuses the values in dSpacing (summing
+them up into a single spectrum) and then converts them back to
+TOF. The output workspace produced by this algorithm has one spectrum.
 
 Usage
 -----
@@ -26,11 +26,12 @@ Usage
 
 **Example - Simple focussing of and EnginX data file:**
 
-.. testcode:: ExSimple
+.. testcode:: ExSimpleFocussing
 
    # Run the algorithm
-   ws = EnginXFocus(Filename="ENGINX00213855.nxs",
-   			   		Bank=1)
+   ws_name = 'data_ws'
+   Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
+   ws = EnginXFocus(InputWorkspace=ws_name, Bank='1')
 
    # Should have one spectrum only
    print "No. of spectra:", ws.getNumberHistograms()
@@ -40,9 +41,13 @@ Usage
    for bin in [3169, 6037, 7124]:
      print fmt.format(ws.readX(0)[bin], ws.readY(0)[bin])
 
+.. testcleanup:: ExSimpleFocussing
+
+   DeleteWorkspace(ws_name)
+
 Output:
 
-.. testoutput:: ExSimple
+.. testoutput:: ExSimpleFocussing
 
    No. of spectra: 1
    For TOF of 20165.642 intensity is 7.436
@@ -50,3 +55,5 @@ Output:
    For TOF of 38619.804 intensity is 17.397
    
 .. categories::
+
+.. sourcelink::

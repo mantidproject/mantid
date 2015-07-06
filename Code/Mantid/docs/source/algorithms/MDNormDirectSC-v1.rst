@@ -80,3 +80,5 @@ The output would look like:
 
 .. categories::
 
+.. sourcelink::
+

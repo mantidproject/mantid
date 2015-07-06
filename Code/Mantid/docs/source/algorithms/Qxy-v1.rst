@@ -16,3 +16,5 @@ for further documentation on how this algorithm works please see
 :ref:`algm-Q1D`.
 
 .. categories::
+
+.. sourcelink::

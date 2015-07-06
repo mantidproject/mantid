@@ -5,7 +5,6 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Math/LaszloIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
 #include "MantidGeometry/Math/Vertex2D.h"
@@ -17,14 +16,9 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWPolygon)
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Geometry::IDetector_const_sptr;
-using Geometry::DetectorGroup;
-using Geometry::DetectorGroup_const_sptr;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
-using Geometry::Vertex2D;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 /// Default constructor
 SofQWPolygon::SofQWPolygon()
@@ -80,11 +74,11 @@ void SofQWPolygon::exec() {
     qCalculator = &SofQWPolygon::calculateIndirectQ;
   }
 
-  /* PARALLEL_FOR2(inputWS, outputWS) */
+  PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
        ++i) // signed for openmp
   {
-    /* PARALLEL_START_INTERUPT_REGION */
+    PARALLEL_START_INTERUPT_REGION
 
     const double theta = m_thetaPts[i];
     if (theta < 0.0) // One to skip
@@ -122,15 +116,17 @@ void SofQWPolygon::exec() {
           std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
-        specNumberMapping.push_back(
-            outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
-        detIDMapping.push_back(det->getID());
+        PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
+          specNumberMapping.push_back(
+              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+          detIDMapping.push_back(det->getID());
+        }
       }
     }
 
-    /* PARALLEL_END_INTERUPT_REGION */
+    PARALLEL_END_INTERUPT_REGION
   }
-  /* PARALLEL_CHECK_INTERUPT_REGION */
+  PARALLEL_CHECK_INTERUPT_REGION
 
   DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS,
                                                     m_progress);

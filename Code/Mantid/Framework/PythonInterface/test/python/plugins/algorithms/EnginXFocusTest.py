@@ -4,33 +4,66 @@ from mantid.api import *
 
 class EnginXFocusTest(unittest.TestCase):
 
+    _data_ws = None
+
+    _expected_yvals_bank1  = [0.0037582279159681957, 0.00751645583194, 0.0231963801368,
+                              0.0720786940576, 0.0615909620868, 0.00987979301753]
+
+    _expected_yvals_bank2 = [0, 0.0112746837479, 0.0394536605073, 0.0362013481777,
+                    0.0728500403862, 0.000870882282987]
+
+    # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
+    # unittest of rhel6
+    def setUp(self):
+        """
+        Set up dependencies for one or more of the tests below.
+        """
+        if not self.__class__._data_ws:
+            self.__class__._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+
     def test_wrong_properties(self):
         """
         Tests proper error handling when passing wrong properties or not passing
         required ones.
         """
 
-        # No Filename property
+        # No InputWorkspace property
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          File='foo', Bank=1, OutputWorkspace='nop')
+                          Bank='1', OutputWorkspace='nop')
 
-        # Wrong filename
+        # Mispelled InputWorkspace prop
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          File='foo_is_not_there', Bank=1, OutputWorkspace='nop')
+                          InputWrkspace='anything_goes', Bank='1', OutputWorkspace='nop')
+
+        # Wrong InputWorkspace name
+        self.assertRaises(ValueError,
+                          EnginXFocus,
+                          InputWorkspace='foo_is_not_there', Bank='1', OutputWorkspace='nop')
 
         # mispelled bank
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          Filename='ENGINX00228061.nxs', bnk='2', OutputWorkspace='nop')
+                          InputWorkspace=self.__class__._data_ws, bnk='2', OutputWorkspace='nop')
 
         # mispelled DetectorsPosition
         tbl = CreateEmptyTableWorkspace()
         self.assertRaises(RuntimeError,
                           EnginXFocus,
-                          Filename='ENGINX00228061.nxs', Detectors=tbl, OutputWorkspace='nop')
+                          InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace='nop')
 
+        # bank and indices list clsh. This starts as a ValueError but the managers is raising a RuntimeError
+        self.assertRaises(RuntimeError,
+                          EnginXFocus,
+                          InputWorkspace=self.__class__._data_ws, Bank='2', DetectorPositions=tbl,
+                          SpectrumNumbers='1-10', OutputWorkspace='nop')
+
+        # workspace index too big. This starts as a ValueError but the managers is raising a RuntimeError
+        self.assertRaises(RuntimeError,
+                          EnginXFocus,
+                          InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
+                          SpectrumNumbers='999999999999999', OutputWorkspace='nop')
 
     def _check_output_ok(self, ws, ws_name='', y_dim_max=1, yvalues=None):
         """
@@ -72,12 +105,40 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out'
-        out = EnginXFocus(Filename='ENGINX00228061.nxs', Bank=1, OutputWorkspace=out_name)
+        out = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='1', OutputWorkspace=out_name)
 
-        yvals = [0.0037582279159681957, 0.00751645583194, 0.0231963801368, 0.0720786940576,
-                 0.0615909620868, 0.00987979301753]
-        self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=yvals)
+        self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
+    def test_runs_ok_south(self):
+        """
+        Same as before but with Bank='South' - equivalent to Bank='1'
+        """
+
+        out_name = 'out'
+        out = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='North', OutputWorkspace=out_name)
+
+        self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
+
+    def test_runs_ok_indices(self):
+        """
+        Same as above but with detector (workspace) indices equivalent to bank 1
+        """
+        out_idx_name = 'out_idx'
+        out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws, SpectrumNumbers='1-1200',
+                              OutputWorkspace=out_idx_name)
+        self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
+                              yvalues=self._expected_yvals_bank1)
+
+    def test_runs_ok_indices_split3(self):
+        """
+        Same as above but with detector (workspace) indices equivalent to bank 1
+        """
+        out_idx_name = 'out_idx'
+        out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws,
+                              SpectrumNumbers='1-100, 101-500, 400-1200',
+                              OutputWorkspace=out_idx_name)
+        self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
+                              yvalues=self._expected_yvals_bank1)
 
     def test_runs_ok_bank2(self):
         """
@@ -85,13 +146,22 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out_bank2'
-        out_bank2 = EnginXFocus(Filename="ENGINX00228061.nxs", Bank=2,
+        out_bank2 = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='2',
                                 OutputWorkspace=out_name)
 
-        yvals = [0, 0.0112746837479, 0.0394536605073, 0.0362013481777,
-                 0.0728500403862, 0.000870882282987]
         self._check_output_ok(ws=out_bank2, ws_name=out_name, y_dim_max=1201,
-                              yvalues=yvals)
+                              yvalues=self._expected_yvals_bank2)
+
+    def test_runs_ok_bank_south(self):
+        """
+        As before but using the Bank='South' alias. Should produce the same results.
+        """
+        out_name = 'out_bank_south'
+        out_bank_south = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='South',
+                                OutputWorkspace=out_name)
+
+        self._check_output_ok(ws=out_bank_south, ws_name=out_name, y_dim_max=1201,
+                              yvalues=self._expected_yvals_bank2)
 
 
 

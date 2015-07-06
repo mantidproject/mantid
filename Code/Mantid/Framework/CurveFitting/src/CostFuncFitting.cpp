@@ -135,7 +135,6 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
     ++ii;
   }
 
-  // std::cerr << "c=\n" << c << std::endl;
   if (isTransformationIdentity) {
     // if the transformation is identity simply copy the matrix
     covar = c;
@@ -144,10 +143,7 @@ void CostFuncFitting::calCovarianceMatrix(GSLMatrix &covar, double epsrel) {
     GSLMatrix tm;
     calTransformationMatrixNumerically(tm);
     covar = Tr(tm) * c * tm;
-    // std::cerr << "tm:\n" << tm << std::endl;
   }
-
-  // std::cerr << "Covar:\n" << covar << std::endl;
 }
 
 /**

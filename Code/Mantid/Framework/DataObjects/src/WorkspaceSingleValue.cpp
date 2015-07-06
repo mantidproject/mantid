@@ -21,6 +21,11 @@ WorkspaceSingleValue::WorkspaceSingleValue(double value, double error)
   isDistribution(true);
 }
 
+WorkspaceSingleValue::WorkspaceSingleValue(const WorkspaceSingleValue &other)
+    : MatrixWorkspace(other), data(other.data) {
+  isDistribution(true);
+}
+
 /// Destructor
 WorkspaceSingleValue::~WorkspaceSingleValue() {}
 
@@ -64,6 +69,9 @@ void WorkspaceSingleValue::generateHistogram(const std::size_t index,
   throw std::runtime_error(
       "generateHistogram() not implemented for WorkspaceSingleValue.");
 }
+
+/// Our parent MatrixWorkspace has hardcoded 2, but we need 0.
+size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
 } // namespace DataObjects
 } // namespace Mantid

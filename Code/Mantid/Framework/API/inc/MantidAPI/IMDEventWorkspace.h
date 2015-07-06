@@ -32,8 +32,12 @@ class MANTID_API_DLL IMDEventWorkspace : public API::IMDWorkspace,
                                          public API::MultipleExperimentInfos {
 public:
   IMDEventWorkspace();
-  IMDEventWorkspace(const IMDEventWorkspace &other);
   virtual ~IMDEventWorkspace() {}
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<IMDEventWorkspace> clone() const {
+    return std::unique_ptr<IMDEventWorkspace>(doClone());
+  }
 
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize() = 0;
@@ -82,10 +86,18 @@ public:
       const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMDEventWorkspace(const IMDEventWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMDEventWorkspace &operator=(const IMDEventWorkspace &other);
+
   virtual const std::string toString() const;
   /// Marker set to true when a file-backed workspace needs its back-end file
   /// updated (by calling SaveMD(UpdateFileBackEnd=1) )
   bool m_fileNeedsUpdating;
+
+private:
+  virtual IMDEventWorkspace *doClone() const = 0;
 };
 
 } // namespace MDEvents

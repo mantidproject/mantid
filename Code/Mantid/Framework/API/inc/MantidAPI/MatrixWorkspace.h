@@ -82,6 +82,11 @@ public:
   /// Delete
   virtual ~MatrixWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MatrixWorkspace> clone() const {
+    return std::unique_ptr<MatrixWorkspace>(doClone());
+  }
+
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const;
@@ -426,6 +431,11 @@ public:
   //=====================================================================================
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MatrixWorkspace(const MatrixWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  MatrixWorkspace &operator=(const MatrixWorkspace &other);
+
   MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory *factory = NULL);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
@@ -441,10 +451,8 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  MatrixWorkspace(const MatrixWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  MatrixWorkspace &operator=(const MatrixWorkspace &);
+  virtual MatrixWorkspace *doClone() const = 0;
+
   /// Create an MantidImage instance.
   MantidImage_sptr
   getImage(const MantidVec &(MatrixWorkspace::*read)(std::size_t const) const,

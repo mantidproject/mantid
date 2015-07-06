@@ -49,3 +49,5 @@ Output:
     Solid angle of Spectra 101 in Bank 2: 1.60e-08
 
 .. categories::
+
+.. sourcelink::

@@ -22,3 +22,5 @@ spectra (e.g. flood correction files) FirstColumnValue must be set to
 must match.
 
 .. categories::
+
+.. sourcelink::

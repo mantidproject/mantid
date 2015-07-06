@@ -72,3 +72,5 @@ Output:
     Workspace 'wsOut' has 10 spectra after AppendSpectra
 
 .. categories::
+
+.. sourcelink::

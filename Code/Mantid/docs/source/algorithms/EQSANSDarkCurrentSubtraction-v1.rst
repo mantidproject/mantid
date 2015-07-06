@@ -32,3 +32,5 @@ The example above uses the counting time for normalization. If the proton charge
 available, the normalization will be done using the proton charge instead.
 
 .. categories::
+
+.. sourcelink::

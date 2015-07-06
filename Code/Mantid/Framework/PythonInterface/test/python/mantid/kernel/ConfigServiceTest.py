@@ -1,5 +1,6 @@
 import unittest
 import os
+import testhelpers
 
 from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
                            std_vector_str, FacilityInfo, InstrumentInfo)
@@ -89,8 +90,11 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertTrue('tmp' in paths[0])
         self.assertTrue('tmp_2' in paths[1])
         self._clean_up_test_areas()
-
-
+            
+    def test_setting_log_channel_levels(self):
+        testhelpers.assertRaisesNothing(self, config.setFileLogLevel, 4)
+        testhelpers.assertRaisesNothing(self, config.setConsoleLogLevel, 4)
+    
     def _setup_test_areas(self):
         """Create a new data search path string
         """

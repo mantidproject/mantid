@@ -21,3 +21,5 @@ has been implemented.
 There won't be any usage example for SelectPowderDiffPeaks because it is deprecated. 
 
 .. categories::
+
+.. sourcelink::

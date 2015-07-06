@@ -330,6 +330,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
  * @param ws :: The workspace to search
  */
 void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
+  m_uiForm.cbWidth->blockSignals(true);
   m_uiForm.cbWidth->clear();
   m_spectraList.clear();
 
@@ -368,6 +369,7 @@ void JumpFit::findAllWidths(Mantid::API::MatrixWorkspace_const_sptr ws) {
       }
     }
   }
+  m_uiForm.cbWidth->blockSignals(false);
 }
 
 /**

@@ -36,3 +36,5 @@ Usage
    efficiency = CalculateEfficiency('workspace', MinEfficiency=0.5, MaxEfficiency=1.5)
 
 .. categories::
+
+.. sourcelink::

@@ -36,7 +36,7 @@ using API::FileProperty;
 DECLARE_ALGORITHM(AlignAndFocusPowder)
 
 AlignAndFocusPowder::AlignAndFocusPowder()
-    : API::Algorithm(), m_l1(0.0), m_resampleX(0), dspace(false), xmin(0.0),
+    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false), xmin(0.0),
       xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), tmin(0.0), tmax(0.0),
       m_preserveEvents(false), m_processLowResTOF(false), m_lowResSpecOffset(0),
       m_progress(NULL) {}
@@ -107,11 +107,15 @@ void AlignAndFocusPowder::init() {
                   "Bin in Dspace. (True is Dspace; False is TOF)");
   declareProperty(new ArrayProperty<double>("DMin"),
                   "Minimum for Dspace axis. (Default 0.) ");
+  mapPropertyName("DMin", "d_min");
   declareProperty(new ArrayProperty<double>("DMax"),
                   "Maximum for Dspace axis. (Default 0.) ");
+  mapPropertyName("DMax", "d_max");
   declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
+  mapPropertyName("TMin", "tof_min");
   declareProperty("TMax", EMPTY_DBL(),
                   "Maximum for TOF or dspace axis. Defaults to 0. ");
+  mapPropertyName("TMax", "tof_max");
   declareProperty("PreserveEvents", true, "If the InputWorkspace is an "
                                           "EventWorkspace, this will preserve "
                                           "the full event list (warning: this "
@@ -185,60 +189,20 @@ void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
 
 //----------------------------------------------------------------------------------------------
 /**
- * Function to get a property either from a PropertyManager or the algorithm
- * properties.
- * @param apname : The algorithm property to retrieve.
- * @param pmpname : The property manager property name.
- * @param pm : The PropertyManager instance.
- * @return : The value of the requested property.
- */
-double AlignAndFocusPowder::getPropertyFromPmOrSelf(
-    const std::string &apname, const std::string &pmpname,
-    boost::shared_ptr<PropertyManager> pm) {
-  // Look at algorithm first
-  double param = getProperty(apname);
-  if (param != EMPTY_DBL()) {
-    g_log.information() << "Returning algorithm parameter" << std::endl;
-    return param;
-  }
-  // Look in property manager
-  if (pm && pm->existsProperty(pmpname)) {
-    g_log.information() << "Have property manager and returning value."
-                        << std::endl;
-    return pm->getProperty(pmpname);
-  } else {
-    g_log.information() << "No property, using default." << std::endl;
-    return 0.0;
-  }
-}
-
-//----------------------------------------------------------------------------------------------
-/**
  * Function to get a vector property either from a PropertyManager or the
  * algorithm
  * properties. If both PM and algorithm properties are specified, the algorithm
  * one wins.
  * The return value is the first element in the vector if it is not empty.
- * @param apname : The algorithm property to retrieve.
+ * @param name : The algorithm property to retrieve.
  * @param avec : The vector to hold the property value.
- * @param pmpname : The property manager property name.
- * @param pm : The PropertyManager instance.
  * @return : The default value of the requested property.
  */
 double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(
-    const std::string &apname, std::vector<double> &avec,
-    const std::string &pmpname, boost::shared_ptr<PropertyManager> pm) {
-  avec = getProperty(apname);
-  // Look at algorithm first
+    const std::string &name, std::vector<double> &avec) {
+  avec = getProperty(name);
   if (!avec.empty()) {
     return avec[0];
-  }
-  // Look in property manager
-  if (pm && pm->existsProperty(pmpname)) {
-    avec = pm->getProperty(pmpname);
-    if (!avec.empty()) {
-      return avec[0];
-    }
   }
   // No overrides provided.
   return 0.0;
@@ -252,15 +216,6 @@ double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(
  * successfully
  */
 void AlignAndFocusPowder::exec() {
-  // Get the reduction property manager
-  const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
-  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-  }
-
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
@@ -280,14 +235,14 @@ void AlignAndFocusPowder::exec() {
   m_params = getProperty("Params");
   dspace = getProperty("DSpacing");
   auto dmin =
-      getVecPropertyFromPmOrSelf("DMin", m_dmins, "d_min", reductionManager);
+      getVecPropertyFromPmOrSelf("DMin", m_dmins);
   auto dmax =
-      getVecPropertyFromPmOrSelf("DMax", m_dmaxs, "d_max", reductionManager);
+      getVecPropertyFromPmOrSelf("DMax", m_dmaxs);
   LRef = getProperty("UnwrapRef");
   DIFCref = getProperty("LowResRef");
   minwl = getProperty("CropWavelengthMin");
-  tmin = getPropertyFromPmOrSelf("TMin", "tof_min", reductionManager);
-  tmax = getPropertyFromPmOrSelf("TMax", "tof_max", reductionManager);
+  tmin = getProperty("TMin");
+  tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
   m_resampleX = getProperty("ResampleX");
   // determine some bits about d-space and binning

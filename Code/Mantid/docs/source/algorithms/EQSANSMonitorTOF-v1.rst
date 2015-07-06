@@ -17,3 +17,5 @@ This algorithm is rarely called directly. It is called by
 :ref:`EQSANSNormalise <algm-EQSANSNormalise>`.
 
 .. categories::
+
+.. sourcelink::

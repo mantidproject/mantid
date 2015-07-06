@@ -17,3 +17,5 @@ Two types of GSAS files (.fxye) are supported
 | ``* SLOG``
 
 .. categories::
+
+.. sourcelink::

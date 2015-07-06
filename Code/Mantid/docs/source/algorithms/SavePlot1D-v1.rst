@@ -63,3 +63,5 @@ The file should look like
 
 
 .. categories::
+
+.. sourcelink::

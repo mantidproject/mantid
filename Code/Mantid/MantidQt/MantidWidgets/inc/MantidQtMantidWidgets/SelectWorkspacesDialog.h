@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectWorkspacesDialog : public QDialog
 
 public:
   ///return value of the Custom button
-  static const int CustomButton = 45654;
+  static const int CustomButton = 45654;  //do not use this number direct, just refer to this static constant
   
   /// Constructor
   SelectWorkspacesDialog (QWidget* parent = NULL, const std::string& typeFilter = "", const std::string& customButtonLabel = "");

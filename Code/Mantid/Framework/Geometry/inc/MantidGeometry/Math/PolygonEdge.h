@@ -54,7 +54,7 @@ public:
   /// Access the end point
   inline const Kernel::V2D &end() const { return m_end; }
   /// Return the direction
-  inline Kernel::V2D direction() const { return m_end - m_start; }
+  inline const Kernel::V2D &direction() const { return m_dir; }
   /// Create a point a given fraction along this edge
   Kernel::V2D point(const double fraction) const;
 
@@ -66,6 +66,8 @@ private:
   const Kernel::V2D m_start;
   /// Destination point
   const Kernel::V2D m_end;
+  /// Direction vector
+  const Kernel::V2D m_dir;
 };
 
 /// Enumeration for point type w.r.t an edge

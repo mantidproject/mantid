@@ -72,3 +72,5 @@ Output:
     Cell 2,3: Not available
 
 .. categories::
+
+.. sourcelink::

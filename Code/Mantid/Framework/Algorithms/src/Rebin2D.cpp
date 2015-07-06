@@ -10,6 +10,9 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidGeometry/Math/ConvexPolygon.h"
+#include "MantidGeometry/Math/Quadrilateral.h"
+#include "MantidGeometry/Math/LaszloIntersection.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -21,8 +24,7 @@ DECLARE_ALGORITHM(Rebin2D)
 
 using namespace API;
 using namespace DataObjects;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
+using namespace Geometry;
 using Kernel::V2D;
 
 //--------------------------------------------------------------------------
@@ -113,7 +115,7 @@ void Rebin2D::exec() {
   m_progress = boost::shared_ptr<API::Progress>(
       new API::Progress(this, 0.0, 1.0, nreports));
 
-  // PARALLEL_FOR2(inputWS, outputWS)
+  PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(numYBins);
        ++i) // signed for openmp
   {

@@ -47,6 +47,11 @@ public:
   // Destructor
   virtual ~EventWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<EventWorkspace> clone() const {
+    return std::unique_ptr<EventWorkspace>(doClone());
+  }
+
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &, const std::size_t &);
 
@@ -189,11 +194,14 @@ public:
                                     const double maxX,
                                     const bool entireRange) const;
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  EventWorkspace(const EventWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  EventWorkspace &operator=(const EventWorkspace &other);
+
 private:
-  /// NO COPY ALLOWED
-  EventWorkspace(const EventWorkspace &);
-  /// NO ASSIGNMENT ALLOWED
-  EventWorkspace &operator=(const EventWorkspace &);
+  virtual EventWorkspace *doClone() const { return new EventWorkspace(*this); }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.

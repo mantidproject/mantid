@@ -25,3 +25,5 @@ with UpdateFileBackEnd=True (if necessary), followed by a simple LoadMD
 call to the file in question.
 
 .. categories::
+
+.. sourcelink::

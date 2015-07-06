@@ -108,3 +108,5 @@ Transformations <http://www.mantidproject.org/BinMD_Coordinate_Transformations>`
    :alt: BinMD_Coordinate_Transforms_withLine.png
 
 .. categories::
+
+.. sourcelink::

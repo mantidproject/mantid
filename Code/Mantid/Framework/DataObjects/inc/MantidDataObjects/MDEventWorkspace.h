@@ -40,8 +40,12 @@ public:
   typedef MDE MDEventType;
 
   MDEventWorkspace();
-  MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
   virtual ~MDEventWorkspace();
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<MDEventWorkspace> clone() const {
+    return std::unique_ptr<MDEventWorkspace>(doClone());
+  }
 
   /// Perform initialization after dimensions (and others) have been set.
   virtual void initialize();
@@ -166,6 +170,19 @@ public:
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  /// Windows Visual Studio 2012 has trouble with declaration without definition
+  /// so we provide one that throws an error. This seems template related.
+  /// TODO: clean this up.
+  MDEventWorkspace<MDE, nd> &operator=(const MDEventWorkspace<MDE, nd> &other) {
+    throw std::runtime_error("MDEventWorkspace::operator= not implemented.");
+    // this codepath should never be reached, prevent unused parameter warning:
+    setTitle(other.getTitle());
+    return *this;
+  }
+
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;
 
@@ -173,6 +190,10 @@ protected:
   API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
 private:
+  virtual MDEventWorkspace *doClone() const {
+    return new MDEventWorkspace(*this);
+  }
+
   Kernel::SpecialCoordinateSystem m_coordSystem;
 };
 

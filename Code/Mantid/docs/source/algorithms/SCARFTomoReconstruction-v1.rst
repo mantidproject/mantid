@@ -85,3 +85,5 @@ Output:
    ValueError, as expected, as it was not previously logged on
 
 .. categories::
+
+.. sourcelink::

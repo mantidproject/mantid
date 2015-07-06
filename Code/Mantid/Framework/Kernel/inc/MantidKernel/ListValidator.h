@@ -9,6 +9,7 @@
 #include <boost/lexical_cast.hpp>
 #endif
 #include <vector>
+#include <set>
 #include <map>
 
 namespace Mantid {

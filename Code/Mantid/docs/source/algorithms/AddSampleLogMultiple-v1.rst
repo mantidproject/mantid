@@ -47,3 +47,5 @@ Output:
     1.6e-07
 
 .. categories::
+
+.. sourcelink::

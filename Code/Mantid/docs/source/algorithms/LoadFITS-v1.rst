@@ -155,3 +155,5 @@ Output:
    Number of spectra in the output workspace: 262144
 
 .. categories::
+
+.. sourcelink::

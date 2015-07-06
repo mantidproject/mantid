@@ -27,3 +27,5 @@ You can create a file-backed MDEventWorkspace by specifying the Filename
 and Memory parameters.
 
 .. categories::
+
+.. sourcelink::

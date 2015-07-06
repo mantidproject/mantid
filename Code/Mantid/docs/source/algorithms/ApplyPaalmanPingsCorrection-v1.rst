@@ -74,3 +74,5 @@ Output:
     Type of correction applied: sample_and_can_corrections
 
 .. categories::
+
+.. sourcelink::

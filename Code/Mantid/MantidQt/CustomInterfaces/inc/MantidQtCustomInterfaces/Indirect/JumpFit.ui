@@ -121,8 +121,10 @@
        <property name="showLegend" stdset="0">
         <bool>true</bool>
        </property>
-       <property name="showErrorBars" stdset="0">
-        <bool>true</bool>
+       <property name="curveErrorBars" stdset="0">
+        <stringlist>
+         <string>Sample</string>
+        </stringlist>
        </property>
       </widget>
      </item>

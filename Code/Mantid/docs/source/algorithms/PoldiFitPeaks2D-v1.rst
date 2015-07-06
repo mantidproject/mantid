@@ -21,7 +21,7 @@ Alternatively, if the peaks have been indexed using a different method, the log 
 
 PoldiFitPeaks2D can also be used to calculate a theoretical 2D pattern from a set of peaks by limiting the iterations to 0.
 
-In addition to performing the 2D-fit, a theoretical 1D-diffractogram of the fit-function is calculated as well, which can be used in conjunction with :ref:`algm-PoldiAnalyseResiduals` to assess the quality of a fit.
+In addition to performing the 2D-fit, a theoretical 1D-diffractogram of the fit-function is calculated as well, which can be used in conjunction with :ref:`algm-PoldiAnalyseResiduals` to assess the quality of a fit. Depending on the value of the `OutputIntegratedIntensity`-option, the output peaks intensities are either integrated or describe the maximum.
 
 Usage
 -----
@@ -158,6 +158,8 @@ The refined lattice parameter is printed at the end:
 
 .. testoutput:: ExSilicon2DPawley
 
-    Refined lattice parameter a = 5.43125 +/- 4e-05
+    Refined lattice parameter a = 5.43126 +/- 4e-05
 
 .. categories::
+
+.. sourcelink::

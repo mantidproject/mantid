@@ -98,3 +98,5 @@ Output:
     Workspace type = MDEventWorkspace<MDEvent,2>
 
 .. categories::
+
+.. sourcelink::

@@ -125,3 +125,5 @@ Output:
     Done
 
 .. categories::
+
+.. sourcelink::

@@ -75,3 +75,5 @@ Output:
     The following vectors are in the horizontal plane:  [0,0,5] [2,0,0]
 
 .. categories::
+
+.. sourcelink::
