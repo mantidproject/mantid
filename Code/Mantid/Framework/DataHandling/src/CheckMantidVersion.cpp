@@ -57,8 +57,8 @@ const std::string CheckMantidVersion::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CheckMantidVersion::init() {
-  declareProperty("CurrentVersion", "", "The version string of the currently running version", Direction::Output);
-  declareProperty("MostRecentVersion", "", "The version string of most recent full or patch release available for download", Direction::Output);
+  declareProperty("CurrentVersion", "", Direction::Output);
+  declareProperty("MostRecentVersion", "", Direction::Output);
   declareProperty("IsNewVersionAvailable", false,"True if a newer version is available, otherwise false", Direction::Output);
 }
 
