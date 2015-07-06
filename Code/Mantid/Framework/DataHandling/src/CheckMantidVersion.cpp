@@ -57,9 +57,9 @@ const std::string CheckMantidVersion::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CheckMantidVersion::init() {
-  declareProperty("CurrentVersion", "", Direction::Output);
-  declareProperty("MostRecentVersion", "", Direction::Output);
-  declareProperty("IsNewVersionAvailable", false, Direction::Output);
+  declareProperty("CurrentVersion", "", "The version string of the currently running version", Direction::Output);
+  declareProperty("MostRecentVersion", "", "The version string of most recent full or patch release available for download", Direction::Output);
+  declareProperty("IsNewVersionAvailable", false,"True if a newer version is available, otherwise false", Direction::Output);
 }
 
   //----------------------------------------------------------------------------------------------
@@ -82,17 +82,21 @@ void CheckMantidVersion::exec() {
   }
 
   std::string json = "";
+  bool skipVersionCheck = false;
   try {
     json = getVersionsFromGitHub(gitHubReleaseUrl);
   } catch (Exception::InternetError &ex) {
     if (ex.errorCode() == InternetHelper::HTTP_NOT_MODIFIED) {
       // No changes since last release
-      mostRecentVersion = getCurrentVersion();
+      //mostRecentVersion = getCurrentVersion();
+      mostRecentVersion = "No new versions since " + 
+        std::string(MantidVersion::releaseDate());
     } else {
       throw;
     }
   }
 
+  bool isNewVersionAvailable = false;
   if (!json.empty()) {
     Json::Reader r;
     Json::Value root;
@@ -100,17 +104,18 @@ void CheckMantidVersion::exec() {
 
     std::string gitHubVersionTag = root["tag_name"].asString();
     mostRecentVersion = cleanVersionTag(gitHubVersionTag);
-
+  
+    isNewVersionAvailable = isVersionMoreRecent(currentVersion, mostRecentVersion);
+    if (isNewVersionAvailable) {
+      // output a notice level log
+      g_log.notice("A new version of Mantid(" + mostRecentVersion +
+                   ") is available for download from " + downloadUrl);
+    }
   }
 
   g_log.information("Current Mantid Version: " + currentVersion);
   g_log.information("Most Recent Mantid Version: " + mostRecentVersion);
-  bool isNewVersionAvailable = isVersionMoreRecent(currentVersion, mostRecentVersion);
-  if (isVersionMoreRecent(currentVersion, mostRecentVersion)) {
-    // output a notice level log
-    g_log.notice("A new version of Mantid(" + mostRecentVersion +
-                 ") is available for download from " + downloadUrl);
-  }
+
   setProperty("CurrentVersion", currentVersion);
   setProperty("MostRecentVersion", mostRecentVersion);
   setProperty("IsNewVersionAvailable", isNewVersionAvailable);
