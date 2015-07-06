@@ -74,3 +74,5 @@ peak:
 .. properties::
 
 .. categories::
+
+.. sourcelink::

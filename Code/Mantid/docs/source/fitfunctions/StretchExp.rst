@@ -18,3 +18,5 @@ The Stretched exponential fit function is defined by
 .. properties::
 
 .. categories::
+
+.. sourcelink::

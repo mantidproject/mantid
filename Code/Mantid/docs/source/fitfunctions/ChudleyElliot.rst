@@ -20,3 +20,5 @@ motions of molecules. The Chudley-Elliot Jump diffusion model (1961) has the for
 .. properties::
 
 .. categories::
+
+.. sourcelink::
