@@ -18,6 +18,9 @@ class EnginXCalibrate(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
                              "Workspace with the calibration run to use.")
 
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
+                             "Workspace with the Vanadium (correction and calibration) run.")
+
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
 
@@ -61,6 +64,7 @@ class EnginXCalibrate(PythonAlgorithm):
         import EnginXUtils
 
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
+                                     self.getProperty("VanadiumWorkspace").value
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
@@ -75,12 +79,13 @@ class EnginXCalibrate(PythonAlgorithm):
 
         self._produceOutputs(difc, zero)
 
-    def _focusRun(self, ws, bank, indices):
+    def _focusRun(self, ws, bank, indices, vanWS):
         """
         Focuses the input workspace by running EnginXFocus as a child algorithm, which will produce a
         single spectrum workspace.
 
         @param ws :: workspace to focus
+        @param vanWS :: workspace with Vanadium run for corrections
         @param bank :: the focussing will be applied on the detectors of this bank
         @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
         mutually exclusive)
@@ -89,6 +94,7 @@ class EnginXCalibrate(PythonAlgorithm):
         """
         alg = self.createChildAlgorithm('EnginXFocus')
         alg.setProperty('InputWorkspace', ws)
+        alg.setProperty('VanadiumWorkspace', vanWS)
         alg.setProperty('Bank', bank)
         alg.setProperty(self.INDICES_PROP_NAME, indices)
 
