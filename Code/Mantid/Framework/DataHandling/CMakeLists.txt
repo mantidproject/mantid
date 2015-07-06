@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
+	src/DecoratorWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -163,6 +164,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
+	inc/MantidDataHandling/DecoratorWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -318,6 +320,7 @@ set ( TEST_FILES
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
+	DecoratorWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
