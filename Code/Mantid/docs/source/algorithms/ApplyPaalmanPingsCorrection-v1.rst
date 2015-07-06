@@ -22,6 +22,11 @@ indirect calculate correcteions routine, providing that the sample and container
 are first converted to wavelength and the corrections are interpolated to match
 the sample as demonstrated in the example below.
 
+Workflow
+--------
+
+.. diagram:: ApplyPaalmanPingsCorrection-v1_wkflw.dot
+
 Usage
 -----
 
