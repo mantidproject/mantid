@@ -19,6 +19,15 @@ calibrated pixel positions, focuses the values in dSpacing (summing
 them up into a single spectrum) and then converts them back to
 TOF. The output workspace produced by this algorithm has one spectrum.
 
+If a table of detector positions is passed as an input property, the
+detectors are calibrated before performing the conversions between TOF
+and dSpacing.
+
+In any case, before focusing the workspace, the spectra are corrected
+by using data from a Vanadium run (passed in the VanadiumWorkspace
+property). These corrections include two steps: detector sensitivity
+correction and pixel-by-pixel correction on a per-bank basis.
+
 Usage
 -----
 

@@ -17,7 +17,8 @@ Description
 
 Utilises :ref:`algm-EnginXFocus` which performs a TOF to dSpacing
 conversion using calibrated pixel positions, focuses the values in
-dSpacing and then converts them back to TOF.
+dSpacing and then converts them back to TOF. :ref:`algm-EnginXFocus`
+also perform corrections with Vanadium data.
 
 Then this algorithm calls :ref:`algm-EnginXFitPeaks` (as a child
 algorithm) which through a sequence of peak fits determines a linear

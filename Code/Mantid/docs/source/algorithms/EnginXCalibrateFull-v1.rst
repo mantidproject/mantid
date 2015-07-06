@@ -57,7 +57,10 @@ peaks. See the algorithm :ref:`algm-EnginXFitPeaks` for details on how
 
 This algorithm expects as input/output workspace the *long*
 calibration run, which provides a decent pattern for every detector or
-pixel.
+pixel. The spectra of the workspace are corrected using data from a
+Vanadium run (passed in the VanadiumWorkspace property). These
+corrections include two steps: detector sensitivity correction and
+pixel-by-pixel correction on a per-bank basis.
 
 .. categories::
 
