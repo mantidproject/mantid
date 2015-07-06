@@ -99,19 +99,19 @@ Usage
 
     # Should now have signed theta vs Lambda
     ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
-
-ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='QxQy_poly', OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
+    
+    ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='QxQy_poly', OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
                                 
-ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='KiKf_poly', OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
-                                
-ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='PiPf_poly', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
+    ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='KiKf_poly', OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
+    
+    ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='PiPf_poly', OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
 
-qxqy = mtd['QxQy_poly']
-kikf = mtd['KiKf_poly']
-pipf = mtd['PiPf_poly']
-print qxqy.getDimension(0).getName(), qxqy.getDimension(1).getName()
-print kikf.getDimension(0).getName(), kikf.getDimension(1).getName()
-print pipf.getDimension(0).getName(), pipf.getDimension(1).getName()
+    qxqy = mtd['QxQy_poly']
+    kikf = mtd['KiKf_poly']
+    pipf = mtd['PiPf_poly']
+    print qxqy.getDimension(0).getName(), qxqy.getDimension(1).getName()
+    print kikf.getDimension(0).getName(), kikf.getDimension(1).getName()
+    print pipf.getDimension(0).getName(), pipf.getDimension(1).getName()
 
 
 Output:
