@@ -1,0 +1,25 @@
+digraph MSDFit {
+  label="MSDFit Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    XStart
+    XEnd
+    SpecMin
+    SpecMax
+    OutputWorkspace
+    ParameterWorkspace
+    FitWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+  }
+
+}

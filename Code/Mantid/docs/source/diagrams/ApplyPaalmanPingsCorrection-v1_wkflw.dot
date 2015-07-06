@@ -1,0 +1,22 @@
+digraph ApplyPaalmanPingsCorrection {
+  label="ApplyPaalmanPingsCorrection Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    CorrectionsWorkspace
+    CanWorkspace
+    CanScaleFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+  }
+
+}

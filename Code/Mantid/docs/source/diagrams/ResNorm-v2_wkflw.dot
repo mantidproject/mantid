@@ -1,0 +1,23 @@
+digraph ResNorm2 {
+  label="ResNorm v2 Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+    $param_style
+    ResolutionWorkspace
+    VanadiumWorkspace
+    EnergyMin
+    EnergyMax
+    CreateOutput
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+  }
+
+}

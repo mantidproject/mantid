@@ -1,0 +1,24 @@
+digraph ElasticWindow {
+  label="ElasticWindow Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+    $param_style
+    InputWorkspace
+    OutputInQ
+    OutputInQSquared
+    IntegrationRangeStart
+    IntegrationRangeEnd
+    BackgroundRangeStart
+    BackgroundRangeEnd
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+  }
+
+}

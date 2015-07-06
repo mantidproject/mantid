@@ -1,0 +1,28 @@
+digraph ElasticWindowMultiple {
+  label="ElasticWindowMultiple Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+    $param_style
+    InputWorkspaces
+    IntegrationRangeStart
+    IntegrationRangeEnd
+    BackgroundRangeStart
+    BackgroundRangeEnd
+    SampleEnvironmentLogValue
+    SampleEnvironmentLogName
+    OutputInQ
+    OutputInQSquared
+    OutputELF
+    OutputELT
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+  }
+
+}

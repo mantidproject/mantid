@@ -1,0 +1,25 @@
+digraph TransformToIqt {
+  label="TransformToIqt Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    ResolutionWorkspace
+    EnergyMin
+    EnergyMax
+    BinReductionFactor
+    ParameterWorkspace
+    OutputWorkspace
+    DryRun
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+  }
+
+}
