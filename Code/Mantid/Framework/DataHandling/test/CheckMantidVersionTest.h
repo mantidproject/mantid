@@ -14,14 +14,15 @@ namespace {
  */
 class MockedCheckMantidVersion : public CheckMantidVersion {
 public:
-  MockedCheckMantidVersion(std::string currentVersion, std::string gitHubVersion) : CurrentVersion(currentVersion),
-    GitHubVersion(gitHubVersion), CheckMantidVersion() {}
+  MockedCheckMantidVersion(std::string currentVersion, std::string gitHubVersion) : CheckMantidVersion(), CurrentVersion(currentVersion),
+    GitHubVersion(gitHubVersion){}
 
   std::string CurrentVersion;
   std::string GitHubVersion;
 private:
   virtual std::string getVersionsFromGitHub(const std::string &url) {
-    std::string outputString;
+    //the initial assignment of the value to url is just to suppress a compiler warning
+    std::string outputString(url);
     outputString ="{\n"
       "  \"url\": \"https://api.github.com/repos/mantidproject/mantid/releases/1308203\",\n"
       "  \"assets_url\": \"https://api.github.com/repos/mantidproject/mantid/releases/1308203/assets\",\n"

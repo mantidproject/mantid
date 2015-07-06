@@ -175,7 +175,7 @@ bool CheckMantidVersion::isVersionMoreRecent(
   auto localVersionParts = splitVersionString(localVersion);
   auto gitHubVersionParts = splitVersionString(gitHubVersion);
 
-  for (int i = 0; i < gitHubVersionParts.size(); i++) {
+  for (size_t i = 0; i < gitHubVersionParts.size(); i++) {
     // sanity check
     if (i >= localVersionParts.size()) {
       // ran out of items to compare
