@@ -58,13 +58,13 @@ Binning Methods
 The *Method* property allows the binning method used when applying the
 coordinate transformations to be selected. The default method,
 *Centre*, takes center point of each input bin, and locates the
-corresponding output bin, adding the input bins value to it.
+corresponding output bin, adding the input bins value to it. Centre point rebinning is faster.
 
 *NormalisedPolygon* is a more sophisticated approach. It constructs
 a polygon using the boundaries of the input bin, then transforms that polygon
 into the output coordinates, and then searches for intersections with the
 output bins. The value added to each output bin is proportional to size of the
-overlap with the input bin, yielding smoother output.
+overlap with the input bin. The normalised polygon approach gives better accuracy.
 
 Usage
 -----
