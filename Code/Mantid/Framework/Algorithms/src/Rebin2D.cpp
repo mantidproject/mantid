@@ -12,7 +12,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
+#include "MantidGeometry/Math/PolygonIntersection.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 

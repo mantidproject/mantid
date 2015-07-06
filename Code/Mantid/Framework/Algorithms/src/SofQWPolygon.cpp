@@ -5,10 +5,10 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
+#include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 
 namespace Mantid {
 namespace Algorithms {
