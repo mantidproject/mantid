@@ -158,3 +158,5 @@ Output:
    1.000000 was corrected to 1.004997.
 
 .. categories::
+
+.. sourcelink::

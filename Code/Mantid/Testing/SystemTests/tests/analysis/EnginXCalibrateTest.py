@@ -13,13 +13,13 @@ class EnginXCalibrateTest(stresstesting.MantidStressTest):
         calib_ws = Load(Filename = 'ENGINX00193749.nxs')
 
         positions = EnginXCalibrateFull(Workspace = calib_ws,
-                                      Bank = 1,
-                                      ExpectedPeaks = '1.3529, 1.6316, 1.9132')
+                                        Bank = '1',
+                                        ExpectedPeaks = '1.3529, 1.6316, 1.9132')
 
         (self.difc, self.zero) = EnginXCalibrate(InputWorkspace = calib_ws,
-                                               Bank = 1,
-                                               ExpectedPeaks = '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
-                                               DetectorPositions = positions)
+                                                 Bank = '1',
+                                                 ExpectedPeaks = '2.7057,1.9132,1.6316,1.5621,1.3528,0.9566',
+                                                 DetectorPositions = positions)
 
     def validate(self):
         import sys

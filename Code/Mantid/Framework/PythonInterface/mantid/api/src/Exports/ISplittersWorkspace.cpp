@@ -4,12 +4,11 @@
 #include <boost/python/return_internal_reference.hpp>
 
 using Mantid::API::ISplittersWorkspace;
-using Mantid::API::ITableWorkspace;
 using namespace Mantid::PythonInterface::Registry;
 using namespace boost::python;
 
 void export_ISplittersWorkspace() {
-  class_<ISplittersWorkspace, bases<ITableWorkspace>, boost::noncopyable>(
+  class_<ISplittersWorkspace, boost::noncopyable>(
          "ISplittersWorkspace", no_init)
       .def("getNumberSplitters", &ISplittersWorkspace::getNumberSplitters,
            "Returns the number of splitters within the workspace")

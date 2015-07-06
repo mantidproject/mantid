@@ -22,15 +22,25 @@ public:
   OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
   ~OffsetsWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<OffsetsWorkspace> clone() const {
+    return std::unique_ptr<OffsetsWorkspace>(doClone());
+  }
+
   /** Gets the name of the workspace type
   @return Standard string name  */
   virtual const std::string id() const { return "OffsetsWorkspace"; }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  OffsetsWorkspace(const OffsetsWorkspace &other);
+  OffsetsWorkspace(const OffsetsWorkspace &other) : SpecialWorkspace2D(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   OffsetsWorkspace &operator=(const OffsetsWorkspace &other);
+
+private:
+  virtual OffsetsWorkspace *doClone() const {
+    return new OffsetsWorkspace(*this);
+  }
 };
 
 /// shared pointer to the OffsetsWorkspace class

@@ -35,3 +35,5 @@ Output:
     Workspace type = OffsetsWorkspace
 
 .. categories::
+
+.. sourcelink::

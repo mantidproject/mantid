@@ -24,28 +24,28 @@ class EnginXCalibrateTest(unittest.TestCase):
         # No InputWorkspace property (required)
         self.assertRaises(RuntimeError,
                           EnginXCalibrate,
-                          File='foo', Bank=1)
+                          File='foo', Bank='1')
 
         # Wrong (mispelled) InputWorkspace property
         self.assertRaises(RuntimeError,
                           EnginXCalibrate,
-                          InputWorkpace='anything_goes', Bank=2)
+                          InputWorkpace='anything_goes', Bank='2')
 
         # mispelled ExpectedPeaks
         tbl = CreateEmptyTableWorkspace(OutputWorkspace='test_table')
         self.assertRaises(RuntimeError,
                           EnginXCalibrate,
-                          Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank=2, Peaks='2')
+                          Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank='2', Peaks='2')
 
         # mispelled DetectorPositions
         self.assertRaises(RuntimeError,
                           EnginXCalibrate,
-                          InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank=2, Peaks='2')
+                          InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank='2', Peaks='2')
 
         # There's no output workspace
         self.assertRaises(RuntimeError,
                           EnginXCalibrate,
-                          InputWorkspace=self.__class__._data_ws, Bank=1)
+                          InputWorkspace=self.__class__._data_ws, Bank='1')
 
 
     def test_fails_gracefully(self):
@@ -57,7 +57,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         # and finally raise after a 'some peaks not found' error
         self.assertRaises(RuntimeError,
                           EnginXCalibrate,
-                          InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank=2)
+                          InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank='2')
 
     def test_runs_ok(self):
         """
@@ -65,7 +65,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         """
 
         difc, zero = EnginXCalibrate(InputWorkspace=self.__class__._data_ws,
-                                     ExpectedPeaks=[1.6, 1.1, 1.8], Bank=2)
+                                     ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
 
         self.check_3peaks_values(difc, zero)
 
@@ -79,7 +79,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         difc, zero = EnginXCalibrate(InputWorkspace=self.__class__._data_ws,
                                      ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
                                      ExpectedPeaksFromFile=filename,
-                                     Bank=2)
+                                     Bank='2')
 
         self.check_3peaks_values(difc, zero)
 

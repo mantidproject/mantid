@@ -37,6 +37,8 @@ workspace with that name, containing the two output parameters.
 
 .. categories::
 
+.. sourcelink::
+
 Usage
 -----
 
@@ -50,7 +52,7 @@ Usage
    ws_name = 'test'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
    Difc, Zero = EnginXCalibrate(InputWorkspace=ws_name,
-                                ExpectedPeaks=[1.097, 2.1], Bank=1,
+                                ExpectedPeaks=[1.097, 2.1], Bank='1',
                                 OutputParametersTableName=out_tbl_name)
 
    print "Difc: %.2f" % (Difc)

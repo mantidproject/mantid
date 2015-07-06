@@ -3,7 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h"
 
-// IDATab subclasses:
+// IndirectDataAnalysisTab subclasses:
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
@@ -50,9 +50,6 @@ namespace IDA
     m_tabs.insert(std::make_pair(IQT,        new Iqt(m_uiForm.twIDATabs->widget(IQT))));
     m_tabs.insert(std::make_pair(IQT_FIT,    new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT))));
     m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
-    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twIDATabs->widget(CALC_CORR))));
-    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twIDATabs->widget(APPLY_CORR))));
-    m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twIDATabs->widget(ABSORPTION_CORRECTIONS))));
   }
 
   /**

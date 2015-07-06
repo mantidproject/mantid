@@ -39,6 +39,11 @@ EventWorkspace::EventWorkspace() : data(), m_noVectors(),
   mru(new EventWorkspaceMRU) {
 }
 
+EventWorkspace::EventWorkspace(const EventWorkspace &other)
+    : IEventWorkspace(other), mru(new EventWorkspaceMRU) {
+    copyDataFrom(other);
+}
+
 EventWorkspace::~EventWorkspace() {
   delete mru;
 

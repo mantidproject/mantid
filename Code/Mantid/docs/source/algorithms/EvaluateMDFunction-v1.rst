@@ -54,3 +54,5 @@ Output
   Dim3
 
 .. categories::
+
+.. sourcelink::

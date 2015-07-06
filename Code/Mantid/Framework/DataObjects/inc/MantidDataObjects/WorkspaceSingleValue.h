@@ -45,6 +45,11 @@ public:
 
   virtual ~WorkspaceSingleValue();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceSingleValue> clone() const {
+    return std::unique_ptr<WorkspaceSingleValue>(doClone());
+  }
+
   /// Returns the number of single indexable items in the workspace
   virtual std::size_t size() const { return 1; }
 
@@ -76,6 +81,10 @@ protected:
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
 
 private:
+  virtual WorkspaceSingleValue *doClone() const {
+    return new WorkspaceSingleValue(*this);
+  }
+
   // allocates space in a new workspace - does nothing in this case
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength);

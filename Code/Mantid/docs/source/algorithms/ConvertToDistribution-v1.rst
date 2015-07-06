@@ -50,3 +50,5 @@ Output:
     The largest of which is 0.0415 counts.
 
 .. categories::
+
+.. sourcelink::

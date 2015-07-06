@@ -52,7 +52,7 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IMaskWorkspace(const IMaskWorkspace &other);
+  IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
   /// Protected copy assignment operator. Assignment not implemented.
   IMaskWorkspace &operator=(const IMaskWorkspace &other);
 };

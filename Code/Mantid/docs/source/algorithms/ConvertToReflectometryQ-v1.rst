@@ -53,3 +53,5 @@ You will usually want to rebin using :ref:`algm-BinMD` or
 are not regularly binned.
 
 .. categories::
+
+.. sourcelink::

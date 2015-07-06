@@ -9,11 +9,16 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "MantidDataObjects/Events.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <memory>
 
 namespace Mantid {
 
 namespace DataHandling {
+
+// Forward dec
+class DecoratorWorkspace;
 
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
@@ -21,8 +26,12 @@ namespace DataHandling {
  */
 class BankPulseTimes {
 public:
+
+  /// Starting number for assigning periods.
+  static const unsigned int FirstPeriod;
+
   /// Constructor with NeXus::File
-  BankPulseTimes(::NeXus::File &file);
+  BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNumbers);
 
   /// Constructor with vector of DateAndTime
   BankPulseTimes(const std::vector<Kernel::DateAndTime> &times);
@@ -41,6 +50,9 @@ public:
 
   /// Array of the pulse times
   Kernel::DateAndTime *pulseTimes;
+
+  /// Vector of period numbers corresponding to each pulse
+  std::vector<int> periodNumbers;
 };
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
@@ -107,7 +119,7 @@ public:
   static boost::shared_ptr<BankPulseTimes>
   runLoadNexusLogs(const std::string &nexusfilename,
                    API::MatrixWorkspace_sptr localWorkspace, Algorithm &alg,
-                   bool returnpulsetimes);
+                   bool returnpulsetimes, int& size_t, std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
 
   static void loadEntryMetadata(const std::string &nexusfilename,
                                 Mantid::API::MatrixWorkspace_sptr WS,
@@ -133,7 +145,7 @@ public:
 
   static void
   loadSampleDataISIScompatibility(::NeXus::File &file,
-                                  Mantid::API::MatrixWorkspace_sptr WS);
+  DecoratorWorkspace& WS);
 
   /// method used to return instrument name for some old ISIS files where it is
   /// not written properly within the instrument
@@ -144,7 +156,7 @@ public:
   std::string m_filename;
 
   /// The workspace being filled out
-  DataObjects::EventWorkspace_sptr WS;
+  boost::shared_ptr<DecoratorWorkspace> m_ws;
 
   /// Filter by a minimum time-of-flight
   double filter_tof_min;
@@ -196,7 +208,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the
   /// event list.
-  std::vector<EventVector_pt> eventVectors;
+  std::vector<std::vector<EventVector_pt> > eventVectors;
 
   /// Mutex to protect eventVectors from each task
   Poco::Mutex m_eventVectorMutex;
@@ -233,7 +245,7 @@ public:
 
   /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent>
   /// in the event list.
-  std::vector<WeightedEventVector_pt> weightedEventVectors;
+  std::vector<std::vector<WeightedEventVector_pt> > weightedEventVectors;
 
 private:
   /// Intialisation code
@@ -245,7 +257,7 @@ private:
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
 
   /// Map detector IDs to event lists.
-  template <class T> void makeMapToEventLists(std::vector<T> &vectors);
+  template <class T> void makeMapToEventLists(std::vector<std::vector<T> > &vectors);
 
   void createWorkspaceIndexMaps(const bool monitors, const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
@@ -281,10 +293,6 @@ private:
 
   /// Set the top entry field name
   void setTopEntryName();
-
-  /// to re-use (copy) logs from data workspace to monitors, etc. workspace
-  void copyLogs(const DataObjects::EventWorkspace_sptr& from,
-                    DataObjects::EventWorkspace_sptr& to);
 
   /// to open the nexus file with specific exception handling/message
   void safeOpenFile(const std::string fname);

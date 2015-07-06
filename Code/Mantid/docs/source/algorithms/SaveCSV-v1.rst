@@ -56,3 +56,5 @@ Usage
   os.remove(filePath)
 
 .. categories::
+
+.. sourcelink::

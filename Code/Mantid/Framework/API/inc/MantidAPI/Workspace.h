@@ -56,6 +56,29 @@ public:
   Workspace();
   virtual ~Workspace();
 
+  /** Returns a clone (copy) of the workspace with covariant return type in all
+   * derived classes.
+   *
+   * Note that this public function is *not* virtual. This has two reasons:
+   * - We want to enforce covariant return types. If this public clone() method
+   *   was virtual some derived class might fail to reimplement it. Since there
+   *   are several levels of inheritance in the Workspace inheritance tree we
+   *   cannot just use a pure virtual method in the base class. Thus, we use
+   *   this non-virtual interface method which calls the private and virtual
+   *   doClone() method. Since it is private, failing to reimplement it will
+   *   cause a compiler error as a reminder. Note that this mechanism does not
+   *   always work if a derived class does not implement clone(): if doClone()
+   *   in a parent is implemented then calling clone on a base class will return
+   *   a clone of the parent defining doClone, not the actual instance. This is
+   *   more a problem of the inheritance structure, i.e., whether or not all
+   *   non-leaf classes are pure virtual and declare doClone()=0.
+   * - Covariant return types are in conflict with smart pointers, but if
+   *   clone() is not virtual this is a non-issue.
+   */
+  std::unique_ptr<Workspace> clone() const {
+    return std::unique_ptr<Workspace>(doClone());
+  }
+
   // DataItem interface
   /// Name
   virtual const std::string name() const { return this->getName(); }
@@ -100,6 +123,9 @@ private:
   std::string m_name;
   /// The history of the workspace, algorithm and environment
   WorkspaceHistory m_history;
+
+  /// Virtual clone method. Not implemented to force implementation in childs.
+  virtual Workspace *doClone() const = 0;
 
   friend class AnalysisDataServiceImpl;
 };

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
-    <height>700</height>
+    <width>700</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,21 +49,6 @@
       <widget class="QWidget" name="tabConvFit">
        <attribute name="title">
         <string>ConvFit</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabCalcCorr">
-       <attribute name="title">
-        <string>Calculate Corrections</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabApplyCorr">
-       <attribute name="title">
-        <string>Apply Corrections</string>
-       </attribute>
-      </widget>
-      <widget class="QWidget" name="tabAbsorptionCorrections">
-       <attribute name="title">
-        <string>Absorption Corrections</string>
        </attribute>
       </widget>
      </widget>

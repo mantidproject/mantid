@@ -111,3 +111,5 @@ Output
   The non-zero difference -0.0464531276188 is due to detector 33
 
 .. categories::
+
+.. sourcelink::

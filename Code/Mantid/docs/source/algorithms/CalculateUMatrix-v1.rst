@@ -162,3 +162,5 @@ which is the eigenvector corresponding to the largest eigenvalue of
 :math:`HS`.
 
 .. categories::
+
+.. sourcelink::

@@ -66,3 +66,5 @@ Output:
   Mixed Phase 1 and 2 Time[4] = 2012-08-14T18:55:55.640000000 .
 
 .. categories::
+
+.. sourcelink::

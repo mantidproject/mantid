@@ -14,3 +14,5 @@ The ``InputWorkspace`` must contain histogram data. Once executed the
 the centre points of the input bins.
 
 .. categories::
+
+.. sourcelink::

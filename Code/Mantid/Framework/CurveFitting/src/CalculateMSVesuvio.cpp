@@ -120,7 +120,7 @@ void CalculateMSVesuvio::init() {
       "Workspace to store the calculated total scattering counts");
   declareProperty(
       new WorkspaceProperty<>("MultipleScatteringWS", "", Direction::Output),
-      "Workspace to store the calculated total scattering counts");
+      "Workspace to store the calculated multiple scattering counts summed for all orders");
 }
 
 /**

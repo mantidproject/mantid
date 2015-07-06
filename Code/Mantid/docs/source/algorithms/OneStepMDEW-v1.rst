@@ -27,3 +27,5 @@ for the details of the usage of these algorithms
 
 
 .. categories::
+
+.. sourcelink::

@@ -124,6 +124,8 @@ Output:
 
 .. categories::
 
+.. sourcelink::
+
 
 
 

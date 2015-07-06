@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CALCCORR_H_
 
 #include "ui_CalcCorr.h"
-#include "IDATab.h"
+#include "CorrectionsTab.h"
 
 namespace MantidQt
 {
@@ -10,7 +10,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport CalcCorr : public IDATab
+  class DLLExport CalcCorr : public CorrectionsTab
   {
     Q_OBJECT
 

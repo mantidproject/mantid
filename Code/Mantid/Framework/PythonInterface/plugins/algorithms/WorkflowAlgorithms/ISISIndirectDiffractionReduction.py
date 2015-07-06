@@ -14,6 +14,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _chopped_data = None
     _output_ws = None
     _data_files = None
+    _load_logs = None
     _instrument_name = None
     _mode = None
     _spectra_range = None
@@ -37,6 +38,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
+
+        self.declareProperty(name='LoadLogFiles', defaultValue=True,
+                             doc='Load log files when loading runs')
 
         self.declareProperty(name='Instrument', defaultValue='IRIS',
                              validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'VESUVIO']),
@@ -107,6 +111,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                               self._spectra_range[0],
                                                               self._spectra_range[1],
                                                               self._sum_files,
+                                                              self._load_logs,
                                                               load_opts=load_opts)
 
         for c_ws_name in self._workspace_names:
@@ -181,6 +186,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
+        self._load_logs = self.getProperty('LoadLogFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
         self._mode = self.getPropertyValue('Mode')
         self._spectra_range = self.getProperty('SpectraRange').value

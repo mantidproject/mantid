@@ -9,11 +9,8 @@
 Description
 -----------
 
-Source Code
------------
-
-The source code for the Python Algorithm may be viewed at:
-`OSIRISDiffractionReduction.py <https://github.com/mantidproject/mantid/blob/master/Code/Mantid/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/OSIRISDiffractionReduction.py>`__
+Performs a diffraction reduction for OSIRIS using normalisation to a set of
+vanadium sample runs.
 
 Usage
 -----
@@ -23,14 +20,14 @@ Usage
 .. testcode:: ExOSIRISDiffractionReductionSimple
 
     import os
-    
+
     def createDummyOSIRISWorkspace(name, func, xmin, xmax, bin_width):
       """Creates a workspace that looks something like an OSIRIS diffraction run"""
       #create workspace according to function
       ws = CreateSampleWorkspace("Histogram", Function="User Defined", UserDefinedFunction=func, XMin=xmin, XMax=xmax, Random=True, BinWidth=bin_width, NumBanks=11, OutputWorkspace=name)
       ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=1009, OutputWorkspace=name)
       AddSampleLog(ws, 'gd_prtn_chrg', '30.01270866394043',  'Number')
-      
+
       #load instrument parameters
       LoadInstrument(ws, InstrumentName='OSIRIS')
       param_file = config['instrumentDefinition.directory'] + 'OSIRIS_diffraction_diffspec_Parameters.xml'
@@ -82,3 +79,5 @@ Output:
     removeFiles(vanadium)
 
 .. categories::
+
+.. sourcelink::

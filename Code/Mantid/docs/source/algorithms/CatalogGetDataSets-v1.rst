@@ -32,3 +32,5 @@ Output:
     The number of datafiles in this investigation is: 2
 
 .. categories::
+
+.. sourcelink::
