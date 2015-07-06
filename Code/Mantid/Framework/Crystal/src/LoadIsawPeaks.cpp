@@ -416,7 +416,12 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    int col0 = col;
+    if(children[0]->getName().compare("sixteenpack") == 0){
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      children.clear();
+      asmb->getChildren(children, false);
+    }
+    int col0 = col - 1;
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =

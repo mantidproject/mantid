@@ -182,6 +182,14 @@ void SaveIsawPeaks::exec() {
         // Retrieve it
         boost::shared_ptr<const IComponent> det =
             inst->getComponentByName(bankName);
+        if (det->getPos() == V3D(0,0,0)) // for Corelli with sixteenpack under bank
+        {
+          std::vector<Geometry::IComponent_const_sptr> children;
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+              boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
+          asmb->getChildren(children, false);
+          det = children[0];
+        }
         if (det) {
           // Center of the detector
           V3D center = det->getPos();
@@ -384,6 +392,11 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
+    if(children[0]->getName().compare("sixteenpack") == 0){
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      children.clear();
+      asmb->getChildren(children, false);
+    }
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             children[col]);
@@ -412,6 +425,11 @@ void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
+    if(children[0]->getName().compare("sixteenpack") == 0){
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      children.clear();
+      asmb->getChildren(children, false);
+    }
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
