@@ -176,3 +176,71 @@ def  generateOutputParTable(name, difc, zero):
     tbl.addColumn('double', 'difc')
     tbl.addColumn('double', 'zero')
     tbl.addRow([float(difc), float(zero)])
+
+def convertToDSpacing(parent, ws):
+    """
+    Converts a workspace to dSpacing using 'ConvertUnits' as a child algorithm.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace (normally in ToF units) to convert (not modified)
+
+    @returns workspace converted to d-spacing units
+    """
+    alg = parent.createChildAlgorithm('ConvertUnits')
+    alg.setProperty('InputWorkspace', ws)
+    alg.setProperty('Target', 'dSpacing')
+    alg.setProperty('AlignBins', True)
+    alg.execute()
+    return alg.getProperty('OutputWorkspace').value
+
+def convertToTOF(parent, ws):
+    """
+    Converts workspace to TOF using 'ConvertUnits' as a child algorithm.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace (normally in d-spacing units) to convert to ToF
+
+    @returns workspace with data converted to ToF units
+    """
+    alg = parent.createChildAlgorithm('ConvertUnits')
+    alg.setProperty('InputWorkspace', ws)
+    alg.setProperty('Target', 'TOF')
+    alg.execute()
+    return alg.getProperty('OutputWorkspace').value
+
+def cropData(parent, ws, indices):
+    """
+    Produces a cropped workspace from the input workspace so that only
+    data for the specified bank (given as a list of indices) is left.
+
+    NB: This assumes spectra for a bank are consequent.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace to crop (not modified in-place)
+    @param indices :: workspace indices to keep in the workpace returned
+
+    @returns cropped workspace, with only the spectra corresponding to the indices requested
+    """
+    # Leave only spectra between min and max
+    alg = parent.createChildAlgorithm('CropWorkspace')
+    alg.setProperty('InputWorkspace', ws)
+    alg.setProperty('StartWorkspaceIndex', min(indices))
+    alg.setProperty('EndWorkspaceIndex', max(indices))
+    alg.execute()
+
+    return alg.getProperty('OutputWorkspace').value
+
+def sumSpectra(parent, ws):
+    """
+    Focuses/sums up all the spectra into a single one (calls the SumSpectra algorithm)
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace to sum up
+
+    @return single-spectrum workspace resulting from the sum
+    """
+    alg = parent.createChildAlgorithm('SumSpectra')
+    alg.setProperty('InputWorkspace', ws)
+    alg.execute()
+
+    return alg.getProperty('OutputWorkspace').value

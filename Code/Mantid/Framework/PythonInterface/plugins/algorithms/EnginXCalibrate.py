@@ -75,6 +75,31 @@ class EnginXCalibrate(PythonAlgorithm):
 
         self._produceOutputs(difc, zero)
 
+    def _focusRun(self, ws, bank, indices):
+        """
+        Focuses the input workspace by running EnginXFocus as a child algorithm, which will produce a
+        single spectrum workspace.
+
+        @param ws :: workspace to focus
+        @param bank :: the focussing will be applied on the detectors of this bank
+        @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
+        mutually exclusive)
+
+        @return focussed (summed) workspace
+        """
+        alg = self.createChildAlgorithm('EnginXFocus')
+        alg.setProperty('InputWorkspace', ws)
+        alg.setProperty('Bank', bank)
+        alg.setProperty(self.INDICES_PROP_NAME, indices)
+
+        detPos = self.getProperty('DetectorPositions').value
+        if detPos:
+            alg.setProperty('DetectorPositions', detPos)
+
+        alg.execute()
+
+        return alg.getProperty('OutputWorkspace').value
+
     def _fitParams(self, focusedWS, expectedPeaksD):
         """
         Fit the GSAS parameters that this algorithm produces: difc and zero
@@ -97,30 +122,6 @@ class EnginXCalibrate(PythonAlgorithm):
         zero = fitPeaksAlg.getProperty('Zero').value
 
         return difc, zero
-
-    def _focusRun(self, ws, bank, indices):
-        """
-        Focuses the input workspace by running EnginXFocus which will produce a single spectrum workspace.
-
-        @param ws :: workspace to focus
-        @param bank :: the focussing will be applied on the detectors of this bank
-        @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
-        mutually exclusive)
-
-        @return focussed (summed) workspace
-        """
-        alg = self.createChildAlgorithm('EnginXFocus')
-        alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('Bank', bank)
-        alg.setProperty(self.INDICES_PROP_NAME, indices)
-
-        detPos = self.getProperty('DetectorPositions').value
-        if detPos:
-            alg.setProperty('DetectorPositions', detPos)
-
-        alg.execute()
-
-        return alg.getProperty('OutputWorkspace').value
 
     def _produceOutputs(self, difc, zero):
         """

@@ -49,19 +49,21 @@ class EnginXFocus(PythonAlgorithm):
                                                            self.getProperty(self.INDICES_PROP_NAME).value)
 
     	# Leave the data for the bank we are interested in only
-        ws = self._cropData(ws, indices)
+        ws = EnginXUtils.cropData(self, ws, indices)
 
     	# Apply calibration
-        self._applyCalibration(ws)
+        detPos = self.getProperty("DetectorPositions").value
+        if detPos:
+            self._applyCalibration(ws, detPos)
 
     	# Convert to dSpacing
-        ws = self._convertToDSpacing(ws)
+        ws = EnginXUtils.convertToDSpacing(self, ws)
 
     	# Sum the values
-        ws = self._sumSpectra(ws)
+        ws = EnginXUtils.sumSpectra(self, ws)
 
     	# Convert back to time of flight
-        ws = self._convertToTOF(ws)
+        ws = EnginXUtils.convertToTOF(self, ws)
 
     	# OpenGenie displays distributions instead of pure counts (this is done implicitly when
     	# converting units), so I guess that's what users will expect
@@ -69,71 +71,26 @@ class EnginXFocus(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", ws)
 
-    def _applyCalibration(self, ws):
-        """ Refines the detector positions using the result of calibration (if one is specified)
-    	"""
-        detPos = self.getProperty("DetectorPositions").value
+    def _applyCalibration(self, ws, detPos):
+        """
+        Refines the detector positions using the result of calibration (if one is specified).
 
-        if detPos:
-            alg = self.createChildAlgorithm('ApplyCalibration')
-            alg.setProperty('Workspace', ws)
-            alg.setProperty('PositionTable', detPos)
-            alg.execute()
-
-    def _convertToDSpacing(self, ws):
-        """ Converts workspace to dSpacing
+        @param ws :: workspace to apply the calibration (on its instrument)
+        @param detPos :: detector positions (as a table of positions, one row per detector)
     	"""
-        alg = self.createChildAlgorithm('ConvertUnits')
-        alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('Target', 'dSpacing')
-        alg.setProperty('AlignBins', True)
+        alg = self.createChildAlgorithm('ApplyCalibration')
+        alg.setProperty('Workspace', ws)
+        alg.setProperty('PositionTable', detPos)
         alg.execute()
-        return alg.getProperty('OutputWorkspace').value
-
-    def _convertToTOF(self, ws):
-        """ Converts workspace to TOF
-    	"""
-        alg = self.createChildAlgorithm('ConvertUnits')
-        alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('Target', 'TOF')
-        alg.execute()
-        return alg.getProperty('OutputWorkspace').value
 
     def _convertToDistr(self, ws):
-        """ Convert workspace to distribution
+        """
+        Convert workspace to distribution
+
+        @param ws :: workspace, which is modified/converted in place
     	"""
         alg = self.createChildAlgorithm('ConvertToDistribution')
         alg.setProperty('Workspace', ws)
         alg.execute()
-
-    def _cropData(self, ws, indices):
-        """
-        Produces a cropped workspace from the input workspace so that only
-        data for the specified bank is left.
-
-        NB: This assumes spectra for a bank are consequent.
-
-        @param ws :: workspace to crop (not modified in-place)
-        @param bank :: workspace indices to keep in the workpace returned
-
-        @returns cropped workspace, with only the spectra corresponding to the indices requested
-        """
-    	# Leave only spectra between min and max
-        alg = self.createChildAlgorithm('CropWorkspace')
-        alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('StartWorkspaceIndex', min(indices))
-        alg.setProperty('EndWorkspaceIndex', max(indices))
-        alg.execute()
-
-        return alg.getProperty('OutputWorkspace').value
-
-    def _sumSpectra(self, ws):
-        """ Calls the SumSpectra algorithm
-    	"""
-        alg = self.createChildAlgorithm('SumSpectra')
-        alg.setProperty('InputWorkspace', ws)
-        alg.execute()
-        return alg.getProperty('OutputWorkspace').value
-
 
 AlgorithmFactory.subscribe(EnginXFocus)
