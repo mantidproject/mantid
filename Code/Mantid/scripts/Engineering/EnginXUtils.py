@@ -3,6 +3,8 @@ import os
 
 from mantid.api import *
 import mantid.simpleapi as sapi
+# numpy needed only for Vanadium calculations, at the moment
+import numpy as np
 
 ENGINX_BANKS = ['', 'North', 'South', '1', '2']
 
@@ -244,3 +246,179 @@ def sumSpectra(parent, ws):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value
+
+# ----------------------------------------------------------------------------------------
+# Funcionts for Vanadium corrections follow. These could be converted into an algorithm
+# that would be used as a child from EnginXFocus and EnginXCalibrate
+# ----------------------------------------------------------------------------------------
+
+def applyVanadiumCorrection(parent, ws, vanWS):
+    """
+    Vanadium correction as done for the EnginX instrument. This is in principle meant to be used
+    in EnginXFocus and EnginXCalibrateFull. The process consists of two steps:
+    1. sensitivity correction
+    2. pixel-by-pixel correction
+
+    1. is performed for very pixel/detector/spectrum: scale every spectrum/curve by a
+    scale factor proportional to the number of neutrons in that spectrum
+
+    2. Correct every pixel by dividing by a curve (spline) fitted on the summed spectra
+    (summing banks separately).
+
+    The sums and fits are done in d-spacing.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace to work on, must be a Vanadium (V-Nb) run (in/out)
+    @param ws :: workspace with Vanadium data
+    """
+
+    applySensitivityCorrection(parent, ws)
+
+    # apply this to both Engin-X banks, each with separate calculations
+    applyPixByPixCorrection(parent, ws, [1,2])
+
+def applySensitivityCorrection(parent, ws, vanWS):
+    """
+    Applies the first step of the Vanadium corrections on the given workspace.
+    Operations are done in ToF
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace (in/out)
+    @param vanWS :: workspace with Vanadium data
+    """
+    expectedDim = 'Time-of-flight'
+    dimType = vanWS.getXDimension().getName()
+    if expectedDim != dimType:
+        raise ValueError("This algorithm expects a workspace with %s X dimension, but "
+                         "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))
+
+    integWS = integrateSpectra(parent, vanWS)
+    if integWS.getNumberHistograms() != ws.getNumberHistograms():
+        raise RuntimeError("Error while integrating workspace")
+
+    for i in range(0, ws.getNumberHistograms()):
+        scaleFactor = integWS.readY(i)[0] / vanWS.blocksize()
+        ws.setY(i, np.divide(ws.dataY(i), scaleFactor)) # DivideSpec(ws, scaleFactor)
+
+def applyPixByPixCorrection(parent, ws, vanWS, banks):
+    """
+    Applies the second step of the Vanadium correction on the given workspace: pixel by pixel
+    divides by a curve fitted to the sum of the set of spectra of the corresponding bank.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace to work on / correct
+    @param banks :: list of banks to correct - normally would expect all banks: [1,2]
+    @param vanWS :: workspace with Vanadium data
+    """
+    # get one curve per bank, in d-spacing
+    curves = fitCurvesPerBank(parent, vanWS, banks)
+    # divide the spectra by their corresponding bank curve
+    divideByCurves(ws, banks, curves)
+
+def divideByCurves(ws, banks, curves):
+    """
+    Expects a workspace in ToF units. All operations are done in-place (the workspace is
+    input/output). For every bank-curve pair, divides the corresponding spectra in the
+    workspace by the (simulated) fitted curve. The division is done in d-spacing (the
+    input workspace is converted to d-spacing inside this method, but results are converted
+    back to ToF before returning from this method).
+
+    @param ws :: workspace with (sample) spectra to divide by curves fitted to Vanadium spectra
+
+    @param banks :: list of banks to consider (normally all the banks of the instrument)
+
+    @param curves :: fitting workspaces (in d-spacing), one per bank. Every of them is
+    expected as a fitting workspace as returned by the algorithm 'Fit': 3 spectra: original
+    data, simulated data with fit, difference
+    """
+    # Note that this division could use the algorithm 'Divide'
+    # This is simple and more efficient than using divide workspace, which requires
+    # cropping separate workspaces, dividing them separately, then appending them
+    # with AppendSpectra, etc.
+    ws = convertToDSpacing(ws)
+    for bIdx, b in enumerate(banks):
+        # process all the spectra (indices) in one bank
+        fittedCurve = curves[bIdx]
+        idxs = getWsIndicesForBank(b)
+        for i in idxs:
+            ws.setY(i, np.divide(ws.dataY(i), fittedCurve))
+
+    ws = convertToTOF(ws)
+
+def fitCurvesPerBank(parent, wsVan, banks):
+    """
+    Fits one curve to every bank (where for every bank the data fitted is the result of
+    summing up all the spectra of the bank). The fitting is done in d-spacing.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: Vanadium workspace to fit
+    @param banks :: list of banks to consider which is normally all the banks of the instrument
+
+    @returns list of fit workspaces, with one per bank given in the inputs. These workspaces are
+    in d-spacing units
+    """
+    curves = []
+    for b in banks:
+        indices = getWsIndicesForBank(vanWS, b)
+        wsToFit = cropData(parent, vanWS, indices)
+        wsToFit = convertToDSpacing(parent, wsToFit)
+        wsToFit = sumSpectra(parent, wsToFit)
+        fitWS = fitBankCurve(parent, vanWS)
+        curves.append(fitWS)
+
+    return curves
+
+def fitBankCurve(parent, vanWS):
+    """
+    Fits a spline to a single-spectrum workspace (in d-spacing)
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param vanWS :: Vanadium workspace to fit (normally this contains spectra for a single bank)
+
+    @returns fit workspace (MatrixWorkspace), with the same number of bins as the input
+    workspace, and the Y values simulated from the fitted curve
+    """
+    expectedDim = 'dSpacing'
+    dimType = vanWS.getXDimension().getName()
+    if expectedDim != dimType:
+        raise ValueError("This algorithm expects a workspace with %s X dimension, but "
+                         "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))
+
+    if 1 != vanWS.getNumberHistograms():
+        raise ValueError("The workspace does not have exactly one histogram. Inconsistency found.")
+
+    functionName = 'BSpline'
+    fitAlg = parent.createChildAlgorithm('Fit')
+    fitAlg.setProperty('Function', 'name=' + functionName)
+    fitAlg.setProperty('InputWorkspace', vanWS)
+    # WorkspaceIndex is left to default '0' for 1D function fits
+    # StartX, EndX left to default start/end of the spectrum
+    fitWSName = 'vanadium_bank_fit'
+    fitAlg.setProperty('Output', fitWSName)
+    fitAlt.execute()
+    fitWS = None
+    fitWSName = fitWSName + '_Workspace'
+    try:
+        fitWS = mtd[fitWSName]
+    except RuntimeError:
+        raise RuntimeError("Could not find the workspace %s. It seems that this algorithm failed "
+                           "to fit a function '%s' to the summed spectra of a bank: %s"
+                           % (fitWSName, functionName, str(re)))
+    return fitWS
+
+def integrateSpectra(parent, ws):
+    """
+    Integrates all the spectra or a workspace, and return the result.
+    Simply uses 'Integration' as a child algorithm.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: workspace (MatrixWorkspace)
+
+    @returns integrated workspace, or result of integrating every spectra in the input workspace
+    """
+    intAlg = parent.createChildAlgorithm('Integration')
+    intAlg.setPropertyValue('InputWorkspace', ws)
+    intAlg.execute()
+    ws = intAlg.getPropertyValue('OutputWorkspace')
+
+    return ws

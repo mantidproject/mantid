@@ -20,6 +20,9 @@ class EnginXCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
 
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
+                             "Workspace with the Vanadium (correction and calibration) run.")
+
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
                              "calibration information. The table includes: the old positions in V3D format "
@@ -64,6 +67,11 @@ class EnginXCalibrateFull(PythonAlgorithm):
         inWS = self.getProperty('Workspace').value
         WSIndices = EnginXUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
                                                              self.getProperty(self.INDICES_PROP_NAME).value)
+
+        vanWS = self.getProperty("VanadiumWorkspace").value
+        # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
+        # calibration step, which creates a cycle / chicken-and-egg issue.
+        EnginXUtils.applyVanadiumCorrection(self, ws, vanWS)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
         posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)

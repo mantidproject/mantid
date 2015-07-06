@@ -18,6 +18,9 @@ class EnginXFocus(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Workspace with the run to focus.")
 
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
+                             "Workspace with the Vanadium (correction and calibration) run.")
+
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                              "A workspace with focussed data")
 
@@ -55,6 +58,10 @@ class EnginXFocus(PythonAlgorithm):
         detPos = self.getProperty("DetectorPositions").value
         if detPos:
             self._applyCalibration(ws, detPos)
+
+        vanWS = self.getProperty("VanadiumWorkspace").value
+        # These corrections rely on ToF<->Dspacing conversions, so they're done after the calibration step
+        EnginXUtils.applyVanadiumCorrection(self, ws, vanWS)
 
     	# Convert to dSpacing
         ws = EnginXUtils.convertToDSpacing(self, ws)
