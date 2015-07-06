@@ -19,3 +19,5 @@ will store previously calculated results so that the center doesn't have
 to be recalculated every time we load a new file.
 
 .. categories::
+
+.. sourcelink::

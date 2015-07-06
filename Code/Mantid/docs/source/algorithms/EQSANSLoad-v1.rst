@@ -43,3 +43,5 @@ This algorithm is rarely called directly. It is called by
 .. |LoadEQSANS.png| image:: /images/LoadEQSANS.png
 
 .. categories::
+
+.. sourcelink::

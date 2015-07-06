@@ -23,7 +23,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   CalcCorr::CalcCorr(QWidget * parent) :
-    IDATab(parent)
+    CorrectionsTab(parent)
   {
     m_uiForm.setupUi(parent);
 

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -60,7 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlignAndFocusPowder : public API::Algorithm {
+class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
 public:
   /// Constructor
   AlignAndFocusPowder();
@@ -104,15 +104,9 @@ private:
                                            std::vector<double> l2s,
                                            std::vector<double> phis);
 
-  double getPropertyFromPmOrSelf(const std::string &apname,
-                                 const std::string &pmpname,
-                                 boost::shared_ptr<Kernel::PropertyManager> pm);
-
   double
-  getVecPropertyFromPmOrSelf(const std::string &apname,
-                             std::vector<double> &avec,
-                             const std::string &pmpname,
-                             boost::shared_ptr<Kernel::PropertyManager> pm);
+  getVecPropertyFromPmOrSelf(const std::string &name,
+                             std::vector<double> &avec);
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;

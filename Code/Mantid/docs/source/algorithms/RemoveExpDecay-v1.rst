@@ -41,3 +41,5 @@ Output:
    Exp. decay removed: [-0.24271091  0.79071878 -0.05901962 -0.70332224 -0.76615428]
 
 .. categories::
+
+.. sourcelink::

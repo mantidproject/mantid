@@ -111,3 +111,5 @@ Usage
    Workspace Type is:  MDEventWorkspace<MDLeanEvent,3>
    
 .. categories::
+
+.. sourcelink::

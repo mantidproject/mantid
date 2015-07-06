@@ -40,3 +40,5 @@ Output:
     A datafile with id '33121573' exists.
 
 .. categories::
+
+.. sourcelink::

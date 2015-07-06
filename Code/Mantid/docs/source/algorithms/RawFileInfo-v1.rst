@@ -16,3 +16,5 @@ column for each value of the ``RPB_STRUCT``, i.e. column names such as ``r_dur``
 etc. This is Mantid's version of the ``Get`` routine in `Open Genie <http://www.opengenie.org/>`__.
 
 .. categories::
+
+.. sourcelink::

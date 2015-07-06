@@ -42,3 +42,5 @@ Output:
     The new output workspace has  1  histogram, with the minimum Y =  2.0  and it occurs at X between  2.0  and  3.0
 
 .. categories::
+
+.. sourcelink::

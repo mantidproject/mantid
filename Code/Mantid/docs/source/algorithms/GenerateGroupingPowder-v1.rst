@@ -69,3 +69,5 @@ If one would use LoadDetectorsGroupingFile on powder.xml one would get a workspa
    :alt: GenerateGroupingPowder.png
    
 .. categories::
+
+.. sourcelink::

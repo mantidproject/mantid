@@ -73,3 +73,5 @@ ChildAlgorithms used
 None
 
 .. categories::
+
+.. sourcelink::

@@ -20,3 +20,5 @@ particularly suitable for reformatting workspaces loaded via
 :ref:`LoadAscii <algm-LoadAscii>`. Input workspaces must be a distribution.
 
 .. categories::
+
+.. sourcelink::

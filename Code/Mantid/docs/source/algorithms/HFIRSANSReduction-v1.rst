@@ -55,3 +55,5 @@ The workflow proceeds as follows:
 .. |HFIRSANSReduction.png| image:: /images/HFIRSANSReduction.png
 
 .. categories::
+
+.. sourcelink::

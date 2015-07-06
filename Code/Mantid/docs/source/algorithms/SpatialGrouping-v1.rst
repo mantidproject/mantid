@@ -54,3 +54,5 @@ Output:
     os.remove(group_file)
 
 .. categories::
+
+.. sourcelink::

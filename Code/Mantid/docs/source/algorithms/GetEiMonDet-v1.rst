@@ -23,3 +23,5 @@ algorithm. The output of this algorithm is identical to that of
     get a better estimate of Ei. The algorithm might soon be deprecated. 
 
 .. categories::
+
+.. sourcelink::

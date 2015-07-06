@@ -87,3 +87,5 @@ The script produces a WorkspaceGroup which contains a table with reflections for
     Compound 2: Iron_BCC has 8 reflections in the resolution range.
 
 .. categories::
+
+.. sourcelink::

@@ -31,6 +31,11 @@ public:
   SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);
   ~SpecialWorkspace2D();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<SpecialWorkspace2D> clone() const {
+    return std::unique_ptr<SpecialWorkspace2D>(doClone());
+  }
+
   /** Gets the name of the workspace type
   @return Standard string name  */
   virtual const std::string id() const { return "SpecialWorkspace2D"; }
@@ -52,6 +57,9 @@ public:
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 private:
+  virtual SpecialWorkspace2D *doClone() const {
+    return new SpecialWorkspace2D(*this);
+  }
   bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
 protected:

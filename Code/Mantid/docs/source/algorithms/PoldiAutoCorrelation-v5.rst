@@ -64,3 +64,5 @@ Output:
     The correlation spectrum has 5531 data points.
 
 .. categories::
+
+.. sourcelink::

@@ -31,3 +31,5 @@ Usage
     :ref:`FindPeaksMD <algm-FindPeaksMD>`
 
 .. categories::
+
+.. sourcelink::

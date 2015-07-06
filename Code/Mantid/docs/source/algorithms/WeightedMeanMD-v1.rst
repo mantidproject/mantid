@@ -15,3 +15,5 @@ algorithm workings. Both inputs must be MDHistoWorkspaces, the algorithm
 will not run with MDEventWorkspaces.
 
 .. categories::
+
+.. sourcelink::

@@ -65,3 +65,5 @@ Output
   True
 
 .. categories::
+
+.. sourcelink::

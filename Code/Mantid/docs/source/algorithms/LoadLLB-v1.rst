@@ -34,3 +34,5 @@ Output:
    This workspace has 2 dimensions and its title is: Lysozyme/D2O (c=80 mg/ml) Treg=293 K, Tch=288 K  wl=5.2A  sous pression (4.5 kbar)
 
 .. categories::
+
+.. sourcelink::

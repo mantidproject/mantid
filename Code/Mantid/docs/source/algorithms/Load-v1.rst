@@ -96,3 +96,5 @@ Output:
    The number of histograms (spectra) is: 6
 
 .. categories::
+
+.. sourcelink::

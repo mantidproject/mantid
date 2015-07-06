@@ -53,3 +53,5 @@ all; binning can be performed as the very last step.
 .. |Example of RAW GEM data focused across the 5 detector banks| image:: /images/GEM_Focused.png
 
 .. categories::
+
+.. sourcelink::

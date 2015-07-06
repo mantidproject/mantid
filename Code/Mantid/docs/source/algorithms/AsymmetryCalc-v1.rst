@@ -58,3 +58,5 @@ Output:
    Errors: [ 0.5396295   0.69971423  0.28688766]
 
 .. categories::
+
+.. sourcelink::

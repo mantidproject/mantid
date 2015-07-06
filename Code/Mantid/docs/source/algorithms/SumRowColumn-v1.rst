@@ -45,3 +45,5 @@ Output:
    Output workspace has 128 points.
 
 .. categories::
+
+.. sourcelink::

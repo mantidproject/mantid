@@ -61,3 +61,5 @@ Output:
 	bank 2 was not scaled and remains 0.08 by 0.08
 
 .. categories::
+
+.. sourcelink::

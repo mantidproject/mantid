@@ -50,3 +50,5 @@ Output:
    Remember, the table is a workspace.  It's name is "my_table".
 
 .. categories::
+
+.. sourcelink::

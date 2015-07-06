@@ -81,3 +81,5 @@ Usage
     ELF bin count: 7
 
 .. categories::
+
+.. sourcelink::

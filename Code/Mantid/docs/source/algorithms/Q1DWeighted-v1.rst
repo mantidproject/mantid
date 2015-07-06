@@ -29,3 +29,5 @@ Usage
 This algorithm is not intended to be run individually, rather as a part of the `SANSReduction <http://www.mantidproject.org/Reduction_for_HFIR_SANS>`_.
 
 .. categories::
+
+.. sourcelink::

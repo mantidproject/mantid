@@ -24,3 +24,5 @@ Usage
 This is a part of the EQSANS workflow algorithm and is not intended to be executed seperately.
 
 .. categories::
+
+.. sourcelink::

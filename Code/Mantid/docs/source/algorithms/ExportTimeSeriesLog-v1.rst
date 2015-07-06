@@ -109,3 +109,5 @@ Output:
   Number of events = 40
 
 .. categories::
+
+.. sourcelink::

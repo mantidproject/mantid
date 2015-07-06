@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
 #include "ui_Iqt.h"
-#include "IDATab.h"
+#include "IndirectDataAnalysisTab.h"
 
 namespace MantidQt
 {
@@ -10,7 +10,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport Iqt : public IDATab
+  class DLLExport Iqt : public IndirectDataAnalysisTab
   {
     Q_OBJECT
 

@@ -34,3 +34,5 @@ Output:
    Bin0 contained 55 counts.
 
 .. categories::
+
+.. sourcelink::

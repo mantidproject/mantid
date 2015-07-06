@@ -71,3 +71,5 @@ Output:
     15 good spectra left from an original 200.
 
 .. categories::
+
+.. sourcelink::

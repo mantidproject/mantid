@@ -45,3 +45,5 @@ Output:
     A1: [ 0.11014908]
 
 .. categories::
+
+.. sourcelink::

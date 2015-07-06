@@ -44,3 +44,5 @@ Output:
     The facility of instrument ALF is: ISIS
 
 .. categories::
+
+.. sourcelink::
