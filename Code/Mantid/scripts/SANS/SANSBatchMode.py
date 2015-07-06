@@ -437,7 +437,7 @@ def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file,
         keep the user file loaded. If the new_user_file is empty then we default to
         original_user_file.
         @param new_user_file: The new user file. Note that this can be merely the filename (+ extension)
-        @param current_user_filie: The currently loaded user file
+        @param current_user_file: The currently loaded user file
         @param original_user_file: The originally loaded user file. This is used as a default
         @param original_settings: The original reducer
         @param original_prop_man_settings: Original properties settings
