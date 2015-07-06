@@ -540,7 +540,7 @@ void SANSRunWindow::initWidgetMaps()
   m_allowed_batchtags.insert("background_trans",-1);
   m_allowed_batchtags.insert("background_direct_beam",-1);
   m_allowed_batchtags.insert("output_as",6);
-
+  m_allowed_batchtags.insert("user_file",7);
   //            detector info  
   // SANS2D det names/label map
     QHash<QString, QLabel*> labelsmap;

@@ -39,7 +39,7 @@ import copy
 import sys
 import re
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
-
+from isis_reduction_steps import UserFile
 ################################################################################
 # Avoid a bug with deepcopy in python 2.6, details and workaround here:
 # http://bugs.python.org/issue1515
@@ -50,7 +50,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
-ALLOWED_NUM_ENTRIES = set([20,14,8,6,4])
+ALLOWED_NUM_ENTRIES = set([20,16,14,8,6,4])
 
 # Build a dictionary of possible input data  keys
 IN_FORMAT = {}
@@ -65,6 +65,8 @@ IN_FORMAT['can_direct_beam'] = ''
 #    IN_FORMAT['background_trans'] = 0
 #    IN_FORMAT['background_direct_beam'] = 0
 IN_FORMAT['output_as'] = ''
+IN_FORMAT['user_file'] =''
+
 #maps the run types above to the Python interface command to use to load it
 COMMAND = {}
 COMMAND['sample_sans'] = 'AssignSample('
@@ -95,13 +97,16 @@ def addRunToStore(parts, run_store):
         role = parts[i]
         if role in inputdata.keys():
             inputdata[parts[i]] = parts[i+1]
+        else:
+            issueWarning('You seem to have specified an invalid key in the SANSBatch file. The key was ' + str(role))
         if 'background' in role:
             issueWarning('Background runs are not yet implemented in Mantid! Will process Sample & Can only')
 
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False,
+                centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
@@ -111,6 +116,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         @param centreit: do centre finding (default=False)
         @param reducer: if to use the command line (default) or GUI reducer object
         @param combineDet: that will be forward to WavRangeReduction (rear, front, both, merged, None)
+        @param save_as_zero_error_free: Should the reduced workspaces contain zero errors or not
         @return final_setings: A dictionary with some values of the Reduction - Right Now:(scale, shift)
     """
     if not format.startswith('.'):
@@ -141,8 +147,25 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     settings = copy.deepcopy(ReductionSingleton().reference())
     prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
 
+    # Make a note of the original user file, as we want to set it 
+    original_user_file = ReductionSingleton().user_settings.filename
+    current_user_file = original_user_file
+
     # Now loop over all the lines and do a reduction (hopefully) for each
     for run in runinfo:
+        # Set the user file, if it is required
+        try:
+            current_user_file = setUserFileInBatchMode(new_user_file=run['user_file'],
+                                                       current_user_file=current_user_file,
+                                                       original_user_file=original_user_file,
+                                                       original_settings = settings,
+                                                       original_prop_man_settings = prop_man_settings)
+        except (RunTimeError, ValueError) as e:
+            sanslog.warning("Error in Batchmode user files: Could not reset the specified user file %s. More info: %s" %(str(run['user_file']),str(e)))
+
+        local_settings = copy.deepcopy(ReductionSingleton().reference())
+        local_prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
+
         raw_workspaces = []
         try:
             # Load in the sample runs specified in the csv file
@@ -268,9 +291,12 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 PlotResult(final_name)
 
         #the call to WaveRang... killed the reducer so copy back over the settings
-        ReductionSingleton().replace(copy.deepcopy(settings))
+        ReductionSingleton().replace(copy.deepcopy(local_settings))
+        ReductionSingleton().settings = local_prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
 
-        ReductionSingleton().settings = prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
+    # Set everything back to the initial state
+    ReductionSingleton().replace(copy.deepcopy(settings))
+    ReductionSingleton().settings = prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
 
     #end of reduction of all entries of batch file
     return scale_shift
@@ -404,3 +430,42 @@ def delete_cloned_workspaces(save_names_dict):
     for element in to_delete:
         su.delete_zero_error_free_workspace(input_workspace_name = element)
 
+def setUserFileInBatchMode(new_user_file, current_user_file, original_user_file, original_settings, original_prop_man_settings):
+    """
+        Loads a specified user file. The file is loaded if
+        new_user_file is different from  current_user_file. Else we just
+        keep the user file loaded. If the new_user_file is empty then we default to
+        original_user_file.
+        @param new_user_file: The new user file. Note that this can be merely the filename (+ extension)
+        @param current_user_filie: The currently loaded user file
+        @param original_user_file: The originally loaded user file. This is used as a default
+        @param original_settings: The original reducer
+        @param original_prop_man_settings: Original properties settings
+    """
+    user_file_to_set = ""
+
+    # Try to find the user file in the default paths
+    if not os.path.isfile(new_user_file):
+        user_file = FileFinder.getFullPath(new_user_file)
+        if not os.path.isfile(user_file):
+            user_file_to_set = original_user_file
+        else:
+            user_file_to_set = user_file
+    else:
+        user_file_to_set = new_user_file
+
+    # Set the user file in the reducer and load the user file
+    if user_file_to_set != current_user_file:
+        # Need to setup a clean reducer. If we are dealing with the original user file,
+        # then we should take gui changes into account, ie reset to the original reducer
+        if user_file_to_set == original_user_file:
+            ReductionSingleton().replace(copy.deepcopy(original_settings))
+            ReductionSingleton().settings = original_prop_man_settings.clone(REDUCTION_SETTINGS_OBJ_NAME)
+        else:
+            instrument = copy.deepcopy(ReductionSingleton().get_instrument())
+            ReductionSingleton().clean(isis_reducer.ISISReducer)
+            ReductionSingleton().set_instrument(instrument)
+            ReductionSingleton().user_settings = UserFile(user_file_to_set)
+            ReductionSingleton().user_settings.execute(ReductionSingleton())
+        current_user_file = user_file_to_set
+    return current_user_file
