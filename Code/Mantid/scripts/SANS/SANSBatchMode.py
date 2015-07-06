@@ -147,7 +147,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     settings = copy.deepcopy(ReductionSingleton().reference())
     prop_man_settings = ReductionSingleton().settings.clone("TEMP_SETTINGS")
 
-    # Make a note of the original user file, as we want to set it 
+    # Make a note of the original user file, as we want to set it
     original_user_file = ReductionSingleton().user_settings.filename
     current_user_file = original_user_file
 
