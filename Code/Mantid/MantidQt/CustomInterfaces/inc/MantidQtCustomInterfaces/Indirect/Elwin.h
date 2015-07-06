@@ -3,7 +3,7 @@
 
 #include "ui_Elwin.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtCustomInterfaces/Indirect/IDATab.h"
+#include "MantidQtCustomInterfaces/Indirect/IndirectDataAnalysisTab.h"
 
 namespace MantidQt
 {
@@ -11,7 +11,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport Elwin : public IDATab
+  class DLLExport Elwin : public IndirectDataAnalysisTab
   {
     Q_OBJECT
 

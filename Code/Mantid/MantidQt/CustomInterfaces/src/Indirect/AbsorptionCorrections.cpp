@@ -19,7 +19,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   AbsorptionCorrections::AbsorptionCorrections(QWidget * parent) :
-    IDATab(parent)
+    CorrectionsTab(parent)
   {
     m_uiForm.setupUi(parent);
 

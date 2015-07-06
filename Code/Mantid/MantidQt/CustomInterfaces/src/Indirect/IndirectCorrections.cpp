@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.h"
+#include "MantidQtCustomInterfaces/Indirect/IndirectCorrections.h"
 
 // IndirectDataAnalysisTab subclasses:
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
@@ -28,34 +28,31 @@ namespace CustomInterfaces
 namespace IDA
 {
   // Add this class to the list of specialised dialogs in this namespace
-  DECLARE_SUBWINDOW(IndirectDataAnalysis)
+  DECLARE_SUBWINDOW(IndirectCorrections)
 
   /**
    * Constructor.
    *
    * @param parent :: the parent QWidget.
    */
-  IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
+  IndirectCorrections::IndirectCorrections(QWidget *parent) :
     UserSubWindow(parent),
-    m_valInt(NULL), m_valDbl(NULL),
-    m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
+    m_changeObserver(*this, &IndirectCorrections::handleDirectoryChange)
   {
     m_uiForm.setupUi(this);
 
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
     // All tabs MUST appear here to be shown in interface.
     // We make the assumption that each map key corresponds to the order in which the tabs appear.
-    m_tabs.insert(std::make_pair(ELWIN,      new Elwin(m_uiForm.twIDATabs->widget(ELWIN))));
-    m_tabs.insert(std::make_pair(MSD_FIT,    new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT))));
-    m_tabs.insert(std::make_pair(IQT,        new Iqt(m_uiForm.twIDATabs->widget(IQT))));
-    m_tabs.insert(std::make_pair(IQT_FIT,    new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT))));
-    m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
+    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twTabs->widget(CALC_CORR))));
+    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twTabs->widget(APPLY_CORR))));
+    m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS))));
   }
 
   /**
    * @param :: the detected close event
    */
-  void IndirectDataAnalysis::closeEvent(QCloseEvent*)
+  void IndirectCorrections::closeEvent(QCloseEvent*)
   {
     Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
   }
@@ -65,7 +62,7 @@ namespace IDA
    *
    * @param pNf :: notification
    */
-  void IndirectDataAnalysis::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+  void IndirectCorrections::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
   {
     std::string key = pNf->key();
 
@@ -76,7 +73,7 @@ namespace IDA
   /**
    * Initialised the layout of the interface.  MUST be called.
    */
-  void IndirectDataAnalysis::initLayout()
+  void IndirectCorrections::initLayout()
   {
     // Connect Poco Notification Observer
     Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
@@ -98,7 +95,7 @@ namespace IDA
   /**
    * Allow Python to be called locally.
    */
-  void IndirectDataAnalysis::initLocalPython()
+  void IndirectCorrections::initLocalPython()
   {
     QString pyInput = "from mantid.simpleapi import *";
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -108,7 +105,7 @@ namespace IDA
   /**
    * Load the settings saved for this interface.
    */
-  void IndirectDataAnalysis::loadSettings()
+  void IndirectCorrections::loadSettings()
   {
     QSettings settings;
     QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
@@ -128,16 +125,16 @@ namespace IDA
   /**
    * Private slot, called when the Run button is pressed.  Runs current tab.
    */
-  void IndirectDataAnalysis::run()
+  void IndirectCorrections::run()
   {
-    const unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
+    const unsigned int currentTab = m_uiForm.twTabs->currentIndex();
     m_tabs[currentTab]->runTab();
   }
 
   /**
    * Opens a directory dialog.
    */
-  void IndirectDataAnalysis::openDirectoryDialog()
+  void IndirectCorrections::openDirectoryDialog()
   {
     MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
     ad->show();
@@ -147,17 +144,17 @@ namespace IDA
   /**
    * Opens the Mantid Wiki web page of the current tab.
    */
-  void IndirectDataAnalysis::help()
+  void IndirectCorrections::help()
   {
-    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_DataAnalysis"));
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Indirect_Corrections"));
   }
 
   /**
    * Handles exporting a Python script for the current tab.
    */
-  void IndirectDataAnalysis::exportTabPython()
+  void IndirectCorrections::exportTabPython()
   {
-    unsigned int currentTab = m_uiForm.twIDATabs->currentIndex();
+    unsigned int currentTab = m_uiForm.twTabs->currentIndex();
     m_tabs[currentTab]->exportPythonScript();
   }
 
@@ -167,7 +164,7 @@ namespace IDA
    *
    * @param message The message to display in the message box
    */
-  void IndirectDataAnalysis::showMessageBox(const QString& message)
+  void IndirectCorrections::showMessageBox(const QString& message)
   {
     showInformationBox(message);
   }

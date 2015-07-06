@@ -1,10 +1,10 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectDataAnalysis.h"
+#include "ui_IndirectCorrections.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "IndirectTab.h"
 
@@ -23,41 +23,36 @@ namespace IDA
 {
   // The assumption is made elsewhere that the ordering of these enums matches the ordering of the
   // tabs as they appear in the interface itself.
-  enum IDATabChoice
+  enum CorrectionTabChoice
   {
-    ELWIN,
-    MSD_FIT,
-    IQT,
-    IQT_FIT,
-    CONV_FIT
+    CALC_CORR,
+    APPLY_CORR,
+    ABSORPTION_CORRECTIONS
   };
 
-  // Number of decimal places in property browsers.
-  static const unsigned int NUM_DECIMALS = 6;
-
   // Forward Declaration
-  class IndirectDataAnalysisTab;
+  class CorrectionsTab;
 
   /**
-   * The IndirectDataAnalysis class is the main class that handles the interface and controls
+   * The IndirectCorrections class is the main class that handles the interface and controls
    * its tabs.
    *
-   * Is a friend to the IndirectDataAnalysisTab class.
+   * Is a friend to the CorrectionsTab class.
    */
-  class IndirectDataAnalysis : public MantidQt::API::UserSubWindow
+  class IndirectCorrections : public MantidQt::API::UserSubWindow
   {
     Q_OBJECT
 
-    /// Allow IndirectDataAnalysisTab to have access.
-    friend class IndirectDataAnalysisTab;
+    /// Allow CorrectionsTab to have access.
+    friend class CorrectionsTab;
 
   public:
     /// The name of the interface as registered into the factory
-    static std::string name() { return "Data Analysis"; }
+    static std::string name() { return "Corrections"; }
     // This interface's categories.
     static QString categoryInfo() { return "Indirect"; }
     /// Default Constructor
-    IndirectDataAnalysis(QWidget *parent = 0);
+    IndirectCorrections(QWidget *parent = 0);
 
   private:
     /// Initialize the layout
@@ -86,21 +81,17 @@ namespace IDA
 
   private:
     /// UI form containing all Qt elements.
-    Ui::IndirectDataAnalysis m_uiForm;
-    /// Integer validator
-    QIntValidator* m_valInt;
-    /// Double validator
-    QDoubleValidator* m_valDbl;
+    Ui::IndirectCorrections m_uiForm;
 
     /// Change Observer for ConfigService (monitors user directories)
-    Poco::NObserver<IndirectDataAnalysis, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
+    Poco::NObserver<IndirectCorrections, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
 
     /// Map of unsigned int (TabChoice enum values) to tabs.
-    std::map<unsigned int, IndirectDataAnalysisTab*> m_tabs;
+    std::map<unsigned int, CorrectionsTab*> m_tabs;
 
   };
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTANALYSIS_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTCORRECTIONS_H_ */
