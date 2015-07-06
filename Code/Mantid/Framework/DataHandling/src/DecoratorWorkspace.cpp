@@ -43,7 +43,7 @@ void copyLogs(const EventWorkspace_sptr& from,
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DecoratorWorkspace::DecoratorWorkspace(): m_WsVec(1, createEmptyEventWorkspace()) {}
+DecoratorWorkspace::DecoratorWorkspace(): EventWorkspace(), m_WsVec(1, createEmptyEventWorkspace()) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
