@@ -67,6 +67,7 @@ void CheckMantidVersion::init() {
  */
 void CheckMantidVersion::exec() {
   std::string currentVersion = getCurrentVersion();
+  setProperty("CurrentVersion", currentVersion);
   std::string mostRecentVersion = "";
 
   std::string gitHubReleaseUrl = ConfigService::Instance().getString(
@@ -82,7 +83,6 @@ void CheckMantidVersion::exec() {
   }
 
   std::string json = "";
-  bool skipVersionCheck = false;
   try {
     json = getVersionsFromGitHub(gitHubReleaseUrl);
   } catch (Exception::InternetError &ex) {
@@ -92,7 +92,11 @@ void CheckMantidVersion::exec() {
       mostRecentVersion = "No new versions since " + 
         std::string(MantidVersion::releaseDate());
     } else {
-      throw;
+      // any other exception just log quietly and return
+      g_log.debug("Cannot get latest version details from " + gitHubReleaseUrl);
+      g_log.debug("The address can be changed using the property CheckMantidVersion.GitHubReleaseURL");
+      g_log.debug(ex.what());
+      return;
     }
   }
 
@@ -116,7 +120,6 @@ void CheckMantidVersion::exec() {
   g_log.information("Current Mantid Version: " + currentVersion);
   g_log.information("Most Recent Mantid Version: " + mostRecentVersion);
 
-  setProperty("CurrentVersion", currentVersion);
   setProperty("MostRecentVersion", mostRecentVersion);
   setProperty("IsNewVersionAvailable", isNewVersionAvailable);
 }
@@ -199,12 +202,11 @@ bool CheckMantidVersion::isVersionMoreRecent(
 
 /** Gets the version json for the most recent release from gitHub
 
-@param urlFile : The url to download the contents of
+@param url : The url to use
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
 */
 std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
-  std::string retVal = "";
 
   Kernel::InternetHelper inetHelper;
   std::ostringstream os;
@@ -216,7 +218,7 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
           Poco::DateTimeParser::parse(MantidVersion::releaseDate(), tzd),
           Poco::DateTimeFormat::HTTP_FORMAT)));
   inetHelper.sendRequest(url, os);
-  retVal = os.str();
+  std::string retVal = os.str();
 
   return retVal;
 }
