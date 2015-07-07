@@ -175,14 +175,16 @@ void SaveIsawPeaks::exec() {
         std::ostringstream mess;
         if (bankPart == "bank")
           mess << "bank" << bank;
-        else if (bankPart == "WISH")
+        else if (bankPart == "WISH" && bank < 10)
           mess << "WISHpanel0" << bank;
+        else if (bankPart == "WISH")
+          mess << "WISHpanel" << bank;
 
         std::string bankName = mess.str();
         // Retrieve it
         boost::shared_ptr<const IComponent> det =
             inst->getComponentByName(bankName);
-        if (det->getPos() == V3D(0,0,0)) // for Corelli with sixteenpack under bank
+        if (inst->getName() .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
         {
           std::vector<Geometry::IComponent_const_sptr> children;
           boost::shared_ptr<const Geometry::ICompAssembly> asmb =

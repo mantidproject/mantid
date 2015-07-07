@@ -83,7 +83,7 @@ void SaveIsawDetCal::exec() {
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
   std::string bankPart = "bank";
-  if (inst->getName() .compare("WISH") == 0) bankPart = "WISHpanel0";
+  if (inst->getName() .compare("WISH") == 0) bankPart = "WISHpanel";
 
   std::set<int> uniqueBanks;
   // Get all children
@@ -134,7 +134,10 @@ void SaveIsawDetCal::exec() {
     // Build up the bank name
     int bank = *it;
     std::ostringstream mess;
-    mess << bankPart << bank;
+    if (bankPart == "WISHpanel" && bank < 10)
+        mess << bankPart << "0" << bank;
+    else
+      mess << bankPart << bank;
 
     std::string bankName = mess.str();
     // Retrieve it

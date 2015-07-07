@@ -186,7 +186,10 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
     std::string bankName = "bank";
     if (instr->getName() == "WISH")
-      bankName = "WISHpanel0";
+    {
+      if (bankNum < 10) bankName = "WISHpanel0";
+      else bankName = "WISHpanel";
+    }
     bankName += SbankNum;
     boost::shared_ptr<const Geometry::IComponent> bank =
         instr_old->getComponentByName(bankName);
@@ -527,7 +530,10 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     std::ostringstream oss;
     std::string bankString = "bank";
     if (outWS->getInstrument()->getName() == "WISH")
-      bankString = "WISHpanel0";
+    {
+      if (bankNum < 10) bankString = "WISHpanel0";
+      else bankString = "WISHpanel";
+    }
     oss << bankString << bankNum;
     std::string bankName = oss.str();
 
