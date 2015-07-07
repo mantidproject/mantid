@@ -520,7 +520,7 @@ Polymer
 
 References:
 
-1. J S Higgins, R E Ghosh, W S Howells & G Allen, JCS Faraday II 73 40 (1977)
-2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, Chem Phys Lett 49 197 (1977)
+1. J S Higgins, R E Ghosh, W S Howells & G Allen, `JCS Faraday II 73 40 (1977) <http://dx.doi.org/10.1039/F29777300040>`_
+2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, `Chem Phys Lett 49 197 (1977) <http://dx.doi.org/10.1016/0009-2614(77)80569-1>`_
 
 .. categories:: Interfaces Indirect
