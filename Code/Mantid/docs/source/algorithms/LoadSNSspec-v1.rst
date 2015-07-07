@@ -74,3 +74,5 @@ This will create a Workspace2D with 1 spectrum.
 This text file will create a Workspace2D with 3 spectra.
 
 .. categories::
+
+.. sourcelink::

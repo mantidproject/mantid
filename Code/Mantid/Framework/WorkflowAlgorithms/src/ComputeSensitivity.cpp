@@ -42,9 +42,8 @@ void ComputeSensitivity::exec() {
   progress(0.1, "Setting up sensitivity calculation");
 
   // Reduction property manager
-  const std::string reductionManagerName = getProperty("ReductionProperties");
   boost::shared_ptr<PropertyManager> reductionManager =
-      getProcessProperties(reductionManagerName);
+      getProcessProperties();
 
   const std::string outputWS = getPropertyValue("OutputWorkspace");
 
@@ -55,7 +54,8 @@ void ComputeSensitivity::exec() {
 
     IAlgorithm_sptr ctrAlg =
         reductionManager->getProperty("SANSBeamFinderAlgorithm");
-    ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    ctrAlg->setPropertyValue("ReductionProperties",
+                             getPropertyValue("ReductionProperties"));
     ctrAlg->setChild(true);
     ctrAlg->execute();
     std::string outMsg2 = ctrAlg->getPropertyValue("OutputMessage");

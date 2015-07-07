@@ -15,3 +15,5 @@ algorithm simply builds a parameter list that is passed to the
 :ref:`algm-Rebin` algorithm, which actually does the work.
 
 .. categories::
+
+.. sourcelink::

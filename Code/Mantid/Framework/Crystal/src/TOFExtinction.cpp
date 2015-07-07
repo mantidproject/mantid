@@ -77,7 +77,7 @@ void TOFExtinction::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != inPeaksW)
-    peaksW = inPeaksW->clone();
+    peaksW.reset(inPeaksW->clone().release());
 
   const Kernel::Material *m_sampleMaterial =
       &(inPeaksW->sample().getMaterial());

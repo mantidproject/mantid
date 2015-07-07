@@ -57,3 +57,5 @@ Output:
     Spectrum 0 detectors after copy: set(3,4,5,6,7)
 
 .. categories::
+
+.. sourcelink::

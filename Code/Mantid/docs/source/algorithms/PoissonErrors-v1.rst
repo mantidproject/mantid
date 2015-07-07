@@ -45,3 +45,5 @@ Output:
     The updated Error values are: [  0.    1.5   3.    4.5   6.    7.5   9.   10.5  12. ]
 
 .. categories::
+
+.. sourcelink::

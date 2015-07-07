@@ -32,3 +32,5 @@ small values will lead to long calculation times, while large values will produc
 .. properties::
 
 .. categories::
+
+.. sourcelink::

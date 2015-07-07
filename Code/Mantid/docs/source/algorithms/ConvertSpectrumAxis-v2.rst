@@ -59,3 +59,5 @@ Usage
    Final Q value: 0.006088 (A^-1)
 
 .. categories::
+
+.. sourcelink::

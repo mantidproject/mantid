@@ -182,3 +182,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

@@ -60,3 +60,5 @@ Output:
     Number of spectra in fitWorkspace is: 3
 
 .. categories::
+
+.. sourcelink::

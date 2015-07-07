@@ -63,3 +63,5 @@ Output
   os.remove( calFilePath )
 
 .. categories::
+
+.. sourcelink::

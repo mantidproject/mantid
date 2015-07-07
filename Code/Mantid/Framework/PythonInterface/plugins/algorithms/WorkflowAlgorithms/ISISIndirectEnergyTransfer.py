@@ -166,7 +166,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 # Detailed balance
                 if self._detailed_balance is not None:
                     corr_factor = 11.606 / (2 * self._detailed_balance)
-                    ExponentialCorrection(InputWorkspaces=ws_name,
+                    ExponentialCorrection(InputWorkspace=ws_name,
                                           OutputWorkspace=ws_name,
                                           C0=1.0,
                                           C1=corr_factor,

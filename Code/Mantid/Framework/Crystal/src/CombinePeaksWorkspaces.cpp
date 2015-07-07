@@ -79,7 +79,7 @@ void CombinePeaksWorkspaces::exec() {
   }
 
   // Copy the first workspace to our output workspace
-  PeaksWorkspace_sptr output(LHSWorkspace->clone());
+  PeaksWorkspace_sptr output(LHSWorkspace->clone().release());
   // Get hold of the peaks in the second workspace
   auto &rhsPeaks = RHSWorkspace->getPeaks();
 

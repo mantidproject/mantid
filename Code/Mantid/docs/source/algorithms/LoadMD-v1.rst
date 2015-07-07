@@ -51,3 +51,5 @@ Output:
    Workspace has: 4 dimensions and contains:    0 MD events
 
 .. categories::
+
+.. sourcelink::

@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -20,7 +21,12 @@ public:
   {
   }
 
+  void testClone() {
+    auto inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
+    OffsetsWorkspace ws(inst);
+    TS_ASSERT_THROWS_NOTHING(ws.clone());
+  }
 };
 
 

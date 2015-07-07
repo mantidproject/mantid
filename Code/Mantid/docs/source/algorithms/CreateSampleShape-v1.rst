@@ -48,3 +48,5 @@ Usage
     CreateSampleShape(ws,shape_xml)
 
 .. categories::
+
+.. sourcelink::

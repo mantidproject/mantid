@@ -57,3 +57,5 @@ In addition, the three workspaces described above are available, plotting them s
 
 .. categories::
 
+.. sourcelink::
+

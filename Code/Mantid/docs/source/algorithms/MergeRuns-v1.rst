@@ -82,7 +82,7 @@ Usage
    a = CreateWorkspace(dataX, dataY)
    b = CreateWorkspace(dataX, dataY)
 
-   merged = MergeRuns(InputWorkspaces="a, b")
+   merged = MergeRuns(InputWorkspaces="a, b")  
 
    print "a      = " + str(a.readY(0))
    print "b      = " + str(b.readY(0))
@@ -128,3 +128,5 @@ Usage
    merged   = [ 24.  60.  84.  36.]
 
 .. categories::
+
+.. sourcelink::

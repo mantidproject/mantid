@@ -24,7 +24,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  Iqt::Iqt(QWidget * parent) : IDATab(parent),
+  Iqt::Iqt(QWidget * parent) : IndirectDataAnalysisTab(parent),
     m_furTree(NULL),
     m_furyResFileType()
   {

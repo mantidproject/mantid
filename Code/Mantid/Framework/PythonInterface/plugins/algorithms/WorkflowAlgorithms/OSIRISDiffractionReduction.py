@@ -152,6 +152,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _vans = None
     _samMap = None
     _vanMap = None
+    _load_logs = None
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
@@ -172,6 +173,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace. If no name is provided, "+\
                                  "one will be generated based on the run numbers.")
+        self.declareProperty(name='LoadLogFiles', defaultValue=True,
+                             doc='Load log files when loading runs')
 
         self._cal = None
         self._outputWsName = None
@@ -183,6 +186,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Set OSIRIS as default instrument.
         config["default.instrument"] = 'OSIRIS'
 
+        self._load_logs = self.getProperty('LoadLogFiles').value
         self._cal = self.getProperty("CalFile").value
         self._outputWsName = self.getPropertyValue("OutputWorkspace")
 
@@ -201,7 +205,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
         for fileName in self._sams + self._vans:
-            Load(Filename=fileName, OutputWorkspace=fileName, SpectrumMin=3, SpectrumMax=962)
+            Load(Filename=fileName,
+                 OutputWorkspace=fileName,
+                 SpectrumMin=3,
+                 SpectrumMax=962,
+                 LoadLogFiles=self._load_logs)
         for sam in self._sams:
             self._samMap.addWs(sam)
         for van in self._vans:

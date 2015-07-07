@@ -77,3 +77,5 @@ Output:
    Normalisation factor 10.0   
 
 .. categories::
+
+.. sourcelink::

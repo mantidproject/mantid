@@ -151,3 +151,5 @@ Output:
   In Q-sample frame, center of peak 0 is at (-6.95467, -0.06937, 8.14106) at detector with ID 29072
 
 .. categories::
+
+.. sourcelink::

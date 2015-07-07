@@ -175,7 +175,7 @@ namespace CustomInterfaces
 
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
-    symmetriseAlg->setProperty("Sample", workspaceName.toStdString());
+    symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
@@ -385,7 +385,7 @@ namespace CustomInterfaces
     // Run the algorithm on the preview spectrum only
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
-    symmetriseAlg->setProperty("Sample", workspaceName.toStdString());
+    symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
     symmetriseAlg->setProperty("SpectraRange", spectraRange);

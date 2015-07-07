@@ -172,7 +172,7 @@ class MolDyn(PythonAlgorithm):
                     # as the Symmetrise algorithm will do this
                     if self._symmetrise:
                         # Symmetrise the sample workspace in x=0
-                        Symmetrise(Sample=ws_name,
+                        Symmetrise(InputWorkspace=ws_name,
                                    XMin=0,
                                    XMax=e_max,
                                    OutputWorkspace=ws_name)

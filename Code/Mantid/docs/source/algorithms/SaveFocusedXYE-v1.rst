@@ -101,3 +101,5 @@ Output:
     removeFiles([file_name])
 
 .. categories::
+
+.. sourcelink::

@@ -52,3 +52,5 @@ Output:
    Unmodified component name = both rings
 
 .. categories::
+
+.. sourcelink::

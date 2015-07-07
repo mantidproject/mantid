@@ -29,3 +29,5 @@ Note that using ``GenerateZeros`` or ``GenerateMultipleEvents`` may use a
 lot of memory!
 
 .. categories::
+
+.. sourcelink::

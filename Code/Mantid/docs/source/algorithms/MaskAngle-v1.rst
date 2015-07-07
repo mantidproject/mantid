@@ -54,3 +54,5 @@ The instrument view would look like:
    :alt: MaskAngle.png    
 
 .. categories::
+
+.. sourcelink::

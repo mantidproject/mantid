@@ -108,3 +108,5 @@ Output:
   Size of mask workspace = 7392
 
 .. categories::
+
+.. sourcelink::

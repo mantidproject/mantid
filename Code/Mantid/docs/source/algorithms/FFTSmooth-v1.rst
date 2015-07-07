@@ -72,3 +72,5 @@ Output:
     90  0.20  0.30 
 
 .. categories::
+
+.. sourcelink::

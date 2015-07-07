@@ -53,3 +53,5 @@ a 4D `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_. The fo
 number, allowing you to easily pick a bank to view.
 
 .. categories::
+
+.. sourcelink::

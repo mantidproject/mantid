@@ -50,3 +50,5 @@ Output:
     ['irs26173_slice']
 
 .. categories::
+
+.. sourcelink::

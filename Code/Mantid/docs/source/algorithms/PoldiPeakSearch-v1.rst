@@ -79,3 +79,5 @@ Output:
     The correlation spectrum of sample 6904 contains 14 peaks.
 
 .. categories::
+
+.. sourcelink::

@@ -45,6 +45,11 @@ public:
   /// Class destructor.
   virtual ~RebinnedOutput();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<RebinnedOutput> clone() const {
+    return std::unique_ptr<RebinnedOutput>(doClone());
+  }
+
   /// Get the workspace ID.
   virtual const std::string id() const;
 
@@ -75,6 +80,9 @@ protected:
 
   /// A vector that holds the 1D vectors for the fractional area.
   std::vector<MantidVec> fracArea;
+
+private:
+  virtual RebinnedOutput *doClone() const { return new RebinnedOutput(*this); }
 };
 
 /// shared pointer to the RebinnedOutput class

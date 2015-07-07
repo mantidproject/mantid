@@ -68,3 +68,5 @@ Output:
   Output workspace has 9 spectra
 
 .. categories::
+
+.. sourcelink::

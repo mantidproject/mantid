@@ -68,7 +68,7 @@ void SortHKL::exec() {
   // HKL will be overwritten by equivalent HKL but never seen by user
   PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
   if (peaksW != InPeaksW)
-    peaksW = InPeaksW->clone();
+    peaksW.reset(InPeaksW->clone().release());
 
   // Init or append to a table workspace
   bool append = getProperty("Append");

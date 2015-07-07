@@ -26,3 +26,5 @@ Usage
     This algorithm is not meant to be run from the command line.
 
 .. categories::
+
+.. sourcelink::

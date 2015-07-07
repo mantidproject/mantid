@@ -23,6 +23,8 @@ Also see
 
 .. categories::
 
+.. sourcelink::
+
 Usage
 -----
 
@@ -55,3 +57,5 @@ Output:
    [0,1,1]
 
 .. categories::
+
+.. sourcelink::

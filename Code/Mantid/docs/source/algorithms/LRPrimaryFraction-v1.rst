@@ -15,3 +15,5 @@ The primary fraction is the fraction of the counts within a specified range
 that should contain the reflected beam to the total number of counts on the detector. 
 
 .. categories::
+
+.. sourcelink::
