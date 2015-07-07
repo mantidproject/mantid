@@ -14,18 +14,21 @@ elseif(MSVC)
   # find_library won't find dlls only import libraries so just hardcode them
   # Release
   set( _pvplugins_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Release/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
+  set( _plugins_dir
   if (NOT ${_pvplugins_dir} )
     file( MAKE_DIRECTORY ${_pvplugins_dir} )
     file( COPY ${ParaView_DIR}/bin/Release/NonOrthogonalSource.dll DESTINATION ${_pvplugins_dir} )
   endif ()
-  install( FILES ${ParaView_DIR}/bin/Release/NonOrthogonalSource.dll DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR}/NonOrthogonalSource.dll)
+  install( FILES ${ParaView_DIR}/bin/Release/NonOrthogonalSource.dll DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR}/NonOrthogonalSource.dll )
   # Debug
-  set( _pvplugins_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Debug/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
-  if (NOT ${_pvplugins_dir} )
-    file( MAKE_DIRECTORY ${_pvplugins_dir} )
-    file( COPY ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll DESTINATION ${_pvplugins_dir} )
-  endif ()
-  # Don't install the debug as the packaging is broken under debug
+  if (EXISTS ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll)
+    set( _pvplugins_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Debug/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
+    if (NOT ${_pvplugins_dir} )
+      file( MAKE_DIRECTORY ${_pvplugins_dir} )
+      file( COPY ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll DESTINATION ${_pvplugins_dir} )
+    endif ()
+    # Don't install the debug as the packaging is broken under debug
+  endif()
 else ()
   message ( WARNING "Unknown multi-configuration generator. Cannot copy NonOrthogonalSource plugin to our plugin directory." )
 endif()
