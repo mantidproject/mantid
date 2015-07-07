@@ -42,7 +42,7 @@ Sample Corrections Only
 In the case where only correction factors and no container workspace is
 provided.
 
-.. diagram:: ApplyPaalmanPingsCorrection-v1_samplecorrectionsonly_wkflw.dot
+.. diagram:: ApplyPaalmanPingsCorrection-v1_samplecorrectiononly_wkflw.dot
 
 Full Corrections
 ================
@@ -50,7 +50,7 @@ Full Corrections
 In the case where both a container workspace and correction factors are
 provided.
 
-.. diagram:: ApplyPaalmanPingsCorrection-v1_fullcorrections_wkflw.dot
+.. diagram:: ApplyPaalmanPingsCorrection-v1_fullcorrection_wkflw.dot
 
 Usage
 -----
