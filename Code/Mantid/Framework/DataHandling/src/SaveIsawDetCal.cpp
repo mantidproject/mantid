@@ -86,21 +86,34 @@ void SaveIsawDetCal::exec() {
   if (inst->getName() .compare("WISH") == 0) bankPart = "WISHpanel";
 
   std::set<int> uniqueBanks;
-  // Get all children
-  std::vector<IComponent_const_sptr> comps;
-  inst->getChildren(comps, true);
+  if (bankNames.empty()) {
+    // Get all children
+    std::vector<IComponent_const_sptr> comps;
+    inst->getChildren(comps, true);
 
-  for (size_t i = 0; i < comps.size(); i++) {
-    std::string bankName = comps[i]->getName();
-    boost::trim(bankName);
-    boost::erase_all(bankName,bankPart);
-    int bank = 0;
-    Strings::convert(bankName, bank);
-    if (bank == 0)continue;
-    // Track unique bank numbers
-    uniqueBanks.insert(bank);
+    for (size_t i = 0; i < comps.size(); i++) {
+      std::string bankName = comps[i]->getName();
+      boost::trim(bankName);
+      boost::erase_all(bankName,bankPart);
+      int bank = 0;
+      Strings::convert(bankName, bank);
+      if (bank == 0)continue;
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
+    }
   }
-
+  else {
+    for (size_t i = 0; i < bankNames.size(); i++) {
+      std::string bankName = bankNames[i];
+      boost::trim(bankName);
+      boost::erase_all(bankName,bankPart);
+      int bank = 0;
+      Strings::convert(bankName, bank);
+      if (bank == 0)continue;
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
+    }
+  }
   if (!inst)
     throw std::runtime_error(
         "No instrument in PeaksWorkspace. Cannot save peaks file.");
