@@ -234,7 +234,6 @@ void AlignAndFocusPowder::exec() {
   m_instName =
       Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
   std::string calFileName = getPropertyValue("CalFileName");
-  m_offsetsWS = getProperty("OffsetsWorkspace");
   m_calibrationWS = getProperty("CalibrationWorkspace");
   m_maskWS = getProperty("MaskWorkspace");
   m_groupWS = getProperty("GroupingWorkspace");
@@ -451,12 +450,12 @@ void AlignAndFocusPowder::exec() {
     m_outputW = rebin(m_outputW);
   m_progress->report();
 
-  if (m_offsetsWS) {
+  if (m_calibrationWS) {
     g_log.information() << "running AlignDetectors\n";
     API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
     alignAlg->setProperty("InputWorkspace", m_outputW);
     alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
+    alignAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
     alignAlg->executeAsChildAlg();
     m_outputW = alignAlg->getProperty("OutputWorkspace");
   } else {
@@ -855,6 +854,21 @@ bool endswith(const std::string &str, const std::string &ending) {
 }
 }
 
+void AlignAndFocusPowder::convertOffsetsToCal(
+    DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
+  if (!offsetsWS)
+    return;
+
+  IAlgorithm_sptr alg = createChildAlgorithm("ConvertDiffCal");
+  alg->setProperty("OffsetsWorkspace", offsetsWS);
+  alg->setPropertyValue("OutputWorkspace", m_instName + "_cal");
+  alg->executeAsChildAlg();
+
+  m_calibrationWS = alg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
+                                               m_calibrationWS);
+}
+
 //----------------------------------------------------------------------------------------------
 /**
  * Loads the .cal file if necessary.
@@ -871,13 +885,28 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
       ; // not noteworthy
     }
   }
-  if ((!m_offsetsWS) && (!calFileName.empty())) {
-    try {
-      m_offsetsWS =
-          AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
-              m_instName + "_offsets");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
+  if ((!m_calibrationWS) && (!calFileName.empty())) {
+    OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+    if (offsetsWS) {
+      convertOffsetsToCal(offsetsWS);
+    } else {
+      try {
+        m_calibrationWS =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                m_instName + "_cal");
+      } catch (Exception::NotFoundError &) {
+        ; // not noteworthy
+      }
+      if (!m_calibrationWS) {
+        try {
+          OffsetsWorkspace_sptr offsetsWS =
+              AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
+                  m_instName + "_offsets");
+          convertOffsetsToCal(offsetsWS);
+        } catch (Exception::NotFoundError &) {
+          ; // not noteworthy
+        }
+      }
     }
   }
   if ((!m_maskWS) && (!calFileName.empty())) {
@@ -890,7 +919,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   }
 
   // see if everything exists to exit early
-  if (m_groupWS && m_offsetsWS && m_maskWS)
+  if (m_groupWS && m_calibrationWS && m_maskWS)
     return;
 
   // see if the calfile is specified
@@ -901,7 +930,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
 
   // bunch of booleans to keep track of things
   bool loadGrouping = !m_groupWS;
-  bool loadOffsets = !m_offsetsWS;
+  bool loadOffsets = !m_calibrationWS;
   bool loadMask = !m_maskWS;
   bool isAsciiCal = endswith(calFileName, ".cal");
 
@@ -934,11 +963,6 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
                                                  m_groupWS);
   }
   if (loadOffsets) {
-    if (isAsciiCal) {
-      m_offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
-      AnalysisDataService::Instance().addOrReplace(m_instName + "_offsets",
-                                                   m_offsetsWS);
-    }
     m_calibrationWS = alg->getProperty("OutputCalWorkspace");
     AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
                                                  m_calibrationWS);

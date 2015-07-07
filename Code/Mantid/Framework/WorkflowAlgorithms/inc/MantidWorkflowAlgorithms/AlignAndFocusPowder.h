@@ -103,7 +103,7 @@ private:
                                            std::vector<specid_t> specids,
                                            std::vector<double> l2s,
                                            std::vector<double> phis);
-
+  void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);
   double
   getVecPropertyFromPmOrSelf(const std::string &name,
                              std::vector<double> &avec);
@@ -112,7 +112,6 @@ private:
   API::MatrixWorkspace_sptr m_outputW;
   DataObjects::EventWorkspace_sptr m_inputEW;
   DataObjects::EventWorkspace_sptr m_outputEW;
-  DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
   API::ITableWorkspace_sptr m_calibrationWS;
   API::MatrixWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
