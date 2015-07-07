@@ -130,7 +130,7 @@ void CreateSampleWorkspace::init() {
                   "The bin width of the X axis (default:200)");
   declareProperty("PixelSpacing", 0.008,
                   boost::make_shared<BoundedValidator<double>>(0, 100000, true),
-                  "The spacing between detector pixels in M (default:0.008), this also controls the pixel width and height.");
+                  "The spacing between detector pixels in M (default:0.008)");
   declareProperty("BankDistanceFromSample", 5.0,
                   boost::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the sample to "
@@ -416,6 +416,8 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @param pixelSpacing :: padding between pixels
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
  *to 5.0m)
+ * @param sourceSampleDistance :: The distance from the source to the sample
+ * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     int num_banks, int pixels, double pixelSpacing,
