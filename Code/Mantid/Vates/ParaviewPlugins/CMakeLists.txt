@@ -14,18 +14,19 @@ elseif(MSVC)
   # find_library won't find dlls only import libraries so just hardcode them
   # Release
   set( _pvplugins_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Release/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
-  set( _plugins_dir
+  set( RUNTIME_LIB ${ParaView_DIR}/bin/Release/NonOrthogonalSource.dll )
   if (NOT ${_pvplugins_dir} )
     file( MAKE_DIRECTORY ${_pvplugins_dir} )
-    file( COPY ${ParaView_DIR}/bin/Release/NonOrthogonalSource.dll DESTINATION ${_pvplugins_dir} )
+    file( COPY ${RUNTIME_LIB} DESTINATION ${_pvplugins_dir} )
   endif ()
-  install( FILES ${ParaView_DIR}/bin/Release/NonOrthogonalSource.dll DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR}/NonOrthogonalSource.dll )
+  install( FILES ${RUNTIME_LIB} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR}/NonOrthogonalSource.dll )
   # Debug
-  if (EXISTS ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll)
+  set( RUNTIME_LIB_DEBUG ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll )
+  if (EXISTS ${RUNTIME_LIB_DEBUG})
     set( _pvplugins_dir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Debug/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
     if (NOT ${_pvplugins_dir} )
       file( MAKE_DIRECTORY ${_pvplugins_dir} )
-      file( COPY ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll DESTINATION ${_pvplugins_dir} )
+      file( COPY ${RUNTIME_LIB_DEBUG} DESTINATION ${_pvplugins_dir} )
     endif ()
     # Don't install the debug as the packaging is broken under debug
   endif()
