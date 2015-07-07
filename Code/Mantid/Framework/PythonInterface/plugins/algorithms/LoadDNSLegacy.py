@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import mantid.simpleapi as api
 import numpy as np
 import os

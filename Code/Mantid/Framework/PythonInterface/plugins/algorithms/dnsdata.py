@@ -105,7 +105,6 @@ class DNSdata(object):
                     self.befilter_status = res.group("filter")
                     b1rest.remove(line)
                 # the rest unparsed lines go to notes for the moment
-                # [TODO]: parse more information about the sample
                 self.notes = ' '.join(b1rest)
 
             # parse block 2 (wavelength and mochromator angle)
@@ -182,7 +181,7 @@ class DNSdata(object):
             b7splitted = [s.strip() for s in blocks[7].split('#')]
             # duration
             line = b7splitted[2].split()
-            self.duration = float(line[1])   # assume seconds [TODO]: check
+            self.duration = float(line[1])   # assume seconds
             # monitor data
             line = b7splitted[3].split()
             self.monitor_counts = int(line[1])
