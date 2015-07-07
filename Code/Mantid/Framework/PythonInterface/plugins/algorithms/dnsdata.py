@@ -1,11 +1,13 @@
 #pylint: disable=invalid-name,too-many-instance-attributes,too-few-public-methods,anomalous-backslash-in-string
-import sys, re
+import sys
+import re
 import datetime
+
 
 class DNSdata(object):
     """
-    class which describes the DNS data structure
-    will be used for data read-in and write-out routines
+    this class describes the DNS data structure
+    will be used for DNS data read-in and write-out routines
     """
     def __init__(self):
         self.title = ""
@@ -56,7 +58,6 @@ class DNSdata(object):
         self.chopper_slits = None
         self.monitor_counts = None
 
-
     def read_legacy(self, filename):
         """
         reads the DNS legacy ascii file into the DNS data object
@@ -64,14 +65,14 @@ class DNSdata(object):
         with open(filename, 'r') as fhandler:
             # read file content and split it into blocks
             splitsymbol = \
-                    '#--------------------------------------------------------------------------'
+                '#--------------------------------------------------------------------------'
             unparsed = fhandler.read()
             blocks = unparsed.split(splitsymbol)
 
             # parse each block
             # parse block 0 (header)
             res = parse_header(blocks[0])
-            #if not res: raise Exception "wrong file format" else
+            # if not res: raise Exception "wrong file format" else
             try:
                 self.run_number = res['file']
                 self.experiment_number = res['exp']
@@ -80,7 +81,7 @@ class DNSdata(object):
             except:
                 raise ValueError("The file %s does not contain valid DNS data format." % filename)
             # parse block 1 (general information)
-            b1splitted = [s.strip() for s in blocks[1].split('#')]
+            b1splitted = map(str.strip, blocks[1].split('#'))
             b1rest = [el for el in b1splitted]
             r_user = re.compile("User:\s*(?P<name>.*?$)")
             r_sample = re.compile("Sample:\s*(?P<sample>.*?$)")
@@ -109,7 +110,7 @@ class DNSdata(object):
 
             # parse block 2 (wavelength and mochromator angle)
             # for the moment, only theta and lambda are needed
-            b2splitted = [s.strip() for s in blocks[2].split('#')]
+            b2splitted = map(str.strip, blocks[2].split('#'))
             # assume that theta and lambda are always on the fixed positions
             # assume theta is give in degree, lambda in nm
             line = b2splitted[2].split()
@@ -118,7 +119,7 @@ class DNSdata(object):
             self.incident_energy = float(line[4])
 
             # parse block 3 (motors position)
-            b3splitted = [s.strip() for s in blocks[3].split('#')]
+            b3splitted = map(str.strip, blocks[3].split('#'))
             self.monochromator_position = float(b3splitted[2].split()[1])
             # DeteRota, angle of rotation of detector bank
             self.deterota = float(b3splitted[3].split()[1])
@@ -128,28 +129,28 @@ class DNSdata(object):
             self.cradle_upper = float(b3splitted[7].split()[1])
             # Slit_i, convert mm to meter
             self.slit_i_upper_blade_position = \
-                    0.001*float(b3splitted[9].split()[2])
+                0.001*float(b3splitted[9].split()[2])
             self.slit_i_lower_blade_position = \
-                    0.001*float(b3splitted[10].split()[1])
+                0.001*float(b3splitted[10].split()[1])
             self.slit_i_left_blade_position = \
-                    0.001*float(b3splitted[11].split()[2])
+                0.001*float(b3splitted[11].split()[2])
             self.slit_i_right_blade_position = \
-                    0.001*float(b3splitted[12].split()[1])
-            # Slit_f
+                0.001*float(b3splitted[12].split()[1])
+            # Slit_f, does not exist in the recent configuration
             self.slit_f_upper_blade_position = \
-                    0.001*float(b3splitted[14].split()[1])
+                0.001*float(b3splitted[14].split()[1])
             self.slit_f_lower_blade_position = \
-                    0.001*float(b3splitted[15].split()[1])
+                0.001*float(b3splitted[15].split()[1])
             # Detector_position vertical
             self.detector_position_vertical = \
-                    0.001*float(b3splitted[16].split()[1])
+                0.001*float(b3splitted[16].split()[1])
             # Polarizer
             self.polarizer_translation = \
-                    0.001*float(b3splitted[19].split()[1])
+                0.001*float(b3splitted[19].split()[1])
             self.polarizer_rotation = float(b3splitted[20].split()[1])
 
             # parse block 4 (B-fields), only currents in A are taken
-            b4splitted = [s.strip() for s in blocks[4].split('#')]
+            b4splitted = map(str.strip, blocks[4].split('#'))
             self.flipper_precession_current = float(b4splitted[2].split()[1])
             self.flipper_z_compensation_current = float(b4splitted[3].split()[1])
             self.a_coil_current = float(b4splitted[4].split()[1])
@@ -157,16 +158,15 @@ class DNSdata(object):
             self.c_coil_current = float(b4splitted[6].split()[1])
             self.z_coil_current = float(b4splitted[7].split()[1])
 
-
             # parse block 5 (Temperatures)
             # assume: T1=cold_head_temperature, T2=sample_temperature
-            b5splitted = [s.strip() for s in blocks[5].split('#')]
+            b5splitted = map(str.strip, blocks[5].split('#'))
             self.t1 = float(b5splitted[2].split()[1])
             self.t2 = float(b5splitted[3].split()[1])
             self.tsp = float(b5splitted[4].split()[1])
 
             # parse block 6 (TOF parameters)
-            b6splitted = [s.strip() for s in blocks[6].split('#')]
+            b6splitted = map(str.strip, blocks[6].split('#'))
             self.tof_channel_number = int(b6splitted[2].split()[2])
             if self.tof_channel_number > 1:
                 self.tof_channel_width = float(b6splitted[3].split()[3])
@@ -179,10 +179,10 @@ class DNSdata(object):
 
             # parse block 7 (Time and monitor)
             # assume everything to be at the fixed positions
-            b7splitted = [s.strip() for s in blocks[7].split('#')]
+            b7splitted = map(str.strip, blocks[7].split('#'))
             # duration
             line = b7splitted[2].split()
-            self.duration = float(line[1]) # assume seconds [TODO]: check
+            self.duration = float(line[1])   # assume seconds [TODO]: check
             # monitor data
             line = b7splitted[3].split()
             self.monitor_counts = int(line[1])
@@ -215,8 +215,3 @@ if __name__ == '__main__':
     dns_data = DNSdata()
     dns_data.read_legacy(fname)
     print dns_data.__dict__
-
-
-
-
-
