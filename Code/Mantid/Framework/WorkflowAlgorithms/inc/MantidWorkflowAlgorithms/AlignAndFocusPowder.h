@@ -113,6 +113,7 @@ private:
   DataObjects::EventWorkspace_sptr m_inputEW;
   DataObjects::EventWorkspace_sptr m_outputEW;
   DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
+  API::ITableWorkspace_sptr m_calibrationWS;
   API::MatrixWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
   double m_l1;
