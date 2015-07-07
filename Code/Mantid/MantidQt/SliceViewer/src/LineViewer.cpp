@@ -472,6 +472,11 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
   alg->setProperty("AxisAligned", false);
 
+  // If we are rebinning from an existing MDHistoWorkspace, and that workspace has been created with basis vectors normalized, then we reapply that setting here.
+  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)){
+      alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
+  }
+
   std::vector<int> OutputBins;
   std::vector<double> OutputExtents;
 

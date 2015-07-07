@@ -8,6 +8,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
@@ -1985,6 +1986,11 @@ void SliceViewer::rebinParamsChanged() {
   alg->setProperty("InputWorkspace", m_ws);
   alg->setProperty("AxisAligned", false);
 
+  // If we are rebinning from an existing MDHistoWorkspace, and that workspace has been created with basis vectors normalized, then we reapply that setting here.
+  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)){
+      alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
+  }
+
   std::vector<double> OutputExtents;
   std::vector<int> OutputBins;
 
@@ -2032,7 +2038,6 @@ void SliceViewer::rebinParamsChanged() {
   alg->setProperty("OutputExtents", OutputExtents);
   alg->setProperty("OutputBins", OutputBins);
   alg->setPropertyValue("Translation", "");
-  alg->setProperty("NormalizeBasisVectors", true);
   alg->setProperty("ForceOrthogonal", false);
   alg->setProperty("Parallel", true);
   alg->setPropertyValue("OutputWorkspace", m_overlayWSName);

@@ -279,6 +279,9 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
   m_basisVectors[index] = vec;
 }
 
+/**
+ * @return True ONLY if ALL the basis vectors have been normalized.
+ */
 bool MDGeometry::allBasisNormalized() const {
   bool allNormalized = true;
   for (auto it = m_basisVectors.begin(); it != m_basisVectors.end(); ++it) {
