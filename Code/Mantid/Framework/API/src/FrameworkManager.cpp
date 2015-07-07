@@ -133,7 +133,7 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
 }
 
 
-/// Update instrument definitions from github
+/// Check if a newer release of Mantid is available
 void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
   try {
     IAlgorithm *algCheckVersion =
@@ -142,7 +142,7 @@ void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
     Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
-                     "ucheck if a newer version is available." << std::endl;
+                     "check if a newer version is available." << std::endl;
   }
 }
 
