@@ -287,11 +287,6 @@ namespace CustomInterfaces
       }
       plotSpectrum(plotWorkspaces);
     }
-
-    // Plot the smoothed workspace if required
-    if(m_uiForm.ckSmoothResolution->isChecked() && m_uiForm.ckPlot->isChecked())
-    {
-    }
   }
 
   bool ISISCalibration::validate()
