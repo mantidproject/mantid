@@ -129,18 +129,18 @@ class DNSdata(object):
             self.cradle_upper = float(b3splitted[7].split()[1])
             # Slit_i, convert mm to meter
             self.slit_i_upper_blade_position = \
-                0.001*float(b3splitted[9].split()[2])
+                float(b3splitted[9].split()[2])
             self.slit_i_lower_blade_position = \
-                0.001*float(b3splitted[10].split()[1])
+                float(b3splitted[10].split()[1])
             self.slit_i_left_blade_position = \
-                0.001*float(b3splitted[11].split()[2])
+                float(b3splitted[11].split()[2])
             self.slit_i_right_blade_position = \
-                0.001*float(b3splitted[12].split()[1])
+                float(b3splitted[12].split()[1])
             # Slit_f, does not exist in the recent configuration
             self.slit_f_upper_blade_position = \
-                0.001*float(b3splitted[14].split()[1])
+                float(b3splitted[14].split()[1])
             self.slit_f_lower_blade_position = \
-                0.001*float(b3splitted[15].split()[1])
+                float(b3splitted[15].split()[1])
             # Detector_position vertical
             self.detector_position_vertical = \
                 0.001*float(b3splitted[16].split()[1])
