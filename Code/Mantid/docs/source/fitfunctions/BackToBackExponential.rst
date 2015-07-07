@@ -52,3 +52,5 @@ peak:
    HRPD instrument.
 
 .. categories::
+
+.. sourcelink::

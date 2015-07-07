@@ -20,3 +20,5 @@ motions of molecules. The Hall-Ross Jump diffusion model has the form:
 .. properties::
 
 .. categories::
+
+.. sourcelink::
