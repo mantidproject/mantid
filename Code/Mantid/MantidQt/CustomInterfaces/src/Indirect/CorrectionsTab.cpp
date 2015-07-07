@@ -81,12 +81,15 @@ namespace IDA
   /**
    * Adds a unit converstion step to the batch algorithm queue.
    *
+   * Note that if converting diffraction data in wavelength then eMode must be set.
+   *
    * @param ws Pointer to the workspace to convert
    * @param unitID ID of unit to convert to
    * @param suffix Suffix to append to output workspace name
+   * @param eMode Emode to use (if not set will determine based on current X unit)
    * @return Name of output workspace
    */
-  std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix)
+  std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix, std::string eMode)
   {
     std::string outputName = ws->name();
 
@@ -103,7 +106,9 @@ namespace IDA
     convertAlg->setProperty("OutputWorkspace", outputName);
     convertAlg->setProperty("Target", unitID);
 
-    std::string eMode = getEMode(ws);
+    if(eMode.empty())
+      eMode = getEMode(ws);
+
     convertAlg->setProperty("EMode", eMode);
 
     if(eMode == "Indirect")

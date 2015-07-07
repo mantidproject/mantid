@@ -26,3 +26,5 @@ the type double. Likewise, the attribute names have the form 'xi'.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

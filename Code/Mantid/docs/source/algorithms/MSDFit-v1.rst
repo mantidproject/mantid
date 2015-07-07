@@ -47,3 +47,5 @@ Output:
 .. categories::
 
 .. sourcelink::
+  :cpp: None
+  :h: None

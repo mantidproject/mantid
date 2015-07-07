@@ -125,7 +125,7 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset, const DataType &desiredDataT
         std::vector<float> temp(dataSpace.getSelectNpoints());
         dataset.read(&temp[0], dataType, dataSpace);
         for( auto it = temp.begin(); it != temp.end(); ++it)
-          result.push_back(static_cast<int32_t>(*it));
+          result.push_back(static_cast<NumT>(*it));
     } else {
         throw DataTypeIException();
     }
