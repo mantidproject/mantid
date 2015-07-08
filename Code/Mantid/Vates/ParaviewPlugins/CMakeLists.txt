@@ -7,9 +7,6 @@ if("${CMAKE_CFG_INTDIR}" STREQUAL ".")
   # This is NOT a multi-configuration builder
   find_library(NonOrthogonalSourcePlugin_LOCATION name NonOrthogonalSource HINTS ${ParaView_DIR}/lib)
   file (COPY ${NonOrthogonalSourcePlugin_LOCATION} DESTINATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})
-  if ( NOT APPLE )
-     install( FILES ${NonOrthogonalSourcePlugin_LOCATION} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
-  endif()
 elseif(MSVC)
   # find_library won't find dlls only import libraries so just hardcode them
   # Release
@@ -19,7 +16,7 @@ elseif(MSVC)
     file( MAKE_DIRECTORY ${_pvplugins_dir} )
     file( COPY ${RUNTIME_LIB} DESTINATION ${_pvplugins_dir} )
   endif ()
-  install( FILES ${RUNTIME_LIB} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR}/NonOrthogonalSource.dll )
+  set( NonOrthogonalSourcePlugin_LOCATION ${RUNTIME_LIB} )
   # Debug
   set( RUNTIME_LIB_DEBUG ${ParaView_DIR}/bin/Debug/NonOrthogonalSource.dll )
   if (EXISTS ${RUNTIME_LIB_DEBUG})
@@ -32,6 +29,11 @@ elseif(MSVC)
   endif()
 else ()
   message ( WARNING "Unknown multi-configuration generator. Cannot copy NonOrthogonalSource plugin to our plugin directory." )
+endif()
+
+if ( (NOT APPLE) AND NonOrthogonalSourcePlugin_LOCATION)
+  # make_package.rb handles this for OSX
+  install( FILES ${NonOrthogonalSourcePlugin_LOCATION} DESTINATION ${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR} )
 endif()
 
 add_subdirectory( ParaViewFilters )
