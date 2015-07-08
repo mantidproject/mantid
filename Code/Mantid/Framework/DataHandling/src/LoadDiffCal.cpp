@@ -352,7 +352,7 @@ void LoadDiffCal::runLoadCalFile() {
   bool makeMaskWS = getProperty("MakeMaskWorkspace");
   bool makeGroupWS = getProperty("MakeGroupingWorkspace");
 
-  auto alg = createChildAlgorithm("LoadCalFile");
+  auto alg = createChildAlgorithm("LoadCalFile", 0., 1.);
   alg->setPropertyValue("CalFilename", m_filename);
   alg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
   alg->setPropertyValue("InstrumentName", getPropertyValue("InstrumentName"));
