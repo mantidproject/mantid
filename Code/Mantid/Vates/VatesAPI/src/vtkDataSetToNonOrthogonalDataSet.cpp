@@ -8,6 +8,7 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 
+#include <vtkPointSet.h>
 #include <vtkDataSet.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
@@ -16,7 +17,6 @@
 #include "vtkVector.h"
 #include <vtkNew.h>
 #include <vtkPoints.h>
-#include <vtkUnstructuredGrid.h>
 #include <vtkDataObject.h>
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
@@ -110,8 +110,8 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
 vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 
 void vtkDataSetToNonOrthogonalDataSet::execute() {
-  // Downcast to a vtkUnstructuredGrid
-  vtkUnstructuredGrid *data = vtkUnstructuredGrid::SafeDownCast(m_dataSet);
+  // Downcast to a vtkPointSet
+  vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
   if (NULL == data)
   {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
@@ -339,7 +339,7 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat) {
  * VTK dataset.
  * @param ugrid : The VTK dataset to add the metadata to
  */
-void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
+void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid)
 {
   // Create and add the change of basis matrix
   addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ,
