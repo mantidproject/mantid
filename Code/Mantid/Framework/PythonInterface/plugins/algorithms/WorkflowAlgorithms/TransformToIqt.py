@@ -245,9 +245,19 @@ class TransformToIqt(PythonAlgorithm):
 
         rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
         Rebin(InputWorkspace=self._sample,
-              OutputWorkspace='__sam_rebin',
+              OutputWorkspace='__sam_data',
               Params=rebin_param,
               FullBinsOnly=True)
+        Integration(InputWorkspace='__sam_data',
+                    OutputWorkspace='__sam_int')
+        ConvertToPointData(InputWorkspace='__sam_data',
+                           OutputWorkspace='__sam_data')
+        ExtractFFTSpectrum(InputWorkspace='__sam_data',
+                           OutputWorkspace='__sam_fft',
+                           FFTPart=2)
+        Divide(LHSWorkspace='__sam_fft',
+               RHSWorkspace='__sam_int',
+               OutputWorkspace='__sam')
 
         Rebin(InputWorkspace=self._resolution,
               OutputWorkspace='__res_data',
@@ -263,26 +273,11 @@ class TransformToIqt(PythonAlgorithm):
                RHSWorkspace='__res_int',
                OutputWorkspace='__res')
 
-        Rebin(InputWorkspace='__sam_rebin',
-              OutputWorkspace='__sam_data',
-              Params=rebin_param)
-        Integration(InputWorkspace='__sam_data',
-                    OutputWorkspace='__sam_int')
-        ConvertToPointData(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_data')
-        ExtractFFTSpectrum(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_fft',
-                           FFTPart=2)
-        Divide(LHSWorkspace='__sam_fft',
-               RHSWorkspace='__sam_int',
-               OutputWorkspace='__sam')
-
         Divide(LHSWorkspace='__sam',
                RHSWorkspace='__res',
                OutputWorkspace=self._output_workspace)
 
         # Cleanup sample workspaces
-        DeleteWorkspace('__sam_rebin')
         DeleteWorkspace('__sam_data')
         DeleteWorkspace('__sam_int')
         DeleteWorkspace('__sam_fft')
