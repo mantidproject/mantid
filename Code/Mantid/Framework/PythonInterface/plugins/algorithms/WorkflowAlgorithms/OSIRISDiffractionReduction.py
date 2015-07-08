@@ -264,15 +264,15 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         Execute the algorithm in diffraction-only mode
         """
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
-        for fileName in self._sams + self._vans:
+        for fileName in self._sample_runs + self._vanadium_runs:
             Load(Filename=fileName,
                  OutputWorkspace=fileName,
                  SpectrumMin=3,
                  #SpectrumMax=962,
                  LoadLogFiles=self._load_logs)
-        for sam in self._sams:
+        for sam in self._sample_runs:
             self._samMap.addWs(sam)
-        for van in self._vans:
+        for van in self._vanadium_runs:
             self._vanMap.addWs(van)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
