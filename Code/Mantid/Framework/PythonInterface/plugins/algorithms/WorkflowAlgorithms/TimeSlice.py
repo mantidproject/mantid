@@ -55,8 +55,6 @@ class TimeSlice(PythonAlgorithm):
     _background_range = None
     _calib_ws = None
     _out_ws_group = None
-    _plot = None
-    _save = None
 
     def category(self):
         return 'PythonAlgorithms;Inelastic'
@@ -82,12 +80,6 @@ class TimeSlice(PythonAlgorithm):
 
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Background range in time of flight')
-
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot result workspaces')
-
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Save result workspaces as nexus files to default save directory')
 
         self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
@@ -150,24 +142,9 @@ class TimeSlice(PythonAlgorithm):
             out_ws_list.append(slice_file)
             DeleteWorkspace(raw_file)
 
-            if self._save:
-                work_dir = config['defaultsave.directory']
-                save_path = os.path.join(work_dir, slice_file + '.nxs')
-                SaveNexusProcessed(InputWorkspace=slice_file, Filename=save_path)
-                logger.information('Output file :' + save_path)
-
         all_workspaces = ','.join(out_ws_list)
         GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
         self.setProperty('OutputWorkspace', self._out_ws_group)
-
-        if self._plot:
-            try:
-                from IndirectImport import import_mantidplot
-                mp = import_mantidplot()
-                mp.plotSpectrum(slice_file, 0)
-            except RuntimeError:
-                # User clicked cancel on plot so don't do anything
-                pass
 
 
     def _setup(self):
@@ -189,9 +166,6 @@ class TimeSlice(PythonAlgorithm):
             self._calib_ws = None
 
         self._out_ws_group = self.getPropertyValue('OutputWorkspace')
-
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
 
 
     def _read_raw_file(self, filename):
