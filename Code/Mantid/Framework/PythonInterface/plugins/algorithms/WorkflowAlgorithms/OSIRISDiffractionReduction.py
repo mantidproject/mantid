@@ -271,9 +271,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                  #SpectrumMax=962,
                  LoadLogFiles=self._load_logs)
         for sam in self._sample_runs:
-            self._samMap.addWs(sam)
+            self._sam_ws_map.addWs(sam)
         for van in self._vanadium_runs:
-            self._vanMap.addWs(van)
+            self._van_ws_map.addWs(van)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map.getMap().iterkeys():
