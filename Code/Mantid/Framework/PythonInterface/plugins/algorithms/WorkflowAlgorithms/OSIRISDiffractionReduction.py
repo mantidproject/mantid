@@ -188,7 +188,7 @@ def is_in_ranges(range_list, val):
     return False
 
 
-#pylint: disable=no-init
+#pylint: disable=no-init,too-many-instance-attributes
 class OSIRISDiffractionReduction(PythonAlgorithm):
     """
     Handles the reduction of OSIRIS Diffraction Data.
