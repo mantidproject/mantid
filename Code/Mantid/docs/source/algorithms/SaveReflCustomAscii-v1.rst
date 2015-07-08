@@ -16,3 +16,5 @@ separated by spaces. This is used by the reflectometry interface.
 
 
 .. categories::
+
+.. sourcelink::

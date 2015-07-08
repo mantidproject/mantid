@@ -40,7 +40,23 @@ public:
   MementoTableWorkspace(int nRows = 0);
   ~MementoTableWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MementoTableWorkspace> clone() const {
+    return std::unique_ptr<MementoTableWorkspace>(doClone());
+  }
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MementoTableWorkspace(const MementoTableWorkspace &other)
+      : TableWorkspace(other) {}
+  /// Protected copy assignment operator. Assignment not implemented.
+  MementoTableWorkspace &operator=(const MementoTableWorkspace &other);
+
 private:
+  virtual MementoTableWorkspace *doClone() const {
+    return new MementoTableWorkspace(*this);
+  }
+
   static bool expectedColumn(Mantid::API::Column_const_sptr expected,
                              Mantid::API::Column_const_sptr candidate);
 };

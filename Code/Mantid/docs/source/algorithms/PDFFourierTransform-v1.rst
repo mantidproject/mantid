@@ -174,3 +174,5 @@ Usage
    
 
 .. categories::
+
+.. sourcelink::

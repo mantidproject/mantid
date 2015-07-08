@@ -52,7 +52,7 @@ public:
   virtual const std::string toString() const;
 
   /// Instrument accessors
-  void setInstrument(const Geometry::Instrument_const_sptr &instr);
+  virtual void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
   virtual Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -121,6 +121,8 @@ public:
   virtual void loadExperimentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
   virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
+  /// Load instrument parameters from an open Nexus file in Instument group if found there
+  virtual void loadInstrumentParametersNexus ( ::NeXus::File *file, std::string &parameterStr);
 
   /// Load the sample and log info from an open NeXus file.
   virtual void loadSampleAndLogInfoNexus(::NeXus::File *file);

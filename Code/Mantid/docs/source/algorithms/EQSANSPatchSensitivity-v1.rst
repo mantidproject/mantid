@@ -34,3 +34,5 @@ along a given tube, that pixel's sensitivity (Y-value) is set to:
 The output workspace is the patched version of the input workspace.
 
 .. categories::
+
+.. sourcelink::

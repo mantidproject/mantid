@@ -4,6 +4,7 @@
 from mantid.simpleapi import *
 from Direct.PropertiesDescriptors import *
 import re
+import collections
 
 class RunList(object):
     """Helper class to maintain list of runs used in RunDescriptor for summing
@@ -831,8 +832,16 @@ class RunDescriptor(PropDescriptor):
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
 
         if monitors_ID:
-            if isinstance(monitors_ID,list):
-                mon_list = monitors_ID
+            def flatten_list(targ_list,source):
+                if isinstance(source, collections.Iterable):
+                    for item in source:
+                        targ_list = flatten_list(targ_list,item)
+                else:
+                    targ_list.append(source)
+                return targ_list
+            if isinstance(monitors_ID, collections.Iterable):
+                mon_list = []
+                mon_list = flatten_list(mon_list,monitors_ID)
             else:
                 mon_list = [monitors_ID]
         else:
@@ -846,7 +855,7 @@ class RunDescriptor(PropDescriptor):
                     monws_name = mon_ws.name()
                 except:
                     monws_name = 'None'
-                RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
+                RunDescriptor._logger('*** Monitor workspace {0} does not have spectra with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
                 mon_ws = None
                 break

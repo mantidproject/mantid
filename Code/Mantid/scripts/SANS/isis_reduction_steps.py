@@ -1215,6 +1215,9 @@ class TransmissionCalc(ReductionStep):
 
     DEFAULT_FIT = 'LOGARITHMIC'
 
+    # The y unit label for transmission data
+    YUNITLABEL_TRANSMISSION_RATIO = "Transmission"
+
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
@@ -1472,7 +1475,8 @@ class TransmissionCalc(ReductionStep):
         trans_raw, direct_raw = self._get_run_wksps(reducer)
 
         if not trans_raw:
-            raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % self.CAN_SAMPLE_SUFFIXES[reducer.is_can()])
+            raise RuntimeError('Attempting transmission correction with no specified transmission %s file'
+                               % self.CAN_SAMPLE_SUFFIXES[reducer.is_can()])
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
 
@@ -1569,6 +1573,14 @@ class TransmissionCalc(ReductionStep):
             calc_trans_alg.setProperty("TransmissionMonitor", reducer.instrument.default_trans_spec)
 
         calc_trans_alg.execute()
+
+        # Set the y axis label correctly for the transmission ratio data
+        fitted_trans_ws = mtd[fittedtransws]
+        unfitted_trans_ws = mtd[unfittedtransws]
+        if fitted_trans_ws:
+            fitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
+        if unfitted_trans_ws:
+            unfitted_trans_ws.setYUnitLabel(self.YUNITLABEL_TRANSMISSION_RATIO)
 
         # Remove temporaries
         files2delete = [trans_tmp_out]
@@ -1883,10 +1895,32 @@ class ConvertToQISIS(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj, ExtraLength=self._grav_extra_length)
+                Q1D(DetBankWorkspace=workspace,
+                    OutputWorkspace= workspace,
+                    OutputBinning=self.binning,
+                    WavelengthAdj=wave_adj,
+                    PixelAdj=pixel_adj,
+                    AccountForGravity=self._use_gravity,
+                    RadiusCut=self.r_cut*1000.0,
+                    WaveCut=self.w_cut,
+                    OutputParts=self.outputParts,
+                    WavePixelAdj = wavepixeladj,
+                    ExtraLength=self._grav_extra_length)
             elif self._Q_alg == 'Qxy':
-                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, ExtraLength=self._grav_extra_length)
-                ReplaceSpecialValues(InputWorkspace=workspace,OutputWorkspace= workspace, NaNValue="0", InfinityValue="0")
+                Qxy(InputWorkspace=workspace,
+                    OutputWorkspace= workspace,
+                    MaxQxy= reducer.QXY2,
+                    DeltaQ= reducer.DQXY,
+                    WavelengthAdj=wave_adj,
+                    PixelAdj=pixel_adj,
+                    AccountForGravity=self._use_gravity,
+                    RadiusCut=self.r_cut*1000.0,
+                    WaveCut=self.w_cut,
+                    OutputParts=self.outputParts,
+                    ExtraLength=self._grav_extra_length)
+                ReplaceSpecialValues(InputWorkspace=workspace,
+                                     OutputWorkspace= workspace,
+                                     NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
@@ -2193,9 +2227,14 @@ class UserFile(ReductionStep):
                 self._readDetectorCorrections(upper_line[8:], reducer)
             elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
                 self._readFrontRescaleShiftSetup(det_specif, reducer)
-            else:
-                # for /DET/FRONT and /DET/REAR commands
+            elif any(it == det_specif.strip() for it in ['FRONT','REAR','BOTH','MERGE','MERGED']):
+                # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
+                det_specif = det_specif.strip()
+                if det_specif == 'MERGE':
+                    det_specif = 'MERGED'
                 reducer.instrument.setDetector(det_specif)
+            else:
+                _issueWarning('Incorrectly formatted DET line, %s, line ignored' % upper_line)
 
         # There are two entries for Gravity: 1. ON/OFF (TRUE/FALSE)
         #                                    2. LEXTRA=xx.xx

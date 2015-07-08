@@ -84,3 +84,5 @@ Output:
    SigmaSquared type = fitting
 
 .. categories::
+
+.. sourcelink::

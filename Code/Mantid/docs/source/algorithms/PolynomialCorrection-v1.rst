@@ -67,3 +67,5 @@ Usage
    First 5 error values: [   4.   16.   36.   64.  100.]
 
 .. categories::
+
+.. sourcelink::

@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/IDATab.h"
+#include "MantidQtCustomInterfaces/Indirect/CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "boost/shared_ptr.hpp"
@@ -21,7 +21,7 @@ namespace IDA
    *
    * @param parent :: the parent widget (an IndirectDataAnalysis object).
    */
-  IDATab::IDATab(QWidget * parent) : IndirectTab(parent),
+  CorrectionsTab::CorrectionsTab(QWidget * parent) : IndirectTab(parent),
     m_dblEdFac(NULL), m_blnEdFac(NULL),
     m_parent(NULL)
   {
@@ -40,7 +40,7 @@ namespace IDA
    *
    * @param settings :: the QSettings object from which to load
    */
-  void IDATab::loadTabSettings(const QSettings & settings)
+  void CorrectionsTab::loadTabSettings(const QSettings & settings)
   {
     loadSettings(settings);
   }
@@ -49,7 +49,7 @@ namespace IDA
   /**
    * Slot that can be called when a user edits an input.
    */
-  void IDATab::inputChanged()
+  void CorrectionsTab::inputChanged()
   {
     validate();
   }
@@ -63,7 +63,7 @@ namespace IDA
   * @return whether the binning matches
   * @throws std::runtime_error if one of the workspaces is an invalid pointer
   */
-  bool IDATab::checkWorkspaceBinningMatches(MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right)
+  bool CorrectionsTab::checkWorkspaceBinningMatches(MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right)
   {
     if (left && right) //check the workspaces actually point to something first
     {
@@ -73,7 +73,7 @@ namespace IDA
     }
     else
     {
-      throw std::runtime_error("IDATab: One of the operands is an invalid MatrixWorkspace pointer");
+      throw std::runtime_error("CorrectionsTab: One of the operands is an invalid MatrixWorkspace pointer");
     }
   }
 
@@ -81,12 +81,15 @@ namespace IDA
   /**
    * Adds a unit converstion step to the batch algorithm queue.
    *
+   * Note that if converting diffraction data in wavelength then eMode must be set.
+   *
    * @param ws Pointer to the workspace to convert
    * @param unitID ID of unit to convert to
    * @param suffix Suffix to append to output workspace name
+   * @param eMode Emode to use (if not set will determine based on current X unit)
    * @return Name of output workspace
    */
-  std::string IDATab::addConvertUnitsStep(MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix)
+  std::string CorrectionsTab::addConvertUnitsStep(MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix, std::string eMode)
   {
     std::string outputName = ws->name();
 
@@ -103,7 +106,9 @@ namespace IDA
     convertAlg->setProperty("OutputWorkspace", outputName);
     convertAlg->setProperty("Target", unitID);
 
-    std::string eMode = getEMode(ws);
+    if(eMode.empty())
+      eMode = getEMode(ws);
+
     convertAlg->setProperty("EMode", eMode);
 
     if(eMode == "Indirect")

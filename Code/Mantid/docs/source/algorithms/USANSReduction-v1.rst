@@ -23,3 +23,5 @@ Each analyzer angle is treated separately.
 More details about the procedure will be documented here as the complete reduction process becomes available.
 
 .. categories::
+
+.. sourcelink::

@@ -118,6 +118,7 @@ namespace CustomInterfaces
     reductionAlg->setProperty("InputFiles", files.toStdString());
 
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
+    reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
 
     if(m_uiForm.ckUseCalib->isChecked())
     {
@@ -150,7 +151,7 @@ namespace CustomInterfaces
     }
 
     if(m_uiForm.ckDetailedBalance->isChecked())
-      reductionAlg->setProperty("DetailedBalance", m_uiForm.spDetailedBalance->value());
+      reductionAlg->setProperty("DetailedBalance", QString::number(m_uiForm.spDetailedBalance->value()).toStdString());
 
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.spScaleMultiplier->value());

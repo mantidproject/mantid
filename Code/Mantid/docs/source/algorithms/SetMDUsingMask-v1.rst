@@ -34,3 +34,5 @@ Usage (Python)
 | ``ModifiedWS = SetMDUsingMask(InputWorkspace=WS, Value="0", MaskWorkspace=MaskWS)``
 
 .. categories::
+
+.. sourcelink::

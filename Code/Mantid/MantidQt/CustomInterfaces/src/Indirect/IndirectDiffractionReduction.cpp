@@ -280,6 +280,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
   msgDiffReduction->setProperty("Mode", mode.toStdString());
   msgDiffReduction->setProperty("SumFiles", m_uiForm.dem_ckSumFiles->isChecked());
+  msgDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   msgDiffReduction->setProperty("InputFiles", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
   msgDiffReduction->setProperty("SpectraRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
@@ -329,6 +330,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   osirisDiffReduction->setProperty("Sample", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("Vanadium", m_uiForm.dem_vanadiumFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("CalFile", m_uiForm.dem_calFile->getFirstFilename().toStdString());
+  osirisDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
   m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 

@@ -39,3 +39,5 @@ parameter named 'test2' for a component whose detector has an id of '14'.
     </parameter-file>
 
 .. categories::
+
+.. sourcelink::

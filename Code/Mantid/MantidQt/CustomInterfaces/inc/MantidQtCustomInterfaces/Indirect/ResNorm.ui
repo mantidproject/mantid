@@ -208,14 +208,14 @@
          </spacer>
         </item>
         <item>
-         <widget class="QCheckBox" name="chkSave">
+         <widget class="QCheckBox" name="ckSave">
           <property name="text">
            <string>Save Result</string>
           </property>
          </widget>
         </item>
        </layout>
-       <zorder>chkSave</zorder>
+       <zorder>ckSave</zorder>
        <zorder>lblPlot</zorder>
        <zorder>cbPlot</zorder>
       </widget>

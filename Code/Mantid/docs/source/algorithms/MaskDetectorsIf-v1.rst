@@ -15,3 +15,5 @@ the contributing detectors in the output calfile. All other aspects of
 the ``InputCalFile`` are copied over to the ``OutputCalFile``.
 
 .. categories::
+
+.. sourcelink::

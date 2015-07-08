@@ -1,10 +1,10 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as sapi
-
 
 class EnginXCalibrate(PythonAlgorithm):
+    INDICES_PROP_NAME = 'SpectrumNumbers'
+
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
@@ -15,13 +15,30 @@ class EnginXCalibrate(PythonAlgorithm):
         return "Calibrates a detector bank by performing a single peak fitting."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
-    		"Calibration run to use")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
+                             "Workspace with the calibration run to use.")
 
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
 
-        self.declareProperty("Bank", 1, "Which bank to calibrate")
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
+                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
+                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
+                             "options are given.")
+
+        import EnginXUtils
+        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+                             direction=Direction.Input,
+                             doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "for a more flexible alternative to select specific detectors")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the spectrum numbers for the detectors '
+                             'that should be considered in the calibration (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
                 Direction.Input, PropertyMode.Optional),\
@@ -34,31 +51,46 @@ class EnginXCalibrate(PythonAlgorithm):
                              'generated.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
-    		doc = "Calibrated Difc value for the bank")
+                             doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
 
         self.declareProperty("Zero", 0.0, direction = Direction.Output,\
-    		doc = "Calibrated Zero value for the bank")
+                             doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
 
     def PyExec(self):
 
-        ws = self._focusRun()
+        import EnginXUtils
 
-        difc, zero = self._fitParams(ws)
+        focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
+                                     self.getProperty('Bank').value,
+                                     self.getProperty(self.INDICES_PROP_NAME).value)
+
+        # Get peaks in dSpacing from file
+        expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                         self.getProperty('ExpectedPeaks').value)
+
+        if len(expectedPeaksD) < 1:
+            raise ValueError("Cannot run this algorithm without any input expected peaks")
+
+        difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
 
         self._produceOutputs(difc, zero)
 
-    def _fitParams(self, focusedWS):
+    def _fitParams(self, focusedWS, expectedPeaksD):
         """
         Fit the GSAS parameters that this algorithm produces: difc and zero
 
-        @param focusedWS: focused workspace to do the fitting on
+        @param focusedWS :: focused workspace to do the fitting on
+        @param expectedPeaksD :: expected peaks for the fitting, in d-spacing units
 
         @returns a pair of parameters: difc and zero
         """
+
         fitPeaksAlg = self.createChildAlgorithm('EnginXFitPeaks')
         fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
         fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
-        fitPeaksAlg.setProperty('ExpectedPeaks', self.getProperty('ExpectedPeaks').value)
+        fitPeaksAlg.setProperty('ExpectedPeaks', expectedPeaksD)
+        # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
+        # EnginXFitPEaks, but better to check inputs early, before this
         fitPeaksAlg.execute()
 
         difc = fitPeaksAlg.getProperty('Difc').value
@@ -66,13 +98,21 @@ class EnginXCalibrate(PythonAlgorithm):
 
         return difc, zero
 
-    def _focusRun(self):
+    def _focusRun(self, ws, bank, indices):
         """
         Focuses the input workspace by running EnginXFocus which will produce a single spectrum workspace.
+
+        @param ws :: workspace to focus
+        @param bank :: the focussing will be applied on the detectors of this bank
+        @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
+        mutually exclusive)
+
+        @return focussed (summed) workspace
         """
         alg = self.createChildAlgorithm('EnginXFocus')
-        alg.setProperty('Filename', self.getProperty('Filename').value)
-        alg.setProperty('Bank', self.getProperty('Bank').value)
+        alg.setProperty('InputWorkspace', ws)
+        alg.setProperty('Bank', bank)
+        alg.setProperty(self.INDICES_PROP_NAME, indices)
 
         detPos = self.getProperty('DetectorPositions').value
         if detPos:
@@ -85,29 +125,21 @@ class EnginXCalibrate(PythonAlgorithm):
     def _produceOutputs(self, difc, zero):
         """
         Just fills in the output properties as requested
+
         @param difc :: the difc GSAS parameter as fitted here
         @param zero :: the zero GSAS parameter as fitted here
         """
+
+        import EnginXUtils
+
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
 
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            self._generateOutputParTable(tblName)
-
-    def _generateOutputParTable(self, name):
-        """
-        Produces a table workspace with the two calibration parameters
-
-        @param name :: the name to use for the table workspace that is created here
-        """
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
-        tbl.addColumn('double', 'difc')
-        tbl.addColumn('double', 'zero')
-        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
-
-        self.log().information("Output parameters added into a table workspace: %s" % name)
+            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
 
 AlgorithmFactory.subscribe(EnginXCalibrate)

@@ -320,6 +320,8 @@ Output:
 
 .. categories::
 
+.. sourcelink::
+
 """ % (classname,classname,classname,classname)
 
     f.write(s)

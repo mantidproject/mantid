@@ -32,6 +32,13 @@ If the workspace does not have common binning, then the monitor spectrum
 is rebinned internally to match each data spectrum prior to doing the
 normalisation.
 
+If a bin in the monitor spectrum contains 0 counts there is no special
+treatment, only a warning is logged. The following options are available to deal
+with the issue:
+
+- Smooth the monitor spectrum before normalisation (using for example :ref:`algm-FFTSmooth`, :ref:`algm-SmoothData`, :ref:`algm-SplineSmoothing` algorithms).
+- Replace the infinite numbers and NaNs after normalisation (:ref:`algm-ReplaceSpecialValues` algorithm).
+
 Normalisation by integrated count mode
 ######################################
 
@@ -94,3 +101,5 @@ Output:
    Selected data 1.485135, 0.741801
 
 .. categories::
+
+.. sourcelink::

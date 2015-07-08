@@ -93,3 +93,5 @@ The data used in this algorithm comes from the following paper.
    `doi: 10.1107/S0021889887087028 <http://dx.doi.org/10.1107/S0021889887087028>`_
 
 .. categories::
+
+.. sourcelink::

@@ -47,6 +47,7 @@ set ( TEST_PY_FILES
   MolDynTest.py
   MSDFitTest.py
   PDDetermineCharacterizationsTest.py
+  ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py

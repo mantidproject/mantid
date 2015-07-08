@@ -49,3 +49,5 @@ Usage
   True
 
 .. categories::
+
+.. sourcelink::

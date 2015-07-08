@@ -41,3 +41,5 @@ Output
   Its second item is ws2
 
 .. categories::
+
+.. sourcelink::

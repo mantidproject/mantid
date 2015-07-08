@@ -24,3 +24,5 @@ Usage
 This a currently a Proof of Concept algorithm.  If it matures into normal use a usage example must be added.
 
 .. categories::
+
+.. sourcelink::

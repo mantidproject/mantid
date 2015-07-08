@@ -43,3 +43,5 @@ Output
   "Rebunched" workspace values 0.9 10.9 0.9
 
 .. categories::
+
+.. sourcelink::

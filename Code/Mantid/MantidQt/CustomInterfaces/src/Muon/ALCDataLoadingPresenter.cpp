@@ -195,5 +195,18 @@ namespace CustomInterfaces
     }
    }
 
+   void ALCDataLoadingPresenter::setData(MatrixWorkspace_const_sptr data) {
+
+     if (data) {
+       // Set the data
+       m_loadedData = data;
+       // Plot the data
+       m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_loadedData, 0)),
+         ALCHelper::curveErrorsFromWs(m_loadedData, 0));
+
+     } else {
+       std::invalid_argument("Cannot load an empty workspace");
+     }
+   }
 } // namespace CustomInterfaces
 } // namespace MantidQt

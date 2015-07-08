@@ -44,6 +44,7 @@ namespace CustomInterfaces
     m_parameterTable = fit->getProperty("OutputParameters");
 
     enableDisabledPoints(fitOutput,m_data);
+    setErrorsAfterFit(fitOutput);
 
     setCorrectedData(fitOutput);
     setFittedFunction(funcToFit);
@@ -109,6 +110,15 @@ namespace CustomInterfaces
     destWs->dataE(0) = sourceWs->readE(0);
   }
 
+  /**
+   * Set errors in Diff spectrum after a fit
+   * @param data :: [input/output] Workspace containing spectrum to set errors to
+   */
+  void ALCBaselineModellingModel::setErrorsAfterFit (MatrixWorkspace_sptr data) {
+
+    data->dataE(2)=data->readE(0);
+  }
+
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
   {
     if ( m_data && m_data->getNumberHistograms() == 3 ) {
@@ -172,26 +182,34 @@ namespace CustomInterfaces
 
   MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const
   {
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    extract->setProperty("WorkspaceIndex", 0);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-    return result;
+    if (m_data) {
+      IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+      extract->setChild(true);
+      extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+      extract->setProperty("WorkspaceIndex", 0);
+      extract->setProperty("OutputWorkspace", "__NotUsed__");
+      extract->execute();
+      MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+      return result;
+    } else {
+      return MatrixWorkspace_const_sptr();
+    }
   }
 
   MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const
   {
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    extract->setProperty("WorkspaceIndex", 2);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
-    return result;
+    if (m_data && (m_data->getNumberHistograms()==3) ) {
+      IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+      extract->setChild(true);
+      extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+      extract->setProperty("WorkspaceIndex", 2);
+      extract->setProperty("OutputWorkspace", "__NotUsed__");
+      extract->execute();
+      MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+      return result;
+    } else {
+      return MatrixWorkspace_const_sptr();
+    }
   }
 
 } // namespace CustomInterfaces

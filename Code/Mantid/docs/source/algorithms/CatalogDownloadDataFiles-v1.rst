@@ -62,3 +62,5 @@ Output:
     ['/home/USERNAME/Desktop/33127010.nxs', '/home/USERNAME/Desktop/33127011.nxs']
 
 .. categories::
+
+.. sourcelink::

@@ -42,3 +42,5 @@ Output:
     Calibration workspace has 24 spectra and 1 bin(s)
 
 .. categories::
+
+.. sourcelink::

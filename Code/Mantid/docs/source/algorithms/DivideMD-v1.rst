@@ -33,3 +33,5 @@ The error of :math:`f = a / b` is propagated with
       meaning would be.
 
 .. categories::
+
+.. sourcelink::

@@ -18,10 +18,12 @@ Description
 Utilises :ref:`algm-EnginXFocus` which performs a TOF to dSpacing
 conversion using calibrated pixel positions, focuses the values in
 dSpacing and then converts them back to TOF.
-Then calls :ref:`algm-EnginXFitPeaks` which through a sequence of peak
-fits determines a linear relationship between dSpacing and measured
-TOF values in terms of DIFC and ZERO values and provides the these
-parameters to the Calibrate algorithm.
+
+Then this algorithm calls :ref:`algm-EnginXFitPeaks` (as a child
+algorithm) which through a sequence of peak fits determines a linear
+relationship between dSpacing and measured TOF values in terms of DIFC
+and ZERO values and provides the these parameters to the Calibrate
+algorithm.
 
 This algorithm provides an indirect calibration of the sample
 position, that is, a calibration returned in terms of Difc and Zero
@@ -35,6 +37,8 @@ workspace with that name, containing the two output parameters.
 
 .. categories::
 
+.. sourcelink::
+
 Usage
 -----
 
@@ -45,8 +49,10 @@ Usage
 .. testcode:: ExampleCalib
 
    out_tbl_name = 'out_params'
-   Difc, Zero = EnginXCalibrate(Filename="ENGINX00213855.nxs",
-                                ExpectedPeaks=[1.097, 2.1], Bank=1,
+   ws_name = 'test'
+   Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
+   Difc, Zero = EnginXCalibrate(InputWorkspace=ws_name,
+                                ExpectedPeaks=[1.097, 2.1], Bank='1',
                                 OutputParametersTableName=out_tbl_name)
 
    print "Difc: %.2f" % (Difc)
@@ -58,6 +64,7 @@ Usage
 .. testcleanup:: ExampleCalib
 
    DeleteWorkspace(out_tbl_name)
+   DeleteWorkspace(ws_name)
 
 Output:
 

@@ -113,3 +113,5 @@ Output:
    Number of groups: 5
 
 .. categories::
+
+.. sourcelink::

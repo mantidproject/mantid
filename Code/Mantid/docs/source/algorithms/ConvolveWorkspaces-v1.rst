@@ -37,3 +37,5 @@ Output:
       146.57078223]
 
 .. categories::
+
+.. sourcelink::

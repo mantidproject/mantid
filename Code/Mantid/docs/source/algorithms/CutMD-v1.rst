@@ -74,7 +74,7 @@ projection tables for you automatically. For example:
    proj_prop = Projection()
    proj_prop.setOffset(0, 100) # Set u offset to 100
    proj_prop.setOffset(1, -5.0) # Set v offset to -5
-   proj_prop.setType(1, 'a') # Set v type to be RLU
+   proj_prop.setType(1, 'r') # Set v type to be RLU
    proj_prop.setType(2, 'a') # Set w type to be inverse angstroms
 
    #Create table workspaces from these projections
@@ -162,3 +162,5 @@ Output:
    Half the volume should give half the signal = 50.00
    
 .. categories::
+
+.. sourcelink::

@@ -64,3 +64,7 @@ Output:
      The number of search results returned was: 109
 
 .. categories::
+
+.. sourcelink::
+     :h: Framework/ICat/inc/MantidICat/CatalogSearch.h
+     :cpp: Framework/ICat/src/CatalogSearch.cpp

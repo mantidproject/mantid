@@ -224,8 +224,9 @@ class DetectorBank(object):
         # hold rescale and shift object _RescaleAndShift
         self.rescaleAndShift = self._RescaleAndShift()
 
-        #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
-        self._orientation = 'HorizontalFlipped'
+        # The orientation is set by default to Horizontal (Note this used to be HorizontalFlipped,
+        # probably as part of some hack for specific run numbers of SANS2D)
+        self._orientation = 'Horizontal'
 
     def disable_y_and_rot_corrs(self):
         """
@@ -363,14 +364,6 @@ class DetectorBank(object):
                 for x in range(0, xdim):
                     std_i = start_spec + x + (y*det_dimension)
                     output += str(max_spec - (std_i - base)) + ','
-        elif self._orientation == 'HorizontalFlipped':
-            for y in range(ylow,ylow+ydim):
-                max_row = base + (y+1)*det_dimension - 1
-                min_row = base + (y)*det_dimension
-                for x in range(xlow,xlow+xdim):
-                    std_i = base + x + (y*det_dimension)
-                    diff_s = std_i - min_row
-                    output += str(max_row - diff_s) + ','
 
         return output.rstrip(",")
 
@@ -378,8 +371,7 @@ class DetectorBank(object):
     _ORIENTED = {
         'Horizontal' : None,        #most runs have the detectors in this state
         'Vertical' : None,
-        'Rotated' : None,
-        'HorizontalFlipped' : None} # This is for the empty instrument
+        'Rotated' : None}
 
     def set_orien(self, orien):
         """
@@ -599,13 +591,8 @@ class ISISInstrument(BaseInstrument):
         if self.other_detector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True
-        else:
-            #there are only two detectors, they must have selected the current one so no change is need
-            if self.cur_detector().isAlias(detName):
-                return True
-            else:
-                sanslog.notice("setDetector: Detector not found")
-                sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
+        elif self.cur_detector().isAlias(detName):
+            return True
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
@@ -901,11 +888,7 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            # empty instrument number spectra differently.
-            if base_runno == 'emptyInstrument':
-                second.set_orien('HorizontalFlipped')
-            else:
-                second.set_orien('Horizontal')
+            second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too
         second.place_after(first)

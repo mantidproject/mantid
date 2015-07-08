@@ -47,6 +47,11 @@ public:
   // Destructor
   virtual ~EventWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<EventWorkspace> clone() const {
+    return std::unique_ptr<EventWorkspace>(doClone());
+  }
+
   // Initialize the pixels
   void init(const std::size_t &, const std::size_t &, const std::size_t &);
 
@@ -67,7 +72,7 @@ public:
   size_t getMemorySize() const;
 
   // Get the number of histograms. aka the number of pixels or detectors.
-  std::size_t getNumberHistograms() const;
+  virtual std::size_t getNumberHistograms() const;
 
   //------------------------------------------------------------
   // Return the underlying ISpectrum ptr at the given workspace index.
@@ -135,33 +140,33 @@ public:
 
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
-  void setAllX(Kernel::cow_ptr<MantidVec> &x);
+  virtual void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
   // Get an EventList object at the given workspace index number
-  EventList &getEventList(const std::size_t workspace_index);
+  virtual EventList &getEventList(const std::size_t workspace_index);
 
   // Get a const EventList object at the given workspace index number
-  const EventList &getEventList(const std::size_t workspace_index) const;
+  virtual const EventList &getEventList(const std::size_t workspace_index) const;
 
   // Get an EventList pointer at the given workspace index number
-  EventList *getEventListPtr(const std::size_t workspace_index);
+  virtual EventList *getEventListPtr(const std::size_t workspace_index);
 
   // Get or add an EventList
   EventList &getOrAddEventList(const std::size_t workspace_index);
 
   // Resizes the workspace to contain the number of spectra/event lists given
-  void resizeTo(const std::size_t numSpectra);
+  virtual void resizeTo(const std::size_t numSpectra);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty
   // spectra-detector map
   void padSpectra();
   // Pad pixels in the workspace using specList. Requires a non-empty vector
-  void padSpectra(const std::vector<int32_t> &specList);
+  virtual void padSpectra(const std::vector<int32_t> &specList);
   // Remove pixels in the workspace that do not contain events.
   void deleteEmptyLists();
 
   //------------------------------------------------------------
   // The total number of events across all of the spectra.
-  std::size_t getNumberEvents() const;
+  virtual std::size_t getNumberEvents() const;
 
   // Type of the events
   Mantid::API::EventType getEventType() const;
@@ -189,11 +194,14 @@ public:
                                     const double maxX,
                                     const bool entireRange) const;
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  EventWorkspace(const EventWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  EventWorkspace &operator=(const EventWorkspace &other);
+
 private:
-  /// NO COPY ALLOWED
-  EventWorkspace(const EventWorkspace &);
-  /// NO ASSIGNMENT ALLOWED
-  EventWorkspace &operator=(const EventWorkspace &);
+  virtual EventWorkspace *doClone() const { return new EventWorkspace(*this); }
 
   /** A vector that holds the event list for each spectrum; the key is
    * the workspace index, which is not necessarily the pixelid.

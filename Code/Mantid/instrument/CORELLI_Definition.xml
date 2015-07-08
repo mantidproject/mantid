@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2014-04-03 15:21:50.935979" name="CORELLI" valid-from="2014-02-25 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2015-07-06 17:02:46.748632" name="CORELLI" valid-from="2014-02-25 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--Created by Ross Whitfield-->
   <defaults>
     <length unit="metre"/>
@@ -50,15 +50,24 @@
       <height val="0.02"/>
     </cylinder>
     <cuboid id="hole">
-      <left-front-bottom-point x="0.02" y="-0.02" z="0.0"/>
-      <left-front-top-point x="0.02" y="-0.02" z="0.02"/>
-      <left-back-bottom-point x="-0.02" y="-0.02" z="0.0"/>
-      <right-front-bottom-point x="0.02" y="0.02" z="0.0"/>
+      <left-front-bottom-point x="0.04" y="-0.02" z="0.0"/>
+      <left-front-top-point x="0.04" y="-0.02" z="0.02"/>
+      <left-back-bottom-point x="-0.04" y="-0.02" z="0.0"/>
+      <right-front-bottom-point x="0.04" y="0.02" z="0.0"/>
     </cuboid>
     <algebra val="body (# hole)"/>
   </type>
   <component type="double-disk-chopper">
     <location z="-11.79995"/>
+    <parameter name="Speed (Hz)">
+      <logfile id="BL9:Chop:Skf2:MotorSpeed"/>
+    </parameter>
+    <parameter name="Bandwidth (A)">
+      <logfile id="BL9:Chop:Skf23:Bandwidth"/>
+    </parameter>
+    <parameter name="Center (A)">
+      <logfile id="BL9:Chop:Skf23:CenterWavelength"/>
+    </parameter>
   </component>
   <type is="chopper" name="double-disk-chopper">
     <cylinder id="body1">
@@ -67,11 +76,11 @@
       <radius val="0.2"/>
       <height val="0.02"/>
     </cylinder>
-    <cuboid id="hole1">
-      <left-front-bottom-point x="0.03" y="-0.015" z="0.0"/>
-      <left-front-top-point x="0.03" y="-0.015" z="0.02"/>
-      <left-back-bottom-point x="-0.03" y="-0.015" z="0.0"/>
-      <right-front-bottom-point x="0.03" y="0.015" z="0.0"/>
+    <cuboid id="hole">
+      <left-front-bottom-point x="0.04" y="-0.02" z="0.0"/>
+      <left-front-top-point x="0.04" y="-0.02" z="0.055"/>
+      <left-back-bottom-point x="-0.04" y="-0.02" z="0.0"/>
+      <right-front-bottom-point x="0.04" y="0.02" z="0.0"/>
     </cuboid>
     <cylinder id="body2">
       <centre-of-bottom-base x="-0.17" y="-0.0" z="0.035"/>
@@ -79,665 +88,670 @@
       <radius val="0.2"/>
       <height val="0.02"/>
     </cylinder>
-    <cuboid id="hole2">
-      <left-front-bottom-point x="0.03" y="-0.015" z="0.035"/>
-      <left-front-top-point x="0.03" y="-0.015" z="0.055"/>
-      <left-back-bottom-point x="-0.03" y="-0.015" z="0.035"/>
-      <right-front-bottom-point x="0.03" y="0.015" z="0.035"/>
-    </cuboid>
-    <algebra val="body1 (# hole1) : body2 (# hole2)"/>
+    <algebra val="(body1 : body2) (#hole)"/>
   </type>
   <component type="correlation-chopper">
     <location z="-2.000653"/>
+    <parameter name="Speed (Hz)">
+      <logfile id="BL9:Chop:Skf4:MotorSpeed"/>
+    </parameter>
   </component>
   <type is="chopper" name="correlation-chopper">
     <cylinder id="body">
       <centre-of-bottom-base x="-0.28" y="0.0" z="0.0"/>
       <axis x="0.0" y="0.0" z="1.0"/>
-      <radius val="0.3"/>
+      <radius val="0.255"/>
       <height val="0.02"/>
     </cylinder>
     <hexahedron id="hole0">
-      <left-back-bottom-point x="-0.296408053377" y="0.329591832096" z="0.0"/>
-      <left-front-bottom-point x="-0.296408053377" y="0.329591832096" z="0.02"/>
-      <right-front-bottom-point x="-0.28" y="0.33" z="0.02"/>
-      <right-back-bottom-point x="-0.28" y="0.33" z="0.0"/>
-      <left-back-top-point x="-0.293126442701" y="0.263673465677" z="0.0"/>
-      <left-front-top-point x="-0.293126442701" y="0.263673465677" z="0.02"/>
-      <right-front-top-point x="-0.28" y="0.264" z="0.02"/>
-      <right-back-top-point x="-0.28" y="0.264" z="0.0"/>
+      <left-back-bottom-point x="-0.28" y="0.3" z="0.0"/>
+      <left-front-bottom-point x="-0.28" y="0.3" z="0.02"/>
+      <right-front-bottom-point x="-0.25810687051" y="0.299200085029" z="0.02"/>
+      <right-back-bottom-point x="-0.25810687051" y="0.299200085029" z="0.0"/>
+      <left-back-top-point x="-0.28" y="0.24" z="0.0"/>
+      <left-front-top-point x="-0.28" y="0.24" z="0.02"/>
+      <right-front-top-point x="-0.262485496408" y="0.239360068023" z="0.02"/>
+      <right-back-top-point x="-0.262485496408" y="0.239360068023" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole1">
-      <left-back-bottom-point x="-0.255917557561" y="0.329120093531" z="0.0"/>
-      <left-front-bottom-point x="-0.255917557561" y="0.329120093531" z="0.02"/>
-      <right-front-bottom-point x="-0.239737383825" y="0.327534611513" z="0.02"/>
-      <right-back-bottom-point x="-0.239737383825" y="0.327534611513" z="0.0"/>
-      <left-back-top-point x="-0.260734046048" y="0.263296074825" z="0.0"/>
-      <left-front-top-point x="-0.260734046048" y="0.263296074825" z="0.02"/>
-      <right-front-top-point x="-0.24778990706" y="0.26202768921" z="0.02"/>
-      <right-back-top-point x="-0.24778990706" y="0.26202768921" z="0.0"/>
+      <left-back-bottom-point x="-0.243397621659" y="0.297758737739" z="0.0"/>
+      <left-front-bottom-point x="-0.243397621659" y="0.297758737739" z="0.02"/>
+      <right-front-bottom-point x="-0.221344524478" y="0.294210018849" z="0.02"/>
+      <right-back-bottom-point x="-0.221344524478" y="0.294210018849" z="0.0"/>
+      <left-back-top-point x="-0.250718097327" y="0.238206990191" z="0.0"/>
+      <left-front-top-point x="-0.250718097327" y="0.238206990191" z="0.02"/>
+      <right-front-top-point x="-0.233075619582" y="0.235368015079" z="0.02"/>
+      <right-back-top-point x="-0.233075619582" y="0.235368015079" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole2">
-      <left-back-bottom-point x="-0.215478976925" y="0.323631020734" z="0.0"/>
-      <left-front-bottom-point x="-0.215478976925" y="0.323631020734" z="0.02"/>
-      <right-front-bottom-point x="-0.191683690405" y="0.31796262274" z="0.02"/>
-      <right-back-bottom-point x="-0.191683690405" y="0.31796262274" z="0.0"/>
-      <left-back-top-point x="-0.22838318154" y="0.258904816587" z="0.0"/>
-      <left-front-top-point x="-0.22838318154" y="0.258904816587" z="0.02"/>
-      <right-front-top-point x="-0.209346952324" y="0.254370098192" z="0.02"/>
-      <right-back-top-point x="-0.209346952324" y="0.254370098192" z="0.0"/>
+      <left-back-bottom-point x="-0.199712445822" y="0.289056929763" z="0.0"/>
+      <left-front-bottom-point x="-0.199712445822" y="0.289056929763" z="0.02"/>
+      <right-front-bottom-point x="-0.18560840902" y="0.284763458948" z="0.02"/>
+      <right-back-bottom-point x="-0.18560840902" y="0.284763458948" z="0.0"/>
+      <left-back-top-point x="-0.215769956658" y="0.231245543811" z="0.0"/>
+      <left-front-top-point x="-0.215769956658" y="0.231245543811" z="0.02"/>
+      <right-front-top-point x="-0.204486727216" y="0.227810767159" z="0.02"/>
+      <right-back-top-point x="-0.204486727216" y="0.227810767159" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole3">
-      <left-back-bottom-point x="-0.176169249922" y="0.313239804843" z="0.0"/>
-      <left-front-bottom-point x="-0.176169249922" y="0.313239804843" z="0.02"/>
-      <right-front-bottom-point x="-0.160943170562" y="0.307775033692" z="0.02"/>
-      <right-back-bottom-point x="-0.160943170562" y="0.307775033692" z="0.0"/>
-      <left-back-top-point x="-0.196935399937" y="0.250591843875" z="0.0"/>
-      <left-front-top-point x="-0.196935399937" y="0.250591843875" z="0.02"/>
-      <right-front-top-point x="-0.18475453645" y="0.246220026954" z="0.02"/>
-      <right-back-top-point x="-0.18475453645" y="0.246220026954" z="0.0"/>
+      <left-back-bottom-point x="-0.171766518693" y="0.279795485175" z="0.0"/>
+      <left-front-bottom-point x="-0.171766518693" y="0.279795485175" z="0.02"/>
+      <right-front-bottom-point x="-0.165020845774" y="0.277091670921" z="0.02"/>
+      <right-back-bottom-point x="-0.165020845774" y="0.277091670921" z="0.0"/>
+      <left-back-top-point x="-0.193413214954" y="0.22383638814" z="0.0"/>
+      <left-front-top-point x="-0.193413214954" y="0.22383638814" z="0.02"/>
+      <right-front-top-point x="-0.18801667662" y="0.221673336736" z="0.02"/>
+      <right-back-top-point x="-0.18801667662" y="0.221673336736" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole4">
-      <left-back-bottom-point x="-0.153522930352" y="0.304800838013" z="0.0"/>
-      <left-front-bottom-point x="-0.153522930352" y="0.304800838013" z="0.02"/>
-      <right-front-bottom-point x="-0.116753855032" y="0.286793821679" z="0.02"/>
-      <right-back-bottom-point x="-0.116753855032" y="0.286793821679" z="0.0"/>
-      <left-back-top-point x="-0.178818344281" y="0.24384067041" z="0.0"/>
-      <left-front-top-point x="-0.178818344281" y="0.24384067041" z="0.02"/>
-      <right-front-top-point x="-0.149403084026" y="0.229435057343" z="0.02"/>
-      <right-back-top-point x="-0.149403084026" y="0.229435057343" z="0.0"/>
+      <left-back-bottom-point x="-0.131594413666" y="0.260721656072" z="0.0"/>
+      <left-front-bottom-point x="-0.131594413666" y="0.260721656072" z="0.02"/>
+      <right-front-bottom-point x="-0.125241802292" y="0.257001751438" z="0.02"/>
+      <right-back-bottom-point x="-0.125241802292" y="0.257001751438" z="0.0"/>
+      <left-back-top-point x="-0.161275530933" y="0.208577324857" z="0.0"/>
+      <left-front-top-point x="-0.161275530933" y="0.208577324857" z="0.02"/>
+      <right-front-top-point x="-0.156193441833" y="0.20560140115" z="0.02"/>
+      <right-back-top-point x="-0.156193441833" y="0.20560140115" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole5">
-      <left-back-bottom-point x="-0.109765982521" y="0.282701926581" z="0.0"/>
-      <left-front-bottom-point x="-0.109765982521" y="0.282701926581" z="0.02"/>
-      <right-front-bottom-point x="-0.102861177827" y="0.278427437009" z="0.02"/>
-      <right-back-bottom-point x="-0.102861177827" y="0.278427437009" z="0.0"/>
-      <left-back-top-point x="-0.143812786017" y="0.226161541265" z="0.0"/>
-      <left-front-top-point x="-0.143812786017" y="0.226161541265" z="0.02"/>
-      <right-front-top-point x="-0.138288942262" y="0.222741949607" z="0.02"/>
-      <right-back-top-point x="-0.138288942262" y="0.222741949607" z="0.0"/>
+      <left-back-bottom-point x="-0.118964707116" y="0.253115851826" z="0.0"/>
+      <left-front-bottom-point x="-0.118964707116" y="0.253115851826" z="0.02"/>
+      <right-front-bottom-point x="-0.106723914657" y="0.244898751014" z="0.02"/>
+      <right-back-bottom-point x="-0.106723914657" y="0.244898751014" z="0.0"/>
+      <left-back-top-point x="-0.151171765693" y="0.202492681461" z="0.0"/>
+      <left-front-top-point x="-0.151171765693" y="0.202492681461" z="0.02"/>
+      <right-front-top-point x="-0.141379131726" y="0.195919000811" z="0.02"/>
+      <right-back-top-point x="-0.141379131726" y="0.195919000811" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole6">
-      <left-back-bottom-point x="-0.0893963061231" y="0.269388626116" z="0.0"/>
-      <left-front-bottom-point x="-0.0893963061231" y="0.269388626116" z="0.02"/>
-      <right-front-bottom-point x="-0.0699520044197" y="0.254518839288" z="0.02"/>
-      <right-back-bottom-point x="-0.0699520044197" y="0.254518839288" z="0.0"/>
-      <left-back-top-point x="-0.127517044899" y="0.215510900893" z="0.0"/>
-      <left-front-top-point x="-0.127517044899" y="0.215510900893" z="0.02"/>
-      <right-front-top-point x="-0.111961603536" y="0.203615071431" z="0.02"/>
-      <right-back-top-point x="-0.111961603536" y="0.203615071431" z="0.0"/>
+      <left-back-bottom-point x="-0.0890472767451" y="0.231380762989" z="0.0"/>
+      <left-front-bottom-point x="-0.0890472767451" y="0.231380762989" z="0.02"/>
+      <right-front-bottom-point x="-0.0834392751587" y="0.226636010929" z="0.02"/>
+      <right-back-bottom-point x="-0.0834392751587" y="0.226636010929" z="0.0"/>
+      <left-back-top-point x="-0.127237821396" y="0.185104610392" z="0.0"/>
+      <left-front-top-point x="-0.127237821396" y="0.185104610392" z="0.02"/>
+      <right-front-top-point x="-0.122751420127" y="0.181308808743" z="0.02"/>
+      <right-back-top-point x="-0.122751420127" y="0.181308808743" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole7">
-      <left-back-bottom-point x="-0.0637832026745" y="0.249299612022" z="0.0"/>
-      <left-front-bottom-point x="-0.0637832026745" y="0.249299612022" z="0.02"/>
-      <right-front-bottom-point x="-0.0459268991048" y="0.232615097183" z="0.02"/>
-      <right-back-bottom-point x="-0.0459268991048" y="0.232615097183" z="0.0"/>
-      <left-back-top-point x="-0.10702656214" y="0.199439689618" z="0.0"/>
-      <left-front-top-point x="-0.10702656214" y="0.199439689618" z="0.02"/>
-      <right-front-top-point x="-0.0927415192839" y="0.186092077746" z="0.02"/>
-      <right-back-top-point x="-0.0927415192839" y="0.186092077746" z="0.0"/>
+      <left-back-bottom-point x="-0.0672062719135" y="0.211468270166" z="0.0"/>
+      <left-front-bottom-point x="-0.0672062719135" y="0.211468270166" z="0.02"/>
+      <right-front-bottom-point x="-0.0474339430799" y="0.189507332757" z="0.02"/>
+      <right-back-bottom-point x="-0.0474339430799" y="0.189507332757" z="0.0"/>
+      <left-back-top-point x="-0.109765017531" y="0.169174616133" z="0.0"/>
+      <left-front-top-point x="-0.109765017531" y="0.169174616133" z="0.02"/>
+      <right-front-top-point x="-0.0939471544639" y="0.151605866206" z="0.02"/>
+      <right-back-top-point x="-0.0939471544639" y="0.151605866206" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole8">
-      <left-back-bottom-point x="-0.0241773373879" y="0.208458066033" z="0.0"/>
-      <left-front-bottom-point x="-0.0241773373879" y="0.208458066033" z="0.02"/>
-      <right-front-bottom-point x="-0.0190548110661" y="0.202008931417" z="0.02"/>
-      <right-back-bottom-point x="-0.0190548110661" y="0.202008931417" z="0.0"/>
-      <left-back-top-point x="-0.0753418699103" y="0.166766452826" z="0.0"/>
-      <left-front-top-point x="-0.0753418699103" y="0.166766452826" z="0.02"/>
-      <right-front-top-point x="-0.0712438488529" y="0.161607145134" z="0.02"/>
-      <right-back-top-point x="-0.0712438488529" y="0.161607145134" z="0.0"/>
+      <left-back-bottom-point x="-0.0427771009692" y="0.183644483106" z="0.0"/>
+      <left-front-bottom-point x="-0.0427771009692" y="0.183644483106" z="0.02"/>
+      <right-front-bottom-point x="-0.0385070060749" y="0.177991948933" z="0.02"/>
+      <right-back-bottom-point x="-0.0385070060749" y="0.177991948933" z="0.0"/>
+      <left-back-top-point x="-0.0902216807753" y="0.146915586485" z="0.0"/>
+      <left-front-top-point x="-0.0902216807753" y="0.146915586485" z="0.02"/>
+      <right-front-top-point x="-0.0868056048599" y="0.142393559147" z="0.02"/>
+      <right-back-top-point x="-0.0868056048599" y="0.142393559147" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole9">
-      <left-back-bottom-point x="-0.0143577066824" y="0.195791143827" z="0.0"/>
-      <left-front-bottom-point x="-0.0143577066824" y="0.195791143827" z="0.02"/>
-      <right-front-bottom-point x="-0.00957415353061" y="0.189129219216" z="0.02"/>
-      <right-back-bottom-point x="-0.00957415353061" y="0.189129219216" z="0.0"/>
-      <left-back-top-point x="-0.0674861653459" y="0.156632915061" z="0.0"/>
-      <left-front-top-point x="-0.0674861653459" y="0.156632915061" z="0.02"/>
-      <right-front-top-point x="-0.0636593228245" y="0.151303375373" z="0.02"/>
-      <right-back-top-point x="-0.0636593228245" y="0.151303375373" z="0.0"/>
+      <left-back-bottom-point x="-0.0341583213915" y="0.171935653833" z="0.0"/>
+      <left-front-bottom-point x="-0.0341583213915" y="0.171935653833" z="0.02"/>
+      <right-front-bottom-point x="-0.0299470188015" y="0.165751339644" z="0.02"/>
+      <right-back-bottom-point x="-0.0299470188015" y="0.165751339644" z="0.0"/>
+      <left-back-top-point x="-0.0833266571132" y="0.137548523066" z="0.0"/>
+      <left-front-top-point x="-0.0833266571132" y="0.137548523066" z="0.02"/>
+      <right-front-top-point x="-0.0799576150412" y="0.132601071715" z="0.02"/>
+      <right-back-top-point x="-0.0799576150412" y="0.132601071715" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole10">
-      <left-back-bottom-point x="-0.00494172068167" y="0.182326473608" z="0.0"/>
-      <left-front-bottom-point x="-0.00494172068167" y="0.182326473608" z="0.02"/>
-      <right-front-bottom-point x="-0.000510995695856" y="0.175459101996" z="0.02"/>
-      <right-back-bottom-point x="-0.000510995695856" y="0.175459101996" z="0.0"/>
-      <left-back-top-point x="-0.0599533765453" y="0.145861178887" z="0.0"/>
-      <left-front-top-point x="-0.0599533765453" y="0.145861178887" z="0.02"/>
-      <right-front-top-point x="-0.0564087965567" y="0.140367281596" z="0.02"/>
-      <right-back-top-point x="-0.0564087965567" y="0.140367281596" z="0.0"/>
+      <left-back-bottom-point x="-0.0259190869962" y="0.159508274541" z="0.0"/>
+      <left-front-bottom-point x="-0.0259190869962" y="0.159508274541" z="0.02"/>
+      <right-front-bottom-point x="-0.0220951234362" y="0.153248408294" z="0.02"/>
+      <right-back-bottom-point x="-0.0220951234362" y="0.153248408294" z="0.0"/>
+      <left-back-top-point x="-0.076735269597" y="0.127606619633" z="0.0"/>
+      <left-front-top-point x="-0.076735269597" y="0.127606619633" z="0.02"/>
+      <right-front-top-point x="-0.0736760987489" y="0.122598726635" z="0.02"/>
+      <right-back-top-point x="-0.0736760987489" y="0.122598726635" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole11">
-      <left-back-bottom-point x="0.00369536422021" y="0.168573249123" z="0.0"/>
-      <left-front-bottom-point x="0.00369536422021" y="0.168573249123" z="0.02"/>
-      <right-front-bottom-point x="0.0115995252423" y="0.154498274678" z="0.02"/>
-      <right-back-bottom-point x="0.0115995252423" y="0.154498274678" z="0.0"/>
-      <left-back-top-point x="-0.0530437086238" y="0.134858599299" z="0.0"/>
-      <left-front-top-point x="-0.0530437086238" y="0.134858599299" z="0.02"/>
-      <right-front-top-point x="-0.0467203798062" y="0.123598619742" z="0.02"/>
-      <right-back-top-point x="-0.0467203798062" y="0.123598619742" z="0.0"/>
+      <left-back-bottom-point x="-0.014909522507" y="0.14045297698" z="0.0"/>
+      <left-front-bottom-point x="-0.014909522507" y="0.14045297698" z="0.02"/>
+      <right-front-bottom-point x="-0.0114986682551" y="0.133817169493" z="0.02"/>
+      <right-back-bottom-point x="-0.0114986682551" y="0.133817169493" z="0.0"/>
+      <left-back-top-point x="-0.0679276180056" y="0.112362381584" z="0.0"/>
+      <left-front-top-point x="-0.0679276180056" y="0.112362381584" z="0.02"/>
+      <right-front-top-point x="-0.0651989346041" y="0.107053735595" z="0.02"/>
+      <right-back-top-point x="-0.0651989346041" y="0.107053735595" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole12">
-      <left-back-bottom-point x="0.0153514649193" y="0.147198886443" z="0.0"/>
-      <left-front-bottom-point x="0.0153514649193" y="0.147198886443" z="0.02"/>
-      <right-front-bottom-point x="0.0222380659683" y="0.132484532983" z="0.02"/>
-      <right-back-bottom-point x="0.0222380659683" y="0.132484532983" z="0.0"/>
-      <left-back-top-point x="-0.0437188280645" y="0.117759109154" z="0.0"/>
-      <left-front-top-point x="-0.0437188280645" y="0.117759109154" z="0.02"/>
-      <right-front-top-point x="-0.0382095472254" y="0.105987626386" z="0.02"/>
-      <right-back-top-point x="-0.0382095472254" y="0.105987626386" z="0.0"/>
+      <left-back-bottom-point x="-0.00523812184702" y="0.12044048453" z="0.0"/>
+      <left-front-bottom-point x="-0.00523812184702" y="0.12044048453" z="0.02"/>
+      <right-front-bottom-point x="0.00295288109308" y="0.0996878482119" z="0.02"/>
+      <right-back-bottom-point x="0.00295288109308" y="0.0996878482119" z="0.0"/>
+      <left-back-top-point x="-0.0601904974776" y="0.0963523876241" z="0.0"/>
+      <left-front-top-point x="-0.0601904974776" y="0.0963523876241" z="0.02"/>
+      <right-front-top-point x="-0.0536376951255" y="0.0797502785696" z="0.02"/>
+      <right-back-top-point x="-0.0536376951255" y="0.0797502785696" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole13">
-      <left-back-bottom-point x="0.0312481692024" y="0.109656633033" z="0.0"/>
-      <left-front-bottom-point x="0.0312481692024" y="0.109656633033" z="0.02"/>
-      <right-front-bottom-point x="0.0338094714196" y="0.102096109854" z="0.02"/>
-      <right-back-bottom-point x="0.0338094714196" y="0.102096109854" z="0.0"/>
-      <left-back-top-point x="-0.0310014646381" y="0.0877253064265" z="0.0"/>
-      <left-front-top-point x="-0.0310014646381" y="0.0877253064265" z="0.02"/>
-      <right-front-top-point x="-0.0289524228643" y="0.0816768878832" z="0.02"/>
-      <right-back-top-point x="-0.0289524228643" y="0.0816768878832" z="0.0"/>
+      <left-back-bottom-point x="0.00528133765422" y="0.0928146453219" z="0.0"/>
+      <left-front-bottom-point x="0.00528133765422" y="0.0928146453219" z="0.02"/>
+      <right-front-bottom-point x="0.0145638255313" y="0.0568520244877" z="0.02"/>
+      <right-back-bottom-point x="0.0145638255313" y="0.0568520244877" z="0.0"/>
+      <left-back-top-point x="-0.0517749298766" y="0.0742517162575" z="0.0"/>
+      <left-front-top-point x="-0.0517749298766" y="0.0742517162575" z="0.02"/>
+      <right-front-top-point x="-0.0443489395749" y="0.0454816195901" z="0.02"/>
+      <right-back-top-point x="-0.0443489395749" y="0.0454816195901" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole14">
-      <left-back-bottom-point x="0.0440202080845" y="0.0625372269365" z="0.0"/>
-      <left-front-bottom-point x="0.0440202080845" y="0.0625372269365" z="0.02"/>
-      <right-front-bottom-point x="0.0454542639209" y="0.0545849988156" z="0.02"/>
-      <right-back-bottom-point x="0.0454542639209" y="0.0545849988156" z="0.0"/>
-      <left-back-top-point x="-0.0207838335324" y="0.0500297815492" z="0.0"/>
-      <left-front-top-point x="-0.0207838335324" y="0.0500297815492" z="0.02"/>
-      <right-front-top-point x="-0.0196365888633" y="0.0436679990525" z="0.02"/>
-      <right-back-top-point x="-0.0196365888633" y="0.0436679990525" z="0.0"/>
+      <left-back-bottom-point x="0.0158675126554" y="0.049622726196" z="0.0"/>
+      <left-front-bottom-point x="0.0158675126554" y="0.049622726196" z="0.02"/>
+      <right-front-bottom-point x="0.0187174094554" y="0.027711176234" z="0.02"/>
+      <right-back-bottom-point x="0.0187174094554" y="0.027711176234" z="0.0"/>
+      <left-back-top-point x="-0.0433059898757" y="0.0396981809568" z="0.0"/>
+      <left-front-top-point x="-0.0433059898757" y="0.0396981809568" z="0.02"/>
+      <right-front-top-point x="-0.0410260724357" y="0.0221689409872" z="0.02"/>
+      <right-back-top-point x="-0.0410260724357" y="0.0221689409872" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole15">
-      <left-back-bottom-point x="0.0485891504009" y="0.0304822938574" z="0.0"/>
-      <left-front-bottom-point x="0.0485891504009" y="0.0304822938574" z="0.02"/>
-      <right-front-bottom-point x="0.049943740266" y="0.00609329625687" z="0.02"/>
-      <right-back-bottom-point x="0.049943740266" y="0.00609329625687" z="0.0"/>
-      <left-back-top-point x="-0.0171286796793" y="0.0243858350859" z="0.0"/>
-      <left-front-top-point x="-0.0171286796793" y="0.0243858350859" z="0.02"/>
-      <right-front-top-point x="-0.0160450077872" y="0.0048746370055" z="0.02"/>
-      <right-back-top-point x="-0.0160450077872" y="0.0048746370055" z="0.0"/>
+      <left-back-bottom-point x="0.0199488547873" y="0.00553936023352" z="0.0"/>
+      <left-front-bottom-point x="0.0199488547873" y="0.00553936023352" z="0.02"/>
+      <right-front-bottom-point x="0.0199965695879" y="-0.00143465517683" z="0.02"/>
+      <right-back-bottom-point x="0.0199965695879" y="-0.00143465517683" z="0.0"/>
+      <left-back-top-point x="-0.0400409161702" y="0.00443148818682" z="0.0"/>
+      <left-front-top-point x="-0.0400409161702" y="0.00443148818682" z="0.02"/>
+      <right-front-top-point x="-0.0400027443297" y="-0.00114772414146" z="0.02"/>
+      <right-back-top-point x="-0.0400027443297" y="-0.00114772414146" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole16">
-      <left-back-bottom-point x="0.0499962265467" y="-0.00157812069451" z="0.0"/>
-      <left-front-bottom-point x="0.0499962265467" y="-0.00157812069451" z="0.02"/>
-      <right-front-bottom-point x="0.0495077118905" y="-0.0180185405815" z="0.02"/>
-      <right-back-bottom-point x="0.0495077118905" y="-0.0180185405815" z="0.0"/>
-      <left-back-top-point x="-0.0160030187626" y="-0.00126249655561" z="0.0"/>
-      <left-front-top-point x="-0.0160030187626" y="-0.00126249655561" z="0.02"/>
-      <right-front-top-point x="-0.0163938304876" y="-0.0144148324652" z="0.02"/>
-      <right-back-top-point x="-0.0163938304876" y="-0.0144148324652" z="0.0"/>
+      <left-back-bottom-point x="0.019552465355" y="-0.0163804914378" z="0.0"/>
+      <left-front-bottom-point x="0.019552465355" y="-0.0163804914378" z="0.02"/>
+      <right-front-bottom-point x="0.0175282511001" y="-0.0384309744516" z="0.02"/>
+      <right-back-bottom-point x="0.0175282511001" y="-0.0384309744516" z="0.0"/>
+      <left-back-top-point x="-0.040358027716" y="-0.0131043931502" z="0.0"/>
+      <left-front-top-point x="-0.040358027716" y="-0.0131043931502" z="0.02"/>
+      <right-front-top-point x="-0.0419773991199" y="-0.0307447795612" z="0.02"/>
+      <right-back-top-point x="-0.0419773991199" y="-0.0307447795612" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole17">
-      <left-back-bottom-point x="0.0472810762101" y="-0.0422740718967" z="0.0"/>
-      <left-front-bottom-point x="0.0472810762101" y="-0.0422740718967" z="0.02"/>
-      <right-front-bottom-point x="0.0461180088358" y="-0.0504682505439" z="0.02"/>
-      <right-back-bottom-point x="0.0461180088358" y="-0.0504682505439" z="0.0"/>
-      <left-back-top-point x="-0.0181751390319" y="-0.0338192575174" z="0.0"/>
-      <left-front-top-point x="-0.0181751390319" y="-0.0338192575174" z="0.02"/>
-      <right-front-top-point x="-0.0191055929313" y="-0.0403746004351" z="0.02"/>
-      <right-back-top-point x="-0.0191055929313" y="-0.0403746004351" z="0.0"/>
+      <left-back-bottom-point x="0.0164709171235" y="-0.0458802277672" z="0.0"/>
+      <left-front-bottom-point x="0.0164709171235" y="-0.0458802277672" z="0.02"/>
+      <right-front-bottom-point x="0.0122980577979" y="-0.0675414347461" z="0.02"/>
+      <right-back-bottom-point x="0.0122980577979" y="-0.0675414347461" z="0.0"/>
+      <left-back-top-point x="-0.0428232663012" y="-0.0367041822138" z="0.0"/>
+      <left-front-top-point x="-0.0428232663012" y="-0.0367041822138" z="0.02"/>
+      <right-front-top-point x="-0.0461615537617" y="-0.0540331477969" z="0.02"/>
+      <right-back-top-point x="-0.0461615537617" y="-0.0540331477969" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole18">
-      <left-back-bottom-point x="0.0415278635777" y="-0.0742955782207" z="0.0"/>
-      <left-front-bottom-point x="0.0415278635777" y="-0.0742955782207" z="0.02"/>
-      <right-front-bottom-point x="0.0299703221874" y="-0.113218370254" z="0.02"/>
-      <right-back-bottom-point x="0.0299703221874" y="-0.113218370254" z="0.0"/>
-      <left-back-top-point x="-0.0227777091378" y="-0.0594364625766" z="0.0"/>
-      <left-front-top-point x="-0.0227777091378" y="-0.0594364625766" z="0.02"/>
-      <right-front-top-point x="-0.0320237422501" y="-0.0905746962035" z="0.02"/>
-      <right-back-top-point x="-0.0320237422501" y="-0.0905746962035" z="0.0"/>
+      <left-back-bottom-point x="0.00179120198851" y="-0.10292579114" z="0.0"/>
+      <left-front-bottom-point x="0.00179120198851" y="-0.10292579114" z="0.02"/>
+      <right-front-bottom-point x="-0.000851707776235" y="-0.109891905746" z="0.02"/>
+      <right-back-bottom-point x="-0.000851707776235" y="-0.109891905746" z="0.0"/>
+      <left-back-top-point x="-0.0545670384092" y="-0.0823406329123" z="0.0"/>
+      <left-front-top-point x="-0.0545670384092" y="-0.0823406329123" z="0.02"/>
+      <right-front-top-point x="-0.056681366221" y="-0.087913524597" z="0.02"/>
+      <right-back-top-point x="-0.056681366221" y="-0.087913524597" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole19">
-      <left-back-bottom-point x="0.0270631214461" y="-0.120881096321" z="0.0"/>
-      <left-front-bottom-point x="0.0270631214461" y="-0.120881096321" z="0.02"/>
-      <right-front-bottom-point x="0.0207393751834" y="-0.135852229331" z="0.02"/>
-      <right-back-bottom-point x="0.0207393751834" y="-0.135852229331" z="0.0"/>
-      <left-back-top-point x="-0.0343495028431" y="-0.0967048770568" z="0.0"/>
-      <left-front-top-point x="-0.0343495028431" y="-0.0967048770568" z="0.02"/>
-      <right-front-top-point x="-0.0394084998533" y="-0.108681783465" z="0.02"/>
-      <right-back-top-point x="-0.0394084998533" y="-0.108681783465" z="0.0"/>
+      <left-back-bottom-point x="-0.00660056801513" y="-0.123502026665" z="0.0"/>
+      <left-front-bottom-point x="-0.00660056801513" y="-0.123502026665" z="0.02"/>
+      <right-front-bottom-point x="-0.0130579110046" y="-0.136901136309" z="0.02"/>
+      <right-back-bottom-point x="-0.0130579110046" y="-0.136901136309" z="0.0"/>
+      <left-back-top-point x="-0.0612804544121" y="-0.098801621332" z="0.0"/>
+      <left-front-top-point x="-0.0612804544121" y="-0.098801621332" z="0.02"/>
+      <right-front-top-point x="-0.0664463288037" y="-0.109520909047" z="0.02"/>
+      <right-back-top-point x="-0.0664463288037" y="-0.109520909047" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole20">
-      <left-back-bottom-point x="0.0136362978949" y="-0.15059124994" z="0.0"/>
-      <left-front-bottom-point x="0.0136362978949" y="-0.15059124994" z="0.02"/>
-      <right-front-bottom-point x="0.00992440938204" y="-0.15761927815" z="0.02"/>
-      <right-back-bottom-point x="0.00992440938204" y="-0.15761927815" z="0.0"/>
-      <left-back-top-point x="-0.0450909616841" y="-0.120472999952" z="0.0"/>
-      <left-front-top-point x="-0.0450909616841" y="-0.120472999952" z="0.02"/>
-      <right-front-top-point x="-0.0480604724944" y="-0.12609542252" z="0.02"/>
-      <right-back-top-point x="-0.0480604724944" y="-0.12609542252" z="0.0"/>
+      <left-back-bottom-point x="-0.0164323551072" y="-0.143290252863" z="0.0"/>
+      <left-front-bottom-point x="-0.0164323551072" y="-0.143290252863" z="0.02"/>
+      <right-front-bottom-point x="-0.020142651267" y="-0.149913836284" z="0.02"/>
+      <right-back-bottom-point x="-0.020142651267" y="-0.149913836284" z="0.0"/>
+      <left-back-top-point x="-0.0691458840858" y="-0.114632202291" z="0.0"/>
+      <left-front-top-point x="-0.0691458840858" y="-0.114632202291" z="0.02"/>
+      <right-front-top-point x="-0.0721141210136" y="-0.119931069027" z="0.02"/>
+      <right-back-top-point x="-0.0721141210136" y="-0.119931069027" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole21">
-      <left-back-bottom-point x="0.00584308360628" y="-0.164905219913" z="0.0"/>
-      <left-front-bottom-point x="0.00584308360628" y="-0.164905219913" z="0.02"/>
-      <right-front-bottom-point x="-0.00250075505658" y="-0.178589386739" z="0.02"/>
-      <right-back-bottom-point x="-0.00250075505658" y="-0.178589386739" z="0.0"/>
-      <left-back-top-point x="-0.051325533115" y="-0.13192417593" z="0.0"/>
-      <left-front-top-point x="-0.051325533115" y="-0.13192417593" z="0.02"/>
-      <right-front-top-point x="-0.0580006040453" y="-0.142871509391" z="0.02"/>
-      <right-back-top-point x="-0.0580006040453" y="-0.142871509391" z="0.0"/>
+      <left-back-bottom-point x="-0.0277279591423" y="-0.162353987945" z="0.0"/>
+      <left-front-bottom-point x="-0.0277279591423" y="-0.162353987945" z="0.02"/>
+      <right-front-bottom-point x="-0.0319052621135" y="-0.168668316625" z="0.02"/>
+      <right-back-bottom-point x="-0.0319052621135" y="-0.168668316625" z="0.0"/>
+      <left-back-top-point x="-0.0781823673139" y="-0.129883190356" z="0.0"/>
+      <left-front-top-point x="-0.0781823673139" y="-0.129883190356" z="0.02"/>
+      <right-front-top-point x="-0.0815242096908" y="-0.1349346533" z="0.02"/>
+      <right-back-top-point x="-0.0815242096908" y="-0.1349346533" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole22">
-      <left-back-bottom-point x="-0.00709578832482" y="-0.185535148287" z="0.0"/>
-      <left-front-bottom-point x="-0.00709578832482" y="-0.185535148287" z="0.02"/>
-      <right-front-bottom-point x="-0.0318776738995" y="-0.217566797307" z="0.02"/>
-      <right-back-bottom-point x="-0.0318776738995" y="-0.217566797307" z="0.0"/>
-      <left-back-top-point x="-0.0616766306599" y="-0.14842811863" z="0.0"/>
-      <left-front-top-point x="-0.0616766306599" y="-0.14842811863" z="0.02"/>
-      <right-front-top-point x="-0.0815021391196" y="-0.174053437846" z="0.02"/>
-      <right-back-top-point x="-0.0815021391196" y="-0.174053437846" z="0.0"/>
+      <left-back-bottom-point x="-0.0544342489995" y="-0.197787997552" z="0.0"/>
+      <left-front-bottom-point x="-0.0544342489995" y="-0.197787997552" z="0.02"/>
+      <right-front-bottom-point x="-0.0594368715522" y="-0.203351681501" z="0.02"/>
+      <right-back-bottom-point x="-0.0594368715522" y="-0.203351681501" z="0.0"/>
+      <left-back-top-point x="-0.0995473991996" y="-0.158230398042" z="0.0"/>
+      <left-front-top-point x="-0.0995473991996" y="-0.158230398042" z="0.02"/>
+      <right-front-top-point x="-0.103549497242" y="-0.162681345201" z="0.02"/>
+      <right-back-top-point x="-0.103549497242" y="-0.162681345201" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole23">
-      <left-back-bottom-point x="-0.0373805587075" y="-0.223686849651" z="0.0"/>
-      <left-front-bottom-point x="-0.0373805587075" y="-0.223686849651" z="0.02"/>
-      <right-front-bottom-point x="-0.042854047458" y="-0.229481583559" z="0.02"/>
-      <right-back-bottom-point x="-0.042854047458" y="-0.229481583559" z="0.0"/>
-      <left-back-top-point x="-0.085904446966" y="-0.178949479721" z="0.0"/>
-      <left-front-top-point x="-0.085904446966" y="-0.178949479721" z="0.02"/>
-      <right-front-top-point x="-0.0902832379664" y="-0.183585266848" z="0.02"/>
-      <right-back-top-point x="-0.0902832379664" y="-0.183585266848" z="0.0"/>
+      <left-back-bottom-point x="-0.0644127704164" y="-0.208619621418" z="0.0"/>
+      <left-front-bottom-point x="-0.0644127704164" y="-0.208619621418" z="0.02"/>
+      <right-front-bottom-point x="-0.0697645696187" y="-0.21401183101" z="0.02"/>
+      <right-back-bottom-point x="-0.0697645696187" y="-0.21401183101" z="0.0"/>
+      <left-back-top-point x="-0.107530216333" y="-0.166895697134" z="0.0"/>
+      <left-front-top-point x="-0.107530216333" y="-0.166895697134" z="0.02"/>
+      <right-front-top-point x="-0.111811655695" y="-0.171209464808" z="0.02"/>
+      <right-back-top-point x="-0.111811655695" y="-0.171209464808" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole24">
-      <left-back-bottom-point x="-0.0487410265805" y="-0.235413014111" z="0.0"/>
-      <left-front-bottom-point x="-0.0487410265805" y="-0.235413014111" z="0.02"/>
-      <right-front-bottom-point x="-0.0545154492869" y="-0.240949615874" z="0.02"/>
-      <right-back-bottom-point x="-0.0545154492869" y="-0.240949615874" z="0.0"/>
-      <left-back-top-point x="-0.0949928212644" y="-0.188330411289" z="0.0"/>
-      <left-front-top-point x="-0.0949928212644" y="-0.188330411289" z="0.02"/>
-      <right-front-top-point x="-0.0996123594295" y="-0.192759692699" z="0.02"/>
-      <right-back-top-point x="-0.0996123594295" y="-0.192759692699" z="0.0"/>
+      <left-back-bottom-point x="-0.0750140448062" y="-0.21904510534" z="0.0"/>
+      <left-front-bottom-point x="-0.0750140448062" y="-0.21904510534" z="0.02"/>
+      <right-front-bottom-point x="-0.086146821476" y="-0.228956207988" z="0.02"/>
+      <right-back-bottom-point x="-0.086146821476" y="-0.228956207988" z="0.0"/>
+      <left-back-top-point x="-0.116011235845" y="-0.175236084272" z="0.0"/>
+      <left-front-top-point x="-0.116011235845" y="-0.175236084272" z="0.02"/>
+      <right-front-top-point x="-0.124917457181" y="-0.18316496639" z="0.02"/>
+      <right-back-top-point x="-0.124917457181" y="-0.18316496639" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole25">
-      <left-back-bottom-point x="-0.0667615036236" y="-0.251851828787" z="0.0"/>
-      <left-front-bottom-point x="-0.0667615036236" y="-0.251851828787" z="0.02"/>
-      <right-front-bottom-point x="-0.0924077571426" y="-0.271494291689" z="0.02"/>
-      <right-back-bottom-point x="-0.0924077571426" y="-0.271494291689" z="0.0"/>
-      <left-back-top-point x="-0.109409202899" y="-0.201481463029" z="0.0"/>
-      <left-front-top-point x="-0.109409202899" y="-0.201481463029" z="0.02"/>
-      <right-front-top-point x="-0.129926205714" y="-0.217195433351" z="0.02"/>
-      <right-back-top-point x="-0.129926205714" y="-0.217195433351" z="0.0"/>
+      <left-back-bottom-point x="-0.109461597402" y="-0.246812992445" z="0.0"/>
+      <left-front-bottom-point x="-0.109461597402" y="-0.246812992445" z="0.02"/>
+      <right-front-bottom-point x="-0.115761703192" y="-0.251049361405" z="0.02"/>
+      <right-back-bottom-point x="-0.115761703192" y="-0.251049361405" z="0.0"/>
+      <left-back-top-point x="-0.143569277922" y="-0.197450393956" z="0.0"/>
+      <left-front-top-point x="-0.143569277922" y="-0.197450393956" z="0.02"/>
+      <right-front-top-point x="-0.148609362554" y="-0.200839489124" z="0.02"/>
+      <right-back-top-point x="-0.148609362554" y="-0.200839489124" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole26">
-      <left-back-bottom-point x="-0.0993378735112" y="-0.276154297545" z="0.0"/>
-      <left-front-bottom-point x="-0.0993378735112" y="-0.276154297545" z="0.02"/>
-      <right-front-bottom-point x="-0.106036062251" y="-0.280422089648" z="0.02"/>
-      <right-back-bottom-point x="-0.106036062251" y="-0.280422089648" z="0.0"/>
-      <left-back-top-point x="-0.135470298809" y="-0.220923438036" z="0.0"/>
-      <left-front-top-point x="-0.135470298809" y="-0.220923438036" z="0.02"/>
-      <right-front-top-point x="-0.140828849801" y="-0.224337671719" z="0.02"/>
-      <right-back-top-point x="-0.140828849801" y="-0.224337671719" z="0.0"/>
+      <left-back-bottom-point x="-0.121850965683" y="-0.254929172408" z="0.0"/>
+      <left-front-bottom-point x="-0.121850965683" y="-0.254929172408" z="0.02"/>
+      <right-front-bottom-point x="-0.128207935578" y="-0.258764698478" z="0.02"/>
+      <right-back-bottom-point x="-0.128207935578" y="-0.258764698478" z="0.0"/>
+      <left-back-top-point x="-0.153480772546" y="-0.203943337926" z="0.0"/>
+      <left-front-top-point x="-0.153480772546" y="-0.203943337926" z="0.02"/>
+      <right-front-top-point x="-0.158566348462" y="-0.207011758782" z="0.02"/>
+      <right-back-top-point x="-0.158566348462" y="-0.207011758782" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole27">
-      <left-back-bottom-point x="-0.113028729135" y="-0.284641168326" z="0.0"/>
-      <left-front-bottom-point x="-0.113028729135" y="-0.284641168326" z="0.02"/>
-      <right-front-bottom-point x="-0.120103507274" y="-0.288674750565" z="0.02"/>
-      <right-back-bottom-point x="-0.120103507274" y="-0.288674750565" z="0.0"/>
-      <left-back-top-point x="-0.146422983308" y="-0.227712934661" z="0.0"/>
-      <left-front-top-point x="-0.146422983308" y="-0.227712934661" z="0.02"/>
-      <right-front-top-point x="-0.152082805819" y="-0.230939800452" z="0.02"/>
-      <right-back-top-point x="-0.152082805819" y="-0.230939800452" z="0.0"/>
+      <left-back-bottom-point x="-0.134639552067" y="-0.262431591423" z="0.0"/>
+      <left-front-bottom-point x="-0.134639552067" y="-0.262431591423" z="0.02"/>
+      <right-front-bottom-point x="-0.147943021208" y="-0.269371405966" z="0.02"/>
+      <right-back-bottom-point x="-0.147943021208" y="-0.269371405966" z="0.0"/>
+      <left-back-top-point x="-0.163711641654" y="-0.209945273138" z="0.0"/>
+      <left-front-top-point x="-0.163711641654" y="-0.209945273138" z="0.02"/>
+      <right-front-top-point x="-0.174354416966" y="-0.215497124773" z="0.02"/>
+      <right-back-top-point x="-0.174354416966" y="-0.215497124773" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole28">
-      <left-back-bottom-point x="-0.134737323329" y="-0.296308546563" z="0.0"/>
-      <left-front-bottom-point x="-0.134737323329" y="-0.296308546563" z="0.02"/>
-      <right-front-bottom-point x="-0.141779523293" y="-0.299658305106" z="0.02"/>
-      <right-back-bottom-point x="-0.141779523293" y="-0.299658305106" z="0.0"/>
-      <left-back-top-point x="-0.163789858663" y="-0.23704683725" z="0.0"/>
-      <left-front-top-point x="-0.163789858663" y="-0.23704683725" z="0.02"/>
-      <right-front-top-point x="-0.169423618634" y="-0.239726644085" z="0.02"/>
-      <right-back-top-point x="-0.169423618634" y="-0.239726644085" z="0.0"/>
+      <left-back-bottom-point x="-0.154345021175" y="-0.272416641005" z="0.0"/>
+      <left-front-bottom-point x="-0.154345021175" y="-0.272416641005" z="0.02"/>
+      <right-front-bottom-point x="-0.161216136181" y="-0.27548211139" z="0.02"/>
+      <right-back-bottom-point x="-0.161216136181" y="-0.27548211139" z="0.0"/>
+      <left-back-top-point x="-0.17947601694" y="-0.217933312804" z="0.0"/>
+      <left-front-top-point x="-0.17947601694" y="-0.217933312804" z="0.02"/>
+      <right-front-top-point x="-0.184972908945" y="-0.220385689112" z="0.02"/>
+      <right-back-top-point x="-0.184972908945" y="-0.220385689112" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole29">
-      <left-back-bottom-point x="-0.149337749799" y="-0.30303032253" z="0.0"/>
-      <left-front-bottom-point x="-0.149337749799" y="-0.30303032253" z="0.02"/>
-      <right-front-bottom-point x="-0.172018093337" y="-0.311833141012" z="0.02"/>
-      <right-back-bottom-point x="-0.172018093337" y="-0.311833141012" z="0.0"/>
-      <left-back-top-point x="-0.175470199839" y="-0.242424258024" z="0.0"/>
-      <left-front-top-point x="-0.175470199839" y="-0.242424258024" z="0.02"/>
-      <right-front-top-point x="-0.19361447467" y="-0.24946651281" z="0.02"/>
-      <right-back-top-point x="-0.19361447467" y="-0.24946651281" z="0.0"/>
+      <left-back-bottom-point x="-0.181834630306" y="-0.283484673647" z="0.0"/>
+      <left-front-bottom-point x="-0.181834630306" y="-0.283484673647" z="0.02"/>
+      <right-front-bottom-point x="-0.210185337176" y="-0.291763453597" z="0.02"/>
+      <right-back-bottom-point x="-0.210185337176" y="-0.291763453597" z="0.0"/>
+      <left-back-top-point x="-0.201467704245" y="-0.226787738918" z="0.0"/>
+      <left-front-top-point x="-0.201467704245" y="-0.226787738918" z="0.02"/>
+      <right-front-top-point x="-0.224148269741" y="-0.233410762878" z="0.02"/>
+      <right-back-top-point x="-0.224148269741" y="-0.233410762878" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole30">
-      <left-back-bottom-point x="-0.203203870894" y="-0.320939798957" z="0.0"/>
-      <left-front-bottom-point x="-0.203203870894" y="-0.320939798957" z="0.02"/>
-      <right-front-bottom-point x="-0.218990371039" y="-0.324311309044" z="0.02"/>
-      <right-back-bottom-point x="-0.218990371039" y="-0.324311309044" z="0.0"/>
-      <left-back-top-point x="-0.218563096715" y="-0.256751839165" z="0.0"/>
-      <left-front-top-point x="-0.218563096715" y="-0.256751839165" z="0.02"/>
-      <right-front-top-point x="-0.231192296831" y="-0.259449047235" z="0.02"/>
-      <right-back-top-point x="-0.231192296831" y="-0.259449047235" z="0.0"/>
+      <left-back-bottom-point x="-0.224536700944" y="-0.294828462768" z="0.0"/>
+      <left-front-bottom-point x="-0.224536700944" y="-0.294828462768" z="0.02"/>
+      <right-front-bottom-point x="-0.231983958089" y="-0.296132503652" z="0.02"/>
+      <right-back-bottom-point x="-0.231983958089" y="-0.296132503652" z="0.0"/>
+      <left-back-top-point x="-0.235629360756" y="-0.235862770214" z="0.0"/>
+      <left-front-top-point x="-0.235629360756" y="-0.235862770214" z="0.02"/>
+      <right-front-top-point x="-0.241587166471" y="-0.236906002922" z="0.02"/>
+      <right-back-top-point x="-0.241587166471" y="-0.236906002922" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole31">
-      <left-back-bottom-point x="-0.227182353898" y="-0.325745754017" z="0.0"/>
-      <left-front-bottom-point x="-0.227182353898" y="-0.325745754017" z="0.02"/>
-      <right-front-bottom-point x="-0.235219567401" y="-0.326947568971" z="0.02"/>
-      <right-back-bottom-point x="-0.235219567401" y="-0.326947568971" z="0.0"/>
-      <left-back-top-point x="-0.237745883119" y="-0.260596603214" z="0.0"/>
-      <left-front-top-point x="-0.237745883119" y="-0.260596603214" z="0.02"/>
-      <right-front-top-point x="-0.244175653921" y="-0.261558055177" z="0.02"/>
-      <right-back-top-point x="-0.244175653921" y="-0.261558055177" z="0.0"/>
+      <left-back-bottom-point x="-0.239290515819" y="-0.297225062701" z="0.0"/>
+      <left-front-bottom-point x="-0.239290515819" y="-0.297225062701" z="0.02"/>
+      <right-front-bottom-point x="-0.253874141492" y="-0.298860234085" z="0.02"/>
+      <right-back-bottom-point x="-0.253874141492" y="-0.298860234085" z="0.0"/>
+      <left-back-top-point x="-0.247432412656" y="-0.237780050161" z="0.0"/>
+      <left-front-top-point x="-0.247432412656" y="-0.237780050161" z="0.02"/>
+      <right-front-top-point x="-0.259099313194" y="-0.239088187268" z="0.02"/>
+      <right-back-top-point x="-0.259099313194" y="-0.239088187268" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole32">
-      <left-back-bottom-point x="-0.251261555642" y="-0.328746257493" z="0.0"/>
-      <left-front-bottom-point x="-0.251261555642" y="-0.328746257493" z="0.02"/>
-      <right-front-bottom-point x="-0.3001000271" y="-0.329387293183" z="0.02"/>
-      <right-back-bottom-point x="-0.3001000271" y="-0.329387293183" z="0.0"/>
-      <left-back-top-point x="-0.257009244513" y="-0.262997005995" z="0.0"/>
-      <left-front-top-point x="-0.257009244513" y="-0.262997005995" z="0.02"/>
-      <right-front-top-point x="-0.29608002168" y="-0.263509834547" z="0.02"/>
-      <right-back-top-point x="-0.29608002168" y="-0.263509834547" z="0.0"/>
+      <left-back-bottom-point x="-0.298272751909" y="-0.299442993803" z="0.0"/>
+      <left-front-bottom-point x="-0.298272751909" y="-0.299442993803" z="0.02"/>
+      <right-front-bottom-point x="-0.305479002038" y="-0.29891607594" z="0.02"/>
+      <right-back-bottom-point x="-0.305479002038" y="-0.29891607594" z="0.0"/>
+      <left-back-top-point x="-0.294618201528" y="-0.239554395042" z="0.0"/>
+      <left-front-top-point x="-0.294618201528" y="-0.239554395042" z="0.02"/>
+      <right-front-top-point x="-0.30038320163" y="-0.239132860752" z="0.02"/>
+      <right-back-top-point x="-0.30038320163" y="-0.239132860752" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole33">
-      <left-back-bottom-point x="-0.308026902241" y="-0.328807683534" z="0.0"/>
-      <left-front-bottom-point x="-0.308026902241" y="-0.328807683534" z="0.02"/>
-      <right-front-bottom-point x="-0.340420857564" y="-0.324421515888" z="0.02"/>
-      <right-back-bottom-point x="-0.340420857564" y="-0.324421515888" z="0.0"/>
-      <left-back-top-point x="-0.302421521793" y="-0.263046146827" z="0.0"/>
-      <left-front-top-point x="-0.302421521793" y="-0.263046146827" z="0.02"/>
-      <right-front-top-point x="-0.328336686051" y="-0.259537212711" z="0.02"/>
-      <right-back-top-point x="-0.328336686051" y="-0.259537212711" z="0.0"/>
+      <left-back-bottom-point x="-0.334928052331" y="-0.294928650808" z="0.0"/>
+      <left-front-bottom-point x="-0.334928052331" y="-0.294928650808" z="0.02"/>
+      <right-front-bottom-point x="-0.349463248213" y="-0.291847318212" z="0.02"/>
+      <right-back-bottom-point x="-0.349463248213" y="-0.291847318212" z="0.0"/>
+      <left-back-top-point x="-0.323942441865" y="-0.235942920646" z="0.0"/>
+      <left-front-top-point x="-0.323942441865" y="-0.235942920646" z="0.02"/>
+      <right-front-top-point x="-0.33557059857" y="-0.23347785457" z="0.02"/>
+      <right-back-top-point x="-0.33557059857" y="-0.23347785457" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole34">
-      <left-back-bottom-point x="-0.356409573034" y="-0.321032050034" z="0.0"/>
-      <left-front-bottom-point x="-0.356409573034" y="-0.321032050034" z="0.02"/>
-      <right-front-bottom-point x="-0.364191293929" y="-0.319079654673" z="0.02"/>
-      <right-back-bottom-point x="-0.364191293929" y="-0.319079654673" z="0.0"/>
-      <left-back-top-point x="-0.341127658427" y="-0.256825640027" z="0.0"/>
-      <left-front-top-point x="-0.341127658427" y="-0.256825640027" z="0.02"/>
-      <right-front-top-point x="-0.347353035144" y="-0.255263723739" z="0.02"/>
-      <right-back-top-point x="-0.347353035144" y="-0.255263723739" z="0.0"/>
+      <left-back-bottom-point x="-0.356537539936" y="-0.290072413339" z="0.0"/>
+      <left-front-bottom-point x="-0.356537539936" y="-0.290072413339" z="0.02"/>
+      <right-front-bottom-point x="-0.370805789234" y="-0.28592710372" z="0.02"/>
+      <right-back-bottom-point x="-0.370805789234" y="-0.28592710372" z="0.0"/>
+      <left-back-top-point x="-0.341230031949" y="-0.232057930672" z="0.0"/>
+      <left-front-top-point x="-0.341230031949" y="-0.232057930672" z="0.02"/>
+      <right-front-top-point x="-0.352644631388" y="-0.228741682976" z="0.02"/>
+      <right-back-top-point x="-0.352644631388" y="-0.228741682976" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole35">
-      <left-back-bottom-point x="-0.379886368158" y="-0.314519814092" z="0.0"/>
-      <left-front-bottom-point x="-0.379886368158" y="-0.314519814092" z="0.02"/>
-      <right-front-bottom-point x="-0.387600850118" y="-0.31196483304" z="0.02"/>
-      <right-back-bottom-point x="-0.387600850118" y="-0.31196483304" z="0.0"/>
-      <left-back-top-point x="-0.359909094526" y="-0.251615851273" z="0.0"/>
-      <left-front-top-point x="-0.359909094526" y="-0.251615851273" z="0.02"/>
-      <right-front-top-point x="-0.366080680094" y="-0.249571866432" z="0.02"/>
-      <right-back-top-point x="-0.366080680094" y="-0.249571866432" z="0.0"/>
+      <left-back-bottom-point x="-0.377818954652" y="-0.283604393673" z="0.0"/>
+      <left-front-bottom-point x="-0.377818954652" y="-0.283604393673" z="0.02"/>
+      <right-front-bottom-point x="-0.391667964605" y="-0.278442571603" z="0.02"/>
+      <right-back-bottom-point x="-0.391667964605" y="-0.278442571603" z="0.0"/>
+      <left-back-top-point x="-0.358255163722" y="-0.226883514939" z="0.0"/>
+      <left-front-top-point x="-0.358255163722" y="-0.226883514939" z="0.02"/>
+      <right-front-top-point x="-0.369334371684" y="-0.222754057282" z="0.02"/>
+      <right-back-top-point x="-0.369334371684" y="-0.222754057282" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole36">
-      <left-back-bottom-point x="-0.402834761066" y="-0.306286828763" z="0.0"/>
-      <left-front-bottom-point x="-0.402834761066" y="-0.306286828763" z="0.02"/>
-      <right-front-bottom-point x="-0.425133373854" y="-0.296371901154" z="0.02"/>
-      <right-back-bottom-point x="-0.425133373854" y="-0.296371901154" z="0.0"/>
-      <left-back-top-point x="-0.378267808853" y="-0.245029463011" z="0.0"/>
-      <left-front-top-point x="-0.378267808853" y="-0.245029463011" z="0.02"/>
-      <right-front-top-point x="-0.396106699083" y="-0.237097520923" z="0.02"/>
-      <right-back-top-point x="-0.396106699083" y="-0.237097520923" z="0.0"/>
+      <left-back-bottom-point x="-0.411939430776" y="-0.269429001049" z="0.0"/>
+      <left-front-bottom-point x="-0.411939430776" y="-0.269429001049" z="0.02"/>
+      <right-front-bottom-point x="-0.418385233652" y="-0.266175744776" z="0.02"/>
+      <right-back-bottom-point x="-0.418385233652" y="-0.266175744776" z="0.0"/>
+      <left-back-top-point x="-0.385551544621" y="-0.215543200839" z="0.0"/>
+      <left-front-top-point x="-0.385551544621" y="-0.215543200839" z="0.02"/>
+      <right-front-top-point x="-0.390708186922" y="-0.212940595821" z="0.02"/>
+      <right-back-top-point x="-0.390708186922" y="-0.212940595821" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole37">
-      <left-back-bottom-point x="-0.432223757018" y="-0.292793319253" z="0.0"/>
-      <left-front-bottom-point x="-0.432223757018" y="-0.292793319253" z="0.02"/>
-      <right-front-bottom-point x="-0.446509034035" y="-0.284911813698" z="0.02"/>
-      <right-back-bottom-point x="-0.446509034035" y="-0.284911813698" z="0.0"/>
-      <left-back-top-point x="-0.401779005614" y="-0.234234655403" z="0.0"/>
-      <left-front-top-point x="-0.401779005614" y="-0.234234655403" z="0.02"/>
-      <right-front-top-point x="-0.413207227228" y="-0.227929450959" z="0.02"/>
-      <right-back-top-point x="-0.413207227228" y="-0.227929450959" z="0.0"/>
+      <left-back-bottom-point x="-0.431371849123" y="-0.259010739726" z="0.0"/>
+      <left-front-bottom-point x="-0.431371849123" y="-0.259010739726" z="0.02"/>
+      <right-front-bottom-point x="-0.443935844767" y="-0.251246967744" z="0.02"/>
+      <right-back-bottom-point x="-0.443935844767" y="-0.251246967744" z="0.0"/>
+      <left-back-top-point x="-0.401097479298" y="-0.20720859178" z="0.0"/>
+      <left-front-top-point x="-0.401097479298" y="-0.20720859178" z="0.02"/>
+      <right-front-top-point x="-0.411148675814" y="-0.200997574195" z="0.02"/>
+      <right-back-top-point x="-0.411148675814" y="-0.200997574195" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole38">
-      <left-back-bottom-point x="-0.460329429244" y="-0.276371664518" z="0.0"/>
-      <left-front-bottom-point x="-0.460329429244" y="-0.276371664518" z="0.02"/>
-      <right-front-bottom-point x="-0.467037451215" y="-0.271876795338" z="0.02"/>
-      <right-back-bottom-point x="-0.467037451215" y="-0.271876795338" z="0.0"/>
-      <left-back-top-point x="-0.424263543395" y="-0.221097331615" z="0.0"/>
-      <left-front-top-point x="-0.424263543395" y="-0.221097331615" z="0.02"/>
-      <right-front-top-point x="-0.429629960972" y="-0.21750143627" z="0.02"/>
-      <right-back-top-point x="-0.429629960972" y="-0.21750143627" z="0.0"/>
+      <left-back-bottom-point x="-0.450034046559" y="-0.247160723034" z="0.0"/>
+      <left-front-bottom-point x="-0.450034046559" y="-0.247160723034" z="0.02"/>
+      <right-front-bottom-point x="-0.456119469703" y="-0.242861961599" z="0.02"/>
+      <right-back-bottom-point x="-0.456119469703" y="-0.242861961599" z="0.0"/>
+      <left-back-top-point x="-0.416027237247" y="-0.197728578427" z="0.0"/>
+      <left-front-top-point x="-0.416027237247" y="-0.197728578427" z="0.02"/>
+      <right-front-top-point x="-0.420895575763" y="-0.194289569279" z="0.02"/>
+      <right-back-top-point x="-0.420895575763" y="-0.194289569279" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole39">
-      <left-back-bottom-point x="-0.473731416673" y="-0.267148157758" z="0.0"/>
-      <left-front-bottom-point x="-0.473731416673" y="-0.267148157758" z="0.02"/>
-      <right-front-bottom-point x="-0.480200597249" y="-0.262335130817" z="0.02"/>
-      <right-back-bottom-point x="-0.480200597249" y="-0.262335130817" z="0.0"/>
-      <left-back-top-point x="-0.434985133339" y="-0.213718526207" z="0.0"/>
-      <left-front-top-point x="-0.434985133339" y="-0.213718526207" z="0.02"/>
-      <right-front-top-point x="-0.4401604778" y="-0.209868104654" z="0.02"/>
-      <right-back-top-point x="-0.4401604778" y="-0.209868104654" z="0.0"/>
+      <left-back-bottom-point x="-0.462000542954" y="-0.238486482561" z="0.0"/>
+      <left-front-bottom-point x="-0.462000542954" y="-0.238486482561" z="0.02"/>
+      <right-front-bottom-point x="-0.467858699526" y="-0.233899784122" z="0.02"/>
+      <right-back-bottom-point x="-0.467858699526" y="-0.233899784122" z="0.0"/>
+      <left-back-top-point x="-0.425600434363" y="-0.190789186049" z="0.0"/>
+      <left-front-top-point x="-0.425600434363" y="-0.190789186049" z="0.02"/>
+      <right-front-top-point x="-0.43028695962" y="-0.187119827298" z="0.02"/>
+      <right-back-top-point x="-0.43028695962" y="-0.187119827298" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole40">
-      <left-back-bottom-point x="-0.486644569478" y="-0.257289762535" z="0.0"/>
-      <left-front-bottom-point x="-0.486644569478" y="-0.257289762535" z="0.02"/>
-      <right-front-bottom-point x="-0.492921841751" y="-0.252119593259" z="0.02"/>
-      <right-back-bottom-point x="-0.492921841751" y="-0.252119593259" z="0.0"/>
-      <left-back-top-point x="-0.445315655583" y="-0.205831810028" z="0.0"/>
-      <left-front-top-point x="-0.445315655583" y="-0.205831810028" z="0.02"/>
-      <right-front-top-point x="-0.450337473401" y="-0.201695674607" z="0.02"/>
-      <right-back-top-point x="-0.450337473401" y="-0.201695674607" z="0.0"/>
+      <left-back-bottom-point x="-0.473565310683" y="-0.229199630236" z="0.0"/>
+      <left-front-bottom-point x="-0.473565310683" y="-0.229199630236" z="0.02"/>
+      <right-front-bottom-point x="-0.50521674349" y="-0.198185313411" z="0.02"/>
+      <right-back-bottom-point x="-0.50521674349" y="-0.198185313411" z="0.0"/>
+      <left-back-top-point x="-0.434852248546" y="-0.183359704189" z="0.0"/>
+      <left-front-top-point x="-0.434852248546" y="-0.183359704189" z="0.02"/>
+      <right-front-top-point x="-0.460173394792" y="-0.158548250729" z="0.02"/>
+      <right-back-top-point x="-0.460173394792" y="-0.158548250729" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole41">
-      <left-back-bottom-point x="-0.527738417839" y="-0.218003844752" z="0.0"/>
-      <left-front-bottom-point x="-0.527738417839" y="-0.218003844752" z="0.02"/>
-      <right-front-bottom-point x="-0.533046237112" y="-0.211819739127" z="0.02"/>
-      <right-back-bottom-point x="-0.533046237112" y="-0.211819739127" z="0.0"/>
-      <left-back-top-point x="-0.478190734271" y="-0.174403075802" z="0.0"/>
-      <left-front-top-point x="-0.478190734271" y="-0.174403075802" z="0.02"/>
-      <right-front-top-point x="-0.482436989689" y="-0.169455791301" z="0.02"/>
-      <right-back-top-point x="-0.482436989689" y="-0.169455791301" z="0.0"/>
+      <left-back-bottom-point x="-0.510042033738" y="-0.192563399206" z="0.0"/>
+      <left-front-bottom-point x="-0.510042033738" y="-0.192563399206" z="0.02"/>
+      <right-front-bottom-point x="-0.519379365813" y="-0.180824553706" z="0.02"/>
+      <right-back-bottom-point x="-0.519379365813" y="-0.180824553706" z="0.0"/>
+      <left-back-top-point x="-0.46403362699" y="-0.154050719365" z="0.0"/>
+      <left-front-top-point x="-0.46403362699" y="-0.154050719365" z="0.02"/>
+      <right-front-top-point x="-0.47150349265" y="-0.144659642965" z="0.02"/>
+      <right-back-top-point x="-0.47150349265" y="-0.144659642965" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole42">
-      <left-back-bottom-point x="-0.543317302394" y="-0.198907009077" z="0.0"/>
-      <left-front-bottom-point x="-0.543317302394" y="-0.198907009077" z="0.02"/>
-      <right-front-bottom-point x="-0.54807827993" y="-0.192442292206" z="0.02"/>
-      <right-back-bottom-point x="-0.54807827993" y="-0.192442292206" z="0.0"/>
-      <left-back-top-point x="-0.490653841915" y="-0.159125607262" z="0.0"/>
-      <left-front-top-point x="-0.490653841915" y="-0.159125607262" z="0.02"/>
-      <right-front-top-point x="-0.494462623944" y="-0.153953833765" z="0.02"/>
-      <right-back-top-point x="-0.494462623944" y="-0.153953833765" z="0.0"/>
+      <left-back-bottom-point x="-0.523707527209" y="-0.174947538369" z="0.0"/>
+      <left-front-bottom-point x="-0.523707527209" y="-0.174947538369" z="0.02"/>
+      <right-front-bottom-point x="-0.531976929823" y="-0.162811629919" z="0.02"/>
+      <right-back-bottom-point x="-0.531976929823" y="-0.162811629919" z="0.0"/>
+      <left-back-top-point x="-0.474966021767" y="-0.139958030696" z="0.0"/>
+      <left-front-top-point x="-0.474966021767" y="-0.139958030696" z="0.02"/>
+      <right-front-top-point x="-0.481581543858" y="-0.130249303935" z="0.02"/>
+      <right-back-top-point x="-0.481581543858" y="-0.130249303935" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole43">
-      <left-back-bottom-point x="-0.557174622805" y="-0.179092792911" z="0.0"/>
-      <left-front-bottom-point x="-0.557174622805" y="-0.179092792911" z="0.02"/>
-      <right-front-bottom-point x="-0.565678888258" y="-0.165189505731" z="0.02"/>
-      <right-back-bottom-point x="-0.565678888258" y="-0.165189505731" z="0.0"/>
-      <left-back-top-point x="-0.501739698244" y="-0.143274234329" z="0.0"/>
-      <left-front-top-point x="-0.501739698244" y="-0.143274234329" z="0.02"/>
-      <right-front-top-point x="-0.508543110607" y="-0.132151604584" z="0.02"/>
-      <right-back-top-point x="-0.508543110607" y="-0.132151604584" z="0.0"/>
+      <left-back-bottom-point x="-0.539708080235" y="-0.150172277937" z="0.0"/>
+      <left-front-bottom-point x="-0.539708080235" y="-0.150172277937" z="0.02"/>
+      <right-front-bottom-point x="-0.550027228458" y="-0.130710733649" z="0.02"/>
+      <right-back-bottom-point x="-0.550027228458" y="-0.130710733649" z="0.0"/>
+      <left-back-top-point x="-0.487766464188" y="-0.12013782235" z="0.0"/>
+      <left-front-top-point x="-0.487766464188" y="-0.12013782235" z="0.02"/>
+      <right-front-top-point x="-0.496021782767" y="-0.104568586919" z="0.02"/>
+      <right-back-top-point x="-0.496021782767" y="-0.104568586919" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole44">
-      <left-back-bottom-point x="-0.577029951304" y="-0.143781807014" z="0.0"/>
-      <left-front-bottom-point x="-0.577029951304" y="-0.143781807014" z="0.02"/>
-      <right-front-bottom-point x="-0.583813840679" y="-0.128829927469" z="0.02"/>
-      <right-back-bottom-point x="-0.583813840679" y="-0.128829927469" z="0.0"/>
-      <left-back-top-point x="-0.517623961043" y="-0.115025445611" z="0.0"/>
-      <left-front-top-point x="-0.517623961043" y="-0.115025445611" z="0.02"/>
-      <right-front-top-point x="-0.523051072544" y="-0.103063941975" z="0.02"/>
-      <right-back-top-point x="-0.523051072544" y="-0.103063941975" z="0.0"/>
+      <left-back-bottom-point x="-0.556194400618" y="-0.117118115881" z="0.0"/>
+      <left-front-bottom-point x="-0.556194400618" y="-0.117118115881" z="0.02"/>
+      <right-front-bottom-point x="-0.558940655069" y="-0.110417892343" z="0.02"/>
+      <right-back-bottom-point x="-0.558940655069" y="-0.110417892343" z="0.0"/>
+      <left-back-top-point x="-0.500955520494" y="-0.0936944927045" z="0.0"/>
+      <left-front-top-point x="-0.500955520494" y="-0.0936944927045" z="0.02"/>
+      <right-front-top-point x="-0.503152524055" y="-0.0883343138745" z="0.02"/>
+      <right-back-top-point x="-0.503152524055" y="-0.0883343138745" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole45">
-      <left-back-bottom-point x="-0.586834720576" y="-0.121459681577" z="0.0"/>
-      <left-front-bottom-point x="-0.586834720576" y="-0.121459681577" z="0.02"/>
-      <right-front-bottom-point x="-0.592501750555" y="-0.106031391108" z="0.02"/>
-      <right-back-bottom-point x="-0.592501750555" y="-0.106031391108" z="0.0"/>
-      <left-back-top-point x="-0.525467776461" y="-0.0971677452619" z="0.0"/>
-      <left-front-top-point x="-0.525467776461" y="-0.0971677452619" z="0.02"/>
-      <right-front-top-point x="-0.530001400444" y="-0.0848251128864" z="0.02"/>
-      <right-back-top-point x="-0.530001400444" y="-0.0848251128864" z="0.0"/>
+      <left-back-bottom-point x="-0.564092500504" y="-0.0963921737346" z="0.0"/>
+      <left-front-bottom-point x="-0.564092500504" y="-0.0963921737346" z="0.02"/>
+      <right-front-bottom-point x="-0.566204689663" y="-0.0899270571911" z="0.02"/>
+      <right-back-bottom-point x="-0.566204689663" y="-0.0899270571911" z="0.0"/>
+      <left-back-top-point x="-0.507274000403" y="-0.0771137389877" z="0.0"/>
+      <left-front-top-point x="-0.507274000403" y="-0.0771137389877" z="0.02"/>
+      <right-front-top-point x="-0.50896375173" y="-0.0719416457529" z="0.02"/>
+      <right-back-top-point x="-0.50896375173" y="-0.0719416457529" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole46">
-      <left-back-bottom-point x="-0.594825158629" y="-0.0989197629102" z="0.0"/>
-      <left-front-bottom-point x="-0.594825158629" y="-0.0989197629102" z="0.02"/>
-      <right-front-bottom-point x="-0.597396713162" y="-0.0903289902183" z="0.02"/>
-      <right-back-bottom-point x="-0.597396713162" y="-0.0903289902183" z="0.0"/>
-      <left-back-top-point x="-0.531860126903" y="-0.0791358103282" z="0.0"/>
-      <left-front-top-point x="-0.531860126903" y="-0.0791358103282" z="0.02"/>
-      <right-front-top-point x="-0.53391737053" y="-0.0722631921746" z="0.02"/>
-      <right-back-top-point x="-0.53391737053" y="-0.0722631921746" z="0.0"/>
+      <left-back-bottom-point x="-0.568542466511" y="-0.0821172638348" z="0.0"/>
+      <left-front-bottom-point x="-0.568542466511" y="-0.0821172638348" z="0.02"/>
+      <right-front-bottom-point x="-0.573713641745" y="-0.0610925253421" z="0.02"/>
+      <right-back-bottom-point x="-0.573713641745" y="-0.0610925253421" z="0.0"/>
+      <left-back-top-point x="-0.510833973209" y="-0.0656938110679" z="0.0"/>
+      <left-front-top-point x="-0.510833973209" y="-0.0656938110679" z="0.02"/>
+      <right-front-top-point x="-0.514970913396" y="-0.0488740202736" z="0.02"/>
+      <right-back-top-point x="-0.514970913396" y="-0.0488740202736" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole47">
-      <left-back-bottom-point x="-0.60308500592" y="-0.0672017778763" z="0.0"/>
-      <left-front-bottom-point x="-0.60308500592" y="-0.0672017778763" z="0.02"/>
-      <right-front-bottom-point x="-0.608157138961" y="-0.0348266011728" z="0.02"/>
-      <right-back-bottom-point x="-0.608157138961" y="-0.0348266011728" z="0.0"/>
-      <left-back-top-point x="-0.538468004736" y="-0.053761422301" z="0.0"/>
-      <left-front-top-point x="-0.538468004736" y="-0.053761422301" z="0.02"/>
-      <right-front-top-point x="-0.542525711168" y="-0.0278612809383" z="0.02"/>
-      <right-back-top-point x="-0.542525711168" y="-0.0278612809383" z="0.0"/>
+      <left-back-bottom-point x="-0.578324671782" y="-0.0316605465207" z="0.0"/>
+      <left-front-bottom-point x="-0.578324671782" y="-0.0316605465207" z="0.02"/>
+      <right-front-bottom-point x="-0.579844474643" y="-0.00965872797791" z="0.02"/>
+      <right-back-bottom-point x="-0.579844474643" y="-0.00965872797791" z="0.0"/>
+      <left-back-top-point x="-0.518659737426" y="-0.0253284372166" z="0.0"/>
+      <left-front-top-point x="-0.518659737426" y="-0.0253284372166" z="0.02"/>
+      <right-front-top-point x="-0.519875579714" y="-0.00772698238233" z="0.02"/>
+      <right-back-top-point x="-0.519875579714" y="-0.00772698238233" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole48">
-      <left-back-bottom-point x="-0.609828922107" y="-0.0106246007757" z="0.0"/>
-      <left-front-bottom-point x="-0.609828922107" y="-0.0106246007757" z="0.02"/>
-      <right-front-bottom-point x="-0.609991633243" y="-0.00234989144512" z="0.02"/>
-      <right-back-bottom-point x="-0.609991633243" y="-0.00234989144512" z="0.0"/>
-      <left-back-top-point x="-0.543863137686" y="-0.00849968062056" z="0.0"/>
-      <left-front-top-point x="-0.543863137686" y="-0.00849968062056" z="0.02"/>
-      <right-front-top-point x="-0.543993306594" y="-0.00187991315609" z="0.02"/>
-      <right-back-top-point x="-0.543993306594" y="-0.00187991315609" z="0.0"/>
+      <left-back-bottom-point x="-0.579992393857" y="-0.00213626495011" z="0.0"/>
+      <left-front-bottom-point x="-0.579992393857" y="-0.00213626495011" z="0.02"/>
+      <right-front-bottom-point x="-0.579959884196" y="0.00490590184433" z="0.02"/>
+      <right-back-bottom-point x="-0.579959884196" y="0.00490590184433" z="0.0"/>
+      <left-back-top-point x="-0.519993915086" y="-0.00170901196008" z="0.0"/>
+      <left-front-top-point x="-0.519993915086" y="-0.00170901196008" z="0.02"/>
+      <right-front-top-point x="-0.519967907357" y="0.00392472147547" z="0.02"/>
+      <right-back-top-point x="-0.519967907357" y="0.00392472147547" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole49">
-      <left-back-bottom-point x="-0.609955872616" y="0.00539649202876" z="0.0"/>
-      <left-front-bottom-point x="-0.609955872616" y="0.00539649202876" z="0.02"/>
-      <right-front-bottom-point x="-0.609272956893" y="0.0218933747743" z="0.02"/>
-      <right-back-bottom-point x="-0.609272956893" y="0.0218933747743" z="0.0"/>
-      <left-back-top-point x="-0.543964698093" y="0.00431719362301" z="0.0"/>
-      <left-front-top-point x="-0.543964698093" y="0.00431719362301" z="0.02"/>
-      <right-front-top-point x="-0.543418365514" y="0.0175146998194" z="0.02"/>
-      <right-back-top-point x="-0.543418365514" y="0.0175146998194" z="0.0"/>
+      <left-back-bottom-point x="-0.579339051721" y="0.0199030679766" z="0.0"/>
+      <left-front-bottom-point x="-0.579339051721" y="0.0199030679766" z="0.02"/>
+      <right-front-bottom-point x="-0.577990710746" y="0.0346631837704" z="0.02"/>
+      <right-back-bottom-point x="-0.577990710746" y="0.0346631837704" z="0.0"/>
+      <left-back-top-point x="-0.519471241377" y="0.0159224543813" z="0.0"/>
+      <left-front-top-point x="-0.519471241377" y="0.0159224543813" z="0.02"/>
+      <right-front-top-point x="-0.518392568597" y="0.0277305470163" z="0.02"/>
+      <right-back-top-point x="-0.518392568597" y="0.0277305470163" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole50">
-      <left-back-bottom-point x="-0.607789781821" y="0.0381295021475" z="0.0"/>
-      <left-front-bottom-point x="-0.607789781821" y="0.0381295021475" z="0.02"/>
-      <right-front-bottom-point x="-0.606739381139" y="0.0462750128348" z="0.02"/>
-      <right-back-bottom-point x="-0.606739381139" y="0.0462750128348" z="0.0"/>
-      <left-back-top-point x="-0.542231825456" y="0.030503601718" z="0.0"/>
-      <left-front-top-point x="-0.542231825456" y="0.030503601718" z="0.02"/>
-      <right-front-top-point x="-0.541391504911" y="0.0370200102679" z="0.02"/>
-      <right-back-top-point x="-0.541391504911" y="0.0370200102679" z="0.0"/>
+      <left-back-bottom-point x="-0.577035801036" y="0.0420681934862" z="0.0"/>
+      <left-front-bottom-point x="-0.577035801036" y="0.0420681934862" z="0.02"/>
+      <right-front-bottom-point x="-0.56541871697" y="0.0923913199569" z="0.02"/>
+      <right-back-bottom-point x="-0.56541871697" y="0.0923913199569" z="0.0"/>
+      <left-back-top-point x="-0.517628640828" y="0.033654554789" z="0.0"/>
+      <left-front-top-point x="-0.517628640828" y="0.033654554789" z="0.02"/>
+      <right-front-top-point x="-0.508334973576" y="0.0739130559656" z="0.02"/>
+      <right-back-top-point x="-0.508334973576" y="0.0739130559656" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole51">
-      <left-back-bottom-point x="-0.593960588667" y="0.101630451953" z="0.0"/>
-      <left-front-bottom-point x="-0.593960588667" y="0.101630451953" z="0.02"/>
-      <right-front-bottom-point x="-0.585465427492" y="0.124863415807" z="0.02"/>
-      <right-back-bottom-point x="-0.585465427492" y="0.124863415807" z="0.0"/>
-      <left-back-top-point x="-0.531168470933" y="0.0813043615621" z="0.0"/>
-      <left-front-top-point x="-0.531168470933" y="0.0813043615621" z="0.02"/>
-      <right-front-top-point x="-0.524372341994" y="0.0998907326456" z="0.02"/>
-      <right-back-top-point x="-0.524372341994" y="0.0998907326456" z="0.0"/>
+      <left-back-bottom-point x="-0.557695843175" y="0.113512196188" z="0.0"/>
+      <left-front-bottom-point x="-0.557695843175" y="0.113512196188" z="0.02"/>
+      <right-front-bottom-point x="-0.554864779729" y="0.120205461042" z="0.02"/>
+      <right-back-bottom-point x="-0.554864779729" y="0.120205461042" z="0.0"/>
+      <left-back-top-point x="-0.50215667454" y="0.0908097569505" z="0.0"/>
+      <left-front-top-point x="-0.50215667454" y="0.0908097569505" z="0.02"/>
+      <right-front-top-point x="-0.499891823783" y="0.0961643688338" z="0.02"/>
+      <right-back-top-point x="-0.499891823783" y="0.0961643688338" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole52">
-      <left-back-bottom-point x="-0.582351257702" y="0.132226007147" z="0.0"/>
-      <left-front-bottom-point x="-0.582351257702" y="0.132226007147" z="0.02"/>
-      <right-front-bottom-point x="-0.57904991864" y="0.13953188224" z="0.02"/>
-      <right-back-bottom-point x="-0.57904991864" y="0.13953188224" z="0.0"/>
-      <left-back-top-point x="-0.521881006162" y="0.105780805717" z="0.0"/>
-      <left-front-top-point x="-0.521881006162" y="0.105780805717" z="0.02"/>
-      <right-front-top-point x="-0.519239934912" y="0.111625505792" z="0.02"/>
-      <right-back-top-point x="-0.519239934912" y="0.111625505792" z="0.0"/>
+      <left-back-bottom-point x="-0.5518635624" y="0.126847165672" z="0.0"/>
+      <left-front-bottom-point x="-0.5518635624" y="0.126847165672" z="0.02"/>
+      <right-front-bottom-point x="-0.548594688313" y="0.133629687607" z="0.02"/>
+      <right-back-bottom-point x="-0.548594688313" y="0.133629687607" z="0.0"/>
+      <left-back-top-point x="-0.49749084992" y="0.101477732538" z="0.0"/>
+      <left-front-top-point x="-0.49749084992" y="0.101477732538" z="0.02"/>
+      <right-front-top-point x="-0.494875750651" y="0.106903750085" z="0.02"/>
+      <right-back-top-point x="-0.494875750651" y="0.106903750085" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole53">
-      <left-back-bottom-point x="-0.575454157145" y="0.146992656368" z="0.0"/>
-      <left-front-bottom-point x="-0.575454157145" y="0.146992656368" z="0.02"/>
-      <right-front-bottom-point x="-0.571839162168" y="0.154045134376" z="0.02"/>
-      <right-back-bottom-point x="-0.571839162168" y="0.154045134376" z="0.0"/>
-      <left-back-top-point x="-0.516363325716" y="0.117594125094" z="0.0"/>
-      <left-front-top-point x="-0.516363325716" y="0.117594125094" z="0.02"/>
-      <right-front-top-point x="-0.513471329734" y="0.123236107501" z="0.02"/>
-      <right-back-top-point x="-0.513471329734" y="0.123236107501" z="0.0"/>
+      <left-back-bottom-point x="-0.545308329244" y="0.140041031251" z="0.0"/>
+      <left-front-bottom-point x="-0.545308329244" y="0.140041031251" z="0.02"/>
+      <right-front-bottom-point x="-0.538062546467" y="0.152982751025" z="0.02"/>
+      <right-back-bottom-point x="-0.538062546467" y="0.152982751025" z="0.0"/>
+      <left-back-top-point x="-0.492246663395" y="0.112032825001" z="0.0"/>
+      <left-front-top-point x="-0.492246663395" y="0.112032825001" z="0.02"/>
+      <right-front-top-point x="-0.486450037173" y="0.12238620082" z="0.02"/>
+      <right-back-top-point x="-0.486450037173" y="0.12238620082" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole54">
-      <left-back-bottom-point x="-0.563868801114" y="0.168281026127" z="0.0"/>
-      <left-front-bottom-point x="-0.563868801114" y="0.168281026127" z="0.02"/>
-      <right-front-bottom-point x="-0.559626723345" y="0.175239537751" z="0.02"/>
-      <right-back-bottom-point x="-0.559626723345" y="0.175239537751" z="0.0"/>
-      <left-back-top-point x="-0.507095040891" y="0.134624820902" z="0.0"/>
-      <left-front-top-point x="-0.507095040891" y="0.134624820902" z="0.02"/>
-      <right-front-top-point x="-0.503701378676" y="0.140191630201" z="0.02"/>
-      <right-back-top-point x="-0.503701378676" y="0.140191630201" z="0.0"/>
+      <left-back-bottom-point x="-0.534206112132" y="0.159308670683" z="0.0"/>
+      <left-front-bottom-point x="-0.534206112132" y="0.159308670683" z="0.02"/>
+      <right-front-bottom-point x="-0.530180195344" y="0.165559263883" z="0.02"/>
+      <right-back-bottom-point x="-0.530180195344" y="0.165559263883" z="0.0"/>
+      <left-back-top-point x="-0.483364889705" y="0.127446936546" z="0.0"/>
+      <left-front-top-point x="-0.483364889705" y="0.127446936546" z="0.02"/>
+      <right-front-top-point x="-0.480144156275" y="0.132447411107" z="0.02"/>
+      <right-back-top-point x="-0.480144156275" y="0.132447411107" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole55">
-      <left-back-bottom-point x="-0.555198214878" y="0.182115190272" z="0.0"/>
-      <left-front-bottom-point x="-0.555198214878" y="0.182115190272" z="0.02"/>
-      <right-front-bottom-point x="-0.550630345612" y="0.188836479616" z="0.02"/>
-      <right-back-bottom-point x="-0.550630345612" y="0.188836479616" z="0.0"/>
-      <left-back-top-point x="-0.500158571903" y="0.145692152217" z="0.0"/>
-      <left-front-top-point x="-0.500158571903" y="0.145692152217" z="0.02"/>
-      <right-front-top-point x="-0.49650427649" y="0.151069183693" z="0.02"/>
-      <right-back-top-point x="-0.49650427649" y="0.151069183693" z="0.0"/>
+      <left-back-bottom-point x="-0.52602758692" y="0.171669526924" z="0.0"/>
+      <left-front-bottom-point x="-0.52602758692" y="0.171669526924" z="0.02"/>
+      <right-front-bottom-point x="-0.521623403944" y="0.177814877517" z="0.02"/>
+      <right-back-bottom-point x="-0.521623403944" y="0.177814877517" z="0.0"/>
+      <left-back-top-point x="-0.476822069536" y="0.137335621539" z="0.0"/>
+      <left-front-top-point x="-0.476822069536" y="0.137335621539" z="0.02"/>
+      <right-front-top-point x="-0.473298723155" y="0.142251902014" z="0.02"/>
+      <right-back-top-point x="-0.473298723155" y="0.142251902014" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole56">
-      <left-back-bottom-point x="-0.545785744338" y="0.195596365269" z="0.0"/>
-      <left-front-bottom-point x="-0.545785744338" y="0.195596365269" z="0.02"/>
-      <right-front-bottom-point x="-0.535953590172" y="0.208297286776" z="0.02"/>
-      <right-back-bottom-point x="-0.535953590172" y="0.208297286776" z="0.0"/>
-      <left-back-top-point x="-0.492628595471" y="0.156477092215" z="0.0"/>
-      <left-front-top-point x="-0.492628595471" y="0.156477092215" z="0.02"/>
-      <right-front-top-point x="-0.484762872138" y="0.166637829421" z="0.02"/>
-      <right-back-top-point x="-0.484762872138" y="0.166637829421" z="0.0"/>
+      <left-back-bottom-point x="-0.512685081974" y="0.189361169796" z="0.0"/>
+      <left-front-bottom-point x="-0.512685081974" y="0.189361169796" z="0.02"/>
+      <right-front-bottom-point x="-0.502946951169" y="0.20073529078" z="0.02"/>
+      <right-back-bottom-point x="-0.502946951169" y="0.20073529078" z="0.0"/>
+      <left-back-top-point x="-0.46614806558" y="0.151488935837" z="0.0"/>
+      <left-front-top-point x="-0.46614806558" y="0.151488935837" z="0.02"/>
+      <right-front-top-point x="-0.458357560935" y="0.160588232624" z="0.02"/>
+      <right-back-top-point x="-0.458357560935" y="0.160588232624" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole57">
-      <left-back-bottom-point x="-0.525241646286" y="0.220808819858" z="0.0"/>
-      <left-front-bottom-point x="-0.525241646286" y="0.220808819858" z="0.02"/>
-      <right-front-bottom-point x="-0.502558063934" y="0.243655306074" z="0.02"/>
-      <right-back-bottom-point x="-0.502558063934" y="0.243655306074" z="0.0"/>
-      <left-back-top-point x="-0.476193317029" y="0.176647055886" z="0.0"/>
-      <left-front-top-point x="-0.476193317029" y="0.176647055886" z="0.02"/>
-      <right-front-top-point x="-0.458046451147" y="0.194924244859" z="0.02"/>
-      <right-back-top-point x="-0.458046451147" y="0.194924244859" z="0.0"/>
+      <left-back-bottom-point x="-0.482325512667" y="0.221504823703" z="0.0"/>
+      <left-front-bottom-point x="-0.482325512667" y="0.221504823703" z="0.02"/>
+      <right-front-bottom-point x="-0.453528176512" y="0.24472019115" z="0.02"/>
+      <right-back-bottom-point x="-0.453528176512" y="0.24472019115" z="0.0"/>
+      <left-back-top-point x="-0.441860410134" y="0.177203858963" z="0.0"/>
+      <left-front-top-point x="-0.441860410134" y="0.177203858963" z="0.02"/>
+      <right-front-top-point x="-0.41882254121" y="0.19577615292" z="0.02"/>
+      <right-back-top-point x="-0.41882254121" y="0.19577615292" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole58">
-      <left-back-bottom-point x="-0.470880994163" y="0.269192210265" z="0.0"/>
-      <left-front-bottom-point x="-0.470880994163" y="0.269192210265" z="0.02"/>
-      <right-front-bottom-point x="-0.45713396267" y="0.278430528622" z="0.02"/>
-      <right-back-bottom-point x="-0.45713396267" y="0.278430528622" z="0.0"/>
-      <left-back-top-point x="-0.432704795331" y="0.215353768212" z="0.0"/>
-      <left-front-top-point x="-0.432704795331" y="0.215353768212" z="0.02"/>
-      <right-front-top-point x="-0.421707170136" y="0.222744422898" z="0.02"/>
-      <right-back-top-point x="-0.421707170136" y="0.222744422898" z="0.0"/>
+      <left-back-bottom-point x="-0.441030875155" y="0.253118662384" z="0.0"/>
+      <left-front-bottom-point x="-0.441030875155" y="0.253118662384" z="0.02"/>
+      <right-front-bottom-point x="-0.395496422759" y="0.276876464023" z="0.02"/>
+      <right-back-bottom-point x="-0.395496422759" y="0.276876464023" z="0.0"/>
+      <left-back-top-point x="-0.408824700124" y="0.202494929907" z="0.0"/>
+      <left-front-top-point x="-0.408824700124" y="0.202494929907" z="0.02"/>
+      <right-front-top-point x="-0.372397138207" y="0.221501171218" z="0.02"/>
+      <right-back-top-point x="-0.372397138207" y="0.221501171218" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole59">
-      <left-back-bottom-point x="-0.407046065035" y="0.304564110425" z="0.0"/>
-      <left-front-bottom-point x="-0.407046065035" y="0.304564110425" z="0.02"/>
-      <right-front-bottom-point x="-0.399475710625" y="0.307612669717" z="0.02"/>
-      <right-back-bottom-point x="-0.399475710625" y="0.307612669717" z="0.0"/>
-      <left-back-top-point x="-0.381636852028" y="0.24365128834" z="0.0"/>
-      <left-front-top-point x="-0.381636852028" y="0.24365128834" z="0.02"/>
-      <right-front-top-point x="-0.3755805685" y="0.246090135774" z="0.02"/>
-      <right-back-top-point x="-0.3755805685" y="0.246090135774" z="0.0"/>
+      <left-back-bottom-point x="-0.388614282387" y="0.279647881561" z="0.0"/>
+      <left-front-bottom-point x="-0.388614282387" y="0.279647881561" z="0.02"/>
+      <right-front-bottom-point x="-0.381508059765" y="0.282305001378" z="0.02"/>
+      <right-back-bottom-point x="-0.381508059765" y="0.282305001378" z="0.0"/>
+      <left-back-top-point x="-0.366891425909" y="0.223718305249" z="0.0"/>
+      <left-front-top-point x="-0.366891425909" y="0.223718305249" z="0.02"/>
+      <right-front-top-point x="-0.361206447812" y="0.225844001102" z="0.02"/>
+      <right-back-top-point x="-0.361206447812" y="0.225844001102" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole60">
-      <left-back-bottom-point x="-0.391658865741" y="0.310535501515" z="0.0"/>
-      <left-front-bottom-point x="-0.391658865741" y="0.310535501515" z="0.02"/>
-      <right-front-bottom-point x="-0.384016612028" y="0.313178135288" z="0.02"/>
-      <right-back-bottom-point x="-0.384016612028" y="0.313178135288" z="0.0"/>
-      <left-back-top-point x="-0.369327092593" y="0.248428401212" z="0.0"/>
-      <left-front-top-point x="-0.369327092593" y="0.248428401212" z="0.02"/>
-      <right-front-top-point x="-0.363213289622" y="0.25054250823" z="0.02"/>
-      <right-back-top-point x="-0.363213289622" y="0.25054250823" z="0.0"/>
+      <left-back-bottom-point x="-0.374560556389" y="0.284707395716" z="0.0"/>
+      <left-front-bottom-point x="-0.374560556389" y="0.284707395716" z="0.02"/>
+      <right-front-bottom-point x="-0.367526226741" y="0.286948008588" z="0.02"/>
+      <right-back-bottom-point x="-0.367526226741" y="0.286948008588" z="0.0"/>
+      <left-back-top-point x="-0.355648445111" y="0.227765916573" z="0.0"/>
+      <left-front-top-point x="-0.355648445111" y="0.227765916573" z="0.02"/>
+      <right-front-top-point x="-0.350020981393" y="0.22955840687" z="0.02"/>
+      <right-back-top-point x="-0.350020981393" y="0.22955840687" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole61">
-      <left-back-bottom-point x="-0.376278849415" y="0.315642809446" z="0.0"/>
-      <left-front-bottom-point x="-0.376278849415" y="0.315642809446" z="0.02"/>
-      <right-front-bottom-point x="-0.368366253958" y="0.317948746123" z="0.02"/>
-      <right-back-bottom-point x="-0.368366253958" y="0.317948746123" z="0.0"/>
-      <left-back-top-point x="-0.357023079532" y="0.252514247557" z="0.0"/>
-      <left-front-top-point x="-0.357023079532" y="0.252514247557" z="0.02"/>
-      <right-front-top-point x="-0.350693003166" y="0.254358996899" z="0.02"/>
-      <right-back-top-point x="-0.350693003166" y="0.254358996899" z="0.0"/>
+      <left-back-bottom-point x="-0.360332958143" y="0.289044314658" z="0.0"/>
+      <left-front-bottom-point x="-0.360332958143" y="0.289044314658" z="0.02"/>
+      <right-front-bottom-point x="-0.353216530194" y="0.290928409933" z="0.02"/>
+      <right-back-bottom-point x="-0.353216530194" y="0.290928409933" z="0.0"/>
+      <left-back-top-point x="-0.344266366515" y="0.231235451726" z="0.0"/>
+      <left-front-top-point x="-0.344266366515" y="0.231235451726" z="0.02"/>
+      <right-front-top-point x="-0.338573224155" y="0.232742727947" z="0.02"/>
+      <right-back-top-point x="-0.338573224155" y="0.232742727947" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole62">
-      <left-back-bottom-point x="-0.360538183214" y="0.320021250927" z="0.0"/>
-      <left-front-bottom-point x="-0.360538183214" y="0.320021250927" z="0.02"/>
-      <right-front-bottom-point x="-0.328685962613" y="0.326388843321" z="0.02"/>
-      <right-back-bottom-point x="-0.328685962613" y="0.326388843321" z="0.0"/>
-      <left-back-top-point x="-0.344430546571" y="0.256017000741" z="0.0"/>
-      <left-front-top-point x="-0.344430546571" y="0.256017000741" z="0.02"/>
-      <right-front-top-point x="-0.31894877009" y="0.261111074657" z="0.02"/>
-      <right-back-top-point x="-0.31894877009" y="0.261111074657" z="0.0"/>
+      <left-back-bottom-point x="-0.324259966012" y="0.296717130292" z="0.0"/>
+      <left-front-bottom-point x="-0.324259966012" y="0.296717130292" z="0.02"/>
+      <right-front-bottom-point x="-0.316940151288" y="0.297717022058" z="0.02"/>
+      <right-back-bottom-point x="-0.316940151288" y="0.297717022058" z="0.0"/>
+      <left-back-top-point x="-0.315407972809" y="0.237373704233" z="0.0"/>
+      <left-front-top-point x="-0.315407972809" y="0.237373704233" z="0.02"/>
+      <right-front-top-point x="-0.30955212103" y="0.238173617646" z="0.02"/>
+      <right-back-top-point x="-0.30955212103" y="0.238173617646" z="0.0"/>
     </hexahedron>
     <hexahedron id="hole63">
-      <left-back-bottom-point x="-0.320634166416" y="0.327488724263" z="0.0"/>
-      <left-front-bottom-point x="-0.320634166416" y="0.327488724263" z="0.02"/>
-      <right-front-bottom-point x="-0.304484520415" y="0.329090425658" z="0.02"/>
-      <right-back-bottom-point x="-0.304484520415" y="0.329090425658" z="0.0"/>
-      <left-back-top-point x="-0.312507333133" y="0.261990979411" z="0.0"/>
-      <left-front-top-point x="-0.312507333133" y="0.261990979411" z="0.02"/>
-      <right-front-top-point x="-0.299587616332" y="0.263272340527" z="0.02"/>
-      <right-back-top-point x="-0.299587616332" y="0.263272340527" z="0.0"/>
+      <left-back-bottom-point x="-0.302258654923" y="0.299173114235" z="0.0"/>
+      <left-front-bottom-point x="-0.302258654923" y="0.299173114235" z="0.02"/>
+      <right-front-bottom-point x="-0.294916412161" y="0.299628938269" z="0.02"/>
+      <right-back-bottom-point x="-0.294916412161" y="0.299628938269" z="0.0"/>
+      <left-back-top-point x="-0.297806923938" y="0.239338491388" z="0.0"/>
+      <left-front-top-point x="-0.297806923938" y="0.239338491388" z="0.02"/>
+      <right-front-top-point x="-0.291933129728" y="0.239703150615" z="0.02"/>
+      <right-back-top-point x="-0.291933129728" y="0.239703150615" z="0.0"/>
     </hexahedron>
-    <algebra val="body  (# hole0) (# hole1) (# hole2) (# hole3) (# hole4) (# hole5) (# hole6) (# hole7) (# hole8) (# hole9) (# hole10) (# hole11) (# hole12) (# hole13) (# hole14) (# hole15) (# hole16) (# hole17) (# hole18) (# hole19) (# hole20) (# hole21) (# hole22) (# hole23) (# hole24) (# hole25) (# hole26) (# hole27) (# hole28) (# hole29) (# hole30) (# hole31) (# hole32) (# hole33) (# hole34) (# hole35) (# hole36) (# hole37) (# hole38) (# hole39) (# hole40) (# hole41) (# hole42) (# hole43) (# hole44) (# hole45) (# hole46) (# hole47) (# hole48) (# hole49) (# hole50) (# hole51) (# hole52) (# hole53) (# hole54) (# hole55) (# hole56) (# hole57) (# hole58) (# hole59) (# hole60) (# hole61) (# hole62) (# hole63)"/>
+    <algebra val="body : hole0 : hole1 : hole2 : hole3 : hole4 : hole5 : hole6 : hole7 : hole8 : hole9 : hole10 : hole11 : hole12 : hole13 : hole14 : hole15 : hole16 : hole17 : hole18 : hole19 : hole20 : hole21 : hole22 : hole23 : hole24 : hole25 : hole26 : hole27 : hole28 : hole29 : hole30 : hole31 : hole32 : hole33 : hole34 : hole35 : hole36 : hole37 : hole38 : hole39 : hole40 : hole41 : hole42 : hole43 : hole44 : hole45 : hole46 : hole47 : hole48 : hole49 : hole50 : hole51 : hole52 : hole53 : hole54 : hole55 : hole56 : hole57 : hole58 : hole59 : hole60 : hole61 : hole62 : hole63"/>
+    <bounding-box>
+      <x-min val="-0.58"/>
+      <x-max val="0.02"/>
+      <y-min val="-0.3"/>
+      <y-max val="0.3"/>
+      <z-min val="0.0"/>
+      <z-max val="0.02"/>
+    </bounding-box>
   </type>
   <component-link name="correlation-chopper">
     <parameter name="sequence" type="string">
@@ -748,95 +762,95 @@
     <location/>
   </component>
   <type name="A row">
-    <component type="A1">
+    <component type="bank1">
       <location/>
     </component>
-    <component type="A2">
+    <component type="bank2">
       <location/>
     </component>
-    <component type="A3">
+    <component type="bank3">
       <location/>
     </component>
-    <component type="A4">
+    <component type="bank4">
       <location/>
     </component>
-    <component type="A5">
+    <component type="bank5">
       <location/>
     </component>
-    <component type="A6">
+    <component type="bank6">
       <location/>
     </component>
-    <component type="A7">
+    <component type="bank7">
       <location/>
     </component>
-    <component type="A8">
+    <component type="bank8">
       <location/>
     </component>
-    <component type="A9">
+    <component type="bank9">
       <location/>
     </component>
-    <component type="A10">
+    <component type="bank10">
       <location/>
     </component>
-    <component type="A11">
+    <component type="bank11">
       <location/>
     </component>
-    <component type="A12">
+    <component type="bank12">
       <location/>
     </component>
-    <component type="A13">
+    <component type="bank13">
       <location/>
     </component>
-    <component type="A14">
+    <component type="bank14">
       <location/>
     </component>
-    <component type="A15">
+    <component type="bank15">
       <location/>
     </component>
-    <component type="A16">
+    <component type="bank16">
       <location/>
     </component>
-    <component type="A17">
+    <component type="bank17">
       <location/>
     </component>
-    <component type="A18">
+    <component type="bank18">
       <location/>
     </component>
-    <component type="A19">
+    <component type="bank19">
       <location/>
     </component>
-    <component type="A20">
+    <component type="bank20">
       <location/>
     </component>
-    <component type="A21">
+    <component type="bank21">
       <location/>
     </component>
-    <component type="A22">
+    <component type="bank22">
       <location/>
     </component>
-    <component type="A23">
+    <component type="bank23">
       <location/>
     </component>
-    <component type="A24">
+    <component type="bank24">
       <location/>
     </component>
-    <component type="A25">
+    <component type="bank25">
       <location/>
     </component>
-    <component type="A26">
+    <component type="bank26">
       <location/>
     </component>
-    <component type="A27">
+    <component type="bank27">
       <location/>
     </component>
-    <component type="A28">
+    <component type="bank28">
       <location/>
     </component>
-    <component type="A29">
+    <component type="bank29">
       <location/>
     </component>
   </type>
-  <type name="A1">
+  <type name="bank1">
     <component type="sixteenpack">
       <location x="1.274295027" y="-0.804864486" z="-2.054426768">
         <rot axis-x="0" axis-y="1" axis-z="0" val="328.19">
@@ -847,7 +861,7 @@
       </location>
     </component>
   </type>
-  <type name="A2">
+  <type name="bank2">
     <component type="sixteenpack">
       <location x="1.462650296" y="-0.804864486" z="-1.924876949">
         <rot axis-x="0" axis-y="1" axis-z="0" val="322.77">
@@ -858,7 +872,7 @@
       </location>
     </component>
   </type>
-  <type name="A3">
+  <type name="bank3">
     <component type="sixteenpack">
       <location x="1.637926704" y="-0.804864486" z="-1.778115089">
         <rot axis-x="0" axis-y="1" axis-z="0" val="317.35">
@@ -869,7 +883,7 @@
       </location>
     </component>
   </type>
-  <type name="A4">
+  <type name="bank4">
     <component type="sixteenpack">
       <location x="1.798556949" y="-0.804864486" z="-1.615453515">
         <rot axis-x="0" axis-y="1" axis-z="0" val="311.93">
@@ -880,7 +894,7 @@
       </location>
     </component>
   </type>
-  <type name="A5">
+  <type name="bank5">
     <component type="sixteenpack">
       <location x="1.943104691" y="-0.804864486" z="-1.438346731">
         <rot axis-x="0" axis-y="1" axis-z="0" val="306.51">
@@ -891,7 +905,7 @@
       </location>
     </component>
   </type>
-  <type name="A6">
+  <type name="bank6">
     <component type="sixteenpack">
       <location x="2.070277401" y="-0.804864486" z="-1.248378405">
         <rot axis-x="0" axis-y="1" axis-z="0" val="301.09">
@@ -902,7 +916,7 @@
       </location>
     </component>
   </type>
-  <type name="A7">
+  <type name="bank7">
     <component type="sixteenpack">
       <location x="2.246370655" y="-0.804864486" z="-0.893485333">
         <rot axis-x="0" axis-y="1" axis-z="0" val="291.69">
@@ -913,7 +927,7 @@
       </location>
     </component>
   </type>
-  <type name="A8">
+  <type name="bank8">
     <component type="sixteenpack">
       <location x="2.320722146" y="-0.804864486" z="-0.677307816">
         <rot axis-x="0" axis-y="1" axis-z="0" val="286.27">
@@ -924,7 +938,7 @@
       </location>
     </component>
   </type>
-  <type name="A9">
+  <type name="bank9">
     <component type="sixteenpack">
       <location x="2.374321991" y="-0.804864486" z="-0.455073886">
         <rot axis-x="0" axis-y="1" axis-z="0" val="280.85">
@@ -935,7 +949,7 @@
       </location>
     </component>
   </type>
-  <type name="A10">
+  <type name="bank10">
     <component type="sixteenpack">
       <location x="2.406690904" y="-0.804864486" z="-0.228770735">
         <rot axis-x="0" axis-y="1" axis-z="0" val="275.43">
@@ -946,7 +960,7 @@
       </location>
     </component>
   </type>
-  <type name="A11">
+  <type name="bank11">
     <component type="sixteenpack">
       <location x="2.417539448" y="-0.804864486" z="-0.00042194">
         <rot axis-x="0" axis-y="1" axis-z="0" val="270.01">
@@ -957,7 +971,7 @@
       </location>
     </component>
   </type>
-  <type name="A12">
+  <type name="bank12">
     <component type="sixteenpack">
       <location x="2.385146032" y="-0.804864486" z="0.394430682">
         <rot axis-x="0" axis-y="1" axis-z="0" val="260.61">
@@ -968,7 +982,7 @@
       </location>
     </component>
   </type>
-  <type name="A13">
+  <type name="bank13">
     <component type="sixteenpack">
       <location x="2.337225898" y="-0.804864486" z="0.617958138">
         <rot axis-x="0" axis-y="1" axis-z="0" val="255.19">
@@ -979,7 +993,7 @@
       </location>
     </component>
   </type>
-  <type name="A14">
+  <type name="bank14">
     <component type="sixteenpack">
       <location x="2.268406542" y="-0.804864486" z="0.835959879">
         <rot axis-x="0" axis-y="1" axis-z="0" val="249.77">
@@ -990,7 +1004,7 @@
       </location>
     </component>
   </type>
-  <type name="A15">
+  <type name="bank15">
     <component type="sixteenpack">
       <location x="2.179303339" y="-0.804864486" z="1.046486558">
         <rot axis-x="0" axis-y="1" axis-z="0" val="244.35">
@@ -1001,7 +1015,7 @@
       </location>
     </component>
   </type>
-  <type name="A16">
+  <type name="bank16">
     <component type="sixteenpack">
       <location x="2.070713041" y="-0.804864486" z="1.247655666">
         <rot axis-x="0" axis-y="1" axis-z="0" val="238.93">
@@ -1012,7 +1026,7 @@
       </location>
     </component>
   </type>
-  <type name="A17">
+  <type name="bank17">
     <component type="sixteenpack">
       <location x="1.839133279" y="-0.804864486" z="1.569103547">
         <rot axis-x="0" axis-y="1" axis-z="0" val="229.53">
@@ -1023,7 +1037,7 @@
       </location>
     </component>
   </type>
-  <type name="A18">
+  <type name="bank18">
     <component type="sixteenpack">
       <location x="1.682699644" y="-0.804864486" z="1.73580502">
         <rot axis-x="0" axis-y="1" axis-z="0" val="224.11">
@@ -1034,7 +1048,7 @@
       </location>
     </component>
   </type>
-  <type name="A19">
+  <type name="bank19">
     <component type="sixteenpack">
       <location x="1.511219491" y="-0.804864486" z="1.886985111">
         <rot axis-x="0" axis-y="1" axis-z="0" val="218.69">
@@ -1045,7 +1059,7 @@
       </location>
     </component>
   </type>
-  <type name="A20">
+  <type name="bank20">
     <component type="sixteenpack">
       <location x="1.326226176" y="-0.804864486" z="2.021291985">
         <rot axis-x="0" axis-y="1" axis-z="0" val="213.27">
@@ -1056,7 +1070,7 @@
       </location>
     </component>
   </type>
-  <type name="A21">
+  <type name="bank21">
     <component type="sixteenpack">
       <location x="1.12937389" y="-0.804864486" z="2.137524684">
         <rot axis-x="0" axis-y="1" axis-z="0" val="207.85">
@@ -1067,7 +1081,7 @@
       </location>
     </component>
   </type>
-  <type name="A22">
+  <type name="bank22">
     <component type="sixteenpack">
       <location x="0.765095564" y="-0.804864486" z="2.293278425">
         <rot axis-x="0" axis-y="1" axis-z="0" val="198.45">
@@ -1078,7 +1092,7 @@
       </location>
     </component>
   </type>
-  <type name="A23">
+  <type name="bank23">
     <component type="sixteenpack">
       <location x="0.545061359" y="-0.804864486" z="2.355293033">
         <rot axis-x="0" axis-y="1" axis-z="0" val="193.03">
@@ -1089,7 +1103,7 @@
       </location>
     </component>
   </type>
-  <type name="A24">
+  <type name="bank24">
     <component type="sixteenpack">
       <location x="0.320153274" y="-0.804864486" z="2.396246865">
         <rot axis-x="0" axis-y="1" axis-z="0" val="187.61">
@@ -1100,7 +1114,7 @@
       </location>
     </component>
   </type>
-  <type name="A25">
+  <type name="bank25">
     <component type="sixteenpack">
       <location x="0.092382414" y="-0.804864486" z="2.415773716">
         <rot axis-x="0" axis-y="1" axis-z="0" val="182.19">
@@ -1111,7 +1125,7 @@
       </location>
     </component>
   </type>
-  <type name="A26">
+  <type name="bank26">
     <component type="sixteenpack">
       <location x="-0.136214521" y="-0.804864486" z="2.413698979">
         <rot axis-x="0" axis-y="1" axis-z="0" val="176.77">
@@ -1122,7 +1136,7 @@
       </location>
     </component>
   </type>
-  <type name="A27">
+  <type name="bank27">
     <component type="sixteenpack">
       <location x="-0.46128828" y="-0.804864486" z="2.373122475">
         <rot axis-x="0" axis-y="1" axis-z="0" val="169">
@@ -1133,7 +1147,7 @@
       </location>
     </component>
   </type>
-  <type name="A28">
+  <type name="bank28">
     <component type="sixteenpack">
       <location x="-0.683381125" y="-0.804864486" z="2.318941008">
         <rot axis-x="0" axis-y="1" axis-z="0" val="163.58">
@@ -1144,7 +1158,7 @@
       </location>
     </component>
   </type>
-  <type name="A29">
+  <type name="bank29">
     <component type="sixteenpack">
       <location x="-0.899363249" y="-0.804864486" z="2.24402382">
         <rot axis-x="0" axis-y="1" axis-z="0" val="158.16">
@@ -1159,107 +1173,107 @@
     <location/>
   </component>
   <type name="B row">
-    <component type="B1">
+    <component type="bank30">
       <location/>
     </component>
-    <component type="B2">
+    <component type="bank31">
       <location/>
     </component>
-    <component type="B3">
+    <component type="bank32">
       <location/>
     </component>
-    <component type="B4">
+    <component type="bank33">
       <location/>
     </component>
-    <component type="B5">
+    <component type="bank34">
       <location/>
     </component>
-    <component type="B6">
+    <component type="bank35">
       <location/>
     </component>
-    <component type="B7">
+    <component type="bank36">
       <location/>
     </component>
-    <component type="B8">
+    <component type="bank37">
       <location/>
     </component>
-    <component type="B9">
+    <component type="bank38">
       <location/>
     </component>
-    <component type="B10">
+    <component type="bank39">
       <location/>
     </component>
-    <component type="B11">
+    <component type="bank40">
       <location/>
     </component>
-    <component type="B12">
+    <component type="bank41">
       <location/>
     </component>
-    <component type="B13">
+    <component type="bank42">
       <location/>
     </component>
-    <component type="B14">
+    <component type="bank43">
       <location/>
     </component>
-    <component type="B15">
+    <component type="bank44">
       <location/>
     </component>
-    <component type="B16">
+    <component type="bank45">
       <location/>
     </component>
-    <component type="B17">
+    <component type="bank46">
       <location/>
     </component>
-    <component type="B18">
+    <component type="bank47">
       <location/>
     </component>
-    <component type="B19">
+    <component type="bank48">
       <location/>
     </component>
-    <component type="B20">
+    <component type="bank49">
       <location/>
     </component>
-    <component type="B21">
+    <component type="bank50">
       <location/>
     </component>
-    <component type="B22">
+    <component type="bank51">
       <location/>
     </component>
-    <component type="B23">
+    <component type="bank52">
       <location/>
     </component>
-    <component type="B24">
+    <component type="bank53">
       <location/>
     </component>
-    <component type="B25">
+    <component type="bank54">
       <location/>
     </component>
-    <component type="B26">
+    <component type="bank55">
       <location/>
     </component>
-    <component type="B27">
+    <component type="bank56">
       <location/>
     </component>
-    <component type="B28">
+    <component type="bank57">
       <location/>
     </component>
-    <component type="B29">
+    <component type="bank58">
       <location/>
     </component>
-    <component type="B30">
+    <component type="bank59">
       <location/>
     </component>
-    <component type="B31">
+    <component type="bank60">
       <location/>
     </component>
-    <component type="B32">
+    <component type="bank61">
       <location/>
     </component>
-    <component type="B33">
+    <component type="bank62">
       <location/>
     </component>
   </type>
-  <type name="B1">
+  <type name="bank30">
     <component type="sixteenpack">
       <location x="1.304201117" y="0.082562778" z="-2.229192417">
         <rot axis-x="0" axis-y="1" axis-z="0" val="329.67">
@@ -1270,7 +1284,7 @@
       </location>
     </component>
   </type>
-  <type name="B2">
+  <type name="bank31">
     <component type="sixteenpack">
       <location x="1.49609828" y="0.082562778" z="-2.105214793">
         <rot axis-x="0" axis-y="1" axis-z="0" val="324.6">
@@ -1281,7 +1295,7 @@
       </location>
     </component>
   </type>
-  <type name="B3">
+  <type name="bank32">
     <component type="sixteenpack">
       <location x="1.676288396" y="0.082562778" z="-1.964763752">
         <rot axis-x="0" axis-y="1" axis-z="0" val="319.53">
@@ -1292,7 +1306,7 @@
       </location>
     </component>
   </type>
-  <type name="B4">
+  <type name="bank33">
     <component type="sixteenpack">
       <location x="1.843361467" y="0.082562778" z="-1.808938333">
         <rot axis-x="0" axis-y="1" axis-z="0" val="314.46">
@@ -1303,7 +1317,7 @@
       </location>
     </component>
   </type>
-  <type name="B5">
+  <type name="bank34">
     <component type="sixteenpack">
       <location x="1.996010138" y="0.082562778" z="-1.638957876">
         <rot axis-x="0" axis-y="1" axis-z="0" val="309.39">
@@ -1314,7 +1328,7 @@
       </location>
     </component>
   </type>
-  <type name="B6">
+  <type name="bank35">
     <component type="sixteenpack">
       <location x="2.133039925" y="0.082562778" z="-1.456152488">
         <rot axis-x="0" axis-y="1" axis-z="0" val="304.32">
@@ -1325,7 +1339,7 @@
       </location>
     </component>
   </type>
-  <type name="B7">
+  <type name="bank36">
     <component type="sixteenpack">
       <location x="2.253378563" y="0.082562778" z="-1.26195263">
         <rot axis-x="0" axis-y="1" axis-z="0" val="299.25">
@@ -1336,7 +1350,7 @@
       </location>
     </component>
   </type>
-  <type name="B8">
+  <type name="bank37">
     <component type="sixteenpack">
       <location x="2.368113691" y="0.082562778" z="-1.030668199">
         <rot axis-x="0" axis-y="1" axis-z="0" val="293.52">
@@ -1347,7 +1361,7 @@
       </location>
     </component>
   </type>
-  <type name="B9">
+  <type name="bank38">
     <component type="sixteenpack">
       <location x="2.449931376" y="0.082562778" z="-0.817358942">
         <rot axis-x="0" axis-y="1" axis-z="0" val="288.45">
@@ -1358,7 +1372,7 @@
       </location>
     </component>
   </type>
-  <type name="B10">
+  <type name="bank39">
     <component type="sixteenpack">
       <location x="2.51257822" y="0.082562778" z="-0.597653809">
         <rot axis-x="0" axis-y="1" axis-z="0" val="283.38">
@@ -1369,7 +1383,7 @@
       </location>
     </component>
   </type>
-  <type name="B11">
+  <type name="bank40">
     <component type="sixteenpack">
       <location x="2.555564008" y="0.082562778" z="-0.373272004">
         <rot axis-x="0" axis-y="1" axis-z="0" val="278.31">
@@ -1380,7 +1394,7 @@
       </location>
     </component>
   </type>
-  <type name="B12">
+  <type name="bank41">
     <component type="sixteenpack">
       <location x="2.578552374" y="0.082562778" z="-0.145969326">
         <rot axis-x="0" axis-y="1" axis-z="0" val="273.24">
@@ -1391,7 +1405,7 @@
       </location>
     </component>
   </type>
-  <type name="B13">
+  <type name="bank42">
     <component type="sixteenpack">
       <location x="2.581363432" y="0.082562778" z="0.08247557">
         <rot axis-x="0" axis-y="1" axis-z="0" val="268.17">
@@ -1402,7 +1416,7 @@
       </location>
     </component>
   </type>
-  <type name="B14">
+  <type name="bank43">
     <component type="sixteenpack">
       <location x="2.560231046" y="0.082562778" z="0.339788726">
         <rot axis-x="0" axis-y="1" axis-z="0" val="262.44">
@@ -1413,7 +1427,7 @@
       </location>
     </component>
   </type>
-  <type name="B15">
+  <type name="bank44">
     <component type="sixteenpack">
       <location x="2.520186008" y="0.082562778" z="0.564713974">
         <rot axis-x="0" axis-y="1" axis-z="0" val="257.37">
@@ -1424,7 +1438,7 @@
       </location>
     </component>
   </type>
-  <type name="B16">
+  <type name="bank45">
     <component type="sixteenpack">
       <location x="2.460420382" y="0.082562778" z="0.785220306">
         <rot axis-x="0" axis-y="1" axis-z="0" val="252.3">
@@ -1435,7 +1449,7 @@
       </location>
     </component>
   </type>
-  <type name="B17">
+  <type name="bank46">
     <component type="sixteenpack">
       <location x="2.381401839" y="0.082562778" z="0.999582248">
         <rot axis-x="0" axis-y="1" axis-z="0" val="247.23">
@@ -1446,7 +1460,7 @@
       </location>
     </component>
   </type>
-  <type name="B18">
+  <type name="bank47">
     <component type="sixteenpack">
       <location x="2.283748701" y="0.082562778" z="1.206122407">
         <rot axis-x="0" axis-y="1" axis-z="0" val="242.16">
@@ -1457,7 +1471,7 @@
       </location>
     </component>
   </type>
-  <type name="B19">
+  <type name="bank48">
     <component type="sixteenpack">
       <location x="2.168225109" y="0.082562778" z="1.403224595">
         <rot axis-x="0" axis-y="1" axis-z="0" val="237.09">
@@ -1468,7 +1482,7 @@
       </location>
     </component>
   </type>
-  <type name="B20">
+  <type name="bank49">
     <component type="sixteenpack">
       <location x="2.01729243" y="0.082562778" z="1.612690497">
         <rot axis-x="0" axis-y="1" axis-z="0" val="231.36">
@@ -1479,7 +1493,7 @@
       </location>
     </component>
   </type>
-  <type name="B21">
+  <type name="bank50">
     <component type="sixteenpack">
       <location x="1.866881812" y="0.082562778" z="1.7846545">
         <rot axis-x="0" axis-y="1" axis-z="0" val="226.29">
@@ -1490,7 +1504,7 @@
       </location>
     </component>
   </type>
-  <type name="B22">
+  <type name="bank51">
     <component type="sixteenpack">
       <location x="1.701862747" y="0.082562778" z="1.942653489">
         <rot axis-x="0" axis-y="1" axis-z="0" val="221.22">
@@ -1501,7 +1515,7 @@
       </location>
     </component>
   </type>
-  <type name="B23">
+  <type name="bank52">
     <component type="sixteenpack">
       <location x="1.523526516" y="0.082562778" z="2.085451113">
         <rot axis-x="0" axis-y="1" axis-z="0" val="216.15">
@@ -1512,7 +1526,7 @@
       </location>
     </component>
   </type>
-  <type name="B24">
+  <type name="bank53">
     <component type="sixteenpack">
       <location x="1.33326861" y="0.082562778" z="2.211929972">
         <rot axis-x="0" axis-y="1" axis-z="0" val="211.08">
@@ -1523,7 +1537,7 @@
       </location>
     </component>
   </type>
-  <type name="B25">
+  <type name="bank54">
     <component type="sixteenpack">
       <location x="1.132577808" y="0.082562778" z="2.321100363">
         <rot axis-x="0" axis-y="1" axis-z="0" val="206.01">
@@ -1534,7 +1548,7 @@
       </location>
     </component>
   </type>
-  <type name="B26">
+  <type name="bank55">
     <component type="sixteenpack">
       <location x="0.895178412" y="0.082562778" z="2.422580236">
         <rot axis-x="0" axis-y="1" axis-z="0" val="200.28">
@@ -1545,7 +1559,7 @@
       </location>
     </component>
   </type>
-  <type name="B27">
+  <type name="bank56">
     <component type="sixteenpack">
       <location x="0.677585904" y="0.082562778" z="2.492211213">
         <rot axis-x="0" axis-y="1" axis-z="0" val="195.21">
@@ -1556,7 +1570,7 @@
       </location>
     </component>
   </type>
-  <type name="B28">
+  <type name="bank57">
     <component type="sixteenpack">
       <location x="0.454691251" y="0.082562778" z="2.542340507">
         <rot axis-x="0" axis-y="1" axis-z="0" val="190.14">
@@ -1567,7 +1581,7 @@
       </location>
     </component>
   </type>
-  <type name="B29">
+  <type name="bank58">
     <component type="sixteenpack">
       <location x="0.228238615" y="0.082562778" z="2.572575854">
         <rot axis-x="0" axis-y="1" axis-z="0" val="185.07">
@@ -1578,7 +1592,7 @@
       </location>
     </component>
   </type>
-  <type name="B30">
+  <type name="bank59">
     <component type="sixteenpack">
       <location x="-0.228238615" y="0.082562778" z="2.572575854">
         <rot axis-x="0" axis-y="1" axis-z="0" val="174.93">
@@ -1589,7 +1603,7 @@
       </location>
     </component>
   </type>
-  <type name="B31">
+  <type name="bank60">
     <component type="sixteenpack">
       <location x="-0.483946097" y="0.082562778" z="2.536934284">
         <rot axis-x="0" axis-y="1" axis-z="0" val="169.2">
@@ -1600,7 +1614,7 @@
       </location>
     </component>
   </type>
-  <type name="B32">
+  <type name="bank61">
     <component type="sixteenpack">
       <location x="-0.706248527" y="0.082562778" z="2.484240811">
         <rot axis-x="0" axis-y="1" axis-z="0" val="164.13">
@@ -1611,7 +1625,7 @@
       </location>
     </component>
   </type>
-  <type name="B33">
+  <type name="bank62">
     <component type="sixteenpack">
       <location x="-0.923024525" y="0.082562778" z="2.412108023">
         <rot axis-x="0" axis-y="1" axis-z="0" val="159.06">
@@ -1626,95 +1640,95 @@
     <location/>
   </component>
   <type name="C row">
-    <component type="C1">
+    <component type="bank63">
       <location/>
     </component>
-    <component type="C2">
+    <component type="bank64">
       <location/>
     </component>
-    <component type="C3">
+    <component type="bank65">
       <location/>
     </component>
-    <component type="C4">
+    <component type="bank66">
       <location/>
     </component>
-    <component type="C5">
+    <component type="bank67">
       <location/>
     </component>
-    <component type="C6">
+    <component type="bank68">
       <location/>
     </component>
-    <component type="C7">
+    <component type="bank69">
       <location/>
     </component>
-    <component type="C8">
+    <component type="bank70">
       <location/>
     </component>
-    <component type="C9">
+    <component type="bank71">
       <location/>
     </component>
-    <component type="C10">
+    <component type="bank72">
       <location/>
     </component>
-    <component type="C11">
+    <component type="bank73">
       <location/>
     </component>
-    <component type="C12">
+    <component type="bank74">
       <location/>
     </component>
-    <component type="C13">
+    <component type="bank75">
       <location/>
     </component>
-    <component type="C14">
+    <component type="bank76">
       <location/>
     </component>
-    <component type="C15">
+    <component type="bank77">
       <location/>
     </component>
-    <component type="C16">
+    <component type="bank78">
       <location/>
     </component>
-    <component type="C17">
+    <component type="bank79">
       <location/>
     </component>
-    <component type="C18">
+    <component type="bank80">
       <location/>
     </component>
-    <component type="C19">
+    <component type="bank81">
       <location/>
     </component>
-    <component type="C20">
+    <component type="bank82">
       <location/>
     </component>
-    <component type="C21">
+    <component type="bank83">
       <location/>
     </component>
-    <component type="C22">
+    <component type="bank84">
       <location/>
     </component>
-    <component type="C23">
+    <component type="bank85">
       <location/>
     </component>
-    <component type="C24">
+    <component type="bank86">
       <location/>
     </component>
-    <component type="C25">
+    <component type="bank87">
       <location/>
     </component>
-    <component type="C26">
+    <component type="bank88">
       <location/>
     </component>
-    <component type="C27">
+    <component type="bank89">
       <location/>
     </component>
-    <component type="C28">
+    <component type="bank90">
       <location/>
     </component>
-    <component type="C29">
+    <component type="bank91">
       <location/>
     </component>
   </type>
-  <type name="C1">
+  <type name="bank63">
     <component type="sixteenpack">
       <location x="1.274473643" y="0.966788649" z="-2.054714734">
         <rot axis-x="0" axis-y="1" axis-z="0" val="328.19">
@@ -1725,7 +1739,7 @@
       </location>
     </component>
   </type>
-  <type name="C2">
+  <type name="bank64">
     <component type="sixteenpack">
       <location x="1.462855314" y="0.966788649" z="-1.925146757">
         <rot axis-x="0" axis-y="1" axis-z="0" val="322.77">
@@ -1736,7 +1750,7 @@
       </location>
     </component>
   </type>
-  <type name="C3">
+  <type name="bank65">
     <component type="sixteenpack">
       <location x="1.638156291" y="0.966788649" z="-1.778364325">
         <rot axis-x="0" axis-y="1" axis-z="0" val="317.35">
@@ -1747,7 +1761,7 @@
       </location>
     </component>
   </type>
-  <type name="C4">
+  <type name="bank66">
     <component type="sixteenpack">
       <location x="1.798809051" y="0.966788649" z="-1.615679952">
         <rot axis-x="0" axis-y="1" axis-z="0" val="311.93">
@@ -1758,7 +1772,7 @@
       </location>
     </component>
   </type>
-  <type name="C5">
+  <type name="bank67">
     <component type="sixteenpack">
       <location x="1.943377054" y="0.966788649" z="-1.438548342">
         <rot axis-x="0" axis-y="1" axis-z="0" val="306.51">
@@ -1769,7 +1783,7 @@
       </location>
     </component>
   </type>
-  <type name="C6">
+  <type name="bank68">
     <component type="sixteenpack">
       <location x="2.070567589" y="0.966788649" z="-1.248553389">
         <rot axis-x="0" axis-y="1" axis-z="0" val="301.09">
@@ -1780,7 +1794,7 @@
       </location>
     </component>
   </type>
-  <type name="C7">
+  <type name="bank69">
     <component type="sixteenpack">
       <location x="2.246685526" y="0.966788649" z="-0.893610572">
         <rot axis-x="0" axis-y="1" axis-z="0" val="291.69">
@@ -1791,7 +1805,7 @@
       </location>
     </component>
   </type>
-  <type name="C8">
+  <type name="bank70">
     <component type="sixteenpack">
       <location x="2.321047439" y="0.966788649" z="-0.677402754">
         <rot axis-x="0" axis-y="1" axis-z="0" val="286.27">
@@ -1802,7 +1816,7 @@
       </location>
     </component>
   </type>
-  <type name="C9">
+  <type name="bank71">
     <component type="sixteenpack">
       <location x="2.374654797" y="0.966788649" z="-0.455137674">
         <rot axis-x="0" axis-y="1" axis-z="0" val="280.85">
@@ -1813,7 +1827,7 @@
       </location>
     </component>
   </type>
-  <type name="C10">
+  <type name="bank72">
     <component type="sixteenpack">
       <location x="2.407028248" y="0.966788649" z="-0.228802802">
         <rot axis-x="0" axis-y="1" axis-z="0" val="275.43">
@@ -1824,7 +1838,7 @@
       </location>
     </component>
   </type>
-  <type name="C11">
+  <type name="bank73">
     <component type="sixteenpack">
       <location x="2.417878311" y="0.966788649" z="-0.000421999">
         <rot axis-x="0" axis-y="1" axis-z="0" val="270.01">
@@ -1835,7 +1849,7 @@
       </location>
     </component>
   </type>
-  <type name="C12">
+  <type name="bank74">
     <component type="sixteenpack">
       <location x="2.385480356" y="0.966788649" z="0.394485969">
         <rot axis-x="0" axis-y="1" axis-z="0" val="260.61">
@@ -1846,7 +1860,7 @@
       </location>
     </component>
   </type>
-  <type name="C13">
+  <type name="bank75">
     <component type="sixteenpack">
       <location x="2.337553504" y="0.966788649" z="0.618044757">
         <rot axis-x="0" axis-y="1" axis-z="0" val="255.19">
@@ -1857,7 +1871,7 @@
       </location>
     </component>
   </type>
-  <type name="C14">
+  <type name="bank76">
     <component type="sixteenpack">
       <location x="2.268724502" y="0.966788649" z="0.836077055">
         <rot axis-x="0" axis-y="1" axis-z="0" val="249.77">
@@ -1868,7 +1882,7 @@
       </location>
     </component>
   </type>
-  <type name="C15">
+  <type name="bank77">
     <component type="sixteenpack">
       <location x="2.17960881" y="0.966788649" z="1.046633242">
         <rot axis-x="0" axis-y="1" axis-z="0" val="244.35">
@@ -1879,7 +1893,7 @@
       </location>
     </component>
   </type>
-  <type name="C16">
+  <type name="bank78">
     <component type="sixteenpack">
       <location x="2.071003291" y="0.966788649" z="1.247830548">
         <rot axis-x="0" axis-y="1" axis-z="0" val="238.93">
@@ -1890,7 +1904,7 @@
       </location>
     </component>
   </type>
-  <type name="C17">
+  <type name="bank79">
     <component type="sixteenpack">
       <location x="1.839391068" y="0.966788649" z="1.569323487">
         <rot axis-x="0" axis-y="1" axis-z="0" val="229.53">
@@ -1901,7 +1915,7 @@
       </location>
     </component>
   </type>
-  <type name="C18">
+  <type name="bank80">
     <component type="sixteenpack">
       <location x="1.682935506" y="0.966788649" z="1.736048326">
         <rot axis-x="0" axis-y="1" axis-z="0" val="224.11">
@@ -1912,7 +1926,7 @@
       </location>
     </component>
   </type>
-  <type name="C19">
+  <type name="bank81">
     <component type="sixteenpack">
       <location x="1.511431317" y="0.966788649" z="1.887249608">
         <rot axis-x="0" axis-y="1" axis-z="0" val="218.69">
@@ -1923,7 +1937,7 @@
       </location>
     </component>
   </type>
-  <type name="C20">
+  <type name="bank82">
     <component type="sixteenpack">
       <location x="1.326412072" y="0.966788649" z="2.021575307">
         <rot axis-x="0" axis-y="1" axis-z="0" val="213.27">
@@ -1934,7 +1948,7 @@
       </location>
     </component>
   </type>
-  <type name="C21">
+  <type name="bank83">
     <component type="sixteenpack">
       <location x="1.129532193" y="0.966788649" z="2.137824299">
         <rot axis-x="0" axis-y="1" axis-z="0" val="207.85">
@@ -1945,7 +1959,7 @@
       </location>
     </component>
   </type>
-  <type name="C22">
+  <type name="bank84">
     <component type="sixteenpack">
       <location x="0.765202807" y="0.966788649" z="2.293599872">
         <rot axis-x="0" axis-y="1" axis-z="0" val="198.45">
@@ -1956,7 +1970,7 @@
       </location>
     </component>
   </type>
-  <type name="C23">
+  <type name="bank85">
     <component type="sixteenpack">
       <location x="0.54513776" y="0.966788649" z="2.355623172">
         <rot axis-x="0" axis-y="1" axis-z="0" val="193.03">
@@ -1967,7 +1981,7 @@
       </location>
     </component>
   </type>
-  <type name="C24">
+  <type name="bank86">
     <component type="sixteenpack">
       <location x="0.32019815" y="0.966788649" z="2.396582745">
         <rot axis-x="0" axis-y="1" axis-z="0" val="187.61">
@@ -1978,7 +1992,7 @@
       </location>
     </component>
   </type>
-  <type name="C25">
+  <type name="bank87">
     <component type="sixteenpack">
       <location x="0.092395363" y="0.966788649" z="2.416112333">
         <rot axis-x="0" axis-y="1" axis-z="0" val="182.19">
@@ -1989,7 +2003,7 @@
       </location>
     </component>
   </type>
-  <type name="C26">
+  <type name="bank88">
     <component type="sixteenpack">
       <location x="-0.136233614" y="0.966788649" z="2.414037305">
         <rot axis-x="0" axis-y="1" axis-z="0" val="176.77">
@@ -2000,7 +2014,7 @@
       </location>
     </component>
   </type>
-  <type name="C27">
+  <type name="bank89">
     <component type="sixteenpack">
       <location x="-0.461352939" y="0.966788649" z="2.373455113">
         <rot axis-x="0" axis-y="1" axis-z="0" val="169">
@@ -2011,7 +2025,7 @@
       </location>
     </component>
   </type>
-  <type name="C28">
+  <type name="bank90">
     <component type="sixteenpack">
       <location x="-0.683476914" y="0.966788649" z="2.319266051">
         <rot axis-x="0" axis-y="1" axis-z="0" val="163.58">
@@ -2022,7 +2036,7 @@
       </location>
     </component>
   </type>
-  <type name="C29">
+  <type name="bank91">
     <component type="sixteenpack">
       <location x="-0.899489312" y="0.966788649" z="2.244338363">
         <rot axis-x="0" axis-y="1" axis-z="0" val="158.16">

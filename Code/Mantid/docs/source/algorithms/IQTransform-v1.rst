@@ -123,3 +123,5 @@ Output:
    Output X: [  1.   8.  27.]
 
 .. categories::
+
+.. sourcelink::

@@ -79,3 +79,5 @@ Usage
     interpolated_ws = SplineInterpolation(WorkspaceToMatch=spline_ws, WorkspaceToInterpolate=ws, DerivOrder=2, OutputWorkspaceDeriv='derivs')
 
 .. categories::
+
+.. sourcelink::

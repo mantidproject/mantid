@@ -45,3 +45,5 @@ Output:
     mean of column 'a' is 2.500
 
 .. categories::
+
+.. sourcelink::

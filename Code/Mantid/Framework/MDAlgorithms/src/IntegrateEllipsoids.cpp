@@ -306,7 +306,7 @@ void IntegrateEllipsoids::exec() {
   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
       getProperty("OutputWorkspace");
   if (peak_ws != in_peak_ws) {
-    peak_ws = in_peak_ws->clone();
+    peak_ws.reset(in_peak_ws->clone().release());
   }
   double radius = getProperty("RegionRadius");
   int numSigmas = getProperty("NumSigmas");

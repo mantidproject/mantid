@@ -29,7 +29,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   IqtFit::IqtFit(QWidget * parent) :
-    IDATab(parent),
+    IndirectDataAnalysisTab(parent),
     m_stringManager(NULL), m_ffTree(NULL),
     m_ffRangeManager(NULL),
     m_fixedProps(),

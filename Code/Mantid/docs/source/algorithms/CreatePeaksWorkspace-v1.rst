@@ -48,3 +48,5 @@ Output:
     Created a PeaksWorkspace with 3 rows
 
 .. categories::
+
+.. sourcelink::

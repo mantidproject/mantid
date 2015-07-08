@@ -180,8 +180,8 @@ References
 ##########
 
 Calculation of Q is from Seeger, P. A. and Hjelm, R. P. Jr, "Small-Angle
-Neutron Scattering at Pulsed Spallation Sources" (1991) J. Appl **24**
-467-478
+Neutron Scattering at Pulsed Spallation Sources" (1991) `J. Appl 24
+467-478 <http://dx.doi.org/10.1107/S0021889891004764>`_
 
 Previous Versions
 -----------------
@@ -225,3 +225,5 @@ Properties
 +---------+---------------------+-------------+-------------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 .. categories::
+
+.. sourcelink::

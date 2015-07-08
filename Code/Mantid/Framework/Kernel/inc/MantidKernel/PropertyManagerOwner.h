@@ -71,14 +71,16 @@ public:
   bool validateProperties() const;
   size_t propertyCount() const;
 
-  std::string getPropertyValue(const std::string &name) const;
+  virtual std::string getPropertyValue(const std::string &name) const;
   const std::vector<Property *> &getProperties() const;
 
   /// Get the value of a property
-  TypedValue getProperty(const std::string &name) const;
+  virtual TypedValue getProperty(const std::string &name) const;
   /// Return the property manager serialized as a string.
   virtual std::string asString(bool withDefaultValues = false,
                                char separator = ',') const;
+
+  bool isDefault(const std::string &name) const;
 
   /// Removes the property from management
   void removeProperty(const std::string &name, const bool delproperty = true);

@@ -81,7 +81,7 @@ automatic back transform is not provided.
 References
 ----------
 
-1. U P Wild, R Holzwarth & H P Good, Rev Sci Instr 48 1621 (1977)
+1. U P Wild, R Holzwarth & H P Good, `Rev Sci Instr 48 1621 (1977) <http://dx.doi.org/10.1063/1.1134962>`_
 
 Usage
 -----
@@ -110,3 +110,5 @@ Output:
     Resolution bins: 6
 
 .. categories::
+
+.. sourcelink::

@@ -18,3 +18,5 @@ This algorithm is generally not called directly. It's called by
 after the calculation of I(Q). It can only be applied to an I(Q) workspace.
 
 .. categories::
+
+.. sourcelink::

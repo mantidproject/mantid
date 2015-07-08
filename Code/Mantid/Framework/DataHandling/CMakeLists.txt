@@ -1,12 +1,14 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
+	src/CheckMantidVersion.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
+	src/DecoratorWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -32,6 +34,7 @@ set ( SRC_FILES
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
 	src/LoadDetectorsGroupingFile.cpp
+	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
@@ -121,6 +124,7 @@ set ( SRC_FILES
 	src/SaveCanSAS1D2.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorsGrouping.cpp
+	src/SaveDiffCal.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
@@ -155,12 +159,14 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
+	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
+	inc/MantidDataHandling/DecoratorWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -186,6 +192,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
+	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
@@ -270,6 +277,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCanSAS1D2.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
+	inc/MantidDataHandling/SaveDiffCal.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
@@ -308,12 +316,14 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
+	CheckMantidVersionTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
+	DecoratorWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
@@ -336,6 +346,7 @@ set ( TEST_FILES
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
+	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusTest.h
@@ -415,6 +426,7 @@ set ( TEST_FILES
 	SaveCanSAS1dTest2.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
+	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
