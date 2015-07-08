@@ -93,10 +93,10 @@ void AlignAndFocusPowder::init() {
       new WorkspaceProperty<OffsetsWorkspace>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: A workspace giving which detectors are masked.");
+  declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace", "",
+                                                       Direction::Input,
+                                                       PropertyMode::Optional),
+                  "Optional: A workspace giving which detectors are masked.");
   declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable", "",
                                                         Direction::Input,
                                                         PropertyMode::Optional),
@@ -843,17 +843,6 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   return outws;
 }
 
-namespace {
-bool endswith(const std::string &str, const std::string &ending) {
-  if (ending.size() > str.size()) {
-    return false;
-  }
-
-  return std::equal(str.begin() + str.size() - ending.size(), str.end(),
-                    ending.begin());
-}
-}
-
 void AlignAndFocusPowder::convertOffsetsToCal(
     DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
   if (!offsetsWS)
@@ -911,7 +900,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   }
   if ((!m_maskWS) && (!calFileName.empty())) {
     try {
-      m_maskWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_maskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(
           m_instName + "_mask");
     } catch (Exception::NotFoundError &) {
       ; // not noteworthy
@@ -930,27 +919,13 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
 
   // bunch of booleans to keep track of things
   bool loadGrouping = !m_groupWS;
-  bool loadOffsets = !m_calibrationWS;
+  bool loadCalibration = !m_calibrationWS;
   bool loadMask = !m_maskWS;
-  bool isAsciiCal = endswith(calFileName, ".cal");
 
-  // Load the .cal file
-  IAlgorithm_sptr alg;
-  if (isAsciiCal) {
-    alg = createChildAlgorithm("LoadCalFile");
-    alg->setPropertyValue("CalFilename", calFileName);
-    alg->setProperty("InputWorkspace", m_inputW);
-    alg->setProperty<bool>("MakeOffsetsWorkspace", loadOffsets);
-  } else if (endswith(calFileName, ".h5") || endswith(calFileName, ".hd5") ||
-             endswith(calFileName, ".hdf")) {
-    alg = createChildAlgorithm("LoadDiffCal");
-    alg->setPropertyValue("Filename", calFileName);
-    alg->setProperty<bool>("MakeCalWorkspace", loadOffsets);
-  } else {
-    std::stringstream msg;
-    msg << "Do not know how to load cal file: " << calFileName;
-    throw std::runtime_error(msg.str());
-  }
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+  alg->setProperty("InputWorkspace", m_inputW);
+  alg->setPropertyValue("Filename", calFileName);
+  alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
   alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
   alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
   alg->setPropertyValue("WorkspaceName", m_instName);
@@ -962,7 +937,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
     AnalysisDataService::Instance().addOrReplace(m_instName + "_group",
                                                  m_groupWS);
   }
-  if (loadOffsets) {
+  if (loadCalibration) {
     m_calibrationWS = alg->getProperty("OutputCalWorkspace");
     AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
                                                  m_calibrationWS);

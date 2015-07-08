@@ -113,7 +113,7 @@ private:
   DataObjects::EventWorkspace_sptr m_inputEW;
   DataObjects::EventWorkspace_sptr m_outputEW;
   API::ITableWorkspace_sptr m_calibrationWS;
-  API::MatrixWorkspace_sptr m_maskWS;
+  DataObjects::MaskWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
   double m_l1;
   std::vector<int32_t> specids;
