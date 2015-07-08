@@ -189,7 +189,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
-    // We now check the parameter that is different in the embedded parameters
+    // We now check a parameter
     const ParameterMap& paramMap = output->instrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "main-detector-bank");
