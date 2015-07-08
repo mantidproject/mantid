@@ -93,7 +93,6 @@ public:
 
     // Check the results
     TS_ASSERT_EQUALS(alg.CurrentVersion,currentVersion);
-    TS_ASSERT_EQUALS(alg.CurrentVersion,currentVersion);
     TS_ASSERT_EQUALS(expectedResult,isNewVersionAvailable);
   }
 
