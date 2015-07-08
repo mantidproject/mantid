@@ -2,14 +2,14 @@
 from mantid.kernel import *
 from mantid.api import *
 
-class EnginXFocus(PythonAlgorithm):
+class EnggFocus(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
-        return "EnginXFocus"
+        return "EnggFocus"
 
     def summary(self):
         return "Focuses a run."
@@ -21,8 +21,8 @@ class EnginXFocus(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                              "A workspace with focussed data")
 
-        import EnginXUtils
-        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+        import EnggUtils
+        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to focus: It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
@@ -40,12 +40,12 @@ class EnginXFocus(PythonAlgorithm):
 
 
     def PyExec(self):
-        import EnginXUtils
+        import EnggUtils
 
         # Get the run workspace
         ws = self.getProperty('InputWorkspace').value
 
-        indices = EnginXUtils.getWsIndicesFromInProperties(ws, self.getProperty('Bank').value,
+        indices = EnggUtils.getWsIndicesFromInProperties(ws, self.getProperty('Bank').value,
                                                            self.getProperty(self.INDICES_PROP_NAME).value)
 
     	# Leave the data for the bank we are interested in only
@@ -136,4 +136,4 @@ class EnginXFocus(PythonAlgorithm):
         return alg.getProperty('OutputWorkspace').value
 
 
-AlgorithmFactory.subscribe(EnginXFocus)
+AlgorithmFactory.subscribe(EnggFocus)

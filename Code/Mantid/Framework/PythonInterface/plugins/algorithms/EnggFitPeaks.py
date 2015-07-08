@@ -4,7 +4,7 @@ from mantid.api import *
 
 import math
 
-class EnginXFitPeaks(PythonAlgorithm):
+class EnggFitPeaks(PythonAlgorithm):
     EXPECTED_DIM_TYPE = 'Time-of-flight'
     PEAK_TYPE = 'BackToBackExponential'
 
@@ -12,7 +12,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
-        return "EnginXFitPeaks"
+        return "EnggFitPeaks"
 
     def summary(self):
         return ("The algorithm fits an expected diffraction pattern to a workpace spectrum by "
@@ -52,10 +52,10 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     def PyExec(self):
 
-        import EnginXUtils
+        import EnggUtils
 
         # Get peaks in dSpacing from file
-        expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                          self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
@@ -86,7 +86,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         self._produceOutputs(difc, zero)
 
     def _getDefaultPeaks(self):
-        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
+        """ Gets default peaks for Engg algorithm. Values from CeO2 """
         defaultPeaks = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
                        1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
                        0.8252, 0.8158, 0.7811]
@@ -101,7 +101,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         @param zero :: the zero GSAS parameter as fitted here
         """
 
-        import EnginXUtils
+        import EnggUtils
 
         # mandatory outputs
         self.setProperty('Difc', difc)
@@ -110,12 +110,12 @@ class EnginXFitPeaks(PythonAlgorithm):
         # optional outputs
         tblName = self.getPropertyValue("OutParametersTable")
         if '' != tblName:
-            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            EnggUtils.generateOutputParTable(tblName, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
     def _fitAllPeaks(self, inWS, wsIndex, peaks, peaksTableName):
         """
-        This method is the core of EnginXFitPeaks. Ittries to fit as many peaks as there are in the list of
+        This method is the core of EnggFitPeaks. Ittries to fit as many peaks as there are in the list of
         expected peaks passed to the algorithm.
 
         The parameters from the (Gaussian) peaks fitted by FindPeaks elsewhere (before calling this method)
@@ -314,7 +314,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         # lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
         # which is approximately what ConverUnits will do
         # remember the -1, we must produce a histogram data workspace, which is what
-        # for example EnginXCalibrate expects
+        # for example EnggCalibrate expects
         yVals = [1] * (len(expectedPeaks) - 1)
         # Do like: wsFrom = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
         #                                        ParentWorkspace=self.getProperty("InputWorkspace").value)
@@ -419,4 +419,4 @@ class EnginXFitPeaks(PythonAlgorithm):
             paramMap[name + '_Err'] = row['Error']
 
 
-AlgorithmFactory.subscribe(EnginXFitPeaks)
+AlgorithmFactory.subscribe(EnggFitPeaks)

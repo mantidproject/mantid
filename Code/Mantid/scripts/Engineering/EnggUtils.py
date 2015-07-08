@@ -12,9 +12,9 @@ def readInExpectedPeaks(filename, expectedGiven):
     peaks given (and check that it is not empty).
 
     @param :: filename name of the csv file to read from. If empty, we take the peaks given in an option.
-    This is passed to EnginX algorithms in the (optional) input property 'ExpectedPeaksFromFile'
+    This is passed to Engg algorithms in the (optional) input property 'ExpectedPeaksFromFile'
 
-    @param :: expectedGiven list of expected peaks given as an input property to an EnginX algorithm
+    @param :: expectedGiven list of expected peaks given as an input property to an Engg algorithm
     (ExpectedPeaks)
 
     @returns the expected peaks either from a file or input list, sorted in ascending order
@@ -60,7 +60,7 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
     'DetectorIndices'
 
     @param workspace :: input workspace (with instrument)
-    @param bank :: value passed in the input property 'Bank' to an EnginX algorithm
+    @param bank :: value passed in the input property 'Bank' to an Engg algorithm
     @param detIndices :: value passed in the 'Det
 
     @returns list of workspace indices that can be used in mantid algorithms such as CropWorkspace.
@@ -134,11 +134,12 @@ def getWsIndicesForBank(ws, bank):
 
 def getDetIDsForBank(bank):
     """
-    Find the detector IDs for an instrument bank.
+    Find the detector IDs for an instrument bank. Note this is at this point specific to
+    the ENGINX instrument.
 
     @param bank :: name/number as a string
 
-    @returns list of detector IDs corresponding to the specified EnginX bank number
+    @returns list of detector IDs corresponding to the specified Engg bank number
     """
     groupingFilePath = os.path.join(sapi.config.getInstrumentDirectory(),
                                     'Grouping', 'ENGINX_Grouping.xml')

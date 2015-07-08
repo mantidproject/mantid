@@ -2,7 +2,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class EnginXFitPeaksTest(unittest.TestCase):
+class EnggFitPeaksTest(unittest.TestCase):
 
     def test_wrong_properties(self):
         """
@@ -17,24 +17,24 @@ class EnginXFitPeaksTest(unittest.TestCase):
 
         # No InputWorkspace property (required)
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
 
         # Wrong WorkspaceIndex value
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           InputWorkspace=ws_name,
                           WorkspaceIndex=-3, ExpectedPeaks='0.51, 0.72')
 
         # Wrong property
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           InputWorkspace=ws_name, BankPixelFoo=33,
                           WorkspaceIndex=0, ExpectedPeaks='0.51, 0.72')
 
         # Wrong ExpectedPeaks value
         self.assertRaises(ValueError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           InputWorkspace=ws_name,
                           WorkspaceIndex=0, ExpectedPeaks='a')
 
@@ -102,11 +102,11 @@ class EnginXFitPeaksTest(unittest.TestCase):
                                     XMin=10000, XMax=30000, BinWidth=10, Random=1)
         # these should raise because of issues with the peak center - data range
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           sws, 0, [0.5, 2.5])
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[90], PrimaryFlightPath=50)
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           sws, 0, [1, 3])
 
         # this should fail because of nan/infinity issues
@@ -116,7 +116,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
                                     XMin=10000, XMax=30000, BinWidth=10)
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[35], PrimaryFlightPath=35)
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           sws, 0, [1, 2, 3])
 
         # this should fail because FindPeaks doesn't initialize/converge well
@@ -126,7 +126,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
                                     XMin=2000, XMax=30000, BinWidth=10)
         EditInstrumentGeometry(Workspace=sws, L2=[1.0], Polar=[90], PrimaryFlightPath=50)
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           sws, 0, [0.6])
 
     def test_fails_ok_1peak(self):
@@ -141,7 +141,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
                                     XMin=0, XMax=25000, BinWidth=10)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=45)
         self.assertRaises(RuntimeError,
-                          EnginXFitPeaks,
+                          EnggFitPeaks,
                           sws, WorkspaceIndex=0, ExpectedPeaks='0.542')
 
     def test_runs_ok_2peaks(self):
@@ -162,7 +162,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         ep1 = 0.4
         ep2 = 1.09
         paramsTblName = 'test_difc_zero_table'
-        difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
+        difc, zero = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2],
                                     OutFittedPeaksTable=peaksTblName,
                                     OutParametersTable=paramsTblName)
         pTable = mtd[paramsTblName]
@@ -203,7 +203,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         ep1 = 0.4
         ep2 = 0.83
         ep3 = 1.09
-        difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
+        difc, zero = EnggFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[ep1, ep2, ep3],
                                     OutFittedPeaksTable=peaksTblName)
 
         expected_difc = 17335.67250113934
