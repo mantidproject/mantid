@@ -5,6 +5,7 @@ import math
 import EnginXUtils
 
 class EnginXCalibrateFull(PythonAlgorithm):
+    INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
@@ -25,6 +26,18 @@ class EnginXCalibrateFull(PythonAlgorithm):
                              "(3D vector with x, y, z values), the new positions in V3D, the new positions "
                              "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
 
+        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+                             direction=Direction.Input,
+                             doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
+                             "equivalently,North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "for a more flexible alternative to select specific detectors")
+
+        self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
+                             doc = 'Sets the spectrum numbers for the detectors '
+                             'that should be considered in the calibration (all others will be '
+                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
+
         self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
                              "Name of the file to save the pre-/post-calibrated detector positions - this "
                              "saves the same information that is provided in the output table workspace "
@@ -39,8 +52,6 @@ class EnginXCalibrateFull(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty("Bank", 1, "Which bank to calibrate")
-
     def PyExec(self):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
@@ -51,10 +62,11 @@ class EnginXCalibrateFull(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         inWS = self.getProperty('Workspace').value
-        bank = self.getProperty('Bank').value
+        WSIndices = EnginXUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
+                                                             self.getProperty(self.INDICES_PROP_NAME).value)
 
-        rebinWS = self._prepareWsForFitting(inWS)
-        posTbl = self._calculateCalibPositionsTbl(rebinWS, bank, expectedPeaksD)
+        rebinnedWS = self._prepareWsForFitting(inWS)
+        posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
 
         # Produce 2 results: 'output table' and 'apply calibration' + (optional) calibration file
         self.setProperty("OutDetPosTable", posTbl)
@@ -78,22 +90,21 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         return result
 
-    def _calculateCalibPositionsTbl(self, ws, bank, expectedPeaksD):
+    def _calculateCalibPositionsTbl(self, ws, indices, expectedPeaksD):
         """
         Makes a table of calibrated positions (and additional parameters). It goes through
         the detectors of the workspace and calculates the difc and zero parameters by fitting
         peaks, then calculates the coordinates and adds them in the returned table.
 
         @param ws :: input workspace with an instrument definition
-        @param bank :: instrument bank to calibrate
+        @param indices :: workspace indices to consider for calibration (for example all the
+        indices of a bank)
         @param expectedPeaksD :: expected peaks in d-spacing
 
-        @return table that with the detector positions, with one row per detector
+        @return table with the detector positions, one row per detector
 
         """
         posTbl = self._createPositionsTable()
-
-        indices = EnginXUtils.getWsIndicesForBank(bank, ws)
 
         prog = Progress(self, start=0, end=1, nreports=len(indices))
 

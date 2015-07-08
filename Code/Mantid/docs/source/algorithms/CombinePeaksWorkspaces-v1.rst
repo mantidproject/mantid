@@ -21,3 +21,5 @@ match is found (the search stops at the first match for each
 RHSWorkspace peak) then the peak in the LHSWorkspace is retained.
 
 .. categories::
+
+.. sourcelink::

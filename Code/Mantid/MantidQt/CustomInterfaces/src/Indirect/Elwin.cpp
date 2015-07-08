@@ -22,7 +22,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   Elwin::Elwin(QWidget * parent) :
-    IDATab(parent),
+    IndirectDataAnalysisTab(parent),
     m_elwTree(NULL)
   {
     m_uiForm.setupUi(parent);

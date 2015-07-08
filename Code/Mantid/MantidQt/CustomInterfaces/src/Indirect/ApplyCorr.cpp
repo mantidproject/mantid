@@ -20,7 +20,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   ApplyCorr::ApplyCorr(QWidget * parent) :
-    IDATab(parent)
+    CorrectionsTab(parent)
   {
     m_uiForm.setupUi(parent);
 
@@ -264,7 +264,10 @@ namespace IDA
     if(m_originalSampleUnits != "Wavelength")
     {
       auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
-      addConvertUnitsStep(ws, m_originalSampleUnits, "");
+      std::string eMode("");
+      if(m_originalSampleUnits == "dSpacing")
+        eMode = "Elastic";
+      addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
     }
 
     // Add save algorithms if required

@@ -24,3 +24,5 @@ The ``SaveSpeed`` and ``LoadSpeed`` output properties are set to the saving
 and loading rates, in MB per second.
 
 .. categories::
+
+.. sourcelink::

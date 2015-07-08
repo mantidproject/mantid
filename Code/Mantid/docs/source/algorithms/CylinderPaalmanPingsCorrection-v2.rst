@@ -62,3 +62,5 @@ Output:
     Correction workspaces: corr_ass, corr_assc, corr_acsc, corr_acc
 
 .. categories::
+
+.. sourcelink::

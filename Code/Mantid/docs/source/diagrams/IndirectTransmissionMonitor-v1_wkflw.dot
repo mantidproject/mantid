@@ -1,4 +1,4 @@
-digraph TimeSlice {
+digraph IndirectTransmissionMonitor {
   label="IndirectTransmissionMonitor Flowchart"
   $global_style
 
@@ -7,7 +7,6 @@ digraph TimeSlice {
     ExtractMonitor_HaveMonitor2_1   [label="Have Monitor 2?"]
     ExtractMonitor_HaveMonitor2_2   [label="Have Monitor 2?"]
     ExtractMonitor_IsSameTimeRegime [label="Is Same Start Time?"]
-    Save                            [label="Save?"]
   }
 
   subgraph params {
@@ -34,7 +33,6 @@ digraph TimeSlice {
 
     Divide
     GroupWorkspaces
-    SaveNexusProcessed
   }
 
   subgraph processes {
@@ -76,7 +74,5 @@ digraph TimeSlice {
   Divide                  -> GroupWorkspaces
   SampleWorkspace         -> GroupWorkspaces
   CanWorkspace            -> GroupWorkspaces
-  GroupWorkspaces         -> Save
-  Save                    -> SaveNexusProcessed   [label="Yes"]
   GroupWorkspaces         -> OutputWorkspace
 }

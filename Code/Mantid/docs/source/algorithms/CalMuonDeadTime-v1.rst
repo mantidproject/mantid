@@ -59,3 +59,5 @@ Output:
       Spectrum 5 -> -0.5304
 
 .. categories::
+
+.. sourcelink::

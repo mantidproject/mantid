@@ -35,3 +35,5 @@ and
 .. properties::
 
 .. categories::
+
+.. sourcelink::

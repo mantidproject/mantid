@@ -34,3 +34,5 @@ Output:
     Spectrum0 contained 0 counts
 
 .. categories::
+
+.. sourcelink::

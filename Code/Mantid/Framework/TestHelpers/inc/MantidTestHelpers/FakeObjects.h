@@ -132,6 +132,9 @@ public:
   }
 
 private:
+  virtual WorkspaceTester *doClone() const {
+    throw std::runtime_error("Cloning of WorkspaceTester is not implemented.");
+  }
   std::vector<SpectrumTester> vec;
   size_t spec;
 };
@@ -230,6 +233,12 @@ public:
 
   void find(V3D, size_t&, const size_t&) {
     throw std::runtime_error("find not implemented");
+  }
+
+private:
+  virtual TableWorkspaceTester *doClone() const {
+    throw std::runtime_error(
+        "Cloning of TableWorkspaceTester is not implemented.");
   }
 };
 

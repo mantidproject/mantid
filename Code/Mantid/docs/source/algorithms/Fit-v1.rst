@@ -326,3 +326,7 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::
+ :h: Framework/CurveFitting/inc/MantidCurveFitting/Fit.h
+ :cpp: Framework/CurveFitting/src/Fit.cpp

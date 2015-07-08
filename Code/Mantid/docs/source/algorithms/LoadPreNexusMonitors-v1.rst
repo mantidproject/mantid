@@ -33,3 +33,5 @@ Output:
    The resulting workspace contains 3 spectra -- one for each monitor.
 
 .. categories::
+
+.. sourcelink::

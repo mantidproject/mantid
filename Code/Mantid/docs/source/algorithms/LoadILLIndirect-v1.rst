@@ -33,3 +33,5 @@ Output:
 	This workspace has 2 dimensions and has 2057 histograms.
 
 .. categories::
+
+.. sourcelink::

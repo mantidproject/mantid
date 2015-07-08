@@ -35,3 +35,7 @@ If necessary, the imput workspace is cloned, to save it from being modified.
 .. image:: ../images/StepScanWorkflow.png
 
 .. categories::
+
+.. sourcelink::
+    :cpp: Framework/WorkflowAlgorithms/src/StepScan.cpp
+    :h: Framework/WorkflowAlgorithms/inc/MantidWorkflowAlgorithms/StepScan.h

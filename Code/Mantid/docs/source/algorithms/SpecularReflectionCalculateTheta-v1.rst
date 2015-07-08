@@ -49,3 +49,5 @@ Output:
    45.0
   
 .. categories::
+
+.. sourcelink::

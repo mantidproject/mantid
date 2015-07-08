@@ -311,3 +311,5 @@ Output
   Detector 104 is masked: False
 
 .. categories::
+
+.. sourcelink::

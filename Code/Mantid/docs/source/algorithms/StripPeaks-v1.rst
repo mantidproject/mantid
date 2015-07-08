@@ -19,3 +19,5 @@ The :ref:`algm-FindPeaks` algorithm is used to identify the peaks in
 the data.
 
 .. categories::
+
+.. sourcelink::

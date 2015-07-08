@@ -201,7 +201,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _sam_ws_map = None
     _van_ws_map = None
     _man_d_range = None
-
+    _load_logs = None
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
@@ -225,6 +225,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
                              doc="Name to give the output workspace. If no name is provided, "+\
                                  "one will be generated based on the run numbers.")
+        self.declareProperty(name='LoadLogFiles', defaultValue=True,
+                             doc='Load log files when loading runs')
 
         self.declareProperty('DetectDRange', True,
                              doc='Disable to override automatic dRange detection')
@@ -242,8 +244,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
 
     def PyExec(self):
-        # Set OSIRIS as default instrument.
-        # config["default.instrument"] = 'OSIRIS'
+        self._load_logs = self.getProperty('LoadLogFiles').value
         self._cal = self.getProperty("CalFile").value
         self._output_ws_name = self.getPropertyValue("OutputWorkspace")
 
@@ -263,16 +264,16 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         Execute the algorithm in diffraction-only mode
         """
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
-        for filename in self._sample_runs + self._vanadium_runs:
-            Load(Filename=filename,
-                 OutputWorkspace=filename,
-                 SpectrumMin=3)
-                 # SpectrumMax=962)
-
-        for sam in self._sample_runs:
-            self._sam_ws_map.addWs(sam, self._man_d_range)
-        for van in self._vanadium_runs:
-            self._van_ws_map.addWs(van, self._man_d_range)
+        for fileName in self._sams + self._vans:
+            Load(Filename=fileName,
+                 OutputWorkspace=fileName,
+                 SpectrumMin=3,
+                 #SpectrumMax=962,
+                 LoadLogFiles=self._load_logs)
+        for sam in self._sams:
+            self._samMap.addWs(sam)
+        for van in self._vans:
+            self._vanMap.addWs(van)
 
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map.getMap().iterkeys():

@@ -22,3 +22,5 @@ becomes
 A, B, C, D, E, P, Q, Z F, G, H, I, J, P, Q, Z K, L, M, N, O, P, Q, Z
 
 .. categories::
+
+.. sourcelink::

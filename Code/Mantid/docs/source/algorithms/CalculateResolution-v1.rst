@@ -60,3 +60,5 @@ Usage
   Two Theta: 0.7000
 
 .. categories::
+
+.. sourcelink::

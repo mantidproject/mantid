@@ -43,3 +43,7 @@ Note that the box function is defined on interval [-5, 5]:
 .. properties::
 
 .. categories::
+
+.. sourcelink::
+   :h: Framework/CurveFitting/inc/MantidCurveFitting/Convolution.h
+   :cpp: Framework/CurveFitting/src/Convolution.cpp

@@ -45,3 +45,5 @@ Output:
    IRS21360_graphite002_red
 
 .. categories::
+
+.. sourcelink::

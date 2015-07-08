@@ -65,3 +65,5 @@ Output:
     Reduced right workspace has 24 spectra
 
 .. categories::
+
+.. sourcelink::

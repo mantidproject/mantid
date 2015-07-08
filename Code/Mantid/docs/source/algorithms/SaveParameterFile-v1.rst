@@ -59,3 +59,5 @@ Example Output::
     </parameter-file>
 
 .. categories::
+
+.. sourcelink::

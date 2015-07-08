@@ -54,3 +54,5 @@ Output:
    51200 17
 
 .. categories::
+
+.. sourcelink::

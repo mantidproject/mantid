@@ -162,3 +162,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

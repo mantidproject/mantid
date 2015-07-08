@@ -65,3 +65,5 @@ Output:
     Chi2: 0.0203
 
 .. categories::
+
+.. sourcelink::

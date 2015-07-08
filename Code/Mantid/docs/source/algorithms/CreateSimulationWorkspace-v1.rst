@@ -21,3 +21,5 @@ number of histograms as detectors in the instrument (not including
 monitors)
 
 .. categories::
+
+.. sourcelink::
