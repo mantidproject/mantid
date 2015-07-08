@@ -356,17 +356,6 @@ void LoadIsawDetCal::exec() {
       // Final = those two rotations in succession; Q1 is done first.
       Quat Rot = Q2 * Q1;
 
-      // Then find the corresponding relative position
-      /*boost::shared_ptr<const IComponent> comp =
-          inst->getComponentByName(detname);
-      if (inst->getName() .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
-      {
-        std::vector<Geometry::IComponent_const_sptr> children;
-        boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-            boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
-        asmb->getChildren(children, false);
-        comp = children[0];
-      }*/
       boost::shared_ptr<const IComponent> parent = comp->getParent();
       if (parent) {
         Quat rot0 = parent->getRelativeRot();

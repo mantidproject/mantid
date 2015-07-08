@@ -167,19 +167,23 @@ void SaveIsawDetCal::exec() {
     if (det) {
       // Center of the detector
       V3D center = det->getPos();
+
       // Distance to center of detector
       double detd = (center - inst->getSample()->getPos()).norm();
-
-      // Base unit vector (along the horizontal, X axis)
-      V3D base =
-          findPixelPos(bankName, 1, 0) - findPixelPos(bankName, 0, 0);
-      base.normalize();
-      // Up unit vector (along the vertical, Y axis)
-      V3D up = findPixelPos(bankName, 0, 1) - findPixelPos(bankName, 0, 0);
-      up.normalize();
       int NCOLS, NROWS;
       double xsize, ysize;
       sizeBanks(bankName, NCOLS, NROWS, xsize, ysize);
+      // Base unit vector (along the horizontal, X axis)
+      // Since WISH banks are curved use center and increment 2 for tubedown
+      int midX = NCOLS/2;
+      int midY = NROWS/2;
+      V3D base =
+          findPixelPos(bankName, midX, midY) - findPixelPos(bankName, midX + 2, midY);
+      base.normalize();
+
+      // Up unit vector (along the vertical, Y axis)
+      V3D up = findPixelPos(bankName, midX, midY) - findPixelPos(bankName, midX, midY + 1);
+      up.normalize();
 
       // Write the line
       out << "5 " << std::setw(6) << std::right << bank << " "
@@ -233,12 +237,16 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
       children.clear();
       asmb->getChildren(children, false);
     }
+    int col0 = col - 1;
+    //WISH detectors are in bank in this order in instrument
+    if (inst->getName() == "WISH")
+      col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
-            children[col]);
+            children[col0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
-    Geometry::IComponent_const_sptr first = grandchildren[row];
+    Geometry::IComponent_const_sptr first = grandchildren[row-1];
     return first->getPos();
   }
 }
