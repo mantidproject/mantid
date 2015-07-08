@@ -48,7 +48,7 @@ void ScriptOutputDisplay::mouseMoveEvent(QMouseEvent * e)
     this->setReadOnly(true);
     QTextEdit::mouseMoveEvent(e);
     this->setReadOnly(false);
-  };
+  }
 
 /**
  * Is there anything here
