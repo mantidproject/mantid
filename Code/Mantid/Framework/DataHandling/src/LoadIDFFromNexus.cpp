@@ -83,8 +83,10 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
 
   std::string parameterString;
 
-  // First attempt to load parameters from nexus file.
+  // First attempt to load parameters from nexus file.                                    
+  nxfile->openGroup("instrument", "NXinstrument");
   localWorkspace->loadInstrumentParametersNexus( nxfile, parameterString );
+  nxfile->closeGroup();
 
   // loadInstrumentParametersNexus does not populate any instrument params
   // so we do it here.
