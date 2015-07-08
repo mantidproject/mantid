@@ -38,10 +38,10 @@ void CreateCalFileByNames::init() {
       new WorkspaceProperty<>("InstrumentWorkspace", "", Direction::Input,
                               boost::make_shared<InstrumentValidator>()),
       "A workspace that contains a reference to the instrument of interest. "
-      "You can use [[LoadEmptyInstrument]] to create such a workspace.");
+      "You can use LoadEmptyInstrument to create such a workspace.");
   declareProperty(
       new FileProperty("GroupingFileName", "", FileProperty::Save, ".cal"),
-      "The name of the output [[CalFile]]");
+      "The name of the output CalFile");
   declareProperty(
       "GroupNames", "",
       "A string of the instrument component names to use as separate groups. "
