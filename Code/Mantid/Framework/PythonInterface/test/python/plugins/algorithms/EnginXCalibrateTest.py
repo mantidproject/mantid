@@ -90,6 +90,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         # assertLess would be nices, but only available in unittest >= 2.7
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
         expected_zero = -223297.87349744083
+        print "[DEBUG DELETE LATER] Zero = %.5f, Delta(Zero) = %.5f" % (zero, abs((expected_zero-zero)/expected_zero))
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 
