@@ -116,7 +116,7 @@ Usage
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
     FakeMDEventData(InputWorkspace=mdws, PeakParams='500000,0,0,0,3')
     binned_ws = BinMD(InputWorkspace=mdws, AlignedDim0='A,0,10,100', AlignedDim1='B,-10,10,100', AlignedDim2='C,-10,10,100')
-    print "Number of events =", binned.getNEvents()
+    print "Number of events =", binned_ws.getNEvents()
 
 Output:
 
@@ -133,8 +133,7 @@ The output looks like the following in the `SliceViewer <http://www.mantidprojec
 
 .. testcode:: NonAxisAligned
 
-import math
-
+    import math
     mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
     FakeMDEventData(InputWorkspace=mdws, PeakParams='100000,-5,-5,0,1')
     FakeMDEventData(InputWorkspace=mdws, PeakParams='100000,0,0,0,1')
