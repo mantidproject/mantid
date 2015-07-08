@@ -43,6 +43,7 @@ public:
 
   static Geometry::Instrument_const_sptr
   getInstrument3Ways(API::Algorithm *alg);
+  static bool instrumentIsSpecified(API::Algorithm *alg);
 
   static void readCalFile(const std::string &calFileName,
                           Mantid::DataObjects::GroupingWorkspace_sptr groupWS,
