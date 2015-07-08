@@ -22,7 +22,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata,
-                         extract_child_ws_for_added_eventdata, INCIDENT_MONITOR_TAG)
+                         extract_child_ws_for_added_eventdata, INCIDENT_MONITOR_TAG,load_monitors_for_multiperiod_event_data)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -151,11 +151,8 @@ class LoadRun(object):
 
         # We need to check if we are dealing with a group workspace which is made up of added event data. Note that
         # we can also have a group workspace which is associated with period data, which don't want to deal with here.
-
         added_event_data_flag = False
         if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
-            if self._period != self.UNSET_PERIOD:
-                raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
             extract_child_ws_for_added_eventdata(outWs, appendix)
             added_event_data_flag = True
             # Reload the outWs, it has changed from a group workspace to an event workspace
@@ -163,6 +160,7 @@ class LoadRun(object):
 
         monitor_ws_name = workspace + appendix
 
+        # Handle simple EventWorkspace data
         if not added_event_data_flag:
             if isinstance(outWs, IEventWorkspace):
                 try:
@@ -174,6 +172,11 @@ class LoadRun(object):
             else:
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
+
+        # Handle Multi-period Event data
+        if not added_event_data_flag:
+            if isinstance(outWs, WorkspaceGroup) and len(outWs)>0 and isinstance(outWs[0], IEventWorkspace):
+                load_monitors_for_multiperiod_event_data(workspace=outWs, data_file=self._data_file, monitor_appendix= appendix)
 
         loader_name = ''
         try:

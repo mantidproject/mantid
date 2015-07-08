@@ -257,6 +257,9 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
         aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
         ws_monitor.clone(OutputWorkspace=name)
 
+    SaveNexus(Filename="C:/Users/xsd05043/Desktop/mon.nxs", InputWorkspace=ws_monitor)
+    SaveNexus(Filename="C:/Users/xsd05043/Desktop/ev.nxs", InputWorkspace=aux_hist)
+
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
 
@@ -681,7 +684,37 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     return message, isValid
 
+def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
+    '''
+    Takes a multi-period event workspace and loads the monitors
+    as a group workspace
+    @param workspace: Multi-period event workspace
+    @param data_file: The data file
+    @param monitor_appendix: The appendix for monitor data
+    '''
+    # Load all monitors
+    mon_ws_group_name = "temp_ws_group"
+    LoadNexusMonitors(Filename=data_file, OutputWorkspace=mon_ws_group_name)
+    mon_ws = mtd["temp_ws_group"]
+    # Rename all monitor workspces
+    rename_monitors_for_multiperiod_event_data(monitor_workspace = mon_ws, workspace=workspace, appendix=monitor_appendix)
 
+def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, appendix):
+    '''
+    Takes a multi-period event workspace and loads the monitors
+    as a group workspace
+    @param workspace: Multi-period event workspace
+    @param data_file: The file which can 
+    @param monitor_appendix: The appendix for monitor data
+    '''
+    if len(monitor_workspace) != len(workspace):
+        raise RuntimeError("The workspace and monitor workspace lengths do not match.")
+    for index in range(0,len(monitor_workspace)):
+        monitor_name = workspace[index].name() + appendix
+        RenameWorkspace(InputWorkspace=monitor_workspace[index], OutputWorkspace=monitor_name)
+    # Finally rename the group workspace
+    monitor_group_ws_name = workspace.name() + appendix
+    RenameWorkspace(InputWorkspace=monitor_workspace, OutputWorkspace=monitor_group_ws_name)
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
