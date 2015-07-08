@@ -68,6 +68,9 @@ namespace CustomInterfaces
     Ui::ISISCalibration m_uiForm;
     QString m_lastCalPlotFilename;
 
+    QString m_outputCalibrationName;
+    QString m_outputResolutionName;
+
   };
 } // namespace CustomInterfaces
 } // namespace Mantid

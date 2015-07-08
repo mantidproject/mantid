@@ -107,9 +107,6 @@ namespace CustomInterfaces
 
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(updatePreviewPlot()));
 
-    // Update preview plot when slice algorithm completes
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
-
     // Set default UI state
     sliceTwoRanges(0, false);
     m_uiForm.ckUseCalibration->setChecked(false);
@@ -147,8 +144,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-    sliceAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
     sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
@@ -166,6 +161,7 @@ namespace CustomInterfaces
       sliceAlg->setProperty("BackgroundRange", backgroundRange);
     }
 
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     runAlgorithm(sliceAlg);
   }
 
@@ -203,6 +199,42 @@ namespace CustomInterfaces
       g_log.warning(error.toStdString());
 
     return !isError;
+  }
+
+  /**
+   * Handles completion of the algorithm.
+   *
+   * @param error If the algorithm failed
+   */
+  void ISISDiagnostics::algorithmComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
+    if(error)
+      return;
+
+    WorkspaceGroup_sptr sliceOutputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("IndirectDiagnostics_Workspaces");
+    if(sliceOutputGroup->size() == 0)
+    {
+      g_log.warning("No result workspaces, cannot plot preview.");
+      return;
+    }
+
+    for(size_t i = 0; i < sliceOutputGroup->size(); i++)
+    {
+      QString wsName = QString::fromStdString(sliceOutputGroup->getItem(i)->name());
+
+      if(m_uiForm.ckPlot->isChecked())
+        plotSpectrum(wsName);
+
+      if(m_uiForm.ckSave->isChecked())
+        addSaveWorkspaceToQueue(wsName);
+    }
+
+    // Update the preview plots
+    sliceAlgDone(false);
+
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   /**
@@ -365,8 +397,6 @@ namespace CustomInterfaces
     sliceAlg->setProperty("InputFiles", filenames.toStdString());
     sliceAlg->setProperty("SpectraRange", spectraRange);
     sliceAlg->setProperty("PeakRange", peakRange);
-    sliceAlg->setProperty("Plot", false);
-    sliceAlg->setProperty("Save", false);
     sliceAlg->setProperty("OutputNameSuffix", suffix.toStdString());
     sliceAlg->setProperty("OutputWorkspace", "IndirectDiagnostics_Workspaces");
 
@@ -386,7 +416,12 @@ namespace CustomInterfaces
 
     // Stop the algorithm conflicting with it's self if it is already running
     if(m_batchAlgoRunner->queueLength() == 0)
+    {
+      // Update preview plot when slice algorithm completes
+      connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
+
       runAlgorithm(sliceAlg);
+    }
   }
 
   /**
@@ -396,6 +431,8 @@ namespace CustomInterfaces
    */
   void ISISDiagnostics::sliceAlgDone(bool error)
   {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(sliceAlgDone(bool)));
+
     if(error)
       return;
 
