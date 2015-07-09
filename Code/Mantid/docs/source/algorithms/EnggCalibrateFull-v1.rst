@@ -17,7 +17,7 @@ Description
 
 Allows to calibrate or correct for variations in detector position
 parameters. It does this by fitting the peaks for each of the selected
-bank's detector indices, (using :ref:`algm-EnginXFitPeaks` as a child
+bank's detector indices, (using :ref:`algm-EnggFitPeaks` as a child
 algorithm) and using the resulting difc values to calibrate the
 detector positions.
 
@@ -38,8 +38,8 @@ variation in the L2 position, and the 'difc' and 'zero' calibration
 parameters.
 
 The result of the calibration (the output table given in
-OutDetPosTable) is accepted by both :ref:`algm-EnginXCalibrate` and
-:ref:`algm-EnginXFocus` which use the columns 'Detector ID' and
+OutDetPosTable) is accepted by both :ref:`algm-EnggCalibrate` and
+:ref:`algm-EnggFocus` which use the columns 'Detector ID' and
 'Detector Position' of the table to correct the detector positions
 before focussing. The OutDetPosTable output table can also be used
 to apply the calibration calculated by this algorithm on any other
@@ -52,7 +52,7 @@ follows:
 .. math:: L2 = \left(\frac{Difc} { 252.816 * 2 * sin \left(\frac{2\theta} {2.0}\right)}\right) - 50
 
 where the *difc* values are obtained from the fitting of expected
-peaks. See the algorithm :ref:`algm-EnginXFitPeaks` for details on how
+peaks. See the algorithm :ref:`algm-EnggFitPeaks` for details on how
 *difc* and other calibration parameters are calculated.
 
 This algorithm expects as input/output workspace the *long*
@@ -71,14 +71,14 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculate corrected positions, and difc and zero:**
+**Example - Calculate corrected positions, and difc and zero, for Engg:**
 
 .. testcode:: ExCalFull
 
    ws_name = 'ws_focussed'
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
-   posTable = EnginXCalibrateFull(Workspace=ws_name,
+   posTable = EnggCalibrateFull(Workspace=ws_name,
                                   ExpectedPeaks=[1.097, 2.1], Bank='1')
 
    detID = posTable.column(0)[0]
@@ -101,7 +101,7 @@ Output:
    Calibrated position: (1.506,0.000,0.002)
    Is the detector position calibrated now in the original workspace instrument? True
 
-**Example - Calculate corrected positions, saving in a file:**
+**Example - Calculate corrected positions for EngingX, saving in a file:**
 
 .. testcode:: ExCalFullWithOutputFile
 
@@ -110,7 +110,7 @@ Output:
    ws_name = 'ws_focussed'
    pos_filename = 'detectors_pos.csv'
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
-   posTable = EnginXCalibrateFull(Workspace=ws_name,
+   posTable = EnggCalibrateFull(Workspace=ws_name,
                                   ExpectedPeaks=[1.097, 2.1], Bank='1',
                                   OutDetPosFilename=pos_filename)
 

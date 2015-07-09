@@ -34,3 +34,5 @@ a TOF peak:
 .. properties::
 
 .. categories::
+
+.. sourcelink::

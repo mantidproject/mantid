@@ -15,12 +15,12 @@ Description
    removed without a notification, should instrument scientists decide to do so.
 
 
-Utilises :ref:`algm-EnginXFocus` which performs a TOF to dSpacing
+Utilises :ref:`algm-EnggFocus` which performs a TOF to dSpacing
 conversion using calibrated pixel positions, focuses the values in
 dSpacing and then converts them back to TOF. :ref:`algm-EnginXFocus`
 also perform corrections with Vanadium data.
 
-Then this algorithm calls :ref:`algm-EnginXFitPeaks` (as a child
+Then this algorithm calls :ref:`algm-EnggFitPeaks` (as a child
 algorithm) which through a sequence of peak fits determines a linear
 relationship between dSpacing and measured TOF values in terms of DIFC
 and ZERO values and provides the these parameters to the Calibrate
@@ -45,14 +45,14 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculate Difc and Zero:**
+**Example - Calculate Difc and Zero for EnginX:**
 
 .. testcode:: ExampleCalib
 
    out_tbl_name = 'out_params'
    ws_name = 'test'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
-   Difc, Zero = EnginXCalibrate(InputWorkspace=ws_name,
+   Difc, Zero = EnggCalibrate(InputWorkspace=ws_name,
                                 ExpectedPeaks=[1.097, 2.1], Bank='1',
                                 OutputParametersTableName=out_tbl_name)
 

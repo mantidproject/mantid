@@ -2,7 +2,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class EnginXCalibrateTest(unittest.TestCase):
+class EnggCalibrateTest(unittest.TestCase):
 
     _data_ws = None
 
@@ -23,28 +23,28 @@ class EnginXCalibrateTest(unittest.TestCase):
 
         # No InputWorkspace property (required)
         self.assertRaises(RuntimeError,
-                          EnginXCalibrate,
+                          EnggCalibrate,
                           File='foo', Bank='1')
 
         # Wrong (mispelled) InputWorkspace property
         self.assertRaises(RuntimeError,
-                          EnginXCalibrate,
+                          EnggCalibrate,
                           InputWorkpace='anything_goes', Bank='2')
 
         # mispelled ExpectedPeaks
         tbl = CreateEmptyTableWorkspace(OutputWorkspace='test_table')
         self.assertRaises(RuntimeError,
-                          EnginXCalibrate,
+                          EnggCalibrate,
                           Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank='2', Peaks='2')
 
         # mispelled DetectorPositions
         self.assertRaises(RuntimeError,
-                          EnginXCalibrate,
+                          EnggCalibrate,
                           InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank='2', Peaks='2')
 
         # There's no output workspace
         self.assertRaises(RuntimeError,
-                          EnginXCalibrate,
+                          EnggCalibrate,
                           InputWorkspace=self.__class__._data_ws, Bank='1')
 
 
@@ -56,7 +56,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         # This should produce 'given peak center ... is outside of data range' warnings
         # and finally raise after a 'some peaks not found' error
         self.assertRaises(RuntimeError,
-                          EnginXCalibrate,
+                          EnggCalibrate,
                           InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank='2')
 
     def test_runs_ok(self):
@@ -64,7 +64,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         Checks normal operation.
         """
 
-        difc, zero = EnginXCalibrate(InputWorkspace=self.__class__._data_ws,
+        difc, zero = EnggCalibrate(InputWorkspace=self.__class__._data_ws,
                                      ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
 
         self.check_3peaks_values(difc, zero)
@@ -76,7 +76,7 @@ class EnginXCalibrateTest(unittest.TestCase):
         """
         # This file has: 1.6, 1.1, 1.8 (as the test above)
         filename = 'EnginX_3_expected_peaks_unittest.csv'
-        difc, zero = EnginXCalibrate(InputWorkspace=self.__class__._data_ws,
+        difc, zero = EnggCalibrate(InputWorkspace=self.__class__._data_ws,
                                      ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
                                      ExpectedPeaksFromFile=filename,
                                      Bank='2')

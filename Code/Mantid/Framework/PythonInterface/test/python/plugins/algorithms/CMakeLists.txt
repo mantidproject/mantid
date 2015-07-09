@@ -18,10 +18,10 @@ set ( TEST_PY_FILES
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
   DSFinterpTest.py
-  EnginXCalibrateFullTest.py
-  EnginXCalibrateTest.py
-  EnginXFitPeaksTest.py
-  EnginXFocusTest.py
+  EnggCalibrateFullTest.py
+  EnggCalibrateTest.py
+  EnggFitPeaksTest.py
+  EnggFocusTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py

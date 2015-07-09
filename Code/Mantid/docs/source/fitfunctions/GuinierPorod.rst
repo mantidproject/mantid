@@ -17,3 +17,5 @@ The Guinier-Porod model is defined in Hammouda, J. Appl. Cryst. (2010) 43, 716-7
 .. properties::
 
 .. categories::
+
+.. sourcelink::

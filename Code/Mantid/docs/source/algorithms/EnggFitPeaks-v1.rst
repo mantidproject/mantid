@@ -65,10 +65,10 @@ Usage
    EditInstrumentGeometry(Workspace = ws, L2 = [1.5], Polar = [90], PrimaryFlightPath = 50)
 
    # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
-   # difc, zero = EnginXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
+   # difc, zero = EnggXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
 
    out_tbl_name = 'out_params'
-   difc, zero = EnginXFitPeaks(ws, 0, [0.65, 1.9], OutParametersTable=out_tbl_name)
+   difc, zero = EnggFitPeaks(ws, 0, [0.65, 1.9], OutParametersTable=out_tbl_name)
 
 
    # Print the results

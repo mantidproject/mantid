@@ -27,3 +27,5 @@ The figure below shows data together with a fitted Pseudo-Voigt function, as wel
 .. properties::
 
 .. categories::
+
+.. sourcelink::

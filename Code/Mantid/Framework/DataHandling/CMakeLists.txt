@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
+	src/CheckMantidVersion.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
@@ -158,6 +159,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
+	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
@@ -314,6 +316,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
+	CheckMantidVersionTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
