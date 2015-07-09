@@ -50,6 +50,11 @@ TimeAtSampleStrategyElastic::TimeAtSampleStrategyElastic(Mantid::API::MatrixWork
  */
 TimeAtSampleStrategyElastic::~TimeAtSampleStrategyElastic() {}
 
+/**
+ * @brief Calculate correction
+ * @param workspace_index
+ * @return Correction
+ */
 Correction TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index) const
 {
     auto instrument = m_ws->getInstrument();

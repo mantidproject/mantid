@@ -5,15 +5,7 @@
 #include "MantidAlgorithms/RebinByTimeBase.h"
 
 namespace Mantid {
-namespace Kernel{
-   // Forward declarations
-   class V3D;
-}
-namespace Geometry{
-   // Forward declarations
-   class IComponent;
-   class IDetector;
-}
+
 namespace Algorithms {
 
 /** RebinByTimeAtSample : Rebins an event workspace to a histogram workspace
@@ -49,12 +41,6 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
-
-  static double calculateTOFRatio(const Mantid::Geometry::IDetector& detector,
-                                  const Mantid::Geometry::IComponent& source,
-                                  const Mantid::Geometry::IComponent& sample,
-                                  const double& L1s,
-                                  const Mantid::Kernel::V3D& beamDir);
 
 private:
   void doHistogramming(Mantid::API::IEventWorkspace_sptr inWS,

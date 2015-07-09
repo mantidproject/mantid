@@ -268,51 +268,6 @@ public:
 
   }
 
-  void test_L2_detector(){
-      using namespace Mantid::Geometry;
-
-      Component sample;
-      sample.setPos(V3D(0,0,0));
-
-      Component source;
-      source.setPos(-10,0,0);
-
-      const V3D beamDir(1,0,0); // Along x
-
-      Detector detector("det",1,  NULL);
-      detector.setPos(1, 1, 0);
-      detector.markAsMonitor(false);
-
-      const double L1 = source.getPos().distance(sample.getPos());
-      const double ratio = RebinByTimeAtSample::calculateTOFRatio(detector, source, sample, L1,
-                                             beamDir);
-
-      TSM_ASSERT_EQUALS("L1 / (L1 + L2)", L1 / (L1 + sample.getPos().distance(detector.getPos())), ratio);
-  }
-
-  void test_L2_monitor(){
-      using namespace Mantid::Geometry;
-
-      Component sample;
-      sample.setPos(V3D(0,0,0));
-
-      Component source;
-      source.setPos(-10,0,0);
-
-      const V3D beamDir(1,0,0); // Along x
-
-      Detector monitor("monitor",1,  NULL);
-      monitor.setPos(1, 1, 0);
-      monitor.markAsMonitor(true);
-
-      const double L1 = source.getPos().distance(sample.getPos());
-
-      const double ratio = RebinByTimeAtSample::calculateTOFRatio(monitor, source, sample, L1,
-                                             beamDir);
-
-      TSM_ASSERT_EQUALS("L1/L1m", std::abs(L1/beamDir.scalar_prod(source.getPos() - monitor.getPos())), ratio);
-  }
-
 };
 
 //=====================================================================================

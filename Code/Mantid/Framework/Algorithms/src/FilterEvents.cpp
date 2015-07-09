@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -601,25 +602,18 @@ void FilterEvents::setupDetectorTOFCalibration() {
 /**
   */
 void FilterEvents::setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-  // Get sample distance to moderator
-  Geometry::Instrument_const_sptr instrument = m_eventWS->getInstrument();
-  IComponent_const_sptr source =
-      boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
-  double l1 = instrument->getDistance(*source);
+
+  TimeAtSampleStrategyElastic strategy(m_eventWS);
 
   // Get
   size_t numhist = m_eventWS->getNumberHistograms();
   for (size_t i = 0; i < numhist; ++i) {
     if (!m_vecSkip[i]) {
-      IComponent_const_sptr tmpdet =
-          boost::dynamic_pointer_cast<const IComponent>(
-              m_eventWS->getDetector(i));
-      double l2 = instrument->getDistance(*tmpdet);
 
-      double corrfactor = (l1) / (l1 + l2);
+      Correction correction = strategy.calculate(i);
 
-      m_detTofOffsets[i] = corrfactor;
-      corrws->dataY(i)[0] = corrfactor;
+      m_detTofOffsets[i] = correction.offset;
+      corrws->dataY(i)[0] = correction.factor;
     }
   }
 
