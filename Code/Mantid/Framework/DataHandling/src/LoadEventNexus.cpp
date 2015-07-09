@@ -1684,7 +1684,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   shortest_tof =
       static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
-
+  
   // Make the thread pool
   ThreadScheduler *scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
@@ -1802,7 +1802,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   }
   // Set the binning axis using this.
   m_ws->setAllX(axis);
-
   // if there is time_of_flight load it
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);
 }
@@ -2264,7 +2263,7 @@ void LoadEventNexus::createSpectraMapping(
       // Make an event list for each.
       for (size_t wi = 0; wi < allDets.size(); wi++) {
         const detid_t detID = allDets[wi]->getID();
-        m_ws->getSpectrum(wi)->setDetectorID(detID);
+        m_ws->setDetectorIdsForAllPeriods(wi,detID);
       }
       spectramap = true;
       g_log.debug() << "Populated spectra map for select banks\n";
@@ -2529,10 +2528,9 @@ void LoadEventNexus::runLoadMonitors() {
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        auto spectrum = m_ws->getSpectrum(i);
         const specid_t &specNo = spec[it - udet.begin()];
-        spectrum->setSpectrumNo(specNo);
-        spectrum->setDetectorID(id);
+        m_ws->setSpectrumNumberForAllPeriods(i,specNo);
+        m_ws->setDetectorIdsForAllPeriods(i,id);
       }
     }
   } else {
@@ -2563,12 +2561,7 @@ void LoadEventNexus::runLoadMonitors() {
     m_ws->resizeTo(mapping.getMapping().size());
     // Make sure spectrum numbers are correct
     auto uniqueSpectra = mapping.getSpectrumNumbers();
-    auto itend = uniqueSpectra.end();
-    size_t counter = 0;
-    for (auto it = uniqueSpectra.begin(); it != itend; ++it) {
-      m_ws->getSpectrum(counter)->setSpectrumNo(*it);
-      ++counter;
-    }
+    m_ws->setSpectrumNumbersFromUniqueSpectra(uniqueSpectra);
     // Fill detectors based on this mapping
     m_ws->updateSpectraUsing(mapping);
   }

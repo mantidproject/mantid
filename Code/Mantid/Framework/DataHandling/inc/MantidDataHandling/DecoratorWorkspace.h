@@ -71,7 +71,9 @@ public:
   void setThickness(const float flag);
   void setHeight(const float flag);
   void setWidth(const float flag);
-
+  void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
+  void setSpectrumNumberForAllPeriods(const size_t spectrumNumber, const specid_t specid);
+  void setDetectorIdsForAllPeriods(const size_t spectrumNumber, const detid_t id);
   /*-------------------------------------------------------
    * EventWorkspace overriden methods
    *-------------------------------------------------------*/

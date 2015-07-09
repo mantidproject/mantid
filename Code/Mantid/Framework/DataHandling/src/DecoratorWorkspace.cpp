@@ -152,6 +152,31 @@ Mantid::API::ISpectrum* DecoratorWorkspace::getSpectrum(const size_t index)  {
 const Mantid::API::ISpectrum *DecoratorWorkspace::getSpectrum(const size_t index) const{
     return m_WsVec[0]->getSpectrum(index);
 }
+void DecoratorWorkspace::setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra){
+  // For each workspace, update all the spectrum numbers
+  for (auto ws = m_WsVec.begin(); ws != m_WsVec.end(); ++ws) {
+    size_t counter = 0;
+    for (auto it = uniqueSpectra.begin(); it !=uniqueSpectra.end(); ++it) {
+      (*ws)->getSpectrum(counter)->setSpectrumNo(*it);
+      ++counter;
+    }
+  }
+}
+
+void DecoratorWorkspace::setSpectrumNumberForAllPeriods(const size_t spectrumNumber, const specid_t specid) {
+  for (auto ws = m_WsVec.begin(); ws != m_WsVec.end(); ++ws) {
+    auto spec = (*ws)->getSpectrum(spectrumNumber);
+    spec->setSpectrumNo(specid);
+  }
+}
+
+void DecoratorWorkspace::setDetectorIdsForAllPeriods(const size_t spectrumNumber, const detid_t id) {
+  for (auto ws = m_WsVec.begin(); ws != m_WsVec.end(); ++ws) {
+    auto spec = (*ws)->getSpectrum(spectrumNumber);
+    spec->setDetectorID(id);
+  }
+}
+
 Mantid::API::Axis* DecoratorWorkspace::getAxis(const size_t& i) const {
     return m_WsVec[0]->getAxis(i);
 }
