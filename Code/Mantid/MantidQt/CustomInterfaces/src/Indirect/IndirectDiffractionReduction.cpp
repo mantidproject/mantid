@@ -282,6 +282,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
 
+  if(m_uiForm.ckUseCan->isChecked())
+    msgDiffReduction->setProperty("ContainerFiles", m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
+
   // Add the pproperty for grouping policy if needed
   if(m_uiForm.ckIndividualGrouping->isChecked())
     msgDiffReduction->setProperty("GroupingPolicy", "Individual");
@@ -328,11 +331,15 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   osirisDiffReduction->setProperty("Sample", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("Vanadium", m_uiForm.rfVanadiumFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("CalFile", m_uiForm.rfCalFile->getFirstFilename().toStdString());
-  osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   osirisDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
+
+  osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   if(manualDRange)
     osirisDiffReduction->setProperty("DRange", static_cast<long>(m_uiForm.spDRange->value()));
+
+  if(m_uiForm.ckUseCan->isChecked())
+    osirisDiffReduction->setProperty("ContainerFiles", m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
 
   m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 
@@ -437,6 +444,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
 
   // Set the search instrument for runs
   m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
+  m_uiForm.rfCanFiles->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
