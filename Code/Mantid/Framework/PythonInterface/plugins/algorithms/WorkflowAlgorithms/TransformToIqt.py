@@ -68,9 +68,7 @@ class TransformToIqt(PythonAlgorithm):
 
         if not self._dry_run:
             self._transform()
-
             self._add_logs()
-
         else:
             logger.information('Dry run, will not run TransformToIqt')
 
@@ -215,8 +213,7 @@ class TransformToIqt(PythonAlgorithm):
         rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
         Rebin(InputWorkspace=self._sample,
               OutputWorkspace='__sam_data',
-              Params=rebin_param,
-              FullBinsOnly=True)
+              Params=rebin_param)
         Integration(InputWorkspace='__sam_data',
                     OutputWorkspace='__sam_int')
         ConvertToPointData(InputWorkspace='__sam_data',
