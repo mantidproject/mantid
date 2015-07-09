@@ -580,6 +580,10 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const {
 //---------------------------------------------------------------------------------------
 /** Converts a list of detector IDs to the corresponding workspace indices.
 *
+     *  Note that only known detector IDs are converted (so an empty vector will be returned
+     *  if none of the IDs are recognised), and that the returned workspace indices are
+     *  effectively a set (i.e. there are no duplicates).
+     *
 *  @param detIdList :: The list of detector IDs required
 *  @param indexList :: Returns a reference to the vector of indices
 */

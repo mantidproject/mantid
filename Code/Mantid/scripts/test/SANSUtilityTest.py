@@ -1,6 +1,5 @@
 
 import unittest
-import re
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import *
@@ -24,55 +23,96 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
-
+    
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 
-#class TestSliceStringParser(unittest.TestCase):
+class SANSUtilityTest(unittest.TestCase):
 
-#    def checkValues(self, list1, list2):
+    #def checkValues(self, list1, list2):
 
-#        def _check_single_values( v1, v2):
-#            self.assertAlmostEqual(v1, v2)
+    #    def _check_single_values( v1, v2):
+    #        self.assertAlmostEqual(v1, v2)
 
-#        self.assertEqual(len(list1), len(list2))
-#        for v1,v2 in zip(list1, list2):
-#            start_1,stop_1 = v1
-#            start_2, stop_2 = v2
-#            _check_single_values(start_1, start_2)
-#            _check_single_values(stop_1, stop_2)
+    #    self.assertEqual(len(list1), len(list2))
+    #    for v1,v2 in zip(list1, list2):
+    #        start_1,stop_1 = v1
+    #        start_2, stop_2 = v2
+    #        _check_single_values(start_1, start_2)
+    #        _check_single_values(stop_1, stop_2)
 
-#    def test_checkValues(self):
-#        """sanity check to ensure that the others will work correctly"""
-#        values = [  [[1,2],],
-#                  [[None, 3],[4, None]],
-#                 ]
-#        for singlevalues in values:
-#            self.checkValues(singlevalues, singlevalues)
+    #def test_checkValues(self):
+    #    """sanity check to ensure that the others will work correctly"""
+    #    values = [
+    #        [[1,2],],
+    #        [[None, 3],[4, None]],
+    #    ]
+    #    for singlevalues in values:
+    #        self.checkValues(singlevalues, singlevalues)
+    
+    #def test_parse_strings(self):
+    #    inputs = { '1-2':[[1,2]],         # single period syntax  min < x < max
+    #               '1.3-5.6':[[1.3,5.6]], # float
+    #               '1-2,3-4':[[1,2],[3,4]],# more than one slice
+    #               '>1':[[1, -1]],       # just lower bound
+    #               '<5':[[-1, 5]],      # just upper bound
+    #               '<5,8-9': [[-1, 5], [8,9]],
+    #               '1:2:5': [[1,3], [3,5]] # sintax: start, step, stop                   
+    #        }
 
+    #    for (k, v) in inputs.items(): 
+    #        self.checkValues(su.sliceParser(k),v)
 
-#    def test_parse_strings(self):
-#        inputs = { '1-2':[[1,2]],         # single period syntax  min < x < max
-#                   '1.3-5.6':[[1.3,5.6]], # float
-#                   '1-2,3-4':[[1,2],[3,4]],# more than one slice
-#                   '>1':[[1, -1]],       # just lower bound
-#                   '<5':[[-1, 5]],      # just upper bound
-#                   '<5,8-9': [[-1, 5], [8,9]],
-#                   '1:2:5': [[1,3], [3,5]] # sintax: start, step, stop
-#            }
+    #def test_accept_spaces(self):
+    #    self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1,2],[3,4]])
+        
+    #def test_invalid_values_raise(self):
+    #    invalid_strs = ["5>6", ":3:", "MAX<min"]
+    #    for val in invalid_strs:
+    #        self.assertRaises(SyntaxError, su.sliceParser, val)
 
-#        for (k, v) in inputs.items():
-#            self.checkValues(su.sliceParser(k),v)
+    #def test_empty_string_is_valid(self):
+    #    self.checkValues(su.sliceParser(""), [[-1,-1]])
 
-#    def test_accept_spaces(self):
-#        self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1,2],[3,4]])
+    def test_extract_spectra(self):
+        mtd.clear()
 
-#    def test_invalid_values_raise(self):
-#        invalid_strs = ["5>6", ":3:", "MAX<min"]
-#        for val in invalid_strs:
-#            self.assertRaises(SyntaxError, su.sliceParser, val)
+        ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
+        det_ids = [100, 102, 104]
 
-#    def test_empty_string_is_valid(self):
-#        self.checkValues(su.sliceParser(""), [[-1,-1]])
+        result = su.extract_spectra(ws, det_ids, "result")
+
+        # Essentially, do we end up with our original workspace and the resulting
+        # workspace in the ADS, and NOTHING else?
+        self.assertTrue("result" in mtd)
+        self.assertTrue("ws" in mtd)
+        self.assertEquals(2, len(mtd))
+
+        self.assertEquals(result.getNumberHistograms(), len(det_ids))
+        self.assertEquals(result.getDetector(0).getID(), 100)
+        self.assertEquals(result.getDetector(1).getID(), 102)
+        self.assertEquals(result.getDetector(2).getID(), 104)
+
+        ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
+        det_ids = range(100, 299, 2)
+        result = su.extract_spectra(ws, det_ids, "result")
+
+    def test_get_masked_det_ids(self):
+        ws = CreateSampleWorkspace("Histogram", "Multiple Peaks")
+
+        MaskDetectors(Workspace=ws, DetectorList=[100, 102, 104])
+
+        masked_det_ids = list(su.get_masked_det_ids(ws))
+
+        self.assertTrue(100 in masked_det_ids)
+        self.assertTrue(102 in masked_det_ids)
+        self.assertTrue(104 in masked_det_ids)
+        self.assertEquals(len(masked_det_ids), 3)
+
+    def test_merge_to_ranges(self):
+        self.assertEquals([[1, 4]],                 su._merge_to_ranges([1, 2, 3, 4]))
+        self.assertEquals([[1, 3], [5, 7]],         su._merge_to_ranges([1, 2, 3, 5, 6, 7]))
+        self.assertEquals([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
+        self.assertEquals([[1, 1]],                 su._merge_to_ranges([1]))
 
 class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
     def _prepare_workspaces(self, names):
@@ -205,12 +245,11 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
 
         provide_group_workspace_for_added_event_data(event_ws_name = event_name, monitor_ws_name = monitor_name, out_ws_name = out_ws_name)
         out_ws_group = mtd[out_ws_name]
-        
+
         # Act
         su.extract_child_ws_for_added_eventdata(out_ws_group, self._appendix)
 
         # Assert
-
         self.assertTrue(event_name_expect in mtd)
         self.assertTrue(monitor_name_expect in mtd)
 
@@ -221,6 +260,8 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
     def test_extract_data_and_monitor_child_ws(self):
         # Check when there is no special ending
         self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON)
+
+
 
 
 class TestZeroErrorFreeWorkspace(unittest.TestCase):
