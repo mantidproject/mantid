@@ -154,7 +154,12 @@ void FFT::exec() {
         lblUnit->setLabel("Frequency", "MHz");
       } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "MHz") {
         lblUnit->setLabel("Time", Units::Symbol::Microsecond);
+      } else if (inputUnit->caption() == "d-Spacing" && inputUnit->label() == "Angstrom") {
+        lblUnit->setLabel("q", Units::Symbol::InverseAngstrom);
+      } else if (inputUnit->caption() == "q" && inputUnit->label() == "Angstrom^-1") {
+        lblUnit->setLabel("d-Spacing", Units::Symbol::Angstrom);
       }
+
       outWS->getAxis(0)->unit() = lblUnit;
     }
   }
