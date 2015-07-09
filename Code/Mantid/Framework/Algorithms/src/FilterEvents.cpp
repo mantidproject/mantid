@@ -16,7 +16,7 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
-
+#include <memory>
 #include <sstream>
 
 using namespace Mantid;
@@ -574,7 +574,7 @@ void FilterEvents::createOutputWorkspaces() {
   */
 void FilterEvents::setupDetectorTOFCalibration() {
   // Set output correction workspace and set to output
-  size_t numhist = m_eventWS->getNumberHistograms();
+  const size_t numhist = m_eventWS->getNumberHistograms();
   MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numhist, 2, 2));
   setProperty("OutputTOFCorrectionWorkspace", corrws);
@@ -584,50 +584,43 @@ void FilterEvents::setupDetectorTOFCalibration() {
   m_detTofShifts.resize(numhist, 0.0);
 
   // Set up detector values
+  std::unique_ptr<TimeAtSampleStrategy> strategy;
+
   if (m_tofCorrType == CustomizedCorrect) {
     setupCustomizedTOFCorrection();
   } else if (m_tofCorrType == ElasticCorrect) {
     // Generate TOF correction from instrument's set up
-    setupElasticTOFCorrection(corrws);
+    strategy.reset(setupElasticTOFCorrection());
   } else if (m_tofCorrType == DirectCorrect) {
     // Generate TOF correction for direct inelastic instrument
-    setupDirectTOFCorrection(corrws);
+    strategy.reset(setupDirectTOFCorrection());
   } else if (m_tofCorrType == IndirectCorrect) {
     // Generate TOF correction for indirect elastic instrument
-    setupIndirectTOFCorrection(corrws);
+    strategy.reset(setupIndirectTOFCorrection());
   }
+  if (strategy) {
+    for (size_t i = 0; i < numhist; ++i) {
+      if (!m_vecSkip[i]) {
 
-  return;
-}
+        Correction correction = strategy->calculate(i);
+        m_detTofOffsets[i] = correction.offset;
+        m_detTofShifts[i] = correction.factor;
 
-//----------------------------------------------------------------------------------------------
-/**
-  */
-void FilterEvents::setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-
-  TimeAtSampleStrategyElastic strategy(m_eventWS);
-
-  // Get
-  size_t numhist = m_eventWS->getNumberHistograms();
-  for (size_t i = 0; i < numhist; ++i) {
-    if (!m_vecSkip[i]) {
-
-      Correction correction = strategy.calculate(i);
-
-      m_detTofOffsets[i] = correction.offset;
-      corrws->dataY(i)[0] = correction.factor;
+        corrws->dataY(i)[0] = correction.offset;
+        corrws->dataY(i)[1] = correction.factor;
+      }
     }
   }
 
   return;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Calculate TOF correction for direct geometry inelastic instrument
-  * Time = T_pulse + TOF*0 + L1/sqrt(E*2/m)
-  */
-void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
+TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
 
+  return new TimeAtSampleStrategyElastic(m_eventWS);
+}
+
+TimeAtSampleStrategy *FilterEvents::setupDirectTOFCorrection() const {
 
   // Get incident energy Ei
   double ei = 0.;
@@ -643,45 +636,11 @@ void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
     g_log.debug() << "Using user-input Ei value " << ei << "\n";
   }
 
-  TimeAtSampleStrategyDirect strategy(m_eventWS, ei);
-
-  size_t numhist = m_eventWS->getNumberHistograms();
-  for (size_t i = 0; i < numhist; ++i) {
-
-    Correction correction = strategy.calculate(i);
-    m_detTofOffsets[i] = correction.offset;
-    m_detTofShifts[i] = correction.factor;
-
-    corrws->dataY(i)[0] = correction.offset;
-    corrws->dataY(i)[1] = correction.factor;
-  }
-
-  return;
+  return new TimeAtSampleStrategyDirect(m_eventWS, ei);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Calculate TOF correction for indirect geometry inelastic instrument
-  * Time = T_pulse + TOF - L2/sqrt(E_fix * 2 * meV / mass)
-  */
-void
-FilterEvents::setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-  g_log.debug("Start to set up indirect TOF correction. ");
-
-  TimeAtSampleStrategyIndirect strategy(m_eventWS);
-
-  size_t numhist = m_eventWS->getNumberHistograms();
-  for (size_t i = 0; i < numhist; ++i) {
-
-    Correction correction = strategy.calculate(i);
-    m_detTofOffsets[i] = correction.offset;
-    m_detTofShifts[i] = correction.factor;
-
-    corrws->dataY(i)[0] = correction.offset;
-    corrws->dataY(i)[1] = correction.factor;
-  }
-
-
-  return;
+TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
+  return new TimeAtSampleStrategyIndirect(m_eventWS);
 }
 
 //----------------------------------------------------------------------------------------------
