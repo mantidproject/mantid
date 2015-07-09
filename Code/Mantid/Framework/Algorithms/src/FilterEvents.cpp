@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
+#include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -666,73 +667,19 @@ void
 FilterEvents::setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
   g_log.debug("Start to set up indirect TOF correction. ");
 
-  // A constant among all spectra
-  double twomev_d_mass =
-      2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
-  V3D samplepos = m_eventWS->getInstrument()->getSample()->getPos();
+  TimeAtSampleStrategyIndirect strategy(m_eventWS);
 
-  // Get the parameter map
-  const ParameterMap &pmap = m_eventWS->constInstrumentParameters();
-
-  // Set up the shift
   size_t numhist = m_eventWS->getNumberHistograms();
-
-  g_log.debug() << "[DBx158] Number of histograms = " << numhist
-                << ", Correction WS size = " << corrws->getNumberHistograms()
-                << "\n";
-
   for (size_t i = 0; i < numhist; ++i) {
-    if (!m_vecSkip[i]) {
-      double shift;
-      IDetector_const_sptr det = m_eventWS->getDetector(i);
-      if (!det->isMonitor()) {
-        // Get E_fix
-        double efix = 0.;
-        try {
-          Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
-          if (par) {
-            efix = par->value<double>();
-            g_log.debug() << "Detector: " << det->getID() << " of spectrum "
-                          << i << " EFixed: " << efix << "\n";
-          } else {
-            g_log.warning() << "Detector: " << det->getID() << " of spectrum "
-                            << i << " does not have EFixed set up."
-                            << "\n";
-          }
-        } catch (std::runtime_error &) {
-          // Throws if a DetectorGroup, use single provided value
-          stringstream errmsg;
-          errmsg << "Inelastic instrument detector " << det->getID()
-                 << " of spectrum " << i << " does not have EFixed ";
-          throw runtime_error(errmsg.str());
-        }
 
-        // Get L2
-        double l2 = det->getPos().distance(samplepos);
+    Correction correction = strategy.calculate(i);
+    m_detTofOffsets[i] = correction.offset;
+    m_detTofShifts[i] = correction.factor;
 
-        // Calculate shift
-        shift = -1. * l2 / sqrt(efix * twomev_d_mass);
+    corrws->dataY(i)[0] = correction.offset;
+    corrws->dataY(i)[1] = correction.factor;
+  }
 
-        g_log.notice() << "Detector " << i << ": "
-                       << "L2 = " << l2 << ", EFix = " << efix
-                       << ", Shift = " << shift << "\n";
-      } else {
-        // Monitor:
-        g_log.warning() << "Spectrum " << i << " contains detector "
-                        << det->getID() << " is a monitor. "
-                        << "\n";
-
-        shift = 0.;
-      }
-
-      // Set up the shifts
-      m_detTofOffsets[i] = 1.0;
-      m_detTofShifts[i] = shift;
-
-      corrws->dataY(i)[0] = 1.0;
-      corrws->dataY(i)[1] = shift;
-    }
-  } // ENDOF (all spectra)
 
   return;
 }
