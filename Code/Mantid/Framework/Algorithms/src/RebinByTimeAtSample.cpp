@@ -3,8 +3,11 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include <boost/make_shared.hpp>
 #include <algorithm>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -46,6 +49,30 @@ const std::string RebinByTimeAtSample::name() const {
 }
 
 /**
+ * For detectors (not monitor detectors). neutrons interact with the sample first. so the ratio we want to
+ * calculate is L1 / (L1 + L2) in order to calculate a TatSample for a neturon based on it's recorded TOF at the detector.
+ *
+ * For monitors. The L2 scattering distance is of no consequence. The ratio we want to calculate is L1m / L1s where L1m
+ * is the L1 for the monitor, and L1s is the L1 for the sample.
+ *
+ *
+ * @param detector : Detector
+ * @param source : Source
+ * @param L1s : L1 distance Source - Sample
+ * @return Calculated ratio
+ */
+double RebinByTimeAtSample::calculateTOFRatio(const Geometry::IDetector& detector, const Geometry::IComponent& source, const Geometry::IComponent& sample,
+                         const double& L1s, const V3D& beamDir){
+    if(detector.isMonitor()){
+       double L1m = beamDir.scalar_prod(source.getPos() - detector.getPos());
+       return std::abs(L1s / L1m);
+    } else {
+       const double L2 = sample.getPos().distance(detector.getPos());
+       return L1s / (L1s + L2);
+    }
+}
+
+/**
  * Do histogramming of the data to create the output workspace.
  * @param inWS : input workspace
  * @param outputWS : output workspace
@@ -64,15 +91,16 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
   auto instrument = inWS->getInstrument();
   auto source = instrument->getSource();
   auto sample = instrument->getSample();
-  const double L1 = source->getDistance(*sample);
+  const double L1s = source->getDistance(*sample);
+  auto refFrame = instrument->getReferenceFrame();
+  const V3D& beamDir = refFrame->vecPointingAlongBeam();
 
   // Go through all the histograms and set the data
   PARALLEL_FOR2(inWS, outputWS)
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const double L2 = inWS->getDetector(i)->getDistance(*sample);
-    const double tofFactor = L1 / (L1 + L2);
+    const double tofFactor = calculateTOFRatio(*inWS->getDetector(i), *source, *sample, L1s, beamDir);
 
     const IEventList *el = inWS->getEventListPtr(i);
     MantidVec y_data, e_data;
