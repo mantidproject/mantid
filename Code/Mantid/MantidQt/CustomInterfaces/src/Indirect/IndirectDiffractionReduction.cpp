@@ -45,7 +45,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 //----------------------
 ///Constructor
 IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
-  UserSubWindow(parent), m_valInt(NULL), m_valDbl(NULL),
+  UserSubWindow(parent), m_valDbl(NULL),
   m_settingsGroup("CustomInterfaces/DEMON"),
   m_batchAlgoRunner(new BatchAlgorithmRunner(parent))
 {
@@ -68,21 +68,17 @@ void IndirectDiffractionReduction::initLayout()
 
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(demonRun()));
+  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
 
   connect(m_uiForm.iicInstrumentConfiguration, SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)),
           this, SLOT(instrumentSelected(const QString &, const QString &, const QString &)));
 
   // Update run button based on state of raw files field
-  connect(m_uiForm.dem_rawFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
-  connect(m_uiForm.dem_rawFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
-  connect(m_uiForm.dem_rawFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
+  connect(m_uiForm.rfSampleFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
+  connect(m_uiForm.rfSampleFiles, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
+  connect(m_uiForm.rfSampleFiles, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
 
-  m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
-
-  m_uiForm.set_leSpecMin->setValidator(m_valInt);
-  m_uiForm.set_leSpecMax->setValidator(m_valInt);
 
   m_uiForm.leRebinStart->setValidator(m_valDbl);
   m_uiForm.leRebinWidth->setValidator(m_valDbl);
@@ -103,14 +99,14 @@ void IndirectDiffractionReduction::initLayout()
 /**
  * Runs a diffraction reduction when the user clicks Run.
  */
-void IndirectDiffractionReduction::demonRun()
+void IndirectDiffractionReduction::run()
 {
   QString instName = m_uiForm.iicInstrumentConfiguration->getInstrumentName();
   QString mode = m_uiForm.iicInstrumentConfiguration->getReflectionName();
 
   if(instName == "OSIRIS" && mode == "diffonly")
   {
-    if(!m_uiForm.dem_rawFiles->isValid() || !validateVanCal())
+    if(!m_uiForm.rfSampleFiles->isValid() || !validateVanCal())
     {
       showInformationBox("Invalid input.\nIncorrect entries marked with red star.");
       return;
@@ -120,7 +116,7 @@ void IndirectDiffractionReduction::demonRun()
   }
   else
   {
-    if(!m_uiForm.dem_rawFiles->isValid() || !validateRebin())
+    if(!m_uiForm.rfSampleFiles->isValid() || !validateRebin())
     {
       showInformationBox("Invalid input.\nIncorrect entries marked with red star.");
       return;
@@ -263,8 +259,8 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
 
   // Get detector range
   std::vector<long> detRange;
-  detRange.push_back(m_uiForm.set_leSpecMin->text().toLong());
-  detRange.push_back(m_uiForm.set_leSpecMax->text().toLong());
+  detRange.push_back(static_cast<long>(m_uiForm.spSpecMin->value()));
+  detRange.push_back(static_cast<long>(m_uiForm.spSpecMax->value()));
 
   // Get generic reduction algorithm instance
   IAlgorithm_sptr msgDiffReduction = AlgorithmManager::Instance().create("ISISIndirectDiffractionReduction");
@@ -279,9 +275,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   // Set algorithm properties
   msgDiffReduction->setProperty("Instrument", instName.toStdString());
   msgDiffReduction->setProperty("Mode", mode.toStdString());
-  msgDiffReduction->setProperty("SumFiles", m_uiForm.dem_ckSumFiles->isChecked());
+  msgDiffReduction->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
   msgDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
-  msgDiffReduction->setProperty("InputFiles", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
+  msgDiffReduction->setProperty("InputFiles", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
   msgDiffReduction->setProperty("SpectraRange", detRange);
   msgDiffReduction->setProperty("RebinParam", rebin.toStdString());
   msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
@@ -305,7 +301,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
 void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
 {
   // Get the files names from MWRunFiles widget, and convert them from Qt forms into stl equivalents.
-  QStringList fileNames = m_uiForm.dem_rawFiles->getFilenames();
+  QStringList fileNames = m_uiForm.rfSampleFiles->getFilenames();
   std::vector<std::string> stlFileNames;
   stlFileNames.reserve(fileNames.size());
   std::transform(fileNames.begin(),fileNames.end(),std::back_inserter(stlFileNames), toStdString);
@@ -329,9 +325,9 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
 
   IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
   osirisDiffReduction->initialize();
-  osirisDiffReduction->setProperty("Sample", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
-  osirisDiffReduction->setProperty("Vanadium", m_uiForm.dem_vanadiumFile->getFilenames().join(",").toStdString());
-  osirisDiffReduction->setProperty("CalFile", m_uiForm.dem_calFile->getFirstFilename().toStdString());
+  osirisDiffReduction->setProperty("Sample", m_uiForm.rfSampleFiles->getFilenames().join(",").toStdString());
+  osirisDiffReduction->setProperty("Vanadium", m_uiForm.rfVanadiumFile->getFilenames().join(",").toStdString());
+  osirisDiffReduction->setProperty("CalFile", m_uiForm.rfCalFile->getFirstFilename().toStdString());
   osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   osirisDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
@@ -440,7 +436,7 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
   UNUSED_ARG(analyserName);
 
   // Set the search instrument for runs
-  m_uiForm.dem_rawFiles->setInstrumentOverride(instrumentName);
+  m_uiForm.rfSampleFiles->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
@@ -449,8 +445,8 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
   double specMin = instrument->getNumberParameter("spectra-min")[0];
   double specMax = instrument->getNumberParameter("spectra-max")[0];
 
-  m_uiForm.set_leSpecMin->setText(QString::number(specMin));
-  m_uiForm.set_leSpecMax->setText(QString::number(specMax));
+  m_uiForm.spSpecMin->setValue(static_cast<int>(specMin));
+  m_uiForm.spSpecMax->setValue(static_cast<int>(specMax));
 
   // Determine whether we need vanadium input
   std::vector<std::string> correctionVector = instrument->getStringParameter("Workflow.Diffraction.Correction");
@@ -472,16 +468,16 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
     m_uiForm.ckIndividualGrouping->setChecked(false);
 
     // Disable sum files
-    m_uiForm.dem_ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
-    m_uiForm.dem_ckSumFiles->setEnabled(false);
-    m_uiForm.dem_ckSumFiles->setChecked(false);
+    m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
+    m_uiForm.ckSumFiles->setEnabled(false);
+    m_uiForm.ckSumFiles->setChecked(false);
   }
   else
   {
     // Re-enable sum files
-    m_uiForm.dem_ckSumFiles->setToolTip("");
-    m_uiForm.dem_ckSumFiles->setEnabled(true);
-    m_uiForm.dem_ckSumFiles->setChecked(true);
+    m_uiForm.ckSumFiles->setToolTip("");
+    m_uiForm.ckSumFiles->setEnabled(true);
+    m_uiForm.ckSumFiles->setChecked(true);
 
     // Re-enable individual grouping
     m_uiForm.ckIndividualGrouping->setToolTip("");
@@ -522,10 +518,10 @@ void IndirectDiffractionReduction::loadSettings()
 
   settings.beginGroup(m_settingsGroup);
   settings.setValue("last_directory", dataDir);
-  m_uiForm.dem_rawFiles->readSettings(settings.group());
-  m_uiForm.dem_calFile->readSettings(settings.group());
-  m_uiForm.dem_calFile->setUserInput(settings.value("last_cal_file").toString());
-  m_uiForm.dem_vanadiumFile->setUserInput(settings.value("last_van_files").toString());
+  m_uiForm.rfSampleFiles->readSettings(settings.group());
+  m_uiForm.rfCalFile->readSettings(settings.group());
+  m_uiForm.rfCalFile->setUserInput(settings.value("last_cal_file").toString());
+  m_uiForm.rfVanadiumFile->setUserInput(settings.value("last_van_files").toString());
   settings.endGroup();
 }
 
@@ -535,8 +531,8 @@ void IndirectDiffractionReduction::saveSettings()
   QSettings settings;
 
   settings.beginGroup(m_settingsGroup);
-  settings.setValue("last_cal_file", m_uiForm.dem_calFile->getText());
-  settings.setValue("last_van_files", m_uiForm.dem_vanadiumFile->getText());
+  settings.setValue("last_cal_file", m_uiForm.rfCalFile->getText());
+  settings.setValue("last_van_files", m_uiForm.rfVanadiumFile->getText());
   settings.endGroup();
 }
 
@@ -598,10 +594,10 @@ bool IndirectDiffractionReduction::validateRebin()
  */
 bool IndirectDiffractionReduction::validateVanCal()
 {
-  if(!m_uiForm.dem_calFile->isValid())
+  if(!m_uiForm.rfCalFile->isValid())
     return false;
 
-  if(!m_uiForm.dem_vanadiumFile->isValid())
+  if(!m_uiForm.rfVanadiumFile->isValid())
     return false;
 
   return true;
@@ -633,7 +629,7 @@ void IndirectDiffractionReduction::runFilesFinding()
  */
 void IndirectDiffractionReduction::runFilesFound()
 {
-  bool valid = m_uiForm.dem_rawFiles->isValid();
+  bool valid = m_uiForm.rfSampleFiles->isValid();
   m_uiForm.pbRun->setEnabled(valid);
 
   if(valid)
@@ -642,9 +638,9 @@ void IndirectDiffractionReduction::runFilesFound()
     m_uiForm.pbRun->setText("Invalid Run");
 
   // Disable sum files if only one file is given
-  int fileCount = m_uiForm.dem_rawFiles->getFilenames().size();
+  int fileCount = m_uiForm.rfSampleFiles->getFilenames().size();
   if(fileCount < 2)
-    m_uiForm.dem_ckSumFiles->setChecked(false);
+    m_uiForm.ckSumFiles->setChecked(false);
 }
 
 

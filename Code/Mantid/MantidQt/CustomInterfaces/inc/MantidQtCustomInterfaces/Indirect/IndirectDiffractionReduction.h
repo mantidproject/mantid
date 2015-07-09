@@ -31,7 +31,7 @@ public:
 public slots:
   void instrumentSelected(const QString & instrumentName, const QString & analyserName,
       const QString & reflectionName);
-  void demonRun();
+  void run();
   void openDirectoryDialog();
   void help();
   void plotResults(bool error);
@@ -59,7 +59,6 @@ private:
 
 private:
   Ui::IndirectDiffractionReduction m_uiForm;  /// The form generated using Qt Designer
-  QIntValidator * m_valInt;
   QDoubleValidator * m_valDbl;
   QString m_settingsGroup;                    /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
