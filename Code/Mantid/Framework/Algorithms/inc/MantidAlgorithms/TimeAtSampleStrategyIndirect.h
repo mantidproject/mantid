@@ -2,11 +2,18 @@
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECT_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAlgorithms/TimeAtSampleStrategy.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
+
+namespace API {
+class MatrixWorkspace;
+}
+
 namespace Algorithms {
 
-/** TimeAtSampleStrategyIndirect : TODO: DESCRIPTION
+/** TimeAtSampleStrategyIndirect : Determine Time At Sample for an indirect instrument setup.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,10 +36,14 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TimeAtSampleStrategyIndirect {
+class DLLExport TimeAtSampleStrategyIndirect : public TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyIndirect();
+  TimeAtSampleStrategyIndirect(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
   virtual ~TimeAtSampleStrategyIndirect();
+  virtual Correction calculate(const size_t &workspace_index) const;
+private:
+  /// Workspace to operate on
+  boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ws;
 };
 
 } // namespace Algorithms

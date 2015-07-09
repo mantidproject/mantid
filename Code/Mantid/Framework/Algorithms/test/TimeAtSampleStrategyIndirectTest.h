@@ -2,8 +2,9 @@
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYINDIRECTTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 
 using Mantid::Algorithms::TimeAtSampleStrategyIndirect;
 
@@ -15,9 +16,11 @@ public:
   static void destroySuite( TimeAtSampleStrategyIndirectTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_break_on_monitors()
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();// workspace has monitors
+    TimeAtSampleStrategyIndirect strategy(ws);
+    TS_ASSERT_THROWS(strategy.calculate(1 /*monitor index*/), std::invalid_argument&);
   }
 
 
