@@ -72,3 +72,5 @@ Output:
    e value: [ 0.1]
 
 .. categories::
+
+.. sourcelink::

@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/DecoratorWorkspace.h"
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -39,16 +40,45 @@ using namespace Geometry;
 using namespace API;
 using namespace DataObjects;
 
+namespace {
+
+/**
+ * Copy all logData properties from the 'from' workspace to the 'to'
+ * workspace. Does not use CopyLogs as a child algorithm (this is a
+ * simple copy and the workspace is not yet in the ADS).
+ *
+ * @param from source of log entries
+ * @param to workspace where to add the log entries
+ */
+void copyLogs(const EventWorkspace_sptr& from,
+                                  EventWorkspace_sptr& to)
+{
+  // from the logs, get all the properties that don't overwrite any
+  // prop. already set in the sink workspace (like 'filename').
+  auto props = from->mutableRun().getLogData();
+  for (size_t j=0; j<props.size(); j++) {
+    if (!to->mutableRun().hasProperty(props[j]->name())) {
+      to->mutableRun().addLogData(props[j]->clone());
+    }
+  }
+}
+
+}
+
 //===============================================================================================
 // BankPulseTimes
 //===============================================================================================
+
+/// The first period
+const unsigned int BankPulseTimes::FirstPeriod = 1;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Loads the pulse times from the bank entry of the file
 *
 * @param file :: nexus file open in the right bank entry
+* @param pNumbers :: Period numbers to index into. Index via frame/pulse
 */
-BankPulseTimes::BankPulseTimes(::NeXus::File &file) {
+BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int>& pNumbers) : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
   // Read the offset (time zero)
   file.getAttr("offset", startTime);
@@ -61,6 +91,12 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file) {
   numPulses = seconds.size();
   if (numPulses == 0)
     throw std::runtime_error("event_time_zero field has no data!");
+
+  // Ensure that we always have a consistency between nPulses and periodNumbers containers
+  if (numPulses != pNumbers.size()){
+      periodNumbers = std::vector<int>(numPulses, FirstPeriod);;
+  }
+
   pulseTimes = new DateAndTime[numPulses];
   for (size_t i = 0; i < numPulses; i++)
     pulseTimes[i] = start + seconds[i];
@@ -75,6 +111,7 @@ BankPulseTimes::BankPulseTimes(const std::vector<Kernel::DateAndTime> &times) {
   if (numPulses == 0)
     return;
   pulseTimes = new DateAndTime[numPulses];
+  periodNumbers = std::vector<int>(numPulses, FirstPeriod); // TODO we are fixing this at 1 period for all
   for (size_t i = 0; i < numPulses; i++)
     pulseTimes[i] = times[i];
 }
@@ -156,7 +193,7 @@ public:
     prog->report(entry_name + ": precount");
 
     // ---- Pre-counting events per pixel ID ----
-    auto &outputWS = *(alg->WS);
+    auto &outputWS = *(alg->m_ws);
     if (alg->precount) {
 
       if (alg->m_specMin != EMPTY_INT() && alg->m_specMax != EMPTY_INT()) {
@@ -180,7 +217,7 @@ public:
           size_t wi = pixelID_to_wi_vector[pixID + pixelID_to_wi_offset];
           // Allocate it
           if (wi < numEventLists) {
-            outputWS.getEventList(wi).reserve(counts[pixID - m_min_id]);
+            outputWS.reserveEventListAt(wi, counts[pixID - m_min_id]);
           }
           if (alg->getCancel())
             break; // User cancellation
@@ -195,6 +232,8 @@ public:
 
     // Default pulse time (if none are found)
     Mantid::Kernel::DateAndTime pulsetime;
+    int periodNumber = 1;
+    int periodIndex = 0;
     Mantid::Kernel::DateAndTime lastpulsetime(0);
 
     bool pulsetimesincreasing = true;
@@ -242,8 +281,12 @@ public:
             break;
         }
 
+
         // Save the pulse time at this index for creating those events
         pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
+        int logPeriodNumber = thisBankPulseTimes->periodNumbers[pulse_i];
+        periodNumber = logPeriodNumber > 0 ? logPeriodNumber : periodNumber; // Some historic files have recorded their logperiod numbers as zeros!
+        periodIndex = periodNumber - 1;
 
         // Determine if pulse times continue to increase
         if (pulsetime < lastpulsetime)
@@ -268,7 +311,7 @@ public:
             double weight = static_cast<double>(event_weight[i]);
             double errorSq = weight * weight;
             LoadEventNexus::WeightedEventVector_pt eventVector =
-                alg->weightedEventVectors[detId];
+                alg->weightedEventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
@@ -285,7 +328,7 @@ public:
           } else {
             // We have cached the vector of events for this detector ID
             std::vector<Mantid::DataObjects::TofEvent> *eventVector =
-                alg->eventVectors[detId];
+                alg->eventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
 #if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
@@ -427,20 +470,21 @@ public:
   * @param prog :: an optional Progress object
   * @param ioMutex :: a mutex shared for all Disk I-O tasks
   * @param scheduler :: the ThreadScheduler that runs this task.
+  * @param framePeriodNumbers :: Period numbers corresponding to each frame
   */
   LoadBankFromDiskTask(LoadEventNexus *alg, const std::string &entry_name,
                        const std::string &entry_type,
                        const std::size_t numEvents,
                        const bool oldNeXusFileNames, Progress *prog,
                        boost::shared_ptr<Mutex> ioMutex,
-                       ThreadScheduler *scheduler)
+                       ThreadScheduler *scheduler, const std::vector<int>& framePeriodNumbers)
       : Task(), alg(alg), entry_name(entry_name), entry_type(entry_type),
         // prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL),
         // m_loadError(false),
         prog(prog), scheduler(scheduler), m_loadError(false),
         m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(),
         m_event_id(NULL), m_event_time_of_flight(NULL), m_have_weight(false),
-        m_event_weight(NULL) {
+        m_event_weight(NULL), m_framePeriodNumbers(framePeriodNumbers) {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
     m_min_id = std::numeric_limits<uint32_t>::max();
@@ -468,6 +512,8 @@ public:
       thisNumPulses = file.getInfo().dims[0];
     file.closeData();
 
+
+
     // Now, we look through existing ones to see if it is already loaded
     // thisBankPulseTimes = NULL;
     for (size_t i = 0; i < alg->m_bankPulseTimes.size(); i++) {
@@ -478,7 +524,7 @@ public:
     }
 
     // Not found? Need to load and add it
-    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file));
+    thisBankPulseTimes = boost::make_shared<BankPulseTimes>(boost::ref(file), m_framePeriodNumbers);
     alg->m_bankPulseTimes.push_back(thisBankPulseTimes);
   }
 
@@ -924,6 +970,8 @@ private:
   bool m_have_weight;
   /// Event weights
   float *m_event_weight;
+  /// Frame period numbers
+  const std::vector<int> m_framePeriodNumbers;
 }; // END-DEF-CLASS LoadBankFromDiskTask
 
 //===============================================================================================
@@ -988,9 +1036,9 @@ void LoadEventNexus::init() {
       "The file name is typically of the form INST_####_event.nxs (N.B. case "
       "sensitive if running on Linux).");
 
-  this->declareProperty(new WorkspaceProperty<IEventWorkspace>(
+  this->declareProperty(new WorkspaceProperty<Workspace>(
                             "OutputWorkspace", "", Direction::Output),
-                        "The name of the output EventWorkspace in which to "
+                        "The name of the output EventWorkspace or WorkspaceGroup in which to "
                         "load the EventNexus file.");
 
   declareProperty(new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(),
@@ -1208,7 +1256,7 @@ void LoadEventNexus::exec() {
   Progress prog(this, 0.0, 0.3, reports);
 
   // Load the detector events
-  WS = createEmptyEventWorkspace(); // Algorithm currently relies on an
+  m_ws = boost::make_shared<DecoratorWorkspace>(); // Algorithm currently relies on an
                                     // object-level workspace ptr
   loadEvents(&prog, false);         // Do not load monitor blocks
 
@@ -1221,12 +1269,12 @@ void LoadEventNexus::exec() {
 
   // If the run was paused at any point, filter out those events (SNS only, I
   // think)
-  filterDuringPause(WS);
+  filterDuringPause(m_ws->getSingleHeldWorkspace());
 
   // add filename
-  WS->mutableRun().addProperty("Filename", m_filename);
+  m_ws->mutableRun().addProperty("Filename", m_filename);
   // Save output
-  this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
+  this->setProperty("OutputWorkspace", m_ws->combinedWorkspace());
   // Load the monitors
   if (load_monitors) {
     prog.report("Loading monitors");
@@ -1240,6 +1288,9 @@ void LoadEventNexus::exec() {
     if (monitorsAsEvents) {
       // no matter whether the file has events or not, the user has requested to
       // load events from monitors
+      if(m_ws->nPeriods() > 1){
+          throw std::runtime_error("Loading multi-period monitors in event mode is not supported.");
+      }
       this->runLoadMonitorsAsEvents(&prog);
     } else {
       // this resorts to child algorithm 'LoadNexusMonitors', passing the
@@ -1260,10 +1311,11 @@ void LoadEventNexus::exec() {
 * @param vectors :: the array to create the map on
 */
 template <class T>
-void LoadEventNexus::makeMapToEventLists(std::vector<T> &vectors) {
+void LoadEventNexus::makeMapToEventLists(std::vector<std::vector<T> > &vectors) {
+  vectors.resize(m_ws->nPeriods());
   if (this->event_id_is_spec) {
     // Find max spectrum no
-    Axis *ax1 = WS->getAxis(1);
+    Axis *ax1 = m_ws->getAxis(1);
     specid_t maxSpecNo =
         -std::numeric_limits<
             specid_t>::max(); // So that any number will be greater than this
@@ -1278,12 +1330,16 @@ void LoadEventNexus::makeMapToEventLists(std::vector<T> &vectors) {
     // the maximum
     // possible spectrum number
     eventid_max = maxSpecNo;
-    vectors.resize(maxSpecNo + 1, NULL);
-    for (size_t i = 0; i < WS->getNumberHistograms(); ++i) {
-      const ISpectrum *spec = WS->getSpectrum(i);
-      if (spec) {
-        getEventsFrom(WS->getEventList(i), vectors[spec->getSpectrumNo()]);
-      }
+    for(size_t i= 0; i < vectors.size(); ++i){
+        vectors[i].resize(maxSpecNo + 1, NULL);
+    }
+    for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
+        for (size_t i = 0; i < m_ws->getNumberHistograms(); ++i) {
+          const ISpectrum *spec = m_ws->getSpectrum(i);
+          if (spec) {
+            getEventsFrom(m_ws->getEventList(i, period), vectors[period][spec->getSpectrumNo()]);
+          }
+        }
     }
   } else {
     // To avoid going out of range in the vector, this is the MAX index that can
@@ -1293,14 +1349,18 @@ void LoadEventNexus::makeMapToEventLists(std::vector<T> &vectors) {
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default
-    vectors.resize(eventid_max + 1, NULL);
+    for(size_t i= 0; i < vectors.size(); ++i){
+        vectors[i].resize(eventid_max + 1, NULL);
+    }
 
     for (size_t j = size_t(pixelID_to_wi_offset);
          j < pixelID_to_wi_vector.size(); j++) {
       size_t wi = pixelID_to_wi_vector[j];
       // Save a POINTER to the vector
-      if (wi < WS->getNumberHistograms()) {
-        getEventsFrom(WS->getEventList(wi), vectors[j - pixelID_to_wi_offset]);
+      if (wi < m_ws->getNumberHistograms()) {
+          for (size_t period = 0; period < m_ws->nPeriods(); ++period) {
+              getEventsFrom(m_ws->getEventList(wi, period), vectors[period][j - pixelID_to_wi_offset]);
+          }
       }
     }
   }
@@ -1360,10 +1420,10 @@ void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
 
   // This map will be used to find the workspace index
   if (this->event_id_is_spec)
-    WS->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
+    m_ws->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
                                           pixelID_to_wi_offset);
   else
-    WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
+    m_ws->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
                                             pixelID_to_wi_offset, true);
 }
 
@@ -1375,7 +1435,7 @@ void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
 * main banks
 *
 * This also loads the instrument, but only if it has not been set in the workspace
-* being used as input (WS data member). Same applies to the logs.
+* being used as input (m_ws data member). Same applies to the logs.
 */
 void LoadEventNexus::loadEvents(API::Progress *const prog,
                                 const bool monitors) {
@@ -1388,12 +1448,15 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   DateAndTime run_start(0, 0);
   // Initialize the counter of bad TOFs
   bad_tofs = 0;
-
+  int nPeriods = 1;
+  std::unique_ptr<const TimeSeriesProperty<int> > periodLog(new const TimeSeriesProperty<int>("period_log"));
   if (!m_logs_loaded_correctly) {
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
-      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, WS, *this, true);
-      run_start = WS->getFirstPulseTime();
+
+      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true, nPeriods, periodLog);
+
+      run_start = m_ws->getFirstPulseTime();
       m_logs_loaded_correctly = true;
     } else {
       g_log.information() << "Skipping the loading of sample logs!\n"
@@ -1406,10 +1469,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       m_file->readData("start_time", tmp);
       m_file->closeGroup();
       run_start = DateAndTime(tmp);
-      WS->mutableRun().addProperty("run_start", run_start.toISO8601String(),
+      m_ws->mutableRun().addProperty("run_start", run_start.toISO8601String(),
                                    true);
     }
   }
+  m_ws->setNPeriods(nPeriods, periodLog); // This is how many workspaces we are going to make.
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
   if (m_allBanksPulseTimes == NULL) {
@@ -1418,11 +1482,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     m_allBanksPulseTimes = boost::make_shared<BankPulseTimes>(temp);
   }
 
-  if (!WS->getInstrument() || !m_instrument_loaded_correctly) {
+  if (!m_ws->getInstrument() || !m_instrument_loaded_correctly) {
     // Load the instrument (if not loaded before)
     prog->report("Loading instrument");
     m_instrument_loaded_correctly =
-      loadInstrument(m_filename, WS, m_top_entry_name, this);
+      loadInstrument(m_filename, m_ws, m_top_entry_name, this);
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error(
@@ -1471,7 +1535,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
 
-  loadSampleDataISIScompatibility(*m_file, WS);
+  loadSampleDataISIScompatibility(*m_file, *m_ws);
 
   // Close the 'top entry' group (raw_data_1 for NexusProcessed, etc.)
   m_file->closeGroup();
@@ -1485,7 +1549,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   try {
     // this is a static method that is why it is passing the
     // file object and the file path
-    loadEntryMetadata(m_filename, WS, m_top_entry_name);
+    loadEntryMetadata(m_filename, m_ws, m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << std::endl;
@@ -1529,7 +1593,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   if (is_time_filtered) {
     // Now filter out the run, using the DateAndTime type.
-    WS->mutableRun().filterByTime(filter_time_start, filter_time_stop);
+    m_ws->mutableRun().filterByTime(filter_time_start, filter_time_stop);
   }
 
   if (metaDataOnly) {
@@ -1541,7 +1605,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
               1; // Just to make sure the bins hold it all
     xRef[1] = 1;
     // Set the binning axis using this.
-    WS->setAllX(axis);
+    m_ws->setAllX(axis);
 
     createWorkspaceIndexMaps(monitors, std::vector<std::string>());
 
@@ -1588,13 +1652,13 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   prog->report("Initializing all pixels");
   // Remove used banks if parameter is set
-  if (WS->getInstrument()->hasParameter("remove-unused-banks")) {
+  if (m_ws->getInstrument()->hasParameter("remove-unused-banks")) {
     std::vector<double> instrumentUnused =
-        WS->getInstrument()->getNumberParameter("remove-unused-banks", true);
+        m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
     if (!instrumentUnused.empty()) {
       const int unused = static_cast<int>(instrumentUnused.front());
       if (unused == 1)
-        deleteBanks(WS, bankNames);
+        deleteBanks(m_ws, bankNames);
     }
   }
   //----------------- Pad Empty Pixels -------------------------------
@@ -1605,16 +1669,16 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     this->makeMapToEventLists<EventVector_pt>(eventVectors);
   } else {
     // Convert to weighted events
-    for (size_t i = 0; i < WS->getNumberHistograms(); i++) {
-      WS->getEventList(i).switchTo(API::WEIGHTED);
+    for (size_t i = 0; i < m_ws->getNumberHistograms(); i++) {
+      m_ws->getEventList(i).switchTo(API::WEIGHTED);
     }
     this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
   }
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling
   // SortEvents will not try to sort these empty lists.
-  for (size_t i = 0; i < WS->getNumberHistograms(); i++)
-    WS->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
+  for (size_t i = 0; i < m_ws->getNumberHistograms(); i++)
+    m_ws->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
 
   // Count the limits to time of flight
   shortest_tof =
@@ -1699,12 +1763,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     numProg += bankNames.size() * 3; // 3 = second proc task
   Progress *prog2 = new Progress(this, 0.3, 1.0, numProg);
 
+  const std::vector<int> periodLogVec =  periodLog->valuesAsVector();
+
   for (size_t i = bank0; i < bankn; i++) {
     // We make tasks for loading
     if (bankNumEvents[i] > 0)
       pool.schedule(new LoadBankFromDiskTask(
           this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
-          prog2, diskIOMutex, scheduler));
+          prog2, diskIOMutex, scheduler, periodLogVec));
   }
   // Start and end all threads
   pool.joinAll();
@@ -1712,7 +1778,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   delete prog2;
 
   // Info reporting
-  const std::size_t eventsLoaded = WS->getNumberEvents();
+  const std::size_t eventsLoaded = m_ws->getNumberEvents();
   g_log.information() << "Read " << eventsLoaded << " events"
                       << ". Shortest TOF: " << shortest_tof
                       << " microsec; longest TOF: " << longest_tof
@@ -1735,30 +1801,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     xRef[1] = longest_tof + 1;
   }
   // Set the binning axis using this.
-  WS->setAllX(axis);
+  m_ws->setAllX(axis);
 
   // if there is time_of_flight load it
-  loadTimeOfFlight(WS, m_top_entry_name, classType);
-}
-
-//-----------------------------------------------------------------------------
-/**
-* Create a blank event workspace
-* @returns A shared pointer to a new empty EventWorkspace object
-*/
-EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace() {
-  // Create the output workspace
-  EventWorkspace_sptr eventWS(new EventWorkspace());
-  // Make sure to initialize.
-  //   We can use dummy numbers for arguments, for event workspace it doesn't
-  //   matter
-  eventWS->initialize(1, 1, 1);
-
-  // Set the units
-  eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  eventWS->setYUnit("Counts");
-
-  return eventWS;
+  loadTimeOfFlight(m_ws, m_top_entry_name, classType);
 }
 
 //-----------------------------------------------------------------------------
@@ -2090,11 +2136,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 
 //-----------------------------------------------------------------------------
 /**
-* Create the required spectra mapping. If the file contains an isis_vms_compat
-* block then
-* the mapping is read from there, otherwise a 1:1 map with the instrument is
-* created (along
-* with the associated spectra axis)
+* Deletes banks for a workspace given the bank names.
 * @param workspace :: The workspace to contain the spectra mapping
 * @param bankNames :: Bank names that are in Nexus file
 */
@@ -2209,7 +2251,7 @@ void LoadEventNexus::createSpectraMapping(
     for (auto name = bankNames.begin(); name != bankNames.end(); ++name) {
       // Only build the map for the single bank
       std::vector<IDetector_const_sptr> dets;
-      WS->getInstrument()->getDetectorsInBank(dets, (*name));
+      m_ws->getInstrument()->getDetectorsInBank(dets, (*name));
       if (dets.empty())
         throw std::runtime_error("Could not find the bank named '" + (*name) +
                                  "' as a component assembly in the instrument "
@@ -2218,11 +2260,11 @@ void LoadEventNexus::createSpectraMapping(
       allDets.insert(allDets.end(), dets.begin(), dets.end());
     }
     if (!allDets.empty()) {
-      WS->resizeTo(allDets.size());
+      m_ws->resizeTo(allDets.size());
       // Make an event list for each.
       for (size_t wi = 0; wi < allDets.size(); wi++) {
         const detid_t detID = allDets[wi]->getID();
-        WS->getSpectrum(wi)->setDetectorID(detID);
+        m_ws->getSpectrum(wi)->setDetectorID(detID);
       }
       spectramap = true;
       g_log.debug() << "Populated spectra map for select banks\n";
@@ -2239,12 +2281,12 @@ void LoadEventNexus::createSpectraMapping(
   if (!spectramap) {
     g_log.debug() << "No custom spectra mapping found, continuing with default "
                      "1:1 mapping of spectrum:detectorID\n";
-    auto specList = WS->getInstrument()->getDetectorIDs(true);
+    auto specList = m_ws->getInstrument()->getDetectorIDs(true);
     createSpectraList(*std::min_element(specList.begin(), specList.end()),
                       *std::max_element(specList.begin(), specList.end()));
     // The default 1:1 will suffice but exclude the monitors as they are always
     // in a separate workspace
-    WS->padSpectra(m_specList);
+    m_ws->padSpectra(m_specList);
     g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
   }
 }
@@ -2292,20 +2334,20 @@ bool LoadEventNexus::hasEventMonitors() {
 */
 void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
   try {
-    // Note the reuse of the WS member variable below. Means I need to grab a
+    // Note the reuse of the m_ws member variable below. Means I need to grab a
     // copy of its current value.
-    auto dataWS = WS;
-    WS = createEmptyEventWorkspace(); // Algorithm currently relies on an
+    auto dataWS = m_ws;
+    m_ws = boost::make_shared<DecoratorWorkspace>(); // Algorithm currently relies on an
                                       // object-level workspace ptr
     // add filename
-    WS->mutableRun().addProperty("Filename", m_filename);
+    m_ws->mutableRun().addProperty("Filename", m_filename);
 
     // Re-use instrument, which has probably been loaded into the data
     // workspace (this happens in the first call to loadEvents() (inside
     // LoadEventNexuss::exec()). The second call to loadEvents(), immediately
     // below, can re-use it.
     if (m_instrument_loaded_correctly) {
-      WS->setInstrument(dataWS->getInstrument());
+      m_ws->setInstrument(dataWS->getInstrument());
       g_log.information() << "Instrument data copied into monitors workspace "
         " from the data workspace." << std::endl;
     }
@@ -2320,7 +2362,9 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
       g_log.information() << "Copying log data into monitors workspace from the "
                           << "data workspace." << std::endl;
       try {
-        copyLogs(dataWS, WS);
+        auto to = m_ws->getSingleHeldWorkspace();
+        auto from = dataWS;
+        copyLogs(from, to);
         g_log.information() << "Log data copied." << std::endl;
       } catch(std::runtime_error&) {
         g_log.error() << "Could not copy log data into monitors workspace. Some "
@@ -2335,12 +2379,12 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
         new WorkspaceProperty<IEventWorkspace>("MonitorWorkspace", mon_wsname,
                                                Direction::Output),
         "Monitors from the Event NeXus file");
-    this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", WS);
+    this->setProperty<IEventWorkspace_sptr>("MonitorWorkspace", m_ws->getSingleHeldWorkspace());
     // Set the internal monitor workspace pointer as well
-    dataWS->setMonitorWorkspace(WS);
+    dataWS->setMonitorWorkspace(m_ws->getSingleHeldWorkspace());
     // If the run was paused at any point, filter out those events (SNS only, I
     // think)
-    filterDuringPause(WS);
+    filterDuringPause(m_ws);
   } catch (const std::exception &e) {
     g_log.error() << "Error while loading monitors as events from file: ";
     g_log.error() << e.what() << std::endl;
@@ -2381,7 +2425,7 @@ void LoadEventNexus::runLoadMonitors() {
     MatrixWorkspace_sptr mons = boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
     if (mons) {
       // Set the internal monitor workspace pointer as well
-      WS->setMonitorWorkspace(mons);
+      m_ws->setMonitorWorkspace(mons);
 
       filterDuringPause(mons);
     } else {
@@ -2473,19 +2517,19 @@ void LoadEventNexus::runLoadMonitors() {
     throw std::runtime_error(os.str());
   }
   // Monitor filtering/selection
-  const std::vector<detid_t> monitors = WS->getInstrument()->getMonitors();
+  const std::vector<detid_t> monitors = m_ws->getInstrument()->getMonitors();
   const size_t nmons(monitors.size());
   if (monitorsOnly) {
     g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
     // Find the det_ids in the udet array.
-    WS->resizeTo(nmons);
+    m_ws->resizeTo(nmons);
     for (size_t i = 0; i < nmons; ++i) {
       // Find the index in the udet array
       const detid_t &id = monitors[i];
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        auto spectrum = WS->getSpectrum(i);
+        auto spectrum = m_ws->getSpectrum(i);
         const specid_t &specNo = spec[it - udet.begin()];
         spectrum->setSpectrumNo(specNo);
         spectrum->setDetectorID(id);
@@ -2516,17 +2560,17 @@ void LoadEventNexus::runLoadMonitors() {
     }
 
     SpectrumDetectorMapping mapping(spec, udet, monitors);
-    WS->resizeTo(mapping.getMapping().size());
+    m_ws->resizeTo(mapping.getMapping().size());
     // Make sure spectrum numbers are correct
     auto uniqueSpectra = mapping.getSpectrumNumbers();
     auto itend = uniqueSpectra.end();
     size_t counter = 0;
     for (auto it = uniqueSpectra.begin(); it != itend; ++it) {
-      WS->getSpectrum(counter)->setSpectrumNo(*it);
+      m_ws->getSpectrum(counter)->setSpectrumNo(*it);
       ++counter;
     }
     // Fill detectors based on this mapping
-    WS->updateSpectraUsing(mapping);
+    m_ws->updateSpectraUsing(mapping);
   }
   return true;
 }
@@ -2776,7 +2820,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 * @param WS : pointer to the workspace
 */
 void LoadEventNexus::loadSampleDataISIScompatibility(
-    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr WS) {
+  ::NeXus::File &file, DecoratorWorkspace& WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -2791,11 +2835,12 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
     file.readData("SPB", spb);
     file.readData("RSPB", rspb);
 
-    WS->mutableSample().setGeometryFlag(
+      
+    WS.setGeometryFlag(
         spb[2]); // the flag is in the third value
-    WS->mutableSample().setThickness(rspb[3]);
-    WS->mutableSample().setHeight(rspb[4]);
-    WS->mutableSample().setWidth(rspb[5]);
+    WS.setThickness(rspb[3]);
+    WS.setHeight(rspb[4]);
+    WS.setWidth(rspb[5]);
   } catch (::NeXus::Exception &ex) {
     // it means that the data was not as expected, report the problem
     std::stringstream s;
@@ -2811,7 +2856,7 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
   try {
     if ((!ConfigService::Instance().hasProperty(
             "loadeventnexus.keeppausedevents")) &&
-        (WS->run().getLogData("pause")->size() > 1)) {
+        (m_ws->run().getLogData("pause")->size() > 1)) {
       g_log.notice("Filtering out events when the run was marked as paused. "
                    "Set the loadeventnexus.keeppausedevents configuration "
                    "property to override this.");
@@ -2839,13 +2884,15 @@ void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
 * @param alg :: Handle of the algorithm
 * @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
 *otherwise NULL.
+* @param nPeriods : Number of periods (write to)
+* @param periodLog : Period logs DateAndTime to int map.
 *
 * @return Pulse times given in the DAS logs
 */
 boost::shared_ptr<BankPulseTimes>
 LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
                                  API::MatrixWorkspace_sptr localWorkspace,
-                                 API::Algorithm &alg, bool returnpulsetimes) {
+                                 API::Algorithm &alg, bool returnpulsetimes, int& nPeriods, std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
   // --------------------- Load DAS Logs -----------------
   // The pulse times will be empty if not specified in the DAS logs.
   // BankPulseTimes * out = NULL;
@@ -2860,6 +2907,17 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
     loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
                                                      localWorkspace);
     loadLogs->execute();
+
+    const Run& run = localWorkspace->run();
+    // Get the number of periods
+    if(run.hasProperty("nperiods")){
+        nPeriods  = run.getPropertyValueAsType<int>("nperiods");
+    }
+    // Get the period log. Map of DateAndTime to Period int values.
+    if(run.hasProperty("period_log")){
+        auto* temp = run.getProperty("period_log");
+        periodLog.reset(dynamic_cast<TimeSeriesProperty<int>*>(temp->clone()));
+    }
 
     // If successful, we can try to load the pulse times
     Kernel::TimeSeriesProperty<double> *log =
@@ -2968,7 +3026,7 @@ void LoadEventNexus::createSpectraList(int32_t min, int32_t max) {
   if (!m_specList.empty()) {
 
     // Check that spectra supplied by user do not correspond to monitors
-    auto nmonitors = WS->getInstrument()->getMonitors().size();
+    auto nmonitors = m_ws->getInstrument()->getMonitors().size();
 
     for (size_t i = 0; i < nmonitors; ++i) {
       if (std::find(m_specList.begin(), m_specList.end(), i + 1) !=
@@ -3002,26 +3060,7 @@ void LoadEventNexus::safeOpenFile(const std::string fname)
   }
 }
 
-/**
- * Copy all logData properties from the 'from' workspace to the 'to'
- * workspace. Does not use CopyLogs as a child algorithm (this is a
- * simple copy and the workspace is not yet in the ADS).
- *
- * @param from source of log entries
- * @param to workspace where to add the log entries
- */
-void LoadEventNexus::copyLogs(const EventWorkspace_sptr& from,
-                                  EventWorkspace_sptr& to)
-{
-  // from the logs, get all the properties that don't overwrite any
-  // prop. already set in the sink workspace (like 'filename').
-  auto props = from->mutableRun().getLogData();
-  for (size_t j=0; j<props.size(); j++) {
-    if (!to->mutableRun().hasProperty(props[j]->name())) {
-      to->mutableRun().addLogData(props[j]->clone());
-    }
-  }
-}
+
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -26,4 +26,31 @@ memory with the overhead of boxes.
 You can create a file-backed MDEventWorkspace by specifying the Filename
 and Memory parameters.
 
+Usage
+-----
+
+**Example**
+
+.. testcode:: Example
+
+    mdws = CreateMDWorkspace(Dimensions=3, Extents='-10,10,-10,10,-10,10', Names='A,B,C', Units='U,U,U')
+    
+    print "mdws is a " + mdws.id()
+    print "with {0} dimensions:".format(mdws.getNumDims())
+    for i in range (mdws.getNumDims()):
+        print mdws.getDimension(i).getName()
+
+Output:
+
+.. testoutput:: Example
+
+    mdws is a MDEventWorkspace<MDLeanEvent,3>
+    with 3 dimensions:
+    A
+    B
+    C
+
+
 .. categories::
+
+.. sourcelink::

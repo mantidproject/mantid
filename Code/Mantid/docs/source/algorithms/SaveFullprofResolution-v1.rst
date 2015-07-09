@@ -90,5 +90,7 @@ Output:
 
 .. categories::
 
+.. sourcelink::
+
 
 

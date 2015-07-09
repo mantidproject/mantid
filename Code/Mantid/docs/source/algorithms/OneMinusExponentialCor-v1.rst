@@ -50,3 +50,5 @@ Output:
     [ 2.59399415  2.94505308  2.99256374]
 
 .. categories::
+
+.. sourcelink::

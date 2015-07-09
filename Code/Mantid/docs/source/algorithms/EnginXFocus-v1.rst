@@ -31,7 +31,7 @@ Usage
    # Run the algorithm
    ws_name = 'data_ws'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
-   ws = EnginXFocus(InputWorkspace=ws_name, Bank=1)
+   ws = EnginXFocus(InputWorkspace=ws_name, Bank='1')
 
    # Should have one spectrum only
    print "No. of spectra:", ws.getNumberHistograms()
@@ -55,3 +55,5 @@ Output:
    For TOF of 38619.804 intensity is 17.397
    
 .. categories::
+
+.. sourcelink::

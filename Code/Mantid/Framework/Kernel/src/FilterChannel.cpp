@@ -50,6 +50,12 @@ void FilterChannel::close() {
   }
 }
 
+const FilterChannel &FilterChannel::setPriority(const int &priority) {
+  _priority = priority;
+  
+  return *this;
+}
+
 const FilterChannel &FilterChannel::setPriority(const std::string &priority) {
   // take a local copy of the input
   std::string workPriority = priority;

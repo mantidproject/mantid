@@ -42,3 +42,5 @@ Output:
     It has 1 histogram, with 731 bins
 
 .. categories::
+
+.. sourcelink::

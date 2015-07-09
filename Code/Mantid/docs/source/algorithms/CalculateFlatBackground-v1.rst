@@ -79,3 +79,5 @@ Output:
    Calculated Mean background: [ 3.  3.  3.  3.  3.]
 
 .. categories::
+
+.. sourcelink::

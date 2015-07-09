@@ -181,11 +181,6 @@ void Fit::execConcrete() {
     }
     prog.report();
     m_function->iterationFinished();
-    if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-      g_log.debug() << "Iteration " << iter
-                    << ", cost function = " << minimizer->costFunctionVal()
-                    << "\n";
-    }
     ++iter;
   }
   g_log.debug() << "Number of minimizer iterations=" << iter << "\n";

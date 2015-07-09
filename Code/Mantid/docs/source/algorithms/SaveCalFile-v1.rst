@@ -37,3 +37,5 @@ The format is
 :ref:`algm-LoadCalFile`
 
 .. categories::
+
+.. sourcelink::

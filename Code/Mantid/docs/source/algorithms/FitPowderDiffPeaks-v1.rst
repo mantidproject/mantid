@@ -176,3 +176,5 @@ Output:
   Peak @ d = 0.95366, TOF_0 = 21540.56129, A = 0.12770, B = 0.08669, Sigma = 8.26518
 
 .. categories::
+
+.. sourcelink::

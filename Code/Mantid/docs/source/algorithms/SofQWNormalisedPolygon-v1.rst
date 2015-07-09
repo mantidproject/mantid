@@ -70,3 +70,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

@@ -19,15 +19,11 @@ using Mantid::TestChannel;
 
 class FilterChannelTest : public CxxTest::TestSuite
 {
-public: 
-
+public:
   void testContructor()
   {
-    TS_ASSERT_THROWS_NOTHING
-      (
-	Poco::FilterChannel a;
-	)
-      }
+    TS_ASSERT_THROWS_NOTHING(Poco::FilterChannel a;)
+  }
 
   void testContructorDefaults()
   {
@@ -127,7 +123,24 @@ public:
     a.log(msg);
     TS_ASSERT_EQUALS(tChannel->list().size(),1);
   }
-
+  void testSimpleLogMessagesByPriority()
+  {
+    //initialise the channel
+    boost::shared_ptr<TestChannel> tChannel(new TestChannel);
+    Poco::FilterChannel a;
+    a.addChannel(tChannel.get());
+    Poco::Message msg;
+    a.setPriority(Poco::Message::Priority::PRIO_INFORMATION);
+    msg.setPriority(Poco::Message::Priority::PRIO_NOTICE);
+    a.log(msg);
+    TSM_ASSERT_EQUALS("Message of greater priority failed to get through",tChannel->list().size(),1);
+    msg.setPriority(Poco::Message::Priority::PRIO_INFORMATION);
+    a.log(msg);
+    TSM_ASSERT_EQUALS("Message of equal priority failed to get through",tChannel->list().size(),2);
+    msg.setPriority(Poco::Message::Priority::PRIO_DEBUG);
+    a.log(msg);
+    TSM_ASSERT_EQUALS("Message of lesser priority managed to get through",tChannel->list().size(),2);
+  }
   void testLogMessagesByPriority()
   {
     //initialise the channel
@@ -163,7 +176,7 @@ public:
         msg.setPriority(static_cast<Poco::Message::Priority>(msgPriority));
 
         size_t previousMessageCount = tChannel->list().size();
-	a.log(msg);
+	      a.log(msg);
         size_t addedMessageCount = tChannel->list().size() - previousMessageCount;
 
         if ((channelPriority >= msgPriority)&&(addedMessageCount==1))

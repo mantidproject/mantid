@@ -57,7 +57,8 @@ void OneStepMDEW::exec() {
   loadAlg->setPropertyValue("Filename", getPropertyValue("Filename"));
   loadAlg->setPropertyValue("OutputWorkspace", tempWsName);
   loadAlg->executeAsChildAlg();
-  IEventWorkspace_sptr tempWS = loadAlg->getProperty("OutputWorkspace");
+  Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
+  IEventWorkspace_sptr tempWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
 
   // --------- Now Convert -------------------------------
 

@@ -47,3 +47,5 @@ Output:
     Corrected start time for 'Speed5': 2010-03-25T16:08:37 
 
 .. categories::
+
+.. sourcelink::

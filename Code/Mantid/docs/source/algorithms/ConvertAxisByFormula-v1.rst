@@ -112,3 +112,5 @@ Output:
    New Y title: Doubled Y
 
 .. categories::
+
+.. sourcelink::

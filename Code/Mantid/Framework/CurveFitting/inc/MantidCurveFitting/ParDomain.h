@@ -48,8 +48,7 @@ public:
   /// function
   virtual void
   leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                              bool evalFunction, bool evalDeriv,
-                              bool evalHessian);
+                              bool evalDeriv, bool evalHessian);
 };
 
 } // namespace CurveFitting

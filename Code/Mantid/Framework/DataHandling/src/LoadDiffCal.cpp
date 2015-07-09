@@ -9,6 +9,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
+#include <cmath>
 #include <H5Cpp.h>
 
 namespace Mantid {
@@ -124,7 +125,7 @@ std::vector<NumT> readArrayCoerce(DataSet &dataset, const DataType &desiredDataT
         std::vector<float> temp(dataSpace.getSelectNpoints());
         dataset.read(&temp[0], dataType, dataSpace);
         for( auto it = temp.begin(); it != temp.end(); ++it)
-          result.push_back(static_cast<int32_t>(*it));
+          result.push_back(static_cast<NumT>(*it));
     } else {
         throw DataTypeIException();
     }
@@ -147,6 +148,15 @@ std::vector<double> LoadDiffCal::readDoubleArray(Group & group, const std::strin
     UNUSED_ARG(e);
     g_log.information() << "DataSet \"" << name << "\" should be double" << "\n";
   }
+
+  for (size_t i=0; i<result.size(); ++i) {
+    if (std::abs(result[i]) < 1.e-10) {
+      result[i] = 0.;
+    } else if (result[i] != result[i]) { // check for NaN
+      result[i] = 0.;
+    }
+  }
+
 
   return result;
 }
@@ -245,8 +255,9 @@ void LoadDiffCal::makeMaskWorkspace(const std::vector<int32_t> &detids, const st
     for (size_t i=0; i<numDet; ++i) {
         bool shouldUse = (use[i] > 0);
         detid_t detid = static_cast<detid_t>(detids[i]);
-        wksp->setMasked(detid, shouldUse);
-        wksp->setValue(detid, (shouldUse ? 1. : 0.));
+        // in maskworkspace 0=use, 1=dontuse
+        wksp->setMasked(detid, !shouldUse);
+        wksp->setValue(detid, (shouldUse ? 0. : 1.));
         progress.report();
     }
 

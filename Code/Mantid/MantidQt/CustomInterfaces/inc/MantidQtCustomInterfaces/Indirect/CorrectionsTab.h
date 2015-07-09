@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -46,13 +46,13 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport IDATab : public IndirectTab
+  class DLLExport CorrectionsTab : public IndirectTab
   {
     Q_OBJECT
 
   public:
     /// Constructor
-    IDATab(QWidget * parent = 0);
+    CorrectionsTab(QWidget * parent = 0);
 
     /// Loads the tab's settings.
     void loadTabSettings(const QSettings & settings);
@@ -68,7 +68,7 @@ namespace IDA
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                       Mantid::API::MatrixWorkspace_const_sptr right);
     /// Adds a unit conversion step to the algorithm queue
-    std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix = "UNIT");
+    std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix = "UNIT", std::string eMode = "");
 
     /// DoubleEditorFactory
     DoubleEditorFactory* m_dblEdFac;
@@ -98,4 +98,4 @@ namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACESIDA_CORRECTIONSTAB_H_ */

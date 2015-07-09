@@ -27,3 +27,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

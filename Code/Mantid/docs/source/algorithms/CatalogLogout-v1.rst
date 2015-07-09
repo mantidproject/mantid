@@ -26,3 +26,5 @@ Usage
     CatalogLogout(session)
 
 .. categories::
+
+.. sourcelink::

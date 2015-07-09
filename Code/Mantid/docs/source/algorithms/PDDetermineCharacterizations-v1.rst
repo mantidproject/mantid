@@ -52,3 +52,5 @@ For a description of the  `TableWorkspace <TableWorkspace>`__
 see :ref:`PDLoadCharacterizations <algm-PDLoadCharacterizations>`.
 
 .. categories::
+
+.. sourcelink::

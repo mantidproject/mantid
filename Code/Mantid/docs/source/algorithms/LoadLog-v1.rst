@@ -102,3 +102,5 @@ Output:
     ts2beamcurrent
 
 .. categories::
+
+.. sourcelink::

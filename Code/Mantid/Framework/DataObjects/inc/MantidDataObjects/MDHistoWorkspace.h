@@ -47,10 +47,12 @@ public:
   MDHistoWorkspace(
       std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
 
-  // TODO once we have a polymorphic clone this should be made protected
-  MDHistoWorkspace(const MDHistoWorkspace &other);
-
   virtual ~MDHistoWorkspace();
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<MDHistoWorkspace> clone() const {
+    return std::unique_ptr<MDHistoWorkspace>(doClone());
+  }
 
   void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
   void init(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
@@ -379,13 +381,14 @@ public:
   /// Get the size of an element in the HistoWorkspace.
   static size_t sizeOfElement();
 
-  /// Virutal constructor.
-  boost::shared_ptr<IMDHistoWorkspace> clone() const;
-
   /// Preferred visual normalization method.
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 private:
+  virtual MDHistoWorkspace *doClone() const {
+    return new MDHistoWorkspace(*this);
+  }
+
   void initVertexesArray();
 
   /// Number of dimensions in this workspace
@@ -428,6 +431,8 @@ private:
   Kernel::SpecialCoordinateSystem m_coordSystem;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MDHistoWorkspace(const MDHistoWorkspace &other);
   /// Protected copy assignment operator. Assignment not implemented.
   MDHistoWorkspace &operator=(const MDHistoWorkspace &other);
 

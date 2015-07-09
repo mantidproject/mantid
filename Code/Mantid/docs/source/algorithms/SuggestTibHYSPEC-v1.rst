@@ -35,3 +35,5 @@ Output:
     Incident Energy = 40, tibMin = 11898.11, tibMax = 13898.11
 
 .. categories::
+
+.. sourcelink::

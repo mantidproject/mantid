@@ -83,7 +83,7 @@ public:
 
     const API::Run & run = testWS->run();
     const std::vector< Property* >& logs = run.getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 33);
+    TS_ASSERT_EQUALS(logs.size(), 34); //33 logs in file + 1 synthetic nperiods log
 
     TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(run.getLogData("icp_event"));
     TS_ASSERT(slog);
@@ -106,6 +106,55 @@ public:
     TimeSeriesProperty<double> *dlog = dynamic_cast<TimeSeriesProperty<double>*>(run.getLogData("proton_charge"));
     TS_ASSERT(dlog);
     TS_ASSERT_EQUALS(dlog->size(),172);
+  }
+
+  void test_extract_nperiod_log_from_event_nexus(){
+
+      auto testWS = createTestWorkspace();
+      auto run = testWS->run();
+      TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs", !run.hasProperty("nperiods"));
+      LoadNexusLogs loader;
+
+      loader.setChild(true);
+      loader.initialize();
+      loader.setProperty("Workspace", testWS);
+      loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+      loader.execute();
+      run = testWS->run();
+
+      const bool hasNPeriods = run.hasProperty("nperiods");
+      TSM_ASSERT("Should have nperiods now we have run LoadNexusLogs", hasNPeriods);
+      if(hasNPeriods) {
+          const int nPeriods  = run.getPropertyValueAsType<int>("nperiods");
+          TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
+      }
+
+  }
+
+  void test_extract_periods_log_from_event_nexus(){
+
+      auto testWS = createTestWorkspace();
+      auto run = testWS->run();
+      TSM_ASSERT("Should not have nperiods until we run LoadNexusLogs", !run.hasProperty("nperiods"));
+      LoadNexusLogs loader;
+
+      loader.setChild(true);
+      loader.initialize();
+      loader.setProperty("Workspace", testWS);
+      loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+      loader.execute();
+      run = testWS->run();
+
+      const bool hasPeriods = run.hasProperty("period_log");
+      TSM_ASSERT("Should have period_log now we have run LoadNexusLogs", hasPeriods);
+
+      auto* temp = run.getProperty("period_log");
+      auto * periodLog = dynamic_cast<TimeSeriesProperty<int>*>(temp);
+      TSM_ASSERT("Period log should be an int time series property", periodLog);
+
+      std::vector<int> periodValues = periodLog->valuesAsVector();
+      std::set<int> uniquePeriods(periodValues.begin(), periodValues.end());
+      TSM_ASSERT_EQUALS("Should have 4 periods in total", 4, uniquePeriods.size());
   }
 
 private:

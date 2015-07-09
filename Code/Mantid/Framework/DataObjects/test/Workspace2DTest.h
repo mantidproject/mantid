@@ -56,6 +56,20 @@ public:
     return retVal;
   }
 
+  void testClone() {
+    Workspace2D_sptr cloned(ws->clone().release());
+
+    // Swap ws with cloned pointer, such that we can reuse existing tests.
+    ws.swap(cloned);
+
+    // Run all other (non-destructive) tests on ws.
+    testInit();
+    testId();
+    testDataDx();
+
+    // Undo swap, to avoid possible interferences.
+    ws.swap(cloned);
+  }
 
   void testInit()
   {

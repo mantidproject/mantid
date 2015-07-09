@@ -14,6 +14,11 @@ If the input workspaces do not have common binning, the bins in the
 output workspace will cover the entire range of all the input
 workspaces, with the largest bin widths used in regions of overlap.
 
+The combination of each workspace is performed using the :ref:`algm-Plus` algorithm,
+this does not preform any weighting based on the duration of collection, or proton charge.
+If you wish to perform Merge runs that should not be equally weighted then they should be
+corrected individually prior to merging.
+
 Restrictions on the input workspace
 ###################################
 
@@ -37,7 +42,7 @@ Processing Group Workspaces
 ###########################
 
 Multi-period Group Workspaces
-#############################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Group workspaces will be merged respecting the periods within each
 group. For example if you have two multiperiod group workspaces A and B
@@ -49,7 +54,7 @@ Therefore, merging is conducted such that A\_1 + B\_1 = C\_1 and A\_2 +
 B\_2 = C\_2.
 
 Group Workspaces that are not multiperiod
-#########################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If group workspaces are provided that are not multi-period, this
 algorithm will merge across all nested workspaces, to give a singe
@@ -60,6 +65,9 @@ ChildAlgorithms used
 
 The :ref:`algm-Rebin` algorithm is used, if neccessary, to put all the
 input workspaces onto a common binning.
+
+The :ref:`algm-Plus` algorithm is used to combine each of the workspaces 
+together one pair at a time.
 
 Usage
 -----
@@ -74,7 +82,7 @@ Usage
    a = CreateWorkspace(dataX, dataY)
    b = CreateWorkspace(dataX, dataY)
 
-   merged = MergeRuns(InputWorkspaces="a, b")
+   merged = MergeRuns(InputWorkspaces="a, b")  
 
    print "a      = " + str(a.readY(0))
    print "b      = " + str(b.readY(0))
@@ -120,3 +128,5 @@ Usage
    merged   = [ 24.  60.  84.  36.]
 
 .. categories::
+
+.. sourcelink::

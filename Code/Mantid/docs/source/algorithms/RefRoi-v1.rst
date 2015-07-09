@@ -12,3 +12,5 @@ Description
 
 
 .. categories::
+
+.. sourcelink::

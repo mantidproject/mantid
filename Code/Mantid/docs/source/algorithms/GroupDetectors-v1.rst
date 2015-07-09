@@ -264,3 +264,5 @@ Output
   Number of detectors is 1
 
 .. categories::
+
+.. sourcelink::

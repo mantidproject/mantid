@@ -20,6 +20,11 @@ public:
   MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
   ~MaskWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MaskWorkspace> clone() const {
+    return std::unique_ptr<MaskWorkspace>(doClone());
+  }
+
   bool isMasked(const detid_t detectorID) const;
   bool isMasked(const std::set<detid_t> &detectorIDs) const;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
@@ -46,6 +51,8 @@ protected:
   virtual const std::string toString() const;
 
 private:
+  virtual MaskWorkspace *doClone() const { return new MaskWorkspace(*this); }
+
   /// Clear original incorrect mask
   void clearMask();
 

@@ -20,6 +20,22 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         self.assertEqual(ws.getNames()[0], 'IRS26176_graphite002_red')
 
 
+    def test_reduction_with_detailed_balance_completes(self):
+        """
+        Sanity test to ensure a reduction using detailed balance option completes.
+        """
+
+        ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
+                                        Instrument='IRIS',
+                                        Analyser='graphite',
+                                        Reflection='002',
+                                        SpectraRange=[3, 53],
+                                        DetailedBalance='300')
+
+        self.assertTrue(isinstance(ws, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(ws.getNames()[0], 'IRS26176_graphite002_red')
+
+
     def test_instrument_validation_failure(self):
         """
         Tests that an invalid instrument configuration causes the validation to fail.

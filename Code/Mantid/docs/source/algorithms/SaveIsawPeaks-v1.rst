@@ -71,3 +71,5 @@ Output
   os.remove( isawPeaksFilePath )
 
 .. categories::
+
+.. sourcelink::

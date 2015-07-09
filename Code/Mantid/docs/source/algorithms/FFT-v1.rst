@@ -178,3 +178,7 @@ for the real (0), imaginary (1) parts, and the modulus (2).
 +-------------------+------------------+
 
 .. categories::
+
+.. sourcelink::
+    :h: Framework/Algorithms/inc/MantidAlgorithms/FFT.h
+    :cpp: Framework/Algorithms/src/FFT.cpp

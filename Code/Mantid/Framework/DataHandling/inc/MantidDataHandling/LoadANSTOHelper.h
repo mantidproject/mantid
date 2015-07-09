@@ -56,11 +56,15 @@ private:
   const size_t m_stride;
   double m_tofMin;
   double m_tofMax;
+  // correction
+  const double m_period;
+  const double m_phase;
 
 public:
   // construction
   EventCounter(std::vector<size_t> &eventCounts, const std::vector<bool> &mask,
-               const std::vector<int> &offsets, size_t stride);
+               const std::vector<int> &offsets, size_t stride,
+               double periode, double phase);
 
   // properties
   double tofMin() const;
@@ -77,12 +81,15 @@ private:
   const std::vector<bool> &m_mask;
   const std::vector<int> &m_offsets;
   const size_t m_stride;
+  // correction
+  const double m_period;
+  const double m_phase;
 
 public:
   // construction
-  EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                const std::vector<bool> &mask, const std::vector<int> &offsets,
-                size_t stride);
+  EventAssigner(std::vector<EventVector_pt> &eventVectors, const std::vector<bool> &mask,
+                const std::vector<int> &offsets, size_t stride,
+                double periode, double phase);
 
   // methods
   void addEvent(size_t x, size_t y, double tof);

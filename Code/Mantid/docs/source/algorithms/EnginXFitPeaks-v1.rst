@@ -31,9 +31,15 @@ ExpectedPeaks dSpacing values according to:
 
 ZERO and Difc can then be used within the GSAS program.  The
 parameters DIFC and ZERO are returned and can be retrieved as output
-properties as well. If a name is given in OutputParametersTableName
-this algorithm also produces a table workspace with that name,
-containing the two fitted (DIFC, ZERO) parameters.
+properties as well.
+
+If a name is given in OutParametersTable this algorithm also
+produces a table workspace with that name, containing the two fitted
+(DIFC, ZERO) parameters. Also, if a name is given in
+OutFittedPeaksTable, the algorithm produces a table workspace with
+information about the peaks fitted. The table has one row per peak and
+several columns for the different fitted parameters (and the errors of
+these parameters).
 
 Usage
 -----
@@ -62,7 +68,7 @@ Usage
    # difc, zero = EnginXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
 
    out_tbl_name = 'out_params'
-   difc, zero = EnginXFitPeaks(ws, 0, [0.65, 1.9], OutputParametersTableName=out_tbl_name)
+   difc, zero = EnginXFitPeaks(ws, 0, [0.65, 1.9], OutParametersTable=out_tbl_name)
 
 
    # Print the results
@@ -86,3 +92,5 @@ Output:
    Parameters from the table, Difc: 18400.0, Zero: 46.0
 
 .. categories::
+
+.. sourcelink::

@@ -33,8 +33,8 @@ set ( SRC_FILES
 	src/StepScan.cpp
 	src/WorkflowAlgorithmHelpers.cpp
 )
-                
-set ( SRC_UNITY_IGNORE_FILES 
+
+set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
@@ -53,7 +53,6 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSMonitorTOF.h
 	inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
 	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
-	inc/MantidWorkflowAlgorithms/EQSANSReduce.h
 	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
@@ -73,7 +72,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/StepScan.h
 	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
-              
+
 set ( TEST_FILES
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
@@ -82,9 +81,9 @@ set ( TEST_FILES
 	StepScanTest.h
 )
 
-set ( TEST_PY_FILES 
-  EQSANSQ2DTest.py 
-  SANSBeamFluxCorrectionTest.py 
+set ( TEST_PY_FILES
+  EQSANSQ2DTest.py
+  SANSBeamFluxCorrectionTest.py
 )
 
 if (COVERALLS)
@@ -109,7 +108,7 @@ set_target_properties ( WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflow
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 endif ()
- 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 

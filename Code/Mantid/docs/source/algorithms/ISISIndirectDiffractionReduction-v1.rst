@@ -45,3 +45,5 @@ Output:
     Number of bins: 1935
 
 .. categories::
+
+.. sourcelink::
