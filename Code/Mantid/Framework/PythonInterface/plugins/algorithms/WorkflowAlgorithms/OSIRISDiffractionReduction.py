@@ -203,6 +203,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _van_ws_map = None
     _man_d_range = None
     _load_logs = None
+    _spec_min = None
+
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
@@ -258,7 +260,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self._container_file = self.getPropertyValue("Container")
         if self._container_file != '':
-            self._container_file = self._find_runs([self._container_file])
+            self._container_file = self._find_runs([self._container_file])[0]
 
         self._spec_min = 3
         # self._spec_max = 962
@@ -285,7 +287,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         # Load the container run
         if self._container_file != '':
-            container = Load(Filename=fileName,
+            container = Load(Filename=self._container_file,
                              OutputWorkspace='__container',
                              SpectrumMin=self._spec_min,
                              # SpectrumMax=self._spec_max,

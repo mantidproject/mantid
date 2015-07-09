@@ -14,6 +14,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _chopped_data = None
     _output_ws = None
     _data_files = None
+    _container_workspace = None
+    _container_data_files = None
     _load_logs = None
     _instrument_name = None
     _mode = None
