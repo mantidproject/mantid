@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_array.hpp>
@@ -145,6 +146,14 @@ void FFT::exec() {
           inputUnit->label() == "meV") {
         lblUnit->setLabel("Time", "ns");
         df /= 2.418e2;
+      } else if (inputUnit->caption() == "Time" && inputUnit->label() == "s") {
+        lblUnit->setLabel("Frequency", "Hz");
+      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "Hz") {
+        lblUnit->setLabel("Time", "s");
+      } else if (inputUnit->caption() == "Time" && inputUnit->label() == "microsecond") {
+        lblUnit->setLabel("Frequency", "MHz");
+      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "MHz") {
+        lblUnit->setLabel("Time", Units::Symbol::Microsecond);
       }
       outWS->getAxis(0)->unit() = lblUnit;
     }
