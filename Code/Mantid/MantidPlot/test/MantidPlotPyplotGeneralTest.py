@@ -225,5 +225,16 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
         except:
             print "Failed, as it should"
 
+    def test_savefig(self):
+        # save a minimal figure just to check that the file is written
+        import os
+
+        plot([0, 0.5, 0.1])
+
+        tmp_figname = 'pyplot_tmp_fig_test.png'
+        savefig(tmp_figname)
+        self.assertTrue(os.path.exists(tmp_figname))
+        os.remove(tmp_figname)
+
 # Run the unit tests
 mantidplottests.runTests(MantidPlotPyplotGeneralTest)
