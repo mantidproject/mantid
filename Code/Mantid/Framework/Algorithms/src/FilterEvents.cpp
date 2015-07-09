@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 #include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
@@ -625,10 +626,7 @@ void FilterEvents::setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws) {
   * Time = T_pulse + TOF*0 + L1/sqrt(E*2/m)
   */
 void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-  // Get L1
-  V3D samplepos = m_eventWS->getInstrument()->getSample()->getPos();
-  V3D sourcepos = m_eventWS->getInstrument()->getSource()->getPos();
-  double l1 = samplepos.distance(sourcepos);
+
 
   // Get incident energy Ei
   double ei = 0.;
@@ -644,26 +642,17 @@ void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
     g_log.debug() << "Using user-input Ei value " << ei << "\n";
   }
 
-  // Calculate constant (to all spectra) shift
-  double constshift = l1 / sqrt(ei * 2. * PhysicalConstants::meV /
-                                PhysicalConstants::NeutronMass);
+  TimeAtSampleStrategyDirect strategy(m_eventWS, ei);
 
-  // Set up the shfit
   size_t numhist = m_eventWS->getNumberHistograms();
-
-  g_log.debug()
-      << "Calcualte direct inelastic scattering for input workspace of "
-      << numhist << " spectra "
-      << "storing to output workspace with " << corrws->getNumberHistograms()
-      << " spectra. "
-      << "\n";
-
   for (size_t i = 0; i < numhist; ++i) {
-    m_detTofOffsets[i] = 0.0;
-    m_detTofShifts[i] = constshift;
 
-    corrws->dataY(i)[0] = 0.0;
-    corrws->dataY(i)[1] = constshift;
+    Correction correction = strategy.calculate(i);
+    m_detTofOffsets[i] = correction.offset;
+    m_detTofShifts[i] = correction.factor;
+
+    corrws->dataY(i)[0] = correction.offset;
+    corrws->dataY(i)[1] = correction.factor;
   }
 
   return;
