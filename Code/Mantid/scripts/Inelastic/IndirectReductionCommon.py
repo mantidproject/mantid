@@ -7,7 +7,7 @@ import numpy as np
 
 #-------------------------------------------------------------------------------
 
-def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None):
+def load_files(data_files, spec_min, spec_max, ipf_filename='', sum_files=False, load_logs=True, load_opts=None):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
@@ -48,8 +48,9 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
                  **load_opts)
 
         # Load the instrument parameters
-        LoadParameterFile(Workspace=ws_name,
-                          Filename=ipf_filename)
+        if ipf_filename != '':
+            LoadParameterFile(Workspace=ws_name,
+                              Filename=ipf_filename)
 
         # Add the workspace to the list of workspaces
         workspace_names.append(ws_name)
