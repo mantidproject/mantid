@@ -304,6 +304,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for van in self._vanadium_runs:
             self._van_ws_map.addWs(van)
 
+        # Finished with container now so delete it
+        if self._container_file != '':
+            DeleteWorkspace(container)
+
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for d_range in self._sam_ws_map.getMap().iterkeys():
             if d_range not in self._van_ws_map.getMap():
