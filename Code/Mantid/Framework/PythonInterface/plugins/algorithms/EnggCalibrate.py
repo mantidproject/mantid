@@ -2,14 +2,14 @@
 from mantid.kernel import *
 from mantid.api import *
 
-class EnginXCalibrate(PythonAlgorithm):
+class EnggCalibrate(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
-        return "EnginXCalibrate"
+        return "EnggCalibrate"
 
     def summary(self):
         return "Calibrates a detector bank by performing a single peak fitting."
@@ -27,8 +27,8 @@ class EnginXCalibrate(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        import EnginXUtils
-        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+        import EnggUtils
+        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate. It can be specified as 1 or 2, or "
                              "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
@@ -58,14 +58,14 @@ class EnginXCalibrate(PythonAlgorithm):
 
     def PyExec(self):
 
-        import EnginXUtils
+        import EnggUtils
 
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         # Get peaks in dSpacing from file
-        expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                          self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
@@ -85,12 +85,12 @@ class EnginXCalibrate(PythonAlgorithm):
         @returns a pair of parameters: difc and zero
         """
 
-        fitPeaksAlg = self.createChildAlgorithm('EnginXFitPeaks')
+        fitPeaksAlg = self.createChildAlgorithm('EnggFitPeaks')
         fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
         fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
         fitPeaksAlg.setProperty('ExpectedPeaks', expectedPeaksD)
         # we could also pass raw 'ExpectedPeaks' and 'ExpectedPeaksFromFile' to
-        # EnginXFitPEaks, but better to check inputs early, before this
+        # EnggFitPaks, but better to check inputs early, before this
         fitPeaksAlg.execute()
 
         difc = fitPeaksAlg.getProperty('Difc').value
@@ -100,7 +100,7 @@ class EnginXCalibrate(PythonAlgorithm):
 
     def _focusRun(self, ws, bank, indices):
         """
-        Focuses the input workspace by running EnginXFocus which will produce a single spectrum workspace.
+        Focuses the input workspace by running EnggFocus which will produce a single spectrum workspace.
 
         @param ws :: workspace to focus
         @param bank :: the focussing will be applied on the detectors of this bank
@@ -109,7 +109,7 @@ class EnginXCalibrate(PythonAlgorithm):
 
         @return focussed (summed) workspace
         """
-        alg = self.createChildAlgorithm('EnginXFocus')
+        alg = self.createChildAlgorithm('EnggFocus')
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('Bank', bank)
         alg.setProperty(self.INDICES_PROP_NAME, indices)
@@ -130,7 +130,7 @@ class EnginXCalibrate(PythonAlgorithm):
         @param zero :: the zero GSAS parameter as fitted here
         """
 
-        import EnginXUtils
+        import EnggUtils
 
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
@@ -138,8 +138,8 @@ class EnginXCalibrate(PythonAlgorithm):
         # make output table if requested
         tblName = self.getPropertyValue("OutputParametersTableName")
         if '' != tblName:
-            EnginXUtils.generateOutputParTable(tblName, difc, zero)
+            EnggUtils.generateOutputParTable(tblName, difc, zero)
             self.log().information("Output parameters added into a table workspace: %s" % tblName)
 
 
-AlgorithmFactory.subscribe(EnginXCalibrate)
+AlgorithmFactory.subscribe(EnggCalibrate)

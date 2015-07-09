@@ -2,7 +2,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class EnginXFocusTest(unittest.TestCase):
+class EnggFocusTest(unittest.TestCase):
 
     _data_ws = None
 
@@ -29,45 +29,45 @@ class EnginXFocusTest(unittest.TestCase):
 
         # No InputWorkspace property
         self.assertRaises(RuntimeError,
-                          EnginXFocus,
+                          EnggFocus,
                           Bank='1', OutputWorkspace='nop')
 
         # Mispelled InputWorkspace prop
         self.assertRaises(RuntimeError,
-                          EnginXFocus,
+                          EnggFocus,
                           InputWrkspace='anything_goes', Bank='1', OutputWorkspace='nop')
 
         # Wrong InputWorkspace name
         self.assertRaises(ValueError,
-                          EnginXFocus,
+                          EnggFocus,
                           InputWorkspace='foo_is_not_there', Bank='1', OutputWorkspace='nop')
 
         # mispelled bank
         self.assertRaises(RuntimeError,
-                          EnginXFocus,
+                          EnggFocus,
                           InputWorkspace=self.__class__._data_ws, bnk='2', OutputWorkspace='nop')
 
         # mispelled DetectorsPosition
         tbl = CreateEmptyTableWorkspace()
         self.assertRaises(RuntimeError,
-                          EnginXFocus,
+                          EnggFocus,
                           InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace='nop')
 
         # bank and indices list clsh. This starts as a ValueError but the managers is raising a RuntimeError
         self.assertRaises(RuntimeError,
-                          EnginXFocus,
+                          EnggFocus,
                           InputWorkspace=self.__class__._data_ws, Bank='2', DetectorPositions=tbl,
                           SpectrumNumbers='1-10', OutputWorkspace='nop')
 
         # workspace index too big. This starts as a ValueError but the managers is raising a RuntimeError
         self.assertRaises(RuntimeError,
-                          EnginXFocus,
+                          EnggFocus,
                           InputWorkspace=self.__class__._data_ws, DetectorPositions=tbl,
                           SpectrumNumbers='999999999999999', OutputWorkspace='nop')
 
     def _check_output_ok(self, ws, ws_name='', y_dim_max=1, yvalues=None):
         """
-        Checks expected types, values, etc. of an output workspace from EnginXFocus.
+        Checks expected types, values, etc. of an output workspace from EnggFocus.
         """
 
         self.assertTrue(isinstance(ws, MatrixWorkspace),
@@ -105,7 +105,7 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out'
-        out = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='1', OutputWorkspace=out_name)
+        out = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='1', OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
@@ -115,7 +115,7 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out'
-        out = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='North', OutputWorkspace=out_name)
+        out = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='North', OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 
@@ -124,7 +124,7 @@ class EnginXFocusTest(unittest.TestCase):
         Same as above but with detector (workspace) indices equivalent to bank 1
         """
         out_idx_name = 'out_idx'
-        out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws, SpectrumNumbers='1-1200',
+        out_idx = EnggFocus(InputWorkspace=self.__class__._data_ws, SpectrumNumbers='1-1200',
                               OutputWorkspace=out_idx_name)
         self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
                               yvalues=self._expected_yvals_bank1)
@@ -134,7 +134,7 @@ class EnginXFocusTest(unittest.TestCase):
         Same as above but with detector (workspace) indices equivalent to bank 1
         """
         out_idx_name = 'out_idx'
-        out_idx = EnginXFocus(InputWorkspace=self.__class__._data_ws,
+        out_idx = EnggFocus(InputWorkspace=self.__class__._data_ws,
                               SpectrumNumbers='1-100, 101-500, 400-1200',
                               OutputWorkspace=out_idx_name)
         self._check_output_ok(ws=out_idx, ws_name=out_idx_name, y_dim_max=1,
@@ -146,7 +146,7 @@ class EnginXFocusTest(unittest.TestCase):
         """
 
         out_name = 'out_bank2'
-        out_bank2 = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='2',
+        out_bank2 = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='2',
                                 OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out_bank2, ws_name=out_name, y_dim_max=1201,
@@ -157,7 +157,7 @@ class EnginXFocusTest(unittest.TestCase):
         As before but using the Bank='South' alias. Should produce the same results.
         """
         out_name = 'out_bank_south'
-        out_bank_south = EnginXFocus(InputWorkspace=self.__class__._data_ws, Bank='South',
+        out_bank_south = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='South',
                                 OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out_bank_south, ws_name=out_name, y_dim_max=1201,

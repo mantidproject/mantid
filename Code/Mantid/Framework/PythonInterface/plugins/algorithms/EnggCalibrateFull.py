@@ -2,16 +2,16 @@
 from mantid.kernel import *
 from mantid.api import *
 import math
-import EnginXUtils
+import EnggUtils
 
-class EnginXCalibrateFull(PythonAlgorithm):
+class EnggCalibrateFull(PythonAlgorithm):
     INDICES_PROP_NAME = 'SpectrumNumbers'
 
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
-        return "EnginXCalibrateFull"
+        return "EnggCalibrateFull"
 
     def summary(self):
         return "Calibrates every pixel position by performing single peak fitting."
@@ -26,7 +26,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
                              "(3D vector with x, y, z values), the new positions in V3D, the new positions "
                              "in spherical coordinates, the change in L2, and the DIFC and ZERO parameters.")
 
-        self.declareProperty("Bank", '', StringListValidator(EnginXUtils.ENGINX_BANKS),
+        self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
                              "equivalently,North or South. See also " + self.INDICES_PROP_NAME + " "
@@ -55,14 +55,14 @@ class EnginXCalibrateFull(PythonAlgorithm):
     def PyExec(self):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
-        expectedPeaksD = EnginXUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
                                                          self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         inWS = self.getProperty('Workspace').value
-        WSIndices = EnginXUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
+        WSIndices = EnggUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
                                                              self.getProperty(self.INDICES_PROP_NAME).value)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
@@ -142,7 +142,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
         @returns a pair of parameters: difc and zero
     	"""
-        alg = self.createChildAlgorithm('EnginXFitPeaks')
+        alg = self.createChildAlgorithm('EnggFitPeaks')
         alg.setProperty('InputWorkspace', ws)
         alg.setProperty('WorkspaceIndex', wsIndex) # There should be only one index anyway
         alg.setProperty('ExpectedPeaks', expectedPeaksD)
@@ -164,7 +164,7 @@ class EnginXCalibrateFull(PythonAlgorithm):
         table = alg.getProperty('OutputWorkspace').value
 
         # Note: the colums 'Detector ID' and 'Detector Position' must have those
-        # exact names (expected by child alg. ApplyCalibration in EnginXFocus)
+        # exact names (expected by child alg. ApplyCalibration in EnggFocus)
         table.addColumn('int', 'Detector ID')
         table.addColumn('V3D', 'Old Detector Position')
         table.addColumn('V3D', 'Detector Position')
@@ -253,4 +253,4 @@ class EnginXCalibrateFull(PythonAlgorithm):
         return V3D(x,y,z)
 
 
-AlgorithmFactory.subscribe(EnginXCalibrateFull)
+AlgorithmFactory.subscribe(EnggCalibrateFull)
