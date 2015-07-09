@@ -92,8 +92,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._setup()
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                                ipf_filename=self._ipf_filename,
-                                                               spec_max=self._spectra_range[0],
-                                                               spec_min=self._spectra_range[1],
+                                                               spec_min=self._spectra_range[0],
+                                                               spec_max=self._spectra_range[1],
                                                                sum_files=self._sum_files,
                                                                load_logs=self._load_logs)
 
