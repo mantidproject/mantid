@@ -216,8 +216,10 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         runs_desc='The list of run numbers that are part of the sample run. '+\
                   'There should be five of these in most cases. Enter them as comma separated values.'
 
-        self.declareProperty('Sample', '', doc=runs_desc)
-        self.declareProperty('Vanadium', '', doc=runs_desc)
+        self.declareProperty(StringArrayProperty('Sample'),
+                             doc=runs_desc)
+        self.declareProperty(StringArrayProperty('Vanadium'),
+                             doc=runs_desc)
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
@@ -248,8 +250,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._cal = self.getProperty("CalFile").value
         self._output_ws_name = self.getPropertyValue("OutputWorkspace")
 
-        self._sample_runs = self._find_runs(self.getPropertyValue("Sample"))
-        self._vanadium_runs = self._find_runs(self.getPropertyValue("Vanadium"))
+        self._sample_runs = self._find_runs(self.getProperty("Sample").value)
+        self._vanadium_runs = self._find_runs(self.getProperty("Vanadium").value)
 
         self._man_d_range = None
         if not self.getProperty("DetectDRange").value:
@@ -371,7 +373,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self.setProperty("OutputWorkspace", result)
 
 
-    def _find_runs(self, run_str):
+    def _find_runs(self, runs):
         """
         Use the FileFinder to find search for the runs given by the string of
         comma-separated run numbers.
@@ -379,7 +381,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         @param run_str A string of run numbers to find
         @returns A list of filepaths
         """
-        runs = run_str.split(",")
         run_files = []
         for run in runs:
             try:
