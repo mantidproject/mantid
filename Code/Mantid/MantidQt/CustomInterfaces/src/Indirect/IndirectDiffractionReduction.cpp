@@ -325,13 +325,19 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
     return;
   }
 
+  bool manualDRange(m_uiForm.ckManualDRange->isChecked());
+
   IAlgorithm_sptr osirisDiffReduction = AlgorithmManager::Instance().create("OSIRISDiffractionReduction");
   osirisDiffReduction->initialize();
   osirisDiffReduction->setProperty("Sample", m_uiForm.dem_rawFiles->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("Vanadium", m_uiForm.dem_vanadiumFile->getFilenames().join(",").toStdString());
   osirisDiffReduction->setProperty("CalFile", m_uiForm.dem_calFile->getFirstFilename().toStdString());
+  osirisDiffReduction->setProperty("DetectDRange", !manualDRange);
   osirisDiffReduction->setProperty("LoadLogFiles", m_uiForm.ckLoadLogs->isChecked());
   osirisDiffReduction->setProperty("OutputWorkspace", drangeWsName.toStdString());
+  if(manualDRange)
+    osirisDiffReduction->setProperty("DRange", static_cast<long>(m_uiForm.spDRange->value()));
+
   m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromReductionProps;
