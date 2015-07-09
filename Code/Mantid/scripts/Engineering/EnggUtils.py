@@ -249,7 +249,7 @@ def sumSpectra(parent, ws):
     return alg.getProperty('OutputWorkspace').value
 
 # ----------------------------------------------------------------------------------------
-# Funcionts for Vanadium corrections follow. These could be converted into an algorithm
+# Functions for Vanadium corrections follow. These could be converted into an algorithm
 # that would be used as a child from EnginXFocus and EnginXCalibrate
 # ----------------------------------------------------------------------------------------
 
