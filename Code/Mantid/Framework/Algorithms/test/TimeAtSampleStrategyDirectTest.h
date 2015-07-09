@@ -2,10 +2,17 @@
 #define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGYDIRECTTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/V3D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
 
-using Mantid::Algorithms::TimeAtSampleStrategyDirect;
+using namespace Mantid::Algorithms;
 
 class TimeAtSampleStrategyDirectTest : public CxxTest::TestSuite {
 public:
@@ -15,11 +22,35 @@ public:
   static void destroySuite( TimeAtSampleStrategyDirectTest *suite ) { delete suite; }
 
 
-  void test_Something()
-  {
-    TSM_ASSERT( "You forgot to write a test!", 0);
-  }
+  void test_L2_detector(){
+      using namespace Mantid;
+      using namespace Mantid::Geometry;
 
+
+      auto ws = WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+
+      auto instrument = ws->getInstrument();
+
+      auto sample =instrument->getSample();
+
+      auto source = instrument->getSource();
+
+      const size_t detectorIndex = 0; // detector workspace index.
+      const double ei = 12; //MeV
+      auto detector = ws->getDetector(detectorIndex);
+
+      const double L1 = source->getPos().distance(sample->getPos());
+
+      TimeAtSampleStrategyDirect strategy(ws, ei);
+      Correction correction = strategy.calculate(detectorIndex);
+
+      const double shift = correction.factor;
+
+      double expectedShift = L1 / std::sqrt(ei * 2. * PhysicalConstants::meV /
+                                                         PhysicalConstants::NeutronMass);
+
+      TSM_ASSERT_EQUALS("L1 / (L1 + L2)", expectedShift, shift);
+  }
 
 };
 

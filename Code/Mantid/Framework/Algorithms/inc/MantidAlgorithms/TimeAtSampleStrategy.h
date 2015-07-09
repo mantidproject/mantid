@@ -6,14 +6,15 @@
 namespace Mantid {
 namespace Algorithms {
 
-struct Correction{
-  Correction(double tOffset, double tFactor) : offset(tOffset), factor(tFactor){
-  }
+struct Correction {
+  Correction(double tOffset, double tFactor)
+      : offset(tOffset), factor(tFactor) {}
   double offset;
   double factor;
 };
 
-/** TimeAtSampleStrategy : Strategy (technique dependent) for determining Time At Sample
+/** TimeAtSampleStrategy : Strategy (technique dependent) for determining Time
+  At Sample
 
   SampleT = PulseT + [TOF to sample]
 
@@ -40,10 +41,9 @@ struct Correction{
 */
 class DLLExport TimeAtSampleStrategy {
 public:
-  virtual Correction calculate(const size_t& workspace_index) const = 0;
+  virtual Correction calculate(const size_t &workspace_index) const = 0;
   virtual ~TimeAtSampleStrategy(){};
 };
-
 
 } // namespace Algorithms
 } // namespace Mantid

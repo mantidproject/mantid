@@ -7,8 +7,8 @@
 
 namespace Mantid {
 
-namespace API{
-  class MatrixWorkspace;
+namespace API {
+class MatrixWorkspace;
 }
 namespace Algorithms {
 
@@ -35,11 +35,14 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TimeAtSampleStrategyElastic : public Mantid::Algorithms::TimeAtSampleStrategy {
+class DLLExport TimeAtSampleStrategyElastic
+    : public Mantid::Algorithms::TimeAtSampleStrategy {
 public:
-  TimeAtSampleStrategyElastic(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+  TimeAtSampleStrategyElastic(
+      boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
   virtual ~TimeAtSampleStrategyElastic();
   virtual Correction calculate(const size_t &workspace_index) const;
+
 private:
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ws;
 };
