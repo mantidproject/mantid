@@ -479,6 +479,10 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
     m_uiForm.ckSumFiles->setToolTip("OSIRIS cannot sum files in diffonly mode");
     m_uiForm.ckSumFiles->setEnabled(false);
     m_uiForm.ckSumFiles->setChecked(false);
+
+    // Disable spectra range
+    m_uiForm.spSpecMin->setEnabled(false);
+    m_uiForm.spSpecMax->setEnabled(false);
   }
   else
   {
@@ -490,6 +494,10 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
     // Re-enable individual grouping
     m_uiForm.ckIndividualGrouping->setToolTip("");
     m_uiForm.ckIndividualGrouping->setEnabled(true);
+
+    // Re-enable spectra range
+    m_uiForm.spSpecMin->setEnabled(true);
+    m_uiForm.spSpecMax->setEnabled(true);
   }
 }
 
