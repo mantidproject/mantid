@@ -198,6 +198,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _output_ws_name = None
     _sample_runs = None
     _vanadium_runs = None
+    _container_file = None
     _sam_ws_map = None
     _van_ws_map = None
     _man_d_range = None
@@ -220,6 +221,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc=runs_desc)
         self.declareProperty(StringArrayProperty('Vanadium'),
                              doc=runs_desc)
+        self.declareProperty('Container', '',
+                             doc='Run for the container')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
@@ -253,6 +256,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._sample_runs = self._find_runs(self.getProperty("Sample").value)
         self._vanadium_runs = self._find_runs(self.getProperty("Vanadium").value)
 
+        self._container_file = self.getPropertyValue("Container")
+        if self._container_file != '':
+            self._container_file = self._find_runs([self._container_file])
+
+        self._spec_min = 3
+        # self._spec_max = 962
+
         self._man_d_range = None
         if not self.getProperty("DetectDRange").value:
             self._man_d_range = self.getProperty("DRange").value - 1
@@ -265,15 +275,32 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         """
         Execute the algorithm in diffraction-only mode
         """
-        # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
+        # Load all sample, vanadium files
         for fileName in self._sample_runs + self._vanadium_runs:
             Load(Filename=fileName,
                  OutputWorkspace=fileName,
-                 SpectrumMin=3,
-                 #SpectrumMax=962,
+                 SpectrumMin=self._spec_min,
+                 # SpectrumMax=self._spec_max,
                  LoadLogFiles=self._load_logs)
+
+        # Load the container run
+        if self._container_file != '':
+            container = Load(Filename=fileName,
+                             OutputWorkspace='__container',
+                             SpectrumMin=self._spec_min,
+                             # SpectrumMax=self._spec_max,
+                             LoadLogFiles=self._load_logs)
+
+        # Add the sample workspaces to the dRange to sample map
         for sam in self._sample_runs:
+            if self._container_file != '':
+                Minus(LHSWorkspace=sam,
+                      RHSWorkspace=container,
+                      OutputWorkspace=sam)
+
             self._sam_ws_map.addWs(sam)
+
+        # Add the vanadium workspaces to the dRange to vanadium map
         for van in self._vanadium_runs:
             self._van_ws_map.addWs(van)
 
@@ -282,8 +309,9 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             if d_range not in self._van_ws_map.getMap():
                 raise RuntimeError("There is no van file that covers the " + str(d_range) + " DRange.")
 
-        # Average together any sample workspaces with the same DRange.  This will mean our map of DRanges
-        # to list of workspaces becomes a map of DRanges, each to a *single* workspace.
+        # Average together any sample workspaces with the same DRange.
+        # This will mean our map of DRanges to list of workspaces becomes a map
+        # of DRanges, each to a *single* workspace.
         temp_sam_map = DRangeToWorkspaceMap()
         for d_range, ws_list in self._sam_ws_map.getMap().iteritems():
             temp_sam_map.setItem(d_range, average_ws_list(ws_list))

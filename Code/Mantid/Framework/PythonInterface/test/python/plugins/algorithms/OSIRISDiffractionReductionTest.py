@@ -42,7 +42,7 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         ws = OSIRISDiffractionReduction(Sample=['OSI10203.raw'],
                                         CalFile='osiris_041_RES10.cal',
                                         Vanadium=['OSI10156.raw'],
-                                        ContainerFiles=['OSI10241.raw'],
+                                        Container='OSI10241.raw',
                                         DetectDRange=False,
                                         DRange=4)
 

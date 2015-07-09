@@ -339,7 +339,7 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
     osirisDiffReduction->setProperty("DRange", static_cast<long>(m_uiForm.spDRange->value()));
 
   if(m_uiForm.ckUseCan->isChecked())
-    osirisDiffReduction->setProperty("ContainerFiles", m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
+    osirisDiffReduction->setProperty("Container", m_uiForm.rfCanFiles->getFirstFilename().toStdString());
 
   m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 
