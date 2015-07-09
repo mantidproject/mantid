@@ -49,9 +49,14 @@ Run Numbers
   specified in the same manner as in the Energy Transfer tab on Indirect Data
   Reduction.
 
+Use Container
+  This option allows the subtraction of a run for an empty container run.
+
 Spectra Min & Spectra Max
   Specify the range of spectra to use in the reduction, the default values of
-  this are set based on the instrument and reflection selected.
+  this are set based on the instrument and reflection selected. Note that these
+  options will be disabled when using OSIRIS in diffonly mode, in which case the
+  entire spectra range will be used.
 
 Plot Type
   Specify the type of plot to be created when the reduction is complete, either
