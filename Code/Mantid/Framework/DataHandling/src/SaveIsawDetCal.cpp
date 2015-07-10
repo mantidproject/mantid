@@ -178,17 +178,17 @@ void SaveIsawDetCal::exec() {
       int midX = NCOLS/2;
       int midY = NROWS/2;
       V3D base =
-          findPixelPos(bankName, midX, midY) - findPixelPos(bankName, midX + 2, midY);
+          findPixelPos(bankName, midX + 2, midY) - findPixelPos(bankName, midX, midY);
       base.normalize();
 
       // Up unit vector (along the vertical, Y axis)
-      V3D up = findPixelPos(bankName, midX, midY) - findPixelPos(bankName, midX, midY + 1);
+      V3D up = findPixelPos(bankName, midX, midY + 1) - findPixelPos(bankName, midX, midY);
       up.normalize();
 
       // Write the line
       out << "5 " << std::setw(6) << std::right << bank << " "
-          << std::setw(6) << std::right << NCOLS << " " << std::setw(6)
-          << std::right << NROWS << " " << std::setw(7) << std::right
+          << std::setw(6) << std::right << NROWS << " " << std::setw(6)
+          << std::right << NCOLS << " " << std::setw(7) << std::right
           << std::fixed << std::setprecision(4) << 100.0 * xsize << " "
           << std::setw(7) << std::right << std::fixed
           << std::setprecision(4) << 100.0 * ysize << " "
@@ -240,7 +240,7 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
     int col0 = col - 1;
     //WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
-      col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
+      col0 = 152 - (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             children[col0]);

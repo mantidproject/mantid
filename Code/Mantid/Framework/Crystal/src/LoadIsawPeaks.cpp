@@ -427,7 +427,7 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     int col0 = col - 1;
     //WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
-      col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
+      col0 = 152 - (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             children[col0]);

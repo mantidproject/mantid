@@ -214,8 +214,8 @@ void SaveIsawPeaks::exec() {
 
           // Write the line
           out << "5 " << std::setw(6) << std::right << bank << " "
-              << std::setw(6) << std::right << NCOLS << " " << std::setw(6)
-              << std::right << NROWS << " " << std::setw(7) << std::right
+              << std::setw(6) << std::right << NROWS << " " << std::setw(6)
+              << std::right << NCOLS << " " << std::setw(7) << std::right
               << std::fixed << std::setprecision(4) << 100.0 * xsize << " "
               << std::setw(7) << std::right << std::fixed
               << std::setprecision(4) << 100.0 * ysize << " "
@@ -405,7 +405,7 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
     int col0 = col - 1;
     //WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
-      col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
+      col0 = 152 - (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             children[col0]);
