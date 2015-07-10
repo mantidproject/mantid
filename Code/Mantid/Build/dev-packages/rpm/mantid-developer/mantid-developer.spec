@@ -88,7 +88,7 @@ required for Mantid development.
 %files
 
 %changelog
-* Wed July 01 2015 Steven Hahn <hahnse@ornl.gov>
+* Wed Jul 01 2015 Steven Hahn <hahnse@ornl.gov>
 - Added python-matplotlib dependency
 
 * Thu Feb 12 2015 Harry Jeffery <henry.jeffery@stfc.ac.uk>
