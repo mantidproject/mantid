@@ -88,7 +88,9 @@ void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
   }
 
   // Add axes that reference the data
+  size_t size= m_axes.size();
   m_axes.resize(2);
+  size = m_axes.size();
   m_axes[0] = new API::RefAxis(XLength, this);
   m_axes[1] = new API::SpectraAxis(this);
 }
