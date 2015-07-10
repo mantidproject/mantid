@@ -28,7 +28,7 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
 
   // invert dimensions in C way, e.g. slowest changing ndim goes first
   for (size_t i = 0; i < ndims; ++i) {
-      nd.push_back(self.getDimension(ndims - i - 1)->getNBins());
+      nd.push_back(self.getDimension( i )->getNBins());
   }
 
   ndims = nd.size();
@@ -117,7 +117,8 @@ void throwIfSizeIncorrect(IMDHistoWorkspace &self, const numeric::array &signal,
 void setSignalArray(IMDHistoWorkspace &self,
                     const numeric::array &signalValues) {
   throwIfSizeIncorrect(self, signalValues, "setSignalArray");
-  object flattened = signalValues.attr("flat");
+  object rav=signalValues.attr("ravel")("F");
+  object flattened = rav.attr("flat");
   auto length = len(flattened);
   for (auto i = 0; i < length; ++i) {
     self.setSignalAt(i, extract<double>(flattened[i])());
@@ -134,7 +135,8 @@ void setSignalArray(IMDHistoWorkspace &self,
 void setErrorSquaredArray(IMDHistoWorkspace &self,
                           const numeric::array &errorSquared) {
   throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
-  object flattened = errorSquared.attr("flat");
+  object rav=errorSquared.attr("ravel")("F");
+  object flattened = rav.attr("flat");
   auto length = len(flattened);
   for (auto i = 0; i < length; ++i) {
     self.setErrorSquaredAt(i, extract<double>(flattened[i])());
@@ -196,14 +198,14 @@ void export_IMDHistoWorkspace() {
            (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t) const) &
                IMDHistoWorkspace::getLinearIndex,
            return_value_policy<return_by_value>(),
-           "Get the 1D linear index from the 2D array")
+           "Get the 1D linear index from the 3D array")
 
       .def("getLinearIndex",
            (size_t (IMDHistoWorkspace::*)(size_t, size_t, size_t, size_t)
             const) &
                IMDHistoWorkspace::getLinearIndex,
            return_value_policy<return_by_value>(),
-           "Get the 1D linear index from the 2D array")
+           "Get the 1D linear index from the 4D array")
 
       .def("getCenter", &IMDHistoWorkspace::getCenter,
            return_value_policy<return_by_value>(),
