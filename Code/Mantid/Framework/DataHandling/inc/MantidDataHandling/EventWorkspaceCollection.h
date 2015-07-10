@@ -18,8 +18,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** EventWorkspaceCollection : Decorator pattern around a collection of EventWorspaces to give backward-forward compatibility
- around performing operations on groups. Behave like an EventWorkspace with some overriden functionality and some additional new functionality.
+/** EventWorkspaceCollection : Collection of EventWorspaces to give backward-forward compatibility
+ around performing operations on groups. Behave similar to an EventWorkspace with some some additional new functionality.
 Original purpose to support LoadEventNexus for the MultiPeriod cases.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -61,9 +61,6 @@ public:
   EventWorkspaceCollection();
   virtual ~EventWorkspaceCollection();
 
-  /*-------------------------------------------------------
-   * EventWorkspaceCollection specific methods
-   *-------------------------------------------------------*/
   void setNPeriods(size_t nPeriods,  std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
   void reserveEventListAt(size_t wi, size_t size);
   size_t nPeriods() const;
@@ -78,9 +75,7 @@ public:
   void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
   void setSpectrumNumberForAllPeriods(const size_t spectrumNumber, const specid_t specid);
   void setDetectorIdsForAllPeriods(const size_t spectrumNumber, const detid_t id);
-  /*-------------------------------------------------------
-   * EventWorkspace overriden methods
-   *-------------------------------------------------------*/
+
   Geometry::Instrument_const_sptr getInstrument() const;
   const API::Run &run() const;
   API::Run &mutableRun();

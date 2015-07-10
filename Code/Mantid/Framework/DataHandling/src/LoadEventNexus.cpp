@@ -1595,7 +1595,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
 
   // The run_start will be loaded from the pulse times.
   DateAndTime run_start(0, 0);
-  // Initialize the counter ofl bad TOFs
+  // Initialize the counter of bad TOFs
   bad_tofs = 0;
   int nPeriods = 1;
   std::unique_ptr<const TimeSeriesProperty<int> > periodLog(new const TimeSeriesProperty<int>("period_log"));
@@ -2006,10 +2006,10 @@ LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
 
 //-----------------------------------------------------------------------------
 /** Load the instrument definition file specified by info in the NXS file for
-* a decorator workspace
+* a EventWorkspaceCollection
 *
 *  @param nexusfilename :: Used to pick the instrument.
-*  @param localWorkspace :: Decorator in which to put the instrument
+*  @param localWorkspace :: EventWorkspaceCollection in which to put the instrument
 *geometry
 *  @param top_entry_name :: entry name at the top of the NXS file
 *  @param alg :: Handle of the algorithm
@@ -2494,7 +2494,7 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 /**
 * Check if time_of_flight can be found in the file and load it
 *
-* @param WS :: The decorator workspace which events will be modified.
+* @param WS :: The event workspace collection which events will be modified.
 * @param entry_name :: An NXentry tag in the file
 * @param classType :: The type of the events: either detector or monitor
 */
@@ -2605,7 +2605,7 @@ void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
 * Load the time of flight data. file must have open the group containing
 * "time_of_flight" data set.
 * @param file :: The nexus file to read from.
-* @param WS :: The decorator workspace to write to.
+* @param WS :: The event workspace collection to write to.
 * @param binsName :: bins name
 * @param start_wi :: First workspace index to process
 * @param end_wi :: Last workspace index to process
