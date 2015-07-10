@@ -341,6 +341,8 @@ void LoadIsawDetCal::exec() {
       // Rotation angle from oX to rX
       double angle1 = oX.angle(rX);
       angle1 *= 180.0 / M_PI;
+      //TODO: find out why this is needed for WISH
+      if (inst->getName() == "WISH") angle1 += 180.0;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
