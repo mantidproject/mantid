@@ -190,7 +190,7 @@ class LoadRun(object):
             self._loadSampleDetails(workspace)
 
         if self._period != self.UNSET_PERIOD and isinstance(outWs, WorkspaceGroup):
-            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
+            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period, appendix)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
 
@@ -316,7 +316,7 @@ class LoadRun(object):
 
         return
 
-    def _leaveSinglePeriod(self, workspace, period):
+    def _leaveSinglePeriod(self, workspace, period, appendix):
         groupW = mtd[workspace]
         if not isinstance(groupW, WorkspaceGroup):
             logger.warning("Invalid request for getting single period in a non group workspace")
@@ -325,14 +325,30 @@ class LoadRun(object):
             raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
         ws_name = groupW[period].name()
 
+        # If we are dealing with event data, then we also want to extract and rename the according monitor data set
+        monitor_name = ""
+        if isEventWorkspace(groupW[period]):
+            # Check if the monitor ws exists and extract it
+            expected_mon_name = ws_name + appendix
+            expected_mon_group_name = groupW.name() + appendix
+            if mtd.doesExist(expected_mon_name):
+                monitor_name = expected_mon_name
+            if mtd.doesExist(expected_mon_group_name):
+                group_mon_ws = mtd[expected_mon_group_name]
+                group_mon_ws.remove(expected_mon_name)
+                DeleteWorkspace(expected_mon_group_name)
+
         # remove this workspace from the group
         groupW.remove(ws_name)
         # remove the entire group
         DeleteWorkspace(groupW)
 
         new_name = self._get_workspace_name(period)
+        new_mon_name = new_name + appendix
         if new_name != ws_name:
             RenameWorkspace(ws_name, OutputWorkspace=new_name)
+        if monitor_name != "" and new_mon_name != monitor_name:
+            RenameWorkspace(monitor_name, OutputWorkspace=new_mon_name)
         return new_name
 
     def _extract_run_details(self, run_string):
