@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_DECORATORWORKSPACETEST_H_
-#define MANTID_DATAHANDLING_DECORATORWORKSPACETEST_H_
+#ifndef MANTID_DATAHANDLING_EventWorkspaceCollectionTEST_H_
+#define MANTID_DATAHANDLING_EventWorkspaceCollectionTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -7,7 +7,7 @@
 #include <memory>
 #include <boost/make_shared.hpp>
 
-#include "MantidDataHandling/DecoratorWorkspace.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -18,9 +18,9 @@ using namespace Mantid::Kernel;
 
 namespace {
 
-DecoratorWorkspace_uptr makeDecoratorWorkspace(unsigned int decoratorSize) {
+EventWorkspaceCollection_uptr makeEventWorkspaceCollection(unsigned int decoratorSize) {
 
-  DecoratorWorkspace_uptr decorator(new DecoratorWorkspace);
+  EventWorkspaceCollection_uptr decorator(new EventWorkspaceCollection);
 
   std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
       new const TimeSeriesProperty<int>("period_log"));
@@ -31,29 +31,29 @@ DecoratorWorkspace_uptr makeDecoratorWorkspace(unsigned int decoratorSize) {
 }
 }
 
-class DecoratorWorkspaceTest : public CxxTest::TestSuite {
+class EventWorkspaceCollectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static DecoratorWorkspaceTest *createSuite() {
-    return new DecoratorWorkspaceTest();
+  static EventWorkspaceCollectionTest *createSuite() {
+    return new EventWorkspaceCollectionTest();
   }
-  static void destroySuite(DecoratorWorkspaceTest *suite) { delete suite; }
+  static void destroySuite(EventWorkspaceCollectionTest *suite) { delete suite; }
 
   void test_constructor() {
-    DecoratorWorkspace decorator;
+    EventWorkspaceCollection decorator;
     TSM_ASSERT_EQUALS("Always one period by default", 1, decorator.nPeriods());
   }
 
   void test_output_single_workspace() {
-    DecoratorWorkspace decorator;
+    EventWorkspaceCollection decorator;
     TSM_ASSERT_EQUALS("Always one period by default", 1, decorator.nPeriods());
     TS_ASSERT_EQUALS(decorator.combinedWorkspace(),
                      decorator.getSingleHeldWorkspace());
   }
 
   void test_output_multiple_workspaces() {
-    DecoratorWorkspace decorator;
+    EventWorkspaceCollection decorator;
 
     std::unique_ptr<const TimeSeriesProperty<int>> periodLog(
         new const TimeSeriesProperty<int>("period_log"));
@@ -67,7 +67,7 @@ public:
 
   void test_set_geometryFlag() {
 
-    DecoratorWorkspace_uptr decorator = makeDecoratorWorkspace(3);
+    EventWorkspaceCollection_uptr decorator = makeEventWorkspaceCollection(3);
 
     const int geometryFlag = 3;
 
@@ -87,7 +87,7 @@ public:
 
   void test_set_thickness() {
 
-    DecoratorWorkspace_uptr decorator = makeDecoratorWorkspace(3);
+    EventWorkspaceCollection_uptr decorator = makeEventWorkspaceCollection(3);
 
     const float thickness = 3;
 
@@ -105,7 +105,7 @@ public:
   }
 
   void test_set_height() {
-    DecoratorWorkspace_uptr decorator = makeDecoratorWorkspace(3);
+    EventWorkspaceCollection_uptr decorator = makeEventWorkspaceCollection(3);
 
     const float height = 3;
 
@@ -124,7 +124,7 @@ public:
 
   void test_set_width() {
 
-    DecoratorWorkspace_uptr decorator = makeDecoratorWorkspace(3);
+    EventWorkspaceCollection_uptr decorator = makeEventWorkspaceCollection(3);
 
     const float width = 3;
 
@@ -142,4 +142,4 @@ public:
   }
 };
 
-#endif /* MANTID_DATAHANDLING_DECORATORWORKSPACETEST_H_ */
+#endif /* MANTID_DATAHANDLING_EventWorkspaceCollectionTEST_H_ */

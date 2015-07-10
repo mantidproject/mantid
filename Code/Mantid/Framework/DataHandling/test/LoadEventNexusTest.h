@@ -636,7 +636,6 @@ void test_extract_nperiod_data() {
       TSM_ASSERT_EQUALS("Current period is not what was expected.", currentPeriod, i+1);
 
   }
-
   // Make sure that the spectraNo are equal for all child workspaces.
   auto isFirstChildWorkspace = true;
   std::vector<Mantid::specid_t> specids;
@@ -656,7 +655,6 @@ void test_extract_nperiod_data() {
 
     isFirstChildWorkspace = false;
   }
-
 }
 
 private:

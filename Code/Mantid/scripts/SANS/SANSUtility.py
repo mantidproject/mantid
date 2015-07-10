@@ -257,9 +257,6 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
         aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
         ws_monitor.clone(OutputWorkspace=name)
 
-    SaveNexus(Filename="C:/Users/xsd05043/Desktop/mon.nxs", InputWorkspace=ws_monitor)
-    SaveNexus(Filename="C:/Users/xsd05043/Desktop/ev.nxs", InputWorkspace=aux_hist)
-
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
 
