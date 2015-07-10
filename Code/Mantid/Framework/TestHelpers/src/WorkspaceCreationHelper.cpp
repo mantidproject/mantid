@@ -518,12 +518,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   workspace->setYUnit("Counts");
 
   workspace->setInstrument(instrument);
-  //workspace->getSpectrum(0)->clearDetectorIDs();
-  //workspace->getSpectrum(1)->clearDetectorIDs();
   workspace->getSpectrum(0)->setDetectorID(det->getID());
   workspace->getSpectrum(1)->setDetectorID(monitor->getID());
-  //workspace->getSpectrum(0)->addDetectorID(det->getID());
-  //workspace->getSpectrum(1)->addDetectorID(monitor->getID());
   return workspace;
 }
 
