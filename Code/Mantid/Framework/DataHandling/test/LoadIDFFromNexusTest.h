@@ -125,7 +125,7 @@ public:
   void test_parameter_source() {
 
     // We load a processed Nexus file with embedded parameters, one of which has been made different 
-    // from the same parameter in the 
+    // from the same parameter in the file on disk (LOQ_Parameters.xml)
 
     if ( !loader.isInitialized() ) loader.initialize();
 
