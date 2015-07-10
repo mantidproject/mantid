@@ -18,3 +18,5 @@ The function is A*erfc((B-x)/C) + D for positive A and the same minus 2A for neg
 .. properties::
 
 .. categories::
+
+.. sourcelink::

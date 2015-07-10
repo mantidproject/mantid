@@ -58,7 +58,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         if file_name is None:
             #build a sensible default
             file_name = self.algorithm_name()
-            if (self.algorithm_version() != 1):
+            if (self.algorithm_version() != 1) and (self.algorithm_version() is not None):
                 file_name += str(self.algorithm_version())
                 
         

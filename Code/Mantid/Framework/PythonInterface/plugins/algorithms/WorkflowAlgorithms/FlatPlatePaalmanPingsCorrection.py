@@ -29,6 +29,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     _elastic = 0.0
     _interpolate=None
 
+#------------------------------------------------------------------------------
 
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
@@ -37,6 +38,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     def summary(self):
         return "Calculates absorption corrections for a flat plate sample using Paalman & Pings format."
 
+#------------------------------------------------------------------------------
 
     def PyInit(self):
         ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
@@ -93,6 +95,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='The output corrections workspace group')
 
+#------------------------------------------------------------------------------
 
     def validateInputs(self):
         issues = dict()
@@ -108,18 +111,21 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         return issues
 
+#------------------------------------------------------------------------------
 
     def PyExec(self):
         self._setup()
         self._wave_range()
 
         # Set sample material form chemical formula
-        SetSampleMaterial(self._sample_ws_name , ChemicalFormula=self._sample_chemical_formula,
+        SetSampleMaterial(InputWorkspace=self._sample_ws_name,
+                          ChemicalFormula=self._sample_chemical_formula,
                           SampleNumberDensity=self._sample_number_density)
 
         # If using a can, set sample material using chemical formula
         if self._use_can:
-            SetSampleMaterial(InputWorkspace=self._can_ws_name, ChemicalFormula=self._can_chemical_formula,
+            SetSampleMaterial(InputWorkspace=self._can_ws_name,
+                              ChemicalFormula=self._can_chemical_formula,
                               SampleNumberDensity=self._can_number_density)
 
         # Holders for the corrected data
@@ -148,9 +154,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
-        CreateWorkspace(OutputWorkspace=ass_ws, DataX=dataX, DataY=data_ass,
-                        NSpec=num_angles, UnitX='Wavelength',
-                        VerticalAxisUnit='SpectraNumber')
+        CreateWorkspace(OutputWorkspace=ass_ws,
+                        DataX=dataX,
+                        DataY=data_ass,
+                        NSpec=num_angles,
+                        UnitX='Wavelength',
+                        VerticalAxisUnit='SpectraNumber',
+                        ParentWorkspace=self._sample_ws_name)
         self._add_sample_logs(ass_ws, sample_logs)
 
         workspaces = [ass_ws]
@@ -160,39 +170,47 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
-            CreateWorkspace(OutputWorkspace=assc_ws, DataX=dataX, DataY=data_assc,
-                            NSpec=num_angles, UnitX='Wavelength',
-                            VerticalAxisUnit='SpectraNumber')
+            CreateWorkspace(OutputWorkspace=assc_ws,
+                            DataX=dataX,
+                            DataY=data_assc,
+                            NSpec=num_angles,
+                            UnitX='Wavelength',
+                            VerticalAxisUnit='SpectraNumber',
+                            ParentWorkspace=self._sample_ws_name)
             self._add_sample_logs(assc_ws, sample_logs)
             AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
-            CreateWorkspace(OutputWorkspace=acsc_ws, DataX=dataX, DataY=data_acsc,
-                            NSpec=num_angles, UnitX='Wavelength',
-                            VerticalAxisUnit='SpectraNumber')
+            CreateWorkspace(OutputWorkspace=acsc_ws,
+                            DataX=dataX,
+                            DataY=data_acsc,
+                            NSpec=num_angles,
+                            UnitX='Wavelength',
+                            VerticalAxisUnit='SpectraNumber',
+                            ParentWorkspace=self._sample_ws_name)
             self._add_sample_logs(acsc_ws, sample_logs)
             AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
-            CreateWorkspace(OutputWorkspace=acc_ws, DataX=dataX, DataY=data_acc,
-                            NSpec=num_angles, UnitX='Wavelength',
-                            VerticalAxisUnit='SpectraNumber')
+            CreateWorkspace(OutputWorkspace=acc_ws,
+                            DataX=dataX,
+                            DataY=data_acc,
+                            NSpec=num_angles,
+                            UnitX='Wavelength',
+                            VerticalAxisUnit='SpectraNumber',
+                            ParentWorkspace=self._sample_ws_name)
             self._add_sample_logs(acc_ws, sample_logs)
             AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
         if self._interpolate:
             self._interpolate_corrections(workspaces)
 
-        try:
-            self. _copy_detector_table(workspaces)
-        except RuntimeError:
-            logger.warning('Cannot copy spectra mapping. Check input workspace instrument.')
-
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
+#------------------------------------------------------------------------------
 
     def _setup(self):
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
@@ -217,6 +235,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
+#------------------------------------------------------------------------------
 
     def _get_angles(self):
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
@@ -229,6 +248,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
             self._angles.append(two_theta)
 
+#------------------------------------------------------------------------------
 
     def _wave_range(self):
         wave_range = '__WaveRange'
@@ -251,6 +271,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         logger.information('Elastic lambda %f' % self._elastic)
         DeleteWorkspace(wave_range)
 
+#------------------------------------------------------------------------------
 
     def _interpolate_corrections(self, workspaces):
         """
@@ -266,24 +287,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                                 OutputWorkspace=ws,
                                 OutputWorkspaceDeriv='')
 
-
-    def _copy_detector_table(self, workspaces):
-        """
-        Copy the detector table from the sample workspaces to the correction workspaces.
-
-        @param workspaces List of correction workspaces
-        """
-
-        instrument = mtd[self._sample_ws_name].getInstrument().getName()
-
-        for ws in workspaces:
-            LoadInstrument(Workspace=ws,
-                           InstrumentName=instrument)
-
-            CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name,
-                                WorkspaceToRemap=ws,
-                                IndexBySpectrumNumber=True)
-
+#------------------------------------------------------------------------------
 
     def _add_sample_logs(self, ws, sample_logs):
         """
@@ -305,6 +309,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
             AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
 
+#------------------------------------------------------------------------------
 
     def _flat_abs(self, angle):
         """
@@ -369,6 +374,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         return ass, assc, acsc, acc
 
+#------------------------------------------------------------------------------
 
     def _fact(self, x_section, thickness, sec1, sec2):
         S = x_section * thickness * (sec1 - sec2)
@@ -380,6 +386,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             F = thickness*S
         return F
 
+#------------------------------------------------------------------------------
 
     def _calc_thickness_at_x_sect(self, x_section, thickness, sec):
         sec1, sec2 = sec
@@ -388,6 +395,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         thick_sec_2 = x_section * thickness * sec2
 
         return thick_sec_1, thick_sec_2
+
+#------------------------------------------------------------------------------
 
     #pylint: disable=too-many-arguments
     def _calculate_can(self, ass, can_x_section, sample_sect_1, sample_sect_2, sec):
@@ -436,6 +445,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         return assc, acsc, acc
 
+#------------------------------------------------------------------------------
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(FlatPlatePaalmanPingsCorrection)

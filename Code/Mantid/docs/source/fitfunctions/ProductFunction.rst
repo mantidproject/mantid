@@ -20,3 +20,5 @@ a ProductFunction can be a composite function itself.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

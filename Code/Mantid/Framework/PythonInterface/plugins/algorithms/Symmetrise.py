@@ -5,7 +5,6 @@ from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProper
 from mantid.kernel import Direction, IntArrayProperty
 import mantid.simpleapi as ms
 import math
-import os.path
 import numpy as np
 
 #pylint: disable=too-many-instance-attributes
@@ -14,8 +13,6 @@ class Symmetrise(PythonAlgorithm):
     _sample = None
     _x_min = None
     _x_max = None
-    _plot = None
-    _save = None
     _spectra_range = None
     _output_workspace = None
     _props_output_workspace = None
@@ -40,11 +37,6 @@ class Symmetrise(PythonAlgorithm):
 
         self.declareProperty('XMin', 0.0, doc='X value marking lower limit of curve to copy')
         self.declareProperty('XMax', 0.0, doc='X value marking upper limit of curve to copy')
-
-        self.declareProperty('Plot', defaultValue=False,
-                             doc='Switch plotting Off/On')
-        self.declareProperty('Save', defaultValue=False,
-                             doc='Switch saving result to nxs file Off/On')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',\
                              Direction.Output), doc='Name to call the output workspace.')
@@ -137,12 +129,6 @@ class Symmetrise(PythonAlgorithm):
 
         ms.DeleteWorkspace(cropped_input)
 
-        if self._save:
-            self._save_output()
-
-        if self._plot:
-            self._plot_output()
-
         if self._props_output_workspace != '':
             self._generate_props_table()
 
@@ -222,9 +208,6 @@ class Symmetrise(PythonAlgorithm):
         self._x_min = math.fabs(self.getProperty('XMin').value)
         self._x_max = math.fabs(self.getProperty('XMax').value)
 
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
-
         self._spectra_range = self.getProperty('SpectraRange').value
         # If the user did not enter a spectra range, use the spectra range of the workspace
         if len(self._spectra_range) == 0:
@@ -293,29 +276,6 @@ class Symmetrise(PythonAlgorithm):
                             int(self._positive_max_index)])
 
         self.setProperty('OutputPropertiesTable', self._props_output_workspace)
-
-
-    def _save_output(self):
-        """
-        Save the output workspace to the user's default working directory
-        """
-        from IndirectCommon import getDefaultWorkingDirectory
-        workdir = getDefaultWorkingDirectory()
-        file_path = os.path.join(workdir, self._output_workspace + '.nxs')
-        ms.SaveNexusProcessed(InputWorkspace=self._output_workspace,
-                              Filename=file_path)
-
-        logger.information('Output file : ' + file_path)
-
-
-    def _plot_output(self):
-        """
-        Plot the first spectrum of the input and output workspace together.
-        """
-        from IndirectImport import import_mantidplot
-        mtd_plot = import_mantidplot()
-
-        mtd_plot.plotSpectrum([self._sample, self._output_workspace], 0)
 
 
 # Register algorithm with Mantid

@@ -74,7 +74,7 @@ class PropertiesDirective(AlgorithmBaseDirective):
                     str(direction_string[prop.direction]),
                     property_type_dict.get(str(prop.type),str(prop.type)),
                     str(self._get_default_prop(prop)),
-                    str(prop.documentation.replace("\n", " "))
+                    self._create_property_description_string(prop)
                     ))
 
             self.add_rst(self.make_header("Properties"))
@@ -199,6 +199,43 @@ class PropertiesDirective(AlgorithmBaseDirective):
                 defaultstr = "False"
 
         return defaultstr
+
+    def _create_property_description_string(self, prop):
+        """
+        Converts the description of the property to a more use-friendly one.
+
+        Args:
+          prop. The property to find the default value of.
+
+        Returns:
+          str: The string to add to the property table description section.
+        """
+        desc = str(prop.documentation.replace("\n", " "))
+
+        allowedValueString = str(prop.allowedValues)
+        # 4 allows for ['']
+        if len(allowedValueString) > 4: 
+            ##make sure the last sentence ended with a full stop (or equivalent)
+            if (not desc.rstrip().endswith("."))      \
+                and (not desc.rstrip().endswith("!")) \
+                and (not desc.rstrip().endswith("?")) \
+                and (len(desc.strip())>0):
+                desc += "."
+            isFileExts = True
+            for item in prop.allowedValues:
+                #check it does not look like a file extension
+                if (not item.startswith(".")) and (not item[-4:].startswith(".")):
+                    isFileExts = False
+                    break
+                    
+            prefixString = " Allowed values: "
+            if isFileExts:
+                prefixString = " Allowed extensions: "
+            #put a space in between entries to allow the line to break
+            allowedValueString = allowedValueString.replace("','","', '")
+            desc += prefixString + allowedValueString
+
+        return desc
 
 
 def setup(app):

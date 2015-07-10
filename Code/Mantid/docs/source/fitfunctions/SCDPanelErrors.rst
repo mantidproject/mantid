@@ -94,3 +94,5 @@ follows:
 The order of rotations correspond to the order used in all of Mantid.
 
 .. categories::
+
+.. sourcelink::
