@@ -1,7 +1,7 @@
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
-#include "MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 // TODO: what's in this file should become a class of its own,
 // 'SavuConfigDialog' or similar
 
-void TomoReconstruction::loadAvailablePlugins() {
+void TomographyIfaceViewQtGUI::loadAvailablePlugins() {
   // TODO:: load actual plugins when we know them
   // creating a few relatively realistic choices for now (should crossh check
   //  with the savu api when finalized).
@@ -62,7 +62,7 @@ void TomoReconstruction::loadAvailablePlugins() {
 
 // Reloads the GUI list of available plugins from the data object ::
 // Populating only through this ensures correct indexing.
-void TomoReconstruction::refreshAvailablePluginListUI() {
+void TomographyIfaceViewQtGUI::refreshAvailablePluginListUI() {
   // Table WS structure, id/params/name/cite
   m_uiSavu.listAvailablePlugins->clear();
   for (size_t i = 0; i < m_availPlugins->rowCount(); ++i) {
@@ -74,14 +74,14 @@ void TomoReconstruction::refreshAvailablePluginListUI() {
 
 // Reloads the GUI list of current plugins from the data object ::
 // Populating only through this ensures correct indexing.
-void TomoReconstruction::refreshCurrentPluginListUI() {
+void TomographyIfaceViewQtGUI::refreshCurrentPluginListUI() {
   // Table WS structure, id/params/name/cite
   m_uiSavu.treeCurrentPlugins->clear();
   createPluginTreeEntries(m_currPlugins);
 }
 
 // Updates the selected plugin info from Available plugins list.
-void TomoReconstruction::availablePluginSelected() {
+void TomographyIfaceViewQtGUI::availablePluginSelected() {
   if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
     size_t idx = static_cast<size_t>(
         m_uiSavu.listAvailablePlugins->currentIndex().row());
@@ -93,7 +93,7 @@ void TomoReconstruction::availablePluginSelected() {
 }
 
 // Updates the selected plugin info from Current plugins list.
-void TomoReconstruction::currentPluginSelected() {
+void TomographyIfaceViewQtGUI::currentPluginSelected() {
   if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     auto currItem = m_uiSavu.treeCurrentPlugins->selectedItems()[0];
 
@@ -135,8 +135,8 @@ private:
 };
 
 // On user editing a parameter tree item, update the data object to match.
-void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
-                                          int /*column*/) {
+void TomographyIfaceViewQtGUI::paramValModified(QTreeWidgetItem *item,
+                                                int /*column*/) {
   OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem *>(item);
   if (!ownItem)
     return;
@@ -170,7 +170,7 @@ void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
 
 // When a top level item is expanded, also expand its child items - if tree
 // items
-void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
+void TomographyIfaceViewQtGUI::expandedItem(QTreeWidgetItem *item) {
   if (item->parent() == NULL) {
     for (int i = 0; i < item->childCount(); ++i) {
       item->child(i)->setExpanded(true);
@@ -180,7 +180,7 @@ void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
 
 // Adds one plugin from the available plugins list into the list of
 // current plugins
-void TomoReconstruction::transferClicked() {
+void TomographyIfaceViewQtGUI::transferClicked() {
   if (0 == m_uiSavu.listAvailablePlugins->selectedItems().count())
     return;
 
@@ -192,7 +192,7 @@ void TomoReconstruction::transferClicked() {
   createPluginTreeEntry(row);
 }
 
-void TomoReconstruction::moveUpClicked() {
+void TomographyIfaceViewQtGUI::moveUpClicked() {
   if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
     return;
 
@@ -210,7 +210,7 @@ void TomoReconstruction::moveUpClicked() {
   }
 }
 
-void TomoReconstruction::moveDownClicked() {
+void TomographyIfaceViewQtGUI::moveDownClicked() {
   // TODO: this can be done with the same function as above...
   if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
     return;
@@ -229,7 +229,7 @@ void TomoReconstruction::moveDownClicked() {
   }
 }
 
-void TomoReconstruction::removeClicked() {
+void TomographyIfaceViewQtGUI::removeClicked() {
   // Also clear ADS entries
   if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
     return;
@@ -240,7 +240,7 @@ void TomoReconstruction::removeClicked() {
   refreshCurrentPluginListUI();
 }
 
-void TomoReconstruction::menuOpenClicked() {
+void TomographyIfaceViewQtGUI::menuOpenClicked() {
   QString s =
       QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
@@ -270,8 +270,8 @@ void TomoReconstruction::menuOpenClicked() {
   }
 }
 
-void TomoReconstruction::menuSaveClicked() {
-  if (m_currentParamPath == "") {
+void TomographyIfaceViewQtGUI::menuSaveClicked() {
+  if (m_currentParamPath.empty()) {
     menuSaveAsClicked();
     return;
   }
@@ -298,7 +298,7 @@ void TomoReconstruction::menuSaveClicked() {
   }
 }
 
-void TomoReconstruction::menuSaveAsClicked() {
+void TomographyIfaceViewQtGUI::menuSaveAsClicked() {
   QString s =
       QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
@@ -311,8 +311,8 @@ void TomoReconstruction::menuSaveAsClicked() {
   menuSaveClicked();
 }
 
-QString TomoReconstruction::tableWSRowToString(ITableWorkspace_sptr table,
-                                               size_t i) {
+QString TomographyIfaceViewQtGUI::tableWSRowToString(ITableWorkspace_sptr table,
+                                                     size_t i) {
   std::stringstream msg;
   msg << "ID: " << table->cell<std::string>(i, 0) << std::endl
       << "Params: " << table->cell<std::string>(i, 1) << std::endl
@@ -326,7 +326,7 @@ QString TomoReconstruction::tableWSRowToString(ITableWorkspace_sptr table,
  *
  * @param row Row from a table workspace with each row specfying a savu plugin
  */
-void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
+void TomographyIfaceViewQtGUI::createPluginTreeEntry(TableRow &row) {
   QStringList idStr, nameStr, citeStr, paramsStr;
   idStr.push_back(QString::fromStdString("ID: " + row.cell<std::string>(0)));
   nameStr.push_back(
@@ -411,8 +411,8 @@ void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
  * separated by commas
  */
 std::string
-TomoReconstruction::paramValStringFromArray(const Json::Value &jsonVal,
-                                            const std::string &name) {
+TomographyIfaceViewQtGUI::paramValStringFromArray(const Json::Value &jsonVal,
+                                                  const std::string &name) {
   std::string s;
   s = "[";
   for (Json::ArrayIndex i = 0; i < jsonVal.size(); ++i) {
@@ -452,8 +452,9 @@ TomoReconstruction::paramValStringFromArray(const Json::Value &jsonVal,
  *
  * @return String with a parameter value
  */
-std::string TomoReconstruction::pluginParamValString(const Json::Value &jsonVal,
-                                                     const std::string &name) {
+std::string
+TomographyIfaceViewQtGUI::pluginParamValString(const Json::Value &jsonVal,
+                                               const std::string &name) {
   std::string s;
   // string and numeric values can (normally) be converted to string but arrays
   // cannot
@@ -475,7 +476,8 @@ std::string TomoReconstruction::pluginParamValString(const Json::Value &jsonVal,
   return s;
 }
 
-void TomoReconstruction::createPluginTreeEntries(ITableWorkspace_sptr table) {
+void
+TomographyIfaceViewQtGUI::createPluginTreeEntries(ITableWorkspace_sptr table) {
   for (size_t i = 0; i < table->rowCount(); ++i) {
     TableRow r = table->getRow(i);
     createPluginTreeEntry(r);
