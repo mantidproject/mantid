@@ -74,3 +74,5 @@ This will create a :ref:`Workspace2D <Workspace2D>` with 1 spectrum.
 This text file will create a :ref:`Workspace2D <Workspace2D>` with 3 spectra.
 
 .. categories::
+
+.. sourcelink::

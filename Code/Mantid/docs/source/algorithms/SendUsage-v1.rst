@@ -18,3 +18,5 @@ statistics to a central server. To disable it set the user property
    usagereports.enabled=0
 
 .. categories::
+
+.. sourcelink::

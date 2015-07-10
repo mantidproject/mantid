@@ -224,8 +224,9 @@ class DetectorBank(object):
         # hold rescale and shift object _RescaleAndShift
         self.rescaleAndShift = self._RescaleAndShift()
 
-        #in the empty instrument detectors are laid out as below on loading a run the orientation becomes run dependent
-        self._orientation = 'HorizontalFlipped'
+        # The orientation is set by default to Horizontal (Note this used to be HorizontalFlipped,
+        # probably as part of some hack for specific run numbers of SANS2D)
+        self._orientation = 'Horizontal'
 
     def disable_y_and_rot_corrs(self):
         """
@@ -363,14 +364,6 @@ class DetectorBank(object):
                 for x in range(0, xdim):
                     std_i = start_spec + x + (y*det_dimension)
                     output += str(max_spec - (std_i - base)) + ','
-        elif self._orientation == 'HorizontalFlipped':
-            for y in range(ylow,ylow+ydim):
-                max_row = base + (y+1)*det_dimension - 1
-                min_row = base + (y)*det_dimension
-                for x in range(xlow,xlow+xdim):
-                    std_i = base + x + (y*det_dimension)
-                    diff_s = std_i - min_row
-                    output += str(max_row - diff_s) + ','
 
         return output.rstrip(",")
 
@@ -378,8 +371,7 @@ class DetectorBank(object):
     _ORIENTED = {
         'Horizontal' : None,        #most runs have the detectors in this state
         'Vertical' : None,
-        'Rotated' : None,
-        'HorizontalFlipped' : None} # This is for the empty instrument
+        'Rotated' : None}
 
     def set_orien(self, orien):
         """
@@ -509,6 +501,9 @@ class ISISInstrument(BaseInstrument):
         self._back_start = None
         # default end region
         self._back_end = None
+        # the background TOF region for ROI data. Note that either this or a transmission monitor is used.
+        self._back_start_ROI = None
+        self._back_end_ROI = None
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
         # Used when new calibration required.
@@ -596,13 +591,8 @@ class ISISInstrument(BaseInstrument):
         if self.other_detector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True
-        else:
-            #there are only two detectors, they must have selected the current one so no change is need
-            if self.cur_detector().isAlias(detName):
-                return True
-            else:
-                sanslog.notice("setDetector: Detector not found")
-                sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
+        elif self.cur_detector().isAlias(detName):
+            return True
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
@@ -668,6 +658,38 @@ class ISISInstrument(BaseInstrument):
             self._back_ground = {}
             self._back_start = None
             self._back_end = None
+            self.reset_TOFs_for_ROI()
+
+    def get_TOFs_for_ROI(self):
+        """
+            Gets the TOFs for the ROI which is required for the Transmission calculation. If it is
+            not available then use the default setting
+            @return: the start time, the end time
+        """
+        if self._back_start_ROI and self._back_end_ROI:
+            return self._back_start_ROI, self._back_end_ROI
+        else:
+            return None, None
+
+    def set_TOFs_for_ROI(self, start, end):
+        """
+            Sets the TOFs for the ROI which is required for the Transmission calculation.
+            @param: start : defines the start of the background region for ROI
+            @param: end : defines the end of the background region for ROI
+        """
+        if start != None:
+            start = float(start)
+        if end != None:
+            end = float(end)
+        self._back_start_ROI = start
+        self._back_end_ROI = end
+
+    def reset_TOFs_for_ROI(self):
+        """
+            Reset background region set by set_TOFs for ROI
+        """
+        self._back_start_ROI = None
+        self._back_end_ROI = None
 
     def move_all_components(self, ws):
         """
@@ -866,11 +888,7 @@ class SANS2D(ISISInstrument):
             #this is the default case
             first.set_first_spec_num(9)
             first.set_orien('Horizontal')
-            # empty instrument number spectra differently.
-            if base_runno == 'emptyInstrument':
-                second.set_orien('HorizontalFlipped')
-            else:
-                second.set_orien('Horizontal')
+            second.set_orien('Horizontal')
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too
         second.place_after(first)

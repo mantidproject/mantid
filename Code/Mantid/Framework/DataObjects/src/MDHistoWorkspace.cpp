@@ -1217,14 +1217,6 @@ size_t MDHistoWorkspace::sizeOfElement() {
 }
 
 /**
- * Clone the workspace.
- * @return Deep copy of existing workspace.
- */
-boost::shared_ptr<IMDHistoWorkspace> MDHistoWorkspace::clone() const {
-  return boost::shared_ptr<IMDHistoWorkspace>(new MDHistoWorkspace(*this));
-}
-
-/**
 Preferred normalization to use for visual purposes.
 */
 MDNormalization MDHistoWorkspace::displayNormalization() const {

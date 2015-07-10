@@ -53,3 +53,5 @@ Output:
     os.remove(savefile)
 
 .. categories::
+
+.. sourcelink::

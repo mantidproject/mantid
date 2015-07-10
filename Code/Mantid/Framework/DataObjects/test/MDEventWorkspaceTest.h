@@ -87,6 +87,12 @@ public:
     delete ew3;
   }
 
+  class TestableMDEventWorkspace : public MDEventWorkspace<MDLeanEvent<3>, 3> {
+  public:
+    TestableMDEventWorkspace(const MDEventWorkspace<MDLeanEvent<3>, 3> &other)
+        : MDEventWorkspace<MDLeanEvent<3>, 3>(other) {}
+  };
+
   void test_copy_constructor()
   {
     MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
@@ -105,7 +111,7 @@ public:
     ExperimentInfo_sptr ei(new ExperimentInfo);
     TS_ASSERT_EQUALS( ew3.addExperimentInfo(ei), 0);
 
-    MDEventWorkspace<MDLeanEvent<3>, 3> copy(ew3);
+    TestableMDEventWorkspace copy(ew3);
     TS_ASSERT_EQUALS( copy.getNumDims(), 3);
     TS_ASSERT_EQUALS( copy.getDimension(0)->getName(), "x");
     TS_ASSERT_EQUALS( copy.getNumExperimentInfo(), 1);

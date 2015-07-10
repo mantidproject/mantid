@@ -81,3 +81,5 @@ file it will call the previous version of the algorithm to perform the
 task.
 
 .. categories::
+
+.. sourcelink::

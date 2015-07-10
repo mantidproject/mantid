@@ -67,3 +67,5 @@ Usage
 		QLines(SamNumber='26176', ResNumber='26173', InputType='Workspace', ResInputType='Workspace', Instrument='irs', Analyser='graphite002', Plot='None')
 
 .. categories::
+
+.. sourcelink::

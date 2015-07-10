@@ -22,7 +22,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  MSDFit::MSDFit(QWidget * parent) : IDATab(parent),
+  MSDFit::MSDFit(QWidget * parent) : IndirectDataAnalysisTab(parent),
     m_currentWsName(""), m_msdTree(NULL)
   {
     m_uiForm.setupUi(parent);

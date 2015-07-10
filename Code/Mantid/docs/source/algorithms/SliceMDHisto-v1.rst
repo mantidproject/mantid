@@ -71,3 +71,5 @@ Usage
     C      7      -9.00   5.78
 
 .. categories::
+
+.. sourcelink::

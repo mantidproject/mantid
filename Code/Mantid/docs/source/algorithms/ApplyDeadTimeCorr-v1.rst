@@ -100,3 +100,5 @@ Output:
    Spectrum: 63; original: 8875.000; corrected: 8969.891
 
 .. categories::
+
+.. sourcelink::

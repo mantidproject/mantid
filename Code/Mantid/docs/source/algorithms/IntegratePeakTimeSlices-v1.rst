@@ -62,3 +62,5 @@ Usage
     print "Intensity and SigmaIntensity of peak 0  = ",int,sig
 
 .. categories::
+
+.. sourcelink::

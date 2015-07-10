@@ -77,3 +77,5 @@ Output:
    Position of Detector ID=1103 in 2nd workspace after CopyInstrumentParameters: 12,3,6
 
 .. categories::
+
+.. sourcelink::

@@ -527,8 +527,7 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
                            Reflection=self.reflection,
                            DetectorRange=self.detector_range,
                            BackgroundRange=self.background,
-                           RebinParam=self.rebin_params,
-                           Plot=False)
+                           RebinParam=self.rebin_params)
 
         self.result_names = ['__IndirectResolution_Test']
 
@@ -606,9 +605,7 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
                   OutputNameSuffix=self.suffix,
                   OutputWorkspace='__IndirectInelasticDiagnostics_out_group',
                   PeakRange=self.peak,
-                  SpectraRange=self.spectra,
-                  Plot=False,
-                  Save=False)
+                  SpectraRange=self.spectra)
 
         # Construct the result ws name.
         self.result_names = [os.path.splitext(self.rawfiles[0])[0] + self.suffix]
@@ -844,9 +841,7 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
                                              EnergyMin=self.e_min,
                                              EnergyMax=self.e_max,
                                              BinReductionFactor=self.num_bins,
-                                             DryRun=False,
-                                             Save=False,
-                                             Plot=False)
+                                             DryRun=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
@@ -964,9 +959,7 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
                                              EnergyMin=self.e_min,
                                              EnergyMax=self.e_max,
                                              BinReductionFactor=self.num_bins,
-                                             DryRun=False,
-                                             Save=False,
-                                             Plot=False)
+                                             DryRun=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitMult(fury_ws.getName(),

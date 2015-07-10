@@ -1,12 +1,14 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
+	src/CheckMantidVersion.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
+	src/DecoratorWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
@@ -157,12 +159,14 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
+	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
+	inc/MantidDataHandling/DecoratorWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
@@ -312,12 +316,14 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
+	CheckMantidVersionTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
+	DecoratorWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h

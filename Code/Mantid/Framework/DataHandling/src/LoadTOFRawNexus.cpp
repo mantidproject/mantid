@@ -518,7 +518,9 @@ void LoadTOFRawNexus::exec() {
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
 
-  LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false);
+  int nPeriods = 1; // Unused
+  std::unique_ptr<const TimeSeriesProperty<int> > periodLog(new const TimeSeriesProperty<int>("period_log")); // Unused
+  LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false, nPeriods, periodLog);
 
   // Load the instrument
   prog->report("Loading instrument");

@@ -41,3 +41,5 @@ This is normally not a problem unless the setup of the instrument has
 been changed between recording the Vanadium and the sample datasets.
 
 .. categories::
+
+.. sourcelink::

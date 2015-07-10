@@ -361,3 +361,5 @@ Output:
   Fitted background parameters: A0 = 3.90254e+00, A1 = 1.09284e-02, Chi-square = 0.08237
 
 .. categories::
+
+.. sourcelink::

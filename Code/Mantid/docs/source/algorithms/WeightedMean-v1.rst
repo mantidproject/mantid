@@ -47,3 +47,5 @@ Output:
       0.9486833  0.9486833  0.9486833]
 
 .. categories::
+
+.. sourcelink::

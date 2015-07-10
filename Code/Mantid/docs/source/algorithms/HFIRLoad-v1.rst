@@ -50,3 +50,5 @@ Output:
    SDD = 6000
    
 .. categories::
+
+.. sourcelink::

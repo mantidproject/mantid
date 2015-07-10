@@ -41,3 +41,5 @@ to generate good approximation to the true function.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

@@ -126,8 +126,8 @@ normalized by the transmission counters.
 References
 ----------
 
-Annie Brulet et al. - Improvement of data treatment in SANS - J. Appl.
-Cryst. (2007). 40
+Annie Brulet et al. - Improvement of data treatment in small-angle neutron scattering - `J. Appl.
+Cryst. (2007). 40 <http://dx.doi.org/10.1107/S0021889806051442>`_
 
 Ghosh, Egelhaaf & Rennie - Computing guide for Small Angle Scattering
 Experiments
@@ -158,3 +158,5 @@ Output:
    1.000000 was corrected to 1.004997.
 
 .. categories::
+
+.. sourcelink::

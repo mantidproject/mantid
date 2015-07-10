@@ -37,3 +37,5 @@ data download due to its size. It be downloaded from
                           OutputWorkspace="PG3_cal")
 
 .. categories::
+
+.. sourcelink::

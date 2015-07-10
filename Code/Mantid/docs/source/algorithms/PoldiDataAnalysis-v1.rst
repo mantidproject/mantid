@@ -72,3 +72,5 @@ This will print the following output:
 If PlotResult is changed to True, a plot of the spectrum and the residuals is created as described above.
 
 .. categories::
+
+.. sourcelink::

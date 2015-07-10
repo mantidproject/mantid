@@ -138,4 +138,6 @@ Output:
 
 .. categories::
 
+.. sourcelink::
+
 

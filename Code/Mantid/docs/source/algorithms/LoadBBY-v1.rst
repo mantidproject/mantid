@@ -13,6 +13,8 @@ Load data from the Bilby beamline at ANSTO. The workspace generated is a TOF Eve
 
 .. categories::
 
+.. sourcelink::
+
 Usage
 -----
 

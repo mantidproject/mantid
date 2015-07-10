@@ -30,3 +30,5 @@ MaximumRows that you set, then it will emit a warning, and also, set the
 TruncatedOutput output property to false.
 
 .. categories::
+
+.. sourcelink::

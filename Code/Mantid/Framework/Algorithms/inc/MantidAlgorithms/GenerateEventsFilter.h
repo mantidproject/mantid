@@ -6,7 +6,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
@@ -174,7 +173,7 @@ private:
   DataObjects::EventWorkspace_const_sptr m_dataWS;
 
   /// SplitterWorkspace
-  API::ISplittersWorkspace_sptr m_splitWS;
+  DataObjects::SplittersWorkspace_sptr m_splitWS;
   /// Matrix workspace containing splitters
   API::MatrixWorkspace_sptr m_filterWS;
 

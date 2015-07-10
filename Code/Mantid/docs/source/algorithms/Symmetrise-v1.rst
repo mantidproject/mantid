@@ -38,6 +38,8 @@ Usage
     sample_ws = CreateWorkspace(data_x, data_y)
     sample_ws = ScaleX(sample_ws, -1, "Add")  # centre the peak over 0
 
-    symm_ws = Symmetrise(Sample=sample_ws, XMin=0.05, XMax=8.0)
+    symm_ws = Symmetrise(InputWorkspace=sample_ws, XMin=0.05, XMax=8.0)
 
 .. categories::
+
+.. sourcelink::

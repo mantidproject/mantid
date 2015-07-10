@@ -52,11 +52,13 @@ void ProgressTracker::complete() {
 // EventCounter
 EventCounter::EventCounter(std::vector<size_t> &eventCounts,
                            const std::vector<bool> &mask,
-                           const std::vector<int> &offsets, size_t stride)
+                           const std::vector<int> &offsets, size_t stride,
+                           double periode, double phase)
     : m_eventCounts(eventCounts), m_mask(mask),
       m_offsets(offsets), m_stride(stride),
       m_tofMin(std::numeric_limits<double>::max()),
-      m_tofMax(std::numeric_limits<double>::min()) {}
+      m_tofMax(std::numeric_limits<double>::min()),
+      m_period(periode), m_phase(phase) {}
 double EventCounter::tofMin() const {
   return m_tofMin <= m_tofMax ? m_tofMin : 0.0;
 }
@@ -64,6 +66,15 @@ double EventCounter::tofMax() const {
   return m_tofMin <= m_tofMax ? m_tofMax : 0.0;
 }
 void EventCounter::addEvent(size_t x, size_t y, double tof) {
+  // correction
+  if (m_period > 0.0) {
+    tof += m_phase;
+    while (tof > m_period)
+      tof -= m_period;
+    while (tof < 0)
+      tof += m_period;
+  }
+
   size_t yNew = y + (size_t)m_offsets[x];
   if (yNew < m_stride) {
     size_t s = m_stride * x + yNew;
@@ -82,10 +93,21 @@ void EventCounter::addEvent(size_t x, size_t y, double tof) {
 // EventAssigner
 EventAssigner::EventAssigner(std::vector<EventVector_pt> &eventVectors,
                              const std::vector<bool> &mask,
-                             const std::vector<int> &offsets, size_t stride)
+                             const std::vector<int> &offsets, size_t stride,
+                             double periode, double phase)
     : m_eventVectors(eventVectors), m_mask(mask),
-      m_offsets(offsets), m_stride(stride) {}
+      m_offsets(offsets), m_stride(stride),
+      m_period(periode), m_phase(phase) {}
 void EventAssigner::addEvent(size_t x, size_t y, double tof) {
+  // correction
+  if (m_period > 0.0) {
+    tof += m_phase;
+    while (tof > m_period)
+      tof -= m_period;
+    while (tof < 0)
+      tof += m_period;
+  }
+
   size_t yNew = y + (size_t)m_offsets[x];
   if (yNew < m_stride) {
     size_t s = m_stride * x + yNew;

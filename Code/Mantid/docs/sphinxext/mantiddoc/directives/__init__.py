@@ -7,7 +7,7 @@
    'mantiddoc.directives' to be added to the Sphinx extensions configuration.
 """
 
-import algorithm, alias, attributes, categories, diagram, interface, properties, summary
+import algorithm, alias, attributes, categories, diagram, interface, properties, sourcelink, summary
 
 def setup(app):
     """
@@ -23,4 +23,5 @@ def setup(app):
     diagram.setup(app)
     interface.setup(app)
     properties.setup(app)
+    sourcelink.setup(app)
     summary.setup(app)

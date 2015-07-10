@@ -376,7 +376,6 @@ private:
   static const QString m_pythonEmptyKeyword;
   /// Sans utility
   SANSUtil m_sansUtility;
-
   /// Stores the URL of each tab's help page.
   QMap<Tab, QString> m_helpPageUrls;
   

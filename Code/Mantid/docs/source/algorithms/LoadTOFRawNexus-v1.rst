@@ -30,3 +30,5 @@ change!):
    *dspacing*
 
 .. categories::
+
+.. sourcelink::

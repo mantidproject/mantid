@@ -52,3 +52,5 @@ or another algorithm requiring it is called. The workspace is marked as
 'requiring file update'.
 
 .. categories::
+
+.. sourcelink::

@@ -1,0 +1,78 @@
+digraph IndirectTransmissionMonitor {
+  label="IndirectTransmissionMonitor Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    ExtractMonitor_HaveMonitor2_1   [label="Have Monitor 2?"]
+    ExtractMonitor_HaveMonitor2_2   [label="Have Monitor 2?"]
+    ExtractMonitor_IsSameTimeRegime [label="Is Same Start Time?"]
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    CanWorkspace
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+
+    ExtractMonitor_CropWorkspace_D1       [label="CropWorkspace"]
+    ExtractMonitor_CropWorkspace_M1       [label="CropWorkspace"]
+    ExtractMonitor_CropWorkspace_M1_2     [label="CropWorkspace"]
+    ExtractMonitor_CropWorkspace_M2       [label="CropWorkspace"]
+    ExtractMonitor_ConvertUnitsMonitor1   [label="ConvertUnits"]
+    ExtractMonitor_ConvertUnitsMonitor2   [label="ConvertUnits"]
+    ExtractMonitor_RebinToWorkspace       [label="RebinToWorkspace"]
+    ExtractMonitor_Divide                 [label="Divide"]
+    ExtractMonitor_UnwrapMonitor          [label="UnwrapMonitor"]
+    ExtractMonitor_RemoveBins             [label="RemoveBins"]
+    ExtractMonitor_FFTSmooth              [label="FFTSmooth"]
+
+    Divide
+    GroupWorkspaces
+  }
+
+  subgraph processes {
+    $process_style
+    ExtractMonitor_Sample   [label="Extract Monitor"]
+    ExtractMonitor_Can      [label="Extract Monitor"]
+  }
+
+  ExtractMonitor_Start  [label="Extract Monitor"]
+  ExtractMonitor_End    [label="End"]
+
+  subgraph ExtractMonitor {
+    ExtractMonitor_Start                -> ExtractMonitor_CropWorkspace_M1      [label="Monitor 1"]
+    ExtractMonitor_Start                -> ExtractMonitor_CropWorkspace_D1      [label="Detector 1"]
+    ExtractMonitor_CropWorkspace_D1     -> ExtractMonitor_IsSameTimeRegime
+    ExtractMonitor_Start                -> ExtractMonitor_HaveMonitor2_1        [label="Monitor 2"]
+    ExtractMonitor_HaveMonitor2_1       -> ExtractMonitor_CropWorkspace_M2      [label="Yes"]
+    ExtractMonitor_IsSameTimeRegime     -> ExtractMonitor_UnwrapMonitor         [label="No"]
+    ExtractMonitor_UnwrapMonitor        -> ExtractMonitor_RemoveBins
+    ExtractMonitor_RemoveBins           -> ExtractMonitor_FFTSmooth
+    ExtractMonitor_FFTSmooth            -> ExtractMonitor_CropWorkspace_M1_2    [label="Yes"]
+    ExtractMonitor_CropWorkspace_M1     -> ExtractMonitor_IsSameTimeRegime
+    ExtractMonitor_IsSameTimeRegime     -> ExtractMonitor_ConvertUnitsMonitor1  [label="Yes"]
+    ExtractMonitor_CropWorkspace_M1     -> ExtractMonitor_HaveMonitor2_2
+    ExtractMonitor_HaveMonitor2_2       -> ExtractMonitor_End                   [label="No"]
+    ExtractMonitor_HaveMonitor2_2       -> ExtractMonitor_ConvertUnitsMonitor2  [label="Yes"]
+    ExtractMonitor_ConvertUnitsMonitor1 -> ExtractMonitor_CropWorkspace_M1_2
+    ExtractMonitor_ConvertUnitsMonitor2 -> ExtractMonitor_RebinToWorkspace      [label="WorkspaceToMatch"]
+    ExtractMonitor_CropWorkspace_M2     -> ExtractMonitor_RebinToWorkspace      [label="WorkspaceToRebin"]
+    ExtractMonitor_RebinToWorkspace     -> ExtractMonitor_Divide                [label="LHS (monitor 2)"]
+    ExtractMonitor_CropWorkspace_M1_2   -> ExtractMonitor_Divide                [label="RHS (monitor 1)"]
+    ExtractMonitor_Divide               -> ExtractMonitor_End
+  }
+
+  SampleWorkspace         -> ExtractMonitor_Sample
+  CanWorkspace            -> ExtractMonitor_Can
+  ExtractMonitor_Sample   -> Divide [label="LHS"]
+  ExtractMonitor_Can      -> Divide [label="RHS"]
+  Divide                  -> GroupWorkspaces
+  SampleWorkspace         -> GroupWorkspaces
+  CanWorkspace            -> GroupWorkspaces
+  GroupWorkspaces         -> OutputWorkspace
+}

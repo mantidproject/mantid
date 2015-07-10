@@ -47,3 +47,5 @@ Usage
 		Quest(SamNumber='26176', ResNumber='26173', ResNormNumber='26176', InputType='Workspace', ResInputType='Workspace', ResNormInputType='Workspace', Instrument='irs', Analyser='graphite002', )
 
 .. categories::
+
+.. sourcelink::

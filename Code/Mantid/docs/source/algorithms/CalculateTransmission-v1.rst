@@ -41,3 +41,5 @@ Uses the algorithm `Fit <algm-Fit>`_ to fit to the calculated
 transmission fraction.
 
 .. categories::
+
+.. sourcelink::

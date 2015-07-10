@@ -102,6 +102,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string with offset 999 should be trace"));
   }
 
+  void testLogLevelFiltering()
+  {
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setConsoleLogLevel(4));
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setFileLogLevel(4));
+    TSM_ASSERT_THROWS("A false channel name for setFilterChannelLogLevel did not throw",
+      ConfigService::Instance().setFilterChannelLogLevel("AnIncorrectChannelName",4),std::invalid_argument);
+    TSM_ASSERT_THROWS("A correct channel name, but not a filterChannel for setFilterChannelLogLevel did not throw",
+      ConfigService::Instance().setFilterChannelLogLevel("consoleChannel",4),std::invalid_argument);
+  }
+
   void testDefaultFacility()
   {
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility() );

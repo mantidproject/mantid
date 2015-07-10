@@ -95,3 +95,5 @@ In this example the fitting function is a\*exp(-(x-c)^2\*s). The
 parameter *s* is fixed.
 
 .. categories::
+
+.. sourcelink::
