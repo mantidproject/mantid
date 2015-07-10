@@ -95,42 +95,50 @@ public:
   {
     const double wavelength = 1;
 
-    CalculateReflectometryDiffP A(0);
+    CalculateReflectometryP A;
+    A.setThetaIncident(0);
     A.setThetaFinal(0);
-    TS_ASSERT_EQUALS(0, A.execute(wavelength));
+    TS_ASSERT_EQUALS(0, A.calculateDim1(wavelength));
 
-    CalculateReflectometryDiffP B(90);
+    CalculateReflectometryP B;
+    B.setThetaIncident(90);
     B.setThetaFinal(0);
-    TS_ASSERT_DELTA(2*M_PI/wavelength, B.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, B.calculateDim1(wavelength), 0.0001);
 
-    CalculateReflectometryDiffP C(0);
+    CalculateReflectometryP C;
+    C.setThetaIncident(0);
     C.setThetaFinal(90);
-    TS_ASSERT_DELTA(-2*M_PI/wavelength, C.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(-2*M_PI/wavelength, C.calculateDim1(wavelength), 0.0001);
 
-    CalculateReflectometryDiffP D(90);
+    CalculateReflectometryP D;
+    D.setThetaIncident(90);
     D.setThetaFinal(90);
-    TS_ASSERT_EQUALS(0, A.execute(wavelength));
+    TS_ASSERT_EQUALS(0, A.calculateDim1(wavelength));
   }
 
   void test_calulate_sum_p()
   {
     const double wavelength = 1;
 
-    CalculateReflectometrySumP A(0);
+    CalculateReflectometryP A;
+    A.setThetaIncident(0);
     A.setThetaFinal(0);
-    TS_ASSERT_EQUALS(0, A.execute(wavelength));
+    TS_ASSERT_EQUALS(0, A.calculateDim0(wavelength));
 
-    CalculateReflectometrySumP B(90);
+    CalculateReflectometryP B;
+    B.setThetaIncident(90);
     B.setThetaFinal(0);
-    TS_ASSERT_DELTA(2*M_PI/wavelength, B.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, B.calculateDim0(wavelength), 0.0001);
 
-    CalculateReflectometrySumP C(0);
+    CalculateReflectometryP C;
+    C.setThetaIncident(0);
     C.setThetaFinal(90);
-    TS_ASSERT_DELTA(2*M_PI/wavelength, C.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, C.calculateDim0(wavelength), 0.0001);
 
-    CalculateReflectometrySumP D(90);
+    CalculateReflectometryP D;
+    D.setThetaIncident(90);
     D.setThetaFinal(90);
-    TS_ASSERT_DELTA(4*M_PI/wavelength, D.execute(wavelength), 0.0001);
+    TS_ASSERT_DELTA(4*M_PI/wavelength, D.calculateDim0(wavelength), 0.0001);
   }
 
 };

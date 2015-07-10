@@ -6,6 +6,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/UnitFactory.h"
@@ -34,7 +35,9 @@ SofQWNormalisedPolygon::SofQWNormalisedPolygon()
 /**
  * @return the name of the Algorithm
  */
-const std::string SofQWNormalisedPolygon::name() const { return "SofQWNormalisedPolygon"; }
+const std::string SofQWNormalisedPolygon::name() const {
+  return "SofQWNormalisedPolygon";
+}
 
 /**
  * @return the version number of the Algorithm
@@ -44,12 +47,16 @@ int SofQWNormalisedPolygon::version() const { return 1; }
 /**
  * @return the category list for the Algorithm
  */
-const std::string SofQWNormalisedPolygon::category() const { return "Inelastic"; }
+const std::string SofQWNormalisedPolygon::category() const {
+  return "Inelastic";
+}
 
 /**
  * Initialize the algorithm
  */
-void SofQWNormalisedPolygon::init() { SofQW::createCommonInputProperties(*this); }
+void SofQWNormalisedPolygon::init() {
+  SofQW::createCommonInputProperties(*this);
+}
 
 /**
  * Execute the algorithm.
@@ -150,7 +157,8 @@ void SofQWNormalisedPolygon::exec() {
 
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
-      this->rebinToFractionalOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+      FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
+                                                   outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
@@ -173,7 +181,7 @@ void SofQWNormalisedPolygon::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   outputWS->finalize();
-  this->normaliseOutput(outputWS, inputWS);
+  FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress);
 
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
@@ -190,8 +198,10 @@ void SofQWNormalisedPolygon::exec() {
  * @param azimuthal :: The value of the azimuthual angle
  * @return The value of Q
  */
-double SofQWNormalisedPolygon::calculateQ(const double efixed, int emode, const double deltaE,
-                          const double twoTheta, const double azimuthal) const {
+double SofQWNormalisedPolygon::calculateQ(const double efixed, int emode,
+                                          const double deltaE,
+                                          const double twoTheta,
+                                          const double azimuthal) const {
   double ki = 0.0;
   double kf = 0.0;
   if (emode == 1) {
@@ -294,8 +304,8 @@ void SofQWNormalisedPolygon::initAngularCachesNonPSD(
  * it calculates the two-theta and azimuthal angle widths.
  * @param workspace : the workspace containing the needed detector information
  */
-void
-SofQWNormalisedPolygon::initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace) {
+void SofQWNormalisedPolygon::initAngularCachesPSD(
+    const API::MatrixWorkspace_const_sptr &workspace) {
   // Trigger a build of the nearst neighbors outside the OpenMP loop
   const int numNeighbours = 4;
   const size_t nHistos = workspace->getNumberHistograms();
@@ -367,10 +377,9 @@ SofQWNormalisedPolygon::initAngularCachesPSD(const API::MatrixWorkspace_const_sp
  * parameters
  *  @return A pointer to the newly-created workspace
  */
-RebinnedOutput_sptr
-SofQWNormalisedPolygon::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
-                             const std::vector<double> &binParams,
-                             std::vector<double> &newAxis) {
+RebinnedOutput_sptr SofQWNormalisedPolygon::setUpOutputWorkspace(
+    API::MatrixWorkspace_const_sptr inputWorkspace,
+    const std::vector<double> &binParams, std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
   MantidVecPtr xAxis;
   xAxis.access() = inputWorkspace->readX(0);
