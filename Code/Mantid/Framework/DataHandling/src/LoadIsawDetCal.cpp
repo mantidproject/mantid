@@ -152,7 +152,7 @@ void LoadIsawDetCal::exec() {
   }
   std::set<int> uniqueBanks; // for CORELLI and WISH
   std::string bankPart = "bank";
-  if (inst->getName() .compare("WISH") == 0) bankPart = "WISHpanel";
+  if (instname .compare("WISH") == 0) bankPart = "WISHpanel";
   if (detList.empty())
   {
     // Get all children
@@ -177,7 +177,7 @@ void LoadIsawDetCal::exec() {
       std::stringstream(line) >> count >> mL1 >> mT0;
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
-      if (inst->getName() .compare("WISH") == 0) center(0.0, 0.0, -0.01 * mL1, "undulator", inname);
+      if (instname .compare("WISH") == 0) center(0.0, 0.0, -0.01 * mL1, "undulator", inname);
       else center(0.0, 0.0, -0.01 * mL1, "moderator", inname);
       // mT0 and time of flight are both in microsec
       IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
@@ -221,9 +221,10 @@ void LoadIsawDetCal::exec() {
         idnum = i;
     if (idnum >= 0) det = detList[idnum];
     if (det) {
+      detname = det->getName();
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
       alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
-      alg1->setProperty("ComponentName", det->getName());
+      alg1->setProperty("ComponentName", detname);
       // Convert from cm to m
       alg1->setProperty("ScaleX", 0.01 * width / det->xsize());
       alg1->setProperty("ScaleY", 0.01 * height / det->ysize());
@@ -233,7 +234,6 @@ void LoadIsawDetCal::exec() {
       x *= 0.01;
       y *= 0.01;
       z *= 0.01;
-      detname = det->getName();
       center(x, y, z, detname, inname);
 
       // These are the ISAW axes
@@ -306,7 +306,7 @@ void LoadIsawDetCal::exec() {
     // Retrieve it
     boost::shared_ptr<const IComponent> comp =
         inst->getComponentByName(bankName);
-    if (inst->getName() .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
+    if (instname .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
       boost::shared_ptr<const Geometry::ICompAssembly> asmb =
@@ -321,7 +321,7 @@ void LoadIsawDetCal::exec() {
       x *= 0.01;
       y *= 0.01;
       z *= 0.01;
-      detname = comp->getName();
+      detname = comp->getFullName();
       center(x, y, z, detname, inname);
 
       // These are the ISAW axes
@@ -342,7 +342,7 @@ void LoadIsawDetCal::exec() {
       double angle1 = oX.angle(rX);
       angle1 *= 180.0 / M_PI;
       //TODO: find out why this is needed for WISH
-      if (inst->getName() == "WISH") angle1 += 180.0;
+      if (instname == "WISH") angle1 += 180.0;
       // Create the first quaternion
       Quat Q1(angle1, ax1);
 
