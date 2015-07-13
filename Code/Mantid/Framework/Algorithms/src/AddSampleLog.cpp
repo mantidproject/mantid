@@ -28,7 +28,6 @@ void AddSampleLog::init() {
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
-  declareProperty("LogUnit", "", "The units of the log");
 
   std::vector<std::string> propOptions;
   propOptions.push_back("String");
@@ -37,6 +36,7 @@ void AddSampleLog::init() {
   declareProperty("LogType", "String",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
+  declareProperty("LogUnit", "", "The units of the log");
 }
 
 void AddSampleLog::exec() {
