@@ -11,7 +11,7 @@ MDUnit::MDUnit() {}
 
 bool MDUnit::operator==(const MDUnit &other) const
 {
-    return this->canConvertTo(other);
+    return typeid(*this) == typeid(other) && this->canConvertTo(other);
 }
 
 //----------------------------------------------------------------------------------------------

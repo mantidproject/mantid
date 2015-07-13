@@ -25,14 +25,14 @@ public:
       ReciprocalLatticeUnit unit;
       LabelUnit other("MeV");
       TSM_ASSERT("Conversion forbidden", !unit.canConvertTo(other));
-      TS_ASSERT_DIFFERS(unit, other);
+      TSM_ASSERT_DIFFERS("Different types", unit, other);
   }
 
   void test_RLU_canConvertTo_InverseAngstroms(){
       ReciprocalLatticeUnit unit;
       InverseAngstromsUnit other;
       TSM_ASSERT("Simple conversion possible", unit.canConvertTo(other));
-      TS_ASSERT(unit == other);
+      TSM_ASSERT_DIFFERS("Convertable, but not the same", unit, other);
   }
 
   void test_InverseAngstroms_getUnitLabel(){
@@ -44,14 +44,14 @@ public:
       InverseAngstromsUnit unit;
       LabelUnit other("MeV");
       TSM_ASSERT("Conversion forbidden", !unit.canConvertTo(other));
-      TS_ASSERT_DIFFERS(unit, other);
+      TSM_ASSERT_DIFFERS("Different types", unit, other);
   }
 
   void test_InverseAnstroms_canConvertTo_RLU(){
       ReciprocalLatticeUnit unit;
       InverseAngstromsUnit other;
       TSM_ASSERT("Simple conversion possible", unit.canConvertTo(other));
-      TS_ASSERT(unit == other);
+      TSM_ASSERT_DIFFERS("Convertable, but not the same", unit, other);
   }
 
   void test_labelUnit_getUnitLabel(){
@@ -67,7 +67,7 @@ public:
       LabelUnit a("Bar");
       LabelUnit b("Bar");
       TS_ASSERT(a.canConvertTo(b));
-      TS_ASSERT(a == b);
+      TSM_ASSERT_EQUALS("Convertable, and same type", a, b);
   }
 
   void test_LabelUnit_canConvert_to_other(){

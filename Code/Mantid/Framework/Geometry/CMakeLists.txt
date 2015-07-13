@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
 	src/Crystal/BraggScatterer.cpp
 	src/Crystal/BraggScattererFactory.cpp
@@ -68,6 +69,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDPlane.cpp
 	src/MDGeometry/MDPlaneImplicitFunction.cpp
 	src/MDGeometry/NullImplicitFunction.cpp
+	src/MDGeometry/QLab.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -194,6 +196,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDDimensionExtents.h
+	inc/MantidGeometry/MDGeometry/MDFrame.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
@@ -205,6 +208,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
+	inc/MantidGeometry/MDGeometry/QLab.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
@@ -256,8 +260,8 @@ set ( TEST_FILES
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
 	ConventionalCellTest.h
-	ConvexPolygonTest.h
 	ConvexPolygonIteratorTest.h
+	ConvexPolygonTest.h
 	CrystalStructureTest.h
 	CyclicGroupTest.h
 	CylinderTest.h
@@ -312,6 +316,7 @@ set ( TEST_FILES
 	PolygonEdgeTest.h
 	PolygonIntersectionTest.h
 	ProductOfCyclicGroupsTest.h
+	QLabTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
