@@ -71,6 +71,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDPlaneImplicitFunction.cpp
 	src/MDGeometry/NullImplicitFunction.cpp
 	src/MDGeometry/QLab.cpp
+	src/MDGeometry/QSample.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -211,6 +212,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/QLab.h
+	inc/MantidGeometry/MDGeometry/QSample.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
@@ -320,6 +322,7 @@ set ( TEST_FILES
 	PolygonIntersectionTest.h
 	ProductOfCyclicGroupsTest.h
 	QLabTest.h
+	QSampleTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
