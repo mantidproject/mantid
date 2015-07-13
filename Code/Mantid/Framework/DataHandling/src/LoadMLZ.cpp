@@ -420,7 +420,6 @@ namespace DataHandling
    * Loads all the spectra into the workspace, including that from the monitor
    *
    * @param entry :: The Nexus entry
-   * @param ElasticPeakPosition :: If -1 uses this value as the elastic peak position at the detector.
    */
   void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry)
   {
