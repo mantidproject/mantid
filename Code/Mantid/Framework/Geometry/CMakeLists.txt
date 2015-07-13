@@ -58,6 +58,7 @@ set ( SRC_FILES
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
+	src/MDGeometry/HKL.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
@@ -192,6 +193,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
+	inc/MantidGeometry/MDGeometry/HKL.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
@@ -271,6 +273,7 @@ set ( TEST_FILES
 	GeneralTest.h
 	GoniometerTest.h
 	GroupTest.h
+	HKLTest.h
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h

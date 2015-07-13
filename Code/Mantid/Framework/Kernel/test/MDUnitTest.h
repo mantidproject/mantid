@@ -77,6 +77,13 @@ public:
       TS_ASSERT_DIFFERS(a, b);
   }
 
+  void test_cloneLabelUnit(){
+      LabelUnit a("CustomUnit");
+      LabelUnit* b = a.clone();
+      TS_ASSERT_EQUALS(a, *b);
+      delete b;
+  }
+
 
 
 

@@ -9,9 +9,8 @@ namespace Kernel {
  */
 MDUnit::MDUnit() {}
 
-bool MDUnit::operator==(const MDUnit &other) const
-{
-    return typeid(*this) == typeid(other) && this->canConvertTo(other);
+bool MDUnit::operator==(const MDUnit &other) const {
+  return typeid(*this) == typeid(other) && this->canConvertTo(other);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -22,15 +21,9 @@ MDUnit::~MDUnit() {}
 //----------------------------------------------------------------------------------------------
 // QUnit
 //----------------------------------------------------------------------------------------------
-QUnit::~QUnit()
-{
+QUnit::~QUnit() {}
 
-}
-
-bool QUnit::isQUnit() const
-{
-    return true;
-}
+bool QUnit::isQUnit() const { return true; }
 
 //----------------------------------------------------------------------------------------------
 // End QUnit
@@ -39,43 +32,36 @@ bool QUnit::isQUnit() const
 //----------------------------------------------------------------------------------------------
 // RLU
 //----------------------------------------------------------------------------------------------
-UnitLabel ReciprocalLatticeUnit::getUnitLabel() const
-{
-    return Units::Symbol::RLU;
+UnitLabel ReciprocalLatticeUnit::getUnitLabel() const {
+  return Units::Symbol::RLU;
 }
 
-bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const
-{
-    return other.isQUnit();
+bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const {
+  return other.isQUnit();
 }
 
-ReciprocalLatticeUnit::~ReciprocalLatticeUnit()
-{
+ReciprocalLatticeUnit* ReciprocalLatticeUnit::clone() const {return new ReciprocalLatticeUnit;}
 
-}
+ReciprocalLatticeUnit::~ReciprocalLatticeUnit() {}
 //----------------------------------------------------------------------------------------------
 // End RLU
 //----------------------------------------------------------------------------------------------
-
 
 //----------------------------------------------------------------------------------------------
 // Inverse Angstrom Unit
 //----------------------------------------------------------------------------------------------
 
-UnitLabel InverseAngstromsUnit::getUnitLabel() const
-{
-    return Units::Symbol::InverseAngstrom;
+UnitLabel InverseAngstromsUnit::getUnitLabel() const {
+  return Units::Symbol::InverseAngstrom;
 }
 
-bool InverseAngstromsUnit::canConvertTo(const MDUnit &other) const
-{
-    return other.isQUnit();
+bool InverseAngstromsUnit::canConvertTo(const MDUnit &other) const {
+  return other.isQUnit();
 }
 
-InverseAngstromsUnit::~InverseAngstromsUnit()
-{
+InverseAngstromsUnit::~InverseAngstromsUnit() {}
 
-}
+InverseAngstromsUnit* InverseAngstromsUnit::clone() const {return new InverseAngstromsUnit;}
 
 //----------------------------------------------------------------------------------------------
 // Inverse Angstrom Unit
@@ -85,34 +71,23 @@ InverseAngstromsUnit::~InverseAngstromsUnit()
 //  LabelUnit
 //----------------------------------------------------------------------------------------------
 
-LabelUnit::LabelUnit(const std::string& unitLabel) : m_unitLabel(unitLabel) {
+LabelUnit::LabelUnit(const std::string &unitLabel) : m_unitLabel(unitLabel) {}
 
+UnitLabel LabelUnit::getUnitLabel() const { return UnitLabel(m_unitLabel); }
+
+bool LabelUnit::canConvertTo(const MDUnit &other) const {
+  return this->getUnitLabel() == other.getUnitLabel();
 }
 
-UnitLabel LabelUnit::getUnitLabel() const
-{
-    return UnitLabel(m_unitLabel);
-}
+bool LabelUnit::isQUnit() const { return false; }
 
-bool LabelUnit::canConvertTo(const MDUnit &other) const
-{
-    return this->getUnitLabel() == other.getUnitLabel();
-}
+LabelUnit::~LabelUnit() {}
 
-bool LabelUnit::isQUnit() const
-{
-    return false;
-}
-
-LabelUnit::~LabelUnit()
-{
-
-}
+LabelUnit* LabelUnit::clone() const {return new LabelUnit(m_unitLabel);}
 
 //----------------------------------------------------------------------------------------------
 // End RLU
 //----------------------------------------------------------------------------------------------
-
 
 } // namespace Kernel
 } // namespace Mantid

@@ -1,15 +1,15 @@
-#ifndef MANTID_GEOMETRY_MDFRAME_H_
-#define MANTID_GEOMETRY_MDFRAME_H_
-
-#include "MantidKernel/System.h"
+#ifndef MANTID_GEOMETRY_HKL_H_
+#define MANTID_GEOMETRY_HKL_H_
 
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/System.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
-/** MDFrame : The coordinate frame for a dimension, or set of dimensions in a multidimensional workspace.
+/** HKL : HKL MDFrame
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -32,16 +32,27 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDFrame {
+class DLLExport HKL : public MDFrame {
 public:
-    virtual Mantid::Kernel::UnitLabel getUnitLabel() const = 0;
-    virtual const Mantid::Kernel::MDUnit& getMDUnit() const = 0;
-    virtual bool canConvertTo(const Mantid::Kernel::MDUnit& otherUnit) const = 0;
-    virtual std::string name() const = 0;
+  HKL(const HKL& other);
+  HKL& operator=(const HKL& other);
+  HKL(std::unique_ptr<Kernel::MDUnit>& unit);
+  HKL(Kernel::MDUnit* unit);
+  virtual ~HKL();
+  static const std::string HKLName;
 
+  // MDFrame interface
+  Kernel::UnitLabel getUnitLabel() const;
+  const Kernel::MDUnit& getMDUnit() const;
+  bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
+  std::string name() const;
+
+private:
+
+  std::unique_ptr<Kernel::MDUnit> m_unit;
 };
 
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_MDFRAME_H_ */
+#endif /* MANTID_GEOMETRY_HKL_H_ */

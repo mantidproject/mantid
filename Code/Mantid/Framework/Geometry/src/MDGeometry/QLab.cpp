@@ -23,7 +23,7 @@ Kernel::UnitLabel QLab::getUnitLabel() const
     return m_unit->getUnitLabel();
 }
 
-Kernel::MDUnit QLab::getMDUnit() const
+const Kernel::MDUnit& QLab::getMDUnit() const
 {
     return *m_unit;
 }

@@ -38,7 +38,7 @@ public:
   QLab();
   virtual ~QLab();
   Mantid::Kernel::UnitLabel getUnitLabel() const;
-  Mantid::Kernel::MDUnit getMDUnit() const;
+  const Mantid::Kernel::MDUnit& getMDUnit() const;
   bool canConvertTo(const Mantid::Kernel::MDUnit& otherUnit) const;
   virtual std::string name() const;
 
