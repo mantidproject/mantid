@@ -13,6 +13,7 @@
 
 #include "vtkNew.h"
 #include "vtkStructuredGrid.h"
+#include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
 
 using Mantid::API::IMDWorkspace;
@@ -115,74 +116,69 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   coord_t incrementZ = (maxZ - minZ) / static_cast<coord_t>(nBinsZ);
 
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-  vtkNew<vtkPoints> points;
-  points->Allocate(static_cast<int>(imageSize));
-
-  vtkNew<vtkDoubleArray> signal;
-  signal->SetName(vtkDataSetFactory::ScalarName.c_str());
-  signal->SetNumberOfComponents(1);
-  signal->Allocate(imageSize);
   
   vtkNew<vtkStructuredGrid> visualDataSet;
   visualDataSet->SetDimensions(nBinsX+1,nBinsY+1,nBinsZ+1);
 
-  const int nPointsX = nBinsX + 1;
-  const int nPointsY = nBinsY + 1;
-  const int nPointsZ = nBinsZ + 1;
-
-  CPUTimer tim;
-
-  /* The idea of the next chunk of code is that you should only
-   create the points that will be needed; so an array of pointNeeded
-   is set so that all required vertices are marked, and created in a second
-   step. */
+  const int nPointsX = nBinsX+1;
+  const int nPointsY = nBinsY+1;
+  const int nPointsZ = nBinsZ+1;
 
   // Array with true where the voxel should be shown
-  double progressFactor = 0.5 / double(nBinsZ);
+  double progressFactor = 0.5 / double(imageSize);
   double progressOffset = 0.5;
 
-  boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-      dynamic_cast<MDHistoWorkspaceIterator *>(createIteratorWithNormalization(
-          m_normalizationOption, m_workspace.get())));
-  vtkIdType index = 0;
-
-  for (int z = 0; z < nBinsZ; z++) {
-    // Report progress updates for the first 50%
-    progressUpdate.eventRaised(double(z) * progressFactor);
-    for (int y = 0; y < nBinsY; y++) {
-      for (int x = 0; x < nBinsX; x++) {
-        /* NOTE: It is very important to match the ordering of the two arrays
-         * (the one used in MDHistoWorkspace and voxelShown/pointNeeded).
-         * If you access the array in the wrong way and can't cache it on L1/L2
-         * cache, I got a factor of 8x slowdown.
-         */
-        // index = x + (nBinsX * y) + (nBinsX*nBinsY*z);
-
-        size_t linearIndex = 0;
-        if (nDims == 4) {
-          linearIndex = x + (indexMultiplier[0] * y) + (indexMultiplier[1] * z)
-                         + (timestep * indexMultiplier[2]);
-        } else {
-          linearIndex = x + (indexMultiplier[0] * y) + (indexMultiplier[1] * z);
-        }
-        iterator->jumpTo(linearIndex);
-        const double signalScalar =
-            iterator->getNormalizedSignal(); // Normalized by the requested
-                                             // method applied above.
-        signal->InsertNextValue(signalScalar);
-        
-        bool maskValue = (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar));
-        if (maskValue)
-        {
-          visualDataSet->BlankCell(index);
-        }
-        index++;
-      }
-    }
+  std::size_t offset = 0;
+  if (nDims == 4)
+  {
+    offset = timestep * indexMultiplier[2];
   }
 
-  //std::cout << tim << " to check all the signal values." << std::endl;
+  if(m_normalizationOption == VATES::NoNormalization)
+  {
+    vtkNew<vtkDoubleArray> signal;
+    signal->SetName(vtkDataSetFactory::ScalarName.c_str());
+    signal->SetArray(m_workspace->getSignalArray()+offset,imageSize,1);
 
+    for (vtkIdType index = 0; index < imageSize; ++index) {
+      progressUpdate.eventRaised(double(index) * progressFactor);
+      double signalScalar = signal->GetValue(index);
+      bool maskValue = (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar));
+      if (maskValue)
+      {
+        visualDataSet->BlankCell(index);
+      }
+    }
+
+    visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+  }
+  else
+  {
+    vtkNew<vtkFloatArray> signal;
+    signal->SetName(vtkDataSetFactory::ScalarName.c_str());
+    signal->Allocate(static_cast<int>(imageSize));
+
+    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
+           dynamic_cast<MDHistoWorkspaceIterator *>(createIteratorWithNormalization(
+           m_normalizationOption, m_workspace.get())));
+    iterator->jumpTo(offset);
+    for (vtkIdType index = 0; index < imageSize; ++index) {
+      progressUpdate.eventRaised(double(index) * progressFactor);
+      // Normalized by the requested method applied above.
+      const double signalScalar = iterator->getNormalizedSignal();
+      signal->InsertNextValue(signalScalar);
+      bool maskValue = (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar));
+      if (maskValue)
+      {
+        visualDataSet->BlankCell(index);
+      }
+      iterator->next();
+    }
+    visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
+  }
+
+  vtkNew<vtkPoints> points;
+  points->Allocate(static_cast<int>(imageSize));
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
   Mantid::API::CoordTransform const *transform = NULL;
@@ -193,7 +189,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   Mantid::coord_t out[3];
 
   progressFactor = 0.5 / static_cast<double>(nPointsZ);
-    
+
   for (int z = 0; z < nPointsZ; z++) {
     // Report progress updates for the last 50%
     progressUpdate.eventRaised(double(z) * progressFactor + progressOffset);
@@ -205,13 +201,6 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
       for (int x = 0; x < nPointsX; x++) {
         // Create the point only when needed
         in[0] = (minX + (static_cast<coord_t>(x) * incrementX)); // Calculate increment in x;
-        size_t linearIndex = 0;
-        if (nDims == 4) {
-           linearIndex = x + (indexMultiplier[0] * y) + (indexMultiplier[1] * z)
-           + (timestep * indexMultiplier[2]);
-        } else {
-          linearIndex = x + (indexMultiplier[0] * y) + (indexMultiplier[1] * z);
-        }
         if (transform)
         {
             transform->apply(in, out);
@@ -226,7 +215,6 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
     
   visualDataSet->SetPoints(points.GetPointer());
-  visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
   visualDataSet->Register(NULL);
   visualDataSet->Squeeze();
 
