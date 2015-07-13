@@ -121,6 +121,8 @@ public:
   virtual void loadExperimentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
   virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
+  /// Load the instrument from an open NeXus file without reading any parameters
+  virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file);
   /// Load instrument parameters from an open Nexus file in Instument group if found there
   virtual void loadInstrumentParametersNexus ( ::NeXus::File *file, std::string &parameterStr);
 
@@ -166,6 +168,12 @@ private:
                              const std::string &name,
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
+
+  /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
+  void loadEmbeddedInstrumentInfoNexus( ::NeXus::File *file, std::string &instrumentName, std::string &instrumentXML );
+
+  /// Set the instrument given the name and XML leading from IDF file if XML string is empty
+  void setInstumentFromXML( const std::string& nxFilename, std::string &instrumentName, std::string &instrumentXML );
 
   //Loads the xml from an instrument file with some basic error handling
   std::string loadInstrumentXML(const std::string& filename);
