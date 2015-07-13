@@ -28,6 +28,7 @@ void AddSampleLog::init() {
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
+  declareProperty("LogUnit", "", "The units of the log");
 
   std::vector<std::string> propOptions;
   propOptions.push_back("String");
@@ -48,6 +49,7 @@ void AddSampleLog::exec() {
   // get the data that the user wants to add
   std::string propName = getProperty("LogName");
   std::string propValue = getProperty("LogText");
+  std::string propUnit = getProperty("LogUnit");
   std::string propType = getPropertyValue("LogType");
 
   // Remove any existing log
@@ -57,6 +59,7 @@ void AddSampleLog::exec() {
 
   if (propType == "String") {
     theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
+    theRun.getProperty(propName)->setUnits(propUnit);
     return;
   }
 
@@ -94,6 +97,7 @@ void AddSampleLog::exec() {
       theRun.addLogData(tsp);
     }
   }
+  theRun.getProperty(propName)->setUnits(propUnit);
 }
 
 } // namespace Algorithms
