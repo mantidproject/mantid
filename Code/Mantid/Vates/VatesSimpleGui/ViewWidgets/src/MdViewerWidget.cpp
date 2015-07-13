@@ -56,6 +56,7 @@
 #include <pqServerManagerModel.h>
 #include <pqStatusBar.h>
 #include <vtkCamera.h>
+#include <vtkMathTextUtilities.h>
 #include <vtkPVOrthographicSliceView.h>
 #include <vtkPVXMLElement.h>
 #include <vtkSMDoubleVectorProperty.h>
@@ -1172,6 +1173,9 @@ void MdViewerWidget::shutdown()
 {
   // This seems to cure a XInitThreads error.
   pqPVApplicationCore::instance()->deleteLater();
+  // Ensure that the MathText utilties are cleaned up as they call Python cleanup code
+  // and we need to make sure this can happen before MantidPlot shuts down the interpreter
+  vtkMathTextUtilitiesCleanup();
 }
 
 /**
