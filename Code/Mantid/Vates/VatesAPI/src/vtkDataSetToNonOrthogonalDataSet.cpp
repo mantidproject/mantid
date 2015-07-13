@@ -13,12 +13,14 @@
 #include <vtkFloatArray.h>
 #include <vtkDoubleArray.h>
 #include <vtkMatrix3x3.h>
+#include "vtkVector.h"
 #include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkDataObject.h>
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
+#include <vtkPVChangeOfBasisHelper.h>
 
 #include <boost/algorithm/string/find.hpp>
 #include <stdexcept>
@@ -26,9 +28,11 @@
 using namespace Mantid;
 namespace {
 
-void addChangeOfBasisMatrixToFieldData(vtkDataObject *dataObject,
-                                       const MantidVec &u, const MantidVec &v,
-                                       const MantidVec &w) {
+Mantid::Kernel::Logger g_log("vtkDataSetToNonOrthogonalDataSet");
+
+void addChangeOfBasisMatrixToFieldData(
+    vtkDataObject *dataObject, const MantidVec &u, const MantidVec &v,
+    const MantidVec &w, const std::array<double, 6> &boundingBox) {
 
   if (!dataObject) {
     throw std::invalid_argument("Change of basis needs a vtkDataObject");
@@ -44,21 +48,20 @@ void addChangeOfBasisMatrixToFieldData(vtkDataObject *dataObject,
   }
 
   vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-      vtkSmartPointer<vtkMatrix4x4>::New();
-  cobMatrix->Identity();
-  std::copy(u.begin(), u.end(), cobMatrix->Element[0]);
-  std::copy(v.begin(), v.end(), cobMatrix->Element[1]);
-  std::copy(w.begin(), w.end(), cobMatrix->Element[2]);
+      vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(
+          vtkVector3d(&u[0]), vtkVector3d(&v[0]), vtkVector3d(&w[0]));
 
-  cobMatrix->Transpose();
+  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(dataObject,
+                                                                   cobMatrix)) {
+    g_log.warning("The Change-of-Basis-Matrix could not be added to the field "
+                  "data of the data set.\n");
+  }
 
-  vtkNew<vtkDoubleArray> cobArray;
-  cobArray->SetName("ChangeOfBasisMatrix");
-  cobArray->SetNumberOfComponents(16);
-  cobArray->SetNumberOfTuples(1);
-  std::copy(&cobMatrix->Element[0][0], (&cobMatrix->Element[0][0]) + 16,
-            cobArray->GetPointer(0));
-  dataObject->GetFieldData()->AddArray(cobArray.GetPointer());
+  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(dataObject,
+                                                       &boundingBox[0])) {
+    g_log.warning("The bounding box could not be added to the field data of "
+                  "the data set.\n");
+  }
 }
 
 }
@@ -127,6 +130,14 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   if (boost::algorithm::find_first(wsType, "MDHistoWorkspace")) {
     API::IMDHistoWorkspace_const_sptr infoWs =
         boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
+
+    m_boundingBox[0] = infoWs->getDimension(0)->getMinimum();
+    m_boundingBox[1] = infoWs->getDimension(0)->getMaximum();
+    m_boundingBox[2] = infoWs->getDimension(1)->getMinimum();
+    m_boundingBox[3] = infoWs->getDimension(1)->getMaximum();
+    m_boundingBox[4] = infoWs->getDimension(2)->getMinimum();
+    m_boundingBox[5] = infoWs->getDimension(2)->getMaximum();
+
     m_numDims = infoWs->getNumDims();
     m_coordType = infoWs->getSpecialCoordinateSystem();
     if (Kernel::HKL != m_coordType) {
@@ -331,7 +342,8 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat) {
 void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
 {
   // Create and add the change of basis matrix
-  addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ);
+  addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ,
+                                    m_boundingBox);
 }
 
 } // namespace VATES
