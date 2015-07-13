@@ -36,8 +36,9 @@ class DLLExport MDUnit {
 public:
   MDUnit();
   virtual UnitLabel getUnitLabel() const = 0;
-  virtual bool canConvertTo(MDUnit &other) const = 0;
+  virtual bool canConvertTo(const MDUnit &other) const = 0;
   virtual bool isQUnit() const = 0;
+  bool operator==(const MDUnit& other) const;
   virtual ~MDUnit();
 };
 
@@ -52,7 +53,7 @@ public:
 class DLLExport ReciprocalLatticeUnit : public QUnit {
 public:
   UnitLabel getUnitLabel() const;
-  bool canConvertTo(MDUnit &other) const;
+  bool canConvertTo(const MDUnit &other) const;
   virtual ~ReciprocalLatticeUnit();
 };
 
@@ -60,7 +61,7 @@ public:
 class DLLExport InverseAngstromsUnit : public QUnit {
 public:
   UnitLabel getUnitLabel() const;
-  bool canConvertTo(MDUnit &other) const;
+  bool canConvertTo(const MDUnit &other) const;
   virtual ~InverseAngstromsUnit();
 };
 
@@ -70,7 +71,7 @@ private:
 public:
   LabelUnit(const std::string& unitLabel);
   UnitLabel getUnitLabel() const;
-  bool canConvertTo(MDUnit &other) const;
+  bool canConvertTo(const MDUnit &other) const;
   bool isQUnit() const;
   virtual ~LabelUnit();
 };

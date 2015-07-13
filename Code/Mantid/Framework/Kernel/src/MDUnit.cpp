@@ -9,6 +9,11 @@ namespace Kernel {
  */
 MDUnit::MDUnit() {}
 
+bool MDUnit::operator==(const MDUnit &other) const
+{
+    return this->canConvertTo(other);
+}
+
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
@@ -39,7 +44,7 @@ UnitLabel ReciprocalLatticeUnit::getUnitLabel() const
     return Units::Symbol::RLU;
 }
 
-bool ReciprocalLatticeUnit::canConvertTo(MDUnit &other) const
+bool ReciprocalLatticeUnit::canConvertTo(const MDUnit &other) const
 {
     return other.isQUnit();
 }
@@ -62,7 +67,7 @@ UnitLabel InverseAngstromsUnit::getUnitLabel() const
     return Units::Symbol::InverseAngstrom;
 }
 
-bool InverseAngstromsUnit::canConvertTo(MDUnit &other) const
+bool InverseAngstromsUnit::canConvertTo(const MDUnit &other) const
 {
     return other.isQUnit();
 }
@@ -89,7 +94,7 @@ UnitLabel LabelUnit::getUnitLabel() const
     return UnitLabel(m_unitLabel);
 }
 
-bool LabelUnit::canConvertTo(MDUnit &other) const
+bool LabelUnit::canConvertTo(const MDUnit &other) const
 {
     return this->getUnitLabel() == other.getUnitLabel();
 }
