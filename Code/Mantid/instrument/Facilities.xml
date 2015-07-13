@@ -631,7 +631,7 @@
   <instrument name="TOFTOF">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Time-of-flight Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
   </instrument>
 </facility>
 
