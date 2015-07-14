@@ -14,8 +14,16 @@ public:
   GlobalInterpreterLock();
   /// Destructor
   ~GlobalInterpreterLock();
+
+  /// @name Static Helpers
+  ///@{
   /// Is this thread the active thread
-  static bool thisPyThreadIsActive();
+  static bool pyThreadIsActive();
+  /// Call PyGILState_Ensure
+  static PyGILState_STATE acquire();
+  /// Call PyGILState_Release
+  static void release(PyGILState_STATE tstate);
+  ///@}
 
 private:
   GlobalInterpreterLock(const GlobalInterpreterLock&);
