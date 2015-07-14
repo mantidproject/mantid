@@ -3,33 +3,35 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
-using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataObjects;
+
 
 class ConvertToMatrixWorkspaceTest : public CxxTest::TestSuite
 {
 public:
   void testName()
   {
+	Mantid::Algorithms::ConvertToMatrixWorkspace cloner;
     TS_ASSERT_EQUALS( cloner.name(), "ConvertToMatrixWorkspace" )
   }
 
   void testVersion()
   {
+	Mantid::Algorithms::ConvertToMatrixWorkspace cloner;
     TS_ASSERT_EQUALS( cloner.version(), 1 )
   }
 
   void testInit()
   {
+    Mantid::Algorithms::ConvertToMatrixWorkspace cloner;
     TS_ASSERT_THROWS_NOTHING( cloner.initialize() )
     TS_ASSERT( cloner.isInitialized() )
   }
@@ -37,18 +39,19 @@ public:
 
   void testExec_2D_to_2D()
   {
+	Mantid::Algorithms::ConvertToMatrixWorkspace cloner;
     if ( !cloner.isInitialized() ) cloner.initialize();
 	//create 2D input workspace
-	MatrixWorkspace_sptr in = WorkspaceCreationHelper::Create2DWorkspace(5,10);
+	Mantid::API::MatrixWorkspace_sptr in = WorkspaceCreationHelper::Create2DWorkspace(5,10);
 	//add instance to variable 'in' 
-	AnalysisDataService::Instance().addOrReplace("in", in);
+	Mantid::API::AnalysisDataService::Instance().addOrReplace("in", in);
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("InputWorkspace","in") )
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("OutputWorkspace","out") )
     TS_ASSERT( cloner.execute() )
 	
-	MatrixWorkspace_sptr out;
+	Mantid::API::MatrixWorkspace_sptr out;
 	//retrieve OutputWorkspace produced by execute and set it to out
-	TS_ASSERT_THROWS_NOTHING( out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out") );
+	TS_ASSERT_THROWS_NOTHING( out = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("out") );
 	TS_ASSERT(out);
 	if (!out) return;
 	
@@ -61,22 +64,23 @@ public:
     checker.execute();
 
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
-	AnalysisDataService::Instance().remove("in");
+	Mantid::API::AnalysisDataService::Instance().remove("in");
   }
 
   void testExec_Event_to_2D()
   {
+	Mantid::Algorithms::ConvertToMatrixWorkspace cloner;
     if ( !cloner.isInitialized() ) cloner.initialize();
 
-    EventWorkspace_sptr in = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10);
-    AnalysisDataService::Instance().addOrReplace("in", in);
+	Mantid::DataObjects::EventWorkspace_sptr in = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("in", in);
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("InputWorkspace", "in") )
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("OutputWorkspace","out") )
     TS_ASSERT( cloner.execute() )
 
-    MatrixWorkspace_sptr out;
+    Mantid::API::MatrixWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out") );
+        out = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("out") );
     TS_ASSERT(out);
     if (!out) return;
 
@@ -85,8 +89,8 @@ public:
     TS_ASSERT_EQUALS( in->getInstrument()->isParametrized(), out->getInstrument()->isParametrized());
     for (size_t i=0; i < out->getNumberHistograms(); i++)
     {
-      const ISpectrum * inSpec = in->getSpectrum(i);
-      const ISpectrum * outSpec = out->getSpectrum(i);
+      const Mantid::API::ISpectrum * inSpec = in->getSpectrum(i);
+      const Mantid::API:: ISpectrum * outSpec = out->getSpectrum(i);
       TS_ASSERT_EQUALS( inSpec->getSpectrumNo(), outSpec->getSpectrumNo());
       TS_ASSERT_EQUALS( *inSpec->getDetectorIDs().begin(), *outSpec->getDetectorIDs().begin());
       TS_ASSERT_EQUALS( in->readX(i), out->readX(i));
@@ -94,11 +98,8 @@ public:
       TS_ASSERT_EQUALS( in->readE(i), out->readE(i));
     }
 
-    AnalysisDataService::Instance().remove("in");
+    Mantid::API::AnalysisDataService::Instance().remove("in");
   }
-
-private:
-  Mantid::Algorithms::ConvertToMatrixWorkspace cloner;
 };
 
 #endif /*CONVERTTOMATRIXWORKSPACETEST_H_*/
