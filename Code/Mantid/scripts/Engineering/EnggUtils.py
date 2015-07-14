@@ -7,6 +7,8 @@ import mantid.simpleapi as sapi
 import numpy as np
 
 ENGINX_BANKS = ['', 'North', 'South', '1', '2']
+# banks (or groups) to which the pixel-by-pixel correction should be applied
+ENGINX_BANKS_FOR_PIXBYPIX_CORR = [1,2]
 
 def readInExpectedPeaks(filename, expectedGiven):
     """
@@ -21,6 +23,7 @@ def readInExpectedPeaks(filename, expectedGiven):
 
     @returns the expected peaks either from a file or input list, sorted in ascending order
     """
+
     expectedPeaksD = None
 
     if filename != "":
@@ -67,6 +70,7 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
 
     @returns list of workspace indices that can be used in mantid algorithms such as CropWorkspace.
     """
+
     indices = None
     if bank and detIndices:
         raise ValueError("It is not possible to use at the same time the input properties 'Bank' and "
@@ -189,6 +193,14 @@ def convertToDSpacing(parent, ws):
 
     @returns workspace converted to d-spacing units
     """
+    # A check to catch possible errors in an understandable way
+    expectedDim = 'Time-of-flight'
+    dimType = ws.getXDimension().getName()
+    if expectedDim != dimType:
+        raise ValueError("This function expects a workspace with %s X dimension, but "
+                         "the X dimension of the input workspace is: '%s'. This is an internal logic "
+                         "error. "% (expectedDim, dimType))
+
     alg = parent.createChildAlgorithm('ConvertUnits')
     alg.setProperty('InputWorkspace', ws)
     alg.setProperty('Target', 'dSpacing')
@@ -196,9 +208,9 @@ def convertToDSpacing(parent, ws):
     alg.execute()
     return alg.getProperty('OutputWorkspace').value
 
-def convertToTOF(parent, ws):
+def convertToToF(parent, ws):
     """
-    Converts workspace to TOF using 'ConvertUnits' as a child algorithm.
+    Converts workspace to Time-of-Flight using 'ConvertUnits' as a child algorithm.
 
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace (normally in d-spacing units) to convert to ToF
@@ -270,13 +282,12 @@ def applyVanadiumCorrection(parent, ws, vanWS):
 
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace to work on, must be a Vanadium (V-Nb) run (in/out)
-    @param ws :: workspace with Vanadium data
+    @param vanWS :: workspace with Vanadium data
     """
-
-    applySensitivityCorrection(parent, ws)
+    applySensitivityCorrection(parent, ws, vanWS)
 
     # apply this to both Engin-X banks, each with separate calculations
-    applyPixByPixCorrection(parent, ws, [1,2])
+    applyPixByPixCorrection(parent, ws, vanWS, ENGINX_BANKS_FOR_PIXBYPIX_CORR)
 
 def applySensitivityCorrection(parent, ws, vanWS):
     """
@@ -294,8 +305,10 @@ def applySensitivityCorrection(parent, ws, vanWS):
                          "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))
 
     integWS = integrateSpectra(parent, vanWS)
-    if integWS.getNumberHistograms() != ws.getNumberHistograms():
-        raise RuntimeError("Error while integrating workspace")
+    if 1 != integWS.blocksize() or integWS.getNumberHistograms() != ws.getNumberHistograms():
+        raise RuntimeError("Error while integrating workspace, the Integration algorithm "
+                           "produced a workspace with %d bins and %d spectra"%
+                           (integWS.blocksize(), integWS.getNumberHistograms()))
 
     for i in range(0, ws.getNumberHistograms()):
         scaleFactor = integWS.readY(i)[0] / vanWS.blocksize()
@@ -314,72 +327,95 @@ def applyPixByPixCorrection(parent, ws, vanWS, banks):
     # get one curve per bank, in d-spacing
     curves = fitCurvesPerBank(parent, vanWS, banks)
     # divide the spectra by their corresponding bank curve
-    divideByCurves(ws, banks, curves)
+    divideByCurves(parent, ws, curves)
 
-def divideByCurves(ws, banks, curves):
+def divideByCurves(parent, ws, curves):
     """
     Expects a workspace in ToF units. All operations are done in-place (the workspace is
     input/output). For every bank-curve pair, divides the corresponding spectra in the
     workspace by the (simulated) fitted curve. The division is done in d-spacing (the
     input workspace is converted to d-spacing inside this method, but results are converted
-    back to ToF before returning from this method).
+    back to ToF before returning from this method). The curves workspace is expected in
+    d-spacing units (since it comes from fitting a sum of spectra for a bank or group of
+    detectors).
 
+    This method is capable of dealing with workspaces with range and bin size different from
+    the range and bin size of the curves. It will rebin the curves workspace to match the
+    input 'ws' workspace (using the algorithm RebinToWorkspace).
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace with (sample) spectra to divide by curves fitted to Vanadium spectra
-
-    @param banks :: list of banks to consider (normally all the banks of the instrument)
-
-    @param curves :: fitting workspaces (in d-spacing), one per bank. Every of them is
-    expected as a fitting workspace as returned by the algorithm 'Fit': 3 spectra: original
-    data, simulated data with fit, difference
+    @param curves :: dictionary of fitting workspaces (in d-spacing), one per bank. The keys are
+    the bank identifier and the values are their fitting workspaces. The fitting workspaces are
+    expected as returned by the algorithm 'Fit': 3 spectra: original data, simulated data with fit,
+    difference between original and simulated data.
     """
     # Note that this division could use the algorithm 'Divide'
     # This is simple and more efficient than using divide workspace, which requires
     # cropping separate workspaces, dividing them separately, then appending them
     # with AppendSpectra, etc.
-    ws = convertToDSpacing(ws)
-    for bIdx, b in enumerate(banks):
+    ws = convertToDSpacing(parent, ws)
+    for b in curves:
         # process all the spectra (indices) in one bank
-        fittedCurve = curves[bIdx]
-        idxs = getWsIndicesForBank(b)
+        fittedCurve = curves[b]
+        idxs = getWsIndicesForBank(ws, b)
+
+        if not idxs:
+            pass
+
+        # This RebinToWorkspace is required here: normal runs will have narrower range of X values,
+        # and possibly different bin size, as compared to (long) Vanadium runs. Same applies to short
+        # Ceria runs (for Calibrate -non-full) and even long Ceria runs (for Calibrate-Full).
+        rebinnedFitCurve = rebinToMatchWS(parent, fittedCurve, ws)
+
         for i in idxs:
-            ws.setY(i, np.divide(ws.dataY(i), fittedCurve))
+            # take values of the second spectrum of the workspace (fit simulation - fitted curve)
+            ws.setY(i, np.divide(ws.dataY(i), rebinnedFitCurve.readY(1)))
 
-    ws = convertToTOF(ws)
+    # finally, convert back to ToF
+    ws = convertToToF(parent, ws)
 
-def fitCurvesPerBank(parent, wsVan, banks):
+def fitCurvesPerBank(parent, vanWS, banks):
     """
     Fits one curve to every bank (where for every bank the data fitted is the result of
     summing up all the spectra of the bank). The fitting is done in d-spacing.
 
     @param parent :: parent (Mantid) algorithm that wants to run this
-    @param ws :: Vanadium workspace to fit
+    @param vanWS :: Vanadium run workspace to fit, expected in TOF units as they are archived
     @param banks :: list of banks to consider which is normally all the banks of the instrument
 
-    @returns list of fit workspaces, with one per bank given in the inputs. These workspaces are
-    in d-spacing units
+    @returns dictionary of fit workspaces, with one per bank given in the inputs. These workspaces are
+    in d-spacing units. The bank identifiers are the keys, and the workspaces are the values.
     """
-    curves = []
+    curves = {}
     for b in banks:
         indices = getWsIndicesForBank(vanWS, b)
+        if not indices:
+            # no indices at all for this bank, not interested in it, don't add it to the dictionary
+            # (as when doing Calibrate (not-full)) which does CropData() the original workspace
+            continue
+
         wsToFit = cropData(parent, vanWS, indices)
         wsToFit = convertToDSpacing(parent, wsToFit)
         wsToFit = sumSpectra(parent, wsToFit)
-        fitWS = fitBankCurve(parent, vanWS)
-        curves.append(fitWS)
+
+        fitWS = fitBankCurve(parent, wsToFit, b)
+        curves.update({b: fitWS})
 
     return curves
 
-def fitBankCurve(parent, vanWS):
+def fitBankCurve(parent, vanWS, bank):
     """
     Fits a spline to a single-spectrum workspace (in d-spacing)
 
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param vanWS :: Vanadium workspace to fit (normally this contains spectra for a single bank)
+    @param bank :: instrument bank this is fitting is done for
 
     @returns fit workspace (MatrixWorkspace), with the same number of bins as the input
     workspace, and the Y values simulated from the fitted curve
     """
-    expectedDim = 'dSpacing'
+    expectedDim = 'd-Spacing'
     dimType = vanWS.getXDimension().getName()
     if expectedDim != dimType:
         raise ValueError("This algorithm expects a workspace with %s X dimension, but "
@@ -395,16 +431,34 @@ def fitBankCurve(parent, vanWS):
     # WorkspaceIndex is left to default '0' for 1D function fits
     # StartX, EndX left to default start/end of the spectrum
     fitWSName = 'vanadium_bank_fit'
-    fitAlg.setProperty('Output', fitWSName)
-    fitAlt.execute()
-    fitWS = None
-    fitWSName = fitWSName + '_Workspace'
+    fitAlg.setPropertyValue('Output', fitWSName)
+    fitAlg.setProperty('CreateOutput', True)
+    fitAlg.execute()
+
+    success = fitAlg.getProperty('OutputStatus').value
+    parent.log().information("Fitting Vanadium curve for bank %s, using function of type %s, result: %s" %
+                             (bank, functionName, success))
+
+    detailMsg = ("It seems that this algorithm failed to to fit a function of type '%s' to the summed "
+                 "spectra of a bank") % functionName
+
+    outParsPropName = 'OutputParameters'
+    params = None
     try:
-        fitWS = mtd[fitWSName]
+        params = fitAlg.getProperty(outParsPropName).value
     except RuntimeError:
-        raise RuntimeError("Could not find the workspace %s. It seems that this algorithm failed "
-                           "to fit a function '%s' to the summed spectra of a bank: %s"
-                           % (fitWSName, functionName, str(re)))
+        raise RuntimeError("Could not find the parameters workspace expected in the output property " +
+                           OutParsPropName + " from the algorithm Fit. It seems that this algorithm failed." +
+                           detailMsg)
+
+    outWSPropName = 'OutputWorkspace'
+    fitWS = None
+    try:
+        fitWS = fitAlg.getProperty(outWSPropName).value
+    except RuntimeError:
+        raise RuntimeError("Could not find the data workspace expected in the output property " +
+                           outWSPropName + ". " + detailMsg)
+
     return fitWS
 
 def integrateSpectra(parent, ws):
@@ -413,13 +467,34 @@ def integrateSpectra(parent, ws):
     Simply uses 'Integration' as a child algorithm.
 
     @param parent :: parent (Mantid) algorithm that wants to run this
-    @param ws :: workspace (MatrixWorkspace)
+    @param ws :: workspace (MatrixWorkspace) with the spectra to integrate
 
     @returns integrated workspace, or result of integrating every spectra in the input workspace
     """
     intAlg = parent.createChildAlgorithm('Integration')
-    intAlg.setPropertyValue('InputWorkspace', ws)
+    intAlg.setProperty('InputWorkspace', ws)
     intAlg.execute()
-    ws = intAlg.getPropertyValue('OutputWorkspace')
+    ws = intAlg.getProperty('OutputWorkspace').value
 
     return ws
+
+def rebinToMatchWS(parent, ws, targetWS):
+    """
+    Rebins a workspace so that its bins match those of a 'target' workspace. This simply uses the
+    algorithm RebinToWorkspace as a child. In principle this method does not care about the units
+    of the input workspaces, as long as they are in the same units.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws :: input workspace (MatrixWorkspace) to rebin (all spectra will be rebinnded)
+    @param targetWS :: workspace to match against, this fixes the data range, and number and width of the
+    bins for the workspace returned
+
+    @returns ws rebinned to resemble targetWS
+    """
+    reAlg = parent.createChildAlgorithm('RebinToWorkspace')
+    reAlg.setProperty('WorkspaceToRebin', ws)
+    reAlg.setProperty('WorkspaceToMatch', targetWS)
+    reAlg.execute()
+    reWS = reAlg.getProperty('OutputWorkspace').value
+
+    return reWS
