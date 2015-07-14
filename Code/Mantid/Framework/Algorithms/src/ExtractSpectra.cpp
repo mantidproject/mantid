@@ -222,7 +222,7 @@ struct eventFilter {
 
 template <class T>
 void copyEventsHelper(const std::vector<T> &inputEvents, std::vector<T> &outputEvents, const double xmin, const double xmax) {
-    copy_if(inputEvents.begin(), inputEvents.end(), outputEvents.begin(), eventFilter<T>(xmin, xmax));
+    copy_if(inputEvents.begin(), inputEvents.end(), std::back_inserter(outputEvents), eventFilter<T>(xmin, xmax));
 }
 
 }
