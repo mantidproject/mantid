@@ -3,6 +3,7 @@
 
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/UnitLabel.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include <memory>
 

@@ -1,16 +1,16 @@
-#ifndef MANTID_GEOMETRY_HKL_H_
-#define MANTID_GEOMETRY_HKL_H_
+#ifndef MANTID_GEOMETRY_GENERALFRAME_H_
+#define MANTID_GEOMETRY_GENERALFRAME_H_
 
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
-#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
-/** HKL : HKL MDFrame
+/** GeneralFrame : Any MDFrame that isn't related to momemtum transfer
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -33,27 +33,22 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport HKL : public MDFrame {
+class DLLExport GeneralFrame : public MDFrame {
 public:
-  HKL(const HKL& other);
-  HKL& operator=(const HKL& other);
-  HKL(std::unique_ptr<Kernel::MDUnit>& unit);
-  HKL(Kernel::MDUnit* unit);
-  virtual ~HKL();
-  static const std::string HKLName;
-
-  // MDFrame interface
+  GeneralFrame(const std::string& frameName, const std::string& unit);
+  GeneralFrame(const std::string& frameName, std::unique_ptr<Mantid::Kernel::MDUnit> unit);
+  virtual ~GeneralFrame();
   Kernel::UnitLabel getUnitLabel() const;
-  const Kernel::MDUnit& getMDUnit() const;
+  const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   std::string name() const;
-
 private:
-
-  std::unique_ptr<Kernel::MDUnit> m_unit;
+  /// Label unit
+  const std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;
+  /// Frame name
+  const std::string m_frameName;
 };
-
 } // namespace Geometry
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_HKL_H_ */
+#endif /* MANTID_GEOMETRY_GENERALFRAME_H_ */
