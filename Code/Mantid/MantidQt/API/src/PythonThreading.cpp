@@ -13,7 +13,7 @@ extern "C" {
 }
 
 //------------------------------------------------------------------------------
-// Public members
+// GlobalInterpreterLock Public members
 //------------------------------------------------------------------------------
 
 /**
@@ -38,7 +38,7 @@ GlobalInterpreterLock::~GlobalInterpreterLock() {
 }
 
 //------------------------------------------------------------------------------
-// Static helpers
+// GlobalInterpreterLock Static helpers
 //------------------------------------------------------------------------------
 
 /// @return True if this thread considered the active Python thread
@@ -60,4 +60,26 @@ PyGILState_STATE GlobalInterpreterLock::acquire() {
  */
 void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
   PyGILState_Release(tstate);
+}
+
+//------------------------------------------------------------------------------
+// PyGILStateService
+//------------------------------------------------------------------------------
+
+/**
+ * @param thread A pointer to the current QThread object that defines a thread
+ * @param tstate The value of PyGILState provided by a call to PyGILState_Ensure()
+ */
+void PyGILStateService::add(QThread* thread, PyGILState_STATE tstate) {
+  m_mapping.insert(thread, tstate);
+}
+
+/**
+ * @param thread A pointer to a QThread whose tstate should be retrieved. If found, the
+ * state is dropped from the map
+ * @return The PyGILState_STATE value associated with this thread. A default value is
+ * return if one cannot be found
+ */
+PyGILState_STATE PyGILStateService::retrieve(QThread* thread) {
+  return m_mapping.take(thread);
 }
