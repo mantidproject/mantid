@@ -64,13 +64,13 @@ class EnggCalibrate(PythonAlgorithm):
         import EnggUtils
 
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
-                                     self.getProperty("VanadiumWorkspace").value
+                                     self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         # Get peaks in dSpacing from file
         expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                         self.getProperty('ExpectedPeaks').value)
+                                                       self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
@@ -102,7 +102,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         return difc, zero
 
-    def _focusRun(self, ws, bank, indices, vanWS):
+    def _focusRun(self, ws, vanWS, bank, indices):
         """
         Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
         single spectrum workspace.

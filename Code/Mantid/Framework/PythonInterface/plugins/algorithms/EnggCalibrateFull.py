@@ -32,7 +32,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
-                             "equivalently,North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
                              "for a more flexible alternative to select specific detectors")
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
@@ -66,12 +66,12 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         inWS = self.getProperty('Workspace').value
         WSIndices = EnggUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
-                                                             self.getProperty(self.INDICES_PROP_NAME).value)
+                                                           self.getProperty(self.INDICES_PROP_NAME).value)
 
         vanWS = self.getProperty("VanadiumWorkspace").value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        EnginXUtils.applyVanadiumCorrection(self, ws, vanWS)
+        EnggUtils.applyVanadiumCorrection(self, inWS, vanWS)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
         posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)

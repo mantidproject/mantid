@@ -105,7 +105,7 @@ class EnggFocusTest(unittest.TestCase):
         """
 
         out_name = 'out'
-        out = EnggFocus(InputWorkspace=self.__class__._data_ws, Bank='1', OutputWorkspace=out_name)
+        out = EnggFocus(InputWorkspace=self.__class__._data_ws, VanadiumWorkspace=self.__class__._data_ws, Bank='1', OutputWorkspace=out_name)
 
         self._check_output_ok(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
 

@@ -48,29 +48,34 @@ class EnggFocus(PythonAlgorithm):
         # Get the run workspace
         ws = self.getProperty('InputWorkspace').value
 
-        indices = EnggUtils.getWsIndicesFromInProperties(ws, self.getProperty('Bank').value,
-                                                           self.getProperty(self.INDICES_PROP_NAME).value)
+        # Get spectra indices either from bank or direct list of indices, checking for errors
+        bank = self.getProperty('Bank').value
+        spectra = self.getProperty(self.INDICES_PROP_NAME).value
+        indices = EnggUtils.getWsIndicesFromInProperties(ws, bank, spectra)
 
     	# Leave the data for the bank we are interested in only
-        ws = EnginXUtils.cropData(self, ws, indices)
+        ws = EnggUtils.cropData(self, ws, indices)
 
     	# Apply calibration
         detPos = self.getProperty("DetectorPositions").value
         if detPos:
             self._applyCalibration(ws, detPos)
 
+        # Leave data for the same bank in the vanadium workspace too
         vanWS = self.getProperty("VanadiumWorkspace").value
+        vanWS = EnggUtils.cropData(self, vanWS, indices)
+
         # These corrections rely on ToF<->Dspacing conversions, so they're done after the calibration step
-        EnginXUtils.applyVanadiumCorrection(self, ws, vanWS)
+        EnggUtils.applyVanadiumCorrection(self, ws, vanWS)
 
     	# Convert to dSpacing
-        ws = EnginXUtils.convertToDSpacing(self, ws)
+        ws = EnggUtils.convertToDSpacing(self, ws)
 
     	# Sum the values
-        ws = EnginXUtils.sumSpectra(self, ws)
+        ws = EnggUtils.sumSpectra(self, ws)
 
     	# Convert back to time of flight
-        ws = EnginXUtils.convertToTOF(self, ws)
+        ws = EnggUtils.convertToToF(self, ws)
 
     	# OpenGenie displays distributions instead of pure counts (this is done implicitly when
     	# converting units), so I guess that's what users will expect
