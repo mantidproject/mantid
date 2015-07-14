@@ -4,9 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
-#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -40,18 +38,21 @@ public:
   void testExec_2D_to_2D()
   {
     if ( !cloner.isInitialized() ) cloner.initialize();
-
-    Mantid::DataHandling::LoadRaw3 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "LOQ48127.raw");
-    loader.setPropertyValue("OutputWorkspace", "in");
-    loader.execute();
-
+	//create 2D input workspace
+	MatrixWorkspace_sptr in = WorkspaceCreationHelper::Create2DWorkspace(5,10);
+	//add instance to variable 'in' 
+	AnalysisDataService::Instance().addOrReplace("in", in);
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("InputWorkspace","in") )
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("OutputWorkspace","out") )
-
     TS_ASSERT( cloner.execute() )
-
+	
+	MatrixWorkspace_sptr out;
+	//retrieve OutputWorkspace produced by execute and set it to out
+	TS_ASSERT_THROWS_NOTHING( out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out") );
+	TS_ASSERT(out);
+	if (!out) return;
+	
+	
     // Best way to test this is to use the CheckWorkspacesMatch algorithm
     Mantid::Algorithms::CheckWorkspacesMatch checker;
     checker.initialize();
@@ -59,7 +60,8 @@ public:
     checker.setPropertyValue("Workspace2","out");
     checker.execute();
 
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() )
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
+	AnalysisDataService::Instance().remove("in");
   }
 
   void testExec_Event_to_2D()
