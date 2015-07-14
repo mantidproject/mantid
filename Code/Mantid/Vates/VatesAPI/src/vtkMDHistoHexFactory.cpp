@@ -3,6 +3,7 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 
+#include "MantidVatesAPI/vtkStructuredPointsArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -15,6 +16,7 @@
 #include "vtkStructuredGrid.h"
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
+
 
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
@@ -177,10 +179,10 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     visualDataSet->GetCellData()->SetScalars(signal.GetPointer());
   }
 
-  vtkNew<vtkPoints> points;
+  /*vtkNew<vtkPoints> points;
   points->Allocate(static_cast<int>(imageSize));
-  // Get the transformation that takes the points in the TRANSFORMED space back
-  // into the ORIGINAL (not-rotated) space.
+  //Get the transformation that takes the points in the TRANSFORMED space back
+  //into the ORIGINAL (not-rotated) space.
   Mantid::API::CoordTransform const *transform = NULL;
   if (m_useTransform)
     transform = m_workspace->getTransformToOriginal();
@@ -212,9 +214,25 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
         }
       }
     }
-  }
+  }*/
     
-  visualDataSet->SetPoints(points.GetPointer());
+  vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
+  implicitPoints->InitializeArray(m_workspace.get(),m_useTransform);
+  vtkNew<vtkPoints> newPoints;
+  newPoints->SetData(implicitPoints.GetPointer());
+  /*for ( auto i = 0; i < points->GetNumberOfPoints();++i)
+    {
+      double* oldPoint = points->GetPoint(i);
+      double* newPoint = newPoints->GetPoint(i);
+      for (auto j = 0; j < 3;++j)
+      {
+        if (std::abs(newPoint[j]-oldPoint[j])>1.0e-4)
+          std::cout << "error at point #" << i << std::endl;
+      }
+    }*/
+  
+    
+  visualDataSet->SetPoints(newPoints.GetPointer());
   visualDataSet->Register(NULL);
   visualDataSet->Squeeze();
 

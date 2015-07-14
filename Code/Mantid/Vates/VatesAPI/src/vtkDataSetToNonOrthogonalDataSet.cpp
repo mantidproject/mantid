@@ -22,6 +22,10 @@
 #include <vtkSmartPointer.h>
 #include <vtkPVChangeOfBasisHelper.h>
 
+#include "MantidVatesAPI/vtkStructuredPointsArray.h"
+#include <vtkPointData.h>
+#include "vtkNew.h"
+
 #include <boost/algorithm/string/find.hpp>
 #include <stdexcept>
 
@@ -202,8 +206,8 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   // Get the original points
   vtkPoints *points = data->GetPoints();
   double outPoint[3];
-  vtkPoints *newPoints = vtkPoints::New();
-  newPoints->Allocate(points->GetNumberOfPoints());
+  //vtkPoints *newPoints = vtkPoints::New();
+  //newPoints->Allocate(points->GetNumberOfPoints());
 
   /// Put together the skew matrix for use
   double skew[9];
@@ -216,13 +220,35 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
       index++;
     }
   }
-
-  for (int i = 0; i < points->GetNumberOfPoints(); i++) {
+    
+  Mantid::DataObjects::MDHistoWorkspace_sptr asdfWs =
+  boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(ws);
+    
+  vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
+  implicitPoints->InitializeArray(asdfWs.get(),0,skew);
+  vtkNew<vtkPoints> newImplicitPoints;
+  newImplicitPoints->SetData(implicitPoints.GetPointer());
+    
+  /*for (int i = 0; i < points->GetNumberOfPoints(); i++) {
     double *inPoint = points->GetPoint(i);
     vtkMatrix3x3::MultiplyPoint(skew, inPoint, outPoint);
+    double *newOutPoint = newImplicitPoints->GetPoint(i);
+      bool validpoint = true;
+    for (auto j = 0; j < 3;++j)
+    {
+      if (std::abs(newOutPoint[j]-outPoint[j])>1.0e-4)
+          validpoint = false;
+    }
+    if(!validpoint)
+    {
+      std::cout << "error at point #" << i << std::endl;
+      std::cout << "oldPoint:" << outPoint[0] << " " << outPoint[1] << " " << outPoint[2] << std::endl;
+      std::cout << "newPoint:" << newOutPoint[0] << " " << newOutPoint[1] << " " << newOutPoint[2] << std::endl;
+    }
     newPoints->InsertNextPoint(outPoint);
-  }
-  data->SetPoints(newPoints);
+  }*/
+    
+  data->SetPoints(newImplicitPoints.GetPointer());
   this->updateMetaData(data);
 }
 

@@ -128,6 +128,7 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
+inc/MantidVatesAPI/vtkStructuredPointsArray.h
 )
 
 set( TEST_FILES
