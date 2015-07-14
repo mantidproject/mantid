@@ -5,7 +5,7 @@
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "PythonThreading.h"
+#include "MantidQtAPI/PythonThreading.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/DynamicFactory.h"

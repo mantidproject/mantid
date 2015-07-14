@@ -29,8 +29,10 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-#include "PythonSystemHeader.h"
-#include "PythonThreading.h"
+// Python headers have to go first!
+#include "MantidQtAPI/PythonSystemHeader.h"
+#include "MantidQtAPI/PythonThreading.h"
+
 #include "Script.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 
@@ -43,7 +45,7 @@ class PythonScripting;
 struct _sipWrapperType;
 
 /**
- * This class holds, compiles and executes the Python code. 
+ * This class holds, compiles and executes the Python code.
  */
 class PythonScript : public Script, MantidQt::API::WorkspaceObserver
 {
@@ -82,9 +84,9 @@ public:
   /// Special handle for syntax errors as they have no traceback
   QString constructSyntaxErrorStr(PyObject *syntaxError);
   /// Convert a traceback to a string
-  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback, 
+  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback,
                       bool root=true);
-  
+
   /// Set the name of the passed object so that Python can refer to it
   bool setQObject(QObject *val, const char *name);
   /// Set the name of the integer so that Python can refer to it
