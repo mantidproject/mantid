@@ -36,6 +36,7 @@ void AddSampleLog::init() {
   declareProperty("LogType", "String",
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
+  declareProperty("LogUnit", "", "The units of the log");
 }
 
 void AddSampleLog::exec() {
@@ -48,6 +49,7 @@ void AddSampleLog::exec() {
   // get the data that the user wants to add
   std::string propName = getProperty("LogName");
   std::string propValue = getProperty("LogText");
+  std::string propUnit = getProperty("LogUnit");
   std::string propType = getPropertyValue("LogType");
 
   // Remove any existing log
@@ -57,6 +59,7 @@ void AddSampleLog::exec() {
 
   if (propType == "String") {
     theRun.addLogData(new PropertyWithValue<std::string>(propName, propValue));
+    theRun.getProperty(propName)->setUnits(propUnit);
     return;
   }
 
@@ -94,6 +97,7 @@ void AddSampleLog::exec() {
       theRun.addLogData(tsp);
     }
   }
+  theRun.getProperty(propName)->setUnits(propUnit);
 }
 
 } // namespace Algorithms

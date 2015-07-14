@@ -14,6 +14,8 @@
 namespace Mantid {
 namespace Algorithms {
 
+class TimeAtSampleStrategy;
+
 /** FilterEvents : Filter Events in EventWorkspace to multiple EventsWorkspace
   by Splitters
 
@@ -92,15 +94,15 @@ private:
   void setupDetectorTOFCalibration();
 
   /// Set up detector calibration parameters for elastic scattering instrument
-  void setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws);
+  TimeAtSampleStrategy* setupElasticTOFCorrection() const;
 
   /// Set up detector calibration parmaeters for direct inelastic scattering
   /// instrument
-  void setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws);
+  TimeAtSampleStrategy* setupDirectTOFCorrection() const;
 
   /// Set up detector calibration parameters for indirect inelastic scattering
   /// instrument
-  void setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws);
+  TimeAtSampleStrategy* setupIndirectTOFCorrection() const;
 
   /// Set up detector calibration parameters from customized values
   void setupCustomizedTOFCorrection();

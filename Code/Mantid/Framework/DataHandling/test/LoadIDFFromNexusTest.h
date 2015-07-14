@@ -42,6 +42,8 @@ public:
 
   void testExec()
   {
+    // We load a processed Nexus file with embedded parameters
+
     if ( !loader.isInitialized() ) loader.initialize();
 
     //Create a workspace with some sample data
@@ -54,7 +56,7 @@ public:
 
     // Set properties
     loader.setPropertyValue("Workspace", wsName);
-    loader.setPropertyValue("Filename", "LOQ48127.nxs");
+    loader.setPropertyValue("Filename", "LOQ48127.nxs"); 
     loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
     inputFile = loader.getPropertyValue("Filename"); // get full pathname
     
@@ -118,6 +120,80 @@ public:
     TS_ASSERT( ! i->getDetector(16500)->isMonitor() )
 
 	  AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_parameter_source() {
+
+    // We load a processed Nexus file with embedded parameters, one of which has been made different 
+    // from the same parameter in the file on disk (LOQ_Parameters.xml)
+
+    if ( !loader.isInitialized() ) loader.initialize();
+
+    //Create a workspace with some sample data
+    wsName = "LoadIDFFromNexusTest2";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //Put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Set properties 
+    loader.setPropertyValue("Workspace", wsName);
+    loader.setPropertyValue("Filename", "LOQ48127p.nxs"); 
+    loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
+    inputFile = loader.getPropertyValue("Filename"); // get full pathname
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    // We now check the parameter that is different in the embedded parameters
+    const ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "LAB");
+    // If this gives "main-detector-bank" instead of "LAB", 
+    // then the embedded parameters have not, been read and the parameter file has been used instead.
+
+  }
+
+   void test_parameter_file() {
+
+    // We load a processed Nexus file without embedded parameters and 
+    // check that parameters has been loaded (from file) despite that
+
+    if ( !loader.isInitialized() ) loader.initialize();
+
+    //Create a workspace with some sample data
+    wsName = "LoadIDFFromNexusTest3";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //Put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Set properties 
+    loader.setPropertyValue("Workspace", wsName);
+    loader.setPropertyValue("Filename", "LOQ48127np.nxs"); 
+    loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
+    inputFile = loader.getPropertyValue("Filename"); // get full pathname
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    // We now check a parameter
+    const ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "main-detector-bank");
+
   }
 
 
