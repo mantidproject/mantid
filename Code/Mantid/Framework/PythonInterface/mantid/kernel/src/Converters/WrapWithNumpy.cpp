@@ -46,9 +46,9 @@ template <typename ElementType>
 PyObject *wrapWithNDArray(const ElementType *carray, const int ndims,
                           Py_intptr_t *dims, const NumpyWrapMode mode) {
   int datatype = NDArrayTypeIndex<ElementType>::typenum;
-  PyArrayObject *nparray = (PyArrayObject *)PyArray_New(&PyArray_Type, ndims, dims, datatype, NULL, \
-                                                        static_cast<void *>(const_cast<ElementType *>(carray)), 0, NPY_ARRAY_FARRAY, NULL);
-
+  PyArrayObject *nparray = (PyArrayObject *)PyArray_SimpleNewFromData(
+        ndims, dims, datatype,
+        static_cast<void *>(const_cast<ElementType *>(carray)));
 
 
   if (mode == ReadOnly)
