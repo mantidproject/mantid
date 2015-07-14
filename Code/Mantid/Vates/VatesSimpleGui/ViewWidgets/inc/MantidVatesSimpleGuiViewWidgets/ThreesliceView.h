@@ -91,6 +91,12 @@ public:
    */
   void resetDisplay();
 
+private slots:
+  /// Called when the rendering begins
+  void onBeginRender();
+  /// Called when the rendering finishes
+  void onEndRender();
+
 private:
   Q_DISABLE_COPY(ThreeSliceView)
 

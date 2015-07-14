@@ -1,8 +1,11 @@
+#include "MantidQtAPI/PythonThreading.h"
+
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/LibHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Path.h>
+
 
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -39,6 +42,8 @@ namespace
 {
   /// Static logger
   Kernel::Logger g_log("ThreeSliceView");
+  /// Global Python thread state
+  PyGILState_STATE GIL_STATE = PyGILState_UNLOCKED;
 }
 
 
@@ -48,6 +53,8 @@ ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinned
   this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
                                           QString("OrthographicSliceView"));
   pqActiveObjects::instance().setActiveView(this->m_mainView);
+  connect(this->m_mainView, SIGNAL(beginRender()), this, SLOT(onBeginRender()));
+  connect(this->m_mainView, SIGNAL(endRender()), this, SLOT(onEndRender()));
 }
 
 ThreeSliceView::~ThreeSliceView()
@@ -129,6 +136,16 @@ void ThreeSliceView::correctColorScaleRange()
 void ThreeSliceView::resetCamera()
 {
   this->m_mainView->resetCamera();
+}
+
+/// Called when the rendering begins
+void ThreeSliceView::onBeginRender() {
+  GIL_STATE = GlobalInterpreterLock::acquire();
+}
+
+/// Called when the rendering finishes
+void ThreeSliceView::onEndRender() {
+  GlobalInterpreterLock::release(GIL_STATE);
 }
 
 }
