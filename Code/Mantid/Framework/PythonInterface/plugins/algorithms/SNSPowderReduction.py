@@ -83,7 +83,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("VanadiumBackgroundNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,\
-                                      extensions = ["cal"]))
+                                      extensions = [".h5", ".hd5", ".hdf", ".cal"]))
         self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,\
                                       extensions = ["txt"]),"File with characterization runs denoted")
         self.declareProperty("UnwrapRef", 0.,

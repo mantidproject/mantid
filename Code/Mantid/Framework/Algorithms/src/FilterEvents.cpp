@@ -1,4 +1,7 @@
 #include "MantidAlgorithms/FilterEvents.h"
+#include "MantidAlgorithms/TimeAtSampleStrategyDirect.h"
+#include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
+#include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -13,7 +16,7 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/ArrayProperty.h"
-
+#include <memory>
 #include <sstream>
 
 using namespace Mantid;
@@ -571,7 +574,7 @@ void FilterEvents::createOutputWorkspaces() {
   */
 void FilterEvents::setupDetectorTOFCalibration() {
   // Set output correction workspace and set to output
-  size_t numhist = m_eventWS->getNumberHistograms();
+  const size_t numhist = m_eventWS->getNumberHistograms();
   MatrixWorkspace_sptr corrws = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", numhist, 2, 2));
   setProperty("OutputTOFCorrectionWorkspace", corrws);
@@ -581,60 +584,43 @@ void FilterEvents::setupDetectorTOFCalibration() {
   m_detTofShifts.resize(numhist, 0.0);
 
   // Set up detector values
+  std::unique_ptr<TimeAtSampleStrategy> strategy;
+
   if (m_tofCorrType == CustomizedCorrect) {
     setupCustomizedTOFCorrection();
   } else if (m_tofCorrType == ElasticCorrect) {
     // Generate TOF correction from instrument's set up
-    setupElasticTOFCorrection(corrws);
+    strategy.reset(setupElasticTOFCorrection());
   } else if (m_tofCorrType == DirectCorrect) {
     // Generate TOF correction for direct inelastic instrument
-    setupDirectTOFCorrection(corrws);
+    strategy.reset(setupDirectTOFCorrection());
   } else if (m_tofCorrType == IndirectCorrect) {
     // Generate TOF correction for indirect elastic instrument
-    setupIndirectTOFCorrection(corrws);
+    strategy.reset(setupIndirectTOFCorrection());
   }
+  if (strategy) {
+    for (size_t i = 0; i < numhist; ++i) {
+      if (!m_vecSkip[i]) {
 
-  return;
-}
+        Correction correction = strategy->calculate(i);
+        m_detTofOffsets[i] = correction.offset;
+        m_detTofShifts[i] = correction.factor;
 
-//----------------------------------------------------------------------------------------------
-/**
-  */
-void FilterEvents::setupElasticTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-  // Get sample distance to moderator
-  Geometry::Instrument_const_sptr instrument = m_eventWS->getInstrument();
-  IComponent_const_sptr source =
-      boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
-  double l1 = instrument->getDistance(*source);
-
-  // Get
-  size_t numhist = m_eventWS->getNumberHistograms();
-  for (size_t i = 0; i < numhist; ++i) {
-    if (!m_vecSkip[i]) {
-      IComponent_const_sptr tmpdet =
-          boost::dynamic_pointer_cast<const IComponent>(
-              m_eventWS->getDetector(i));
-      double l2 = instrument->getDistance(*tmpdet);
-
-      double corrfactor = (l1) / (l1 + l2);
-
-      m_detTofOffsets[i] = corrfactor;
-      corrws->dataY(i)[0] = corrfactor;
+        corrws->dataY(i)[0] = correction.offset;
+        corrws->dataY(i)[1] = correction.factor;
+      }
     }
   }
 
   return;
 }
 
-//----------------------------------------------------------------------------------------------
-/** Calculate TOF correction for direct geometry inelastic instrument
-  * Time = T_pulse + TOF*0 + L1/sqrt(E*2/m)
-  */
-void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-  // Get L1
-  V3D samplepos = m_eventWS->getInstrument()->getSample()->getPos();
-  V3D sourcepos = m_eventWS->getInstrument()->getSource()->getPos();
-  double l1 = samplepos.distance(sourcepos);
+TimeAtSampleStrategy *FilterEvents::setupElasticTOFCorrection() const {
+
+  return new TimeAtSampleStrategyElastic(m_eventWS);
+}
+
+TimeAtSampleStrategy *FilterEvents::setupDirectTOFCorrection() const {
 
   // Get incident energy Ei
   double ei = 0.;
@@ -650,108 +636,11 @@ void FilterEvents::setupDirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
     g_log.debug() << "Using user-input Ei value " << ei << "\n";
   }
 
-  // Calculate constant (to all spectra) shift
-  double constshift = l1 / sqrt(ei * 2. * PhysicalConstants::meV /
-                                PhysicalConstants::NeutronMass);
-
-  // Set up the shfit
-  size_t numhist = m_eventWS->getNumberHistograms();
-
-  g_log.debug()
-      << "Calcualte direct inelastic scattering for input workspace of "
-      << numhist << " spectra "
-      << "storing to output workspace with " << corrws->getNumberHistograms()
-      << " spectra. "
-      << "\n";
-
-  for (size_t i = 0; i < numhist; ++i) {
-    m_detTofOffsets[i] = 0.0;
-    m_detTofShifts[i] = constshift;
-
-    corrws->dataY(i)[0] = 0.0;
-    corrws->dataY(i)[1] = constshift;
-  }
-
-  return;
+  return new TimeAtSampleStrategyDirect(m_eventWS, ei);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Calculate TOF correction for indirect geometry inelastic instrument
-  * Time = T_pulse + TOF - L2/sqrt(E_fix * 2 * meV / mass)
-  */
-void
-FilterEvents::setupIndirectTOFCorrection(API::MatrixWorkspace_sptr corrws) {
-  g_log.debug("Start to set up indirect TOF correction. ");
-
-  // A constant among all spectra
-  double twomev_d_mass =
-      2. * PhysicalConstants::meV / PhysicalConstants::NeutronMass;
-  V3D samplepos = m_eventWS->getInstrument()->getSample()->getPos();
-
-  // Get the parameter map
-  const ParameterMap &pmap = m_eventWS->constInstrumentParameters();
-
-  // Set up the shift
-  size_t numhist = m_eventWS->getNumberHistograms();
-
-  g_log.debug() << "[DBx158] Number of histograms = " << numhist
-                << ", Correction WS size = " << corrws->getNumberHistograms()
-                << "\n";
-
-  for (size_t i = 0; i < numhist; ++i) {
-    if (!m_vecSkip[i]) {
-      double shift;
-      IDetector_const_sptr det = m_eventWS->getDetector(i);
-      if (!det->isMonitor()) {
-        // Get E_fix
-        double efix = 0.;
-        try {
-          Parameter_sptr par = pmap.getRecursive(det.get(), "Efixed");
-          if (par) {
-            efix = par->value<double>();
-            g_log.debug() << "Detector: " << det->getID() << " of spectrum "
-                          << i << " EFixed: " << efix << "\n";
-          } else {
-            g_log.warning() << "Detector: " << det->getID() << " of spectrum "
-                            << i << " does not have EFixed set up."
-                            << "\n";
-          }
-        } catch (std::runtime_error &) {
-          // Throws if a DetectorGroup, use single provided value
-          stringstream errmsg;
-          errmsg << "Inelastic instrument detector " << det->getID()
-                 << " of spectrum " << i << " does not have EFixed ";
-          throw runtime_error(errmsg.str());
-        }
-
-        // Get L2
-        double l2 = det->getPos().distance(samplepos);
-
-        // Calculate shift
-        shift = -1. * l2 / sqrt(efix * twomev_d_mass);
-
-        g_log.notice() << "Detector " << i << ": "
-                       << "L2 = " << l2 << ", EFix = " << efix
-                       << ", Shift = " << shift << "\n";
-      } else {
-        // Monitor:
-        g_log.warning() << "Spectrum " << i << " contains detector "
-                        << det->getID() << " is a monitor. "
-                        << "\n";
-
-        shift = 0.;
-      }
-
-      // Set up the shifts
-      m_detTofOffsets[i] = 1.0;
-      m_detTofShifts[i] = shift;
-
-      corrws->dataY(i)[0] = 1.0;
-      corrws->dataY(i)[1] = shift;
-    }
-  } // ENDOF (all spectra)
-
-  return;
+TimeAtSampleStrategy *FilterEvents::setupIndirectTOFCorrection() const {
+  return new TimeAtSampleStrategyIndirect(m_eventWS);
 }
 
 //----------------------------------------------------------------------------------------------

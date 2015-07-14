@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/RebinByTimeBase.h"
 
 namespace Mantid {
+
 namespace Algorithms {
 
 /** RebinByTimeAtSample : Rebins an event workspace to a histogram workspace

@@ -47,6 +47,18 @@ Transform to k-space label:
 std::string kSpaceTransform() { return "K (incident, final)"; }
 
 /*
+Center point rebinning
+@return: associated id/label
+*/
+std::string centerTransform() { return "Centre"; }
+
+/*
+Normalised polygon rebinning
+@return: associated id/label
+*/
+std::string normPolyTransform() { return "NormalisedPolygon"; }
+
+/*
 Check that the input workspace is of the correct type.
 @param: inputWS: The input workspace.
 @throw: runtime_error if the units do not appear to be correct/compatible with
@@ -179,6 +191,17 @@ void ConvertToReflectometryQ::init() {
       "  P (lab frame): Momentum in the sample frame.\n"
       "  K initial and final vectors in the z plane.");
 
+  std::vector<std::string> transOptions;
+  transOptions.push_back(centerTransform());
+  transOptions.push_back(normPolyTransform());
+
+  declareProperty(
+      "Method", centerTransform(),
+      boost::make_shared<StringListValidator>(transOptions),
+      "What method should be used for the axis transformation?\n"
+      "  Centre: Use center point rebinning.\n"
+      "  NormalisedPolygon: Use normalised polygon rebinning.");
+
   declareProperty(
       new Kernel::PropertyWithValue<bool>("OverrideIncidentTheta", false),
       "Use the provided incident theta value.");
@@ -248,6 +271,7 @@ void ConvertToReflectometryQ::exec() {
   const std::vector<double> extents = getProperty("Extents");
   double incidentTheta = getProperty("IncidentTheta");
   const std::string outputDimensions = getPropertyValue("OutputDimensions");
+  const std::string transMethod = getPropertyValue("Method");
   const bool outputAsMDWorkspace = getProperty("OutputAsMDWorkspace");
   const int numberOfBinsQx = getProperty("NumberBinsQx");
   const int numberOfBinsQz = getProperty("NumberBinsQz");
@@ -315,16 +339,29 @@ void ConvertToReflectometryQ::exec() {
   IMDWorkspace_sptr outputWS;
 
   if (outputAsMDWorkspace) {
-    auto outputMDWS = transform->executeMD(inputWs, bc);
-
-    // Copy ExperimentInfo (instrument, run, sample) to the output WS
-    ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
-    outputMDWS->addExperimentInfo(ei);
-    outputWS = outputMDWS;
+    if (transMethod == centerTransform()) {
+      auto outputMDWS = transform->executeMD(inputWs, bc);
+      // Copy ExperimentInfo (instrument, run, sample) to the output WS
+      ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
+      outputMDWS->addExperimentInfo(ei);
+      outputWS = outputMDWS;
+    } else if (transMethod == normPolyTransform()) {
+      throw std::runtime_error("Normalised Polynomial rebinning not supported for multidimensional output.");
+    } else {
+      throw std::runtime_error("Unknown rebinning method: " + transMethod);
+    }
   } else {
-    auto outputWS2D = transform->execute(inputWs);
-    outputWS2D->copyExperimentInfoFrom(inputWs.get());
-    outputWS = outputWS2D;
+    if (transMethod == centerTransform()) {
+      auto outputWS2D = transform->execute(inputWs);
+      outputWS2D->copyExperimentInfoFrom(inputWs.get());
+      outputWS = outputWS2D;
+    } else if (transMethod == normPolyTransform()) {
+      auto outputWSRB = transform->executeNormPoly(inputWs);
+      outputWSRB->copyExperimentInfoFrom(inputWs.get());
+      outputWS = outputWSRB;
+    } else {
+      throw std::runtime_error("Unknown rebinning method: " + transMethod);
+    }
   }
 
   // Execute the transform and bind to the output.

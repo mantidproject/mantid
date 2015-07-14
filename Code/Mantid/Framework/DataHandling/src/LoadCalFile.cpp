@@ -59,6 +59,22 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
   alg->setPropertyGroup("InstrumentFilename", grpName);
 }
 
+bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
+  MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
+  if (bool(inWS))
+    return true;
+
+  std::string InstrumentName = alg->getPropertyValue("InstrumentName");
+  if (!InstrumentName.empty())
+    return true;
+
+  std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
+  if (!InstrumentFilename.empty())
+    return true;
+
+  return false;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Get a pointer to an instrument in one of 3 ways: InputWorkspace,
  * InstrumentName, InstrumentFilename
