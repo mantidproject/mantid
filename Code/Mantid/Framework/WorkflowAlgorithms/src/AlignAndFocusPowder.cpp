@@ -71,21 +71,32 @@ void AlignAndFocusPowder::init() {
   //   Direction::Output, PropertyMode::Optional),
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
+  std::vector<std::string> exts;
+  exts.push_back(".h5");
+  exts.push_back(".hd5");
+  exts.push_back(".hdf");
+  exts.push_back(".cal");
   declareProperty(
-      new FileProperty("CalFileName", "", FileProperty::OptionalLoad, ".cal"),
+      new FileProperty("CalFileName", "", FileProperty::OptionalLoad, exts),
       "The name of the CalFile with offset, masking, and grouping data");
   declareProperty(
       new WorkspaceProperty<GroupingWorkspace>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A GroupingWorkspace giving the grouping info.");
+
+  declareProperty(
+      new WorkspaceProperty<ITableWorkspace>(
+          "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional: A Workspace containing the calibration information. Either "
+      "this or CalibrationFile needs to be specified.");
   declareProperty(
       new WorkspaceProperty<OffsetsWorkspace>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: A workspace giving which detectors are masked.");
+  declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace", "",
+                                                       Direction::Input,
+                                                       PropertyMode::Optional),
+                  "Optional: A workspace giving which detectors are masked.");
   declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable", "",
                                                         Direction::Input,
                                                         PropertyMode::Optional),
@@ -223,7 +234,7 @@ void AlignAndFocusPowder::exec() {
   m_instName =
       Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
   std::string calFileName = getPropertyValue("CalFileName");
-  m_offsetsWS = getProperty("OffsetsWorkspace");
+  m_calibrationWS = getProperty("CalibrationWorkspace");
   m_maskWS = getProperty("MaskWorkspace");
   m_groupWS = getProperty("GroupingWorkspace");
   DataObjects::TableWorkspace_sptr maskBinTableWS = getProperty("MaskBinTable");
@@ -439,12 +450,12 @@ void AlignAndFocusPowder::exec() {
     m_outputW = rebin(m_outputW);
   m_progress->report();
 
-  if (m_offsetsWS) {
+  if (m_calibrationWS) {
     g_log.information() << "running AlignDetectors\n";
     API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
     alignAlg->setProperty("InputWorkspace", m_outputW);
     alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
+    alignAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
     alignAlg->executeAsChildAlg();
     m_outputW = alignAlg->getProperty("OutputWorkspace");
   } else {
@@ -832,6 +843,21 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   return outws;
 }
 
+void AlignAndFocusPowder::convertOffsetsToCal(
+    DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
+  if (!offsetsWS)
+    return;
+
+  IAlgorithm_sptr alg = createChildAlgorithm("ConvertDiffCal");
+  alg->setProperty("OffsetsWorkspace", offsetsWS);
+  alg->setPropertyValue("OutputWorkspace", m_instName + "_cal");
+  alg->executeAsChildAlg();
+
+  m_calibrationWS = alg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
+                                               m_calibrationWS);
+}
+
 //----------------------------------------------------------------------------------------------
 /**
  * Loads the .cal file if necessary.
@@ -848,18 +874,33 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
       ; // not noteworthy
     }
   }
-  if ((!m_offsetsWS) && (!calFileName.empty())) {
-    try {
-      m_offsetsWS =
-          AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
-              m_instName + "_offsets");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
+  if ((!m_calibrationWS) && (!calFileName.empty())) {
+    OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+    if (offsetsWS) {
+      convertOffsetsToCal(offsetsWS);
+    } else {
+      try {
+        m_calibrationWS =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                m_instName + "_cal");
+      } catch (Exception::NotFoundError &) {
+        ; // not noteworthy
+      }
+      if (!m_calibrationWS) {
+        try {
+          OffsetsWorkspace_sptr offsetsWS =
+              AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
+                  m_instName + "_offsets");
+          convertOffsetsToCal(offsetsWS);
+        } catch (Exception::NotFoundError &) {
+          ; // not noteworthy
+        }
+      }
     }
   }
   if ((!m_maskWS) && (!calFileName.empty())) {
     try {
-      m_maskWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_maskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(
           m_instName + "_mask");
     } catch (Exception::NotFoundError &) {
       ; // not noteworthy
@@ -867,7 +908,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   }
 
   // see if everything exists to exit early
-  if (m_groupWS && m_offsetsWS && m_maskWS)
+  if (m_groupWS && m_calibrationWS && m_maskWS)
     return;
 
   // see if the calfile is specified
@@ -878,18 +919,16 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
 
   // bunch of booleans to keep track of things
   bool loadGrouping = !m_groupWS;
-  bool loadOffsets = !m_offsetsWS;
+  bool loadCalibration = !m_calibrationWS;
   bool loadMask = !m_maskWS;
 
-  // Load the .cal file
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadCalFile");
-  alg->setPropertyValue("CalFilename", calFileName);
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);
-  alg->setProperty<std::string>("WorkspaceName", m_instName);
-  alg->setProperty("MakeGroupingWorkspace", loadGrouping);
-  alg->setProperty("MakeOffsetsWorkspace", loadOffsets);
-  alg->setProperty("MakeMaskWorkspace", loadMask);
-  alg->setLogging(true);
+  alg->setPropertyValue("Filename", calFileName);
+  alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
+  alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
+  alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+  alg->setPropertyValue("WorkspaceName", m_instName);
   alg->executeAsChildAlg();
 
   // replace workspaces as appropriate
@@ -898,10 +937,10 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
     AnalysisDataService::Instance().addOrReplace(m_instName + "_group",
                                                  m_groupWS);
   }
-  if (loadOffsets) {
-    m_offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
-    AnalysisDataService::Instance().addOrReplace(m_instName + "_offsets",
-                                                 m_offsetsWS);
+  if (loadCalibration) {
+    m_calibrationWS = alg->getProperty("OutputCalWorkspace");
+    AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
+                                                 m_calibrationWS);
   }
   if (loadMask) {
     m_maskWS = alg->getProperty("OutputMaskWorkspace");

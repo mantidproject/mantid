@@ -1,5 +1,3 @@
-from mantid.kernel import *
-import mantid.simpleapi as api
 import unittest
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
@@ -11,12 +9,11 @@ class LoadDNSLegacyTest(unittest.TestCase):
     def test_LoadValidData(self):
         outputWorkspaceName = "LoadDNSLegacyTest_Test1"
         filename = "dn134011vana.d_dat"
-        alg_test = run_algorithm("LoadDNSLegacy", Filename = filename, \
-                OutputWorkspace = outputWorkspaceName, Polarisation='y')
-                
+        alg_test = run_algorithm("LoadDNSLegacy", Filename=filename,
+                                 OutputWorkspace=outputWorkspaceName, Polarisation='y')
         self.assertTrue(alg_test.isExecuted())
-        
-        #Verify some values
+
+        # Verify some values
         ws = AnalysisDataService.retrieve(outputWorkspaceName)
         # dimensions
         self.assertEqual(24, ws.getNumberHistograms())
@@ -32,7 +29,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         # check whether detector bank is rotated
         det = ws.getDetector(1)
         self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
-        run_algorithm("DeleteWorkspace", Workspace = outputWorkspaceName)
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
 if __name__ == '__main__':

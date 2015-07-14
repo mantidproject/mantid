@@ -279,7 +279,7 @@ class Layer(QtProxyObject):
     # The only purpose of listing them here is that these will be returned by this class' __dir()__, and
     #    shown interactively, while the ones not listed and/or overloaded here may not be shown in ipython, etc.
     additional_methods = ['logLogAxes', 'logXLinY', 'logXLinY',
-                          'removeLegend', 'saveImage', 'setAxisScale', 'setCurveLineColor', 'setCurveLineStyle',
+                          'removeLegend', 'export', 'setAxisScale', 'setCurveLineColor', 'setCurveLineStyle',
                           'setCurveLineWidth', 'setCurveSymbol', 'setScale', 'setTitle', 'setXTitle', 'setYTitle']
 
     def __init__(self, toproxy):

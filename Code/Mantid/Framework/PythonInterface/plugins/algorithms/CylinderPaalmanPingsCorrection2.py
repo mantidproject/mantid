@@ -158,32 +158,44 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
-        CreateWorkspace(OutputWorkspace=ass_ws, DataX=dataX, DataY=dataA1,
-                    NSpec=len(self._angles), UnitX='Wavelength')
+        CreateWorkspace(OutputWorkspace=ass_ws,
+                        DataX=dataX,
+                        DataY=dataA1,
+                        NSpec=len(self._angles),
+                        UnitX='Wavelength',
+                        ParentWorkspace=self._sample_ws_name)
         workspaces = [ass_ws]
 
         if self._use_can:
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
-            CreateWorkspace(OutputWorkspace=assc_ws, DataX=dataX, DataY=dataA2,
-                            NSpec=len(self._angles), UnitX='Wavelength')
+            CreateWorkspace(OutputWorkspace=assc_ws,
+                            DataX=dataX,
+                            DataY=dataA2,
+                            NSpec=len(self._angles),
+                            UnitX='Wavelength',
+                            ParentWorkspace=self._sample_ws_name)
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
-            CreateWorkspace(OutputWorkspace=acsc_ws, DataX=dataX, DataY=dataA3,
-                            NSpec=len(self._angles), UnitX='Wavelength')
+            CreateWorkspace(OutputWorkspace=acsc_ws,
+                            DataX=dataX,
+                            DataY=dataA3,
+                            NSpec=len(self._angles),
+                            UnitX='Wavelength',
+                            ParentWorkspace=self._sample_ws_name)
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
-            CreateWorkspace(OutputWorkspace=acc_ws, DataX=dataX, DataY=dataA4,
-                            NSpec=len(self._angles), UnitX='Wavelength')
+            CreateWorkspace(OutputWorkspace=acc_ws,
+                            DataX=dataX,
+                            DataY=dataA4,
+                            NSpec=len(self._angles),
+                            UnitX='Wavelength',
+                            ParentWorkspace=self._sample_ws_name)
 
         if self._interpolate:
             self._interpolate_corrections(workspaces)
-        try:
-            self. _copy_detector_table(workspaces)
-        except RuntimeError:
-            logger.warning('Cannot copy spectra mapping. Check input workspace instrument.')
 
         sample_log_workspaces = workspaces
         sample_logs = [('sample_shape', 'cylinder'),
@@ -364,38 +376,19 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
 #------------------------------------------------------------------------------
 
-    def _copy_detector_table(self, workspaces):
-        """
-        Copy the detector table from the sample workspaces to the correction workspaces.
-
-        @param workspaces List of correction workspaces
-        """
-
-        instrument = mtd[self._sample_ws_name].getInstrument().getName()
-
-        for ws in workspaces:
-            LoadInstrument(Workspace=ws,
-                           InstrumentName=instrument)
-
-            CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name,
-                                WorkspaceToRemap=ws,
-                                IndexBySpectrumNumber=True)
-
-#------------------------------------------------------------------------------
-
     def _cyl_abs(self, angle):
-#  Parameters :
-#  self._step_size - step size
-#  self._beam - beam parameters
-#  nan - number of annuli
-#  radii - list of radii (for each annulus)
-#  density - list of densities (for each annulus)
-#  sigs - list of scattering cross-sections (for each annulus)
-#  siga - list of absorption cross-sections (for each annulus)
-#  angle - list of angles
-#  wavelas - elastic wavelength
-#  waves - list of wavelengths
-#  Output parameters :  A1 - Ass ; A2 - Assc ; A3 - Acsc ; A4 - Acc
+        #  Parameters :
+        #  self._step_size - step size
+        #  self._beam - beam parameters
+        #  nan - number of annuli
+        #  radii - list of radii (for each annulus)
+        #  density - list of densities (for each annulus)
+        #  sigs - list of scattering cross-sections (for each annulus)
+        #  siga - list of absorption cross-sections (for each annulus)
+        #  angle - list of angles
+        #  wavelas - elastic wavelength
+        #  waves - list of wavelengths
+        #  Output parameters :  A1 - Ass ; A2 - Assc ; A3 - Acsc ; A4 - Acc
 
         amu_scat = np.zeros(self._number_can)
         amu_scat = self._density*self._sig_s
