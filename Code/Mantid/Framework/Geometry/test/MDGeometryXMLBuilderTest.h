@@ -53,6 +53,7 @@ private:
       coord_t(size_t ind));
     MOCK_METHOD3(setRange,
       void(size_t nBins, coord_t min, coord_t max));
+    MOCK_CONST_METHOD0(getMDUnits, const Kernel::MDUnit&());
   };
 
 static std::string createDimensionXMLString(unsigned int nbins, int min, int max, std::string name, std::string id)

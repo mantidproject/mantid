@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
 #include <string>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -79,6 +80,9 @@ public:
   virtual ~LabelUnit();
   LabelUnit* clone() const;
 };
+
+typedef std::unique_ptr<MDUnit> MDUnit_uptr;
+typedef std::unique_ptr<const MDUnit> MDUnit_const_uptr;
 
 } // namespace Kernel
 } // namespace Mantid

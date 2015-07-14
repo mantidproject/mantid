@@ -4,7 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/VMD.h"
 
 namespace Mantid {
@@ -31,7 +31,7 @@ public:
   MDHistoDimension(std::string name, std::string ID,
                    const Kernel::UnitLabel &units, coord_t min, coord_t max,
                    size_t numBins)
-      : m_name(name), m_dimensionId(ID), m_units(units), m_min(min), m_max(max),
+      : m_name(name), m_dimensionId(ID), m_units(new Kernel::LabelUnit(units.ascii())), m_min(min), m_max(max),
         m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
@@ -45,7 +45,7 @@ public:
    */
   MDHistoDimension(const IMDDimension *other)
       : m_name(other->getName()), m_dimensionId(other->getDimensionId()),
-        m_units(other->getUnits()), m_min(other->getMinimum()),
+        m_units(other->getMDUnits().clone()), m_min(other->getMinimum()),
         m_max(other->getMaximum()), m_numBins(other->getNBins()),
         m_binWidth(other->getBinWidth()) {}
 
@@ -56,7 +56,10 @@ public:
   virtual std::string getName() const { return m_name; }
 
   /// Return the units of the dimension as a string
-  virtual const Kernel::UnitLabel getUnits() const { return m_units; }
+  virtual const Kernel::UnitLabel getUnits() const { return m_units->getUnitLabel(); }
+
+  /// Returns the unit
+  virtual const Kernel::MDUnit& getMDUnits() const {return *m_units;}
 
   /** Short name which identify the dimension among other dimension.
    * A dimension can be usually found by its ID and various
@@ -109,7 +112,7 @@ private:
   std::string m_dimensionId;
 
   /// Dimension units
-  Kernel::UnitLabel m_units;
+  Kernel::MDUnit_uptr m_units;
 
   /// Extent of dimension
   coord_t m_min;

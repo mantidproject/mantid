@@ -71,6 +71,17 @@ public:
     TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
+  void test_getMDUnits_gives_label_unit(){
+
+   Kernel::UnitLabel unitLabel("Meters");
+   MDHistoDimension dimension("Distance", "Dist", unitLabel, 0, 10, 1);
+   const Mantid::Kernel::MDUnit & unit = dimension.getMDUnits();
+   TS_ASSERT_EQUALS(unit.getUnitLabel(), unitLabel);
+   TS_ASSERT(dynamic_cast<const Mantid::Kernel::LabelUnit*>(&unit));
+
+
+  }
+
 
 };
 
