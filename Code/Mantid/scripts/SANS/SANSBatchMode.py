@@ -50,7 +50,22 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
-ALLOWED_NUM_ENTRIES = set([20,16,14,8,6,4])
+# The allowed number of entries per row. 
+# The minimum is 4:  sample_sans, sample_sans_VALUE,
+#                    output_as, output_as_VALUE
+# The maximum is 22: sample_sans, sample_sans_VALUE,
+#                    sample_trans, sample_trans_VALUE,
+#                    sample_direct_beam, sample_directr_beam_VALUE,
+#                    can_sans, can_sans_VALUE,
+#                    can_trans, can_trans_VALUE,
+#                    can_direct_beam, can_direct_beam_VALUE
+#                    output_as, output_as_VALUE
+#                    user_file, user_file_VALUE
+#                    background_sans, background_sans_VALUE,         # CURRENTLY NOT SUPPORTED
+#                    background_trans, background_trans_VALUE,       # CURRENTLY NOT SUPPORTED
+#                    background_direct_beam, background_trans_VALUE  # CURRENTLY NOT SUPPORTED
+
+ALLOWED_NUM_ENTRIES = set([22,20,16,14,8,6,4])
 
 # Build a dictionary of possible input data  keys
 IN_FORMAT = {}
