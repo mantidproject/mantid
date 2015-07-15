@@ -265,7 +265,7 @@ def sumSpectra(parent, ws):
 # that would be used as a child from EnginXFocus and EnginXCalibrate
 # ----------------------------------------------------------------------------------------
 
-def applyVanadiumCorrection(parent, ws, vanWS):
+def applyVanadiumCorrection(parent, ws, vanWS, precalcInteg=None):
     """
     Vanadium correction as done for the EnginX instrument. This is in principle meant to be used
     in EnginXFocus and EnginXCalibrateFull. The process consists of two steps:
@@ -283,19 +283,32 @@ def applyVanadiumCorrection(parent, ws, vanWS):
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace to work on, must be a Vanadium (V-Nb) run (in/out)
     @param vanWS :: workspace with Vanadium data
+    @param precalcIntegration :: pre-calculated integral of every spectrum for the vanadium data
 
     @param curvesWS :: workspace with the fitting workspace(s) corresponding to the bank(s)
     processed (3 spectra workspace for every bank). If several banks have been processed there
     will be 3 spectra for each bank.
     """
-    applySensitivityCorrection(parent, ws, vanWS)
+    if vanadiumWorkspaceIsPrecalculated(vanWS):
+        if not precalcInteg:
+            raise ValueError('A pre-calcuated vanadium curves workspace was passed instead of raw '
+                             'Vanadium run data, but no spectra integration results were provided.')
+
+        rows = precalcInteg.rowCount()
+        spectra = ws.getNumberHistograms()
+        if rows < spectra:
+            raise ValueError("The number of histograms in the input data workspace (%d) is bigger "
+                             "than the number of rows (spectra) in the integration workspace (%d)"%
+                             (rows, spectra))
+
+    applySensitivityCorrection(parent, ws, vanWS, precalcInteg)
 
     # apply this to both Engin-X banks, each with separate calculations
     curvesDict = applyPixByPixCorrection(parent, ws, vanWS, ENGINX_BANKS_FOR_PIXBYPIX_CORR)
     curvesWS = prepareCurvesWS(parent, curvesDict)
     return curvesWS
 
-def applySensitivityCorrection(parent, ws, vanWS):
+def applySensitivityCorrection(parent, ws, vanWS, precalcInteg):
     """
     Applies the first step of the Vanadium corrections on the given workspace.
     Operations are done in ToF
@@ -303,6 +316,20 @@ def applySensitivityCorrection(parent, ws, vanWS):
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace (in/out)
     @param vanWS :: workspace with Vanadium data
+    @param precalcIntegration :: pre-calculated integral of every spectrum for the vanadium data
+    """
+    if not vanadiumWorkspaceIsPrecalculated(vanWS):
+        applySensitivytCorrectionFromRawData(parent, ws, vanWS)
+    else:
+        for i in range(0, ws.getNumberHistograms()):
+            scaleFactor = precalcInteg.cell(i,0)/vanWS.blocksize()
+            ws.setY(i, np.divide(ws.dataY(i), scaleFactor))
+
+
+def applySensitivityCorrectionFromRawData(parent, ws, vanWS):
+    """
+    This does the real calculations behind applySensitivityCorrection() for when we are given raw
+    data from a Vanadium run.
     """
     expectedDim = 'Time-of-flight'
     dimType = vanWS.getXDimension().getName()
@@ -311,10 +338,10 @@ def applySensitivityCorrection(parent, ws, vanWS):
                          "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))
 
     integWS = integrateSpectra(parent, vanWS)
-    if 1 != integWS.blocksize() or integWS.getNumberHistograms() < ws.getNumberHistograms():
-        raise RuntimeError("Error while integrating workspace, the Integration algorithm "
-                           "produced a workspace with %d bins and %d spectra. The (vanadium) "
-                           "workspace integrated has %d spectra."%
+    if  1 != integWS.blocksize() or integWS.getNumberHistograms() < ws.getNumberHistograms():
+        raise RuntimeError("Error while integrating vanadium workspace, the Integration algorithm "
+                           "produced a workspace with %d bins and %d spectra. The workspace "
+                           "integrated has %d spectra."%
                            (integWS.blocksize(), integWS.getNumberHistograms()))
 
     for i in range(0, ws.getNumberHistograms()):
@@ -334,8 +361,13 @@ def applyPixByPixCorrection(parent, ws, vanWS, banks):
     @param curves :: a dictionary with bank id's (numbers) as keys and fitting output workspace
     as values
     """
-    # get one curve per bank, in d-spacing
-    curves = fitCurvesPerBank(parent, vanWS, banks)
+    if vanadiumWorkspaceIsPrecalculated(vanWS):
+        # No instrument -> precalculated curve(s)
+        curves = _precalcWStoDict(parent, vanWS)
+    else:
+        # Have to calculate curves. get one curve per bank, in d-spacing
+        curves = fitCurvesPerBank(parent, vanWS, banks)
+
     # divide the spectra by their corresponding bank curve
     divideByCurves(parent, ws, curves)
 
@@ -505,6 +537,42 @@ def prepareCurvesWS(parent, curvesDict):
         ws = appendSpec(parent, ws, nextWS)
 
     return ws
+
+def vanadiumWorkspaceIsPrecalculated(ws):
+    """
+    Is the workspace precalculated curve(s)? If not, it must be raw data from a Vanadium run
+
+    @param ws :: workspace passed in an Engg algorithm property
+
+    @returns True if the workspace seems to contain precalculated bank curves for Vanadium data
+    """
+    inst = ws.getInstrument()
+    return not inst or not inst.getName()
+
+def _precalcWStoDict(parent, ws):
+    """
+    Turn a workspace with one or more fitting results (3 spectra per curve fitted), that comes
+    with all the spectra appended, into a dictionary of individual fitting results.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws workspace with fitting results (3 spectra per curve fitted) as provided by Fit
+
+    @returns dictionary with every individual fitting result (3 spectra)
+
+    """
+    curves = {}
+
+    if 0 != (ws.getNumberHistograms() % 3):
+        raise RuntimeError("A workspace without instrument definition has ben passed, so it is "
+                           "expected to have fitting results, but it does not have a number of "
+                           "histograms multiple of 3. Number of hsitograms found: %d"%
+                           ws.getNumberHistograms())
+
+    for wi in range(0, ws.getNumberHistograms()/3):
+        indiv = cropData(parent, ws, [wi, wi+2])
+        curves.update({wi: indiv})
+
+    return curves
 
 def appendSpec(parent, ws1, ws2):
     """

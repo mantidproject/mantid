@@ -42,12 +42,20 @@ class EnggFocus(PythonAlgorithm):
                                                      PropertyMode.Optional),\
                              "Calibrated detector positions. If not specified, default ones are used.")
 
+        self.declareProperty(ITableWorkspaceProperty("VanadiumIntegWorkspace", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             '(integration result) and one row per spectrum. This can be used in '
+                             'combination with OutVanadiumCurveFits from a previous execution and '
+                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+
         self.declareProperty('OutVanadiumCurveFits', '', direction=Direction.Input,
                              doc = 'Name for a workspace2D with the fitting workspaces corresponding to '
                              'the banks processed. This workspace has three spectra per bank, as produced '
                              'by the algorithm Fit. This is meant to be used as an alternative input '
                              'VanadiumWorkspace for testing and performance reasons. If not given, no '
                              'workspace is generated.')
+
 
     def PyExec(self):
         import EnggUtils
@@ -70,10 +78,13 @@ class EnggFocus(PythonAlgorithm):
 
         # Leave data for the same bank in the vanadium workspace too
         vanWS = self.getProperty("VanadiumWorkspace").value
-        vanWS = EnggUtils.cropData(self, vanWS, indices)
+        # if it is raw data (not precalculated curve), needs to be cropped
+        if EnggUtils.vanadiumWorkspaceIsPrecalculated(ws):
+            vanWS = EnggUtils.cropData(self, vanWS, indices)
 
         # These corrections rely on ToF<->Dspacing conversions, so they're done after the calibration step
-        vanFittingWS = EnggUtils.applyVanadiumCorrection(self, ws, vanWS)
+        vanFittingWS = EnggUtils.applyVanadiumCorrection(self, ws, vanWS,
+                                                         self.getProperty('VanadiumIntegWorkspace').value)
 
     	# Convert to dSpacing
         ws = EnggUtils.convertToDSpacing(self, ws)
