@@ -1,7 +1,8 @@
-#ifndef MANTID_PYTHONINTERFACE_PYTHONTHREADING_H_
-#define MANTID_PYTHONINTERFACE_PYTHONTHREADING_H_
+#ifndef MANTID_PYTHONINTERFACE_THREADING_H_
+#define MANTID_PYTHONINTERFACE_THREADING_H_
 /**
-    Defines utility functions and classes for dealing with Python threads
+    Defines an RAII class for dealing with the Python GIL in non-python
+    created C-threads
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -30,40 +31,23 @@ namespace Mantid {
 namespace PythonInterface {
 namespace Environment {
 
-/// Saves a pointer to the PyThreadState of the main thread
-void saveMainThreadState(PyThreadState *threadState);
-
-/**
- * Defines a structure for creating and destroying a
- * Python thread state using the RAII pattern
- */
-struct PythonThreadState {
-  explicit PythonThreadState();
-  ~PythonThreadState();
-
-private:
-  PythonThreadState(const PythonThreadState &);
-  PythonThreadState &operator=(const PythonThreadState &);
-
-  PyThreadState *m_mainThreadState;
-  PyThreadState *m_thisThreadState;
-};
-
 /**
  * Defines a structure for acquiring/releasing the Python GIL
  * using the RAII pattern
  */
-struct GlobalInterpreterLock {
-  GlobalInterpreterLock() : m_state(PyGILState_Ensure()) {}
-
-  ~GlobalInterpreterLock() { PyGILState_Release(m_state); }
+class GlobalInterpreterLock {
+public:
+  /// Constructor
+  GlobalInterpreterLock();
+  /// Destructor
+  ~GlobalInterpreterLock();
 
 private:
-  /// Current GIL state
+  /// State returned from PyGILState_Ensure
   PyGILState_STATE m_state;
 };
 }
 }
 }
 
-#endif /* MANTID_PYTHONAPI_PYTHONTHREADING_H_ */
+#endif /* MANTID_PYTHONINTERFACE_THREADING_H_ */
