@@ -814,6 +814,20 @@ def is_valid_xml_file_list(input):
         if not isinstance(element, str) or not element.endswith('.xml'):
             return False
     return True
+
+def convert_from_string_list(to_convert):
+    '''
+    Convert a Python string list to a comma-separted string
+    @param to_convert :: a string list input
+    '''
+    return ','.join(element.replace(" ", "") for element in to_convert)
+
+def convert_to_string_list(to_convert):
+    '''
+    Convert a comma-separted string to a Python string list
+    @param to_convert :: a comma-spearated string
+    '''
+    return to_convert.replace(" ", "").split(",")
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

@@ -113,7 +113,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         # Act
         result = command_iface.GetTransmissionROI()
         # Assert
-        self.assertEqual('roi_file1.xml,roi_file2.xml', result, 'The transmission roi should have two entries')
+        self.assertEqual(trans_roi_files, result, 'The transmission roi should have two entries')
 
     def test_that_gets_None_for_empty_roi_files(self):
          # Arrange
@@ -126,7 +126,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
 
     def test_setting_roi_file_for_valid_input(self):
          # Arrange
-        trans_roi_files = "  file1.xml,  file2.xml "
+        trans_roi_files = ['file1.xml', 'file2.xml']
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
@@ -139,7 +139,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
 
     def test_setting_roi_file_for_invalid_input(self):
          # Arrange
-        trans_roi_files = " file1g,  file2.xml "
+        trans_roi_files = ['file1g', 'file2.xml']
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
@@ -158,7 +158,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         # Act
         result = command_iface.GetTransmissionMask()
         # Assert
-        self.assertEqual('mask_file1.xml,mask_file2.xml', result, 'The transmission mask should have two entries')
+        self.assertEqual(trans_mask_files, result, 'The transmission mask should have two entries')
 
     def test_that_gets_None_for_empty_mask_files(self):
          # Arrange
@@ -171,7 +171,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
 
     def test_setting_mask_file_for_valid_input(self):
          # Arrange
-        trans_mask_files = "  file1.xml,  file2.xml "
+        trans_mask_files = ['file1.xml', 'file2.xml']
         command_iface.Clean()
         command_iface.SANS2D()
         # Act

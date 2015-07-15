@@ -1199,8 +1199,21 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
     else:
         return ""
 
+def ConvertToPythonStringList(to_convert):
+    '''
+    Converts a python string list to a format more suitable for GUI representation
+    @param to_convert:: The string list
+    '''
+    return su.convert_to_string_list(to_convert)
 
-###################### Accessor functions
+def ConvertFromPythonStringList(to_convert):
+    '''
+    Converts a comma-separated string into a Python string list
+    @param to_convert:: The comm-separated string
+    '''
+    return su.convert_from_string_list(to_convert)
+
+###################### Accessor functions for Transmission
 def GetTransmissionMonitorSpectrum():
     """
         Gets the transmission monitor spectrum
@@ -1217,6 +1230,12 @@ def SetTransmissionMonitorSpectrum(trans_mon):
         ReductionSingleton().transmission_calculator.trans_mon = int(trans_mon)
     else:
         sanslog.warning('Warning: Could not convert the transmission monitor spectrum to int.')
+
+def UnsetTransmissionMonitorSpectrum():
+    """
+        Sets the transmission monitor spectrum to None
+    """
+    ReductionSingleton().transmission_calculator.trans_mon = None
 
 def GetTransmissionMonitorSpectrumShift():
     """
@@ -1270,18 +1289,15 @@ def GetTransmissionROI():
     if len(roi_files) == 0:
         return
     else:
-        # Bring to a good form
-        formatted_roi_files = ','.join( roi_file.replace(" ", "") for roi_file in roi_files)
-        return formatted_roi_files
+        return roi_files
 
 def SetTransmissionROI(trans_roi_files):
     """
         Sets the transmission monitor region of interest.
         @param trans_roi_files :: A string list of roi files
     """
-    roi = trans_roi_files.replace(" ", "").split(",")
-    if su.is_valid_xml_file_list(roi):
-        ReductionSingleton().transmission_calculator.roi_files = roi
+    if su.is_valid_xml_file_list(trans_roi_files):
+        ReductionSingleton().transmission_calculator.roi_files = trans_roi_files
     else:
         sanslog.warning('Warning: The roi file list does not seem to be valid.')
 
@@ -1294,17 +1310,15 @@ def GetTransmissionMask():
     if len(trans_mask_files) == 0:
         return
     else:
-        formatted_mask_files = ','.join(mask_file.replace(" ", "") for mask_file in trans_mask_files)
-        return formatted_mask_files
+        return trans_mask_files
 
 def SetTransmissionMask(trans_mask_files):
     """
         Sets the transmission masks.
         @param trans_mask_files :: A string list of mask files
     """
-    mask = trans_mask_files.replace(" ", "").split(",")
-    if su.is_valid_xml_file_list(mask):
-        ReductionSingleton().transmission_calculator.mask_files = mask
+    if su.is_valid_xml_file_list(trans_mask_files):
+        ReductionSingleton().transmission_calculator.mask_files = trans_mask_files
     else:
         sanslog.warning('Warning: The mask file list does not seem to be valid.')
 

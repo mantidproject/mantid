@@ -472,5 +472,24 @@ class TestValidXmlFileList(unittest.TestCase):
         result = su.is_valid_xml_file_list(input)
         # Assert
         self.assertFalse(result)
+
+class TestConvertToAndFromPythonStringList(unittest.TestCase):
+    def test_converts_from_string_to_list(self):
+        # Arrange
+        input = "test1.xml, test2.xml, test3.xml"
+        # Act
+        result = su.convert_to_string_list(input)
+        # Assert
+        expected = ["test1.xml", "test2.xml", "test3.xml"]
+        self.assertEqual(expected, result)
+    def test_converts_from_list_to_string(self):
+        # Arrange
+        input = ["test1.xml", "test2.xml", "test3.xml"]
+        # Act
+        result = su.convert_from_string_list(input)
+        # Assert
+        expected = "test1.xml,test2.xml,test3.xml"
+        self.assertEqual(expected, result)
+
 if __name__ == "__main__":
     unittest.main()

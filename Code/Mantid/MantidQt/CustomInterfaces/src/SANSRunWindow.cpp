@@ -4025,6 +4025,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString resultTransmissionROI(runPythonCode(transmissionROIRequest, false));
   resultTransmissionROI = resultTransmissionROI.simplified();
   if (resultTransmissionROI != m_pythonEmptyKeyword) {
+      resultTransmissionROI = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionROI+ ")", false);
       this->m_uiForm.trans_roi_files_line_edit->setText(resultTransmissionROI);
       this->m_uiForm.trans_roi_files_checkbox->setChecked(true);
       setBeamStopLogic(TransSettings::ROI, true);
@@ -4036,6 +4037,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString resultTransmissionMask(runPythonCode(transmissionMaskRequest, false));
   resultTransmissionMask = resultTransmissionMask.simplified();
   if (resultTransmissionMask != m_pythonEmptyKeyword) {
+    resultTransmissionMask = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionMask+ ")", false);
     this->m_uiForm.trans_masking_line_edit->setText(resultTransmissionMask);
   }
 
@@ -4138,23 +4140,39 @@ void SANSRunWindow::setROIAndMaskLogic(bool isNowChecked) {
  * @param pythonCode :: The python code string
  */
 void SANSRunWindow::writeTransmissionSettingsToPythonScript(QString& pythonCode) {
-  auto m3 = this->m_uiForm.trans_M3_check_box->isChecked();
-  auto m4 = this->m_uiForm.trans_M4_check_box->isChecked();
+  auto m3 = m_uiForm.trans_M3_check_box->isChecked();
+  auto m4 = m_uiForm.trans_M4_check_box->isChecked();
 
   if (m3 || m4) {
     // Handle M3/M4 settings and the TRANSPEC
     auto spectrum = m3 ? 3 : 4;
     pythonCode+="i.SetTransmissionMonitorSpectrum(trans_mon=" + QString::number(spectrum) + ")\n";
 
-    auto transSpec = this->m_uiForm.trans_M3M4_line_edit->text();
+    auto transSpec = m_uiForm.trans_M3M4_line_edit->text();
     if (!transSpec.isEmpty()) {
       pythonCode+="i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" + transSpec + ")\n";
     }
   } else {
-    // Handle Radius, ROI and Mask
-    auto radius = this->m_uiForm.trans_radius_check_box->isChecked();
-    auto roiFiles = this->m_uiForm.trans_roi_files_checkbox->isChecked();
-    auto masks = this->m_uiForm.trans_masking_line_edit->text();
+    // Handle Radius
+    auto radius = m_uiForm.trans_radius_line_edit->text();
+    if (m_uiForm.trans_radius_check_box->isChecked() && !radius.isEmpty()) {
+      pythonCode+="i.SetTransmissionRadius(trans_radius=" + radius + ")\n";
+    }
+    // Handle ROI
+    auto roi = m_uiForm.trans_roi_files_line_edit->text();
+    if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
+      roi = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" + roi + ")", false);
+      pythonCode+="i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
+    }
+    // Handle Mask
+    auto mask = m_uiForm.trans_masking_line_edit->text();
+    if (!mask.isEmpty()) {
+      mask = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" + mask + ")", false);
+      pythonCode+="i.SetTransmissionMask(trans_mask_files=" + mask + ")\n";
+    }
+
+    // Unset a potential monitor setting which had been set by the user file.
+     pythonCode+="i.UnsetTransmissionMonitorSpectrum()\n";
   }
 }
 
