@@ -52,6 +52,10 @@ Run Numbers
 Use Container
   This option allows the subtraction of a run for an empty container run.
 
+Scale Container
+  This option allows for an optional scale factor to be applied to the container
+  data before it is subtracted.
+
 Spectra Min & Spectra Max
   Specify the range of spectra to use in the reduction, the default values of
   this are set based on the instrument and reflection selected. Note that these
