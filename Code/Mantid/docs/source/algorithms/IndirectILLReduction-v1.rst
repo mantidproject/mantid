@@ -13,6 +13,17 @@ A workflow algorithm to perform a data reduction for Indirect ILL instruments.
 
 Note that currently only IN16B is supported.
 
+Mirror Mode
+~~~~~~~~~~~
+
+When IN16B records data in mirror mode the spectra for the acceleration and
+deceleration phase of the Doppler drive are recorded separately, the result is
+each spectra containing two regions for the same energy range.
+
+Enabling MirrorMode on this algorithm will split the data for each spectrum into
+two separate spectra, these form the "left" and "right" workspaces that are
+reduced independently and then summed.
+
 Workflow
 --------
 

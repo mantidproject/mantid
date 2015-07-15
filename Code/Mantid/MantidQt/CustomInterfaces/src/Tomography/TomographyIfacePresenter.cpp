@@ -22,8 +22,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 TomographyIfacePresenter::TomographyIfacePresenter(ITomographyIfaceView *view)
-    : m_view(view), m_model(new TomographyIfaceModel()),
-      m_statusMutex(NULL), m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
+    : m_view(view), m_model(new TomographyIfaceModel()), m_statusMutex(NULL),
+      m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
   if (!m_view) {
     throw std::runtime_error("Severe inconsistency found. Presenter created "
                              "with an empty/null view (tomography interface). "
@@ -141,7 +141,12 @@ void TomographyIfacePresenter::processSetup() {
         "Failed to initialize remote compute resource(s). This "
         "custom interface will not work. Error description: " +
         std::string(e.what());
-    m_view->userError("Fatal error", msg);
+
+    m_view->enableLoggedActions(false);
+    // This would ideally be shown to the user as a "fatal error" pop-up, as
+    // itis an unrecoverable error. But in facilities other than ISIS this
+    // would block the builds (docs-qthelp).
+    // m_view->userError("Fatal error", msg);
     m_model->logMsg(msg);
   }
 }
@@ -176,6 +181,15 @@ void TomographyIfacePresenter::processTomoPathsChanged() {
 }
 
 void TomographyIfacePresenter::processLogin() {
+  if (!m_model->facilitySupported()) {
+    m_view->userError(
+        "Fatal error",
+        "Cannot do any login operation because the current facility is not "
+        "supported by this interface. Please check the log messages for more "
+        "details.");
+    return;
+  }
+
   if (!m_model->loggedIn().empty()) {
     m_view->userError(
         "Better to logout before logging in again",

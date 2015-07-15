@@ -1,0 +1,60 @@
+digraph ElasticWindowMultiple {
+  label="ElasticWindowMultiple Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    HaveTemperatureLogs     [label="Have Temperature Logs?"]
+  }
+
+  subgraph processes {
+    $process_style
+    ProcessTemperatureLogs  [label="Get temperature from run\nand set as vertical axis"]
+    NormaliseByTemperature  [label="Normalise to run with\nlowest temperature"]
+  }
+
+  subgraph params {
+    $param_style
+    InputWorkspaces
+    IntegrationRangeStart
+    IntegrationRangeEnd
+    BackgroundRangeStart
+    BackgroundRangeEnd
+    SampleEnvironmentLogValue
+    SampleEnvironmentLogName
+    OutputInQ
+    OutputInQSquared
+    OutputELF
+    OutputELT
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    ElasticWindow
+    Logarithm
+    Transpose
+    SortXAxis
+    AppendSpectra_Q         [label="AppendSpectra"]
+    AppendSpectra_Q2        [label="AppendSpectra"]
+  }
+
+  InputWorkspaces           -> ElasticWindow
+  IntegrationRangeStart     -> ElasticWindow
+  IntegrationRangeEnd       -> ElasticWindow
+  BackgroundRangeStart      -> ElasticWindow
+  BackgroundRangeEnd        -> ElasticWindow
+  SampleEnvironmentLogValue -> ProcessTemperatureLogs
+  SampleEnvironmentLogName  -> ProcessTemperatureLogs
+  ElasticWindow             -> ProcessTemperatureLogs
+  ProcessTemperatureLogs    -> Logarithm                [label="OutputInQSquared"]
+  Logarithm                 -> AppendSpectra_Q2
+  ProcessTemperatureLogs    -> AppendSpectra_Q          [label="OutputInQ"]
+  AppendSpectra_Q           -> OutputInQ
+  AppendSpectra_Q2          -> OutputInQSquared
+  AppendSpectra_Q           -> Transpose
+  Transpose                 -> SortXAxis
+  SortXAxis                 -> OutputELF
+  SortXAxis                 -> HaveTemperatureLogs
+  HaveTemperatureLogs       -> NormaliseByTemperature
+  NormaliseByTemperature    -> OutputELT
+}
