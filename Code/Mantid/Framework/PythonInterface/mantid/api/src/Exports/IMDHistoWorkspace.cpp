@@ -5,7 +5,10 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/numeric.hpp>
-
+#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define NO_IMPORT_ARRAY
+#include <numpy/arrayobject.h>
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
@@ -13,8 +16,22 @@ using namespace boost::python;
 
 namespace {
 /// Convenience typedef
-typedef Converters::CArrayToNDArray<Mantid::signal_t, Converters::WrapReadOnly>
-    WrapReadOnlyNumpy;
+//typedef Converters::CArrayToNDArray<Mantid::signal_t, Converters::WrapReadOnly>
+//    WrapReadOnlyNumpy;
+PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr, std::vector<Py_intptr_t> dims)
+{
+    int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
+
+    PyArrayObject *nparray = (PyArrayObject *)PyArray_New(&PyArray_Type,
+          static_cast<int>(dims.size()), &dims[0], datatype,NULL,
+          static_cast<void *>(const_cast<double *>(arr)),0,NPY_ARRAY_FARRAY,NULL);
+    #if NPY_API_VERSION >= 0x00000007 //(1.7)
+        PyArray_CLEARFLAGS(nparray, NPY_ARRAY_WRITEABLE);
+    #else
+        nparray->flags &= ~NPY_WRITEABLE;
+    #endif
+    return (PyObject *)nparray;
+}
 
 /**
  * Determine the sizes of each dimensions
@@ -49,9 +66,8 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
  * @param self :: A reference to the calling object
  */
 PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
-  auto dims = countDimensions(self);
-  return WrapReadOnlyNumpy()(self.getSignalArray(),
-                             static_cast<int>(dims.size()), &dims[0]);
+    auto dims = countDimensions(self);
+    return WrapReadOnlyNumpyFArray(self.getSignalArray(),dims);
 }
 
 /**
@@ -60,8 +76,7 @@ PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
  */
 PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
-  return WrapReadOnlyNumpy()(self.getErrorSquaredArray(),
-                             static_cast<int>(dims.size()), &dims[0]);
+  return WrapReadOnlyNumpyFArray(self.getErrorSquaredArray(),dims);
 }
 
 /**
@@ -70,8 +85,7 @@ PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
  */
 PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
-  return WrapReadOnlyNumpy()(self.getNumEventsArray(),
-                             static_cast<int>(dims.size()), &dims[0]);
+  return WrapReadOnlyNumpyFArray(self.getNumEventsArray(),dims);
 }
 
 /**
