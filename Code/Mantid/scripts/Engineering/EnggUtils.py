@@ -319,7 +319,7 @@ def applySensitivityCorrection(parent, ws, vanWS, precalcInteg):
     @param precalcIntegration :: pre-calculated integral of every spectrum for the vanadium data
     """
     if not vanadiumWorkspaceIsPrecalculated(vanWS):
-        applySensitivytCorrectionFromRawData(parent, ws, vanWS)
+        applySensitivityCorrectionFromRawData(parent, ws, vanWS)
     else:
         for i in range(0, ws.getNumberHistograms()):
             scaleFactor = precalcInteg.cell(i,0)/vanWS.blocksize()

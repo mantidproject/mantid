@@ -92,10 +92,10 @@ class EnggCalibrateTest(unittest.TestCase):
     def check_3peaks_values(self, difc, zero):
         # There are platform specific differences in final parameter values
         # For example in earlier versions, debian: 369367.57492582797; win7: 369242.28850305633
-        expected_difc = 19110.7598121
+        expected_difc = -1910618.2889
         # assertLess would be nices, but only available in unittest >= 2.7
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
-        expected_zero = -724.337353801
+        expected_zero = 2120458.99303
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 
