@@ -42,7 +42,7 @@
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include <Qsci/qscilexerpython.h> 
+#include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/InterfaceManager.h"
 
@@ -55,9 +55,9 @@
 extern "C" void init_qti();
 
 // Factory function
-ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
-{ 
-  return new PythonScripting(parent); 
+ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
+{
+  return new PythonScripting(parent);
 }
 
 /** Constructor */
@@ -70,7 +70,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 #if defined(Q_OS_DARWIN) || defined(Q_OS_LINUX)
   const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
   // MG: The documentation claims that if the third argument to setenv is non zero then it will update the
-  // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have 
+  // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have
   // to save it and update it ourself.
   const char * envname = "PYTHONPATH";
   char * pythonpath = getenv(envname);
@@ -218,7 +218,7 @@ bool PythonScripting::start()
     pycode = pycode.arg(mantidbin.absolutePath());
     PyRun_SimpleString(pycode.toStdString().c_str());
 
-    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) ) 
+    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
       d_initialized = true;
     }
@@ -269,7 +269,7 @@ QString PythonScripting::toString(PyObject *object, bool decref)
   QString ret;
   if (!object) return ret;
   PyObject *repr = PyObject_Str(object);
-  if (decref) 
+  if (decref)
   {
     Py_DECREF(object);
   }
@@ -337,7 +337,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 {
   if(!val) return false;
   PyObject *pyobj=NULL;
-  
+
   if (!sipAPI__qti)
   {
     throw std::runtime_error("sipAPI_qti is undefined");
@@ -349,9 +349,9 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   sipWrapperType *klass = sipFindClass(val->className());
   if ( !klass ) return false;
   pyobj = sipConvertFromInstance(val, klass, NULL);
-  
+
   if (!pyobj) return false;
-  
+
   if (dict)
     PyDict_SetItemString(dict,name,pyobj);
   else
