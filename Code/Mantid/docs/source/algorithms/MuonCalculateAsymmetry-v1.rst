@@ -9,20 +9,20 @@
 Description
 -----------
 
-Converts loaded/prepared Muon data to a data suitable for analysis.
+Converts loaded/prepared Muon data to a data suitable for analysis. Either one or two data acquisition period
+workspaces may be provided (only the first one is mandatory). When both of them are supplied, the algorithm merges the counts and
+then calculates the asymmetry. PeriodOperation determines in which way period data will be
+merged before the asymmetry calculation.
 
-Supports three modes:
+The algorithm supports three asymmetry types or modes:
 
--  PairAsymmetry - asymmetry is calculated for a given pair of groups,
-   using the alpha value provided.
--  GroupAsymmetry - asymmetry between given group and Muon exponential
-   decay is calculated.
+-  PairAsymmetry - asymmetry is calculated for a given pair of spectra,
+   using the alpha value provided. The pair to use is specified via
+   PairFirstIndex and PairSecondIndex.
+-  GroupAsymmetry - asymmetry between given spectrum (specified via GroupIndex)
+   and Muon exponential decay is calculated.
 -  GroupCount - **no asymmetry is calculated**, pure counts of the
-   specified group are used.
-
-For every mode, either one or two data acquisition period workspaces can
-be provided. PeriodOperation determines in which way period data will be
-merged at the end.
+   specified spectrum (via GroupIndex) are used.
 
 Usage
 -----

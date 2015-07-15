@@ -48,14 +48,13 @@ const std::string MuonCalculateAsymmetry::category() const {
 void MuonCalculateAsymmetry::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstPeriodWorkspace",
                                                          "", Direction::Input),
-                  "First period data. If second period is not specified - the "
-                  "only one used.");
+                  "First period data. The only one used if second period is "
+                  "not specified.");
 
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("SecondPeriodWorkspace", "",
-                                             Direction::Input,
-                                             PropertyMode::Optional),
-      "Second period data. If not spefied - first period used only.");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+                      "SecondPeriodWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Second period data.");
 
   std::vector<std::string> allowedOperations;
   allowedOperations.push_back("+");
@@ -71,22 +70,22 @@ void MuonCalculateAsymmetry::init() {
   allowedTypes.push_back("GroupCounts");
   declareProperty("OutputType", "PairAsymmetry",
                   boost::make_shared<StringListValidator>(allowedTypes),
-                  "What kind of workspace required for analysis.");
+                  "What kind of calculation required for analysis.");
 
   declareProperty("PairFirstIndex", EMPTY_INT(),
-                  "Workspace index of the first group of the pair. Used when "
+                  "Workspace index of the first spectrum of the pair. Only used when "
                   "OutputType is PairAsymmetry.");
 
   declareProperty("PairSecondIndex", EMPTY_INT(),
-                  "Workspace index of the second group of the pair. Used when "
+                  "Workspace index of the second spectrum of the pair. Only used when "
                   "OutputType is PairAsymmetry.");
 
   declareProperty(
       "Alpha", 1.0,
-      "Alpha value of the pair. Used when OutputType is PairAsymmetry.");
+      "Alpha value of the pair. Only used when OutputType is PairAsymmetry.");
 
-  declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group. "
-                                             "Used then OutputType is "
+  declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the spectrum. "
+                                             "Only used then OutputType is "
                                              "GroupAsymmetry or GroupCounts.");
 
   declareProperty(
