@@ -1,5 +1,3 @@
-#include "MantidQtAPI/PythonThreading.h"
-
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/LibHelper.h"
 #include "MantidKernel/ConfigService.h"
@@ -42,19 +40,22 @@ namespace
 {
   /// Static logger
   Kernel::Logger g_log("ThreeSliceView");
-  /// Global Python thread state
-  PyGILState_STATE GIL_STATE = PyGILState_UNLOCKED;
 }
 
 
-ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
+ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
+  ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui(), m_gilStateStore()
 {
   this->m_ui.setupUi(this);
   this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
                                           QString("OrthographicSliceView"));
   pqActiveObjects::instance().setActiveView(this->m_mainView);
-  connect(this->m_mainView, SIGNAL(beginRender()), this, SLOT(onBeginRender()));
-  connect(this->m_mainView, SIGNAL(endRender()), this, SLOT(onEndRender()));
+
+  // Direct connections so that the Python code runs in the activating thread
+  connect(this->m_mainView, SIGNAL(beginRender()), this, SLOT(lockPyGIL()),
+          Qt::DirectConnection);
+  connect(this->m_mainView, SIGNAL(endRender()), this, SLOT(releasePyGIL()),
+          Qt::DirectConnection);
 }
 
 ThreeSliceView::~ThreeSliceView()
@@ -139,13 +140,13 @@ void ThreeSliceView::resetCamera()
 }
 
 /// Called when the rendering begins
-void ThreeSliceView::onBeginRender() {
-  GIL_STATE = GlobalInterpreterLock::acquire();
+void ThreeSliceView::lockPyGIL() {
+  PyGILStateService::acquireAndStore(this->m_gilStateStore);
 }
 
 /// Called when the rendering finishes
-void ThreeSliceView::onEndRender() {
-  GlobalInterpreterLock::release(GIL_STATE);
+void ThreeSliceView::releasePyGIL() {
+  PyGILStateService::dropAndRelease(this->m_gilStateStore);
 }
 
 }
