@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_THREADING_H_
-#define MANTID_PYTHONINTERFACE_THREADING_H_
+#ifndef MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_
+#define MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_
 /**
     Defines an RAII class for dealing with the Python GIL in non-python
     created C-threads
@@ -35,19 +35,30 @@ namespace Environment {
  * Defines a structure for acquiring/releasing the Python GIL
  * using the RAII pattern
  */
-class GlobalInterpreterLock {
+class GlobalInterpreterLock
+{
 public:
-  /// Constructor
+  /// @name Static Helpers
+  ///@{
+  /// Call PyGILState_Ensure
+  static PyGILState_STATE acquire();
+  /// Call PyGILState_Release
+  static void release(PyGILState_STATE tstate);
+  ///@}
+
+  /// Default constructor
   GlobalInterpreterLock();
   /// Destructor
   ~GlobalInterpreterLock();
 
 private:
-  /// State returned from PyGILState_Ensure
+  GlobalInterpreterLock(const GlobalInterpreterLock&);
+  /// Current GIL state
   PyGILState_STATE m_state;
 };
+
 }
 }
 }
 
-#endif /* MANTID_PYTHONINTERFACE_THREADING_H_ */
+#endif /* MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_ */
