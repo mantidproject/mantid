@@ -283,11 +283,17 @@ def applyVanadiumCorrection(parent, ws, vanWS):
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace to work on, must be a Vanadium (V-Nb) run (in/out)
     @param vanWS :: workspace with Vanadium data
+
+    @param curvesWS :: workspace with the fitting workspace(s) corresponding to the bank(s)
+    processed (3 spectra workspace for every bank). If several banks have been processed there
+    will be 3 spectra for each bank.
     """
     applySensitivityCorrection(parent, ws, vanWS)
 
     # apply this to both Engin-X banks, each with separate calculations
-    applyPixByPixCorrection(parent, ws, vanWS, ENGINX_BANKS_FOR_PIXBYPIX_CORR)
+    curvesDict = applyPixByPixCorrection(parent, ws, vanWS, ENGINX_BANKS_FOR_PIXBYPIX_CORR)
+    curvesWS = prepareCurvesWS(parent, curvesDict)
+    return curvesWS
 
 def applySensitivityCorrection(parent, ws, vanWS):
     """
@@ -305,9 +311,10 @@ def applySensitivityCorrection(parent, ws, vanWS):
                          "the X dimension of the input workspace is: '%s'" % (expectedDim, dimType))
 
     integWS = integrateSpectra(parent, vanWS)
-    if 1 != integWS.blocksize() or integWS.getNumberHistograms() != ws.getNumberHistograms():
+    if 1 != integWS.blocksize() or integWS.getNumberHistograms() < ws.getNumberHistograms():
         raise RuntimeError("Error while integrating workspace, the Integration algorithm "
-                           "produced a workspace with %d bins and %d spectra"%
+                           "produced a workspace with %d bins and %d spectra. The (vanadium) "
+                           "workspace integrated has %d spectra."%
                            (integWS.blocksize(), integWS.getNumberHistograms()))
 
     for i in range(0, ws.getNumberHistograms()):
@@ -323,11 +330,16 @@ def applyPixByPixCorrection(parent, ws, vanWS, banks):
     @param ws :: workspace to work on / correct
     @param banks :: list of banks to correct - normally would expect all banks: [1,2]
     @param vanWS :: workspace with Vanadium data
+
+    @param curves :: a dictionary with bank id's (numbers) as keys and fitting output workspace
+    as values
     """
     # get one curve per bank, in d-spacing
     curves = fitCurvesPerBank(parent, vanWS, banks)
     # divide the spectra by their corresponding bank curve
     divideByCurves(parent, ws, curves)
+
+    return curves
 
 def divideByCurves(parent, ws, curves):
     """
@@ -424,23 +436,26 @@ def fitBankCurve(parent, vanWS, bank):
     if 1 != vanWS.getNumberHistograms():
         raise ValueError("The workspace does not have exactly one histogram. Inconsistency found.")
 
-    functionName = 'BSpline'
+    # without these min/max parameters 'BSpline' would completely misbehave
+    xvec = vanWS.readX(0)
+    startX = min(xvec)
+    endX = max(xvec)
+    functionDesc = 'name=BSpline, Order=3, StartX=' + str(startX) +', EndX=' + str(endX) + ', NBreak=12'
     fitAlg = parent.createChildAlgorithm('Fit')
-    fitAlg.setProperty('Function', 'name=' + functionName)
+    fitAlg.setProperty('Function', functionDesc)
     fitAlg.setProperty('InputWorkspace', vanWS)
     # WorkspaceIndex is left to default '0' for 1D function fits
-    # StartX, EndX left to default start/end of the spectrum
-    fitWSName = 'vanadium_bank_fit'
-    fitAlg.setPropertyValue('Output', fitWSName)
+    # StartX, EndX could in principle be left to default start/end of the spectrum, but apparently
+    # not safe for 'BSpline'
     fitAlg.setProperty('CreateOutput', True)
     fitAlg.execute()
 
     success = fitAlg.getProperty('OutputStatus').value
-    parent.log().information("Fitting Vanadium curve for bank %s, using function of type %s, result: %s" %
-                             (bank, functionName, success))
+    parent.log().information("Fitting Vanadium curve for bank %s, using function '%s', result: %s" %
+                             (bank, functionDesc, success))
 
-    detailMsg = ("It seems that this algorithm failed to to fit a function of type '%s' to the summed "
-                 "spectra of a bank") % functionName
+    detailMsg = ("It seems that this algorithm failed to to fit a function to the summed "
+                 "spectra of a bank. The function definiton was: '%s'") % functionDesc
 
     outParsPropName = 'OutputParameters'
     params = None
@@ -459,7 +474,55 @@ def fitBankCurve(parent, vanWS, bank):
         raise RuntimeError("Could not find the data workspace expected in the output property " +
                            outWSPropName + ". " + detailMsg)
 
+    mtd['van_ws_dsp'] = vanWS
+    mtd['fit_ws_dsp'] = fitWS
+
     return fitWS
+
+def prepareCurvesWS(parent, curvesDict):
+    """
+    Simply concantenates or appends fitting output workspaces as produced by the algorithm Fit (with 3
+    spectra each). The groups of 3 spectra are added sorted by the bank ID (number). This could also
+    produce a workspace group with the individual workspaces in it, but the AppendSpectra solution
+    seems simpler.
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param curvesDict :: dictionary with fitting workspaces produced by 'Fit'
+
+    @returns a workspace where all the input workspaces have been concatenated, with 3 spectra per
+    workspace / bank
+    """
+    if 0 == len(curvesDict):
+        raise RuntimeError("Expecting a dictionary with fitting workspaces from 'Fit' but got an "
+                           "empty dictionary")
+    if 1 == len(curvesDict):
+        return curvesDict.values()[0]
+
+    keys = sorted(curvesDict)
+    ws = curvesDict[keys[0]]
+    for idx in range(1, len(keys)):
+        nextWS = curvesDict[keys[idx]]
+        ws = appendSpec(parent, ws, nextWS)
+
+    return ws
+
+def appendSpec(parent, ws1, ws2):
+    """
+    Uses the algorithm 'AppendSpectra' to append the spectra of ws1 and ws2
+
+    @param parent :: parent (Mantid) algorithm that wants to run this
+    @param ws1 :: first workspace
+    @param ws2 :: second workspace
+
+    @returns workspace with the concatenation of the spectra ws1+ws2
+    """
+    alg = parent.createChildAlgorithm('AppendSpectra')
+    alg.setProperty('InputWorkspace1', ws1)
+    alg.setProperty('InputWorkspace2', ws2)
+    alg.execute()
+
+    result = alg.getProperty('OutputWorkspace').value
+    return result
 
 def integrateSpectra(parent, ws):
     """

@@ -15,6 +15,8 @@ class EnggFocus(PythonAlgorithm):
         return "Focuses a run by summing up all the spectra into a single one."
 
     def PyInit(self):
+        import EnggUtils
+
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
                              "Workspace with the run to focus.")
 
@@ -24,7 +26,6 @@ class EnggFocus(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                              "A workspace with focussed data")
 
-        import EnggUtils
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to focus: It can be specified as 1 or 2, or "
@@ -41,6 +42,12 @@ class EnggFocus(PythonAlgorithm):
                                                      PropertyMode.Optional),\
                              "Calibrated detector positions. If not specified, default ones are used.")
 
+        self.declareProperty('OutVanadiumCurveFits', '', direction=Direction.Input,
+                             doc = 'Name for a workspace2D with the fitting workspaces corresponding to '
+                             'the banks processed. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                             'workspace is generated.')
 
     def PyExec(self):
         import EnggUtils
@@ -66,7 +73,7 @@ class EnggFocus(PythonAlgorithm):
         vanWS = EnggUtils.cropData(self, vanWS, indices)
 
         # These corrections rely on ToF<->Dspacing conversions, so they're done after the calibration step
-        EnggUtils.applyVanadiumCorrection(self, ws, vanWS)
+        vanFittingWS = EnggUtils.applyVanadiumCorrection(self, ws, vanWS)
 
     	# Convert to dSpacing
         ws = EnggUtils.convertToDSpacing(self, ws)
@@ -82,6 +89,11 @@ class EnggFocus(PythonAlgorithm):
         self._convertToDistr(ws)
 
         self.setProperty("OutputWorkspace", ws)
+
+        # optinally, generate the workspace with per-bank vanadium fitting curves
+        outVanWSName = self.getPropertyValue('OutVanadiumCurveFits')
+        if outVanWSName:
+            mtd[outVanWSName] = vanFittingWS
 
     def _applyCalibration(self, ws, detPos):
         """

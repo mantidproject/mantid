@@ -51,10 +51,13 @@ Usage
 
    out_tbl_name = 'out_params'
    ws_name = 'test'
+   van_ws_name = 'test_vanadium'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
+   Load('ENGINX00193749.nxs', OutputWorkspace=van_ws_name)
    Difc, Zero = EnggCalibrate(InputWorkspace=ws_name,
-                                ExpectedPeaks=[1.097, 2.1], Bank='1',
-                                OutputParametersTableName=out_tbl_name)
+                              VanadiumWorkspace= van_ws_name,
+                              ExpectedPeaks=[1.097, 2.1], Bank='1',
+                              OutputParametersTableName=out_tbl_name)
 
    print "Difc: %.2f" % (Difc)
    print "Zero: %.2f" % (Zero)
@@ -66,12 +69,13 @@ Usage
 
    DeleteWorkspace(out_tbl_name)
    DeleteWorkspace(ws_name)
+   DeleteWorkspace(van_ws_name)
 
 Output:
 
 .. testoutput:: ExampleCalib
 
-   Difc: 18404.93
-   Zero: -10.89
+   Difc: 18404.35
+   Zero: -8.77
    The output table has 1 row(s)
-   Parameters from the table, Difc: 18404.93, Zero: -10.89
+   Parameters from the table, Difc: 18404.35, Zero: -8.77
