@@ -199,6 +199,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     _sample_runs = None
     _vanadium_runs = None
     _container_file = None
+    _container_scale_factor = None
     _sam_ws_map = None
     _van_ws_map = None
     _man_d_range = None
