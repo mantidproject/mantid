@@ -47,7 +47,8 @@ public:
   virtual void PrintSelf(ostream &os, vtkIndent indent);
 
   void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points);
-  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points, const double* skewMatrix);
+  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points,
+                       const double *skewMatrix);
 
   // Reimplemented virtuals -- see superclasses for descriptions:
   void Initialize();
@@ -114,7 +115,7 @@ private:
 
   Scalar m_skewMatrix[9] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
   vtkIdType m_dims[3];
-  Scalar m_TempScalarArray[3],m_origin[3], m_spacing[3];
+  Scalar m_TempScalarArray[3], m_origin[3], m_spacing[3];
   Mantid::DataObjects::MDHistoWorkspace *m_workspace;
 };
 
@@ -177,7 +178,8 @@ void vtkStructuredPointsArray<Scalar>::InitializeArray(
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-void vtkStructuredPointsArray<Scalar>::InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points,const double* skewMatrix) {
+void vtkStructuredPointsArray<Scalar>::InitializeArray(
+    Mantid::DataObjects::MDHistoWorkspace *points, const double *skewMatrix) {
   for (auto i = 0; i < 9; ++i) {
     m_skewMatrix[i] = skewMatrix[i];
   }
@@ -330,10 +332,10 @@ Scalar vtkStructuredPointsArray<Scalar>::GetValue(vtkIdType idx) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkStructuredPointsArray<Scalar>::GetValueReference(vtkIdType idx) {
- 
-  //const vtkIdType tuple = idx / 3;
-  //const vtkIdType comp = idx % 3;
-  const auto tmp = std::div(idx,static_cast<vtkIdType>(3));
+
+  // const vtkIdType tuple = idx / 3;
+  // const vtkIdType comp = idx % 3;
+  const auto tmp = std::div(idx, static_cast<vtkIdType>(3));
   this->GetTupleValue(tmp.quot, this->m_TempScalarArray);
   return m_TempScalarArray[tmp.rem];
 }
@@ -355,10 +357,13 @@ void vtkStructuredPointsArray<Scalar>::GetTupleValue(vtkIdType tupleId,
     v[i] = m_origin[i] + loc[i] * m_spacing[i];
   }
 
-  //vtkMatrix3x3::MultiplyPoint(m_skewMatrix, v, tuple);
-  tuple[0] = v[0]*m_skewMatrix[0]  + v[1]*m_skewMatrix[1]  + v[2]*m_skewMatrix[2];
-  tuple[1] = v[0]*m_skewMatrix[3]  + v[1]*m_skewMatrix[4]  + v[2]*m_skewMatrix[5];
-  tuple[2] = v[0]*m_skewMatrix[6]  + v[1]*m_skewMatrix[7]  + v[2]*m_skewMatrix[8];
+  // vtkMatrix3x3::MultiplyPoint(m_skewMatrix, v, tuple);
+  tuple[0] =
+      v[0] * m_skewMatrix[0] + v[1] * m_skewMatrix[1] + v[2] * m_skewMatrix[2];
+  tuple[1] =
+      v[0] * m_skewMatrix[3] + v[1] * m_skewMatrix[4] + v[2] * m_skewMatrix[5];
+  tuple[2] =
+      v[0] * m_skewMatrix[6] + v[1] * m_skewMatrix[7] + v[2] * m_skewMatrix[8];
 }
 
 //------------------------------------------------------------------------------

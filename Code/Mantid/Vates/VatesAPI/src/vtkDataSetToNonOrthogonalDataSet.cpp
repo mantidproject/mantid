@@ -216,27 +216,25 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   }
 
   vtkNew<vtkPoints> newPoints;
-  Mantid::DataObjects::MDHistoWorkspace_sptr MDHws = boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(ws);
-    
-  if(MDHws)
-  {
+  Mantid::DataObjects::MDHistoWorkspace_sptr MDHws =
+      boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(ws);
+
+  if (MDHws) {
     vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
-    implicitPoints->InitializeArray(MDHws.get(),skew);
+    implicitPoints->InitializeArray(MDHws.get(), skew);
     newPoints->SetData(implicitPoints.GetPointer());
-  }
-  else
-  {
+  } else {
     double outPoint[3];
     // Get the original points
     vtkPoints *points = data->GetPoints();
     newPoints->Allocate(points->GetNumberOfPoints());
     for (int i = 0; i < points->GetNumberOfPoints(); i++) {
-      points->GetPoint(i,outPoint);
+      points->GetPoint(i, outPoint);
       vtkMatrix3x3::MultiplyPoint(skew, outPoint, outPoint);
       newPoints->InsertNextPoint(outPoint);
     }
   }
-    
+
   data->SetPoints(newPoints.GetPointer());
   this->updateMetaData(data);
 }
