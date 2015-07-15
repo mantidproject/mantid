@@ -225,7 +225,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(ws);
     
   vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
-  implicitPoints->InitializeArray(asdfWs.get(),0,skew);
+  implicitPoints->InitializeArray(asdfWs.get(),skew);
   vtkNew<vtkPoints> newImplicitPoints;
   newImplicitPoints->SetData(implicitPoints.GetPointer());
     

@@ -33,6 +33,8 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include <vtkMatrix3x3.h>
 
+#include <cstdlib>
+
 class vtkImageData;
 
 template <class Scalar>
@@ -44,10 +46,8 @@ public:
       vtkStructuredPointsArray<Scalar>) static vtkStructuredPointsArray *New();
   virtual void PrintSelf(ostream &os, vtkIndent indent);
 
-  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points,
-                       bool useTransform);
-  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points,
-                       bool useTransform, double *skewMatrix);
+  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points);
+  void InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points, const double* skewMatrix);
 
   // Reimplemented virtuals -- see superclasses for descriptions:
   void Initialize();
@@ -112,11 +112,9 @@ private:
       const vtkStructuredPointsArray &);            // Not implemented.
   void operator=(const vtkStructuredPointsArray &); // Not implemented.
 
-  Mantid::API::CoordTransform const *m_transform = NULL;
-  double TempDoubleArray[3],
-      m_skewMatrix[9] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+  Scalar m_skewMatrix[9] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
   vtkIdType m_dims[3];
-  double m_origin[3], m_spacing[3];
+  Scalar m_TempScalarArray[3],m_origin[3], m_spacing[3];
   Mantid::DataObjects::MDHistoWorkspace *m_workspace;
 };
 
@@ -139,17 +137,17 @@ void vtkStructuredPointsArray<Scalar>::PrintSelf(ostream &os,
                                                  vtkIndent indent) {
   this->vtkStructuredPointsArray<Scalar>::Superclass::PrintSelf(os, indent);
 
-  os << indent << "TempDoubleArray: " << this->TempDoubleArray << "\n";
+  os << indent << "TempScalarArray: " << this->m_TempScalarArray << "\n";
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkStructuredPointsArray<Scalar>::InitializeArray(
-    Mantid::DataObjects::MDHistoWorkspace *points, bool useTransform) {
-  double extent[6];
+    Mantid::DataObjects::MDHistoWorkspace *points) {
 
   m_workspace = points;
 
+  Scalar extent[6];
   extent[0] = m_workspace->getXDimension()->getMinimum();
   extent[1] = m_workspace->getXDimension()->getMaximum();
   extent[2] = m_workspace->getYDimension()->getMinimum();
@@ -165,9 +163,9 @@ void vtkStructuredPointsArray<Scalar>::InitializeArray(
   m_dims[1] = m_workspace->getYDimension()->getNBins() + 1;
   m_dims[2] = m_workspace->getZDimension()->getNBins() + 1;
 
-  m_spacing[0] = (extent[1] - extent[0]) / double(m_dims[0] - 1);
-  m_spacing[1] = (extent[3] - extent[2]) / double(m_dims[1] - 1);
-  m_spacing[2] = (extent[5] - extent[4]) / double(m_dims[2] - 1);
+  m_spacing[0] = (extent[1] - extent[0]) / Scalar(m_dims[0] - 1);
+  m_spacing[1] = (extent[3] - extent[2]) / Scalar(m_dims[1] - 1);
+  m_spacing[2] = (extent[5] - extent[4]) / Scalar(m_dims[2] - 1);
 
   this->MaxId = (m_dims[0] * m_dims[1] * m_dims[2]) * 3 - 1;
   this->Size = this->MaxId + 1;
@@ -175,20 +173,15 @@ void vtkStructuredPointsArray<Scalar>::InitializeArray(
 
   // Get the transformation that takes the points in the TRANSFORMED space back
   // into the ORIGINAL (not-rotated) space.
-
-  if (useTransform)
-    m_transform = m_workspace->getTransformToOriginal();
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
-void vtkStructuredPointsArray<Scalar>::InitializeArray(
-    Mantid::DataObjects::MDHistoWorkspace *points, bool useTransform,
-    double *skewMatrix) {
+void vtkStructuredPointsArray<Scalar>::InitializeArray(Mantid::DataObjects::MDHistoWorkspace *points,const double* skewMatrix) {
   for (auto i = 0; i < 9; ++i) {
     m_skewMatrix[i] = skewMatrix[i];
   }
-  this->InitializeArray(points, useTransform);
+  this->InitializeArray(points);
 }
 
 //------------------------------------------------------------------------------
@@ -296,8 +289,8 @@ template <class Scalar> void vtkStructuredPointsArray<Scalar>::ClearLookup() {
 //------------------------------------------------------------------------------
 template <class Scalar>
 double *vtkStructuredPointsArray<Scalar>::GetTuple(vtkIdType i) {
-  this->GetTuple(i, &TempDoubleArray[0]);
-  return &TempDoubleArray[0];
+  this->GetTuple(i, &m_TempScalarArray[0]);
+  return &m_TempScalarArray[0];
 }
 
 //------------------------------------------------------------------------------
@@ -331,17 +324,18 @@ void vtkStructuredPointsArray<Scalar>::LookupTypedValue(Scalar value,
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar vtkStructuredPointsArray<Scalar>::GetValue(vtkIdType idx) {
-  return this->GetValueReference(idx);
+  return this->GetValue(idx);
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkStructuredPointsArray<Scalar>::GetValueReference(vtkIdType idx) {
-  const vtkIdType tuple = idx / 3;
-  const vtkIdType comp = idx % 3;
-
-  this->GetTupleValue(tuple, this->TempDoubleArray);
-  return TempDoubleArray[comp];
+ 
+  //const vtkIdType tuple = idx / 3;
+  //const vtkIdType comp = idx % 3;
+  const auto tmp = std::div(idx,static_cast<vtkIdType>(3));
+  this->GetTupleValue(tmp.quot, this->m_TempScalarArray);
+  return m_TempScalarArray[tmp.rem];
 }
 
 //------------------------------------------------------------------------------
@@ -352,26 +346,14 @@ void vtkStructuredPointsArray<Scalar>::GetTupleValue(vtkIdType tupleId,
   // loc[0] = tupleId % m_dims[0];
   // loc[1] = (tupleId / m_dims[0]) % m_dims[1];
   // loc[2] = tupleId / (m_dims[0]*m_dims[1]);
-  auto tmp1 = std::div(tupleId, m_dims[0]);
-  auto tmp2 = std::div(tmp1.quot, m_dims[1]);
-  long long loc[3] = {tmp1.rem, tmp2.rem, tmp2.quot};
+  const auto tmp1 = std::div(tupleId, m_dims[0]);
+  const auto tmp2 = std::div(tmp1.quot, m_dims[1]);
+  const vtkIdType loc[3] = {tmp1.rem, tmp2.rem, tmp2.quot};
 
-  Mantid::coord_t in[3];
   for (int i = 0; i < 3; i++) {
-    in[i] = m_origin[i] + loc[i] * m_spacing[i];
+    tuple[i] = m_origin[i] + loc[i] * m_spacing[i];
   }
 
-  if (m_transform) {
-    Mantid::coord_t out[3];
-    m_transform->apply(in, out);
-    for (int i = 0; i < 3; i++) {
-      tuple[i] = out[i];
-    }
-  } else {
-    for (int i = 0; i < 3; i++) {
-      tuple[i] = in[i];
-    }
-  }
   vtkMatrix3x3::MultiplyPoint(m_skewMatrix, tuple, tuple);
 }
 

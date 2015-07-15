@@ -142,7 +142,7 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   }
     
   vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
-  implicitPoints->InitializeArray(m_workspace.get(),m_useTransform);
+  implicitPoints->InitializeArray(m_workspace.get());
   vtkNew<vtkPoints> newPoints;
   newPoints->SetData(implicitPoints.GetPointer());
     

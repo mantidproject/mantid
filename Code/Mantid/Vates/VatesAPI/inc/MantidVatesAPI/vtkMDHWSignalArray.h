@@ -235,7 +235,7 @@ void vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value, vtkIdList *ids) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkVariant vtkMDHWSignalArray<Scalar>::GetVariantValue(vtkIdType idx) {
-  return vtkVariant(this->GetValueReference(idx));
+  return vtkVariant(this->GetValue(idx));
 }
 
 //------------------------------------------------------------------------------
@@ -309,12 +309,6 @@ void vtkMDHWSignalArray<Scalar>::GetTupleValue(vtkIdType tupleId,
                                                Scalar *tuple) {
   m_iterator->jumpTo(m_offset + tupleId);
   tuple[0] = m_iterator->getNormalizedSignal();
-  /*
-  for (size_t comp = 0; comp < this->Arrays.size(); ++comp)
-    {
-    tuple[comp] = this->Arrays[comp][tupleId];
-    }
-  */
 }
 
 //------------------------------------------------------------------------------
