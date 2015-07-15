@@ -5,6 +5,7 @@ from mantid.api import *
 class EnggCalibrateTest(unittest.TestCase):
 
     _data_ws = None
+    _van_ws = None
 
     # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
     # unittest of rhel6
@@ -14,6 +15,9 @@ class EnggCalibrateTest(unittest.TestCase):
         """
         if not self.__class__._data_ws:
             self.__class__._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+
+        if not self.__class__._van_ws:
+            self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
 
     def test_issues_with_properties(self):
         """
@@ -65,7 +69,8 @@ class EnggCalibrateTest(unittest.TestCase):
         """
 
         difc, zero = EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                     ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
+                                   VanadiumWorkspace=self.__class__._van_ws,
+                                   ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
 
         self.check_3peaks_values(difc, zero)
 
@@ -77,19 +82,20 @@ class EnggCalibrateTest(unittest.TestCase):
         # This file has: 1.6, 1.1, 1.8 (as the test above)
         filename = 'EnginX_3_expected_peaks_unittest.csv'
         difc, zero = EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                     ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
-                                     ExpectedPeaksFromFile=filename,
-                                     Bank='2')
+                                   VanadiumWorkspace=self.__class__._van_ws,
+                                   ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
+                                   ExpectedPeaksFromFile=filename,
+                                   Bank='2')
 
         self.check_3peaks_values(difc, zero)
 
     def check_3peaks_values(self, difc, zero):
         # There are platform specific differences in final parameter values
-        # For example, debian: 369367.57492582797; win7: 369242.28850305633
-        expected_difc = 369367.57492582797
+        # For example in earlier versions, debian: 369367.57492582797; win7: 369242.28850305633
+        expected_difc = 19110.7598121
         # assertLess would be nices, but only available in unittest >= 2.7
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
-        expected_zero = -223297.87349744083
+        expected_zero = -724.337353801
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 
