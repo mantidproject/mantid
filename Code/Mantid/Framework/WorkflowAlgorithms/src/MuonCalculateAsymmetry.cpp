@@ -100,22 +100,23 @@ void MuonCalculateAsymmetry::init() {
  * Execute the algorithm.
  */
 void MuonCalculateAsymmetry::exec() {
+
   MatrixWorkspace_sptr firstPeriodWS = getProperty("FirstPeriodWorkspace");
   MatrixWorkspace_sptr secondPeriodWS = getProperty("SecondPeriodWorkspace");
 
-  MatrixWorkspace_sptr firstConverted = convertWorkspace(firstPeriodWS);
+  MatrixWorkspace_sptr convertedWS;
 
   if (secondPeriodWS) {
     // Two periods
-    MatrixWorkspace_sptr secondConverted = convertWorkspace(secondPeriodWS);
+    MatrixWorkspace_sptr mergedWS = mergePeriods(firstPeriodWS, secondPeriodWS);
+    convertedWS = convertWorkspace(mergedWS);
 
-    setProperty("OutputWorkspace",
-                mergePeriods(firstConverted, secondConverted));
   } else {
     // Single period only
-
-    setProperty("OutputWorkspace", firstConverted);
+    convertedWS = convertWorkspace(firstPeriodWS);
   }
+
+  setProperty("OutputWorkspace", convertedWS);
 }
 
 /**
