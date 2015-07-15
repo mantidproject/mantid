@@ -16,8 +16,6 @@ class GlobalInterpreterLock
 public:
   /// @name Static Helpers
   ///@{
-  /// Is this thread the active thread
-  static bool pyThreadIsActive();
   /// Call PyGILState_Ensure
   static PyGILState_STATE acquire();
   /// Call PyGILState_Release
@@ -31,8 +29,6 @@ public:
 
 private:
   GlobalInterpreterLock(const GlobalInterpreterLock&);
-  /// Did we choose to acquire the lock
-  bool m_locked;
   /// Current GIL state
   PyGILState_STATE m_state;
 };
@@ -55,18 +51,10 @@ public:
   static void dropAndRelease(PyGILStateService &targetStore);
   ///@}
 
-  /**
-   * @param thread A pointer to the current QThread object that defines a thread
-   * @param tstate The value of PyGILState provided by a call to PyGILState_Ensure()
-   */
+  /// Associate a QThread with a PyGILState_STATE value
   void add(QThread* thread, PyGILState_STATE tstate);
-  /**
-   * @param thread A pointer to a QThread whose tstate should be retrieved. If found, the
-   * state is dropped from the map.
-   * @param tstate Filled PyGILState_STATE value associated with this thread if found
-   * @return True if a value was found and removed
-   */
-  bool retrieve(QThread* thread, PyGILState_STATE &tstate);
+  /// Find the PyGILState for the given QThread
+  PyGILState_STATE take(QThread* thread);
 
 private:
   typedef QHash<QThread*, PyGILState_STATE> QThreadToGILMap;
