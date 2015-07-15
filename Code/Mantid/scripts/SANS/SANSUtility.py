@@ -666,7 +666,6 @@ def extract_spectra(ws, det_ids, output_ws_name):
     """
     A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
     of ws indices to keep.  Everything else is ignored.
-    
     @param ws :: the workspace from which to extract spectra
     @param det_ids :: the detector IDs corresponding to the spectra to extract
     @param output_ws_name :: the name of the resulting workspace
@@ -800,7 +799,7 @@ def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, app
     Takes a multi-period event workspace and loads the monitors
     as a group workspace
     @param workspace: Multi-period event workspace
-    @param data_file: The file which can 
+    @param data_file: The data file
     @param monitor_appendix: The appendix for monitor data
     '''
     if len(monitor_workspace) != len(workspace):
