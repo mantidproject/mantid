@@ -51,6 +51,7 @@ set ( SRC_FILES
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
+	src/GSLVector.cpp
 	src/GausDecay.cpp
 	src/GausOsc.cpp
 	src/Gaussian.cpp
@@ -285,6 +286,7 @@ set ( TEST_FILES
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
 	GSLMatrixTest.h
+	GSLVectorTest.h
 	GausDecayTest.h
 	GausOscTest.h
 	GaussianComptonProfileTest.h
