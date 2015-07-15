@@ -17,7 +17,7 @@ from mantid.kernel import Logger
 sanslog = Logger("SANS")
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace, FileLoaderRegistry
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
@@ -140,7 +140,8 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
-            extra_options['EntryNumber'] = self._period
+            if not FileLoaderRegistry.canLoad("LoadEventNexus", self._data_file):
+                extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
 
