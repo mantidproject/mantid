@@ -66,6 +66,9 @@ public:
            "Nexus file";
   }
 
+  /// Get the parameter correction file, if it exists else return ""
+  std::string getParameterCorrectionFile( const std::string& instName ) ;
+
   /// Load the parameters from Nexus file if possible, else from parameter file, into workspace
   void LoadParameters( ::NeXus::File *nxfile, const API::MatrixWorkspace_sptr localWorkspace );
 

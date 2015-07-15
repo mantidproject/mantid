@@ -4,6 +4,8 @@
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
+#include <Poco/Path.h>
+#include <Poco/File.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -66,10 +68,40 @@ void LoadIDFFromNexus::exec() {
   // Take instrument info from nexus file.
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile );
 
+  // Look for parameter correction file
+  std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
+
   LoadParameters(  &nxfile, localWorkspace );
 
   return;
 }
+
+  /*  Gets the full pathname of the parameter correction file, if it exists
+   * @param instName :: short name of instrument as it appears in IDF filename etc.
+   * @returns  full path name of correction file if found else ""
+  */
+  std::string LoadIDFFromNexus::getParameterCorrectionFile( const std::string& instName ) {
+
+    std::vector<std::string> directoryNames =
+      ConfigService::Instance().getInstrumentDirectories();
+    for (auto instDirs_itr = directoryNames.begin();
+      instDirs_itr != directoryNames.end(); ++instDirs_itr) {
+        // This will iterate around the directories from user ->etc ->install, and
+        // find the first appropriate file
+        Poco::Path iPath( *instDirs_itr,"embedded_instrument_corrections"); // Go to correction file subfolder
+        // First see if the directory exists
+        Poco::File ipDir(iPath);
+        if( ipDir.exists() && ipDir.isDirectory() ) {
+          iPath.append(instName + "_Parameter_Corrections.xml"); // Append file name to pathname
+            Poco::File ipFile(iPath);
+            if( ipFile.exists() && ipFile.isFile())
+            {
+              return ipFile.path(); // Return first found
+            }
+        } // Directory
+    } // Loop
+    return ""; // No file found
+  }
 
 
 /** Loads the parameters from the Nexus file if possible, else from a parameter file
@@ -101,7 +133,7 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
     for (auto instDirs_itr = directoryNames.begin();
          instDirs_itr != directoryNames.end(); ++instDirs_itr) {
       // This will iterate around the directories from user ->etc ->install, and
-      // find the first beat file
+      // find the first appropriate file
       std::string directoryName = *instDirs_itr;
       const std::string paramFile =
           directoryName + instrumentName + "_Parameters.xml";
