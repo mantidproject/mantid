@@ -223,8 +223,11 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc=runs_desc)
         self.declareProperty(StringArrayProperty('Vanadium'),
                              doc=runs_desc)
+
         self.declareProperty('Container', '',
                              doc='Run for the container')
+        self.declareProperty('ContainerScaleFactor', 1.0,
+                             doc='Factor by which to scale the container')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
@@ -259,6 +262,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._vanadium_runs = self._find_runs(self.getProperty("Vanadium").value)
 
         self._container_file = self.getPropertyValue("Container")
+        self._container_scale_factor = self.getProperty("ContainerScaleFactor").value
+
         if self._container_file != '':
             self._container_file = self._find_runs([self._container_file])[0]
 
@@ -292,6 +297,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              SpectrumMin=self._spec_min,
                              # SpectrumMax=self._spec_max,
                              LoadLogFiles=self._load_logs)
+
+            # Scale the container run if required
+            if self._container_scale_factor != 1.0:
+                Scale(InputWorkspace=container,
+                      OutputWorkspace=container,
+                      Factor=self._container_scale_factor,
+                      Operation='Multiply')
 
         # Add the sample workspaces to the dRange to sample map
         for sam in self._sample_runs:

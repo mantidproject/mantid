@@ -50,5 +50,22 @@ class OSIRISDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'dSpacing')
 
 
+    def test_reduction_with_can_subtraction_and_scale(self):
+        """
+        Tests reduction after subtraction of an empty can.
+        """
+
+        ws = OSIRISDiffractionReduction(Sample=['OSI10203.raw'],
+                                        CalFile='osiris_041_RES10.cal',
+                                        Vanadium=['OSI10156.raw'],
+                                        Container='OSI10241.raw',
+                                        ContainerScaleFactor=0.5,
+                                        DetectDRange=False,
+                                        DRange=4)
+
+        self.assertTrue(isinstance(ws, MatrixWorkspace), 'Result workspace should be a matrix workspace.')
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'dSpacing')
+
+
 if __name__ == '__main__':
     unittest.main()
