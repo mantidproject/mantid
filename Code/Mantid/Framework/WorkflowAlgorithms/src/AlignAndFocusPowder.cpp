@@ -37,7 +37,7 @@ DECLARE_ALGORITHM(AlignAndFocusPowder)
 
 AlignAndFocusPowder::AlignAndFocusPowder()
     : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false), xmin(0.0),
-      xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), tmin(0.0), tmax(0.0),
+      xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.), tmin(0.0), tmax(0.0),
       m_preserveEvents(false), m_processLowResTOF(false), m_lowResSpecOffset(0),
       m_progress(NULL) {}
 
@@ -145,6 +145,9 @@ void AlignAndFocusPowder::init() {
   declareProperty(
       "CropWavelengthMin", 0.,
       "Crop the data at this minimum wavelength. Overrides LowResRef.");
+  declareProperty(
+      "CropWavelengthMax", EMPTY_DBL(),
+      "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
   declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
@@ -252,6 +255,8 @@ void AlignAndFocusPowder::exec() {
   LRef = getProperty("UnwrapRef");
   DIFCref = getProperty("LowResRef");
   minwl = getProperty("CropWavelengthMin");
+  maxwl = getProperty("CropWavelengthMax");
+  if (maxwl == 0.) maxwl = EMPTY_DBL(); // python can only specify 0 for unused
   tmin = getProperty("TMin");
   tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
@@ -463,7 +468,7 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (LRef > 0. || minwl > 0. || DIFCref > 0.) {
+  if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "TOF");
   }
   m_progress->report();
@@ -485,9 +490,15 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (minwl > 0.) {
-    g_log.information() << "running RemoveLowResTOF(MinWavelength=" << minwl
-                        << ",Tmin=" << tmin << ". ";
+  if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the worksapce
+    // turn off the low res stuff
+    m_processLowResTOF = false;
+
+    g_log.information() << "running CropWorkspace(MinWavelength=" << minwl;
+    if (!isEmpty(maxwl))
+        g_log.information() << ", MaxWavelength=" << maxwl;
+    g_log.information() << ")\n";
+
     EventWorkspace_sptr ews =
         boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -495,19 +506,15 @@ void AlignAndFocusPowder::exec() {
                           << ". ";
     g_log.information("\n");
 
-    API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
+    m_outputW = convertUnits(m_outputW, "Wavelength");
+
+    API::IAlgorithm_sptr removeAlg = createChildAlgorithm("CropWorkspace");
     removeAlg->setProperty("InputWorkspace", m_outputW);
     removeAlg->setProperty("OutputWorkspace", m_outputW);
-    removeAlg->setProperty("MinWavelength", minwl);
-    if (tmin > 0.)
-      removeAlg->setProperty("Tmin", tmin);
-    if (m_processLowResTOF)
-      removeAlg->setProperty("LowResTOFWorkspace", m_lowResW);
-
+    removeAlg->setProperty("XMin", minwl);
+    removeAlg->setProperty("XMax", maxwl);
     removeAlg->executeAsChildAlg();
     m_outputW = removeAlg->getProperty("OutputWorkspace");
-    if (m_processLowResTOF)
-      m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22)\n";
@@ -552,7 +559,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // Convert units
-  if (LRef > 0. || minwl > 0. || DIFCref > 0.) {
+  if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "dSpacing");
     if (m_processLowResTOF)
       m_lowResW = convertUnits(m_lowResW, "dSpacing");
