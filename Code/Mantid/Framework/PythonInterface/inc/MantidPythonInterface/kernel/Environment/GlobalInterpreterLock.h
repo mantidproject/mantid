@@ -33,7 +33,12 @@ namespace Environment {
 
 /**
  * Defines a structure for acquiring/releasing the Python GIL
- * using the RAII pattern
+ * using the RAII pattern.
+ *
+ * This class is copied in
+ * MantidQt/API/inc/MantidQtAPI/PythonThreading.h as we have no good
+ * way to share code with that without tight coupling the GUI layer
+ * to PythonInterface
  */
 class GlobalInterpreterLock
 {

@@ -9,7 +9,12 @@
 //------------------------------------------------------------------------------
 /**
  * Defines a structure for acquiring/releasing the Python GIL
- * using the RAII pattern
+ * using the RAII pattern.
+ *
+.* This is an exact copy of the one in
+ * Framework/PythonInterface/inc/MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h
+ * as we have no good way to share code with that without tight coupling the GUI layer
+ * to PythonInterface
  */
 class GlobalInterpreterLock
 {
