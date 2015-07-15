@@ -53,6 +53,13 @@ class EnggCalibrate(PythonAlgorithm):
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
+        self.declareProperty(ITableWorkspaceProperty("VanadiumIntegWorkspace", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             '(integration result) and one row per spectrum. This can be used in '
+                             'combination with OutVanadiumCurveFits from a previous execution and '
+                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
                              doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
 
@@ -120,6 +127,10 @@ class EnggCalibrate(PythonAlgorithm):
         alg.setProperty('VanadiumWorkspace', vanWS)
         alg.setProperty('Bank', bank)
         alg.setProperty(self.INDICES_PROP_NAME, indices)
+
+        integWS = self.getProperty('VanadiumIntegWorkspace').value
+        if integWS:
+            alg.setProperty('VanadiumIntegWorkspace', integWS)
 
         detPos = self.getProperty('DetectorPositions').value
         if detPos:
