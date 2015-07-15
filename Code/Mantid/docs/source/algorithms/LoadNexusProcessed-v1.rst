@@ -76,3 +76,5 @@ Output:
    Success!
 
 .. categories::
+
+.. sourcelink::

@@ -18,3 +18,5 @@ Exponential decay function is defined by
 .. properties::
 
 .. categories::
+
+.. sourcelink::

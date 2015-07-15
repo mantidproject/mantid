@@ -514,3 +514,5 @@ Output:
    [ 10.]
 
 .. categories::
+
+.. sourcelink::

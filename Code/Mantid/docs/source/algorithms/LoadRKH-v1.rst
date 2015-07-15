@@ -51,3 +51,5 @@ Output:
    Contents of the file  = [ 8.  4.  9.  7.]
 
 .. categories::
+
+.. sourcelink::

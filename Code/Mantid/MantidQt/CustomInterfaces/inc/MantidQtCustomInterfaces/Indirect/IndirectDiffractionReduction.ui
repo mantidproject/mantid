@@ -88,6 +88,16 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="ckLoadLogs">
+           <property name="text">
+            <string>Load Log Files</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -176,6 +186,9 @@
              </property>
              <property name="multipleFiles" stdset="0">
               <bool>true</bool>
+             </property>
+             <property name="instrumentOverride" stdset="0">
+              <string>OSIRIS</string>
              </property>
             </widget>
            </item>
@@ -443,6 +456,24 @@
    <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>iicInstrumentConfiguration</tabstop>
+  <tabstop>dem_ckSumFiles</tabstop>
+  <tabstop>ckLoadLogs</tabstop>
+  <tabstop>set_leSpecMin</tabstop>
+  <tabstop>set_leSpecMax</tabstop>
+  <tabstop>leRebinStart</tabstop>
+  <tabstop>leRebinWidth</tabstop>
+  <tabstop>leRebinEnd</tabstop>
+  <tabstop>ckIndividualGrouping</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckGSS</tabstop>
+  <tabstop>ckNexus</tabstop>
+  <tabstop>ckAscii</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

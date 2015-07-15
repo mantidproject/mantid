@@ -268,3 +268,5 @@ Output
 .. seealso :: Algorithm :ref:`algm-EstimateResolutionDiffraction`
 
 .. categories::
+
+.. sourcelink::

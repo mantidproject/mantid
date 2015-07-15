@@ -36,3 +36,5 @@ Output:
     Number of peaks entries 36
 
 .. categories::
+
+.. sourcelink::

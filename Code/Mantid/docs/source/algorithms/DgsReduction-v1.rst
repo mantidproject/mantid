@@ -131,3 +131,5 @@ Output:
     Number of events = 2178
 
 .. categories::
+
+.. sourcelink::

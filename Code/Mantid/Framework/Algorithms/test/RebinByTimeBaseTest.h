@@ -91,6 +91,12 @@ namespace
     MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
     virtual ~MockIEventWorkspace()
     {}
+
+  private:
+    virtual MockIEventWorkspace *doClone() const {
+      throw std::runtime_error(
+          "Cloning of MockIEventWorkspace is not implemented.");
+    }
   };}
 //=====================================================================================
 // Functional Tests

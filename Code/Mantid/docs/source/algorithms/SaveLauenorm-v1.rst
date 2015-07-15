@@ -99,3 +99,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

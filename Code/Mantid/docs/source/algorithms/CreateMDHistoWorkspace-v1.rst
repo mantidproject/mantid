@@ -71,3 +71,5 @@ Usage
    dimension 1 has ID: Dim2; nBins=10; min: -10.0; max: 10.0 in units of: EnergyTransfer
 
 .. categories::
+
+.. sourcelink::

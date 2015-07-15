@@ -88,3 +88,5 @@ Usage
     Number of symmetrised spectra is: 1
 
 .. categories::
+
+.. sourcelink::

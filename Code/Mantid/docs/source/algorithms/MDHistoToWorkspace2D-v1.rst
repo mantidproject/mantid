@@ -46,3 +46,5 @@ Output:
    corresponding part of 2D workspace [ 0.  4.  5.  0.]
 
 .. categories::
+
+.. sourcelink::

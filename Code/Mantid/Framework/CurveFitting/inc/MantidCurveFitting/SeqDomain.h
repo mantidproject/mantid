@@ -62,13 +62,11 @@ public:
   /// function
   virtual void
   leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                              bool evalFunction, bool evalDeriv,
-                              bool evalHessian);
+                              bool evalDeriv, bool evalHessian);
   /// Calculate the value of a Rwp cost function
   void rwpVal(const CostFuncRwp &rwp);
   /// Calculate the value, first and second derivatives of a RWP cost function
-  void rwpValDerivHessian(const CostFuncRwp &rwp, bool evalFunction,
-                          bool evalDeriv, bool evalHessian);
+  void rwpValDerivHessian(const CostFuncRwp &rwp, bool evalDeriv, bool evalHessian);
 
   /// Create an instance of SeqDomain in one of two forms: either SeqDomain for
   /// sequential domain creation

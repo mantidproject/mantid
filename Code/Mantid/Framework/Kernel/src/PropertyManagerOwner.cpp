@@ -159,6 +159,15 @@ PropertyManagerOwner::getProperty(const std::string &name) const {
 }
 
 /**
+ * @param name
+ * @return True if the property is its default value.
+ */
+bool PropertyManagerOwner::isDefault(const std::string &name) const {
+  return m_properties->getPointerToProperty(name)->isDefault();
+}
+
+
+/**
 * Return the property manager serialized as a string.
 * The format is propName=value,propName=value,propName=value
 * @param withDefaultValues :: If true then the value of default parameters will

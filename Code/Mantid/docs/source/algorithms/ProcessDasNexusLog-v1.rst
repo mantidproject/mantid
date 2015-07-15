@@ -22,3 +22,5 @@ Hence algorithm ProcessDasNexusLog is deprecated.
 No usage example is needed for a deprecated algorithm. 
 
 .. categories::
+
+.. sourcelink::

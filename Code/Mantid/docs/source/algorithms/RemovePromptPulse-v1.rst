@@ -56,3 +56,5 @@ The spectra should look like
    :alt: RemovePromptPulse.png
 
 .. categories::
+
+.. sourcelink::

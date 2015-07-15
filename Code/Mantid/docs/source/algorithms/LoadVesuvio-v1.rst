@@ -89,3 +89,5 @@ Output::
    Number of spectra: 1
 
 .. categories::
+
+.. sourcelink::

@@ -153,7 +153,7 @@ namespace
 // Static key strings
 //----------------------------------------------
 const QString SANSRunWindow::m_pythonSuccessKeyword  = "pythonExecutionWasSuccessful";
-
+const QString SANSRunWindow::m_pythonEmptyKeyword = "None";
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -982,6 +982,7 @@ bool SANSRunWindow::loadUserFile()
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.det_selection").trimmed();
+
   if (detName == "REAR" || detName == "MAIN"){
      m_uiForm.detbank_sel->setCurrentIndex(0);
   }else if (detName == "FRONT" || detName == "HAB"){
@@ -3014,10 +3015,15 @@ void SANSRunWindow::handleInstrumentChange()
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.cur_detector().name()");
-  int ind = m_uiForm.detbank_sel->findText(detect);  
-  if( ind != -1 )
-  {
-    m_uiForm.detbank_sel->setCurrentIndex(ind);
+  QString detectorSelection = runReduceScriptFunction(
+    "print i.ReductionSingleton().instrument.det_selection").trimmed();
+  int ind = m_uiForm.detbank_sel->findText(detect);
+  // We set the detector selection only if nothing is set yet.
+  // Previously, we didn't handle merged and both at this point
+  if (detectorSelection == m_pythonEmptyKeyword || detectorSelection.isEmpty()) {
+    if( ind != -1 ) {
+      m_uiForm.detbank_sel->setCurrentIndex(ind);
+    }
   }
 
   m_uiForm.beam_rmin->setText("60");

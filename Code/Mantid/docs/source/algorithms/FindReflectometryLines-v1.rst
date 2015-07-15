@@ -46,3 +46,5 @@ Output:
     Transmission Spectrum Number 2
 
 .. categories::
+
+.. sourcelink::

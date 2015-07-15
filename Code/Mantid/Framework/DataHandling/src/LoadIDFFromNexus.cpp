@@ -64,21 +64,36 @@ void LoadIDFFromNexus::exec() {
   nxfile.openPath(instrumentParentPath);
 
   // Take instrument info from nexus file.
-  // If the nexus file also contains a instrument parameter map entry this
-  // is returned as parameterString
+  localWorkspace->loadInstrumentInfoNexus(filename, &nxfile );
+
+  LoadParameters(  &nxfile, localWorkspace );
+
+  return;
+}
+
+
+/** Loads the parameters from the Nexus file if possible, else from a parameter file
+ *  into the specified workspace
+ * @param nxfile :: open NeXus file
+ * @param localWorkspace :: workspace into which loading occurs
+ *
+ *  @throw FileError Thrown if unable to parse XML file
+ */
+void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorkspace_sptr localWorkspace ) {
+
   std::string parameterString;
-  localWorkspace->loadInstrumentInfoNexus(filename, &nxfile, parameterString);
-  // at present loadInstrumentInfoNexus does not populate any instrument params
-  // into the workspace including those that are defined in the IDF.
-  // Here populate inst params defined in IDF
+
+  // First attempt to load parameters from nexus file.                                    
+  nxfile->openGroup("instrument", "NXinstrument");
+  localWorkspace->loadInstrumentParametersNexus( nxfile, parameterString );
+  nxfile->closeGroup();
+
+  // loadInstrumentParametersNexus does not populate any instrument params
+  // so we do it here.
   localWorkspace->populateInstrumentParameters();
 
-  // if no parameter map in nexus file then attempt to load a 'fallback'
-  // parameter file from hard-disk. You may argue whether this should be
-  // done at all from an algorithm called LoadIDFFromNexus but that is
-  // for another day to possible change
   if (parameterString.empty()) {
-    // Create the 'fallback' parameter file name to look for
+    // No parameters have been found in Nexus file, so we look for them in a parameter file.
     std::vector<std::string> directoryNames =
         ConfigService::Instance().getInstrumentDirectories();
     const std::string instrumentName =
@@ -106,7 +121,7 @@ void LoadIDFFromNexus::exec() {
                       << " not found or un-parsable. ";
       }
     }
-  } else {
+  } else { // We do have parameters from the Nexus file
     g_log.notice()
         << "Found Instrument parameter map entry in Nexus file, which is loaded"
         << std::endl;
@@ -114,7 +129,6 @@ void LoadIDFFromNexus::exec() {
     localWorkspace->readParameterMap(parameterString);
   }
 
-  return;
 }
 
 } // namespace DataHandling

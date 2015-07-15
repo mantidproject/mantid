@@ -56,3 +56,5 @@ Output:
     There are 14 plots available for inspection.
     
 .. categories::
+
+.. sourcelink::

@@ -160,3 +160,5 @@ Output:
   X = 0.950000, Y = 15.642332
 
 .. categories::
+
+.. sourcelink::

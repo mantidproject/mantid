@@ -35,6 +35,11 @@ private:
     MOCK_METHOD1(setMDMasking, void(Mantid::Geometry::MDImplicitFunction*));
     MOCK_METHOD0(clearMDMasking, void());
     MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
+  private:
+    virtual MockMDWorkspace *doClone() const {
+      throw std::runtime_error(
+          "Cloning of MockMDWorkspace is not implemented.");
+    }
   };
 
   class MockMDIterator : public Mantid::API::IMDIterator

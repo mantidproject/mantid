@@ -41,3 +41,5 @@ the compute resource uses the Mantid remote job submission API as job
 manager (underlying remote job scheduling mechanism).
 
 .. categories::
+
+.. sourcelink::

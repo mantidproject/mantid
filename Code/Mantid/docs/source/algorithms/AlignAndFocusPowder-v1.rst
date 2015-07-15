@@ -58,3 +58,5 @@ You will have to rename :literal:`pg3_mantid_det.cal` manually, as its name in t
 
 
 .. categories::
+
+.. sourcelink::

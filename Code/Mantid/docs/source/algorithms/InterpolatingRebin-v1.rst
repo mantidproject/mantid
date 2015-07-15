@@ -74,3 +74,5 @@ Output:
 For further examples with more complex parameter strings see :ref:`Rebin examples <rebin-usage>`.
 
 .. categories::
+
+.. sourcelink::

@@ -46,3 +46,5 @@ Output:
    The first entry is 50.000000.
 
 .. categories::
+
+.. sourcelink::

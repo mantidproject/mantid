@@ -22,3 +22,5 @@ spectra (i.e. is not a `ragged workspace <Ragged Workspace>`__). Only
 the X values from the first spectrum in the workspace are saved out.
 
 .. categories::
+
+.. sourcelink::

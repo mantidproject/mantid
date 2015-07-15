@@ -207,6 +207,11 @@ public:
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
   }
 
+  class TestableMDHistoWorkspace : public MDHistoWorkspace {
+  public:
+    TestableMDHistoWorkspace(const MDHistoWorkspace &other)
+        : MDHistoWorkspace(other) {}
+  };
 
   //--------------------------------------------------------------------------------------
   void test_copy_constructor()
@@ -215,7 +220,7 @@ public:
     a->addExperimentInfo( ExperimentInfo_sptr(new ExperimentInfo()) );
     for (size_t i=0; i<a->getNPoints(); i++)
       a->setNumEventsAt(i, 123.);
-    MDHistoWorkspace_sptr b( new MDHistoWorkspace(*a));
+    MDHistoWorkspace_sptr b( new TestableMDHistoWorkspace(*a));
     TS_ASSERT_EQUALS( b->getNumDims(), a->getNumDims() );
     TS_ASSERT_EQUALS( b->getNPoints(), a->getNPoints() );
     TS_ASSERT_EQUALS( b->getNumExperimentInfo(), a->getNumExperimentInfo() );

@@ -22,3 +22,5 @@ where:
 .. properties::
 
 .. categories::
+
+.. sourcelink::

@@ -20,6 +20,10 @@ public:
 
   /// Add actions applicable to an edit menu
   void populateEditMenu(QMenu &editMenu);
+  ///Capture key presses
+  virtual void keyPressEvent(QKeyEvent* event);
+  //squash dragging ability
+  void mouseMoveEvent(QMouseEvent * e);
 
 public slots:
   /// Print the text within the window

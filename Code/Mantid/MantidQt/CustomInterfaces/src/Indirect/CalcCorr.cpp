@@ -23,7 +23,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   CalcCorr::CalcCorr(QWidget * parent) :
-    IDATab(parent)
+    CorrectionsTab(parent)
   {
     m_uiForm.setupUi(parent);
 
@@ -217,27 +217,35 @@ namespace IDA
     }
 
     // Convert the spectrum axis of correction factors to Q
+    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
     WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
     for(size_t i = 0; i < corrections->size(); i++)
     {
       MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
-      if(!factorWs)
+      if(!factorWs || !sampleWs)
         continue;
 
-      std::string eMode = getEMode(factorWs);
-
-      API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
-      IAlgorithm_sptr convertSpecAlgo = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
-      convertSpecAlgo->initialize();
-      convertSpecAlgo->setProperty("InputWorkspace", factorWs);
-      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
-      convertSpecAlgo->setProperty("Target", "ElasticQ");
-      convertSpecAlgo->setProperty("EMode", eMode);
+      std::string eMode = getEMode(sampleWs);
 
       if(eMode == "Indirect")
-        convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
+      {
+        API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
+        IAlgorithm_sptr convertSpecAlgo = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+        convertSpecAlgo->initialize();
+        convertSpecAlgo->setProperty("InputWorkspace", factorWs);
+        convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
+        convertSpecAlgo->setProperty("Target", "ElasticQ");
+        convertSpecAlgo->setProperty("EMode", "Indirect");
 
-      m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
+        try
+        {
+          convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
+        }
+        catch(std::runtime_error &) {}
+
+        m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
+      }
     }
 
     // Run algorithm queue

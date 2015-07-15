@@ -3643,7 +3643,7 @@ MdiSubWindow* ApplicationWindow::window(const QString& name)
 
 Table* ApplicationWindow::table(const QString& name)
 {
-  int pos = name.find("_", 0);
+  int pos = name.lastIndexOf("_");
   QString caption = name.left(pos);
 
   Folder *f = projectFolder();

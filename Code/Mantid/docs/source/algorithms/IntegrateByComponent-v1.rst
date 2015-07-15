@@ -75,3 +75,5 @@ Output:
      - two pixels in different bankss have the same value  True
 
 .. categories::
+
+.. sourcelink::

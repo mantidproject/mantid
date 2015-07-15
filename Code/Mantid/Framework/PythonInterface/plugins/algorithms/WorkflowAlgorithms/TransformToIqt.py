@@ -17,8 +17,6 @@ class TransformToIqt(PythonAlgorithm):
     _number_points_per_bin = None
     _parameter_table = None
     _output_workspace = None
-    _plot = None
-    _save = None
     _dry_run = None
 
 
@@ -59,10 +57,6 @@ class TransformToIqt(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='Output workspace')
 
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Switch Plot Off/On')
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Switch Save result to nxs file Off/On')
         self.declareProperty(name='DryRun', defaultValue=False,
                              doc='Only calculate and output the parameters')
 
@@ -77,14 +71,6 @@ class TransformToIqt(PythonAlgorithm):
 
             self._add_logs()
 
-            if self._save:
-                workdir = config['defaultsave.directory']
-                opath = os.path.join(workdir, self._output_workspace + '.nxs')
-                SaveNexusProcessed(InputWorkspace=self._output_workspace, Filename=opath)
-                logger.information('Output file : ' + opath)
-
-            if self._plot:
-                self._plot_output()
         else:
             logger.information('Dry run, will not run TransformToIqt')
 
@@ -114,8 +100,6 @@ class TransformToIqt(PythonAlgorithm):
         if self._output_workspace == '':
             self._output_workspace = getWSprefix(self._sample) + 'iqt'
 
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
         self._dry_run = self.getProperty('DryRun').value
 
 
@@ -196,21 +180,6 @@ class TransformToIqt(PythonAlgorithm):
         self.setProperty('ParameterWorkspace', param_table)
 
 
-    def _plot_output(self):
-        """
-        Plot output.
-        """
-        from IndirectImport import import_mantidplot
-        mtd_plot = import_mantidplot()
-
-        spectra_range = range(0, mtd[self._output_workspace].getNumberHistograms())
-
-        graph = mtd_plot.plotSpectrum(self._output_workspace, spectra_range)
-
-        layer = graph.activeLayer()
-        layer.setScale(mtd_plot.Layer.Left, 0, 1.0)
-
-
     def _add_logs(self):
         sample_logs = [
                 ('iqt_sample_workspace', self._sample),
@@ -244,11 +213,28 @@ class TransformToIqt(PythonAlgorithm):
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')
 
         rebin_param = str(self._e_min) + ',' + str(self._e_width) + ',' + str(self._e_max)
+
         Rebin(InputWorkspace=self._sample,
-              OutputWorkspace='__sam_rebin',
+              OutputWorkspace='__sam_data',
               Params=rebin_param,
               FullBinsOnly=True)
 
+        # Sample
+        Rebin(InputWorkspace='__sam_data',
+              OutputWorkspace='__sam_data',
+              Params=rebin_param)
+        Integration(InputWorkspace='__sam_data',
+                    OutputWorkspace='__sam_int')
+        ConvertToPointData(InputWorkspace='__sam_data',
+                           OutputWorkspace='__sam_data')
+        ExtractFFTSpectrum(InputWorkspace='__sam_data',
+                           OutputWorkspace='__sam_fft',
+                           FFTPart=2)
+        Divide(LHSWorkspace='__sam_fft',
+               RHSWorkspace='__sam_int',
+               OutputWorkspace='__sam')
+
+        # Resolution
         Rebin(InputWorkspace=self._resolution,
               OutputWorkspace='__res_data',
               Params=rebin_param)
@@ -263,26 +249,11 @@ class TransformToIqt(PythonAlgorithm):
                RHSWorkspace='__res_int',
                OutputWorkspace='__res')
 
-        Rebin(InputWorkspace='__sam_rebin',
-              OutputWorkspace='__sam_data',
-              Params=rebin_param)
-        Integration(InputWorkspace='__sam_data',
-                    OutputWorkspace='__sam_int')
-        ConvertToPointData(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_data')
-        ExtractFFTSpectrum(InputWorkspace='__sam_data',
-                           OutputWorkspace='__sam_fft',
-                           FFTPart=2)
-        Divide(LHSWorkspace='__sam_fft',
-               RHSWorkspace='__sam_int',
-               OutputWorkspace='__sam')
-
         Divide(LHSWorkspace='__sam',
                RHSWorkspace='__res',
                OutputWorkspace=self._output_workspace)
 
         # Cleanup sample workspaces
-        DeleteWorkspace('__sam_rebin')
         DeleteWorkspace('__sam_data')
         DeleteWorkspace('__sam_int')
         DeleteWorkspace('__sam_fft')
