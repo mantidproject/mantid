@@ -53,8 +53,8 @@ namespace CustomInterfaces
       // If time limiting requested, set min/max times
       if (auto timeRange = m_view->timeRange())
       {
-        double timeMin = timeRange->first;
-        double timeMax = timeRange->second;
+        double timeMin = (*timeRange).first;
+        double timeMax = (*timeRange).second;
         if (timeMin>=timeMax) {
           throw std::invalid_argument("Invalid time limits");
         }
