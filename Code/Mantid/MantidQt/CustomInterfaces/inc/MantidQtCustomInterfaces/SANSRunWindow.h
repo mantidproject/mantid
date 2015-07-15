@@ -407,9 +407,11 @@ private:
   /// get the transmission settings
   void setTransmissionSettingsFromUserFile();
   /// write the transmission settings to a python script
-  void writeTranssmissionSettingsToPythonScript(QString& pythonCode);
+  void writeTransmissionSettingsToPythonScript(QString& pythonCode);
   /// initialize the connections for the transmission settings
   void initTransmissionSettings();
+  /// Set all trans fields to a certain enabled state
+  void setAllTransFields(bool state);
 
   UserSubWindow * slicingWindow;
 

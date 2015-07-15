@@ -2321,7 +2321,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += ")\n";
 
   //Set the Transmision settings
-  writeTranssmissionSettingsToPythonScript(exec_reduce);
+  writeTransmissionSettingsToPythonScript(exec_reduce);
 
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to the center
@@ -4007,8 +4007,18 @@ void SANSRunWindow::setBeamStopLogic(TransSettings setting, bool isNowChecked) {
  * Reads the transmission settings from the user file and sets it in the GUI
  */
 void SANSRunWindow::setTransmissionSettingsFromUserFile() {
+  // Set all fields to disabled
+  setAllTransFields(false);
 
   // Read the Radius settings
+  QString transmissionRadiusRequest("\nprint i.GetTransmissionRadius()");
+  QString resultTransmissionRadius(runPythonCode(transmissionRadiusRequest, false));
+  resultTransmissionRadius = resultTransmissionRadius.simplified();
+  if (resultTransmissionRadius != m_pythonEmptyKeyword) {
+      this->m_uiForm.trans_radius_line_edit->setText(resultTransmissionRadius);
+      this->m_uiForm.trans_radius_check_box->setChecked(true);
+      setBeamStopLogic(TransSettings::RADIUS, true);
+  }
 
   // Read the ROI settings
 
@@ -4022,22 +4032,25 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
     this->m_uiForm.trans_M3M4_line_edit->setText(resultTransmissionMonitorSpectrumShift);
   }
 
-  // Read Transmission Monitor Spectrum, we expect either 3 or 4
+  // Read Transmission Monitor Spectrum, we expect either 3 or 4. If this is selected, then this takes precedence over
+  // the radius, roi and mask settings
   QString transmissionMonitorSpectrumRequest("\nprint i.GetTransmissionMonitorSpectrum()");
   QString resultTransmissionMonitorSpectrum(runPythonCode(transmissionMonitorSpectrumRequest, false));
   resultTransmissionMonitorSpectrum = resultTransmissionMonitorSpectrum.simplified();
-  if (resultTransmissionMonitorSpectrum == "3") {
-    this->m_uiForm.trans_M3_check_box->setChecked(true);
-    setM3M4Logic(TransSettings::M3, true);
-  } else if (resultTransmissionMonitorSpectrum == "4") {
-    this->m_uiForm.trans_M4_check_box->setChecked(true);
-    setM3M4Logic(TransSettings::M4, true);
-  } else {
-    this->m_uiForm.trans_M3_check_box->setChecked(false);
-    this->m_uiForm.trans_M4_check_box->setChecked(false);
-    setM3M4Logic(TransSettings::M3,false);
-    setM3M4Logic(TransSettings::M4, false);
-    g_log.notice("No transmission monitor, transmission radius nor trasmission ROI was set. The reducer will use the default value.");
+  if (resultTransmissionMonitorSpectrum != m_pythonEmptyKeyword) {
+    if (resultTransmissionMonitorSpectrum == "3") {
+      this->m_uiForm.trans_M3_check_box->setChecked(true);
+      setM3M4Logic(TransSettings::M3, true);
+    } else if (resultTransmissionMonitorSpectrum == "4") {
+      this->m_uiForm.trans_M4_check_box->setChecked(true);
+      setM3M4Logic(TransSettings::M4, true);
+    } else {
+      this->m_uiForm.trans_M3_check_box->setChecked(false);
+      this->m_uiForm.trans_M4_check_box->setChecked(false);
+      setM3M4Logic(TransSettings::M3,false);
+      setM3M4Logic(TransSettings::M4, false);
+      g_log.notice("No transmission monitor, transmission radius nor trasmission ROI was set. The reducer will use the default value.");
+    }
   }
 }
 
@@ -4109,18 +4122,18 @@ void SANSRunWindow::setROIAndMaskLogic(bool isNowChecked) {
  * a radius or a ROI being set.
  * @param pythonCode :: The python code string
  */
-void SANSRunWindow::writeTranssmissionSettingsToPythonScript(QString& pythonCode) {
+void SANSRunWindow::writeTransmissionSettingsToPythonScript(QString& pythonCode) {
   auto m3 = this->m_uiForm.trans_M3_check_box->isChecked();
   auto m4 = this->m_uiForm.trans_M4_check_box->isChecked();
 
   if (m3 || m4) {
     // Handle M3/M4 settings and the TRANSPEC
     auto spectrum = m3 ? 3 : 4;
-    pythonCode+="i.SetTransmissionMonitorSpectrum(trans_spec=" + QString::number(spectrum) + ")\n";
+    pythonCode+="i.SetTransmissionMonitorSpectrum(trans_mon=" + QString::number(spectrum) + ")\n";
 
     auto transSpec = this->m_uiForm.trans_M3M4_line_edit->text();
     if (!transSpec.isEmpty()) {
-      pythonCode+="i.SetTransmissionMonitorSpectrumShift(trans_spec_shift=" + transSpec + ")\n";
+      pythonCode+="i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" + transSpec + ")\n";
     }
   } else {
     // Handle Radius, ROI and Mask
@@ -4130,6 +4143,16 @@ void SANSRunWindow::writeTranssmissionSettingsToPythonScript(QString& pythonCode
   }
 }
 
+/**
+ * Set the enabled state for all trans-related fields
+ * @param state:: The enabled status
+ */
+void SANSRunWindow::setAllTransFields(bool state) {
+  m_uiForm.trans_radius_line_edit->setEnabled(state);
+  m_uiForm.trans_roi_files_line_edit->setEnabled(state);
+  m_uiForm.trans_masking_line_edit->setEnabled(state);
+  m_uiForm.trans_M3M4_line_edit->setEnabled(state);
+}
 
 } //namespace CustomInterfaces
 

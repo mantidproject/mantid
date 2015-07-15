@@ -1206,17 +1206,17 @@ def GetTransmissionMonitorSpectrum():
         Gets the transmission monitor spectrum
         @return: tranmission monitor spectrum
     """
-    return ReductionSingleton().transmission_calculator.trans_spec
+    return ReductionSingleton().transmission_calculator.trans_mon
 
-def SetTransmissionMonitorSpectrum(trans_spec):
+def SetTransmissionMonitorSpectrum(trans_mon):
     """
         Sets the transmission monitor spectrum.
-        @param trans_spec :: The spectrum to set.
+        @param trans_mon :: The spectrum to set.
     """
-    if su.is_convertible_to_int(trans_spec):
-        ReductionSingleton().transmission_calculator.trans_spec = int(trans_spec)
+    if su.is_convertible_to_int(trans_mon):
+        ReductionSingleton().transmission_calculator.trans_mon = int(trans_mon)
     else:
-        sanslog.warning('Warning: Could convert the transmission monitor spectrum to int.')
+        sanslog.warning('Warning: Could not convert the transmission monitor spectrum to int.')
 
 def GetTransmissionMonitorSpectrumShift():
     """
@@ -1229,23 +1229,27 @@ def GetTransmissionMonitorSpectrumShift():
         return
     return inst.monitor_4_offset
 
-def SetTransmissionMonitorSpectrumShift(trans_spec_shift):
+def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
     """
         Sets the transmission monitor spectrum shfit.
-        @param trans_spec_shift :: The spectrum shift to set.
+        @param trans_mon_shift :: The spectrum shift to set.
     """
-    if su.is_convertible_to_float(trans_spec_shift):
+    if su.is_convertible_to_float(trans_mon_shift):
         inst =  ReductionSingleton().get_instrument()
         # Note that we are only setting the transmission monitor spectrum shift
         # if we are dealing with a SANS2D instrument
         if inst.name() != 'SANS2D' and inst.name() != 'SANS2DTUBES':
             return
-        inst.monitor_4_offset = float(trans_spec_shift)
+        inst.monitor_4_offset = float(trans_mon_shift)
     else:
-        sanslog.warning('Warning: Could convert transmission monitor spectrum shift to float.')
+        sanslog.warning('Warning: Could not convert transmission monitor spectrum shift to float.')
 
 def GetTransmissionRadius():
-    pass
+    """
+        Gets the radius for usage with beam stop as transmission monitor
+        @return: tranmission radius
+    """
+    return ReductionSingleton().transmission_calculator.radius
 
 def SetTransmissionRadius(trans_radius):
     """
@@ -1253,8 +1257,9 @@ def SetTransmissionRadius(trans_radius):
         @param trans_radius :: The radius to set
     """
     if su.is_convertible_to_float(trans_radius):
-        pass
-    # TODO ADD IMPL
+        ReductionSingleton().transmission_calculator.radius = int(trans_radius)
+    else:
+        sanslog.warning('Warning: Could convert transmission radius to float.')
 
 def GetTransmissionROI():
     pass

@@ -12,7 +12,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         trans_spectrum = 4
         command_iface.Clean()
         command_iface.SANS2D()
-        ReductionSingleton().transmission_calculator.trans_spec = trans_spectrum
+        ReductionSingleton().transmission_calculator.trans_mon = trans_spectrum
         # Act
         result = command_iface.GetTransmissionMonitorSpectrum()
         # Assert
@@ -24,7 +24,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
-        command_iface.SetTransmissionMonitorSpectrum(trans_spec = trans_spectrum)
+        command_iface.SetTransmissionMonitorSpectrum(trans_mon = trans_spectrum)
         # Assert
         self.assertEqual(trans_spectrum, command_iface.GetTransmissionMonitorSpectrum(), 'The transmission spectrum should be set to 4.')
 
@@ -35,8 +35,8 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
-        command_iface.SetTransmissionMonitorSpectrum(trans_spec = trans_spectrum)
-        command_iface.SetTransmissionMonitorSpectrum(trans_spec = trans_spectrum_invalid)
+        command_iface.SetTransmissionMonitorSpectrum(trans_mon = trans_spectrum)
+        command_iface.SetTransmissionMonitorSpectrum(trans_mon = trans_spectrum_invalid)
         # Assert
         self.assertEqual(trans_spectrum, command_iface.GetTransmissionMonitorSpectrum(), 'The transmission spectrum should be set to 4.')
 
@@ -57,10 +57,8 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
-        command_iface.SetTransmissionMonitorSpectrumShift(trans_spec_shift = trans_spectrum_shift)
+        command_iface.SetTransmissionMonitorSpectrumShift(trans_mon_shift = trans_spectrum_shift)
         # Assert
-        result = command_iface.GetTransmissionMonitorSpectrumShift()
-
         self.assertEqual(trans_spectrum_shift, command_iface.GetTransmissionMonitorSpectrumShift(), 'The transmission monitor shift should be set to -55.')
 
     def test_setting_shift_with_invalid_input(self):
@@ -69,11 +67,40 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
-        command_iface.SetTransmissionMonitorSpectrumShift(trans_spec_shift = trans_spectrum_shift)
+        command_iface.SetTransmissionMonitorSpectrumShift(trans_mon_shift = trans_spectrum_shift)
         # Assert
-        result = command_iface.GetTransmissionMonitorSpectrumShift()
-
         self.assertEqual(None, command_iface.GetTransmissionMonitorSpectrumShift(), 'The transmission monitor shift should be None.')
+
+    def test_that_gets_transmission_radius(self):
+        # Arrange
+        trans_radius = 23
+        command_iface.Clean()
+        command_iface.SANS2D()
+        ReductionSingleton().transmission_calculator.radius = trans_radius
+        # Act
+        result = command_iface.GetTransmissionRadius()
+        # Assert
+        self.assertEqual(trans_radius, result, 'The transmission radius should be set to 23.')
+
+    def test_setting_radius_to_valid_value(self):
+        # Arrange
+        trans_radius = 23
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        command_iface.SetTransmissionRadius(trans_radius = trans_radius)
+        # Assert
+        self.assertEqual(trans_radius, command_iface.GetTransmissionRadius(), 'The transmission radius should be set to 23.')
+
+    def test_setting_radius_with_invalid_input(self):
+        # Arrange
+        trans_radius = '23_yh'
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        command_iface.SetTransmissionRadius(trans_radius = trans_radius)
+        # Assert
+        self.assertEqual(None, command_iface.GetTransmissionRadius(), 'The transmission radius should be None.')
 
 if __name__ == "__main__":
     unittest.main()
