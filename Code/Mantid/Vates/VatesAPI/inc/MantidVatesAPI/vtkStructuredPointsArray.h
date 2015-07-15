@@ -280,7 +280,7 @@ void vtkStructuredPointsArray<Scalar>::LookupValue(vtkVariant value,
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkVariant vtkStructuredPointsArray<Scalar>::GetVariantValue(vtkIdType idx) {
-  return vtkVariant(this->GetValueReference(idx));
+  return vtkVariant(this->GetValue(idx));
 }
 
 //------------------------------------------------------------------------------
