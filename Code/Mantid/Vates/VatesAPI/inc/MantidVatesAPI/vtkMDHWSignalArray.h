@@ -107,7 +107,7 @@ private:
 
   std::size_t m_offset;
   std::unique_ptr<Mantid::DataObjects::MDHistoWorkspaceIterator> m_iterator;
-  Scalar Value[1];
+  Scalar m_temporaryTuple[1];
 };
 
 #include "vtkIdList.h"
@@ -247,8 +247,8 @@ template <class Scalar> void vtkMDHWSignalArray<Scalar>::ClearLookup() {
 template <class Scalar>
 double *vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i) {
   m_iterator->jumpTo(m_offset + i);
-  Value[0] = m_iterator->getNormalizedSignal();
-  return &Value[0];
+  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
+  return &m_temporaryTuple[0];
 }
 
 //------------------------------------------------------------------------------
@@ -292,15 +292,15 @@ void vtkMDHWSignalArray<Scalar>::LookupTypedValue(Scalar value,
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar vtkMDHWSignalArray<Scalar>::GetValue(vtkIdType idx) {
-  return this->GetValueReference(idx);
+  m_iterator->jumpTo(m_offset + idx);
+  return m_iterator->getNormalizedSignal();
 }
-
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkMDHWSignalArray<Scalar>::GetValueReference(vtkIdType idx) {
   m_iterator->jumpTo(m_offset + idx);
-  Value[0] = m_iterator->getNormalizedSignal();
-  return Value[0];
+  m_temporaryTuple[0] = m_iterator->getNormalizedSignal();
+  return m_temporaryTuple[0];
 }
 
 //------------------------------------------------------------------------------
