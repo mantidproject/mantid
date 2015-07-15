@@ -83,6 +83,11 @@ References
 
 1. U P Wild, R Holzwarth & H P Good, `Rev Sci Instr 48 1621 (1977) <http://dx.doi.org/10.1063/1.1134962>`_
 
+Workflow
+--------
+
+.. diagram:: TransformToIqt-v1_wkflw.dot
+
 Usage
 -----
 

@@ -16,6 +16,11 @@ unity and performing a linear fit with the vanadium.
 The outpout workspace is a WorkspaceGroup containing two MatrixWorkspaces named
 *_Intensity* and *_Stretch* with the fitted parameters.
 
+Workflow
+--------
+
+.. diagram:: ResNorm-v2_wkflw.dot
+
 Usage
 -----
 
