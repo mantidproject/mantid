@@ -1,4 +1,4 @@
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 namespace Mantid {
 namespace PythonInterface {

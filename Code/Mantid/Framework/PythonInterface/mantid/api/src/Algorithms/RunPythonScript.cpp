@@ -1,7 +1,7 @@
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidKernel/MandatoryValidator.h"
 
