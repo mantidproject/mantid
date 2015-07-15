@@ -4007,8 +4007,8 @@ void SANSRunWindow::setBeamStopLogic(TransSettings setting, bool isNowChecked) {
  * Reads the transmission settings from the user file and sets it in the GUI
  */
 void SANSRunWindow::setTransmissionSettingsFromUserFile() {
-  // Set all fields to disabled
-  setAllTransFields(false);
+  // Reset all trans-related fields
+  resetAllTransFields();
 
   // Read the Radius settings
   QString transmissionRadiusRequest("\nprint i.GetTransmissionRadius()");
@@ -4021,6 +4021,15 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   }
 
   // Read the ROI settings
+  QString transmissionROIRequest("\nprint i.GetTransmissionROI()");
+  QString resultTransmissionROI(runPythonCode(transmissionROIRequest, false));
+  resultTransmissionROI = resultTransmissionROI.simplified();
+  if (resultTransmissionROI != m_pythonEmptyKeyword) {
+      this->m_uiForm.trans_roi_files_line_edit->setText(resultTransmissionROI);
+      this->m_uiForm.trans_roi_files_checkbox->setChecked(true);
+      setBeamStopLogic(TransSettings::ROI, true);
+  }
+
 
   // Read the MASK settings
 
@@ -4145,17 +4154,27 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(QString& pythonCode)
 
 /**
  * Set the enabled state for all trans-related fields
- * @param state:: The enabled status
  */
-void SANSRunWindow::setAllTransFields(bool state) {
+void SANSRunWindow::resetAllTransFields() {
+  bool state = false;
   m_uiForm.trans_radius_line_edit->setEnabled(state);
+  m_uiForm.trans_radius_line_edit->clear();
+
   m_uiForm.trans_roi_files_line_edit->setEnabled(state);
+  m_uiForm.trans_roi_files_line_edit->clear();
+
   m_uiForm.trans_masking_line_edit->setEnabled(state);
+  m_uiForm.trans_masking_line_edit->clear();
+
   m_uiForm.trans_M3M4_line_edit->setEnabled(state);
+  m_uiForm.trans_M3M4_line_edit->clear();
+
+  m_uiForm.trans_M3_check_box->setChecked(state);
+  m_uiForm.trans_M4_check_box->setChecked(state);
+  m_uiForm.trans_roi_files_checkbox->setChecked(state);
+  m_uiForm.trans_radius_check_box->setChecked(state);
 }
 
 } //namespace CustomInterfaces
 
 } //namespace MantidQt
-
-

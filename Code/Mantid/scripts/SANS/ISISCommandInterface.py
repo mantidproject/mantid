@@ -1262,15 +1262,28 @@ def SetTransmissionRadius(trans_radius):
         sanslog.warning('Warning: Could convert transmission radius to float.')
 
 def GetTransmissionROI():
-    pass
+    """
+        Gets the list of ROI file names
+        @return: list of roi file names or None
+    """
+    roi_files = ReductionSingleton().transmission_calculator.roi_files
+    if len(roi_files) == 0:
+        return
+    else:
+        # Bring to a good form
+        formatted_roi_files = ','.join( roi_file.replace(" ", "") for roi_file in roi_files)
+        return formatted_roi_files
 
 def SetTransmissionROI(trans_roi_files):
     """
         Sets the transmission monitor region of interest.
         @param trans_roi_files :: A string list of roi files
     """
-    if su.check_for_valid_file_list(trans_roi_files):
-        pass
+    roi = trans_roi_files.replace(" ", "").split(",")
+    if su.is_valid_xml_file_list(roi):
+        ReductionSingleton().transmission_calculator.roi_files = roi
+    else:
+        sanslog.warning('Warning: The roi file list does not seem to be valid.')
 
 def GetTransmissionMask():
     pass

@@ -102,5 +102,52 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         # Assert
         self.assertEqual(None, command_iface.GetTransmissionRadius(), 'The transmission radius should be None.')
 
+
+
+    def test_that_gets_non_empty_roi_files(self):
+        # Arrange
+        trans_roi_files = ['roi_file1.xml', 'roi_file2.xml']
+        command_iface.Clean()
+        command_iface.SANS2D()
+        ReductionSingleton().transmission_calculator.roi_files = trans_roi_files
+        # Act
+        result = command_iface.GetTransmissionROI()
+        # Assert
+        self.assertEqual('roi_file1.xml,roi_file2.xml', result, 'The transmission roi should have two entries')
+
+    def test_that_gets_None_for_empty_roi_files(self):
+         # Arrange
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        result = command_iface.GetTransmissionROI()
+        # Assert
+        self.assertEqual(None, result, 'The transmission roi should be None')
+
+    def test_setting_roi_file_for_valid_input(self):
+         # Arrange
+        trans_roi_files = "  file1.xml,  file2.xml "
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        command_iface.SetTransmissionROI(trans_roi_files = trans_roi_files)
+        # Assert
+        result = command_iface.GetTransmissionROI()
+        self.assertEqual(2, len(result), 'The transmission roi list should have two entries')
+        self.assertEqual("file1.xml", result[0], 'The first file should be file1.xml')
+        self.assertEqual("file2.xml", result[1], 'The second file should be file2.xml')
+
+    def test_setting_roi_file_for_valid_input(self):
+         # Arrange
+        trans_roi_files = " file1g,  file2.xml "
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        command_iface.SetTransmissionROI(trans_roi_files = trans_roi_files)
+        # Assert
+        self.assertEqual(0, len(ReductionSingleton().transmission_calculator.roi_files), 'The transmission roi list should be empty.')
+
+
+
 if __name__ == "__main__":
     unittest.main()

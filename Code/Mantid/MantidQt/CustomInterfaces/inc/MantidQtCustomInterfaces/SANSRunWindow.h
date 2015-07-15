@@ -411,7 +411,7 @@ private:
   /// initialize the connections for the transmission settings
   void initTransmissionSettings();
   /// Set all trans fields to a certain enabled state
-  void setAllTransFields(bool state);
+  void resetAllTransFields();
 
   UserSubWindow * slicingWindow;
 
