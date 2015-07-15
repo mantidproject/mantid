@@ -43,6 +43,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='ContainerFiles'),
                              doc='Comma separated list of input files for the empty contianer runs.')
 
+        self.declareProperty('ContainerScaleFactor', 1.0,
+                             doc='Factor by which to scale the container runs.')
+
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
 
@@ -123,6 +126,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                               load_logs=self._load_logs,
                                                               load_opts=load_opts)
 
+        # Load container if run is given
         if self._container_data_files is not None:
             self._container_workspace, _ = load_files(self._container_data_files,
                                                       self._ipf_filename,
@@ -132,6 +136,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                       load_logs=self._load_logs,
                                                       load_opts=load_opts)
             self._container_workspace = self._container_workspace[0]
+
+            # Scale container if factor is given
+            if self._container_scale_factor != 1.0:
+                Scale(InputWorkspace=self._container_workspace,
+                      OutputWorkspace=self._container_workspace,
+                      Factor=self._container_scale_factor,
+                      Operation='Multiply')
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -218,6 +229,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
         self._container_data_files = self.getProperty('ContainerFiles').value
+        self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
         self._mode = self.getPropertyValue('Mode')
