@@ -186,7 +186,10 @@ LoadIsawPeaks::ApplyCalibInfo(std::ifstream &in, std::string startChar,
     std::string SbankNum = boost::lexical_cast<std::string>(bankNum);
     std::string bankName = "bank";
     if (instr->getName() == "WISH")
-      bankName = "WISHpanel0";
+    {
+      if (bankNum < 10) bankName = "WISHpanel0";
+      else bankName = "WISHpanel";
+    }
     bankName += SbankNum;
     boost::shared_ptr<const Geometry::IComponent> bank =
         instr_old->getComponentByName(bankName);
@@ -416,7 +419,13 @@ int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
     boost::shared_ptr<const Geometry::ICompAssembly> asmb =
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    int col0 = col;
+    if(children[0]->getName().compare("sixteenpack") == 0){
+      asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+      children.clear();
+      asmb->getChildren(children, false);
+    }
+    int col0 = col - 1;
+    //WISH detectors are in bank in this order in instrument
     if (inst->getName() == "WISH")
       col0 = (col % 2 == 0 ? col / 2 + 75 : (col - 1) / 2);
     boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
@@ -522,7 +531,10 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
     std::ostringstream oss;
     std::string bankString = "bank";
     if (outWS->getInstrument()->getName() == "WISH")
-      bankString = "WISHpanel0";
+    {
+      if (bankNum < 10) bankString = "WISHpanel0";
+      else bankString = "WISHpanel";
+    }
     oss << bankString << bankNum;
     std::string bankName = oss.str();
 

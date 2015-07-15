@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitLabelTypes.h"
 #include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_array.hpp>
@@ -127,25 +128,41 @@ void FFT::exec() {
   MatrixWorkspace_sptr outWS =
       WorkspaceFactory::Instance().create(inWS, nOut, xSize, ySize);
 
-  bool isEnergyMeV = false;
-  if (inWS->getAxis(0)->unit() &&
-      (inWS->getAxis(0)->unit()->caption() == "Energy" ||
-       inWS->getAxis(0)->unit()->caption() == "Energy transfer") &&
-      inWS->getAxis(0)->unit()->label() == "meV") {
+  double df = 1.0 / (dx * ySize);
+
+  // Output label
+  outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+
+  auto inputUnit = inWS->getAxis(0)->unit();
+  if (inputUnit) {
+
     boost::shared_ptr<Kernel::Units::Label> lblUnit =
         boost::dynamic_pointer_cast<Kernel::Units::Label>(
             UnitFactory::Instance().create("Label"));
     if (lblUnit) {
-      lblUnit->setLabel("Time", "ns");
+
+      if ((inputUnit->caption() == "Energy" ||
+           inputUnit->caption() == "Energy transfer") &&
+          inputUnit->label() == "meV") {
+        lblUnit->setLabel("Time", "ns");
+        df /= 2.418e2;
+      } else if (inputUnit->caption() == "Time" && inputUnit->label() == "s") {
+        lblUnit->setLabel("Frequency", "Hz");
+      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "Hz") {
+        lblUnit->setLabel("Time", "s");
+      } else if (inputUnit->caption() == "Time" && inputUnit->label() == "microsecond") {
+        lblUnit->setLabel("Frequency", "MHz");
+      } else if (inputUnit->caption() == "Frequency" && inputUnit->label() == "MHz") {
+        lblUnit->setLabel("Time", Units::Symbol::Microsecond);
+      } else if (inputUnit->caption() == "d-Spacing" && inputUnit->label() == "Angstrom") {
+        lblUnit->setLabel("q", Units::Symbol::InverseAngstrom);
+      } else if (inputUnit->caption() == "q" && inputUnit->label() == "Angstrom^-1") {
+        lblUnit->setLabel("d-Spacing", Units::Symbol::Angstrom);
+      }
+
       outWS->getAxis(0)->unit() = lblUnit;
     }
-    isEnergyMeV = true;
-  } else
-    outWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-
-  double df = 1.0 / (dx * ySize);
-  if (isEnergyMeV)
-    df /= 2.418e2;
+  }
 
   // centerShift == true means that the zero on the x axis is assumed to be in
   // the data centre
