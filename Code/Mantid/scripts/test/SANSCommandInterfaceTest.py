@@ -132,12 +132,12 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         # Act
         command_iface.SetTransmissionROI(trans_roi_files = trans_roi_files)
         # Assert
-        result = command_iface.GetTransmissionROI()
+        result = ReductionSingleton().transmission_calculator.roi_files
         self.assertEqual(2, len(result), 'The transmission roi list should have two entries')
         self.assertEqual("file1.xml", result[0], 'The first file should be file1.xml')
         self.assertEqual("file2.xml", result[1], 'The second file should be file2.xml')
 
-    def test_setting_roi_file_for_valid_input(self):
+    def test_setting_roi_file_for_invalid_input(self):
          # Arrange
         trans_roi_files = " file1g,  file2.xml "
         command_iface.Clean()
@@ -148,6 +148,49 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         self.assertEqual(0, len(ReductionSingleton().transmission_calculator.roi_files), 'The transmission roi list should be empty.')
 
 
+
+    def test_that_gets_non_empty_mask_files(self):
+        # Arrange
+        trans_mask_files = ['mask_file1.xml', 'mask_file2.xml']
+        command_iface.Clean()
+        command_iface.SANS2D()
+        ReductionSingleton().transmission_calculator.mask_files = trans_mask_files
+        # Act
+        result = command_iface.GetTransmissionMask()
+        # Assert
+        self.assertEqual('mask_file1.xml,mask_file2.xml', result, 'The transmission mask should have two entries')
+
+    def test_that_gets_None_for_empty_mask_files(self):
+         # Arrange
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        result = command_iface.GetTransmissionMask()
+        # Assert
+        self.assertEqual(None, result, 'The transmission mask should be None')
+
+    def test_setting_mask_file_for_valid_input(self):
+         # Arrange
+        trans_mask_files = "  file1.xml,  file2.xml "
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        command_iface.SetTransmissionMask(trans_mask_files = trans_mask_files)
+        # Assert
+        result = ReductionSingleton().transmission_calculator.mask_files
+        self.assertEqual(2, len(result), 'The transmission mask list should have two entries')
+        self.assertEqual("file1.xml", result[0], 'The first file should be file1.xml')
+        self.assertEqual("file2.xml", result[1], 'The second file should be file2.xml')
+
+    def test_setting_mask_file_for_invalid_input(self):
+         # Arrange
+        trans_mask_files = " file1g,  file2.xml "
+        command_iface.Clean()
+        command_iface.SANS2D()
+        # Act
+        command_iface.SetTransmissionMask(trans_mask_files = trans_mask_files)
+        # Assert
+        self.assertEqual(0, len(ReductionSingleton().transmission_calculator.mask_files), 'The transmission mask list should be empty.')
 
 if __name__ == "__main__":
     unittest.main()

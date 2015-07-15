@@ -4032,6 +4032,12 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
 
 
   // Read the MASK settings
+  QString transmissionMaskRequest("\nprint i.GetTransmissionMask()");
+  QString resultTransmissionMask(runPythonCode(transmissionMaskRequest, false));
+  resultTransmissionMask = resultTransmissionMask.simplified();
+  if (resultTransmissionMask != m_pythonEmptyKeyword) {
+    this->m_uiForm.trans_masking_line_edit->setText(resultTransmissionMask);
+  }
 
   // Read the Transmission Monitor Spectrum Shift
   QString transmissionMonitorSpectrumShiftRequest("\nprint i.GetTransmissionMonitorSpectrumShift()");

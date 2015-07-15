@@ -1286,15 +1286,27 @@ def SetTransmissionROI(trans_roi_files):
         sanslog.warning('Warning: The roi file list does not seem to be valid.')
 
 def GetTransmissionMask():
-    pass
+    """
+        Gets the list of transmission maks file names
+        @return: list of transmission mask file names or None
+    """
+    trans_mask_files = ReductionSingleton().transmission_calculator.mask_files
+    if len(trans_mask_files) == 0:
+        return
+    else:
+        formatted_mask_files = ','.join(mask_file.replace(" ", "") for mask_file in trans_mask_files)
+        return formatted_mask_files
 
-def SetTransmissionMask(trans_roi_files):
+def SetTransmissionMask(trans_mask_files):
     """
-        Sets the transmission mask if one was defined.
-        @param trans_mask_files : The mask files
+        Sets the transmission masks.
+        @param trans_mask_files :: A string list of mask files
     """
-    if su.check_for_valid_file_list(trans_roi_files):
-        pass
+    mask = trans_mask_files.replace(" ", "").split(",")
+    if su.is_valid_xml_file_list(mask):
+        ReductionSingleton().transmission_calculator.mask_files = mask
+    else:
+        sanslog.warning('Warning: The mask file list does not seem to be valid.')
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
