@@ -350,11 +350,15 @@ void vtkStructuredPointsArray<Scalar>::GetTupleValue(vtkIdType tupleId,
   const auto tmp2 = std::div(tmp1.quot, m_dims[1]);
   const vtkIdType loc[3] = {tmp1.rem, tmp2.rem, tmp2.quot};
 
+  Scalar v[3];
   for (int i = 0; i < 3; i++) {
-    tuple[i] = m_origin[i] + loc[i] * m_spacing[i];
+    v[i] = m_origin[i] + loc[i] * m_spacing[i];
   }
 
-  vtkMatrix3x3::MultiplyPoint(m_skewMatrix, tuple, tuple);
+  //vtkMatrix3x3::MultiplyPoint(m_skewMatrix, v, tuple);
+  tuple[0] = v[0]*m_skewMatrix[0]  + v[1]*m_skewMatrix[1]  + v[2]*m_skewMatrix[2];
+  tuple[1] = v[0]*m_skewMatrix[3]  + v[1]*m_skewMatrix[4]  + v[2]*m_skewMatrix[5];
+  tuple[2] = v[0]*m_skewMatrix[6]  + v[1]*m_skewMatrix[7]  + v[2]*m_skewMatrix[8];
 }
 
 //------------------------------------------------------------------------------
