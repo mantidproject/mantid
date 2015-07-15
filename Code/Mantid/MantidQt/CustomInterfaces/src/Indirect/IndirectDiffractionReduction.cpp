@@ -283,7 +283,11 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
 
   if(m_uiForm.ckUseCan->isChecked())
+  {
     msgDiffReduction->setProperty("ContainerFiles", m_uiForm.rfCanFiles->getFilenames().join(",").toStdString());
+    if(m_uiForm.ckCanScale->isChecked())
+      msgDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
+  }
 
   // Add the pproperty for grouping policy if needed
   if(m_uiForm.ckIndividualGrouping->isChecked())
@@ -339,7 +343,11 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
     osirisDiffReduction->setProperty("DRange", static_cast<long>(m_uiForm.spDRange->value()));
 
   if(m_uiForm.ckUseCan->isChecked())
+  {
     osirisDiffReduction->setProperty("Container", m_uiForm.rfCanFiles->getFirstFilename().toStdString());
+    if(m_uiForm.ckCanScale->isChecked())
+      osirisDiffReduction->setProperty("ContainerScaleFactor", m_uiForm.spCanScale->value());
+  }
 
   m_batchAlgoRunner->addAlgorithm(osirisDiffReduction);
 

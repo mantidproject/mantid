@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>550</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -147,6 +147,32 @@
          </property>
          <property name="multipleFiles" stdset="0">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="ckCanScale">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Scale Container:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QDoubleSpinBox" name="spCanScale">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -521,6 +547,8 @@
   <tabstop>spSpecMax</tabstop>
   <tabstop>ckLoadLogs</tabstop>
   <tabstop>ckUseCan</tabstop>
+  <tabstop>ckCanScale</tabstop>
+  <tabstop>spCanScale</tabstop>
   <tabstop>leRebinStart</tabstop>
   <tabstop>leRebinWidth</tabstop>
   <tabstop>leRebinEnd</tabstop>
@@ -544,12 +572,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>55</x>
-     <y>287</y>
+     <x>64</x>
+     <y>245</y>
     </hint>
     <hint type="destinationlabel">
-     <x>291</x>
-     <y>287</y>
+     <x>108</x>
+     <y>245</y>
     </hint>
    </hints>
   </connection>
@@ -560,12 +588,44 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>73</x>
-     <y>189</y>
+     <x>90</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
-     <x>197</x>
+     <x>371</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ckCanScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>55</x>
      <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckCanScale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCanScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>141</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>194</y>
     </hint>
    </hints>
   </connection>
