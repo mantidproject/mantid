@@ -9,9 +9,6 @@
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
 #include "MantidQtCustomInterfaces/Indirect/IqtFit.h"
 #include "MantidQtCustomInterfaces/Indirect/ConvFit.h"
-#include "MantidQtCustomInterfaces/Indirect/CalcCorr.h"
-#include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
-#include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"

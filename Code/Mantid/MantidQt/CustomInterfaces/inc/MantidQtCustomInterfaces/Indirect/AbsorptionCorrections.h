@@ -8,8 +8,6 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-namespace IDA
-{
   class DLLExport AbsorptionCorrections : public CorrectionsTab
   {
     Q_OBJECT
@@ -34,7 +32,6 @@ namespace IDA
     Ui::AbsorptionCorrections m_uiForm;
 
   };
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
