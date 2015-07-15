@@ -27,9 +27,10 @@ html_theme_options = {
     # Remove the local TOC from the nav bar
     'navbar_pagenav': False,
     # Hide the next/previous in the nav bar.
-    'navbar_sidebarrel': False,
+    'navbar_sidebarrel': True,
     # Use the latest version.
     'bootstrap_version': "3",
     # Ensure the nav bar always stays on top of page.
     'navbar_fixed_top': "false",
+
 }

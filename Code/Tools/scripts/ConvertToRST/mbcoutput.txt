@@ -1,0 +1,88 @@
+FrameworkManager-[Notice] Welcome to Mantid 3.4.20150710.1928
+FrameworkManager-[Notice] Please cite: http://dx.doi.org/10.1016/j.nima.2014.07.029 and this release: http://dx.doi.org/10.5286/Software/Mantid
+DownloadInstrument-[Notice] All instrument definitions up to date
+http://www.mantidproject.org/MBC_Masking_and_Grouping
+C:/Mantid/Code/Mantid/docs/source/training/MBC_Masking_and_Grouping.rst
+Parsing  /MBC_Masking_and_Grouping
+pandoc -f mediawiki -t rst "http://www.mantidproject.org/MBC_Masking_and_Grouping?action=raw"
+None
+C:\Mantid\Code\Mantid\docs\source\images C:/Mantid/Code/Mantid/docs/source/training
+('processing image link', '[[File:MaskTabToolButtons.png]]')
+image:: ../images/MaskTabToolButtons.png
+
+('processing image link', '[[File:MaskOrGroup.png]]')
+image:: ../images/MaskOrGroup.png
+
+('processing image link', '[[File:MaskRedRing.png]]')
+image:: ../images/MaskRedRing.png
+
+('processing image link', '[[File:GroupBlueRing.png]]')
+image:: ../images/GroupBlueRing.png
+
+('processing image link', '[[File:GroupingOperations.png]]')
+image:: ../images/GroupingOperations.png
+
+('processing image link', '[[File:MaskingViewAndWorkspace.png]]')
+image:: ../images/MaskingViewAndWorkspace.png
+
+('processing image link', '[[File:MaskedViewPixels.png]]')
+image:: ../images/MaskedViewPixels.png
+
+('processing image link', '[[File:ClearAllButton.png]]')
+image:: ../images/ClearAllButton.png
+
+('processing image link', '[[File:ApplyAndSaveMenu.png]]')
+image:: ../images/ApplyAndSaveMenu.png
+
+('processing image link', '[[File:ApplyToDataButton.png]]')
+image:: ../images/ApplyToDataButton.png
+
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+libifcoremd.dll    0000000006A631F8  Unknown               Unknown  Unknown
+libifcoremd.dll    0000000006A5C789  Unknown               Unknown  Unknown
+libifcoremd.dll    0000000006A48583  Unknown               Unknown  Unknown
+libifcoremd.dll    00000000069B725D  Unknown               Unknown  Unknown
+libifcoremd.dll    00000000069C72A6  Unknown               Unknown  Unknown
+kernel32.dll       0000000077304B23  Unknown               Unknown  Unknown
+kernel32.dll       00000000772C59CD  Unknown               Unknown  Unknown
+ntdll.dll          00000000773FB891  Unknown               Unknown  Unknown
+
+('processing image link', '[[File:DetectorPositionOptions.png]]')
+image:: ../images/DetectorPositionOptions.png
+
+('processing image link', '[[File:PickTabZoomButton.png]]')
+image:: ../images/PickTabZoomButton.png
+
+('processing image link', '[[File:PickTabEllipseButton.png]]')
+image:: ../images/PickTabEllipseButton.png
+
+('processing image link', '[[File:PickTabRectButton.png]]')
+image:: ../images/PickTabRectButton.png
+
+('processing image link', '[[File:PickTabElRingButton.png]]')
+image:: ../images/PickTabElRingButton.png
+
+('processing image link', '[[File:PickTabRectRingButton.png]]')
+image:: ../images/PickTabRectRingButton.png
+
+('processing image link', '[[File:PickTabEditButton.png]]')
+image:: ../images/PickTabEditButton.png
+
+('processing image link', '[[File:PickTabEllipseButton.png]]')
+image:: ../images/PickTabEllipseButton.png
+
+('processing image link', '[[File:DrawingEllipse.png]]')
+image:: ../images/DrawingEllipse.png
+
+('processing image link', '[[File:PickTabEditButton.png]]')
+image:: ../images/PickTabEditButton.png
+
+('processing image link', '[[File:SelectMuplipleShapes.png]]')
+image:: ../images/SelectMuplipleShapes.png
+
+('processing image link', '[[File:SelectedMuplipleShapes.png]]')
+image:: ../images/SelectedMuplipleShapes.png
+
+
+C:\Mantid\Code\Tools\scripts\ConvertToRST>python.exe ConvertWikiPage.py http://www.mantidproject.org/MBC_Masking_and_Grouping -o C:/Mantid/Code/Mantid/docs/source/training/MBC_Masking_and_Grouping.rst 
