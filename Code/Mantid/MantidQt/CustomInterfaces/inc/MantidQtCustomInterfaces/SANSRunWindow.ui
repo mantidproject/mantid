@@ -1622,10 +1622,7 @@ intermediate ranges are there for comparison</string>
             <layout class="QVBoxLayout" name="verticalLayout_15">
              <item>
               <layout class="QGridLayout" name="gridLayout_32">
-               <item row="1" column="0">
-                <widget class="QLineEdit" name="trans_M3M4_line_edit"/>
-               </item>
-               <item row="1" column="2">
+               <item row="1" column="4">
                 <widget class="QLineEdit" name="trans_roi_files_line_edit">
                  <property name="minimumSize">
                   <size>
@@ -1635,7 +1632,7 @@ intermediate ranges are there for comparison</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="1">
+               <item row="1" column="2">
                 <widget class="QLineEdit" name="trans_radius_line_edit"/>
                </item>
                <item row="0" column="0">
@@ -1656,19 +1653,59 @@ intermediate ranges are there for comparison</string>
                  </item>
                 </layout>
                </item>
-               <item row="0" column="1">
+               <item row="0" column="2">
                 <widget class="QCheckBox" name="trans_radius_check_box">
                  <property name="text">
                   <string>Radius</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="2">
+               <item row="0" column="4">
                 <widget class="QCheckBox" name="trans_roi_files_checkbox">
                  <property name="text">
                   <string>ROI files</string>
                  </property>
                 </widget>
+               </item>
+               <item row="0" column="1" rowspan="2">
+                <widget class="QFrame" name="frame">
+                 <property name="frameShape">
+                  <enum>QFrame::VLine</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3" rowspan="2">
+                <widget class="QFrame" name="frame_2">
+                 <property name="frameShape">
+                  <enum>QFrame::VLine</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <layout class="QHBoxLayout" name="horizontalLayout_28">
+                 <item>
+                  <widget class="QLabel" name="label_17">
+                   <property name="text">
+                    <string>Shift:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="trans_M3M4_line_edit"/>
+                 </item>
+                </layout>
                </item>
               </layout>
              </item>

@@ -4011,7 +4011,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   resetAllTransFields();
 
   // Read the Radius settings
-  QString transmissionRadiusRequest("\nprint i.GetTransmissionRadius()");
+  QString transmissionRadiusRequest("\nprint i.GetTransmissionRadiusInMM()");
   QString resultTransmissionRadius(runPythonCode(transmissionRadiusRequest, false));
   resultTransmissionRadius = resultTransmissionRadius.simplified();
   if (resultTransmissionRadius != m_pythonEmptyKeyword) {
@@ -4077,14 +4077,43 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
  * between user-induced and programmatic changes to the checkbox.
  */
 void SANSRunWindow::initTransmissionSettings() {
-  QObject::connect(this->m_uiForm.trans_M3_check_box, SIGNAL(clicked()),
+  QObject::connect(m_uiForm.trans_M3_check_box, SIGNAL(clicked()),
                    this, SLOT(onTransmissionM3CheckboxChanged()));
-  QObject::connect(this->m_uiForm.trans_M4_check_box, SIGNAL(clicked()),
+  QObject::connect(m_uiForm.trans_M4_check_box, SIGNAL(clicked()),
                    this, SLOT(onTransmissionM4CheckboxChanged()));
-  QObject::connect(this->m_uiForm.trans_radius_check_box, SIGNAL(clicked()),
+  QObject::connect(m_uiForm.trans_radius_check_box, SIGNAL(clicked()),
                    this, SLOT(onTransmissionRadiusCheckboxChanged()));
-  QObject::connect(this->m_uiForm.trans_roi_files_checkbox, SIGNAL(clicked()),
+  QObject::connect(m_uiForm.trans_roi_files_checkbox, SIGNAL(clicked()),
                    this, SLOT(onTransmissionROIFilesCheckboxChanged()));
+
+  // Set the Tooltips
+  const QString m3CB = "Selects the monitor spectrum 3\n"
+                       "for the transmission calculation.";
+  const QString m4CB = "Selects the monitor spectrum 4\n"
+                       "for the transmission calculation.";
+  const QString shift = "Sets the shift of the selected monitor in mm.";
+  const QString radiusCB = "Selects a radius when using the beam stop\n"
+                           "for the transmission calculation.";
+  const QString radius = "Sets a radius in mm when using the beam stop\n"
+                         "for the transmission calculation.";
+  const QString roiCB = "Selects a comma-separated list of ROI files\n"
+                        "when using the beam stop for the\n"
+                        "transmission calculation.";
+  const QString roi = "Sets a comma-separated list of ROI files\n"
+                      "when using the beam stop for the\n"
+                      "transmission calculation.";
+  const QString mask = "Sets a comma-separated list of Mask files\n"
+                       "when using the beam stop for the\n"
+                       "transmission calculation.";
+
+  m_uiForm.trans_M3_check_box->setToolTip(m3CB);
+  m_uiForm.trans_M4_check_box->setToolTip(m4CB);
+  m_uiForm.trans_M3M4_line_edit->setToolTip(shift);
+  m_uiForm.trans_radius_check_box->setToolTip(radiusCB);
+  m_uiForm.trans_radius_line_edit->setToolTip(radius);
+  m_uiForm.trans_roi_files_checkbox->setToolTip(roiCB);
+  m_uiForm.trans_roi_files_line_edit->setToolTip(roi);
+  m_uiForm.trans_masking_line_edit->setToolTip(mask);
 }
 
 /**
@@ -4156,7 +4185,7 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(QString& pythonCode)
     // Handle Radius
     auto radius = m_uiForm.trans_radius_line_edit->text();
     if (m_uiForm.trans_radius_check_box->isChecked() && !radius.isEmpty()) {
-      pythonCode+="i.SetTransmissionRadius(trans_radius=" + radius + ")\n";
+      pythonCode+="i.SetTransmissionRadiusInMM(trans_radius=" + radius + ")\n";
     }
     // Handle ROI
     auto roi = m_uiForm.trans_roi_files_line_edit->text();

@@ -1263,20 +1263,23 @@ def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
     else:
         sanslog.warning('Warning: Could not convert transmission monitor spectrum shift to float.')
 
-def GetTransmissionRadius():
+def GetTransmissionRadiusInMM():
     """
-        Gets the radius for usage with beam stop as transmission monitor
-        @return: tranmission radius
+        Gets the radius for usage with beam stop as transmission monitor in mm
+        @return: tranmission radius in mm
     """
-    return ReductionSingleton().transmission_calculator.radius
+    radius = ReductionSingleton().transmission_calculator.radius
+    if radius is not None:
+        radius = radius*1000.0
+    return radius
 
-def SetTransmissionRadius(trans_radius):
+def SetTransmissionRadiusInMM(trans_radius):
     """
         Sets the transmission monitor spectrum.
-        @param trans_radius :: The radius to set
+        @param trans_radius :: The radius to set in mm
     """
     if su.is_convertible_to_float(trans_radius):
-        ReductionSingleton().transmission_calculator.radius = int(trans_radius)
+        ReductionSingleton().transmission_calculator.radius = float(trans_radius)/1000.0
     else:
         sanslog.warning('Warning: Could convert transmission radius to float.')
 

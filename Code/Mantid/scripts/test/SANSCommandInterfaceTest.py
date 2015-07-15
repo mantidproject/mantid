@@ -73,14 +73,14 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
 
     def test_that_gets_transmission_radius(self):
         # Arrange
-        trans_radius = 23
+        trans_radius = 23/1000
         command_iface.Clean()
         command_iface.SANS2D()
         ReductionSingleton().transmission_calculator.radius = trans_radius
         # Act
-        result = command_iface.GetTransmissionRadius()
+        result = command_iface.GetTransmissionRadiusInMM()
         # Assert
-        self.assertEqual(trans_radius, result, 'The transmission radius should be set to 23.')
+        self.assertEqual(trans_radius*1000, result, 'The transmission radius should be set to 23 mm.')
 
     def test_setting_radius_to_valid_value(self):
         # Arrange
@@ -88,9 +88,9 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
-        command_iface.SetTransmissionRadius(trans_radius = trans_radius)
+        command_iface.SetTransmissionRadiusInMM(trans_radius = trans_radius)
         # Assert
-        self.assertEqual(trans_radius, command_iface.GetTransmissionRadius(), 'The transmission radius should be set to 23.')
+        self.assertEqual(trans_radius, command_iface.GetTransmissionRadiusInMM(), 'The transmission radius should be set to 23.')
 
     def test_setting_radius_with_invalid_input(self):
         # Arrange
@@ -98,9 +98,9 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.Clean()
         command_iface.SANS2D()
         # Act
-        command_iface.SetTransmissionRadius(trans_radius = trans_radius)
+        command_iface.SetTransmissionRadiusInMM(trans_radius = trans_radius)
         # Assert
-        self.assertEqual(None, command_iface.GetTransmissionRadius(), 'The transmission radius should be None.')
+        self.assertEqual(None, command_iface.GetTransmissionRadiusInMM(), 'The transmission radius should be None.')
 
 
 
