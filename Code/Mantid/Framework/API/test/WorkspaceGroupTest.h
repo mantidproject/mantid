@@ -60,6 +60,11 @@ private:
     MOCK_CONST_METHOD0(threadSafe, bool());
     MOCK_CONST_METHOD0(toString, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
+
+  private:
+    virtual MockWorkspace *doClone() const {
+      throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+    }
   };
 
   /// Make a simple group

@@ -191,3 +191,5 @@ Output:
    Workspace has: 4 dimensions and contains:  580 MD events
 
 .. categories::
+
+.. sourcelink::

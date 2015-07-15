@@ -245,7 +245,8 @@ void IntegrateMDHistoWorkspace::exec() {
   if (emptyCount == pbins.size()) {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
-    this->setProperty("OutputWorkspace", inWS->clone());
+    this->setProperty("OutputWorkspace", boost::shared_ptr<IMDHistoWorkspace>(
+                                             inWS->clone().release()));
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate

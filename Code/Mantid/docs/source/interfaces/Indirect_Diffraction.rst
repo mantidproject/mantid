@@ -89,8 +89,9 @@ IRIS, OSIRIS diffspec, TOSCA & VESUVIO
 .. interface:: Diffraction
   :widget: pageDSpaceRebin
 
-All other instruments are supported through the :ref:`MSGDiffractionReduction
-<algm-MSGDiffractionReduction>` algorithm and share the same set of options:
+All other instruments are supported through the
+:ref:`ISISIndirectDiffractionReduction <algm-ISISIndirectDiffractionReduction>`
+algorithm and share the same set of options:
 
 Sum Files
   If selected the raw files will be summed after they are loaded and the

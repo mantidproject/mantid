@@ -86,3 +86,5 @@ Output:
     Error Squared at (1, 2) = 50.41
 
 .. categories::
+
+.. sourcelink::

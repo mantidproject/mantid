@@ -38,3 +38,5 @@ algorithm as follows:
 histogram bin values of InputWorkspace.
 
 .. categories::
+
+.. sourcelink::

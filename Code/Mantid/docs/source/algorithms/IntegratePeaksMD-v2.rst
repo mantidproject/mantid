@@ -195,3 +195,5 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
    |     3132  |  1218594  |    0.000  |    0.000  |    0.000  |    1.016  |   79.240  | 4740.921  |    0.776  | 2999.159  |   35.467  |  901.000  | bank18    |   34.000  |  152.000  | [4.9551,3.59367,5.30453]  | [7.96049,1.19466,0.899379]  |
 
 .. categories::
+
+.. sourcelink::

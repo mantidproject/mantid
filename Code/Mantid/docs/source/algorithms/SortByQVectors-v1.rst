@@ -40,3 +40,5 @@ Output:
     0.0240240236744
 
 .. categories::
+
+.. sourcelink::

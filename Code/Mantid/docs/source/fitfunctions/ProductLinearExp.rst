@@ -25,3 +25,5 @@ detector efficiency calibration.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

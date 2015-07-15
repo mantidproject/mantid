@@ -37,3 +37,5 @@ The workflow proceeds as follows:
 12. Rebin the Q axis to the specified binning and crop out the first and last Q point.
 
 .. categories::
+
+.. sourcelink::

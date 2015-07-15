@@ -30,3 +30,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

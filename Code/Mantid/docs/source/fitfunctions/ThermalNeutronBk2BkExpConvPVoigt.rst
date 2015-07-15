@@ -177,3 +177,5 @@ where
 .. properties::
 
 .. categories::
+
+.. sourcelink::

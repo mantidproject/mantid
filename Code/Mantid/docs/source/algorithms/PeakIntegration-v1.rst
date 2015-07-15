@@ -14,3 +14,5 @@ crystal data and place results into peak workspace. Uses IkedaCarpenter
 function to fit TOF.
 
 .. categories::
+
+.. sourcelink::

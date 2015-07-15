@@ -51,3 +51,5 @@ Output:
      [ 0.06103109  0.03149982  0.01101201]]
 
 .. categories::
+
+.. sourcelink::

@@ -48,3 +48,5 @@ This algorithm takes the same inputs as :ref:`algm-RebinByPulseTimes`. See that 
 
 .. categories::
 
+.. sourcelink::
+

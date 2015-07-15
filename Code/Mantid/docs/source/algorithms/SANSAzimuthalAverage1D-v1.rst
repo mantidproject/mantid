@@ -27,3 +27,5 @@ If *ComputeResolution* was set to True, the
 :ref:`ReactorSANSResolution <algm-ReactorSANSResolution>` is called.
 
 .. categories::
+
+.. sourcelink::

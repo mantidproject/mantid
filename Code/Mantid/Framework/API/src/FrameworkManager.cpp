@@ -82,23 +82,42 @@ FrameworkManagerImpl::FrameworkManagerImpl()
 
   g_log.debug() << "FrameworkManager created." << std::endl;
 
-  int updateInstrumentDefinitions = 0;
-  int retVal = Kernel::ConfigService::Instance().getValue(
-      "UpdateInstrumentDefinitions.OnStartup", updateInstrumentDefinitions);
-  if ((retVal == 1) && (updateInstrumentDefinitions == 1)) {
-    UpdateInstrumentDefinitions();
-  } else {
-    g_log.information()
-        << "Instrument updates disabled - cannot update instrument definitions."
-        << std::endl;
-  }
-
-  // the algorithm will see if it should run
-  SendStartupUsageInfo();
+  AsynchronousStartupTasks();
 }
 
 /// Destructor
 FrameworkManagerImpl::~FrameworkManagerImpl() {}
+
+/// Starts asynchronous tasks that are done as part of Start-up.
+void FrameworkManagerImpl::AsynchronousStartupTasks()
+{
+  int updateInstrumentDefinitions = 0;
+  int retVal = Kernel::ConfigService::Instance().getValue(
+    "UpdateInstrumentDefinitions.OnStartup", updateInstrumentDefinitions);
+  if ((retVal == 1) && (updateInstrumentDefinitions == 1)) {
+    UpdateInstrumentDefinitions();
+  } else {
+    g_log.information()
+      << "Instrument updates disabled - cannot update instrument definitions."
+      << std::endl;
+  }
+
+  int checkIfNewerVersionIsAvailable= 0;
+  int retValVersionCheck = Kernel::ConfigService::Instance().getValue(
+    "CheckMantidVersion.OnStartup", checkIfNewerVersionIsAvailable);
+  if ((retValVersionCheck == 1) && (checkIfNewerVersionIsAvailable == 1)) {
+    CheckIfNewerVersionIsAvailable();
+  } else {
+    g_log.information()
+      << "Version check disabled."
+      << std::endl;
+  }
+
+
+  // the algorithm will see if it should run
+
+  SendStartupUsageInfo();
+}
 
 /// Update instrument definitions from github
 void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
@@ -110,6 +129,20 @@ void FrameworkManagerImpl::UpdateInstrumentDefinitions() {
   } catch (Kernel::Exception::NotFoundError &) {
     g_log.debug() << "DowndloadInstrument algorithm is not available - cannot "
                      "update instrument definitions." << std::endl;
+  }
+}
+
+
+/// Check if a newer release of Mantid is available
+void FrameworkManagerImpl::CheckIfNewerVersionIsAvailable() {
+  try {
+    IAlgorithm *algCheckVersion =
+        this->createAlgorithm("CheckMantidVersion");
+    algCheckVersion->setAlgStartupLogging(false);
+    Poco::ActiveResult<bool> result = algCheckVersion->executeAsync();
+  } catch (Kernel::Exception::NotFoundError &) {
+    g_log.debug() << "CheckMantidVersion algorithm is not available - cannot "
+                     "check if a newer version is available." << std::endl;
   }
 }
 

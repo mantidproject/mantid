@@ -39,3 +39,5 @@ Output:
     Investigation type is: unknown
 
 .. categories::
+
+.. sourcelink::

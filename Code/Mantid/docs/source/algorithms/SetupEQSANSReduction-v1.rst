@@ -16,3 +16,5 @@ PropertyManagerDataService.
 See :ref:`SANSReduction <algm-SANSReduction>` for details.
 
 .. categories::
+
+.. sourcelink::

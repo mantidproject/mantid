@@ -79,3 +79,5 @@ well the peak positions calculated from the fitted parameters match the observed
 .. properties::
 
 .. categories::
+
+.. sourcelink::

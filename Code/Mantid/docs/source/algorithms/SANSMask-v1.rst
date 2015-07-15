@@ -17,3 +17,5 @@ This algorithm is rarely called directly. It is called by
 :ref:`SANSReduction <algm-SANSReduction>` or :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>`.
 
 .. categories::
+
+.. sourcelink::

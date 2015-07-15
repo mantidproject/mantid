@@ -24,3 +24,5 @@ are guessed at automatically from the neutron filename, if not
 specified.
 
 .. categories::
+
+.. sourcelink::

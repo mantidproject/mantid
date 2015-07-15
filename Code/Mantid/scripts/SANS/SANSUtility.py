@@ -5,6 +5,7 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+import mantid
 import inspect
 import math
 import os
@@ -73,14 +74,14 @@ def GetInstrumentDetails(instrum):
 
     return det.n_columns, first_spectrum, last_spectrum
 
-def InfinitePlaneXML(id, plane_pt, normal_pt):
-    return '<infinite-plane id="' + str(id) + '">' + \
+def InfinitePlaneXML(id_name, plane_pt, normal_pt):
+    return '<infinite-plane id="' + str(id_name) + '">' + \
         '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
         '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
         '</infinite-plane>'
 
-def InfiniteCylinderXML(id, centre, radius, axis):
-    return  '<infinite-cylinder id="' + str(id) + '">' + \
+def InfiniteCylinderXML(id_name, centre, radius, axis):
+    return  '<infinite-cylinder id="' + str(id_name) + '">' + \
     '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
     '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
     '<radius val="' + str(radius) + '" />' + \
@@ -97,11 +98,16 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
-    while phimax > 360 : phimax -= 360
-    while phimax < 0 : phimax += 360
-    while phimin > 360 : phimin -= 360
-    while phimin < 0 : phimin += 360
-    while phimax<phimin : phimax += 360
+    while phimax > 360 :
+        phimax -= 360
+    while phimax < 0 :
+        phimax += 360
+    while phimin > 360 :
+        phimin -= 360
+    while phimin < 0 :
+        phimin += 360
+    while phimax<phimin :
+        phimax += 360
 
     #Convert to radians
     phimin = math.pi*phimin/180.0
@@ -365,17 +371,20 @@ def sliceParser(str_to_parser):
 
     def _parse_lower(inpstr):
         val = _check_match(inpstr, lowbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [val[0], MARK]
 
     def _parse_upper(inpstr):
         val = _check_match(inpstr, upbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [MARK, val[0]]
 
     def _parse_start_step_stop(inpstr):
         val = _check_match(inpstr, sss_pat, 3)
-        if not val: return val
+        if not val:
+            return val
         start = val[0]
         step = val[1]
         stop = val[2]
@@ -442,32 +451,91 @@ def getFileAndName(incomplete_path):
 
     return this_path, basename
 
+def _merge_to_ranges(ints):
+    """
+    Given an integer list, will "merge" adjacent integers into "ranges".
+    Assumes that the given list will already be sorted and that it contains no
+    duplicates.  Best explained with examples:
+
+    Input:  [1, 2, 3, 4]
+    Output: [[1, 4]]
+
+    Input:  [1, 2, 3, 5, 6, 7]
+    Output: [[1, 3], [5, 7]]
+
+    Input:  [1, 2, 3, 5, 7, 8, 9]
+    Output: [[1, 3], [5, 5], [7, 9]]
+
+    Input:  [1, 2, 7, 5, 6, 3, 2, 2]
+    Output: Unknown -- the input contains duplicates and is unsorted.
+
+    @params ints :: the integer list to merge, sorted and without duplicates
+
+    @returns a list of ranges
+    """
+    ranges = []
+    current_range = []
+    for i in ints:
+        if current_range == []:
+            current_range = [i, i]
+        elif current_range[1] + 1 == i:
+            current_range[1] = i
+        else:
+            ranges.append(current_range)
+            current_range = [i, i]
+    if not current_range in ranges:
+        ranges.append(current_range)
+    return ranges
+
+def _yield_masked_det_ids(masking_ws):
+    """
+    For some reason Detector.isMasked() does not work for MaskingWorkspaces.
+    We use masking_ws.readY(ws_index)[0] == 1 instead.
+    """
+    for ws_index in range(masking_ws.getNumberHistograms()):
+        if masking_ws.readY(ws_index)[0] == 1:
+            yield masking_ws.getDetector(ws_index).getID()
+
+def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
+    """
+    Given a mask file and the (necessary) path to the corresponding IDF, will
+    load in the file and return a list of detector IDs that are masked.
+
+    @param mask_file_path :: the path of the mask file to read in
+    @param idf_path :: the path to the corresponding IDF. Necessary so that we
+                       know exactly which instrument to use, and therefore know
+                       the correct detector IDs.
+
+    @returns the list of detector IDs that were masked in the file
+    """
+    mask_ws_name = "__temp_mask"
+    LoadMask(
+        Instrument=idf_path,
+        InputFile=mask_file_path,
+        OutputWorkspace=mask_ws_name)
+    det_ids = list(_yield_masked_det_ids(mtd[mask_ws_name]))
+    DeleteWorkspace(Workspace=mask_ws_name)
+
+    return det_ids
+
 def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
     """
     Rolling our own MaskDetectors wrapper since masking is broken in a couple
-    of places that affect us here:
+    of places that affect us here.
 
-    1. Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name)
-       is not something we can do because the algorithm masks by ws index
-       rather than detector id, and unfortunately for SANS the detector table
-       is not the same for MaskingWorkspaces as it is for the workspaces
-       containing the data to be masked.  Basically, we get a mirror image of
-       what we expect.  Instead, we have to extract the det IDs and use those
-       via the DetectorList property.
-
-    2. For some reason Detector.isMasked() does not work for MaskingWorkspaces.
-       We use masking_ws.readY(ws_index)[0] == 1 instead.
+    Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name) is
+    not something we can do because the algorithm masks by ws index rather than
+    detector id, and unfortunately for SANS the detector table is not the same
+    for MaskingWorkspaces as it is for the workspaces containing the data to be
+    masked.  Basically, we get a mirror image of what we expect.  Instead, we
+    have to extract the det IDs and use those via the DetectorList property.
 
     @param ws :: the workspace to be masked.
     @param masking_ws :: the masking workspace that contains masking info.
     """
     ws, masking_ws = mtd[ws_name], mtd[masking_ws_name]
 
-    masked_det_ids = []
-
-    for ws_index in range(masking_ws.getNumberHistograms()):
-        if masking_ws.readY(ws_index)[0] == 1:
-            masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
+    masked_det_ids = list(_yield_masked_det_ids(masking_ws))
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
 
@@ -594,6 +662,37 @@ def get_full_path_for_added_event_data(file_name):
 
     return full_path_name
 
+def extract_spectra(ws, det_ids, output_ws_name):
+    """
+    A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
+    of ws indices to keep.  Everything else is ignored.
+    
+    @param ws :: the workspace from which to extract spectra
+    @param det_ids :: the detector IDs corresponding to the spectra to extract
+    @param output_ws_name :: the name of the resulting workspace
+    @returns :: a workspace containing the extracted spectra
+    """
+    ExtractSpectra(InputWorkspace=ws,OutputWorkspace=output_ws_name, DetectorList=det_ids)
+    return mtd[output_ws_name]
+
+def get_masked_det_ids(ws):
+    """
+    Given a workspace, will return a list of all the IDs that correspond to
+    detectors that have been masked.
+
+    @param ws :: the workspace to extract the det IDs from
+
+    @returns a list of IDs for masked detectors
+    """
+    for ws_index in range(ws.getNumberHistograms()):
+        try:
+            det = ws.getDetector(ws_index)
+        except RuntimeError:
+            # Skip the rest after finding the first spectra with no detectors,
+            # which is a big speed increase for SANS2D.
+            break
+        if det.isMasked():
+            yield det.getID()
 
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
@@ -693,8 +792,8 @@ def parseLogFile(logfile):
         'Front_Det_Rot':0.0}
     if logfile == None:
         return tuple(logkeywords.values())
-    file = open(logfile, 'rU')
-    for line in file:
+    file_log = open(logfile, 'rU')
+    for line in file_log:
         entry = line.split()[1]
         if entry in logkeywords.keys():
             logkeywords[entry] = float(line.split()[2])

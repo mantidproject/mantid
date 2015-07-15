@@ -44,3 +44,5 @@ Output:
    Chi: 90.0, Omega: 90.0, Indexed: 300, AvErrIndex: 0.2114 AvErrAll: 0.2114
 
 .. categories::
+
+.. sourcelink::

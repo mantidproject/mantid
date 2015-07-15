@@ -38,6 +38,12 @@ namespace API {
 class MANTID_API_DLL IEventWorkspace : public MatrixWorkspace {
 public:
   IEventWorkspace() : MatrixWorkspace() {}
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<IEventWorkspace> clone() const {
+    return std::unique_ptr<IEventWorkspace>(doClone());
+  }
+
   /// Return the workspace typeID
   virtual const std::string id() const { return "IEventWorkspace"; }
   virtual std::size_t getNumberEvents() const = 0;
@@ -59,11 +65,15 @@ public:
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
-  IEventWorkspace(const IEventWorkspace &other);
+  IEventWorkspace(const IEventWorkspace &other) : MatrixWorkspace(other) {}
   /// Protected copy assignment operator. Assignment not implemented.
   IEventWorkspace &operator=(const IEventWorkspace &other);
 
   virtual const std::string toString() const;
+
+private:
+  virtual IEventWorkspace *doClone() const = 0;
+
 };
 }
 }

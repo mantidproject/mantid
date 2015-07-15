@@ -38,3 +38,5 @@ Usage
      dataWS = CreateWorkspace(DataX=dataX, DataY=dataY, DataE=dataE, NSpec=4,UnitX="Wavelength")
 
 .. categories::
+
+.. sourcelink::

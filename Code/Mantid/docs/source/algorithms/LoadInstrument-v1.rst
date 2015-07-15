@@ -58,3 +58,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

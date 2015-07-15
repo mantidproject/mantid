@@ -96,3 +96,5 @@ Output:
     Is detector 20475 masked: True
 
 .. categories::
+
+.. sourcelink::

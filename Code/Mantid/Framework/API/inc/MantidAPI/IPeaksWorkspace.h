@@ -54,6 +54,11 @@ public:
   /// Destructor
   virtual ~IPeaksWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<IPeaksWorkspace> clone() const {
+    return std::unique_ptr<IPeaksWorkspace>(doClone());
+  }
+
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks
    */
@@ -154,6 +159,9 @@ protected:
   IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
 
   virtual const std::string toString() const;
+
+private:
+  virtual IPeaksWorkspace *doClone() const = 0;
 };
 
 }

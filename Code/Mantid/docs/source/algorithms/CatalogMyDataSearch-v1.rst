@@ -37,3 +37,5 @@ Output:
     The title of the investigation is: Mantid Test Investigation
 
 .. categories::
+
+.. sourcelink::
