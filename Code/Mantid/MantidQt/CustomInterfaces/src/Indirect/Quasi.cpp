@@ -50,6 +50,8 @@ namespace MantidQt
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 
+			connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString&)), this, SLOT(handleResolutionInputReady(const QString&)));
+
       // Connect the progrm selector to its handler
 			connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
 
@@ -280,6 +282,21 @@ namespace MantidQt
 
 			setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 			setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+		}
+
+		/**
+     * Toggles the use ResNorm option depending on if the resolution file is a
+     * resolution or vanadoum reduction.
+		 *
+		 * @param wsName The name of the workspace loaded
+		 */
+		void Quasi::handleResolutionInputReady(const QString& wsName)
+		{
+      bool isResolution(wsName.endsWith("_res"));
+
+			m_uiForm.chkUseResNorm->setEnabled(isResolution);
+      if(!isResolution)
+        m_uiForm.chkUseResNorm->setChecked(false);
 		}
 
 		/**
