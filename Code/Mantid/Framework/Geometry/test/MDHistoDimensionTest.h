@@ -79,7 +79,13 @@ public:
    TS_ASSERT_EQUALS(unit.getUnitLabel(), unitLabel);
    TS_ASSERT(dynamic_cast<const Mantid::Kernel::LabelUnit*>(&unit));
 
+  }
 
+  void test_construct_with_unit_type(){
+   Kernel::InverseAngstromsUnit unit;
+   MDHistoDimension dimension("QLabX", "QLabX", unit, 0, 10, 1);
+   const auto & units = dimension.getMDUnits();
+   TS_ASSERT_EQUALS(unit.getUnitLabel(), units.getUnitLabel());
   }
 
 

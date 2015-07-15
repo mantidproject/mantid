@@ -40,6 +40,26 @@ public:
     }
   }
 
+  /** Constructor for simple MDHistoDimension
+  * @param name :: full name of the axis
+  * @param ID :: identifier string
+  * @param units :: MDUnit
+  * @param min :: minimum extent
+  * @param max :: maximum extent
+  * @param numBins :: number of bins (evenly spaced)
+  */
+  MDHistoDimension(std::string name, std::string ID,
+                   const Kernel::MDUnit &units, coord_t min, coord_t max,
+                   size_t numBins)
+      : m_name(name), m_dimensionId(ID), m_units(units.clone()), m_min(min), m_max(max),
+        m_numBins(numBins),
+        m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
+    if (max < min) {
+      throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
+                                  "dimension with min > max");
+    }
+  }
+
   /** copy constructor
    * @param other :: other IMDDimension
    */
