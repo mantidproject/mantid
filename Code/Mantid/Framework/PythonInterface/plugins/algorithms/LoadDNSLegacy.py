@@ -48,92 +48,107 @@ class LoadDNSLegacy(PythonAlgorithm):
     def PyExec(self):
         # Input
         filename = self.getPropertyValue("Filename")
-        outws = self.getPropertyValue("OutputWorkspace")
+        outws_name = self.getPropertyValue("OutputWorkspace")
         pol = self.getPropertyValue("Polarisation")
 
         # load data array from the given file
         data_array = np.loadtxt(filename)
-        ndet = 24
-        dataX = np.zeros(ndet)
-        dataY = data_array[0:ndet, 1:]
-        dataE = np.sqrt(dataY)
-        # create workspace
-        __temporary_workspace__ = api.CreateWorkspace(DataX=dataX,
-                                                      DataY=dataY, DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        api.LoadInstrument(__temporary_workspace__, InstrumentName='DNS')
+        if not data_array.size:
+            message = "File " + filename + " does not contain any data!"
+            self.log().error(message)
+            raise RuntimeError(message)
+            return
 
         # load run information
         metadata = DNSdata()
-        metadata.read_legacy(filename)
-        run = __temporary_workspace__.mutableRun()
+        try:
+            metadata.read_legacy(filename)
+        except RuntimeError as err:
+            message = "Error of loading of file " + filename + ": " + err
+            self.log().error(message)
+            raise RuntimeError(message)
+            return
+
+        ndet = 24
+        # this needed to be able to use ConvertToMD
+        dataX = np.zeros(2*ndet)
+        dataX.fill(metadata.wavelength + 0.00001)
+        dataX[::2] -= 0.000002
+        dataY = data_array[0:ndet, 1:]
+        dataE = np.sqrt(dataY)
+        # create workspace
+        api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
+                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
+        outws = api.mtd[outws_name]
+        api.LoadInstrument(outws, InstrumentName='DNS')
+
+        run = outws.mutableRun()
         if metadata.start_time and metadata.end_time:
             run.setStartAndEndTime(DateAndTime(metadata.start_time),
                                    DateAndTime(metadata.end_time))
         # add name of file as a run title
         fname = os.path.splitext(os.path.split(filename)[1])[0]
         run.addProperty('run_title', fname, True)
-        # run.addProperty('dur_secs', str(metadata.duration), True)
 
         # rotate the detector bank to the proper position
-        api.RotateInstrumentComponent(__temporary_workspace__,
+        api.RotateInstrumentComponent(outws,
                                       "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
         # add sample log Ei and wavelength
-        api.AddSampleLog(__temporary_workspace__,
+        api.AddSampleLog(outws,
                          'Ei', LogText=str(metadata.incident_energy),
                          LogType='Number')
-        api.AddSampleLog(__temporary_workspace__,
+        api.AddSampleLog(outws,
                          'wavelength', LogText=str(metadata.wavelength),
                          LogType='Number')
         # add other sample logs
-        api.AddSampleLog(__temporary_workspace__, 'deterota',
+        api.AddSampleLog(outws, 'deterota',
                          LogText=str(metadata.deterota), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'mon_sum',
-                         LogText=str(metadata.monitor_counts), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'duration',
+        api.AddSampleLog(outws, 'mon_sum',
+                         LogText=str(float(metadata.monitor_counts)), LogType='Number')
+        api.AddSampleLog(outws, 'duration',
                          LogText=str(metadata.duration), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'huber',
+        api.AddSampleLog(outws, 'huber',
                          LogText=str(metadata.huber), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'T1',
+        api.AddSampleLog(outws, 'T1',
                          LogText=str(metadata.t1), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'T2',
+        api.AddSampleLog(outws, 'T2',
                          LogText=str(metadata.t2), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'Tsp',
+        api.AddSampleLog(outws, 'Tsp',
                          LogText=str(metadata.tsp), LogType='Number')
         # flipper
-        api.AddSampleLog(__temporary_workspace__, 'flipper_precession',
+        api.AddSampleLog(outws, 'flipper_precession',
                          LogText=str(metadata.flipper_precession_current), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'flipper_z_compensation',
+        api.AddSampleLog(outws, 'flipper_z_compensation',
                          LogText=str(metadata.flipper_z_compensation_current), LogType='Number')
-        flipper_status = 'OFF'
+        flipper_status = 0.0    # flipper OFF
         if abs(metadata.flipper_precession_current) > sys.float_info.epsilon:
-            flipper_status = 'ON'
-        api.AddSampleLog(__temporary_workspace__, 'flipper',
-                         LogText=flipper_status, LogType='String')
+            flipper_status = 1.0    # flipper ON
+        api.AddSampleLog(outws, 'flipper',
+                         LogText=str(flipper_status), LogType='Number')
         # coil currents
-        api.AddSampleLog(__temporary_workspace__, 'C_a',
+        api.AddSampleLog(outws, 'C_a',
                          LogText=str(metadata.a_coil_current), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'C_b',
+        api.AddSampleLog(outws, 'C_b',
                          LogText=str(metadata.b_coil_current), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'C_c',
+        api.AddSampleLog(outws, 'C_c',
                          LogText=str(metadata.c_coil_current), LogType='Number')
-        api.AddSampleLog(__temporary_workspace__, 'C_z',
+        api.AddSampleLog(outws, 'C_z',
                          LogText=str(metadata.z_coil_current), LogType='Number')
         # type of polarisation
-        api.AddSampleLog(__temporary_workspace__, 'polarisation',
+        api.AddSampleLog(outws, 'polarisation',
                          LogText=pol, LogType='String')
         # slits
-        api.AddSampleLog(__temporary_workspace__, 'slit_i_upper_blade_position',
+        api.AddSampleLog(outws, 'slit_i_upper_blade_position',
                          LogText=str(metadata.slit_i_upper_blade_position), LogType='String')
-        api.AddSampleLog(__temporary_workspace__, 'slit_i_lower_blade_position',
+        api.AddSampleLog(outws, 'slit_i_lower_blade_position',
                          LogText=str(metadata.slit_i_lower_blade_position), LogType='String')
-        api.AddSampleLog(__temporary_workspace__, 'slit_i_left_blade_position',
+        api.AddSampleLog(outws, 'slit_i_left_blade_position',
                          LogText=str(metadata.slit_i_left_blade_position), LogType='String')
-        api.AddSampleLog(__temporary_workspace__, 'slit_i_right_blade_position',
+        api.AddSampleLog(outws, 'slit_i_right_blade_position',
                          LogText=str(metadata.slit_i_right_blade_position), LogType='String')
 
-        self.setProperty("OutputWorkspace", __temporary_workspace__)
-        self.log().debug('LoadDNSLegacy: data are loaded to the workspace ' + outws)
-        api.DeleteWorkspace(__temporary_workspace__)
+        self.setProperty("OutputWorkspace", outws)
+        self.log().debug('LoadDNSLegacy: data are loaded to the workspace ' + outws_name)
 
         return
 
