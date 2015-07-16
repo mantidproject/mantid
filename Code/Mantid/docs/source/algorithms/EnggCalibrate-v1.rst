@@ -17,7 +17,7 @@ Description
 
 Utilises :ref:`algm-EnggFocus` which performs a TOF to dSpacing
 conversion using calibrated pixel positions, focuses the values in
-dSpacing and then converts them back to TOF. :ref:`algm-EnginXFocus`
+dSpacing and then converts them back to TOF. :ref:`algm-EnggFocus`
 also perform corrections with Vanadium data.
 
 Then this algorithm calls :ref:`algm-EnggFitPeaks` (as a child
@@ -36,7 +36,7 @@ output properties as well. If a name is given in
 OutputParametersTableName the algorithm also produces a table
 workspace with that name, containing the two output parameters.
 
-See the algorithm :ref:`algm-EnginXFocus` for details on the Vanadium
+See the algorithm :ref:`algm-EnggFocus` for details on the Vanadium
 corrections.
 
 .. categories::

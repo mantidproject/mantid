@@ -61,7 +61,6 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         # change too much AND the final results do not change too much as a result
         EnggFocus(InputWorkspace = long_calib_ws,
                   VanadiumWorkspace = van_ws,
-                  OutputWorkspace = self.out_ws_precalc_name,
                   Bank = '1',
                   VanadiumIntegWorkspace = self._precalc_van_integ_tbl,
                   OutVanadiumCurveFits = self.van_bank_curves_pre_integ_name,

@@ -43,7 +43,7 @@ OutDetPosTable) is accepted by both :ref:`algm-EnggCalibrate` and
 'Detector Position' of the table to correct the detector positions
 before focussing. The OutDetPosTable output table can also be used
 to apply the calibration calculated by this algorithm on any other
-workspace by using the algorithm :ref:`algm-AppplyCalibration`.
+workspace by using the algorithm :ref:`algm-ApplyCalibration`.
 
 In the output table the calibrated positions for every detector are
 found by calculating the *L2* values from the *difc* values as
