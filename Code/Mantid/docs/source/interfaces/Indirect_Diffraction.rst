@@ -76,6 +76,12 @@ The available options are the same, except that a single calibration file and
 one or more vanadium files must be specified instead of rebinning values. These
 files are remembered by the interface so only have to be set once per cycle.
 
+There is also the option to manually set the dRange used in all of the sample
+runs, note that in this case all sample iles must correspond to the same dRange.
+The dRanges are numbered as per the `OSIRIS manual
+<http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
+Otherwise the dRange is determined based on the table provided in the manual.
+
 Note: There must be a corresponding vanadium file with the same dRanges for each
 of the data files entered, but leaving in a full complement of vanadium files -
 even if they are not all used - should not be a problem. Further, mixing up the
