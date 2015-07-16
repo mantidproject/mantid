@@ -15,6 +15,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include <vector>
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -194,6 +195,24 @@ public:
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "main-detector-bank");
 
+  }
+
+  void test_get_parameter_correction_file() {
+
+    // We test the function the looks for a parameter correction file 
+    // for a given instrument.
+
+    // TEST 1 file exists
+    std::string testpath1 = loader.getParameterCorrectionFile("Test1");
+    Poco::Path iPath( true );  // Absolute path
+    TS_ASSERT(iPath.tryParse(testpath1)); // Result has correct syntax
+    TS_ASSERT(iPath.isFile()); // The result is a file
+    TS_ASSERT(iPath.getFileName()=="Test1_Parameter_Corrections.xml"); // Correct filename
+    TS_ASSERT(iPath.directory(iPath.depth()-1)=="embedded_instrument_corrections"); // Correct folder
+
+    // TEST0 file does not exist
+    std::string testpath0 = loader.getParameterCorrectionFile("Test0"); 
+    TS_ASSERT(testpath0 == ""); // Nothing should be found
   }
 
 
