@@ -650,6 +650,11 @@
                 <string>Output Name</string>
                </property>
               </column>
+              <column>
+               <property name="text">
+                <string>User File</string>
+               </property>
+              </column>
              </widget>
             </item>
            </layout>

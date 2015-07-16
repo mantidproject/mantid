@@ -983,7 +983,6 @@ def DisplayMask(mask_worksp=None):
 
             counts_data = '__DisplayMasked_tempory_wksp'
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
-
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log = True, no_console=False)
