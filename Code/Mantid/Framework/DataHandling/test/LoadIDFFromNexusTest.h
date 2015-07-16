@@ -203,15 +203,15 @@ public:
     // for a given instrument.
 
     // TEST1 file exists
-    std::string testpath1 = loader.getParameterCorrectionFile("Test1");
+    std::string testpath1 = loader.getParameterCorrectionFile("TEST1");
     Poco::Path iPath( true );  // Absolute path
     TS_ASSERT(iPath.tryParse(testpath1)); // Result has correct syntax
     TS_ASSERT(iPath.isFile()); // Result is a file
-    TS_ASSERT(iPath.getFileName()=="Test1_Parameter_Corrections.xml"); // Correct filename
+    TS_ASSERT(iPath.getFileName()=="TEST1_Parameter_Corrections.xml"); // Correct filename
     TS_ASSERT(iPath.directory(iPath.depth()-1)=="embedded_instrument_corrections"); // Correct folder
 
     // TEST0 file does not exist
-    std::string testpath0 = loader.getParameterCorrectionFile("Test0"); 
+    std::string testpath0 = loader.getParameterCorrectionFile("TEST0"); 
     TS_ASSERT(testpath0 == ""); // Nothing should be found
   }
 

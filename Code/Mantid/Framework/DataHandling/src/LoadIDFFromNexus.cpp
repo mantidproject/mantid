@@ -70,6 +70,7 @@ void LoadIDFFromNexus::exec() {
 
   // Look for parameter correction file
   std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
+  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile;
 
   LoadParameters(  &nxfile, localWorkspace );
 
