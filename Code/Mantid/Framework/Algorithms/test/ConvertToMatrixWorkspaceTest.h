@@ -91,14 +91,14 @@ public:
                             std::to_string(i),
                         inSpec->getSpectrumNo(), outSpec->getSpectrumNo());
       TSM_ASSERT_EQUALS("Failed on comparing Detector ID for Histogram: " +
-                            std::to_string(i),
+                            i.toString(),
                         *inSpec->getDetectorIDs().begin(),
                         *outSpec->getDetectorIDs().begin());
-      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + std::to_string(i),
+      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + i.toString(),
                         in->readX(i), out->readX(i));
-      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + std::to_string(i),
+      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + i.toString(),
                         in->readY(i), out->readY(i));
-      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + std::to_string(i),
+      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + i.toString(),
                         in->readE(i), out->readE(i));
     }
   }
