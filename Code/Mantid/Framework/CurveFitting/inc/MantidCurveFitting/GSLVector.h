@@ -77,6 +77,8 @@ public:
   double norm() const;
   /// Get vector norm squared
   double norm2() const;
+  /// Calculate the dot product
+  double dot(const GSLVector &v) const;
 
   /// Add a vector
   GSLVector &operator+=(const GSLVector &v);

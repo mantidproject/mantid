@@ -7,13 +7,9 @@
 
 using namespace Mantid::CurveFitting;
 
-
-class GSLVectorTest : public CxxTest::TestSuite
-{
+class GSLVectorTest : public CxxTest::TestSuite {
 public:
-
-  void test_create_GSLVector()
-  {
+  void test_create_GSLVector() {
     {
       GSLVector v;
       TS_ASSERT_EQUALS(v.size(), 1);
@@ -28,10 +24,11 @@ public:
     }
   }
 
-  void test_create_from_std_vector()
-  {
+  void test_create_from_std_vector() {
     std::vector<double> v(3);
-    v[0] = 2; v[1] = 4; v[2] = 6;
+    v[0] = 2;
+    v[1] = 4;
+    v[2] = 6;
     GSLVector gv(v);
     TS_ASSERT_EQUALS(gv.size(), 3);
     TS_ASSERT_EQUALS(gv[0], 2);
@@ -39,10 +36,11 @@ public:
     TS_ASSERT_EQUALS(gv[2], 6);
   }
 
-  void test_copy_constructor()
-  {
+  void test_copy_constructor() {
     std::vector<double> v(3);
-    v[0] = 2; v[1] = 4; v[2] = 6;
+    v[0] = 2;
+    v[1] = 4;
+    v[2] = 6;
     GSLVector gv(v);
     GSLVector gc(gv);
     TS_ASSERT_EQUALS(gc.size(), 3);
@@ -51,10 +49,11 @@ public:
     TS_ASSERT_EQUALS(gc[2], 6);
   }
 
-  void test_assignment_operator()
-  {
+  void test_assignment_operator() {
     std::vector<double> v(3);
-    v[0] = 2; v[1] = 4; v[2] = 6;
+    v[0] = 2;
+    v[1] = 4;
+    v[2] = 6;
     GSLVector gv(v);
     GSLVector gc;
     gc = gv;
@@ -64,10 +63,11 @@ public:
     TS_ASSERT_EQUALS(gc[2], 6);
   }
 
-  void test_zero()
-  {
+  void test_zero() {
     std::vector<double> v(3);
-    v[0] = 2; v[1] = 4; v[2] = 6;
+    v[0] = 2;
+    v[1] = 4;
+    v[2] = 6;
     GSLVector gv(v);
     gv.zero();
     TS_ASSERT_EQUALS(gv[0], 0);
@@ -75,8 +75,7 @@ public:
     TS_ASSERT_EQUALS(gv[2], 0);
   }
 
-  void test_set_get()
-  {
+  void test_set_get() {
     GSLVector gv(3);
     gv.set(0, 9.9);
     gv.set(1, 7.7);
@@ -86,8 +85,7 @@ public:
     TS_ASSERT_EQUALS(gv.get(2), 3.3);
   }
 
-  void test_square_brackets()
-  {
+  void test_square_brackets() {
     GSLVector gv(3);
     gv.set(0, 9.9);
     gv.set(1, 7.7);
@@ -103,22 +101,20 @@ public:
     TS_ASSERT_EQUALS(gv[0], 3.3);
   }
 
-  void test_gsl()
-  {
+  void test_gsl() {
     GSLVector gv(3);
     gv.set(0, 9.9);
     gv.set(1, 7.7);
     gv.set(2, 3.3);
 
     auto gslVec = gv.gsl();
-    
+
     TS_ASSERT_EQUALS(gsl_vector_get(gslVec, 0), 9.9);
     TS_ASSERT_EQUALS(gsl_vector_get(gslVec, 1), 7.7);
     TS_ASSERT_EQUALS(gsl_vector_get(gslVec, 2), 3.3);
   }
 
-  void test_resize()
-  {
+  void test_resize() {
     GSLVector gv(3);
     gv.set(0, 9.9);
     gv.set(1, 7.7);
@@ -143,8 +139,7 @@ public:
     TS_ASSERT_EQUALS(gv.get(1), 7.7);
   }
 
-  void test_plus_operator()
-  {
+  void test_plus_operator() {
     auto v1 = makeVector1();
     auto v2 = makeVector2();
     v1 += v2;
@@ -156,8 +151,7 @@ public:
     TS_ASSERT_THROWS(v1 += makeVector3(), std::runtime_error);
   }
 
-  void test_minus_operator()
-  {
+  void test_minus_operator() {
     auto v1 = makeVector1();
     auto v2 = makeVector2();
     v1 -= v2;
@@ -169,8 +163,7 @@ public:
     TS_ASSERT_THROWS(v1 -= makeVector3(), std::runtime_error);
   }
 
-  void test_times_operator()
-  {
+  void test_times_operator() {
     auto v1 = makeVector1();
     v1 *= 2.2;
     TS_ASSERT_EQUALS(v1.size(), 3);
@@ -179,18 +172,24 @@ public:
     TS_ASSERT_EQUALS(v1[2], 1221);
   }
 
-  void test_norm()
-  {
+  void test_norm() {
     auto v = makeVector1();
-    TS_ASSERT_DELTA(v.norm2(), 5.0*5.0 + 55.0*55.0 + 555.0*555.0, 1e-10);
-    TS_ASSERT_DELTA(v.norm(), sqrt(5.0*5.0 + 55.0*55.0 + 555.0*555.0), 1e-10);
+    TS_ASSERT_DELTA(v.norm2(), 5.0 * 5.0 + 55.0 * 55.0 + 555.0 * 555.0, 1e-10);
+    TS_ASSERT_DELTA(v.norm(), sqrt(5.0 * 5.0 + 55.0 * 55.0 + 555.0 * 555.0),
+                    1e-10);
     v.normalize();
     TS_ASSERT_DELTA(v.norm(), 1.0, 1e-10);
   }
 
-private:
+  void test_dot() { 
+    auto v1 = makeVector1();
+    auto v2 = makeVector2();
+    TS_ASSERT_DELTA(v1.dot(v2), 3.0 * 5.0 + 33.0 * 55.0 + 333.0 * 555.0, 1e-10);
+    TS_ASSERT_THROWS(v1.dot(makeVector3()), std::runtime_error);
+  }
 
-  GSLVector makeVector1(){
+private:
+  GSLVector makeVector1() {
     GSLVector v(3);
     v[0] = 5;
     v[1] = 55;
@@ -198,7 +197,7 @@ private:
     return v;
   }
 
-  GSLVector makeVector2(){
+  GSLVector makeVector2() {
     GSLVector v(3);
     v[0] = 3;
     v[1] = 33;
@@ -206,7 +205,7 @@ private:
     return v;
   }
 
-  GSLVector makeVector3(){
+  GSLVector makeVector3() {
     GSLVector v(2);
     v[0] = 1;
     v[1] = 11;

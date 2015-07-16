@@ -217,10 +217,11 @@ public:
   /// @param P :: Output vector with approximation parameters.
   /// @param A :: Output vector with approximation parameters.
   ChebfunBase_sptr makeApprox(double lBound, double rBound,
-                              std::vector<double> &P, std::vector<double> &A) {
+                              std::vector<double> &P, std::vector<double> &A, bool &ok) {
 
     auto base = ChebfunBase::bestFitAnyTolerance(lBound, rBound, *this, P, A,
                                                  1.0, 1e-4, 129);
+    ok = bool(base);
     if (!base) {
       base = boost::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);
       P = base->fit(*this);
@@ -350,13 +351,13 @@ void CalculateChiSquared::estimateErrors() {
 
   // Parameter bounds that define a volume in the parameter
   // space within which the chi squared is being examined.
-  std::vector<double> lBounds(nParams);
-  std::vector<double> rBounds(nParams);
+  GSLVector lBounds(nParams);
+  GSLVector rBounds(nParams);
 
   // Number of points in lines for plotting
   size_t n = 100;
   pdfTable->setRowCount(n);
-  const double fac = 1e-9;
+  const double fac = 1e-4;
 
   // Loop over each parameter
   for (size_t ip = 0; ip < nParams; ++ip) {
@@ -401,7 +402,11 @@ void CalculateChiSquared::estimateErrors() {
     // The polynomial is defined on interval [lBound, rBound]
     // The value of the polynomial at 0 == chi squared at par0
     std::vector<double> P, A;
-    auto base = slice.makeApprox(lBound, rBound, P, A);
+    bool ok = true;
+    auto base = slice.makeApprox(lBound, rBound, P, A, ok);
+    if (!ok) {
+      g_log.warning() << "Approximation failed for parameter " << ip << std::endl;
+    }
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
       g_log.debug() << "Parameter " << ip << std::endl;
       g_log.debug() << "Slice approximated by polynomial of order "
@@ -551,18 +556,31 @@ void CalculateChiSquared::estimateErrors() {
   // One of the eigenvectors of the hessian is the direction of the slowest
   // change.
   H.eigenSystem(v, Q);
-  double rBound0 = *std::max_element(rBounds.begin(), rBounds.end());
-  double lBound0 = *std::min_element(lBounds.begin(), lBounds.end());
+
   // Loop over the eigenvectors
   for (size_t i = 0; i < nParams; ++i) {
     auto dir = Q.copyColumn(i);
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "Direction " << i << std::endl;
+      g_log.debug() << dir << std::endl;
+    }
     // Make a slice in that direction
     ChiSlice slice(*m_function, dir, *domain, *values, chi0, sigma2);
+    double rBound0 = dir.dot(rBounds);
+    double lBound0 = dir.dot(lBounds);
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "lBound " << lBound0 << std::endl;
+      g_log.debug() << "rBound " << rBound0 << std::endl;
+    }
     double lBound = slice.findBound(lBound0);
     double rBound = slice.findBound(rBound0);
     std::vector<double> P, A;
     // Use a polynomial approximation
-    auto base = slice.makeApprox(lBound, rBound, P, A);
+    bool ok = true;
+    auto base = slice.makeApprox(lBound, rBound, P, A, ok);
+    if (!ok) {
+      g_log.warning() << "Approximation failed in direction " << i << std::endl;
+    }
     // Find the deviation points where the chi^2 = 1/2
     A[0] -= 0.5;
     std::vector<double> roots = base->roots(A);
@@ -581,16 +599,28 @@ void CalculateChiSquared::estimateErrors() {
       roots[1] = roots.back();
       roots.resize(2);
     }
+    if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+      g_log.debug() << "Roots " << roots[0] << " (" << slice(roots[0]) << ") " << roots[1] << " (" << slice(roots[1]) << ") " << std::endl;
+    }
     // Loop over the parameters and see if there deviations along
     // this direction is greater than any previous value.
     for (size_t ip = 0; ip < nParams; ++ip) {
-      auto error = roots.front() * dir[ip];
-      if (error < leftErrColumn->toDouble(ip)) {
-        leftErrColumn->fromDouble(ip, error);
+      auto lError = roots.front() * dir[ip];
+      auto rError = roots.back() * dir[ip];
+      if (lError > rError) {
+        std::swap(lError, rError);
       }
-      error = roots.back() * dir[ip];
-      if (error > rightErrColumn->toDouble(ip)) {
-        rightErrColumn->fromDouble(ip, error);
+      if (lError < leftErrColumn->toDouble(ip)) {
+        if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+          g_log.debug() << "  left for  " << ip << ' ' << lError << ' ' << leftErrColumn->toDouble(ip) << std::endl;
+        }
+        leftErrColumn->fromDouble(ip, lError);
+      }
+      if (rError > rightErrColumn->toDouble(ip)) {
+        if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+          g_log.debug() << "  right for " << ip << ' ' << rError << ' ' << rightErrColumn->toDouble(ip) << std::endl;
+        }
+        rightErrColumn->fromDouble(ip, rError);
       }
     }
     // Output the quadratic estimate for comparrison.

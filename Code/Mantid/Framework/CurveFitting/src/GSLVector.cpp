@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/GSLVector.h"
 
+#include <gsl/gsl_blas.h>
 #include <stdexcept>
 #include <iomanip>
 #include <sstream>
@@ -146,6 +147,17 @@ double GSLVector::norm2() const
   for(auto el = m_data.begin(); el != m_data.end(); ++el) {
     res += (*el) * (*el);
   }
+  return res;
+}
+
+/// Calculate the dot product
+/// @param v :: The other vector.
+double GSLVector::dot(const GSLVector &v) const {
+  if (size() != v.size()) {
+    throw std::runtime_error("Vectors have different sizes in dot product.");
+  }
+  double res = 0.0;
+  gsl_blas_ddot(gsl(), v.gsl(), &res);
   return res;
 }
 
