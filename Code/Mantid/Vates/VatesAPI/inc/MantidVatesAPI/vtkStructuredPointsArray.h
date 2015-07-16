@@ -113,6 +113,7 @@ private:
       const vtkStructuredPointsArray &);            // Not implemented.
   void operator=(const vtkStructuredPointsArray &); // Not implemented.
 
+  vtkIdType Lookup(const Scalar &val, vtkIdType startIndex);
   Scalar m_skewMatrix[9] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
   vtkIdType m_dims[3];
   Scalar m_TempScalarArray[3], m_origin[3], m_spacing[3];
@@ -171,9 +172,6 @@ void vtkStructuredPointsArray<Scalar>::InitializeArray(
   this->MaxId = (m_dims[0] * m_dims[1] * m_dims[2]) * 3 - 1;
   this->Size = this->MaxId + 1;
   this->NumberOfComponents = 3;
-
-  // Get the transformation that takes the points in the TRANSFORMED space back
-  // into the ORIGINAL (not-rotated) space.
 }
 
 //------------------------------------------------------------------------------
@@ -252,7 +250,7 @@ vtkIdType vtkStructuredPointsArray<Scalar>::LookupValue(vtkVariant value) {
   bool valid = true;
   Scalar val = vtkVariantCast<Scalar>(value, &valid);
   if (valid) {
-    // return this->Lookup(val, 0);
+    return this->Lookup(val, 0);
   }
   return -1;
 }
@@ -261,7 +259,7 @@ vtkIdType vtkStructuredPointsArray<Scalar>::LookupValue(vtkVariant value) {
 template <class Scalar>
 void vtkStructuredPointsArray<Scalar>::LookupValue(vtkVariant value,
                                                    vtkIdList *ids) {
-  /*
+
    bool valid = true;
    Scalar val = vtkVariantCast<Scalar>(value, &valid);
    ids->Reset();
@@ -274,7 +272,6 @@ void vtkStructuredPointsArray<Scalar>::LookupValue(vtkVariant value,
    ++index;
    }
    }
-   */
 }
 
 //------------------------------------------------------------------------------
@@ -304,15 +301,14 @@ void vtkStructuredPointsArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkIdType vtkStructuredPointsArray<Scalar>::LookupTypedValue(Scalar value) {
-  //  return this->Lookup(value, 0);
-  return 0;
+  return this->Lookup(value, 0);
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkStructuredPointsArray<Scalar>::LookupTypedValue(Scalar value,
                                                         vtkIdList *ids) {
-  /*
+
    ids->Reset();
    vtkIdType index = 0;
    while ((index = this->Lookup(value, index)) >= 0)
@@ -320,21 +316,17 @@ void vtkStructuredPointsArray<Scalar>::LookupTypedValue(Scalar value,
    ids->InsertNextId(index);
    ++index;
    }
-   */
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar vtkStructuredPointsArray<Scalar>::GetValue(vtkIdType idx) {
-  return this->GetValue(idx);
+  return this->GetValueReference(idx);
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 Scalar &vtkStructuredPointsArray<Scalar>::GetValueReference(vtkIdType idx) {
-
-  // const vtkIdType tuple = idx / 3;
-  // const vtkIdType comp = idx % 3;
   const auto tmp = std::div(idx, static_cast<vtkIdType>(3));
   this->GetTupleValue(tmp.quot, this->m_TempScalarArray);
   return m_TempScalarArray[tmp.rem];
@@ -558,6 +550,17 @@ vtkStructuredPointsArray<Scalar>::vtkStructuredPointsArray() {}
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkStructuredPointsArray<Scalar>::~vtkStructuredPointsArray() {}
+
+template <class Scalar>
+vtkIdType vtkStructuredPointsArray<Scalar>::Lookup(const Scalar &val,
+                                                   vtkIdType index) {
+  while (index <= this->MaxId) {
+    if (this->GetValueReference(++index) == val) {
+      return index;
+    }
+  }
+  return -1;
+}
 
 #endif // vtkStructuredPointsArray_h
 
