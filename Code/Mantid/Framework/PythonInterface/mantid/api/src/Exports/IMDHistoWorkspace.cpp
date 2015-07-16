@@ -1,14 +1,14 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 //#include "MantidPythonInterface/kernel/Converters/CArrayToNDArray.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
-
+#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/numeric.hpp>
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
