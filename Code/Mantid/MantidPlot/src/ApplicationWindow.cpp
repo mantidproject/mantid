@@ -8393,7 +8393,7 @@ void ApplicationWindow::clearSelection()
     if (!g)
       return;
 
-    if (g->activeTool())
+    if (g->activeTool() && !dynamic_cast<PeakPickerTool*>(g->activeTool()))
     {
       auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
       auto lbt = dynamic_cast<LabelTool*>(g->activeTool());
@@ -8450,19 +8450,19 @@ void ApplicationWindow::copySelection()
     if (!g)
       return;
 
-    if (g->activeTool()){
+    if (g->activeTool())
+    {
       if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
       {
         RangeSelectorTool* rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
         if(rst)
           rst->copySelection();
       }
-    } else if (g->markerSelected()){
-      copyMarker();
-    } else
-    {
-      copyActiveLayer();
     }
+    else if (g->markerSelected())
+      copyMarker();
+    else
+      copyActiveLayer();
 
     plot->copyAllLayers();
   }
@@ -8498,11 +8498,14 @@ void ApplicationWindow::cutSelection()
     if (!g)
       return;
 
-    if (g->activeTool()){
+    if (g->activeTool())
+    {
       auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
       if (rst)
         rst->cutSelection();
-    } else {
+    }
+    else
+    {
       copyMarker();
       g->removeMarker();
     }
@@ -9607,8 +9610,12 @@ void ApplicationWindow::showMarkerPopupMenu()
     markerMenu.insertSeparator();
   }
 
-  markerMenu.insertItem(getQPixmap("cut_xpm"),tr("&Cut"),this, SLOT(cutSelection()));
-  markerMenu.insertItem(getQPixmap("copy_xpm"), tr("&Copy"),this, SLOT(copySelection()));
+  if (!(g->activeTool() && dynamic_cast<PeakPickerTool*>(g->activeTool())))
+  {
+    markerMenu.insertItem(getQPixmap("cut_xpm"),tr("&Cut"),this, SLOT(cutSelection()));
+    markerMenu.insertItem(getQPixmap("copy_xpm"), tr("&Copy"),this, SLOT(copySelection()));
+  }
+
   markerMenu.insertItem(getQPixmap("erase_xpm"), tr("&Delete"),this, SLOT(clearSelection()));
   markerMenu.insertSeparator();
   if (g->arrowMarkerSelected())
