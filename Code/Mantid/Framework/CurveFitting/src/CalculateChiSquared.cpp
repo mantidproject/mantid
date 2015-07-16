@@ -128,7 +128,7 @@ void CalculateChiSquared::execConcrete() {
   setProperty("chiSquaredWeighted", chiSquaredWeighted);
 
   // Divide by the DOF
-  g_log.debug() << "DOF " << dof << std::endl;
+  g_log.notice() << "DOF " << dof << std::endl;
   if (dof <= 0.0) {
     dof = 1.0;
     g_log.warning() << "DOF has a non-positive value, changing to 1.0."
@@ -517,8 +517,10 @@ void CalculateChiSquared::estimateErrors() {
   // Improve estimates for standard deviations.
   // If parameters are correlated the found deviations
   // most likely underestimate the true values.
+  unfixParameters();
   GSLJacobian J(m_function, values->size());
   m_function->functionDeriv(*domain, J);
+  refixParameters();
   // Calculate the hessian at the current point.
   GSLMatrix H;
   if (useWeighted) {
@@ -625,6 +627,24 @@ void CalculateChiSquared::estimateErrors() {
     }
     // Output the quadratic estimate for comparrison.
     quadraticErrColumn->fromDouble(i, sqrt(V.get(i, i)));
+  }
+}
+
+/// Temporary unfix any fixed parameters.
+void CalculateChiSquared::unfixParameters() {
+  for(size_t i = 0; i < m_function->nParams(); ++i)
+  {
+    if (m_function->isFixed(i)) {
+      m_function->unfix(i);
+      m_fixedParameters.push_back(i);
+    }
+  }
+}
+
+/// Restore the "fixed" status of previously unfixed paramters.
+void CalculateChiSquared::refixParameters() {
+  for(auto i = m_fixedParameters.begin(); i != m_fixedParameters.end(); ++i) {
+    m_function->fix(*i);
   }
 }
 

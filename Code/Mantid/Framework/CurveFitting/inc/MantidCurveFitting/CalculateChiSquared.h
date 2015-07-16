@@ -44,6 +44,11 @@ private:
   void initConcrete();
   void execConcrete();
   void estimateErrors();
+  void unfixParameters();
+  void refixParameters();
+
+  /// Cache indices of fixed parameters
+  std::vector<size_t> m_fixedParameters;
 };
 
 } // namespace CurveFitting
