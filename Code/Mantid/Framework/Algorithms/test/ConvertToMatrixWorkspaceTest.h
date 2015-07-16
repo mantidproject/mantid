@@ -87,12 +87,19 @@ public:
     for (size_t i = 0; i < out->getNumberHistograms(); i++) {
       const Mantid::API::ISpectrum *inSpec = in->getSpectrum(i);
       const Mantid::API::ISpectrum *outSpec = out->getSpectrum(i);
-      TS_ASSERT_EQUALS(inSpec->getSpectrumNo(), outSpec->getSpectrumNo());
-      TS_ASSERT_EQUALS(*inSpec->getDetectorIDs().begin(),
-                       *outSpec->getDetectorIDs().begin());
-      TS_ASSERT_EQUALS(in->readX(i), out->readX(i));
-      TS_ASSERT_EQUALS(in->readY(i), out->readY(i));
-      TS_ASSERT_EQUALS(in->readE(i), out->readE(i));
+      TSM_ASSERT_EQUALS("Failed on comparing Spectrum Number for Histogram: " +
+                            std::to_string(i),
+                        inSpec->getSpectrumNo(), outSpec->getSpectrumNo());
+      TSM_ASSERT_EQUALS("Failed on comparing Detector ID for Histogram: " +
+                            std::to_string(i),
+                        *inSpec->getDetectorIDs().begin(),
+                        *outSpec->getDetectorIDs().begin());
+      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + std::to_string(i),
+                        in->readX(i), out->readX(i));
+      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + std::to_string(i),
+                        in->readY(i), out->readY(i));
+      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + std::to_string(i),
+                        in->readE(i), out->readE(i));
     }
   }
 };
