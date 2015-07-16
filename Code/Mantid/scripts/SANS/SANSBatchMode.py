@@ -8,7 +8,8 @@
 # For batch-reduction of LOQ or SANS2D runs in Mantid using a SINGLE set of instrument parameters (Q, wavelength, radius, etc)
 #
 # Reads multi-line input from file of the form:
-# sample_sans   54431   sample_trans    54435   direct_beam 54433   can_sans    54432   can_trans   54434   direct_beam 54433   background_sans     background_trans        direct_beam     output_as   script54435.txt
+# sample_sans   54431   sample_trans    54435   direct_beam 54433   can_sans    54432   can_trans  --> continued below
+# 54434   direct_beam 54433   background_sans     background_trans        direct_beam     output_as   script54435.txt
 #
 # Assumes the following have already been set by either the SANS GUI or directly from python using the AssignSample, LimitsR etc commands
 # instrument
@@ -50,7 +51,7 @@ if sys.version_info[0] == 2 and sys.version_info[1] == 6:
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 ################################################################################
 
-# The allowed number of entries per row. 
+# The allowed number of entries per row.
 # The minimum is 4:  sample_sans, sample_sans_VALUE,
 #                    output_as, output_as_VALUE
 # The maximum is 22: sample_sans, sample_sans_VALUE,
@@ -141,7 +142,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     file_handle = open(filename, 'r')
     runinfo = []
     for line in file_handle:
-        # See how many pieces of information have been provided; brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
+        # See how many pieces of information have been provided;
+        # brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
         parts = line.rstrip().split(',')
         if addRunToStore(parts, runinfo) > 0:
             issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
