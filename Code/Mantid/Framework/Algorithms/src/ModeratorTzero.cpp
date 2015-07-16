@@ -44,6 +44,7 @@ void ModeratorTzero::init() {
   // declare the output workspace
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
     Direction::Output), "The name of the output workspace");
+
   // declare the instrument scattering mode
   std::vector<std::string> EModeOptions;
   EModeOptions.push_back("Indirect");
@@ -52,6 +53,7 @@ void ModeratorTzero::init() {
   this->declareProperty("EMode", "Indirect",
     boost::make_shared<StringListValidator>(EModeOptions),
     "The energy mode (default: Indirect)");
+
   declareProperty(new Kernel::PropertyWithValue<double>(
     "tolTOF", 0.1, Kernel::Direction::Input),
     "Tolerance in the calculation of the emission time, in "
@@ -75,35 +77,35 @@ void ModeratorTzero::exec() {
   {
     if(!inputWS->run().hasProperty("Ei"))
     {
-      throw std::invalid_argument(
-        "No incident energy value (Ei) has been set or stored");
+      g_log.error("No incident energy value (Ei) has been set or stored.");
+      return;
     }
-  }
-
-  // Are there source and sample?
-  IComponent_const_sptr source = m_instrument->getSource();
-  IComponent_const_sptr sample = m_instrument->getSource();
-  double Lss(0); // distance from source to sample
-  try
-  {
-    Lss = source->getDistance(*sample);
-  }
-  catch (Exception::NotFoundError &)
-  {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance", inputWS->getTitle());
   }
 
   // extract formula from instrument parameters
   std::vector<std::string> t0_formula =
-    m_instrument->getStringParameter("t0_formula");
+  m_instrument->getStringParameter("t0_formula");
   if (t0_formula.empty())
   {
-    throw Exception::InstrumentDefinitionError(
-      "Unable to retrieve t0_formula among instrument parameters");
+    g_log.error("Unable to retrieve t0_formula among instrument parameters.");
+    return;
   }
   m_formula = t0_formula[0];
+  // Are there source and sample?
+  IComponent_const_sptr source;
+  IComponent_const_sptr sample;
+  double Lss(0); // distance from source to sample
+  try
+  {
+    source = m_instrument->getSource();
+    sample = m_instrument->getSample();
+    Lss = source->getDistance(*sample);
+  }
+  catch(Exception::NotFoundError &)
+  {
+    g_log.error("Unable to calculate source-sample distance.");
+    return;
+  }
 
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
@@ -140,7 +142,6 @@ void ModeratorTzero::exec() {
   for (int i = 0; i < static_cast<int>(numHists); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    size_t wsIndex = static_cast<size_t>(i);
     MantidVec &inbins = inputWS->dataX(i);
     MantidVec &outbins = outputWS->dataX(i);
 
@@ -150,22 +151,30 @@ void ModeratorTzero::exec() {
     parser.DefineVar("incidentEnergy", &E1); // associate E1 to this parser
     parser.SetExpr(m_formula);
 
+    IDetector_const_sptr det;
+    double L1(Lss); // distance from source to sample
+    double L2(-1); // distance from sample to detector
     try
     {
-      IDetector_const_sptr det = inputWS->getDetector(i);
-      double L1(Lss); // distance from source to sample
-      double L2(0); // distance from sample to detector
+      det = inputWS->getDetector(i);
       if (det->isMonitor())
       {
         // redefine the sample as the monitor
         L1 = source->getDistance(*det);
-        // L2 is kept to zero
+        L2 = 0;
       }
       else
       {
         L2 = sample->getDistance(*det);
       }
-
+    } // end of try
+    catch(Exception::NotFoundError &)
+    {
+      g_log.error() << "Unable to calculate distances to/from detector" << i << std::endl;
+      outbins = inbins;
+    }
+    if(L2 >= 0)
+    {
       // fast neutrons are shifted by min_t0_next, irrespective of tof
       double v1_max = L1 / m_t1min;
       E1 = m_convfactor * v1_max*v1_max;
@@ -173,7 +182,6 @@ void ModeratorTzero::exec() {
 
       if(emode=="Indirect")
       {
-
         double t2(-1.0); // time from sample to detector. (-1) signals error
         if(det->isMonitor())
         {
@@ -233,12 +241,7 @@ void ModeratorTzero::exec() {
           outbins[ibin] = inbins[ibin] - t0_direct;
         }
       } // end of else if(emode="Direct")
-    } // end of try
-    catch(Exception::NotFoundError &)
-    {
-      g_log.error() << "Unable to calculate distances to/from detector" << i << std::endl;
-      outbins = inbins;
-    }
+    } // end of if(L2 >= 0)
 
     // Copy y and e data
     outputWS->dataY(i) = inputWS->dataY(i);
@@ -266,8 +269,6 @@ void ModeratorTzero::exec() {
   }
 
   // Assign it to the output workspace property
-  setProperty("OutputWorkspace", outputWS);
-
 } //end of void ModeratorTzero::exec
 
 
@@ -303,7 +304,7 @@ void ModeratorTzero::execEvent(const std::string &emode)
 
   // Get pointers to sample and source
   IComponent_const_sptr source = m_instrument->getSource();
-  IComponent_const_sptr sample = m_instrument->getSource();
+  IComponent_const_sptr sample = m_instrument->getSample();
   double Lss = source->getDistance(*sample); // distance from source to sample
 
   // calculate tof shift once for all neutrons if emode==Direct
@@ -328,27 +329,36 @@ void ModeratorTzero::execEvent(const std::string &emode)
     EventList &evlist = outputWS->getEventList(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
     {
+      IDetector_const_sptr det;
+      double L1(Lss); // distance from source to sample
+      double L2(-1); // distance from sample to detector
+
       try
+      {
+        det = inputWS->getDetector(i);
+        if (det->isMonitor())
+        {
+          // redefine the sample as the monitor
+          L1 = source->getDistance(*det);
+          L2 = 0;
+        }
+        else
+        {
+          L2 = sample->getDistance(*det);
+        }
+      }
+      catch(Exception::NotFoundError &)
+      {
+        g_log.error() << "Unable to calculate distances to/from detector" << i << std::endl;
+      }
+
+      if(L2 >= 0)
       {
         // One parser for each parallel processor needed (except Edirect mode)
         double E1;
         mu::Parser parser;
         parser.DefineVar("incidentEnergy", &E1); // associate E1 to this parser
         parser.SetExpr(m_formula);
-
-        IDetector_const_sptr det = inputWS->getDetector(i);
-        double L1(Lss); // distance from source to sample
-        double L2(0); // distance from sample to detector
-        if (det->isMonitor())
-        {
-          // redefine the sample as the monitor
-          L1 = source->getDistance(*det);
-          // L2 is kept to zero
-        }
-        else
-        {
-          L2 = sample->getDistance(*det);
-        }
 
         // fast neutrons are shifted by min_t0_next, irrespective of tof
         double v1_max = L1 / m_t1min;
@@ -397,9 +407,7 @@ void ModeratorTzero::execEvent(const std::string &emode)
             MantidVec tofs = evlist.getTofs();
             for (unsigned int itof = 0; itof < tofs.size(); itof++)
             {
-              // add a [-0.1,0.1] microsecond noise to avoid artifacts
-              // resulting from original tof data
-              tof = tofs[itof] + 0.002 * (rand() % 100 - 50);
+              tof = tofs[itof];
               if (tof < m_t1min + t2)
                 tof -= min_t0_next;
               else
@@ -413,7 +421,7 @@ void ModeratorTzero::execEvent(const std::string &emode)
         else if(emode=="Elastic")
         {
           double tof;
-          // fix the histogram bins
+          // Apply t0 correction to histogram bins
           MantidVec &x = evlist.dataX();
           for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
           {
@@ -430,7 +438,7 @@ void ModeratorTzero::execEvent(const std::string &emode)
           {
             // add a [-0.1,0.1] microsecond noise to avoid artifacts
             // resulting from original tof data
-            tof = tofs[itof] + 0.002 * (rand() % 100 - 50);
+            tof = tofs[itof];
             if(tof < m_t1min *(L1+L2)/L1)
               tof -= min_t0_next;
             else
@@ -439,10 +447,12 @@ void ModeratorTzero::execEvent(const std::string &emode)
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
+
+          MantidVec tofs_b=evlist.getTofs();
+          MantidVec xarray=evlist.readX();
         } // end of else if(emode=="Elastic")
         else if(emode=="Direct")
         {
-          double tof;
           // fix the histogram bins
           MantidVec &x = evlist.dataX();
           for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
@@ -453,19 +463,12 @@ void ModeratorTzero::execEvent(const std::string &emode)
           MantidVec tofs = evlist.getTofs();
           for (unsigned int itof = 0; itof < tofs.size(); itof++)
           {
-            // add a [-0.1,0.1] microsecond noise to avoid artifacts
-            // resulting from original tof data
-            tof = tofs[itof] + 0.002 * (rand() % 100 - 50);
-            tofs[itof] = tof - t0_direct;
+            tofs[itof] -=t0_direct;
           }
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
         } // end of else if(emode=="Direct")
-      }
-      catch(Exception::NotFoundError &)
-      {
-        g_log.error("Unable to calculate detector-sample distance");
-      }
+      } // end of if(L2 >= 0)
     } // end of if (evlist.getNumberEvents() > 0)
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -479,6 +482,7 @@ void ModeratorTzero::execEvent(const std::string &emode)
 /// and TOF when Emode==Inelastic
 double ModeratorTzero::CalculateT0indirect(const double &tof, const double &L1,
   const double &t2, double &E1, mu::Parser &parser) {
+
   double t0_curr, t0_next;
   t0_curr = m_tolTOF; // current iteration emission time
   t0_next = 0.0;      // next iteration emission time, initialized to zero
