@@ -88,17 +88,17 @@ public:
       const Mantid::API::ISpectrum *inSpec = in->getSpectrum(i);
       const Mantid::API::ISpectrum *outSpec = out->getSpectrum(i);
       TSM_ASSERT_EQUALS("Failed on comparing Spectrum Number for Histogram: " +
-                            std::to_string(i),
+                            itoa(i),
                         inSpec->getSpectrumNo(), outSpec->getSpectrumNo());
       TSM_ASSERT_EQUALS("Failed on comparing Detector ID for Histogram: " +
-                            i.toString(),
+                            itoa(i),
                         *inSpec->getDetectorIDs().begin(),
                         *outSpec->getDetectorIDs().begin());
-      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + i.toString(),
+      TSM_ASSERT_EQUALS("Failed on readX for Histogram: " + itoa(i),
                         in->readX(i), out->readX(i));
-      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + i.toString(),
+      TSM_ASSERT_EQUALS("Failed on readY for Histogram: " + itoa(i),
                         in->readY(i), out->readY(i));
-      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + i.toString(),
+      TSM_ASSERT_EQUALS("Failed on readE for Histogram: " + itoa(i),
                         in->readE(i), out->readE(i));
     }
   }
