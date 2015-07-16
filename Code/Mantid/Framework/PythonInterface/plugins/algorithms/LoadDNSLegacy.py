@@ -12,11 +12,13 @@ from dnsdata import DNSdata
 sys.path.pop(0)
 
 POLARISATIONS = ['0', 'x', 'y', 'z', '-x', '-y', '-z']
+NORMALIZATIONS = ['duration', 'monitor']
 
 
 class LoadDNSLegacy(PythonAlgorithm):
     """
-    Load the DNS Legacy data file to the mantid workspace
+    Load the DNS Legacy data file to the matrix workspace
+    Monitor/duration data are loaded to the separate workspace
     """
     def category(self):
         """
@@ -43,13 +45,18 @@ class LoadDNSLegacy(PythonAlgorithm):
         self.declareProperty("Polarisation", "0",
                              StringListValidator(POLARISATIONS),
                              doc="Type of polarisation. Valid values: %s" % str(POLARISATIONS))
+        self.declareProperty("Normalization", "duration",
+                             StringListValidator(NORMALIZATIONS),
+                             doc="Type of data for normalization. Valid values: %s" % str(NORMALIZATIONS))
         return
 
     def PyExec(self):
         # Input
         filename = self.getPropertyValue("Filename")
         outws_name = self.getPropertyValue("OutputWorkspace")
+        monws_name = outws_name + '_NORM'
         pol = self.getPropertyValue("Polarisation")
+        norm = self.getPropertyValue("Normalization")
 
         # load data array from the given file
         data_array = np.loadtxt(filename)
@@ -151,6 +158,19 @@ class LoadDNSLegacy(PythonAlgorithm):
         api.AddSampleLog(outws, 'slit_i_right_blade_position',
                          LogText=str(metadata.slit_i_right_blade_position),
                          LogType='Number', LogUnit='mm')
+
+        # create workspace with normalization data (monitor or duration)
+        if norm == 'duration':
+            dataY.fill(metadata.duration)
+            dataE.fill(0.001)
+        else:
+            dataY.fill(metadata.monitor_counts)
+            dataE = np.sqrt(dataY)
+        api.CreateWorkspace(OutputWorkspace=monws_name, DataX=dataX, DataY=dataY,
+                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
+        monws = api.mtd[monws_name]
+        api.LoadInstrument(monws, InstrumentName='DNS')
+        api.CopyLogs(InputWorkspace=outws_name, OutputWorkspace=monws_name, MergeStrategy='MergeReplaceExisting')
 
         self.setProperty("OutputWorkspace", outws)
         self.log().debug('LoadDNSLegacy: data are loaded to the workspace ' + outws_name)
