@@ -83,7 +83,6 @@ set ( SRC_FILES
   src/SANSEventSlicing.cpp
   src/SANSPlotSpecial.cpp
   src/SANSRunWindow.cpp
-	src/SANSUtil.cpp
   src/StepScan.cpp
   src/Tomography/SavuConfigDialog.cpp
   src/Tomography/TomographyIfaceModel.cpp
@@ -191,7 +190,6 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/SANSEventSlicing.h
   inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
   inc/MantidQtCustomInterfaces/SANSRunWindow.h
-	inc/MantidQtCustomInterfaces/SANSUtil.h
   inc/MantidQtCustomInterfaces/StepScan.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
@@ -366,7 +364,6 @@ set ( TEST_FILES
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
   TomographyIfacePresenterTest.h
-  SANSUtilTest.h
   UserInputValidatorTest.h
 )
 
