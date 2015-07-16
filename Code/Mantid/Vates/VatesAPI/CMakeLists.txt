@@ -184,6 +184,7 @@ test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
 test/vtkNullStructuredGridTest.h
 test/vtkStructuredPointsArrayTest.h
+test/vtkMDHWSignalArrayTest.h
 test/vtkEllipsoidTransformerTest.h
 test/NullPeaksPresenterVsiTest.h
 test/ConcretePeaksPresenterVsiTest.h
