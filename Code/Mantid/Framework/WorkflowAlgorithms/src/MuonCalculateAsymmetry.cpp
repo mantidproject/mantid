@@ -73,18 +73,18 @@ void MuonCalculateAsymmetry::init() {
                   "What kind of calculation required for analysis.");
 
   declareProperty("PairFirstIndex", EMPTY_INT(),
-                  "Workspace index of the first spectrum of the pair. Only used when "
+                  "Workspace index of the first group of the pair. Only used when "
                   "OutputType is PairAsymmetry.");
 
   declareProperty("PairSecondIndex", EMPTY_INT(),
-                  "Workspace index of the second spectrum of the pair. Only used when "
+                  "Workspace index of the second group of the pair. Only used when "
                   "OutputType is PairAsymmetry.");
 
   declareProperty(
       "Alpha", 1.0,
       "Alpha value of the pair. Only used when OutputType is PairAsymmetry.");
 
-  declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the spectrum. "
+  declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group to analyse. "
                                              "Only used then OutputType is "
                                              "GroupAsymmetry or GroupCounts.");
 

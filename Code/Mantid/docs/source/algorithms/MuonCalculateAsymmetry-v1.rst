@@ -16,13 +16,16 @@ merged before the asymmetry calculation.
 
 The algorithm supports three asymmetry types or modes:
 
--  PairAsymmetry - asymmetry is calculated for a given pair of spectra,
+-  PairAsymmetry - asymmetry is calculated for a given pair of groups,
    using the alpha value provided. The pair to use is specified via
    PairFirstIndex and PairSecondIndex.
--  GroupAsymmetry - asymmetry between given spectrum (specified via GroupIndex)
+-  GroupAsymmetry - asymmetry between given group (specified via GroupIndex)
    and Muon exponential decay is calculated.
 -  GroupCount - **no asymmetry is calculated**, pure counts of the
-   specified spectrum (via GroupIndex) are used.
+   specified group (via GroupIndex) are used.
+
+Note that this algorithm is intended to be executed on input workspaces whose spectra correspond to previously grouped spectra, hence
+the term 'group' is used instead of 'spectrum'.
 
 Usage
 -----
