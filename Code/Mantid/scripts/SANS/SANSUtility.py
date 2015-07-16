@@ -808,9 +808,9 @@ def is_valid_xml_file_list(input_value):
     the form and not the existence of the file
     @param input :: a list input
     '''
-    if not isinstance(input_value, list) or not input:
+    if not isinstance(input_value, list) or not input or len(input_value) == 0:
         return False
-    for element in input:
+    for element in input_value:
         if not isinstance(element, str) or not element.endswith('.xml'):
             return False
     return True
