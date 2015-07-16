@@ -6,7 +6,7 @@
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 import mantid
-from mantid.kernel import DateAndTime, time_duration, FloatTimeSeriesProperty,BoolTimeSeriesProperty,StringTimeSeriesProperty,StringPropertyWithValue
+from mantid.kernel import time_duration
 import inspect
 import math
 import os
@@ -667,7 +667,6 @@ def extract_spectra(ws, det_ids, output_ws_name):
     """
     A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
     of ws indices to keep.  Everything else is ignored.
-    
     @param ws :: the workspace from which to extract spectra
     @param det_ids :: the detector IDs corresponding to the spectra to extract
     @param output_ws_name :: the name of the resulting workspace
