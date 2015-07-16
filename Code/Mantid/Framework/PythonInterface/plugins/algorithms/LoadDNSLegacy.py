@@ -91,61 +91,66 @@ class LoadDNSLegacy(PythonAlgorithm):
         run.addProperty('run_title', fname, True)
 
         # rotate the detector bank to the proper position
-        api.RotateInstrumentComponent(outws,
-                                      "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
+        api.RotateInstrumentComponent(outws, "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
         # add sample log Ei and wavelength
-        api.AddSampleLog(outws,
-                         'Ei', LogText=str(metadata.incident_energy),
-                         LogType='Number')
-        api.AddSampleLog(outws,
-                         'wavelength', LogText=str(metadata.wavelength),
-                         LogType='Number')
+        api.AddSampleLog(outws, LogName='Ei', LogText=str(metadata.incident_energy),
+                         LogType='Number', LogUnit='meV')
+        api.AddSampleLog(outws, LogName='wavelength', LogText=str(metadata.wavelength),
+                         LogType='Number', LogUnit='Angstrom')
         # add other sample logs
-        api.AddSampleLog(outws, 'deterota',
-                         LogText=str(metadata.deterota), LogType='Number')
+        api.AddSampleLog(outws, LogName='deterota', LogText=str(metadata.deterota),
+                         LogType='Number', LogUnit='Degrees')
         api.AddSampleLog(outws, 'mon_sum',
                          LogText=str(float(metadata.monitor_counts)), LogType='Number')
-        api.AddSampleLog(outws, 'duration',
-                         LogText=str(metadata.duration), LogType='Number')
-        api.AddSampleLog(outws, 'huber',
-                         LogText=str(metadata.huber), LogType='Number')
-        api.AddSampleLog(outws, 'T1',
-                         LogText=str(metadata.t1), LogType='Number')
-        api.AddSampleLog(outws, 'T2',
-                         LogText=str(metadata.t2), LogType='Number')
-        api.AddSampleLog(outws, 'Tsp',
-                         LogText=str(metadata.tsp), LogType='Number')
+        api.AddSampleLog(outws, LogName='duration', LogText=str(metadata.duration),
+                         LogType='Number', LogUnit='Seconds')
+        api.AddSampleLog(outws, LogName='huber', LogText=str(metadata.huber),
+                         LogType='Number', LogUnit='Degrees')
+        api.AddSampleLog(outws, LogName='omega', LogText=str(metadata.huber - metadata.deterota),
+                         LogType='Number', LogUnit='Degrees')
+        api.AddSampleLog(outws, LogName='T1', LogText=str(metadata.t1),
+                         LogType='Number', LogUnit='K')
+        api.AddSampleLog(outws, LogName='T2', LogText=str(metadata.t2),
+                         LogType='Number', LogUnit='K')
+        api.AddSampleLog(outws, LogName='Tsp', LogText=str(metadata.tsp),
+                         LogType='Number', LogUnit='K')
         # flipper
-        api.AddSampleLog(outws, 'flipper_precession',
-                         LogText=str(metadata.flipper_precession_current), LogType='Number')
-        api.AddSampleLog(outws, 'flipper_z_compensation',
-                         LogText=str(metadata.flipper_z_compensation_current), LogType='Number')
-        flipper_status = 0.0    # flipper OFF
+        api.AddSampleLog(outws, LogName='flipper_precession',
+                         LogText=str(metadata.flipper_precession_current),
+                         LogType='Number', LogUnit='A')
+        api.AddSampleLog(outws, LogName='flipper_z_compensation',
+                         LogText=str(metadata.flipper_z_compensation_current),
+                         LogType='Number', LogUnit='A')
+        flipper_status = 'OFF'    # flipper OFF
         if abs(metadata.flipper_precession_current) > sys.float_info.epsilon:
-            flipper_status = 1.0    # flipper ON
-        api.AddSampleLog(outws, 'flipper',
-                         LogText=str(flipper_status), LogType='Number')
+            flipper_status = 'ON'    # flipper ON
+        api.AddSampleLog(outws, LogName='flipper',
+                         LogText=flipper_status, LogType='String')
         # coil currents
-        api.AddSampleLog(outws, 'C_a',
-                         LogText=str(metadata.a_coil_current), LogType='Number')
-        api.AddSampleLog(outws, 'C_b',
-                         LogText=str(metadata.b_coil_current), LogType='Number')
-        api.AddSampleLog(outws, 'C_c',
-                         LogText=str(metadata.c_coil_current), LogType='Number')
-        api.AddSampleLog(outws, 'C_z',
-                         LogText=str(metadata.z_coil_current), LogType='Number')
+        api.AddSampleLog(outws, LogName='C_a', LogText=str(metadata.a_coil_current),
+                         LogType='Number', LogUnit='A')
+        api.AddSampleLog(outws, LogName='C_b', LogText=str(metadata.b_coil_current),
+                         LogType='Number', LogUnit='A')
+        api.AddSampleLog(outws, LogName='C_c', LogText=str(metadata.c_coil_current),
+                         LogType='Number', LogUnit='A')
+        api.AddSampleLog(outws, LogName='C_z', LogText=str(metadata.z_coil_current),
+                         LogType='Number', LogUnit='A')
         # type of polarisation
         api.AddSampleLog(outws, 'polarisation',
                          LogText=pol, LogType='String')
         # slits
-        api.AddSampleLog(outws, 'slit_i_upper_blade_position',
-                         LogText=str(metadata.slit_i_upper_blade_position), LogType='String')
-        api.AddSampleLog(outws, 'slit_i_lower_blade_position',
-                         LogText=str(metadata.slit_i_lower_blade_position), LogType='String')
-        api.AddSampleLog(outws, 'slit_i_left_blade_position',
-                         LogText=str(metadata.slit_i_left_blade_position), LogType='String')
+        api.AddSampleLog(outws, LogName='slit_i_upper_blade_position',
+                         LogText=str(metadata.slit_i_upper_blade_position),
+                         LogType='Number', LogUnit='mm')
+        api.AddSampleLog(outws, LogName='slit_i_lower_blade_position',
+                         LogText=str(metadata.slit_i_lower_blade_position),
+                         LogType='Number', LogUnit='mm')
+        api.AddSampleLog(outws, LogName='slit_i_left_blade_position',
+                         LogText=str(metadata.slit_i_left_blade_position),
+                         LogType='Number', LogUnit='mm')
         api.AddSampleLog(outws, 'slit_i_right_blade_position',
-                         LogText=str(metadata.slit_i_right_blade_position), LogType='String')
+                         LogText=str(metadata.slit_i_right_blade_position),
+                         LogType='Number', LogUnit='mm')
 
         self.setProperty("OutputWorkspace", outws)
         self.log().debug('LoadDNSLegacy: data are loaded to the workspace ' + outws_name)
