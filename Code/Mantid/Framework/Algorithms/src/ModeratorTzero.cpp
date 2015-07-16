@@ -61,7 +61,6 @@ void ModeratorTzero::init() {
   declareProperty(new Kernel::PropertyWithValue<size_t>(
     "Niter", 1, Kernel::Direction::Input),
     "Number of iterations (default:1)");
-
 } // end of void ModeratorTzero::init()
 
 void ModeratorTzero::exec() {
@@ -513,7 +512,7 @@ double ModeratorTzero::CalculateT0elastic(const double &tof, const double &L12,
   while (std::fabs(t0_curr - t0_next) >= m_tolTOF && iiter < m_niter)
   {
     t0_curr = t0_next;
-    double v1 = L12 / tof; // v1 = v2 = v since emode is elastic
+    double v1 = L12 / (tof - t0_curr); // v1 = v2 = v since emode is elastic
     E1 = m_convfactor * v1 * v1; // Energy in meV if v1 in meter/microsecond
     t0_next = parser.Eval();
     iiter++;
