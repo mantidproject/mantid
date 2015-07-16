@@ -6,6 +6,7 @@
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 import mantid
+from mantid.kernel import DateAndTime, time_duration, FloatTimeSeriesProperty,BoolTimeSeriesProperty,StringTimeSeriesProperty,StringPropertyWithValue
 import inspect
 import math
 import os
