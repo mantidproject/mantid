@@ -53,7 +53,6 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         # do all calculations from raw data
         EnggFocus(InputWorkspace = long_calib_ws,
                   VanadiumWorkspace = van_ws,
-                  OutputWorkspace = self.out_ws_name,
                   Bank = '1',
                   OutVanadiumCurveFits = self.van_bank_curves_name,
                   OutputWorkspace='out_ws')

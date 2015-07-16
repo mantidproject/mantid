@@ -492,7 +492,7 @@ def fitBankCurve(parent, vanWS, bank):
 
     outParsPropName = 'OutputParameters'
     try:
-        params = fitAlg.getProperty(outParsPropName).value
+        fitAlg.getProperty(outParsPropName).value
     except RuntimeError:
         raise RuntimeError("Could not find the parameters workspace expected in the output property " +
                            OutParsPropName + " from the algorithm Fit. It seems that this algorithm failed." +
@@ -506,8 +506,8 @@ def fitBankCurve(parent, vanWS, bank):
         raise RuntimeError("Could not find the data workspace expected in the output property " +
                            outWSPropName + ". " + detailMsg)
 
-    mtd['van_ws_dsp'] = vanWS
-    mtd['fit_ws_dsp'] = fitWS
+    mtd['engg_van_ws_dsp'] = vanWS
+    mtd['engg_fit_ws_dsp'] = fitWS
 
     return fitWS
 
