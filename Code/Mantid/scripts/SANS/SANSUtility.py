@@ -666,7 +666,7 @@ def extract_spectra(ws, det_ids, output_ws_name):
     """
     A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
     of ws indices to keep.  Everything else is ignored.
-    
+
     @param ws :: the workspace from which to extract spectra
     @param det_ids :: the detector IDs corresponding to the spectra to extract
     @param output_ws_name :: the name of the resulting workspace
@@ -780,35 +780,35 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     return message, isValid
 
-def is_convertible_to_int(input):
+def is_convertible_to_int(input_value):
     '''
     Check if the input can be converted to int
-    @param input :: a general input
+    @param input_value :: a general input
     '''
     try:
-        converted = int(input)
+        dummy_converted = int(input_value)
     except ValueError:
         return False
     return True
 
-def is_convertible_to_float(input):
+def is_convertible_to_float(input_value):
     '''
     Check if the input can be converted to float
-    @param input :: a general input
+    @param input_value :: a general input
     '''
     try:
-        converted = float(input)
+        dummy_converted = float(input_value)
     except ValueError:
         return False
     return True
 
-def is_valid_xml_file_list(input):
+def is_valid_xml_file_list(input_value):
     '''
     Check if the input is a valid xml file list. We only check
     the form and not the existence of the file
     @param input :: a list input
     '''
-    if not isinstance(input, list) or not input:
+    if not isinstance(input_value, list) or not input:
         return False
     for element in input:
         if not isinstance(element, str) or not element.endswith('.xml'):
