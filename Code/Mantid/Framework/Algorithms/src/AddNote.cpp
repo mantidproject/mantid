@@ -19,7 +19,7 @@ namespace {
  * @param value The value at the given time
  */
 void createOrUpdateValue(API::Run &run, const std::string &name,
-                         const std::string &time, const std::string value) {
+                         const std::string &time, const std::string &value) {
   TimeSeriesProperty<std::string> *timeSeries(NULL);
   if (run.hasProperty(name)) {
     timeSeries =

@@ -10,35 +10,50 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
-
+Creates/updates a time-series log entry on a chosen workspace. The given 
+time stamp and value are appended to the named log entry. If the named
+entry does no exist, then a new log is created. A time stamp must be 
+given in ISO8601 format, e.g. 2010-09-14T04:20:12.
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - AddNote**
 
 .. testcode:: AddNoteExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = AddNote()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
+	# Create a host workspace
+	ws = CreateSampleWorkspace()
+   
+	AddNote(ws, Name="my_log", Time="2014-01-01T00:00:00", Value="Initial")
+	AddNote(ws, Name="my_log", Time="2014-01-01T00:30:30", Value="Second")
+	AddNote(ws, Name="my_log", Time="2014-01-01T00:50:00", Value="Final")
+   
+	log = ws.getRun().getLogData("my_log")
+	print "my_log has %i entries" % log.size()
+	for i in range(log.size()):
+		print "\t%s\t%f" %(log.times[i], log.value[i])
+	
+	AddNote(ws, Name="my_log", Time="2014-01-01T00:00:00", Value="New Initial", DeleteExisting=True)
+	AddNote(ws, Name="my_log", Time="2014-01-01T00:30:00", Value="New Final")
+	
+	log = ws.getRun().getLogData("my_log")
+	print "my_log now has %i entries" %log.size()
+	for i in range(log.size()):
+		print "\t%s\t%i" % (log.times[i], log.value[i])
+		
 Output:
 
 .. testoutput:: AddNoteExample
-
-  The output workspace has ?? spectra
+    :options: +NORMALIZE_WHITESPACE
+	
+	my_log has 3 entries
+            2010-01-01T00:00:00     Initial
+            2010-01-01T00:30:00     Second
+            2010-01-01T00:50:00     Final
+    my_log now has 2 entries
+            2010-01-01T00:00:00     New Initial
+            2010-01-01T00:50:00     New Final  
 
 .. categories::
 
