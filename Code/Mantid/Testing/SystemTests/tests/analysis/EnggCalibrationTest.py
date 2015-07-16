@@ -2,7 +2,7 @@
 import stresstesting
 from mantid.simpleapi import *
 
-def _relErrLessDelta(val, ref, epsilon):
+def relErrLessDelta(val, ref, epsilon):
     """
     Checks that a value 'val' does not defer from a reference value 'ref' by 'epsilon'
     or more. This method compares the relative error. An epsilon of 0.1 means a relative
@@ -16,7 +16,7 @@ def _relErrLessDelta(val, ref, epsilon):
     """
     if 0 == ref:
         return False
-    return (abs((ref-val)/ref) < epsilon)
+    return abs((ref-val)/ref) < epsilon
 
 class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
@@ -32,8 +32,8 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
                                           OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
         self._precalc_van_integ_tbl = CreateEmptyTableWorkspace(OutputWorkspace='van_spectra_integration_table')
         self._precalc_van_integ_tbl.addColumn('int', 'Spectra integration')
-        for r in range(0, precalc_van_integ_nxs.getNumberHistograms()):
-            self._precalc_van_integ_tbl.addRow([ int(precalc_van_integ_nxs.readY(r)[0]) ])
+        for idx in range(0, precalc_van_integ_nxs.getNumberHistograms()):
+            self._precalc_van_integ_tbl.addRow([ int(precalc_van_integ_nxs.readY(idx)[0]) ])
 
         self.van_bank_curves_name = 'enginx_van_bank_curves'
         self.van_bank_curves_pre_integ_name = 'enginx_van_bank_curves_with_precalc_integ'
@@ -51,20 +51,22 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         # note: not giving calibrated detector positions
 
         # do all calculations from raw data
-        out_ws = EnggFocus(InputWorkspace = long_calib_ws,
-                           VanadiumWorkspace = van_ws,
-                           OutputWorkspace = self.out_ws_name,
-                           Bank = '1',
-                           OutVanadiumCurveFits = self.van_bank_curves_name)
+        EnggFocus(InputWorkspace = long_calib_ws,
+                  VanadiumWorkspace = van_ws,
+                  OutputWorkspace = self.out_ws_name,
+                  Bank = '1',
+                  OutVanadiumCurveFits = self.van_bank_curves_name,
+                  OutputWorkspace='out_ws')
 
         # Now with pre-calculated curves and integration values. This makes sure that these do not
         # change too much AND the final results do not change too much as a result
-        out_pre_int_ws = EnggFocus(InputWorkspace = long_calib_ws,
-                                   VanadiumWorkspace = van_ws,
-                                   OutputWorkspace = self.out_ws_precalc_name,
-                                   Bank = '1',
-                                   VanadiumIntegWorkspace = self._precalc_van_integ_tbl,
-                                   OutVanadiumCurveFits = self.van_bank_curves_pre_integ_name)
+        EnggFocus(InputWorkspace = long_calib_ws,
+                  VanadiumWorkspace = van_ws,
+                  OutputWorkspace = self.out_ws_precalc_name,
+                  Bank = '1',
+                  VanadiumIntegWorkspace = self._precalc_van_integ_tbl,
+                  OutVanadiumCurveFits = self.van_bank_curves_pre_integ_name,
+                  OutputWorkspace='out_pre_int_ws')
 
     def validate(self):
         out_ws = mtd[self.out_ws_name]
@@ -107,12 +109,12 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
         delta = 1e-5
         for i in range(0, len(simul)):
-            self.assertTrue(_relErrLessDelta(simul[i], precalc_curve_simul[i], delta),
+            self.assertTrue(relErrLessDelta(simul[i], precalc_curve_simul[i], delta),
                             "Relative difference bigger than acceptable error (%f) when comparing bin %d "
                             "against bank curves previously fitted. got: %f where I expect: %f"%
                             (delta, i, simul[i], precalc_curve_simul[i]))
 
-            self.assertTrue(_relErrLessDelta(simul[i], precalc_curve_simul[i], delta),
+            self.assertTrue(relErrLessDelta(simul[i], precalc_curve_simul[i], delta),
                             "Relative difference bigger than acceptable error (%f) when comparing bin %d "
                             "against bank curves previously fitted (and also using pre-calculated integration "
                             "values). got: %f where I expect: %f"%
@@ -125,7 +127,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         focussed_sp = out_ws.readY(0)
         focussed_sp_precalc = out_precalc_ws.readY(0)
         for i in range(0, out_ws.blocksize()):
-            self.assertTrue(_relErrLessDelta(simul[i], precalc_curve_simul[i], delta),
+            self.assertTrue(relErrLessDelta(simul[i], precalc_curve_simul[i], delta),
                             "Relative difference bigger than accepted delta (%f) when comparing bin %d "
                             "of the focussed spectrum against the focussed spectrum obtained using bank curves "
                             "and spectra integration values pre-calculated. got: %f where I expect: %f"%
@@ -191,12 +193,12 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         exdelta = 1e-5
         # Note that the reference values are given with 12 digits more for reference than
         # for assert-comparison purposes (comparisons are not that picky, by far)
-        self.assertTrue(_relErrLessDelta(self.posTable.cell(100, 3), 1.49010562897, exdelta))
+        self.assertTrue(relErrLessDelta(self.posTable.cell(100, 3), 1.49010562897, exdelta))
         #self.assertDelta(self.posTable.cell(100, 3), 1.49010562897, delta)
-        self.assertTrue(_relErrLessDelta(self.posTable.cell(400, 4), 1.65264105797, exdelta))
-        self.assertTrue(_relErrLessDelta(self.posTable.cell(200, 5), 0.296705961227, exdelta))
-        self.assertTrue(_relErrLessDelta(self.posTable.cell(610, 7), 18585.1738281, exdelta))
-        self.assertTrue(_relErrLessDelta(self.posTable.cell(1199, 8), -1.56501817703, exdelta))
+        self.assertTrue(relErrLessDelta(self.posTable.cell(400, 4), 1.65264105797, exdelta))
+        self.assertTrue(relErrLessDelta(self.posTable.cell(200, 5), 0.296705961227, exdelta))
+        self.assertTrue(relErrLessDelta(self.posTable.cell(610, 7), 18585.1738281, exdelta))
+        self.assertTrue(relErrLessDelta(self.posTable.cell(1199, 8), -1.56501817703, exdelta))
 
         # === check difc, zero parameters for GSAS produced by EnggCalibrate
         # Mac fitting tests produce differences for some reason.
@@ -206,15 +208,15 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
             exdelta = delta_darwin
 
         # Bank 1
-        self.assertTrue(_relErrLessDelta(self.difc, 18405.0526862, exdelta),
+        self.assertTrue(relErrLessDelta(self.difc, 18405.0526862, exdelta),
                         "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
-        self.assertTrue(_relErrLessDelta(self.zero, -0.835864, exdelta),
+        self.assertTrue(relErrLessDelta(self.zero, -0.835864, exdelta),
                         "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
         # Bank 2
-        self.assertTrue(_relErrLessDelta(self.difc_b2, 18392.7375314, exdelta),
+        self.assertTrue(relErrLessDelta(self.difc_b2, 18392.7375314, exdelta),
                         "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
-        self.assertTrue(_relErrLessDelta(self.zero_b2, -11.341251, exdelta),
+        self.assertTrue(relErrLessDelta(self.zero_b2, -11.341251, exdelta),
                         "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
 
     def cleanup(self):

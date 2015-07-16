@@ -341,8 +341,9 @@ def applySensitivityCorrectionFromRawData(parent, ws, vanWS):
     if  1 != integWS.blocksize() or integWS.getNumberHistograms() < ws.getNumberHistograms():
         raise RuntimeError("Error while integrating vanadium workspace, the Integration algorithm "
                            "produced a workspace with %d bins and %d spectra. The workspace "
-                           "integrated has %d spectra."%
-                           (integWS.blocksize(), integWS.getNumberHistograms()))
+                           "being integrated has %d spectra."%
+                           (integWS.blocksize(), integWS.getNumberHistograms(),
+                            vanWS.getNumberHistograms()))
 
     for i in range(0, ws.getNumberHistograms()):
         scaleFactor = integWS.readY(i)[0] / vanWS.blocksize()
@@ -490,7 +491,6 @@ def fitBankCurve(parent, vanWS, bank):
                  "spectra of a bank. The function definiton was: '%s'") % functionDesc
 
     outParsPropName = 'OutputParameters'
-    params = None
     try:
         params = fitAlg.getProperty(outParsPropName).value
     except RuntimeError:

@@ -78,7 +78,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         vanWS = self.getProperty("VanadiumWorkspace").value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        vanCurvesWS = EnggUtils.applyVanadiumCorrection(self, inWS, vanWS)
+        EnggUtils.applyVanadiumCorrection(self, inWS, vanWS)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
         posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
