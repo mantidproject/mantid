@@ -82,6 +82,12 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
             self.assertTrue(isinstance(lines[i].figure()._graph, proxies.Graph))
 
     def close_win(self, lines):
+        """
+        Close a plot window. Use this on your test windows to prevent very likely
+        segfaults at the end of the tests.
+
+        @param lines :: lines object as returned by the plot function
+        """
         if len(lines) > 0:
             self.close_win_by_graph(lines[0]._graph)        
 
@@ -224,6 +230,18 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
             self.assertRaises(ValueError, plot(WorkspaceName2D, [0,1], WorkspaceName2D, tool='plot_spectrum'), "wont see this")
         except:
             print "Failed, as it should"
+
+    def test_savefig(self):
+        # save a minimal figure just to check that the file is written
+        import os
+
+        lines = plot([0, 0.5, 0.1])
+        tmp_figname = 'pyplot_tmp_fig_test.png'
+        savefig(tmp_figname)
+        self.close_win(lines)
+
+        self.assertTrue(os.path.exists(tmp_figname))
+        os.remove(tmp_figname)
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotPyplotGeneralTest)

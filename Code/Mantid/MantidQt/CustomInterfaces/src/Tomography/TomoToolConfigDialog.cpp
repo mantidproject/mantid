@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h"
+#include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

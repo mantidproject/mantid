@@ -15,11 +15,10 @@ workspaces.
 
 There are two output workspaces.
 
-Subalgorithms used
-##################
+Workflow
+--------
 
-This algorithm uses the :ref:`algm-Integration`, :ref:`algm-ConvertSpectrumAxis`
-and :ref:`algm-Transpose` algorithms.
+.. diagram:: ElasticWindow-v1_wkflw.dot
 
 Usage
 -----

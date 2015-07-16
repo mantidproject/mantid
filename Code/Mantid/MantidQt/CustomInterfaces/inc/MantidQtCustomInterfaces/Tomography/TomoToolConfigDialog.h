@@ -1,7 +1,6 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOTOOLCONFIGDIALOG_H_
 
-#include "ui_TomoReconstruction.h"
 #include "ui_TomoToolConfigAstra.h"
 #include "ui_TomoToolConfigCustom.h"
 #include "ui_TomoToolConfigSavu.h"
