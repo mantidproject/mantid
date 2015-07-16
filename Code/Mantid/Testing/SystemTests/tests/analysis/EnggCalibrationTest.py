@@ -27,13 +27,9 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         # unit tests) are still the same results as we get from the actual calculations
         self._precalc_van_ws = LoadNexus(Filename='ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
                                          OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
-        precalc_van_integ_nxs = LoadNexus(Filename=
-                                          'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
-                                          OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
-        self._precalc_van_integ_tbl = CreateEmptyTableWorkspace(OutputWorkspace='van_spectra_integration_table')
-        self._precalc_van_integ_tbl.addColumn('int', 'Spectra integration')
-        for idx in range(0, precalc_van_integ_nxs.getNumberHistograms()):
-            self._precalc_van_integ_tbl.addRow([ int(precalc_van_integ_nxs.readY(idx)[0]) ])
+        self._precalc_van_integ_tbl = LoadNexus(Filename=
+                                               'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+                                               OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
         self.van_bank_curves_name = 'enginx_van_bank_curves'
         self.van_bank_curves_pre_integ_name = 'enginx_van_bank_curves_with_precalc_integ'
@@ -55,7 +51,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
                   VanadiumWorkspace = van_ws,
                   Bank = '1',
                   OutVanadiumCurveFits = self.van_bank_curves_name,
-                  OutputWorkspace='out_ws')
+                  OutputWorkspace=self.out_ws_name)
 
         # Now with pre-calculated curves and integration values. This makes sure that these do not
         # change too much AND the final results do not change too much as a result
@@ -64,7 +60,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
                   Bank = '1',
                   VanadiumIntegWorkspace = self._precalc_van_integ_tbl,
                   OutVanadiumCurveFits = self.van_bank_curves_pre_integ_name,
-                  OutputWorkspace='out_pre_int_ws')
+                  OutputWorkspace=self.out_ws_precalc_name)
 
     def validate(self):
         out_ws = mtd[self.out_ws_name]
