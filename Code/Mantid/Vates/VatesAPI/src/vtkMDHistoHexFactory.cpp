@@ -8,12 +8,13 @@
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
+#include "MantidVatesAPI/vtkNullStructuredGrid.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidKernel/ReadLock.h"
 
 #include "vtkNew.h"
+#include "vtkSmartPointer.h"
 #include "vtkStructuredGrid.h"
 #include "vtkFloatArray.h"
 #include "vtkDoubleArray.h"
@@ -108,8 +109,9 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   const int nBinsZ = static_cast<int>(m_workspace->getZDimension()->getNBins());
 
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-  
-  vtkNew<vtkStructuredGrid> visualDataSet;
+
+  vtkSmartPointer<vtkStructuredGrid> visualDataSet =
+      vtkSmartPointer<vtkStructuredGrid>::New();
   visualDataSet->SetDimensions(nBinsX+1,nBinsY+1,nBinsZ+1);
 
   // Array with true where the voxel should be shown
@@ -150,13 +152,12 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
   visualDataSet->Register(NULL);
   visualDataSet->Squeeze();
 
-  // TODO: fix for vtkStructuredGrid
   // Hedge against empty data sets
-  //if (visualDataSet->GetNumberOfPoints() <= 0) {
-  //  visualDataSet->Delete();
-  //  vtkNullUnstructuredGrid nullGrid;
-  //  visualDataSet = nullGrid.createNullData();
-  //}
+  if (visualDataSet->GetNumberOfPoints() <= 0) {
+    visualDataSet->Delete();
+    vtkNullStructuredGrid nullGrid;
+    visualDataSet = nullGrid.createNullData();
+  }
 
   return visualDataSet.GetPointer();
 }
