@@ -29,6 +29,12 @@ property). These corrections include two steps: detector sensitivity
 correction and pixel-by-pixel correction on a per-bank basis. See also
 :ref:`algm-EnggCalibrateFull` where the same correction is applied.
 
+The pixel-by-pixel Vanadium correction is based on curves fitted for
+every bank. These curves can be obtained via the output property
+OutVanadiumCurveFits. For every bank, the curve is fitted to the
+summation of all the spectra of the bank, and then every spectra of
+the bank is divided by the bank curve.
+
 Usage
 -----
 

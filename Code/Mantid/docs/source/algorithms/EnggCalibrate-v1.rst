@@ -36,6 +36,9 @@ output properties as well. If a name is given in
 OutputParametersTableName the algorithm also produces a table
 workspace with that name, containing the two output parameters.
 
+See the algorithm :ref:`algm-EnginXFocus` for details on the Vanadium
+corrections.
+
 .. categories::
 
 .. sourcelink::

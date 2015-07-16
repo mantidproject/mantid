@@ -61,7 +61,10 @@ pixel. The spectra of the workspace are corrected using data from a
 Vanadium run (passed in the VanadiumWorkspace property). These
 corrections include two steps: detector sensitivity correction and
 pixel-by-pixel correction on a per-bank basis. See also
-:ref:`algm-EnggFocus` where the same correction is applied.
+:ref:`algm-EnggFocus` where the same correction is applied. Similarly
+as in :ref:`algm-EnggFocus`, it is possible to retrieve the curves
+fitted to the Vanadium run data for every bank by using the
+OutVanadiumCurveFits property.
 
 .. categories::
 
