@@ -216,10 +216,12 @@ Also, if the function's derivatives can be evaluated an additional
 produced. If for example the property Output is set to "MyResults"
 then this TableWorkspace will have the name
 "MyResults\_NormalisedCovarianceMatrix" and it contains a calculated
-correlation matrix. Denote this matrix C and its elements Cij then the
-diagonal elements are listed as 1.0 and the off diagnonal elements as
-percentages of correlation between parameter i and j equal to
-100\*Cij/sqrt(Cii\*Cjj).
+correlation matrix. Denote this matrix :math:`\rm C` and its elements
+:math:`c_{ij}` then the diagonal elements are listed as 1.0 and the
+off diagonal elements as percentages of correlation between parameter
+:math:`i` and :math:`j` equal to
+
+.. math:: 100 \cdot c_{ij} / \sqrt{c_{ii} \cdot c_{jj}}.
 
 Examples
 --------
