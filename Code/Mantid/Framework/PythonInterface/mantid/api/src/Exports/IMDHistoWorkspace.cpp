@@ -1,23 +1,26 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidPythonInterface/kernel/Converters/CArrayToNDArray.h"
+//#include "MantidPythonInterface/kernel/Converters/CArrayToNDArray.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/numeric.hpp>
-#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+#define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
+#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 namespace {
-/// Convenience typedef
-//typedef Converters::CArrayToNDArray<Mantid::signal_t, Converters::WrapReadOnly>
-//    WrapReadOnlyNumpy;
+/**
+ * Determine the sizes of each dimensions
+ * @param array :: the C++ array
+ * @param dims :: the dimensions vector (Py_intptr_t type)
+ * @returns A python object containing the numpy array
+ */
 PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr, std::vector<Py_intptr_t> dims)
 {
     int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
