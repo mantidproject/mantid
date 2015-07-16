@@ -4,6 +4,7 @@ set ( SRC_FILES
 	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
+	src/AddNote.cpp
 	src/AddPeak.cpp
 	src/AddSampleLog.cpp
 	src/AddTimeSeriesLog.cpp
@@ -267,6 +268,7 @@ set ( INC_FILES
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
+	inc/MantidAlgorithms/AddNote.h
 	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
@@ -541,6 +543,7 @@ set ( TEST_FILES
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
+	AddNoteTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
 	AddTimeSeriesLogTest.h
