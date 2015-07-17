@@ -9,7 +9,7 @@ namespace Algorithms {
 /**
   An Algorithm that adds a timestamped note to a workspace.
 
-  @Author Elliot Oram, ISIS, RAL
+  @author Elliot Oram, ISIS, RAL
   @date 17/07/2015
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
