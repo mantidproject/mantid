@@ -22,7 +22,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkPVChangeOfBasisHelper.h>
 
-#include "MantidVatesAPI/vtkStructuredPointsArray.h"
+#include "MantidVatesAPI/vtkMDHWPointsArray.h"
 #include <vtkPointData.h>
 #include "vtkNew.h"
 
@@ -220,7 +220,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
       boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(ws);
 
   if (MDHws) {
-    vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
+    vtkNew<vtkMDHWPointsArray<double>> implicitPoints;
     implicitPoints->InitializeArray(MDHws.get(), skew);
     newPoints->SetData(implicitPoints.GetPointer());
   } else {
