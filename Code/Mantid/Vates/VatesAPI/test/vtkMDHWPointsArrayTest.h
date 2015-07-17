@@ -3,7 +3,7 @@
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidVatesAPI/vtkStructuredPointsArray.h"
+#include "MantidVatesAPI/vtkMDHWPointsArray.h"
 
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
@@ -21,12 +21,12 @@
 using namespace Mantid::VATES;
 using namespace Mantid::DataObjects;
 
-class vtkStructuredPointsArrayTest : public CxxTest::TestSuite {
+class vtkMDHWPointsArrayTest : public CxxTest::TestSuite {
 public:
   void testGetTuple() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkNew<vtkStructuredPointsArray<double>> spa;
+    vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
 
     long long dims[3];
@@ -65,7 +65,7 @@ public:
   void testGetValue() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkNew<vtkStructuredPointsArray<double>> spa;
+    vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
 
     long long dims[3];
@@ -128,7 +128,7 @@ public:
   void testGetTuplesPtIds() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkNew<vtkStructuredPointsArray<double>> spa;
+    vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
 
     long long dims[3];
@@ -160,7 +160,7 @@ public:
   void testGetTuplesRange() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkNew<vtkStructuredPointsArray<double>> spa;
+    vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
 
     long long dims[3];
@@ -186,7 +186,7 @@ public:
   void testLookupOneValue() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkNew<vtkStructuredPointsArray<double>> spa;
+    vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
     TS_ASSERT(spa->LookupValue(1.0) == 3);
     TS_ASSERT(spa->LookupTypedValue(1.0) == 3);
@@ -195,7 +195,7 @@ public:
   void testLookupAllValues() {
     MDHistoWorkspace_sptr ws_sptr =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3);
-    vtkNew<vtkStructuredPointsArray<double>> spa;
+    vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
     vtkNew<vtkIdList> idList1, idList2;
     spa->LookupValue(0.0, idList1.GetPointer());
@@ -210,11 +210,11 @@ public:
   }
 };
 
-class vtkStructuredPointsArrayTestPerformance : public CxxTest::TestSuite {
+class vtkMDHWPointsArrayTestPerformance : public CxxTest::TestSuite {
 public:
   long long dims[3];
   MDHistoWorkspace_sptr ws_sptr;
-  vtkNew<vtkStructuredPointsArray<double>> m_spa;
+  vtkNew<vtkMDHWPointsArray<double>> m_spa;
 
   void setUp() {
     ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 200);

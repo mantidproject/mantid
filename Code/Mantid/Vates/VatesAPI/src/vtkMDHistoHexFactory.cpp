@@ -4,7 +4,7 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 
 #include "MantidVatesAPI/vtkMDHWSignalArray.h"
-#include "MantidVatesAPI/vtkStructuredPointsArray.h"
+#include "MantidVatesAPI/vtkMDHWPointsArray.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -142,8 +142,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
       visualDataSet->BlankCell(index);
     }
   }
-    
-  vtkNew<vtkStructuredPointsArray<double>> implicitPoints;
+
+  vtkNew<vtkMDHWPointsArray<double>> implicitPoints;
   implicitPoints->InitializeArray(m_workspace.get());
   vtkNew<vtkPoints> newPoints;
   newPoints->SetData(implicitPoints.GetPointer());
