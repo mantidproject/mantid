@@ -6,7 +6,11 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** AddNote : TODO: DESCRIPTION
+/**
+  An Algorithm that adds a timestamped note to a workspace.
+
+  @Author Elliot Oram, ISIS, RAL
+  @date 17/07/2015
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
