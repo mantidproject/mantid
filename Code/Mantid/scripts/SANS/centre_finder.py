@@ -38,7 +38,6 @@ class CentreFinder(object):
             @param find_direction: Find the direction of 
             @return: the asymmetry in the calculated Q in the x and y directions
         """
-
         self.detector = setup.instrument.cur_detector().name()
 
         # populate the x and y scale factor values at this point for the text box

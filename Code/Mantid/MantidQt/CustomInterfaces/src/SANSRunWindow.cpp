@@ -253,6 +253,8 @@ void SANSRunWindow::initLayout()
   // Centre finder logger
   m_uiForm.centre_logging->attachLoggingChannel();
   connect(m_uiForm.clear_centre_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
+  connect(m_uiForm.up_down_checkbox, SIGNAL(stateChanged(int)), this, SLOT(onUpDownCheckboxChanged()));
+  connect(m_uiForm.left_right_checkbox, SIGNAL(stateChanged(int)), this, SLOT(onLeftRightCheckboxChanged()));
 
   //Create the widget hash maps
   initWidgetMaps();
@@ -3928,7 +3930,29 @@ bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString& wsName) {
     return isValid;
 }
 
+/**
+ * React to changes of the Left/Right checkbox
+ */
+void SANSRunWindow::onLeftRightCheckboxChanged() {
+  auto checked = m_uiForm.left_right_checkbox->isChecked();
+  if (m_uiForm.rear_radio->isChecked()) {
+    m_uiForm.rear_beam_x->setEnabled(checked);
+  } else {
+    m_uiForm.front_beam_x->setEnabled(checked);
+  }
+}
 
+/**
+ * React to changes of the Up/Down checkbox
+ */
+void SANSRunWindow::onUpDownCheckboxChanged() {
+  auto checked = m_uiForm.up_down_checkbox->isChecked();
+  if (m_uiForm.rear_radio->isChecked()) {
+    m_uiForm.rear_beam_y->setEnabled(checked);
+  } else {
+    m_uiForm.front_beam_y->setEnabled(checked);
+  }
+}
 } //namespace CustomInterfaces
 
 } //namespace MantidQt

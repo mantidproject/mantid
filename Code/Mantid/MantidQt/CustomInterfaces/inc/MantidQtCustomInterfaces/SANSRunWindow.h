@@ -275,6 +275,10 @@ private slots:
   void handleSlicePushButton();
   /// Open the help page of whichever tab the user is currently viewing.
   void openHelpPage();
+  /// React to change in Left/Right checkbox
+  void onLeftRightCheckboxChanged();
+  /// React to change in Up/Down checkbox
+  void onUpDownCheckboxChanged();
 
 private:
   /// used to specify the range of validation to do
