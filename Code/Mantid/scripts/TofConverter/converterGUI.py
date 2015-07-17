@@ -88,12 +88,12 @@ class MainWindow(QtGui.QMainWindow):
             return
 
     def input2energy(self, inputval, inOption):
-        e2lam = 81.787
-        e2nu = 4.139
-        e2v = 0.0000052276
-        e2k = 2.717
-        e2t = 0.086165
-        e2cm = 0.123975
+        e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
+        e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
+        e2v = 0.0000052276 # using v = h/(m*lambda) 
+        e2k = 2.717 #using k = 2*pi/(lambda) k:momentum
+        e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
+        e2cm = 0.123975 #cm = 8.06554465*E E:energy
         iv2 = inputval ** 2
 
         if inOption == 'Wavelength (Angstroms)':
@@ -138,13 +138,13 @@ class MainWindow(QtGui.QMainWindow):
         return Energy
 
     def energy2output(self, Energy, inOption):
-        e2lam = 81.787
-        e2nu = 4.139
-        e2v = 0.0000052276
-        e2k = 2.0717
-        e2t = 0.086165
-        e2cm = 0.123975
-        iv2 = Energy ** 2
+        e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
+        e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
+        e2v = 0.0000052276 # using v = h/(m*lambda) 
+        e2k = 2.717 #using k = 2*pi/(lambda) k:momentum
+        e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
+        e2cm = 0.123975 #cm = 8.06554465*E E:energy
+        iv2 = inputval ** 2
 
         if inOption == 'Wavelength (Angstroms)':
             OutputVal =  (e2lam/ Energy)**0.5
