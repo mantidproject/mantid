@@ -58,6 +58,8 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   endif ( MPI_BUILD )
 endif ()
 
+find_package ( GSL REQUIRED )
+
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
