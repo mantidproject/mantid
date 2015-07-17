@@ -58,6 +58,7 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   endif ( MPI_BUILD )
 endif ()
 
+find_package ( OpenGL REQUIRED )
 find_package ( GSL REQUIRED )
 
 ###########################################################################
