@@ -51,6 +51,11 @@
         <string>ConvFit</string>
        </attribute>
       </widget>
+       <widget class="QWidget" name="tabJumpFit">
+        <attribute name="title">
+         <string>JumpFit</string>
+        </attribute>
+       </widget>
      </widget>
     </item>
     <item>
