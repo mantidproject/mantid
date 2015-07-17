@@ -19,7 +19,6 @@
 #include <vtkStructuredGrid.h>
 #include <vtkDoubleArray.h>
 #include <vtkPoints.h>
-#include <iostream>
 
 using namespace Mantid::VATES;
 using namespace Mantid::DataObjects;
