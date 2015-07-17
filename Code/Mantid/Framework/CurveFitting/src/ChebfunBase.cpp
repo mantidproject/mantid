@@ -153,6 +153,8 @@ void ChebfunBase::calcIntegrationWeights() const {
  * @param a :: A vector of coefficients.
  * @param maxA :: A maximum value of the coefficients to compare against.
  * @param tolerance :: Convergence tolerance.
+ * @param shift :: Displacement from the back of the coeffs vector (a)
+ *    from which the coefficients are considered for testing.
  * @return :: True if converged or false otherwise.
  */
 bool ChebfunBase::hasConverged(const std::vector<double> &a, double maxA,
@@ -346,15 +348,19 @@ ChebfunBase_sptr ChebfunBase::integral(const std::vector<double> &a,
 
 /**
  * Fit a function until full convergence. Increases size of the base until full
- * conversion
- * or a size limit is reached. If size limit is reached returns an empty
- * pointer. In this
- * case the calling method can divide the interval and fit each part separately.
+ * conversion or a size limit is reached. If size limit is reached returns an
+ * empty pointer. In this case the calling method can divide the interval and
+ * fit each part separately.
  * @param start :: Lower limit of the x-interval.
  * @param end :: Upper limit of the x-interval.
  * @param f :: Function to fit.
  * @param p :: Function values at the found x-points.
+ * @param a :: Chebyshev expansion coefficients.
  * @param maxA :: A maximum value of the coefficients to compare against.
+ * @param tolerance :: A tolerance for comparing values. Defines the accuracy of
+ *  the approximation.
+ * @param maxSize :: A maximum size of the expansion. If a large base is required
+ *  to reach the desired accuracy returns an empty pointer.
  * @return :: A ChebfunBase of the best fit if succeeded or empty pointer if
  * failed.
  */
@@ -644,7 +650,7 @@ std::vector<double> ChebfunBase::fitOdd(ChebfunFunctionType f,
  * This method is used by bestFit to minimize the number of calls to the
  * approximated function.
  * @param f :: Function to calculate.
- * @param p :: Values of function f at the even-valued indices of m_x.
+ * @param pEven :: Values of function f at the even-valued indices of m_x.
  */
 std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
                                         std::vector<double> &pEven) const {
