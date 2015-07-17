@@ -767,6 +767,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
                                        std::string(e.what()));
     return;
   }
+
   size_t height;
   try {
     height =
@@ -779,6 +780,7 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
                                        std::string(e.what()));
     return;
   }
+
   std::string name;
   try {
     name = ws->run().getLogData("run_title")->value();
@@ -793,20 +795,23 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   }
 
   // images are loaded as 1 histogram == 1 pixel (1 bin per histogram):
-  if ((width * height) != ws->getNumberHistograms()) {
-    userError("Image dimensions do not match", "Could not load the expected "
-                                               "number of pixels.");
+  if (height != ws->getNumberHistograms() || width != ws->blocksize()) {
+    userError("Image dimensions do not match in the input image workspace",
+              "Could not load the expected "
+              "number of rows and columns.");
     return;
   }
   // find min and max to scale pixel values
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();
   for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
-    const double &v = ws->readY(i)[0];
-    if (v < min)
-      min = v;
-    if (v > max)
-      max = v;
+    for (size_t j = 0; j < ws->blocksize(); ++j) {
+      const double &v = ws->readY(i)[j];
+      if (v < min)
+        min = v;
+      if (v > max)
+        max = v;
+    }
   }
   if (min >= max) {
     userWarning("Empty image!",
@@ -823,17 +828,16 @@ void TomographyIfaceViewQtGUI::showImage(const MatrixWorkspace_sptr &ws) {
   // load / transfer image into a QImage
   QImage rawImg(QSize(static_cast<int>(width), static_cast<int>(height)),
                 QImage::Format_RGB32);
-  size_t i = 0;
-  double max_min = max - min;
+  const double max_min = max - min;
+  const double scaleFactor = 255.0/max_min;
   for (size_t yi = 0; yi < width; ++yi) {
     for (size_t xi = 0; xi < width; ++xi) {
-      const double &v = ws->readY(i)[0];
+      const double &v = ws->readY(yi)[xi];
       // color the range min-max in gray scale. To apply different color
       // maps you'd need to use rawImg.setColorTable() or similar.
-      int scaled = static_cast<int>(255.0 * (v - min) / max_min);
+      const int scaled = static_cast<int>(scaleFactor * (v - min));
       QRgb vRgb = qRgb(scaled, scaled, scaled);
       rawImg.setPixel(static_cast<int>(xi), static_cast<int>(yi), vRgb);
-      ++i;
     }
   }
 
