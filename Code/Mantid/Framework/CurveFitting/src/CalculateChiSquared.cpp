@@ -128,7 +128,6 @@ void CalculateChiSquared::execConcrete() {
   setProperty("chiSquaredWeighted", chiSquaredWeighted);
 
   // Divide by the DOF
-  g_log.notice() << "DOF " << dof << std::endl;
   if (dof <= 0.0) {
     dof = 1.0;
     g_log.warning() << "DOF has a non-positive value, changing to 1.0."
@@ -139,6 +138,7 @@ void CalculateChiSquared::execConcrete() {
   g_log.notice() << "Chi squared / DOF " << chiSquared << std::endl;
   g_log.notice() << "Chi squared weighed / DOF " << chiSquaredWeighted
                  << std::endl;
+  g_log.notice() << "DOF " << dof << std::endl;
 
   // Store the result.
   setProperty("ChiSquaredDividedByDOF", chiSquared);
@@ -376,7 +376,7 @@ void CalculateChiSquared::estimateErrors() {
     col3->setPlotType(2);
 
     double par0 = m_function->getParameter(ip);
-    double shift = par0 * fac;
+    double shift = fabs(par0 * fac);
     if (shift == 0.0) {
       shift = fac;
     }
