@@ -28,8 +28,14 @@
 
 #include "vtkTypeTemplate.h"  // For templated vtkObject API
 #include "vtkObjectFactory.h" // for vtkStandardNewMacro
+#include "vtkIdList.h"
+#include "vtkVariant.h"
+#include "vtkVariantCast.h"
 
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
+
+namespace Mantid {
+namespace VATES {
 
 template <class Scalar>
 class vtkMDHWSignalArray : public vtkTypeTemplate<vtkMDHWSignalArray<Scalar>,
@@ -110,11 +116,6 @@ private:
   std::unique_ptr<Mantid::DataObjects::MDHistoWorkspaceIterator> m_iterator;
   Scalar m_temporaryTuple[1];
 };
-
-#include "vtkIdList.h"
-#include "vtkObjectFactory.h"
-#include "vtkVariant.h"
-#include "vtkVariantCast.h"
 
 //------------------------------------------------------------------------------
 // Can't use vtkStandardNewMacro on a templated class.
@@ -488,6 +489,8 @@ template <class Scalar> vtkMDHWSignalArray<Scalar>::vtkMDHWSignalArray() {}
 
 //------------------------------------------------------------------------------
 template <class Scalar> vtkMDHWSignalArray<Scalar>::~vtkMDHWSignalArray() {}
+}
+}
 
 #endif // vtkMDHWSignalArray_h
 

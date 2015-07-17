@@ -28,14 +28,17 @@
 
 #include "vtkTypeTemplate.h"  // For templated vtkObject API
 #include "vtkObjectFactory.h" // for vtkStandardNewMacro
+#include "vtkIdList.h"
+#include "vtkVariant.h"
+#include "vtkVariantCast.h"
+//#include <vtkMatrix3x3.h>
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidAPI/NullCoordTransform.h"
-#include <vtkMatrix3x3.h>
 
 #include <cstdlib>
 
-class vtkImageData;
+namespace Mantid {
+namespace VATES {
 
 template <class Scalar>
 class vtkStructuredPointsArray
@@ -119,12 +122,6 @@ private:
   Scalar m_TempScalarArray[3], m_origin[3], m_spacing[3];
   Mantid::DataObjects::MDHistoWorkspace *m_workspace;
 };
-
-#include "vtkIdList.h"
-#include "vtkObjectFactory.h"
-#include "vtkVariant.h"
-#include "vtkVariantCast.h"
-#include "vtkImageData.h"
 
 //------------------------------------------------------------------------------
 // Can't use vtkStandardNewMacro on a templated class.
@@ -561,6 +558,8 @@ vtkStructuredPointsArray<Scalar>::vtkStructuredPointsArray() {}
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkStructuredPointsArray<Scalar>::~vtkStructuredPointsArray() {}
+}
+}
 
 #endif // vtkStructuredPointsArray_h
 
