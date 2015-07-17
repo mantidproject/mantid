@@ -102,6 +102,7 @@ protected:
   ~vtkMDHWSignalArray();
 
 private:
+  vtkIdType Lookup(const Scalar &val, vtkIdType startIndex);
   vtkMDHWSignalArray(const vtkMDHWSignalArray &); // Not implemented.
   void operator=(const vtkMDHWSignalArray &);     // Not implemented.
 
@@ -203,11 +204,10 @@ vtkArrayIterator *vtkMDHWSignalArray<Scalar>::NewIterator() {
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkIdType vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value) {
-  vtkErrorMacro("Not Implemented.");
   bool valid = true;
   Scalar val = vtkVariantCast<Scalar>(value, &valid);
   if (valid) {
-    // return this->Lookup(val, 0);
+    return this->Lookup(val, 0);
   }
   return -1;
 }
@@ -215,8 +215,6 @@ vtkIdType vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value) {
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value, vtkIdList *ids) {
-  vtkErrorMacro("Not Implemented.");
-  /*
   bool valid = true;
   Scalar val = vtkVariantCast<Scalar>(value, &valid);
   ids->Reset();
@@ -229,7 +227,6 @@ void vtkMDHWSignalArray<Scalar>::LookupValue(vtkVariant value, vtkIdList *ids) {
       ++index;
       }
     }
-  */
 }
 
 //------------------------------------------------------------------------------
@@ -256,29 +253,18 @@ template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
   m_iterator->jumpTo(m_offset + i);
   tuple[0] = m_iterator->getNormalizedSignal();
-  // vtkWarningMacro("Value = "+std::to_string(*tuple))
-  /*
-  for (size_t comp = 0; comp < this->Arrays.size(); ++comp)
-    {
-    tuple[comp] = static_cast<double>(this->Arrays[comp][i]);
-    }
-  */
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkIdType vtkMDHWSignalArray<Scalar>::LookupTypedValue(Scalar value) {
-  vtkErrorMacro("Not Implemented.")
-      //  return this->Lookup(value, 0);
-      return 0;
+  return this->Lookup(value, 0);
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::LookupTypedValue(Scalar value,
                                                   vtkIdList *ids) {
-  vtkErrorMacro("Not Implemented.")
-  /*
   ids->Reset();
   vtkIdType index = 0;
   while ((index = this->Lookup(value, index)) >= 0)
@@ -286,7 +272,18 @@ void vtkMDHWSignalArray<Scalar>::LookupTypedValue(Scalar value,
     ids->InsertNextId(index);
     ++index;
     }
-  */
+}
+
+template <class Scalar>
+vtkIdType vtkMDHWSignalArray<Scalar>::Lookup(const Scalar &val,
+                                             vtkIdType index) {
+  while (index <= this->MaxId) {
+    if (this->GetValueReference(index) == val) {
+      return index;
+    }
+    index++;
+  }
+  return -1;
 }
 
 //------------------------------------------------------------------------------

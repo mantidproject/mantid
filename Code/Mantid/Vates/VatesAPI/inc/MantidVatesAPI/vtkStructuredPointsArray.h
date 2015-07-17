@@ -358,6 +358,17 @@ void vtkStructuredPointsArray<Scalar>::GetTupleValue(vtkIdType tupleId,
       v[0] * m_skewMatrix[6] + v[1] * m_skewMatrix[7] + v[2] * m_skewMatrix[8];
 }
 
+template <class Scalar>
+vtkIdType vtkStructuredPointsArray<Scalar>::Lookup(const Scalar &val,
+                                                   vtkIdType index) {
+  while (index <= this->MaxId) {
+    if (this->GetValueReference(index) == val) {
+      return index;
+    }
+    index++;
+  }
+  return -1;
+}
 //------------------------------------------------------------------------------
 template <class Scalar>
 int vtkStructuredPointsArray<Scalar>::Allocate(vtkIdType, vtkIdType) {
@@ -550,17 +561,6 @@ vtkStructuredPointsArray<Scalar>::vtkStructuredPointsArray() {}
 //------------------------------------------------------------------------------
 template <class Scalar>
 vtkStructuredPointsArray<Scalar>::~vtkStructuredPointsArray() {}
-
-template <class Scalar>
-vtkIdType vtkStructuredPointsArray<Scalar>::Lookup(const Scalar &val,
-                                                   vtkIdType index) {
-  while (index <= this->MaxId) {
-    if (this->GetValueReference(++index) == val) {
-      return index;
-    }
-  }
-  return -1;
-}
 
 #endif // vtkStructuredPointsArray_h
 
