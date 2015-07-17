@@ -114,10 +114,13 @@ private:
   vtkMDHWPointsArray(const vtkMDHWPointsArray &); // Not implemented.
   void operator=(const vtkMDHWPointsArray &);     // Not implemented.
 
+  template <class otherScalar>
+  void GetAnyScalarTupleValue(vtkIdType idx, otherScalar *t);
   vtkIdType Lookup(const Scalar &val, vtkIdType startIndex);
   Scalar m_skewMatrix[9] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
   vtkIdType m_dims[3];
   Scalar m_TempScalarArray[3], m_origin[3], m_spacing[3];
+  double m_tempDoubleArray[3];
   Mantid::DataObjects::MDHistoWorkspace *m_workspace;
 };
 
@@ -222,7 +225,8 @@ void vtkMDHWPointsArray<Scalar>::GetTuples(vtkIdType p1, vtkIdType p2,
   }
 
   for (vtkIdType daTupleId = 0; p1 <= p2; ++p1) {
-    da->SetTuple(daTupleId++, this->GetTuple(p1));
+    da->SetTuple(daTupleId, this->GetTuple(p1));
+    ++daTupleId;
   }
 }
 
@@ -279,14 +283,14 @@ template <class Scalar> void vtkMDHWPointsArray<Scalar>::ClearLookup() {
 //------------------------------------------------------------------------------
 template <class Scalar>
 double *vtkMDHWPointsArray<Scalar>::GetTuple(vtkIdType i) {
-  this->GetTuple(i, &m_TempScalarArray[0]);
-  return &m_TempScalarArray[0];
+  this->GetAnyScalarTupleValue(i, &m_tempDoubleArray[0]);
+  return &m_tempDoubleArray[0];
 }
 
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWPointsArray<Scalar>::GetTuple(vtkIdType i, double *tuple) {
-  this->GetTupleValue(i, tuple);
+  this->GetAnyScalarTupleValue(i, tuple);
 }
 
 //------------------------------------------------------------------------------
@@ -326,26 +330,28 @@ Scalar &vtkMDHWPointsArray<Scalar>::GetValueReference(vtkIdType idx) {
 template <class Scalar>
 void vtkMDHWPointsArray<Scalar>::GetTupleValue(vtkIdType tupleId,
                                                Scalar *tuple) {
-  // int loc[3];
-  // loc[0] = tupleId % m_dims[0];
-  // loc[1] = (tupleId / m_dims[0]) % m_dims[1];
-  // loc[2] = tupleId / (m_dims[0]*m_dims[1]);
+  this->GetAnyScalarTupleValue(tupleId, tuple);
+}
+
+template <class Scalar>
+template <class otherScalar>
+void vtkMDHWPointsArray<Scalar>::GetAnyScalarTupleValue(vtkIdType tupleId,
+                                                        otherScalar *tuple) {
+
   const auto tmp1 = std::div(tupleId, m_dims[0]);
   const auto tmp2 = std::div(tmp1.quot, m_dims[1]);
-  const vtkIdType loc[3] = {tmp1.rem, tmp2.rem, tmp2.quot};
+  const Scalar loc[3] = {static_cast<Scalar>(tmp1.rem),
+                         static_cast<Scalar>(tmp2.rem),
+                         static_cast<Scalar>(tmp2.quot)};
 
-  Scalar v[3];
-  for (int i = 0; i < 3; i++) {
-    v[i] = m_origin[i] + loc[i] * m_spacing[i];
-  }
+  Scalar v0 = m_origin[0] + loc[0] * m_spacing[0];
+  Scalar v1 = m_origin[1] + loc[1] * m_spacing[1];
+  Scalar v2 = m_origin[2] + loc[2] * m_spacing[2];
 
   // vtkMatrix3x3::MultiplyPoint(m_skewMatrix, v, tuple);
-  tuple[0] =
-      v[0] * m_skewMatrix[0] + v[1] * m_skewMatrix[1] + v[2] * m_skewMatrix[2];
-  tuple[1] =
-      v[0] * m_skewMatrix[3] + v[1] * m_skewMatrix[4] + v[2] * m_skewMatrix[5];
-  tuple[2] =
-      v[0] * m_skewMatrix[6] + v[1] * m_skewMatrix[7] + v[2] * m_skewMatrix[8];
+  tuple[0] = v0 * m_skewMatrix[0] + v1 * m_skewMatrix[1] + v2 * m_skewMatrix[2];
+  tuple[1] = v0 * m_skewMatrix[3] + v1 * m_skewMatrix[4] + v2 * m_skewMatrix[5];
+  tuple[2] = v0 * m_skewMatrix[6] + v1 * m_skewMatrix[7] + v2 * m_skewMatrix[8];
 }
 
 template <class Scalar>

@@ -1,5 +1,5 @@
-#ifndef VTKNULLSTRUCTUREDPOINTSARRAY_TEST_H_
-#define VTKNULLSTRUCTUREDPOINTSARRAY_TEST_H_
+#ifndef VTKMDHWPOINTSARRAY_TEST_H_
+#define VTKMDHWPOINTSARRAY_TEST_H_
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -165,12 +165,12 @@ public:
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(3);
     doubleArray->Allocate(100);
-    spa->GetTuples(0, 100, doubleArray.GetPointer());
+    spa->GetTuples(0, 99, doubleArray.GetPointer());
 
     for (auto idx = 0; idx < 100; ++idx) {
       double output1[3], output2[3];
-      spa->GetTupleValue(idx, output1);
-      doubleArray->GetTupleValue(idx, output2);
+      spa->GetTupleValue(idx, &output1[0]);
+      doubleArray->GetTupleValue(idx, &output2[0]);
       TS_ASSERT_DELTA(output1[0], output2[0], 0.0001);
       TS_ASSERT_DELTA(output1[1], output2[1], 0.0001);
       TS_ASSERT_DELTA(output1[2], output2[2], 0.0001);
@@ -208,10 +208,10 @@ class vtkMDHWPointsArrayTestPerformance : public CxxTest::TestSuite {
 public:
   long long dims[3];
   MDHistoWorkspace_sptr ws_sptr;
-  vtkNew<vtkMDHWPointsArray<double>> m_spa;
+  vtkNew<vtkMDHWPointsArray<float>> m_spa;
 
   void setUp() {
-    ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 200);
+    ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 500);
     m_spa->InitializeArray(ws_sptr.get());
     dims[0] = ws_sptr->getXDimension()->getNBins() + 1;
     dims[1] = ws_sptr->getYDimension()->getNBins() + 1;
@@ -226,7 +226,7 @@ public:
       for (auto j = 0; j < dims[1]; ++j) {
         for (auto i = 0; i < dims[0]; ++i) {
           // test member function.
-          double output[3];
+          float output[3];
           m_spa->GetTupleValue(index, output);
           TS_ASSERT_DELTA(0.05 * double(i), output[0], 0.0001);
           index++;

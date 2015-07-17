@@ -122,7 +122,7 @@ public:
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(1);
     doubleArray->Allocate(100);
-    signal->GetTuples(0, 100, doubleArray.GetPointer());
+    signal->GetTuples(0, 99, doubleArray.GetPointer());
 
     for (auto idx = 0; idx < 100; ++idx) {
       double output1[1], output2[1];

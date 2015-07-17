@@ -220,7 +220,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
       boost::dynamic_pointer_cast<Mantid::DataObjects::MDHistoWorkspace>(ws);
 
   if (MDHws) {
-    vtkNew<vtkMDHWPointsArray<double>> implicitPoints;
+    vtkNew<vtkMDHWPointsArray<float>> implicitPoints;
     implicitPoints->InitializeArray(MDHws.get(), skew);
     newPoints->SetData(implicitPoints.GetPointer());
   } else {
