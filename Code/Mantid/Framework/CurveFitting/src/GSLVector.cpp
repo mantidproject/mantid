@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include <sstream>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
