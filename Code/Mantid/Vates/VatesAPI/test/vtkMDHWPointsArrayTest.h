@@ -162,11 +162,6 @@ public:
     vtkNew<vtkMDHWPointsArray<double>> spa;
     spa->InitializeArray(ws_sptr.get());
 
-    long long dims[3];
-    dims[0] = ws_sptr->getXDimension()->getNBins() + 1;
-    dims[1] = ws_sptr->getYDimension()->getNBins() + 1;
-    dims[2] = ws_sptr->getZDimension()->getNBins() + 1;
-
     vtkNew<vtkDoubleArray> doubleArray;
     doubleArray->SetNumberOfComponents(3);
     doubleArray->Allocate(100);
