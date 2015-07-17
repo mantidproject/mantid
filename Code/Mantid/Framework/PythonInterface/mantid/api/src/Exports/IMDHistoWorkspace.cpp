@@ -1,7 +1,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
-//#include "MantidPythonInterface/kernel/Converters/CArrayToNDArray.h"
+#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
-//#include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
+
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
 #include <boost/python/numeric.hpp>
@@ -11,7 +11,7 @@
 
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
-//namespace Converters = Mantid::PythonInterface::Converters;
+namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
 namespace {
@@ -23,7 +23,7 @@ namespace {
  */
 PyObject *WrapReadOnlyNumpyFArray(Mantid::signal_t *arr, std::vector<Py_intptr_t> dims)
 {
-    int datatype = NPY_DOUBLE;//Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
+    int datatype = Converters::NDArrayTypeIndex<Mantid::signal_t>::typenum;
     #if NPY_API_VERSION >= 0x00000007 //(1.7)
         PyArrayObject *nparray = (PyArrayObject *)PyArray_New(&PyArray_Type,
             static_cast<int>(dims.size()), &dims[0], datatype,NULL,
