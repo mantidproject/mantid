@@ -505,7 +505,6 @@ void CalculateChiSquared::estimateErrors() {
 
     // Output the PDF
     for (size_t i = 0; i < n; ++i) {
-      double par = col1->toDouble(i);
       double chi = col2->toDouble(i);
       col3->fromDouble(i, exp(-chi + chiMin));
     }

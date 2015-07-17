@@ -197,7 +197,7 @@ typedef boost::shared_ptr<ChebfunBase> ChebfunBase_sptr;
 
 /// Find best fit with highest possible tolerance (to be used with noisy data).
 template <class FunctionType>
-static boost::shared_ptr<ChebfunBase>
+boost::shared_ptr<ChebfunBase>
 ChebfunBase::bestFitAnyTolerance(double start, double end, FunctionType f,
                     std::vector<double> &p, std::vector<double> &a,
                     double maxA, double tolerance, size_t maxSize)
