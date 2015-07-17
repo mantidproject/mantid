@@ -5,6 +5,11 @@ from mantid.simpleapi import *
 from mantid.kernel import Logger
 import SANSUtility
 
+class FindDirectionEnum:
+        ALL = 0
+        UP_DOWN = 1
+        LEFT_RIGHT=2
+
 class CentreFinder(object):
     """
         Aids estimating the effective centre of the particle beam by calculating Q in four
@@ -24,12 +29,13 @@ class CentreFinder(object):
         self.XSF = 1.0
         self.YSF = 1.0
 
-    def SeekCentre(self, setup, trial):
+    def SeekCentre(self, setup, trial, find_direction = FindDirectionEnum.ALL):
         """
             Does four calculations of Q to estimate a better centre location than the one passed
             to it
             @param setup: the reduction chain object that contains information about the reduction
             @param trial: the coordinates of the location to test as a list in the form [x, y]
+            @param find_direction: Find the direction of 
             @return: the asymmetry in the calculated Q in the x and y directions
         """
 
@@ -106,11 +112,18 @@ class CentreFinder(object):
         """
         x = -x
         y = -y
-        MoveInstrumentComponent(Workspace=setup.get_sample().wksp_name,\
-            ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
+
+        setup.instrument.elementary_displacement_of_single_component(workspace=setup.get_sample().wksp_name,
+                                                                     component_name=self.detector,
+                                                                     coord1 = x,
+                                                                     coord2 = y,
+                                                                     relative_displacement = True)
         if setup.get_can():
-            MoveInstrumentComponent(Workspace=setup.get_can().wksp_name,\
-                ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
+            setup.instrument.elementary_displacement_of_single_component(workspace=setup.get_sample().wksp_name,
+                                                                         component_name=self.detector,
+                                                                         coord1 = x,
+                                                                         coord2 = y,
+                                                                         relative_displacement = True)
 
     # Create a workspace with a quadrant value in it
     def _create_quadrant(self, setup, reduced_ws, quadrant, xcentre, ycentre, r_min, r_max, suffix):
@@ -165,6 +178,7 @@ class CentreFinder(object):
         qvalsB = mtd['Down'].readX(0)
         qrange = [len(yvalsA), len(yvalsB)]
         nvals = min(qrange)
+
         residueY = 0
         indexB = 0
         for indexA in range(0, nvals):

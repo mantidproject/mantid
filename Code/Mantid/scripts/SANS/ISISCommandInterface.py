@@ -11,6 +11,7 @@ sanslog = Logger("SANS")
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import CentreFinder as CentreFinder
+from centre_finder import FindDirectionEnum as FindDirectionEnum
 #import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
@@ -1048,7 +1049,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
 
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4):
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4, find_direction= FindDirectionEnum.ALL):
     """
         Estimates the location of the effective beam centre given a good initial estimate. For more
         information go to this page
@@ -1058,7 +1059,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
         @param xstart: initial guess for the horizontal distance of the beam centre from the detector centre in meters (default the values in the mask file)
         @param ystart: initial guess for the distance of the beam centre from the detector centre vertically in metres (default the values in the mask file)
-    @param tolerance: define the precision of the search. If the step is smaller than the tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param tolerance: define the precision of the search. If the step is smaller than the tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param find_only: if only Up/Down or only Left/Right is required then variable is set to 
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step
@@ -1085,7 +1087,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     xstart = beamcoords[0]
     ystart = beamcoords[1]
 
-
     #remove this if we know running the Reducer() doesn't change i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
@@ -1094,7 +1095,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     centre.logger.notice("xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.))
     centre.logger.notice("Starting centre finding routine ...")
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center
-    resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
+    resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW], find_direction)
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
@@ -1149,11 +1150,22 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         XNEW -= XSTEP
         YNEW -= YSTEP
 
-    ReductionSingleton().set_beam_finder(
-        isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(XNEW*XSF) + ", " + str(YNEW*YSF) + ']')
+    # Create the appropriate return values
+    if find_direction == FindDirectionEnum.ALL:
+        x_centre = XNEW
+        y_centre = YNEW
+    elif find_direction == FindDirectionEnum.UP_DOWN:
+        x_centre = XNEW
+        y_centre = ystart
+    elif find_direction == FindDirectionEnum.LEFT_RIGHT:
+        x_centre = xstart
+        y_centre = YNEW
 
-    return XNEW, YNEW
+    ReductionSingleton().set_beam_finder(
+        isis_reduction_steps.BaseBeamFinder(x_centre, y_centre), det_bank)
+    centre.logger.notice("Centre coordinates updated: [" + str(x_centre*XSF) + ", " + str(y_centre*YSF) + ']')
+
+    return x_centre, y_centre
 
 
 ###################### Utility functions ####################################################

@@ -713,6 +713,18 @@ class ISISInstrument(BaseInstrument):
         """Define how to move the bank to position beamX and beamY must be implemented"""
         raise RuntimeError("Not Implemented")
 
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate
+        @param coord2: the second coordinate
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        raise RuntimeError("Not Implemented")
+
     def cur_detector_position(self, ws_name):
         """Return the position of the center of the detector bank"""
         raise RuntimeError("Not Implemented")
@@ -802,6 +814,22 @@ class LOQ(ISISInstrument):
             yshift = yshift + det.y_corr/1000.0
 
         return [xshift, yshift], [xshift, yshift]
+
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        MoveInstrumentComponent(Workspace=workspace,
+                                ComponentName=component_name,
+                                X=coord1,
+                                Y=coord2,
+                                RelativePosition=relative_displacement)
 
     def get_marked_dets(self):
         raise NotImplementedError('The marked detector list isn\'t stored for instrument '+self._NAME)
@@ -1022,6 +1050,22 @@ class SANS2D(ISISInstrument):
             det_cen = [-xbeam, -ybeam]
 
         return beam_cen, det_cen
+
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        MoveInstrumentComponent(Workspace=workspace,
+                                ComponentName=component_name,
+                                X=coord1,
+                                Y=coord2,
+                                RelativePosition=relative_displacement)
 
     def get_detector_log(self, wksp):
         """
@@ -1388,28 +1432,62 @@ class LARMOR(ISISInstrument):
         zshift = 0
         sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(yshift*YSF) + " " + str(zshift*1000))
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
+
+        # Deal with the angle value
+        self._rotate_around_y_axis(workspace = ws,
+                                   component_name = detBench.name(),
+                                   x_beam = xbeam,
+                                   x_scale_factor = XSF,
+                                   bench_rotation = BENCH_ROT)
+
+        # beam centre, translation
+        return [0.0, 0.0], [-xbeam, -ybeam]
+
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+        """
+        A simple elementary displacement of a single component.
+        This provides the adequate displacement for finding the beam centre.
+        @param workspace: the workspace which needs to have the move applied to it
+        @param component_name: the name of the component which being displaced
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param relative_displacement: If the the displacement is to be relative (it normally should be)
+        """
+        BENCH_ROT = self.getDetValues(workspace)[0]
+        XSF = self.beam_centre_scale_factor1
+
+        # Shift the component in the y direction
+        MoveInstrumentComponent(Workspace=workspace,
+                                ComponentName=component_name,
+                                Y=coord2,
+                                RelativePosition=relative_displacement)
+
+        # Rotate around the x-axis
+        self._rotate_around_y_axis(workspace = workspace,
+                                   component_name = component_name,
+                                   x_beam = coord1,
+                                   x_scale_factor = XSF,
+                                   bench_rotation = BENCH_ROT)
+
+    def _rotate_around_y_axis(self,workspace, component_name, x_beam, x_scale_factor, bench_rotation):
         # in order to avoid rewriting old mask files from initial commisioning during 2014.
-        ws_ref=mtd[ws]
+        ws_ref=mtd[workspace]
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(workspace))[0])
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
         if int(run_num) < 2217:
             # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
-            xshift = -xbeam
-            sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
-            MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=0.0, Z=0.0)
+            xshift = -x_beam
+            sanslog.notice("Setup move " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
+            MoveInstrumentComponent(workspace, ComponentName=component_name, X=xshift, Y=0.0, Z=0.0)
         else:
-            xshift = BENCH_ROT-xbeam*XSF
-            sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
-            RotateInstrumentComponent(ws, ComponentName=detBench.name(), X=0, Y=1, Z=0, Angle=xshift)
-            #logger.warning("Back from RotateInstrumentComponent")
-
-        # beam centre, translation
-        return [0.0, 0.0], [-xbeam, -ybeam]
+            xshift = bench_rotation -x_beam*x_scale_factor
+            sanslog.notice("Setup move " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
+            RotateInstrumentComponent(workspace, ComponentName=component_name, X=0, Y=1, Z=0, Angle=xshift)
 
     def append_marked(self, detNames):
         self._marked_dets.append(detNames)

@@ -2757,8 +2757,6 @@ void SANSRunWindow::handleRunFindCentre()
   }
   py_code += ", tolerance=" + QString::number(tolerance) + ")"; 
 
-  
-
   g_centreFinderLog.notice("Iteration 1\n");
   m_uiForm.beamstart_box->setFocus();
 
