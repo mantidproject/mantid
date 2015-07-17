@@ -43,52 +43,52 @@
      </property>
      <item>
       <property name="text">
-       <string>meV (energy)</string>
+       <string>Energy (meV)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Angstroms (wavelength)</string>
+       <string>Wavelength (Angstroms)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>THz (nu)</string>
+       <string>Nu (THz)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>m/s (velocity)</string>
+       <string>Velocity (m/s)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>k Angstroms^-1 (momentum)</string>
+       <string>Momentum (k Angstroms^-1)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>K (temperature)</string>
+       <string>Temperature (K)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>cm^-1 (energy)</string>
+       <string>Energy (cm^-1)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Q Angstroms^-1 (momentum transfer)</string>
+       <string>Momentum transfer (Q Angstroms^-1)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Angstroms (d-spacing)</string>
+       <string>d-spacing (Angstroms)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>microseconds (time of flight)</string>
+       <string>Time of flight (microseconds)</string>
       </property>
      </item>
     </widget>
@@ -191,52 +191,52 @@
      </property>
      <item>
       <property name="text">
-       <string>meV (energy)</string>
+       <string>Energy (meV)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Angstroms (wavelength)</string>
+       <string>Wavelength (Angstroms)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>THz (nu)</string>
+       <string>Nu (Thz)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>m/s (velocity)</string>
+       <string>Velocity (m/s)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>k Angstroms^-1 (momentum)</string>
+       <string>Momentum (k Angstroms^-1)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>K (temperature)</string>
+       <string>Temperature (K)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>cm^-1 (energy)</string>
+       <string>Energy (cm^-1)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Q Angstroms^-1 (momentum transfer)</string>
+       <string>Momentum transfer (Q Angstroms^-1)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Angstroms (d-spacing)</string>
+       <string>d-spacing (Angstroms)</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>microseconds (time of flight)</string>
+       <string>Time of flight (microseconds)</string>
       </property>
      </item>
     </widget>

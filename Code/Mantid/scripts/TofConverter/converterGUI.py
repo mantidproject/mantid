@@ -4,10 +4,10 @@ from PyQt4 import QtCore, QtGui
 import math
 
 class MainWindow(QtGui.QMainWindow):
-    needsThetaInputList = ['Q Angstroms^-1 (momentum transfer)', 'Angstroms (d-spacing)']
-    needsThetaOutputList = ['Q Angstroms^-1 (momentum transfer)', 'Angstroms (d-spacing)']
-    needsFlightPathInputList = ['microseconds (time of flight)']
-    needsFlightPathOutputList = ['microseconds (time of flight)']
+    needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
+    needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
+    needsFlightPathInputList = ['Time of flight (microseconds)']
+    needsFlightPathOutputList = ['Time of flight (microseconds)']
 
     def thetaEnable (self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
@@ -96,39 +96,39 @@ class MainWindow(QtGui.QMainWindow):
         e2cm = 0.123975
         iv2 = inputval ** 2
 
-        if inOption == 'Angstroms (wavelength)':
+        if inOption == 'Wavelength (Angstroms)':
             Energy = e2lam / iv2
 
-        elif inOption == 'meV (energy)':
+        elif inOption == 'Energy (meV)':
             Energy = inputval
 
-        elif inOption == 'THz (nu)':
+        elif inOption == 'Nu (Thz)':
             Energy = e2nu * inputval
 
-        elif inOption == 'm/s (velocity)':
+        elif inOption == 'Velocity (m/s)':
             Energy = e2v *iv2
 
-        elif inOption == 'k Angstroms^-1 (momentum)':
+        elif inOption == 'Momentum (k Angstroms^-1)':
             Energy = e2k*iv2
 
-        elif inOption == 'K (temperature)':
+        elif inOption == 'Temperature (K)':
             Energy = e2t *inputval
 
-        elif inOption == 'cm^-1 (energy)':
+        elif inOption == 'Energy (cm^-1)':
             Energy = e2cm * inputval
 
-        elif inOption == 'Q Angstroms^-1 (momentum transfer)':
+        elif inOption == 'Momentum transfer (Q Angstroms^-1)':
             if self.Theta >= 0.0:
                 k = inputval * 0.5 / math.sin(self.Theta)
                 Energy = e2k * k * k
             else:
                 raise RuntimeError("Theta > 0 is required for conversion from Q")
 
-        elif inOption == 'Angstroms (d-spacing)':
+        elif inOption == 'd-spacing (Angstroms)':
             lam = 2 * inputval * math.sin(self.Theta)
             Energy = e2lam / (lam * lam)
 
-        elif  inOption == 'microseconds (time of flight)':
+        elif  inOption == 'Time of flight (microseconds)':
             if self.flightpath >= 0.0:
                 Energy = 1000000 * self.flightpath
                 Energy = e2v * Energy *Energy / iv2
@@ -146,45 +146,45 @@ class MainWindow(QtGui.QMainWindow):
         e2cm = 0.123975
         iv2 = Energy ** 2
 
-        if inOption == 'Angstroms (wavelength)':
+        if inOption == 'Wavelength (Angstroms)':
             OutputVal =  (e2lam/ Energy)**0.5
 
-        elif inOption == 'THz (nu)':
+        elif inOption == 'Nu (Thz)':
             OutputVal = Energy / e2nu
 
-        elif inOption == 'm/s (velocity)':
+        elif inOption == 'Velocity (m/s)':
             OutputVal = (Energy / e2v)**0.5
 
-        elif inOption == 'k Angstroms^-1 (momentum)':
+        elif inOption == 'Momentum (k Angstroms^-1)':
             OutputVal = (Energy / e2k)**0.5
 
-        elif inOption == 'K (temperature)':
+        elif inOption == 'Temperature (K)':
             OutputVal = Energy / e2t
 
-        elif inOption == 'cm^-1 (energy)':
+        elif inOption == 'Energy (cm^-1)':
             OutputVal = Energy / e2cm
 
-        elif inOption == 'Q Angstroms^-1 (momentum transfer)':
+        elif inOption == 'Momentum transfer (Q Angstroms^-1)':
             if self.Theta >= 0.0:
                 k = (Energy / e2k) ** 0.5
                 OutputVal = 2 * k * math.sin(self.Theta)
             else:
                 raise RuntimeError("Theta > 0 is required for conversion to Q")
 
-        elif inOption == 'Angstroms (d-spacing)':
+        elif inOption == 'd-spacing (Angstroms)':
             if self.Theta >= 0.0:
                 lam = (e2lam / Energy)**0.5
                 OutputVal = lam * 0.5 / math.sin(self.Theta)
             else:
                 raise RuntimeError("Theta > 0 is required for conversion to d-Spacing")
 
-        elif inOption == 'microseconds (time of flight)':
+        elif inOption == 'Time of flight (microseconds)':
             if self.flightpath >= 0.0:
                 OutputVal = self.flightpath * 1000 * ((e2v * 1000000 / Energy) ** 0.5)
             else:
                 raise RuntimeError("Flight path >= 0 is required for conversion to TOF")
 
-        elif inOption == 'meV (energy)':
+        elif inOption == 'Energy (meV)':
             OutputVal = Energy
 
         return OutputVal
