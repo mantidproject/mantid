@@ -48,7 +48,7 @@ Usage
 
 Output:
 
-.. testoutput:: ExMonitorEfficiencyCorUSer
+.. testoutput:: ExMonitorEfficiencyCorUser
 
     Coefficient of proportionality between Input and Output of MonitorEfficiencyCorUser algorithm:
     41038.4323645
