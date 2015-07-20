@@ -276,9 +276,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 # ENDIF
             # ENDFOR (processing each)
 
-            factor = 1 / float(len(samRuns))
-            samRun = api.Scale(samRun, Factor=factor, OutputWorkspace=samRun)
-
             samRuns = [samRun]
             workspacelist.append(str(samRun))
             samwksplist.append(str(samRun))
