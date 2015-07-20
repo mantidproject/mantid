@@ -24,7 +24,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return 1; }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "MLZ;CorrectionFunctions\\NormalisationCorrections"; }
+  virtual const std::string category() const { return "CorrectionFunctions\\NormalisationCorrections"; }
 
 private:
   /// Initialisation code
