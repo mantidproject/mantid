@@ -480,7 +480,7 @@ class TestConvertToAndFromPythonStringList(unittest.TestCase):
         # Act
         result = su.convert_to_string_list(input)
         # Assert
-        expected = ["test1.xml", "test2.xml", "test3.xml"]
+        expected = "['test1.xml','test2.xml','test3.xml']"
         self.assertEqual(expected, result)
     def test_converts_from_list_to_string(self):
         # Arrange
