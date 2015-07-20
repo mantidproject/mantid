@@ -55,11 +55,10 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   if ( MPI_BUILD )
   include ( MPISetup )
         set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+        find_package ( OpenGL REQUIRED )
+        find_package ( GSL REQUIRED )
   endif ( MPI_BUILD )
 endif ()
-
-find_package ( OpenGL REQUIRED )
-find_package ( GSL REQUIRED )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
