@@ -556,9 +556,6 @@
                       </property>
                      </widget>
                     </item>
-                    <item>
-                     <widget class="QComboBox" name="comboBox_indvDetXLabel"/>
-                    </item>
                    </layout>
                   </item>
                   <item>
@@ -670,6 +667,13 @@
                      </spacer>
                     </item>
                     <item>
+                     <widget class="QLabel" name="label_6">
+                      <property name="text">
+                       <string>YLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QComboBox" name="comboBox_indvDetYLabel"/>
                     </item>
                     <item>
@@ -678,6 +682,16 @@
                        <string>Plot Sample Log</string>
                       </property>
                      </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_21">
+                      <property name="text">
+                       <string>XLabel</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="comboBox_indvDetXLabel"/>
                     </item>
                     <item>
                      <spacer name="verticalSpacer_16">
@@ -2080,7 +2094,7 @@
      <x>0</x>
      <y>0</y>
      <width>1412</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
