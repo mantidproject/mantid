@@ -27,7 +27,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(8332872, run.getProperty('mon_sum').value)
         self.assertEqual('y', run.getProperty('polarisation').value)
         # check whether detector bank is rotated
-        det = ws.getDetector(1)
+        det = ws.getDetector(0)
         self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
