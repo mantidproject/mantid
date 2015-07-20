@@ -64,7 +64,6 @@ class LoadDNSLegacy(PythonAlgorithm):
             message = "File " + filename + " does not contain any data!"
             self.log().error(message)
             raise RuntimeError(message)
-            return
 
         # load run information
         metadata = DNSdata()
@@ -74,7 +73,6 @@ class LoadDNSLegacy(PythonAlgorithm):
             message = "Error of loading of file " + filename + ": " + err
             self.log().error(message)
             raise RuntimeError(message)
-            return
 
         ndet = 24
         # this needed to be able to use ConvertToMD
