@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-from TofConverter.ui_converter import Ui_MainWindow #import line for the UI python class
+from ui_converter import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 import math
 
@@ -65,7 +65,6 @@ class MainWindow(QtGui.QMainWindow):
         # Temporary import while method is in the wrong place
         from pymantidplot.proxies import showCustomInterfaceHelp
         showCustomInterfaceHelp("TOF_Converter") #need to find a way to import this module
-    
     def convert(self):
         if self.ui.InputVal.text() == "":
             return
@@ -83,14 +82,14 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.stage2output))
-        except Exception, e:
+        except ArithmeticError, e:
             QtGui.QMessageBox.warning(self, "TofConverter", str(e))
             return
 
     def input2energy(self, inputval, inOption):
         e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
         e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
-        e2v = 0.0000052276 # using v = h/(m*lambda) 
+        e2v = 0.0000052276 # using v = h/(m*lambda)
         e2k = 2.717 #using k = 2*pi/(lambda) k:momentum
         e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
         e2cm = 0.123975 #cm = 8.06554465*E E:energy
@@ -140,11 +139,10 @@ class MainWindow(QtGui.QMainWindow):
     def energy2output(self, Energy, inOption):
         e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
         e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
-        e2v = 0.0000052276 # using v = h/(m*lambda) 
+        e2v = 0.0000052276 # using v = h/(m*lambda)
         e2k = 2.717 #using k = 2*pi/(lambda) k:momentum
         e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
         e2cm = 0.123975 #cm = 8.06554465*E E:energy
-        iv2 = inputval ** 2
 
         if inOption == 'Wavelength (Angstroms)':
             OutputVal =  (e2lam/ Energy)**0.5
