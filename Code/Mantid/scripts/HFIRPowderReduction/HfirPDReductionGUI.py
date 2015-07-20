@@ -132,6 +132,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.doSaveMultipleScans)
         self.connect(self.ui.pushButton_saveMerge, QtCore.SIGNAL('clicked()'),
                 self.doSaveMergedScan)
+        self.connect(self.ui.pushButton_plotRawMultiScans, QtCore.SIGNAL('clicked()'),
+                     self.doPlotMultiScanRaw)
 
         # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
@@ -421,6 +423,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView_indvDet.clearAllLines()
         if self._tabLineDict.has_key(self.ui.graphicsView_indvDet):
             self._tabLineDict[self.ui.graphicsView_indvDet] = []
+        self.ui.graphicsView_indvDet.resetColorScheme()
 
         return
 
@@ -946,7 +949,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get detector ID and x-label option
         try:
-            detid = self._getInteger(self.ui.lineEdit_detID)
+            #detid = self._getInteger(self.ui.lineEdit_detID)
+            detidlist = self._getIntArray(self.ui.lineEdit_detID)
         except EmptyError:
             self._logError("Detector ID must be specified for plotting individual detector.")
             return
@@ -958,20 +962,21 @@ class MainWindow(QtGui.QMainWindow):
 
         xlabel = str(self.ui.comboBox_indvDetXLabel.currentText()).strip()
         if xlabel != "" and xlabel != "Pt.":
-            self._logNotice("X-label %s is not supported for plotting individual detector's counts.  Set to detector angle." % (xlabel))
-            xlabel = ""
+            self._logNotice("New Feature: X-label %s is supported for plotting individual detector's counts.  Set to detector angle." % (xlabel))
+            xlabel = xlabel
         else:
             self._logNotice("X-label for individual detectror is %s." % (xlabel))
 
         # plot
-        try:
-            self._plotIndividualDetCounts(expno, scanno, detid, xlabel)
-            self._expNo = expno
-            self._scanNo = scanno
-            self._detID = detid
-            self._indvXLabel = xlabel
-        except NotImplementedError as e:
-            self._logError(str(e))
+        for detid in sorted(detidlist):
+            try:
+                self._plotIndividualDetCounts(expno, scanno, detid, xlabel)
+                self._expNo = expno
+                self._scanNo = scanno
+                self._detID = detid
+                self._indvXLabel = xlabel
+            except NotImplementedError as e:
+                self._logError(str(e))
 
         return
 
@@ -1021,6 +1026,43 @@ class MainWindow(QtGui.QMainWindow):
         # Update widget
         self.ui.lineEdit_detID.setText(str(self._detID))
 
+        return
+    
+
+    def doPlotMultiScanRaw(self):
+        """ Plot multiple scans before merging
+        """
+        # Get information
+        minX = self._getFloat(self.ui.lineEdit_mergeMinX)
+        maxX = self._getFloat(self.ui.lineEdit_mergeMaxX)
+        binsize = self._getFloat(self.ui.lineEdit_mergeBinSize)
+        
+        # Process input experiment number and scan list
+        try:
+            r = self._uiGetExpScanTabMultiScans()
+            expno = r[0]
+            scanlist = r[1]
+        except NotImplementedError as e:
+            self._logError(str(e))
+            return False
+        
+        # Re-process the data
+        self._myControl.scaleupToRawMonitorCounts(expno, scanlist)
+
+        # Clear image
+        canvas = self.ui.graphicsView_mergeRun
+        canvas.clearAllLines()
+        canvas.clearCanvas()
+
+        # Plot data
+        unit = str(self.ui.comboBox_mscanUnit.currentText())
+        xlabel = self._getXLabelFromUnit(unit)
+
+        for scanno in scanlist:
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=False)
+        # ENDFOR        
+        
         return
 
 
@@ -1422,8 +1464,12 @@ class MainWindow(QtGui.QMainWindow):
         if x is not None and y is not None:
 
             if button == 1:
-                msg = "You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
-                QtGui.QMessageBox.information(self, "Click!", msg)
+                msg = "Mouse 1: You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
+                print msg
+            
+            elif button == 2:
+                msg = "Mouse 2: You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
+                QtGui.QMessageBox.information(self, "Click!", msg)                
 
             elif button == 3:
                 # right click of mouse will pop up a context-menu
@@ -1484,6 +1530,43 @@ class MainWindow(QtGui.QMainWindow):
     #--------------------------------------------------------------------------
     # Private methods to plot data
     #--------------------------------------------------------------------------
+    
+    def _plotIndividualDetCountsVsSampleLog(self, expno, scanno, detid, samplename, raw=True):
+        """ Plot one specific detector's counts vs. one specified sample log's value
+        along with all Pts.
+        
+        For example: detector 11's counts vs. sample_b's value
+        """
+        # Validate input
+        try:
+            expno = int(expno)
+            scanno = int(scanno)
+            detid = int(detid)        
+            samplename = str(samplename)
+        except ValueError:
+            raise NotImplementedError("ExpNo, ScanNo or DetID is not integer.")
+        
+        # Get the array for detector counts vs. sample log value by mapping Pt.
+        vecx, vecy = self._myControl.getIndividualDetCountsVsSample(expno, scanno,
+                                                                    detid, samplename)
+        
+        # Clear canvas
+        self.ui.graphicsView_indvDet.clearCanvas()
+        
+        # Plot
+        marker, color = self.ui.graphicsView_indvDet.getNextLineMarkerColorCombo()
+        self.ui.graphicsView_indvDet.addPlot(x=vecx, 
+                                             y=vecy,
+                                             marker=marker,
+                                             color=color,
+                                             xlabel=samplename,
+                                             ylabel='Counts',
+                                             label='DetID = %d'%(detid))
+        
+        self._graphIndDevMode = (samplename, 'Counts')
+        
+        return    
+        
 
     def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis):
         """ Plot a specific detector's counts along all experiment points (pt)
@@ -1530,6 +1613,9 @@ class MainWindow(QtGui.QMainWindow):
             dx = xmax-xmin
             dy = ymax-ymin
             canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
+            
+        # Set canvas mode
+        self._graphIndDevMode = (xlabel, 'Counts')
 
         return True
 

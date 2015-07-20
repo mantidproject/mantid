@@ -334,7 +334,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -657,6 +657,9 @@
                      <spacer name="verticalSpacer_15">
                       <property name="orientation">
                        <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Fixed</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
@@ -1303,6 +1306,13 @@
                 </item>
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_11">
+                  <item>
+                   <widget class="QPushButton" name="pushButton_plotRawMultiScans">
+                    <property name="text">
+                     <string>Plot Raw</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item>
                    <spacer name="verticalSpacer_11">
                     <property name="orientation">
@@ -2070,7 +2080,7 @@
      <x>0</x>
      <y>0</y>
      <width>1412</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

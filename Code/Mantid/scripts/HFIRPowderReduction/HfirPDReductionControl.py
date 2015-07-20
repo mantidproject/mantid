@@ -69,6 +69,26 @@ class PDRManager(object):
         self._applySmoothVan = smoothaccept
 
         return
+    
+    def getAverageMonitorCounts(self):
+        """ Return the average monitor counts 
+        """
+        # Get the column index for monitor counts
+        colnames = self._rawSpiceTableWS.getColumnNames()
+        try:
+            imonitor = colnames.index("monitor")
+        except ValueError:
+            raise RuntimeError("monitor is not a column name in SPICE table workspace.")
+        
+        # Sum and average
+        numpts = self._rawSpiceTableWS.rowCount()
+        totalcounts = 0
+        for irow in xrange(numpts):
+            moncounts = self._rawSpiceTableWS.cell(irow, imonitor)
+            totalcounts += moncounts
+        
+        return float(totalcounts)/float(numpts)
+
 
     def getProcessedVanadiumWS(self):
         """
@@ -124,6 +144,7 @@ class PDRManager(object):
             print e
 
         return
+    
 
     def setRawWorkspaces(self, spicetablews, logmatrixws):
         """ Set 2 raw SPICE workspaces
@@ -226,6 +247,14 @@ class HFIRPDRedControl(object):
 
     def getIndividualDetCounts(self, exp, scan, detid, xlabel):
         """ Get individual detector counts
+        
+        Arguments:
+        - exp    :: experiment number
+        - scan   :: scan number
+        - detid  :: detector ID
+        - xlabel :: x-axis for detector's counts. (1) None for Pt. Or (2) any valid sample log name
+                    
+        Return: 2-tuple (vecX, vecY) for plotting
         """
         # Check and get data
         exp = int(exp)
@@ -254,6 +283,7 @@ class HFIRPDRedControl(object):
                                                     Mode='Detector',
                                                     DetectorID = detid)
         else:
+            print "Plot detector %d's counts vs. sample log %s."%(detid, xlabel)
             tempoutws = \
                     api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
@@ -265,6 +295,7 @@ class HFIRPDRedControl(object):
         vecy = tempoutws.readY(0)[:]
 
         return (vecx, vecy)
+    
 
 
     def getRawDetectorCounts(self, exp, scan, ptnolist=None):
@@ -680,6 +711,37 @@ class HFIRPDRedControl(object):
         self._myWorkspaceDict[(expno, scanno)] = wsmanager
 
         return True
+    
+    def scaleupToRawMonitorCounts(self, exp, scanlist, minX, maxX, binsize):
+        """ Scale up the reduced powder spectrum to its average monitor counts
+        
+        Arguments:
+         - exp :: experiment number
+         - scanlist :: list of scanns
+        """ 
+        try:
+            exp = int(exp)
+        except ValueError as e:
+            return (False, str(e))
+        
+        
+        for scan in scanlist:
+            try:
+                scan = int(scan)
+                wsmanager = self._myWorkspaceDict[(exp, scan)]
+            except ValueError:
+                # type error, return with false
+                return (False, 'Scan number %s is not integer.'%(str(scan)))            
+            except KeyError:
+                # data has not been reduced yet. Reduce dat
+                self.reduceSpicePDData(exp, scan, unit='2theta',
+                                       xmin=minX, xmax=maxX, binsize=binsize)
+                wsmanager = self._myWorkspaceDict[(exp, scan)]
+                monitorcounts = wsmanager.getAverageMonitorCounts()
+                wsmanager.reducedws = wsmanager.reducedws.multiply(monitorcounts)
+            
+            
+
 
 
     def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=None,scalefactor=None):
