@@ -41,8 +41,7 @@ MplBasicColors = [
         "green",
         "cyan",
         "magenta",
-        "yellow",
-        "white"]
+        "yellow"] #"white"]
 
 
 class Qt4MplPlotView(QtGui.QWidget):
@@ -192,6 +191,12 @@ class Qt4MplPlotView(QtGui.QWidget):
             self._myLineMarkerColorIndex = 0
 
         return (marker, color)
+    
+    def resetLineColorStyle(self):
+        """ Reset the auto index for line's color and style 
+        """
+        self._myLineMarkerColorIndex = 0
+        return
 
     def setXYLimit(self, xmin, xmax, ymin, ymax):
         """ Set X-Y limit automatically

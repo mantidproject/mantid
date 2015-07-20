@@ -420,10 +420,13 @@ class MainWindow(QtGui.QMainWindow):
         """ Clear the canvas in tab 'Individual Detector' and current plotted lines
         in managing dictionary
         """
+        # Clear all lines on canvas
         self.ui.graphicsView_indvDet.clearAllLines()
+        # Remove their references in dictionary
         if self._tabLineDict.has_key(self.ui.graphicsView_indvDet):
             self._tabLineDict[self.ui.graphicsView_indvDet] = []
-        self.ui.graphicsView_indvDet.resetColorScheme()
+        # Reset colur schedule
+        self.ui.graphicsView_indvDet.resetLineColorStyle()
 
         return
 
