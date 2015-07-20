@@ -2,11 +2,16 @@
 #define SMOOTHDATATEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include "MantidAlgorithms/CreateSampleWorkspace.h"
+#include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAlgorithms/SmoothData.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::DataObjects;
 
 class SmoothDataTest : public CxxTest::TestSuite
 {
@@ -16,6 +21,7 @@ public:
   
   SmoothDataTest()
   {
+    FrameworkManager::Instance();
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",2,10,10);
     for (int i = 0; i < 10; ++i)
@@ -30,19 +36,23 @@ public:
 
   void testName()
   {
+    SmoothData smooth;
     TS_ASSERT_EQUALS( smooth.name(), "SmoothData" );
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( smooth.version(), 1 );
+    SmoothData smooth;
+	TS_ASSERT_EQUALS( smooth.version(), 1 );
   }
 
   void testInit()
   {
+    SmoothData smooth;
     TS_ASSERT_THROWS_NOTHING( smooth.initialize() );
     TS_ASSERT( smooth.isInitialized() );
   }
+
 
   void testInvalidInputs()
   {
@@ -60,9 +70,76 @@ public:
     TS_ASSERT( ! smooth2.isExecuted() );
   }
 
+  void testGroupspaceProperty()
+  {
+	
+	MatrixWorkspace_sptr createSampleWorkspace;
+	//Creating sample workspace
+	CreateSampleWorkspace createWS;
+	createWS.initialize();
+	createWS.setChild(true);
+	//setting property
+	std::string outWSName("CreateWorkspaceTest_OutputWS");
+	TS_ASSERT_THROWS_NOTHING(createWS.setPropertyValue("OutputWorkspace", outWSName));
+	TS_ASSERT_THROWS_NOTHING( createWS.execute(); );
+	MatrixWorkspace_sptr outWS = createWS.getProperty("OutputWorkspace");
+
+	//Creating group workspace
+	CreateGroupingWorkspace alg;
+	alg.initialize();
+	alg.setChild(true);
+	std::string outGWSName("CreateGroupingWorkspaceTest_OutputWS");
+	TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", outWS));
+	TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("GroupNames", "bank1,bank2") );
+	TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outGWSName) );
+	TS_ASSERT_THROWS_NOTHING( alg.execute() );
+	TS_ASSERT( alg.isExecuted() ); 
+    GroupingWorkspace_sptr groupingWS = alg.getProperty("OutputWorkspace");
+
+    SmoothData smooth;
+    smooth.initialize();
+	smooth.setChild(true);
+	TS_ASSERT_THROWS_NOTHING( smooth.setProperty("InputWorkspace",outWS) );
+    std::string outputWS("smoothed");
+    TS_ASSERT_THROWS_NOTHING( smooth.setPropertyValue("OutputWorkspace",outputWS) );
+    // Set to 4 - algorithm should change it to 5
+    TS_ASSERT_THROWS_NOTHING( smooth.setPropertyValue("NPoints","3,5") );
+	TS_ASSERT_THROWS_NOTHING( smooth.setProperty("GroupingWorkspace", groupingWS));
+	TS_ASSERT_THROWS_NOTHING( smooth.execute() );
+	TS_ASSERT( smooth.isExecuted() );
+
+	MatrixWorkspace_const_sptr output = smooth.getProperty("OutputWorkspace");
+	//as alg child is set true, wouldnt need to use AnalysisDataService
+	const Mantid::MantidVec &Y = output->dataY(0);
+	const Mantid::MantidVec &X = output->dataX(0);
+	const Mantid::MantidVec &E = output->dataE(0);
+	TS_ASSERT_EQUALS( Y[0], 0.3 );
+	TS_ASSERT_EQUALS( X[6], 1200 );
+	TS_ASSERT_DIFFERS(E[2], Y[2]);
+	for (int i = 0; i < 4; ++i)
+    {
+		TS_ASSERT_EQUALS( Y[i], 0.3);
+		TS_ASSERT_EQUALS( X[i+1], (i+1)*200); 
+    }
+	TS_ASSERT_LESS_THAN(E[8], 0.31625);
+	TS_ASSERT_EQUALS(Y[10],Y[15]);
+	TS_ASSERT_DIFFERS(Y[50],Y[45]);
+	TS_ASSERT_EQUALS( X[50], 10000 );
+	TS_ASSERT_DIFFERS(Y[51],3.63333333333333);
+	TS_ASSERT_LESS_THAN_EQUALS(E[15], 0.3169);
+	TS_ASSERT_EQUALS(X[16],3200);
+	TS_ASSERT_LESS_THAN_EQUALS(Y[49], 3.64);
+	TS_ASSERT_DIFFERS(X[2],E[2]);
+	TS_ASSERT_DIFFERS(X[0],Y[0]);
+	TS_ASSERT_DIFFERS(E[5],Y[5]);
+	// Check X vectors are shared
+	TS_ASSERT_EQUALS( &(output->dataX(0)), &(output->dataX(1)) );
+	}
+
   void testExec()
   {
-    if ( !smooth.isInitialized() ) smooth.initialize();
+    SmoothData smooth;
+	smooth.initialize();
 
     TS_ASSERT_THROWS_NOTHING( smooth.setPropertyValue("InputWorkspace","noisy") );
     std::string outputWS("smoothed");
@@ -97,8 +174,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
   }
 
-private:
-  SmoothData smooth;
 };
 
 #endif /*SMOOTHDATATEST_H_*/
+
