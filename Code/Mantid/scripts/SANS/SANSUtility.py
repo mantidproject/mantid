@@ -866,8 +866,6 @@ class OverlayWorkspaces(object):
         time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
         total_time_shift = time_difference + time_shift
 
-        # Normalize by proton charge -- Should we really be doing this?
-
         # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
         temp = rhs_ws
         temp_ws_name = 'shifted'
