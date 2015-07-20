@@ -44,10 +44,10 @@ class LoadDNSLegacy(PythonAlgorithm):
                              doc="Name of the workspace to store the experimental data.")
         self.declareProperty("Polarisation", "0",
                              StringListValidator(POLARISATIONS),
-                             doc="Type of polarisation. Valid values: %s" % str(POLARISATIONS))
+                             doc="Type of polarisation.")
         self.declareProperty("Normalization", "duration",
                              StringListValidator(NORMALIZATIONS),
-                             doc="Type of data for normalization. Valid values: %s" % str(NORMALIZATIONS))
+                             doc="Type of data for normalization.")
         return
 
     def PyExec(self):
