@@ -86,6 +86,10 @@ public:
    *  @throw std::invalid_argument if the string passed is not compatible with
    * the array type
    */
+
+  //The constructor of the base class is called with an empty vector
+  //resulting in the most current previous values not being remembered
+  //correctly. Use this constructor with caution.
   ArrayProperty(const std::string &name, const std::string &values,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input)
