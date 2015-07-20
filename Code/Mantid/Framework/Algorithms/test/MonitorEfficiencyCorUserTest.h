@@ -28,7 +28,7 @@ public:
 	MonitorEfficiencyCorUserTest() :
 			m_inWSName("input_workspace"), m_outWSName("output_workspace") {
 		m_Ei = 3.27;
-                m_monitor_counts = 1000.;
+                m_monitor_counts = 1000;
 		createInputWorkSpace();
 	}
 
