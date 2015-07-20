@@ -16,6 +16,11 @@
 
 #include <algorithm>
 
+
+namespace {
+  enum BINOPTIONS {CUSTOMBINNING, FROMMONITORS, SAVEASEVENTDATA};
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -48,7 +53,12 @@ const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
-  m_newOutDir(*this, &SANSAddFiles::changeOutputDir)
+  m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning(""),
+  m_customBinningText("Bin Settings: "), m_customBinningToolTip("Sets the bin options for custom binning"),
+  m_saveEventDataText("Additional Time Shifts: "),
+  m_saveEventDataToolTip("Set optional, comma-separated time shifts in seconds.\n"
+                         "You can either specify non or N-1 time shifts for N files.\n"
+                         "Note that the time shifts are relative to the time of the workspace which was added last.")
 {
   initLayout();
 
@@ -124,6 +134,10 @@ void SANSAddFiles::initLayout()
   // Track changes in the selection of the histogram option
   connect(m_SANSForm->comboBox_histogram_choice, SIGNAL(currentIndexChanged (int)), this, SLOT(onCurrentIndexChangedForHistogramChoice(int)));
 
+  // Track changes in the overlay options 
+  m_SANSForm->overlayCheckBox->setEnabled(false);
+  m_customBinning = m_SANSForm->eventToHistBinning->text();
+  connect(m_SANSForm->overlayCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onStateChangedForOverlayCheckBox(int)));
 }
 /**
  * Restore previous input
@@ -243,6 +257,11 @@ void SANSAddFiles::add2Runs2Add()
 */
 void SANSAddFiles::runPythonAddFiles()
 {
+  // Check the validty of the input for the 
+  if (!checkValidityTimeShiftsForAddedEventFiles()) {
+    return;
+  }
+
   if (m_pythonRunning)
   {//it is only possible to run one python script at a time
     return;
@@ -294,19 +313,22 @@ void SANSAddFiles::runPythonAddFiles()
   QString lowMem = m_SANSForm->loadSeparateEntries->isChecked()?"True":"False";
   code_torun += ", lowMem="+lowMem;
 
+  QString overlay = m_SANSForm->overlayCheckBox->isChecked()?"True":"False";
   // In case of event data, check if the user either wants 
   // 0. Custom historgram binning
   // 1. A binning which is set by the data set
   // 2. To save the actual event data
   switch (m_SANSForm->comboBox_histogram_choice->currentIndex())
   {
-    case 0:
+    case CUSTOMBINNING:
       code_torun += ", binning='" + m_SANSForm->eventToHistBinning->text() + "'";
       break;
-    case 1:
+    case FROMMONITORS:
       break;
-    case 2:
+    case SAVEASEVENTDATA:
       code_torun += ", saveAsEvent=True";
+      code_torun += ", isOverlay=" + overlay;
+      code_torun += ", time_shifts="+ createPythonStringList(m_SANSForm->eventToHistBinning->text());
       break;
     default:
       break;
@@ -432,15 +454,123 @@ void SANSAddFiles::enableSumming()
  */
 void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index) 
 {
-  if (index == 0)
-  {
-    this->m_SANSForm->eventToHistBinning->setEnabled(true);
-  }
-  else
-  {
-    this->m_SANSForm->eventToHistBinning->setEnabled(false);
+  // Set the overlay checkbox enabled or disabled
+  // Set the input field enabled or disabled
+  switch(index) {
+    case CUSTOMBINNING: 
+      m_SANSForm->overlayCheckBox->setEnabled(false);
+      setHistogramUiLogic(m_customBinningText, m_customBinningToolTip, m_customBinning, true);
+      break;
+    case FROMMONITORS:
+      setHistogramUiLogic(m_customBinningText, m_customBinningToolTip, m_customBinning, false);
+      setInputEnabled(false);
+      break;
+    case SAVEASEVENTDATA:
+      m_customBinning = this->m_SANSForm->eventToHistBinning->text();
+      m_SANSForm->eventToHistBinning->setText("");
+
+      setHistogramUiLogic(m_saveEventDataText, m_saveEventDataToolTip, "", true);
+      m_SANSForm->overlayCheckBox->setEnabled(true);
+
+      setInputEnabled(m_SANSForm->overlayCheckBox->isChecked());
+      break;
+    default:
+      setInputEnabled(false);
+      break;
   }
 }
+
+/**
+ * Reacts to changes of the overlay check box when adding event data
+ * @param state the state of the check box
+ */
+void SANSAddFiles::onStateChangedForOverlayCheckBox(int state) {
+  setInputEnabled(state != 0);
+}
+
+/*
+ * Check the validity of the time shift input field for added event files
+ */
+bool SANSAddFiles::checkValidityTimeShiftsForAddedEventFiles() {
+  bool state = true;
+
+  if (m_SANSForm->comboBox_histogram_choice->currentIndex() == SAVEASEVENTDATA && m_SANSForm->overlayCheckBox->isChecked()) {
+    QString code_torun = "import ISISCommandInterface as i\n";
+    code_torun += "i.check_time_shifts_for_added_event_files(number_of_files=";
+    code_torun += QString::number(m_SANSForm->toAdd_List->count() - 1);
+    code_torun += ", time_shifts='" + m_SANSForm->eventToHistBinning->text() + "')\n";
+
+    QString status = runPythonCode(code_torun, false);
+    if (!status.isEmpty()) {
+      g_log.warning() << status.toStdString();
+    }
+
+    if (status.contains("Error")) {
+      state = false;
+    }
+  }
+
+  return state;
+}
+
+/**
+ * Set the UI logic for the histogram binning and saving as event data bit.
+ * @param label :: the label of the line edit field.
+ * @param toolTip :: the tooltip text.
+ * @param lineEditText :: text for the line edit field
+ * @param enabled :: if the input should be enabled.
+ */
+void SANSAddFiles::setHistogramUiLogic(QString label, QString toolTip, QString lineEditText, bool enabled) {
+  // Line edit field
+  m_SANSForm->eventToHistBinning->setText(lineEditText);
+  m_SANSForm->eventToHistBinning->setToolTip(toolTip);
+
+  // Label for line edit field
+  m_SANSForm->labelBinning->setText(label);
+  m_SANSForm->labelBinning->setToolTip(toolTip);
+
+  setInputEnabled(enabled);
+}
+
+/**
+ * Enables or disables the line editr field for histograms and time shifts, as well 
+ * as the corresponding labels
+ * @param enabled :: is enabled or not
+ */
+void SANSAddFiles::setInputEnabled(bool enabled) {
+  m_SANSForm->eventToHistBinning->setEnabled(enabled);
+  m_SANSForm->labelBinning->setEnabled(enabled);
+}
+
+/**
+ * Produces a Python string list of the format "['entry1', 'entry2', ...]"
+ * @param inputString :: This string has a format of "entry1, entry2, ..."
+ * @returns a Python list of strings
+ */
+QString SANSAddFiles::createPythonStringList(QString inputString) {
+  QString formattedString = "[";
+  QString finalizer = "]";
+  QString quotationMark = "'";
+  QString delimiter = ",";
+
+  if (inputString.isEmpty()) {
+    return formattedString + finalizer;
+  }
+
+  inputString.replace(" ", "");
+  auto inputStringList = inputString.split(delimiter);
+
+  for (auto it = inputStringList.begin(); it != inputStringList.end(); ++it) {
+
+    formattedString += quotationMark + *it + quotationMark + delimiter;
+  }
+
+  formattedString.remove(formattedString.length()-delimiter.length(), delimiter.length());
+  formattedString += finalizer;
+  return formattedString;
+}
+
+
 
 }//namespace CustomInterfaces
 }//namespace MantidQt
