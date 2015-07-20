@@ -38,7 +38,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         """
         creates an incomplete data file
         """
-        with open (filename, "w") as f:
+        with open(filename, "w") as f:
             f.write("# DNS Data userid=sa,exp=961,file=988,sample=run2")
             f.write("#--------------------------------------------------------------------------")
             f.write("# 9")
