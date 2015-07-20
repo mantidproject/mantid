@@ -412,8 +412,7 @@ std::string createParName(size_t index, size_t subIndex,
 
 /**
  * Creates a function to carry out the fitting in the "ConvFit" tab.  The
- *function consists
- * of various sub functions, with the following structure:
+ * function consists of various sub functions, with the following structure:
  *
  * Composite
  *  |
@@ -785,12 +784,12 @@ QtProperty *ConvFit::createDiffRotDiscreteCircle(const QString &name) {
 }
 
 /**
- * Populates the properties of a function with required values
- * @param func The function tobe populated
- * @param comp The composite function
+ * Populates the properties of a function with given values
+ * @param func The function currently being added to the composite
+ * @param comp A composite function of the previously called functions
  * @param group The QtProperty representing the fit type
  * @param pref The index of the functions eg. (f0.f1)
- * @param tie 
+ * @param tie Bool to state if parameters are to be tied together
  */
 void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
                                QtProperty *group, const std::string &pref,
