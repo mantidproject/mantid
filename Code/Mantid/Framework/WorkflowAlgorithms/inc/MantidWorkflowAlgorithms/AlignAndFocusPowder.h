@@ -131,6 +131,7 @@ private:
   double LRef;
   double DIFCref;
   double minwl;
+  double maxwl;
   double tmin;
   double tmax;
   bool m_preserveEvents;

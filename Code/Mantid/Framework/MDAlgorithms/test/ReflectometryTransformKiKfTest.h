@@ -92,27 +92,31 @@ public:
     const double wavelength = 1;
 
     //Sine 0 = 0
-    CalculateReflectometryK A(0);
-    TS_ASSERT_EQUALS(0, A.execute(wavelength));
+    CalculateReflectometryK A;
+    A.setThetaIncident(0);
+    TS_ASSERT_EQUALS(0, A.calculateDim0(wavelength));
 
     //Sine 90 = 1
-    CalculateReflectometryK B(90);
-    TS_ASSERT_DELTA(2*M_PI/wavelength, B.execute(wavelength), 0.0001);
+    CalculateReflectometryK B;
+    B.setThetaIncident(90);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, B.calculateDim0(wavelength), 0.0001);
 
     //Sine 270 = -1
-    CalculateReflectometryK C(270);
-    TS_ASSERT_DELTA(-2*M_PI/wavelength, C.execute(wavelength), 0.0001);
+    CalculateReflectometryK C;
+    C.setThetaIncident(270);
+    TS_ASSERT_DELTA(-2*M_PI/wavelength, C.calculateDim0(wavelength), 0.0001);
   }
 
   void test_recalculate_k()
   {
     const double wavelength = 1;
 
-    CalculateReflectometryK A(90);
-    TS_ASSERT_DELTA(2*M_PI/wavelength, A.execute(wavelength), 0.0001);
+    CalculateReflectometryK A;
+    A.setThetaIncident(90);
+    TS_ASSERT_DELTA(2*M_PI/wavelength, A.calculateDim0(wavelength), 0.0001);
 
     //Now re-execute on the same calculation object.
-    TS_ASSERT_DELTA(M_PI/wavelength, A.execute(2*wavelength), 0.0001);
+    TS_ASSERT_DELTA(M_PI/wavelength, A.calculateDim0(2*wavelength), 0.0001);
   }
 
 

@@ -66,6 +66,9 @@ public:
            "Nexus file";
   }
 
+  /// Load the parameters from Nexus file if possible, else from parameter file, into workspace
+  void LoadParameters( ::NeXus::File *nxfile, const API::MatrixWorkspace_sptr localWorkspace );
+
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
 

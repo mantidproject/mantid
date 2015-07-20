@@ -39,6 +39,23 @@ private:
 
   Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
 
+  /// Cache for custom binning string
+  QString m_customBinning;
+  /// Text for label for custom binning
+  QString m_customBinningText;
+  /// Text for tooltip for custom binning
+  QString m_customBinningToolTip;
+  /// Text for label for save event data
+  QString m_saveEventDataText;
+  /// Text for tooltip for save event data
+  QString m_saveEventDataToolTip;
+  /// Set the bin field
+  void setHistogramUiLogic(QString label, QString toolTip, QString lineEditText,bool enabled);
+  /// Set the histo gram input enabled or disabled
+  void setInputEnabled(bool enabled);
+  /// Create Python string list
+  QString createPythonStringList(QString inputString);
+
   void initLayout();
   void setToolTips();
   QListWidgetItem* insertListFront(const QString &text);
@@ -46,6 +63,7 @@ private:
   void setOutDir(std::string dir);
   void readSettings();
   void saveSettings();
+  bool checkValidityTimeShiftsForAddedEventFiles();
 
 private slots:
   ///insert another row into the files to sum table (tbRunsToAdd), in response to a click on the pbNewRow button
@@ -65,6 +83,8 @@ private slots:
   void enableSumming();
   /// reacts to changges of the combo box selection for the histogram options for event data
   void onCurrentIndexChangedForHistogramChoice(int index);
+  /// reacts to changes of the overlay check box
+  void onStateChangedForOverlayCheckBox(int);
 };
 
 }

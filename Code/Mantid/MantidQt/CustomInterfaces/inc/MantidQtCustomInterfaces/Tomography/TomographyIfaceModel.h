@@ -55,6 +55,9 @@ public:
   void setupComputeResource();
   void setupRunTool(const std::string &compRes);
 
+  /// is the current facility supported? (only ISIS for now)
+  bool facilitySupported();
+
   /// the compure resources supported and their status/availability
   std::vector<std::string> computeResources() { return m_computeRes; }
   std::vector<bool> computeResourcesStatus() { return m_computeResStatus; }

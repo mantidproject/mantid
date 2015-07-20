@@ -20,6 +20,7 @@
    concepts/index
    interfaces/index
    fitfunctions/*
+   training/*
    api/index
 
 This is the documentation for Mantid |release|.
@@ -32,3 +33,5 @@ This is the documentation for Mantid |release|.
 * `Fit Functions <fitfunctions/index.html>`_
 * `API <api/index.html>`_
     - `Python <api/python/index.html>`_
+* `Training Courses <training/index.html>`_
+    - `Mantid Basics <training/MantidBasics/index.html>`_
