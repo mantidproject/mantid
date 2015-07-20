@@ -2532,6 +2532,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
 
   std::cout << "\n\n" << py_code.toStdString() << "\n\n";
+
   runReduceScriptFunction(py_code);
   }
   // Mark that a reload is necessary to rerun the same reduction
@@ -4190,12 +4191,14 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(QString& pythonCode)
     // Handle ROI
     auto roi = m_uiForm.trans_roi_files_line_edit->text();
     if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
+      roi = "'" + roi.simplified() + "'";
       roi = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" + roi + ")", false);
       pythonCode+="i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
     }
     // Handle Mask
     auto mask = m_uiForm.trans_masking_line_edit->text();
     if (!mask.isEmpty()) {
+      mask = "'" + mask.simplified() + "'";
       mask = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" + mask + ")", false);
       pythonCode+="i.SetTransmissionMask(trans_mask_files=" + mask + ")\n";
     }
