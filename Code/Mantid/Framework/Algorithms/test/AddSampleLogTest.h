@@ -71,9 +71,18 @@ public:
     ExecuteAlgorithm(ws, "Another Name", "Number Series", "123456789", 123456789);
   }
 
+  void test_Units()
+  {
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace(10,10);
+    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"),DateAndTime("2013-12-18T13:42:00"));
+    ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234,false,"myUnit");
+    ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963,false,"differentUnit");
+    ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0,false,"stringUnit");
+  }
+
   template<typename T>
   void ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string LogName, std::string LogType, std::string LogText,
-      T expectedValue, bool fails=false)
+      T expectedValue, bool fails=false, std::string LogUnit="")
   {
     //add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary", testWS);
@@ -86,6 +95,7 @@ public:
     alg.setPropertyValue("Workspace", "AddSampleLogTest_Temporary");
     alg.setPropertyValue("LogName", LogName);
     alg.setPropertyValue("LogText", LogText);
+    alg.setPropertyValue("LogUnit", LogUnit);
     alg.setPropertyValue("LogType", LogType);
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     if (fails)
@@ -123,7 +133,6 @@ public:
       TS_ASSERT_EQUALS(testProp->firstTime(),DateAndTime("2013-12-18T13:40:00"));
       TS_ASSERT_DELTA(testProp->firstValue(), expectedValue, 1e-5);
     }
-    
     //cleanup
     AnalysisDataService::Instance().remove(output->getName());
     

@@ -56,6 +56,7 @@ set ( EXPORT_FILES
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
   src/Exports/FileFinder.cpp
+  src/Exports/FileLoaderRegistry.cpp
   src/Exports/Sample.cpp
   src/Exports/ScriptRepository.cpp
   src/Exports/ScriptRepositoryFactory.cpp

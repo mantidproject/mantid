@@ -983,7 +983,6 @@ def DisplayMask(mask_worksp=None):
 
             counts_data = '__DisplayMasked_tempory_wksp'
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
-
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log = True, no_console=False)
@@ -1198,6 +1197,35 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
         return message
     else:
         return ""
+
+################################################################################
+# Input check functions
+
+# Check the input for time shifts when adding event files
+def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
+    # If there are no entries then proceed.
+    if not time_shifts or time_shifts.isspace():
+        return
+
+    time_shift_container = time_shifts.split(',')
+    message = ''
+
+    # Check if the time shift elements can be cast to float
+    for time_shift_element in time_shift_container:
+        try:
+            float(time_shift_element)
+        except ValueError:
+            message = ('Error: Elements of the time shift list cannot be ' +
+                       'converted to a numeric value, e.g ' + time_shift_element)
+            print message
+            return message
+
+    if number_of_files -1 != len(time_shift_container):
+        message = ('Error: Expected N-1 time shifts for N files, but read ' +
+                  str(len(time_shift_container)) + ' time shifts for ' +
+                  str(number_of_files) + ' files.')
+        print message
+        return message
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

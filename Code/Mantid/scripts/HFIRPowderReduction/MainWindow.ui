@@ -334,7 +334,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -392,7 +392,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_14">
                 <item>
-                 <widget class="QGraphicsView" name="graphicsView_Raw">
+                 <widget class="MplFigureCanvas" name="graphicsView_Raw">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                     <horstretch>0</horstretch>
@@ -547,7 +547,7 @@
                   <item>
                    <layout class="QVBoxLayout" name="verticalLayout_13">
                     <item>
-                     <widget class="QGraphicsView" name="graphicsView_indvDet">
+                     <widget class="MplFigureCanvas" name="graphicsView_indvDet">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                         <horstretch>0</horstretch>
@@ -810,7 +810,7 @@
                 <item>
                  <layout class="QGridLayout" name="gridLayout_reductionView">
                   <item row="0" column="0">
-                   <widget class="QGraphicsView" name="graphicsView_reducedData">
+                   <widget class="MplFigureCanvas" name="graphicsView_reducedData">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                       <horstretch>0</horstretch>
@@ -1297,7 +1297,7 @@
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_mergeView">
                   <item>
-                   <widget class="QGraphicsView" name="graphicsView_mergeRun"/>
+                   <widget class="MplFigureCanvas" name="graphicsView_mergeRun"/>
                   </item>
                  </layout>
                 </item>
@@ -1496,7 +1496,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_11">
                 <item>
-                 <widget class="QGraphicsView" name="graphicsView_vanPeaks">
+                 <widget class="MplFigureCanvas" name="graphicsView_vanPeaks">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                     <horstretch>0</horstretch>
@@ -2140,6 +2140,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MplFigureCanvas</class>
+   <extends>QGraphicsView</extends>
+   <header>MplFigureCanvas.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
