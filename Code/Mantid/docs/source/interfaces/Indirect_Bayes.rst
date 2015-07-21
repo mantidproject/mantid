@@ -188,40 +188,4 @@ Plot Result
 Save Result
   Saves the result in the default save directory.
 
-JumpFit
--------
-
-.. interface:: Bayes
-  :widget: JumpFit
-
-One of the models used to interpret diffusion is that of jump diffusion in which
-it is assumed that an atom remains at a given site for a time :math:`\tau`; and
-then moves rapidly, that is, in a time negligible compared to :math:`\tau`;
-hence ‘jump’.
-
-Options
-~~~~~~~
-
-Sample
-  A sample workspace created with either ConvFit or Quasi.
-
-Fit Funcion
-  Selects the model to be used for fitting.
-
-Width
-  Spectrum in the sample workspace to fit.
-
-QMin & QMax
-  The Q range to perform fitting within.
-
-Fitting Parameters
-  Provides the option to change the defautl fitting parameters passed to the
-  chosen function.
-
-Plot Result
-  Plots the result workspaces.
-
-Save Result
-  Saves the result in the default save directory.
-
 .. categories:: Interfaces Indirect

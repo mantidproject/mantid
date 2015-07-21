@@ -1,21 +1,25 @@
-#ifndef MANTID_DATAHANDLING_DECORATORWORKSPACE_H_
-#define MANTID_DATAHANDLING_DECORATORWORKSPACE_H_
+#ifndef MANTID_DATAHANDLING_EventWorkspaceCollection_H_
+#define MANTID_DATAHANDLING_EventWorkspaceCollection_H_
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/DllConfig.h"
-
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
 #include <memory>
+
+
+  
 
 namespace Mantid {
 namespace DataHandling {
 
-/** DecoratorWorkspace : Decorator pattern around a collection of EventWorspaces to give backward-forward compatibility
- around performing operations on groups. Behave like an EventWorkspace with some overriden functionality and some additional new functionality.
+/** EventWorkspaceCollection : Collection of EventWorspaces to give backward-forward compatibility
+ around performing operations on groups. Behave similar to an EventWorkspace with some some additional new functionality.
 Original purpose to support LoadEventNexus for the MultiPeriod cases.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -39,7 +43,7 @@ Original purpose to support LoadEventNexus for the MultiPeriod cases.
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DecoratorWorkspace : public Mantid::DataObjects::EventWorkspace {
+class DLLExport EventWorkspaceCollection {
 
 private:
 
@@ -48,43 +52,41 @@ private:
   /// Create Empty EventWorkspaces
   DataObjects::EventWorkspace_sptr createEmptyEventWorkspace() const;
   /// private copy constructor. Not implemented.
-  DecoratorWorkspace(const DecoratorWorkspace &other);
+  EventWorkspaceCollection(const EventWorkspaceCollection &other);
   /// Private copy assignment operator. Assignment not implemented.
-  DecoratorWorkspace &operator=(const DecoratorWorkspace &other);
+  EventWorkspaceCollection &operator=(const EventWorkspaceCollection &other);
 
 public:
 
-  DecoratorWorkspace();
-  virtual ~DecoratorWorkspace();
+  EventWorkspaceCollection();
+  virtual ~EventWorkspaceCollection();
 
-  /*-------------------------------------------------------
-   * DecoratorWorkspace specific methods
-   *-------------------------------------------------------*/
   void setNPeriods(size_t nPeriods,  std::unique_ptr<const Kernel::TimeSeriesProperty<int> >& periodLog);
   void reserveEventListAt(size_t wi, size_t size);
   size_t nPeriods() const;
   DataObjects::EventWorkspace_sptr getSingleHeldWorkspace();
   API::Workspace_sptr combinedWorkspace();
   const DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber) const;
-  virtual DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber);
+  DataObjects::EventList& getEventList(const size_t workspace_index, const size_t periodNumber);
   void setGeometryFlag(const int flag);
   void setThickness(const float flag);
   void setHeight(const float flag);
   void setWidth(const float flag);
+  void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
+  void setSpectrumNumberForAllPeriods(const size_t spectrumNumber, const specid_t specid);
+  void setDetectorIdsForAllPeriods(const size_t spectrumNumber, const detid_t id);
 
-  /*-------------------------------------------------------
-   * EventWorkspace overriden methods
-   *-------------------------------------------------------*/
   Geometry::Instrument_const_sptr getInstrument() const;
   const API::Run &run() const;
   API::Run &mutableRun();
+  API::Sample &mutableSample();
   Mantid::API::ISpectrum* getSpectrum(const size_t index);
-  virtual const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
-  virtual Mantid::API::Axis* getAxis(const size_t& i) const;
+  const Mantid::API::ISpectrum *getSpectrum(const size_t index) const;
+  Mantid::API::Axis* getAxis(const size_t& i) const;
   size_t getNumberHistograms() const;
-  virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const;
+  const DataObjects::EventList& getEventList(const size_t workspace_index) const;
 
-  virtual DataObjects::EventList &getEventList(const std::size_t workspace_index);
+  DataObjects::EventList &getEventList(const std::size_t workspace_index);
   void getSpectrumToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset) const;
 
   void getDetectorIDToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset, bool dothrow) const;
@@ -98,12 +100,14 @@ public:
   void updateSpectraUsing(const API::SpectrumDetectorMapping& map);
   DataObjects::EventList* getEventListPtr(size_t i);
   void populateInstrumentParameters();
+  void setTitle(std::string title);
+  void applyFilter(boost::function<void (API::MatrixWorkspace_sptr)> filter);
 };
 
-typedef boost::shared_ptr<DecoratorWorkspace> DecoratorWorkspace_sptr;
-typedef std::unique_ptr<DecoratorWorkspace>DecoratorWorkspace_uptr;
+typedef boost::shared_ptr<EventWorkspaceCollection> EventWorkspaceCollection_sptr;
+typedef std::unique_ptr<EventWorkspaceCollection>EventWorkspaceCollection_uptr;
 
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_DECORATORWORKSPACE_H_ */
+#endif /* MANTID_DATAHANDLING_EventWorkspaceCollection_H_ */

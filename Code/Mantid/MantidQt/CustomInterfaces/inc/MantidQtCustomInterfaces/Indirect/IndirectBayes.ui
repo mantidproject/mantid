@@ -35,11 +35,6 @@
        <string>Stretch</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="JumpFit">
-      <attribute name="title">
-       <string>JumpFit</string>
-      </attribute>
-     </widget>
     </widget>
    </item>
    <item>

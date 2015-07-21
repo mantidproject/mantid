@@ -3,12 +3,6 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectCorrections.h"
 
-// IndirectDataAnalysisTab subclasses:
-#include "MantidQtCustomInterfaces/Indirect/Elwin.h"
-#include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
-#include "MantidQtCustomInterfaces/Indirect/Iqt.h"
-#include "MantidQtCustomInterfaces/Indirect/IqtFit.h"
-#include "MantidQtCustomInterfaces/Indirect/ConvFit.h"
 #include "MantidQtCustomInterfaces/Indirect/CalcCorr.h"
 #include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
 #include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
