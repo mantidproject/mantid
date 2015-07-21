@@ -764,7 +764,7 @@ bool SANSRunWindow::loadUserFile()
     m_cfg_loaded = false;
     return false;
   }
-  
+
   QFile user_file(filetext);
   if( !user_file.open(QIODevice::ReadOnly) )
   {
@@ -774,14 +774,14 @@ bool SANSRunWindow::loadUserFile()
   }
 
   user_file.close();
-  
+
   //Clear the def masking info table.
   int mask_table_count = m_uiForm.mask_table->rowCount();
   for( int i = mask_table_count - 1; i >= 0; --i )
   {
     m_uiForm.mask_table->removeRow(i);
   }
-  
+
   QString pyCode = "i.Clean()";
   pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
@@ -927,7 +927,6 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.enableFrontFlood_ck->setChecked( ! m_uiForm.floodFrontFile->isEmpty() );
   m_uiForm.floodFrontFile->setEnabled(m_uiForm.enableFrontFlood_ck->checkState()
                                      == Qt::Checked);
-  
 
   //Scale factor
   dbl_param = runReduceScriptFunction(

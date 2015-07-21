@@ -3968,13 +3968,6 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="12" column="2">
-         <widget class="QLineEdit" name="eventToHistBinning">
-          <property name="text">
-           <string>5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0</string>
-          </property>
-         </widget>
-        </item>
         <item row="10" column="2">
          <widget class="QComboBox" name="comboBox_histogram_choice">
           <item>
@@ -3993,6 +3986,37 @@ p, li { white-space: pre-wrap; }
            </property>
           </item>
          </widget>
+        </item>
+        <item row="11" column="2">
+         <widget class="QCheckBox" name="overlayCheckBox">
+          <property name="text">
+           <string>OverlayEventWorkspaces</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <item>
+           <widget class="QLabel" name="labelBinning">
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Bin Settings:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="eventToHistBinning">
+            <property name="text">
+             <string>5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>

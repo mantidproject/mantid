@@ -123,8 +123,10 @@ class MainWindow(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(self)
 
         # UI Window (from Qt Designer)
-        self.ui = ui_MainWindow()
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.ui.mainplot = self.ui.graphicsView.getPlot()
+
 
         # Do initialize plotting
         vecx, vecy, xlim, ylim = self.computeMock()

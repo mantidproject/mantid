@@ -19,40 +19,67 @@ calibrated pixel positions, focuses the values in dSpacing (summing
 them up into a single spectrum) and then converts them back to
 TOF. The output workspace produced by this algorithm has one spectrum.
 
+If a table of detector positions is passed as an input property, the
+detectors are calibrated before performing the conversions between TOF
+and dSpacing.
+
+In any case, before focusing the workspace, the spectra are corrected
+by using data from a Vanadium run (passed in the VanadiumWorkspace
+property). These corrections include two steps: detector sensitivity
+correction and pixel-by-pixel correction on a per-bank basis. See also
+:ref:`algm-EnggCalibrateFull` where the same correction is applied.
+
+The pixel-by-pixel Vanadium correction is based on curves fitted for
+every bank. These curves can be obtained via the output property
+OutVanadiumCurveFits. For every bank, the curve is fitted to the
+summation of all the spectra of the bank, and then every spectra of
+the bank is divided by the bank curve.
+
 Usage
 -----
 
 .. include:: ../usagedata-note.txt
 
-**Example - Simple focussing of and EnginX data file:**
+**Example - Simple focussing of an EnginX data file:**
 
 .. testcode:: ExSimpleFocussing
 
    # Run the algorithm on an EnginX file
-   ws_name = 'data_ws'
-   Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
-   ws = EnggFocus(InputWorkspace=ws_name, Bank='1')
+   data_ws = Load('ENGINX00213855.nxs')
+   van_ws = Load('ENGINX00236516.nxs')
+
+   focussed_ws = EnggFocus(InputWorkspace=data_ws,
+                           VanadiumWorkspace=van_ws,
+                           Bank='1')
+   # Use this additional options if you want to see the curve fit for the summed up vanadium data for
+   # that bank. It will generate a workspace called 'vanadium_curve'
+   # focussed_ws = EnggFocus(InputWorkspace=data_ws,
+   #                         VanadiumWorkspace=van_ws,
+   #                         Bank='1',
+   #                         OutVanadiumCurveFits='vanadium_curve')
 
    # Should have one spectrum only
-   print "No. of spectra:", ws.getNumberHistograms()
+   print "No. of spectra:", focussed_ws.getNumberHistograms()
 
    # Print a few arbitrary bins where higher intensities are expected
    fmt = "For TOF of {0:.3f} intensity is {1:.3f}"
    for bin in [3169, 6037, 7124]:
-     print fmt.format(ws.readX(0)[bin], ws.readY(0)[bin])
+     print fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin])
 
 .. testcleanup:: ExSimpleFocussing
 
-   DeleteWorkspace(ws_name)
+   DeleteWorkspace(focussed_ws)
+   DeleteWorkspace(van_ws)
+   DeleteWorkspace(data_ws)
 
 Output:
 
 .. testoutput:: ExSimpleFocussing
 
    No. of spectra: 1
-   For TOF of 20165.642 intensity is 7.436
-   For TOF of 33547.826 intensity is 9.388
-   For TOF of 38619.804 intensity is 17.397
+   For TOF of 20165.642 intensity is 13.102
+   For TOF of 33547.826 intensity is 17.844
+   For TOF of 38619.804 intensity is 32.768
    
 .. categories::
 

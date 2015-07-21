@@ -44,7 +44,7 @@ MplBasicColors = [
         "yellow"] #"white"]
 
 
-class Qt4MplPlotView(QtGui.QWidget):
+class MplFigureCanvas(QtGui.QWidget):
     """ A combined graphics view including matplotlib canvas and
     a navigation tool bar
     """
