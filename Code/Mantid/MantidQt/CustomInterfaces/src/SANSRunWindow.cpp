@@ -2730,6 +2730,9 @@ void SANSRunWindow::handleRunFindCentre()
     py_code += "i.SetDetectorFloodFile('')\n";
 
 
+  // We need to load the FinDirectionEnum class
+  py_code += "from centre_finder import FindDirectionEnum as FindDirectionEnum \n";
+
   //Find centre function
   py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" + m_uiForm.beam_rmax->text() +
       ",MaxIter=" + m_uiForm.beam_iter->text() + ",";
@@ -2757,7 +2760,20 @@ void SANSRunWindow::handleRunFindCentre()
     setProcessingState(Ready);
     return;
   }
-  py_code += ", tolerance=" + QString::number(tolerance) + ")"; 
+  py_code += ", tolerance=" + QString::number(tolerance); 
+
+  // Set which part of the beam centre finder should be used
+  auto updownIsRequired = m_uiForm.up_down_checkbox->isChecked();
+  auto leftRightIsRequired = m_uiForm.left_right_checkbox->isChecked();
+  if (updownIsRequired && leftRightIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.ALL";
+  } else if (updownIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.UP_DOWN";
+  } else if (leftRightIsRequired) {
+    py_code += ", find_direction=FindDirectionEnum.LEFT_RIGHT";
+  }
+
+  py_code += ")";
 
   g_centreFinderLog.notice("Iteration 1\n");
   m_uiForm.beamstart_box->setFocus();

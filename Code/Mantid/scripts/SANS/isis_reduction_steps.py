@@ -23,7 +23,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata,
-                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG)
+                         MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep

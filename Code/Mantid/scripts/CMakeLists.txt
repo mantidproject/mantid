@@ -29,6 +29,7 @@ set ( TEST_PY_FILES
       test/RunDescriptorTest.py
       test/SansIsisGuiSettings.py
       test/SANSBatchModeTest.py
+      test/SANSCentreFinderTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
       test/SANSReductionStepsUserFileTest.py

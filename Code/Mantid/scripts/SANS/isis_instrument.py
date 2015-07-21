@@ -1439,7 +1439,6 @@ class LARMOR(ISISInstrument):
                                    x_beam = xbeam,
                                    x_scale_factor = XSF,
                                    bench_rotation = BENCH_ROT)
-
         # beam centre, translation
         return [0.0, 0.0], [-xbeam, -ybeam]
 
@@ -1472,21 +1471,18 @@ class LARMOR(ISISInstrument):
     def _rotate_around_y_axis(self,workspace, component_name, x_beam, x_scale_factor, bench_rotation):
         # in order to avoid rewriting old mask files from initial commisioning during 2014.
         ws_ref=mtd[workspace]
-        try:
-            run_num = ws_ref.getRun().getLogData('run_number').value
-        except:
-            run_num = int(re.findall(r'\d+',str(workspace))[0])
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
-        if int(run_num) < 2217:
+        if LARMOR.is_run_new_style_run(ws_ref):
             # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
             xshift = -x_beam
             sanslog.notice("Setup move " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
             MoveInstrumentComponent(workspace, ComponentName=component_name, X=xshift, Y=0.0, Z=0.0)
         else:
+            # The x shift is in degree
             xshift = bench_rotation -x_beam*x_scale_factor
-            sanslog.notice("Setup move " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
+            sanslog.notice("Setup rotate " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
             RotateInstrumentComponent(workspace, ComponentName=component_name, X=0, Y=1, Z=0, Angle=xshift)
 
     def append_marked(self, detNames):
@@ -1535,11 +1531,8 @@ class LARMOR(ISISInstrument):
         ws_ref = mtd[str(ws_name)]
         # in order to avoid problems with files from initial commisioning during 2014.
         # these didn't have the required log entries for the detector position
-        try:
-            run_num = ws_ref.getRun().getLogData('run_number').value
-        except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
-        if int(run_num) >= 2217:
+
+        if LARMOR.is_run_new_style_run(ws_ref):
             try:
                 #logger.warning("Trying get_detector_log")
                 log = self.get_detector_log(ws_ref)
@@ -1557,6 +1550,24 @@ class LARMOR(ISISInstrument):
                 self.check_can_logs(log)
 
         ISISInstrument.on_load_sample(self, ws_name, beamcentre,  isSample)
+
+    @staticmethod
+    def is_run_new_style_run(workspace_ref):
+        '''
+        Checks if the run assiated with the workspace is pre or post 2217
+        Original comment:
+        In order to avoid problems with files from initial commisioning during 2014.
+        these didn't have the required log entries for the detector position
+        @param workspace_ref:: A handle to the workspace
+        '''
+        try:
+            run_num = workspace_ref.getRun().getLogData('run_number').value
+        except:
+            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+        if int(run_num) >2217:
+            return True
+        else:
+            return False
 
 if __name__ == '__main__':
     pass

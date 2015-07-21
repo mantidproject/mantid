@@ -10,8 +10,7 @@ sanslog = Logger("SANS")
 
 import isis_reduction_steps
 import isis_reducer
-from centre_finder import CentreFinder as CentreFinder
-from centre_finder import FindDirectionEnum as FindDirectionEnum
+from centre_finder import *
 #import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup
@@ -1049,7 +1048,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
 
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4, find_direction= FindDirectionEnum.ALL):
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, tolerance=1.251e-4, find_direction = FindDirectionEnum.ALL):
     """
         Estimates the location of the effective beam centre given a good initial estimate. For more
         information go to this page
@@ -1063,8 +1062,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @param find_only: if only Up/Down or only Left/Right is required then variable is set to 
         @return: the best guess for the beam centre point
     """
-    XSTEP = ReductionSingleton().inst.cen_find_step
-    YSTEP = ReductionSingleton().inst.cen_find_step2
+    COORD1STEP = ReductionSingleton().inst.cen_find_step
+    COORD2STEP = ReductionSingleton().inst.cen_find_step2
 
     XSF = ReductionSingleton().inst.beam_centre_scale_factor1
     YSF = ReductionSingleton().inst.beam_centre_scale_factor2
@@ -1082,41 +1081,49 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
-    XNEW = beamcoords[0]
-    YNEW = beamcoords[1]
-    xstart = beamcoords[0]
-    ystart = beamcoords[1]
+
+
+    COORD1NEW = beamcoords[0]
+    COORD2NEW = beamcoords[1]
 
     #remove this if we know running the Reducer() doesn't change i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-    centre = CentreFinder(original)
-    centre.logger.notice("xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.))
+    # Create an object which handles the the positions and increments
+    centre_positioner = CentrePositioner(reducer = centre_reduction,
+                                         position_type=find_direction,
+                                         coord1_start=beamcoords[0],
+                                         coord2_start=beamcoords[1],
+                                         coord1_step = COORD1STEP,
+                                         coord2_step = COORD2STEP,
+                                         tolerance = tolerance)
+
+    centre = CentreFinder(original, find_direction)
+    centre.logger.notice("xstart,ystart="+str(COORD1NEW*1000.)+" "+str(COORD2NEW*1000.))
     centre.logger.notice("Starting centre finding routine ...")
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center
-    resX_old, resY_old = centre.SeekCentre(centre_reduction, [XNEW, YNEW], find_direction)
+    resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-    logger.notice(centre.status_str(0, resX_old, resY_old))
+    logger.notice(centre.status_str(0, resCoord1_old, resCoord2_old))
 
     # take first trial step
-    XNEW = xstart + XSTEP
-    YNEW = ystart + YSTEP
+    COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
     graph_handle = None
     it = 0
     for i in range(1, MaxIter+1):
         it = i
 
         centre_reduction.set_beam_finder(
-            isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
+            isis_reduction_steps.BaseBeamFinder(COORD1NEW, COORD2NEW), det_bank)
 
-        resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
+        resCoord1, resCoord2 = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
         LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-        centre.logger.notice(centre.status_str(it, resX, resY))
+        centre.logger.notice(centre.status_str(it, resCoord1, resCoord2))
 
         if mantidplot:
             try :
@@ -1124,48 +1131,38 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                     #once we have a plot it will be updated automatically when the workspaces are updated
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
                 graph_handle.activeLayer().setTitle(\
-                        centre.status_str(it, resX, resY))
+                        centre.status_str(it, resCoord1, resCoord2))
             except :
                 #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
                 pass
 
         #have we stepped across the y-axis that goes through the beam center?
-        if resX > resX_old:
+        if resCoord1 > resCoord1_old:
             # yes with stepped across the middle, reverse direction and half the step size
-            XSTEP = -XSTEP/2.
-        if resY > resY_old:
-            YSTEP = -YSTEP/2.
-        if abs(XSTEP) < tolerance and abs(YSTEP) < tolerance :
+            centre_positioner.set_new_increment_coord1()
+        if resCoord2 > resCoord2_old:
+            centre_positioner.set_new_increment_coord2()
+        if centre_positioner.is_increment_coord1_smaller_than_tolerance() and centre_positioner.is_increment_coord2_smaller_than_tolerance():
             # this is the success criteria, we've close enough to the center
             centre.logger.notice("Converged - check if stuck in local minimum!")
             break
 
-        resX_old = resX
-        resY_old = resY
-        XNEW += XSTEP
-        YNEW += YSTEP
+        resCoord1_old = resCoord1
+        resCoord2_old = resCoord2
 
-    if it == MaxIter:
-        centre.logger.notice("Out of iterations, new coordinates may not be the best!")
-        XNEW -= XSTEP
-        YNEW -= YSTEP
+        if it != MaxIter:
+            COORD1NEW, COORD2NEW = centre_positioner.increment_position(xstart, ystart)
+        else:
+            centre.logger.notice("Out of iterations, new coordinates may not be the best!")
 
     # Create the appropriate return values
-    if find_direction == FindDirectionEnum.ALL:
-        x_centre = XNEW
-        y_centre = YNEW
-    elif find_direction == FindDirectionEnum.UP_DOWN:
-        x_centre = XNEW
-        y_centre = ystart
-    elif find_direction == FindDirectionEnum.LEFT_RIGHT:
-        x_centre = xstart
-        y_centre = YNEW
+    coord1_centre, coord2_centre = centre_positioner.produce_final_position(COORD1NEW, COORD2NEW)
 
     ReductionSingleton().set_beam_finder(
-        isis_reduction_steps.BaseBeamFinder(x_centre, y_centre), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(x_centre*XSF) + ", " + str(y_centre*YSF) + ']')
+        isis_reduction_steps.BaseBeamFinder(coord1_centre, coord2_centre), det_bank)
+    centre.logger.notice("Centre coordinates updated: [" + str(coord1_centre*XSF) + ", " + str(coord2_centre*YSF) + ']')
 
-    return x_centre, y_centre
+    return coord1_centre, coord2_centre
 
 
 ###################### Utility functions ####################################################
