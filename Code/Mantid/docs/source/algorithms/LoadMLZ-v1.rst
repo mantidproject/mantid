@@ -27,7 +27,7 @@ Usage
 
 .. testcode:: ExLoadTOFTOFnexus
 
-   ws = LoadMLZ(Filename='TOFTOFtestdata.nxs')
+   ws = LoadMLZ(Filename='TOFTOFTestdata.nxs')
 
    print "Name of the instrument: ", ws.getInstrument().getName()
    print "Number of spectra: ", ws.getNumberHistograms()
