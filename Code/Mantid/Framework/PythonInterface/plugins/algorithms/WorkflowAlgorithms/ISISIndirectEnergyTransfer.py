@@ -181,10 +181,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Group spectra
                 group_spectra(ws_name,
-                              masked_detectors,
-                              self._grouping_method,
-                              self._grouping_map_file,
-                              self._grouping_ws)
+                              masked_detectors=masked_detectors,
+                              method=self._grouping_method,
+                              group_file=self._grouping_map_file,
+                              group_ws=self._grouping_ws)
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)
