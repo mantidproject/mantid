@@ -110,8 +110,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
 
   const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-  vtkSmartPointer<vtkStructuredGrid> visualDataSet =
-      vtkSmartPointer<vtkStructuredGrid>::New();
+  //vtkSmartPointer<vtkStructuredGrid> visualDataSet = vtkSmartPointer<vtkStructuredGrid>::New();
+  vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
   visualDataSet->SetDimensions(nBinsX+1,nBinsY+1,nBinsZ+1);
 
   // Array with true where the voxel should be shown
@@ -159,7 +159,8 @@ vtkMDHistoHexFactory::create3Dor4D(size_t timestep,
     visualDataSet = nullGrid.createNullData();
   }
 
-  return visualDataSet.GetPointer();
+  return visualDataSet;
+
 }
 
 /**

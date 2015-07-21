@@ -151,5 +151,32 @@ std::string MDHWNexusLoadingPresenter::getWorkspaceTypeName()
   return m_wsTypeName;
 }
 
+std::vector<int> MDHWNexusLoadingPresenter::getExtents()
+{
+  // Hack which only works in 3D. Needs to be updated for 4 dimensions!
+  // Hack to ensure MD_HISTO_WS_ID is available. Fix so we're not constantly reloading!
+  using namespace Mantid::API;
+
+  AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
+
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
+  alg->initialize();
+  alg->setPropertyValue("Filename", this->m_filename);
+  alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
+  alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
+  alg->execute();
+
+  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
+  Mantid::API::IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+
+  std::vector<int> extents(6, 0);
+  extents[1] = histoWs->getDimension(0)->getNBins();
+  extents[3] = histoWs->getDimension(1)->getNBins();
+  extents[5] = histoWs->getDimension(2)->getNBins();
+  //AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
+  
+  return extents;
+}
+
 }
 }
