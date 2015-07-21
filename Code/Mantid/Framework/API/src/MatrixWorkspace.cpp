@@ -9,6 +9,7 @@
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/MDUnit.h"
 
 #include <numeric>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -1277,7 +1278,7 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL) {}
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL), m_unit(new Kernel::LabelUnit(m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   virtual std::string getName() const {
@@ -1290,7 +1291,7 @@ public:
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const {
-    return m_axis.unit()->label();
+    return m_unit->getUnitLabel();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
@@ -1339,12 +1340,18 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
+  const Kernel::MDUnit &getMDUnits() const{
+      return *m_unit;
+  }
+
   virtual ~MWDimension() {}
 
 private:
   const Axis &m_axis;
   const std::string m_dimensionId;
   const bool m_haveEdges;
+  const Kernel::MDUnit_const_uptr m_unit;
+
 };
 
 //===============================================================================
@@ -1354,7 +1361,7 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId) {
+      : m_ws(ws), m_dimensionId(dimensionId), m_unit(new Kernel::LabelUnit(m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1372,7 +1379,7 @@ public:
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const {
-    return m_ws->getAxis(0)->unit()->label();
+    return m_unit->getUnitLabel();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
@@ -1407,6 +1414,9 @@ public:
   virtual std::string toXMLString() const {
     throw std::runtime_error("Not implemented");
   }
+  const Kernel::MDUnit &getMDUnits() const{
+      return *m_unit;
+  }
 
 private:
   /// Workspace we refer to
@@ -1415,6 +1425,8 @@ private:
   MantidVec m_X;
   /// Dimension ID string
   const std::string m_dimensionId;
+  /// Unit
+  const Kernel::MDUnit_const_uptr m_unit;
 };
 
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>

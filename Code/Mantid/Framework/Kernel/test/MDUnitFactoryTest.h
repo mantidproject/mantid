@@ -5,6 +5,7 @@
 #include <gmock/gmock.h>
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 using namespace Mantid::Kernel;
 using namespace testing;
@@ -89,6 +90,37 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factoryPrimary));
   }
+
+  void test_label_unit_factory(){
+      LabelUnitFactory factory;
+      auto product = factory.create("anything");
+      TS_ASSERT(dynamic_cast<LabelUnit*>(product.get()));
+  }
+
+  void test_RLU_factory(){
+      ReciprocalLatticeUnitFactory factory;
+      auto product = factory.create(Units::Symbol::RLU);
+      TS_ASSERT(dynamic_cast<ReciprocalLatticeUnit*>(product.get()));
+  }
+
+  void test_InverseAngstroms_factory(){
+      InverseAngstromsUnitFactory factory;
+      auto product = factory.create(Units::Symbol::InverseAngstrom);
+      TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
+  }
+
+  void test_make_standard_chain(){
+      MDUnitFactory_uptr chain = makeStandardChain();
+      // Now lets try the chain of factories out
+      TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(chain->create(Units::Symbol::InverseAngstrom).get()));
+      TS_ASSERT(dynamic_cast<ReciprocalLatticeUnit*>(chain->create(Units::Symbol::RLU).get()));
+      TS_ASSERT(dynamic_cast<LabelUnit*>(chain->create("Anything else").get()));
+
+  }
+
+
+
+
 };
 
 #endif /* MANTID_KERNEL_MDUNITFACTORYTEST_H_ */

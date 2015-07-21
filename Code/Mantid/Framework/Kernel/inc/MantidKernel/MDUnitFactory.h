@@ -2,18 +2,26 @@
 #define MANTID_KERNEL_MDUNITFACTORY_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/MDUnit.h"
 #include <boost/optional.hpp>
 #include <memory>
 
 namespace Mantid {
 namespace Kernel {
 
-// Forward declartion
-class MDUnit;
 
+/**
+ CRTP class
 
+ Chainable gives the ability to set successors, but chainable items do not define create. This is important
+ because the return from setSuccessor should not be the factory directly. Otherwise you could do this
+
+ factory.setSuccessor(new Factory).create()
+
+ and create would be bypass the chain of resposibility, which should be executed along the chain top to bottom.
+ */
 template <typename ChainableType>
-class Chainable{
+class DLLExport Chainable{
 protected:
     /// Successor factory
     boost::optional<std::unique_ptr<ChainableType> > m_successor;
@@ -27,6 +35,7 @@ public:
     virtual ~Chainable() = 0;
 };
 
+/// Keep our destructor pure virtual, but require an implementation.
 template <typename ChainableType>
 Chainable<ChainableType>::~Chainable(){}
 
@@ -72,6 +81,28 @@ private:
   /// Indicate an ability to intepret the string
   virtual bool canInterpret(const std::string& unitString) const = 0;
 };
+
+class DLLExport LabelUnitFactory : public MDUnitFactory {
+    LabelUnit *createRaw(const std::string &unitString) const;
+    bool canInterpret(const std::string &unitString) const;
+};
+
+class DLLExport InverseAngstromsUnitFactory : public MDUnitFactory {
+    InverseAngstromsUnit *createRaw(const std::string &unitString) const;
+    bool canInterpret(const std::string &unitString) const;
+};
+
+class DLLExport ReciprocalLatticeUnitFactory : public MDUnitFactory {
+    ReciprocalLatticeUnit *createRaw(const std::string &unitString) const;
+    bool canInterpret(const std::string &unitString) const;
+};
+
+typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;
+
+typedef std::unique_ptr<const MDUnitFactory> MDUnitFactory_const_uptr;
+
+/// Convience method. Pre-constructed builder chain.
+MDUnitFactory_uptr DLLExport makeStandardChain();
 
 
 } // namespace Kernel
