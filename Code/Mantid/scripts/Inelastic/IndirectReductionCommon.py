@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module
+#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module,too-many-locals
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
