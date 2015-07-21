@@ -56,7 +56,11 @@ class DensityOfStatesTest(unittest.TestCase):
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_peak_width(self):
-        ws = DensityOfStates(File=self._file_name, PeakWidth=0.3)
+        ws = DensityOfStates(File=self._file_name, PeakWidth='0.3')
+        self.assertEquals(ws.getNumberHistograms(), 1)
+
+    def test_peak_width_function(self):
+        ws = DensityOfStates(File=self._file_name, PeakWidth='0.1*energy')
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_temperature(self):
