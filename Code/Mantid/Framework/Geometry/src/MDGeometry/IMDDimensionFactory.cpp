@@ -112,8 +112,11 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
     lowerBounds = lowerLimit;
   }
 
+  // Select the unit.
+  Kernel::MDUnit_const_uptr mdunit = Kernel::makeFactoryChain()->create(units);
+
   return boost::make_shared<MDHistoDimension>(
-      name, id, units, static_cast<coord_t>(lowerBounds),
+      name, id, *mdunit, static_cast<coord_t>(lowerBounds),
       static_cast<coord_t>(upperBounds), nBins);
 }
 

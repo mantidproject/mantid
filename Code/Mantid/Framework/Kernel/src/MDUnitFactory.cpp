@@ -54,7 +54,7 @@ bool ReciprocalLatticeUnitFactory::canInterpret(const std::string &unitString) c
     return unitString == Units::Symbol::RLU.ascii();
 }
 
-MDUnitFactory_uptr makeStandardChain()
+MDUnitFactory_uptr makeFactoryChain()
 {
     typedef MDUnitFactory_uptr FactoryType;
     auto first = FactoryType(new InverseAngstromsUnitFactory);

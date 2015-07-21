@@ -102,7 +102,7 @@ typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;
 typedef std::unique_ptr<const MDUnitFactory> MDUnitFactory_const_uptr;
 
 /// Convience method. Pre-constructed builder chain.
-MDUnitFactory_uptr DLLExport makeStandardChain();
+MDUnitFactory_uptr DLLExport makeFactoryChain();
 
 
 } // namespace Kernel

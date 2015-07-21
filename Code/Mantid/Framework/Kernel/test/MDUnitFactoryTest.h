@@ -110,7 +110,7 @@ public:
   }
 
   void test_make_standard_chain(){
-      MDUnitFactory_uptr chain = makeStandardChain();
+      MDUnitFactory_uptr chain = makeFactoryChain();
       // Now lets try the chain of factories out
       TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(chain->create(Units::Symbol::InverseAngstrom).get()));
       TS_ASSERT(dynamic_cast<ReciprocalLatticeUnit*>(chain->create(Units::Symbol::RLU).get()));

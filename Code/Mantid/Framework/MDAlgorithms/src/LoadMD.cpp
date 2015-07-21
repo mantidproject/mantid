@@ -8,6 +8,8 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/LoadMD.h"
@@ -317,10 +319,11 @@ void LoadMD::loadDimensions2() {
     m_file->openData(splitAxes[d - 1]);
     m_file->getAttr("long_name", long_name);
     m_file->getAttr("units", units);
+    Kernel::MDUnit_const_uptr mdunit = Kernel::makeFactoryChain()->create(units);
     m_file->getData(axis);
     m_file->closeData();
     m_dims.push_back(boost::make_shared<MDHistoDimension>(
-        long_name, splitAxes[d - 1], units, static_cast<coord_t>(axis.front()),
+        long_name, splitAxes[d - 1], *mdunit, static_cast<coord_t>(axis.front()),
         static_cast<coord_t>(axis.back()), axis.size() - 1));
   }
   m_file->closeGroup();
