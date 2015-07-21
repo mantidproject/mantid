@@ -686,6 +686,7 @@ class MainWindow(QtGui.QMainWindow):
         if itab != 3:
             floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
             self.ui.comboBox_indvDetXLabel.clear()
+            self.ui.comboBox_indvDetXLabel.addItem("2theta/Scattering Angle")
             self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
             self.ui.comboBox_indvDetYLabel.clear()
             self.ui.comboBox_indvDetYLabel.addItems(floatsamplelognamelist)
@@ -964,11 +965,13 @@ class MainWindow(QtGui.QMainWindow):
             self.doClearIndDetCanvas()
 
         xlabel = str(self.ui.comboBox_indvDetXLabel.currentText()).strip()
-        if xlabel != "" and xlabel != "Pt.":
+        if xlabel != "" and xlabel != "Pt." and xlabel != "2theta/Scattering Angle":
             self._logNotice("New Feature: X-label %s is supported for plotting individual detector's counts.  Set to detector angle." % (xlabel))
             xlabel = xlabel
         else:
-            self._logNotice("X-label for individual detectror is %s." % (xlabel))
+            if xlabel != "Pt.":
+                xlabel = ""
+            self._logNotice("X-label for individual detectror is '%s'." % (xlabel))
 
         # plot
         for detid in sorted(detidlist):
@@ -1573,6 +1576,12 @@ class MainWindow(QtGui.QMainWindow):
 
     def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis):
         """ Plot a specific detector's counts along all experiment points (pt)
+        
+        Arguments: 
+         - expno ::
+         - scanno ::
+         - detid ::
+         - xaxis :: string as 'XLabel' 
         """
         # Validate input
         expno = int(expno)
@@ -1595,10 +1604,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plot to canvas
         marker, color = canvas.getNextLineMarkerColorCombo()
-        if xaxis == "":
+        if xaxis == "" or xaxis == "2theta/Scattering Angle":
             xlabel = r'$2\theta$'
         else:
-            xlabel = "Pt."
+            #xlabel = "Pt."
+            xlabel = xlabel 
+        # FIXME - If it works with any way of plotting, then refactor Pt. with any other sample names
 
         label = "Detector ID: %d" % (detid)
 
