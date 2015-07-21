@@ -93,6 +93,7 @@ void ScriptingWindow::saveSettings() {
   settings.setValue("/TabWhitespaceCount", m_manager->m_tabWhitespaceCount);
   settings.setValue("/ScriptFontFamily", m_manager->m_fontFamily);
   settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
+  settings.setValue("/PreviousFiles", m_manager->fileNamesToQStringList());
   settings.endGroup();
 }
 
@@ -123,6 +124,18 @@ void ScriptingWindow::readSettings() {
   m_manager->m_tabWhitespaceCount =
       settings.value("TabWhitespaceCount", 4).toInt();
   m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();
+  
+  const QStringList filesToOpen =
+      settings.value("/PreviousFiles", "").toStringList();
+  const int totalFiles = filesToOpen.size();
+  if (totalFiles == 0) {
+    m_manager->newTab();
+  } else {
+    for (int i = 0; i < totalFiles; i++) {
+      m_manager->newTab(i, filesToOpen[i]);
+    }
+  }
+
   settings.endGroup();
 }
 
