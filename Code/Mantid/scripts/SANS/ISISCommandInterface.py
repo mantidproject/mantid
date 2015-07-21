@@ -1056,10 +1056,14 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @param rlow: mask around the (estimated) centre to this radius (in millimetres)
         @param rupp: don't include further out than this distance (mm) from the centre point
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
-        @param xstart: initial guess for the horizontal distance of the beam centre from the detector centre in meters (default the values in the mask file)
-        @param ystart: initial guess for the distance of the beam centre from the detector centre vertically in metres (default the values in the mask file)
-        @param tolerance: define the precision of the search. If the step is smaller than the tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
-        @param find_only: if only Up/Down or only Left/Right is required then variable is set to 
+        @param xstart: initial guess for the horizontal distance of the beam centre
+                       from the detector centre in meters (default the values in the mask file)
+        @param ystart: initial guess for the distance of the beam centre from the detector centre
+                       vertically in metres (default the values in the mask file)
+        @param tolerance: define the precision of the search. If the step is smaller than the
+                          tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param find_only: if only Up/Down or only Left/Right is
+                          required then variable is set to
         @return: the best guess for the beam centre point
     """
     COORD1STEP = ReductionSingleton().inst.cen_find_step
@@ -1102,7 +1106,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     centre = CentreFinder(original, find_direction)
     centre.logger.notice("xstart,ystart="+str(COORD1NEW*1000.)+" "+str(COORD2NEW*1000.))
     centre.logger.notice("Starting centre finding routine ...")
-    #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center
+    # this function moves the detector to the beam center positions defined above and
+    # returns an estimate of where the beam center is relative to the new center
     resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
@@ -1142,7 +1147,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
             centre_positioner.set_new_increment_coord1()
         if resCoord2 > resCoord2_old:
             centre_positioner.set_new_increment_coord2()
-        if centre_positioner.is_increment_coord1_smaller_than_tolerance() and centre_positioner.is_increment_coord2_smaller_than_tolerance():
+        if (centre_positioner.is_increment_coord1_smaller_than_tolerance() and
+            centre_positioner.is_increment_coord2_smaller_than_tolerance()):
             # this is the success criteria, we've close enough to the center
             centre.logger.notice("Converged - check if stuck in local minimum!")
             break

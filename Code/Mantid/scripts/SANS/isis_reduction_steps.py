@@ -17,7 +17,7 @@ from mantid.kernel import Logger
 sanslog = Logger("SANS")
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace, FileLoaderRegistry
+from mantid.api import (WorkspaceGroup, Workspace, IEventWorkspace, FileLoaderRegistry)
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,

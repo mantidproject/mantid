@@ -723,9 +723,15 @@ class ISISInstrument(BaseInstrument):
         @param coord2: the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
+        dummy_1 = workspace
+        dummy_2 = component_name
+        dummy_3 = coord1
+        dummy_3 = coord2
+        dummy_4 = relative_displacement
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):
+        dummy_1 = ws_name
         """Return the position of the center of the detector bank"""
         raise RuntimeError("Not Implemented")
 
@@ -968,35 +974,46 @@ class SANS2D(ISISInstrument):
 
         # Deal with front detector
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
-        # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent, ytilt rotates about x axis, xtilt rotates about z axis
+        # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent,
+        # ytilt rotates about x axis, xtilt rotates about z axis
         #
         if frontDet.y_tilt != 0.0:
-            RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "1.", Y = "0.", Z = "0.", Angle = frontDet.y_tilt)
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName= self.getDetector('front').name(),
+                                      X = "1.",
+                                      Y = "0.",
+                                      Z = "0.",
+                                      Angle = frontDet.y_tilt)
         if frontDet.x_tilt != 0.0:
-            RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "0.", Y = "0.", Z = "1.", Angle = frontDet.x_tilt)
+            RotateInstrumentComponent(Workspace=ws,
+                                      ComponentName= self.getDetector('front').name(),
+                                      X = "0.",
+                                      Y = "0.",
+                                      Z = "1.",
+                                      Angle = frontDet.x_tilt)
         #
         # 9/1/12  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
-    	# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
-    	# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
+        # the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
+        # Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
         rotateDet = (-FRONT_DET_ROT - frontDet.rot_corr)
         RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)
         RotRadians = math.pi*(FRONT_DET_ROT + frontDet.rot_corr)/180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
-    	# (Note that the X encoder values in NOT used for the rear detector.)
-    	# The front detector is translated using the difference in X encoder values, with a correction from the user file.
-    	# 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
-    	# but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
-    	# 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
-    	# this inserts *(1.0-math.cos(RotRadians)) into xshift, and
-    	# - frontDet.side_corr*math.sin(RotRadians) into zshift.
-    	# (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
+        # (Note that the X encoder values in NOT used for the rear detector.)
+        # The front detector is translated using the difference in X encoder values, with a correction from the user file.
+        # 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
+        # but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
+        # 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
+        # this inserts *(1.0-math.cos(RotRadians)) into xshift, and
+        # - frontDet.side_corr*math.sin(RotRadians) into zshift.
+        # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
         xshift = (REAR_DET_X + rearDet.x_corr -frontDet.x_corr - FRONT_DET_X  -frontDet.side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr/1000.  - ybeam)
         # Note don't understand the comment below (9/1/12 these are comments from the original python code, you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-    	# 21/3/12 RKH add .radius_corr
+        # 21/3/12 RKH add .radius_corr
         zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
         MoveInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
@@ -1005,7 +1022,8 @@ class SANS2D(ISISInstrument):
         # deal with rear detector
 
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
-        # Best to do the tilts first, while the detector is still centred on the z axis, ytilt rotates about x axis, xtilt rotates about z axis
+        # Best to do the tilts first, while the detector is still centred on the z axis,
+        # ytilt rotates about x axis, xtilt rotates about z axis
         # NOTE the beam centre coordinates may change
         if rearDet.y_tilt != 0.0:
             RotateInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = "1.", Y = "0.", Z = "0.", Angle = rearDet.y_tilt)

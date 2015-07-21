@@ -9,15 +9,15 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
     def test_that_find_ALL_produces_correct_increment(self):
         # Arrange
         fac = cf.BeamCentrePositionUpdaterFactory()
-        position_updater = fac.createBeamCentrePositionUpdater(cf.FindDirectionEnum.ALL)
+        position_updater = fac.create_beam_centre_position_updater(cf.FindDirectionEnum.ALL)
         x = 1.0
         y = 2.0
         x_step = 0.1
         y_step = 0.2
 
         # Act
-        x_new, y_new = position_updater.incrementPosition(x, y, x_step, y_step)
-        x_out, y_out = position_updater.produceFinalPosition(x_new, x, y_new, y)
+        x_new, y_new = position_updater.increment_position(x, y, x_step, y_step)
+        x_out, y_out = position_updater.produce_final_position(x_new, x, y_new, y)
 
         # Assert
         x_expected = 1.1
@@ -30,15 +30,15 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
     def test_that_find_LEFTRIGHT_produces_correct_increment(self):
         # Arrange
         fac = cf.BeamCentrePositionUpdaterFactory()
-        position_updater = fac.createBeamCentrePositionUpdater(cf.FindDirectionEnum.LEFT_RIGHT)
+        position_updater = fac.create_beam_centre_position_updater(cf.FindDirectionEnum.LEFT_RIGHT)
         x = 1.0
         y = 2.0
         x_step = 0.1
         y_step = 0.2
 
         # Act
-        x_new, y_new = position_updater.incrementPosition(x, y, x_step, y_step)
-        x_out, y_out = position_updater.produceFinalPosition(x_new, x, y_new, y)
+        x_new, y_new = position_updater.increment_position(x, y, x_step, y_step)
+        x_out, y_out = position_updater.produce_final_position(x_new, x, y_new, y)
 
         # Assert
         x_expected = 1.1
@@ -51,15 +51,15 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
     def test_that_find_UPPDOWN_produces_correct_increment(self):
         # Arrange
         fac = cf.BeamCentrePositionUpdaterFactory()
-        position_updater = fac.createBeamCentrePositionUpdater(cf.FindDirectionEnum.UP_DOWN)
+        position_updater = fac.create_beam_centre_position_updater(cf.FindDirectionEnum.UP_DOWN)
         x = 1.0
         y = 2.0
         x_step = 0.1
         y_step = 0.2
 
         # Act
-        x_new, y_new = position_updater.incrementPosition(x, y, x_step, y_step)
-        x_out, y_out = position_updater.produceFinalPosition(x_new, x, y_new, y)
+        x_new, y_new = position_updater.increment_position(x, y, x_step, y_step)
+        x_out, y_out = position_updater.produce_final_position(x_new, x, y_new, y)
 
         # Assert
         x_expected = 1.0
@@ -68,9 +68,6 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
         self.assertEqual(y_expected, y_new, "The y value should have been incremented.")
         self.assertEqual(x_expected, x_out, "The x output should not be the initial value.")
         self.assertEqual(y_expected, y_out, "The y output should not be the initial value.")
-
-
-
 
 
 if __name__ == "__main__":
