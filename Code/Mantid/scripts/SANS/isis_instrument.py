@@ -728,7 +728,7 @@ class ISISInstrument(BaseInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[0])
 
         if isSample:
             self.set_up_for_run(run_num)
@@ -1393,7 +1393,7 @@ class LARMOR(ISISInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws))[0])
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
@@ -1460,7 +1460,7 @@ class LARMOR(ISISInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[0])
         if int(run_num) >= 2217:
             try:
                 #logger.warning("Trying get_detector_log")

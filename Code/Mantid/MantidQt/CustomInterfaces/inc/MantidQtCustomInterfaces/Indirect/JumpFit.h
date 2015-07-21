@@ -2,17 +2,18 @@
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
 #include "ui_JumpFit.h"
-#include "IndirectBayesTab.h"
+#include "IndirectDataAnalysisTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class DLLExport JumpFit : public IndirectBayesTab {
+namespace IDA {
+class DLLExport JumpFit : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
   JumpFit(QWidget *parent = 0);
 
-  // Inherited methods from IndirectBayesTab
+  // Inherited methods from IndirectDataAnalysisTab
   void setup();
   bool validate();
   void run();
@@ -50,8 +51,11 @@ private:
   // Map of axis labels to spectrum number
   std::map<std::string, int> m_spectraList;
 
+  QtTreePropertyBrowser* m_jfTree;
+
   Mantid::API::IAlgorithm_sptr m_fitAlg;
 };
+} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

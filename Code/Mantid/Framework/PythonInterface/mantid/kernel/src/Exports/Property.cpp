@@ -1,3 +1,4 @@
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidPythonInterface/kernel/StlExportDefinitions.h"
@@ -78,5 +79,9 @@ void export_Property() {
       .add_property("settings",
                     make_function(&Property::getSettings,
                                   return_value_policy<return_by_value>()),
-                    "Return the object managing this property's settings");
+                    "Return the object managing this property's settings")
+
+      .add_static_property("EMPTY_DBL", &Mantid::EMPTY_DBL)
+      .add_static_property("EMPTY_INT", &Mantid::EMPTY_INT)
+      .add_static_property("EMPTY_LONG", &Mantid::EMPTY_LONG);
 }
