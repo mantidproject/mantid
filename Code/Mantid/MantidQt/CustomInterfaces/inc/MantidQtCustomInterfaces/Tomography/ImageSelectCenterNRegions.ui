@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>ImageSelectCenterNRegions</class>
+ <widget class="QWidget" name="ImageSelectCenterNRegions">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -42,7 +42,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QLineEdit" name="lineEdit_img_seq">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
          <horstretch>0</horstretch>
@@ -74,7 +74,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="pushButton_browse_img">
        <property name="text">
         <string>Browse</string>
        </property>
@@ -126,7 +126,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
-            <widget class="QLabel" name="label">
+            <widget class="QLabel" name="label_img">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                <horstretch>2</horstretch>
@@ -143,7 +143,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QScrollBar" name="horizontalScrollBar">
+        <widget class="QScrollBar" name="horizontalScrollBar_img_stack">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>2</horstretch>
@@ -160,7 +160,7 @@
      <widget class="QWidget" name="">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="groupBox_cor">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -265,7 +265,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="groupBox_roi">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -317,7 +317,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_3">
+           <widget class="QSpinBox" name="spinBox_roi_bottom_x">
             <property name="maximum">
              <number>9999</number>
             </property>
@@ -327,7 +327,7 @@
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QSpinBox" name="spinBox_4">
+           <widget class="QSpinBox" name="spinBox_roi_bottom_y">
             <property name="maximum">
              <number>9999</number>
             </property>
@@ -380,7 +380,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="groupBox_norm">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -405,7 +405,7 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QSpinBox" name="spinBox_5">
+           <widget class="QSpinBox" name="spinBox_norm_top_x">
             <property name="maximum">
              <number>9999</number>
             </property>
@@ -415,7 +415,7 @@
            </widget>
           </item>
           <item row="0" column="2">
-           <widget class="QSpinBox" name="spinBox_6">
+           <widget class="QSpinBox" name="spinBox_norm_top_y">
             <property name="maximum">
              <number>9999</number>
             </property>
@@ -432,7 +432,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="spinBox_7">
+           <widget class="QSpinBox" name="spinBox_norm_bottom_x">
             <property name="maximum">
              <number>9999</number>
             </property>
@@ -442,7 +442,7 @@
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QSpinBox" name="spinBox_8">
+           <widget class="QSpinBox" name="spinBox_norm_bottom_y">
             <property name="maximum">
              <number>9999</number>
             </property>
@@ -467,7 +467,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_normalization_area">
+             <widget class="QPushButton" name="pushButton_norm_area">
               <property name="text">
                <string>Select</string>
               </property>
