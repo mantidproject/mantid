@@ -108,7 +108,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         completes.
         """
 
-        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.raw'],
+        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                          Instrument='IRIS',
                                          Analyser='graphite',
                                          Reflection='002',
@@ -128,7 +128,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         completes.
         """
 
-        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.raw'],
+        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                          Instrument='IRIS',
                                          Analyser='graphite',
                                          Reflection='002',
