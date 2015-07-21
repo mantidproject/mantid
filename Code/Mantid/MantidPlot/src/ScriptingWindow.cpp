@@ -123,18 +123,8 @@ void ScriptingWindow::readSettings() {
   m_manager->m_replaceTabs = settings.value("ReplaceTabs", true).toBool();
   m_manager->m_tabWhitespaceCount =
       settings.value("TabWhitespaceCount", 4).toInt();
-  m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();
-  
-  const QStringList filesToOpen =
-      settings.value("/PreviousFiles", "").toStringList();
-  const int totalFiles = filesToOpen.size();
-  if (totalFiles == 0) {
-    m_manager->newTab();
-  } else {
-    for (int i = 0; i < totalFiles; i++) {
-      m_manager->newTab(i, filesToOpen[i]);
-    }
-  }
+  m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();      
+  openPreviousTabs(settings.value("/PreviousFiles", "").toStringList());
 
   settings.endGroup();
 }
@@ -753,4 +743,15 @@ QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
     }
   }
   return filenames;
+}
+
+void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
+  const int totalFiles = tabsToOpen.size();
+  if (totalFiles == 0) {
+    m_manager->newTab();
+  } else {
+    for (int i = 0; i < totalFiles; i++) {
+      m_manager->newTab(i, tabsToOpen[i]);
+    }
+  }
 }
