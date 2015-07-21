@@ -64,15 +64,6 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->languageName() + " Window");
-
-  const int total = m_manager->recentScripts().count();
-  if (total == 0) {
-    m_manager->newTab();
-  } else {
-    for (int i = 0; i < total; i++) {
-      m_manager->openRecentScript(i);
-    }
-  }
 }
 
 /**
@@ -102,7 +93,6 @@ void ScriptingWindow::saveSettings() {
   settings.setValue("/TabWhitespaceCount", m_manager->m_tabWhitespaceCount);
   settings.setValue("/ScriptFontFamily", m_manager->m_fontFamily);
   settings.setValue("/CodeFolding", m_toggleFolding->isChecked());
-
   settings.endGroup();
 }
 
@@ -133,7 +123,6 @@ void ScriptingWindow::readSettings() {
   m_manager->m_tabWhitespaceCount =
       settings.value("TabWhitespaceCount", 4).toInt();
   m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();
-
   settings.endGroup();
 }
 
