@@ -709,5 +709,55 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
 
+
+class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):
+    monitor_appendix="_monitors"
+    def test_monitors_are_renamed_correctly(self):
+        #Arrange
+        ws_1 = CreateSampleWorkspace()
+        ws_2 = CreateSampleWorkspace()
+        ws_3 = CreateSampleWorkspace()
+
+        ws_mon_1 = CreateSampleWorkspace()
+        ws_mon_2 = CreateSampleWorkspace()
+        ws_mon_3 = CreateSampleWorkspace()
+
+        ws_group = GroupWorkspaces(InputWorkspaces=[ws_1, ws_2, ws_3])
+        ws_mon_group = GroupWorkspaces(InputWorkspaces=[ws_mon_1, ws_mon_2, ws_mon_3])
+
+        # Act
+        su.rename_monitors_for_multiperiod_event_data(ws_mon_group, ws_group, self.monitor_appendix)
+
+        # Assert
+        self.assertTrue(ws_mon_1.name() == ws_1.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertTrue(ws_mon_2.name() == ws_2.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertTrue(ws_mon_3.name() == ws_3.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+
+        # Clean up
+        for element in mtd.getObjectNames():
+            if element in mtd:
+                DeleteWorkspace(element)
+
+    def test_expection_is_raised_when_workspaec_and_monitor_mismatch(self):
+        #Arrange
+        ws_1 = CreateSampleWorkspace()
+        ws_2 = CreateSampleWorkspace()
+        ws_3 = CreateSampleWorkspace()
+
+        ws_mon_1 = CreateSampleWorkspace()
+        ws_mon_2 = CreateSampleWorkspace()
+
+        ws_group = GroupWorkspaces(InputWorkspaces=[ws_1, ws_2, ws_3])
+        ws_mon_group = GroupWorkspaces(InputWorkspaces=[ws_mon_1, ws_mon_2])
+
+        # Act + Assert
+        args = {'monitor_worksapce': ws_mon_group, 'workspace':ws_group, 'appendix':self.monitor_appendix}
+        self.assertRaises(RuntimeError, su.rename_monitors_for_multiperiod_event_data, *args)
+
+        # Clean up
+        for element in mtd.getObjectNames():
+            if element in mtd:
+                DeleteWorkspace(element)
+
 if __name__ == "__main__":
     unittest.main()
