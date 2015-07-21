@@ -94,7 +94,7 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
     logger.information('Chopped data: %s' % (str(chopped_data)))
 
     # Sum files if needed
-    if sum_files:
+    if sum_files and len(data_files) > 1:
         if chopped_data:
             workspace_names = sum_chopped_runs(workspace_names)
         else:

@@ -33,6 +33,7 @@ set ( TEST_PY_FILES
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
+  ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
   LoadFullprofFileTest.py
@@ -46,6 +47,7 @@ set ( TEST_PY_FILES
   MergeCalFilesTest.py
   MolDynTest.py
   MSDFitTest.py
+  OSIRISDiffractionReductionTest.py
   PDDetermineCharacterizationsTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
