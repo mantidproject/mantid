@@ -1005,8 +1005,6 @@ def convert_to_string_list(to_convert):
     '''
     string_list = to_convert.replace(" ", "").split(",")
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
-    sanslog.warning("##################################################")
-    sanslog.warning(output_string)
     return output_string
 
 ###############################################################################
