@@ -78,6 +78,11 @@ public:
                                           IValidator_sptr(new NullValidator),
                                           direction) {}
   /** Constructor from which you can set the property's values through a string
+   * 
+   * The constructor of the base class is called with an empty vector for the default values
+   * The values are set directly from the string. Since the default values are never initialized, isDefault
+   * will return false for any non-empty string input.
+   * 
    *  @param name ::      The name to assign to the property
    *  @param values ::    A comma-separated string containing the values to
    * store in the property
