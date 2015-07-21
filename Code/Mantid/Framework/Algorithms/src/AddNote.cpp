@@ -2,6 +2,7 @@
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "boost/date_time/local_time/posix_time_zone.hpp"
 
 namespace Mantid {
 namespace Algorithms {
@@ -73,10 +74,12 @@ void AddNote::init() {
                   "A String name for either a new time series log to be "
                   "created or an existing name to update",
                   Direction::Input);
+
   declareProperty(
-      "Time", "", boost::make_shared<DateTimeValidator>(),
+	  "Time", std::string(""),
       "An ISO formatted date/time string specifying the timestamp for "
-      "the given log value, e.g 2010-09-14T04:20:12",
+      "the given log value, for example 2010-09-14T04:20:12 \n"
+      "If left blank, this will default to the current Date and Time",
       Direction::Input);
 
   declareProperty(
@@ -95,7 +98,6 @@ void AddNote::init() {
 void AddNote::exec() {
   MatrixWorkspace_sptr logWS = getProperty("Workspace");
   std::string name = getProperty("Name");
-
   const bool deleteExisting = getProperty("DeleteExisting");
   auto &run = logWS->mutableRun();
   if (deleteExisting && run.hasProperty(name)) {
@@ -124,6 +126,11 @@ void AddNote::removeExisting(API::MatrixWorkspace_sptr &logWS,
  */
 void AddNote::createOrUpdate(API::Run &run, const std::string &name) {
   std::string time = getProperty("Time");
+  if (time.compare(std::string("")) == 0) {
+    namespace pt = boost::posix_time;
+    auto dateTimeObj = DateAndTime(pt::second_clock::local_time());
+    time = dateTimeObj.toISO8601String();
+  }
   std::string value = getProperty("Value");
 
   createOrUpdateValue(run, name, time, value);
