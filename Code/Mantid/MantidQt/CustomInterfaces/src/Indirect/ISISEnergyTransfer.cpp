@@ -151,7 +151,7 @@ namespace CustomInterfaces
     }
 
     if(m_uiForm.ckDetailedBalance->isChecked())
-      reductionAlg->setProperty("DetailedBalance", QString::number(m_uiForm.spDetailedBalance->value()).toStdString());
+      reductionAlg->setProperty("DetailedBalance", m_uiForm.spDetailedBalance->value());
 
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.spScaleMultiplier->value());
