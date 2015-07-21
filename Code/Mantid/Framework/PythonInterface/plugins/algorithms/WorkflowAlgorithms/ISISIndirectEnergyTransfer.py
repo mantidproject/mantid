@@ -8,6 +8,7 @@ import os
 
 
 _str_or_none = lambda s: s if s != '' else None
+_ws_or_none = lambda s: mtd[s] if s != '' else None
 _float_or_none = lambda i: float(i) if i != '' else None
 _elems_or_none = lambda l: l if len(l) != 0 else None
 
@@ -74,6 +75,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                              doc='Workspace group for the resulting workspaces.')
 
 
+    #pylint: disable=too-many-locals
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
@@ -138,6 +140,14 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Divide by the calibration workspace if one was provided
                 if self._calibration_ws is not None:
+                    index_min = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[0]))
+                    index_max = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
+
+                    CropWorkspace(InputWorkspace=self._calibration_ws,
+                                  OutputWorkspace=self._calibration_ws,
+                                  StartWorkspaceIndex=index_min,
+                                  EndWorkspaceIndex=index_max)
+
                     Divide(LHSWorkspace=ws_name,
                            RHSWorkspace=self._calibration_ws,
                            OutputWorkspace=ws_name)
@@ -254,7 +264,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Validate grouping method
         grouping_method = self.getPropertyValue('GroupingMethod')
-        grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
+        grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
 
         if grouping_method == 'Workspace' and grouping_ws is None:
             issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
@@ -279,7 +289,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._data_files = self.getProperty('InputFiles').value
         self._sum_files = self.getProperty('SumFiles').value
         self._load_logs = self.getProperty('LoadLogFiles').value
-        self._calibration_ws = _str_or_none(self.getPropertyValue('CalibrationWorkspace'))
+        self._calibration_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
 
         self._instrument_name = self.getPropertyValue('Instrument')
         self._analyser = self.getPropertyValue('Analyser')
@@ -293,7 +303,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._fold_multiple_frames = self.getProperty('FoldMultipleFrames').value
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
-        self._grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
+        self._grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
         self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         self._output_x_units = self.getPropertyValue('UnitX')
