@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
+    <width>550</width>
     <height>500</height>
    </rect>
   </property>
@@ -136,7 +136,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="pageCalibration">
        <property name="sizePolicy">
@@ -191,6 +191,30 @@
               <string>OSIRIS</string>
              </property>
             </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="loDRange">
+             <item>
+              <widget class="QCheckBox" name="ckManualDRange">
+               <property name="text">
+                <string>Manual dRange:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spDRange">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>11</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -465,6 +489,8 @@
   <tabstop>leRebinStart</tabstop>
   <tabstop>leRebinWidth</tabstop>
   <tabstop>leRebinEnd</tabstop>
+  <tabstop>ckManualDRange</tabstop>
+  <tabstop>spDRange</tabstop>
   <tabstop>ckIndividualGrouping</tabstop>
   <tabstop>cbPlotType</tabstop>
   <tabstop>ckGSS</tabstop>
@@ -475,5 +501,22 @@
   <tabstop>pbManageDirs</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ckManualDRange</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spDRange</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>91</x>
+     <y>252</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

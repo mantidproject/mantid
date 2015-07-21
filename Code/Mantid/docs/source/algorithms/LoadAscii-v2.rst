@@ -14,7 +14,7 @@ stores it in a `Workspace2D <http://www.mantidproject.org/Workspace2D>`_ as data
 the file must be organized in columns separated by commas, tabs, spaces,
 colons or semicolons. Only one separator type can be used throughout the
 file; use the "Separator" property to tell the algorithm which to use.
-The algorithm :ref:`SaveAscii2 <algm-SaveAscii2-v2>` is normally able to produce
+The algorithm :ref:`SaveAscii2 <algm-SaveAscii-v2>` is normally able to produce
 such a file.
 
 The format must be:
