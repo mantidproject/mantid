@@ -159,7 +159,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
   // Use the values from the instrument parameter file if we can
-  if (getInstrumentResolution(filename, res)) {
+  if (getResolutionRangeFromWs(filename, res)) {
     // ResNorm resolution should be +/- 10 * the IPF resolution
     res.first = res.first * 10;
     res.second = res.second * 10;
@@ -210,14 +210,15 @@ void ResNorm::maxValueChanged(double max) {
  * @param val :: The new value for the property
  */
 void ResNorm::updateProperties(QtProperty *prop, double val) {
+  UNUSED_ARG(val);
+
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
-  if (prop == m_properties["EMin"]) {
-    updateLowerGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     val);
-  } else if (prop == m_properties["EMax"]) {
-    updateUpperGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
-                     val);
+  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
+    auto bounds = qMakePair(m_dblManager->value(m_properties["EMin"]),
+                            m_dblManager->value(m_properties["EMax"]));
+    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                     bounds);
   }
 }
 

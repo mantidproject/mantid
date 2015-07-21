@@ -29,8 +29,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _LRef = None
     _DIFCref = None
     _wavelengthMin = None
+    _wavelengthMax = None
     _vanPeakFWHM = None
     _vanSmoothing = None
+    _vanRadius = None
     _scaleFactor = None
     _outDir = None
     _outPrefix = None
@@ -92,6 +94,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "Reference DIFC for resolution removal. Zero skips the correction")
         self.declareProperty("CropWavelengthMin", 0.,
                              "Crop the data at this minimum wavelength. Overrides LowResRef.")
+        self.declareProperty("CropWavelengthMax", 0.,
+                             "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.")
         self.declareProperty("RemovePromptPulseWidth", 0.0,
                              "Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
         self.declareProperty("MaxChunkSize", 0.0, "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
@@ -111,6 +115,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "\
                              "Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
+        self.declareProperty("VanadiumRadius", .3175, "Radius for MultipleScatteringCylinderAbsorption")
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
         self.declareProperty("FilterBadPulses", 95.,
                              doc="Filter out events measured while proton charge is more than 5% below average")
@@ -171,8 +176,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._LRef = self.getProperty("UnwrapRef").value
         self._DIFCref = self.getProperty("LowResRef").value
         self._wavelengthMin = self.getProperty("CropWavelengthMin").value
+        self._wavelengthMax = self.getProperty("CropWavelengthMax").value
         self._vanPeakFWHM = self.getProperty("VanadiumFWHM").value
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
+        self._vanRadius = self.getProperty("VanadiumRadius").value
         calib = self.getProperty("CalibrationFile").value
         self._scaleFactor = self.getProperty("ScaleData").value
         self._outDir = self.getProperty("OutputDirectory").value
@@ -393,7 +400,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # do the absorption correction
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     api.SetSampleMaterial(InputWorkspace=vanRun, ChemicalFormula="V", SampleNumberDensity=0.0721)
-                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                                                                      CylinderSampleRadius=self._vanRadius)
 
                     # focus the data
                     vanRun = api.AlignAndFocusPowder(InputWorkspace=vanRun, OutputWorkspace=vanRun, CalFileName=calib,
@@ -404,7 +412,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                      CompressTolerance=self.COMPRESS_TOL_TOF,
                                                      UnwrapRef=self._LRef, LowResRef=self._DIFCref,
                                                      LowResSpectrumOffset=self._lowResTOFoffset,
-                                                     CropWavelengthMin=self._wavelengthMin, **(focuspos))
+                                                     CropWavelengthMin=self._wavelengthMin,
+                                                     CropWavelengthMax=self._wavelengthMax, **(focuspos))
 
 
                     # strip peaks
@@ -705,7 +714,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     PreserveEvents=preserveEvents,\
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=self.COMPRESS_TOL_TOF,\
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,\
-                    CropWavelengthMin=self._wavelengthMin, **(focuspos))
+                    CropWavelengthMin=self._wavelengthMin, CropWavelengthMax=self._wavelengthMax, **(focuspos))
                 for iws in xrange(temp.getNumberHistograms()):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))

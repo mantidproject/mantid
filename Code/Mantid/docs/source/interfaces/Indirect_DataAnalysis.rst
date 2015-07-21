@@ -523,4 +523,40 @@ References:
 1. J S Higgins, R E Ghosh, W S Howells & G Allen, `JCS Faraday II 73 40 (1977) <http://dx.doi.org/10.1039/F29777300040>`_
 2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, `Chem Phys Lett 49 197 (1977) <http://dx.doi.org/10.1016/0009-2614(77)80569-1>`_
 
+JumpFit
+-------
+
+.. interface:: Data Analysis
+  :widget: tabJumpFit
+
+One of the models used to interpret diffusion is that of jump diffusion in which
+it is assumed that an atom remains at a given site for a time :math:`\tau`; and
+then moves rapidly, that is, in a time negligible compared to :math:`\tau`;
+hence ‘jump’.
+
+Options
+~~~~~~~
+
+Sample
+  A sample workspace created with either ConvFit or Quasi.
+
+Fit Funcion
+  Selects the model to be used for fitting.
+
+Width
+  Spectrum in the sample workspace to fit.
+
+QMin & QMax
+  The Q range to perform fitting within.
+
+Fitting Parameters
+  Provides the option to change the defautl fitting parameters passed to the
+  chosen function.
+
+Plot Result
+  Plots the result workspaces.
+
+Save Result
+  Saves the result in the default save directory.
+
 .. categories:: Interfaces Indirect
