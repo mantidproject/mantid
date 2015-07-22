@@ -164,7 +164,7 @@ namespace CustomInterfaces
 
     if(grouping.first == "Workspace")
       reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
-    else if(grouping.second == "File")
+    else if(grouping.first == "File")
       reductionAlg->setProperty("MapFile", grouping.second.toStdString());
 
     reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());

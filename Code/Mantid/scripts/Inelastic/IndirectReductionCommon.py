@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module
+#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module,too-many-locals
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -86,15 +86,17 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, lo
                                   WorkspaceIndex=monitor_index)
 
             # Crop to the detectors required
-            CropWorkspace(InputWorkspace=chop_ws_name, OutputWorkspace=chop_ws_name,
-                          StartWorkspaceIndex=int(spec_min) - 1,
-                          EndWorkspaceIndex=int(spec_max) - 1)
+            chop_ws = mtd[chop_ws_name]
+            CropWorkspace(InputWorkspace=chop_ws_name,
+                          OutputWorkspace=chop_ws_name,
+                          StartWorkspaceIndex=chop_ws.getIndexFromSpectrumNumber(int(spec_min)),
+                          EndWorkspaceIndex=chop_ws.getIndexFromSpectrumNumber(int(spec_max)))
 
     logger.information('Loaded workspace names: %s' % (str(workspace_names)))
     logger.information('Chopped data: %s' % (str(chopped_data)))
 
     # Sum files if needed
-    if sum_files:
+    if sum_files and len(data_files) > 1:
         if chopped_data:
             workspace_names = sum_chopped_runs(workspace_names)
         else:

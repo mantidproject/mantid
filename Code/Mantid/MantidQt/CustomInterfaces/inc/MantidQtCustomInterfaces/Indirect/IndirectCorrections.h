@@ -19,8 +19,6 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-namespace IDA
-{
   // The assumption is made elsewhere that the ordering of these enums matches the ordering of the
   // tabs as they appear in the interface itself.
   enum CorrectionTabChoice
@@ -90,7 +88,6 @@ namespace IDA
     std::map<unsigned int, CorrectionsTab*> m_tabs;
 
   };
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
