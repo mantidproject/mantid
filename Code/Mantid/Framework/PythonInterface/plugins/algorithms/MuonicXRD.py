@@ -1,5 +1,6 @@
 from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 
+#pylint: disable=no-init
 class GetNegMuMuonicXRD(PythonAlgorithm):
     #Dictionary of <element>:<peaks> easily extendible by user.
     Muonic_XR={'Au' :[8135.2,8090.6,8105.4,8069.4,5764.89,5594.97,3360.2,
@@ -13,6 +14,18 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
                         437.687,431.285],
                'As' : [1866.9,1855.8,436.6,427.5],
                'Sn' : [3457.3,3412.8,1022.6,982.5,349.953,345.226]}
+
+    def PyInit(self):
+        element_type = self.Muonic_XR.keys()
+        self.declareProperty("Element List", "None", StringListValidator(element_type),
+                             doc="List of available elements")
+        self.declareProperty(StringArrayProperty("Elements", values=[],
+                             direction=Direction.Input
+                             ))
+        self.declareProperty(name="YAxis Position",
+                                    defaultValue=-0.001,
+                                    doc="Position for Markers on the y-axis")
+
     def get_Muonic_XR(self, element):
         #retrieve peak values from dictionary Muonic_XR
         peak_values = self.Muonic_XR[element]
@@ -27,17 +40,6 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         WS_Muon_XR = CreateWorkspace(xvalues, YPos_WS[:])
         RenameWorkspaces(WS_Muon_XR, WorkspaceNames="MuonXRWorkspace_"+element)
         return WS_Muon_XR
-
-    def PyInit(self):
-        element_type = self.Muonic_XR.keys()
-        self.declareProperty("Element List", "None", StringListValidator(element_type),
-                             doc="List of available elements")
-        self.declareProperty(StringArrayProperty("Elements", values=[],
-                             direction=Direction.Input
-                             ))
-        self.declareProperty(name="YAxis Position",
-                                    defaultValue=-0.001,
-                                    doc="Position for Markers on the y-axis")
 
     def category(self):
         return "Muon"
