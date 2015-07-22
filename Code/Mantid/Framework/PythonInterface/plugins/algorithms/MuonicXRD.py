@@ -46,15 +46,17 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         elements = self.getProperty("Elements").value
         yposition = self.getProperty("YAxis Position").value
         workspace_list = [None]*len(elements)
-        iter = 0
+        i = 0
         for element in elements:
             curr_workspace = self.Create_MuonicXR_WS(element, yposition)
-            workspace_list[iter] = curr_workspace
-            iter+=1
+            workspace_list[i] = curr_workspace
+            i+=1
 
-        if (len(elements) == 1):
+        if len(elements) == 1:
             MuonXRWorkspace = workspace_list[0]
+            self.log().information(str("Created: "+MuonXRWorkspace.name()))
         else:
             MuonicXR_group = GroupWorkspaces(workspace_list)
-        
+            self.log().information(str("Created Group: "+MuonicXR_group.name()))
+
 AlgorithmFactory.subscribe(GetNegMuMuonicXRD)
