@@ -115,6 +115,16 @@ void ConvFit::setup() {
   m_properties["DiffSphere"] = createDiffSphere("Diffusion Sphere");
   m_properties["DiffRotDiscreteCircle"] =
       createDiffRotDiscreteCircle("Diffusion Circle");
+  m_properties["ElasticDiffSphere"] =
+      createElasticDiffSphere("Elastic Diffusion Sphere");
+  m_properties["ElasticDiffRotDiscreteCircle"] =
+      createElasticDiffRotDiscreteCircle("Elastic Diffusion Circle");
+  m_properties["InelasticDiffSphere"] =
+      createInelasticDiffSphere("Inelastic Diffusion Sphere");
+  m_properties["InelasticDiffRotDiscreteCircle"] =
+      createInelasticDiffRotDiscreteCircle("Inelastic Diffusion Circle");
+  m_properties["StretchedExpFT"] =
+      createStretchedExpFT("Strecthced Exponential Fit");
 
   m_uiForm.leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
@@ -425,20 +435,28 @@ std::string createParName(size_t index, size_t subIndex,
  *          +-- DeltaFunction (yes/no)
  *					+-- ProductFunction
  *							|
- *							+-- Lorentzian 1 (yes/no)
- *							+-- Temperature Correction (yes/no)
+ *							+-- Lorentzian 1
+ *(yes/no)
+ *							+-- Temperature Correction
+ *(yes/no)
  *					+-- ProductFunction
  *							|
- *							+-- Lorentzian 2 (yes/no)
- *							+-- Temperature Correction (yes/no)
+ *							+-- Lorentzian 2
+ *(yes/no)
+ *							+-- Temperature Correction
+ *(yes/no)
  *					+-- ProductFunction
  *							|
- *							+-- InelasticDiffSphere (yes/no)
- *							+-- Temperature Correction (yes/no)
+ *							+-- InelasticDiffSphere
+ *(yes/no)
+ *							+-- Temperature Correction
+ *(yes/no)
  *					+-- ProductFunction
  *							|
- *							+-- InelasticDiffRotDiscreteCircle (yes/no)
- *							+-- Temperature Correction (yes/no)
+ *							+-- InelasticDiffRotDiscreteCircle
+ *(yes/no)
+ *							+-- Temperature Correction
+ *(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
  *
@@ -639,8 +657,10 @@ void ConvFit::createTemperatureCorrection(CompositeFunction_sptr product) {
 
 /**
  * Obtains the instrument resolution from the provided workspace
- * @param workspaceName The name of the workspaces which holds the instrument resolution
- * @return The resolution of the instrument. returns 0 if no resolution data could be found
+ * @param workspaceName The name of the workspaces which holds the instrument
+ * resolution
+ * @return The resolution of the instrument. returns 0 if no resolution data
+ * could be found
  */
 double ConvFit::getInstrumentResolution(std::string workspaceName) {
   using namespace Mantid::API;
@@ -702,7 +722,7 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
 }
 
 /**
- * Creates a Lorentz peak 
+ * Creates a Lorentz peak
  * @param name The name of the Lorentz peak (1 or 2)
  * @return The QTProperty that represents the lorentz peak
  */
@@ -710,7 +730,8 @@ QtProperty *ConvFit::createLorentzian(const QString &name) {
   QtProperty *lorentzGroup = m_grpManager->addProperty(name);
 
   m_properties[name + ".Amplitude"] = m_dblManager->addProperty("Amplitude");
-  // m_dblManager->setRange(m_properties[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
+  // m_dblManager->setRange(m_properties[name+".Amplitude"], 0.0, 1.0); // 0 <
+  // Amplitude < 1
   m_properties[name + ".PeakCentre"] = m_dblManager->addProperty("PeakCentre");
   m_properties[name + ".FWHM"] = m_dblManager->addProperty("FWHM");
 
@@ -753,7 +774,7 @@ QtProperty *ConvFit::createDiffSphere(const QString &name) {
 }
 
 /**
- * Creates a DiffRotDiscreteCircle 
+ * Creates a DiffRotDiscreteCircle
  * @param name The name of the DiffRotDiscreteCircle
  * @return The QTProperty that represents the DiffRotDiscreteCircle
  */
@@ -783,6 +804,32 @@ QtProperty *ConvFit::createDiffRotDiscreteCircle(const QString &name) {
   return diffRotDiscreteCircleGroup;
 }
 
+QtProperty *ConvFit::createElasticDiffSphere(const QString &name) {
+  QtProperty *elasticDiffSphereGroup = m_grpManager->addProperty(name);
+  return elasticDiffSphereGroup;
+}
+
+QtProperty *ConvFit::createElasticDiffRotDiscreteCircle(const QString &name) {
+  QtProperty *elasticDiffRotDiscreteCircleGroup =
+      m_grpManager->addProperty(name);
+  return elasticDiffRotDiscreteCircleGroup;
+}
+
+QtProperty *ConvFit::createInelasticDiffSphere(const QString &name) {
+  QtProperty *elasticDiffSphereGroup = m_grpManager->addProperty(name);
+  return elasticDiffSphereGroup;
+}
+
+QtProperty *ConvFit::createInelasticDiffRotDiscreteCircle(const QString &name) {
+  QtProperty *inelasticDiffSphereGroup = m_grpManager->addProperty(name);
+  return inelasticDiffSphereGroup;
+}
+
+QtProperty *ConvFit::createStretchedExpFT(const QString &name) {
+  QtProperty *stretchedExpFTGroup = m_grpManager->addProperty(name);
+  return stretchedExpFTGroup;
+}
+
 /**
  * Populates the properties of a function with given values
  * @param func The function currently being added to the composite
@@ -794,7 +841,8 @@ QtProperty *ConvFit::createDiffRotDiscreteCircle(const QString &name) {
 void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp,
                                QtProperty *group, const std::string &pref,
                                bool tie) {
-  // Get subproperties of group and apply them as parameters on the function object
+  // Get subproperties of group and apply them as parameters on the function
+  // object
   QList<QtProperty *> props = group->subProperties();
 
   for (int i = 0; i < props.size(); i++) {
@@ -955,7 +1003,7 @@ void ConvFit::typeSelection(int index) {
 /**
  * Add/Remove sub property 'BGA1' from background based on Background type
  * @param index A reference to the Background type
- */ 
+ */
 void ConvFit::bgTypeSelection(int index) {
   if (index == 2) {
     m_properties["LinearBackground"]->addSubProperty(m_properties["BGA1"]);
@@ -966,7 +1014,7 @@ void ConvFit::bgTypeSelection(int index) {
 
 /**
  * Updates the plot in the gui window
- */ 
+ */
 void ConvFit::updatePlot() {
   using Mantid::Kernel::Exception::NotFoundError;
 

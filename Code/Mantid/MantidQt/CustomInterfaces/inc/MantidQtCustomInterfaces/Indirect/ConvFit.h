@@ -52,6 +52,11 @@ private:
   QtProperty *createLorentzian(const QString &);
   QtProperty *createDiffSphere(const QString &);
   QtProperty *createDiffRotDiscreteCircle(const QString &);
+  QtProperty *createElasticDiffSphere(const QString &);
+  QtProperty *createElasticDiffRotDiscreteCircle(const QString &);
+  QtProperty *createInelasticDiffSphere(const QString &);
+  QtProperty *createInelasticDiffRotDiscreteCircle(const QString &);
+  QtProperty *createStretchedExpFT(const QString &);
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
   void populateFunction(Mantid::API::IFunction_sptr func,
                         Mantid::API::IFunction_sptr comp, QtProperty *group,

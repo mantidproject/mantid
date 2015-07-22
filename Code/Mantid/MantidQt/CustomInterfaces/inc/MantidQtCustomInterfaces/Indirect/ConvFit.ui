@@ -151,6 +151,31 @@
                <string>Diffusion Circle</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+                <string>Elastic Diffusion Sphere</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+                <string>Elastic Diffusion Circle</string>
+              </property>
+             </item>
+              <item>
+                <property name="text">
+                  <string>Inelastic Diffusion Sphere</string>
+                </property>
+              </item>
+              <item>
+                <property name="text">
+                  <string>Inelastic Diffusion Circle</string>
+                </property>
+              </item>
+              <item>
+                <property name="text">
+                  <string>Strecthced Exponential Fit</string>
+                </property>
+              </item>
             </widget>
            </item>
           </layout>
