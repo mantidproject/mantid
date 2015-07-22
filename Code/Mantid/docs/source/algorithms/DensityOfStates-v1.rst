@@ -18,6 +18,8 @@ a table workspace containing each ion that is present in a .phonon file.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - loading data from phonon & castep files:**
 
 .. testcode:: ExDensityOfStatesSimple
