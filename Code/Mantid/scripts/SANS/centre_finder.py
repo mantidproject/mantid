@@ -451,7 +451,7 @@ class IncrementProviderFactory(object):
 
         # The angle increment is currently not specified in the instrument parameters file,
         # hence we set a value here. This is also true for the tolerance
-        self.increment_coord1_angle = 1/1000 #
+        self.increment_coord1_angle = 1.0/1000.0 #
         self.tolerance_angle = tolerance
 
     def create_increment_provider(self, reducer):

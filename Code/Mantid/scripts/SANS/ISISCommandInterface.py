@@ -1157,7 +1157,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         resCoord2_old = resCoord2
 
         if it != MaxIter:
-            COORD1NEW, COORD2NEW = centre_positioner.increment_position(xstart, ystart)
+            COORD1NEW, COORD2NEW = centre_positioner.increment_position(COORD1NEW, COORD2NEW)
         else:
             centre.logger.notice("Out of iterations, new coordinates may not be the best!")
 
