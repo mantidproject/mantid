@@ -124,7 +124,7 @@ class CentreFinder(object):
                                                                      coord2 = y,
                                                                      relative_displacement = True)
         if setup.get_can():
-            setup.instrument.elementary_displacement_of_single_component(workspace=setup.get_sample().wksp_name,
+            setup.instrument.elementary_displacement_of_single_component(workspace=setup.get_can().wksp_name,
                                                                          component_name=self.detector,
                                                                          coord1 = x,
                                                                          coord2 = y,
