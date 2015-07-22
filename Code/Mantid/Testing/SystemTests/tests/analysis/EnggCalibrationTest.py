@@ -188,7 +188,7 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         # Mac fitting tests produce differences for some reason.
         import sys
         if "darwin" == sys.platform:
-            delta_darwin = 5e-3
+            delta_darwin = 1e-2
             exdelta = delta_darwin
         if "win32" == sys.platform:
             delta_win7 =  5e-4 # this is needed especially for the zero parameter (error >=1e-4)
