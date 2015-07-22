@@ -759,6 +759,24 @@ class DensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
+    def _parse_castep_bond(self, bond_match):
+        """
+        Parses a regex match to obtain bond information.
+
+        @param bond_match Regex match to bond data line
+        @return A dictionary defining the bond
+        """
+        bond = dict()
+
+        bond['atom_a'] = (bond_match.group(1), bond_match.group(2))
+        bond['atom_b'] = (bond_match.group(3), bond_match.group(4))
+        bond['population'] = bond_match.group(5)
+        bond['length'] = bond_match.group(6)
+
+        return bond
+
+#----------------------------------------------------------------------------------------
+
     def _parse_castep_file(self, file_name):
         """
         Read frequencies from a <>.castep file
@@ -773,11 +791,16 @@ class DensityOfStates(PythonAlgorithm):
 
         # Data regex. Looks for lines in the following format:
         #     +     1      -0.051481   a          0.0000000  N            0.0000000  N     +
-        data_regex_str = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+"% {'s': self._float_regex}
+        data_regex_str = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+" % {'s': self._float_regex}
         data_regex = re.compile(data_regex_str)
 
+        # Atom bond regex. Looks for lines in the following format:
+        #   H 006 --    O 012               0.46        1.04206
+        bond_regex_str = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        bond_regex = re.compile(bond_regex_str)
+
         block_count = 0
-        frequencies, ir_intensities, raman_intensities, weights = [], [], [], []
+        frequencies, ir_intensities, raman_intensities, weights, bonds = [], [], [], [], []
         data_lists = (frequencies, ir_intensities, raman_intensities)
         with open(file_name, 'rU') as f_handle:
             self._parse_castep_file_header(f_handle)
@@ -803,6 +826,11 @@ class DensityOfStates(PythonAlgorithm):
                         for data_list, item in zip(data_lists, line_data):
                             data_list.append(item)
 
+                # Check if we've found a bond
+                bond_match = bond_regex.match(line)
+                if bond_match:
+                    bonds.append(self._parse_castep_bond(bond_match))
+
         frequencies = np.asarray(frequencies)
         ir_intensities = np.asarray(ir_intensities)
         raman_intensities = np.asarray(raman_intensities)
@@ -814,6 +842,9 @@ class DensityOfStates(PythonAlgorithm):
                 'raman_intensities': raman_intensities,
                 'weights': warray
                 }
+
+        if len(bonds) > 0:
+            file_data['bonds'] = bonds
 
         return file_data
 
