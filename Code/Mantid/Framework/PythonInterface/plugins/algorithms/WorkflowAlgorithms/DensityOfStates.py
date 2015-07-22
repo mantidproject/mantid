@@ -252,7 +252,11 @@ class DensityOfStates(PythonAlgorithm):
         energies = np.arange(xmin, xmin + hist.size)
 
         if PEAK_WIDTH_ENERGY_FLAG in self._peak_width:
-            peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p]))) for p in peaks], dtype=float)
+            try:
+                peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))\
+                                           for p in peaks], dtype=float)
+            except SyntaxError:
+                raise ValueError('Invalid peak width function (must be either a float number or function containing "energy")')
             peak_widths = np.abs(peak_widths)
             logger.debug('Peak widths: %s' % (str(peak_widths)))
         else:

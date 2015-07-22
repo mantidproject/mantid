@@ -150,6 +150,13 @@ class DensityOfStatesTest(unittest.TestCase):
         self.assertRaises(RuntimeError, DensityOfStates,
                           File=self._file_name, SpectrumType='IonTable')
 
+    def test_peak_width_function_error(self):
+        """
+        Using an invalid peak width function should raise RuntimeError.
+        """
+        self.assertRaises(RuntimeError, DensityOfStates,
+                          File=self._file_name, PeakWidth='10*')
+
 
 if __name__=="__main__":
     unittest.main()
