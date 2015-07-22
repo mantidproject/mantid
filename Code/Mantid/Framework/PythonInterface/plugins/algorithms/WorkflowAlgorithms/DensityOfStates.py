@@ -267,7 +267,7 @@ class DensityOfStates(PythonAlgorithm):
             n_gauss = int(3.0 * np.max(peak_widths) / self._bin_width)
             dos = np.zeros(len(hist) - 1 + n_gauss)
 
-            for index, width in zip(peaks, np.nditer(peak_widths)):
+            for index, width in zip(peaks, peak_widths.tolist()):
                 sigma = width / 2.354
                 for g in range(-n_gauss, n_gauss):
                     if index + g > 0:
@@ -278,7 +278,7 @@ class DensityOfStates(PythonAlgorithm):
             n_lorentz = int(25.0 * np.max(peak_widths) / self._bin_width)
             dos = np.zeros(len(hist) - 1 + n_lorentz)
 
-            for index, width in zip(peaks, np.nditer(peak_widths)):
+            for index, width in zip(peaks, peak_widths.tolist()):
                 gamma_by_2 = width / 2
                 for l in range(-n_lorentz, n_lorentz):
                     if index + l > 0:
