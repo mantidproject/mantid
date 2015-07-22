@@ -12,6 +12,12 @@ Description
 Calculates phonon densities of states, Raman and IR spectrum from the
 output of CASTEP code obtained in the form of .phonon and .castep files.
 
+The PeakWidth property may be passed a function containg the variable "energy"
+(e.g. *0.1*energy*) to set the FWHM of the peak as a function of the energy
+(centre point of the peak). This can be useful for comparison with experimental
+data by allowing the peak width to change according to the resolution of the
+instrument.
+
 If the IonTable spectrum type is used then the output workspace will be
 a table workspace containing each ion that is present in a .phonon file.
 
