@@ -46,11 +46,9 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         elements = self.getProperty("Elements").value
         yposition = self.getProperty("YAxis Position").value
         workspace_list = [None]*len(elements)
-        i = 0
-        for element in elements:
+        for idx,element in enumerate(elements):
             curr_workspace = self.Create_MuonicXR_WS(element, yposition)
-            workspace_list[i] = curr_workspace
-            i+=1
+            workspace_list[idx] = curr_workspace
 
         if len(elements) == 1:
             MuonXRWorkspace = workspace_list[0]
