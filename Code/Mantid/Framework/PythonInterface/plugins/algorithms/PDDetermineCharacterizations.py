@@ -2,7 +2,7 @@
 from mantid.api import *
 from mantid.kernel import *
 
-# this should match those in LoadPDCharacterizations
+# this should match those in PDLoadCharacterizations
 COL_NAMES = [
     "frequency",   # double
     "wavelength",  # double
@@ -54,11 +54,16 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                              doc="Property manager name for the reduction")
 
         defaultMsg = " run to use. 0 to use value in table, -1 to not use."
-        self.declareProperty("BackRun", 0,
+        arrValidator = IntArrayBoundedValidator()
+        arrValidator.setLower(-1)
+        self.declareProperty(IntArrayProperty("BackRun", values=[0],
+                                              validator=arrValidator),
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormRun", 0,
+        self.declareProperty(IntArrayProperty("NormRun", values=[0],
+                                              validator=arrValidator),
                              doc="The background" + defaultMsg)
-        self.declareProperty("NormBackRun", 0,
+        self.declareProperty(IntArrayProperty("NormBackRun", values=[0],
+                                              validator=arrValidator),
                              doc="The background" + defaultMsg)
 
         self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],\
@@ -127,11 +132,12 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         propNames = ("BackRun",   "NormRun",  "NormBackRun")
         dictNames = ("container", "vanadium", "empty")
         for (propName, dictName) in zip(propNames, dictNames):
-            runNum = self.getProperty(propName).value
-            if runNum < 0: # reset value
-                info[dictName] = 0
-            elif runNum > 0: # override value
-                info[dictName] = runNum
+            # currently properties cannot be created from ndarras TODO #13173
+            runNums = list(self.getProperty(propName).value)
+            if len(runNums) == 1 and  runNums[0] < 0: # reset value
+                info[dictName] = [0]
+            elif runNums > 0: # override value
+                info[dictName] = runNums
 
         # convert to a property manager
         self.processInformation(manager, info)
@@ -157,6 +163,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             except TypeError:
                 # Converter error, so remove old value first
                 del prop_man[key]
+                prop_man.declareProperty(IntArrayProperty(key, [0]))
                 prop_man[key] = val
 
     def closeEnough(self, left, right):

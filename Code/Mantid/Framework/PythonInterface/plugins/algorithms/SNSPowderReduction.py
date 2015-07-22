@@ -78,11 +78,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("PushDataPositive", "None",
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
-        self.declareProperty("BackgroundNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
+        arrvalidatorBack = IntArrayBoundedValidator()
+        arrvalidator.setLower(-1)
+        self.declareProperty(IntArrayProperty("BackgroundNumber", values=[0], validator=arrvalidatorBack),
                              doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
-        self.declareProperty("VanadiumNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
+        arrvalidatorVan = IntArrayBoundedValidator()
+        arrvalidator.setLower(-1)
+        self.declareProperty(IntArrayProperty("VanadiumNumber", values=[0], validator=arrvalidatorVan),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
-        self.declareProperty("VanadiumBackgroundNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
+        arrvalidatorVanBack = IntArrayBoundedValidator()
+        arrvalidator.setLower(-1)
+        self.declareProperty(IntArrayProperty("VanadiumBackgroundNumber", values=[0], validator=arrvalidatorVanBack),
                              doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load,\
                                       extensions = [".h5", ".hd5", ".hdf", ".cal"]))
@@ -309,7 +315,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # ENDIF
         # ENDFOR
 
-        for samRun in samwksplist:
+        for (samRunIndex, samRun) in enumerate(samwksplist):
             samRun = mtd[str(samRun)]
             try:
                 self.log().information("Sample Run %s:  starting number of events = %d" % (str(samRun), samRun.getNumberEvents()))
@@ -326,7 +332,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._info = self._getinfo(samRun)
 
             # process the container
-            canRun = self._info["container"]
+            canRun = self._info["container"][samRunIndex]
             if canRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     canFilterWall = timeFilterWall
@@ -349,7 +355,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 canRun = None
 
             # process the vanadium run
-            vanRun = self._info["vanadium"]
+            vanRun = self._info["vanadium"][samRunIndex]
             if vanRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = timeFilterWall
@@ -373,7 +379,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
 
                     # load the vanadium background (if appropriate)
-                    vbackRun = self._info["empty"]
+                    vbackRun = self._info["empty"][samRunIndex]
                     if vbackRun > 0:
                         vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
