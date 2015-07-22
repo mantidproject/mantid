@@ -3,4 +3,10 @@
 # RPM pre-uninstall script
 #
 
-# Nothing needs to be done
+if [ -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then
+    rm /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@
+fi
+
+if [ -L /usr/bin/mantidpython@CPACK_PACKAGE_SUFFIX@ ]; then
+    rm /usr/bin/mantidpython@CPACK_PACKAGE_SUFFIX@
+fi
