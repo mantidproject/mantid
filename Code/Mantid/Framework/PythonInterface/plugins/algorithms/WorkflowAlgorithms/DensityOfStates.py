@@ -260,7 +260,8 @@ class DensityOfStates(PythonAlgorithm):
             peak_widths = np.abs(peak_widths)
             logger.debug('Peak widths: %s' % (str(peak_widths)))
         else:
-            peak_widths = np.full((len(peaks)), float(self._peak_width))
+            single_val = np.array([float(self._peak_width)])
+            peak_widths = np.repeat(single_val, len(peaks))
 
         if self._peak_func == "Gaussian":
             n_gauss = int(3.0 * np.max(peak_widths) / self._bin_width)
