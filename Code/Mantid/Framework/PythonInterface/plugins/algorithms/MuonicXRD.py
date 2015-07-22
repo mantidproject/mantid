@@ -1,5 +1,5 @@
 from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
-from mantid.kernel.ListValidator import StringListValidator
+from mantid.kernel import *
 
 #pylint: disable=no-init
 class GetNegMuMuonicXRD(PythonAlgorithm):
