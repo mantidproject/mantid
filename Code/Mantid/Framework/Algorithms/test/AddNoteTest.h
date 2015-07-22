@@ -124,7 +124,7 @@ private:
 	if(logEndTime == 0){
 		TS_ASSERT_EQUALS(DateAndTime(logStartTime), times[position]);
 	}else{
-		int logMinTime, logMaxTime;
+		int logMinTime = 0, logMaxTime = 0;
 		TS_ASSERT_THROWS_NOTHING(logMinTime = (times[position].toISO8601String().at(15)) - '0' );
 		TS_ASSERT_THROWS_NOTHING(logMaxTime = (logStartTime.at(15) + logEndTime) - '0');
 		const int remainder = logMaxTime - logMinTime;
