@@ -41,6 +41,13 @@ Output:
        1.62244888]
 
 
+References
+----------
+
+The source for how this calculation is done is
+
+#. D.F.R. Mildner, J.M. Carpenter, and C.A. Pelizzari *Generalized Attenuation Correction Factor for Scattering from Cylindrical Targets.* Review of Scientific Instruments **45.4** (1974): 572. `doi: 10.1063/1.1686687 <http://dx.doi.org/10.1063/1.1686687>`_
+
 .. categories::
 
 .. sourcelink::
