@@ -143,37 +143,37 @@
              </item>
              <item>
               <property name="text">
-               <string>Diffusion Sphere</string>
+               <string>DiffSphere</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Diffusion Circle</string>
+               <string>DiffRotDiscreteCircle</string>
               </property>
              </item>
              <item>
               <property name="text">
-                <string>Elastic Diffusion Sphere</string>
+                <string>ElasticDiffSphere</string>
               </property>
              </item>
              <item>
               <property name="text">
-                <string>Elastic Diffusion Circle</string>
+                <string>ElasticDiffRotDiscreteCircle</string>
               </property>
              </item>
               <item>
                 <property name="text">
-                  <string>Inelastic Diffusion Sphere</string>
+                  <string>InelasticDiffSphere</string>
                 </property>
               </item>
               <item>
                 <property name="text">
-                  <string>Inelastic Diffusion Circle</string>
+                  <string>InelasticDiffRotDiscreteCircle</string>
                 </property>
               </item>
               <item>
                 <property name="text">
-                  <string>Strecthced Exponential Fit</string>
+                  <string>StretchedExpFT</string>
                 </property>
               </item>
             </widget>

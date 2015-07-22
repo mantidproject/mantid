@@ -195,6 +195,11 @@ void ConvFit::setup() {
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
+  // Update fit parameters in browser when function is selected
+  connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)),
+          this, SLOT(fitFunctionSelected(const QString &)));
+  fitFunctionSelected(m_uiForm.cbFitType->currentText());
+
   updatePlotOptions();
 }
 
@@ -1552,6 +1557,87 @@ void ConvFit::updatePlotOptions() {
   plotOptions << "All";
   m_uiForm.cbPlotType->addItems(plotOptions);
 }
+
+
+
+
+
+
+
+
+/**
+ * Gets a list of parameters for a given fit function.
+ *
+ * @return List fo parameters
+ */
+QStringList ConvFit::getFunctionParameters(const QString &functionName) {
+  QStringList parameters;
+
+  IFunction_sptr func =
+      FunctionFactory::Instance().createFunction(functionName.toStdString());
+
+  for (size_t i = 0; i < func->nParams(); i++)
+    parameters << QString::fromStdString(func->parameterName(i));
+
+  return parameters;
+}
+
+/**
+ * Handles a new fit function being selected.
+ *
+ * @param functionName Name of new fit function
+ */
+void ConvFit::fitFunctionSelected(const QString &functionName) {
+  // Remove current parameter elements
+  if (functionName.compare("Zero Lorentzians") == 0) {
+    return;
+  } else {
+    for (auto it = m_properties.begin(); it != m_properties.end();) {
+      if (it.key().startsWith("parameter_")) {
+        delete it.value();
+        it = m_properties.erase(it);
+      } else {
+        ++it;
+      }
+    }
+
+    // Don't run the algorithm when updating parameter values
+    /*disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+               SLOT(runPreviewAlgorithm()));*/
+
+    // Add new parameter elements
+    QStringList parameters = getFunctionParameters(functionName);
+    for (auto it = parameters.begin(); it != parameters.end(); ++it) {
+      QString name = "parameter_" + *it;
+      m_properties[name] = m_dblManager->addProperty(*it);
+      m_dblManager->setValue(m_properties[name], 1.0);
+      m_properties["FitFunction"]->addSubProperty(m_properties[name]);
+    }
+
+    /*connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+            SLOT(runPreviewAlgorithm()));*/
+
+    // runPreviewAlgorithm();
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -44,6 +44,7 @@ private slots:
   void showTieCheckbox(QString);
   void updatePlotOptions();
   void singleFitComplete(bool error);
+  void fitFunctionSelected(const QString &);
 
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
@@ -74,6 +75,12 @@ private:
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
+
+
+
+  QStringList getFunctionParameters(const QString &);
+
+
 };
 } // namespace IDA
 } // namespace CustomInterfaces
