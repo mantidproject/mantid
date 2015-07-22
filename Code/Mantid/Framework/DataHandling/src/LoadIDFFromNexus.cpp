@@ -6,6 +6,13 @@
 #include "MantidAPI/FileProperty.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Element.h>
+
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
 
 namespace Mantid {
 namespace DataHandling {
@@ -103,6 +110,43 @@ void LoadIDFFromNexus::exec() {
     } // Loop
     return ""; // No file found
   }
+
+
+  /* Reads the parameter correction file and if a correction is needed output the parameterfile needed 
+  *  and whether it is to be appended.
+  * @param correction_file :: path nsame of correction file as returned by getParameterCorrectionFile()
+  * @param date :: IS8601 date string applicable
+  * @param parameter_file :: output parameter file to use or "" if none
+  * @param append :: output whether the parameters from parameter_file should be appended.
+  *
+  *  @throw FileError Thrown if unable to parse XML file
+  */
+void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correction_file, const std::string& date, 
+                                                   std::string parameter_file, bool append ) { 
+
+   // Get contents of correction file                                                    
+  const std::string xmlText = Kernel::Strings::loadFile(correction_file);
+
+  // Set up the DOM parser and parse xml file
+  DOMParser pParser;
+  Document* pDoc;
+  try {
+    pDoc = pParser.parseString(xmlText);
+  } catch (Poco::Exception &exc) {
+    throw Kernel::Exception::FileError(
+        exc.displayText() + ". Unable to parse parameter correction file:", correction_file);
+  } catch (...) {
+    throw Kernel::Exception::FileError("Unable to parse parameter correction file:", correction_file);
+  }
+  // Get pointer to root element
+  Element* pRootElem = pDoc->documentElement();
+  if (!pRootElem->hasChildNodes()) {
+    g_log.error("Parameter correction file: " + correction_file + "contains no XML root element.");
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "No root element in XML parameter correction file", correction_file);
+  }
+
+}
 
 
 /** Loads the parameters from the Nexus file if possible, else from a parameter file
