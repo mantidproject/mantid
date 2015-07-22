@@ -1,7 +1,7 @@
 from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 
 class GetNegMuMuonicXRD(PythonAlgorithm):
- #Dictionary of <element>:<peaks> easily extendible by user.  
+    #Dictionary of <element>:<peaks> easily extendible by user.
     Muonic_XR={'Au' :[8135.2,8090.6,8105.4,8069.4,5764.89,5594.97,3360.2,
                        3206.8,2474.22,2341.21,2304.44,1436.05,1391.58,1104.9,
                        899.14,869.98,405.654,400.143],
@@ -13,7 +13,6 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
                         437.687,431.285],
                'As' : [1866.9,1855.8,436.6,427.5],
                'Sn' : [3457.3,3412.8,1022.6,982.5,349.953,345.226]}
-                       
     def get_Muonic_XR(self, element):
         #retrieve peak values from dictionary Muonic_XR
         peak_values = self.Muonic_XR[element]
@@ -31,20 +30,28 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
 
     def PyInit(self):
         element_type = self.Muonic_XR.keys()
-        self.declareProperty("Element", "None",
-                                    StringListValidator(element_type),
-                                    "Select Element for Muonic XR")
+        self.declareProperty("Element List", "None",
+                             "List of available elements")
+        self.declareProperty(StringArrayProperty("Elements", values=[],
+                             direction=Direction.Input
+                             ))
         self.declareProperty(name="YAxis Position",
                                     defaultValue=-0.001,
                                     doc="Position for Markers on the y-axis")
-
 
     def category(self):
         return "Muon"
 
     def PyExec(self):
-        element = self.getProperty("Element").value
+        elements = self.getProperty("Elements").value
         yposition = self.getProperty("YAxis Position").value
-        output_workspace = self.Create_MuonicXR_WS(element,yposition)
-
+        workspace_list = [None]*len(elements)
+        iter = 0
+        
+        for element in elements:
+            curr_workspace = self.Create_MuonicXR_WS(element, yposition)
+            workspace_list[iter] = curr_workspace
+            iter+=1
+        MuonicXR_group = GroupWorkspaces(workspace_list)
+        
 AlgorithmFactory.subscribe(GetNegMuMuonicXRD)
