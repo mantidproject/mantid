@@ -134,6 +134,9 @@ class CentreFinder(object):
         out_ws = quadrant+suffix
         # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
         CloneWorkspace(InputWorkspace=reduced_ws,OutputWorkspace= out_ws)
+
+        x_dir, y_dir, z_dir = self._get_cylinder_direction(out_ws)
+
         objxml = SANSUtility.QuadrantXML([0, 0, 0.0], r_min, r_max, quadrant)
         # Mask out everything outside the quadrant of interest
         MaskDetectorsInShape(Workspace=out_ws,ShapeXML= objxml)
@@ -212,6 +215,13 @@ class CentreFinder(object):
             indexB += 1
         return residue
 
+def _get_cylinder_direction(self, workspace):
+    '''
+    Get the direction that the masking clyinder needs to point at. This should be the normal
+    of the tilted detector bench
+    @param workspace: the workspace with the tilted detector bench
+    '''
+    pass
 
 class CentrePositioner(object):
     '''
@@ -452,7 +462,7 @@ class IncrementProviderFactory(object):
         else:
             return IncrementProviderXY(increment_coord1 = self.increment_coord1,
                                        increment_coord2 = self.increment_coord2,
-                                       tolerance = tolerance)
+                                       tolerance = self.tolerance)
 
     def is_workspace_which_requires_angle(self, reducer):
         '''
