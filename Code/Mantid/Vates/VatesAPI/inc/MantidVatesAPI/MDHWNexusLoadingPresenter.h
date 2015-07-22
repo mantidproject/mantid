@@ -50,8 +50,11 @@ public:
   virtual std::string getWorkspaceTypeName();
   std::vector<int> getExtents();
 private:
+  void loadWorkspace();
+  void loadWorkspace(ProgressAction& rebinningProgressUpdate);
   const std::string m_filename;
   std::string m_wsTypeName;
+  Mantid::API::IMDHistoWorkspace_sptr m_histoWs;
 };
 }
 }

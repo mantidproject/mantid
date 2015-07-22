@@ -15,6 +15,7 @@ namespace Mantid
 {
 namespace VATES
 {
+
 /**
  * Constructor
  * @param view : MVP view
@@ -76,34 +77,18 @@ vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, Progr
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
 
-  if(this->shouldLoad())
-  {
-    Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate, &ProgressAction::handler);
-    AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
+  if(this->shouldLoad() || !m_histoWs)
+    this->loadWorkspace(loadingProgressUpdate);
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
-    alg->initialize();
-    alg->setPropertyValue("Filename", this->m_filename);
-    alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
-    alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
-    alg->addObserver(observer);
-    alg->execute();
-    alg->removeObserver(observer);
-  }
-
-  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
-  Mantid::API::IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
-
-  //factory->setRecursionDepth(this->m_view->getRecursionDepth());
   // Create visualisation in one-shot.
-  vtkDataSet* visualDataSet = factory->oneStepCreate(histoWs, drawingProgressUpdate);
+  vtkDataSet* visualDataSet = factory->oneStepCreate(m_histoWs, drawingProgressUpdate);
 
   // extractMetaData needs to be re-run here because the first execution
   // of this from ::executeLoadMetadata will not have ensured that all
   // dimensions have proper range extents set.
-  this->extractMetadata(histoWs);
+  this->extractMetadata(m_histoWs);
 
-  this->appendMetadata(visualDataSet, histoWs->getName());
+  this->appendMetadata(visualDataSet, m_histoWs->getName());
   return visualDataSet;
 }
 
@@ -113,24 +98,15 @@ vtkDataSet* MDHWNexusLoadingPresenter::execute(vtkDataSetFactory* factory, Progr
 void MDHWNexusLoadingPresenter::executeLoadMetadata()
 {
   using namespace Mantid::API;
-  AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
-
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
-
-  alg->initialize();
-  alg->setPropertyValue("Filename", this->m_filename);
-  alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
-  alg->setProperty("MetadataOnly", true); //Don't load the events.
-  alg->setProperty("FileBackEnd", false); //Only require metadata, so do it in memory.
-  alg->execute();
-
-  Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
-  IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
-  m_wsTypeName = histoWs->id();
+  
+  if(this->shouldLoad() || !m_histoWs)
+  {
+    // no difference between loading just the metadata or the entire workspace.
+    this->loadWorkspace();
+  }
+  m_wsTypeName = m_histoWs->id();
   // Call base-class extraction method.
-  this->extractMetadata(histoWs);
-
-  AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
+  this->extractMetadata(m_histoWs);
 }
 
 /**
@@ -154,9 +130,25 @@ std::string MDHWNexusLoadingPresenter::getWorkspaceTypeName()
 std::vector<int> MDHWNexusLoadingPresenter::getExtents()
 {
   // Hack which only works in 3D. Needs to be updated for 4 dimensions!
-  // Hack to ensure MD_HISTO_WS_ID is available. Fix so we're not constantly reloading!
-  using namespace Mantid::API;
+  std::vector<int> extents(6, 0);
 
+  if(this->shouldLoad() || !m_histoWs)
+    this->loadWorkspace();
+
+  if(m_histoWs)
+  {
+    extents[1] = m_histoWs->getDimension(0)->getNBins();
+    extents[3] = m_histoWs->getDimension(1)->getNBins();
+    extents[5] = m_histoWs->getDimension(2)->getNBins();
+  }
+
+  return extents;
+
+}
+
+void MDHWNexusLoadingPresenter::loadWorkspace()
+{
+  using namespace Mantid::API;
   AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
@@ -165,17 +157,26 @@ std::vector<int> MDHWNexusLoadingPresenter::getExtents()
   alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
   alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
   alg->execute();
-
   Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
-  Mantid::API::IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+  m_histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+}
 
-  std::vector<int> extents(6, 0);
-  extents[1] = histoWs->getDimension(0)->getNBins();
-  extents[3] = histoWs->getDimension(1)->getNBins();
-  extents[5] = histoWs->getDimension(2)->getNBins();
-  //AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
-  
-  return extents;
+void MDHWNexusLoadingPresenter::loadWorkspace( ProgressAction& loadingProgressUpdate)
+{
+    using namespace Mantid::API;
+    Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate, &ProgressAction::handler);
+
+    AnalysisDataService::Instance().remove("MD_HISTO_WS_ID");
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
+    alg->initialize();
+    alg->setPropertyValue("Filename", this->m_filename);
+    alg->setPropertyValue("OutputWorkspace", "MD_HISTO_WS_ID");
+    alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
+    alg->addObserver(observer);
+    alg->execute();
+    alg->removeObserver(observer);
+    Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
+    m_histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
 }
 
 }
