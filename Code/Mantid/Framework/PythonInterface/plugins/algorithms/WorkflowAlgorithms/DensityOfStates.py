@@ -124,7 +124,11 @@ class DensityOfStates(PythonAlgorithm):
 
         file_name = self.getPropertyValue('File')
         file_data = self._read_data_from_file(file_name)
-        frequencies, ir_intensities, raman_intensities, weights = file_data[:4]
+        frequencies = file_data['frequencies']
+        ir_intensities = file_data['ir_intensities']
+        raman_intensities = file_data['raman_intensities']
+        weights = file_data['weights']
+        eigenvectors = file_data.get('eigenvectors', None)
 
         prog_reporter = Progress(self, 0.0, 1.0, 1)
 
@@ -141,8 +145,6 @@ class DensityOfStates(PythonAlgorithm):
         elif self._calc_partial and self._spec_type == 'DOS':
             logger.notice('Calculating partial density of states')
             prog_reporter.report('Calculating partial density of states')
-
-            eigenvectors = file_data[4]
 
             # Filter the dict of all ions to only those the user cares about
             partial_ions = dict()
@@ -170,8 +172,6 @@ class DensityOfStates(PythonAlgorithm):
         elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
             logger.notice('Calculating summed density of states with scaled intensities')
             prog_reporter.report('Calculating density of states')
-
-            eigenvectors = file_data[4]
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(self._ion_dict, frequencies, eigenvectors, weights)
 
@@ -498,9 +498,7 @@ class DensityOfStates(PythonAlgorithm):
 
             file_data = self._parse_castep_file(file_name)
 
-        frequencies = file_data[0]
-
-        if frequencies.size == 0:
+        if file_data['frequencies'].size == 0:
             raise ValueError("Failed to load any frequencies from file.")
 
         return file_data
@@ -674,7 +672,15 @@ class DensityOfStates(PythonAlgorithm):
         raman_intensities = np.asarray(raman_intensities)
         warray = np.repeat(weights, self._num_branches)
 
-        return frequencies, ir_intensities, raman_intensities, warray, eigenvectors
+        file_data = {
+                'frequencies': frequencies,
+                'ir_intensities': ir_intensities,
+                'raman_intensities': raman_intensities,
+                'weights': warray,
+                'eigenvectors': eigenvectors
+                }
+
+        return file_data
 
 #----------------------------------------------------------------------------------------
 
@@ -802,8 +808,16 @@ class DensityOfStates(PythonAlgorithm):
         raman_intensities = np.asarray(raman_intensities)
         warray = np.repeat(weights, self._num_branches)
 
-        return frequencies, ir_intensities, raman_intensities, warray
+        file_data = {
+                'frequencies': frequencies,
+                'ir_intensities': ir_intensities,
+                'raman_intensities': raman_intensities,
+                'weights': warray
+                }
 
+        return file_data
+
+#----------------------------------------------------------------------------------------
 
 try:
     import scipy.constants
