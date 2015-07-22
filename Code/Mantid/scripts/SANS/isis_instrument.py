@@ -1470,7 +1470,6 @@ class LARMOR(ISISInstrument):
         @param coord2: the second coordinate, which is y here
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        BENCH_ROT = self.getDetValues(workspace)[0]
         XSF = self.beam_centre_scale_factor1
 
         # Shift the component in the y direction
@@ -1479,12 +1478,12 @@ class LARMOR(ISISInstrument):
                                 Y=coord2,
                                 RelativePosition=relative_displacement)
 
-        # Rotate around the x-axis
+        # Rotate around the y-axis.
         self._rotate_around_y_axis(workspace = workspace,
                                    component_name = component_name,
                                    x_beam = coord1,
                                    x_scale_factor = XSF,
-                                   bench_rotation = BENCH_ROT)
+                                   bench_rotation = 0.)
 
     def _rotate_around_y_axis(self,workspace, component_name, x_beam, x_scale_factor, bench_rotation):
         # in order to avoid rewriting old mask files from initial commisioning during 2014.
@@ -1492,7 +1491,7 @@ class LARMOR(ISISInstrument):
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
-        if LARMOR.is_run_new_style_run(ws_ref):
+        if not LARMOR.is_run_new_style_run(ws_ref):
             # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
             xshift = -x_beam
             sanslog.notice("Setup move " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
@@ -1582,7 +1581,7 @@ class LARMOR(ISISInstrument):
             run_num = workspace_ref.getRun().getLogData('run_number').value
         except:
             run_num = int(re.findall(r'\d+',str(ws_name))[-1])
-        if int(run_num) >2217:
+        if int(run_num) >= 2217:
             return True
         else:
             return False

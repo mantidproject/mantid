@@ -449,11 +449,6 @@ class IncrementProviderFactory(object):
         self.increment_coord2 = increment_coord2
         self.tolerance = tolerance
 
-        # The angle increment is currently not specified in the instrument parameters file,
-        # hence we set a value here. This is also true for the tolerance
-        self.increment_coord1_angle = 1.0/1000.0 #
-        self.tolerance_angle = tolerance
-
     def create_increment_provider(self, reducer):
         '''
         Factory method for the IncrementProvider
@@ -461,14 +456,53 @@ class IncrementProviderFactory(object):
         @returns The correct increment provider
         '''
         if self.is_workspace_which_requires_angle(reducer):
-            return IncrementProviderAngleY(increment_coord1 = self.increment_coord1_angle,
+            # The angle increment is currently not specified in the instrument parameters file,
+            # hence we set a value here. This is also true for the tolerance
+            increment_coord1_angle = self.get_increment_coord1_angle(reducer, self.tolerance)
+            tolerance_angle = self.get_tolerance_for_angle(self.tolerance, self.increment_coord1, increment_coord1_angle)
+            return IncrementProviderAngleY(increment_coord1 = increment_coord1_angle,
                                            increment_coord2 = self.increment_coord2,
                                            tolerance = self.tolerance,
-                                           tolerance_angle = self.tolerance_angle)
+                                           tolerance_angle = tolerance_angle)
         else:
             return IncrementProviderXY(increment_coord1 = self.increment_coord1,
                                        increment_coord2 = self.increment_coord2,
                                        tolerance = self.tolerance)
+
+    def get_increment_coord1_angle(self, reducer, tolerance):
+        '''
+        Estimate an increment for the angle based on the specified coord1 increment for linear
+        displacements and the distance from the sample to the detector.
+        For a distance D and an increment dx, we estimate dAlpha to be tan(dAlpha)=dx/D.
+        Since D >> dx, we can use Taylor expansion to set dAlpha = dx/D
+        @param reducer: the reducer object
+        @param tolerance: the tolerance
+        '''
+        workspace_name = reducer.get_sample().wksp_name
+        workspace = mtd[workspace_name]
+
+        instrument = workspace.getInstrument()
+        detector_name = reducer.instrument.cur_detector().name()
+
+        sample = instrument.getSample()
+        component = instrument.getComponentByName(detector_name)
+
+        # We use here the first detector entry. Do we need to have this smarter in the future?
+        detector_bench = component[0]
+        distance = detector_bench.getDistance(sample)
+
+        return tolerance/distance
+
+
+    def get_tolerance_for_angle(self, tolerance_linear, increment_linear, increment_angle):
+        '''
+        The tolerance associated with a linear disaplacement is translated into 
+        a tolerance for an angle. Tol_Angle = Increment_Angle *(Tol_Linear/Increment_Linear)
+        @param tolerance_linear: the tolerance for the linear displacement
+        @param increment_lienar: the increment of the linear displacement
+        @param increment_angle: the increment of the rotation
+        '''
+        return (increment_angle/increment_linear)*tolerance_linear
 
     def is_workspace_which_requires_angle(self, reducer):
         '''
