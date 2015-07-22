@@ -3,7 +3,7 @@ import isis_reducer
 from isis_reduction_steps import StripEndNans
 from isis_instrument import LARMOR
 from mantid.simpleapi import *
-from mantid.kernel import Logger
+from mantid.kernel import Logger, V3D
 import SANSUtility
 
 class FindDirectionEnum(object):
@@ -11,7 +11,7 @@ class FindDirectionEnum(object):
     UP_DOWN = 1
     LEFT_RIGHT=2
 
-    def __init__():
+    def __init__(self):
         super(FindDirectionEnum,self).__init__()
 
 class CentreFinder(object):
@@ -81,7 +81,8 @@ class CentreFinder(object):
         DeleteWorkspace(Workspace='centre')
         self._last_pos = trial
 
-        #prepare the workspaces for "publication", after they have their standard names calculations will be done on them and they will be plotted
+        # prepare the workspaces for "publication", after they have their
+        # standard names calculations will be done on them and they will be plotted
         for out_wksp in self.QUADS:
             in_wksp = out_wksp+'_tmp'
             ReplaceSpecialValues(InputWorkspace=in_wksp,OutputWorkspace=in_wksp,NaNValue=0,InfinityValue=0)
@@ -134,8 +135,6 @@ class CentreFinder(object):
         out_ws = quadrant+suffix
         # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
         CloneWorkspace(InputWorkspace=reduced_ws,OutputWorkspace= out_ws)
-
-        x_dir, y_dir, z_dir = self._get_cylinder_direction(out_ws)
 
         objxml = SANSUtility.QuadrantXML([0, 0, 0.0], r_min, r_max, quadrant)
         # Mask out everything outside the quadrant of interest
@@ -215,13 +214,20 @@ class CentreFinder(object):
             indexB += 1
         return residue
 
-def _get_cylinder_direction(self, workspace):
-    '''
-    Get the direction that the masking clyinder needs to point at. This should be the normal
-    of the tilted detector bench
-    @param workspace: the workspace with the tilted detector bench
-    '''
-    pass
+    def _get_cylinder_direction(self, workspace):
+        '''
+        Get the direction that the masking clyinder needs to point at. This should be the normal
+        of the tilted detector bench. The original normal is along the beam axis as defined in
+        the instrument definition file.
+        @param workspace: the workspace with the tilted detector bench
+        @returns the required direction of the cylinder axis
+        '''
+        ws = mtd[workspace]
+        instrument = ws.getInstrument()
+        quat = instrument.getComponentByName(self.detector).getRotation()
+        cylinder_direction = instrument.getReferenceFrame().vecPointingAlongBeam()
+        quat.rotate(cylinder_direction)
+        return cylinder_direction.X(), cylinder_direction.Y(), cylinder_direction.Z()
 
 class CentrePositioner(object):
     '''
@@ -537,14 +543,14 @@ class IncrementProviderXY(IncrementProvider):
         Check if the increment for the first coordinate is smaller than the tolerance
         @returns True if the increment is smaller than the tolerance, otherwise false
         '''
-        return check_is_smaller_than_tolerance(self.increment_x, self.tolerance)
+        return self.check_is_smaller_than_tolerance(self.increment_x, self.tolerance)
 
     def is_coord2_increment_smaller_than_tolerance(self):
         '''
         Check if the increment for the second coordinate is smaller than the tolerance
         @returns True if the increment is smaller than the tolerance, otherwise false
         '''
-        return check_is_smaller_than_tolerance(self.increment_y, self.tolerance)
+        return self.check_is_smaller_than_tolerance(self.increment_y, self.tolerance)
 
     def get_increment_coord1(self):
         return self.increment_x
