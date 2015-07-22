@@ -18,7 +18,7 @@ that define where the data for a particular dataset can be found, and
 that are normally required to run reconstruction tools but also pre-
 and post- processing steps.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

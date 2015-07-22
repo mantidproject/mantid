@@ -20,7 +20,7 @@ Tomography GUI. Model for the interface (as in the MVP
 signals from this model should always be handled through the presenter
 and never go directly to the view.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

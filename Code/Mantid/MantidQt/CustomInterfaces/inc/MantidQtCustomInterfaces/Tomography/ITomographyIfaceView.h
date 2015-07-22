@@ -15,7 +15,7 @@ Tomography GUI. Base class / interface for the view of the tomo GUI
 specific functionality/dependencies are added in a class derived from
 this.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

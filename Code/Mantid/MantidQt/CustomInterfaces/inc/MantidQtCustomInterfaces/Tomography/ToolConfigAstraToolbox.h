@@ -15,7 +15,7 @@ Configuration of a third party tomographic reconstruction tool
 specialized for the Astra Toolbox tomographic reconstruction tool
 (C++, CUDA): Astra Toolbox <http://sourceforge.net/p/astra-toolbox/wiki/Home/
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

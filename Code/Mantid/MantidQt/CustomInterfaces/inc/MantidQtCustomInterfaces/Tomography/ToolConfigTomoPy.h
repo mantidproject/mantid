@@ -14,7 +14,7 @@ Third party tomographic reconstruction tool configuration class
 specialized for TomoPy (Python + C++):
 https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.

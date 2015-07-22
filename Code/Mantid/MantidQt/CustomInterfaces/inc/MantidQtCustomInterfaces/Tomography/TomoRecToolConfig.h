@@ -12,7 +12,7 @@ is under development, and as it is not necessarily related to custom
 interfaces this class and some derived ones might be moved out of
 here.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
