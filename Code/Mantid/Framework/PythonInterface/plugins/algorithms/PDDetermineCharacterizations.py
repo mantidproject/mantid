@@ -132,7 +132,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         propNames = ("BackRun",   "NormRun",  "NormBackRun")
         dictNames = ("container", "vanadium", "empty")
         for (propName, dictName) in zip(propNames, dictNames):
-            # currently properties cannot be created from ndarras TODO #13173
+            # currently properties cannot be created from ndarrays issue #13173
             runNums = list(self.getProperty(propName).value)
             if len(runNums) == 1 and  runNums[0] < 0: # reset value
                 info[dictName] = [0]
