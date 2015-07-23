@@ -43,7 +43,7 @@ public:
     alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
     alg.setPropertyValue("LogValue","Field_Danfysik");
     alg.setPropertyValue("Red","2");
-  alg.setPropertyValue("Green","1");
+    alg.setPropertyValue("Green", "1");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -253,6 +253,53 @@ public:
     TS_ASSERT_DELTA(Y[1], 0.144008, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);
+  }
+
+    void test_customGrouping()
+  {
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue","run_number");
+    alg.setPropertyValue("Red","2");
+    alg.setPropertyValue("Green","1");
+    alg.setPropertyValue("ForwardSpectra","1-16,33-48");
+    alg.setPropertyValue("BackwardSpectra","17-32,49-64");
+    alg.setPropertyValue("DeadTimeCorrType","None");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    if(!alg.isExecuted()) return;
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "PlotAsymmetryByLogValueTest_WS"));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),4);
+
+    const Mantid::MantidVec& YDiff = outWs->readY(0);
+    const Mantid::MantidVec& EDiff = outWs->readE(0);
+    const Mantid::MantidVec& YSum = outWs->readY(3);
+    const Mantid::MantidVec& ESum = outWs->readE(3);
+
+    TS_ASSERT_DELTA(YDiff[0], 0.001135, 0.000001);
+    TS_ASSERT_DELTA(EDiff[0], 0.001805, 0.000001);
+    TS_ASSERT_DELTA(YDiff[1], -0.000151, 0.000001);
+    TS_ASSERT_DELTA(EDiff[1], 0.001806, 0.000001);
+
+    TS_ASSERT_DELTA(YSum[0], 0.170842, 0.000001);
+    TS_ASSERT_DELTA(ESum[0], 0.001805, 0.000001);
+    TS_ASSERT_DELTA(YSum[1], 0.171467, 0.000001);
+    TS_ASSERT_DELTA(ESum[1], 0.001806, 0.000001);
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_LogValueFunction ()
