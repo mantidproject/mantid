@@ -9,7 +9,7 @@ import os.path
 import math
 
 #pylint: disable=too-many-instance-attributes
-class DensityOfStates(PythonAlgorithm):
+class SimulatedDensityOfStates(PythonAlgorithm):
 
     _float_regex = None
     _temperature = None
@@ -807,6 +807,6 @@ class DensityOfStates(PythonAlgorithm):
 
 try:
     import scipy.constants
-    AlgorithmFactory.subscribe(DensityOfStates)
+    AlgorithmFactory.subscribe(SimulatedDensityOfStates)
 except ImportError:
-    logger.debug('Failed to subscribe algorithm DensityOfStates; The python package scipy may be missing.')
+    logger.debug('Failed to subscribe algorithm SimulatedDensityOfStates; The python package scipy may be missing.')

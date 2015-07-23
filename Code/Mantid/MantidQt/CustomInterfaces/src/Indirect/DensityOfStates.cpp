@@ -70,8 +70,8 @@ namespace CustomInterfaces
    */
   void DensityOfStates::run()
   {
-    // Get the DensityOfStates algorithm
-    IAlgorithm_sptr dosAlgo = AlgorithmManager::Instance().create("DensityOfStates");
+    // Get the SimulatedDensityOfStates algorithm
+    IAlgorithm_sptr dosAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
 
     QString filename = m_uiForm.mwInputFile->getFirstFilename();
     QFileInfo inputFileInfo(filename);
@@ -153,7 +153,7 @@ namespace CustomInterfaces
 
 
   /**
-   * Handles completion of the DensityOfStates algorithm.
+   * Handles completion of the SimulatedDensityOfStates algorithm.
    *
    * @param error If the algorithm failed
    */
@@ -185,7 +185,7 @@ namespace CustomInterfaces
     if(canDoPartialDoS)
     {
       // Load the ion table to populate the list of ions
-      IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("DensityOfStates");
+      IAlgorithm_sptr ionTableAlgo = AlgorithmManager::Instance().create("SimulatedDensityOfStates");
       ionTableAlgo->initialize();
       ionTableAlgo->setProperty("File", filename.toStdString());
       ionTableAlgo->setProperty("SpectrumType", "IonTable");
