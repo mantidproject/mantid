@@ -136,7 +136,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
             runNums = list(self.getProperty(propName).value)
             if len(runNums) == 1 and  runNums[0] < 0: # reset value
                 info[dictName] = [0]
-            elif runNums > 0: # override value
+            elif runNums[0] > 0: # override value
                 info[dictName] = runNums
 
         # convert to a property manager
