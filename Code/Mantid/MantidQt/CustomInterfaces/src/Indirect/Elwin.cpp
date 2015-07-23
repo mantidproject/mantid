@@ -153,8 +153,8 @@ namespace IDA
 
     if(m_blnManager->value(m_properties["BackgroundSubtraction"]))
     {
-      elwinMultAlg->setProperty("BackgroundRangeStart", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["BackgroundStart"])));
-      elwinMultAlg->setProperty("BackgroundRangeEnd", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["BackgroundEnd"])));
+      elwinMultAlg->setProperty("BackgroundRangeStart", m_dblManager->value(m_properties["BackgroundStart"]));
+      elwinMultAlg->setProperty("BackgroundRangeEnd", m_dblManager->value(m_properties["BackgroundEnd"]));
     }
 
     if(m_blnManager->value(m_properties["Normalise"]))

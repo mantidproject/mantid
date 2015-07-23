@@ -169,13 +169,20 @@ public:
     m_view->requestLoading();
   }
 
-  void test_updateAvailableLogs()
+  void test_updateAvailableInfo()
   {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    // Test logs
     EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 37),
                                                 Contains("run_number"),
                                                 Contains("sample_magn_field"),
-                                                Contains("Field_Danfysik"))));
+                                                Contains("Field_Danfysik")))).Times(1);
+    // Test periods
+    EXPECT_CALL(*m_view, setAvailablePeriods(AllOf(Property(&std::vector<std::string>::size, 2),
+                                                Contains("1"),
+                                                Contains("2")))).Times(1);
+    // Test time limits
+    EXPECT_CALL(*m_view, setTimeLimits(Le(-0.54),Ge(31.44))).Times(1);
     m_view->selectFirstRun();
   }
 

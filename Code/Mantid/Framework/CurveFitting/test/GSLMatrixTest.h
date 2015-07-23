@@ -200,6 +200,87 @@ public:
     GSLMatrix subm(m, 2,2,3,3 ), std::runtime_error);
   }
 
+  void test_eigenSystem_rectangular_throw()
+  {
+    GSLMatrix M(3,4);
+    GSLVector v;
+    GSLMatrix Q;
+    TS_ASSERT_THROWS(
+    M.eigenSystem(v, Q), std::runtime_error);
+  }
+
+  void test_eigenSystem()
+  {
+    const size_t n = 4;
+    GSLMatrix m(n, n);
+    m.set(0,0,0); m.set(0,1,1); m.set(0,2,2); m.set(0,3,3);
+    m.set(1,0,1);m.set(1,1,11);m.set(1,2,12);m.set(1,3,13);
+    m.set(2,0,2);m.set(2,1,12);m.set(2,2,22);m.set(2,3,23);
+    m.set(3,0,3);m.set(3,1,13);m.set(3,2,23);m.set(3,3,33);
+    GSLVector v;
+    GSLMatrix Q;
+    GSLMatrix M = m;
+    M.eigenSystem(v, Q);
+    TS_ASSERT_EQUALS(v.size(), n);
+    TS_ASSERT_EQUALS(Q.size1(), n);
+    TS_ASSERT_EQUALS(Q.size2(), n);
+    {
+      GSLMatrix D = Tr(Q) * m * Q;
+      double trace_m = 0.0;
+      double trace_D = 0.0;
+      double det = 1.0;
+      for(size_t i = 0; i < n; ++i) {
+        TS_ASSERT_DELTA(D.get(i, i), v.get(i), 1e-10);
+        trace_m += m.get(i,i);
+        trace_D += D.get(i,i);
+        det *= D.get(i,i);
+      }
+      TS_ASSERT_DELTA(trace_D, trace_m, 1e-10);
+      TS_ASSERT_DELTA(det, m.det(), 1e-10);
+    }
+    {
+      GSLMatrix D = Tr(Q) * Q;
+      for(size_t i = 0; i < n; ++i) {
+        TS_ASSERT_DELTA(D.get(i, i), 1.0, 1e-10);
+      }
+    }
+  }
+
+  void test_copyColumn() {
+
+    GSLMatrix m(4,4);
+    m.set(0,0,0); m.set(0,1,1); m.set(0,2,2); m.set(0,3,3);
+    m.set(1,0,10);m.set(1,1,11);m.set(1,2,12);m.set(1,3,13);
+    m.set(2,0,20);m.set(2,1,21);m.set(2,2,22);m.set(2,3,23);
+    m.set(3,0,30);m.set(3,1,31);m.set(3,2,32);m.set(3,3,33);
+
+    auto column = m.copyColumn(2);
+    TS_ASSERT_EQUALS(column[0], m.get(0,2));
+    TS_ASSERT_EQUALS(column[1], m.get(1,2));
+    TS_ASSERT_EQUALS(column[2], m.get(2,2));
+    TS_ASSERT_EQUALS(column[3], m.get(3,2));
+
+    column[2] = 0;
+    TS_ASSERT_EQUALS(m.get(2,2), 22);
+  }
+
+  void test_copyRow() {
+
+    GSLMatrix m(4,4);
+    m.set(0,0,0); m.set(0,1,1); m.set(0,2,2); m.set(0,3,3);
+    m.set(1,0,10);m.set(1,1,11);m.set(1,2,12);m.set(1,3,13);
+    m.set(2,0,20);m.set(2,1,21);m.set(2,2,22);m.set(2,3,23);
+    m.set(3,0,30);m.set(3,1,31);m.set(3,2,32);m.set(3,3,33);
+
+    auto row = m.copyRow(1);
+    TS_ASSERT_EQUALS(row[0], m.get(1,0));
+    TS_ASSERT_EQUALS(row[1], m.get(1,1));
+    TS_ASSERT_EQUALS(row[2], m.get(1,2));
+    TS_ASSERT_EQUALS(row[3], m.get(1,3));
+    row[2] = 0;
+    TS_ASSERT_EQUALS(m.get(1,2), 12);
+  }
+
 };
 
 #endif /*GSLMATRIXTEST_H_*/
