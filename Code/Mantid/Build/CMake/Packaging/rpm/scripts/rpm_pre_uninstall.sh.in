@@ -4,7 +4,7 @@
 #
 ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 
-if [ ${ENVVARS_ON_INSTALL} -eq 1 ]; then
+if [ ${ENVVARS_ON_INSTALL} -eq 0 ]; then
     if [ -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then
         rm /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@
     fi
