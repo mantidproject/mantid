@@ -2,5 +2,14 @@
 #
 # RPM pre-uninstall script
 #
+ENVVARS_ON_INSTALL=@ENVVARS_ON_INSTALL_INT@
 
-# Nothing needs to be done
+if [ ${ENVVARS_ON_INSTALL} -eq 0 ]; then
+    if [ -L /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@ ]; then
+        rm /usr/bin/mantidplot@CPACK_PACKAGE_SUFFIX@
+    fi
+
+    if [ -L /usr/bin/mantidpython@CPACK_PACKAGE_SUFFIX@ ]; then
+        rm /usr/bin/mantidpython@CPACK_PACKAGE_SUFFIX@
+    fi
+fi
