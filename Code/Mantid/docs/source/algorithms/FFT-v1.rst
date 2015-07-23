@@ -25,31 +25,29 @@ where :math:`x_0=\tfrac{1}{2}(A+B)`, :math:`\xi_k` is the frequency.
 
 Usage
 -------
-
-.. include:: ../usagedata-note.txt
-
 **Example: Applying FFT algorithm:**
 
 .. testcode:: FFTBackwards
 
-	#Load an appopriate file
-	file = Load('IRS21360.raw')
+        #Create Sample Workspace 
+	ws = CreateSampleWorkspace(WorkspaceType = 'Event', Function = 'Exp Decay', NumBanks = '1', BankPixelWidth = '1', NumEvents = '100')
 
 	#apply the FFT algorithm 
-	outworkspace = FFT(InputWorkspace=file, Transform = 'Backward')
+	outworkspace = FFT(InputWorkspace = ws, Transform = 'Backward')
 
-	print "DataX(0)[0] equals DataX(0)[2000]? : " + str((round(abs(outworkspace.dataX(0)[0]), 5)) == (round(outworkspace.dataX(0)[2000], 5)))
-	print "DataX(0)[10] equals DataX(0)[1990]? : " + str((round(abs(outworkspace.dataX(0)[10]), 5)) == (round(outworkspace.dataX(0)[1990], 5)))
-	print "DataX((0)[1000] equals 0? : " + str((round(abs(outworkspace.dataX(0)[1000]), 13)) == 0)
+#print statements
+	print "DataX(0)[0] equals DataX(0)[100]? : " + str((round(abs(outworkspace.dataX(0)[0]), 3)) == (round(outworkspace.dataX(0)[100], 3)))
+	print "DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3)))
+	print "DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0)
+	print "DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5)))
 
 Output:
-
 .. testoutput:: FFTBackwards
 	
-	DataX(0)[0] equals DataX(0)[2000]? : True
-	DataX(0)[10] equals DataX(0)[1990]? : True
-	DataX((0)[1000] equals 0? : True
-
+	DataX(0)[0] equals DataX(0)[100]? : True
+	DataX(0)[10] equals DataX(0)[90]? : True
+	DataX((0)[50] equals 0? : True
+	DataY(0)[40] equals DataY(0)[60]? : True
 
 Details
 -------
