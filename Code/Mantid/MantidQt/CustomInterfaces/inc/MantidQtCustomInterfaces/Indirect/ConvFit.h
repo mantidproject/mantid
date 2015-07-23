@@ -78,7 +78,7 @@ private:
 
 
 
-  QStringList getFunctionParameters(const QString &);
+  QStringList getFunctionParameters(QString);
 
 
 };

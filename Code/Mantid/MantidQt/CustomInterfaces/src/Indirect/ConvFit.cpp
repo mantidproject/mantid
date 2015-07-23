@@ -195,6 +195,10 @@ void ConvFit::setup() {
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
+  // Fitting function
+  m_properties["FitFunction"] = m_grpManager->addProperty("Fitting Parameters");
+  m_cfTree->addProperty(m_properties["FitFunction"]);
+
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(fitFunctionSelected(const QString &)));
@@ -1570,14 +1574,27 @@ void ConvFit::updatePlotOptions() {
  *
  * @return List fo parameters
  */
-QStringList ConvFit::getFunctionParameters(const QString &functionName) {
+QStringList ConvFit::getFunctionParameters(QString functionName) {
   QStringList parameters;
+  if (functionName.compare("Two Lorentzians") == 0) {
+    functionName = "Lorentzian";
+    IFunction_sptr func =
+        FunctionFactory::Instance().createFunction(functionName.toStdString());
+
+    for (size_t i = 0; i < func->nParams(); i++){
+      parameters << QString::fromStdString(func->parameterName(i));
+	}
+  }
+  if(functionName.compare("One Lorentzian") == 0){
+	  functionName =  "Lorentzian";
+  }
 
   IFunction_sptr func =
       FunctionFactory::Instance().createFunction(functionName.toStdString());
 
-  for (size_t i = 0; i < func->nParams(); i++)
+  for (size_t i = 0; i < func->nParams(); i++){
     parameters << QString::fromStdString(func->parameterName(i));
+  }
 
   return parameters;
 }
@@ -1601,10 +1618,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       }
     }
 
-    // Don't run the algorithm when updating parameter values
-    /*disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-               SLOT(runPreviewAlgorithm()));*/
-
     // Add new parameter elements
     QStringList parameters = getFunctionParameters(functionName);
     for (auto it = parameters.begin(); it != parameters.end(); ++it) {
@@ -1613,11 +1626,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       m_dblManager->setValue(m_properties[name], 1.0);
       m_properties["FitFunction"]->addSubProperty(m_properties[name]);
     }
-
-    /*connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-            SLOT(runPreviewAlgorithm()));*/
-
-    // runPreviewAlgorithm();
   }
 }
 
