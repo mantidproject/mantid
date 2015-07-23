@@ -126,6 +126,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/SlitCalculator.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
+    inc/MantidQtMantidWidgets/PeriodicTable.ui
     inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )
