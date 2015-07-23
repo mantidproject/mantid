@@ -559,6 +559,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
 
+    #pylint: disable=too-many-arguments
     def _focusAndSum(self, runnumbers, extension, filterWall, calib, preserveEvents=True):
         """Load, sum, and focus data in chunks"""
         sumRun = None
@@ -568,7 +569,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             runnumber = temp
             self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
 
-            temp = self._focusChunks(temp, SUFFIX, timeFilterWall, calib,\
+            temp = self._focusChunks(temp, extension, filterWall, calib,\
                                      preserveEvents=preserveEvents)
             tempinfo = self._getinfo(temp)
 
@@ -576,19 +577,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 sumRun = temp
                 info = tempinfo
             else:
-                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
-                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
-                        raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                           % (tempinfo["frequency"], info["frequency"]))
-                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
-                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
-                        raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                           % (tempinfo["wavelength"], info["wavelength"]))
-                    samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
-                    if samRun.id() == EVENT_WORKSPACE_ID:
-                        samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
-                    api.DeleteWorkspace(str(temp))
+                if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
+                   and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
+                    raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
+                                       % (tempinfo["frequency"], info["frequency"]))
+                if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
+                   and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
+                    raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
+                                       % (tempinfo["wavelength"], info["wavelength"]))
+                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
+                if sumRun.id() == EVENT_WORKSPACE_ID:
+                    sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
+                                                Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                api.DeleteWorkspace(str(temp))
             # ENDIF
         # ENDFOR (processing each)
         return sumRun
