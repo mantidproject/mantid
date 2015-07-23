@@ -42,7 +42,6 @@ private slots:
   void fixItem();
   void unFixItem();
   void showTieCheckbox(QString);
-  void updatePlotOptions();
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
 
@@ -79,6 +78,7 @@ private:
 
 
   QStringList getFunctionParameters(QString);
+  Mantid::API::IAlgorithm_sptr m_fitAlg;
 
 
 };
