@@ -31,41 +31,42 @@ def skip_if(skipping_criteria):
 class DensityOfStatesTest(unittest.TestCase):
 
     def setUp(self):
-        self._file_name = 'squaricn.phonon'
+        self._phonon_file = 'squaricn.phonon'
+        self._castep_file = 'squaricn.castep'
 
     def test_phonon_load(self):
-        ws = DensityOfStates(File=self._file_name)
+        ws = DensityOfStates(PHONONFile=self._phonon_file)
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_castep_load(self):
-        ws = DensityOfStates(File='squaricn.castep')
+        ws = DensityOfStates(CASTEPFile=self._castep_file)
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_raman_active(self):
         spec_type = 'Raman_Active'
-        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType=spec_type)
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_ir_active(self):
         spec_type = 'IR_Active'
-        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType=spec_type)
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_lorentzian_function(self):
-        ws = DensityOfStates(File=self._file_name, Function='Lorentzian')
+        ws = DensityOfStates(PHONONFile=self._phonon_file, Function='Lorentzian')
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_peak_width(self):
-        ws = DensityOfStates(File=self._file_name, PeakWidth=0.3)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, PeakWidth=0.3)
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_temperature(self):
-        ws = DensityOfStates(File=self._file_name, Temperature=50)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, Temperature=50)
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_scale(self):
-        ws = DensityOfStates(File=self._file_name, Scale=10)
-        ref = DensityOfStates(File=self._file_name)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, Scale=10)
+        ref = DensityOfStates(PHONONFile=self._phonon_file)
         ref = Scale(ref, Factor=10)
 
         self.assertEqual(CheckWorkspacesMatch(ws, ref), 'Success!')
@@ -73,8 +74,8 @@ class DensityOfStatesTest(unittest.TestCase):
     def test_bin_width(self):
         import math
 
-        ref = DensityOfStates(File=self._file_name)
-        ws = DensityOfStates(File=self._file_name, BinWidth=2)
+        ref = DensityOfStates(PHONONFile=self._phonon_file)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, BinWidth=2)
 
         size = ws.blocksize()
         ref_size = ref.blocksize()
@@ -84,7 +85,7 @@ class DensityOfStatesTest(unittest.TestCase):
     def test_zero_threshold(self):
         import numpy as np
 
-        ws = DensityOfStates(File=self._file_name, ZeroThreshold=20)
+        ws = DensityOfStates(PHONONFile=self._phonon_file, ZeroThreshold=20)
 
         x = ws.readX(0)
         y = ws.readY(0)
@@ -95,7 +96,7 @@ class DensityOfStatesTest(unittest.TestCase):
     def test_partial(self):
         spec_type = 'DOS'
 
-        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O')
+        ws = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType=spec_type, Ions='H,C,O')
 
         workspaces = ws.getNames()
         self.assertEquals(len(workspaces), 3)
@@ -104,15 +105,15 @@ class DensityOfStatesTest(unittest.TestCase):
         spec_type = 'DOS'
         tolerance = 1e-10
 
-        summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True)
-        total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type)
+        summed = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True)
+        total = DensityOfStates(PHONONFile=self._phonon_file,  SpectrumType=spec_type)
 
         self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
 
     def test_partial_cross_section_scale(self):
         spec_type = 'DOS'
 
-        ws = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', ScaleByCrossSection='Incoherent')
+        ws = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType=spec_type, Ions='H,C,O', ScaleByCrossSection='Incoherent')
 
         workspaces = ws.getNames()
         self.assertEquals(len(workspaces), 3)
@@ -121,13 +122,13 @@ class DensityOfStatesTest(unittest.TestCase):
         spec_type = 'DOS'
         tolerance = 1e-10
 
-        summed = DensityOfStates(File=self._file_name, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True, ScaleByCrossSection='Incoherent')
-        total = DensityOfStates(File=self._file_name,  SpectrumType=spec_type, ScaleByCrossSection='Incoherent')
+        summed = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType=spec_type, Ions='H,C,O', SumContributions=True, ScaleByCrossSection='Incoherent')
+        total = DensityOfStates(PHONONFile=self._phonon_file,  SpectrumType=spec_type, ScaleByCrossSection='Incoherent')
 
         self.assertEquals(CheckWorkspacesMatch(summed, total, tolerance), 'Success!')
 
     def test_ion_table(self):
-        ws = DensityOfStates(File=self._file_name, SpectrumType='IonTable')
+        ws = DensityOfStates(PHONONFile=self._phonon_file, SpectrumType='IonTable')
 
         # Build the expected output
         expected = CreateEmptyTableWorkspace()
@@ -144,7 +145,16 @@ class DensityOfStatesTest(unittest.TestCase):
         Creating an ion table from a castep file is not possible and should fail validation.
         """
         self.assertRaises(RuntimeError, DensityOfStates,
-                          File=self._file_name, SpectrumType='IonTable')
+                          PHONONFile=self._phonon_file, SpectrumType='IonTable')
+
+    def test_bond_analysis_file_error(self):
+        """
+        Bond analysis requires both a CASTEP and PHONON file.
+        """
+        self.assertRaises(RuntimeError, DensityOfStates,
+                          PHONONFile=self._phonon_file, SpectrumType='BondAnalysis')
+        self.assertRaises(RuntimeError, DensityOfStates,
+                          CASTEPFile=self._castep_file, SpectrumType='BondAnalysis')
 
 
 if __name__=="__main__":

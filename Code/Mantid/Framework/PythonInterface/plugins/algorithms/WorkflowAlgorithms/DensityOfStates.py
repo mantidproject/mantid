@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,anomalous-backslash-in-string
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -40,9 +40,15 @@ class DensityOfStates(PythonAlgorithm):
 
     def PyInit(self):
         # Declare properties
-        self.declareProperty(FileProperty('File', '', action=FileAction.Load,\
-            extensions = ["phonon", "castep"]),\
-            doc='Filename of the file.')
+        self.declareProperty(FileProperty('CASTEPFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions = ["castep"]),
+                             doc='Filename of the CASTEP file.')
+
+        self.declareProperty(FileProperty('PHONONFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions = ["phonon"]),
+                             doc='Filename of the PHONON file.')
 
         self.declareProperty(name='Function',defaultValue='Gaussian',\
             validator=StringListValidator(['Gaussian', 'Lorentzian']),\
@@ -52,7 +58,7 @@ class DensityOfStates(PythonAlgorithm):
             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
         self.declareProperty(name='SpectrumType',defaultValue='DOS',\
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),\
+            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondAnalysis']),\
             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
         self.declareProperty(name='Scale', defaultValue=1.0,\
@@ -81,7 +87,7 @@ class DensityOfStates(PythonAlgorithm):
             doc="Name to give the output workspace.")
 
         # Regex pattern for a floating point number
-        self._float_regex = '\-?(?:\d+\.?\d*|\d*\.?\d+)'
+        self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 
 #----------------------------------------------------------------------------------------
 
@@ -93,8 +99,14 @@ class DensityOfStates(PythonAlgorithm):
         """
         issues = dict()
 
-        file_name = self.getPropertyValue('File')
-        file_type = file_name[file_name.rfind('.') + 1:]
+        castep_filename = self.getPropertyValue('CASTEPFile')
+        phonon_filename = self.getPropertyValue('PHONONFile')
+
+        if castep_filename == '' and phonon_filename == '':
+            msg = 'Must have at least one input file'
+            issues['CASTEPFile'] = msg
+            issues['PHONONFile'] = msg
+
         spec_type = self.getPropertyValue('SpectrumType')
         sum_contributions = self.getProperty('SumContributions').value
         scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection') != 'None'
@@ -102,8 +114,11 @@ class DensityOfStates(PythonAlgorithm):
         ions = self.getProperty('Ions').value
         calc_partial = len(ions) > 0
 
-        if spec_type == 'IonTable' and file_type != 'phonon':
-            issues['SpectrumType'] = 'Cannot output an ion table from a %s file' % file_type
+        if spec_type == 'IonTable' and phonon_filename == '':
+            issues['SpectrumType'] = 'Require a .phonon file for ion table output'
+
+        if spec_type == 'BondAnalysis' and phonon_filename == '' and castep_filename == '':
+            issues['SpectrumType'] = 'Require both a .phonon and .castep file for bond analysis'
 
         if spec_type != 'DOS' and calc_partial:
             issues['Ions'] = 'Cannot calculate partial density of states when using %s' % spec_type
@@ -117,13 +132,22 @@ class DensityOfStates(PythonAlgorithm):
         return issues
 
 #----------------------------------------------------------------------------------------
+
     #pylint: disable=too-many-branches
     def PyExec(self):
         # Run the algorithm
         self._get_properties()
 
-        file_name = self.getPropertyValue('File')
-        file_data = self._read_data_from_file(file_name)
+        castep_filename = self.getPropertyValue('CASTEPFile')
+        phonon_filename = self.getPropertyValue('PHONONFile')
+
+        if phonon_filename != '':
+            file_data = self._read_data_from_file(phonon_filename)
+        elif castep_filename != '':
+            file_data = self._read_data_from_file(castep_filename)
+        else:
+            raise RuntimeError('No valid data file')
+
         frequencies = file_data['frequencies']
         ir_intensities = file_data['ir_intensities']
         raman_intensities = file_data['raman_intensities']
@@ -214,6 +238,11 @@ class DensityOfStates(PythonAlgorithm):
             self._compute_raman(frequencies, raman_intensities, weights)
             mtd[self._ws_name].setYUnit('A^4')
             mtd[self._ws_name].setYUnitLabel('Intensity')
+
+        # We want to perform bond analysis
+        elif self._spec_type == 'BondAnalysis':
+            #TODO
+            pass
 
         self.setProperty('OutputWorkspace', self._ws_name)
 
