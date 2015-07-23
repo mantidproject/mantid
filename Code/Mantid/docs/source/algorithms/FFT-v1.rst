@@ -42,6 +42,7 @@ Usage
 	print "DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5)))
 
 Output:
+
 .. testoutput:: FFTBackwards
 	
 	DataX(0)[0] equals DataX(0)[100]? : True
