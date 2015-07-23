@@ -66,7 +66,7 @@ if ( SPHINX_FOUND )
   endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
 
   # HTML target
-  option (DOCS_HTML "Add target for building html docs" OFF)
+  option (DOCS_HTML "Add target for building html docs" ON)
   if (DOCS_HTML)
     set ( BUILDER html )
     set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
