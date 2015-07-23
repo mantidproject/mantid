@@ -25,6 +25,9 @@ where :math:`x_0=\tfrac{1}{2}(A+B)`, :math:`\xi_k` is the frequency.
 
 Usage
 -------
+
+.. include:: ../usagedata-note.txt
+
 **Example: Applying FFT algorithm:**
 
 .. testcode:: FFTBackwards
