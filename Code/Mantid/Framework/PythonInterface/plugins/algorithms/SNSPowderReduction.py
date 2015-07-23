@@ -252,35 +252,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if self._splitws is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            samRun = None
-            info = None
-            for temp in samRuns:
-                runnumber = temp
-                self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
-
-                temp = self._focusChunks(temp, SUFFIX, timeFilterWall, calib,\
-                        preserveEvents=preserveEvents)
-                tempinfo = self._getinfo(temp)
-
-                if samRun is None:
-                    samRun = temp
-                    info = tempinfo
-                else:
-                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
-                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
-                        raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                           % (tempinfo["frequency"], info["frequency"]))
-                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
-                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
-                        raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                           % (tempinfo["wavelength"], info["wavelength"]))
-                    samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
-                    if samRun.id() == EVENT_WORKSPACE_ID:
-                        samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
-                    api.DeleteWorkspace(str(temp))
-                # ENDIF
-            # ENDFOR (processing each)
+            samRun = self._focusAndSum(samRuns, SUFFIX, timeFilterWall, calib,\
+                                       preserveEvents=preserveEvents)
 
             samRuns = [samRun]
             workspacelist.append(str(samRun))
@@ -292,7 +265,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if not self.getProperty("Sum").value and samRun > 0:
                 self._info = None
                 returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws,\
-                        preserveEvents=preserveEvents)
+                                             preserveEvents=preserveEvents)
 
                 if isinstance(returned, list):
                     # Returned with a list of workspaces
@@ -332,27 +305,31 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._info = self._getinfo(samRun)
 
             # process the container
-            canRun = self._info["container"][samRunIndex]
-            if canRun > 0:
+            canRuns = self._info["container"]
+            if canRuns[samRunIndex] <= 0:
+                canRun = None
+            else:
                 if self.getProperty("FilterCharacterizations").value:
                     canFilterWall = timeFilterWall
                 else:
                     canFilterWall = (0., 0.)
-                if "%s_%d" % (self._instrument, canRun) in mtd:
-                    canRun = mtd["%s_%d" % (self._instrument, canRun)]
+
+                if "%s_%d" % (self._instrument, canRuns[samRunIndex]) in mtd:
+                    canRun = mtd["%s_%d" % (self._instrument, canRuns[samRunIndex])]
+                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
-                    canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,\
+                    if self.getProperty("Sum").value:
+                        canRun = self._focusAndSum(canRuns, SUFFIX, canFilterWall, calib,\
                                preserveEvents=preserveEvents)
-                canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-
-                smoothParams = self.getProperty("BackgroundSmoothParams").value
-                if smoothParams != None and len(smoothParams)>0:
-                    canRun = api.FFTSmooth(InputWorkspace=canRun, OutputWorkspace=canRun, Filter="Butterworth",\
-                                       Params=smoothParams,IgnoreXBins=True,AllSpectra=True)
-
+                    else:
+                        canRun = self._focusChunks(canRuns[samRunIndex], SUFFIX, canFilterWall, calib,\
+                               preserveEvents=preserveEvents)
+                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                    smoothParams = self.getProperty("BackgroundSmoothParams").value
+                    if smoothParams != None and len(smoothParams)>0:
+                        canRun = api.FFTSmooth(InputWorkspace=canRun, OutputWorkspace=canRun, Filter="Butterworth",\
+                                               Params=smoothParams,IgnoreXBins=True,AllSpectra=True)
                 workspacelist.append(str(canRun))
-            else:
-                canRun = None
 
             # process the vanadium run
             vanRun = self._info["vanadium"][samRunIndex]
@@ -581,6 +558,41 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
+
+    def _focusAndSum(self, runnumbers, extension, filterWall, calib, preserveEvents=True):
+        """Load, sum, and focus data in chunks"""
+        sumRun = None
+        info = None
+
+        for temp in runnumbers:
+            runnumber = temp
+            self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
+
+            temp = self._focusChunks(temp, SUFFIX, timeFilterWall, calib,\
+                                     preserveEvents=preserveEvents)
+            tempinfo = self._getinfo(temp)
+
+            if sumRun is None:
+                sumRun = temp
+                info = tempinfo
+            else:
+                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
+                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
+                        raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
+                                           % (tempinfo["frequency"], info["frequency"]))
+                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
+                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
+                        raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
+                                           % (tempinfo["wavelength"], info["wavelength"]))
+                    samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
+                    if samRun.id() == EVENT_WORKSPACE_ID:
+                        samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
+                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                    api.DeleteWorkspace(str(temp))
+            # ENDIF
+        # ENDFOR (processing each)
+        return sumRun
+
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
