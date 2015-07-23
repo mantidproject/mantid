@@ -196,109 +196,100 @@ void ConvFit::setup() {
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
   // Fitting function
-  /*m_properties["FitFunction"] = m_grpManager->addProperty("Fitting Parameters");
+  /*m_properties["FitFunction"] = m_grpManager->addProperty("Fitting
+  Parameters");
   m_cfTree->addProperty(m_properties["FitFunction"]);*/
 
   // Update fit parameters in browser when function is selected
-  connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)),
-          this, SLOT(fitFunctionSelected(const QString &)));
+  connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)), this,
+          SLOT(fitFunctionSelected(const QString &)));
   fitFunctionSelected(m_uiForm.cbFitType->currentText());
-
 }
 
 /**
  * Converts data into a python script which prodcues the output workspace
  */
-//void ConvFit::run() {
-  /*if (m_cfInputWS == NULL) {
-    g_log.error("No workspace loaded");
-    return;
-  }
+// void ConvFit::run() {
+/*if (m_cfInputWS == NULL) {
+  g_log.error("No workspace loaded");
+  return;
+}
 
-  QString fitType = fitTypeString();
-  QString bgType = backgroundString();
+QString fitType = fitTypeString();
+QString bgType = backgroundString();
 
-  if (fitType == "") {
-    g_log.error("No fit type defined");
-  }
+if (fitType == "") {
+  g_log.error("No fit type defined");
+}
 
-  bool useTies = m_uiForm.ckTieCentres->isChecked();
-  QString ties = (useTies ? "True" : "False");
+bool useTies = m_uiForm.ckTieCentres->isChecked();
+QString ties = (useTies ? "True" : "False");
 
-  CompositeFunction_sptr func = createFunction(useTies);
-  std::string function = std::string(func->asString());
-  QString stX = m_properties["StartX"]->valueText();
-  QString enX = m_properties["EndX"]->valueText();
-  QString specMin = m_uiForm.spSpectraMin->text();
-  QString specMax = m_uiForm.spSpectraMax->text();
-  int maxIterations =
-      static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
+CompositeFunction_sptr func = createFunction(useTies);
+std::string function = std::string(func->asString());
+QString stX = m_properties["StartX"]->valueText();
+QString enX = m_properties["EndX"]->valueText();
+QString specMin = m_uiForm.spSpectraMin->text();
+QString specMax = m_uiForm.spSpectraMax->text();
+int maxIterations =
+    static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
-  QString pyInput = "from IndirectDataAnalysis import confitSeq\n"
-                    "input = '" +
-                    m_cfInputWSName + "'\n"
-                                      "func = r'" +
-                    QString::fromStdString(function) + "'\n"
-                                                       "startx = " +
-                    stX + "\n"
-                          "endx = " +
-                    enX + "\n"
-                          "plot = '" +
-                    m_uiForm.cbPlotType->currentText() + "'\n"
-                                                         "ties = " +
-                    ties + "\n"
-                           "specMin = " +
-                    specMin + "\n"
-                              "specMax = " +
-                    specMax + "\n"
-                              "max_iterations = " +
-                    QString::number(maxIterations) + "\n"
-                                                     "minimizer = '" +
-                    minimizerString("$outputname_$wsindex") + "'\n"
-                                                              "save = " +
-                    (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
+QString pyInput = "from IndirectDataAnalysis import confitSeq\n"
+                  "input = '" +
+                  m_cfInputWSName + "'\n"
+                                    "func = r'" +
+                  QString::fromStdString(function) + "'\n"
+                                                     "startx = " +
+                  stX + "\n"
+                        "endx = " +
+                  enX + "\n"
+                        "plot = '" +
+                  m_uiForm.cbPlotType->currentText() + "'\n"
+                                                       "ties = " +
+                  ties + "\n"
+                         "specMin = " +
+                  specMin + "\n"
+                            "specMax = " +
+                  specMax + "\n"
+                            "max_iterations = " +
+                  QString::number(maxIterations) + "\n"
+                                                   "minimizer = '" +
+                  minimizerString("$outputname_$wsindex") + "'\n"
+                                                            "save = " +
+                  (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
 
-  if (m_blnManager->value(m_properties["Convolve"]))
-    pyInput += "convolve = True\n";
-  else
-    pyInput += "convolve = False\n";
+if (m_blnManager->value(m_properties["Convolve"]))
+  pyInput += "convolve = True\n";
+else
+  pyInput += "convolve = False\n";
 
-  QString temperature = m_uiForm.leTempCorrection->text();
-  bool useTempCorrection =
-      (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
-  if (useTempCorrection) {
-    pyInput += "temp=" + temperature + "\n";
-  } else {
-    pyInput += "temp=None\n";
-  }
+QString temperature = m_uiForm.leTempCorrection->text();
+bool useTempCorrection =
+    (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
+if (useTempCorrection) {
+  pyInput += "temp=" + temperature + "\n";
+} else {
+  pyInput += "temp=None\n";
+}
 
-  pyInput += "bg = '" + bgType + "'\n"
-                                 "ftype = '" +
-             fitType +
-             "'\n"
-             "rws = confitSeq(input, func, startx, endx, ftype, bg, temp, "
-             "specMin, specMax, convolve, max_iterations=max_iterations, "
-             "minimizer=minimizer, Plot=plot, Save=save)\n"
-             "AddSampleLog(Workspace=rws, LogName='res_workspace', LogText='" +
-             m_uiForm.dsResInput->getCurrentDataName() + "')\n"
-                                                         "print rws\n";
+pyInput += "bg = '" + bgType + "'\n"
+                               "ftype = '" +
+           fitType +
+           "'\n"
+           "rws = confitSeq(input, func, startx, endx, ftype, bg, temp, "
+           "specMin, specMax, convolve, max_iterations=max_iterations, "
+           "minimizer=minimizer, Plot=plot, Save=save)\n"
+           "AddSampleLog(Workspace=rws, LogName='res_workspace', LogText='" +
+           m_uiForm.dsResInput->getCurrentDataName() + "')\n"
+                                                       "print rws\n";
 
-  QString pyOutput = runPythonCode(pyInput);
+QString pyOutput = runPythonCode(pyInput);
 
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = pyOutput.toStdString();
+// Set the result workspace for Python script export
+m_pythonExportWsName = pyOutput.toStdString();
 
-  updatePlot();*/
+updatePlot();*/
 //}
-
-
-
-
-
-
-
-
-
 
 /**
  * Runs algorithm.
@@ -312,11 +303,11 @@ void ConvFit::run() {
 
   // Fit function to use
   QString functionName = m_uiForm.cbFitType->currentText();
-  if(functionName.compare("One Lorentzian") == 0){
-	functionName = "Lorentzian";
+  if (functionName.compare("One Lorentzian") == 0) {
+    functionName = "Lorentzian";
   }
-  if(functionName.compare("Two Lorentzian") == 0){
-   //Implement two peak lorentxian behaviour
+  if (functionName.compare("Two Lorentzian") == 0) {
+    // Implement two peak lorentxian behaviour
   }
   QString functionString = "name=" + functionName;
 
@@ -349,31 +340,18 @@ void ConvFit::run() {
   m_fitAlg->setProperty("CreateOutput", true);
   m_fitAlg->setProperty("Output", outputName.toStdString());
 
-
-  //Debugging
+  // Debugging
   std::string fs = functionString.toStdString();
   std::string smple = sample.toStdString();
   double sx = m_dblManager->value(m_properties["StartX"]);
   double ex = m_dblManager->value(m_properties["EndX"]);
   std::string on = outputName.toStdString();
 
-
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   m_batchAlgoRunner->executeBatchAsync();
 
   updatePlot();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Validates the user's inputs in the ConvFit tab.
@@ -529,25 +507,30 @@ std::string createParName(size_t index, size_t subIndex,
  *							|
  *							+-- Lorentzian 1
  *(yes/no)
- *							+-- Temperature Correction
+ *							+-- Temperature
+ *Correction
  *(yes/no)
  *					+-- ProductFunction
  *							|
  *							+-- Lorentzian 2
  *(yes/no)
- *							+-- Temperature Correction
+ *							+-- Temperature
+ *Correction
  *(yes/no)
  *					+-- ProductFunction
  *							|
  *							+-- InelasticDiffSphere
  *(yes/no)
- *							+-- Temperature Correction
+ *							+-- Temperature
+ *Correction
  *(yes/no)
  *					+-- ProductFunction
  *							|
- *							+-- InelasticDiffRotDiscreteCircle
+ *							+--
+ *InelasticDiffRotDiscreteCircle
  *(yes/no)
- *							+-- Temperature Correction
+ *							+-- Temperature
+ *Correction
  *(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
@@ -1052,7 +1035,6 @@ QString ConvFit::minimizerString(QString outputName) const {
 void ConvFit::typeSelection(int index) {
   m_uiForm.ckPlotGuess->setEnabled(index < 3);
   m_properties["UseDeltaFunc"]->setEnabled(index < 3);
-
 }
 
 /**
@@ -1561,13 +1543,6 @@ void ConvFit::showTieCheckbox(QString fitType) {
   m_uiForm.ckTieCentres->setVisible(fitType == "Two Lorentzians");
 }
 
-
-
-
-
-
-
-
 /**
  * Gets a list of parameters for a given fit function.
  *
@@ -1608,7 +1583,7 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  //remove old parameter elements 
+  // remove old parameter elements
   for (auto it = m_properties.begin(); it != m_properties.end();) {
     if (it.key().startsWith("parameter_")) {
       delete it.value();
@@ -1618,9 +1593,8 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     }
   }
 
-    m_cfTree->removeProperty(m_properties["FitFunction1"]);
-    m_cfTree->removeProperty(m_properties["FitFunction2"]);
-
+  m_cfTree->removeProperty(m_properties["FitFunction1"]);
+  m_cfTree->removeProperty(m_properties["FitFunction2"]);
 
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
@@ -1633,7 +1607,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_properties["FitFunction1"] = m_grpManager->addProperty(functionName);
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
-
 
   if (parameters[0].compare("Zero") != 0) {
     if (functionName.compare("Two Lorentzians") == 0) {
@@ -1659,8 +1632,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       }
     }
   }
-
-
 }
 
 } // namespace IDA
