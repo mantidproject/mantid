@@ -23,6 +23,34 @@ that for the data defined on an interval [A,B] the output
 :math:`F(\xi_k)` must be multiplied by :math:`e^{-2\pi ix_0\xi_k}`,
 where :math:`x_0=\tfrac{1}{2}(A+B)`, :math:`\xi_k` is the frequency.
 
+Usage
+-------
+
+.. include:: ../usagedata-note.txt
+
+**Example: Applying FFT algorithm:**
+
+.. testcode:: FFTBackwards
+
+	#Load an appopriate file
+	file = Load('IRS21360.raw')
+
+	#apply the FFT algorithm 
+	outworkspace = FFT(InputWorkspace=file, Transform = 'Backward')
+
+	print "DataX(0)[0] equals DataX(0)[2000]? : " + str((round(abs(outworkspace.dataX(0)[0]), 5)) == (round(outworkspace.dataX(0)[2000], 5)))
+	print "DataX(0)[10] equals DataX(0)[1990]? : " + str((round(abs(outworkspace.dataX(0)[10]), 5)) == (round(outworkspace.dataX(0)[1990], 5)))
+	print "DataX((0)[1000] equals 0? : " + str((round(abs(outworkspace.dataX(0)[1000]), 13)) == 0)
+
+Output:
+
+.. testoutput:: FFTBackwards
+	
+	DataX(0)[0] equals DataX(0)[2000]? : True
+	DataX(0)[10] equals DataX(0)[1990]? : True
+	DataX((0)[1000] equals 0? : True
+
+
 Details
 -------
 
