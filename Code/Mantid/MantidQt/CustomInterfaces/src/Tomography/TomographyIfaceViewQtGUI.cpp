@@ -72,6 +72,24 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabSetup.setupUi(tab2w);
   m_ui.tabMain->addTab(tab2w, QString("Setup"));
 
+  QWidget *tab3w = new QWidget(m_ui.tabMain);
+  m_uiTabCoR.setupUi(tab3w);
+  m_ui.tabMain->addTab(tab3w, QString("Center && select"));
+  QList<int> sizes;
+  sizes.push_back(700);
+  sizes.push_back(100);
+  m_uiTabCoR.splitter_img_horiz->setSizes(sizes);
+  m_uiTabCoR.horizontalScrollBar_img_stack->setEnabled(false);
+
+  QWidget *tab4w = new QWidget();
+  m_ui.tabMain->addTab(tab4w, QString("Filters"));
+
+  QWidget *tab5w = new QWidget();
+  m_ui.tabMain->addTab(tab5w, QString("Visualize"));
+
+  QWidget *tab6w = new QWidget();
+  m_ui.tabMain->addTab(tab6w, QString("Convert"));
+
   readSettings();
 
   // basic UI setup

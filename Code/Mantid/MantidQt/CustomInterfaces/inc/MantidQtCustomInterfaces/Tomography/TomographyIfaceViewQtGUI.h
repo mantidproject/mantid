@@ -9,6 +9,8 @@
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h"
 #include "MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h"
+
+#include "ui_ImageSelectCoRAndRegions.h"
 #include "ui_TomographyIfaceQtGUI.h"
 #include "ui_TomographyIfaceQtTabSetup.h"
 #include "ui_TomographyIfaceQtTabRun.h"
@@ -30,7 +32,7 @@ in a foreseeable horizon. The interface of this class is given by
 ITomographyIfaceView so that it fits in the MVP (Model-View-Presenter)
 design of the tomography GUI.
 
-Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
 
 This file is part of Mantid.
@@ -213,6 +215,7 @@ private:
   // but they could be separate dialogs, widgets, etc.
   Ui::TomographyIfaceQtTabSetup m_uiTabSetup;
   Ui::TomographyIfaceQtTabRun m_uiTabRun;
+  Ui::ImageSelectCoRAndRegions m_uiTabCoR;
 
   /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;

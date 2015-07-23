@@ -84,6 +84,9 @@ set ( SRC_FILES
   src/SANSPlotSpecial.cpp
   src/SANSRunWindow.cpp
   src/StepScan.cpp
+  src/Tomography/ImageCoRPresenter.cpp
+  src/Tomography/ImageCoRViewQtGUI.cpp
+  src/Tomography/ImageStackPreParams.cpp
   src/Tomography/SavuConfigDialog.cpp
   src/Tomography/TomographyIfaceModel.cpp
   src/Tomography/TomographyIfacePresenter.cpp
@@ -191,6 +194,11 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
   inc/MantidQtCustomInterfaces/SANSRunWindow.h
   inc/MantidQtCustomInterfaces/StepScan.h
+  inc/MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h
+  inc/MantidQtCustomInterfaces/Tomography/IImageCoRView.h
+  inc/MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h
+  inc/MantidQtCustomInterfaces/Tomography/ImageCoRViewQtGUI.h
+  inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
@@ -287,6 +295,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
+                inc/MantidQtCustomInterfaces/Tomography/ImageCoRViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
                 inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Tomography/TomoToolConfigDialog.h
