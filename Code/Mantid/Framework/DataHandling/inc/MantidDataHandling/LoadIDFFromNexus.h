@@ -71,7 +71,7 @@ public:
 
   /// Read parameter correction file, return applicabel parameter file and whether to append
   void readParameterCorrectionFile( const std::string& correction_file, const std::string& date, 
-    std::string parameter_file, bool append  );
+    std::string& parameter_file, bool& append  );
 
   /// Load the parameters from Nexus file if possible, else from parameter file, into workspace
   void LoadParameters( ::NeXus::File *nxfile, const API::MatrixWorkspace_sptr localWorkspace );

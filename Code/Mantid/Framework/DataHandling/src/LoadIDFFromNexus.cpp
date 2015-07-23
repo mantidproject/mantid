@@ -9,10 +9,14 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
 
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
+using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
 
 namespace Mantid {
 namespace DataHandling {
@@ -77,7 +81,15 @@ void LoadIDFFromNexus::exec() {
 
   // Look for parameter correction file
   std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
-  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile;
+  g_log.notice() << "Parameter correction file: " << parameterCorrectionFile << "\n";
+
+  // Read parameter correction file, if found
+  std::string correctionParameterFile = "";
+  bool append = false;
+  if( parameterCorrectionFile != "") {
+    readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
+  }
+  g_log.notice() << "Result of readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
 
   LoadParameters(  &nxfile, localWorkspace );
 
@@ -122,7 +134,11 @@ void LoadIDFFromNexus::exec() {
   *  @throw FileError Thrown if unable to parse XML file
   */
 void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correction_file, const std::string& date, 
-                                                   std::string parameter_file, bool append ) { 
+                                                   std::string& parameter_file, bool& append ) { 
+
+   // Set output arguments to default
+  parameter_file = "";
+  append = false;
 
    // Get contents of correction file                                                    
   const std::string xmlText = Kernel::Strings::loadFile(correction_file);
@@ -146,6 +162,25 @@ void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correctio
         "No root element in XML parameter correction file", correction_file);
   }
 
+  // Convert date to Mantid object
+  DateAndTime externalDate( date );
+
+  // Examine the XML structure obtained by parsing
+  Poco::AutoPtr<NodeList> correctionNodeList = pRootElem->getElementsByTagName("correction");
+  g_log.notice() << "Number of corrections elements in correction file root = " << correctionNodeList->length() << "\n";
+  for( unsigned long i=0; i < correctionNodeList->length(); ++i ){
+    // For each correction element
+    Element* corr = (Element *)correctionNodeList->item(i);
+    g_log.notice() << corr->getAttribute("valid-from") << " " <<corr->getAttribute("valid-to") << " " << corr->getAttribute("file") << "\n";
+    DateAndTime start(corr->getAttribute("valid-from"));
+    DateAndTime end(corr->getAttribute("valid-to"));
+    if ( start <= externalDate && externalDate <= end ){
+      parameter_file = corr->getAttribute("file");
+      append = ( corr->getAttribute("append") == "true");
+      break;  
+    }
+  }
+  
 }
 
 
