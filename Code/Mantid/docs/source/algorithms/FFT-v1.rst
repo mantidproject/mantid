@@ -29,13 +29,13 @@ Usage
 
 .. testcode:: FFTBackwards
 
-        #Create Sample Workspace 
+    #Create Sample Workspace 
 	ws = CreateSampleWorkspace(WorkspaceType = 'Event', Function = 'Exp Decay', NumBanks = '1', BankPixelWidth = '1', NumEvents = '100')
 
 	#apply the FFT algorithm 
 	outworkspace = FFT(InputWorkspace = ws, Transform = 'Backward')
 
-#print statements
+	#print statements
 	print "DataX(0)[0] equals DataX(0)[100]? : " + str((round(abs(outworkspace.dataX(0)[0]), 3)) == (round(outworkspace.dataX(0)[100], 3)))
 	print "DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3)))
 	print "DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0)
