@@ -149,11 +149,7 @@ namespace
   }
 }
 
-//----------------------------------------------
-// Static key strings
-//----------------------------------------------
-const QString SANSRunWindow::m_pythonSuccessKeyword  = "pythonExecutionWasSuccessful";
-const QString SANSRunWindow::m_pythonEmptyKeyword = "None";
+
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -3020,7 +3016,7 @@ void SANSRunWindow::handleInstrumentChange()
   int ind = m_uiForm.detbank_sel->findText(detect);
   // We set the detector selection only if nothing is set yet.
   // Previously, we didn't handle merged and both at this point
-  if (detectorSelection == m_pythonEmptyKeyword || detectorSelection.isEmpty()) {
+  if (detectorSelection == m_constants.getPythonEmptyKeyword() || detectorSelection.isEmpty()) {
     if( ind != -1 ) {
       m_uiForm.detbank_sel->setCurrentIndex(ind);
     }
@@ -3881,11 +3877,11 @@ void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QSt
     QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += originalWorkspaceName + "',";
     pythonCode += " output_workspace_name='" + clonedWorkspaceName + "')\n";
-    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
+    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
-    if (result != m_pythonSuccessKeyword) {
-      result.replace(m_pythonSuccessKeyword, "");
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
       g_log.warning("Error creating a zerror error free cloned workspace. Will save original workspace. More info: " + result.toStdString());
     }
   }
@@ -3900,11 +3896,11 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
     // Run the python script which destroys the cloned workspace
     QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += clonedWorkspaceName + "')\n";
-    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
+    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
-    if (result != m_pythonSuccessKeyword) {
-      result.replace(m_pythonSuccessKeyword, "");
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
       g_log.warning("Error deleting a zerror error free cloned workspace. More info: " + result.toStdString());
     }
   }
@@ -3917,12 +3913,12 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
 bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString& wsName) {
     QString pythonCode("\nprint i.IsValidWsForRemovingZeroErrors(input_workspace_name='");
     pythonCode += wsName + "')";
-    pythonCode += "\nprint '" + m_pythonSuccessKeyword + "'";
+    pythonCode += "\nprint '" + m_constants.getPythonSuccessKeyword() + "'";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
     bool isValid = true;
-    if (result != m_pythonSuccessKeyword) {
-      result.replace(m_pythonSuccessKeyword, "");
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
       g_log.warning("Not a valid workspace for zero error replacement. Will save original workspace. More info: " + result.toStdString());
       isValid = false;
     }
