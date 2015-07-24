@@ -26,7 +26,7 @@
     (2008-08-26T15:23:52).
 
     Instrument detector description details from Mark Telling
-	amended by FD 7/10/2010
+    amended by FD 7/10/2010
 
   -->
 
@@ -46,10 +46,10 @@
 
 <type name="sample" is="SamplePos">
   <cuboid id="shape">
-    <left-front-bottom-point x="0.02" y="-0.02" z="0.0"  />
-    <left-front-top-point  x="0.02" y="-0.02" z="0.02"  />
-    <left-back-bottom-point  x="-0.02" y="-0.02" z="0.0"  />
-    <right-front-bottom-point  x="0.02" y="0.02" z="0.0"  />
+    <left-front-bottom-point  x="0.02"  y="-0.02" z="0.0"   />
+    <left-front-top-point     x="0.02"  y="-0.02" z="0.02"  />
+    <left-back-bottom-point   x="-0.02" y="-0.02" z="0.0"   />
+    <right-front-bottom-point x="0.02"  y="0.02"  z="0.0"   />
   </cuboid>
   <algebra val="shape" />
 </type>
@@ -57,183 +57,183 @@
 
 <!-- LIST OF DETECTORS AND MONITORS -->
 <component type="monitor1" idlist="monitor1">
-    <location z="-1.827" />
-  </component>
+  <location z="-1.827" />
+</component>
 
-  <type name="monitor1" is="monitor">
-    <percent-transparency val="99.9" />
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
-      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
-      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
-      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
+<type name="monitor1" is="monitor">
+  <percent-transparency val="99.9" />
+  <cuboid id="shape">
+    <left-front-bottom-point  x="0.0125"  y="-0.0125" z="0.0"   />
+    <left-front-top-point     x="0.0125"  y="-0.0125" z="0.005" />
+    <left-back-bottom-point   x="-0.0125" y="-0.0125" z="0.0"   />
+    <right-front-bottom-point x="0.0125"  y="0.0125"  z="0.0"   />
+  </cuboid>
+  <algebra val="shape" />
+</type>
 
-  <idlist idname="monitor1">
-    <id val="1" />
-  </idlist>
+<idlist idname="monitor1">
+  <id val="1" />
+</idlist>
 
-  <component type="monitor2" idlist="monitor2">
-    <location r="3.60" t="0.001" p="0" />
-  </component>
+<component type="monitor2" idlist="monitor2">
+  <location r="3.60" t="0.001" p="0" />
+</component>
 
-  <type name="monitor2" is="monitor">
-    <percent-transparency val="99.9" />
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
-      <left-front-top-point  x="0.0125" y="-0.0125" z="0.005"  />
-      <left-back-bottom-point  x="-0.0125" y="-0.0125" z="0.0"  />
-      <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
-    </cuboid>
-    <algebra val="shape" />
-  </type>
+<type name="monitor2" is="monitor">
+  <percent-transparency val="99.9" />
+  <cuboid id="shape">
+    <left-front-bottom-point  x="0.0125"  y="-0.0125" z="0.0"   />
+    <left-front-top-point     x="0.0125"  y="-0.0125" z="0.005" />
+    <left-back-bottom-point   x="-0.0125" y="-0.0125" z="0.0"   />
+    <right-front-bottom-point x="0.0125"  y="0.0125"  z="0.0"   />
+  </cuboid>
+  <algebra val="shape" />
+</type>
 
-  <idlist idname="monitor2">
-    <id val="2" />
-  </idlist>
+<idlist idname="monitor2">
+  <id val="2" />
+</idlist>
 
 
 <component type="bank" idlist="diffraction">
-  <location  r="1.0115" t="0" p="0" />
+  <location  r="1.0041" t="0" p="0" />
 </component>
 
 <type name="bank">
 <properties />
 <component type="module">
-  <location  r="0" t="0" p="0" rot="0" name="mod0" />
-  <location  r="0" t="0" p="0" rot="180" name="mod1"  />
-  <location  r="0" t="0" p="0" rot="315" name="mod3"  />
-  <location  r="0" t="0" p="0" rot="135" name="mod4" />
-  <location  r="0" t="0" p="0" rot="90" name="mod5" />
-  <location  r="0" t="0" p="0" rot="45" name="mod6" />
-  <location  r="0" t="0" p="0" rot="225" name="mod7" />
-  <location  r="0" t="0" p="0" rot="270" name="mod8" />
+  <location  r="0"    t="0" p="0" rot="0"    name="mod0" />
+  <location  r="0"    t="0" p="0" rot="180"  name="mod1" />
+  <location  r="0.03" t="0" p="0" rot="315"  name="mod3" />
+  <location  r="0"    t="0" p="0" rot="135"  name="mod4" />
+  <location  r="0"    t="0" p="0" rot="90"   name="mod5" />
+  <location  r="0"    t="0" p="0" rot="45"   name="mod6" />
+  <location  r="0"    t="0" p="0" rot="225"  name="mod7" />
+  <location  r="0"    t="0" p="0" rot="270"  name="mod8" />
 </component>
 </type>
 
 <type name="module">
-  <component type="arc_1"> <location r="0" t="171.1280" p="0" name="Det1" /></component>
-  <component type="arc_2"> <location r="0" t="170.8260" p="0" name="Det2" /></component>
-  <component type="arc_3"> <location r="0" t="170.5250" p="0" name="Det3" /></component>
-  <component type="arc_4"> <location r="0" t="170.2230" p="0" name="Det4" /></component>
-  <component type="arc_5"> <location r="0" t="169.9210" p="0" name="Det5" /></component>
-  <component type="arc_6"> <location r="0" t="169.6190" p="0" name="Det6" /></component>
-  <component type="arc_7"> <location r="0" t="169.3170" p="0" name="Det7" /></component>
-  <component type="arc_8"> <location r="0" t="169.0150" p="0" name="Det8" /></component>
-  <component type="arc_9"> <location r="0" t="168.7140" p="0" name="Det9" /></component>
-  <component type="arc_10"> <location r="0" t="168.4120" p="0" name="Det10" /></component>
-  <component type="arc_11"> <location r="0" t="168.1100" p="0" name="Det11" /></component>
-  <component type="arc_12"> <location r="0" t="167.8080" p="0" name="Det12" /></component>
-  <component type="arc_13"> <location r="0" t="167.5060" p="0" name="Det13" /></component>
-  <component type="arc_14"> <location r="0" t="167.2040" p="0" name="Det14" /></component>
-  <component type="arc_15"> <location r="0" t="166.9030" p="0" name="Det15" /></component>
-  <component type="arc_16"> <location r="0" t="166.6010" p="0" name="Det16" /></component>
-  <component type="arc_17"> <location r="0" t="166.2990" p="0" name="Det17" /></component>
-  <component type="arc_18"> <location r="0" t="165.9970" p="0" name="Det18" /></component>
-  <component type="arc_19"> <location r="0" t="165.6950" p="0" name="Det19" /></component>
-  <component type="arc_20"> <location r="0" t="165.3930" p="0" name="Det20" /></component>
-  <component type="arc_22"> <location r="0" t="165.0920" p="0" name="Det22" /></component>
-  <component type="arc_24"> <location r="0" t="164.7900" p="0" name="Det24" /></component>
-  <component type="arc_26"> <location r="0" t="164.4880" p="0" name="Det26" /></component>
-  <component type="arc_28"> <location r="0" t="164.1860" p="0" name="Det28" /></component>
-  <component type="arc_30"> <location r="0" t="163.8840" p="0" name="Det30" /></component>
-  <component type="arc_32"> <location r="0" t="163.5820" p="0" name="Det32" /></component>
-  <component type="arc_34"> <location r="0" t="163.2810" p="0" name="Det34" /></component>
-  <component type="arc_36"> <location r="0" t="162.9790" p="0" name="Det36" /></component>
-  <component type="arc_38"> <location r="0" t="162.6770" p="0" name="Det38" /></component>
-  <component type="arc_40"> <location r="0" t="162.3750" p="0" name="Det40" /></component>
-  <component type="arc_42"> <location r="0" t="162.0730" p="0" name="Det42" /></component>
-  <component type="arc_44"> <location r="0" t="161.7710" p="0" name="Det44" /></component>
-  <component type="arc_46"> <location r="0" t="161.4700" p="0" name="Det46" /></component>
-  <component type="arc_48"> <location r="0" t="161.1680" p="0" name="Det48" /></component>
-  <component type="arc_50"> <location r="0" t="160.8660" p="0" name="Det50" /></component>
-  <component type="arc_52"> <location r="0" t="160.5640" p="0" name="Det52" /></component>
-  <component type="arc_54"> <location r="0" t="160.2620" p="0" name="Det54" /></component>
-  <component type="arc_56"> <location r="0" t="159.9600" p="0" name="Det56" /></component>
-  <component type="arc_58"> <location r="0" t="159.6590" p="0" name="Det58" /></component>
-  <component type="arc_60"> <location r="0" t="159.3570" p="0" name="Det60" /></component>
-  <component type="arc_62"> <location r="0" t="159.0550" p="0" name="Det62" /></component>
-  <component type="arc_64"> <location r="0" t="158.7530" p="0" name="Det64" /></component>
-  <component type="arc_66"> <location r="0" t="158.4510" p="0" name="Det66" /></component>
-  <component type="arc_68"> <location r="0" t="158.1490" p="0" name="Det68" /></component>
-  <component type="arc_70"> <location r="0" t="157.8480" p="0" name="Det70" /></component>
-  <component type="arc_72"> <location r="0" t="157.5460" p="0" name="Det72" /></component>
-  <component type="arc_74"> <location r="0" t="157.2440" p="0" name="Det74" /></component>
-  <component type="arc_76"> <location r="0" t="156.9420" p="0" name="Det76" /></component>
-  <component type="arc_78"> <location r="0" t="156.6400" p="0" name="Det78" /></component>
-  <component type="arc_80"> <location r="0" t="156.3380" p="0" name="Det80" /></component>
-  <component type="arc_82"> <location r="0" t="156.0370" p="0" name="Det82" /></component>
-  <component type="arc_84"> <location r="0" t="155.7350" p="0" name="Det84" /></component>
-  <component type="arc_86"> <location r="0" t="155.4330" p="0" name="Det86" /></component>
-  <component type="arc_88"> <location r="0" t="155.1310" p="0" name="Det88" /></component>
-  <component type="arc_90"> <location r="0" t="154.8290" p="0" name="Det90" /></component>
-  <component type="arc_92"> <location r="0" t="154.5270" p="0" name="Det92" /></component>
-  <component type="arc_94"> <location r="0" t="154.2260" p="0" name="Det94" /></component>
-  <component type="arc_96"> <location r="0" t="153.9240" p="0" name="Det96" /></component>
-  <component type="arc_98"> <location r="0" t="153.6220" p="0" name="Det98" /></component>
-  <component type="arc_100"> <location r="0" t="153.3200" p="0" name="Det100" /></component>
-  <component type="arc_102"> <location r="0" t="153.0180" p="0" name="Det102" /></component>
-  <component type="arc_104"> <location r="0" t="152.7170" p="0" name="Det104" /></component>
-  <component type="arc_106"> <location r="0" t="152.4150" p="0" name="Det106" /></component>
-  <component type="arc_108"> <location r="0" t="152.1130" p="0" name="Det108" /></component>
-  <component type="arc_110"> <location r="0" t="151.8110" p="0" name="Det110" /></component>
-  <component type="arc_112"> <location r="0" t="151.5090" p="0" name="Det112" /></component>
-  <component type="arc_114"> <location r="0" t="151.2070" p="0" name="Det114" /></component>
-  <component type="arc_116"> <location r="0" t="150.9060" p="0" name="Det116" /></component>
-  <component type="arc_118"> <location r="0" t="150.6040" p="0" name="Det118" /></component>
-  <component type="arc_120"> <location r="0" t="150.3020" p="0" name="Det120" /></component>
-  <component type="arc_21"> <location r="0" t="165.0920" p="0" name="Det21" /></component>
-  <component type="arc_23"> <location r="0" t="164.7900" p="0" name="Det23" /></component>
-  <component type="arc_25"> <location r="0" t="164.4880" p="0" name="Det25" /></component>
-  <component type="arc_27"> <location r="0" t="164.1860" p="0" name="Det27" /></component>
-  <component type="arc_29"> <location r="0" t="163.8840" p="0" name="Det29" /></component>
-  <component type="arc_31"> <location r="0" t="163.5820" p="0" name="Det31" /></component>
-  <component type="arc_33"> <location r="0" t="163.2810" p="0" name="Det33" /></component>
-  <component type="arc_35"> <location r="0" t="162.9790" p="0" name="Det35" /></component>
-  <component type="arc_37"> <location r="0" t="162.6770" p="0" name="Det37" /></component>
-  <component type="arc_39"> <location r="0" t="162.3750" p="0" name="Det39" /></component>
-  <component type="arc_41"> <location r="0" t="162.0730" p="0" name="Det41" /></component>
-  <component type="arc_43"> <location r="0" t="161.7710" p="0" name="Det43" /></component>
-  <component type="arc_45"> <location r="0" t="161.4700" p="0" name="Det45" /></component>
-  <component type="arc_47"> <location r="0" t="161.1680" p="0" name="Det47" /></component>
-  <component type="arc_49"> <location r="0" t="160.8660" p="0" name="Det49" /></component>
-  <component type="arc_51"> <location r="0" t="160.5640" p="0" name="Det51" /></component>
-  <component type="arc_53"> <location r="0" t="160.2620" p="0" name="Det53" /></component>
-  <component type="arc_55"> <location r="0" t="159.9600" p="0" name="Det55" /></component>
-  <component type="arc_57"> <location r="0" t="159.6590" p="0" name="Det57" /></component>
-  <component type="arc_59"> <location r="0" t="159.3570" p="0" name="Det59" /></component>
-  <component type="arc_61"> <location r="0" t="159.0550" p="0" name="Det61" /></component>
-  <component type="arc_63"> <location r="0" t="158.7530" p="0" name="Det63" /></component>
-  <component type="arc_65"> <location r="0" t="158.4510" p="0" name="Det65" /></component>
-  <component type="arc_67"> <location r="0" t="158.1490" p="0" name="Det67" /></component>
-  <component type="arc_69"> <location r="0" t="157.8480" p="0" name="Det69" /></component>
-  <component type="arc_71"> <location r="0" t="157.5460" p="0" name="Det71" /></component>
-  <component type="arc_73"> <location r="0" t="157.2440" p="0" name="Det73" /></component>
-  <component type="arc_75"> <location r="0" t="156.9420" p="0" name="Det75" /></component>
-  <component type="arc_77"> <location r="0" t="156.6400" p="0" name="Det77" /></component>
-  <component type="arc_79"> <location r="0" t="156.3380" p="0" name="Det79" /></component>
-  <component type="arc_81"> <location r="0" t="156.0370" p="0" name="Det81" /></component>
-  <component type="arc_83"> <location r="0" t="155.7350" p="0" name="Det83" /></component>
-  <component type="arc_85"> <location r="0" t="155.4330" p="0" name="Det85" /></component>
-  <component type="arc_87"> <location r="0" t="155.1310" p="0" name="Det87" /></component>
-  <component type="arc_89"> <location r="0" t="154.8290" p="0" name="Det89" /></component>
-  <component type="arc_91"> <location r="0" t="154.5270" p="0" name="Det91" /></component>
-  <component type="arc_93"> <location r="0" t="154.2260" p="0" name="Det93" /></component>
-  <component type="arc_95"> <location r="0" t="153.9240" p="0" name="Det95" /></component>
-  <component type="arc_97"> <location r="0" t="153.6220" p="0" name="Det97" /></component>
-  <component type="arc_99"> <location r="0" t="153.3200" p="0" name="Det99" /></component>
-  <component type="arc_101"> <location r="0" t="153.0180" p="0" name="Det101" /></component>
-  <component type="arc_103"> <location r="0" t="152.7170" p="0" name="Det103" /></component>
-  <component type="arc_105"> <location r="0" t="152.4150" p="0" name="Det105" /></component>
-  <component type="arc_107"> <location r="0" t="152.1130" p="0" name="Det107" /></component>
-  <component type="arc_109"> <location r="0" t="151.8110" p="0" name="Det109" /></component>
-  <component type="arc_111"> <location r="0" t="151.5090" p="0" name="Det111" /></component>
-  <component type="arc_113"> <location r="0" t="151.2070" p="0" name="Det113" /></component>
-  <component type="arc_115"> <location r="0" t="150.9060" p="0" name="Det115" /></component>
-  <component type="arc_117"> <location r="0" t="150.6040" p="0" name="Det117" /></component>
-  <component type="arc_119"> <location r="0" t="150.3020" p="0" name="Det119" /></component>
+  <component type="arc_1">   <location r="0.0074" t="171.1280" p="0" name="Det1" /></component>
+  <component type="arc_2">   <location r="0"      t="170.8260" p="0" name="Det2" /></component>
+  <component type="arc_3">   <location r="0.0074" t="170.5250" p="0" name="Det3" /></component>
+  <component type="arc_4">   <location r="0"      t="170.2230" p="0" name="Det4" /></component>
+  <component type="arc_5">   <location r="0.0074" t="169.9210" p="0" name="Det5" /></component>
+  <component type="arc_6">   <location r="0"      t="169.6190" p="0" name="Det6" /></component>
+  <component type="arc_7">   <location r="0.0074" t="169.3170" p="0" name="Det7" /></component>
+  <component type="arc_8">   <location r="0"      t="169.0150" p="0" name="Det8" /></component>
+  <component type="arc_9">   <location r="0.0074" t="168.7140" p="0" name="Det9" /></component>
+  <component type="arc_10">  <location r="0"      t="168.4120" p="0" name="Det10" /></component>
+  <component type="arc_11">  <location r="0.0074" t="168.1100" p="0" name="Det11" /></component>
+  <component type="arc_12">  <location r="0"      t="167.8080" p="0" name="Det12" /></component>
+  <component type="arc_13">  <location r="0.0074" t="167.5060" p="0" name="Det13" /></component>
+  <component type="arc_14">  <location r="0"      t="167.2040" p="0" name="Det14" /></component>
+  <component type="arc_15">  <location r="0.0074" t="166.9030" p="0" name="Det15" /></component>
+  <component type="arc_16">  <location r="0"      t="166.6010" p="0" name="Det16" /></component>
+  <component type="arc_17">  <location r="0.0074" t="166.2990" p="0" name="Det17" /></component>
+  <component type="arc_18">  <location r="0"      t="165.9970" p="0" name="Det18" /></component>
+  <component type="arc_19">  <location r="0.0074" t="165.6950" p="0" name="Det19" /></component>
+  <component type="arc_20">  <location r="0"      t="165.3930" p="0" name="Det20" /></component>
+  <component type="arc_22">  <location r="0"      t="165.0920" p="0" name="Det22" /></component>
+  <component type="arc_24">  <location r="0.0074" t="164.7900" p="0" name="Det24" /></component>
+  <component type="arc_26">  <location r="0"      t="164.4880" p="0" name="Det26" /></component>
+  <component type="arc_28">  <location r="0.0074" t="164.1860" p="0" name="Det28" /></component>
+  <component type="arc_30">  <location r="0"      t="163.8840" p="0" name="Det30" /></component>
+  <component type="arc_32">  <location r="0.0074" t="163.5820" p="0" name="Det32" /></component>
+  <component type="arc_34">  <location r="0"      t="163.2810" p="0" name="Det34" /></component>
+  <component type="arc_36">  <location r="0.0074" t="162.9790" p="0" name="Det36" /></component>
+  <component type="arc_38">  <location r="0"      t="162.6770" p="0" name="Det38" /></component>
+  <component type="arc_40">  <location r="0.0074" t="162.3750" p="0" name="Det40" /></component>
+  <component type="arc_42">  <location r="0"      t="162.0730" p="0" name="Det42" /></component>
+  <component type="arc_44">  <location r="0.0074" t="161.7710" p="0" name="Det44" /></component>
+  <component type="arc_46">  <location r="0"      t="161.4700" p="0" name="Det46" /></component>
+  <component type="arc_48">  <location r="0.0074" t="161.1680" p="0" name="Det48" /></component>
+  <component type="arc_50">  <location r="0"      t="160.8660" p="0" name="Det50" /></component>
+  <component type="arc_52">  <location r="0.0074" t="160.5640" p="0" name="Det52" /></component>
+  <component type="arc_54">  <location r="0"      t="160.2620" p="0" name="Det54" /></component>
+  <component type="arc_56">  <location r="0.0074" t="159.9600" p="0" name="Det56" /></component>
+  <component type="arc_58">  <location r="0"      t="159.6590" p="0" name="Det58" /></component>
+  <component type="arc_60">  <location r="0.0074" t="159.3570" p="0" name="Det60" /></component>
+  <component type="arc_62">  <location r="0"      t="159.0550" p="0" name="Det62" /></component>
+  <component type="arc_64">  <location r="0.0074" t="158.7530" p="0" name="Det64" /></component>
+  <component type="arc_66">  <location r="0"      t="158.4510" p="0" name="Det66" /></component>
+  <component type="arc_68">  <location r="0.0074" t="158.1490" p="0" name="Det68" /></component>
+  <component type="arc_70">  <location r="0"      t="157.8480" p="0" name="Det70" /></component>
+  <component type="arc_72">  <location r="0.0074" t="157.5460" p="0" name="Det72" /></component>
+  <component type="arc_74">  <location r="0"      t="157.2440" p="0" name="Det74" /></component>
+  <component type="arc_76">  <location r="0.0074" t="156.9420" p="0" name="Det76" /></component>
+  <component type="arc_78">  <location r="0"      t="156.6400" p="0" name="Det78" /></component>
+  <component type="arc_80">  <location r="0.0074" t="156.3380" p="0" name="Det80" /></component>
+  <component type="arc_82">  <location r="0"      t="156.0370" p="0" name="Det82" /></component>
+  <component type="arc_84">  <location r="0.0074" t="155.7350" p="0" name="Det84" /></component>
+  <component type="arc_86">  <location r="0"      t="155.4330" p="0" name="Det86" /></component>
+  <component type="arc_88">  <location r="0.0074" t="155.1310" p="0" name="Det88" /></component>
+  <component type="arc_90">  <location r="0"      t="154.8290" p="0" name="Det90" /></component>
+  <component type="arc_92">  <location r="0.0074" t="154.5270" p="0" name="Det92" /></component>
+  <component type="arc_94">  <location r="0"      t="154.2260" p="0" name="Det94" /></component>
+  <component type="arc_96">  <location r="0.0074" t="153.9240" p="0" name="Det96" /></component>
+  <component type="arc_98">  <location r="0"      t="153.6220" p="0" name="Det98" /></component>
+  <component type="arc_100"> <location r="0.0074" t="153.3200" p="0" name="Det100" /></component>
+  <component type="arc_102"> <location r="0"      t="153.0180" p="0" name="Det102" /></component>
+  <component type="arc_104"> <location r="0.0074" t="152.7170" p="0" name="Det104" /></component>
+  <component type="arc_106"> <location r="0"      t="152.4150" p="0" name="Det106" /></component>
+  <component type="arc_108"> <location r="0.0074" t="152.1130" p="0" name="Det108" /></component>
+  <component type="arc_110"> <location r="0"      t="151.8110" p="0" name="Det110" /></component>
+  <component type="arc_112"> <location r="0.0074" t="151.5090" p="0" name="Det112" /></component>
+  <component type="arc_114"> <location r="0"      t="151.2070" p="0" name="Det114" /></component>
+  <component type="arc_116"> <location r="0.0074" t="150.9060" p="0" name="Det116" /></component>
+  <component type="arc_118"> <location r="0"      t="150.6040" p="0" name="Det118" /></component>
+  <component type="arc_120"> <location r="0.0074" t="150.3020" p="0" name="Det120" /></component>
+  <component type="arc_21">  <location r="0"      t="165.0920" p="0" name="Det21" /></component>
+  <component type="arc_23">  <location r="0.0074" t="164.7900" p="0" name="Det23" /></component>
+  <component type="arc_25">  <location r="0"      t="164.4880" p="0" name="Det25" /></component>
+  <component type="arc_27">  <location r="0.0074" t="164.1860" p="0" name="Det27" /></component>
+  <component type="arc_29">  <location r="0"      t="163.8840" p="0" name="Det29" /></component>
+  <component type="arc_31">  <location r="0.0074" t="163.5820" p="0" name="Det31" /></component>
+  <component type="arc_33">  <location r="0"      t="163.2810" p="0" name="Det33" /></component>
+  <component type="arc_35">  <location r="0.0074" t="162.9790" p="0" name="Det35" /></component>
+  <component type="arc_37">  <location r="0"      t="162.6770" p="0" name="Det37" /></component>
+  <component type="arc_39">  <location r="0.0074" t="162.3750" p="0" name="Det39" /></component>
+  <component type="arc_41">  <location r="0"      t="162.0730" p="0" name="Det41" /></component>
+  <component type="arc_43">  <location r="0.0074" t="161.7710" p="0" name="Det43" /></component>
+  <component type="arc_45">  <location r="0"      t="161.4700" p="0" name="Det45" /></component>
+  <component type="arc_47">  <location r="0.0074" t="161.1680" p="0" name="Det47" /></component>
+  <component type="arc_49">  <location r="0"      t="160.8660" p="0" name="Det49" /></component>
+  <component type="arc_51">  <location r="0.0074" t="160.5640" p="0" name="Det51" /></component>
+  <component type="arc_53">  <location r="0"      t="160.2620" p="0" name="Det53" /></component>
+  <component type="arc_55">  <location r="0.0074" t="159.9600" p="0" name="Det55" /></component>
+  <component type="arc_57">  <location r="0"      t="159.6590" p="0" name="Det57" /></component>
+  <component type="arc_59">  <location r="0.0074" t="159.3570" p="0" name="Det59" /></component>
+  <component type="arc_61">  <location r="0"      t="159.0550" p="0" name="Det61" /></component>
+  <component type="arc_63">  <location r="0.0074" t="158.7530" p="0" name="Det63" /></component>
+  <component type="arc_65">  <location r="0"      t="158.4510" p="0" name="Det65" /></component>
+  <component type="arc_67">  <location r="0.0074" t="158.1490" p="0" name="Det67" /></component>
+  <component type="arc_69">  <location r="0"      t="157.8480" p="0" name="Det69" /></component>
+  <component type="arc_71">  <location r="0.0074" t="157.5460" p="0" name="Det71" /></component>
+  <component type="arc_73">  <location r="0"      t="157.2440" p="0" name="Det73" /></component>
+  <component type="arc_75">  <location r="0.0074" t="156.9420" p="0" name="Det75" /></component>
+  <component type="arc_77">  <location r="0"      t="156.6400" p="0" name="Det77" /></component>
+  <component type="arc_79">  <location r="0.0074" t="156.3380" p="0" name="Det79" /></component>
+  <component type="arc_81">  <location r="0"      t="156.0370" p="0" name="Det81" /></component>
+  <component type="arc_83">  <location r="0.0074" t="155.7350" p="0" name="Det83" /></component>
+  <component type="arc_85">  <location r="0"      t="155.4330" p="0" name="Det85" /></component>
+  <component type="arc_87">  <location r="0.0074" t="155.1310" p="0" name="Det87" /></component>
+  <component type="arc_89">  <location r="0"      t="154.8290" p="0" name="Det89" /></component>
+  <component type="arc_91">  <location r="0.0074" t="154.5270" p="0" name="Det91" /></component>
+  <component type="arc_93">  <location r="0"      t="154.2260" p="0" name="Det93" /></component>
+  <component type="arc_95">  <location r="0.0074" t="153.9240" p="0" name="Det95" /></component>
+  <component type="arc_97">  <location r="0"      t="153.6220" p="0" name="Det97" /></component>
+  <component type="arc_99">  <location r="0.0074" t="153.3200" p="0" name="Det99" /></component>
+  <component type="arc_101"> <location r="0"      t="153.0180" p="0" name="Det101" /></component>
+  <component type="arc_103"> <location r="0.0074" t="152.7170" p="0" name="Det103" /></component>
+  <component type="arc_105"> <location r="0"      t="152.4150" p="0" name="Det105" /></component>
+  <component type="arc_107"> <location r="0.0074" t="152.1130" p="0" name="Det107" /></component>
+  <component type="arc_109"> <location r="0"      t="151.8110" p="0" name="Det109" /></component>
+  <component type="arc_111"> <location r="0.0074" t="151.5090" p="0" name="Det111" /></component>
+  <component type="arc_113"> <location r="0"      t="151.2070" p="0" name="Det113" /></component>
+  <component type="arc_115"> <location r="0.0074" t="150.9060" p="0" name="Det115" /></component>
+  <component type="arc_117"> <location r="0"      t="150.6040" p="0" name="Det117" /></component>
+  <component type="arc_119"> <location r="0.0074" t="150.3020" p="0" name="Det119" /></component>
 </type>
 
 <type name="arc_1" is="detector">
@@ -872,14 +872,13 @@
 
 <type name="pix1" is="detector">
   <cuboid id="app-shape">
-    <left-front-bottom-point  x="0.005"   y="-0.1"  z="0.0"  />
+    <left-front-bottom-point  x="0.005"   y="-0.1"  z="0.0"     />
     <left-front-top-point     x="0.005"   y="-0.1"  z="0.0002"  />
-    <left-back-bottom-point   x="-0.005"  y="-0.1"  z="0.0"  />
-    <right-front-bottom-point x="0.005"   y="0.1"   z="0.0"  />
+    <left-back-bottom-point   x="-0.005"  y="-0.1"  z="0.0"     />
+    <right-front-bottom-point x="0.005"   y="0.1"   z="0.0"     />
   </cuboid>
   <algebra val="app-shape" />
 </type>
-
 
 <!-- DETECTOR/MONITOR IDs -->
 
@@ -892,4 +891,5 @@
 <idlist idname="graphite">
   <id start="963" end="1004" />
 </idlist>
+
 </instrument>
