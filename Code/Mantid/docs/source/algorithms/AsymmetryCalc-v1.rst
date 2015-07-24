@@ -10,7 +10,11 @@ Description
 -----------
 
 This algorithm is used to calculate the asymmetry for a Muon workspace.
-The asymmetry is given by:
+It first groups the input workspace according to the spectra numbers
+provided as *ForwardSpectra* and *BackwardSpectra*. If these properties
+are not supplied, the algorithm assumes that the first spectrum in the
+workspace is the forward group and the second one is the backward
+group. It then calculates the asymmetry as:
 
 .. math:: Asymmetry = \frac{F-\alpha B}{F+\alpha B}
 
