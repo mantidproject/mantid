@@ -75,9 +75,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # tab 'Raw Detectors'
         self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
-                self.doPlotRawPtMain)
+                     self.doPlotRawPtMain)
         self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
-                self.doPlotRawPtPrev)
+                     self.do_plot_raw_pt_prev)
         self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
                 self.doPlotRawPtNext)
         self.connect(self.ui.pushButton_clearRawDets, QtCore.SIGNAL('clicked()'),
@@ -85,15 +85,15 @@ class MainWindow(QtGui.QMainWindow):
 
         # tab 'Individual Detectors'
         self.connect(self.ui.pushButton_plotIndvDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotIndvDetMain)
+                     self.doPlotIndvDetMain)
         self.connect(self.ui.pushButton_plotPrevDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotIndvDetPrev)
+                     self.doPlotIndvDetPrev)
         self.connect(self.ui.pushButton_plotNextDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotIndvDetNext)
+                     self.doPlotIndvDetNext)
         self.connect(self.ui.pushButton_clearCanvasIndDet, QtCore.SIGNAL('clicked()'),
-                self.doClearIndDetCanvas)
+                     self.doClearIndDetCanvas)
         self.connect(self.ui.pushButton_plotLog , QtCore.SIGNAL('clicked()'),
-                self.doPlotSampleLog)
+                     self.do_plot_sample_log)
 
         # tab 'Normalized'
         self.connect(self.ui.pushButton_loadData, QtCore.SIGNAL('clicked()'),
@@ -1124,7 +1124,7 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Unable to plot previous raw detector \
                     because Pt. or Detector ID has not been set up yet.")
             return
-        # ENDIFELSE
+        # EndIfElse
 
         # Get plot mode and plot
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
@@ -1139,8 +1139,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-    def doPlotRawPtPrev(self):
+    def do_plot_raw_pt_prev(self):
         """ Plot previous raw detector
         """
         # Validate input
@@ -1164,13 +1163,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def doPlotSampleLog(self):
+    def do_plot_sample_log(self):
         """ Plot sample log vs. Pt. in tab 'Individual Detector'
         """
-        expno =  int(self.ui.lineEdit_expNo.text())
+        expNo =  int(self.ui.lineEdit_expNo.text())
         scanno = int(self.ui.lineEdit_scanNo.text())
         logname = str(self.ui.comboBox_indvDetYLabel.currentText())
-        self._plotSampleLog(expno, scanno, logname)
+        self._plotSampleLog(expNo, scanno, logname)
 
         return
 
