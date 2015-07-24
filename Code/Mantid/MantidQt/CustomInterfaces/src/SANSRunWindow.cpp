@@ -4010,7 +4010,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionRadiusRequest("\nprint i.GetTransmissionRadiusInMM()");
   QString resultTransmissionRadius(runPythonCode(transmissionRadiusRequest, false));
   resultTransmissionRadius = resultTransmissionRadius.simplified();
-  if (resultTransmissionRadius != m_pythonEmptyKeyword) {
+  if (resultTransmissionRadius != m_constants.getPythonEmptyKeyword()) {
       this->m_uiForm.trans_radius_line_edit->setText(resultTransmissionRadius);
       this->m_uiForm.trans_radius_check_box->setChecked(true);
       setBeamStopLogic(TransSettings::RADIUS, true);
@@ -4020,7 +4020,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionROIRequest("\nprint i.GetTransmissionROI()");
   QString resultTransmissionROI(runPythonCode(transmissionROIRequest, false));
   resultTransmissionROI = resultTransmissionROI.simplified();
-  if (resultTransmissionROI != m_pythonEmptyKeyword) {
+  if (resultTransmissionROI != m_constants.getPythonEmptyKeyword()) {
       resultTransmissionROI = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionROI+ ")", false);
       this->m_uiForm.trans_roi_files_line_edit->setText(resultTransmissionROI);
       this->m_uiForm.trans_roi_files_checkbox->setChecked(true);
@@ -4032,7 +4032,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMaskRequest("\nprint i.GetTransmissionMask()");
   QString resultTransmissionMask(runPythonCode(transmissionMaskRequest, false));
   resultTransmissionMask = resultTransmissionMask.simplified();
-  if (resultTransmissionMask != m_pythonEmptyKeyword) {
+  if (resultTransmissionMask != m_constants.getPythonEmptyKeyword()) {
     resultTransmissionMask = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionMask+ ")", false);
     this->m_uiForm.trans_masking_line_edit->setText(resultTransmissionMask);
   }
@@ -4041,7 +4041,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMonitorSpectrumShiftRequest("\nprint i.GetTransmissionMonitorSpectrumShift()");
   QString resultTransmissionMonitorSpectrumShift(runPythonCode(transmissionMonitorSpectrumShiftRequest, false));
   resultTransmissionMonitorSpectrumShift = resultTransmissionMonitorSpectrumShift.simplified();
-  if (resultTransmissionMonitorSpectrumShift != m_pythonEmptyKeyword) {
+  if (resultTransmissionMonitorSpectrumShift != m_constants.getPythonEmptyKeyword()) {
     this->m_uiForm.trans_M3M4_line_edit->setText(resultTransmissionMonitorSpectrumShift);
   }
 
@@ -4050,7 +4050,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMonitorSpectrumRequest("\nprint i.GetTransmissionMonitorSpectrum()");
   QString resultTransmissionMonitorSpectrum(runPythonCode(transmissionMonitorSpectrumRequest, false));
   resultTransmissionMonitorSpectrum = resultTransmissionMonitorSpectrum.simplified();
-  if (resultTransmissionMonitorSpectrum != m_pythonEmptyKeyword) {
+  if (resultTransmissionMonitorSpectrum != m_constants.getPythonEmptyKeyword()) {
     if (resultTransmissionMonitorSpectrum == "3") {
       this->m_uiForm.trans_M3_check_box->setChecked(true);
       setM3M4Logic(TransSettings::M3, true);
