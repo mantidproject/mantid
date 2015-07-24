@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="IRIS" valid-from   ="1900-01-31 23:59:59"
-                        valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2010-10-07 00:00:00">
+            name="IRIS"
+            valid-from="1900-01-31 23:59:59"
+            valid-to="2100-01-31 23:59:59"
+            last-modified="2010-10-07 00:00:00">
 <!-- modified by FD 7/10/2010 -->
 
 <defaults>
@@ -21,7 +22,7 @@
 </defaults>
 
 <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
-  
+
 <!-- source and sample-position components -->
 
 <component type="moderator">
@@ -51,7 +52,7 @@
 <!-- monitor components -->
 
   <component type="monitor1" idlist="monitor1">
-    <location z="-0.335" />
+    <location z="-0.355" />
   </component>
 
   <type name="monitor1" is="monitor">
@@ -63,16 +64,16 @@
       <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
-  </type>  
+  </type>
 
   <idlist idname="monitor1">
-    <id val="1" />  
+    <id val="1" />
   </idlist>
-  
+
   <component type="monitor2" idlist="monitor2">
-    <location z="2.35" />
+    <location z="2.349" />
   </component>
-  
+
   <type name="monitor2" is="monitor">
     <percent-transparency val="99.9" />
     <cuboid id="shape">
@@ -82,10 +83,10 @@
       <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
-  </type> 
+  </type>
 
   <idlist idname="monitor2">
-    <id val="2" />  
+    <id val="2" />
   </idlist>
 
 <!--  detector components -->
@@ -178,7 +179,7 @@
   <location r="1.47" t="-29.89" p="0" name="S57" />
   <location r="1.47" t="-32.62" p="0" name="S58" />
   <location r="1.47" t="-35.35" p="0" name="S59" />
-  <location r="1.47" t="-38.08" p="0" name="S60" /> 
+  <location r="1.47" t="-38.08" p="0" name="S60" />
   <location r="1.47" t="-40.81" p="0" name="S61" />
   <location r="1.47" t="-43.54" p="0" name="S62" />
   <location r="1.47" t="-46.27" p="0" name="S63" />
@@ -189,7 +190,7 @@
   <location r="1.47" t="-59.92" p="0" name="S68" />
   <location r="1.47" t="-62.65" p="0" name="S69" />
   <location r="1.47" t="-65.38" p="0" name="S70" />
- <location r="1.47" t="-68.11" p="0" name="S71" />
+  <location r="1.47" t="-68.11" p="0" name="S71" />
   <location r="1.47" t="-70.84" p="0" name="S72" />
   <location r="1.47" t="-73.57" p="0" name="S73" />
   <location r="1.47" t="-76.30" p="0" name="S74" />
@@ -237,16 +238,16 @@
 
 <type name="diffraction">
  <component type="pix2">
-  <location r="0.8576" t="-167.15" p="0" name="S105" />
-  <location r="0.8502" t="-167.72" p="0" name="S106" />
-  <location r="0.8570" t="-168.33" p="0" name="S107" />
-  <location r="0.8499" t="-168.91" p="0" name="S108" />
-  <location r="0.8568" t="-169.50" p="0" name="S109" />
-  <location r="0.8499" t="-170.09" p="0" name="S110" />
-  <location r="0.8570" t="-170.67" p="0" name="S111" />
-  <location r="0.8502" t="-171.26" p="0" name="S112" />
-  <location r="0.8576" t="-171.83" p="0" name="S113" />
-  <location r="0.8510" t="-172.41" p="0" name="S114" />
+  <location r="0.8563" t="-167.15" p="0" name="S105" />
+  <location r="0.8490" t="-167.72" p="0" name="S106" />
+  <location r="0.8558" t="-168.33" p="0" name="S107" />
+  <location r="0.8486" t="-168.91" p="0" name="S108" />
+  <location r="0.8558" t="-169.50" p="0" name="S109" />
+  <location r="0.8486" t="-170.09" p="0" name="S110" />
+  <location r="0.8558" t="-170.67" p="0" name="S111" />
+  <location r="0.8490" t="-171.26" p="0" name="S112" />
+  <!-- <location r="0.8576" t="-171.83" p="0" name="S113" /> -->
+  <!-- <location r="0.8510" t="-172.41" p="0" name="S114" /> -->
  </component>
 </type>
 
@@ -261,7 +262,7 @@
 </type>
 
 <idlist idname="diffraction">
-  <id start="105" end="114" />
+  <id start="105" end="112" />
 </idlist>
 
 </instrument>
