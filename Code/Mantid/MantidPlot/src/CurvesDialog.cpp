@@ -476,20 +476,26 @@ void CurvesDialog::removeCurves()
 
   showCurveRange(boxShowRange->isChecked());
   d_graph->updatePlot();
-}
-//Enable Disable buttons function
+
+/** Enable disable buttons function 
+* 
+*/
 void CurvesDialog::enableAddBtn()
 {
   btnAdd->setEnabled (available->count()>0 && !available->selectedItems().isEmpty());
 }
 
-// enables or disables the button when appopriate number of graphs are in graph contents 
+/** enables or disables the button when appopriate number of graphs are in graph contents 
+* 
+*/
 void CurvesDialog::enableRemoveBtn()
 { 
   btnRemove->setEnabled (contents->count()>1 && !contents->selectedItems().isEmpty());
 }
 
-//enables btnOK when there is even one graph plotted in graph contents area
+/** enables btnOK if there is one or more graph plotted in graph contents area
+* 
+*/
 void CurvesDialog::enableBtnOK(){
   btnOK->setEnabled (contents->count()>0 && !contents->selectedItems().isEmpty());
 }
