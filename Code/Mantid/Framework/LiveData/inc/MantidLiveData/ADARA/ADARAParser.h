@@ -4,6 +4,8 @@
 #include <string>
 #include <stdint.h>
 #include <stdexcept>
+#include <map>
+#include <unistd.h> // for ssize_t
 
 #include "ADARA.h"
 #include "ADARAPackets.h"
@@ -27,6 +29,29 @@ public:
 
   /// Destructor
   virtual ~Parser();
+
+  ssize_t last_bytes_read;
+  ssize_t last_last_bytes_read;
+  ssize_t last_pkts_parsed;
+  ssize_t last_last_pkts_parsed;
+  unsigned long last_total_bytes;
+  unsigned long last_last_total_bytes;
+  unsigned int last_total_packets;
+  unsigned int last_last_total_packets;
+  unsigned int last_read_count;
+  unsigned int last_last_read_count;
+  unsigned int last_loop_count;
+  unsigned int last_last_loop_count;
+  double last_parse_elapsed_total;
+  double last_last_parse_elapsed_total;
+  double last_read_elapsed_total;
+  double last_last_read_elapsed_total;
+  double last_parse_elapsed;
+  double last_last_parse_elapsed;
+  double last_read_elapsed;
+  double last_last_read_elapsed;
+  double last_elapsed;
+  double last_last_elapsed;
 
 protected:
   /** @name Buffer Manipulation Functions
@@ -53,7 +78,9 @@ protected:
     return NULL;
   }
 
-  unsigned int bufferFillLength(void) const { return m_size - m_len; }
+  unsigned int bufferFillLength(void) const {
+      return m_size - m_len;
+  }
 
   void bufferBytesAppended(unsigned int count) {
     if (bufferFillLength() < count) {
@@ -78,7 +105,7 @@ protected:
     * Partial packet chunks will be counted as completed when the last
     * fragment is processed.
     **/
-  int bufferParse(unsigned int max_packets = 0);
+  int bufferParse(std::string & log_info, unsigned int max_packets = 0);
 
   /** Flush the internal buffers and get ready to restart parsing.
     **/
@@ -101,8 +128,10 @@ protected:
   /**@{*/
   virtual bool rxPacket(const Packet &pkt);
   virtual bool rxUnknownPkt(const Packet &pkt);
-  virtual bool rxOversizePkt(const PacketHeader *hdr, const uint8_t *chunk,
-                             unsigned int chunk_offset, unsigned int chunk_len);
+  virtual bool rxOversizePkt(const PacketHeader *hdr,
+                             const uint8_t *chunk,
+                             unsigned int chunk_offset,
+                             unsigned int chunk_len);
   /**@}*/
 
   /** @name Specific rxPacket Functions
@@ -120,6 +149,7 @@ protected:
     **/
   /**@{*/
   virtual bool rxPacket(const RawDataPkt &pkt);
+  virtual bool rxPacket(const MappedDataPkt &pkt);
   virtual bool rxPacket(const RTDLPkt &pkt);
   virtual bool rxPacket(const SourceListPkt &pkt);
   virtual bool rxPacket(const BankedEventPkt &pkt);
@@ -134,14 +164,31 @@ protected:
   virtual bool rxPacket(const HeartbeatPkt &pkt);
   virtual bool rxPacket(const GeometryPkt &pkt);
   virtual bool rxPacket(const BeamlineInfoPkt &pkt);
+  virtual bool rxPacket(const BeamMonitorConfigPkt &pkt);
+  virtual bool rxPacket(const DetectorBankSetsPkt &pkt);
+  virtual bool rxPacket(const DataDonePkt &pkt);
   virtual bool rxPacket(const DeviceDescriptorPkt &pkt);
   virtual bool rxPacket(const VariableU32Pkt &pkt);
   virtual bool rxPacket(const VariableDoublePkt &pkt);
   virtual bool rxPacket(const VariableStringPkt &pkt);
   /**@}*/
+  
+  /* Collect a log string with statistics on "discarded" packet types,
+    * i.e. packets that for one reason or another were _Not_ parsed
+    * or processed.
+    *
+    * Since we don't have a common logging approach in this software suite
+    * (<sigh/>), we just fill up a happy logging string with info
+    * and return it for the caller's logger du jour.
+    */
+  void getDiscardedPacketsLogString(std::string & log_info);
+
+  /* Reset the collected "discarded packet" statistics.
+    */
+  void resetDiscardedPacketsStats(void);
 
 private:
-  uint8_t *m_buffer;
+  uint8_t * m_buffer;
   unsigned int m_size;
   unsigned int m_max_size;
   unsigned int m_len;
@@ -149,6 +196,8 @@ private:
   unsigned int m_restart_offset;
   unsigned int m_oversize_len;
   unsigned int m_oversize_offset;
+
+  std::map<PacketType::Enum, uint64_t>	m_discarded_packets;
 };
 
 } /* namespacce ADARA */
