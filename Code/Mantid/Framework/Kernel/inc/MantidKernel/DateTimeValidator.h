@@ -32,6 +32,8 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL DateTimeValidator : public TypedValidator<std::string> {
 public:
+  DateTimeValidator();
+
   /// Clone the current state
   IValidator_sptr clone() const;
 
@@ -41,6 +43,7 @@ private:
   /// Checks the value is valid
   std::string checkValidity(const std::string &value) const;
 
+  /// Allows for an empty string to be accepted as input
   bool m_allowedEmpty;
 };
 }

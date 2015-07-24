@@ -77,6 +77,7 @@ void AddNote::init() {
 
   auto dtv = boost::make_shared<DateTimeValidator>();
   dtv->allowEmpty(true);
+
   declareProperty(
       "Time", "", dtv,
       "An ISO formatted date/time string specifying the timestamp for "
@@ -105,6 +106,7 @@ void AddNote::exec() {
     removeExisting(logWS, name);
   }
   createOrUpdate(run, name);
+  auto dtv = boost::make_shared<DateTimeValidator>();
 }
 
 /**

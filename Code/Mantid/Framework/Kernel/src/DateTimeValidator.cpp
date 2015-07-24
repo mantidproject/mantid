@@ -14,6 +14,12 @@ IValidator_sptr DateTimeValidator::clone() const {
   return boost::make_shared<DateTimeValidator>(*this);
 }
 
+DateTimeValidator::DateTimeValidator() { m_allowedEmpty = false; }
+
+/**
+ * Sets the value of the m_allowEmpty variable
+ * @param allow The new value of m_allowEmpty
+ */
 void DateTimeValidator::allowEmpty(const bool &allow) {
   m_allowedEmpty = allow;
 }
@@ -30,7 +36,6 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
   if (m_allowedEmpty && value.empty()) {
     return "";
   } else {
-
     std::string error("");
     try {
       DateAndTime timestamp(value);
