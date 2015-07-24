@@ -9,39 +9,39 @@ from matplotlib.figure import Figure
 
 MplLineStyles = ['-' , '--' , '-.' , ':' , 'None' , ' ' , '']
 MplLineMarkers = [
-        ". (point         )",
-        "* (star          )",
-        "x (x             )",
-        "o (circle        )",
-        "s (square        )",
-        "D (diamond       )",
-        ", (pixel         )",
-        "v (triangle_down )",
-        "^ (triangle_up   )",
-        "< (triangle_left )",
-        "> (triangle_right)",
-        "1 (tri_down      )",
-        "2 (tri_up        )",
-        "3 (tri_left      )",
-        "4 (tri_right     )",
-        "8 (octagon       )",
-        "p (pentagon      )",
-        "h (hexagon1      )",
-        "H (hexagon2      )",
-        "+ (plus          )",
-        "d (thin_diamond  )",
-        "| (vline         )",
-        "_ (hline         )",
-        "None (nothing    )"]
+    ". (point         )",
+    "* (star          )",
+    "x (x             )",
+    "o (circle        )",
+    "s (square        )",
+    "D (diamond       )",
+    ", (pixel         )",
+    "v (triangle_down )",
+    "^ (triangle_up   )",
+    "< (triangle_left )",
+    "> (triangle_right)",
+    "1 (tri_down      )",
+    "2 (tri_up        )",
+    "3 (tri_left      )",
+    "4 (tri_right     )",
+    "8 (octagon       )",
+    "p (pentagon      )",
+    "h (hexagon1      )",
+    "H (hexagon2      )",
+    "+ (plus          )",
+    "d (thin_diamond  )",
+    "| (vline         )",
+    "_ (hline         )",
+    "None (nothing    )"]
 
 MplBasicColors = [
-        "black",
-        "red",
-        "blue",
-        "green",
-        "cyan",
-        "magenta",
-        "yellow"] #"white"]
+    "black",
+    "red",
+    "blue",
+    "green",
+    "cyan",
+    "magenta",
+    "yellow"] #"white"]
 
 
 class MplFigureCanvas(QtGui.QWidget):
@@ -276,8 +276,12 @@ class Qt4MplCanvas(FigureCanvas):
             linestyle = '-'
 
         # color must be RGBA (4-tuple)
-        r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
-                label=label, linewidth=linewidth) # return: list of matplotlib.lines.Line2D object
+        if False:
+            r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
+                               label=label, linewidth=linewidth) # return: list of matplotlib.lines.Line2D object
+        else:
+            r = self.axes.errorbar(x, y, yerr=10, color=color, marker=marker, linestyle=linestyle,
+                                   label=label, linewidth=linewidth)
 
         self.axes.set_aspect('auto')
 
