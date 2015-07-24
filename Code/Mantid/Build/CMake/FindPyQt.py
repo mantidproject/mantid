@@ -12,9 +12,9 @@ def get_default_sip_dir():
     # default case where installation paths have not been changed in PyQt's
     # configuration process.
     if sys.platform == 'win32':
-        pyqt_sip_dir = os.path.join(sys.platform, 'sip', 'PyQt4')
+        pyqt_sip_dir = os.path.join(sys.prefix, 'sip', 'PyQt4')
     else:
-        pyqt_sip_dir = os.path.join(sys.platform, 'share', 'sip', 'PyQt4')
+        pyqt_sip_dir = os.path.join(sys.prefix, 'share', 'sip', 'PyQt4')
     return pyqt_sip_dir
 
 def get_qt4_tag(sip_flags):
