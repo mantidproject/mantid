@@ -26,5 +26,13 @@ void ImageCoRViewQtGUI::initLayout() {
   m_presenter->notify(ImageCoRPresenter::Init);
 }
 
+void ImageCoRViewQtGUI::initParams(ImageStackPreParams &params) {
+  m_params = params;
+}
+
+ImageStackPreParams ImageCoRViewQtGUI::userSelection() const {
+  return m_params;
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

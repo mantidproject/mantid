@@ -18,6 +18,10 @@ ImageCoRPresenter::ImageCoRPresenter(IImageCoRView *view)
 
 ImageCoRPresenter::~ImageCoRPresenter() { cleanup(); }
 
+void ImageCoRPresenter::cleanup() {}
+
+void ImageCoRPresenter::notify(Notification notif) {}
+
 void ImageCoRPresenter::processInit() {}
 
 void ImageCoRPresenter::processBrowseImg() {}

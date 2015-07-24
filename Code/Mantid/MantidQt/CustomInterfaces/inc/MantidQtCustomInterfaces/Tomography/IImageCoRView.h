@@ -52,14 +52,14 @@ public:
    * Order matters
    *
    */
-  virtual void initParams(ImageStackPreParams &params) const;
+  virtual void initParams(ImageStackPreParams &params) = 0;
 
   /**
    * Provides the current user selection.
    *
-   * @return ...
+   * @return parameters as set/edited by the user.
    */
-  virtual ImageStackPreParams userSelection() const;
+  virtual ImageStackPreParams userSelection() const = 0;
 };
 
 } // namespace CustomInterfaces

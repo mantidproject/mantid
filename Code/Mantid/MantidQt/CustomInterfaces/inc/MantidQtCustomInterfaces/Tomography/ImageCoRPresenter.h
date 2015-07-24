@@ -44,7 +44,7 @@ public:
   ImageCoRPresenter(IImageCoRView *view);
   virtual ~ImageCoRPresenter();
 
-  virtual void notify(IImageCoRPresenter::Notification notif);
+  void notify(IImageCoRPresenter::Notification notif);
 
 protected:
   void initialize();

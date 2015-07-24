@@ -46,15 +46,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImageCoRViewQtGUI : public QWidget,
-                                    public IImageCoRView {
+class DLLExport ImageCoRViewQtGUI : public QWidget, public IImageCoRView {
   Q_OBJECT
 
 public:
   ImageCoRViewQtGUI(QWidget *parent = 0);
   virtual ~ImageCoRViewQtGUI(){};
 
-  void initParams(ImageStackPreParams &params) const;
+  void initParams(ImageStackPreParams &params);
 
   ImageStackPreParams userSelection() const;
 
@@ -64,7 +63,7 @@ protected:
 private:
   Ui::ImageSelectCoRAndRegions m_ui;
 
-  boost::scoped_ptr<ImageStackPreParams> m_params;
+  ImageStackPreParams m_params;
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IImageCoRPresenter> m_presenter;
