@@ -953,8 +953,13 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get detector ID and x-label option
         try:
-            #detid = self._getInteger(self.ui.lineEdit_detID)
-            detidlist = self._getIntArray(self.ui.lineEdit_detID)
+            status, detidlist = self._getIntArray(self.ui.lineEdit_detID.text())
+            if status is False:
+                errmsg = detidlist
+                print "Unable to parse detector IDs due to %s."%(errmsg)
+                return
+            else:
+                print "[DB] Detectors to plot: %s"%(detidlist)
         except EmptyError:
             self._logError("Detector ID must be specified for plotting individual detector.")
             return
@@ -966,9 +971,11 @@ class MainWindow(QtGui.QMainWindow):
 
         xlabel = str(self.ui.comboBox_indvDetXLabel.currentText()).strip()
         if xlabel != "" and xlabel != "Pt." and xlabel != "2theta/Scattering Angle":
+            # Plot with sample logs other than Pt.
             self._logNotice("New Feature: X-label %s is supported for plotting individual detector's counts.  Set to detector angle." % (xlabel))
             xlabel = xlabel
         else:
+            # Plot with Pt. or detector angles
             if xlabel != "Pt.":
                 xlabel = ""
             self._logNotice("X-label for individual detectror is '%s'." % (xlabel))
@@ -976,7 +983,7 @@ class MainWindow(QtGui.QMainWindow):
         # plot
         for detid in sorted(detidlist):
             try:
-                self._plotIndividualDetCounts(expno, scanno, detid, xlabel)
+                self._plotIndividualDetCounts(expno, scanno, detid, xlabel, resetboundary=not overplot)
                 self._expNo = expno
                 self._scanNo = scanno
                 self._detID = detid
@@ -1574,14 +1581,14 @@ class MainWindow(QtGui.QMainWindow):
         return    
         
 
-    def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis):
+    def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis, resetboundary=False):
         """ Plot a specific detector's counts along all experiment points (pt)
         
         Arguments: 
          - expno ::
          - scanno ::
          - detid ::
-         - xaxis :: string as 'XLabel' 
+         - xaxis :: string as 'XLabel'
         """
         # Validate input
         expno = int(expno)
@@ -1599,7 +1606,9 @@ class MainWindow(QtGui.QMainWindow):
             self._tabLineDict[canvas] = []
 
         # get data
-        self._logNotice("X-axis is %s."%(xaxis))
+        self._logNotice("Input x-axis is '%s' for plotting individual detector's counts."%(xaxis))
+        if len(xaxis) == 0:
+            xaxis = None
         vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xaxis)
 
         # Plot to canvas
@@ -1608,7 +1617,7 @@ class MainWindow(QtGui.QMainWindow):
             xlabel = r'$2\theta$'
         else:
             #xlabel = "Pt."
-            xlabel = xlabel 
+            xlabel = xaxis 
         # FIXME - If it works with any way of plotting, then refactor Pt. with any other sample names
 
         label = "Detector ID: %d" % (detid)
@@ -1617,12 +1626,21 @@ class MainWindow(QtGui.QMainWindow):
             canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
                 ylabel='Counts',label=label)
             self._tabLineDict[canvas].append( (expno, scanno, detid) )
-
-            # auto setup for image boundary
-            xmin = min(min(vecx), canvas.getXLimit()[0])
-            xmax = max(max(vecx), canvas.getXLimit()[1])
-            ymin = min(min(vecy), canvas.getYLimit()[0])
-            ymax = max(max(vecy), canvas.getYLimit()[1])
+            
+            if resetboundary is True:
+                # Set xmin and xmax about the data for first time
+                xmin = min(vecx)
+                xmax = max(vecx)
+                ymin = min(vecy)
+                ymax = max(vecy)
+                resetboundary = False
+            else:
+                # auto setup for image boundary
+                xmin = min(min(vecx), canvas.getXLimit()[0])
+                xmax = max(max(vecx), canvas.getXLimit()[1])
+                ymin = min(min(vecy), canvas.getYLimit()[0])
+                ymax = max(max(vecy), canvas.getYLimit()[1])
+            # ENDIFELSE
 
             dx = xmax-xmin
             dy = ymax-ymin
@@ -1836,9 +1854,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # pop out the xlabel list
         # REFACTOR - Only need to set up once if previous plot has the same setup
-        floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
-        self.ui.comboBox_indvDetXLabel.clear()
-        self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+
+        if self.ui.comboBox_indvDetXLabel.count() == 0:
+            floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
+            self.ui.comboBox_indvDetXLabel.clear()
+            self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+            raise NotImplemented("This X-label combo box should be set up during loading data before.")
 
         xlabel=str(self.ui.comboBox_indvDetXLabel.currentText())
 
@@ -1847,7 +1868,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plot to canvas
         canvas = self.ui.graphicsView_indvDet
-        canvas.clearAllLines()
+        # FIXME - Clear canvas (think of a case that no need to clear canvas)
+        canvas.clearCanvas()        
+        # canvas.clearAllLines()
 
         marker, color = canvas.getNextLineMarkerColorCombo()
         if xlabel is None:

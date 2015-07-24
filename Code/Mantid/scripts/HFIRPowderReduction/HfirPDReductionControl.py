@@ -386,6 +386,7 @@ class HFIRPDRedControl(object):
         # ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         # get data
+        print "[DB] Plot sample log: XLabel = %s" % (xlabel)
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Sample Log',
