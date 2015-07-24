@@ -26,11 +26,6 @@ the errors in :math:`F-\alpha B` and :math:`F+\alpha B`.
 The output workspace contains one set of data for the time of flight:
 the asymmetry and the asymmetry errors.
 
-.. note::
-   This algorithm does not perform any grouping. The grouping must be
-   done using :ref:`algm-MuonGroupDetectors` or *AutoGroup* option
-   of :ref:`algm-LoadMuonNexus`.
-
 .. [1] See :ref:`algm-AlphaCalc`
 
 Usage
