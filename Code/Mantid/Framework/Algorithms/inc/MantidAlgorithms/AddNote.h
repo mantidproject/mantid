@@ -48,10 +48,9 @@ private:
   void exec();
 
   /// Remove an existing log of the given name
-  void removeExisting(API::MatrixWorkspace_sptr &logWS,
-                      const std::string &name);
+  void removeExisting(API::MatrixWorkspace_sptr &, const std::string &);
   /// Create or update the named log entry
-  void createOrUpdate(API::Run &run, const std::string &name);
+  void createOrUpdate(API::Run &, const std::string &);
 };
 
 } // namespace Algorithms

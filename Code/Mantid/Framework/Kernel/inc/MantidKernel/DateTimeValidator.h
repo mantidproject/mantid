@@ -35,9 +35,13 @@ public:
   /// Clone the current state
   IValidator_sptr clone() const;
 
+  void allowEmpty(const bool &);
+
 private:
   /// Checks the value is valid
   std::string checkValidity(const std::string &value) const;
+
+  bool m_allowedEmpty;
 };
 }
 }

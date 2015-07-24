@@ -14,6 +14,10 @@ IValidator_sptr DateTimeValidator::clone() const {
   return boost::make_shared<DateTimeValidator>(*this);
 }
 
+void DateTimeValidator::allowEmpty(const bool &allow) {
+  m_allowedEmpty = allow;
+}
+
 /**
  *  @param value A string to check for an ISO formatted timestamp
  *  @return An empty string if the value is valid or an string containing
@@ -23,14 +27,19 @@ std::string DateTimeValidator::checkValidity(const std::string &value) const {
   // simply pass off the work DateAndTime constructor
   // the DateAndTime::stringIsISO8601 does not seem strict enough, it accepts
   // empty strings & strings of letters!
-  std::string error("");
-  try {
-    DateAndTime timestamp(value);
-    UNUSED_ARG(timestamp);
-  } catch (std::invalid_argument &exc) {
-    error = exc.what();
+  if (m_allowedEmpty && value.empty()) {
+    return "";
+  } else {
+
+    std::string error("");
+    try {
+      DateAndTime timestamp(value);
+      UNUSED_ARG(timestamp);
+    } catch (std::invalid_argument &exc) {
+      error = exc.what();
+    }
+    return error;
   }
-  return error;
 }
 }
 }

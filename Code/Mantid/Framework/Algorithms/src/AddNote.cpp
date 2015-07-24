@@ -75,8 +75,10 @@ void AddNote::init() {
                   "created or an existing name to update",
                   Direction::Input);
 
+  auto dtv = boost::make_shared<DateTimeValidator>();
+  dtv->allowEmpty(true);
   declareProperty(
-	  "Time", std::string(""),
+      "Time", "", dtv,
       "An ISO formatted date/time string specifying the timestamp for "
       "the given log value, for example 2010-09-14T04:20:12 \n"
       "If left blank, this will default to the current Date and Time",
@@ -91,7 +93,6 @@ void AddNote::init() {
       "If true and the named log exists then the whole log is removed first.",
       Direction::Input);
 }
-
 //----------------------------------------------------------------------------------------------
 /** Executes the algorithm.
  */
