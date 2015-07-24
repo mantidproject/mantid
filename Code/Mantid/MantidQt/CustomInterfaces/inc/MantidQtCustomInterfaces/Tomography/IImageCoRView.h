@@ -60,6 +60,11 @@ public:
    * @return parameters as set/edited by the user.
    */
   virtual ImageStackPreParams userSelection() const = 0;
+
+  /**
+   *
+   */
+  virtual void showImgOrStack() = 0;
 };
 
 } // namespace CustomInterfaces

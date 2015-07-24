@@ -57,13 +57,22 @@ public:
 
   ImageStackPreParams userSelection() const;
 
+  void showImgOrStack();
+
 protected:
   void initLayout();
+  void showImg();
+
+private slots:
+  void browseImgClicked();
 
 private:
+  void setupConnections();
+
   Ui::ImageSelectCoRAndRegions m_ui;
 
   ImageStackPreParams m_params;
+  std::string m_imgPath;
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IImageCoRPresenter> m_presenter;
