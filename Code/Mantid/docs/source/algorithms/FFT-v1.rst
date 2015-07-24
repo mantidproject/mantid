@@ -23,36 +23,6 @@ that for the data defined on an interval [A,B] the output
 :math:`F(\xi_k)` must be multiplied by :math:`e^{-2\pi ix_0\xi_k}`,
 where :math:`x_0=\tfrac{1}{2}(A+B)`, :math:`\xi_k` is the frequency.
 
-Usage
--------
-
-.. include:: ../usagedata-note.txt
-
-**Example: Applying FFT algorithm:**
-
-.. testcode:: FFTBackwards
-
-    #Create Sample Workspace 
-	ws = CreateSampleWorkspace(WorkspaceType = 'Event', Function = 'Exp Decay', NumBanks = '1', BankPixelWidth = '1', NumEvents = '100')
-
-	#apply the FFT algorithm 
-	outworkspace = FFT(InputWorkspace = ws, Transform = 'Backward')
-
-	#print statements
-	print "DataX(0)[0] equals DataX(0)[100]? : " + str((round(abs(outworkspace.dataX(0)[0]), 3)) == (round(outworkspace.dataX(0)[100], 3)))
-	print "DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3)))
-	print "DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0)
-	print "DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5)))
-
-Output:
-
-.. testoutput:: FFTBackwards
-	
-	DataX(0)[0] equals DataX(0)[100]? : True
-	DataX(0)[10] equals DataX(0)[90]? : True
-	DataX((0)[50] equals 0? : True
-	DataY(0)[40] equals DataY(0)[60]? : True
-
 Details
 -------
 
@@ -206,6 +176,37 @@ for the real (0), imaginary (1) parts, and the modulus (2).
 +-------------------+------------------+
 | 2                 | Modulus          |
 +-------------------+------------------+
+
+Usage
+-------
+
+.. include:: ../usagedata-note.txt
+
+**Example: Applying FFT algorithm:**
+
+.. testcode:: FFTBackwards
+
+   #Create Sample Workspace 
+   ws = CreateSampleWorkspace(WorkspaceType = 'Event', NumBanks = 1, Function = 'Exp Decay', BankPixelWidth = 1, NumEvents = 100)
+
+   #apply the FFT algorithm 
+   outworkspace = FFT(InputWorkspace = ws, Transform = 'Backward')
+
+   #print statements
+   print "DataX(0)[0] equals DataX(0)[100]? : " + str((round(abs(outworkspace.dataX(0)[0]), 3)) == (round(outworkspace.dataX(0)[100], 3)))
+   print "DataX(0)[10] equals DataX(0)[90]? : " + str((round(abs(outworkspace.dataX(0)[10]), 3)) == (round(outworkspace.dataX(0)[90], 3)))
+   print "DataX((0)[50] equals 0? : " + str((round(abs(outworkspace.dataX(0)[50]), 3)) == 0)
+   print "DataY(0)[40] equals DataY(0)[60]? : " + str((round(abs(outworkspace.dataY(0)[40]), 5)) == (round(outworkspace.dataY(0)[60], 5)))
+
+Output:
+
+.. testoutput:: FFTBackwards
+	
+   DataX(0)[0] equals DataX(0)[100]? : True
+   DataX(0)[10] equals DataX(0)[90]? : True
+   DataX((0)[50] equals 0? : True
+   DataY(0)[40] equals DataY(0)[60]? : True
+
 
 .. categories::
 
