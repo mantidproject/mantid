@@ -87,6 +87,9 @@ void LoadIDFFromNexus::exec() {
   std::string correctionParameterFile = "";
   bool append = false;
   if( parameterCorrectionFile != "") {
+    // Read parameter correction file 
+    // to find out which parameter file to use 
+    // and whether it is appended to default parameters.
     readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
   }
   g_log.notice() << "Result of readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
