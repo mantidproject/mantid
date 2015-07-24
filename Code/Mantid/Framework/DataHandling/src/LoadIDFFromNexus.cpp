@@ -167,11 +167,9 @@ void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correctio
 
   // Examine the XML structure obtained by parsing
   Poco::AutoPtr<NodeList> correctionNodeList = pRootElem->getElementsByTagName("correction");
-  g_log.notice() << "Number of corrections elements in correction file root = " << correctionNodeList->length() << "\n";
   for( unsigned long i=0; i < correctionNodeList->length(); ++i ){
     // For each correction element
     Element* corr = (Element *)correctionNodeList->item(i);
-    g_log.notice() << corr->getAttribute("valid-from") << " " <<corr->getAttribute("valid-to") << " " << corr->getAttribute("file") << "\n";
     DateAndTime start(corr->getAttribute("valid-from"));
     DateAndTime end(corr->getAttribute("valid-to"));
     if ( start <= externalDate && externalDate <= end ){
