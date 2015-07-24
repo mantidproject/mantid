@@ -84,8 +84,8 @@ void LoadIDFFromNexus::exec() {
   g_log.notice() << "Parameter correction file: " << parameterCorrectionFile << "\n";
 
   // Read parameter correction file, if found
-  std::string correctionParameterFile = "";
-  bool append = false;
+  std::string correctionParameterFile;
+  bool append;
   if( parameterCorrectionFile != "") {
     readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
   }
@@ -127,7 +127,7 @@ void LoadIDFFromNexus::exec() {
   /* Reads the parameter correction file and if a correction is needed output the parameterfile needed 
   *  and whether it is to be appended.
   * @param correction_file :: path nsame of correction file as returned by getParameterCorrectionFile()
-  * @param date :: IS8601 date string applicable
+  * @param date :: IS8601 date string applicable: Must be full timestamp (timezone optional)
   * @param parameter_file :: output parameter file to use or "" if none
   * @param append :: output whether the parameters from parameter_file should be appended.
   *
