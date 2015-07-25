@@ -1,8 +1,9 @@
 #pylint: disable=invalid-name
-import os
-
+#pylint: disable=too-many-arguments
+# R0913: Too many arguments - strictly for write_GSAS_iparam_file()
 from mantid.api import *
 import mantid.simpleapi as sapi
+
 # numpy needed only for Vanadium calculations, at the moment
 import numpy as np
 
@@ -44,7 +45,7 @@ def readInExpectedPeaks(filename, expectedGiven):
             if [] == expectedGiven:
                 raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
                                  filename + "', and no expected peaks were given in the property "
-                                     "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
+                                 "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
             expectedPeaksD = sorted(expectedGiven)
 
         else:
@@ -82,13 +83,13 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
         indices = getWsIndicesForBank(ws, bank)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
-                                "bank passed: %s. Please check the inputs." % bank)
+                               "bank passed: %s. Please check the inputs." % bank)
         return indices
     elif detIndices:
         indices = parseSpectrumIndices(ws, detIndices)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
-                                "range(s) of detectors passed: %s. Please check the inputs." % detIndices)
+                               "range(s) of detectors passed: %s. Please check the inputs." % detIndices)
         return indices
     else:
         raise ValueError("You have not given any value for the properties 'Bank' and 'DetectorIndices' "
@@ -147,6 +148,7 @@ def getDetIDsForBank(bank):
 
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
+    import os
     groupingFilePath = os.path.join(sapi.config.getInstrumentDirectory(),
                                     'Grouping', 'ENGINX_Grouping.xml')
 
