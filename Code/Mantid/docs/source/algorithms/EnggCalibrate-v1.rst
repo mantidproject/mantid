@@ -85,7 +85,7 @@ Usage
    print "Parameters from the table, Difc1: %.2f, Zero1: %.2f" % (tbl.cell(0,0), tbl.cell(0,1))
    import os
    print "Output GSAS iparam file was written?", os.path.exists(GSAS_iparm_fname)
-   print "Size of the GSAS iparam file in bytes:", os.path.getsize(GSAS_iparm_fname)
+   print "Number of lines of the GSAS iparam file:", sum(1 for line in open(GSAS_iparm_fname))
 
 .. testcleanup:: ExampleCalib
 
@@ -104,4 +104,4 @@ Output:
    The output table has 1 row(s)
    Parameters from the table, Difc1: 18404.35, Zero1: -8.77
    Output GSAS iparam file was written? True
-   Size of the GSAS iparam file in bytes: 2870
+   Number of lines of the GSAS iparam file: 35
