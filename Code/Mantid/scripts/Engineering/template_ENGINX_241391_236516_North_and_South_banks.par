@@ -12,7 +12,7 @@ INS    OGPK2   0.839000E+00   0.700000E+00   0.320000E+02   0.149000E+01
 INS    OGPK3  -0.686285E+01   0.220000E+01   0.108719E+01                       
 INS    CALIB   241391   236516 ceo2                                             
 INS    INCBM  ob+mon_236516_North_and_South_banks.his                           
-INS   FCSTBL  det_pars_93875_93874_North_and_South_banks.hdf                     
+INS   FCSTBL  det_pars_93875_93874_North_and_South_banks.hdf                    
 INS  1I ITYP    0    1.0000   80.0000         0                                 
 INS  1BNKPAR     1.502    89.341     0.720     0.000     0.000    0    0        
 INS  1 ICONS  18306.98      2.99     14.44                                      
