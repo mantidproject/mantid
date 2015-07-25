@@ -262,13 +262,14 @@ def sumSpectra(parent, ws):
 
     return alg.getProperty('OutputWorkspace').value
 
-def write_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
-                           vanadium_run=236516, template_file=None):
+def write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
+                                  vanadium_run=236516, template_file=None):
     """
-    Produces and writes an instrument parameter file for GSAS (in the
-    GSAS iparam format, as partially described in the GSAS manual). It
-    simply uses a template (found in template_path) where some values
-    are replaced with the values (difc, zero) passed to this function.
+    Produces and writes an ENGIN-X instrument parameter file for GSAS
+    (in the GSAS iparam format, as partially described in the GSAS
+    manual). It simply uses a template (found in template_path) where
+    some values are replaced with the values (difc, zero) passed to
+    this function.
 
     Possible extensions for the file are .par (used here as default),
     .prm, .ipar, etc.

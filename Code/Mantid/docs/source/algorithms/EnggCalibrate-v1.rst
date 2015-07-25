@@ -36,6 +36,12 @@ output properties as well. If a name is given in
 OutputParametersTableName the algorithm also produces a table
 workspace with that name, containing the two output parameters.
 
+The script EnggUtils included with Mantid can produce a GSAS
+parameters file for the ENGIN-X instrument, given the DIFC and ZERO
+parameters for the instrument banks as produced by EnggCalibrate. This
+can be done with the write_ENGINX_GSAS_iparam_file() function as shown
+in the usage example below.
+
 See the algorithm :ref:`algm-EnggFocus` for details on the Vanadium
 corrections.
 
@@ -57,16 +63,29 @@ Usage
    van_ws_name = 'test_vanadium'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
    Load('ENGINX00193749.nxs', OutputWorkspace=van_ws_name)
-   Difc, Zero = EnggCalibrate(InputWorkspace=ws_name,
-                              VanadiumWorkspace= van_ws_name,
-                              ExpectedPeaks=[1.097, 2.1], Bank='1',
-                              OutputParametersTableName=out_tbl_name)
+   Difc1, Zero1 = EnggCalibrate(InputWorkspace=ws_name,
+                                VanadiumWorkspace= van_ws_name,
+                                ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                OutputParametersTableName=out_tbl_name)
 
-   print "Difc: %.2f" % (Difc)
-   print "Zero: %.2f" % (Zero)
+   Difc2, Zero2 = EnggCalibrate(InputWorkspace=ws_name,
+                                VanadiumWorkspace= van_ws_name,
+                                ExpectedPeaks=[1.097, 2.1], Bank='2')
+
+   # You can produce an instrument parameters (iparam) file for GSAS.
+   # Note that this is very specific to ENGIN-X
+   GSAS_iparm_fname = 'ENGIN_X_bank1'
+   import EnggUtils
+   EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, [Difc1, Difc2], [Zero1, Zero2])
+
+   print "Difc1: %.2f" % (Difc1)
+   print "Zero1: %.2f" % (Zero1)
    tbl = mtd[out_tbl_name]
    print "The output table has %d row(s)" % tbl.rowCount()
-   print "Parameters from the table, Difc: %.2f, Zero: %.2f" % (tbl.cell(0,0), tbl.cell(0,1))
+   print "Parameters from the table, Difc1: %.2f, Zero1: %.2f" % (tbl.cell(0,0), tbl.cell(0,1))
+   import os
+   print "Output GSAS iparam file was written?", os.path.exists(GSAS_iparm_fname)
+   print "Size of the GSAS iparam file in bytes:", os.path.getsize(GSAS_iparm_fname)
 
 .. testcleanup:: ExampleCalib
 
@@ -74,11 +93,15 @@ Usage
    DeleteWorkspace(ws_name)
    DeleteWorkspace(van_ws_name)
 
+   os.remove(GSAS_iparm_fname)
+
 Output:
 
 .. testoutput:: ExampleCalib
 
-   Difc: 18404.35
-   Zero: -8.77
+   Difc1: 18404.35
+   Zero1: -8.77
    The output table has 1 row(s)
-   Parameters from the table, Difc: 18404.35, Zero: -8.77
+   Parameters from the table, Difc1: 18404.35, Zero1: -8.77
+   Output GSAS iparam file was written? True
+   Size of the GSAS iparam file in bytes: 2870
