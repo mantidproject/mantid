@@ -227,20 +227,9 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
       const std::string paramFile =
           directoryName + instrumentName + "_Parameters.xml";
 
-      try {
-        // load and also populate instrument parameters from this 'fallback'
-        // parameter file
-        Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
-        loadParamAlg->setProperty("Filename", paramFile);
-        loadParamAlg->setProperty("Workspace", localWorkspace);
-        loadParamAlg->execute();
-        g_log.notice() << "Instrument parameter file: " << paramFile
-                       << " has been loaded" << std::endl;
-        break; // stop at the first one
-      } catch (std::runtime_error &) {
-        g_log.debug() << "Instrument parameter file: " << paramFile
-                      << " not found or un-parsable. ";
-      }
+      // Attempt to load specified file, if successful, use file and stop search.
+      if(loadParameterFile( paramFile, localWorkspace )) break; 
+
     }
   } else { // We do have parameters from the Nexus file
     g_log.notice()
@@ -251,6 +240,27 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
   }
 
 }
+
+// Private function to load parameter file specified by a full path name into given workspace, returning success.
+bool LoadIDFFromNexus::loadParameterFile (const std::string& fullPathName, const MatrixWorkspace_sptr localWorkspace ) {
+ 
+      try {
+        // load and also populate instrument parameters from this 'fallback'
+        // parameter file
+        Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", fullPathName);
+        loadParamAlg->setProperty("Workspace", localWorkspace);
+        loadParamAlg->execute();
+        g_log.notice() << "Instrument parameter file: " << fullPathName
+                       << " has been loaded" << std::endl;
+        return true; // Success 
+      } catch (std::runtime_error &) {
+        g_log.debug() << "Instrument parameter file: " << fullPathName
+                      << " not found or un-parsable. ";
+        return false; // Failure
+      }
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid
