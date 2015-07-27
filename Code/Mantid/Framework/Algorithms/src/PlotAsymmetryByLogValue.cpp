@@ -285,17 +285,21 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
 
   // Check if dead-time corrections have to be applied
   if (m_dtcType != "None") {
-    if (m_dtcType == "FromSpecifiedFile") {
 
-      // If user specifies a file, load corrections now
-      Workspace_sptr customDeadTimes;
-      loadCorrectionsFromFile(customDeadTimes, m_dtcFile);
-      applyDeadtimeCorr(loadedWs, customDeadTimes);
+    Workspace_sptr deadTimes;
+
+    if (m_dtcType == "FromSpecifiedFile") {
+      // Load corrections from specified file
+      deadTimes = loadCorrectionsFromFile(m_dtcFile);
     } else {
       // Load corrections from run
-      Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
-      applyDeadtimeCorr(loadedWs, deadTimes);
+      deadTimes = load->getProperty("DeadTimeTable");
     }
+    if (!deadTimes)
+      throw std::runtime_error("Couldn't load dead times");
+
+    // Apply corrections
+    applyDeadtimeCorr(loadedWs, deadTimes);
   }
 
   // If m_autogroup, group detectors
@@ -312,18 +316,20 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
 }
 
 /**  Load dead-time corrections from specified file
-*   @param customDeadTimes :: [input/output] Output workspace to store
-* corrections
 *   @param deadTimeFile :: [input] File to read corrections from
+*   @return :: Workspace containing loaded corrections
 */
-void PlotAsymmetryByLogValue::loadCorrectionsFromFile(
-    Workspace_sptr &customDeadTimes, std::string deadTimeFile) {
-  IAlgorithm_sptr loadDeadTimes = createChildAlgorithm("LoadNexusProcessed");
-  loadDeadTimes->setPropertyValue("Filename", deadTimeFile);
-  loadDeadTimes->setProperty("OutputWorkspace", customDeadTimes);
-  loadDeadTimes->executeAsChildAlg();
-  customDeadTimes = loadDeadTimes->getProperty("OutputWorkspace");
+Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
+  const std::string &deadTimeFile) {
+
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadNexusProcessed");
+  alg->setPropertyValue("Filename", deadTimeFile);
+  alg->setLogging(false);
+  alg->execute();
+  Workspace_sptr deadTimes = alg->getProperty("OutputWorkspace");
+  return deadTimes;
 }
+
 /**  Populate output workspace with results
 *   @param outWS :: [input/output] Output workspace to populate
 *   @param nplots :: [input] Number of histograms
@@ -478,10 +484,8 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
   ScopedWorkspace ws(loadedWs);
   ScopedWorkspace dt(deadTimes);
 
-  IAlgorithm_sptr applyCorr =
-      AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+  IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr");
   applyCorr->setLogging(false);
-  applyCorr->setRethrows(true);
   applyCorr->setPropertyValue("InputWorkspace", ws.name());
   applyCorr->setPropertyValue("OutputWorkspace", ws.name());
   applyCorr->setProperty("DeadTimeTable", dt.name());

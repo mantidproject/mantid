@@ -85,7 +85,7 @@ private:
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
   // Load dead-time corrections from specified file
-  void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
+  API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
   void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
   /// Group detectors from run file
