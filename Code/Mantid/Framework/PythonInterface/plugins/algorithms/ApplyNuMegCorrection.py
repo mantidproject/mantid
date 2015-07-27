@@ -1,4 +1,4 @@
-from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
+from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 
 def combine(dd,runno,A2000,B2000,A3000,B3000,C,C1,spec):
     if spec<10:
@@ -67,7 +67,6 @@ def combine(dd,runno,A2000,B2000,A3000,B3000,C,C1,spec):
 
 
 class ApplyNegMuCorrection(PythonAlgorithm):
-
     def PyInit(self):
         self.declareProperty(name="Data Directory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
         self.declareProperty(name="First Run Number",defaultValue=1718,doc="First Run Number")
