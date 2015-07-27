@@ -25,7 +25,9 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include <boost/python/detail/wrap_python.hpp>
+
 
 namespace Mantid {
 namespace PythonInterface {
@@ -40,7 +42,7 @@ namespace Environment {
  * way to share code with that without tight coupling the GUI layer
  * to PythonInterface
  */
-class GlobalInterpreterLock
+class PYTHON_KERNEL_DLL GlobalInterpreterLock
 {
 public:
   /// @name Static Helpers
