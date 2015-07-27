@@ -92,9 +92,17 @@ void LoadIDFFromNexus::exec() {
     // and whether it is appended to default parameters.
     readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
   }
-  g_log.notice() << "Result of readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
 
-  LoadParameters(  &nxfile, localWorkspace );
+
+  // Load default parameters if either there is no correction parameter file or it is to be appended.
+  if( correctionParameterFile == "" || append ) {
+    LoadParameters(  &nxfile, localWorkspace );
+  }
+
+  // Load parameters from correction parameter file, if it exists
+  if( correctionParameterFile != "") {
+      g_log.notice() << "Would use readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
+  }
 
   return;
 }
