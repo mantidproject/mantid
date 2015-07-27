@@ -1,7 +1,6 @@
 #ifndef THREESLICEVIEW_H_
 #define THREESLICEVIEW_H_
 
-#include "MantidQtAPI/PythonThreading.h"
 #include "ui_ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -92,12 +91,6 @@ public:
    */
   void resetDisplay();
 
-private slots:
-  /// Called when the rendering begins
-  void lockPyGIL();
-  /// Called when the rendering finishes
-  void releasePyGIL();
-
 private:
   Q_DISABLE_COPY(ThreeSliceView)
 
@@ -107,8 +100,6 @@ private:
   QPointer<pqRenderView> m_mainView; ///< The 3D view
 
   Ui::ThreeSliceView m_ui; ///< The three slice view's UI form
-
-  PyGILStateService m_gilStateStore; ///< Python GIL storage
 };
 
 }
