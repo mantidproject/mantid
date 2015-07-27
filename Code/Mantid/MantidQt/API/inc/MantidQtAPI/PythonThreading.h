@@ -43,8 +43,8 @@ private:
 //------------------------------------------------------------------------------
 
 /**
- * Defines an index for mapping QThreads to their
- * respective PyGILState_STATE values
+ * Defines an index for storing PyGILState_STATE values returned
+ * from PyGILState_Ensure calls.
  */
 class PyGILStateService {
 public:
@@ -56,6 +56,8 @@ public:
   static void dropAndRelease(PyGILStateService &targetStore);
   ///@}
 
+  /// Return true if the given thread contains an assoicated value in the index
+  bool contains(QThread *thread) const { return m_mapping.contains(thread); }
   /// Associate a QThread with a PyGILState_STATE value
   void add(QThread* thread, PyGILState_STATE tstate);
   /// Find the PyGILState for the given QThread

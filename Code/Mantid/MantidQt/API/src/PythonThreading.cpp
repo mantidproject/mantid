@@ -52,7 +52,9 @@ GlobalInterpreterLock::~GlobalInterpreterLock() {
  * @param targetStore The PyGILStateService object to store the state
  */
 void PyGILStateService::acquireAndStore(PyGILStateService &targetStore) {
-  targetStore.add(QThread::currentThread(), GlobalInterpreterLock::acquire());
+  if(!targetStore.contains(QThread::currentThread())) {
+    targetStore.add(QThread::currentThread(), GlobalInterpreterLock::acquire());
+  }
 }
 
 /**
@@ -61,7 +63,9 @@ void PyGILStateService::acquireAndStore(PyGILStateService &targetStore) {
  * @param targetStore The PyGILStateService object storing the state
  */
 void PyGILStateService::dropAndRelease(PyGILStateService &targetStore) {
-  GlobalInterpreterLock::release(targetStore.take(QThread::currentThread()));
+  if(targetStore.contains(QThread::currentThread())) {
+    GlobalInterpreterLock::release(targetStore.take(QThread::currentThread()));
+  }
 }
 
 //------------------------------------------------------------------------------
