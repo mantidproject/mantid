@@ -152,7 +152,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
   names.insert(std::make_pair(algorithmName, -1));
   IAlgorithm_sptr loader;
   if (nexus) {
-    if( NexusDescriptor::isHDF(filename)) {
+    if (NexusDescriptor::isHDF(filename)) {
       loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
           filename, names, m_log);
     }
