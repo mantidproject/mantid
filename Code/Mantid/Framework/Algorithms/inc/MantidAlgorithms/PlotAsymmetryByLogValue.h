@@ -80,8 +80,9 @@ private:
   void exec();
   // Load run, apply dead time corrections and detector grouping
   API::Workspace_sptr doLoad (int64_t runNumber );
-  // Analyse loaded run
-  void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
+  // Analyse the asymmetry for a loaded run
+  void doAnalysis(API::Workspace_sptr loadedWs, std::vector<double> &y,
+                                                std::vector<double> &e);
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
   // Load dead-time corrections from specified file
@@ -126,23 +127,6 @@ private:
   int m_red;
   /// Store green period
   int m_green;
-  // Mantid vectors to store results
-  // Red mantid vectors
-  std::map<int64_t, double> m_redX;
-  std::map<int64_t, double> m_redY;
-  std::map<int64_t, double> m_redE;
-  // Green mantid vectors
-  std::map<int64_t, double> m_greenX;
-  std::map<int64_t, double> m_greenY;
-  std::map<int64_t, double> m_greenE;
-  // Mantid vectors to store Red + Green
-  std::map<int64_t, double> m_sumX;
-  std::map<int64_t, double> m_sumY;
-  std::map<int64_t, double> m_sumE;
-  // Mantid vectors to store Red - Green
-  std::map<int64_t, double> m_diffX;
-  std::map<int64_t, double> m_diffY;
-  std::map<int64_t, double> m_diffE;
   // LogValue name
   std::string m_logName;
   // LogValue function

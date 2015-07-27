@@ -167,20 +167,17 @@ void PlotAsymmetryByLogValue::exec() {
   // Loop through runs
   for (size_t i = is; i <= ie; i++) {
 
-    // Check if run i was already loaded
-    if (!m_redX.count(i)) {
+    // Load run, apply dead time corrections and detector grouping
+    Workspace_sptr loadedWs = doLoad(i);
 
-      // Load run, apply dead time corrections and detector grouping
-      Workspace_sptr loadedWs = doLoad(i);
+    if (loadedWs) {
 
-      if (loadedWs) {
+      // Get Log value
+      double x = getLogValue(loadedWs);
 
-        // Get Log value
-        double x = getLogValue(loadedWs);
-
-        // Analyse loadedWs
-        doAnalysis(loadedWs, i);
-      }
+      // Analyse loadedWs
+      std::vector<double> y, e;
+      doAnalysis(loadedWs, y, e);
     }
 
     progress.report();
@@ -195,8 +192,7 @@ void PlotAsymmetryByLogValue::exec() {
       npoints, //  the number of data points on a plot
       npoints  //  it's not a histogram
       );
-  // Populate output workspace with data
-  populateOutputWorkspace(outWS, nplots);
+  // TODO populate output ws
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
 }
@@ -239,28 +235,6 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
         "First run number is greater than last run number");
   }
 
-}
-
-/**  Clears any possible result from previous call
-*   @param is :: [input] Run number to clear resulst from
-*   @param ie :: [input] Run number to clear results to
-*/
-void PlotAsymmetryByLogValue::clearResultsFromTo(size_t is, size_t ie) {
-
-  for (size_t i = is; i <= ie; i++) {
-    m_redX.erase(i);
-    m_redY.erase(i);
-    m_redE.erase(i);
-    m_greenX.erase(i);
-    m_greenY.erase(i);
-    m_greenE.erase(i);
-    m_sumX.erase(i);
-    m_sumY.erase(i);
-    m_sumE.erase(i);
-    m_diffX.erase(i);
-    m_diffY.erase(i);
-    m_diffE.erase(i);
-  }
 }
 
 /**  Loads one run and applies dead-time corrections and detector grouping if
@@ -358,69 +332,6 @@ PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
   return boost::dynamic_pointer_cast<Workspace>(group);
 }
 
-/**  Populate output workspace with results
-*   @param outWS :: [input/output] Output workspace to populate
-*   @param nplots :: [input] Number of histograms
-*/
-void
-PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS,
-                                                 int nplots) {
-  TextAxis *tAxis = new TextAxis(nplots);
-  if (nplots == 1) {
-
-    std::vector<double> vecRedX, vecRedY, vecRedE;
-    for (auto it = m_redX.begin(); it != m_redX.end(); ++it) {
-      vecRedX.push_back(m_redX[it->first]);
-      vecRedY.push_back(m_redY[it->first]);
-      vecRedE.push_back(m_redE[it->first]);
-    }
-
-    tAxis->setLabel(0, "Asymmetry");
-    outWS->dataX(0) = vecRedX;
-    outWS->dataY(0) = vecRedY;
-    outWS->dataE(0) = vecRedE;
-  } else {
-
-    std::vector<double> vecRedX, vecRedY, vecRedE;
-    std::vector<double> vecGreenX, vecGreenY, vecGreenE;
-    std::vector<double> vecSumX, vecSumY, vecSumE;
-    std::vector<double> vecDiffX, vecDiffY, vecDiffE;
-    for (auto it = m_redX.begin(); it != m_redX.end(); ++it) {
-      vecRedX.push_back(m_redX[it->first]);
-      vecRedY.push_back(m_redY[it->first]);
-      vecRedE.push_back(m_redE[it->first]);
-      vecGreenX.push_back(m_greenX[it->first]);
-      vecGreenY.push_back(m_greenY[it->first]);
-      vecGreenE.push_back(m_greenE[it->first]);
-      vecSumX.push_back(m_sumX[it->first]);
-      vecSumY.push_back(m_sumY[it->first]);
-      vecSumE.push_back(m_sumE[it->first]);
-      vecDiffX.push_back(m_diffX[it->first]);
-      vecDiffY.push_back(m_diffY[it->first]);
-      vecDiffE.push_back(m_diffE[it->first]);
-    }
-
-    tAxis->setLabel(0, "Red-Green");
-    tAxis->setLabel(1, "Red");
-    tAxis->setLabel(2, "Green");
-    tAxis->setLabel(3, "Red+Green");
-    outWS->dataX(0) = vecDiffX;
-    outWS->dataY(0) = vecDiffY;
-    outWS->dataE(0) = vecDiffE;
-    outWS->dataX(1) = vecRedX;
-    outWS->dataY(1) = vecRedY;
-    outWS->dataE(1) = vecRedE;
-    outWS->dataX(2) = vecGreenX;
-    outWS->dataY(2) = vecGreenY;
-    outWS->dataE(2) = vecGreenE;
-    outWS->dataX(3) = vecSumX;
-    outWS->dataY(3) = vecSumY;
-    outWS->dataE(3) = vecSumE;
-  }
-  outWS->replaceAxis(1, tAxis);
-  outWS->getAxis(0)->title() = m_logName;
-  outWS->setYUnitLabel("Asymmetry");
-}
 /**  Parse run names
 *   @param firstFN :: [input/output] First run's name
 *   @param lastFN :: [input/output] Last run's name
@@ -546,88 +457,65 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
   loadedWs = outWS.retrieve();
 }
 
-
-/**  Performs asymmetry analysis on a loaded workspace
+/**  Performs asymmetry analysis on a given workspace
 *   @param loadedWs :: [input] Workspace to apply analysis to
 *   @param index :: [input] Vector index where results will be stored
 */
 void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
-                                         int64_t index) {
+                                         std::vector<double> &y,
+                                         std::vector<double> &e) {
 
   // Check if workspace is a workspace group
-  WorkspaceGroup_sptr loadedGroup =
+  WorkspaceGroup_sptr group =
       boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
 
-  // If it is not, we only have 'red' data
-  if (!loadedGroup) {
-    Workspace2D_sptr loadedWs2D =
-        boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
+  if (!group) {
+    // If it is not, we only have 'red' data
+
+    MatrixWorkspace_sptr loadedWs2D =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
 
     double Y, E;
     calculateAsymmetry(loadedWs2D, Y, E);
-    m_redY[index] = Y;
-    m_redE[index] = E;
+    y.push_back(Y);
+    e.push_back(E);
 
   } else {
+    // It is a group
 
-    DataObjects::Workspace2D_sptr ws_red;
-    DataObjects::Workspace2D_sptr ws_green;
-    // Run through the periods of the loaded file and save the
-    // selected ones
-    for (int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++) {
+    // Process red data
+    MatrixWorkspace_sptr ws_red;
+    try {
+      ws_red = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red-1));
+    } catch (std::out_of_range &) {
+      throw std::out_of_range("Red period out of range");
+    }
+    double YR, ER;
+    calculateAsymmetry(ws_red, YR, ER);
+    y.push_back(YR);
+    e.push_back(ER);
 
-      Workspace2D_sptr memberWs =
-          boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
-      int period = mi + 1;
-      if (period == m_red) {
-        ws_red = memberWs;
+    if (m_green != EMPTY_INT()) {
+      // Process green period if supplied by user
+      MatrixWorkspace_sptr ws_green;
+      try {
+        ws_green = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_green-1));
+      } catch (std::out_of_range &) {
+        throw std::out_of_range("Green period out of range");
       }
-      if (m_green != EMPTY_INT()) {
-        if (period == m_green) {
-          ws_green = memberWs;
-        }
-      }
-    }
-
-    // Check ws_red
-    if (!ws_red) {
-      throw std::invalid_argument("Red period is out of range");
-    }
-    // Check ws_green
-    if ((m_green != EMPTY_INT()) && (!ws_green)) {
-      throw std::invalid_argument("Green period is out of range");
-    }
-
-    if (m_green == EMPTY_INT()) {
-      double Y, E;
-      calculateAsymmetry(ws_red, Y, E);
-      m_redY[index] = Y;
-      m_redE[index] = E;
-
-    } else {
-
-      double YR, ER;
       double YG, EG;
-      calculateAsymmetry(ws_red, YR, ER);
       calculateAsymmetry(ws_green, YG, EG);
-      // Red data
-      m_redY[index] = YR;
-      m_redE[index] = ER;
-      // Green data
-      m_greenY[index] = YG;
-      m_greenE[index] = EG;
-      // Sum
-      m_sumY[index] = YR + YG;
-      m_sumE[index] = sqrt(ER * ER + EG * EG);
-      // move to last for safety since some grouping takes place in the
-      // calcIntAsymmetry call below
-      calculateAsymmetry(ws_red, ws_green, YR, ER);
-      m_diffY[index] = YR;
-      m_diffE[index] = ER;
-    }
-  } // else loadedGroup
-}
+      y.push_back(YG);
+      e.push_back(EG);
+      y.push_back(YR + YG);
+      e.push_back(sqrt(ER * ER + EG * EG));
 
+      calculateAsymmetry(ws_red, ws_green, YR, ER);
+      y.push_back(YR);
+      e.push_back(ER);
+    }
+  }
+}
 /**  Calculate the integral asymmetry for a workspace.
 *   The calculation is done by AsymmetryCalc and Integration algorithms.
 *   @param ws :: The workspace
