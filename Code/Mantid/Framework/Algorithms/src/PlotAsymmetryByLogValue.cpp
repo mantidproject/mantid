@@ -159,18 +159,17 @@ void PlotAsymmetryByLogValue::exec() {
 
   // Check input properties to decide whether or not we can reuse previous
   // results, if any
-  size_t is, ie;
-  checkProperties(is, ie);
+  checkProperties();
 
   // Vectors to store results
   MantidVec logValue;
   MantidVec yRed, yGreen, yDiff, ySum;
   MantidVec eRed, eGreen, eDiff, eSum;
 
-  Progress progress(this, 0, 1, ie - is + 1);
+  Progress progress(this, 0, 1, m_ie - m_is + 1);
 
   // Loop through runs
-  for (size_t i = is; i <= ie; i++) {
+  for (size_t i = m_is; i <= m_ie; i++) {
 
     // Load run, apply dead time corrections and detector grouping
     Workspace_sptr loadedWs = doLoad(i);
@@ -244,7 +243,7 @@ void PlotAsymmetryByLogValue::exec() {
 *   @param is :: [output] Number of the first run
 *   @param ie :: [output] Number of the last run
 */
-void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
+void PlotAsymmetryByLogValue::checkProperties() {
 
   // Log Value
   m_logName = getPropertyValue("LogValue");
@@ -271,9 +270,9 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 
   // Parse run names and get the number of runs
   parseRunNames(firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
-  is = atoi(firstFN.c_str()); // starting run number
-  ie = atoi(lastFN.c_str());  // last run number
-  if (ie < is) {
+  m_is = atoi(firstFN.c_str()); // starting run number
+  m_ie = atoi(lastFN.c_str());  // last run number
+  if (m_ie < m_is) {
     throw std::runtime_error(
         "First run number is greater than last run number");
   }

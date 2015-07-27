@@ -103,10 +103,14 @@ private:
   /// Populate output workspace with results
   void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
-  void checkProperties (size_t &is, size_t &ie);
+  void checkProperties ();
   /// Clear previous results
   void clearResultsFromTo (size_t is, size_t ie);
 
+  /// Number of the first run in the set
+  size_t m_is;
+  /// Number of the last run in the set
+  size_t m_ie;
   /// Stores base name shared by all runs
   std::string m_filenameBase;
   /// Stores extension shared by all runs
