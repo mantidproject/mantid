@@ -32,6 +32,7 @@ set ( TEST_PY_FILES
       test/SANSCentreFinderTest.py
       test/SANSUtilityTest.py
       test/SANSIsisInstrumentTest.py
+      test/SANSCommandInterfaceTest.py
       test/SANSReductionStepsUserFileTest.py
       test/SettingsTest.py
       test/ReductionSettingsTest.py

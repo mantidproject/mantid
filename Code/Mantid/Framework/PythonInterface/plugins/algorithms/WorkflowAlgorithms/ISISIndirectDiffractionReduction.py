@@ -14,6 +14,9 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _chopped_data = None
     _output_ws = None
     _data_files = None
+    _container_workspace = None
+    _container_data_files = None
+    _container_scale_factor = None
     _load_logs = None
     _instrument_name = None
     _mode = None
@@ -23,6 +26,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     _ipf_filename = None
     _sum_files = None
 
+#------------------------------------------------------------------------------
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
@@ -31,10 +35,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     def summary(self):
         return 'Performs a diffraction reduction for a set of raw run files for an ISIS indirect spectrometer'
 
+#------------------------------------------------------------------------------
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files.')
+
+        self.declareProperty(StringArrayProperty(name='ContainerFiles'),
+                             doc='Comma separated list of input files for the empty contianer runs.')
+
+        self.declareProperty('ContainerScaleFactor', 1.0,
+                             doc='Factor by which to scale the container runs.')
 
         self.declareProperty(name='SumFiles', defaultValue=False,
                              doc='Enabled to sum spectra from each input file.')
@@ -64,6 +75,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              direction=Direction.Output),
                              doc='Group name for the result workspaces.')
 
+#------------------------------------------------------------------------------
 
     def validateInputs(self):
         """
@@ -86,6 +98,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         return issues
 
+#------------------------------------------------------------------------------
 
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
@@ -110,9 +123,27 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                                               self._ipf_filename,
                                                               self._spectra_range[0],
                                                               self._spectra_range[1],
-                                                              self._sum_files,
-                                                              self._load_logs,
+                                                              sum_files=self._sum_files,
+                                                              load_logs=self._load_logs,
                                                               load_opts=load_opts)
+
+        # Load container if run is given
+        if self._container_data_files is not None:
+            self._container_workspace, _ = load_files(self._container_data_files,
+                                                      self._ipf_filename,
+                                                      self._spectra_range[0],
+                                                      self._spectra_range[1],
+                                                      sum_files=True,
+                                                      load_logs=self._load_logs,
+                                                      load_opts=load_opts)
+            self._container_workspace = self._container_workspace[0]
+
+            # Scale container if factor is given
+            if self._container_scale_factor != 1.0:
+                Scale(InputWorkspace=self._container_workspace,
+                      OutputWorkspace=self._container_workspace,
+                      Factor=self._container_scale_factor,
+                      Operation='Multiply')
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -131,6 +162,12 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             # Process workspaces
             for ws_name in workspaces:
+                # Subtract empty container if there is one
+                if self._container_workspace is not None:
+                    Minus(LHSWorkspace=ws_name,
+                          RHSWorkspace=self._container_workspace,
+                          OutputWorkspace=ws_name)
+
                 monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
@@ -169,6 +206,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             if is_multi_frame:
                 fold_chopped(c_ws_name)
 
+        # Remove the container workspaces
+        if self._container_workspace is not None:
+            DeleteWorkspace(self._container_workspace)
+            DeleteWorkspace(self._container_workspace + '_mon')
+
         # Rename output workspaces
         output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 
@@ -178,6 +220,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
+#------------------------------------------------------------------------------
 
     def _setup(self):
         """
@@ -186,6 +229,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._data_files = self.getProperty('InputFiles').value
+        self._container_data_files = self.getProperty('ContainerFiles').value
+        self._container_scale_factor = self.getProperty('ContainerScaleFactor').value
         self._load_logs = self.getProperty('LoadLogFiles').value
         self._instrument_name = self.getPropertyValue('Instrument')
         self._mode = self.getPropertyValue('Mode')
@@ -195,6 +240,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         if self._rebin_string == '':
             self._rebin_string = None
+
+        self._container_workspace = None
+        if len(self._container_data_files) == 0:
+            self._container_data_files = None
 
         # Get the IPF filename
         self._ipf_filename = self._instrument_name + '_diffraction_' + self._mode + '_Parameters.xml'
@@ -214,5 +263,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             else:
                 logger.information('SumFiles options is ignored when only one file is provided')
 
+#------------------------------------------------------------------------------
 
 AlgorithmFactory.subscribe(ISISIndirectDiffractionReduction)

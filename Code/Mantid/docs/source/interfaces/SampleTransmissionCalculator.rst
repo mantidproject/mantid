@@ -43,7 +43,8 @@ Sample Details
 
 The sample details required are the chemical formula which is to be given in the
 format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
-algorithm, number density in :math:`\mathrm{\AA{}}^3` and thickness in :math:`cm`.
+algorithm, number density per atom in :math:`atoms/\mathrm{\AA{}}^3` and
+thickness in :math:`cm`.
 
 Output
 ~~~~~~
