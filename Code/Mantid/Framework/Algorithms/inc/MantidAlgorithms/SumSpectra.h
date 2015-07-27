@@ -96,9 +96,9 @@ private:
   /// The output spectrum id
   specid_t m_outSpecId;
   /// The spectrum to start the integration from
-  int m_MinSpec;
+  int m_minSpec;
   /// The spectrum to finish the integration at
-  int m_MaxSpec;
+  int m_maxSpec;
   /// Set true to keep monitors
   bool m_keepMonitors;
   /// numberOfSpectra in the input
@@ -110,7 +110,7 @@ private:
 
   // if calculateing additional workspace with specially weighted averages is
   // necessary
-  bool m_CalculateWeightedSum;
+  bool m_calculateWeightedSum;
 };
 
 } // namespace Algorithm

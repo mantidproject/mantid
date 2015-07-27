@@ -31,6 +31,8 @@ namespace MantidQt
 			void updateProperties(QtProperty* prop, double val);
 			/// Slot to handle when a new sample file is available
 			void handleSampleInputReady(const QString& filename);
+			/// Slot to handle when a new resolution file is available
+			void handleResolutionInputReady(const QString& wsName);
 			/// slot to handle when the user changes the program to be used
 			void handleProgramChange(int index);
       /// Slot to handle setting a new preview spectrum

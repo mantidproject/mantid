@@ -24,16 +24,19 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         DeleteWorkspace(self._workspace)
 
 
-    def _validate_sample_logs(self, names, values, types):
+    def _validate_sample_logs(self, names, values, types, units=None):
         """
         Validates sample logs set on workspace.
 
         @param names List of sample log names
         @param values List of sample log values
         @param types List of sample log types
+        @param units List of sample unit names
         """
-        logs = self._workspace.getSampleDetails().getLogData()
+        logs = self._workspace.getRun().getProperties()
         matched_logs = list()
+        if units==None:
+            units=['']*len(names)
 
         for log in logs:
             if log.name in names:
@@ -42,6 +45,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
                 self.assertEqual(log.value, values[idx])
                 self.assertEqual(log.type, types[idx])
+                self.assertEqual(log.units, units[idx])
 
         self.assertEqual(matched_logs, names)
 
@@ -75,6 +79,35 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
         self._validate_sample_logs(names, values, types)
 
+    def test_units(self):
+        """
+        Test validation for wrong number of units
+        """
+        names = ['a', 'b', 'c']
+        values = ['one', 'two', 'three']
+        units = ['unit_a', 'unit_b', 'unit_c']
+        types = ['string', 'string', 'string']
+
+        AddSampleLogMultiple(Workspace=self._workspace,
+                             LogNames=names,
+                             LogValues=values,
+                             LogUnits=units)
+        self._validate_sample_logs(names, values, types,units)
+
+    def test_validation_wrong_units(self):
+        """
+        Test validation for wrong number of units
+        """
+        names = ['a', 'b', 'c']
+        values = ['one', 'two', 'three']
+        units = ['unit_a', 'unit_b']
+
+        self.assertRaises(RuntimeError,
+                          AddSampleLogMultiple,
+                          Workspace=self._workspace,
+                          LogNames=names,
+                          LogValues=values,
+                          LogUnits=units)        
 
     def test_validation_no_names(self):
         """

@@ -10,6 +10,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <boost/assign.hpp>
 
@@ -182,6 +183,17 @@ public:
      TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
   }
 
+  void test_execute_qxqz_normalized_polygon_2D()
+  {
+     const bool outputAsMD = false;
+     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
+     alg->setProperty("Method", "NormalisedPolygon");
+     alg->execute();
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
+     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
+  }
+
   void test_execute_kikf_2D()
   {
      const bool outputAsMD = false;
@@ -292,6 +304,25 @@ public:
     TS_ASSERT(alg.execute());
     TS_ASSERT(alg.isExecuted());
     IMDWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("OutputTransformedWorkspace");
+    TS_ASSERT(out != NULL);
+    TS_ASSERT_EQUALS(out->getNumDims(), 2);
+  }
+
+  void testPerformanceNormPoly()
+  {
+    TS_ASSERT(true);
+    ConvertToReflectometryQ alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws->getItem(0));
+    alg.setProperty("OutputDimensions", "Q (lab frame)");
+    alg.setProperty("OutputAsMDWorkspace", false);
+    alg.setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
+    alg.setProperty("OverrideIncidentTheta", true);
+    alg.setProperty("IncidentTheta", 0.5);
+    alg.setProperty("Method", "NormalisedPolygon");
+    TS_ASSERT(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    auto out = AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::Workspace2D>("OutputTransformedWorkspace");
     TS_ASSERT(out != NULL);
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }

@@ -60,6 +60,11 @@
     <livedata address="NDXHRPD:6789" />
   </instrument>
 
+  <instrument name="IMAT">
+    <technique>Neutron Imaging</technique>
+    <livedata address="NDXIMAT:6789" />
+  </instrument>
+
   <instrument name="INES" shortname="INS" beamline="N8">
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXINES:6789" />
@@ -631,7 +636,7 @@
   <instrument name="TOFTOF">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Time-of-flight Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
   </instrument>
 </facility>
 

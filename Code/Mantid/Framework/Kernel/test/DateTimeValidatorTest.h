@@ -34,10 +34,17 @@ public:
 
   //---------------------------- Failure cases --------------------------------------
 
-  void test_empty_string_is_invalid()
+  void test_empty_string_is_invalid_when_allowed_is_false()
   {
     DateTimeValidator validator;
+	validator.allowEmpty(false);
     TS_ASSERT_EQUALS("Error interpreting string '' as a date/time.", validator.isValid(""));
+  }
+
+  void test_empty_string_is_valid_when_allowed_is_true(){
+    DateTimeValidator validator;
+	validator.allowEmpty(true);
+    TS_ASSERT_EQUALS("", validator.isValid(""));
   }
 
   void test_text_string_is_invalid()

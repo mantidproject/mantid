@@ -60,7 +60,7 @@ as well as expected errors at any :math:`T` value.
 Example
 ^^^^^^^
 
-Our example system is a simulation of a small crystal of octa-methyl `silsesqioxane <http://www.en.wikipedia.org/wiki/Silsesquioxane>`_ molecules.
+Our example system is a simulation of a small crystal of octa-methyl `silsesqioxane <http://en.wikipedia.org/wiki/Silsesquioxane>`_ molecules.
 A total of 26 molecular dynamics simulations were performed under different values of the energy barrier
 to methyl rotations, :math:`K`. Dynamics structure factors S(Q,E) were derived from each simulation.
 

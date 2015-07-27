@@ -18,9 +18,9 @@ using namespace API;
 using namespace DataObjects;
 
 SumSpectra::SumSpectra()
-    : API::Algorithm(), m_outSpecId(0), m_MinSpec(0), m_MaxSpec(0),
+    : API::Algorithm(), m_outSpecId(0), m_minSpec(0), m_maxSpec(0),
       m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
-      m_CalculateWeightedSum(false) {}
+      m_calculateWeightedSum(false) {}
 
 /** Initialisation method.
  *
@@ -72,8 +72,8 @@ void SumSpectra::init() {
  */
 void SumSpectra::exec() {
   // Try and retrieve the optional properties
-  m_MinSpec = getProperty("StartWorkspaceIndex");
-  m_MaxSpec = getProperty("EndWorkspaceIndex");
+  m_minSpec = getProperty("StartWorkspaceIndex");
+  m_maxSpec = getProperty("EndWorkspaceIndex");
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
 
   m_keepMonitors = getProperty("IncludeMonitors");
@@ -85,30 +85,30 @@ void SumSpectra::exec() {
   this->m_yLength = static_cast<int>(localworkspace->blocksize());
 
   // Check 'StartSpectrum' is in range 0-m_numberOfSpectra
-  if (m_MinSpec > m_numberOfSpectra) {
+  if (m_minSpec > m_numberOfSpectra) {
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
-    m_MinSpec = 0;
+    m_minSpec = 0;
   }
 
   if (indices_list.empty()) {
     // If no list was given and no max, just do all.
-    if (isEmpty(m_MaxSpec))
-      m_MaxSpec = m_numberOfSpectra - 1;
+    if (isEmpty(m_maxSpec))
+      m_maxSpec = m_numberOfSpectra - 1;
   }
 
-  // Something for m_MaxSpec was given but it is out of range?
-  if (!isEmpty(m_MaxSpec) &&
-      (m_MaxSpec > m_numberOfSpectra - 1 || m_MaxSpec < m_MinSpec)) {
+  // Something for m_maxSpec was given but it is out of range?
+  if (!isEmpty(m_maxSpec) &&
+      (m_maxSpec > m_numberOfSpectra - 1 || m_maxSpec < m_minSpec)) {
     g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
-    m_MaxSpec = m_numberOfSpectra;
+    m_maxSpec = m_numberOfSpectra;
   }
 
   // Make the set of indices to sum up from the list
   this->m_indices.insert(indices_list.begin(), indices_list.end());
 
   // And add the range too, if any
-  if (!isEmpty(m_MaxSpec)) {
-    for (int i = m_MinSpec; i <= m_MaxSpec; i++)
+  if (!isEmpty(m_maxSpec)) {
+    for (int i = m_minSpec; i <= m_maxSpec; i++)
       this->m_indices.insert(i);
   }
 
@@ -118,12 +118,12 @@ void SumSpectra::exec() {
       << "Spectra remapping gives single spectra with spectra number: "
       << m_outSpecId << "\n";
 
-  m_CalculateWeightedSum = getProperty("WeightedSum");
+  m_calculateWeightedSum = getProperty("WeightedSum");
 
   EventWorkspace_const_sptr eventW =
       boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
-    m_CalculateWeightedSum = false;
+    m_calculateWeightedSum = false;
     this->execEvent(eventW, this->m_indices);
   } else {
     //-------Workspace 2D mode -----
@@ -131,7 +131,7 @@ void SumSpectra::exec() {
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace =
         API::WorkspaceFactory::Instance().create(
-            localworkspace, 1, localworkspace->readX(0).size(),
+            localworkspace, 1, localworkspace->readX(m_minSpec).size(),
             this->m_yLength);
     size_t numSpectra(0); // total number of processed spectra
     size_t numMasked(0);  // total number of the masked and skipped spectra
@@ -228,7 +228,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
 
   MantidVec Weight;
   std::vector<size_t> nZeros;
-  if (m_CalculateWeightedSum) {
+  if (m_calculateWeightedSum) {
     Weight.assign(YSum.size(), 0);
     nZeros.assign(YSum.size(), 0);
   }
@@ -238,7 +238,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
 
   // Loop over spectra
   std::set<int>::iterator it;
-  // for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  // for (int i = m_minSpec; i <= m_maxSpec; ++i)
   for (it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
@@ -267,7 +267,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     // Retrieve the spectrum into a vector
     const MantidVec &YValues = localworkspace->readY(i);
     const MantidVec &YErrors = localworkspace->readE(i);
-    if (m_CalculateWeightedSum) {
+    if (m_calculateWeightedSum) {
       for (int k = 0; k < this->m_yLength; ++k) {
         if (YErrors[k] != 0) {
           double errsq = YErrors[k] * YErrors[k];
@@ -291,7 +291,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     progress.report();
   }
 
-  if (m_CalculateWeightedSum) {
+  if (m_calculateWeightedSum) {
     numZeros = 0;
     for (size_t i = 0; i < Weight.size(); i++) {
       if (nZeros[i] == 0)
@@ -343,7 +343,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   MantidVec &FracSum = outWS->dataF(0);
   MantidVec Weight;
   std::vector<size_t> nZeros;
-  if (m_CalculateWeightedSum) {
+  if (m_calculateWeightedSum) {
     Weight.assign(YSum.size(), 0);
     nZeros.assign(YSum.size(), 0);
   }
@@ -353,7 +353,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
 
   // Loop over spectra
   std::set<int>::iterator it;
-  // for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  // for (int i = m_minSpec; i <= m_maxSpec; ++i)
   for (it = m_indices.begin(); it != m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
@@ -384,7 +384,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     const MantidVec &YErrors = localworkspace->readE(i);
     const MantidVec &FracArea = inWS->readF(i);
 
-    if (m_CalculateWeightedSum) {
+    if (m_calculateWeightedSum) {
       for (int k = 0; k < this->m_yLength; ++k) {
         if (YErrors[k] != 0) {
           double errsq = YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
@@ -411,7 +411,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     progress.report();
   }
 
-  if (m_CalculateWeightedSum) {
+  if (m_calculateWeightedSum) {
     numZeros = 0;
     for (size_t i = 0; i < Weight.size(); i++) {
       if (nZeros[i] == 0)
@@ -451,7 +451,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   size_t numSpectra(0);
   size_t numMasked(0);
   size_t numZeros(0);
-  // for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  // for (int i = m_minSpec; i <= m_maxSpec; ++i)
   for (it = indices.begin(); it != indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.

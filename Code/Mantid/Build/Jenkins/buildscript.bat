@@ -9,9 +9,8 @@ setlocal enableextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: All node currently have PARAVIEW_DIR=3.98.1 and PARAVIEW_NEXT_DIR=4.3.1
+:: All nodes currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 
 set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
 "%CMAKE_BIN_DIR%\cmake.exe" --version

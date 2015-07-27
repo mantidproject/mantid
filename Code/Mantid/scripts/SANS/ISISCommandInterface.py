@@ -983,7 +983,6 @@ def DisplayMask(mask_worksp=None):
 
             counts_data = '__DisplayMasked_tempory_wksp'
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
-
         else:
             msg = 'Cannot display the mask without a sample workspace'
             _printMessage(msg, log = True, no_console=False)
@@ -1198,6 +1197,161 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
         return message
     else:
         return ""
+
+################################################################################
+# Input check functions
+
+# Check the input for time shifts when adding event files
+def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
+    # If there are no entries then proceed.
+    if not time_shifts or time_shifts.isspace():
+        return
+
+    time_shift_container = time_shifts.split(',')
+    message = ''
+
+    # Check if the time shift elements can be cast to float
+    for time_shift_element in time_shift_container:
+        try:
+            float(time_shift_element)
+        except ValueError:
+            message = ('Error: Elements of the time shift list cannot be ' +
+                       'converted to a numeric value, e.g ' + time_shift_element)
+            print message
+            return message
+
+    if number_of_files -1 != len(time_shift_container):
+        message = ('Error: Expected N-1 time shifts for N files, but read ' +
+                  str(len(time_shift_container)) + ' time shifts for ' +
+                  str(number_of_files) + ' files.')
+        print message
+        return message
+
+def ConvertToPythonStringList(to_convert):
+    '''
+    Converts a python string list to a format more suitable for GUI representation
+    @param to_convert:: The string list
+    '''
+    return su.convert_to_string_list(to_convert)
+
+def ConvertFromPythonStringList(to_convert):
+    '''
+    Converts a comma-separated string into a Python string list
+    @param to_convert:: The comm-separated string
+    '''
+    return su.convert_from_string_list(to_convert)
+
+###################### Accessor functions for Transmission
+def GetTransmissionMonitorSpectrum():
+    """
+        Gets the transmission monitor spectrum
+        @return: tranmission monitor spectrum
+    """
+    return ReductionSingleton().transmission_calculator.trans_mon
+
+def SetTransmissionMonitorSpectrum(trans_mon):
+    """
+        Sets the transmission monitor spectrum.
+        @param trans_mon :: The spectrum to set.
+    """
+    if su.is_convertible_to_int(trans_mon):
+        ReductionSingleton().transmission_calculator.trans_mon = int(trans_mon)
+    else:
+        sanslog.warning('Warning: Could not convert the transmission monitor spectrum to int.')
+
+def UnsetTransmissionMonitorSpectrum():
+    """
+        Sets the transmission monitor spectrum to None
+    """
+    ReductionSingleton().transmission_calculator.trans_mon = None
+
+def GetTransmissionMonitorSpectrumShift():
+    """
+        Gets the addditional shift for the transmission monitor spectrum.
+        This currently only exists for SANS2D
+        @return: tranmission monitor spectrum
+    """
+    inst =  ReductionSingleton().get_instrument()
+    if inst.name() != "SANS2D" and inst.name() != "SANS2DTUBES":
+        return
+    return inst.monitor_4_offset
+
+def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
+    """
+        Sets the transmission monitor spectrum shfit.
+        @param trans_mon_shift :: The spectrum shift to set.
+    """
+    if su.is_convertible_to_float(trans_mon_shift):
+        inst =  ReductionSingleton().get_instrument()
+        # Note that we are only setting the transmission monitor spectrum shift
+        # if we are dealing with a SANS2D instrument
+        if inst.name() != 'SANS2D' and inst.name() != 'SANS2DTUBES':
+            return
+        inst.monitor_4_offset = float(trans_mon_shift)
+    else:
+        sanslog.warning('Warning: Could not convert transmission monitor spectrum shift to float.')
+
+def GetTransmissionRadiusInMM():
+    """
+        Gets the radius for usage with beam stop as transmission monitor in mm
+        @return: tranmission radius in mm
+    """
+    radius = ReductionSingleton().transmission_calculator.radius
+    if radius is not None:
+        radius = radius*1000.0
+    return radius
+
+def SetTransmissionRadiusInMM(trans_radius):
+    """
+        Sets the transmission monitor spectrum.
+        @param trans_radius :: The radius to set in mm
+    """
+    if su.is_convertible_to_float(trans_radius):
+        ReductionSingleton().transmission_calculator.radius = float(trans_radius)/1000.0
+    else:
+        sanslog.warning('Warning: Could convert transmission radius to float.')
+
+def GetTransmissionROI():
+    """
+        Gets the list of ROI file names
+        @return: list of roi file names or None
+    """
+    roi_files = ReductionSingleton().transmission_calculator.roi_files
+    if len(roi_files) == 0:
+        return
+    else:
+        return roi_files
+
+def SetTransmissionROI(trans_roi_files):
+    """
+        Sets the transmission monitor region of interest.
+        @param trans_roi_files :: A string list of roi files
+    """
+    if su.is_valid_xml_file_list(trans_roi_files):
+        ReductionSingleton().transmission_calculator.roi_files = trans_roi_files
+    else:
+        sanslog.warning('Warning: The roi file list does not seem to be valid.')
+
+def GetTransmissionMask():
+    """
+        Gets the list of transmission maks file names
+        @return: list of transmission mask file names or None
+    """
+    trans_mask_files = ReductionSingleton().transmission_calculator.mask_files
+    if len(trans_mask_files) == 0:
+        return
+    else:
+        return trans_mask_files
+
+def SetTransmissionMask(trans_mask_files):
+    """
+        Sets the transmission masks.
+        @param trans_mask_files :: A string list of mask files
+    """
+    if su.is_valid_xml_file_list(trans_mask_files):
+        ReductionSingleton().transmission_calculator.mask_files = trans_mask_files
+    else:
+        sanslog.warning('Warning: The mask file list does not seem to be valid.')
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

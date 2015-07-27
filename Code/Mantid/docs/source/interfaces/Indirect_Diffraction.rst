@@ -49,9 +49,18 @@ Run Numbers
   specified in the same manner as in the Energy Transfer tab on Indirect Data
   Reduction.
 
+Use Container
+  This option allows the subtraction of a run for an empty container run.
+
+Scale Container
+  This option allows for an optional scale factor to be applied to the container
+  data before it is subtracted.
+
 Spectra Min & Spectra Max
   Specify the range of spectra to use in the reduction, the default values of
-  this are set based on the instrument and reflection selected.
+  this are set based on the instrument and reflection selected. Note that these
+  options will be disabled when using OSIRIS in diffonly mode, in which case the
+  entire spectra range will be used.
 
 Plot Type
   Specify the type of plot to be created when the reduction is complete, either
@@ -75,6 +84,12 @@ different workflow to IRIS and TOSCA.
 The available options are the same, except that a single calibration file and
 one or more vanadium files must be specified instead of rebinning values. These
 files are remembered by the interface so only have to be set once per cycle.
+
+There is also the option to manually set the dRange used in all of the sample
+runs, note that in this case all sample iles must correspond to the same dRange.
+The dRanges are numbered as per the `OSIRIS manual
+<http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
+Otherwise the dRange is determined based on the table provided in the manual.
 
 Note: There must be a corresponding vanadium file with the same dRanges for each
 of the data files entered, but leaving in a full complement of vanadium files -

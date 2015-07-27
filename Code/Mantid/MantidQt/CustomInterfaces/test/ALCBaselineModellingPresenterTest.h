@@ -221,6 +221,18 @@ public:
     m_view->requestAddSection();
   }
 
+  void test_addSection_toEmptyWS()
+  {
+    ON_CALL(*m_model, data()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
+
+    EXPECT_CALL(*m_view, noOfSectionRows()).Times(0);
+    EXPECT_CALL(*m_view, setSectionRow(_,_)).Times(0);
+    EXPECT_CALL(*m_view, addSectionSelector(_,_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_)).Times(1);
+
+    m_view->requestAddSection();
+  }
+
   void test_removeSection()
   {
     ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(3));

@@ -636,7 +636,25 @@ void test_extract_nperiod_data() {
       TSM_ASSERT_EQUALS("Current period is not what was expected.", currentPeriod, i+1);
 
   }
+  // Make sure that the spectraNo are equal for all child workspaces.
+  auto isFirstChildWorkspace = true;
+  std::vector<Mantid::specid_t> specids;
 
+  for(size_t i = 0; i < outGroup->size(); ++i) {
+    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+    if (isFirstChildWorkspace){
+      specids.reserve(ws->getNumberHistograms());
+    }
+    for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
+      if (isFirstChildWorkspace) {
+        specids.push_back(ws->getSpectrum(index)->getSpectrumNo());
+      } else {
+        TSM_ASSERT_EQUALS("The spectrNo should be the same for all child workspaces.",specids[index], ws->getSpectrum(index)->getSpectrumNo());
+      }
+    }
+
+    isFirstChildWorkspace = false;
+  }
 }
 
 private:

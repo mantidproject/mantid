@@ -3294,46 +3294,49 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
   int nPlots = wsNames.size();
   if ( nPlots > 1 )
   {
-    int nCols = 1;
-    if ( nPlots >= 16 )
-    {
-      nCols = 4;
-    }
-    else if ( nPlots >= 9 )
-    {
-      nCols = 3;
-    }
-    else if ( nPlots >= 4 )
-    {
-      nCols = 2;
-    }
-    else
-    {
-      nCols = nPlots;
-    }
-
-    int nRows = nPlots / nCols;
-    if ( nPlots % nCols != 0 )
-    {
-      ++nRows;
-    }
-
-    auto tiledWindow = new TiledWindow(appWindow(),"",appWindow()->generateUniqueName("TiledWindow"),nRows,nCols);
-    appWindow()->addMdiSubWindow(tiledWindow);
-
-    int row = 0;
-    int col = 0;
+    QList<MultiLayer*> plots;
     for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
     {
       const bool hidden = true;
-      auto plot = this->drawSingleColorFillPlot(*cit, curveType, NULL, hidden);
-      tiledWindow->addWidget(plot,row,col);
-      ++col;
-      if (col == nCols)
+      MultiLayer* plot = this->drawSingleColorFillPlot(*cit, curveType, NULL, hidden);
+      if(plot)
+        plots.append(plot);
+    }
+
+    if(!plots.isEmpty())
+    {
+      nPlots = plots.size();
+
+      int nCols = 1;
+      if ( nPlots >= 16 )
+        nCols = 4;
+      else if ( nPlots >= 9 )
+        nCols = 3;
+      else if ( nPlots >= 4 )
+        nCols = 2;
+      else
+        nCols = nPlots;
+
+      int nRows = nPlots / nCols;
+      if ( nPlots % nCols != 0 )
+        ++nRows;
+
+      auto tiledWindow = new TiledWindow(appWindow(),"",appWindow()->generateUniqueName("TiledWindow"),nRows,nCols);
+
+      int row = 0;
+      int col = 0;
+      for(auto it = plots.begin(); it != plots.end(); ++it)
       {
-        col = 0;
-        ++row;
+        tiledWindow->addWidget(*it, row, col);
+        ++col;
+        if (col == nCols)
+        {
+          col = 0;
+          ++row;
+        }
       }
+
+      appWindow()->addMdiSubWindow(tiledWindow);
     }
   }
   else if ( nPlots == 1 )

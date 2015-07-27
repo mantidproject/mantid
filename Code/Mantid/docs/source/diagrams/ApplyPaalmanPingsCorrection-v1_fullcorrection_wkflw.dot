@@ -1,0 +1,58 @@
+digraph ApplyPaalmanPingsCorrection_FullCorrection {
+  label="ApplyPaalmanPingsCorrection Full Corrections Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    IsAccInWavelength   [label="Is in Wavelength?"]
+    IsAcscInWavelength  [label="Is in Wavelength?"]
+    IsAsscInWavelength  [label="Is in Wavelength?"]
+  }
+
+  subgraph params {
+    $param_style
+    SampleWorkspace
+    CorrectionsWorkspace
+    CanWorkspace
+    CanScaleFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Scale
+    Minus
+    Multiply
+    ConvertUnits_Acc    [label="ConvertUnits"]
+    ConvertUnits_Acsc   [label="ConvertUnits"]
+    ConvertUnits_Assc   [label="ConvertUnits"]
+    Divide_CanAcc       [label="Divide"]
+    Divide_CorrAssc     [label="Divide"]
+  }
+
+  CanWorkspace          -> Scale
+  CanScaleFactor        -> Scale
+  CorrectionsWorkspace  -> IsAccInWavelength    [label="Ac,c"]
+  CorrectionsWorkspace  -> IsAcscInWavelength   [label="Ac,sc"]
+  CorrectionsWorkspace  -> IsAsscInWavelength   [label="As,sc"]
+  IsAccInWavelength     -> ConvertUnits_Acc     [label="No"]
+  IsAcscInWavelength    -> ConvertUnits_Acsc    [label="No"]
+  IsAsscInWavelength    -> ConvertUnits_Assc    [label="No"]
+
+  Scale                 -> Divide_CanAcc        [label="LHSWorkspace"]
+  IsAccInWavelength     -> Divide_CanAcc        [label="Yes, RHSWorkspace"]
+  ConvertUnits_Acc      -> Divide_CanAcc        [label="RHSWorkspace"]
+
+  Divide_CanAcc         -> Multiply             [label="LHSWorkspace"]
+  IsAcscInWavelength    -> Multiply             [label="Yes, RHSWorkspace"]
+  ConvertUnits_Acsc     -> Multiply             [label="RHSWorkspace"]
+
+  SampleWorkspace       -> Minus                [label="LHSWorkspace"]
+  Multiply              -> Minus                [label="RHSWorkspace"]
+
+  Minus                 -> Divide_CorrAssc      [label="LHSWorkspace"]
+  IsAsscInWavelength    -> Divide_CorrAssc      [label="Yes, RHSWorkspace"]
+  ConvertUnits_Assc     -> Divide_CorrAssc      [label="RHSWorkspace"]
+
+  Divide_CorrAssc       -> OutputWorkspace
+}
