@@ -1062,9 +1062,8 @@ void Instrument::saveNexus(::NeXus::File *file,
   const std::string& xmlText = getXmlText();
   if (xmlText.empty())
     g_log.warning() << "Saving Instrument with no XML data. Mantid might NOT be"
-                    << " able to re-open the resulting Nexus file. This should"
-                    << " never happen. Please notify the Mantid development"
-                    << " team." << std::endl;
+                    << " able to re-open the resulting Nexus file."
+                    << std::endl;
   file->writeData("data", xmlText);
   file->writeData("type", "text/xml"); // mimetype
   file->writeData("description", "XML contents of the instrument IDF file.");
