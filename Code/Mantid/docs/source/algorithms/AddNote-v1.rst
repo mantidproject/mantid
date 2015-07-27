@@ -32,7 +32,7 @@ Usage
 	log = ws.getRun().getLogData("my_log")
 	print "my_log has %i entries" % log.size()
 	for i in range(log.size()):
-		print "\t%s\t%f" %(log.times[i], log.value[i])
+		print "\t%s\t%s" %(log.times[i], log.value[i])
 	
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:00:00", Value="New Initial", DeleteExisting=True)
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:30:00", Value="New Final")
@@ -40,7 +40,7 @@ Usage
 	log = ws.getRun().getLogData("my_log")
 	print "my_log now has %i entries" %log.size()
 	for i in range(log.size()):
-		print "\t%s\t%i" % (log.times[i], log.value[i])
+		print "\t%s\t%s" % (log.times[i], log.value[i])
 		
 Output:
 
