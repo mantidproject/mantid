@@ -34,7 +34,7 @@ name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
  
  
-  <component type="slit1">
+  <component name="slit1" type="slit1">
     <location z="-5.6398"/> <!-- From survey,  28/11/2014  -->
      <!-- This log file stores the vertical opening of slit -->
     <parameter name="vertical gap">
@@ -42,7 +42,7 @@ name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
     </parameter>
                   </component>
   
-  <component type="slit2"> 
+  <component name="slit2" type="slit2"> 
     <location z="-0.67045"/> <!-- x=18.1902+4.9693   -->
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
@@ -52,7 +52,7 @@ name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
     </parameter> 
   </component>   
   
-  <component type="slit3">  
+  <component name="slit3" type="slit3">  
     <location z="0.6"/> <!-- estimated from MagC position, not accurate   -->
     <!-- This log file stores the vertical opening of slit --> 
     <parameter name="vertical gap">
@@ -60,7 +60,7 @@ name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
     </parameter>
   </component>   
   
-  <component type="slit4">   
+  <component name="slit4" type="slit4">   
     <location z="2.64"/>     <!-- estimated from MagD position, not accurate   -->
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
@@ -73,6 +73,7 @@ name="OFFSPEC" valid-from   ="2012-07-10 22:00:00"
   <type name="slit2"></type>
   <type name="slit3"></type>
   <type name="slit4"></type>
+  
   <!-- detector components (including monitors) -->
  
   <component type="monitor1" idlist="monitor1">
