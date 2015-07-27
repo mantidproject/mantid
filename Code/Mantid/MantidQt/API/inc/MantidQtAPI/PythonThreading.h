@@ -1,7 +1,8 @@
 #ifndef PYTHONTHREADING_H_
 #define PYTHONTHREADING_H_
 
-#include "MantidQtAPI/PythonSystemHeader.h"
+#include "MantidQtAPI/PythonSystemHeader.h" // this needs to go first
+#include "MantidQtAPI/DllOption.h"
 #include <QHash>
 
 //------------------------------------------------------------------------------
@@ -16,7 +17,7 @@
  * as we have no good way to share code with that without tight coupling the GUI layer
  * to PythonInterface
  */
-class GlobalInterpreterLock
+class EXPORT_OPT_MANTIDQT_API GlobalInterpreterLock
 {
 public:
   /// @name Static Helpers
@@ -46,7 +47,7 @@ private:
  * Defines an index for storing PyGILState_STATE values returned
  * from PyGILState_Ensure calls.
  */
-class PyGILStateService {
+class EXPORT_OPT_MANTIDQT_API PyGILStateService {
 public:
   ///@name Static helpers
   ///@{
