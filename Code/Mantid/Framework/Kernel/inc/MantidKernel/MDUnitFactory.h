@@ -1,43 +1,13 @@
 #ifndef MANTID_KERNEL_MDUNITFACTORY_H_
 #define MANTID_KERNEL_MDUNITFACTORY_H_
 
+#include "MantidKernel/ChainableFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/MDUnit.h"
-#include <boost/optional.hpp>
 #include <memory>
 
 namespace Mantid {
 namespace Kernel {
-
-
-/**
- CRTP class
-
- Chainable gives the ability to set successors, but chainable items do not define create. This is important
- because the return from setSuccessor should not be the factory directly. Otherwise you could do this
-
- factory.setSuccessor(new Factory).create()
-
- and create would be bypass the chain of resposibility, which should be executed along the chain top to bottom.
- */
-template <typename ChainableType>
-class DLLExport Chainable{
-protected:
-    /// Successor factory
-    boost::optional<std::unique_ptr<ChainableType> > m_successor;
-public:
-    /// Set the successor
-    Chainable& setSuccessor(std::unique_ptr<ChainableType> successor){
-        m_successor = std::unique_ptr<ChainableType>(successor.release());
-        return *(*m_successor);
-    }
-    bool hasSuccessor() const {return m_successor.is_initialized();}
-    virtual ~Chainable() = 0;
-};
-
-/// Keep our destructor pure virtual, but require an implementation.
-template <typename ChainableType>
-Chainable<ChainableType>::~Chainable(){}
 
 
 /** MDUnitFactory : Abstract type. Factory method with chain of reponsibility succession for creating MDUnits.
@@ -63,15 +33,12 @@ Chainable<ChainableType>::~Chainable(){}
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDUnitFactory : public Chainable<MDUnitFactory> {
+class DLLExport MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit> {
 
 public:
 
   /// Destructor
   virtual ~MDUnitFactory(){}
-
-  /// Create the product
-  virtual std::unique_ptr<MDUnit> create(const std::string& unitString) const;
 
 private:
 
@@ -81,6 +48,10 @@ private:
   /// Indicate an ability to intepret the string
   virtual bool canInterpret(const std::string& unitString) const = 0;
 };
+
+//-----------------------------------------------------------------------
+// Derived MDUnitFactory declarations
+//-----------------------------------------------------------------------
 
 class DLLExport LabelUnitFactory : public MDUnitFactory {
     LabelUnit *createRaw(const std::string &unitString) const;

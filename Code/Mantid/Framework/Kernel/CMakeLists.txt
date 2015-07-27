@@ -130,6 +130,8 @@ set ( INC_FILES
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
+	inc/MantidKernel/Chainable.h
+	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
@@ -176,7 +178,7 @@ set ( INC_FILES
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MDUnit.h
-        inc/MantidKernel/MDUnitFactory.h
+	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h

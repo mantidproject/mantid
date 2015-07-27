@@ -6,24 +6,6 @@
 namespace Mantid {
 namespace Kernel {
 
-/**
- * Factory method wrapper. Wraps results in smart pointer.
- * @param unitString : unit string to intepret
- * @return Product
- */
-std::unique_ptr<MDUnit>
-MDUnitFactory::create(const std::string &unitString) const {
-  if (this->canInterpret(unitString)) {
-    return MDUnit_uptr(this->createRaw(unitString));
-  } else {
-    if (this->hasSuccessor()) {
-      return (*m_successor)->create(unitString);
-    } else {
-      throw std::invalid_argument("No successor MDUnitFactory");
-    }
-  }
-}
-
 LabelUnit *LabelUnitFactory::createRaw(const std::string &unitString) const
 {
     return new LabelUnit(unitString);

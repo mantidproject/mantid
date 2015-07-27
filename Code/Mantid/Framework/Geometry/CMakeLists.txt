@@ -63,6 +63,7 @@ set ( SRC_FILES
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
+	src/MDGeometry/MDFrameFactory.cpp
 	src/MDGeometry/MDGeometryXMLBuilder.cpp
 	src/MDGeometry/MDGeometryXMLParser.cpp
 	src/MDGeometry/MDHistoDimension.cpp
@@ -202,6 +203,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDDimensionExtents.h
 	inc/MantidGeometry/MDGeometry/MDFrame.h
+	inc/MantidGeometry/MDGeometry/MDFrameFactory.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
@@ -290,6 +292,7 @@ set ( TEST_FILES
 	LineIntersectVisitTest.h
 	LineTest.h
 	MDBoxImplicitFunctionTest.h
+	MDFrameFactoryTest.h
 	MDGeometryXMLParserTest.h
 	MDHistoDimensionBuilderTest.h
 	MDHistoDimensionTest.h
