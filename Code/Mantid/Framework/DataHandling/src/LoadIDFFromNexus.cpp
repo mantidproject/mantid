@@ -90,7 +90,7 @@ void LoadIDFFromNexus::exec() {
     // Read parameter correction file 
     // to find out which parameter file to use 
     // and whether it is appended to default parameters.
-    readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
+    readParameterCorrectionFile( parameterCorrectionFile, localWorkspace->getAvailableWorkspaceStartDate(), correctionParameterFile, append );
   }
 
 
@@ -154,11 +154,17 @@ void LoadIDFFromNexus::exec() {
   *  @throw FileError Thrown if unable to parse XML file
   */
 void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correction_file, const std::string& date, 
-                                                   std::string& parameter_file, bool& append ) { 
+                                                   std::string& parameter_file, bool& append ) {
 
    // Set output arguments to default
   parameter_file = "";
   append = false;
+
+  // Check the date.
+  if( date == ""){
+    g_log.notice() << "No date is supplied for parameter correction file " << correction_file << ". Correction file is ignored.\n";
+    return;
+  }
 
    // Get contents of correction file                                                    
   const std::string xmlText = Kernel::Strings::loadFile(correction_file);
@@ -183,6 +189,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correctio
   }
 
   // Convert date to Mantid object
+  g_log.notice() << "Date for correction file " << date << "\n";
   DateAndTime externalDate( date );
 
   // Examine the XML structure obtained by parsing
