@@ -78,7 +78,7 @@ void TOFSANSResolutionByPixel::exec() {
                       "used for interpolation.";
 
     for (size_t i = 0; i < xInterpolate.size() - 1; ++i) {
-      const double midpoint = xInterpolate[i + 1] - xInterpolate[i];
+      const double midpoint = (xInterpolate[i + 1] + xInterpolate[i]) / 2.0;
       lookUpTable.addPoint(midpoint, yInterpolate[i]);
     }
   } else {
