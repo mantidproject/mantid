@@ -1,13 +1,16 @@
 from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 
-def combine(dd,runno,A2000,B2000,A3000,B3000,C,C1,spec):
+class ApplyNegMuCorrection(PythonAlgorithm):
+
+    #Combining work spaces and normalising the correction.
+    def combine(self,dd,runno,A2000,B2000,A3000,B3000,C,C1,spec):
     if spec<10:
         s='0'+str(spec)
     else:
         s=str(spec)
     print dd+'ral0'+runno+'.rooth30'+s+'.dat'
     #loading data
-    try:    
+    try:
         ws3000=Load(Filename=dd+r'\ral0'+runno+'.rooth30'+s+'.dat', OutputWorkspace='ws3000')
         print 'hello'
         ws2000=Load(Filename=dd+r'\ral0'+runno+'.rooth20'+s+'.dat', OutputWorkspace='ws2000')
@@ -64,9 +67,6 @@ def combine(dd,runno,A2000,B2000,A3000,B3000,C,C1,spec):
 
     return
 
-
-
-class ApplyNegMuCorrection(PythonAlgorithm):
     def PyInit(self):
         self.declareProperty(name="Data Directory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
         self.declareProperty(name="First Run Number",defaultValue=1718,doc="First Run Number")
@@ -97,8 +97,8 @@ class ApplyNegMuCorrection(PythonAlgorithm):
                 for x in range(first,last):
                     for spec in range(0,3):
                         runno=str(x)
-                        combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
-                    combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
+                        self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
+                    self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
 
 
 
