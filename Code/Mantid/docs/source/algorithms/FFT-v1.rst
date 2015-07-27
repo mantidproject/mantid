@@ -180,9 +180,7 @@ for the real (0), imaginary (1) parts, and the modulus (2).
 Usage
 -------
 
-.. include:: ../usagedata-note.txt
-
-**Example: Applying FFT algorithm:**
+**Example: Applying FFT algorithm**
 
 .. testcode:: FFTBackwards
 
