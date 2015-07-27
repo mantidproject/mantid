@@ -475,42 +475,30 @@ std::string createParName(size_t index, size_t subIndex,
  *
  * Composite
  *  |
- *  +-- LinearBackground
- *  +-- Convolution
+ *  +- LinearBackground
+ *  +- Convolution
  *      |
- *      +-- Resolution
- *      +-- Model (AT LEAST one delta function or one/two lorentzians.)
+ *      +- Resolution
+ *      +- Model (AT LEAST one delta function or one/two lorentzians.)
  *          |
- *          +-- DeltaFunction (yes/no)
- *					+-- ProductFunction
- *							|
- *							+-- Lorentzian 1
- *(yes/no)
- *							+-- Temperature
- *Correction
- *(yes/no)
- *					+-- ProductFunction
- *							|
- *							+-- Lorentzian 2
- *(yes/no)
- *							+-- Temperature
- *Correction
- *(yes/no)
- *					+-- ProductFunction
- *							|
- *							+-- InelasticDiffSphere
- *(yes/no)
- *							+-- Temperature
- *Correction
- *(yes/no)
- *					+-- ProductFunction
- *							|
- *							+--
- *InelasticDiffRotDiscreteCircle
- *(yes/no)
- *							+-- Temperature
- *Correction
- *(yes/no)
+ *          +- DeltaFunction(yes/no)
+ *				+- ProductFunction
+ *					|
+ *					+- Lorentzian 1(yes/no)
+ *					+- Temperature Correction(yes/no)
+ *				+- ProductFunction
+ *					|
+ *					+- Lorentzian 2(yes/no)
+ *					+- Temperature Correction(yes/no)
+ *				+- ProductFunction
+ *					|
+ *					+- InelasticDiffSphere(yes/no)
+ *					+- Temperature Correction(yes/no)
+ *				+- ProductFunction
+ *					|
+ *					+-
+ *InelasticDiffRotDiscreteCircle(yes/no)
+ *					+- Temperature Correction(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
  *
@@ -530,9 +518,8 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
   func = FunctionFactory::Instance().createFunction("LinearBackground");
   comp->addFunction(func);
 
-  const int bgType =
-      m_uiForm.cbBackground
-          ->currentIndex(); // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
+  // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
+  const int bgType = m_uiForm.cbBackground->currentIndex();
 
   if (bgType == 0 || !m_properties["BGA0"]->subProperties().isEmpty()) {
     comp->tie("f0.A0", m_properties["BGA0"]->valueText().toStdString());
@@ -668,8 +655,7 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
     subIndex = product->addFunction(func);
     index = model->addFunction(product);
     prefix2 = createParName(index, subIndex);
-    populateFunction(func, model, m_properties["FitFunction1"],
-                     prefix2, false);
+    populateFunction(func, model, m_properties["FitFunction1"], prefix2, false);
   }
 
   conv->addFunction(model);
@@ -799,7 +785,6 @@ QtProperty *ConvFit::createLorentzian(const QString &name) {
 
   return lorentzGroup;
 }
-
 /**
  * Populates the properties of a function with given values
  * @param func The function currently being added to the composite
@@ -928,6 +913,19 @@ QString ConvFit::minimizerString(QString outputName) const {
  * @param index A reference to the Fit Type (0-4)
  */
 void ConvFit::typeSelection(int index) {
+  auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+  if(index == 0){
+	hwhmRangeSelector->setVisible(false);
+  }else if(index < 3){
+    hwhmRangeSelector->setVisible(true);
+  }else{
+	hwhmRangeSelector->setVisible(false);
+    m_uiForm.ckPlotGuess->setChecked(false);
+    m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
+  }
+
+  // Disable Plot Guess and Use Delta Function for DiffSphere and
+  // DiffRotDiscreteCircle
   m_uiForm.ckPlotGuess->setEnabled(index < 3);
   m_properties["UseDeltaFunc"]->setEnabled(index < 3);
 }
@@ -1203,9 +1201,9 @@ void ConvFit::singleFitComplete(bool error) {
 
   for (auto it = params.begin(); it != params.end(); ++it) {
     QString functionParam = functionName + "." + *it;
-	std::string fp = functionParam.toStdString();
+    std::string fp = functionParam.toStdString();
     QString paramValue = pref + *it;
-	std::string pv = paramValue.toStdString();
+    std::string pv = paramValue.toStdString();
     m_dblManager->setValue(m_properties[functionParam], parameters[paramValue]);
   }
   funcIndex++;
@@ -1224,49 +1222,6 @@ void ConvFit::singleFitComplete(bool error) {
                              parameters[paramValue]);
     }
   }
-  /*
-  if (fitTypeIndex == 3) {
-    // DiffSphere
-    QString pref = prefBase;
-
-    if (usingCompositeFunc) {
-      pref += "f" + QString::number(funcIndex) + ".f" +
-              QString::number(subIndex) + ".";
-    } else {
-      pref += "f" + QString::number(subIndex) + ".";
-    }
-
-    m_dblManager->setValue(m_properties["Diffusion Sphere.Intensity"],
-                           parameters[pref + "Intensity"]);
-    m_dblManager->setValue(m_properties["Diffusion Sphere.Radius"],
-                           parameters[pref + "Radius"]);
-    m_dblManager->setValue(m_properties["Diffusion Sphere.Diffusion"],
-                           parameters[pref + "Diffusion"]);
-    m_dblManager->setValue(m_properties["Diffusion Sphere.Shift"],
-                           parameters[pref + "Shift"]);
-  }
-
-  if (fitTypeIndex == 4) {
-    // DiffSphere
-    QString pref = prefBase;
-
-    if (usingCompositeFunc) {
-      pref += "f" + QString::number(funcIndex) + ".f" +
-              QString::number(subIndex) + ".";
-    } else {
-      pref += "f" + QString::number(subIndex) + ".";
-    }
-
-    m_dblManager->setValue(m_properties["Diffusion Circle.Intensity"],
-                           parameters[pref + "Intensity"]);
-    m_dblManager->setValue(m_properties["Diffusion Circle.Radius"],
-                           parameters[pref + "Radius"]);
-    m_dblManager->setValue(m_properties["Diffusion Circle.Decay"],
-                           parameters[pref + "Decay"]);
-    m_dblManager->setValue(m_properties["Diffusion Circle.Shift"],
-                           parameters[pref + "Shift"]);
-  }
-  */
   m_pythonExportWsName = "";
 }
 
@@ -1455,7 +1410,8 @@ void ConvFit::showTieCheckbox(QString fitType) {
  */
 QStringList ConvFit::getFunctionParameters(QString functionName) {
   QStringList parameters;
-  if (functionName.compare("Two Lorentzians") == 0) {
+  int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
+  if (fitFunctionIndex == 2) {
     functionName = "Lorentzian";
     IFunction_sptr func =
         FunctionFactory::Instance().createFunction(functionName.toStdString());
@@ -1464,11 +1420,11 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
       parameters << QString::fromStdString(func->parameterName(i));
     }
   }
-  if (functionName.compare("One Lorentzian") == 0) {
+  if (fitFunctionIndex == 1) {
     functionName = "Lorentzian";
   }
 
-  if (functionName.compare("Zero Lorentzians") == 0) {
+  if (fitFunctionIndex == 0) {
     parameters.append("Zero");
   } else {
     IFunction_sptr func =
@@ -1488,10 +1444,10 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
   removeTreeParams();
-
+  int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
-  if (functionName.compare("Two Lorentzians") == 0) {
+  if (fitFunctionIndex == 2) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
     m_properties["FitFunction2"] = m_grpManager->addProperty("Lorentzian 2");
@@ -1503,7 +1459,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
   // No fit function parameters required for Zero
   if (parameters[0].compare("Zero") != 0) {
-    if (functionName.compare("Two Lorentzians") == 0) {
+    if (fitFunctionIndex == 2) {
       int count = 0;
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         QString name = "parameter_" + *it;
