@@ -78,35 +78,37 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad (int64_t runNumber );
-  // Analyse the asymmetry for a loaded run
-  void doAnalysis(API::Workspace_sptr loadedWs, std::vector<double> &y,
-                                                std::vector<double> &e);
+  /// Check input properties supplied by user
+  void checkProperties();
   // Parse run names
-  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
+  void parseRunNames(std::string &firstFN, std::string &lastFN,
+                     std::string &fnBase, std::string &fnExt, int &fnZeros);
+  // Load run, apply dead time corrections and detector grouping
+  API::Workspace_sptr doLoad(int64_t runNumber);
   // Load dead-time corrections from specified file
   API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
-  void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
+  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs,
+                         API::Workspace_sptr deadTimes);
   /// Creates a table workspace containing custom grouping
   API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
                                            const std::vector<int> &bwd);
-  /// Group detectors from run file
-  void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
+  /// Group detectors
+  void groupDetectors(API::Workspace_sptr &loadedWs,
+                      API::Workspace_sptr loadedDetGrouping);
+  // Analyse the asymmetry for a loaded run
+  void doAnalysis(API::Workspace_sptr loadedWs, std::vector<double> &y,
+                  std::vector<double> &e);
   /// Calculates the asymmetry for a workspace (single period)
   void calculateAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
   /// Calculates the asymmetry for a pair of workspaces (red & green)
-  void calculateAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
-  /// Get log value
+  void calculateAsymmetry(API::MatrixWorkspace_sptr ws_red,
+                          API::MatrixWorkspace_sptr ws_geen, double &Y,
+                          double &E);
+  /// Get log value from ws
   double getLogValue(API::Workspace_sptr ws);
-  /// Populate output workspace with results
-  void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
-  /// Check input properties
-  void checkProperties ();
-  /// Clear previous results
-  void clearResultsFromTo (size_t is, size_t ie);
 
+  /// Properties needed for the loading process
   /// Number of the first run in the set
   size_t m_is;
   /// Number of the last run in the set
@@ -117,28 +119,32 @@ private:
   std::string m_filenameExt;
   /// Sotres number of zeros in run name
   int m_filenameZeros;
-  /// Stores property "Int"
-  bool m_int;
-  /// Store forward spectra
-  std::vector<int> m_forward_list;
-  /// Store backward spectra
-  std::vector<int> m_backward_list;
   /// Store type of dead time corrections
   std::string m_dtcType;
   /// File to read corrections from
   std::string m_dtcFile;
-  /// Store red period
+  /// Store forward spectra
+  std::vector<int> m_forward_list;
+  /// Store backward spectra
+  std::vector<int> m_backward_list;
+
+  /// Properties needed for the analysis process
+  /// Type of calculation, if true, integral asymmetry
+  bool m_int;
+  /// Red period
   int m_red;
-  /// Store green period
+  /// Green period
   int m_green;
+  /// Minimum time for the analysis
+  double m_minTime;
+  /// Maximum time for the analysis
+  double m_maxTime;
+
+  /// Properties needed to get the X value
   // LogValue name
   std::string m_logName;
   // LogValue function
   std::string m_logFunc;
-  // Minimum time for the analysis
-  double m_minTime;
-  // Maximum time for the analysis
-  double m_maxTime;
 };
 
 } // namespace Algorithm
