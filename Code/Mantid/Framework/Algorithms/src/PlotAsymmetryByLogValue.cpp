@@ -78,7 +78,7 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
 PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
-    : Algorithm(), m_int(false), m_autogroup(false) {}
+    : Algorithm(), m_int(false) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -213,7 +213,6 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   // Get grouping properties
   m_forward_list = getProperty("ForwardSpectra");
   m_backward_list = getProperty("BackwardSpectra");
-  m_autogroup = (m_forward_list.size() == 0 && m_backward_list.size() == 0);
   // Get green and red periods
   m_red = getProperty("Red");
   m_green = getProperty("Green");
@@ -779,21 +778,6 @@ PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
 
     E = sqrt(VARIF + VARIB);
   }
-}
-
-/**  Group detectors in the workspace.
- *  @param ws :: A local workspace
- *  @param spectraList :: A list of spectra to group.
- */
-void
-PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
-                                        const std::vector<int> &spectraList) {
-  API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
-  group->setProperty("InputWorkspace", ws);
-  group->setProperty("SpectraList", spectraList);
-  group->setProperty("KeepUngroupedSpectra", true);
-  group->execute();
-  ws = group->getProperty("OutputWorkspace");
 }
 
 /**

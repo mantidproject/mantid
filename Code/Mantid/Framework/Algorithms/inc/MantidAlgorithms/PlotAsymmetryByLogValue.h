@@ -97,8 +97,6 @@ private:
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
-  /// Group detectors
-  void groupDetectors (API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
@@ -120,8 +118,6 @@ private:
   std::vector<int> m_forward_list;
   /// Store backward spectra
   std::vector<int> m_backward_list;
-  /// If true call LoadMuonNexus with Autogroup on
-  bool m_autogroup;
   /// Store type of dead time corrections
   std::string m_dtcType;
   /// File to read corrections from
