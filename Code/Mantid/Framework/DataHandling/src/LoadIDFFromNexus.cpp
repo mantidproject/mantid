@@ -101,7 +101,16 @@ void LoadIDFFromNexus::exec() {
 
   // Load parameters from correction parameter file, if it exists
   if( correctionParameterFile != "") {
-      g_log.notice() << "Would use readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
+      Poco::Path corrFilePath(parameterCorrectionFile);
+      g_log.notice() << "Correction file path: " << corrFilePath.toString() << "\n";
+      Poco::Path corrDirPath = corrFilePath.parent();
+      g_log.notice() << "Correction directory path: " << corrDirPath.toString() << "\n";
+      Poco::Path corrParamFile( corrDirPath, correctionParameterFile );
+      g_log.notice() << "Would use readParameterCorrectionFile: " << corrParamFile.toString() << " " << append << "\n";
+      bool ok = loadParameterFile( corrParamFile.toString(), localWorkspace );
+      if(!ok) {
+        g_log.error() << "Unable to load parameter file " << corrParamFile.toString() << " specified in " << corrFilePath.toString() << ".\n";
+      }
   }
 
   return;
@@ -233,7 +242,7 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
     }
   } else { // We do have parameters from the Nexus file
     g_log.notice()
-        << "Found Instrument parameter map entry in Nexus file, which is loaded"
+        << "Found Instrument parameter map entry in Nexus file, which is loaded.\n"
         << std::endl;
     // process parameterString into parameters in workspace
     localWorkspace->readParameterMap(parameterString);
@@ -252,11 +261,11 @@ bool LoadIDFFromNexus::loadParameterFile (const std::string& fullPathName, const
         loadParamAlg->setProperty("Workspace", localWorkspace);
         loadParamAlg->execute();
         g_log.notice() << "Instrument parameter file: " << fullPathName
-                       << " has been loaded" << std::endl;
+                       << " has been loaded.\n" << std::endl;
         return true; // Success 
       } catch (std::runtime_error &) {
         g_log.debug() << "Instrument parameter file: " << fullPathName
-                      << " not found or un-parsable. ";
+                      << " not found or un-parsable.\n";
         return false; // Failure
       }
 }
