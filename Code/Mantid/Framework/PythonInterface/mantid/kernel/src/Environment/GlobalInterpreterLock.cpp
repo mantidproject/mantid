@@ -9,11 +9,7 @@ namespace Environment {
 //------------------------------------------------------------------------------
 
 /**
- * Only if the current thread has no threadstate. There must be a matching
- * call to release() or a deadlock could ensue.
- * @param tstate Filled by the return PyGILState_Ensure(). Only depend on this
- * if this function returns true
- * @return True if the lock was acquired, false otherwise
+ * @return A handle to the Python threadstate before the acquire() call.
  */
 PyGILState_STATE GlobalInterpreterLock::acquire() {
   return PyGILState_Ensure();
@@ -21,7 +17,7 @@ PyGILState_STATE GlobalInterpreterLock::acquire() {
 
 /**
  * There must be have been a call to acquire() to create the tstate value given here.
- * @param tstate The thread-state returned by acquire()
+ * @param tstate The Python threadstate returned by the matching call to acquire()
  */
 void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
   PyGILState_Release(tstate);
@@ -32,14 +28,15 @@ void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
 //------------------------------------------------------------------------------
 
 /**
- * Calls PyGILState_Ensure()
+ * Ensures this thread is ready to call Python code
  */
 GlobalInterpreterLock::GlobalInterpreterLock()
   : m_state(this->acquire()) {
 }
 
 /**
- * Calls PyGILState_Release
+ * Resets the Python threadstate to the state before
+ * this object was created.
  */
 GlobalInterpreterLock::~GlobalInterpreterLock() {
   this->release(m_state);

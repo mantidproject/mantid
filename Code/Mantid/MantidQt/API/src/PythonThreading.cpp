@@ -9,11 +9,7 @@
 //------------------------------------------------------------------------------
 
 /**
- * Only if the current thread has no threadstate. There must be a matching
- * call to release() or a deadlock could ensue.
- * @param tstate Filled by the return PyGILState_Ensure(). Only depend on this
- * if this function returns true
- * @return True if the lock was acquired, false otherwise
+ * @return A handle to the Python threadstate before the acquire() call.
  */
 PyGILState_STATE GlobalInterpreterLock::acquire() {
   return PyGILState_Ensure();
