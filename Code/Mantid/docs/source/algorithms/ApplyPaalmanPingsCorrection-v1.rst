@@ -22,6 +22,36 @@ indirect calculate correcteions routine, providing that the sample and container
 are first converted to wavelength and the corrections are interpolated to match
 the sample as demonstrated in the example below.
 
+Workflow
+--------
+
+Depending on the input workspaces provided to the algorithm it may operate in
+one of three ways, each of which is described on a separate workflow diagram.
+
+Container Scale Only
+====================
+
+In the case where only a container workspace and no correction factors are
+provided.
+
+.. diagram:: ApplyPaalmanPingsCorrection-v1_canscaleonly_wkflw.dot
+
+Sample Corrections Only
+=======================
+
+In the case where only correction factors and no container workspace is
+provided.
+
+.. diagram:: ApplyPaalmanPingsCorrection-v1_samplecorrectiononly_wkflw.dot
+
+Full Corrections
+================
+
+In the case where both a container workspace and correction factors are
+provided.
+
+.. diagram:: ApplyPaalmanPingsCorrection-v1_fullcorrection_wkflw.dot
+
 Usage
 -----
 

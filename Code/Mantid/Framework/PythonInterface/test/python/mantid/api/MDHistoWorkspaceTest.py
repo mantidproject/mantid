@@ -38,7 +38,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                       Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
         testWS = mtd['demo']
         signal = testWS.getSignalArray()
-        expected = numpy.array([[1,2,3],[4,5,6],[7,8,9]])
+        expected = numpy.array([[1,4,7],[2,5,8],[3,6,9]])
         self._verify_numpy_data(signal, expected)
 
         mtd.remove('demo')
@@ -208,7 +208,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                       AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(30L, 1L, 20L)
+        expected =(20L, 1L, 30L)
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
@@ -218,7 +218,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                        IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(1L, 20L)
+        expected =(20L, 1L)
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
@@ -238,13 +238,13 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         nEvents = BH.getNEvents();
         self.assertEqual(nEvents,1000);
         signal = BH.getSignalArray()
-        expected =(40L,5L,20L)
+        expected =(20L,5L,40L)
         shape = signal.shape
         self.assertEqual(shape,expected)
 
         for i in range(0,expected[1]):
-    		self.assertEqual(signal[2,i,1],2)
-    		self.assertEqual(signal[1,i,2],0)
+    		self.assertEqual(signal[1,i,2],2)
+    		self.assertEqual(signal[2,i,1],0)
 
 
         self.assertEqual(BH.signalAt(3+20*(2+5*1)),signal[1,2,3])

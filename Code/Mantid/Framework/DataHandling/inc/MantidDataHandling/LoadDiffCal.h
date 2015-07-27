@@ -51,6 +51,7 @@ private:
   void getInstrument(H5::H5File &file);
   std::vector<int32_t> readInt32Array(H5::Group &group, const std::string &name);
   std::vector<double> readDoubleArray(H5::Group &group, const std::string &name);
+  void runLoadCalFile();
   void makeGroupingWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &groups);
   void makeMaskWorkspace(const std::vector<int32_t> &detids, const std::vector<int32_t> &use);
   void makeCalWorkspace(const std::vector<int32_t> &detids, const std::vector<double> &difc,

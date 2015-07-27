@@ -452,7 +452,7 @@ void LoadNexusMonitors::exec() {
   // Load the meta data, but don't stop on errors
   g_log.debug() << "Loading metadata" << std::endl;
   try {
-    LoadEventNexus::loadEntryMetadata(this->filename, WS, m_top_entry_name);
+    LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(this->filename, WS, m_top_entry_name);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what()
                     << std::endl;

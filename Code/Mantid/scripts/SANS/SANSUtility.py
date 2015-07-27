@@ -5,6 +5,8 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+import mantid
+from mantid.kernel import time_duration
 import inspect
 import math
 import os
@@ -73,14 +75,14 @@ def GetInstrumentDetails(instrum):
 
     return det.n_columns, first_spectrum, last_spectrum
 
-def InfinitePlaneXML(id, plane_pt, normal_pt):
-    return '<infinite-plane id="' + str(id) + '">' + \
+def InfinitePlaneXML(id_name, plane_pt, normal_pt):
+    return '<infinite-plane id="' + str(id_name) + '">' + \
         '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
         '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
         '</infinite-plane>'
 
-def InfiniteCylinderXML(id, centre, radius, axis):
-    return  '<infinite-cylinder id="' + str(id) + '">' + \
+def InfiniteCylinderXML(id_name, centre, radius, axis):
+    return  '<infinite-cylinder id="' + str(id_name) + '">' + \
     '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
     '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
     '<radius val="' + str(radius) + '" />' + \
@@ -97,11 +99,16 @@ def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
     # convert all angles to be between 0 and 360
-    while phimax > 360 : phimax -= 360
-    while phimax < 0 : phimax += 360
-    while phimin > 360 : phimin -= 360
-    while phimin < 0 : phimin += 360
-    while phimax<phimin : phimax += 360
+    while phimax > 360 :
+        phimax -= 360
+    while phimax < 0 :
+        phimax += 360
+    while phimin > 360 :
+        phimin -= 360
+    while phimin < 0 :
+        phimin += 360
+    while phimax<phimin :
+        phimax += 360
 
     #Convert to radians
     phimin = math.pi*phimin/180.0
@@ -365,17 +372,20 @@ def sliceParser(str_to_parser):
 
     def _parse_lower(inpstr):
         val = _check_match(inpstr, lowbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [val[0], MARK]
 
     def _parse_upper(inpstr):
         val = _check_match(inpstr, upbound, 1)
-        if not val: return val
+        if not val:
+            return val
         return [MARK, val[0]]
 
     def _parse_start_step_stop(inpstr):
         val = _check_match(inpstr, sss_pat, 3)
-        if not val: return val
+        if not val:
+            return val
         start = val[0]
         step = val[1]
         stop = val[2]
@@ -442,32 +452,91 @@ def getFileAndName(incomplete_path):
 
     return this_path, basename
 
+def _merge_to_ranges(ints):
+    """
+    Given an integer list, will "merge" adjacent integers into "ranges".
+    Assumes that the given list will already be sorted and that it contains no
+    duplicates.  Best explained with examples:
+
+    Input:  [1, 2, 3, 4]
+    Output: [[1, 4]]
+
+    Input:  [1, 2, 3, 5, 6, 7]
+    Output: [[1, 3], [5, 7]]
+
+    Input:  [1, 2, 3, 5, 7, 8, 9]
+    Output: [[1, 3], [5, 5], [7, 9]]
+
+    Input:  [1, 2, 7, 5, 6, 3, 2, 2]
+    Output: Unknown -- the input contains duplicates and is unsorted.
+
+    @params ints :: the integer list to merge, sorted and without duplicates
+
+    @returns a list of ranges
+    """
+    ranges = []
+    current_range = []
+    for i in ints:
+        if current_range == []:
+            current_range = [i, i]
+        elif current_range[1] + 1 == i:
+            current_range[1] = i
+        else:
+            ranges.append(current_range)
+            current_range = [i, i]
+    if not current_range in ranges:
+        ranges.append(current_range)
+    return ranges
+
+def _yield_masked_det_ids(masking_ws):
+    """
+    For some reason Detector.isMasked() does not work for MaskingWorkspaces.
+    We use masking_ws.readY(ws_index)[0] == 1 instead.
+    """
+    for ws_index in range(masking_ws.getNumberHistograms()):
+        if masking_ws.readY(ws_index)[0] == 1:
+            yield masking_ws.getDetector(ws_index).getID()
+
+def get_masked_det_ids_from_mask_file(mask_file_path, idf_path):
+    """
+    Given a mask file and the (necessary) path to the corresponding IDF, will
+    load in the file and return a list of detector IDs that are masked.
+
+    @param mask_file_path :: the path of the mask file to read in
+    @param idf_path :: the path to the corresponding IDF. Necessary so that we
+                       know exactly which instrument to use, and therefore know
+                       the correct detector IDs.
+
+    @returns the list of detector IDs that were masked in the file
+    """
+    mask_ws_name = "__temp_mask"
+    LoadMask(
+        Instrument=idf_path,
+        InputFile=mask_file_path,
+        OutputWorkspace=mask_ws_name)
+    det_ids = list(_yield_masked_det_ids(mtd[mask_ws_name]))
+    DeleteWorkspace(Workspace=mask_ws_name)
+
+    return det_ids
+
 def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
     """
     Rolling our own MaskDetectors wrapper since masking is broken in a couple
-    of places that affect us here:
+    of places that affect us here.
 
-    1. Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name)
-       is not something we can do because the algorithm masks by ws index
-       rather than detector id, and unfortunately for SANS the detector table
-       is not the same for MaskingWorkspaces as it is for the workspaces
-       containing the data to be masked.  Basically, we get a mirror image of
-       what we expect.  Instead, we have to extract the det IDs and use those
-       via the DetectorList property.
-
-    2. For some reason Detector.isMasked() does not work for MaskingWorkspaces.
-       We use masking_ws.readY(ws_index)[0] == 1 instead.
+    Calling MaskDetectors(Workspace=ws_name, MaskedWorkspace=mask_ws_name) is
+    not something we can do because the algorithm masks by ws index rather than
+    detector id, and unfortunately for SANS the detector table is not the same
+    for MaskingWorkspaces as it is for the workspaces containing the data to be
+    masked.  Basically, we get a mirror image of what we expect.  Instead, we
+    have to extract the det IDs and use those via the DetectorList property.
 
     @param ws :: the workspace to be masked.
     @param masking_ws :: the masking workspace that contains masking info.
     """
     ws, masking_ws = mtd[ws_name], mtd[masking_ws_name]
 
-    masked_det_ids = []
-
-    for ws_index in range(masking_ws.getNumberHistograms()):
-        if masking_ws.readY(ws_index)[0] == 1:
-            masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
+    masked_det_ids = list(_yield_masked_det_ids(masking_ws))
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
 
@@ -594,7 +663,36 @@ def get_full_path_for_added_event_data(file_name):
 
     return full_path_name
 
+def extract_spectra(ws, det_ids, output_ws_name):
+    """
+    A more generic version of ExtactSingleSpectrum.  Accepts an arbitrary list
+    of ws indices to keep.  Everything else is ignored.
+    @param ws :: the workspace from which to extract spectra
+    @param det_ids :: the detector IDs corresponding to the spectra to extract
+    @param output_ws_name :: the name of the resulting workspace
+    @returns :: a workspace containing the extracted spectra
+    """
+    ExtractSpectra(InputWorkspace=ws,OutputWorkspace=output_ws_name, DetectorList=det_ids)
+    return mtd[output_ws_name]
 
+def get_masked_det_ids(ws):
+    """
+    Given a workspace, will return a list of all the IDs that correspond to
+    detectors that have been masked.
+
+    @param ws :: the workspace to extract the det IDs from
+
+    @returns a list of IDs for masked detectors
+    """
+    for ws_index in range(ws.getNumberHistograms()):
+        try:
+            det = ws.getDetector(ws_index)
+        except RuntimeError:
+            # Skip the rest after finding the first spectra with no detectors,
+            # which is a big speed increase for SANS2D.
+            break
+        if det.isMasked():
+            yield det.getID()
 def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
     '''
     Creates a cloned workspace where all zero-error values have been replaced with a large value
@@ -681,6 +779,233 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     return message, isValid
 
+class AddOperation(object):
+    """
+    The AddOperation allows to add two workspaces at a time.
+    """
+    def __init__(self,isOverlay, time_shifts):
+        """
+        The AddOperation requires to know if the workspaces are to
+        be plainly added or to be overlayed. Additional time shifts can be
+        specified
+        @param isOverlay :: true if the operation is an overlay operation
+        @param time_shifts :: a string with comma-separted time shift values
+        """
+        super(AddOperation, self).__init__()
+        factory = CombineWorkspacesFactory()
+        self.adder = factory.create_add_algorithm(isOverlay)
+        self.time_shifter = TimeShifter(time_shifts)
+
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, run_to_add):
+        """
+        Add two workspaces together and place the result into the outputWorkspace.
+        The user needs to specify which run is being added in order to determine
+        the correct time shift
+        @param LHS_workspace :: first workspace, this workspace is a reference workspace
+                                and hence never shifted
+        @param RHS_workspace :: second workspace which can be shifted in time
+        @param run_to_add :: the number of the nth added workspace
+        """
+        current_time_shift = self.time_shifter.get_Nth_time_shift(run_to_add)
+        self.adder.add(LHS_workspace=LHS_workspace,
+                       RHS_workspace= RHS_workspace,
+                       output_workspace= output_workspace,
+                       time_shift = current_time_shift)
+
+class CombineWorkspacesFactory(object):
+    """
+    Factory to determine how to add workspaces
+    """
+    def __init__(self):
+        super(CombineWorkspacesFactory, self).__init__()
+    def create_add_algorithm(self, isOverlay):
+        """
+        @param isOverlay :: if true we provide the OverlayWorkspaces functionality
+        """
+        if isOverlay:
+            return OverlayWorkspaces()
+        else:
+            return PlusWorkspaces()
+
+class PlusWorkspaces(object):
+    """
+    Wrapper for the Plus algorithm
+    """
+    def __init__(self):
+        super(PlusWorkspaces, self).__init__()
+
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+        """
+        @param LHS_workspace :: the first workspace
+        @param RHS_workspace :: the second workspace
+        @param output_workspace :: the output workspace
+        @param time_shift :: unused parameter
+        """
+        dummy_shift = time_shift
+        Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= RHS_workspace,OutputWorkspace= output_workspace)
+
+class OverlayWorkspaces(object):
+    """
+    Overlays (in time) a workspace  on top of another workspace. The two
+    workspaces overlayed such that the first time entry of their proton_charge entry matches.
+    This overlap can be shifted by the specified time_shift in seconds
+    """
+    def __init__(self):
+        super(OverlayWorkspaces, self).__init__()
+
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+        """
+        @param LHS_workspace :: the first workspace
+        @param RHS_workspace :: the second workspace
+        @param output_workspace :: the output workspace
+        @param time_shift :: an additional time shift for the overlay procedure
+        """
+        rhs_ws = self._get_workspace(RHS_workspace)
+        lhs_ws = self._get_workspace(LHS_workspace)
+        # Find the time difference between LHS and RHS workspaces and add optional time shift
+        time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
+        total_time_shift = time_difference + time_shift
+
+        # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
+        temp = rhs_ws
+        temp_ws_name = 'shifted'
+        if total_time_shift != 0.0:
+            temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
+
+        # Add the LHS and shifted workspace
+        Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
+
+        # Remove the shifted workspace
+        if mtd.doesExist(temp_ws_name):
+            mtd.remove(temp_ws_name)
+
+    def _extract_time_difference_in_seconds(self, ws1, ws2):
+        # The times which need to be compared are the first entry in the proton charge log
+        time_1 = self._get_time_from_proton_charge_log(ws1)
+        time_2 = self._get_time_from_proton_charge_log(ws2)
+
+        return time_duration.total_nanoseconds(time_1- time_2)/1e9
+
+    def _get_time_from_proton_charge_log(self, ws):
+        times = ws.getRun().getProperty("proton_charge").times
+        if len(times) == 0:
+            raise ValueError("The proton charge does not have any time entry")
+        return times[0]
+
+    def _get_workspace(self, workspace):
+        if isinstance(workspace, MatrixWorkspace):
+            return workspace
+        elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
+            return mtd[workspace]
+
+class TimeShifter(object):
+    """
+    The time shifter stores all time shifts for all runs which are to be added. If there is
+    a mismatch the time shifts are set to 0.0 seconds.
+    """
+    def __init__(self, time_shifts):
+        super(TimeShifter, self).__init__()
+        self._time_shifts = time_shifts
+    def get_Nth_time_shift(self, n):
+        """
+        Retrieves the specified additional time shift for the nth addition in seconds.
+        @param n :: the nth addition
+        """
+        if len(self._time_shifts) >= (n+1):
+            return self._cast_to_float(self._time_shifts[n])
+        else:
+            return 0.0
+    def _cast_to_float(self, element):
+        float_element = 0.0
+        try:
+            float_element = float(element)
+        except ValueError:
+            pass# Log here
+        return float_element
+
+def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
+    '''
+    Takes a multi-period event workspace and loads the monitors
+    as a group workspace
+    @param workspace: Multi-period event workspace
+    @param data_file: The data file
+    @param monitor_appendix: The appendix for monitor data
+    '''
+    # Load all monitors
+    mon_ws_group_name = "temp_ws_group"
+    LoadNexusMonitors(Filename=data_file, OutputWorkspace=mon_ws_group_name)
+    mon_ws = mtd["temp_ws_group"]
+    # Rename all monitor workspces
+    rename_monitors_for_multiperiod_event_data(monitor_workspace = mon_ws, workspace=workspace, appendix=monitor_appendix)
+
+def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, appendix):
+    '''
+    Takes a multi-period event workspace and loads the monitors
+    as a group workspace
+    @param workspace: Multi-period event workspace
+    @param data_file: The data file
+    @param monitor_appendix: The appendix for monitor data
+    '''
+    if len(monitor_workspace) != len(workspace):
+        raise RuntimeError("The workspace and monitor workspace lengths do not match.")
+    for index in range(0,len(monitor_workspace)):
+        monitor_name = workspace[index].name() + appendix
+        RenameWorkspace(InputWorkspace=monitor_workspace[index], OutputWorkspace=monitor_name)
+    # Finally rename the group workspace
+    monitor_group_ws_name = workspace.name() + appendix
+    RenameWorkspace(InputWorkspace=monitor_workspace, OutputWorkspace=monitor_group_ws_name)
+
+def is_convertible_to_int(input_value):
+    '''
+    Check if the input can be converted to int
+    @param input_value :: a general input
+    '''
+    try:
+        dummy_converted = int(input_value)
+    except ValueError:
+        return False
+    return True
+
+def is_convertible_to_float(input_value):
+    '''
+    Check if the input can be converted to float
+    @param input_value :: a general input
+    '''
+    try:
+        dummy_converted = float(input_value)
+    except ValueError:
+        return False
+    return True
+
+def is_valid_xml_file_list(input_value):
+    '''
+    Check if the input is a valid xml file list. We only check
+    the form and not the existence of the file
+    @param input :: a list input
+    '''
+    if not isinstance(input_value, list) or not input or len(input_value) == 0:
+        return False
+    for element in input_value:
+        if not isinstance(element, str) or not element.endswith('.xml'):
+            return False
+    return True
+
+def convert_from_string_list(to_convert):
+    '''
+    Convert a Python string list to a comma-separted string
+    @param to_convert :: a string list input
+    '''
+    return ','.join(element.replace(" ", "") for element in to_convert)
+
+def convert_to_string_list(to_convert):
+    '''
+    Convert a comma-separted string to a Python string list in a string form
+    "file1.xml, file2.xml" -> "['file1.xml','file2.xml']"
+    @param to_convert :: a comma-spearated string
+    '''
+    string_list = to_convert.replace(" ", "").split(",")
+    output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
+    return output_string
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
@@ -693,8 +1018,8 @@ def parseLogFile(logfile):
         'Front_Det_Rot':0.0}
     if logfile == None:
         return tuple(logkeywords.values())
-    file = open(logfile, 'rU')
-    for line in file:
+    file_log = open(logfile, 'rU')
+    for line in file_log:
         entry = line.split()[1]
         if entry in logkeywords.keys():
             logkeywords[entry] = float(line.split()[2])

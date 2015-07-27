@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
 
 class QwtPlotCurve;
@@ -44,8 +43,6 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-namespace IDA
-{
   class DLLExport CorrectionsTab : public IndirectTab
   {
     Q_OBJECT
@@ -68,7 +65,7 @@ namespace IDA
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                       Mantid::API::MatrixWorkspace_const_sptr right);
     /// Adds a unit conversion step to the algorithm queue
-    std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix = "UNIT");
+    std::string addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix = "UNIT", std::string eMode = "");
 
     /// DoubleEditorFactory
     DoubleEditorFactory* m_dblEdFac;
@@ -89,12 +86,7 @@ namespace IDA
 
     /// Overidden by child class.
     virtual void loadSettings(const QSettings & settings) = 0;
-
-    /// A pointer to the parent (friend) IndirectDataAnalysis object.
-    IndirectDataAnalysis * m_parent;
-
   };
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

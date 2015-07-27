@@ -375,7 +375,7 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
           break;
         }
       }
-      g_log.notice()
+      g_log.debug()
           << "Finding peaks from giving starting point, with interval i_min = "
           << i_min << " i_max = " << i_max << std::endl;
       practical_x_max = vecX[i_max];
@@ -1472,11 +1472,11 @@ void FindPeaks::addInfoRow(const size_t spectrum,
 
     t << a0 << a1 << a2;
 
-    g_log.notice() << "Peak parameters found: cen=" << peakcentre
-                   << " fwhm=" << fwhm << " height=" << height << " a0=" << a0
-                   << " a1=" << a1 << " a2=" << a2;
+    g_log.debug() << "Peak parameters found: cen=" << peakcentre
+                  << " fwhm=" << fwhm << " height=" << height << " a0=" << a0
+                  << " a1=" << a1 << " a2=" << a2;
   }
-  g_log.notice() << " chsq=" << mincost << "\n";
+  g_log.debug() << " chsq=" << mincost << "\n";
   // Minimum cost function value
   t << mincost;
 

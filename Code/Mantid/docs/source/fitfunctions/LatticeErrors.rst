@@ -14,3 +14,5 @@ Description
 .. properties::
 
 .. categories::
+
+.. sourcelink::

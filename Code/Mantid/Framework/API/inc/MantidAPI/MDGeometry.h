@@ -80,6 +80,7 @@ public:
   Mantid::Kernel::VMD &getBasisVector(size_t index);
   const Mantid::Kernel::VMD &getBasisVector(size_t index) const;
   void setBasisVector(size_t index, const Mantid::Kernel::VMD &vec);
+  bool allBasisNormalized() const;
 
   // --------------------------------------------------------------------------------------------
   bool hasOriginalWorkspace(size_t index = 0) const;

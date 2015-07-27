@@ -4,6 +4,7 @@ set ( SRC_FILES
 	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
+	src/AddNote.cpp
 	src/AddPeak.cpp
 	src/AddSampleLog.cpp
 	src/AddTimeSeriesLog.cpp
@@ -246,6 +247,9 @@ set ( SRC_FILES
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/TOFSANSResolutionByPixel.cpp
+	src/TimeAtSampleStrategyDirect.cpp
+	src/TimeAtSampleStrategyElastic.cpp
+	src/TimeAtSampleStrategyIndirect.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
@@ -267,6 +271,7 @@ set ( INC_FILES
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
+	inc/MantidAlgorithms/AddNote.h
 	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
@@ -510,6 +515,10 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
+	inc/MantidAlgorithms/TimeAtSampleStrategy.h
+	inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
+	inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
+	inc/MantidAlgorithms/TimeAtSampleStrategyIndirect.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
@@ -541,6 +550,7 @@ set ( TEST_FILES
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
+	AddNoteTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
 	AddTimeSeriesLogTest.h
@@ -761,6 +771,9 @@ set ( TEST_FILES
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelTest.h
+	TimeAtSampleStrategyDirectTest.h
+	TimeAtSampleStrategyElasticTest.h
+	TimeAtSampleStrategyIndirectTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h

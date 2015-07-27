@@ -836,7 +836,9 @@ void AlgorithmDialog::executeAlgorithmAsync()
     this->observeError(algToExec);
 
     algToExec->executeAsync();
-    m_okButton->setEnabled(false);
+    if (m_okButton) {
+      m_okButton->setEnabled(false);
+    }
   }
   catch (Poco::NoThreadAvailableException &)
   {

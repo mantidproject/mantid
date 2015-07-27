@@ -11,6 +11,8 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
+#include <boost/assign/list_of.hpp>
+
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
 using Mantid::API::MatrixWorkspace;
@@ -31,6 +33,73 @@ public:
 
     TS_ASSERT_EQUALS( trans.name(), "CalculateTransmission" );
     TS_ASSERT_EQUALS( trans.version(), 1 );
+  }
+
+  void testDefiningBothTransmissionMonitorAndRegionOfInterestThrows()
+  {
+    Mantid::Algorithms::CalculateTransmission trans;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4,50,true);
+    inputWS->getAxis(0)->unit() = 
+      Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    const std::string outputWsName("CalculateTransmissionTest_outputWS");
+
+    trans.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("SampleRunWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("DirectRunWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("IncidentBeamMonitor", 1) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("TransmissionMonitor", 2) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("TransmissionROI", "2,3") );
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("OutputWorkspace", outputWsName) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", true) );
+
+    trans.execute();
+
+    TS_ASSERT( !trans.isExecuted() );
+  }
+
+  void testRegionOfInterest()
+  {
+    Mantid::Algorithms::CalculateTransmission trans;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4,50,true);
+    inputWS->getAxis(0)->unit() = 
+      Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+    const std::string outputWsName("CalculateTransmissionTest_outputWS");
+
+    trans.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("SampleRunWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("DirectRunWorkspace", inputWS) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("IncidentBeamMonitor", 1) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("TransmissionROI", "2,3") );
+    TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("OutputWorkspace", outputWsName) );
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", true) );
+
+    TS_ASSERT_THROWS_NOTHING( trans.execute() );
+    TS_ASSERT( trans.isExecuted() );
+
+    Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
+    TS_ASSERT_THROWS_NOTHING(fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWsName)) );
+    TS_ASSERT_THROWS_NOTHING(unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWsName+"_unfitted")) );
+
+    const Mantid::MantidVec &fit = fitted->readY(0), &unfit = unfitted->readY(0);
+    TS_ASSERT_EQUALS(fit.size(), unfit.size())
+    for (unsigned int i = 0; i < fit.size(); ++i)
+    {
+      // Should all be 1 because I used the same workspace twice as the input
+      TS_ASSERT_DELTA( fit[i], 1.0, 0.0005 )
+      // a linear fit thorugh all 1s should result in all 1s
+      TS_ASSERT_DELTA( fit[i], unfit[i], 0.0005 )
+    }
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputWsName);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWsName+"_unfitted");
   }
 
   void testFittedUnfitted()

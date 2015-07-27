@@ -236,55 +236,42 @@ std::map<std::string, std::string> AlignDetectors::validateInputs() {
     return result;
 }
 
-bool endswith(const std::string& str, const std::string &ending) {
-    if (ending.size() > str.size()) {
-      return false;
-    }
-
-    return std::equal(str.begin() + str.size() - ending.size(),
-                      str.end(), ending.begin());
-}
-
 void AlignDetectors::loadCalFile(MatrixWorkspace_sptr inputWS, const std::string & filename) {
-  IAlgorithm_sptr alg;
-  if (endswith(filename, ".cal")) {
-      // Load the .cal file
-      alg = createChildAlgorithm("LoadCalFile");
-      alg->setPropertyValue("CalFilename", filename);
-      alg->setProperty("InputWorkspace", inputWS);
-      alg->setProperty<bool>("MakeOffsetsWorkspace", true);
-  } else if (endswith(filename, ".h5") || endswith(filename, ".hd5") || endswith(filename, ".hdf")) {
-      alg = createChildAlgorithm("LoadDiffCal");
-      alg->setPropertyValue("Filename", filename);
-      alg->setProperty<bool>("MakeCalWorkspace", true);
-  } else {
-      std::stringstream msg;
-      msg << "Do not know how to load cal file: " << filename;
-      throw std::runtime_error(msg.str());
-  }
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setPropertyValue("Filename", filename);
+  alg->setProperty<bool>("MakeCalWorkspace", true);
   alg->setProperty<bool>("MakeGroupingWorkspace", false);
   alg->setProperty<bool>("MakeMaskWorkspace", false);
   alg->setPropertyValue("WorkspaceName", "temp");
   alg->executeAsChildAlg();
+
   m_calibrationWS = alg->getProperty("OutputCalWorkspace");
 }
 
 void AlignDetectors::getCalibrationWS(MatrixWorkspace_sptr inputWS) {
-    const std::string calFileName = getPropertyValue("CalibrationFile");
-    if (!calFileName.empty()) {
-      progress(0.0, "Reading calibration file");
-      loadCalFile(inputWS, calFileName);
-    } else {
-      m_calibrationWS = getProperty("CalibrationWorkspace");
-      if (!m_calibrationWS) {
-          OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
-          auto alg = createChildAlgorithm("ConvertDiffCal");
-          alg->setProperty("OffsetsWorkspace", offsetsWS);
-          alg->executeAsChildAlg();
-          m_calibrationWS = alg->getProperty("OutputWorkspace");
-          m_calibrationWS->setTitle(offsetsWS->getTitle());
-      }
-    }
+  m_calibrationWS = getProperty("CalibrationWorkspace");
+  if (m_calibrationWS)
+    return; // nothing more to do
+
+  OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+  if (offsetsWS) {
+    auto alg = createChildAlgorithm("ConvertDiffCal");
+    alg->setProperty("OffsetsWorkspace", offsetsWS);
+    alg->executeAsChildAlg();
+    m_calibrationWS = alg->getProperty("OutputWorkspace");
+    m_calibrationWS->setTitle(offsetsWS->getTitle());
+    return;
+  }
+
+  const std::string calFileName = getPropertyValue("CalibrationFile");
+  if (!calFileName.empty()) {
+    progress(0.0, "Reading calibration file");
+    loadCalFile(inputWS, calFileName);
+    return;
+  }
+
+  throw std::runtime_error("Failed to determine calibration information");
 }
 
 void setXAxisUnits(API::MatrixWorkspace_sptr outputWS) {

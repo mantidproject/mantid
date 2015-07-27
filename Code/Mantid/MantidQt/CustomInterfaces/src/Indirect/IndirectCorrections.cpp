@@ -3,14 +3,8 @@
 //----------------------
 #include "MantidQtCustomInterfaces/Indirect/IndirectCorrections.h"
 
-// IndirectDataAnalysisTab subclasses:
-#include "MantidQtCustomInterfaces/Indirect/Elwin.h"
-#include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
-#include "MantidQtCustomInterfaces/Indirect/Iqt.h"
-#include "MantidQtCustomInterfaces/Indirect/IqtFit.h"
-#include "MantidQtCustomInterfaces/Indirect/ConvFit.h"
-#include "MantidQtCustomInterfaces/Indirect/CalcCorr.h"
-#include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
+#include "MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h"
+#include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
 #include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 
 #include "MantidQtAPI/HelpWindow.h"
@@ -24,8 +18,6 @@
 namespace MantidQt
 {
 namespace CustomInterfaces
-{
-namespace IDA
 {
   // Add this class to the list of specialised dialogs in this namespace
   DECLARE_SUBWINDOW(IndirectCorrections)
@@ -44,8 +36,8 @@ namespace IDA
     // Allows us to get a handle on a tab using an enum, for example "m_tabs[ELWIN]".
     // All tabs MUST appear here to be shown in interface.
     // We make the assumption that each map key corresponds to the order in which the tabs appear.
-    m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twTabs->widget(CALC_CORR))));
-    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twTabs->widget(APPLY_CORR))));
+    m_tabs.insert(std::make_pair(CALC_CORR,  new CalculatePaalmanPings(m_uiForm.twTabs->widget(CALC_CORR))));
+    m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyPaalmanPings(m_uiForm.twTabs->widget(APPLY_CORR))));
     m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS))));
   }
 
@@ -169,6 +161,5 @@ namespace IDA
     showInformationBox(message);
   }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
