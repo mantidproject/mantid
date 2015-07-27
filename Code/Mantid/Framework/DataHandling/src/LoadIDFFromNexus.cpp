@@ -81,7 +81,7 @@ void LoadIDFFromNexus::exec() {
 
   // Look for parameter correction file
   std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
-  g_log.notice() << "Parameter correction file: " << parameterCorrectionFile << "\n";
+  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile << "\n";
 
   // Read parameter correction file, if found
   std::string correctionParameterFile = "";
@@ -102,11 +102,11 @@ void LoadIDFFromNexus::exec() {
   // Load parameters from correction parameter file, if it exists
   if( correctionParameterFile != "") {
       Poco::Path corrFilePath(parameterCorrectionFile);
-      g_log.notice() << "Correction file path: " << corrFilePath.toString() << "\n";
+      g_log.debug() << "Correction file path: " << corrFilePath.toString() << "\n";
       Poco::Path corrDirPath = corrFilePath.parent();
-      g_log.notice() << "Correction directory path: " << corrDirPath.toString() << "\n";
+      g_log.debug() << "Correction directory path: " << corrDirPath.toString() << "\n";
       Poco::Path corrParamFile( corrDirPath, correctionParameterFile );
-      g_log.notice() << "Would use readParameterCorrectionFile: " << corrParamFile.toString() << " " << append << "\n";
+      g_log.debug() << "Using readParameterCorrectionFile: " << corrParamFile.toString() << " " << append << "\n";
       bool ok = loadParameterFile( corrParamFile.toString(), localWorkspace );
       if(!ok) {
         g_log.error() << "Unable to load parameter file " << corrParamFile.toString() << " specified in " << corrFilePath.toString() << ".\n";
