@@ -106,54 +106,54 @@ private:
   void clearResultsFromTo (size_t is, size_t ie);
 
   /// Stores base name shared by all runs
-  static std::string g_filenameBase;
+  std::string m_filenameBase;
   /// Stores extension shared by all runs
-  static std::string g_filenameExt;
+  std::string m_filenameExt;
   /// Sotres number of zeros in run name
-  static int g_filenameZeros;
+  int m_filenameZeros;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
-  static std::vector<int> g_forward_list;
+  std::vector<int> m_forward_list;
   /// Store backward spectra
-  static std::vector<int> g_backward_list;
+  std::vector<int> m_backward_list;
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
   /// Store type of dead time corrections
-  static std::string g_dtcType;
+  std::string m_dtcType;
   /// File to read corrections from
-  static std::string g_dtcFile;
+  std::string m_dtcFile;
   /// Store red period
-  static int g_red;
+  int m_red;
   /// Store green period
-  static int g_green;
+  int m_green;
   // Mantid vectors to store results
   // Red mantid vectors
-  static std::map<int64_t, double> g_redX;
-  static std::map<int64_t, double> g_redY;
-  static std::map<int64_t, double> g_redE;
+  std::map<int64_t, double> m_redX;
+  std::map<int64_t, double> m_redY;
+  std::map<int64_t, double> m_redE;
   // Green mantid vectors
-  static std::map<int64_t, double> g_greenX;
-  static std::map<int64_t, double> g_greenY;
-  static std::map<int64_t, double> g_greenE;
+  std::map<int64_t, double> m_greenX;
+  std::map<int64_t, double> m_greenY;
+  std::map<int64_t, double> m_greenE;
   // Mantid vectors to store Red + Green
-  static std::map<int64_t, double> g_sumX;
-  static std::map<int64_t, double> g_sumY;
-  static std::map<int64_t, double> g_sumE;
+  std::map<int64_t, double> m_sumX;
+  std::map<int64_t, double> m_sumY;
+  std::map<int64_t, double> m_sumE;
   // Mantid vectors to store Red - Green
-  static std::map<int64_t, double> g_diffX;
-  static std::map<int64_t, double> g_diffY;
-  static std::map<int64_t, double> g_diffE;
+  std::map<int64_t, double> m_diffX;
+  std::map<int64_t, double> m_diffY;
+  std::map<int64_t, double> m_diffE;
   // LogValue name
-  static std::string g_logName;
+  std::string m_logName;
   // LogValue function
-  static std::string g_logFunc;
+  std::string m_logFunc;
   // Type of computation: integral or differential
-  static std::string g_stype;
+  std::string m_stype;
   // Minimum time for the analysis
-  static double g_minTime;
+  double m_minTime;
   // Maximum time for the analysis
-  static double g_maxTime;
+  double m_maxTime;
 };
 
 } // namespace Algorithm
