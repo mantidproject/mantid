@@ -141,13 +141,12 @@ public:
   void test_peaks_fit() {
     API::MatrixWorkspace_sptr ws = generatePeaksCurveWorkspace();
 
-    return;
     Fit fit;
     fit.setChild(true);
     fit.initialize();
 
-    fit.setProperty("Function",
-                    "name=BackToBackExponential");
+    // example X0, S values after a good fit are 10079.0, 404.5
+    fit.setProperty("Function", "name=BackToBackExponential, X0=8500, S=800");
     fit.setProperty("InputWorkspace", ws);
     // fit.setProperty("MaxIterations", 99);
     fit.setProperty("CreateOutput", true);
@@ -169,7 +168,7 @@ public:
       // the delta/difference includes a bit of tolerance for random variations
       // of the generated/sample data
       TSM_ASSERT_DELTA("The difference between data and fit too big", y[i], 0.0,
-                       0.1);
+                       1);
     }
   }
 
