@@ -98,7 +98,7 @@ private:
   /// Calculates the asymmetry for a pair of workspaces (red & green)
   void calculateAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
   /// Get log value
-  double getLogValue(API::MatrixWorkspace &ws);
+  double getLogValue(API::Workspace_sptr ws);
   /// Populate output workspace with results
   void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties

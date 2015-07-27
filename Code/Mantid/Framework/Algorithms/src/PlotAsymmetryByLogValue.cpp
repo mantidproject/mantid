@@ -174,6 +174,10 @@ void PlotAsymmetryByLogValue::exec() {
       Workspace_sptr loadedWs = doLoad(i);
 
       if (loadedWs) {
+
+        // Get Log value
+        double x = getLogValue(loadedWs);
+
         // Analyse loadedWs
         doAnalysis(loadedWs, i);
       }
@@ -561,7 +565,6 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 
     double Y, E;
     calculateAsymmetry(loadedWs2D, Y, E);
-    m_redX[index] = getLogValue(*loadedWs2D);
     m_redY[index] = Y;
     m_redE[index] = E;
 
@@ -598,7 +601,6 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
     if (m_green == EMPTY_INT()) {
       double Y, E;
       calculateAsymmetry(ws_red, Y, E);
-      m_redX[index] = getLogValue(*ws_red);
       m_redY[index] = Y;
       m_redE[index] = E;
 
@@ -606,25 +608,20 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 
       double YR, ER;
       double YG, EG;
-      double logValue = getLogValue(*ws_red);
       calculateAsymmetry(ws_red, YR, ER);
       calculateAsymmetry(ws_green, YG, EG);
       // Red data
-      m_redX[index] = logValue;
       m_redY[index] = YR;
       m_redE[index] = ER;
       // Green data
-      m_greenX[index] = logValue;
       m_greenY[index] = YG;
       m_greenE[index] = EG;
       // Sum
-      m_sumX[index] = logValue;
       m_sumY[index] = YR + YG;
       m_sumE[index] = sqrt(ER * ER + EG * EG);
       // move to last for safety since some grouping takes place in the
       // calcIntAsymmetry call below
       calculateAsymmetry(ws_red, ws_green, YR, ER);
-      m_diffX[index] = logValue;
       m_diffY[index] = YR;
       m_diffE[index] = ER;
     }
@@ -761,13 +758,25 @@ void PlotAsymmetryByLogValue::calculateAsymmetry(
  * Get log value from a workspace. Convert to double if possible.
  *
  * @param ws :: The input workspace.
- * @return :: Log value.
+ * @return :: Log value as double
  * @throw :: std::invalid_argument if the log cannot be converted to a double or
  *doesn't exist.
  */
-double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
+double PlotAsymmetryByLogValue::getLogValue(Workspace_sptr ws) {
 
-  const Run &run = ws.run();
+  MatrixWorkspace_sptr wsm;
+
+  WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+  if (wsg) {
+    wsm = boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
+  } else {
+    wsm = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  }
+  if (!wsm) {
+    throw std::invalid_argument("Couldn't find run logs");
+  }
+
+  const Run &run = wsm->run();
 
   // Get the start & end time for the run
   Mantid::Kernel::DateAndTime start, end;
