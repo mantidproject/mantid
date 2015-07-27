@@ -49,14 +49,7 @@ private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
   double getInstrumentResolution(std::string workspaceName);
-  QtProperty *createLorentzian(const QString &);
-  QtProperty *createDiffSphere(const QString &);
-  QtProperty *createDiffRotDiscreteCircle(const QString &);
-  QtProperty *createElasticDiffSphere(const QString &);
-  QtProperty *createElasticDiffRotDiscreteCircle(const QString &);
-  QtProperty *createInelasticDiffSphere(const QString &);
-  QtProperty *createInelasticDiffRotDiscreteCircle(const QString &);
-  QtProperty *createStretchedExpFT(const QString &);
+  QtProperty *createLorentzian(const QString &); 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
   void populateFunction(Mantid::API::IFunction_sptr func,
                         Mantid::API::IFunction_sptr comp, QtProperty *group,
@@ -80,6 +73,8 @@ private:
   QStringList getFunctionParameters(QString);
   Mantid::API::IAlgorithm_sptr m_fitAlg;
 
+
+  void removeTreeParams();
 
 };
 } // namespace IDA

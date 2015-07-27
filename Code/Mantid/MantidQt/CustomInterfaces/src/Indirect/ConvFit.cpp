@@ -109,23 +109,6 @@ void ConvFit::setup() {
   m_properties["DeltaFunction"]->addSubProperty(m_properties["UseDeltaFunc"]);
   m_cfTree->addProperty(m_properties["DeltaFunction"]);
 
-  // Fit functions
-  m_properties["Lorentzian1"] = createLorentzian("Lorentzian 1");
-  m_properties["Lorentzian2"] = createLorentzian("Lorentzian 2");
-  m_properties["DiffSphere"] = createDiffSphere("Diffusion Sphere");
-  m_properties["DiffRotDiscreteCircle"] =
-      createDiffRotDiscreteCircle("Diffusion Circle");
-  m_properties["ElasticDiffSphere"] =
-      createElasticDiffSphere("Elastic Diffusion Sphere");
-  m_properties["ElasticDiffRotDiscreteCircle"] =
-      createElasticDiffRotDiscreteCircle("Elastic Diffusion Circle");
-  m_properties["InelasticDiffSphere"] =
-      createInelasticDiffSphere("Inelastic Diffusion Sphere");
-  m_properties["InelasticDiffRotDiscreteCircle"] =
-      createInelasticDiffRotDiscreteCircle("Inelastic Diffusion Circle");
-  m_properties["StretchedExpFT"] =
-      createStretchedExpFT("Strecthced Exponential Fit");
-
   m_uiForm.leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
   // Connections
@@ -195,11 +178,6 @@ void ConvFit::setup() {
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
-  // Fitting function
-  /*m_properties["FitFunction"] = m_grpManager->addProperty("Fitting
-  Parameters");
-  m_cfTree->addProperty(m_properties["FitFunction"]);*/
-
   // Update fit parameters in browser when function is selected
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)), this,
           SLOT(fitFunctionSelected(const QString &)));
@@ -209,8 +187,8 @@ void ConvFit::setup() {
 /**
  * Converts data into a python script which prodcues the output workspace
  */
-// void ConvFit::run() {
-/*if (m_cfInputWS == NULL) {
+ void ConvFit::run() {
+if (m_cfInputWS == NULL) {
   g_log.error("No workspace loaded");
   return;
 }
@@ -288,8 +266,10 @@ QString pyOutput = runPythonCode(pyInput);
 // Set the result workspace for Python script export
 m_pythonExportWsName = pyOutput.toStdString();
 
-updatePlot();*/
-//}
+updatePlot();
+}
+
+
 
 /**
  * Runs algorithm.
@@ -297,7 +277,7 @@ updatePlot();*/
  * @param plot Enable/disable plotting
  * @param save Enable/disable saving
  */
-void ConvFit::run() {
+/*void ConvFit::run() {
   if (m_batchAlgoRunner->queueLength() > 0)
     return;
 
@@ -307,7 +287,7 @@ void ConvFit::run() {
     functionName = "Lorentzian";
   }
   if (functionName.compare("Two Lorentzian") == 0) {
-    // Implement two peak lorentxian behaviour
+    // Implement two peak lorentzian behaviour
   }
   QString functionString = "name=" + functionName;
 
@@ -340,18 +320,19 @@ void ConvFit::run() {
   m_fitAlg->setProperty("CreateOutput", true);
   m_fitAlg->setProperty("Output", outputName.toStdString());
 
-  // Debugging
+  // Debugging -----------TO BE REMOVED
   std::string fs = functionString.toStdString();
   std::string smple = sample.toStdString();
   double sx = m_dblManager->value(m_properties["StartX"]);
   double ex = m_dblManager->value(m_properties["EndX"]);
   std::string on = outputName.toStdString();
+  std::string funcString = functionString.toStdString();
 
   m_batchAlgoRunner->addAlgorithm(m_fitAlg);
   m_batchAlgoRunner->executeBatchAsync();
 
   updatePlot();
-}
+}*/
 
 /**
  * Validates the user's inputs in the ConvFit tab.
@@ -820,89 +801,6 @@ QtProperty *ConvFit::createLorentzian(const QString &name) {
   lorentzGroup->addSubProperty(m_properties[name + ".FWHM"]);
 
   return lorentzGroup;
-}
-
-/**
- * Creates a DiffSphere
- * @param name The name of the DiffSphere
- * @return The QTProperty that represents the DiffSphere
- */
-QtProperty *ConvFit::createDiffSphere(const QString &name) {
-  QtProperty *diffSphereGroup = m_grpManager->addProperty(name);
-
-  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Intensity");
-  m_properties[name + ".Radius"] = m_dblManager->addProperty("Radius");
-  m_properties[name + ".Diffusion"] = m_dblManager->addProperty("Diffusion");
-  m_properties[name + ".Shift"] = m_dblManager->addProperty("Shift");
-
-  m_dblManager->setDecimals(m_properties[name + ".Intensity"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Radius"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Diffusion"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Shift"], NUM_DECIMALS);
-
-  diffSphereGroup->addSubProperty(m_properties[name + ".Intensity"]);
-  diffSphereGroup->addSubProperty(m_properties[name + ".Radius"]);
-  diffSphereGroup->addSubProperty(m_properties[name + ".Diffusion"]);
-  diffSphereGroup->addSubProperty(m_properties[name + ".Shift"]);
-
-  return diffSphereGroup;
-}
-
-/**
- * Creates a DiffRotDiscreteCircle
- * @param name The name of the DiffRotDiscreteCircle
- * @return The QTProperty that represents the DiffRotDiscreteCircle
- */
-QtProperty *ConvFit::createDiffRotDiscreteCircle(const QString &name) {
-  QtProperty *diffRotDiscreteCircleGroup = m_grpManager->addProperty(name);
-
-  m_properties[name + ".N"] = m_dblManager->addProperty("N");
-  m_dblManager->setValue(m_properties[name + ".N"], 3.0);
-
-  m_properties[name + ".Intensity"] = m_dblManager->addProperty("Intensity");
-  m_properties[name + ".Radius"] = m_dblManager->addProperty("Radius");
-  m_properties[name + ".Decay"] = m_dblManager->addProperty("Decay");
-  m_properties[name + ".Shift"] = m_dblManager->addProperty("Shift");
-
-  m_dblManager->setDecimals(m_properties[name + ".N"], 0);
-  m_dblManager->setDecimals(m_properties[name + ".Intensity"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Radius"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Decay"], NUM_DECIMALS);
-  m_dblManager->setDecimals(m_properties[name + ".Shift"], NUM_DECIMALS);
-
-  diffRotDiscreteCircleGroup->addSubProperty(m_properties[name + ".N"]);
-  diffRotDiscreteCircleGroup->addSubProperty(m_properties[name + ".Intensity"]);
-  diffRotDiscreteCircleGroup->addSubProperty(m_properties[name + ".Radius"]);
-  diffRotDiscreteCircleGroup->addSubProperty(m_properties[name + ".Decay"]);
-  diffRotDiscreteCircleGroup->addSubProperty(m_properties[name + ".Shift"]);
-
-  return diffRotDiscreteCircleGroup;
-}
-
-QtProperty *ConvFit::createElasticDiffSphere(const QString &name) {
-  QtProperty *elasticDiffSphereGroup = m_grpManager->addProperty(name);
-  return elasticDiffSphereGroup;
-}
-
-QtProperty *ConvFit::createElasticDiffRotDiscreteCircle(const QString &name) {
-  QtProperty *elasticDiffRotDiscreteCircleGroup =
-      m_grpManager->addProperty(name);
-  return elasticDiffRotDiscreteCircleGroup;
-}
-
-QtProperty *ConvFit::createInelasticDiffSphere(const QString &name) {
-  QtProperty *elasticDiffSphereGroup = m_grpManager->addProperty(name);
-  return elasticDiffSphereGroup;
-}
-
-QtProperty *ConvFit::createInelasticDiffRotDiscreteCircle(const QString &name) {
-  QtProperty *inelasticDiffSphereGroup = m_grpManager->addProperty(name);
-  return inelasticDiffSphereGroup;
-}
-
-QtProperty *ConvFit::createStretchedExpFT(const QString &name) {
-  QtProperty *stretchedExpFTGroup = m_grpManager->addProperty(name);
-  return stretchedExpFTGroup;
 }
 
 /**
@@ -1522,6 +1420,9 @@ void ConvFit::fixItem() {
   item->parent()->property()->removeSubProperty(prop);
 }
 
+/**
+ * 
+ */
 void ConvFit::unFixItem() {
   QtBrowserItem *item = m_cfTree->currentItem();
 
@@ -1539,9 +1440,11 @@ void ConvFit::unFixItem() {
   delete prop;
 }
 
+
 void ConvFit::showTieCheckbox(QString fitType) {
   m_uiForm.ckTieCentres->setVisible(fitType == "Two Lorentzians");
 }
+
 
 /**
  * Gets a list of parameters for a given fit function.
@@ -1577,24 +1480,13 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
   return parameters;
 }
 
+
 /**
  * Handles a new fit function being selected.
- *
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  // remove old parameter elements
-  for (auto it = m_properties.begin(); it != m_properties.end();) {
-    if (it.key().startsWith("parameter_")) {
-      delete it.value();
-      it = m_properties.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
-  m_cfTree->removeProperty(m_properties["FitFunction1"]);
-  m_cfTree->removeProperty(m_properties["FitFunction2"]);
+  removeTreeParams();
 
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
@@ -1608,6 +1500,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
+  //No fit function parameters required for Zero
   if (parameters[0].compare("Zero") != 0) {
     if (functionName.compare("Two Lorentzians") == 0) {
       int count = 0;
@@ -1615,6 +1508,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         QString name = "parameter_" + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
         m_dblManager->setValue(m_properties[name], 0.0);
+		m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         if (count < 3) {
           m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
         } else {
@@ -1622,16 +1516,32 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         }
         count++;
       }
-
     } else {
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         QString name = "parameter_" + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
         m_dblManager->setValue(m_properties[name], 0.0);
-        m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
+		m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
+        m_properties["FitFunction1"]->addSubProperty(m_properties[name]);		
       }
     }
   }
+}
+
+/**
+ * Removes fit function related parameters from the cfTree 
+ */ 
+void ConvFit::removeTreeParams() {
+  for (auto it = m_properties.begin(); it != m_properties.end();) {
+    if (it.key().startsWith("parameter_")) {
+      delete it.value();
+      it = m_properties.erase(it);
+    } else {
+      ++it;
+    }
+  }
+  m_cfTree->removeProperty(m_properties["FitFunction1"]);
+  m_cfTree->removeProperty(m_properties["FitFunction2"]);
 }
 
 } // namespace IDA
