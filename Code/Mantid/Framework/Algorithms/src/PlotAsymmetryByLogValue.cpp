@@ -162,6 +162,11 @@ void PlotAsymmetryByLogValue::exec() {
   size_t is, ie;
   checkProperties(is, ie);
 
+  // Vectors to store results
+  MantidVec logValue;
+  MantidVec yRed, yGreen, yDiff, ySum;
+  MantidVec eRed, eGreen, eDiff, eSum;
+
   Progress progress(this, 0, 1, ie - is + 1);
 
   // Loop through runs
@@ -174,27 +179,65 @@ void PlotAsymmetryByLogValue::exec() {
 
       // Get Log value
       double x = getLogValue(loadedWs);
+      logValue.push_back(x);
 
       // Analyse loadedWs
       std::vector<double> y, e;
       doAnalysis(loadedWs, y, e);
+
+      yRed.push_back(y[0]);
+      eRed.push_back(e[0]);
+
+      if ((y.size() == 4) && (e.size() == 4)) {
+        yGreen.push_back(y[1]);
+        ySum.push_back(y[2]);
+        yDiff.push_back(y[3]);
+        eGreen.push_back(e[1]);
+        eSum.push_back(e[2]);
+        eDiff.push_back(e[3]);
+      }
     }
 
     progress.report();
   }
 
   // Create the 2D workspace for the output
-  int nplots = (m_green != EMPTY_INT()) ? 4 : 1;
-  size_t npoints = ie - is + 1;
+  size_t nplots = yGreen.empty() ? 1: 4;
+  size_t npoints = yRed.size();
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       "Workspace2D",
       nplots,  //  the number of plots
       npoints, //  the number of data points on a plot
       npoints  //  it's not a histogram
       );
-  // TODO populate output ws
-  // Assign the result to the output workspace property
-  setProperty("OutputWorkspace", outWS);
+  TextAxis *tAxis = new TextAxis(nplots);
+  if (nplots==1) {
+    tAxis->setLabel(0, "Asymmetry");
+    outWS->dataX(0) = logValue;
+    outWS->dataY(0) = yRed;
+    outWS->dataE(0) = eRed;
+  } else {
+    tAxis->setLabel(0, "Red-Green");
+    tAxis->setLabel(1, "Red");
+    tAxis->setLabel(2, "Green");
+    tAxis->setLabel(3, "Red+Green");
+    outWS->dataX(0) = logValue;
+    outWS->dataY(0) = yDiff;
+    outWS->dataE(0) = eDiff;
+    outWS->dataX(1) = logValue;
+    outWS->dataY(1) = yRed;
+    outWS->dataE(1) = eRed;
+    outWS->dataX(2) = logValue;
+    outWS->dataY(2) = yGreen;
+    outWS->dataE(2) = eGreen;
+    outWS->dataX(3) = logValue;
+    outWS->dataY(3) = ySum;
+    outWS->dataE(3) = eSum;
+  }
+  outWS->replaceAxis(1, tAxis);
+  outWS->getAxis(0)->title() = m_logName;
+  outWS->setYUnitLabel("Asymmetry");
+  setProperty("OutputWorkspace",outWS);
 }
 
 /**  Checks input properties and compares them to previous values
