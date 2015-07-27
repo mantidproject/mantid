@@ -78,7 +78,10 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
 PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
-    : Algorithm(), m_int(false) {}
+    : Algorithm(), m_is(0), m_ie(0), m_filenameBase(), m_filenameExt(),
+      m_filenameZeros(0), m_int(), m_forward_list(), m_backward_list(), m_dtcType(),
+      m_dtcFile(), m_logName(), m_logFunc(), m_red(0), m_green(0),
+      m_minTime(0.0), m_maxTime(0.0) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -250,8 +253,7 @@ void PlotAsymmetryByLogValue::checkProperties() {
   // Get function to apply to logValue
   m_logFunc = getPropertyValue("Function");
   // Get type of computation
-  m_stype = getPropertyValue("Type");
-  m_int = m_stype == "Integral";
+  m_int = (getPropertyValue("Type") == "Integral");
   // Get grouping properties
   m_forward_list = getProperty("ForwardSpectra");
   m_backward_list = getProperty("BackwardSpectra");

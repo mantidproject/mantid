@@ -135,8 +135,6 @@ private:
   std::string m_logName;
   // LogValue function
   std::string m_logFunc;
-  // Type of computation: integral or differential
-  std::string m_stype;
   // Minimum time for the analysis
   double m_minTime;
   // Maximum time for the analysis
