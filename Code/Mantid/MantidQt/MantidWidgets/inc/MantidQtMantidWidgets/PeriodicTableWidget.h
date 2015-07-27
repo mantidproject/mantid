@@ -2,6 +2,7 @@
 #define MANTID_MATIDWIDGETS_PERIODICTABLE_H_
 
 #include "MantidQtMantidWidgets/WidgetDllOption.h"
+#include <qvector.h>
 #include <QWidget>
 #include "ui_PeriodicTableWidget.h"
 
@@ -11,7 +12,7 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeriodicTableWidget : public QWidget {
 public:
   PeriodicTableWidget(QWidget *parent = 0);
   std::string
-  elementsSelectedToString(std::vector<std::string> elementsSelected);
+  elementsSelectedToString(QVector<QString> elementsSelected);
   void populateGroupVectors();
   void ColourElements();
 
@@ -20,38 +21,38 @@ signals:
   void ischecked();
 
 private slots:
-  std::vector<std::string> getCheckedElements();
+  QVector<QString> getCheckedElements();
 
 private:
   Ui::PeriodicTable ui;
   // vectors for storing Element buttons in associated groups
-  std::vector<QPushButton *> OtherNonMetals;
-  std::vector<QPushButton *> AlkaliMetals;
-  std::vector<QPushButton *> AlkalineEarthMetals;
-  std::vector<QPushButton *> TransitionMetals;
-  std::vector<QPushButton *> Actinides;
-  std::vector<QPushButton *> Lanthanides;
-  std::vector<QPushButton *> UnknownProperties;
-  std::vector<QPushButton *> PostTransitionMetals;
-  std::vector<QPushButton *> Metalloids;
-  std::vector<QPushButton *> Halogens;
-  std::vector<QPushButton *> NobleGases;
+  QVector<QPushButton *> OtherNonMetals;
+  QVector<QPushButton *> AlkaliMetals;
+  QVector<QPushButton *> AlkalineEarthMetals;
+  QVector<QPushButton *> TransitionMetals;
+  QVector<QPushButton *> Actinides;
+  QVector<QPushButton *> Lanthanides;
+  QVector<QPushButton *> UnknownProperties;
+  QVector<QPushButton *> PostTransitionMetals;
+  QVector<QPushButton *> Metalloids;
+  QVector<QPushButton *> Halogens;
+  QVector<QPushButton *> NobleGases;
 
   // Methods to colour by group
-  void ColourNonMetals(const std::vector<QPushButton *> &nonMetals);
-  void ColourAlkaliMetals(const std::vector<QPushButton *> &alkaliMetals);
+  void ColourNonMetals(const QVector<QPushButton *> &nonMetals);
+  void ColourAlkaliMetals(const QVector<QPushButton *> &alkaliMetals);
   void ColourAlkalineEarthMetals(
-      const std::vector<QPushButton *> &alkalineEarthMetals);
-  void ColourTransitionMetals(const std::vector<QPushButton *> &transMetals);
-  void ColourActinides(const std::vector<QPushButton *> &actinides);
-  void ColourLanthanides(const std::vector<QPushButton *> &lanthanides);
+      const QVector<QPushButton *> &alkalineEarthMetals);
+  void ColourTransitionMetals(const QVector<QPushButton *> &transMetals);
+  void ColourActinides(const QVector<QPushButton *> &actinides);
+  void ColourLanthanides(const QVector<QPushButton *> &lanthanides);
   void
-  ColourPostTransitionMetals(const std::vector<QPushButton *> &postTransMetals);
+  ColourPostTransitionMetals(const QVector<QPushButton *> &postTransMetals);
   void
-  ColourUnknownProperties(const std::vector<QPushButton *> &unknownProperties);
-  void ColourMetalloids(const std::vector<QPushButton *> &metalloids);
-  void ColourHalogens(const std::vector<QPushButton *> &halogens);
-  void ColourNobleGases(const std::vector<QPushButton *> &nobleGases);
+  ColourUnknownProperties(const QVector<QPushButton *> &unknownProperties);
+  void ColourMetalloids(const QVector<QPushButton *> &metalloids);
+  void ColourHalogens(const QVector<QPushButton *> &halogens);
+  void ColourNobleGases(const QVector<QPushButton *> &nobleGases);
 
   // Methods to colour single element button
   void ColourButton(QPushButton *elementButton, QColor colour);
