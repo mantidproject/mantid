@@ -88,6 +88,9 @@ private:
   API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
   void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
+  /// Creates a table workspace containing custom grouping
+  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
+                                           const std::vector<int> &bwd);
   /// Group detectors from run file
   void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
   /// Calculate the integral asymmetry for a workspace (single period)

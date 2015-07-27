@@ -302,15 +302,20 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
     applyDeadtimeCorr(loadedWs, deadTimes);
   }
 
-  // If m_autogroup, group detectors
-  if (m_autogroup) {
-    Workspace_sptr loadedDetGrouping =
-        load->getProperty("DetectorGroupingTable");
-    if (!loadedDetGrouping)
-      throw std::runtime_error("No grouping info in the file.\n\nPlease "
-                               "specify grouping manually");
-    groupDetectors(loadedWs, loadedDetGrouping);
+  // Group detectors
+  Workspace_sptr grouping;
+  if (m_forward_list.empty() && m_backward_list.empty()) {
+    // Auto group
+    grouping = load->getProperty("DetectorGroupingTable");
+  } else {
+    // Custom grouping
+    grouping = createCustomGrouping(m_forward_list, m_backward_list);
   }
+  if (!grouping)
+    throw std::runtime_error("Couldn't load detector grouping");
+
+  // Apply grouping
+  groupDetectors(loadedWs, grouping);
 
   return loadedWs;
 }
@@ -328,6 +333,26 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
   alg->execute();
   Workspace_sptr deadTimes = alg->getProperty("OutputWorkspace");
   return deadTimes;
+}
+
+/** Creates grouping table from supplied forward and backward spectra
+* @param fwd :: [Input] Forward spectra
+* @param bwd :: [Input] Backward spectra
+* @return :: Workspace containing custom grouping
+*/
+Workspace_sptr
+PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
+                                              const std::vector<int> &bwd) {
+
+  ITableWorkspace_sptr group =
+      WorkspaceFactory::Instance().createTable("TableWorkspace");
+  group->addColumn("vector_int", "group");
+  TableRow row = group->appendRow();
+  row << fwd;
+  row = group->appendRow();
+  row << bwd;
+
+  return boost::dynamic_pointer_cast<Workspace>(group);
 }
 
 /**  Populate output workspace with results
@@ -496,30 +521,28 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
   loadedWs = ws.retrieve();
 }
 
-/**  Group detectors from specified file
+/**  Group detectors from table
 *   @param loadedWs :: [input/output] Workspace to apply grouping to
-*   @param loadedDetGrouping :: [input] Workspace storing detectors grouping
+*   @param grouping :: [input] Workspace containing grouping to apply
 */
 void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
-                                             Workspace_sptr loadedDetGrouping) {
+                                             Workspace_sptr grouping) {
 
   // Could be groups of workspaces, so need to work with ADS
   ScopedWorkspace inWS(loadedWs);
-  ScopedWorkspace grouping(loadedDetGrouping);
+  ScopedWorkspace grWS(grouping);
   ScopedWorkspace outWS;
 
-  IAlgorithm_sptr applyGrouping =
-      AlgorithmManager::Instance().create("MuonGroupDetectors");
-  applyGrouping->setLogging(false);
-  applyGrouping->setRethrows(true);
-
-  applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
-  applyGrouping->setPropertyValue("DetectorGroupingTable", grouping.name());
-  applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
-  applyGrouping->execute();
+  IAlgorithm_sptr alg = createChildAlgorithm("MuonGroupDetectors");
+  alg->setLogging(false);
+  alg->setPropertyValue("InputWorkspace", inWS.name());
+  alg->setPropertyValue("DetectorGroupingTable", grWS.name());
+  alg->setPropertyValue("OutputWorkspace", outWS.name());
+  alg->execute();
 
   loadedWs = outWS.retrieve();
 }
+
 
 /**  Performs asymmetry analysis on a loaded workspace
 *   @param loadedWs :: [input] Workspace to apply analysis to
@@ -631,10 +654,6 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
     asym->initialize();
     asym->setProperty("InputWorkspace", ws);
     asym->setPropertyValue("OutputWorkspace", "tmp");
-    if (!m_autogroup) {
-      asym->setProperty("ForwardSpectra", m_forward_list);
-      asym->setProperty("BackwardSpectra", m_backward_list);
-    }
     asym->execute();
     MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
@@ -666,10 +685,6 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
     asym->initialize();
     asym->setProperty("InputWorkspace", intWS);
     asym->setPropertyValue("OutputWorkspace", "tmp");
-    if (!m_autogroup) {
-      asym->setProperty("ForwardSpectra", m_forward_list);
-      asym->setProperty("BackwardSpectra", m_backward_list);
-    }
     asym->execute();
     MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
 
@@ -690,13 +705,6 @@ void
 PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
                                           API::MatrixWorkspace_sptr ws_green,
                                           double &Y, double &E) {
-  if (!m_autogroup) {
-    groupDetectors(ws_red, m_backward_list);
-    groupDetectors(ws_red, m_forward_list);
-    groupDetectors(ws_green, m_backward_list);
-    groupDetectors(ws_green, m_forward_list);
-  }
-
   Property *startXprop = getProperty("TimeMin");
   Property *endXprop = getProperty("TimeMax");
   bool setX = !startXprop->isDefault() && !endXprop->isDefault();
