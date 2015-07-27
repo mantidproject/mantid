@@ -2,6 +2,7 @@
 #include <QVector>
 
 PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
+  ui.setupUi(this);
   populateGroupVectors();
   ColourElements();
 }
