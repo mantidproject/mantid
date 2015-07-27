@@ -1,5 +1,5 @@
 #include "MantidQtMantidWidgets/PeriodicTableWidget.h"
-#include <vector>
+#include <QVector>
 
 PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   populateGroupVectors();
@@ -18,22 +18,21 @@ void PeriodicTableWidget::ColourElements() {
   ColourPostTransitionMetals(PostTransitionMetals);
   ColourTransitionMetals(TransitionMetals);
 }
-void PeriodicTableWidget::ColourActinides(
-    const std::vector<QPushButton *> &actinides) {
+void PeriodicTableWidget::ColourActinides(const QVector<QPushButton *> &actinides) {
   QColor buttonColour = QColor(255, 85, 127, 255);
   for (auto i = actinides.begin(); i != actinides.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourAlkaliMetals(
-    const std::vector<QPushButton *> &alkaliMetals) {
+    const QVector<QPushButton *> &alkaliMetals) {
   QColor buttonColour = QColor(255, 255, 0, 255);
   for (auto i = alkaliMetals.begin(); i != alkaliMetals.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourAlkalineEarthMetals(
-    const std::vector<QPushButton *> &alkalineEarthMetals) {
+    const QVector<QPushButton *> &alkalineEarthMetals) {
   QColor buttonColour = QColor(170, 170, 127, 255);
   for (auto i = alkalineEarthMetals.begin(); i != alkalineEarthMetals.end();
        i++) {
@@ -41,61 +40,61 @@ void PeriodicTableWidget::ColourAlkalineEarthMetals(
   }
 }
 void PeriodicTableWidget::ColourHalogens(
-    const std::vector<QPushButton *> &halogens) {
+    const QVector<QPushButton *> &halogens) {
   QColor buttonColour = QColor(0, 255, 255, 255);
   for (auto i = halogens.begin(); i != halogens.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourLanthanides(
-    const std::vector<QPushButton *> &lanthanides) {
+    const QVector<QPushButton *> &lanthanides) {
   QColor buttonColour = QColor(170, 85, 255, 255);
   for (auto i = lanthanides.begin(); i != lanthanides.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourMetalloids(
-    const std::vector<QPushButton *> &metalloids) {
+    const QVector<QPushButton *> &metalloids) {
   QColor buttonColour = QColor(255, 170, 255, 255);
   for (auto i = metalloids.begin(); i != metalloids.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourNobleGases(
-    const std::vector<QPushButton *> &nobleGases) {
+    const QVector<QPushButton *> &nobleGases) {
   QColor buttonColour = QColor(255, 170, 0, 255);
   for (auto i = nobleGases.begin(); i != nobleGases.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourNonMetals(
-    const std::vector<QPushButton *> &nonMetals) {
+    const QVector<QPushButton *> &nonMetals) {
   QColor buttonColour = QColor(0, 170, 255, 255);
   for (auto i = nonMetals.begin(); i != nonMetals.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourPostTransitionMetals(
-    const std::vector<QPushButton *> &postTransMetals) {
+    const QVector<QPushButton *> &postTransMetals) {
   QColor buttonColour = QColor(116, 116, 116, 255);
   for (auto i = postTransMetals.begin(); i != postTransMetals.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourTransitionMetals(
-    const std::vector<QPushButton *> &transMetals) {
+    const QVector<QPushButton *> &transMetals) {
   QColor buttonColour = QColor(0, 255, 127, 255);
   for (auto i = transMetals.begin(); i != transMetals.end(); i++) {
     ColourButton(*i, buttonColour);
   }
 }
 void PeriodicTableWidget::ColourUnknownProperties(
-    const std::vector<QPushButton *> &UnknownProperties) {
+    const QVector<QPushButton *> &UnknownProperties) {
   QColor buttonColour = QColor(255, 0, 0, 255);
 }
 
-std::vector<std::string> PeriodicTableWidget::getCheckedElements() {
-  std::vector<std::string> temp;
+  QVector<QString> PeriodicTableWidget::getCheckedElements() {
+  QVector<QString> temp;
   return temp;
 }
 
