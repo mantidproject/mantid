@@ -147,8 +147,7 @@ public:
     fit.initialize();
 
     fit.setProperty("Function",
-                    "name=BackToBackExponential"); //, I=8000, A=1, B=1.2,
-    // X0=10000, S=150");
+                    "name=BackToBackExponential");
     fit.setProperty("InputWorkspace", ws);
     // fit.setProperty("MaxIterations", 99);
     fit.setProperty("CreateOutput", true);
@@ -157,9 +156,6 @@ public:
 
     TS_ASSERT(fit.existsProperty("OutputParameters"));
     TS_ASSERT(fit.existsProperty("OutputWorkspace"));
-    // TS_ASSERT_EQUALS(fit.getPropertyValue("SomeOutput"), "MinimizerOutput");
-    // TS_ASSERT(
-    //    API::AnalysisDataService::Instance().doesExist("MinimizerOutput"));
 
     API::MatrixWorkspace_sptr outWS = fit.getProperty("OutputWorkspace");
     TS_ASSERT(outWS);
