@@ -170,27 +170,51 @@ namespace CustomInterfaces
     QString workspaceName = m_uiForm.dsInput->getCurrentDataName();
     QString outputWorkspaceName = workspaceName.left(workspaceName.length() - 4) + "_sym" + workspaceName.right(4);
 
-    bool plot = m_uiForm.ckPlot->isChecked();
-    bool save = m_uiForm.ckSave->isChecked();
-
     double e_min = m_dblManager->value(m_properties["EMin"]);
     double e_max = m_dblManager->value(m_properties["EMax"]);
 
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
-    symmetriseAlg->setProperty("Sample", workspaceName.toStdString());
+    symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
-    symmetriseAlg->setProperty("Plot", plot);
-    symmetriseAlg->setProperty("Save", save);
     symmetriseAlg->setProperty("OutputWorkspace", outputWorkspaceName.toStdString());
     symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");
+
+    m_batchAlgoRunner->addAlgorithm(symmetriseAlg);
+
+    if(m_uiForm.ckSave->isChecked())
+      addSaveWorkspaceToQueue(outputWorkspaceName);
 
     // Set the workspace name for Python script export
     m_pythonExportWsName = outputWorkspaceName.toStdString();
 
+    // Handle algorithm completion signal
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
     // Execute algorithm on seperate thread
-    runAlgorithm(symmetriseAlg);
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  /**
+   * Handle plotting result workspace.
+   *
+   * @param error If the algorithm failed
+   */
+  void IndirectSymmetrise::algorithmComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+
+    if(error)
+      return;
+
+    if(m_uiForm.ckPlot->isChecked())
+    {
+      QStringList workspaces;
+      workspaces << m_uiForm.dsInput->getCurrentDataName()
+                 << QString::fromStdString(m_pythonExportWsName);
+      plotSpectrum(workspaces);
+    }
   }
 
   /**
@@ -361,11 +385,9 @@ namespace CustomInterfaces
     // Run the algorithm on the preview spectrum only
     IAlgorithm_sptr symmetriseAlg = AlgorithmManager::Instance().create("Symmetrise", -1);
     symmetriseAlg->initialize();
-    symmetriseAlg->setProperty("Sample", workspaceName.toStdString());
+    symmetriseAlg->setProperty("InputWorkspace", workspaceName.toStdString());
     symmetriseAlg->setProperty("XMin", e_min);
     symmetriseAlg->setProperty("XMax", e_max);
-    symmetriseAlg->setProperty("Plot", false);
-    symmetriseAlg->setProperty("Save", false);
     symmetriseAlg->setProperty("SpectraRange", spectraRange);
     symmetriseAlg->setProperty("OutputWorkspace", "__Symmetrise_temp");
     symmetriseAlg->setProperty("OutputPropertiesTable", "__SymmetriseProps_temp");

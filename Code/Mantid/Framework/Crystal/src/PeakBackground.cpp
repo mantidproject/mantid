@@ -1,9 +1,10 @@
 #include "MantidCrystal/PeakBackground.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::API::IPeak;
+using Mantid::Geometry::IPeak;
 
 namespace Mantid {
 namespace Crystal {

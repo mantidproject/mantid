@@ -6,7 +6,6 @@ digraph TimeSlice {
     $decision_style
     HaveCalibration [label="Have calibration workspace?"]
     HaveBackgroundRange [label="Have background range?"]
-    Save [label="Save?"]
   }
 
   subgraph params {
@@ -28,7 +27,6 @@ digraph TimeSlice {
     CalculateFlatBackground
     Transpose
     GroupWorkspaces
-    SaveNexusProcessed
   }
 
   InputFiles              -> Load [label="loop for all files"]
@@ -45,8 +43,6 @@ digraph TimeSlice {
   BackgroundRange         -> CalculateFlatBackground
   CalculateFlatBackground -> Integration
   Integration             -> Transpose
-  Transpose               -> Save
-  Save                    -> SaveNexusProcessed [label="Yes"]
   Transpose               -> GroupWorkspaces
   GroupWorkspaces         -> OutputWorkspace
 }

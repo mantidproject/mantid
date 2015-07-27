@@ -44,11 +44,16 @@ namespace DataObjects {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SplittersWorkspace : virtual public DataObjects::TableWorkspace,
-                                     virtual public API::ISplittersWorkspace {
+class DLLExport SplittersWorkspace : public DataObjects::TableWorkspace,
+                                     public API::ISplittersWorkspace {
 public:
   SplittersWorkspace();
   virtual ~SplittersWorkspace();
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<SplittersWorkspace> clone() const {
+    return std::unique_ptr<SplittersWorkspace>(doClone());
+  }
 
   void addSplitter(Kernel::SplittingInterval splitter);
 
@@ -57,6 +62,18 @@ public:
   size_t getNumberSplitters() const;
 
   bool removeSplitter(size_t);
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  SplittersWorkspace(const SplittersWorkspace &other)
+      : TableWorkspace(other), ISplittersWorkspace(other) {}
+  /// Protected copy assignment operator. Assignment not implemented.
+  SplittersWorkspace &operator=(const SplittersWorkspace &other);
+
+private:
+  virtual SplittersWorkspace *doClone() const {
+    return new SplittersWorkspace(*this);
+  }
 };
 
 typedef boost::shared_ptr<SplittersWorkspace> SplittersWorkspace_sptr;

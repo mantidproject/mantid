@@ -19,6 +19,11 @@ monitor is first divided by the transmission monitor.
 It is assumed that the name of the incident monitor is *monitor2* and the name
 of the transmission monitor is *monitor1*.
 
+Workflow
+--------
+
+.. diagram:: IndirectTransmissionMonitor-v1_wkflw.dot
+
 Usage
 -----
 
@@ -40,3 +45,5 @@ Usage
    sample_ws_Sam, sample_ws_Can, sample_ws_Trans
 
 .. categories::
+
+.. sourcelink::

@@ -27,3 +27,5 @@ Usage
 LoadLiveData is not intended for usage directly, it is part of he process that is started using :ref:`algm-StartLiveData`.
 
 .. categories::
+
+.. sourcelink::

@@ -218,18 +218,63 @@
              <property name="margin">
               <number>0</number>
              </property>
+             <item>
+              <widget class="QCheckBox" name="cbShowDataErrors">
+               <property name="toolTip">
+                <string>Show the error bars on the data curve.</string>
+               </property>
+               <property name="text">
+                <string>Show data errors</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="btnToFittingRange">
+               <property name="toolTip">
+                <string>Zoom to current fitting range.</string>
+               </property>
+               <property name="text">
+                <string>To Fitting Range</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="PanPage"/>
            <widget class="QWidget" name="RangePage">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="QCheckBox" name="cb_applyRangeToAll">
+              <widget class="QCheckBox" name="cbApplyRangeToAll">
+               <property name="toolTip">
+                <string>Apply selected fitting range to all spectra.</string>
+               </property>
                <property name="text">
                 <string>Apply to all spectra</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="btnToVisibleRange">
+               <property name="toolTip">
+                <string>Set fitting range to visible region.</string>
+               </property>
+               <property name="text">
+                <string>To Visible</string>
                </property>
               </widget>
              </item>
@@ -293,7 +338,7 @@
   <tabstop>cbPlotSelector</tabstop>
  </tabstops>
  <resources>
-  <include location="../../icons/CustomInterfacesIcons.qrc"/>
+  <include location="../../../icons/CustomInterfacesIcons.qrc"/>
  </resources>
  <connections/>
 </ui>

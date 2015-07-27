@@ -9,7 +9,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
 #include <string>
-#include <vector>
+#include <array>
 
 class vtkDataSet;
 class vtkUnstructuredGrid;
@@ -83,6 +83,7 @@ namespace VATES
     Kernel::V3D m_basisY; ///< The Y direction basis vector
     Kernel::V3D m_basisZ; ///< The Z direction basis vector
     Kernel::SpecialCoordinateSystem m_coordType; ///< The coordinate system for the workspace
+    std::array<double, 6> m_boundingBox;
   };
 
 

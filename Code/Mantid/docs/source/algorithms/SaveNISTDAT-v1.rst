@@ -47,3 +47,5 @@ Output:
    The data read back in is [-0.0735 -0.0735 -0.0735 ...,  0.0685  0.0685  0.0685]
 
 .. categories::
+
+.. sourcelink::

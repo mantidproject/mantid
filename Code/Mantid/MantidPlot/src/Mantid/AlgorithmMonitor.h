@@ -65,7 +65,7 @@ protected:
 public slots:
   void update();
   void showDialog();
-  void cancel(Mantid::API::AlgorithmID);
+  void cancel(Mantid::API::AlgorithmID, QPushButton*);
   void cancelAll();
 
 private:
@@ -108,9 +108,9 @@ public:
     connect(this,SIGNAL(clicked()),this,SLOT(sendClicked()));
   }
 private slots:
-  void sendClicked(){emit clicked(m_alg);}
+  void sendClicked(){emit clicked(m_alg, this);}
 signals:
-  void clicked(Mantid::API::AlgorithmID );
+  void clicked(Mantid::API::AlgorithmID, QPushButton*);
 private:
   Mantid::API::AlgorithmID m_alg;
 };

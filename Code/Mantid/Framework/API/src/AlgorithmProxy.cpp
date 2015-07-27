@@ -51,7 +51,7 @@ AlgorithmID AlgorithmProxy::getAlgorithmID() const {
 /** Perform whole-input validation */
 std::map<std::string, std::string> AlgorithmProxy::validateInputs() {
   if (!m_alg)
-    createConcreteAlg();
+    createConcreteAlg(true);
   return m_alg->validateInputs();
 }
 
@@ -66,7 +66,7 @@ std::map<std::string, std::string> AlgorithmProxy::validateInputs() {
 *be executed
 */
 bool AlgorithmProxy::execute() {
-  createConcreteAlg();
+  createConcreteAlg(false);
   try {
     m_alg->execute();
   } catch (...) {
@@ -92,7 +92,7 @@ Poco::ActiveResult<bool> AlgorithmProxy::executeAsync() {
 *  @param dummy :: An unused dummy variable
 */
 bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &dummy) {
-  createConcreteAlg();
+  createConcreteAlg(false);
   // Call Algorithm::executeAsyncImpl rather than executeAsync() because the
   // latter
   // would spawn off another (3rd) thread which is unecessary.
@@ -204,7 +204,6 @@ void AlgorithmProxy::setPropertyValue(const std::string &name,
   createConcreteAlg(true);
   m_alg->setPropertyValue(name, value);
   copyPropertiesFrom(*m_alg);
-  m_alg.reset();
 }
 
 /**
@@ -217,7 +216,6 @@ void AlgorithmProxy::afterPropertySet(const std::string &name) {
       ->setValueFromProperty(*this->getPointerToProperty(name));
   m_alg->afterPropertySet(name);
   copyPropertiesFrom(*m_alg);
-  m_alg.reset();
 }
 
 //----------------------------------------------------------------------
@@ -231,12 +229,19 @@ void AlgorithmProxy::afterPropertySet(const std::string &name) {
 * also be added and rethrows will be true
 */
 void AlgorithmProxy::createConcreteAlg(bool initOnly) {
-  m_alg = boost::dynamic_pointer_cast<Algorithm>(
-      AlgorithmManager::Instance().createUnmanaged(name(), version()));
-  m_alg->initializeFromProxy(*this);
-  if (!initOnly) {
-    m_alg->setRethrows(this->m_rethrow);
-    addObservers();
+  if ((m_alg) && initOnly)
+  {
+    //the cached algorithm exists and is not going to be executed,
+    //use that one
+  }
+  else {
+    m_alg = boost::dynamic_pointer_cast<Algorithm>(
+        AlgorithmManager::Instance().createUnmanaged(name(), version()));
+    m_alg->initializeFromProxy(*this);
+    if (!initOnly) {
+      m_alg->setRethrows(this->m_rethrow);
+      addObservers();
+    }
   }
 }
 
@@ -289,9 +294,8 @@ void AlgorithmProxy::setChildEndProgress(const double endProgress) const {
 * @returns This object serialized as a string
 */
 std::string AlgorithmProxy::toString() const {
-  const_cast<AlgorithmProxy *>(this)->createConcreteAlg();
+  const_cast<AlgorithmProxy *>(this)->createConcreteAlg(true);
   std::string serialized = m_alg->toString();
-  m_alg.reset();
   return serialized;
 }
 

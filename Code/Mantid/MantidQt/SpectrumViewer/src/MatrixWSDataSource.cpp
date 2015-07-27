@@ -12,6 +12,7 @@
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
 #include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"

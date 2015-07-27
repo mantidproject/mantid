@@ -56,7 +56,7 @@ const std::string MaskMD::category() const { return "MDAlgorithms"; }
  */
 void MaskMD::init() {
   declareProperty(
-      new PropertyWithValue<bool>("ClearExistingMasks", "1", Direction::Input),
+      new PropertyWithValue<bool>("ClearExistingMasks", true, Direction::Input),
       "Clears any existing masks before applying the provided masking.");
   declareProperty(
       new WorkspaceProperty<IMDWorkspace>("Workspace", "", Direction::InOut),

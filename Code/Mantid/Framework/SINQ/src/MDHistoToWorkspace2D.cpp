@@ -10,6 +10,8 @@
  * Added copying of meta data. Mark Koennecke, July 2013
  */
 #include "MantidSINQ/MDHistoToWorkspace2D.h"
+
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include <cmath>
 #include <iostream>
 

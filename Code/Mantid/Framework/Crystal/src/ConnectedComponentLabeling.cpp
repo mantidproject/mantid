@@ -2,6 +2,7 @@
 
 #include "MantidKernel/Memory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/ICluster.h"
@@ -60,7 +61,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  */
 boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
 cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
-  IMDHistoWorkspace_sptr outWS = inWS->clone();
+  IMDHistoWorkspace_sptr outWS(inWS->clone().release());
 
   // Initialize to zero.
   PARALLEL_FOR_NO_WSP_CHECK()

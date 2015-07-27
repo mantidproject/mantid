@@ -31,6 +31,39 @@ class MonitorNameSorter {
 
 public:
 };
+
+void loadSampleDataISIScompatibilityInfo(
+  ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr  const WS) {
+  try {
+    file.openGroup("isis_vms_compat", "IXvms");
+  } catch (::NeXus::Exception &) {
+    // No problem, it just means that this entry does not exist
+    return;
+  }
+
+  // read the data
+  try {
+    std::vector<int32_t> spb;
+    std::vector<float> rspb;
+    file.readData("SPB", spb);
+    file.readData("RSPB", rspb);
+
+      
+    WS->mutableSample().setGeometryFlag(
+        spb[2]); // the flag is in the third value
+    WS->mutableSample().setThickness(rspb[3]);
+    WS->mutableSample().setHeight(rspb[4]);
+    WS->mutableSample().setWidth(rspb[5]);
+  } catch (::NeXus::Exception &ex) {
+    // it means that the data was not as expected, report the problem
+    std::stringstream s;
+    s << "Wrong definition found in isis_vms_compat :> " << ex.what();
+    file.closeGroup();
+    throw std::runtime_error(s.str());
+  }
+
+  file.closeGroup();
+}
 }
 
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm(), nMonitors(0) {}
@@ -369,7 +402,7 @@ void LoadNexusMonitors::exec() {
   // @todo: Find out if there is a better (i.e. more generic) way to do this
   try {
     g_log.debug() << "Load Sample data isis" << std::endl;
-    LoadEventNexus::loadSampleDataISIScompatibility(file, this->WS);
+    loadSampleDataISIScompatibilityInfo(file, this->WS);
   } catch (::NeXus::Exception &) {
   }
 
@@ -419,7 +452,7 @@ void LoadNexusMonitors::exec() {
   // Load the meta data, but don't stop on errors
   g_log.debug() << "Loading metadata" << std::endl;
   try {
-    LoadEventNexus::loadEntryMetadata(this->filename, WS, m_top_entry_name);
+    LoadEventNexus::loadEntryMetadata<API::MatrixWorkspace_sptr>(this->filename, WS, m_top_entry_name);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what()
                     << std::endl;

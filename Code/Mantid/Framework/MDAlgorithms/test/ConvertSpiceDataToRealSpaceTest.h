@@ -6,6 +6,7 @@
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/IMDIterator.h"

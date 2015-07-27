@@ -171,7 +171,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS = inPeakWS->clone();
+    peakWS.reset(inPeakWS->clone().release());
   // This only fails in the unit tests which say that MaskBTP is not registered
   try {
     runMaskDetectors(inPeakWS, "Tube", "edges");
@@ -506,7 +506,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         findpeaks->setProperty<bool>("HighBackground", true);
         findpeaks->setProperty<bool>("RawPeakParameters", true);
         std::vector<double> peakPosToFit;
-        peakPosToFit.push_back(static_cast<double>(numSteps / 2));
+        peakPosToFit.push_back(static_cast<double>(numSteps) / 2.0);
         findpeaks->setProperty("PeakPositions", peakPosToFit);
         findpeaks->setProperty<int>("MinGuessedPeakWidth", 4);
         findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);

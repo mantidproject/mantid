@@ -25,16 +25,18 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
     _plot = None
     _sample_log_name = None
+    _sample_log_value = None
     _input_workspaces = None
     _q_workspace = None
     _q2_workspace = None
     _elf_workspace = None
     _elt_workspace = None
-    _range_1_start = None
-    _range_1_end = None
-    _range_2_start = None
-    _range_2_end = None
+    _integration_range_start = None
+    _integration_range_end = None
+    _background_range_start = None
+    _background_range_end = None
     _mtd_plot = None
+
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
@@ -48,11 +50,15 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('InputWorkspaces', '', Direction.Input),
                              doc='Grouped input workspaces')
 
-        self.declareProperty(name='Range1Start', defaultValue=0.0, doc='Range 1 start')
-        self.declareProperty(name='Range1End', defaultValue=0.0, doc='Range 1 end')
+        self.declareProperty(name='IntegrationRangeStart', defaultValue=0.0,
+                             doc='Start of integration range in time of flight')
+        self.declareProperty(name='IntegrationRangeEnd', defaultValue=0.0,
+                             doc='End of integration range in time of flight')
 
-        self.declareProperty(name='Range2Start', defaultValue='', doc='Range 2 start')
-        self.declareProperty(name='Range2End', defaultValue='', doc='Range 2 end')
+        self.declareProperty(name='BackgroundRangeStart', defaultValue=Property.EMPTY_DBL,
+                             doc='Start of background range in time of flight')
+        self.declareProperty(name='BackgroundRangeEnd', defaultValue=Property.EMPTY_DBL,
+                             doc='End of background range in time of flight')
 
         self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
                              doc='Name of the sample environment log entry')
@@ -82,26 +88,14 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        range_2_start = self.getPropertyValue('Range2Start')
-        range_2_end = self.getPropertyValue('Range2End')
+        background_range_start = self.getProperty('BackgroundRangeStart').value
+        background_range_end = self.getProperty('BackgroundRangeEnd').value
 
-        if range_2_start != '' and range_2_end == '':
-            issues['Range2End'] = 'If range 2 start was given and range 2 end must also be provided.'
+        if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
+            issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
 
-        if range_2_start == '' and range_2_end != '':
-            issues['Range2Start'] = 'If range 2 end was given and range 2 start must also be provided.'
-
-        if range_2_start != '':
-            try:
-                _ = float(range_2_start)
-            except ValueError:
-                issues['Range2Start'] = 'Range 2 start is not a double number'
-
-        if range_2_end != '':
-            try:
-                _ = float(range_2_end)
-            except ValueError:
-                issues['Range2End'] = 'Range 2 end is not a double number'
+        if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
+            issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
 
         return issues
 
@@ -131,18 +125,23 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_ws = '__' + input_ws + '_q'
             q2_ws = '__' + input_ws + '_q2'
 
-            if self._range_2_start != '' and self._range_2_end != '':
+            if self._background_range_start != Property.EMPTY_DBL and self._background_range_end != Property.EMPTY_DBL:
                 ElasticWindow(InputWorkspace=input_ws,
-                              OutputInQ=q_ws, OutputInQSquared=q2_ws,
-                              Range1Start=self._range_1_start,
-                              Range1End=self._range_1_end,
-                              Range2Start=float(self._range_2_start),
-                              Range2End=float(self._range_2_end))
+                              OutputInQ=q_ws,
+                              OutputInQSquared=q2_ws,
+                              IntegrationRangeStart=self._integration_range_start,
+                              IntegrationRangeEnd=self._integration_range_end,
+                              BackgroundRangeStart=self._background_range_start,
+                              BackgroundRangeEnd=self._background_range_end)
             else:
-                ElasticWindow(InputWorkspace=input_ws, OutputInQ=q_ws, OutputInQSquared=q2_ws,
-                              Range1Start=self._range_1_start, Range1End=self._range_1_end)
+                ElasticWindow(InputWorkspace=input_ws,
+                              OutputInQ=q_ws,
+                              OutputInQSquared=q2_ws,
+                              IntegrationRangeStart=self._integration_range_start,
+                              IntegrationRangeEnd=self._integration_range_end)
 
-            Logarithm(InputWorkspace=q2_ws, OutputWorkspace=q2_ws)
+            Logarithm(InputWorkspace=q2_ws,
+                      OutputWorkspace=q2_ws)
 
             q_workspaces.append(q_ws)
             q2_workspaces.append(q2_ws)
@@ -163,13 +162,17 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
 
         if len(input_workspace_names) == 1:
             # Just rename single workspaces
-            RenameWorkspace(InputWorkspace=q_workspaces[0], OutputWorkspace=self._q_workspace)
-            RenameWorkspace(InputWorkspace=q2_workspaces[0], OutputWorkspace=self._q2_workspace)
+            RenameWorkspace(InputWorkspace=q_workspaces[0],
+                            OutputWorkspace=self._q_workspace)
+            RenameWorkspace(InputWorkspace=q2_workspaces[0],
+                            OutputWorkspace=self._q2_workspace)
         else:
             # Append the spectra of the first two workspaces
-            AppendSpectra(InputWorkspace1=q_workspaces[0], InputWorkspace2=q_workspaces[1],
+            AppendSpectra(InputWorkspace1=q_workspaces[0],
+                          InputWorkspace2=q_workspaces[1],
                           OutputWorkspace=self._q_workspace)
-            AppendSpectra(InputWorkspace1=q2_workspaces[0], InputWorkspace2=q2_workspaces[1],
+            AppendSpectra(InputWorkspace1=q2_workspaces[0],
+                          InputWorkspace2=q2_workspaces[1],
                           OutputWorkspace=self._q2_workspace)
 
             # Append to the spectra of each remaining workspace
@@ -199,10 +202,11 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             logger.notice('Vertical axis is in run number')
             unit = ('Run No', 'last 3 digits')
 
-        q_ws_axis = mtd[self._q_workspace].getAxis(1)
+        # Create a new vertical axis for the Q and Q**2 workspaces
+        q_ws_axis = NumericAxis.create(len(input_workspace_names))
         q_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
 
-        q2_ws_axis = mtd[self._q2_workspace].getAxis(1)
+        q2_ws_axis = NumericAxis.create(len(input_workspace_names))
         q2_ws_axis.setUnit("Label").setLabel(unit[0], unit[1])
 
         # Set the vertical axis values
@@ -214,12 +218,18 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 q_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
                 q2_ws_axis.setValue(idx, float(run_numbers[idx][-3:]))
 
+        # Add the new vertical axis to each workspace
+        mtd[self._q_workspace].replaceAxis(1, q_ws_axis)
+        mtd[self._q2_workspace].replaceAxis(1, q2_ws_axis)
+
         # Process the ELF workspace
         if self._elf_workspace != '':
             logger.information('Creating ELF workspace')
 
-            Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elf_workspace)
-            SortXAxis(InputWorkspace=self._elf_workspace, OutputWorkspace=self._elf_workspace)
+            Transpose(InputWorkspace=self._q_workspace,
+                      OutputWorkspace=self._elf_workspace)
+            SortXAxis(InputWorkspace=self._elf_workspace,
+                      OutputWorkspace=self._elf_workspace)
 
             self.setProperty('OutputELF', self._elf_workspace)
 
@@ -230,8 +240,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # If the ELT workspace was not already created then create it here,
             # otherwise just clone it
             if self._elf_workspace == '':
-                Transpose(InputWorkspace=self._q_workspace, OutputWorkspace=self._elt_workspace)
-                SortXAxis(InputWorkspace=self._elt_workspace, OutputWorkspace=self._elt_workspace)
+                Transpose(InputWorkspace=self._q_workspace,
+                          OutputWorkspace=self._elt_workspace)
+                SortXAxis(InputWorkspace=self._elt_workspace,
+                          OutputWorkspace=self._elt_workspace)
             else:
                 CloneWorkspace(InputWorkspace=self._elf_workspace,
                                OutputWorkspace=self._elt_workspace)
@@ -273,11 +285,11 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._elf_workspace = self.getPropertyValue('OutputELF')
         self._elt_workspace = self.getPropertyValue('OutputELT')
 
-        self._range_1_start = self.getProperty('Range1Start').value
-        self._range_1_end = self.getProperty('Range1End').value
+        self._integration_range_start = self.getProperty('IntegrationRangeStart').value
+        self._integration_range_end = self.getProperty('IntegrationRangeEnd').value
 
-        self._range_2_start = self.getPropertyValue('Range2Start')
-        self._range_2_end = self.getPropertyValue('Range2End')
+        self._background_range_start = self.getProperty('BackgroundRangeStart').value
+        self._background_range_end = self.getProperty('BackgroundRangeEnd').value
 
 
     def _plot_spectra(self, ws_name):

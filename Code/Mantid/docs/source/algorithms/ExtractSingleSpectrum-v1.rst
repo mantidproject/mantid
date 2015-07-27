@@ -45,3 +45,5 @@ Output:
     [  0.3   0.3   0.3   0.3   0.3  10.3   0.3   0.3   0.3   0.3]
 
 .. categories::
+
+.. sourcelink::

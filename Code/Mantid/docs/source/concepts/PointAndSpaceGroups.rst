@@ -238,30 +238,124 @@ Please note that for hexagonal and trigonal space groups, where translations of 
     2: [0.333333,0.666667,0.75]
     3: [0.666667,0.333333,0.25]
     4: [0.666667,0.333333,0.75]
-    
-Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method:
+
+Closely related to the generation of equivalent coordinates is the site symmetry group, which leaves a point unchanged:
+
+.. testcode:: ExSiteSymmetryGroupInBuilt
+
+    from mantid.geometry import SpaceGroupFactory, SymmetryElementFactory, SymmetryElement
+
+    def getFullElementSymbol(symmetryElement):
+    # Dictionary for mapping enum values to short strings
+        rotationSenseDict = {
+                                SymmetryElement.RotationSense.Positive: '+',
+                                SymmetryElement.RotationSense.Negative: '-',
+                                SymmetryElement.RotationSense.None: ''
+                            }
+        hmSymbol = element.getHMSymbol()
+        rotationSense = rotationSenseDict[element.getRotationSense()]
+        axis = str(element.getAxis())
+
+        return hmSymbol + rotationSense + ' ' + axis
+
+
+
+    sg = SpaceGroupFactory.createSpaceGroup("P 6/m")
+
+    position = [1./3., 2./3., 0.25]
+    siteSymmetryGroup = sg.getSiteSymmetryGroup(position)
+
+    print "Order of the site symmetry group:", siteSymmetryGroup.getOrder()
+    print "Group elements:"
+    for i, op in enumerate(siteSymmetryGroup.getSymmetryOperations()):
+        element = SymmetryElementFactory.createSymElement(op)
+        print str(i + 1) + ":", op.getIdentifier(), "(" + getFullElementSymbol(element) + ")"
+
+The group contains three symmetry operations:
+
+.. testoutput:: ExSiteSymmetryGroupInBuilt
+
+    Order of the site symmetry group: 3
+    Group elements:
+    1: -x+y,-x,z (3- [0,0,1])
+    2: -y,x-y,z (3+ [0,0,1])
+    3: x,y,z (1 [0,0,0])
+
+An extended example below shows an algorithm to derive the site symmetry group.
+
+Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method, but the point group can also be conveniently created directly from the space group object:
 
 .. testcode:: ExPointGroupFromSpaceGroup
 
     from mantid.geometry import PointGroupFactory, SpaceGroupFactory
 
     # Create space group Fd-3m (for example silicon or diamond)
-    sg = SpaceGroupFactory.createSpaceGroup("F d -3 m")
-    
-    pg = PointGroupFactory.createPointGroupFromSpaceGroup(sg)
-    
-    print "Space group no.", sg.getNumber(), "has point group:", pg.getHMSymbol()
+    sg_diamond = SpaceGroupFactory.createSpaceGroup("F d -3 m")
+    pg_diamond = PointGroupFactory.createPointGroupFromSpaceGroup(sg_diamond)
+
+    print "Space group no.", sg_diamond.getNumber(), "has point group:", pg_diamond.getHMSymbol()
+
+    # Related space group F-43m (sphalerite)
+    sg_zincblende = SpaceGroupFactory.createSpaceGroup("F -4 3 m")
+    pg_zincblende = sg_zincblende.getPointGroup()
+
+    print "Space group no.", sg_zincblende.getNumber(), "has point group:", pg_zincblende.getHMSymbol()
     
 The script prints the point group of the space group in question:
     
 .. testoutput:: ExPointGroupFromSpaceGroup
 
     Space group no. 227 has point group: m-3m
+    Space group no. 216 has point group: -43m
+
+Sometimes it's useful to reverse the above process - which is not exactly possible, because several space groups may map to the same point group. The space group factory does however provide a way to get all space group symbols that belong to a certain point group:
+
+.. testcode:: ExSpaceGroupFactoryPointGroup
+
+    from mantid.geometry import PointGroupFactory, SpaceGroupFactory
+
+    pg = PointGroupFactory.createPointGroup("m-3")
+
+    print "Space groups with point group m-3:", SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+
+The example produces the following output:
+
+.. testoutput:: ExSpaceGroupFactoryPointGroup
+
+    Space groups with point group m-3: ['F d -3','F m -3','I a -3','I m -3','P a -3','P m -3','P n -3']
+
+While PointGroup offers useful methods to handle reflections, some information can only be obtained from the space group. The presence of translational symmetry causes the contributions from symmetrically equivalent atoms to the structure factor of certain reflections to cancel out completely so that it can not be observed. These systematically absent reflections are characteristic for each space group, a fact that can be used to determine the space group from measured reflection intensities. The following script shows how to check a few reflections:
+
+.. testcode:: ExSpaceGroupReflectionIsAllowed
+
+    from mantid.kernel import V3D
+    from mantid.geometry import SpaceGroupFactory
+
+    sg = SpaceGroupFactory.createSpaceGroup("F d d d")
+
+    hkls = [V3D(0, 0, 2), V3D(0, 0, 4), V3D(0, 0, 6), V3D(0, 0, 8)]
+
+    for hkl in hkls:
+        print hkl, "is allowed:", sg.isAllowedReflection(hkl)
+
+Because space group :math:`Fddd` contains diamond glide planes, only :math:`00l` reflections with :math:`l=4n` are allowed. The script gives the correct answer for these reflections:
+
+.. testoutput:: ExSpaceGroupReflectionIsAllowed
+
+    [0,0,2] is allowed: False
+    [0,0,4] is allowed: True
+    [0,0,6] is allowed: False
+    [0,0,8] is allowed: True
+
+:ref:`Below <SpaceGroupCheck>` is a more elaborate example which shows one possibility to find a likely candidate space group for a list of reflections. Please note that these reflection conditions only covers the ones listed for the "general position" in ITA. When atoms are located on special positions, there may be additional conditions that need to be fulfilled. A notable example is the :math:`222`-reflection in Silicon. It is forbidden because the silicon atom is located on the :math:`8a` position, which introduces additional reflection conditions.
     
 Very similar constructions are available in C++ as well, as shown in the API documentation.
     
 Other ways of using groups in Mantid
 ------------------------------------
+
+Retrieving information about space group symmetry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The previous two sections demonstrated how to perform common tasks using point and space groups in Mantid. With the available Python tools it is however possible to obtain other information as well. One useful method that both PointGroup and SpaceGroup expose is to query the symmetry operations of the group, although in string format:
 
@@ -365,6 +459,9 @@ This prints the following information:
     
 Looking up space group number 62 (:math:`Pnma` from the example) in ITA shows that the full Hermann-Mauguin symbol for that space group is :math:`P 2_1/n 2_1/m 2_1/a`. The short script gives us all of this information, since there are no translations (the primitive lattice translations are implicit) it must be a primitive lattice (:math:`P`) and all directions encoded in the HM-symbol contain a :math:`2_1` screw axis perpendicular to a glide or mirror plane.
 
+Extracting the site symmetry group
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 With the space group information it's also possible to derive information about site symmetry at specific coordinates and construct the site symmetry group, which is the sub-group of the point group that contains the symmetry operations of the space group that leave the point unchanged. In the following script, the site symmetry group of the :math:`6h` position (coordinates :math:`x, 2x, 1/4`) in space group :math:`P6_3/mmc` (no. 194) is determined:
 
 .. testcode:: ExSiteSymmetryGroup
@@ -415,8 +512,100 @@ The script produces the following output:
     Order of space group: 24
     Site multiplicity: 6
 
-There are four symmmetry operations that leave the coordinates :math:`x,2x,1/4` unchanged, they fulfill the group axioms. Dividing the order of the space group by the order of the site symmetry group gives the correct site multiplicity 6. 
-    
+There are four symmmetry operations that leave the coordinates :math:`x,2x,1/4` unchanged, they fulfill the group axioms. Dividing the order of the space group by the order of the site symmetry group gives the correct site multiplicity 6.
+
+.. _SpaceGroupCheck:
+
+Checking a list of unique reflections for possible space groups
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Building on the example above which showed how to check whether a reflection is allowed by the symmetry operations contained in the space group, the next script goes a bit further. The starting point is a list of symmetry independent reflections with the information whether it's observed or not. A list like can usually be obtained at some point during data reduction after intensities have been determined, which allows for the derivation of the Laue class (and thus, merging the reflections so only unique reflections are available) and decision if a reflection is observed or not (for example :math:`I/\sigma(I) > 3`). Covering all these steps is beyond the scope of this document, so it's assumed that a list with pairs of HKL and a boolean value (`True` for "observed" and `False` for "not observed") is available. Furthermore it's assumed that the space group belongs to Laue class :math:`m\bar{3}m`.
+
+.. testcode:: ExSpaceGroupCheck
+
+    from mantid.geometry import SpaceGroupFactory, PointGroupFactory
+
+    # Small helper function that distinguishes three cases:
+    #   0: The reflection is observed and allowed or not observed and not allowed
+    #  -1: The reflection is allowed, but not observed - additional reflection condition is present
+    #   1: The reflection is observed, but not allowed - systematic absence violation
+    def conditionsMatch(spaceGroup, hkl, isObserved):
+        isAllowed = spaceGroup.isAllowedReflection(hkl)
+
+        if isAllowed == isObserved:
+            return 0
+        elif isAllowed and not isObserved:
+            return -1
+        else:
+            return 1
+
+    # Small helper function that returns the frequency of values in a list. Can be replaced with Counter from collections in Python >= 2.7
+    def getValueFrequencies(values):
+        frequencyDict = {}
+
+        uniqueValues = set(values)
+        for val in uniqueValues:
+            frequencyDict[val] = values.count(val)
+
+        return frequencyDict
+
+    # List of reflections with "observation status" from a hypothetical experiment.
+    reflections = [([1,0,0], False), ([1,1,0], False), ([1,1,1], True), ([2,0,0], False), ([2,1,0], False), ([2,1,1], False),
+                ([2,2,0], True), ([2,2,1], False), ([2,2,2], False), ([3,0,0], False), ([3,1,0], False), ([3,1,1], True),
+                ([3,2,0], False), ([3,2,1], False), ([3,2,2], False), ([3,3,0], False), ([3,3,1], True), ([3,3,2], False),
+                ([3,3,3], True), ([4,0,0], True), ([4,1,0], False), ([4,1,1], False), ([4,2,0], False), ([4,2,1], False),
+                ([4,2,2], True), ([4,3,0], False), ([4,3,1], False), ([4,3,2], False), ([4,3,3], False), ([4,4,0], True),
+                ([4,4,1], False), ([4,4,2], False), ([4,4,3], False), ([5,0,0], False), ([5,1,0], False), ([5,1,1], True),
+                ([5,2,0], False), ([5,2,1], False), ([5,2,2], False), ([5,3,0], False), ([5,3,1], True), ([5,3,2], False),
+                ([5,3,3], True), ([5,4,0], False), ([5,4,1], False), ([5,4,2], False), ([6,0,0], False), ([6,1,0], False),
+                ([6,1,1], False), ([6,2,0], True), ([6,2,1], False), ([6,2,2], False), ([6,3,0], False), ([6,3,1], False)]
+
+    reflectionCount = len(reflections)
+    print "There are", reflectionCount, "reflections to consider."
+
+    # Check space groups and store results in a list
+    spaceGroupMatchList = []
+
+    # As described above, point group m-3m is assumed
+    pg = PointGroupFactory.createPointGroup("m-3m")
+    possibleSpaceGroups = SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+    for sgSymbol in possibleSpaceGroups:
+        sgObject = SpaceGroupFactory.createSpaceGroup(sgSymbol)
+
+        # For each (hkl, observed) pair obtain whether this matches the space group's conditions
+        conditionsMatchList = [conditionsMatch(sgObject, x[0], x[1]) for x in reflections]
+
+        # In this list, each reflection has a dictionary with frequency of the values 0, -1 and 1
+        # (see the helper functions defined above).
+        spaceGroupMatchList.append((sgSymbol, getValueFrequencies(conditionsMatchList)))
+
+    # Sort the list according to abscence violations and additional reflection conditions
+    spaceGroupMatchList.sort(key=lambda x: (x[1].get(1, 0), x[1].get(-1, 0)))
+
+    # Print some information about the most likely matches
+    print "5 best matching space groups:"
+
+    for sgPair in spaceGroupMatchList[:5]:
+        sgStatus = sgPair[1]
+        print "    {0}: {1} absence violations, {2: >2} additional absences, {3: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0))
+
+    print "The best matching space group is:", spaceGroupMatchList[0][0]
+
+The script should produce the following output:
+
+.. testoutput:: ExSpaceGroupCheck
+
+    There are 54 reflections to consider.
+    5 best matching space groups:
+        F d -3 m: 0 absence violations,  3 additional absences, 51 matches
+        F m -3 m: 0 absence violations,  6 additional absences, 48 matches
+        P n -3 m: 0 absence violations, 31 additional absences, 23 matches
+        P m -3 m: 0 absence violations, 42 additional absences, 12 matches
+        F d -3 c: 6 absence violations,  3 additional absences, 45 matches
+    The best matching space group is: F d -3 m
+
+In this case, the script gave the right answer, because the list of reflections was created using the crystal structure of silicon, which, as mentioned above, belongs to space group type :math:`Fd\bar{3}m`. The systematic absences derived from the symmetry operations explain all observations (and absences) expcept three. These are caused by the Si-atom on a special position. The presence of atoms in special positions can lead to incorrect determination of the space group because the introduced additional reflection conditions may match those of a different space group.
+
 .. [ITAPointGroups] International Tables for Crystallography (2006). Vol. A, ch. 10.1, p. 762
 
 .. [Shmueli84] U. Shmueli, Acta Crystallogr. A, 40, p. 559 `DOI: 10.1107/S0108767384001161 <http://dx.doi.org/10.1107/S0108767384001161>`_)

@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidKernel/PropertyManager.h"
 #include <vector>
 
@@ -43,6 +43,8 @@ class DLLExport DataProcessorAlgorithm : public Algorithm {
 public:
   DataProcessorAlgorithm();
   virtual ~DataProcessorAlgorithm();
+  virtual std::string getPropertyValue(const std::string &name) const;
+  virtual TypedValue getProperty(const std::string &name) const;
 
 protected:
   virtual boost::shared_ptr<Algorithm> createChildAlgorithm(
@@ -52,6 +54,8 @@ protected:
   void setLoadAlg(const std::string &alg);
   void setLoadAlgFileProp(const std::string &filePropName);
   void setAccumAlg(const std::string &alg);
+  void setPropManagerPropName(const std::string &propName);
+  void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager);
   ITableWorkspace_sptr determineChunk();
   void loadChunk();
   Workspace_sptr load(const std::string &inputData,
@@ -59,7 +63,7 @@ protected:
   std::vector<std::string> splitInput(const std::string &input);
   void forwardProperties();
   boost::shared_ptr<Kernel::PropertyManager>
-  getProcessProperties(const std::string &propertyManager);
+  getProcessProperties(const std::string &propertyManager=std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
   Workspace_sptr assemble(const std::string &partialWSName,
@@ -126,6 +130,11 @@ private:
   std::string m_accumulateAlg;
   /// An alternate filename property for the load algorithm
   std::string m_loadAlgFileProp;
+  /// The name of the parameter that names the property manager. The default
+  /// value is "ReductionProperties".
+  std::string m_propertyManagerPropertyName;
+  /// Map property names to names in supplied properties manager
+  std::map<std::string, std::string> m_nameToPMName;
 };
 
 } // namespace API

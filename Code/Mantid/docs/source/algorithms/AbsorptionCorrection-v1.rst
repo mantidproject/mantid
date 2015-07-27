@@ -100,3 +100,5 @@ Output:
     The created workspace has one entry for each spectra: 1
 
 .. categories::
+
+.. sourcelink::

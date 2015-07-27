@@ -165,6 +165,7 @@ void FunctionBrowser::createBrowser()
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
+  connect(m_browser, SIGNAL(optionChanged(QtProperty*, const QString&, bool)), this, SLOT(globalChanged(QtProperty*, const QString&, bool)));
 
   connect(m_attributeStringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
@@ -1649,6 +1650,39 @@ void FunctionBrowser::removeFunction()
   if (!isFunction(prop)) return;
   removeProperty(prop);
   updateFunctionIndices();
+
+  // After removing a function we could end up with
+  // a CompositeFunction with only one function
+  // In this case, the function should be kept but
+  // the composite function should be removed
+  auto props = m_browser->properties();
+  if (!props.isEmpty()) {
+    // The function browser is not empty
+
+    // Check if the current function in the browser is a
+    // composite function
+    auto topProp = props[0];
+    auto fun = Mantid::API::FunctionFactory::Instance().createFunction(
+        topProp->propertyName().toStdString());
+    auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+    if (cf) {
+      // If it is a composite function
+      // check that there are more than one function
+      // which means more than two subproperties
+      size_t nFunctions = props[0]->subProperties().size() - 1;
+
+      if (nFunctions == 1) {
+        // If only one function remains, remove the composite function:
+        // Temporary copy the remaining function
+        auto func = getFunction(m_browser->properties()[0]->subProperties()[1]);
+        // Remove the composite function
+        m_browser->removeProperty(topProp);
+        // Add the temporary stored function
+        setFunction(func);
+      }
+    }
+  }
+
   emit functionStructureChanged();
 }
 
@@ -2178,6 +2212,23 @@ void FunctionBrowser::updateMultiDatasetParameters(const Mantid::API::IFunction&
   {
     updateParameters( fun );
   }
+}
+
+/// Resize the browser's columns
+/// @param s0 :: New size for the first column (Parameter).
+/// @param s1 :: New size for the second column (Value).
+/// @param s2 :: New size for the third optional column (Global).
+void FunctionBrowser::setColumnSizes(int s0, int s1, int s2)
+{
+  m_browser->setColumnSizes(s0, s1, s2);
+}
+
+/**
+ * Emit a signal when any of the Global options change.
+ */
+void FunctionBrowser::globalChanged(QtProperty*, const QString&, bool)
+{
+  emit globalsChanged();
 }
 
 } // MantidWidgets

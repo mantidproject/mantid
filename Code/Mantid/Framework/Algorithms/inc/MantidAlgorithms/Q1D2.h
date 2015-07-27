@@ -87,7 +87,8 @@ private:
                   const MantidVec::iterator theNorms,
                   const MantidVec::iterator errorSquared) const;
   void convertWavetoQ(const size_t specInd, const bool doGravity,
-                      const size_t offset, MantidVec::iterator Qs) const;
+                      const size_t offset, MantidVec::iterator Qs,
+                      const double extraLength) const;
   void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
                     MantidVec::const_iterator &loc) const;
   void normalize(const MantidVec &normSum, const MantidVec &normError2,

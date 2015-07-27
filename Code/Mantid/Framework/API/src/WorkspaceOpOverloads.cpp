@@ -6,12 +6,13 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include <numeric>
 

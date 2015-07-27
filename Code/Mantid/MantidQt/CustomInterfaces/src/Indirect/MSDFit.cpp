@@ -1,5 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -22,7 +22,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  MSDFit::MSDFit(QWidget * parent) : IDATab(parent),
+  MSDFit::MSDFit(QWidget * parent) : IndirectDataAnalysisTab(parent),
     m_currentWsName(""), m_msdTree(NULL)
   {
     m_uiForm.setupUi(parent);

@@ -5,10 +5,10 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidGeometry/Math/LaszloIntersection.h"
+#include "MantidGeometry/Math/PolygonIntersection.h"
 #include "MantidGeometry/Math/Quadrilateral.h"
-#include "MantidGeometry/Math/Vertex2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidDataObjects/FractionalRebinning.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,17 +16,13 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWPolygon)
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Geometry::IDetector_const_sptr;
-using Geometry::DetectorGroup;
-using Geometry::DetectorGroup_const_sptr;
-using Geometry::ConvexPolygon;
-using Geometry::Quadrilateral;
-using Geometry::Vertex2D;
+using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 /// Default constructor
-SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
+SofQWPolygon::SofQWPolygon()
+    : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -69,7 +65,8 @@ void SofQWPolygon::exec() {
 
   // Select the calculate Q method based on the mode
   // rather than doing this repeatedly in the loop
-  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double) const;
+  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double)
+      const;
   QCalculation qCalculator;
   if (m_EmodeProperties.m_emode == 1) {
     qCalculator = &SofQWPolygon::calculateDirectQ;
@@ -77,11 +74,11 @@ void SofQWPolygon::exec() {
     qCalculator = &SofQWPolygon::calculateIndirectQ;
   }
 
-  /* PARALLEL_FOR2(inputWS, outputWS) */
+  PARALLEL_FOR2(inputWS, outputWS)
   for (int64_t i = 0; i < static_cast<int64_t>(nTheta);
        ++i) // signed for openmp
   {
-    /* PARALLEL_START_INTERUPT_REGION */
+    PARALLEL_START_INTERUPT_REGION
 
     const double theta = m_thetaPts[i];
     if (theta < 0.0) // One to skip
@@ -111,24 +108,28 @@ void SofQWPolygon::exec() {
       const V2D ul(dE_j, (this->*qCalculator)(efixed, dE_j, thetaUpper, 0.0));
       Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
-      rebinToOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
+      DataObjects::FractionalRebinning::rebinToOutput(inputQ, inputWS, i, j,
+                                                      outputWS, m_Qout);
 
       // Find which q bin this point lies in
       const MantidVec::difference_type qIndex =
           std::upper_bound(m_Qout.begin(), m_Qout.end(), lrQ) - m_Qout.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(m_Qout.size())) {
         // Add this spectra-detector pair to the mapping
-        specNumberMapping.push_back(
-            outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
-        detIDMapping.push_back(det->getID());
+        PARALLEL_CRITICAL(SofQWPolygon_spectramap) {
+          specNumberMapping.push_back(
+              outputWS->getSpectrum(qIndex - 1)->getSpectrumNo());
+          detIDMapping.push_back(det->getID());
+        }
       }
     }
 
-    /* PARALLEL_END_INTERUPT_REGION */
+    PARALLEL_END_INTERUPT_REGION
   }
-  /* PARALLEL_CHECK_INTERUPT_REGION */
+  PARALLEL_CHECK_INTERUPT_REGION
 
-  normaliseOutput(outputWS, inputWS);
+  DataObjects::FractionalRebinning::normaliseOutput(outputWS, inputWS,
+                                                    m_progress);
 
   // Set the output spectrum-detector mapping
   SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
@@ -144,7 +145,8 @@ void SofQWPolygon::exec() {
  * @return The value of Q
  */
 double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
-                                const double twoTheta, const double psi) const {
+                                      const double twoTheta,
+                                      const double psi) const {
   const double ki = std::sqrt(efixed * SofQW::energyToK());
   const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
   const double Qx = ki - kf * std::cos(twoTheta);
@@ -161,9 +163,10 @@ double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
  * @param psi The value of the azimuth
  * @return The value of Q
  */
-double SofQWPolygon::calculateIndirectQ(const double efixed, const double deltaE,
-                                  const double twoTheta,
-                                  const double psi) const {
+double SofQWPolygon::calculateIndirectQ(const double efixed,
+                                        const double deltaE,
+                                        const double twoTheta,
+                                        const double psi) const {
   UNUSED_ARG(psi);
   const double ki = std::sqrt((efixed + deltaE) * SofQW::energyToK());
   const double kf = std::sqrt(efixed * SofQW::energyToK());
@@ -230,6 +233,11 @@ void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
       }
     }
   }
+
+  if (0 == ndets)
+    throw std::runtime_error(
+        "Unexpected inconsistency found. The number of detectors is 0"
+        ", and the theta width parameter cannot be calculated.");
 
   m_thetaWidth = (maxTheta - minTheta) / static_cast<double>(ndets);
   g_log.information() << "Calculated detector width in theta="

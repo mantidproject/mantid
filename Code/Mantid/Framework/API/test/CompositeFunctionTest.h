@@ -79,6 +79,11 @@ public:
   void clearFileBacked(bool ){};
   ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/){return ITableWorkspace_sptr();}
 private:
+  virtual CompositeFunctionTest_MocMatrixWorkspace *doClone() const {
+    throw std::runtime_error("Cloning of "
+                             "CompositeFunctionTest_MocMatrixWorkspace is not "
+                             "implemented.");
+  }
   std::vector<CompositeFunctionTest_MocSpectrum> m_spectra;
   size_t m_blocksize;
 };

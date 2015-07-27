@@ -153,7 +153,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(range[0],1000.,7," Default integration min range on MARI should be as described in MARI_Parameters.xml file")
         self.assertAlmostEqual(range[1],2000.,7," Default integration max range on MAPS should be as described in MARI_Parameters.xml file")
 
-        self.assertEqual(propman.ei_mon_spectra,[2,3]," Default ei monitors on MARI should be as described in MARI_Parameters.xml file")
+        self.assertEqual(propman.ei_mon_spectra,(2,3)," Default ei monitors on MARI should be as described in MARI_Parameters.xml file")
 
 
         propman.norm_mon_integration_range = [50,1050]
@@ -162,7 +162,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(range[1],1050.,7)
         propman.ei_mon1_spec = 10
         mon_spectra = propman.ei_mon_spectra
-        self.assertEqual(mon_spectra,[10,3])
+        self.assertEqual(mon_spectra,(10,3))
         self.assertEqual(propman.ei_mon1_spec,10)
 
 
@@ -176,7 +176,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
     def test_set_non_default_complex_value_synonims(self):
         propman = PropertyManager("MAP")
         propman.test_ei2_mon_spectra = 10000
-        self.assertEqual(propman.ei_mon_spectra,[41474,10000])
+        self.assertEqual(propman.ei_mon_spectra,(41474,10000))
 
         prop_changed = propman.getChangedProperties()
         self.assertEqual(len(prop_changed),1)
@@ -185,20 +185,26 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
 
         propman.test_mon_spectra_composite = [10000,2000]
-        self.assertEqual(propman.ei_mon_spectra,[10000,2000])
+        self.assertEqual(propman.ei_mon_spectra,(10000,2000))
 
         prop_changed = propman.getChangedProperties()
         self.assertEqual(len(prop_changed),2)
 
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra")
 
-    ## HOW TO MAKE IT WORK?  it fails silently
-        propman.ei_mon_spectra[1] = 100
+        ## weird way to prohibit this assignment
+        # But it works and I was not able to find any other way!
+        try:
+            propman.ei_mon_spectra[1] = 100
+            Success=True
+        except TypeError:
+            Success=False
+        self.assertFalse(Success)
         self.assertEqual(10000,propman.ei_mon_spectra[0])
         self.assertEqual(2000,propman.ei_mon_spectra[1])
 
-
-        propman.ei_mon_spectra = [100,200]
+        # This works as should
+        propman.ei_mon_spectra = (100,200)
         self.assertEqual(100,propman.ei_mon_spectra[0])
         self.assertEqual(200,propman.ei_mon_spectra[1])
 
@@ -524,10 +530,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         ws = mtd['ws']
         changed_prop = propman.update_defaults_from_instrument(ws.getInstrument(),False)
-        self.assertFalse('ei-mon1-spec' in changed_prop)
+        self.assertTrue('ei-mon1-spec' in changed_prop)
         self.assertEqual(propman.ei_mon1_spec,65542)
 
-        self.assertTrue('ei_mon_spectra' in changed_prop)
+        self.assertFalse('ei_mon_spectra' in changed_prop)
         ei_spec = propman.ei_mon_spectra
         self.assertEqual(ei_spec[0],65542)
         self.assertEqual(ei_spec[1],5506)
@@ -1104,6 +1110,52 @@ class DirectPropertyManagerTest(unittest.TestCase):
        self.assertEqual(propman.save_file_name,'RUN2000atEi20.0meV_One2One')
        # clean up
        PropertyManager.save_file_name.set_custom_print(None)
+
+    def test_ei_mon_spectra(self):
+        propman = self.prop_man
+        # test default property assignment
+        setattr(propman,'ei-mon1-spec',101)
+        setattr(propman,'ei-mon2-spec',2020)
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],101)
+        self.assertEqual(spectra[1],2020)
+
+        propman.ei_mon_spectra = "ei-mon1-spec:ei-mon2-spec"
+
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],101)
+        self.assertEqual(spectra[1],2020)
+
+        setattr(propman,'ei-mon1-spec',[101,102,103])
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],[101,102,103])
+        self.assertEqual(spectra[1],2020)
+        self.assertTrue(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
+
+        propman.ei_mon_spectra=(1,[3,4,5])
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],1)
+        self.assertEqual(spectra[1],[3,4,5])
+        self.assertTrue(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
+
+        propman.ei_mon_spectra="3,4,5:1,2"
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],[3,4,5])
+        self.assertEqual(spectra[1],[1,2])
+        self.assertTrue(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
+
+        propman.ei_mon_spectra="3:10"
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],3)
+        self.assertEqual(spectra[1],10)
+        self.assertFalse(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
+
+        propman.ei_mon_spectra="[4:11]"
+        spectra = propman.ei_mon_spectra
+        self.assertEqual(spectra[0],4)
+        self.assertEqual(spectra[1],11)
+        self.assertFalse(PropertyManager.ei_mon_spectra.need_to_sum_monitors(propman))
+
 
 if __name__ == "__main__":
     unittest.main()

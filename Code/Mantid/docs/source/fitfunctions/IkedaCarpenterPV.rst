@@ -59,8 +59,8 @@ Fullprof manual, see Ref[2].
 
 References:
 
-#. S. Ikeda and J. M. Carpenter, Nuclear Inst. and Meth. in Phys. Res.
-   A239, 536 (1985)
+#. S. Ikeda and J. M. Carpenter, `Nuclear Inst. and Meth. in Phys. Res.
+   A239, 536 (1985) <http://dx.doi.org/10.1016/0168-9002(85)90033-6>`_
 #. Fullprof manual, see http://www.ill.eu/sites/fullprof/
 
 The figure below illustrate this peakshape function fitted to a TOF
@@ -74,3 +74,5 @@ peak:
 .. properties::
 
 .. categories::
+
+.. sourcelink::

@@ -69,3 +69,5 @@ in the workspace (though the workspace does not have to have common X
 values in all spectra).
 
 .. categories::
+
+.. sourcelink::

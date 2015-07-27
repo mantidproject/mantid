@@ -23,14 +23,16 @@ class CalculateSampleTransmission(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(name='WavelengthRange', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='WavelengthRange', defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Wavelength range to calculate transmission for.')
 
-        self.declareProperty(name='ChemicalFormula', defaultValue='', validator=StringMandatoryValidator(),
+        self.declareProperty(name='ChemicalFormula', defaultValue='',
+                             validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
 
         self.declareProperty(name='NumberDensity', defaultValue=0.1,
-                             doc='Number denisty (atoms/Angstrom^3). Default=0.1')
+                             doc='Number denisty per atom (atoms/Angstrom^3). Default=0.1')
 
         self.declareProperty(name='Thickness', defaultValue=0.1,
                              doc='Sample thickness (cm). Default=0.1')

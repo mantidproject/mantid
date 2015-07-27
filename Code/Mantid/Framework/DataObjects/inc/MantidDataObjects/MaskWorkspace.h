@@ -2,7 +2,7 @@
 #define MANTID_DATAOBJECTS_MASKWORKSPACE_H
 
 #include "MantidAPI/IMaskWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -20,6 +20,11 @@ public:
   MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
   ~MaskWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MaskWorkspace> clone() const {
+    return std::unique_ptr<MaskWorkspace>(doClone());
+  }
+
   bool isMasked(const detid_t detectorID) const;
   bool isMasked(const std::set<detid_t> &detectorIDs) const;
   bool isMaskedIndex(const std::size_t wkspIndex) const;
@@ -36,15 +41,17 @@ public:
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MaskWorkspace(const MaskWorkspace &other);
+
+  /// Protected copy assignment operator. Assignment not implemented.
+  MaskWorkspace &operator=(const MaskWorkspace &other);
+
   /// Return human-readable string
   virtual const std::string toString() const;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  MaskWorkspace(const MaskWorkspace &);
-
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  MaskWorkspace &operator=(const MaskWorkspace &);
+  virtual MaskWorkspace *doClone() const { return new MaskWorkspace(*this); }
 
   /// Clear original incorrect mask
   void clearMask();

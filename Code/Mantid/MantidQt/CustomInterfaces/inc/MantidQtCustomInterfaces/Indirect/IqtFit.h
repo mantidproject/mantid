@@ -2,9 +2,9 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
 #include "ui_IqtFit.h"
-#include "IDATab.h"
+#include "IndirectDataAnalysisTab.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid
 {
@@ -21,7 +21,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport IqtFit : public IDATab
+  class DLLExport IqtFit : public IndirectDataAnalysisTab
   {
     Q_OBJECT
 

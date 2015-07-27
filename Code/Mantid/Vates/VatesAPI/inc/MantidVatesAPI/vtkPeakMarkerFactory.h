@@ -32,7 +32,7 @@
  */
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 class vtkPolyData;

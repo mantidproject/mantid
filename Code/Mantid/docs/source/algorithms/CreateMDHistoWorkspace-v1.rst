@@ -51,7 +51,7 @@ Usage
                               NumberOfBins='10,10',Names='Dim1,Dim2',Units='MomentumTransfer,EnergyTransfer')
 
    # check it looks like the one we wanted
-   print 'created workspace is of type : {0}\n'.format(type(ws)),
+   print 'created workspace is of type: {0}\n'.format(ws.id()),
    print 'and has {0} dimensions with {1} points and {2} events'.format(ws.getNumDims(),ws.getNPoints(),ws.getNEvents());
    d1=ws.getDimension(0)
    print 'dimension 0 has ID: {0}; nBins={1}; min: {2}; max: {3} in units of: {4}\n'.format(d1.getDimensionId(),d1.getNBins(),\
@@ -65,9 +65,11 @@ Usage
 
 .. testoutput:: exCreateMDHisto
 
-   created workspace is of type : <class 'mantid.api._api.IMDHistoWorkspace'>
+   created workspace is of type: MDHistoWorkspace
    and has 2 dimensions with 100 points and 0 events 
    dimension 0 has ID: Dim1; nBins=10; min: -3.0; max: 3.0 in units of: MomentumTransfer
    dimension 1 has ID: Dim2; nBins=10; min: -10.0; max: 10.0 in units of: EnergyTransfer
 
 .. categories::
+
+.. sourcelink::

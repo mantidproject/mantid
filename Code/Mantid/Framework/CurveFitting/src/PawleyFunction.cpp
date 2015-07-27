@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/PawleyFunction.h"
 
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidCurveFitting/BoundaryConstraint.h"
 

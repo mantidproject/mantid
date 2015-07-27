@@ -4,6 +4,7 @@ set ( SRC_FILES
 	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
+	src/AddNote.cpp
 	src/AddPeak.cpp
 	src/AddSampleLog.cpp
 	src/AddTimeSeriesLog.cpp
@@ -32,6 +33,7 @@ set ( SRC_FILES
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
+	src/ChangeTimeZero.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
 	src/ClearInstrumentParameters.cpp
@@ -41,6 +43,7 @@ set ( SRC_FILES
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
+	src/ConvertDiffCal.cpp
 	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -244,12 +247,16 @@ set ( SRC_FILES
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/TOFSANSResolutionByPixel.cpp
+	src/TimeAtSampleStrategyDirect.cpp
+	src/TimeAtSampleStrategyElastic.cpp
+	src/TimeAtSampleStrategyIndirect.cpp
 	src/Transpose.cpp
 	src/UnGroupWorkspace.cpp
 	src/UnaryOperation.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/UpdateScriptRepository.cpp
+	src/VesuvioL1ThetaResolution.cpp
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
@@ -264,6 +271,7 @@ set ( INC_FILES
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
+	inc/MantidAlgorithms/AddNote.h
 	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
@@ -292,6 +300,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
+	inc/MantidAlgorithms/ChangeTimeZero.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
@@ -301,6 +310,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
+	inc/MantidAlgorithms/ConvertDiffCal.h
 	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -505,12 +515,17 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
+	inc/MantidAlgorithms/TimeAtSampleStrategy.h
+	inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
+	inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
+	inc/MantidAlgorithms/TimeAtSampleStrategyIndirect.h
 	inc/MantidAlgorithms/Transpose.h
 	inc/MantidAlgorithms/UnGroupWorkspace.h
 	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/UpdateScriptRepository.h
+	inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
@@ -535,6 +550,7 @@ set ( TEST_FILES
 	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
+	AddNoteTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
 	AddTimeSeriesLogTest.h
@@ -563,6 +579,7 @@ set ( TEST_FILES
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
 	ChangePulsetimeTest.h
+	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
 	ClearInstrumentParametersTest.h
@@ -572,6 +589,7 @@ set ( TEST_FILES
 	ConjoinWorkspacesTest.h
 	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
+	ConvertDiffCalTest.h
 	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
 	ConvertSpectrumAxis2Test.h
@@ -753,10 +771,14 @@ set ( TEST_FILES
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelTest.h
+	TimeAtSampleStrategyDirectTest.h
+	TimeAtSampleStrategyElasticTest.h
+	TimeAtSampleStrategyIndirectTest.h
 	TransposeTest.h
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
 	UnwrapSNSTest.h
+	VesuvioL1ThetaResolutionTest.h
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h

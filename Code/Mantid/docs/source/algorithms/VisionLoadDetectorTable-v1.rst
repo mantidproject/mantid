@@ -19,3 +19,5 @@ from a CSV file into a TableWorkspace.
 
 .. categories::
 
+.. sourcelink::
+

@@ -50,18 +50,18 @@ used to generate Bragg reflections that are expected for the crystal structure o
 
     a_true = 5.4311946
     a = np.round(parameters.cell(0, 1), 7)
-    a_err = np.round(parameters.cell(0, 2), 7)
+    a_err = np.round(parameters.cell(0, 2), 16)
 
     print "Refined lattice parameter: a =", a, "+/-", a_err
     print "Difference from expected value: a_observed - a_expected =", np.round(a - a_true, 7)
-    print "Is this difference within the standard deviation?", "Yes" if np.fabs(a - a_true) < a_err else "No"
+    print "Is this difference within the standard deviation?", "Yes" if np.fabs(a - a_true) <= a_err else "No"
 
 Executing the script produces some output with information about the fit:
 
 .. testoutput:: ExSiliconTheoretical
 
-    Refined lattice parameter: a = 5.4311944 +/- 3e-07
-    Difference from expected value: a_observed - a_expected = -2e-07
+    Refined lattice parameter: a = 5.4311946 +/- 2e-16
+    Difference from expected value: a_observed - a_expected = 0.0
     Is this difference within the standard deviation? Yes
 
 In addition there is also an output workspace, which contains information about the peaks used for the fit and how
@@ -79,3 +79,5 @@ well the peak positions calculated from the fitted parameters match the observed
 .. properties::
 
 .. categories::
+
+.. sourcelink::

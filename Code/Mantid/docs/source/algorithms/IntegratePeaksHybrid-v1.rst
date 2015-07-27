@@ -73,3 +73,5 @@ Usage
    integrated_peaks, cluster_images = IntegratePeaksHybrid(InputWorkspace=mdew, PeaksWorkspace=peaks, BackgroundOuterRadius=0.4)
 
 .. categories::
+
+.. sourcelink::

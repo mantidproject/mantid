@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_MERGEMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 

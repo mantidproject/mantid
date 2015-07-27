@@ -64,5 +64,7 @@ These example is for illustation only. The file used is very large and not publi
 
 .. categories::
 
+.. sourcelink::
+
 
 

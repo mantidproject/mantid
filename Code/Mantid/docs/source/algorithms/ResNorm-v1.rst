@@ -31,7 +31,7 @@ Usage
 			ws = CropWorkspace(ws, StartWorkspaceIndex=0, EndWorkspaceIndex=9)
 			ws = ScaleX(ws, -5, "Add")
 			ws = ScaleX(ws, 0.1, "Multiply")
-			
+
 			#load instrument and instrument parameters
 			LoadInstrument(ws, InstrumentName='IRIS')
 			path = os.path.join(config['instrumentDefinition.directory'], 'IRIS_graphite_002_Parameters.xml')
@@ -43,7 +43,18 @@ Usage
 		ws = createSampleWorkspace("irs26173_graphite002_red", random=True)
 		res = createSampleWorkspace("irs26173_graphite002_res")
 
-		ResNorm(VanNumber='26176', ResNumber='26173', InputType='Workspace', ResInputType='Workspace', Instrument='irs', Analyser='graphite002', Plot='None')
+		ResNorm(VanNumber='26176',
+            ResNumber='26173',
+            InputType='Workspace',
+            ResInputType='Workspace',
+            Instrument='irs',
+            Analyser='graphite002',
+            Plot='None',
+            Version=1)
 
 
 .. categories::
+
+.. sourcelink::
+  :cpp: None
+  :h: None

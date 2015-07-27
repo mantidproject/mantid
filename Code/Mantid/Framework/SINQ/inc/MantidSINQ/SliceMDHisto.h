@@ -30,7 +30,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 
 class MANTID_SINQ_DLL SliceMDHisto : public Mantid::API::Algorithm {
 public:

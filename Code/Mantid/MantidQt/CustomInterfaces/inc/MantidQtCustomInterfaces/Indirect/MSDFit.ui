@@ -58,6 +58,11 @@
          <property name="showLegend" stdset="0">
           <bool>true</bool>
          </property>
+         <property name="curveErrorBars" stdset="0">
+          <stringlist>
+           <string>Sample</string>
+          </stringlist>
+         </property>
          <property name="canvasColour" stdset="0">
           <color>
            <red>255</red>

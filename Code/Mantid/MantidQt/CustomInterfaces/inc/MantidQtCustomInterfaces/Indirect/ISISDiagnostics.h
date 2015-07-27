@@ -3,7 +3,7 @@
 
 #include "IndirectDataReductionTab.h"
 #include "ui_ISISDiagnostics.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 // Suppress a warning coming out of code that isn't ours
@@ -67,6 +67,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
+    void algorithmComplete(bool error);
     void handleNewFile();
     void sliceTwoRanges(QtProperty*, bool);
     void sliceCalib(bool state);

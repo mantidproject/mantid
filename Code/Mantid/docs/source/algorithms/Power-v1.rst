@@ -48,3 +48,5 @@ Output:
    Squared values of second spectrum: [ 25.  36.  49.  64.]
 
 .. categories::
+
+.. sourcelink::

@@ -20,6 +20,7 @@
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco {
+class Channel;
 namespace Util {
 class PropertyFileConfiguration;
 class SystemConfiguration;
@@ -206,6 +207,8 @@ public:
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
   const std::string getInstrumentDirectory() const;
+  ///get the vtp file directory
+  const std::string getVTPFileDirectory();
   //@}
 
   /// Load facility information from instrumentDir/Facilities.xml file
@@ -220,6 +223,14 @@ public:
   const FacilityInfo &getFacility(const std::string &facilityName) const;
   /// Set the default facility
   void setFacility(const std::string &facilityName);
+
+  
+  ///Sets the log level priority for the File log channel
+  void setFileLogLevel(int logLevel);
+  ///Sets the log level priority for the Console log channel
+  void setConsoleLogLevel(int logLevel);
+  ///Sets the log level priority for the selected Filter log channel
+  void setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel);
 
   /// Look for an instrument
   const InstrumentInfo &
@@ -260,7 +271,7 @@ private:
   void loadConfig(const std::string &filename, const bool append = false);
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
-  /// Provies a string of a default configuration
+  /// Provides a string of a default configuration
   std::string defaultConfig() const;
   /// Writes out a fresh user properties file
   void createUserPropertiesFile() const;
@@ -326,8 +337,6 @@ private:
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
-  /// Define a flag value for a removed property
-  const std::string m_removedFlag;
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;

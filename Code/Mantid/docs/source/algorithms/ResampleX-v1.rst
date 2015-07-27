@@ -19,3 +19,5 @@ The ``LogBinning`` option calculates constant delta-X/X binning and rebins
 using that, otherwise the bins are constant width.
 
 .. categories::
+
+.. sourcelink::

@@ -12,8 +12,10 @@ set ( SRC_FILES
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
+	src/CalculateChiSquared.cpp
 	src/CalculateGammaBackground.cpp
 	src/CalculateMSVesuvio.cpp
+	src/ChebfunBase.cpp
 	src/Chebyshev.cpp
 	src/ComptonPeakProfile.cpp
 	src/ComptonProfile.cpp
@@ -34,6 +36,7 @@ set ( SRC_FILES
 	src/DynamicKuboToyabe.cpp
 	src/EndErfc.cpp
 	src/EstimatePeakErrors.cpp
+	src/EvaluateFunction.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
@@ -48,11 +51,13 @@ set ( SRC_FILES
 	src/FunctionDomain1DSpectrumCreator.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
+	src/GSLVector.cpp
 	src/GausDecay.cpp
 	src/GausOsc.cpp
 	src/Gaussian.cpp
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
+	src/IFittingAlgorithm.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
@@ -126,8 +131,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
+	inc/MantidCurveFitting/CalculateChiSquared.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/CalculateMSVesuvio.h
+	inc/MantidCurveFitting/ChebfunBase.h
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/ComptonPeakProfile.h
 	inc/MantidCurveFitting/ComptonProfile.h
@@ -149,6 +156,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/EstimatePeakErrors.h
+	inc/MantidCurveFitting/EvaluateFunction.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
@@ -170,6 +178,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
+	inc/MantidCurveFitting/HalfComplex.h
+	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
@@ -240,8 +250,10 @@ set ( TEST_FILES
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
+	CalculateChiSquaredTest.h
 	CalculateGammaBackgroundTest.h
 	CalculateMSVesuvioTest.h
+	ChebfunBaseTest.h
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonPeakProfileTest.h
@@ -259,6 +271,7 @@ set ( TEST_FILES
 	DynamicKuboToyabeTest.h
 	EndErfcTest.h
 	EstimatePeakErrorsTest.h
+	EvaluateFunctionTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
@@ -273,6 +286,7 @@ set ( TEST_FILES
 	FunctionFactoryConstraintTest.h
 	FunctionParameterDecoratorFitTest.h
 	GSLMatrixTest.h
+	GSLVectorTest.h
 	GausDecayTest.h
 	GausOscTest.h
 	GaussianComptonProfileTest.h

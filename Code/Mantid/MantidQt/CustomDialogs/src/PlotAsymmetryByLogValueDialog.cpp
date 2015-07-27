@@ -89,9 +89,6 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
 
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
-  connect( m_uiForm.btnOK,SIGNAL(clicked()),this,SLOT(accept()));
-  connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
-  connect( m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
   connect( m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this, SLOT(showHideDeadTimeFileWidget(int)));
 
@@ -106,6 +103,9 @@ void PlotAsymmetryByLogValueDialog::initLayout()
 
   // So user can enter a custom value
   m_uiForm.logBox->setEditable(true);
+
+  // Create and add the OK/Cancel/Help. buttons
+  m_uiForm.verticalLayout->addLayout(this->createDefaultButtonLayout());
 }
 
 /**
@@ -150,9 +150,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
   {
     alg->setPropertyValue("Filename",nexusFileName.toStdString());
     alg->setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueDialog_tmp");
-    alg->setPropertyValue("DeadTimeTable", ""); // Don't need it for now
-    alg->setPropertyValue("SpectrumMin","0");
-    alg->setPropertyValue("SpectrumMax","0");
+    alg->setPropertyValue("SpectrumList","1"); // Need to load at least one spectrum
     alg->execute();
     if (alg->isExecuted())
     {

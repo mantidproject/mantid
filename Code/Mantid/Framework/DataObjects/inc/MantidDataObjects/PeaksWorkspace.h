@@ -67,10 +67,6 @@ public:
 
   PeaksWorkspace();
 
-  PeaksWorkspace(const PeaksWorkspace &other);
-
-  PeaksWorkspace *clone() const;
-
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very carefull using it to
@@ -92,7 +88,10 @@ public:
 
   virtual ~PeaksWorkspace();
 
-  boost::shared_ptr<PeaksWorkspace> clone();
+  /// Returns a clone of the workspace
+  std::unique_ptr<PeaksWorkspace> clone() const {
+    return std::unique_ptr<PeaksWorkspace>(doClone());
+  }
 
   void appendFile(std::string filename, Geometry::Instrument_sptr inst);
 
@@ -104,11 +103,11 @@ public:
 
   int getNumberPeaks() const;
   void removePeak(int peakNum);
-  void addPeak(const API::IPeak &ipeak);
+  void addPeak(const Geometry::IPeak &ipeak);
   Peak &getPeak(int peakNum);
   const Peak &getPeak(int peakNum) const;
 
-  API::IPeak *createPeak(Kernel::V3D QFrame,
+  Geometry::IPeak *createPeak(Kernel::V3D QFrame,
                          boost::optional<double> detectorDistance =
                              boost::optional<double>()) const;
   std::vector<std::pair<std::string, std::string>>
@@ -181,7 +180,17 @@ public:
   // Save to Nexus
   void saveNexus(::NeXus::File *file) const;
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  PeaksWorkspace(const PeaksWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  PeaksWorkspace &operator=(const PeaksWorkspace &other);
+
 private:
+  virtual PeaksWorkspace *doClone() const {
+    return new PeaksWorkspace(*this);
+  }
+
   /// Initialize the table structure
   void initColumns();
   /// Adds a new PeakColumn of the given type

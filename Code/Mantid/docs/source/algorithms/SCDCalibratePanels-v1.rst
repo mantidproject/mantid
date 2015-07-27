@@ -131,3 +131,5 @@ Output:
     matches
     	
 .. categories::
+
+.. sourcelink::

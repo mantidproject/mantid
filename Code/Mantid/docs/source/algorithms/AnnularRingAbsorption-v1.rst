@@ -49,3 +49,5 @@ Output:
    Just divide your data by the correction to correct for absorption.
 
 .. categories::
+
+.. sourcelink::

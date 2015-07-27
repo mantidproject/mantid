@@ -132,7 +132,7 @@ protected:
   std::string m_path; ///< Keeps the absolute path to the object
   bool m_open;        ///< Set to true if the object has been open
 private:
-  NXObject() : m_fileID() {} ///< Private default constructor
+  NXObject() : m_fileID(), m_open(false) {} ///< Private default constructor
   void getAttributes();
 };
 

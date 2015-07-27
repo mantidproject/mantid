@@ -19,7 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("SCARFLSFJobManager");
 }
 
-std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk/";
+std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk";
 std::string LSFJobManager::g_loginPath = "/cgi-bin/token.py";
 
 std::string SCARFLSFJobManager::g_logoutPath = "webservice/pacclient/logout/";
@@ -43,10 +43,17 @@ std::string SCARFLSFJobManager::g_pingBaseURL =
 void SCARFLSFJobManager::authenticate(const std::string &username,
                                       const std::string &password) {
   // base LSFJobManager class only supports a single user presently
-  m_tokenStash.clear();
-  m_transactions.clear();
+  g_tokenStash.clear();
+  g_transactions.clear();
 
-  const std::string params = "?username=" + username + "&password=" + password;
+  // Do the URI %-encoding, but component by component
+  std::string encodedUser = urlComponentEncode(username);
+  // Poco::URI::encode(username, ";,/?:@&=+$#", encodedUser);
+  std::string encodedPass = urlComponentEncode(password);
+  // Poco::URI::encode(password, ";,/?:@&=+$#", encodedPass);
+
+  const std::string params =
+      "?username=" + encodedUser + "&password=" + encodedPass;
   const Poco::URI fullURL =
       makeFullURI(Poco::URI(g_loginBaseURL), g_loginPath, params);
   int code = 0;
@@ -76,9 +83,9 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     token_str = "platform_token=" + token_str;
     // insert in the token stash
     UsernameToken tok(username, Token(url, token_str));
-    m_tokenStash.insert(tok); // the password is never stored
-    g_log.notice() << "Got authentication token. You are now logged in "
-                   << std::endl;
+    g_tokenStash.insert(tok); // the password is never stored
+    g_log.notice() << "Got authentication token for user '" + username +
+                          "'. You are now logged in " << std::endl;
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +
@@ -139,28 +146,28 @@ bool SCARFLSFJobManager::ping() {
  * successfully logged in).
  *
  * As the authentication method is specific to SCARF, this logout
- * method has been placed here as specific to SCARF too. Probably it
- * is general to other LSF systems without any/much changes.
+ * method has been placed here as specific to SCARF too. Most likely
+ * it is general to other LSF systems without any/much changes.
  *
  * @param username Username to use (should have authenticated
  * before). Leave it empty to log out the last (maybe only) user that
  * logged in with authenticate().
  */
 void SCARFLSFJobManager::logout(const std::string &username) {
-  if (0 == m_tokenStash.size()) {
+  if (0 == g_tokenStash.size()) {
     throw std::runtime_error("Logout failed. No one is currenlty logged in.");
   }
 
   std::map<std::string, Token>::iterator it;
   if (!username.empty()) {
-    it = m_tokenStash.find(username);
-    if (m_tokenStash.end() == it) {
+    it = g_tokenStash.find(username);
+    if (g_tokenStash.end() == it) {
       throw std::invalid_argument(
           "Logout failed. The username given is not logged in: " + username);
     }
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // logout query, needs headers = {'Content-Type': 'text/plain', 'Cookie':
   // token,
@@ -189,12 +196,67 @@ void SCARFLSFJobManager::logout(const std::string &username) {
   // successfully logged out, forget the token
   if (username.empty()) {
     // delete first one
-    m_tokenStash.erase(m_tokenStash.begin());
+    g_tokenStash.erase(g_tokenStash.begin());
   } else {
     // delete requested one
-    if (m_tokenStash.end() != it)
-      m_tokenStash.erase(it);
+    if (g_tokenStash.end() != it)
+      g_tokenStash.erase(it);
   }
+}
+
+/**
+ * This uri encode helper escapes anything that is not unreserved in
+ * RFC3986.
+ *
+ * Note: Poco's encode (Poco::URI::encode()) requires the list of
+ * characters to escape. This method is added here as I think this is
+ * a much safer and standard compliant way than giving a explicit list
+ * of characters to escape. If this same encode happens to be needed
+ * somewhere else maybe it should be moved to a more general place.
+ *
+ * @param in string (normally a component of an uri, like a parameter
+ * value)
+ *
+ * @return uri-encoded string, as per RFC3986
+ */
+std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
+  std::ostringstream out;
+  out.fill('0');
+  out << std::hex;
+
+  for (std::string::const_iterator i = in.begin(), n = in.end(); i != n; ++i) {
+    std::string::value_type c = (*i);
+    // unreserved characters go through, where:
+    // unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+    if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+      out << c;
+    } else {
+      // Any non unreserved is pct-escaped
+      out << '%' << std::setw(2) << int((unsigned char)c);
+    }
+  }
+  return out.str();
+}
+
+std::string
+SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
+                                              const std::string &jobOptions)
+{
+  UNUSED_ARG(jobOptions);
+
+  // Two applications are for now registered and being used on SCARF:
+  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
+  std::string appName = "TOMOPY_0_0_3";
+
+  // Basic guess of the app that we might really need. Not
+  // fixed/unstable at the moment
+  if (runnablePath.find("astra-2d-FBP") != std::string::npos
+      ||
+      runnablePath.find("astra-3d-SIRT3D") != std::string::npos ) {
+    appName = "PYASTRATOOLBOX_1_1";
+  }
+
+  return appName;
 }
 
 } // end namespace RemoteJobManagers

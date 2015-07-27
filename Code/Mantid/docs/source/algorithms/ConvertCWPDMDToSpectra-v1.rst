@@ -217,3 +217,5 @@ Output:
   2theta = 127.800000, Y = 0.237738, E = 0.027303
 
 .. categories::
+
+.. sourcelink::

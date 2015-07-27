@@ -1,18 +1,22 @@
 /*
+ *
  * OptimizeCrystalPlacement.cpp
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
-#include "MantidAPI/IPeak.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
-#include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidCrystal/PeakHKLErrors.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
+
+
 #include <cstdarg>
 
 using namespace Mantid::API;
@@ -22,6 +26,7 @@ using Mantid::Geometry::IndexingUtils;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Geometry::ParameterMap;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 
@@ -146,7 +151,7 @@ void OptimizeCrystalPlacement::exec() {
   PeaksWorkspace_sptr OutPeaks = getProperty("ModifiedPeaksWorkspace");
 
   if (Peaks != OutPeaks) {
-    boost::shared_ptr<PeaksWorkspace> X(Peaks->clone());
+    boost::shared_ptr<PeaksWorkspace> X(Peaks->clone().release());
     OutPeaks = X;
   }
 

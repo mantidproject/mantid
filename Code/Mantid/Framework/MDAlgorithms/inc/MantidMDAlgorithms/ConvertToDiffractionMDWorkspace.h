@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"

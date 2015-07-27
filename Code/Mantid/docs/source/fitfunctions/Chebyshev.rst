@@ -40,3 +40,5 @@ the expansion (fitting) interval.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

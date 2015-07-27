@@ -40,14 +40,16 @@ Usage
    mdws = LoadMD('MAPS_MDEW.nxs');
     
    # Check results
-   print "Workspace type is: ",type(mdws)
+   print "Workspace type is:",mdws.id()
    print "Workspace has:{0:2} dimensions and contains: {1:4} MD events".format(mdws.getNumDims(),mdws.getNEvents())
   
 Output:
 
 .. testoutput:: ExLoadMD
 
-   Workspace type is:  <class 'mantid.api._api.IMDEventWorkspace'>
+   Workspace type is: MDEventWorkspace<MDLeanEvent,4>
    Workspace has: 4 dimensions and contains:    0 MD events
 
 .. categories::
+
+.. sourcelink::

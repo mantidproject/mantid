@@ -84,16 +84,22 @@ namespace CustomInterfaces
    */
   void ALCBaselineModellingPresenter::addSection()
   {
-    double xMin = m_model->data()->getXMin();
-    double xMax = m_model->data()->getXMax();
+    if (MatrixWorkspace_const_sptr data = m_model->data()) {
+      double xMin = data->getXMin();
+      double xMax = data->getXMax();
 
-    int noOfSections = m_view->noOfSectionRows();
+      int noOfSections = m_view->noOfSectionRows();
 
-    m_view->setNoOfSectionRows(noOfSections + 1);
+      m_view->setNoOfSectionRows(noOfSections + 1);
 
-    m_view->setSectionRow(noOfSections, std::make_pair(QString::number(xMin), QString::number(xMax)));
+      m_view->setSectionRow(
+          noOfSections,
+          std::make_pair(QString::number(xMin), QString::number(xMax)));
 
-    m_view->addSectionSelector(noOfSections, std::make_pair(xMin, xMax));
+      m_view->addSectionSelector(noOfSections, std::make_pair(xMin, xMax));
+    } else {
+      m_view->displayError("Please load some data first");
+    }
   }
 
   /**
@@ -169,18 +175,21 @@ namespace CustomInterfaces
   {
     MatrixWorkspace_const_sptr data = m_model->data();
     assert(data);
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)));
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)),
+                         ALCHelper::curveErrorsFromWs(data, 0));
   }
 
   void ALCBaselineModellingPresenter::updateCorrectedCurve()
   {
     if(MatrixWorkspace_const_sptr correctedData = m_model->correctedData())
     {
-      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)));
+      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)),
+                                ALCHelper::curveErrorsFromWs(correctedData, 0));
     }
     else
     {
-      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()));
+      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()),
+                                std::vector<double>());
     }
   }
 

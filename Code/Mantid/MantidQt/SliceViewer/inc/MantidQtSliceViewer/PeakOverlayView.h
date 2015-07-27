@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V2D.h"
-#include "MantidAPI/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include <QPointF>
@@ -49,7 +49,7 @@ namespace MantidQt
       /// Show the view.
       virtual void showView() = 0;
       /// Move the peak overlay to a new position.
-      virtual void movePosition(Mantid::API::PeakTransform_sptr peakTransform) = 0;
+      virtual void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform) = 0;
       /// Change foreground colour
       virtual void changeForegroundColour(const QColor) = 0;
       /// Change background colour
@@ -76,6 +76,14 @@ namespace MantidQt
       virtual QColor getBackgroundColour() const = 0;
       /// Get the current foreground colour
       virtual QColor getForegroundColour() const = 0;
+      /// Enter deletion mode
+      virtual void peakDeletionMode() = 0;
+      /// Enter addition mode
+      virtual void peakAdditionMode() = 0;
+      /// Enter normal view mode
+      virtual void peakDisplayMode() = 0;
+      /// Take settings from.
+      virtual void takeSettingsFrom(PeakOverlayView const * const) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

@@ -5,14 +5,13 @@
 #include <time.h>
 #endif
 #include "MantidAPI/IEventList.h"
-#include "MantidAPI/IEventWorkspace.h" // get EventType declaration
-#include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/Unit.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>
@@ -274,6 +273,8 @@ public:
   double integrate(const double minX, const double maxX,
                    const bool entireRange) const;
 
+  void convertTof(std::function<double(double)> func, const int sorting = 0);
+
   void convertTof(const double factor, const double offset = 0.);
 
   void scaleTof(const double factor);
@@ -431,6 +432,9 @@ private:
   template <class T>
   static double integrateHelper(std::vector<T> &events, const double minX,
                                 const double maxX, const bool entireRange);
+  template <class T>
+  void convertTofHelper(std::vector<T> &events, std::function<double(double)> func);
+
   template <class T>
   void convertTofHelper(std::vector<T> &events, const double factor,
                         const double offset);

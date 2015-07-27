@@ -117,8 +117,12 @@ private:
   void setGlobalLocaleToAscii();
   /// Silence NeXus output
   void disableNexusOutput();
+  /// Starts asynchronous tasks that are done as part of Start-up
+  void AsynchronousStartupTasks();
   /// Update instrument definitions from github
   void UpdateInstrumentDefinitions();
+  ///check if a newer version of Mantid is available
+  void CheckIfNewerVersionIsAvailable();
   /// Sends startup usage information
   void SendStartupUsageInfo();
 

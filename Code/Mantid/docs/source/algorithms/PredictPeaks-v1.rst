@@ -49,3 +49,5 @@ RoundHKL=False.
 .. seealso :: Algorithm :ref:`algm-PredictFractionalPeaks`
 
 .. categories::
+
+.. sourcelink::

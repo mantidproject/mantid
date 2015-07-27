@@ -20,7 +20,7 @@ Usage
 
 **Example - http**
 
-.. testcode:: DownloadFileHttp
+.. code-block:: python
 
     #import the os path libraries for directory functions
     import os
@@ -33,20 +33,16 @@ Usage
 
     print "File Exists:", os.path.exists(savefile)
 
-.. testcleanup:: DownloadFileHttp
-
-    os.remove(savefile)
-
 Output:
 
-.. testoutput:: DownloadFileHttp
+.. code-block:: python
 
     File Exists: True
 
 
 **Example - https**
 
-.. testcode:: DownloadFileHttps
+.. code-block:: python
 
     #import the os path libraries for directory functions
     import os
@@ -59,15 +55,13 @@ Output:
 
     print "File Exists:", os.path.exists(savefile)
 
-.. testcleanup:: DownloadFileHttps
-
-    os.remove(savefile)
-
 Output:
 
-.. testoutput:: DownloadFileHttps
+.. code-block:: python
 
     File Exists: True
 
 .. categories::
+
+.. sourcelink::
 

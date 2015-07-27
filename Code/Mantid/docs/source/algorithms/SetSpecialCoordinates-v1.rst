@@ -30,3 +30,5 @@ flags are new, and legacy workspaces will need to be corrected in order
 for them to work as expected with the Mantid tools.
 
 .. categories::
+
+.. sourcelink::

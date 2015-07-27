@@ -151,3 +151,5 @@ Output:
     removeFiles(['myscript.py'])
 
 .. categories::
+
+.. sourcelink::

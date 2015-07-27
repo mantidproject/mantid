@@ -51,16 +51,20 @@ public:
     {
         m_dummyData = boost::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
         m_dummyData->addColumn("str", "HKL");
-        m_dummyData->addColumn("str", "d");
-        m_dummyData->addColumn("str", "Q");
-        m_dummyData->addColumn("str", "Intensity");
-        m_dummyData->addColumn("str", "FWHM (rel.)");
+        m_dummyData->addColumn("double", "d");
+        m_dummyData->addColumn("double", "delta d");
+        m_dummyData->addColumn("double", "Q");
+        m_dummyData->addColumn("double", "delta Q");
+        m_dummyData->addColumn("double", "Intensity");
+        m_dummyData->addColumn("double", "delta Intensity");
+        m_dummyData->addColumn("double", "FWHM (rel.)");
+        m_dummyData->addColumn("double", "delta FWHM (rel.)");
 
         TableRow first = m_dummyData->appendRow();
-        first << "1 0 0" << "0.5 +/- 0.001" << "12.566370 +/- 0.001000" << "2000 +/- 3" << "0.5 +/- 0.02";
+        first << "1 0 0" << 0.5 << 0.001 << 12.566370 << 0.02513274 << 2000. << 3. << 0.5 << 0.02;
 
         TableRow second = m_dummyData->appendRow();
-        second << "1 1 0" << "0.8 +/- 0.004" << "7.853981 +/- 0.001000" << "200 +/- 14" << "0.9 +/- 0.1";
+        second << "1 1 0" << 0.8 << 0.004 << 7.853981 << 0.039269905 << 200. << 14. << 0.9 << 0.1;
     }
 
     void testConstruction()
@@ -83,18 +87,16 @@ public:
         TS_ASSERT_EQUALS(first->fwhm(PoldiPeak::AbsoluteD), 0.25);
 
         TableWorkspace_sptr exported = fromTable.asTableWorkspace();
-        TS_ASSERT_EQUALS(exported->columnCount(), 5);
+        TS_ASSERT_EQUALS(exported->columnCount(), 9);
         TS_ASSERT_EQUALS(exported->rowCount(), 2);
 
         TableRow secondRowReference = m_dummyData->getRow(1);
         TableRow secondRow = exported->getRow(1);
 
-        // HKL strings compare directly
         TS_ASSERT_EQUALS(secondRow.cell<std::string>(0), secondRowReference.cell<std::string>(0));
 
-        // The other values not necessarily (string conversion of UncertainValue)
         for(size_t i = 1; i < exported->columnCount(); ++i) {
-            TS_ASSERT_DELTA(UncertainValueIO::fromString(secondRow.cell<std::string>(i)).value(), UncertainValueIO::fromString(secondRowReference.cell<std::string>(i)).value(), 1e-6);
+            TS_ASSERT_DELTA(secondRow.cell<double>(i), secondRowReference.cell<double>(i), 1e-6);
         }
     }
 
@@ -159,7 +161,7 @@ public:
 
         TS_ASSERT_EQUALS(collection.intensityType(), PoldiPeakCollection::Maximum);
 
-        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        TableWorkspace_sptr newDummy(m_dummyData->clone().release());
         newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
         PoldiPeakCollection otherCollection(newDummy);
@@ -168,7 +170,7 @@ public:
 
     void testIntensityTypeRecoveryConversion()
     {
-        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        TableWorkspace_sptr newDummy(m_dummyData->clone().release());
         newDummy->logs()->addProperty<std::string>("IntensityType", "Integral");
 
         PoldiPeakCollection collection(newDummy);
@@ -216,7 +218,7 @@ public:
 
     void testUnitCellFromLogs()
     {
-        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        TableWorkspace_sptr newDummy(m_dummyData->clone().release());
 
         UnitCell cell(1, 2, 3, 90, 91, 92);
         newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
@@ -239,7 +241,7 @@ public:
 
     void testGetPointGroupStringFromLog()
     {
-        TableWorkspace_sptr newDummy(m_dummyData->clone());
+        TableWorkspace_sptr newDummy(m_dummyData->clone().release());
         newDummy->logs()->addProperty<std::string>("PointGroup", "SomeString");
 
         TestablePoldiPeakCollection peaks;

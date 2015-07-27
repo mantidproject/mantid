@@ -60,3 +60,46 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
         self.tolerance_is_reller = True
         self.tolerance = 1.0e-2
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
+
+class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
+    """
+    We want to make sure that the BatchMode can remove zero error values
+    and replace them with a large default value.
+    """
+    def runTest(self):
+        config['default.instrument'] = 'SANS2D'
+        SANS2DTUBES()
+        Set1D()
+        Detector("rear-detector")
+        # This contains two MASKFILE commands, each resulting in a seperate call to MaskDetectors.
+        MaskFile('SANS2DTube_ZerroErrorFreeTest.txt')
+
+        # Saves a file which produces an output file which does not contain any zero errors
+        csv_file = FileFinder.getFullPath("SANS2DTUBES_ZeroErrorFree_batch.csv")
+        saveAlg ={"SaveNexus" : "nxs"}
+        BatchReduce(csv_file, 'nxs', saveAlgs = saveAlg, plotresults=False, save_as_zero_error_free=True)
+        DeleteWorkspace('zero_free_out')
+
+        # The zero correction only occurs for the saved files. Stephen King mentioned that the
+        # original workspaces should not be tampered with
+        self._final_output = os.path.join(config['defaultsave.directory'],'zero_free_out.nxs')
+        self._final_workspace = 'ws'
+        Load(Filename = self._final_output, OutputWorkspace=self._final_workspace)
+
+    def validate(self):
+        self.tolerance_is_reller = True
+        self.tolerance = 1.0e-2
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Instrument')
+        self.disableChecking.append('Axes')
+        return self._final_workspace, "SANS2DTube_withZeroErrorCorrections.nxs"
+
+    def validateMethod(self):
+        return "WorkspaceToNexus"
+
+    def cleanup(self):
+        # Delete the stored file
+        os.remove(self._final_output)
+        # Delete the workspace
+        if self._final_workspace in mtd:
+            DeleteWorkspace(self._final_workspace)

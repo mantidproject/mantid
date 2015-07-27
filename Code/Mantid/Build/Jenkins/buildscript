@@ -14,9 +14,9 @@ SCRIPT_DIR=$(dirname "$0")
 BUILDPKG=true
 
 ###############################################################################
-# All node currently have PARAVIEW_DIR=3.98.1 and PARAVIEW_NEXT_DIR=4.3.1
+# All node currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
 ###############################################################################
-export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
+#export PARAVIEW_DIR=${PARAVIEW_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -134,6 +134,10 @@ if [[ ${NODE_LABELS} == *rhel7* ]]; then
   ON_RHEL7=true
 fi
 
+if [[ ${NODE_LABELS} == *ubuntu* ]]; then
+  ON_UBUNTU=true
+fi
+
 ###############################################################################
 # Packaging options
 ###############################################################################
@@ -197,12 +201,19 @@ $SCL_ON_RHEL6 "cmake --build . -- -j$BUILD_THREADS"
 $SCL_ON_RHEL6 "cmake --build . --target AllTests -- -j$BUILD_THREADS"
 
 ###############################################################################
-# Run the tests
+# Run the unit tests
 ###############################################################################
 # Remove any Mantid.user.properties file
 userprops=~/.mantid/Mantid.user.properties
 rm -f $userprops
 $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
+
+###############################################################################
+# Run the documentation tests on Ubuntu when doing a pull request build.
+###############################################################################
+if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+  $SCL_ON_RHEL6 "cmake --build . --target docs-test"
+fi
 
 ###############################################################################
 # Create the install kit if required. This includes building the Qt help
@@ -230,7 +241,7 @@ if [[ "$BUILDPKG" == true ]]; then
 fi
 
 ###############################################################################
-# Run the system tests on RHEL6 when doing a pull request build. Run
+# Run the system tests on RHEL7 when doing a pull request build. Run
 # from a package to have at least one Linux checks it install okay
 ###############################################################################
 if [[ "${ON_RHEL7}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then

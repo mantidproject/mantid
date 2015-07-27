@@ -118,6 +118,7 @@ namespace CustomInterfaces
     reductionAlg->setProperty("InputFiles", files.toStdString());
 
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
+    reductionAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
 
     if(m_uiForm.ckUseCalib->isChecked())
     {
@@ -163,7 +164,7 @@ namespace CustomInterfaces
 
     if(grouping.first == "Workspace")
       reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
-    else if(grouping.second == "File")
+    else if(grouping.first == "File")
       reductionAlg->setProperty("MapFile", grouping.second.toStdString());
 
     reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());

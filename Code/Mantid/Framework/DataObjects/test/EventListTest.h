@@ -1333,7 +1333,7 @@ public:
       TS_ASSERT_DELTA( this->el.readX()[1], MAX_TOF, 1e-4);
 
       //Do convert
-      this->el.convertTof(2.5, 1);
+      this->el.convertTof(2.5, 1.);
       //Unchanged size
       TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
       //Original tofs were 100, 5100, 10100, etc.)

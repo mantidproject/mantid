@@ -16,3 +16,5 @@ PropertyManagerDataService.
 See :ref:`HFIRSANSReduction <algm-HFIRSANSReduction>` for details.
 
 .. categories::
+
+.. sourcelink::

@@ -12,6 +12,7 @@
 #include <QPlainTextEdit>
 #include <QPoint>
 #include <QScrollBar>
+#include <QSettings>
 #include <QSignalMapper>
 
 #include <Poco/Logger.h>
@@ -33,7 +34,7 @@ namespace MantidQt
      * @param parent An optional parent widget
      */
     MessageDisplay::MessageDisplay(QWidget *parent)
-    : QWidget(parent), m_logLevelControl(DisableLogLevelControl), m_logChannel(new API::QtSignalChannel),
+    : QWidget(parent), m_logLevelControl(DisableLogLevelControl), m_logChannel(new API::QtSignalChannel),m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_formats(), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
@@ -50,7 +51,7 @@ namespace MantidQt
      * @param parent An optional parent widget
      */
     MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
-    : QWidget(parent), m_logLevelControl(logLevelControl), m_logChannel(new API::QtSignalChannel),
+    : QWidget(parent), m_logLevelControl(logLevelControl), m_logChannel(new API::QtSignalChannel),m_filterChannel(new Poco::FilterChannel),
       m_textDisplay(new QPlainTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
@@ -65,8 +66,11 @@ namespace MantidQt
      */
     MessageDisplay::~MessageDisplay()
     {
+      QSettings settings;
+      settings.writeEntry("MessageDisplayPriority", static_cast <int>(m_filterChannel->getPriority()));
       // The Channel class is ref counted and will
       // delete itself when required
+      m_filterChannel->release();
       m_logChannel->release();
       delete m_textDisplay;
     }
@@ -83,12 +87,17 @@ namespace MantidQt
       // The root channel might be a SplitterChannel
       if(auto *splitChannel = dynamic_cast<Poco::SplitterChannel*>(rootChannel))
       {
-        splitChannel->addChannel(m_logChannel);
+        splitChannel->addChannel(m_filterChannel);
       }
       else
       {
-        Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
+        Poco::Logger::setChannel(rootLogger.name(), m_filterChannel);
       }
+      m_filterChannel->addChannel(m_logChannel);
+      
+      QSettings settings;
+      int priority = settings.readNumEntry("MessageDisplayPriority", Message::Priority::PRIO_NOTICE);
+      m_filterChannel->setPriority(priority);
 
       connect(m_logChannel, SIGNAL(messageReceived(const Message&)),
           this, SLOT(append(const Message &)));
@@ -254,7 +263,13 @@ namespace MantidQt
         logLevelMenu->addAction(m_debug);
 
         //check the right level
-        int level = Mantid::Kernel::Logger("").getLevel(); //get the root logger logging level
+        int level = m_filterChannel->getPriority(); 
+        //get the root logger logging level
+        int rootLevel = Poco::Logger::root().getLevel();
+        if (rootLevel < level) {
+          level = rootLevel;
+        }
+
         if (level == Poco::Message::PRIO_ERROR)
           m_error->setChecked(true);
         if (level == Poco::Message::PRIO_WARNING)
@@ -263,7 +278,7 @@ namespace MantidQt
           m_notice->setChecked(true);
         if (level == Poco::Message::PRIO_INFORMATION)
           m_information->setChecked(true);
-        if (level == Poco::Message::PRIO_DEBUG)
+        if (level >= Poco::Message::PRIO_DEBUG)
           m_debug->setChecked(true);
       }
 
@@ -277,7 +292,14 @@ namespace MantidQt
      */
     void MessageDisplay::setGlobalLogLevel(int priority)
     {
-      Mantid::Kernel::Logger::setLevelForAll(priority);
+      //set Local filter level
+      m_filterChannel->setPriority(priority);
+      //if this is higher than the global level then that will have to be lowered to work
+      int rootLevel = Poco::Logger::root().getLevel();
+      if (rootLevel < priority)
+      {
+         Mantid::Kernel::Logger::setLevelForAll(priority);
+      }
     }
 
     //-----------------------------------------------------------------------------
@@ -311,7 +333,7 @@ namespace MantidQt
       connect(m_information, SIGNAL(activated()), m_logLevelMapping, SLOT (map()));
       connect(m_debug, SIGNAL(activated()), m_logLevelMapping, SLOT (map()));
 
-      connect(m_logLevelMapping, SIGNAL(mapped(int)), m_logChannel, SLOT(setGlobalLogLevel(int)));
+      connect(m_logLevelMapping, SIGNAL(mapped(int)), this, SLOT(setGlobalLogLevel(int)));
     }
 
     /**

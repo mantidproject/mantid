@@ -22,7 +22,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   Elwin::Elwin(QWidget * parent) :
-    IDATab(parent),
+    IndirectDataAnalysisTab(parent),
     m_elwTree(NULL)
   {
     m_uiForm.setupUi(parent);
@@ -148,13 +148,13 @@ namespace IDA
     elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
     elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_uiForm.leLogValue->currentText().toStdString());
 
-    elwinMultAlg->setProperty("Range1Start", m_dblManager->value(m_properties["IntegrationStart"]));
-    elwinMultAlg->setProperty("Range1End", m_dblManager->value(m_properties["IntegrationEnd"]));
+    elwinMultAlg->setProperty("IntegrationRangeStart", m_dblManager->value(m_properties["IntegrationStart"]));
+    elwinMultAlg->setProperty("IntegrationRangeEnd", m_dblManager->value(m_properties["IntegrationEnd"]));
 
     if(m_blnManager->value(m_properties["BackgroundSubtraction"]))
     {
-      elwinMultAlg->setProperty("Range2Start", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["BackgroundStart"])));
-      elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["BackgroundEnd"])));
+      elwinMultAlg->setProperty("BackgroundRangeStart", m_dblManager->value(m_properties["BackgroundStart"]));
+      elwinMultAlg->setProperty("BackgroundRangeEnd", m_dblManager->value(m_properties["BackgroundEnd"]));
     }
 
     if(m_blnManager->value(m_properties["Normalise"]))

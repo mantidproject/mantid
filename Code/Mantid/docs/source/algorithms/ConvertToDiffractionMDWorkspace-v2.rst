@@ -87,3 +87,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

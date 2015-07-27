@@ -5,8 +5,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include <cmath>
-#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {

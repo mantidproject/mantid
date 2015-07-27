@@ -23,3 +23,5 @@ assumed to be calculated :math:`\frac{I}{I_0}` values and are simply
 read in verbatim.
 
 .. categories::
+
+.. sourcelink::

@@ -16,7 +16,7 @@
 #include <QStringList>
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/ConfigService.h"
 #include <vector>
 
@@ -201,11 +201,17 @@ private:
   int addBatchLine(QString csv_line, QString separator = "");
   ///Save the batch file
   QString saveBatchGrid(const QString & filename = "");
+  /// Check that the workspace can have the zero errors removed
+  bool isValidWsForRemovingZeroErrors(QString& originalWorkspaceName);
   //@}
- 
   public slots:
      /// apply mask
   void applyMask(const QString& wsName,bool time_pixel);
+  /// Create a zero error free clone for the specified workspace
+  void createZeroErrorFreeClone(QString& originalWorkspaceName, QString& clonedWorkspaceName);
+  /// Destroy a zero error free cloned workspace
+  void deleteZeroErrorFreeClone(QString& clonedWorkspaceName);
+
 
 private slots:
   /// phi masking has changed 
@@ -269,6 +275,14 @@ private slots:
   void handleSlicePushButton();
   /// Open the help page of whichever tab the user is currently viewing.
   void openHelpPage();
+  /// Transmission setting for M3
+  void onTransmissionM3CheckboxChanged();
+  /// Transmission setting for M4
+  void onTransmissionM4CheckboxChanged();
+  /// Transmission setting for Radius
+  void onTransmissionRadiusCheckboxChanged();
+  /// Transmission setting for ROI files
+  void onTransmissionROIFilesCheckboxChanged();
 
 private:
   /// used to specify the range of validation to do
@@ -277,6 +291,13 @@ private:
     ALL,                                                    ///< for checking all validators
     LOAD,                                                   ///< for checking the load validators only
     RUN                                                     ///< for checking the run validators only
+  };
+
+  enum TransSettings {
+    M3,
+    M4,
+    RADIUS,
+    ROI
   };
 
   /// holds pointer to validators and their locations
@@ -348,7 +369,10 @@ private:
   QAction *m_batch_clear;
   //Time/Pixel mask string
   QString m_maskScript;
-
+  /// Success keyword
+  static const QString m_pythonSuccessKeyword;
+  /// Keyword for empty return value in python
+  static const QString m_pythonEmptyKeyword;
   /// Stores the URL of each tab's help page.
   QMap<Tab, QString> m_helpPageUrls;
   
@@ -361,6 +385,30 @@ private:
   bool entriesAreValid(ValMap & vals);
   bool runFilesAreValid();
   QString reduceSingleRun() const;
+  void setValidators();
+
+  /// set logic for M3 or M4 selection
+  void setM3M4Logic(TransSettings setting, bool isNowChecked);
+  /// set logic for beam stop selection
+  void setBeamStopLogic(TransSettings setting, bool isNowChecked);
+  /// set logic for radius and mask
+  void setRadiusAndMaskLogic(bool isNowChecked);
+  /// set logic for ROI and mask
+  void setROIAndMaskLogic(bool isNowChecked);
+  /// validate float input
+  //void validateNumericInput(QString numericInput);
+  /// validate file input
+  //void valideateFileInput(QString fileInput);
+  /// set the transmission settings
+  //void sendTransmissionSettings();
+  /// get the transmission settings
+  void setTransmissionSettingsFromUserFile();
+  /// write the transmission settings to a python script
+  void writeTransmissionSettingsToPythonScript(QString& pythonCode);
+  /// initialize the connections for the transmission settings
+  void initTransmissionSettings();
+  /// Set all trans fields to a certain enabled state
+  void resetAllTransFields();
 
   UserSubWindow * slicingWindow;
 

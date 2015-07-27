@@ -73,10 +73,16 @@ public:
     checkPW(*pw);
   }
 
+  class TestablePeaksWorkspace : public PeaksWorkspace {
+  public:
+    TestablePeaksWorkspace(const PeaksWorkspace &other)
+        : PeaksWorkspace(other) {}
+  };
+
   void test_copyConstructor()
   {
     auto pw = buildPW();
-    auto pw2 = PeaksWorkspace_sptr(new PeaksWorkspace(*pw));
+    auto pw2 = PeaksWorkspace_sptr(new TestablePeaksWorkspace(*pw));
     checkPW(*pw2);
   }
 
@@ -272,7 +278,7 @@ public:
    {
      auto pw = buildPW(); // 1 peaks each with single detector
      // Add a detector to the peak
-     Mantid::API::IPeak & ipeak = pw->getPeak(0);
+     Mantid::Geometry::IPeak & ipeak = pw->getPeak(0);
      auto & peak = static_cast<Peak&>(ipeak);
      peak.addContributingDetID(2);
      peak.addContributingDetID(3);
@@ -299,10 +305,10 @@ public:
      auto pw = createSaveTestPeaksWorkspace(); // 5 peaks each with single detector
 
      // Add some detectors
-     Mantid::API::IPeak & ipeak3 = pw->getPeak(2);
+     Mantid::Geometry::IPeak & ipeak3 = pw->getPeak(2);
      auto & peak3 = static_cast<Peak&>(ipeak3);
      peak3.addContributingDetID(11);
-     Mantid::API::IPeak & ipeak5 = pw->getPeak(4);
+     Mantid::Geometry::IPeak & ipeak5 = pw->getPeak(4);
      auto & peak5 = static_cast<Peak&>(ipeak5);
      peak5.addContributingDetID(51);
      peak5.addContributingDetID(52);

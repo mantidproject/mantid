@@ -137,6 +137,9 @@ public:
   /// Update parameter values in the browser to match those of a function.
   void updateMultiDatasetParameters(const Mantid::API::IFunction& fun);
 
+  /// Resize the browser's columns
+  void setColumnSizes(int s0, int s1, int s2 = -1);
+
 signals:
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
@@ -150,6 +153,7 @@ signals:
   void localParameterButtonClicked(const QString& parName);
 
   void functionStructureChanged();
+  void globalsChanged();
 
 public slots:
 
@@ -286,6 +290,7 @@ protected slots:
   /// Called when a function parameter property is changed
   void parameterChanged(QtProperty*);
   void parameterButtonClicked(QtProperty*);
+  void globalChanged(QtProperty*, const QString&, bool);
 
 protected:
   /// Manager for function group properties

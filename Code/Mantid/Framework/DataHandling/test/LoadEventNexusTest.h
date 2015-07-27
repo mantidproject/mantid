@@ -6,19 +6,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
-#include <Poco/File.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -490,7 +483,6 @@ public:
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT( inst->getFilename().empty() ); // This is how we know we got it from inside the nexus file
     TS_ASSERT_EQUALS( inst->getName(), "HYSPECA" );
     TS_ASSERT_EQUALS( inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000") );
     TS_ASSERT_EQUALS( inst->getNumberDetectors(), 20483 );
@@ -610,6 +602,60 @@ public:
         1.8124e-11, 1.0e-4);
     TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(), 1476.0);
   }
+
+void test_extract_nperiod_data() {
+  LoadEventNexus loader;
+
+  loader.setChild(true);
+  loader.initialize();
+  loader.setPropertyValue("OutputWorkspace", "dummy");
+  loader.setPropertyValue("Filename", "LARMOR00003368.nxs");
+  loader.execute();
+  Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+  WorkspaceGroup_sptr outGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+  TSM_ASSERT("Invalid Output Workspace Type", outGroup);
+
+  IEventWorkspace_sptr firstWS = boost::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
+  auto run = firstWS->run();
+  const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
+  TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
+  TSM_ASSERT_EQUALS("Groups size should be same as nperiods", outGroup->size(), nPeriods);
+
+  for(size_t i = 0; i < outGroup->size(); ++i){
+      EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+      TS_ASSERT(ws);
+      TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
+
+      std::stringstream buffer;
+      buffer << "period " << i+1;
+      std::string periodBoolLog = buffer.str();
+
+      const int currentPeriod = ws->run().getPropertyValueAsType<int>("current_period");
+
+      TSM_ASSERT("Each period should have a boolean array for masking period numbers", ws->run().hasProperty(periodBoolLog));
+      TSM_ASSERT_EQUALS("Current period is not what was expected.", currentPeriod, i+1);
+
+  }
+  // Make sure that the spectraNo are equal for all child workspaces.
+  auto isFirstChildWorkspace = true;
+  std::vector<Mantid::specid_t> specids;
+
+  for(size_t i = 0; i < outGroup->size(); ++i) {
+    EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+    if (isFirstChildWorkspace){
+      specids.reserve(ws->getNumberHistograms());
+    }
+    for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
+      if (isFirstChildWorkspace) {
+        specids.push_back(ws->getSpectrum(index)->getSpectrumNo());
+      } else {
+        TSM_ASSERT_EQUALS("The spectrNo should be the same for all child workspaces.",specids[index], ws->getSpectrum(index)->getSpectrumNo());
+      }
+    }
+
+    isFirstChildWorkspace = false;
+  }
+}
 
 private:
   std::string wsSpecFilterAndEventMonitors;

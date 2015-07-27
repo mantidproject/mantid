@@ -76,7 +76,7 @@ Sum Files
   If selected the data from each raw file will be summed and from then on
   treated as a single run.
 
-Load Logs
+Load Log Files
   If selected the sample logs will be laoded from each of the run files.
 
 Grouping
@@ -467,8 +467,8 @@ Input
   Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
   input to the algorithm.
 
-Rebin Type
-  Selects the SofQW algorithm that will be used.
+Method
+  Selects the :ref:`SofQW <algm-SofQW>` method that will be used.
 
 Q Low, Q Width & Q High
   Q binning parameters that are passed to the SofQW algorithm.

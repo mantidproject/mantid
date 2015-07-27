@@ -32,7 +32,7 @@ class POLDIPeakSearchTest(stresstesting.MantidStressTest):
             referencePeaks = mtd["%s_reference_Peaks" % (dataFile)]
             self.assertEqual(calculatedPeaks.rowCount(), referencePeaks.rowCount())
 
-            positions = calculatedPeaks.column(2)
+            positions = calculatedPeaks.column(3)
             referencePositions = referencePeaks.column(0)
 
       # In this test we only compare positions, because the height

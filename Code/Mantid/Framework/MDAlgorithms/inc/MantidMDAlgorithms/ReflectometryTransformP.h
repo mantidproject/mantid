@@ -3,59 +3,69 @@
 
 #include <cmath>
 
-#include "MantidMDAlgorithms/ReflectometryTransform.h"
+#include "MantidDataObjects/CalculateReflectometry.h"
+#include "MantidDataObjects/ReflectometryTransform.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 /**
-class CalculateReflectometryPBase: Base class for p-type transforms.
+class CalculateReflectometryP: p-type transformation calculator
 */
-class CalculateReflectometryPBase {
-protected:
-  double m_sinThetaInitial;
-  double m_sinThetaFinal;
-
-  CalculateReflectometryPBase(const double &thetaIncident) {
-    m_sinThetaInitial = sin(M_PI / 180.0 * thetaIncident);
-    m_sinThetaFinal = -DBL_MAX;
-  }
-  ~CalculateReflectometryPBase() {}
+class CalculateReflectometryP : public DataObjects::CalculateReflectometry {
+private:
+  double m_sin_theta_i;
+  double m_sin_theta_f;
 
 public:
-  void setThetaFinal(const double &thetaFinal) {
-    m_sinThetaFinal = sin(M_PI / 180.0 * thetaFinal);
-  }
-};
+  /**
+   * Constructor
+   */
+  CalculateReflectometryP() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
 
-/**
-class CalculateReflectometryDiffP: Calculates difference between ki and kf.
-*/
-class CalculateReflectometryDiffP : public CalculateReflectometryPBase {
-public:
-  CalculateReflectometryDiffP(const double &thetaInitial)
-      : CalculateReflectometryPBase(thetaInitial) {}
-  double execute(const double &wavelength) {
+  /**
+   * Destructor
+   */
+  ~CalculateReflectometryP(){};
+
+  /**
+   Setter for the incident theta value require for the calculation. Internally
+   pre-calculates and caches to cos theta for speed.
+   @param thetaIncident: incident theta value in degrees
+   */
+  void setThetaIncident(double thetaIncident) {
+    m_sin_theta_i = sin(to_radians_factor * thetaIncident);
+  }
+
+  /**
+   Setter for the final theta value require for the calculation. Internally
+   pre-calculates and caches to cos theta for speed.
+   @param thetaFinal: final theta value in degrees
+   */
+  void setThetaFinal(double thetaFinal) {
+    m_sin_theta_f = sin(to_radians_factor * thetaFinal);
+  }
+
+  /**
+   Executes the calculation to determine PSum
+   @param wavelength : wavelength in Angstroms
+   */
+  double calculateDim0(double wavelength) const {
     double wavenumber = 2 * M_PI / wavelength;
-    double ki = wavenumber * m_sinThetaInitial;
-    double kf = wavenumber * m_sinThetaFinal;
-    return ki - kf;
-  }
-};
-
-/**
-class CalculateReflectometrySumP: Calculates sum of ki and kf.
-*/
-class CalculateReflectometrySumP : public CalculateReflectometryPBase {
-public:
-  CalculateReflectometrySumP(const double &thetaInitial)
-      : CalculateReflectometryPBase(thetaInitial) {}
-  ~CalculateReflectometrySumP(){};
-  double execute(const double &wavelength) {
-    double wavenumber = 2 * M_PI / wavelength;
-    double ki = wavenumber * m_sinThetaInitial;
-    double kf = wavenumber * m_sinThetaFinal;
+    double ki = wavenumber * m_sin_theta_i;
+    double kf = wavenumber * m_sin_theta_f;
     return ki + kf;
+  }
+
+  /**
+   Executes the calculation to determine PDiff
+   @param wavelength : wavelength in Angstroms
+   */
+  double calculateDim1(double wavelength) const {
+    double wavenumber = 2 * M_PI / wavelength;
+    double ki = wavenumber * m_sin_theta_i;
+    double kf = wavenumber * m_sin_theta_f;
+    return ki - kf;
   }
 };
 
@@ -85,28 +95,13 @@ public:
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ReflectometryTransformP : public ReflectometryTransform {
-private:
-  const double m_pSumMin;
-  const double m_pSumMax;
-  const double m_pDiffMin;
-  const double m_pDiffMax;
-  /// Object performing raw calculation to determine pzi + pzf
-  mutable CalculateReflectometrySumP m_pSumCalculation;
-  /// Object performing raw calculation to determine pzi - pzf
-  mutable CalculateReflectometryDiffP m_pDiffCalculation;
-
+class DLLExport ReflectometryTransformP
+    : public DataObjects::ReflectometryTransform {
 public:
   ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin,
                           double pDiffMax, double incidentTheta,
                           int numberOfBinsQx = 100, int numberOfBinsQz = 100);
   virtual ~ReflectometryTransformP();
-  virtual Mantid::API::IMDEventWorkspace_sptr
-  executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-            Mantid::API::BoxController_sptr boxController) const;
-  /// Execute transformation
-  virtual Mantid::API::MatrixWorkspace_sptr
-  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 };
 
 } // namespace MDAlgorithms

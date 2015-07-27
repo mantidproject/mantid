@@ -4,7 +4,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/VesuvioResolution.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
 
 namespace Mantid {

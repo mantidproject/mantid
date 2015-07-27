@@ -41,3 +41,5 @@ Output:
     Weighted Mean Error of Workspace: [ 1.2482116]
 
 .. categories::
+
+.. sourcelink::

@@ -50,16 +50,6 @@ PeaksWorkspace::PeaksWorkspace()
 }
 
 //---------------------------------------------------------------------------------------------
-/** Virtual constructor. Clone method to duplicate the peaks workspace.
- *
- * @return PeaksWorkspace object
- */
-PeaksWorkspace *PeaksWorkspace::clone() const {
-  // Deep copy via copy construtor.
-  return new PeaksWorkspace(*this);
-}
-
-//---------------------------------------------------------------------------------------------
 /** Copy constructor
  *
  * @param other :: other PeaksWorkspace to copy from
@@ -69,16 +59,6 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
     : IPeaksWorkspace(other), peaks(other.peaks), columns(), columnNames(),
       m_coordSystem(other.m_coordSystem) {
   initColumns();
-}
-
-//---------------------------------------------------------------------------------------------
-/** Clone a shared pointer
- *
- * @return copy of the peaksworkspace
- */
-boost::shared_ptr<PeaksWorkspace> PeaksWorkspace::clone() {
-  // Copy construct and return
-  return boost::shared_ptr<PeaksWorkspace>(new PeaksWorkspace(*this));
 }
 
 //=====================================================================================
@@ -164,7 +144,7 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 /** Add a peak to the list
  * @param ipeak :: Peak object to add (copy) into this.
  */
-void PeaksWorkspace::addPeak(const API::IPeak &ipeak) {
+void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
     peaks.push_back((const Peak &)ipeak);
   } else {
@@ -205,7 +185,7 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-API::IPeak *
+Geometry::IPeak *
 PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
                            boost::optional<double> detectorDistance) const {
   return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
@@ -304,7 +284,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
 
   try {
 
-    API::IPeak *peak = createPeak(Qlab);
+    Geometry::IPeak *peak = createPeak(Qlab);
 
     if (sample().hasOrientedLattice()) {
 

@@ -8,10 +8,11 @@
 #include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include <cmath>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 
@@ -59,7 +60,7 @@ public:
   {
     
     //Take a copy of the original peaks workspace.
-    PeaksWorkspace_sptr local = m_masterPeaks->clone();
+    PeaksWorkspace_sptr local(m_masterPeaks->clone().release());
     //Clear the copies hkl values with some invalid values so that we'll know if we fail.
     for(int i = 0; i < nPixels; i++)
     {
@@ -114,7 +115,7 @@ public:
 
   void test_colinearPeaksThrows()
   {
-    PeaksWorkspace_sptr temp = m_masterPeaks->clone();
+    PeaksWorkspace_sptr temp(m_masterPeaks->clone().release());
 
     for(int i = 0; i < m_masterPeaks->getNumberPeaks(); i++)
     {

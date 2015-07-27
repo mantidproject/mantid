@@ -52,7 +52,7 @@ public:
   virtual const std::string toString() const;
 
   /// Instrument accessors
-  void setInstrument(const Geometry::Instrument_const_sptr &instr);
+  virtual void setInstrument(const Geometry::Instrument_const_sptr &instr);
   /// Returns the parameterized instrument
   virtual Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -118,9 +118,14 @@ public:
   /// Saves this experiment description to the open NeXus file
   virtual void saveExperimentInfoNexus(::NeXus::File *file) const;
   /// Loads an experiment description from the open NeXus file
-  virtual void loadExperimentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+  virtual void loadExperimentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
-  virtual void loadInstrumentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+  virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
+  /// Load the instrument from an open NeXus file without reading any parameters
+  virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file);
+  /// Load instrument parameters from an open Nexus file in Instument group if found there
+  virtual void loadInstrumentParametersNexus ( ::NeXus::File *file, std::string &parameterStr);
+
   /// Load the sample and log info from an open NeXus file.
   virtual void loadSampleAndLogInfoNexus(::NeXus::File *file);
   /// Populate the parameter map given a string
@@ -164,6 +169,14 @@ private:
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 
+  /// Attempt to load instrument embedded in Nexus file. *file must have instrument group open.
+  void loadEmbeddedInstrumentInfoNexus( ::NeXus::File *file, std::string &instrumentName, std::string &instrumentXML );
+
+  /// Set the instrument given the name and XML leading from IDF file if XML string is empty
+  void setInstumentFromXML( const std::string& nxFilename, std::string &instrumentName, std::string &instrumentXML );
+
+  //Loads the xml from an instrument file with some basic error handling
+  std::string loadInstrumentXML(const std::string& filename);
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying

@@ -1,4 +1,5 @@
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/EventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
@@ -116,7 +117,8 @@ namespace Mantid
         loadAlg->executeAsChildAlg();
         loadAlg->removeObserver(observer);
 
-        Mantid::API::IEventWorkspace_sptr tempWS = loadAlg->getProperty("OutputWorkspace");
+        Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
+        IEventWorkspace_sptr tempWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
 
         Algorithm_sptr convertAlg = AlgorithmManager::Instance().createUnmanaged(
             "ConvertToDiffractionMDWorkspace", 1);

@@ -114,3 +114,5 @@ Output:
   Center of Mass = 9.00076 +/- 0.00921
 
 .. categories::
+
+.. sourcelink::

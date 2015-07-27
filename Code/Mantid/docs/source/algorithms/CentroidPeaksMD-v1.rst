@@ -21,3 +21,5 @@ Use :ref:`algm-CentroidPeaksMD-v2` for any new scripts.
 
 
 .. categories::
+
+.. sourcelink::

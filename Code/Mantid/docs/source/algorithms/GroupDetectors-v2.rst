@@ -13,10 +13,9 @@ This algorithm sums, bin-by-bin, multiple spectra into a single spectra.
 The errors are summed in quadrature and the algorithm checks that the
 bin boundaries in X are the same. The new summed spectra are created at
 the start of the output workspace and have spectra index numbers that
-start at zero and increase in the order the groups are specified. Each
-new group takes the spectra numbers from the first input spectrum
-specified for that group. All detectors from the grouped spectra will be
-moved to belong to the new spectrum.
+start at zero and increase in the order the groups are specified. All
+detectors from the grouped spectra will be moved to belong to the new
+spectrum.
 
 Not all spectra in the input workspace have to be copied to a group. If
 KeepUngroupedSpectra is set to true any spectra not listed will be
@@ -28,30 +27,34 @@ To create a single group the list of spectra can be identified using a
 list of either spectrum numbers, detector IDs or workspace indices. The
 list should be set against the appropriate property.
 
-An input file allows the specification of many groups. The file must
-have the following format\* (extra space and comments starting with #
-are allowed)::
+MapFile
+#######
 
- "unused number1"
- "unused number2"
- "number_of_input_spectra1"
- "input spec1" "input spec2" "input spec3" "input spec4"
- "input spec5 input spec6"
- **
- "unused number2"
- "number_of_input_spectra2"
- "input spec1" "input spec2" "input spec3" "input spec4"
+An input file allows the specification of many groups. The file has the
+following format::
 
-\* each phrase in "" is replaced by a single integer
+ [number of groups in file]
+ 
+ [first group's number]
+ [number of spectra in first group]
+ [spectrum 1] [spectrum 2] [spectrum 3] [...] [spectrum n]
+ 
+ [second group's number]
+ [number of spectra in second group]
+ [spectrum 1] [spectrum 2] [spectrum 3] [...] [spectrum n]
+ 
+ [repeat as necessary]
 
-\*\* the section of the file that follows is repeated once for each
-group
+Mantid will still work if the number of groups specified at the start is
+incorrect, but other software may not. Mantid will warn you if the value
+given is incorrect.
 
-Some programs require that "unused number1" is the number of groups
-specified in the file but Mantid ignores that number and all groups
-contained in the file are read regardless. "unused number2" is in other
-implementations the group's spectrum number but in this algorithm it is
-is ignored and can be any integer (not necessarily the same integer)
+Each group's spectrum number is determined by the group's number. This
+behaviour can be overriden by enabling the IgnoreGroupNumber property, in
+which case the first group will be numbered 1, and the second 2, and so on.
+
+Blank lines and whitespace in the map file are ignored. Comments may be
+entered using a #, like in a Python script.
 
 An example of an input file follows::
 
@@ -88,6 +91,30 @@ In addition the following XML grouping format is also supported
     </detector-grouping>
 
 where is used to specify spectra IDs and detector IDs.
+
+GroupingPattern
+###############
+
+Grouping can also be specified using the GroupingPattern property. Its syntax
+is as follows:
+
+The pattern consists of a list of numbers that refer to workspace indexes and
+various operators: :literal:`,:+-`.
+
+To remove spectra, you list the workspace indexes that you want to keep. The
+:literal:`:` operator indicates a continuous range, sparing you the need to list
+every one. For example if you have 100 spectra (with workspace indexes from 0 to
+99) and want to remove the first and last 10 spectra along with the 12th, you
+would use the pattern :literal:`10,13:89`. This says keep workspace indices 10
+along with 13 to 89 inclusive.
+
+To add spectra, use :literal:`+` to add two spectra or :literal:`-` to add a
+range. For example you may with to add 10 to 12 and ignore the rest, you would
+use :literal:`10+12`. If you were adding five groups of 20, you would use
+:literal:`0-19,20-39,40-59,60-79,80-99`.
+
+One could combine the two, for example :literal:`10+12,13:89` would list the sum
+of 10 and 12 followed by 13 to 89.
 
 Previous Versions
 -----------------
@@ -457,4 +484,35 @@ Output:
    spectrum 3 (sum of spectra 7-8): [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
    spectrum 4 (sum of spectra 9-10): [ 19.  19.  19.  19.  19.  19.  19.  19.  19.  19.]
 
+**Example 8: Group detectors using grouping pattern:**
+
+.. testcode:: ExGroupDetectorsWithPattern
+
+   # Create Workspace of 10 spectra each with one bin.
+   ws = CreateWorkspace(DataX=[1], DataY=[1,2,3,4,5,6,7,8,9,10], NSpec=10)
+
+   # Run algorithm adding first two spectra and then keep the fourth, add the fifth to seventh, and then keep the last three spectra
+   ws2 = GroupDetectors(ws, GroupingPattern="0+1,3,4-6,7:9")
+
+   #print result
+   print ws2.readY(0)
+   print ws2.readY(1)
+   print ws2.readY(2)
+   print ws2.readY(3)
+   print ws2.readY(4)
+   print ws2.readY(5)
+
+Output:
+
+.. testoutput:: ExGroupDetectorsWithPattern
+
+   [ 3.]
+   [ 4.]
+   [ 18.]
+   [ 8.]
+   [ 9.]
+   [ 10.]
+
 .. categories::
+
+.. sourcelink::

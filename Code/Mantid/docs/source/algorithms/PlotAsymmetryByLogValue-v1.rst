@@ -138,7 +138,7 @@ Output:
 
 .. testoutput:: ExDeadTimeCorrection
 
-   Y values (asymmetry): [ 0.14542059  0.13674275  0.12017568]
+   Y values (asymmetry): [ 0.1458422   0.1371184   0.12047788]
    X values (sample magn. field): [ 1350.  1360.  1370.]
 
 **Example - Calculating asymmetry as a function of the sample mean temperature:**
@@ -160,3 +160,5 @@ Output:
    X values (sample magn. field): [ 290.  290.  290.]
 
 .. categories::
+
+.. sourcelink::

@@ -5,6 +5,8 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <boost/make_shared.hpp>
 
@@ -32,13 +34,12 @@ namespace MDF
 {
 
 /// Constructor
-PlotController::PlotController(MultiDatasetFit *parent, 
-                               QwtPlot *plot, 
-                               QTableWidget *table, 
-                               QComboBox *plotSelector, 
-                               QPushButton *prev, 
-                               QPushButton *next):
-  QObject(parent),m_plot(plot),m_table(table),m_plotSelector(plotSelector),m_prevPlot(prev),m_nextPlot(next),m_currentIndex(-1)
+PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
+                               QTableWidget *table, QComboBox *plotSelector,
+                               QPushButton *prev, QPushButton *next)
+    : QObject(parent), m_plot(plot), m_table(table),
+      m_plotSelector(plotSelector), m_prevPlot(prev), m_nextPlot(next),
+      m_currentIndex(-1), m_showDataErrors(false)
 {
   connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
   connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
@@ -58,32 +59,12 @@ PlotController::PlotController(MultiDatasetFit *parent,
   connect(m_rangeSelector,SIGNAL(selectionChanged(double, double)),this,SLOT(updateFittingRange(double, double)));
 
   disableAllTools();
-
-  m_plot->canvas()->installEventFilter(this);
-  
 }
 
 /// Destructor.
 PlotController::~PlotController()
 {
   m_plotData.clear();
-}
-
-/// Event fiter for intercepting mouse events of the plot
-bool PlotController::eventFilter(QObject *, QEvent *evn)
-{
-  if ( evn->type() == QEvent::MouseButtonDblClick )
-  {
-    if ( isRangeSelectorEnabled() )
-    {
-      resetRange();
-    }
-    else if ( isZoomEnabled() )
-    {
-      zoomToRange();
-    }
-  }
-  return false;
 }
 
 /// Slot. Respond to changes in the data table.
@@ -129,20 +110,24 @@ void PlotController::nextPlot()
 /// @param index :: Index of a dataset.
 boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
 {
+  auto data = boost::shared_ptr<DatasetPlotData>();
+  if (index < 0) return data;
   if ( !m_plotData.contains(index) )
   {
     QString wsName = m_table->item( index, wsColumn )->text();
     int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
     QString outputWorkspaceName = owner()->getOutputWorkspaceName();
-    if ( !outputWorkspaceName.isEmpty() )
-    {
-      outputWorkspaceName += QString("_%1").arg(index);
+    std::string outName = outputWorkspaceName.toStdString();
+    if (!outputWorkspaceName.isEmpty() &&
+        Mantid::API::AnalysisDataService::Instance().doesExist(outName)) {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(outName);
+      if (auto  group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+        outputWorkspaceName = QString::fromStdString(group->getItem(index)->name());
+      }
     }
-    try
-    {
-      auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
-      m_plotData.insert(index, value );
-      return value;
+    try {
+      data = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
+      m_plotData.insert(index, data );
     }
     catch(std::exception& e)
     {
@@ -150,11 +135,19 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
       clear();
       owner()->checkSpectra();
       m_plot->replot();
-      return boost::shared_ptr<DatasetPlotData>();
     }
   }
+  else
+  {
+    data = m_plotData[index];
+  }
 
-  return m_plotData[index];
+  if (data)
+  {
+    data->showDataErrorBars(m_showDataErrors);
+  }
+
+  return data;
 }
 
 /// Plot a data set.
@@ -235,7 +228,11 @@ void PlotController::zoomToRange()
   QwtDoubleRect rect = m_zoomer->zoomRect();
   rect.setX( m_rangeSelector->getMinimum() );
   rect.setRight( m_rangeSelector->getMaximum() );
-  m_zoomer->zoom( rect );
+  // In case the scales were set by the panning tool we need to
+  // reset the zoomer first.
+  m_zoomer->zoom(-1);
+  // Set new zoom level.
+  m_zoomer->zoom(rect);
 }
 
 /// Disable all plot tools. It is a helper method 
@@ -322,6 +319,17 @@ void PlotController::updateRange(int index)
 }
 
 MultiDatasetFit *PlotController::owner() const {return static_cast<MultiDatasetFit*>(parent());}
+
+/// Toggle display of the data error bars.
+void PlotController::showDataErrors(bool on)
+{
+  m_showDataErrors = on;
+  if (auto data = getData(m_currentIndex))
+  {
+    data->show(m_plot);
+    m_plot->replot();
+  }
+}
 
 } // MDF
 } // CustomInterfaces

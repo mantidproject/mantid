@@ -19,6 +19,19 @@ DECLARE_WORKSPACE(Workspace2D)
 /// Constructor
 Workspace2D::Workspace2D(): m_noVectors(0) {}
 
+Workspace2D::Workspace2D(const Workspace2D &other)
+    : MatrixWorkspace(other), m_noVectors(other.m_noVectors),
+      m_monitorList(other.m_monitorList) {
+  data.resize(m_noVectors);
+
+  for (size_t i = 0; i < m_noVectors; ++i) {
+    // Careful: data holds pointers to ISpectrum, but they point to Histogram1D.
+    // There are copy constructors, but we would need a clone() function that is
+    // aware of the polymorphism. Use cast + copy constructor for now.
+    data[i] = new Histogram1D(*static_cast<Histogram1D *>(other.data[i]));
+  }
+}
+
 /// Destructor
 Workspace2D::~Workspace2D() {
 // Clear out the memory

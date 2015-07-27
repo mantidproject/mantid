@@ -20,9 +20,9 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
 namespace Mantid {
@@ -238,7 +238,14 @@ Mantid::DataObjects::EventWorkspace_sptr
 CreateEventWorkspace(int numPixels, int numBins, int numEvents = 100,
                      double x0 = 0.0, double binDelta = 1.0,
                      int eventPattern = 1, int start_at_pixelID = 0);
+                     
+Mantid::DataObjects::EventWorkspace_sptr
+CreateEventWorkspaceWithStartTime(int numPixels, int numBins, int numEvents = 100,
+                     double x0 = 0.0, double binDelta = 1.0,
+                     int eventPattern = 1, int start_at_pixelID = 0,
+                     Mantid::Kernel::DateAndTime run_start = Mantid::Kernel::DateAndTime("2010-01-01T00:00:00"));
 
+                     
 Mantid::DataObjects::EventWorkspace_sptr
 CreateGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
                             double binDelta = 1.0);

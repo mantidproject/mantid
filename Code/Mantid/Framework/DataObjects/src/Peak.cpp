@@ -188,9 +188,9 @@ Peak::Peak(const Peak &other)
  * @param ipeak :: const reference to an IPeak object
  * @return
  */
-Peak::Peak(const API::IPeak &ipeak)
-    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
-      m_intensity(ipeak.getIntensity()),
+Peak::Peak(const Geometry::IPeak &ipeak)
+    : IPeak(ipeak), m_detectorID(ipeak.getDetectorID()), m_H(ipeak.getH()),
+      m_K(ipeak.getK()), m_L(ipeak.getL()), m_intensity(ipeak.getIntensity()),
       m_sigmaIntensity(ipeak.getSigmaIntensity()),
       m_binCount(ipeak.getBinCount()),
       m_initialEnergy(ipeak.getInitialEnergy()),
@@ -198,8 +198,9 @@ Peak::Peak(const API::IPeak &ipeak)
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_runNumber(ipeak.getRunNumber()),
-      m_monitorCount(ipeak.getMonitorCount()), m_orig_H(0.), m_orig_K(0.),
-      m_orig_L(0.), m_peakShape(new NoShape) {
+      m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
+      m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
+      m_peakShape(new NoShape) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -286,6 +287,12 @@ void Peak::setDetectorID(int id) {
     return;
   // Use the grand-parent whenever possible
   m_bankName = parent->getName();
+  // For CORELLI, one level above sixteenpack
+  if(m_bankName.compare("sixteenpack") == 0){
+    parent = parent->getParent();
+    m_bankName = parent->getName();
+  }
+
 
   // Special for rectangular detectors: find the row and column.
   RectangularDetector_const_sptr retDet =

@@ -9,9 +9,8 @@ setlocal enableextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: All node currently have PARAVIEW_DIR=3.98.1 and PARAVIEW_NEXT_DIR=4.3.1
+:: All nodes currently have PARAVIEW_DIR=4.3.b40280 and PARAVIEW_NEXT_DIR=4.3.1
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 
 set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
 "%CMAKE_BIN_DIR%\cmake.exe" --version
@@ -137,33 +136,4 @@ if "%BUILDPKG%" == "yes" (
   :: code is correct!
   ::if ERRORLEVEL 1 exit /B %ERRORLEVEL%
   "%CMAKE_BIN_DIR%\cpack.exe" -C %BUILD_CONFIG% --config CPackConfig.cmake
-)
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Run the doc tests when doing a pull request build. Run from a package
-:: from a package to have at least one Linux checks it install okay
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
-  :: Install package
-  set SYSTEMTESTS_DIR=%WORKSPACE%\Code\Mantid\Testing\SystemTests
-  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py install %BUILD_DIR%
-
-  ::Remove user properties, disable instrument updating & usage reports and add data paths
-  del /Q C:\MantidInstall\bin\Mantid.user.properties
-  echo UpdateInstrumentDefinitions.OnStartup = 0 > C:\MantidInstall\bin\Mantid.user.properties
-  echo usagereports.enabled = 0 >> C:\MantidInstall\bin\Mantid.user.properties
-  :: User properties file cannot contain backslash characters
-  set WORKSPACE_UNIX_STYLE=%WORKSPACE:\=/%
-  set DATA_ROOT=!WORKSPACE_UNIX_STYLE!/build/ExternalData/Testing/Data
-  echo datasearch.directories = !DATA_ROOT!/UnitTest;!DATA_ROOT!/DocTest;!WORKSPACE_UNIX_STYLE!/Code/Mantid/instrument >> C:\MantidInstall\bin\Mantid.user.properties
-
-  :: Run tests
-  cd %BUILD_DIR%\docs
-  C:\MantidInstall\bin\MantidPlot.exe -xq runsphinx_doctest.py
-  set RETCODE=!ERRORLEVEL!
-
-  :: Remove Mantid
-  cd %BUILD_DIR%
-  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %BUILD_DIR%
-  if !RETCODE! NEQ 0 exit /B 1
 )

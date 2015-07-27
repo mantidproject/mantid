@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -23,33 +24,33 @@
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 
-namespace
-{
-  Mantid::Kernel::Logger g_log("PreviewPlot");
-  bool isNegative(double v) { return v <= 0.0; }
+namespace {
+Mantid::Kernel::Logger g_log("PreviewPlot");
+bool isNegative(double v) { return v <= 0.0; }
 }
 
-
-PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent),
-  m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
-  m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent),
-  m_init(init), m_curves(),
-  m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
-  m_contextMenu(new QMenu(this)), m_showLegendAction(NULL)
-{
+PreviewPlot::PreviewPlot(QWidget *parent, bool init)
+    : API::MantidWidget(parent),
+      m_removeObserver(*this, &PreviewPlot::handleRemoveEvent),
+      m_replaceObserver(*this, &PreviewPlot::handleReplaceEvent), m_init(init),
+      m_curves(), m_magnifyTool(NULL), m_panTool(NULL), m_zoomTool(NULL),
+      m_contextMenu(new QMenu(this)), m_showLegendAction(NULL),
+      m_showErrorsMenuAction(NULL), m_showErrorsMenu(NULL),
+      m_errorBarOptionCache() {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
 
-  if(init)
-  {
-    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+  if (init) {
+    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
     ads.notificationCenter.addObserver(m_removeObserver);
     ads.notificationCenter.addObserver(m_replaceObserver);
   }
 
   // Setup plot manipulation tools
-  m_zoomTool = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
-      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, m_uiForm.plot->canvas());
+  m_zoomTool =
+      new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+                        QwtPicker::DragSelection | QwtPicker::CornerToCorner,
+                        QwtPicker::AlwaysOff, m_uiForm.plot->canvas());
   m_zoomTool->setEnabled(false);
 
   m_panTool = new QwtPlotPanner(m_uiForm.plot->canvas());
@@ -61,16 +62,20 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
 
   // Handle showing the context menu
   m_uiForm.plot->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(showContextMenu(QPoint)));
+  connect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
+          SLOT(showContextMenu(QPoint)));
 
   // Create the plot tool list for context menu
   m_plotToolGroup = new QActionGroup(m_contextMenu);
   m_plotToolGroup->setExclusive(true);
 
   QStringList plotTools;
-  plotTools << "None" << "Pan" << "Zoom";
-  QList<QAction *> plotToolActions = addOptionsToMenus("Plot Tools", m_plotToolGroup, plotTools, "None");
-  for(auto it = plotToolActions.begin(); it != plotToolActions.end(); ++it)
+  plotTools << "None"
+            << "Pan"
+            << "Zoom";
+  QList<QAction *> plotToolActions =
+      addOptionsToMenus("Plot Tools", m_plotToolGroup, plotTools, "None");
+  for (auto it = plotToolActions.begin(); it != plotToolActions.end(); ++it)
     connect(*it, SIGNAL(triggered()), this, SLOT(handleViewToolSelect()));
 
   // Create the reset plot view option
@@ -85,9 +90,12 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_xAxisTypeGroup->setExclusive(true);
 
   QStringList xAxisTypes;
-  xAxisTypes << "Linear" << "Logarithmic" << "Squared";
-  QList<QAction *> xAxisTypeActions = addOptionsToMenus("X Axis", m_xAxisTypeGroup, xAxisTypes, "Linear");
-  for(auto it = xAxisTypeActions.begin(); it != xAxisTypeActions.end(); ++it)
+  xAxisTypes << "Linear"
+             << "Logarithmic"
+             << "Squared";
+  QList<QAction *> xAxisTypeActions =
+      addOptionsToMenus("X Axis", m_xAxisTypeGroup, xAxisTypes, "Linear");
+  for (auto it = xAxisTypeActions.begin(); it != xAxisTypeActions.end(); ++it)
     connect(*it, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
 
   // Create the X axis type list for context menu
@@ -95,9 +103,11 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   m_yAxisTypeGroup->setExclusive(true);
 
   QStringList yAxisTypes;
-  yAxisTypes << "Linear" << "Logarithmic";
-  QList<QAction *> yAxisTypeActions = addOptionsToMenus("Y Axis", m_yAxisTypeGroup, yAxisTypes, "Linear");
-  for(auto it = yAxisTypeActions.begin(); it != yAxisTypeActions.end(); ++it)
+  yAxisTypes << "Linear"
+             << "Logarithmic";
+  QList<QAction *> yAxisTypeActions =
+      addOptionsToMenus("Y Axis", m_yAxisTypeGroup, yAxisTypes, "Linear");
+  for (auto it = yAxisTypeActions.begin(); it != yAxisTypeActions.end(); ++it)
     connect(*it, SIGNAL(triggered()), this, SLOT(handleAxisTypeSelect()));
 
   m_contextMenu->addSeparator();
@@ -105,61 +115,72 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init) : API::MantidWidget(parent)
   // Create the show legend option
   m_showLegendAction = new QAction("Show Legend", m_contextMenu);
   m_showLegendAction->setCheckable(true);
-  connect(m_showLegendAction, SIGNAL(toggled(bool)), this, SLOT(showLegend(bool)));
+  connect(m_showLegendAction, SIGNAL(toggled(bool)), this,
+          SLOT(showLegend(bool)));
   m_contextMenu->addAction(m_showLegendAction);
+
+  // Create the show errors option
+  m_showErrorsMenuAction = new QAction("Error Bars:", m_contextMenu);
+  m_showErrorsMenu = new QMenu(m_contextMenu);
+  m_showErrorsMenuAction->setMenu(m_showErrorsMenu);
+  m_contextMenu->addAction(m_showErrorsMenuAction);
 
   connect(this, SIGNAL(needToReplot()), this, SLOT(replot()));
   connect(this, SIGNAL(needToHardReplot()), this, SLOT(hardReplot()));
 }
-
 
 /**
  * Destructor
  *
  * Removes observers on the ADS.
  */
-PreviewPlot::~PreviewPlot()
-{
-  if(m_init)
-  {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(m_removeObserver);
-    AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
+PreviewPlot::~PreviewPlot() {
+  if (m_init) {
+    AnalysisDataService::Instance().notificationCenter.removeObserver(
+        m_removeObserver);
+    AnalysisDataService::Instance().notificationCenter.removeObserver(
+        m_replaceObserver);
   }
 }
-
 
 /**
  * Gets the background colour of the plot window.
  *
  * @return Plot canvas colour
  */
-QColor PreviewPlot::canvasColour()
-{
-  return m_uiForm.plot->canvasBackground();
-}
-
+QColor PreviewPlot::canvasColour() { return m_uiForm.plot->canvasBackground(); }
 
 /**
  * Sets the background colour of the plot window.
  *
  * @param colour Plot canvas colour
  */
-void PreviewPlot::setCanvasColour(const QColor & colour)
-{
+void PreviewPlot::setCanvasColour(const QColor &colour) {
   m_uiForm.plot->setCanvasBackground(QBrush(colour));
 }
-
 
 /**
  * Checks to see if the plot legend is visible.
  *
  * @returns True if the legend is shown
  */
-bool PreviewPlot::legendIsShown()
-{
-  return m_showLegendAction->isChecked();
-}
+bool PreviewPlot::legendIsShown() { return m_showLegendAction->isChecked(); }
 
+/**
+ * Gets a list of curves that have their error bars shown.
+ *
+ * @return List of curve names with error bars shown
+ */
+QStringList PreviewPlot::getShownErrorBars() {
+  QStringList curvesWithErrors;
+
+  for (auto it = m_curves.begin(); it != m_curves.end(); ++it) {
+    if (it.value().showErrorsAction->isChecked())
+      curvesWithErrors << it.key();
+  }
+
+  return curvesWithErrors;
+}
 
 /**
  * Sets the range of the given axis scale to a given range.
@@ -167,45 +188,41 @@ bool PreviewPlot::legendIsShown()
  * @param range Pair of values for range
  * @param axisID ID of axis
  */
-void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID)
-{
-  if(range.first > range.second)
+void PreviewPlot::setAxisRange(QPair<double, double> range, int axisID) {
+  if (range.first > range.second)
     throw std::runtime_error("Supplied range is invalid.");
 
   m_uiForm.plot->setAxisScale(axisID, range.first, range.second);
   emit needToReplot();
 }
 
-
 /**
  * Gets the X range of a curve given a pointer to the workspace.
  *
  * @param ws Pointer to workspace
  */
-QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws)
-{
+QPair<double, double>
+PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws) {
   QStringList curveNames = getCurvesForWorkspace(ws);
 
-  if(curveNames.size() == 0)
+  if (curveNames.size() == 0)
     throw std::runtime_error("Curve for workspace not found.");
 
   return getCurveRange(curveNames[0]);
 }
-
 
 /**
  * Gets the X range of a curve given its name.
  *
  * @param curveName Name of curve
  */
-QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
-{
-  if(!m_curves.contains(curveName))
+QPair<double, double> PreviewPlot::getCurveRange(const QString &curveName) {
+  if (!m_curves.contains(curveName))
     throw std::runtime_error("Curve not on preview plot.");
 
   size_t numPoints = m_curves[curveName].curve->data().size();
 
-  if(numPoints < 2)
+  if (numPoints < 2)
     return qMakePair(0.0, 0.0);
 
   double low = m_curves[curveName].curve->data().x(0);
@@ -213,7 +230,6 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
 
   return qMakePair(low, high);
 }
-
 
 /**
  * Adds a workspace to the preview plot given a pointer to it.
@@ -223,15 +239,37 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
  * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_sptr ws,
-    const size_t specIndex, const QColor & curveColour)
-{
+void PreviewPlot::addSpectrum(const QString &curveName,
+                              const MatrixWorkspace_sptr ws,
+                              const size_t specIndex,
+                              const QColor &curveColour) {
+  if (curveName.isEmpty()) {
+    g_log.warning("Cannot plot with empty curve name");
+    return;
+  }
+
+  if (!ws) {
+    g_log.warning("Cannot plot null workspace");
+    return;
+  }
+
   // Remove the existing curve if it exists
-  if(m_curves.contains(curveName))
+  if (m_curves.contains(curveName))
     removeSpectrum(curveName);
 
+  // Add the error bar option
+  m_curves[curveName].showErrorsAction =
+      new QAction(curveName, m_showErrorsMenuAction);
+  m_curves[curveName].showErrorsAction->setCheckable(true);
+  if (m_errorBarOptionCache.contains(curveName))
+    m_curves[curveName].showErrorsAction->setChecked(
+        m_errorBarOptionCache[curveName]);
+  connect(m_curves[curveName].showErrorsAction, SIGNAL(toggled(bool)), this,
+          SIGNAL(needToHardReplot()));
+  m_showErrorsMenu->addAction(m_curves[curveName].showErrorsAction);
+
   // Create the curve
-  QwtPlotCurve * curve = addCurve(ws, specIndex, curveColour);
+  addCurve(m_curves[curveName], ws, specIndex, curveColour);
 
   // Create the curve label
   QLabel *label = new QLabel(curveName);
@@ -243,7 +281,6 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
   label->setVisible(legendIsShown());
 
   m_curves[curveName].ws = ws;
-  m_curves[curveName].curve = curve;
   m_curves[curveName].label = label;
   m_curves[curveName].colour = curveColour;
   m_curves[curveName].wsIndex = specIndex;
@@ -251,7 +288,6 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
   // Replot
   emit needToReplot();
 }
-
 
 /**
  * Adds a workspace to the preview plot given its name.
@@ -261,48 +297,66 @@ void PreviewPlot::addSpectrum(const QString & curveName, const MatrixWorkspace_s
  * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
-void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
-        const size_t specIndex, const QColor & curveColour)
-{
+void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
+                              const size_t specIndex,
+                              const QColor &curveColour) {
+  if (wsName.isEmpty()) {
+    g_log.error("Cannot plot with empty workspace name");
+    return;
+  }
+
   // Try to get a pointer from the name
   std::string wsNameStr = wsName.toStdString();
-  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      wsName.toStdString());
 
-  if(!ws)
-    throw std::runtime_error(wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
+  if (!ws)
+    throw std::runtime_error(
+        wsNameStr + " is not a MatrixWorkspace, not supported by PreviewPlot.");
 
   addSpectrum(curveName, ws, specIndex, curveColour);
 }
 
-
 /**
  * Removes spectra from a given workspace from the plot given a pointer to it.
  *
- * If multiple curves are plotted form the same workspace then all will be removed.
+ * If multiple curves are plotted form the same workspace then all will be
+ * removed.
  *
  * @param ws Pointer to workspace
  */
-void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
-{
+void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws) {
+  if (!ws) {
+    g_log.error("Cannot remove curve for null workspace");
+    return;
+  }
+
   QStringList curveNames = getCurvesForWorkspace(ws);
 
-  for(auto it = curveNames.begin(); it != curveNames.end(); ++it)
+  for (auto it = curveNames.begin(); it != curveNames.end(); ++it)
     removeSpectrum(*it);
 }
-
 
 /**
  * Removes spectra from a given workspace from the plot given its name.
  *
  * @param curveName Name of curve
  */
-void PreviewPlot::removeSpectrum(const QString & curveName)
-{
+void PreviewPlot::removeSpectrum(const QString &curveName) {
+  if (curveName.isEmpty()) {
+    g_log.error("Cannot remove curve with empty name");
+    return;
+  }
+
   // Remove the curve object and legend label
-  if(m_curves.contains(curveName))
-  {
+  if (m_curves.contains(curveName)) {
     removeCurve(m_curves[curveName].curve);
+    removeCurve(m_curves[curveName].errorCurve);
     m_uiForm.loLegend->removeWidget(m_curves[curveName].label);
+    m_errorBarOptionCache[curveName] =
+        m_curves[curveName].showErrorsAction->isChecked();
+    m_showErrorsMenu->removeAction(m_curves[curveName].showErrorsAction);
+    delete m_curves[curveName].showErrorsAction;
     delete m_curves[curveName].label;
   }
 
@@ -310,12 +364,11 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
   auto it = m_curves.find(curveName);
 
   // Remove the curve from the map
-  if(it != m_curves.end())
+  if (it != m_curves.end())
     m_curves.erase(it);
 
   emit needToReplot();
 }
-
 
 /**
  * Checks to see if a given curve name is present on the plot.
@@ -323,11 +376,9 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
  * @param curveName Curve name
  * @return True if curve is on plot
  */
-bool PreviewPlot::hasCurve(const QString & curveName)
-{
+bool PreviewPlot::hasCurve(const QString &curveName) {
   return m_curves.contains(curveName);
 }
-
 
 /**
  * Creates a RangeSelector, adds it to the plot and stores it.
@@ -336,18 +387,17 @@ bool PreviewPlot::hasCurve(const QString & curveName)
  * @param type Type of range selector to add
  * @return RangeSelector object
  */
-RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
-                                              RangeSelector::SelectType type)
-{
-  if(hasRangeSelector(rsName))
+RangeSelector *PreviewPlot::addRangeSelector(const QString &rsName,
+                                             RangeSelector::SelectType type) {
+  if (hasRangeSelector(rsName))
     throw std::runtime_error("RangeSelector already exists on PreviewPlot");
 
-  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot, type);
+  m_rangeSelectors[rsName] =
+      new MantidWidgets::RangeSelector(m_uiForm.plot, type);
   m_rsVisibility[rsName] = m_rangeSelectors[rsName]->isVisible();
 
   return m_rangeSelectors[rsName];
 }
-
 
 /**
  * Gets a RangeSelector.
@@ -355,14 +405,12 @@ RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
  * @param rsName Name of range selector
  * @return RangeSelector object
  */
-RangeSelector * PreviewPlot::getRangeSelector(const QString & rsName)
-{
-  if(!hasRangeSelector(rsName))
+RangeSelector *PreviewPlot::getRangeSelector(const QString &rsName) {
+  if (!hasRangeSelector(rsName))
     throw std::runtime_error("RangeSelector not found on PreviewPlot");
 
   return m_rangeSelectors[rsName];
 }
-
 
 /**
  * Removes a RangeSelector from the plot.
@@ -370,17 +418,15 @@ RangeSelector * PreviewPlot::getRangeSelector(const QString & rsName)
  * @param rsName Name of range selector
  * @param del If the object should be deleted
  */
-void PreviewPlot::removeRangeSelector(const QString & rsName, bool del = true)
-{
-  if(!hasRangeSelector(rsName))
+void PreviewPlot::removeRangeSelector(const QString &rsName, bool del = true) {
+  if (!hasRangeSelector(rsName))
     return;
 
-  if(del)
+  if (del)
     delete m_rangeSelectors[rsName];
 
   m_rangeSelectors.remove(rsName);
 }
-
 
 /**
  * Checks to see if a range selector with a given name is on the plot.
@@ -388,63 +434,71 @@ void PreviewPlot::removeRangeSelector(const QString & rsName, bool del = true)
  * @param rsName Name of range selector
  * @return True if the plot has a range selector with the given name
  */
-bool PreviewPlot::hasRangeSelector(const QString & rsName)
-{
+bool PreviewPlot::hasRangeSelector(const QString &rsName) {
   return m_rangeSelectors.contains(rsName);
 }
-
 
 /**
  * Shows or hides the plot legend.
  *
  * @param show If the legend should be shown
  */
-void PreviewPlot::showLegend(bool show)
-{
+void PreviewPlot::showLegend(bool show) {
   m_showLegendAction->setChecked(show);
 
-  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
+  for (auto it = m_curves.begin(); it != m_curves.end(); ++it)
     it.value().label->setVisible(show);
 }
 
+/**
+ * Show error bars for the given curves and set a marker that if any curves
+ * added with a given name will have error bars.
+ *
+ * @param curveNames List of curve names to show error bars of
+ */
+void PreviewPlot::setDefaultShownErrorBars(const QStringList &curveNames) {
+  for (auto it = curveNames.begin(); it != curveNames.end(); ++it) {
+    m_errorBarOptionCache[*it] = true;
+
+    if (m_curves.contains(*it))
+      m_curves[*it].showErrorsAction->setChecked(true);
+  }
+
+  emit needToHardReplot();
+}
 
 /**
  * Toggles the pan plot tool.
  *
  * @param enabled If the tool should be enabled
  */
-void PreviewPlot::togglePanTool(bool enabled)
-{
+void PreviewPlot::togglePanTool(bool enabled) {
   // First disbale the zoom tool
-  if(enabled && m_zoomTool->isEnabled())
+  if (enabled && m_zoomTool->isEnabled())
     m_zoomTool->setEnabled(false);
 
   m_panTool->setEnabled(enabled);
   m_magnifyTool->setEnabled(enabled);
 }
 
-
 /**
  * Toggles the zoom plot tool.
  *
  * @param enabled If the tool should be enabled
  */
-void PreviewPlot::toggleZoomTool(bool enabled)
-{
+void PreviewPlot::toggleZoomTool(bool enabled) {
   // First disbale the pan tool
-  if(enabled && m_panTool->isEnabled())
+  if (enabled && m_panTool->isEnabled())
     m_panTool->setEnabled(false);
 
   m_zoomTool->setEnabled(enabled);
   m_magnifyTool->setEnabled(enabled);
 }
 
-
 /**
  * Resets the view to a sensible default.
  */
-void PreviewPlot::resetView()
-{
+void PreviewPlot::resetView() {
   // Auto scale the axis
   m_uiForm.plot->setAxisAutoScale(QwtPlot::xBottom);
   m_uiForm.plot->setAxisAutoScale(QwtPlot::yLeft);
@@ -453,40 +507,38 @@ void PreviewPlot::resetView()
   m_zoomTool->setZoomBase(true);
 }
 
-
 /**
  * Resizes the X axis scale range to exactly fir the curves currently
  * plotted on it.
  */
-void PreviewPlot::resizeX()
-{
+void PreviewPlot::resizeX() {
   double low = DBL_MAX;
   double high = DBL_MIN;
 
-  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
-  {
+  for (auto it = m_curves.begin(); it != m_curves.end(); ++it) {
     auto range = getCurveRange(it.key());
 
-    if(range.first < low)
+    if (range.first < low)
       low = range.first;
 
-    if(range.second > high)
+    if (range.second > high)
       high = range.second;
   }
 
   setAxisRange(qMakePair(low, high), QwtPlot::xBottom);
 }
 
-
 /**
  * Removes all curves from the plot.
  */
-void PreviewPlot::clear()
-{
-  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
-  {
+void PreviewPlot::clear() {
+  for (auto it = m_curves.begin(); it != m_curves.end(); ++it) {
     removeCurve(it.value().curve);
+    removeCurve(it.value().errorCurve);
     m_uiForm.loLegend->removeWidget(it.value().label);
+    m_errorBarOptionCache[it.key()] = it.value().showErrorsAction->isChecked();
+    m_showErrorsMenu->removeAction(it.value().showErrorsAction);
+    delete it.value().showErrorsAction;
     delete it.value().label;
   }
 
@@ -495,32 +547,26 @@ void PreviewPlot::clear()
   emit needToReplot();
 }
 
-
 /**
  * Replots the curves shown on the plot.
  */
-void PreviewPlot::replot()
-{
-  m_uiForm.plot->replot();
-}
-
+void PreviewPlot::replot() { m_uiForm.plot->replot(); }
 
 /**
  * Removes all curves and re-adds them.
  */
-void PreviewPlot::hardReplot()
-{
+void PreviewPlot::hardReplot() {
   QStringList keys = m_curves.keys();
 
-  for(auto it = keys.begin(); it != keys.end(); ++it)
-  {
+  for (auto it = keys.begin(); it != keys.end(); ++it) {
     removeCurve(m_curves[*it].curve);
-    m_curves[*it].curve = addCurve(m_curves[*it].ws, m_curves[*it].wsIndex, m_curves[*it].colour);
+    removeCurve(m_curves[*it].errorCurve);
+    addCurve(m_curves[*it], m_curves[*it].ws, m_curves[*it].wsIndex,
+             m_curves[*it].colour);
   }
 
   emit needToReplot();
 }
-
 
 /**
  * Handle a workspace being deleted from ADS.
@@ -529,12 +575,12 @@ void PreviewPlot::hardReplot()
  *
  * @param pNf Poco notification
  */
-void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
-{
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf) {
+  MatrixWorkspace_sptr ws =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
   // Ignore non matrix worksapces
-  if(!ws)
+  if (!ws)
     return;
 
   // Remove the workspace
@@ -543,7 +589,6 @@ void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
   emit needToReplot();
 }
 
-
 /**
  * Handle a workspace being modified in ADS.
  *
@@ -551,42 +596,44 @@ void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
  *
  * @param pNf Poco notification
  */
-void PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf)
-{
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
+void
+PreviewPlot::handleReplaceEvent(WorkspaceAfterReplaceNotification_ptr pNf) {
+  MatrixWorkspace_sptr ws =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(pNf->object());
 
   // Ignore non matrix worksapces
-  if(!ws)
+  if (!ws)
     return;
 
-  if(getCurvesForWorkspace(ws).size() > 0)
+  if (getCurvesForWorkspace(ws).size() > 0)
     emit needToHardReplot();
 }
-
 
 /**
  * Creates a new curve and adds it to the plot.
  *
+ * @param curveConfig Curve configuration to add to
  * @param ws Worksapce pointer
  * @param specIndex Index of histogram to plot
  * @param curveColour Colour of curve
- * @return Pointer to new curve
  */
-QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specIndex,
-   const QColor & curveColour)
-{
+void PreviewPlot::addCurve(PlotCurveConfiguration &curveConfig,
+                           MatrixWorkspace_sptr ws, const size_t specIndex,
+                           const QColor &curveColour) {
   // Check the spectrum index is in range
-  if(specIndex >= ws->getNumberHistograms())
+  if (specIndex >= ws->getNumberHistograms())
     throw std::runtime_error("Workspace index is out of range, cannot plot.");
 
   // Check the X axis is large enough
-  if(ws->readX(0).size() < 2)
-    throw std::runtime_error("X axis is too small to generate a histogram plot.");
+  if (ws->readX(0).size() < 2)
+    throw std::runtime_error(
+        "X axis is too small to generate a histogram plot.");
 
   // Convert X axis to squared if needed
-  if(getAxisType(QwtPlot::xBottom) == "Squared")
-  {
-    Mantid::API::IAlgorithm_sptr convertXAlg = Mantid::API::AlgorithmManager::Instance().create("ConvertAxisByFormula");
+  if (getAxisType(QwtPlot::xBottom) == "Squared") {
+    Mantid::API::IAlgorithm_sptr convertXAlg =
+        Mantid::API::AlgorithmManager::Instance().create(
+            "ConvertAxisByFormula");
     convertXAlg->initialize();
     convertXAlg->setChild(true);
     convertXAlg->setLogging(false);
@@ -602,11 +649,11 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
 
   // If using log scale need to remove all negative Y values
   bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
-  if(logYScale)
-  {
+  if (logYScale) {
     // Remove negative data in order to search for minimum positive value
     std::vector<double> validData(wsDataY.size());
-    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), isNegative);
+    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(),
+                                  validData.begin(), isNegative);
     validData.resize(std::distance(validData.begin(), it));
 
     // Get minimum positive value
@@ -622,23 +669,28 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   QwtArrayData wsData(dataX, dataY);
 
   // Create the new curve
-  QwtPlotCurve * curve = new QwtPlotCurve();
-  curve->setData(wsData);
-  curve->setPen(curveColour);
-  curve->attach(m_uiForm.plot);
+  curveConfig.curve = new QwtPlotCurve();
+  curveConfig.curve->setData(wsData);
+  curveConfig.curve->setPen(curveColour);
+  curveConfig.curve->attach(m_uiForm.plot);
 
-  return curve;
+  // Create error bars if needed
+  if (curveConfig.showErrorsAction->isChecked()) {
+    curveConfig.errorCurve =
+        new ErrorCurve(curveConfig.curve, ws->readE(specIndex));
+    curveConfig.errorCurve->attach(m_uiForm.plot);
+  } else {
+    curveConfig.errorCurve = NULL;
+  }
 }
-
 
 /**
  * Removes a curve from the plot.
  *
  * @param curve Curve to remove
  */
-void PreviewPlot::removeCurve(QwtPlotCurve * curve)
-{
-  if(!curve)
+void PreviewPlot::removeCurve(QwtPlotItem *curve) {
+  if (!curve)
     return;
 
   // Take it off the plot
@@ -649,9 +701,9 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
   curve = NULL;
 }
 
-
 /**
- * Helper function for adding a set of items to an exclusive menu on the context menu.
+ * Helper function for adding a set of items to an exclusive menu on the context
+ *menu.
  *
  * @param menuName Name of sub menu
  * @param group Pointer to ActionGroup
@@ -659,12 +711,13 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
  * @param defaultItem Default item name
  * @return List of Actions added
  */
-QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem)
-{
+QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
+                                                QActionGroup *group,
+                                                QStringList items,
+                                                QString defaultItem) {
   QMenu *menu = new QMenu(m_contextMenu);
 
-  for(auto it = items.begin(); it != items.end(); ++it)
-  {
+  for (auto it = items.begin(); it != items.end(); ++it) {
     QAction *action = new QAction(*it, menu);
     action->setCheckable(true);
 
@@ -683,31 +736,28 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *
   return group->actions();
 }
 
-
 /**
  * Returns the type of axis scale specified for a given axis.
  *
  * @param axisID ID of axis
  * @return Axis type as string
  */
-QString PreviewPlot::getAxisType(int axisID)
-{
+QString PreviewPlot::getAxisType(int axisID) {
   QString axisType("Linear");
-  QAction * selectedAxisType = NULL;
+  QAction *selectedAxisType = NULL;
 
-  if(axisID == QwtPlot::xBottom)
+  if (axisID == QwtPlot::xBottom)
     selectedAxisType = m_xAxisTypeGroup->checkedAction();
   else if (axisID == QwtPlot::yLeft)
     selectedAxisType = m_yAxisTypeGroup->checkedAction();
   else
     return QString();
 
-  if(selectedAxisType)
+  if (selectedAxisType)
     axisType = selectedAxisType->text();
 
   return axisType;
 }
-
 
 /**
  * Gets a list of curve names that are plotted form the given workspace.
@@ -715,63 +765,50 @@ QString PreviewPlot::getAxisType(int axisID)
  * @param ws Pointer to workspace
  * @return List of curve names
  */
-QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws)
-{
+QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws) {
   QStringList curveNames;
 
-  for(auto it = m_curves.begin(); it != m_curves.end(); ++it)
-  {
-    if(it.value().ws == ws)
+  for (auto it = m_curves.begin(); it != m_curves.end(); ++it) {
+    if (it.value().ws == ws)
       curveNames << it.key();
   }
 
   return curveNames;
 }
 
-
 /**
  * Handles displaying the context menu when a user right clicks on the plot.
  *
  * @param position Position at which to show menu
  */
-void PreviewPlot::showContextMenu(QPoint position)
-{
+void PreviewPlot::showContextMenu(QPoint position) {
   // Show the context menu
   m_contextMenu->popup(m_uiForm.plot->mapToGlobal(position));
 }
 
-
 /**
  * Handles the view tool being selected from the context menu.
  */
-void PreviewPlot::handleViewToolSelect()
-{
+void PreviewPlot::handleViewToolSelect() {
   QAction *selectedPlotType = m_plotToolGroup->checkedAction();
-  if(!selectedPlotType)
+  if (!selectedPlotType)
     return;
 
   QString selectedTool = selectedPlotType->text();
-  if(selectedTool == "None")
-  {
+  if (selectedTool == "None") {
     togglePanTool(false);
     toggleZoomTool(false);
-  }
-  else if(selectedTool == "Pan")
-  {
+  } else if (selectedTool == "Pan") {
     togglePanTool(true);
-  }
-  else if(selectedTool == "Zoom")
-  {
+  } else if (selectedTool == "Zoom") {
     toggleZoomTool(true);
   }
 }
 
-
 /**
  * Handles a change in the plot axis type.
  */
-void PreviewPlot::handleAxisTypeSelect()
-{
+void PreviewPlot::handleAxisTypeSelect() {
   // Determine the type of engine to use for each axis
   QString xAxisType = getAxisType(QwtPlot::xBottom);
   QString yAxisType = getAxisType(QwtPlot::yLeft);
@@ -780,56 +817,43 @@ void PreviewPlot::handleAxisTypeSelect()
   QwtScaleEngine *yEngine = NULL;
 
   // Get the X axis engine
-  if(xAxisType == "Linear")
-  {
+  if (xAxisType == "Linear") {
     xEngine = new QwtLinearScaleEngine();
-  }
-  else if(xAxisType == "Logarithmic")
-  {
+  } else if (xAxisType == "Logarithmic") {
     xEngine = new QwtLog10ScaleEngine();
-  }
-  else if(xAxisType == "Squared")
-  {
+  } else if (xAxisType == "Squared") {
     xEngine = new QwtLinearScaleEngine();
   }
 
   // Get the Y axis engine
-  if(yAxisType == "Linear")
-  {
+  if (yAxisType == "Linear") {
     yEngine = new QwtLinearScaleEngine();
-  }
-  else if(yAxisType == "Logarithmic")
-  {
+  } else if (yAxisType == "Logarithmic") {
     yEngine = new QwtLog10ScaleEngine();
   }
 
   // Set the axis scale engines
-  if(xEngine)
+  if (xEngine)
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::xBottom, xEngine);
 
-  if(yEngine)
+  if (yEngine)
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
 
   emit axisScaleChanged();
 
   // Hide range selectors on X axis when X axis scale is X^2
   bool xIsSquared = xAxisType == "Squared";
-  for(auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it)
-  {
+  for (auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it) {
     QString rsName = it.key();
-    RangeSelector * rs = it.value();
+    RangeSelector *rs = it.value();
     RangeSelector::SelectType type = rs->getType();
 
-    if(type == RangeSelector:: XMINMAX || type == RangeSelector::XSINGLE)
-    {
+    if (type == RangeSelector::XMINMAX || type == RangeSelector::XSINGLE) {
       // When setting to invisible save the last visibility setting
-      if(xIsSquared)
-      {
+      if (xIsSquared) {
         m_rsVisibility[rsName] = rs->isVisible();
         rs->setVisible(false);
-      }
-      else
-      {
+      } else {
         rs->setVisible(m_rsVisibility[rsName]);
       }
     }

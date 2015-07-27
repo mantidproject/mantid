@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
 #include "ui_Iqt.h"
-#include "IDATab.h"
+#include "IndirectDataAnalysisTab.h"
 
 namespace MantidQt
 {
@@ -10,7 +10,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport Iqt : public IDATab
+  class DLLExport Iqt : public IndirectDataAnalysisTab
   {
     Q_OBJECT
 
@@ -24,6 +24,7 @@ namespace IDA
     virtual void loadSettings(const QSettings & settings);
 
   private slots:
+    void algorithmComplete(bool error);
     void plotInput(const QString& wsname);
     void rsRangeChangedLazy(double min, double max);
     void updateRS(QtProperty* prop, double val);

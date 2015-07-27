@@ -3,6 +3,7 @@
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidCrystal/PeakClusterProjection.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -119,8 +120,7 @@ void IntegratePeaksUsingClusters::exec() {
   IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
   IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(
-        dynamic_cast<IPeaksWorkspace *>(inPeakWS->clone()));
+    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
   }
 
   {
@@ -162,7 +162,7 @@ void IntegratePeaksUsingClusters::exec() {
   PARALLEL_FOR1(peakWS)
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak &peak = peakWS->getPeak(i);
+    Geometry::IPeak &peak = peakWS->getPeak(i);
     const Mantid::signal_t signalValue = projection.signalAtPeakCenter(
         peak); // No normalization when extracting label ids!
     if (boost::math::isnan(signalValue)) {

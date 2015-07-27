@@ -2,6 +2,8 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -23,11 +25,9 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DataProcessorAlgorithm::DataProcessorAlgorithm() : API::Algorithm() {
-  m_loadAlg = "Load";
-  m_accumulateAlg = "Plus";
-  m_loadAlgFileProp = "Filename";
-  m_useMPI = false;
+DataProcessorAlgorithm::DataProcessorAlgorithm() : API::Algorithm(),
+    m_useMPI(false), m_loadAlg("Load"), m_accumulateAlg("Plus"),
+    m_loadAlgFileProp("Filename"), m_propertyManagerPropertyName("ReductionProperties") {
   enableHistoryRecordingForChild(true);
 }
 
@@ -91,6 +91,74 @@ void DataProcessorAlgorithm::setAccumAlg(const std::string &alg) {
     throw std::invalid_argument(
         "Cannot set accumulate algorithm to empty string");
   m_accumulateAlg = alg;
+}
+
+void DataProcessorAlgorithm::setPropManagerPropName(const std::string &propName) {
+    m_propertyManagerPropertyName = propName;
+}
+
+/**
+ * Declare mapping of property name to name in the PropertyManager. This is used by
+ * getPropertyValue(const string &) and getProperty(const string&).
+ *
+ * @param nameInProp Name of the property as declared in Algorithm::init().
+ * @param nameInPropManager Name of the property in the PropertyManager.
+ */
+void DataProcessorAlgorithm::mapPropertyName(const std::string &nameInProp,
+                                            const std::string &nameInPropManager) {
+    m_nameToPMName[nameInProp] = nameInPropManager;
+}
+
+/**
+ * Get the property held by this object. If the value is the default see if it
+ * contained in the PropertyManager. @see Algorithm::getPropertyValue(const string &)
+ *
+ * @param name
+ * @return
+ */
+std::string DataProcessorAlgorithm::getPropertyValue(const std::string &name) const {
+  // explicitely specifying a property wins
+  if (!isDefault(name)) {
+    return Algorithm::getPropertyValue(name);
+  }
+
+  // return it if it is in the held property manager
+  auto mapping = m_nameToPMName.find(name);
+  if (mapping != m_nameToPMName.end()) {
+    auto pm = this->getProcessProperties();
+    if (pm->existsProperty(mapping->second)) {
+        return pm->getPropertyValue(mapping->second);
+    }
+  }
+
+  // let the parent class version win
+  return Algorithm::getPropertyValue(name);
+}
+
+/**
+ * Get the property held by this object. If the value is the default see if it
+ * contained in the PropertyManager. @see Algorithm::getProperty(const string&)
+ *
+ * @param name
+ * @return
+ */
+PropertyManagerOwner::TypedValue DataProcessorAlgorithm::getProperty(const std::string &name) const {
+  // explicitely specifying a property wins
+  if (!isDefault(name)) {
+    return Algorithm::getProperty(name);
+  }
+
+  // return it if it is in the held property manager
+  auto mapping = m_nameToPMName.find(name);
+  if (mapping != m_nameToPMName.end()) {
+    auto pm = this->getProcessProperties();
+    if (pm->existsProperty(mapping->second)) {
+      return pm->getProperty(mapping->second);
+    }
+  }
+
+  // let the parent class version win
+  return Algorithm::getProperty(name);
 }
 
 ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk() {
@@ -239,19 +307,31 @@ Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
 
 /**
  * Get the property manager object of a given name from the property manager
- * data service, or create a new one.
- * @param propertyManager :: Name of the property manager to retrieve
+ * data service, or create a new one. If the PropertyManager name is missing (default) this will
+ * look at m_propertyManagerPropertyName to get the correct value;
+ *
+ * @param propertyManager :: Name of the property manager to retrieve.
  */
 boost::shared_ptr<PropertyManager> DataProcessorAlgorithm::getProcessProperties(
-    const std::string &propertyManager) {
+    const std::string &propertyManager) const {
+  std::string propertyManagerName(propertyManager);
+  if (propertyManager.empty() && (!m_propertyManagerPropertyName.empty())) {
+    if (!existsProperty(m_propertyManagerPropertyName)) {
+      std::stringstream msg;
+      msg << "Failed to find property \"" << m_propertyManagerPropertyName << "\"";
+      throw Exception::NotFoundError(msg.str(), this->name());
+    }
+    propertyManagerName = this->getPropertyValue(m_propertyManagerPropertyName);
+  }
+
   boost::shared_ptr<PropertyManager> processProperties;
-  if (PropertyManagerDataService::Instance().doesExist(propertyManager)) {
+  if (PropertyManagerDataService::Instance().doesExist(propertyManagerName)) {
     processProperties =
-        PropertyManagerDataService::Instance().retrieve(propertyManager);
+        PropertyManagerDataService::Instance().retrieve(propertyManagerName);
   } else {
     getLogger().notice() << "Could not find property manager" << std::endl;
     processProperties = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(propertyManager,
+    PropertyManagerDataService::Instance().addOrReplace(propertyManagerName,
                                                         processProperties);
   }
   return processProperties;

@@ -16,10 +16,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-namespace IDA
-{
   AbsorptionCorrections::AbsorptionCorrections(QWidget * parent) :
-    IDATab(parent)
+    CorrectionsTab(parent)
   {
     m_uiForm.setupUi(parent);
 
@@ -274,6 +272,5 @@ namespace IDA
     }
   }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

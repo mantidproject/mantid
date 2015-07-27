@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
@@ -192,7 +192,7 @@ typedef std::vector<SXPeak> peakvector;
 class DLLExport FindSXPeaks : public API::Algorithm {
 public:
   /// Default constructor
-  FindSXPeaks() : API::Algorithm(){};
+  FindSXPeaks();
   /// Destructor
   virtual ~FindSXPeaks(){};
   /// Algorithm's name for identification overriding a virtual method

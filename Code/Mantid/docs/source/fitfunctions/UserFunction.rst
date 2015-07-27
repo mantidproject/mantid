@@ -23,3 +23,7 @@ go first in UserFunction definition.
 .. properties::
 
 .. categories::
+
+.. sourcelink::
+    :h: Framework/CurveFitting/inc/MantidCurveFitting/UserFunction.h
+    :cpp: Framework/CurveFitting/src/UserFunction.cpp

@@ -31,8 +31,8 @@ public:
   MOCK_CONST_METHOD0(function, QString());
   MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
 
-  MOCK_METHOD1(setDataCurve, void(const QwtData&));
-  MOCK_METHOD1(setCorrectedCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
+  MOCK_METHOD2(setCorrectedCurve, void(const QwtData&, const std::vector<double>&));
   MOCK_METHOD1(setBaselineCurve, void(const QwtData&));
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
@@ -76,6 +76,7 @@ MATCHER_P3(FunctionParameter, param, value, delta, "")
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
 MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite
 {
@@ -150,7 +151,10 @@ public:
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                            QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
+                                            QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8)),
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 1, 1E-6),
+                                            VectorValue(2, 1, 1E-6))));
 
     m_model->changeData();
   }
@@ -161,7 +165,10 @@ public:
 
     EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8))));
+                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8)),
+                                           AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 1, 1E-6),
+                                            VectorValue(2, 1, 1E-6))));
 
     m_model->changeCorrectedData();
   }
@@ -170,7 +177,7 @@ public:
   {
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
 
-    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0)));
+    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0),_));
 
     m_model->changeCorrectedData();
   }
@@ -210,6 +217,18 @@ public:
     EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("1"), QString("10")))).After(tableExtended);
 
     EXPECT_CALL(*m_view, addSectionSelector(1, Pair(1,10)));
+
+    m_view->requestAddSection();
+  }
+
+  void test_addSection_toEmptyWS()
+  {
+    ON_CALL(*m_model, data()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
+
+    EXPECT_CALL(*m_view, noOfSectionRows()).Times(0);
+    EXPECT_CALL(*m_view, setSectionRow(_,_)).Times(0);
+    EXPECT_CALL(*m_view, addSectionSelector(_,_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_)).Times(1);
 
     m_view->requestAddSection();
   }

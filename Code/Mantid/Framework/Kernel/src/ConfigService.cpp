@@ -4,7 +4,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/ParaViewVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
@@ -29,6 +28,10 @@
 #ifdef _WIN32
 #pragma warning(disable : 4250)
 #endif
+#include <Poco/Logger.h>
+#include <Poco/Channel.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
@@ -149,7 +152,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_removedFlag("@@REMOVED@@"), m_proxyInfo(),
+      m_instr_prefixes(), m_proxyInfo(),
       m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
@@ -187,14 +190,6 @@ ConfigServiceImpl::ConfigServiceImpl()
     }
   }
 
-  // Assert that the appdata and the instrument subdirectory exists
-  std::string appDataDir = getAppDataDir();
-  Poco::Path path(appDataDir);
-  path.pushDirectory("instrument");
-  Poco::File file(path);
-  // createdirectories will fail gracefully if it is already present
-  file.createDirectories();
-
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
   m_ConfigPaths.insert(
@@ -203,6 +198,7 @@ ConfigServiceImpl::ConfigServiceImpl()
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
+  m_ConfigPaths.insert(std::make_pair("instrumentDefinition.vtpDirectory", true));
   m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
@@ -253,6 +249,16 @@ ConfigServiceImpl::ConfigServiceImpl()
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 #endif
+
+  // Assert that the appdata and the instrument subdirectory exists
+  std::string appDataDir = getAppDataDir();
+  Poco::Path path(appDataDir);
+  path.pushDirectory("instrument");
+  Poco::File file(path);
+  // createdirectories will fail gracefully if it is already present
+  file.createDirectories();
+  Poco::File vtpDir(getVTPFileDirectory());
+  vtpDir.createDirectories();
 }
 
 /** Private Destructor
@@ -943,8 +949,6 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
   std::string retVal;
   try {
     retVal = m_pConf->getString(keyName);
-    if (retVal == m_removedFlag)
-      retVal = "";
   }
   catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << keyName << " in the properties file"
@@ -966,30 +970,8 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
 std::vector<std::string>
 ConfigServiceImpl::getKeys(const std::string &keyName) const {
   std::vector<std::string> rawKeys;
-  std::vector<std::string> keyVector;
-  keyVector.reserve(rawKeys.size());
-  try {
-    m_pConf->keys(keyName, rawKeys);
-    // Work around a limitation of Poco < v1.4 which has no remove functionality
-    // so check those that have been marked with the correct flag
-    const size_t nraw = rawKeys.size();
-    for (size_t i = 0; i < nraw; ++i) {
-      const std::string key = rawKeys[i];
-      try {
-        if (m_pConf->getString(key) == m_removedFlag)
-          continue;
-      }
-      catch (Poco::NotFoundException &) {
-      }
-      keyVector.push_back(key);
-    }
-  }
-  catch (Poco::NotFoundException &) {
-    g_log.debug() << "Unable to find " << keyName << " in the properties file"
-                  << std::endl;
-    keyVector.clear();
-  }
-  return keyVector;
+  m_pConf->keys(keyName, rawKeys);
+  return rawKeys;
 }
 
 /**
@@ -1016,7 +998,7 @@ void ConfigServiceImpl::getKeysRecursive(const std::string &root,
   }
 }
 
-/**
+  /**
  * Recursively gets a list of all config options.
  *
  * This function is needed as Boost Python does not like calling function with
@@ -1039,16 +1021,7 @@ std::vector<std::string> ConfigServiceImpl::keys() const {
  *  @param rootName :: The key that is to be deleted
  */
 void ConfigServiceImpl::remove(const std::string &rootName) const {
-  try {
-    // m_pConf->remove(rootName) will only work in Poco v >=1.4. Current Ubuntu
-    // and RHEL use 1.3.x
-    // Simulate removal by marking with a flag value
-    m_pConf->setString(rootName, m_removedFlag);
-  }
-  catch (Poco::NotFoundException &) {
-    g_log.debug() << "Unable to find " << rootName << " in the properties file"
-                  << std::endl;
-  }
+  m_pConf->remove(rootName);
   m_changed_keys.insert(rootName);
 }
 
@@ -1059,9 +1032,7 @@ void ConfigServiceImpl::remove(const std::string &rootName) const {
  *  @returns Boolean value denoting whether the exists or not.
  */
 bool ConfigServiceImpl::hasProperty(const std::string &rootName) const {
-  // Work around a limitation of Poco < v1.4 which has no remove functionality
-  return m_pConf->hasProperty(rootName) &&
-         m_pConf->getString(rootName) != m_removedFlag;
+  return m_pConf->hasProperty(rootName);
 }
 
 /** Checks to see whether the given file target is an executable one and it
@@ -1669,7 +1640,24 @@ ConfigServiceImpl::getInstrumentDirectories() const {
 const std::string ConfigServiceImpl::getInstrumentDirectory() const {
   return m_InstrumentDirs[m_InstrumentDirs.size() - 1];
 }
-
+/**
+ * Return the search directory for vtp files
+ * @returns a path
+ */
+const std::string ConfigServiceImpl::getVTPFileDirectory() {
+  // Determine the search directory for XML instrument definition files (IDFs)
+  std::string directoryName = getString("instrumentDefinition.vtpDirectory");
+  
+  if (directoryName.empty())
+  {
+    Poco::Path path(getAppDataDir());
+    path.makeDirectory();
+    path.pushDirectory("instrument");
+    path.pushDirectory("geometryCache");
+    directoryName = path.toString();
+  }
+  return directoryName;
+}
 /**
  * Fills the internal cache of instrument definition directories
  */
@@ -1961,6 +1949,59 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   }
   return m_proxyInfo;
 }
+
+/** Sets the log level priority for the File log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
+void ConfigServiceImpl::setFileLogLevel(int logLevel)
+{
+  setFilterChannelLogLevel("fileFilterChannel",logLevel);
+}
+/** Sets the log level priority for the Console log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
+void ConfigServiceImpl::setConsoleLogLevel(int logLevel)
+{
+  setFilterChannelLogLevel("consoleFilterChannel",logLevel);
+}
+
+
+/** Sets the Log level for a filter channel
+* @param filterChannelName the channel name of the filter channel to change
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @throws std::invalid_argument if the channel name is incorrect or it is not a filterChannel
+*/
+void ConfigServiceImpl::setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel)
+{
+  Poco::Channel* channel = NULL;
+  try
+  {
+    channel = Poco::LoggingRegistry::defaultRegistry().channelForName(filterChannelName);
+  }
+  catch(Poco::NotFoundException&)
+  {
+    throw std::invalid_argument(filterChannelName + " not found in the Logging Registry");
+  }
+
+  auto *filterChannel = dynamic_cast<Poco::FilterChannel*>(channel);
+  if (filterChannel)
+  {
+    filterChannel->setPriority(logLevel);      
+    //set root level if required
+    int rootLevel = Poco::Logger::root().getLevel();
+    if (rootLevel < logLevel)
+    {
+        Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    }
+    g_log.log(filterChannelName + " log channel set to " + Logger::PriorityNames[logLevel] + " priority",static_cast<Logger::Priority>(logLevel));
+  }
+  else
+  {
+    throw std::invalid_argument(filterChannelName + " was not a filter channel");
+  }
+}
+
+
 
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,

@@ -59,6 +59,9 @@ public slots:
   void enablePan();
   void enableRange();
   void updateRange(int index);
+  void showDataErrors(bool);
+  void resetRange();
+  void zoomToRange();
 private slots:
   void tableUpdated();
   void prevPlot();
@@ -70,9 +73,6 @@ private:
   void disableAllTools();
   template<class Tool>
   void enableTool(Tool* tool, int cursor);
-  bool eventFilter(QObject *widget, QEvent *evn);
-  void resetRange();
-  void zoomToRange();
   boost::shared_ptr<DatasetPlotData> getData(int i);
 
   /// The plot widget
@@ -97,6 +97,7 @@ private:
   QPushButton *m_nextPlot;
   QMap<int,boost::shared_ptr<DatasetPlotData>> m_plotData;
   int m_currentIndex;
+  bool m_showDataErrors;
 };
 
 } // MDF

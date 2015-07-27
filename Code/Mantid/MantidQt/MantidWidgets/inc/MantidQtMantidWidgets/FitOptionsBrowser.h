@@ -43,13 +43,28 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitOptionsBrowser: public QWidget
 {
   Q_OBJECT
 public:
+  /// Support for fitting algorithms:
+  ///   Simultaneous: Fit
+  ///   Sequential:   PlotPeakByLogValue
+  ///   SimultaneousAndSequential: both Fit and PlotPeakByLogValue, toggled with
+  ///       "Fitting" property.
+  enum FittingType {Simultaneous = 0, Sequential, SimultaneousAndSequential};
+
   /// Constructor
-  FitOptionsBrowser(QWidget *parent = NULL);
+  FitOptionsBrowser(QWidget *parent = NULL, FittingType fitType = Simultaneous);
   QString getProperty(const QString& name) const;
   void setProperty(const QString& name, const QString& value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) const;
   void saveSettings(QSettings& settings) const;
   void loadSettings(const QSettings& settings);
+  FittingType getCurrentFittingType() const;
+  void setCurrentFittingType(FittingType fitType);
+  void lockCurrentFittingType(FittingType fitType);
+  void unlockCurrentFittingType();
+  void setLogNames(const QStringList& logNames);
+
+signals:
+  void changedToSequentialFitting();
 
 private slots:
 
@@ -59,25 +74,33 @@ private:
 
   void createBrowser();
   void createProperties();
+  void createCommonProperties();
+  void createSimultaneousFitProperties();
+  void createSequentialFitProperties();
   void updateMinimizer();
+  void switchFitType();
+  void displayNormalFitProperties();
+  void displaySequentialFitProperties();
+
   QtProperty* createPropertyProperty(Mantid::Kernel::Property* prop);
   QtProperty* addDoubleProperty(const QString& name);
 
-  //  Setters and getters
-  QString getMinimizer() const;
-  void setMinimizer(const QString&);
-  QString getCostFunction() const;
-  void setCostFunction(const QString&);
-  QString getMaxIterations() const;
-  void setMaxIterations(const QString&);
-  QString getOutput() const;
-  void setOutput(const QString&);
-  QString getIgnoreInvalidData() const;
-  void setIgnoreInvalidData(const QString&);
+  void addProperty(const QString& name, QtProperty* prop,
+    QString (FitOptionsBrowser::*getter)(QtProperty*)const, 
+    void (FitOptionsBrowser::*setter)(QtProperty*,const QString&));
 
-  void addProperty(const QString& name, 
-    QString (FitOptionsBrowser::*getter)()const, 
-    void (FitOptionsBrowser::*setter)(const QString&));
+  //  Setters and getters
+  QString getMinimizer(QtProperty*) const;
+  void setMinimizer(QtProperty*, const QString&);
+
+  QString getIntProperty(QtProperty*) const;
+  void setIntProperty(QtProperty*, const QString&);
+  QString getBoolProperty(QtProperty*) const;
+  void setBoolProperty(QtProperty*, const QString&);
+  QString getStringEnumProperty(QtProperty*) const;
+  void setStringEnumProperty(QtProperty*, const QString&);
+  QString getStringProperty(QtProperty*) const;
+  void setStringProperty(QtProperty*, const QString&);
 
   /// Qt property browser which displays properties
   QtTreePropertyBrowser* m_browser;
@@ -95,6 +118,8 @@ private:
   /// Manager for groups of properties
   QtGroupPropertyManager* m_groupManager;
 
+  /// FitType property
+  QtProperty* m_fittingTypeProp;
   /// Minimizer group property
   QtProperty* m_minimizerGroup;
   /// Minimizer property
@@ -103,18 +128,39 @@ private:
   QtProperty* m_costFunction;
   /// MaxIterations property
   QtProperty* m_maxIterations;
+  
+  // Fit properties
   /// Output property
   QtProperty* m_output;
   /// IgnoreInvalidData property
   QtProperty* m_ignoreInvalidData;
 
+  // PlotPeakByLogValue properties
+  /// FitType property
+  QtProperty* m_fitType;
+  /// OutputWorkspace property
+  QtProperty* m_outputWorkspace;
+  /// LogValue property
+  QtProperty* m_logValue;
+
   /// Precision of doubles in m_doubleManager
   int m_decimals;
 
+  typedef  void (FitOptionsBrowser::*SetterType)(QtProperty*, const QString&);
+  typedef  QString (FitOptionsBrowser::*GetterType)(QtProperty*)const;
+  /// Maps algorithm property name to the QtProperty
+  QMap<QString,QtProperty*> m_propertyNameMap;
   /// Store for the properties setter methods
-  QMap<QString,void (FitOptionsBrowser::*)(const QString&)> m_setters;
+  QMap<QtProperty*,SetterType> m_setters;
   /// Store for the properties getter methods
-  QMap<QString,QString (FitOptionsBrowser::*)()const> m_getters;
+  QMap<QtProperty*,GetterType> m_getters;
+
+  /// The Fitting Type
+  FittingType m_fittingType;
+  /// Store special properties of the normal Fit
+  QList<QtProperty*> m_simultaneousProperties;
+  /// Store special properties of the sequential Fit
+  QList<QtProperty*> m_sequentialProperties;
 };
 
 } // MantidWidgets

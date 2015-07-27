@@ -21,3 +21,5 @@ be renamed to Linear in the not too distance future.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

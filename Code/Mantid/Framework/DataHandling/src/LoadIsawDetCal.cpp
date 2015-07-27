@@ -150,11 +150,26 @@ void LoadIsawDetCal::exec() {
       }
     }
   }
-
+  std::set<int> uniqueBanks; // for CORELLI and WISH
+  std::string bankPart = "bank";
+  if (instname .compare("WISH") == 0) bankPart = "WISHpanel";
   if (detList.empty())
-    throw std::runtime_error("This instrument does not have any "
-                             "RectangularDetector's. LoadIsawDetCal cannot "
-                             "operate on this instrument at this time.");
+  {
+    // Get all children
+    std::vector<IComponent_const_sptr> comps;
+    inst->getChildren(comps, true);
+
+    for (size_t i = 0; i < comps.size(); i++) {
+      std::string bankName = comps[i]->getName();
+      boost::trim(bankName);
+      boost::erase_all(bankName,bankPart);
+      int bank = 0;
+      Strings::convert(bankName, bank);
+      if (bank == 0)continue;
+      // Track unique bank numbers
+      uniqueBanks.insert(bank);
+    }
+  }
 
   while (std::getline(input, line)) {
     if (line[0] == '7') {
@@ -162,7 +177,8 @@ void LoadIsawDetCal::exec() {
       std::stringstream(line) >> count >> mL1 >> mT0;
       setProperty("TimeOffset", mT0);
       // Convert from cm to m
-      center(0.0, 0.0, -0.01 * mL1, "moderator", inname);
+      if (instname .compare("WISH") == 0) center(0.0, 0.0, -0.01 * mL1, "undulator", inname);
+      else center(0.0, 0.0, -0.01 * mL1, "moderator", inname);
       // mT0 and time of flight are both in microsec
       IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
       alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
@@ -199,14 +215,16 @@ void LoadIsawDetCal::exec() {
     std::ostringstream Detbank;
     Detbank << "bank" << id;
     // Loop through detectors to match names with number from DetCal file
+    idnum = -1;
     for (int i = 0; i < static_cast<int>(detList.size()); i++)
       if (detList[i]->getName().compare(Detbank.str()) == 0)
         idnum = i;
-    det = detList[idnum];
+    if (idnum >= 0) det = detList[idnum];
     if (det) {
+      detname = det->getName();
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
       alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
-      alg1->setProperty("ComponentName", det->getName());
+      alg1->setProperty("ComponentName", detname);
       // Convert from cm to m
       alg1->setProperty("ScaleX", 0.01 * width / det->xsize());
       alg1->setProperty("ScaleY", 0.01 * height / det->ysize());
@@ -216,7 +234,6 @@ void LoadIsawDetCal::exec() {
       x *= 0.01;
       y *= 0.01;
       z *= 0.01;
-      detname = det->getName();
       center(x, y, z, detname, inname);
 
       // These are the ISAW axes
@@ -254,6 +271,93 @@ void LoadIsawDetCal::exec() {
       // Then find the corresponding relative position
       boost::shared_ptr<const IComponent> comp =
           inst->getComponentByName(detname);
+      boost::shared_ptr<const IComponent> parent = comp->getParent();
+      if (parent) {
+        Quat rot0 = parent->getRelativeRot();
+        rot0.inverse();
+        Rot = Rot * rot0;
+      }
+      boost::shared_ptr<const IComponent> grandparent = parent->getParent();
+      if (grandparent) {
+        Quat rot0 = grandparent->getRelativeRot();
+        rot0.inverse();
+        Rot = Rot * rot0;
+      }
+
+      // Need to get the address to the base instrument component
+      Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+
+      // Set or overwrite "rot" instrument parameter.
+      pmap.addQuat(comp.get(), "rot", Rot);
+    }
+    // Loop through tube detectors to match names with number from DetCal file
+    idnum = -1;
+    std::set<int>::iterator it;
+     for (it = uniqueBanks.begin(); it != uniqueBanks.end(); ++it)
+      if (*it == id) idnum = *it;
+    if (idnum < 0) continue;
+    std::ostringstream mess;
+    if (bankPart == "WISHpanel" && idnum < 10)
+        mess << bankPart << "0" << idnum;
+    else
+      mess << bankPart << idnum;
+
+    std::string bankName = mess.str();
+    // Retrieve it
+    boost::shared_ptr<const IComponent> comp =
+        inst->getComponentByName(bankName);
+    if (instname .compare("CORELLI") == 0) // for Corelli with sixteenpack under bank
+    {
+      std::vector<Geometry::IComponent_const_sptr> children;
+      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(inst->getComponentByName(bankName));
+      asmb->getChildren(children, false);
+      comp = children[0];
+    }
+    if (comp) {
+     // Omitted resizing tubes
+
+      // Convert from cm to m
+      x *= 0.01;
+      y *= 0.01;
+      z *= 0.01;
+      detname = comp->getFullName();
+      center(x, y, z, detname, inname);
+
+      // These are the ISAW axes
+      V3D rX = V3D(base_x, base_y, base_z);
+      rX.normalize();
+      V3D rY = V3D(up_x, up_y, up_z);
+      rY.normalize();
+      // V3D rZ=rX.cross_prod(rY);
+
+      // These are the original axes
+      V3D oX = V3D(1., 0., 0.);
+      V3D oY = V3D(0., 1., 0.);
+      V3D oZ = V3D(0., 0., 1.);
+
+      // Axis that rotates X
+      V3D ax1 = oX.cross_prod(rX);
+      // Rotation angle from oX to rX
+      double angle1 = oX.angle(rX);
+      angle1 *= 180.0 / M_PI;
+      //TODO: find out why this is needed for WISH
+      if (instname == "WISH") angle1 += 180.0;
+      // Create the first quaternion
+      Quat Q1(angle1, ax1);
+
+      // Now we rotate the original Y using Q1
+      V3D roY = oY;
+      Q1.rotate(roY);
+      // Find the axis that rotates oYr onto rY
+      V3D ax2 = roY.cross_prod(rY);
+      double angle2 = roY.angle(rY);
+      angle2 *= 180.0 / M_PI;
+      Quat Q2(angle2, ax2);
+
+      // Final = those two rotations in succession; Q1 is done first.
+      Quat Rot = Q2 * Q1;
+
       boost::shared_ptr<const IComponent> parent = comp->getParent();
       if (parent) {
         Quat rot0 = parent->getRelativeRot();

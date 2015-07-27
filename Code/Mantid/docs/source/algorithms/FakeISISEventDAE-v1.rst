@@ -87,3 +87,5 @@ Output:
     The workspace contains ... events
 
 .. categories::
+
+.. sourcelink::

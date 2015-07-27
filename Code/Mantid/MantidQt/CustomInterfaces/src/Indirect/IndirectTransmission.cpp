@@ -49,10 +49,12 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Plot", m_uiForm.ckPlot->isChecked());
-    transAlg->setProperty("Save", m_uiForm.ckSave->isChecked());
+    m_batchAlgoRunner->addAlgorithm(transAlg);
 
-    runAlgorithm(transAlg);
+    if(m_uiForm.ckSave->isChecked())
+      addSaveWorkspaceToQueue(outWsName);
+
+    m_batchAlgoRunner->executeBatchAsync();
   }
 
   bool IndirectTransmission::validate()
@@ -92,9 +94,6 @@ namespace CustomInterfaces
     transAlg->setProperty("CanWorkspace", canWsName.toStdString());
     transAlg->setProperty("OutputWorkspace", outWsName.toStdString());
 
-    transAlg->setProperty("Plot", false);
-    transAlg->setProperty("Save", false);
-
     // Set the workspace name for Python script export
     m_pythonExportWsName = sampleWsName.toStdString() + "_Trans";
 
@@ -108,6 +107,9 @@ namespace CustomInterfaces
 
     QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString outWsName = sampleWsName + "_trans";
+
+    if(m_uiForm.ckPlot->isChecked())
+      plotSpectrum(outWsName);
 
     WorkspaceGroup_sptr resultWsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWsName.toStdString());
     std::vector<std::string> resultWsNames = resultWsGroup->getNames();
