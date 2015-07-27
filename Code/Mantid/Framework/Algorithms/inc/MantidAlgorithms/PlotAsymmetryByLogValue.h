@@ -93,10 +93,10 @@ private:
                                            const std::vector<int> &bwd);
   /// Group detectors from run file
   void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
-  /// Calculate the integral asymmetry for a workspace (single period)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
-  /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
+  /// Calculates the asymmetry for a workspace (single period)
+  void calculateAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
+  /// Calculates the asymmetry for a pair of workspaces (red & green)
+  void calculateAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results

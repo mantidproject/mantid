@@ -560,7 +560,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
         boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
 
     double Y, E;
-    calcIntAsymmetry(loadedWs2D, Y, E);
+    calculateAsymmetry(loadedWs2D, Y, E);
     m_redX[index] = getLogValue(*loadedWs2D);
     m_redY[index] = Y;
     m_redE[index] = E;
@@ -597,7 +597,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 
     if (m_green == EMPTY_INT()) {
       double Y, E;
-      calcIntAsymmetry(ws_red, Y, E);
+      calculateAsymmetry(ws_red, Y, E);
       m_redX[index] = getLogValue(*ws_red);
       m_redY[index] = Y;
       m_redE[index] = E;
@@ -607,8 +607,8 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
       double YR, ER;
       double YG, EG;
       double logValue = getLogValue(*ws_red);
-      calcIntAsymmetry(ws_red, YR, ER);
-      calcIntAsymmetry(ws_green, YG, EG);
+      calculateAsymmetry(ws_red, YR, ER);
+      calculateAsymmetry(ws_green, YG, EG);
       // Red data
       m_redX[index] = logValue;
       m_redY[index] = YR;
@@ -623,7 +623,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
       m_sumE[index] = sqrt(ER * ER + EG * EG);
       // move to last for safety since some grouping takes place in the
       // calcIntAsymmetry call below
-      calcIntAsymmetry(ws_red, ws_green, YR, ER);
+      calculateAsymmetry(ws_red, ws_green, YR, ER);
       m_diffX[index] = logValue;
       m_diffY[index] = YR;
       m_diffE[index] = ER;
@@ -632,58 +632,52 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 }
 
 /**  Calculate the integral asymmetry for a workspace.
-*   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
-* algorithms.
+*   The calculation is done by AsymmetryCalc and Integration algorithms.
 *   @param ws :: The workspace
-*   @param Y :: Reference to a variable receiving the value of asymmetry
-*   @param E :: Reference to a variable receiving the value of the error
+*   @param Y :: [Output] Reference to a variable receiving the value of
+* asymmetry
+*   @param E :: [Output] Reference to a variable receiving the value of the
+* error
 */
-void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
-                                               double &Y, double &E) {
-  Property *startXprop = getProperty("TimeMin");
-  Property *endXprop = getProperty("TimeMax");
-  bool setX = !startXprop->isDefault() && !endXprop->isDefault();
-  double startX(0.0), endX(0.0);
-  if (setX) {
-    startX = getProperty("TimeMin");
-    endX = getProperty("TimeMax");
-  }
-  if (!m_int) { //  "Differential asymmetry"
+void PlotAsymmetryByLogValue::calculateAsymmetry(API::MatrixWorkspace_sptr ws,
+                                                 double &Y, double &E) {
+
+  if (!m_int) {
+    // "Differential" asymmetry:
+    // Calculate asymmetry first, then integrate
+
     IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
-    asym->initialize();
+    asym->setLogging(false);
     asym->setProperty("InputWorkspace", ws);
-    asym->setPropertyValue("OutputWorkspace", "tmp");
     asym->execute();
     MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", asymWS);
-    integr->setPropertyValue("OutputWorkspace", "tmp");
-    if (setX) {
-      integr->setProperty("RangeLower", startX);
-      integr->setProperty("RangeUpper", endX);
-    }
+    integr->setProperty("RangeLower", m_minTime);
+    integr->setProperty("RangeUpper", m_maxTime);
     integr->execute();
-    API::MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
 
     Y = out->readY(0)[0];
     E = out->readE(0)[0];
+
   } else {
-    //  "Integral asymmetry"
+    // "Integral" asymmetry:
+    // Integrate first, then calculate asymmetry
+
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", ws);
-    integr->setPropertyValue("OutputWorkspace", "tmp");
-    if (setX) {
-      integr->setProperty("RangeLower", startX);
-      integr->setProperty("RangeUpper", endX);
-    }
+    integr->setProperty("RangeLower", m_minTime);
+    integr->setProperty("RangeUpper", m_maxTime);
     integr->execute();
-    API::MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
-    asym->initialize();
+    asym->setLogging(false);
     asym->setProperty("InputWorkspace", intWS);
-    asym->setPropertyValue("OutputWorkspace", "tmp");
     asym->execute();
     MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
 
@@ -693,28 +687,18 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
 }
 
 /**  Calculate the integral asymmetry for a workspace (red & green).
-*   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
-* algorithms.
 *   @param ws_red :: The red workspace
 *   @param ws_green :: The green workspace
 *   @param Y :: Reference to a variable receiving the value of asymmetry
 *   @param E :: Reference to a variable receiving the value of the error
 */
-void
-PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
-                                          API::MatrixWorkspace_sptr ws_green,
-                                          double &Y, double &E) {
-  Property *startXprop = getProperty("TimeMin");
-  Property *endXprop = getProperty("TimeMax");
-  bool setX = !startXprop->isDefault() && !endXprop->isDefault();
-  double startX(0.0), endX(0.0);
-  if (setX) {
-    startX = getProperty("TimeMin");
-    endX = getProperty("TimeMax");
-  }
+void PlotAsymmetryByLogValue::calculateAsymmetry(
+    API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_green,
+    double &Y, double &E) {
+
   if (!m_int) { //  "Differential asymmetry"
 
-    API::MatrixWorkspace_sptr tmpWS = API::WorkspaceFactory::Instance().create(
+    MatrixWorkspace_sptr tmpWS = WorkspaceFactory::Instance().create(
         ws_red, 1, ws_red->readX(0).size(), ws_red->readY(0).size());
 
     for (size_t i = 0; i < tmpWS->dataY(0).size(); i++) {
@@ -729,40 +713,33 @@ PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
     }
 
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", tmpWS);
-    integr->setPropertyValue("OutputWorkspace", "tmp");
-    if (setX) {
-      integr->setProperty("RangeLower", startX);
-      integr->setProperty("RangeUpper", endX);
-    }
+    integr->setProperty("RangeLower", m_minTime);
+    integr->setProperty("RangeUpper", m_maxTime);
     integr->execute();
     MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
 
     Y = out->readY(0)[0] / static_cast<double>(tmpWS->dataY(0).size());
     E = out->readE(0)[0] / static_cast<double>(tmpWS->dataY(0).size());
+
   } else {
     //  "Integral asymmetry"
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", ws_red);
-    integr->setPropertyValue("OutputWorkspace", "tmp");
-    if (setX) {
-      integr->setProperty("RangeLower", startX);
-      integr->setProperty("RangeUpper", endX);
-    }
+    integr->setProperty("RangeLower", m_minTime);
+    integr->setProperty("RangeUpper", m_maxTime);
     integr->execute();
-    API::MatrixWorkspace_sptr intWS_red =
-        integr->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
 
     integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", ws_green);
-    integr->setPropertyValue("OutputWorkspace", "tmp");
-    if (setX) {
-      integr->setProperty("RangeLower", startX);
-      integr->setProperty("RangeUpper", endX);
-    }
+    integr->setProperty("RangeLower", m_minTime);
+    integr->setProperty("RangeUpper", m_maxTime);
     integr->execute();
-    API::MatrixWorkspace_sptr intWS_green =
-        integr->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");
 
     double YIF = (intWS_green->readY(0)[0] - intWS_red->readY(0)[0]) /
                  (intWS_green->readY(0)[0] + intWS_red->readY(0)[0]);
