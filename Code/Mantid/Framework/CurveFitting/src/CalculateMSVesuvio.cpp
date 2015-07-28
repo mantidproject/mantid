@@ -603,11 +603,6 @@ double CalculateMSVesuvio::generateTOF(const double en0, const double dtof,
  * amount the beam would be attenuted by the sample
  * @param startPos Starting position
  * @param direc Direction of travel for the neutron
- * @param detPos Position of the detector that the neutron will end up in.
- * Used
- * to verify that the trajectory is actually possible from any generated
- * scatter
- * point
  * @param weight [InOut] Multiply the incoming weight by the attenuation
  * factor
  * @param scatterPt [Out] Generated scattering point
