@@ -54,6 +54,12 @@ void LoadIDFFromNexus::init() {
                   "and 'mantid_workspace_1' for a processed nexus file. "
                   "Only a one level path is curently supported",
                   Direction::Input);
+  declareProperty("ParameterCorrectionFilePath", std::string(""),
+                  "Full path name of Parameter Correction file. "
+                  "This should only be used in a situation,"
+                  "where the default full file path is inconvenient.",
+                  Direction::Input);
+
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -80,7 +86,10 @@ void LoadIDFFromNexus::exec() {
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile );
 
   // Look for parameter correction file
-  std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
+  std::string parameterCorrectionFile = getPropertyValue("ParameterCorrectionFilePath");
+  if( parameterCorrectionFile == "") {
+     parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
+  }
   g_log.debug() << "Parameter correction file: " << parameterCorrectionFile << "\n";
 
   // Read parameter correction file, if found
