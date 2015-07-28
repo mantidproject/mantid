@@ -7,6 +7,7 @@ namespace Algorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
+using Mantid::API::ITableWorkspace_const_sptr;
 
 namespace { // anonymous namespace
 // this should match those in LoadPDCharacterizations
@@ -76,6 +77,25 @@ std::map<std::string, std::string>
 PDDetermineCharacterizations2::validateInputs() {
   std::map<std::string, std::string> result;
 
+  ITableWorkspace_const_sptr characterizations =
+      getProperty("Characterizations");
+
+  std::vector<std::string> names = characterizations->getColumnNames();
+  if (names.size() >= COL_NAMES.size()) { // allow for extra columns
+    std::stringstream msg;
+    msg << "Encountered invalid number of columns in "
+        << "TableWorkspace. Found " << names.size() << " expected "
+        << COL_NAMES.size();
+    result["Characterizations"] = msg.str();
+  } else {
+    for (auto it = COL_NAMES.begin(); it != COL_NAMES.end(); ++it) {
+      if (std::find(names.begin(), names.end(), *it) == names.end()) {
+        std::stringstream msg;
+        msg << "Failed to find column named " << (*it);
+        result["Characterizations"] = msg.str();
+      }
+    }
+  }
   return result;
 }
 
