@@ -11,3 +11,4 @@ public:
   };
 };
 #endif /*INSTRUMENTWINDOWTYPES_H_*/
+
