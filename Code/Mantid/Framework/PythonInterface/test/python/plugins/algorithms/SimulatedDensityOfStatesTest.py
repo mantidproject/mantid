@@ -56,7 +56,11 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_peak_width(self):
-        ws = SimulatedDensityOfStates(File=self._file_name, PeakWidth=0.3)
+        ws = SimulatedDensityOfStates(File=self._file_name, PeakWidth='0.3')
+        self.assertEquals(ws.getNumberHistograms(), 1)
+
+    def test_peak_width_function(self):
+        ws = SimulatedDensityOfStates(File=self._file_name, PeakWidth='0.1*energy')
         self.assertEquals(ws.getNumberHistograms(), 1)
 
     def test_temperature(self):
@@ -145,6 +149,13 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         """
         self.assertRaises(RuntimeError, SimulatedDensityOfStates,
                           File=self._file_name, SpectrumType='IonTable')
+
+    def test_peak_width_function_error(self):
+        """
+        Using an invalid peak width function should raise RuntimeError.
+        """
+        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
+                          File=self._file_name, PeakWidth='10*')
 
 
 if __name__=="__main__":
