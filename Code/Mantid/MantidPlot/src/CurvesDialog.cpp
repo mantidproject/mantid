@@ -51,6 +51,7 @@
 
 #include <QMessageBox>
 
+
 CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   : QDialog( g, fl ),
     d_app(app),
@@ -97,6 +98,7 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   available->setSelectionMode (QAbstractItemView::ExtendedSelection);
   gl->addWidget(available, 1, 0);
 
+  //add button (move to graph contents)
   QVBoxLayout* vl1 = new QVBoxLayout();
   btnAdd = new QPushButton();
   btnAdd->setPixmap( getQPixmap("next_xpm") );
@@ -104,6 +106,7 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   btnAdd->setFixedHeight (30);
   vl1->addWidget(btnAdd);
 
+  //remove button (move to available data)
   btnRemove = new QPushButton();
   btnRemove->setPixmap( getQPixmap("prev_xpm") );
   btnRemove->setFixedWidth (35);
@@ -130,7 +133,6 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   vl2->addWidget(btnEditFunction);
 
   btnOK = new QPushButton(tr( "OK" ));
-  btnOK->setDefault( true );
   vl2->addWidget(btnOK);
 
   btnCancel = new QPushButton(tr( "Close" ));
@@ -158,8 +160,9 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
   connect(btnEditFunction, SIGNAL(clicked()),this, SLOT(showFunctionDialog()));
   connect(btnAdd, SIGNAL(clicked()),this, SLOT(addCurves()));
   connect(btnRemove, SIGNAL(clicked()),this, SLOT(removeCurves()));
-  connect(btnOK, SIGNAL(clicked()),this, SLOT(close()));
+  connect(btnOK, SIGNAL(clicked()),this, SLOT(close())); 
   connect(btnCancel, SIGNAL(clicked()),this, SLOT(close()));
+  connect(contents, SIGNAL(itemSelectionChanged()), this, SLOT(enableBtnOK()));
   connect(contents, SIGNAL(currentRowChanged(int)), this, SLOT(showCurveBtn(int)));
   connect(contents, SIGNAL(itemSelectionChanged()), this, SLOT(enableRemoveBtn()));
   connect(available, SIGNAL(itemSelectionChanged()), this, SLOT(enableAddBtn()));
@@ -270,15 +273,16 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
   {
     QMenu contextMenu(this);
     QList<QListWidgetItem *> lst = contents->selectedItems();
-    if (lst.size() > 1)
+    
+	if (lst.size() > 1)
       contextMenu.insertItem(tr("&Delete Selection"), this, SLOT(removeCurves()));
-    else if (lst.size() == 1)
+    else if (lst.size() > 0)
       contextMenu.insertItem(tr("&Delete Curve"), this, SLOT(removeCurves()));
     contextMenu.exec(QCursor::pos());
   }
-
   e->accept();
 }
+
 
 void CurvesDialog::init()
 {
@@ -348,6 +352,7 @@ void CurvesDialog::init()
 
 void CurvesDialog::setGraph(Graph *graph)
 {
+  QList<QListWidgetItem *> lst = available->selectedItems();
   d_graph = graph;
   contents->addItems(d_graph->plotItemsList());
   enableRemoveBtn();
@@ -448,6 +453,16 @@ bool CurvesDialog::addCurve(const QString& name)
 
 void CurvesDialog::removeCurves()
 {
+  int count = contents->count();
+  //disables user from deleting last graph from the graph
+  if(count == 1) {
+  QMessageBox::information( 
+    this, 
+    tr("Error - Cannot Delete "), 
+    tr("There should be at least one graph plotted in the graph contents ") );
+	return; 
+  }
+
   QList<QListWidgetItem *> lst = contents->selectedItems();
   for (int i = 0; i < lst.size(); ++i){
     QListWidgetItem *it = lst.at(i);
@@ -463,14 +478,27 @@ void CurvesDialog::removeCurves()
   d_graph->updatePlot();
 }
 
+/** Enable Disable buttons function 
+*
+*/
 void CurvesDialog::enableAddBtn()
 {
   btnAdd->setEnabled (available->count()>0 && !available->selectedItems().isEmpty());
 }
 
+/** Enables or disables the button when appopriate number of graphs are in graph contents
+*
+*/
 void CurvesDialog::enableRemoveBtn()
-{
-  btnRemove->setEnabled (contents->count()>0 && !contents->selectedItems().isEmpty());
+{ 
+  btnRemove->setEnabled (contents->count()>1 && !contents->selectedItems().isEmpty());
+}
+
+/** Enables btnOK when there is even one graph plotted in graph contents area
+*
+*/
+void CurvesDialog::enableBtnOK(){
+  btnOK->setEnabled (contents->count()>0 && !contents->selectedItems().isEmpty());
 }
 
 int CurvesDialog::curveStyle()
@@ -512,7 +540,7 @@ int CurvesDialog::curveStyle()
   return style;
 }
 
-void CurvesDialog::showCurveRange(bool on )
+void CurvesDialog::showCurveRange(bool on)
 {
   int row = contents->currentRow();
   contents->clear();
@@ -547,10 +575,8 @@ void CurvesDialog::updateCurveRange()
 
 void CurvesDialog::showCurrentFolder(bool currentFolder)
 {
-
   d_app->d_show_current_folder = currentFolder;
   available->clear();
-
   if (currentFolder){
     Folder *f = d_app->currentFolder();
     if (f){
@@ -585,6 +611,5 @@ void CurvesDialog::closeEvent(QCloseEvent* e)
     MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
     if( ml ) ml->setCloseOnEmpty(true);
   }
-
   e->accept();
 }
