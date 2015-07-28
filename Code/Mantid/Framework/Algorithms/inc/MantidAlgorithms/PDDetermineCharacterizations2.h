@@ -50,6 +50,10 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
+  double getFrequency(API::MatrixWorkspace_sptr ws,
+                      const std::vector<std::string> &names);
+  double getWavelength(API::MatrixWorkspace_sptr ws,
+                       const std::vector<std::string> &names);
   void setDefaultsInPropManager();
   void overrideRunNumProperty(const std::string &inputName,
                               const std::string &propName);
