@@ -32,7 +32,7 @@ void Fit::initConcrete() {
                          "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
-  auto mustBePositive = boost::shared_ptr<Kernel::BoundedValidator<int> >(
+  auto mustBePositive = boost::shared_ptr<Kernel::BoundedValidator<int>>(
       new Kernel::BoundedValidator<int>());
   mustBePositive->setLower(0);
   declareProperty(
@@ -79,8 +79,12 @@ void Fit::initConcrete() {
       "CreateOutput", false,
       "Set to true to create output workspaces with the results of the fit"
       "(default is false).");
-  declareProperty("Output", "", "A base name for the output workspaces (if not "
-                                "given default names will be created).");
+  declareProperty(
+      "Output", "",
+      "A base name for the output workspaces (if not "
+      "given default names will be created). The "
+      "default is to use the name of the original data workspace as prefix "
+      "followed by suffixes _Workspace, _Parameters, etc.");
   declareProperty("CalcErrors", false,
                   "Set to true to calcuate errors when output isn't created "
                   "(default is false).");
@@ -281,8 +285,10 @@ void Fit::execConcrete() {
           row << 100.0;
         else {
           if (!covar.gsl()) {
-            throw std::runtime_error("There was an error while allocating the (GSL) covariance matrix "
-                                     "which is needed to produce fitting error results.");
+            throw std::runtime_error(
+                "There was an error while allocating the (GSL) covariance "
+                "matrix "
+                "which is needed to produce fitting error results.");
           }
           row << 100.0 * covar.get(ia, ja) /
                      sqrt(covar.get(ia, ia) * covar.get(ja, ja));

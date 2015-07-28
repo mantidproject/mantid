@@ -6,6 +6,17 @@
 #include "MantidAPI/FileProperty.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+
+using Poco::XML::DOMParser;
+using Poco::XML::Document;
+using Poco::XML::Element;
+using Poco::XML::NodeList;
+using Poco::XML::NodeIterator;
 
 namespace Mantid {
 namespace DataHandling {
@@ -70,7 +81,18 @@ void LoadIDFFromNexus::exec() {
 
   // Look for parameter correction file
   std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
-  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile;
+  g_log.notice() << "Parameter correction file: " << parameterCorrectionFile << "\n";
+
+  // Read parameter correction file, if found
+  std::string correctionParameterFile = "";
+  bool append = false;
+  if( parameterCorrectionFile != "") {
+    // Read parameter correction file 
+    // to find out which parameter file to use 
+    // and whether it is appended to default parameters.
+    readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
+  }
+  g_log.notice() << "Result of readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
 
   LoadParameters(  &nxfile, localWorkspace );
 
@@ -103,6 +125,64 @@ void LoadIDFFromNexus::exec() {
     } // Loop
     return ""; // No file found
   }
+
+
+  /* Reads the parameter correction file and if a correction is needed output the parameterfile needed 
+  *  and whether it is to be appended.
+  * @param correction_file :: path nsame of correction file as returned by getParameterCorrectionFile()
+  * @param date :: IS8601 date string applicable: Must be full timestamp (timezone optional)
+  * @param parameter_file :: output parameter file to use or "" if none
+  * @param append :: output whether the parameters from parameter_file should be appended.
+  *
+  *  @throw FileError Thrown if unable to parse XML file
+  */
+void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correction_file, const std::string& date, 
+                                                   std::string& parameter_file, bool& append ) { 
+
+   // Set output arguments to default
+  parameter_file = "";
+  append = false;
+
+   // Get contents of correction file                                                    
+  const std::string xmlText = Kernel::Strings::loadFile(correction_file);
+
+  // Set up the DOM parser and parse xml file
+  DOMParser pParser;
+  Document* pDoc;
+  try {
+    pDoc = pParser.parseString(xmlText);
+  } catch (Poco::Exception &exc) {
+    throw Kernel::Exception::FileError(
+        exc.displayText() + ". Unable to parse parameter correction file:", correction_file);
+  } catch (...) {
+    throw Kernel::Exception::FileError("Unable to parse parameter correction file:", correction_file);
+  }
+  // Get pointer to root element
+  Element* pRootElem = pDoc->documentElement();
+  if (!pRootElem->hasChildNodes()) {
+    g_log.error("Parameter correction file: " + correction_file + "contains no XML root element.");
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "No root element in XML parameter correction file", correction_file);
+  }
+
+  // Convert date to Mantid object
+  DateAndTime externalDate( date );
+
+  // Examine the XML structure obtained by parsing
+  Poco::AutoPtr<NodeList> correctionNodeList = pRootElem->getElementsByTagName("correction");
+  for( unsigned long i=0; i < correctionNodeList->length(); ++i ){
+    // For each correction element
+    Element* corr = (Element *)correctionNodeList->item(i);
+    DateAndTime start(corr->getAttribute("valid-from"));
+    DateAndTime end(corr->getAttribute("valid-to"));
+    if ( start <= externalDate && externalDate <= end ){
+      parameter_file = corr->getAttribute("file");
+      append = ( corr->getAttribute("append") == "true");
+      break;  
+    }
+  }
+  
+}
 
 
 /** Loads the parameters from the Nexus file if possible, else from a parameter file

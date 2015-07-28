@@ -363,8 +363,10 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   bool fileBackEnd = getProperty("FileBackEnd");
 
   if (fileBackEnd && m_BoxStructureAndMethadata)
-    throw std::invalid_argument("Both BoxStructureOnly and fileBackEnd were "
-                                "set to TRUE: this is not possible.");
+    throw std::invalid_argument("Combination of BoxStructureOnly or "
+                                "MetaDataOnly were set to TRUE with "
+                                "fileBackEnd "
+                                ": this is not possible.");
 
   CPUTimer tim;
   Progress *prog = new Progress(this, 0.0, 1.0, 100);

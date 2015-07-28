@@ -181,17 +181,20 @@ the fit. Zero error values are not allowed and are replaced with ones.
 Output
 ######
 
-Two output properties are added if the property 'Output' is set:
+Two output properties are added if the property 'CreateOutput' is set:
 
 1. OutputParameters
 2. OutputWorkspace (only if OutputParametersOnly is not set)
 
 These two properties are not shown in the table of properties above,
 as they are declared dynamically, but they can be retrieved after
-executing the algorithm (as long as the property 'Output' was
+executing the algorithm (as long as the property 'CreateOutput' was
 used). These two output properties provide workspaces which are also
 added in the Analysis Data Service (ADS) with names defined by
-appending a suffix to the string given as value of 'Output'.
+appending a suffix to the name of the original data workspace. You can
+replace the name of the workspace with a different name if you give a
+value to the property 'Output' which redefines the base name of the
+output workspaces.
 
 OutputParameters is is a `TableWorkspace
 <http://www.mantidproject.org/TableWorkspace>`_ with the fitted
