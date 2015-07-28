@@ -38,6 +38,7 @@ public:
   virtual int version() const;
   virtual const std::string category() const;
   virtual const std::string summary() const;
+  virtual std::map<std::string, std::string> validateInputs();
 
 private:
   void init();
