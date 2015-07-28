@@ -138,7 +138,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(const size_t nhist,
   double r(0.55), theta(66.5993), phi(0.0);
   Mantid::Kernel::V3D detPos;
   detPos.spherical_rad(r, theta*M_PI/180.0, phi*M_PI/180.0);
-  ws2d->setInstrument(createTestInstrument(id, detPos));
+  ws2d->setInstrument(createTestInstrument(id, detPos,"",sourcePosition,samplePosition));
 
   // Set the instrument parameters
   setInstrumentParametersForTOFSANS(ws2d,
@@ -373,7 +373,10 @@ void test_that_5_log_guides_are_all_picked_up_and_contribute() {
   // Act
   auto length = collimationLengthEstimator.provideCollimationLength(testWorkspace);
   // Assert
-  auto expectedCollimationLength = V3D(sourcePosition - samplePosition).norm() - collimationLengthCorrection + guideLogDetails.size()*collimationLengthIncrement;
+  auto expectedCollimationLength = V3D(sourcePosition - samplePosition).norm() -
+                                    collimationLengthCorrection +
+                                    static_cast<double>(guideLogDetails.size())*collimationLengthIncrement;
+
   TSM_ASSERT_EQUALS("Should have a collimation length of 5+2*5", length, expectedCollimationLength);
 }
 

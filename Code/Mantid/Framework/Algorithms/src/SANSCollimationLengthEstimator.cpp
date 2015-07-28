@@ -110,9 +110,9 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(MatrixWork
   for (auto it = guideValues.rbegin(); it != guideValues.rend(); ++it) {
     bool guideIsLarger = largerSmallerCounter%2 == 0;
     if (guideIsLarger && (*it > guideCutoff)) {
-      lCollim += 2.0;
+      lCollim += guideIncrement;
     } else if (!guideIsLarger && (*it < guideCutoff)){
-      lCollim += 2.0;
+      lCollim += guideIncrement;
     } else {
       break;
     }

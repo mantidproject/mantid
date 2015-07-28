@@ -33,6 +33,7 @@ algorithm as follows:
 * :math:`R_2` equals SampleApertureRadius
 * :math:`\Delta R` equals DeltaR
 * :math:`\sigma_{moderator}` equals SigmaModerator  
+* :math:`\L_1` equals CollimationLength
 
 :math:`\lambda` in the equation is the midtpoint of wavelength 
 histogram bin values of InputWorkspace.
@@ -46,8 +47,6 @@ use :math:`R = \sqrt{( H^2 +W^2)/6 }`. Note that we are assuming isotropically a
 scalar :math:`Q`, and making some small angle approximations. Results on higher angle detectors
 may not be accurate. For data reduction sliced in different directions on the detector
 (e.g. GISANS) adjust the calling parameters to suit the collimation in that direction.
-
-
 
 
 .. categories::
