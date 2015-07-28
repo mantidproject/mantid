@@ -212,6 +212,7 @@ set ( SRC_FILES
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
+	src/SANSCollimationLengthEstimator.cpp
 	src/SANSDirectBeamScaling.cpp
 	src/SassenaFFT.cpp
 	src/SaveGSASInstrumentFile.cpp
@@ -480,6 +481,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
+	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
@@ -743,6 +745,7 @@ set ( TEST_FILES
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
+	SANSCollimationLengthEstimatorTest.h
 	SassenaFFTTest.h
 	SaveGSASInstrumentFileTest.h
 	ScaleTest.h

@@ -2,13 +2,16 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
+#include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Interpolation.h"
+#include "MantidKernel/ITimeSeriesProperty.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
+#include "boost/lexical_cast.hpp"
 
 namespace Mantid {
 namespace Algorithms {
@@ -42,7 +45,8 @@ void TOFSANSResolutionByPixel::init() {
                       "SigmaModerator", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Sigma moderator spread in units of microsec as a function "
-                  "of wavelenght.");
+                  "of wavelength.");
+  declareProperty("CollimationLength", 0.0, positiveDouble, "Collimation length (m)");
 }
 
 /*
@@ -87,10 +91,17 @@ void TOFSANSResolutionByPixel::exec() {
     }
   }
 
+  // Get the collimation length
+  double LCollim = getProperty("CollimationLength");
   const V3D samplePos = inOutWS->getInstrument()->getSample()->getPos();
-  const V3D sourcePos = inOutWS->getInstrument()->getSource()->getPos();
-  const V3D SSD = samplePos - sourcePos;
-  const double L1 = SSD.norm();
+
+  if (LCollim == 0.0) {
+    auto collimationLengthEstimator = SANSCollimationLengthEstimator();
+    LCollim = collimationLengthEstimator.provideCollimationLength(inOutWS);
+    g_log.information() << "No collimation length was specified. A default collimation length was estimated to be " << LCollim << std::endl;
+  } else {
+    g_log.information() << "The collimation length is  " << LCollim << std::endl;
+  }
 
   const int numberOfSpectra = static_cast<int>(inOutWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
@@ -113,12 +124,12 @@ void TOFSANSResolutionByPixel::exec() {
     const V3D scatteredFlightPathV3D = det->getPos() - samplePos;
 
     const double L2 = scatteredFlightPathV3D.norm();
-    const double Lsum = L1 + L2;
+    const double Lsum = LCollim + L2;
 
     // calculate part that is wavelenght independent
     const double dTheta2 = (4.0 * M_PI * M_PI / 12.0) *
-                           (3.0 * R1 * R1 / (L1 * L1) +
-                            3.0 * R2 * R2 * Lsum * Lsum / (L1 * L1 * L2 * L2) +
+                           (3.0 * R1 * R1 / (LCollim * LCollim) +
+                            3.0 * R2 * R2 * Lsum * Lsum / (LCollim * LCollim * L2 * L2) +
                             (deltaR * deltaR) / (L2 * L2));
 
     // Multiplicative factor to go from lambda to Q
@@ -162,5 +173,7 @@ void TOFSANSResolutionByPixel::exec() {
     progress.report("Computing Q resolution");
   }
 }
+
+
 } // namespace Algorithms
 } // namespace Mantid
