@@ -16,7 +16,6 @@ set ( TEST_PY_FILES
   CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
-  DensityOfStatesTest.py
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
@@ -54,6 +53,7 @@ set ( TEST_PY_FILES
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py
+  SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
   SortDetectorsTest.py

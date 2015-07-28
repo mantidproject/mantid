@@ -8,8 +8,10 @@ import re
 import os.path
 import math
 
+PEAK_WIDTH_ENERGY_FLAG = 'energy'
+
 #pylint: disable=too-many-instance-attributes
-class DensityOfStates(PythonAlgorithm):
+class SimulatedDensityOfStates(PythonAlgorithm):
 
     _float_regex = None
     _temperature = None
@@ -50,40 +52,40 @@ class DensityOfStates(PythonAlgorithm):
                                           extensions = ["phonon"]),
                              doc='Filename of the PHONON file.')
 
-        self.declareProperty(name='Function',defaultValue='Gaussian',\
-            validator=StringListValidator(['Gaussian', 'Lorentzian']),\
+        self.declareProperty(name='Function',defaultValue='Gaussian',
+            validator=StringListValidator(['Gaussian', 'Lorentzian']),
             doc="Type of function to fit to peaks.")
 
-        self.declareProperty(name='PeakWidth', defaultValue=10.0,\
+        self.declareProperty(name='PeakWidth', defaultValue='10.0',
             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
         self.declareProperty(name='SpectrumType',defaultValue='DOS',\
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondAnalysis']),\
+            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondAnalysis']),
             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
-        self.declareProperty(name='Scale', defaultValue=1.0,\
+        self.declareProperty(name='Scale', defaultValue=1.0,
             doc='Scale the intesity by the given factor. Default is no scaling.')
 
-        self.declareProperty(name='BinWidth', defaultValue=1.0,\
+        self.declareProperty(name='BinWidth', defaultValue=1.0,
             doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
-        self.declareProperty(name='Temperature', defaultValue=300.0,\
+        self.declareProperty(name='Temperature', defaultValue=300.0,
             doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
-        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,\
+        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
             doc='Ignore frequencies below the this threshold. Default is 3.0')
 
-        self.declareProperty(StringArrayProperty('Ions', Direction.Input),\
+        self.declareProperty(StringArrayProperty('Ions', Direction.Input),
             doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
 
-        self.declareProperty(name='SumContributions', defaultValue=False,\
+        self.declareProperty(name='SumContributions', defaultValue=False,
             doc="Sum the partial density of states into a single workspace.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',\
-            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),\
+        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
+            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
             doc="Sum the partial density of states by the scattering cross section.")
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),\
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
             doc="Name to give the output workspace.")
 
         # Regex pattern for a floating point number
@@ -267,34 +269,46 @@ class DensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    def _draw_peaks(self, hist, peaks):
+    def _draw_peaks(self, xmin, hist, peaks):
         """
         Draw Gaussian or Lorentzian peaks to each point in the data
 
+        @param xmin - minimum X value
         @param hist - array of counts for each bin
         @param peaks - the indicies of each non-zero point in the data
         @return the fitted y data
         """
-        if self._peak_func == "Gaussian":
-            n_gauss = int(3.0 * self._peak_width / self._bin_width)
-            sigma = self._peak_width / 2.354
+        energies = np.arange(xmin, xmin + hist.size)
 
+        if PEAK_WIDTH_ENERGY_FLAG in self._peak_width:
+            try:
+                peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))\
+                                           for p in peaks], dtype=float)
+            except SyntaxError:
+                raise ValueError('Invalid peak width function (must be either a float number or function containing "energy")')
+            peak_widths = np.abs(peak_widths)
+            logger.debug('Peak widths: %s' % (str(peak_widths)))
+        else:
+            single_val = np.array([float(self._peak_width)])
+            peak_widths = np.repeat(single_val, len(peaks))
+
+        if self._peak_func == "Gaussian":
+            n_gauss = int(3.0 * np.max(peak_widths) / self._bin_width)
             dos = np.zeros(len(hist) - 1 + n_gauss)
 
-            for index in peaks:
+            for index, width in zip(peaks, peak_widths.tolist()):
+                sigma = width / 2.354
                 for g in range(-n_gauss, n_gauss):
                     if index + g > 0:
                         dos[index + g] += hist[index] * math.exp(-(g * self._bin_width) ** 2 / (2 * sigma ** 2)) /\
                                           (math.sqrt(2 * math.pi) * sigma)
 
         elif self._peak_func == "Lorentzian":
-
-            n_lorentz = int(25.0 * self._peak_width / self._bin_width)
-            gamma_by_2 = self._peak_width / 2
-
+            n_lorentz = int(25.0 * np.max(peak_widths) / self._bin_width)
             dos = np.zeros(len(hist) - 1 + n_lorentz)
 
-            for index in peaks:
+            for index, width in zip(peaks, peak_widths.tolist()):
+                gamma_by_2 = width / 2
                 for l in range(-n_lorentz, n_lorentz):
                     if index + l > 0:
                         dos[index + l] += hist[index] * gamma_by_2 / (l ** 2 + gamma_by_2 ** 2) / math.pi
@@ -460,7 +474,7 @@ class DensityOfStates(PythonAlgorithm):
 
         # Find and fit peaks
         peaks = hist.nonzero()[0]
-        dos = self._draw_peaks(hist, peaks)
+        dos = self._draw_peaks(xmin, hist, peaks)
 
         data_x = np.arange(xmin, xmin + dos.size)
         CreateWorkspace(DataX=data_x, DataY=dos, OutputWorkspace=self._ws_name)
@@ -881,6 +895,6 @@ class DensityOfStates(PythonAlgorithm):
 
 try:
     import scipy.constants
-    AlgorithmFactory.subscribe(DensityOfStates)
+    AlgorithmFactory.subscribe(SimulatedDensityOfStates)
 except ImportError:
-    logger.debug('Failed to subscribe algorithm DensityOfStates; The python package scipy may be missing.')
+    logger.debug('Failed to subscribe algorithm SimulatedDensityOfStates; The python package scipy may be missing.')

@@ -275,6 +275,14 @@ private slots:
   void handleSlicePushButton();
   /// Open the help page of whichever tab the user is currently viewing.
   void openHelpPage();
+  /// Transmission setting for M3
+  void onTransmissionM3CheckboxChanged();
+  /// Transmission setting for M4
+  void onTransmissionM4CheckboxChanged();
+  /// Transmission setting for Radius
+  void onTransmissionRadiusCheckboxChanged();
+  /// Transmission setting for ROI files
+  void onTransmissionROIFilesCheckboxChanged();
 
 private:
   /// used to specify the range of validation to do
@@ -283,6 +291,13 @@ private:
     ALL,                                                    ///< for checking all validators
     LOAD,                                                   ///< for checking the load validators only
     RUN                                                     ///< for checking the run validators only
+  };
+
+  enum TransSettings {
+    M3,
+    M4,
+    RADIUS,
+    ROI
   };
 
   /// holds pointer to validators and their locations
@@ -354,7 +369,7 @@ private:
   QAction *m_batch_clear;
   //Time/Pixel mask string
   QString m_maskScript;
-  // Success keyword
+  /// Success keyword
   static const QString m_pythonSuccessKeyword;
   /// Keyword for empty return value in python
   static const QString m_pythonEmptyKeyword;
@@ -371,6 +386,29 @@ private:
   bool runFilesAreValid();
   QString reduceSingleRun() const;
   void setValidators();
+
+  /// set logic for M3 or M4 selection
+  void setM3M4Logic(TransSettings setting, bool isNowChecked);
+  /// set logic for beam stop selection
+  void setBeamStopLogic(TransSettings setting, bool isNowChecked);
+  /// set logic for radius and mask
+  void setRadiusAndMaskLogic(bool isNowChecked);
+  /// set logic for ROI and mask
+  void setROIAndMaskLogic(bool isNowChecked);
+  /// validate float input
+  //void validateNumericInput(QString numericInput);
+  /// validate file input
+  //void valideateFileInput(QString fileInput);
+  /// set the transmission settings
+  //void sendTransmissionSettings();
+  /// get the transmission settings
+  void setTransmissionSettingsFromUserFile();
+  /// write the transmission settings to a python script
+  void writeTransmissionSettingsToPythonScript(QString& pythonCode);
+  /// initialize the connections for the transmission settings
+  void initTransmissionSettings();
+  /// Set all trans fields to a certain enabled state
+  void resetAllTransFields();
 
   UserSubWindow * slicingWindow;
 

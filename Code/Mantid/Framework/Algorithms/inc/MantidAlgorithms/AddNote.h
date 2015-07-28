@@ -1,17 +1,16 @@
-#ifndef MANTID_CURVEFITTING_CALCULATECHISQUARED_H_
-#define MANTID_CURVEFITTING_CALCULATECHISQUARED_H_
+#ifndef MANTID_ALGORITHMS_ADDNOTE_H_
+#define MANTID_ALGORITHMS_ADDNOTE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidCurveFitting/IFittingAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-namespace CurveFitting {
+namespace Algorithms {
 
 /**
+  An Algorithm that adds a timestamped note to a workspace.
 
-  Calculate chi squared for a function and a data set in a workspace.
-  Optionally outputs slices of the chi^2 along the parameter axes
-  and estimates the standard deviations.
+  @author Elliot Oram, ISIS, RAL
+  @date 17/07/2015
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -34,24 +33,27 @@ namespace CurveFitting {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CalculateChiSquared : public IFittingAlgorithm {
+class DLLExport AddNote : public API::Algorithm {
 public:
+  AddNote();
+  virtual ~AddNote();
+
   virtual const std::string name() const;
   virtual int version() const;
+  virtual const std::string category() const;
   virtual const std::string summary() const;
 
 private:
-  void initConcrete();
-  void execConcrete();
-  void estimateErrors();
-  void unfixParameters();
-  void refixParameters();
+  void init();
+  void exec();
 
-  /// Cache indices of fixed parameters
-  std::vector<size_t> m_fixedParameters;
+  /// Remove an existing log of the given name
+  void removeExisting(API::MatrixWorkspace_sptr &, const std::string &);
+  /// Create or update the named log entry
+  void createOrUpdate(API::Run &, const std::string &);
 };
 
-} // namespace CurveFitting
+} // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_CURVEFITTING_CALCULATECHISQUARED_H_ */
+#endif /* MANTID_ALGORITHMS_ADDNOTE_H_ */
