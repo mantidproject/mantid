@@ -24,11 +24,13 @@ using namespace Geometry;
   @param detectAdj (PixelAdj) passing NULL for this wont raise an error, if set
   it will be checked this workspace has as many histograms as dataWS each with
   one bin
+  @param qResolution: the QResolution workspace
   @throw invalid_argument if the workspaces are not mututially compatible
 */
 void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
                            API::MatrixWorkspace_const_sptr binAdj,
-                           API::MatrixWorkspace_const_sptr detectAdj) {
+                           API::MatrixWorkspace_const_sptr detectAdj,
+                           API::MatrixWorkspace_const_sptr qResolution) {
   if (dataWS->getNumberHistograms() < 1) {
     throw std::invalid_argument(
         "Empty data workspace passed, can not continue");
@@ -98,6 +100,26 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
           throw std::invalid_argument(
               "Every detector with non-positive PixelAdj value must be masked");
         }
+      }
+    }
+  }
+
+  // Check the compatibility of the QResolution workspace
+  if (qResolution) {
+    // We require the same number of histograms
+    if (detectAdj->getNumberHistograms() != dataWS->getNumberHistograms()) {
+      throw std::invalid_argument("The QResolution should have one spectrum"
+                                   "per spectrum of the input workspace");
+    }
+
+    // We require the same binning for the input workspace and the q resolution
+    // workspace
+    MantidVec::const_iterator reqX = dataWS->readX(0).begin();
+    MantidVec::const_iterator qResX = qResolution->readX(0).begin();
+    for (; reqX != dataWS->readX(0).end(); ++reqX, ++qResX) {
+      if (*reqX != *qResX) {
+        throw std::invalid_argument("The QResolution needs to have the same binning as"
+                                    "as the input workspace.");
       }
     }
   }

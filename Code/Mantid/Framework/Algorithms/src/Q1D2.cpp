@@ -86,6 +86,11 @@ void Q1D2::init() {
   declareProperty(
       "ExtraLength", 0.0, mustBePositive,
       "Additional length for gravity correction.");
+
+  declareProperty(
+      new WorkspaceProperty<>("QResolution", "", Direction::Input,
+                              PropertyMode::Optional, dataVal),
+      "Workspace to calculate the Q resolution.\n");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -95,12 +100,14 @@ void Q1D2::exec() {
   MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   MatrixWorkspace_const_sptr wavePixelAdj = getProperty("WavePixelAdj");
+  MatrixWorkspace_const_sptr qResolution = getProperty("QResolution");
+
   const bool doGravity = getProperty("AccountForGravity");
   m_doSolidAngle = getProperty("SolidAngleWeighting");
 
   // throws if we don't have common binning or another incompatibility
   Qhelper helper;
-  helper.examineInput(m_dataWS, waveAdj, pixelAdj);
+  helper.examineInput(m_dataWS, waveAdj, pixelAdj, qResolution);
   // FIXME: how to examine the wavePixelAdj?
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
