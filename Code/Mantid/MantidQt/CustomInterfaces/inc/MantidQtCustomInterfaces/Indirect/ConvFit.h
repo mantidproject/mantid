@@ -74,9 +74,6 @@ private:
   QStringList getFunctionParameters(QString);
   Mantid::API::IAlgorithm_sptr m_fitAlg;
 
-
-  void removeTreeParams();
-
 };
 } // namespace IDA
 } // namespace CustomInterfaces

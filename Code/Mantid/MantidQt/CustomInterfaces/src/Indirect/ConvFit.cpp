@@ -1213,6 +1213,7 @@ void ConvFit::hwhmChanged(double val) {
   auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->blockSignals(true);
   m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], hwhm * 2);
+  m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], hwhm * 2);
   hwhmRangeSelector->blockSignals(false);
 }
 
@@ -1390,7 +1391,8 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  removeTreeParams();
+  m_cfTree->removeProperty(m_properties["FitFunction1"]);
+  m_cfTree->removeProperty(m_properties["FitFunction2"]);
   int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
@@ -1405,12 +1407,14 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     m_cfTree->addProperty(m_properties["FitFunction1"]);
   }
 
+  QString propName;
   // No fit function parameters required for Zero
   if (parameters[0].compare("Zero") != 0) {
     if (fitFunctionIndex == 2) {
       int count = 0;
+	  propName = "Lorentzian 2";
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        QString name = "parameter_" + *it;
+        QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
         m_dblManager->setValue(m_properties[name], 0.0);
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
@@ -1422,8 +1426,13 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         count++;
       }
     } else {
+	  if(fitFunctionIndex == 1){
+		propName = "Lorentzian 1";
+	  }else{
+		propName = functionName;
+	  }
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
-        QString name = "parameter_" + *it;
+        QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
         m_dblManager->setValue(m_properties[name], 0.0);
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
@@ -1433,21 +1442,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   }
 }
 
-/**
- * Removes fit function related parameters from the cfTree
- */
-void ConvFit::removeTreeParams() {
-  for (auto it = m_properties.begin(); it != m_properties.end();) {
-    if (it.key().startsWith("parameter_")) {
-      delete it.value();
-      it = m_properties.erase(it);
-    } else {
-      ++it;
-    }
-  }
-  m_cfTree->removeProperty(m_properties["FitFunction1"]);
-  m_cfTree->removeProperty(m_properties["FitFunction2"]);
-}
 
 } // namespace IDA
 } // namespace CustomInterfaces
