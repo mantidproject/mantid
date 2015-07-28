@@ -78,13 +78,13 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  /// Check input properties supplied by user
-  void checkProperties();
+  /// Reads input properties supplied by user and initialises member variables
+  void readProperties();
   // Parse run names
   void parseRunNames(std::string &firstFN, std::string &lastFN,
                      std::string &fnBase, std::string &fnExt, int &fnZeros);
   // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad(int64_t runNumber);
+  API::Workspace_sptr doLoad(size_t runNumber);
   // Load dead-time corrections from specified file
   API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
@@ -107,6 +107,9 @@ private:
                           double &E);
   /// Get log value from ws
   double getLogValue(API::Workspace_sptr ws);
+  /// Returns previously loaded data if they exist
+  API::ITableWorkspace_sptr
+  previousDataAsTable(API::ITableWorkspace_sptr prevData, size_t runNumber);
 
   /// Properties needed for the loading process
   /// Number of the first run in the set
@@ -145,6 +148,9 @@ private:
   std::string m_logName;
   // LogValue function
   std::string m_logFunc;
+
+  /// Name of the table containing previous results
+  std::ostringstream m_prevDataName;
 };
 
 } // namespace Algorithm

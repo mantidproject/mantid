@@ -19,6 +19,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
+#include "MantidAPI/Column.h"
 
 namespace // anonymous
     {
@@ -153,14 +154,14 @@ void PlotAsymmetryByLogValue::init() {
 */
 void PlotAsymmetryByLogValue::exec() {
 
-  // Check input properties to decide whether or not we can reuse previous
-  // results, if any
-  checkProperties();
+  // Read input properties and initialise member variables
+  readProperties();
 
   // Vectors to store results
   MantidVec logValue;
   MantidVec yRed, yGreen, yDiff, ySum;
   MantidVec eRed, eGreen, eDiff, eSum;
+  std::map<size_t,bool> missingRun;
 
   Progress progress(this, 0, 1, m_ie - m_is + 1);
 
@@ -191,6 +192,9 @@ void PlotAsymmetryByLogValue::exec() {
         eSum.push_back(e[2]);
         eDiff.push_back(e[3]);
       }
+
+    } else {
+      missingRun[i] = true;
     }
 
     progress.report();
@@ -233,11 +237,63 @@ void PlotAsymmetryByLogValue::exec() {
   outWS->getAxis(0)->title() = m_logName;
   outWS->setYUnitLabel("Asymmetry");
   setProperty("OutputWorkspace", outWS);
+
+  // Create table workspace for output
+  ITableWorkspace_sptr tabWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+  for (size_t i=m_is; i<=m_ie; i++) {
+    if (!missingRun.count(i)){
+      std::ostringstream ss;
+      ss << i;
+      tabWS->addColumn("double", ss.str());
+    }
+  }
+  TableRow rowVal = tabWS->appendRow();
+  TableRow rowErr = tabWS->appendRow();
+  for (size_t c=0; c<npoints; c++) {
+    rowVal << outWS->readX(0)[c];
+  }
+  if (nplots == 1) {
+    rowVal = tabWS->appendRow();
+    for (size_t c = 0; c < npoints; c++) {
+      rowVal << outWS->readY(0)[c];
+      rowErr << outWS->readE(0)[c];
+    }
+  } else if (nplots == 4) {
+    rowVal = tabWS->appendRow();
+    for (size_t c = 0; c < npoints; c++) {
+      rowVal << outWS->readY(1)[c];
+      rowErr << outWS->readE(1)[c];
+    }
+    rowVal = tabWS->appendRow();
+    rowErr = tabWS->appendRow();
+    for (size_t c = 0; c < npoints; c++) {
+      rowVal << outWS->readY(2)[c];
+      rowErr << outWS->readE(2)[c];
+    }
+    rowVal = tabWS->appendRow();
+    rowErr = tabWS->appendRow();
+    for (size_t c = 0; c < npoints; c++) {
+      rowVal << outWS->readY(3)[c];
+      rowErr << outWS->readE(3)[c];
+    }
+    rowVal = tabWS->appendRow();
+    rowErr = tabWS->appendRow();
+    for (size_t c = 0; c < npoints; c++) {
+      rowVal << outWS->readY(0)[c];
+      rowErr << outWS->readY(0)[c];
+    }
+  }
+  // This table is hidden in the algorithm's dialog so it is
+  // invisible to the user
+  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+                      "PreviousData", m_prevDataName.str(), Kernel::Direction::Output),
+                  "The name of the TableWorkspace in which to store the results");
+  setProperty("PreviousData", tabWS);
 }
 
 /**  Checks input properties and compares them to previous values
 */
-void PlotAsymmetryByLogValue::checkProperties() {
+void PlotAsymmetryByLogValue::readProperties() {
 
   // Properties needed to select X axis
   // Log Value
@@ -275,6 +331,18 @@ void PlotAsymmetryByLogValue::checkProperties() {
     throw std::runtime_error(
         "First run number is greater than last run number");
   }
+
+  // Build the table name from the above properties
+  // If there are previous results in the ADS we can re-use, they
+  // should be stored in a table workspace with the following name:
+  m_prevDataName << "__";
+  m_prevDataName << m_filenameBase << m_filenameExt << m_filenameZeros;
+  m_prevDataName << m_dtcType << m_dtcFile;
+  m_prevDataName << getPropertyValue("ForwardSpectra")
+               << getPropertyValue("BackwardSpectra");
+  m_prevDataName << m_logName << m_logFunc;
+  m_prevDataName << m_int << m_red << m_green << m_minTime << m_maxTime;
+
 }
 
 /**  Parse run names
@@ -362,8 +430,28 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
 * required
 *   @param runNumber :: [input] Run number specifying run to load
 */
-Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
+Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
 
+  if (AnalysisDataService::Instance().doesExist(m_prevDataName.str())) {
+  // First of all check if we can use results
+  // There should be a table workspace with name m_prevDataName
+  // This table should have a column with name corresponding to the
+  // run number
+
+    ITableWorkspace_sptr prevData =
+        AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+            m_prevDataName.str());
+
+    if (prevData) {
+      // If the table exists, check if this specific run number was found
+      ITableWorkspace_sptr data = previousDataAsTable(prevData, runNumber);
+      if (data) {
+        return data;
+      }
+    }
+  }
+
+  // Otherwise load from nexus
   // Get complete run name
   std::ostringstream fn, fnn;
   fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
@@ -416,6 +504,54 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
   groupDetectors(loadedWs, grouping);
 
   return loadedWs;
+}
+
+/**  Returns previously loaded data as a table workspace
+*   @param prevData :: [input] Table with previous results
+*   @param runNumber :: [input] Run number
+*   @return :: TableWorkspace containing values for specified run number
+*/
+ITableWorkspace_sptr
+PlotAsymmetryByLogValue::previousDataAsTable(ITableWorkspace_sptr prevData,
+                                           size_t runNumber) {
+
+  std::ostringstream colName;
+  colName << runNumber;
+  std::vector<std::string> colNames = prevData->getColumnNames();
+
+  if ( std::find(colNames.begin(), colNames.end(), colName.str())!=colNames.end()) {
+    // If runNumber exists as a column in prevData table
+
+    // Get the column and create and return a new table with the run information
+    Column_sptr runCol = prevData->getColumn(colName.str());
+
+    ITableWorkspace_sptr data =
+        WorkspaceFactory::Instance().createTable("TableWorkspace");
+    data->addColumn("double", "RunNumber");
+    TableRow row = data->appendRow();
+    row << runCol->toDouble(0);
+    row = data->appendRow();
+    row << runCol->toDouble(1);
+    row = data->appendRow();
+    row << runCol->toDouble(2);
+    if (runCol->size() == 9) {
+      row = data->appendRow();
+      row << runCol->toDouble(3);
+      row = data->appendRow();
+      row << runCol->toDouble(4);
+      row = data->appendRow();
+      row << runCol->toDouble(5);
+      row = data->appendRow();
+      row << runCol->toDouble(6);
+      row = data->appendRow();
+      row << runCol->toDouble(7);
+      row = data->appendRow();
+      row << runCol->toDouble(8);
+    }
+    return data;
+  } else {
+    return ITableWorkspace_sptr();
+  }
 }
 
 /**  Load dead-time corrections from specified file
@@ -504,6 +640,26 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
 void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
                                          std::vector<double> &y,
                                          std::vector<double> &e) {
+
+  // Check if the ws is a table
+  // If it is, that means we have previous results we can re-use
+  ITableWorkspace_sptr prevData =
+      boost::dynamic_pointer_cast<ITableWorkspace>(loadedWs);
+
+  if (prevData) {
+    y.push_back(prevData->Double(1,0));
+    e.push_back(prevData->Double(2,0));
+    if (prevData->rowCount()==9) {
+      for (size_t i=0; i<3; i++) {
+        y.push_back(prevData->Double(i*2+3,0));
+        e.push_back(prevData->Double(i*2+4,0));
+      }
+    }
+    return;
+  }
+
+  // If we can't find previous results, we need to
+  // analyse loadedWs
 
   // Check if workspace is a workspace group
   WorkspaceGroup_sptr group =
@@ -693,6 +849,16 @@ void PlotAsymmetryByLogValue::calculateAsymmetry(MatrixWorkspace_sptr ws_red,
  */
 double PlotAsymmetryByLogValue::getLogValue(Workspace_sptr ws) {
 
+  // Check if the ws is a table
+  // If it is, read logValue from it
+  ITableWorkspace_sptr prevData =
+      boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+
+  if (prevData) {
+    return prevData->Double(0,0);
+  }
+
+  // If it is not, read log value from ws
   MatrixWorkspace_sptr wsm;
 
   WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
