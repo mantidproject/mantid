@@ -18,12 +18,12 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
 
     def PyInit(self):
         element_type = self.Muonic_XR.keys()
-        self.declareProperty("Element List", "None", StringListValidator(element_type),
+        self.declareProperty("ElementList", "None", StringListValidator(element_type),
                              doc="List of available elements")
         self.declareProperty(StringArrayProperty("Elements", values=[],
                              direction=Direction.Input
                              ))
-        self.declareProperty(name="YAxis Position",
+        self.declareProperty(name="YAxisPosition",
                                     defaultValue=-0.001,
                                     doc="Position for Markers on the y-axis")
 
@@ -47,7 +47,7 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
 
     def PyExec(self):
         elements = self.getProperty("Elements").value
-        yposition = self.getProperty("YAxis Position").value
+        yposition = self.getProperty("YAxisPosition").value
         workspace_list = [None]*len(elements)
         for idx,element in enumerate(elements):
             curr_workspace = self.Create_MuonicXR_WS(element, yposition)
