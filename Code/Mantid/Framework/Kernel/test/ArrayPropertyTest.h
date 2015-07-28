@@ -130,12 +130,11 @@ public:
     TS_ASSERT_EQUALS( d2.operator()()[2], 0.15 )
     //Now we change the values that are set in the indices of d2
     //by using a string
-    ArrayProperty<double> tempd("d", "0.3,0.1,-0.2");
-    d2 = tempd;
-    TS_ASSERT_EQUALS(d2, tempd)
+    d2.setValue("0.3,0.1,-0.2");
     TS_ASSERT_EQUALS( d2.operator()()[0], 0.3 )
     TS_ASSERT_EQUALS( d2.operator()()[1], 0.1)
     TS_ASSERT_EQUALS( d2.operator()()[2], -0.2 )
+	TS_ASSERT(! d2.isDefault());
 
     ArrayProperty<std::string> s("d","a,b,c");
     TS_ASSERT( ! s.operator()()[0].compare("a") )
