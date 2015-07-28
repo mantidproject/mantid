@@ -122,9 +122,8 @@ class PDDetermineCharacterizationsTest(unittest.TestCase):
 
         self.compareResult(self.defaultInfo,
                            PropertyManagerDataService.retrieve(self.mgrName))
-                           
-    # FIXME: Comment out this test for Pete to fix when he gets back! 
-    def xtest_fullChar(self):
+
+    def test_fullChar(self):
         self.createLogWksp()
         self.createTableWksp(True)
         PDDetermineCharacterizations(InputWorkspace=self.logWksp,
