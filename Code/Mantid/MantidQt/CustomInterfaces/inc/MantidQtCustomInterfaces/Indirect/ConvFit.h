@@ -49,7 +49,7 @@ private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
   double getInstrumentResolution(std::string workspaceName);
-  QtProperty *createFitType(const QString &); 
+  QtProperty *createFitType(const QString &);
 
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
   void populateFunction(Mantid::API::IFunction_sptr func,
@@ -58,6 +58,7 @@ private:
   QString fitTypeString() const;
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
+  QStringList getFunctionParameters(QString);
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
@@ -68,12 +69,7 @@ private:
   bool m_confitResFileType;
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
-
-
-
-  QStringList getFunctionParameters(QString);
-  Mantid::API::IAlgorithm_sptr m_fitAlg;
-
+  QStringList m_fitStrings;
 };
 } // namespace IDA
 } // namespace CustomInterfaces

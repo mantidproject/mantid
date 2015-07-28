@@ -143,12 +143,12 @@
              </item>
              <item>
               <property name="text">
-               <string>DiffSphere</string>
+               <string>InelasticDiffSphere</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>DiffRotDiscreteCircle</string>
+               <string>InelasticDiffRotDiscreteCircle</string>
               </property>
              </item>
              <item>
@@ -161,16 +161,6 @@
                 <string>ElasticDiffRotDiscreteCircle</string>
               </property>
              </item>
-              <item>
-                <property name="text">
-                  <string>InelasticDiffSphere</string>
-                </property>
-              </item>
-              <item>
-                <property name="text">
-                  <string>InelasticDiffRotDiscreteCircle</string>
-                </property>
-              </item>
               <item>
                 <property name="text">
                   <string>StretchedExpFT</string>

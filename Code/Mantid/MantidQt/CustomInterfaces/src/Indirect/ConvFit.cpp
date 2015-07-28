@@ -35,6 +35,15 @@ void ConvFit::setup() {
   // Create Property Managers
   m_stringManager = new QtStringPropertyManager();
 
+  // Initialise fitTypeStrings
+  m_fitStrings = QStringList() << "1L"
+                               << "2L"
+                               << "IDS"
+                               << "IDC"
+                               << "EDS"
+                               << "EDC"
+                               << "SFT";
+
   // Create TreeProperty Widget
   m_cfTree = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_cfTree);
@@ -113,11 +122,14 @@ void ConvFit::setup() {
   m_properties["Lorentzian1"] = createFitType("Lorentzian 1");
   m_properties["Lorentzian2"] = createFitType("Lorentzian 2");
   m_properties["DiffSphere"] = createFitType("DiffSphere");
-  m_properties["DiffRotDiscreteCircle"] = createFitType("DiffRotDiscreteCircle");
+  m_properties["DiffRotDiscreteCircle"] =
+      createFitType("DiffRotDiscreteCircle");
   m_properties["ElasticDiffSphere"] = createFitType("ElasticDiffSphere");
-  m_properties["ElasticDiffRotDiscreteCircle"] = createFitType("ElasticDiffRotDiscreteCircle");
+  m_properties["ElasticDiffRotDiscreteCircle"] =
+      createFitType("ElasticDiffRotDiscreteCircle");
   m_properties["InelasticDiffSphere"] = createFitType("InelasticDiffSphere");
-  m_properties["InelasticDiffRotDiscreteCircle"] = createFitType("InelasticDiffRotDiscreteCircle");
+  m_properties["InelasticDiffRotDiscreteCircle"] =
+      createFitType("InelasticDiffRotDiscreteCircle");
   m_properties["StretchedExpFT"] = createFitType("StretchedExpFT");
 
   // Update fit parameters in browser when function is selected
@@ -530,24 +542,28 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
 
   int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
-  // Add 1st Lorentzian
-  if (fitTypeIndex == 1 || fitTypeIndex == 2) {
-    // if temperature not included then product is lorentzian * 1
-    // create product function for temp * lorentzian
-    auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("ProductFunction"));
+  auto product = boost::dynamic_pointer_cast<CompositeFunction>(
+      FunctionFactory::Instance().createFunction("ProductFunction"));
 
-    if (useTempCorrection) {
-      createTemperatureCorrection(product);
-    }
-
-    func = FunctionFactory::Instance().createFunction("Lorentzian");
-    subIndex = product->addFunction(func);
-    index = model->addFunction(product);
-    prefix1 = createParName(index, subIndex);
-
-    populateFunction(func, model, m_properties["FitFunction1"], prefix1, false);
+  if (useTempCorrection) {
+    createTemperatureCorrection(product);
   }
+  // Add 1st Lorentzian
+
+  // if temperature not included then product is lorentzian * 1
+  // create product function for temp * lorentzian
+
+  std::string functionName = m_uiForm.cbFitType->currentText().toStdString();
+
+  if (fitTypeIndex == 1 || fitTypeIndex == 2) {
+    functionName = "Lorentzian";
+  }
+  func = FunctionFactory::Instance().createFunction(functionName);
+  subIndex = product->addFunction(func);
+  index = model->addFunction(product);
+  prefix1 = createParName(index, subIndex);
+
+  populateFunction(func, model, m_properties["FitFunction1"], prefix1, false);
 
   // Add 2nd Lorentzian
   if (fitTypeIndex == 2) {
@@ -560,50 +576,12 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
       createTemperatureCorrection(product);
     }
 
-    func = FunctionFactory::Instance().createFunction("Lorentzian");
+    func = FunctionFactory::Instance().createFunction(functionName);
     subIndex = product->addFunction(func);
     index = model->addFunction(product);
     prefix2 = createParName(index, subIndex);
 
     populateFunction(func, model, m_properties["FitFunction2"], prefix2, false);
-  }
-
-  // -------------------------------------------------------------
-  // --- Composite / Convolution / Model / InelasticDiffSphere ---
-  // -------------------------------------------------------------
-  if (fitTypeIndex == 3) {
-    auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("ProductFunction"));
-
-    if (useTempCorrection) {
-      createTemperatureCorrection(product);
-    }
-
-    func = FunctionFactory::Instance().createFunction("InelasticDiffSphere");
-    subIndex = product->addFunction(func);
-    index = model->addFunction(product);
-    prefix2 = createParName(index, subIndex);
-
-    populateFunction(func, model, m_properties["FitFunction1"], prefix2, false);
-  }
-
-  // ------------------------------------------------------------------------
-  // --- Composite / Convolution / Model / InelasticDiffRotDiscreteCircle ---
-  // ------------------------------------------------------------------------
-  if (fitTypeIndex == 4) {
-    auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-        FunctionFactory::Instance().createFunction("ProductFunction"));
-
-    if (useTempCorrection) {
-      createTemperatureCorrection(product);
-    }
-
-    func = FunctionFactory::Instance().createFunction(
-        "InelasticDiffRotDiscreteCircle");
-    subIndex = product->addFunction(func);
-    index = model->addFunction(product);
-    prefix2 = createParName(index, subIndex);
-    populateFunction(func, model, m_properties["FitFunction1"], prefix2, false);
   }
 
   conv->addFunction(model);
@@ -708,26 +686,31 @@ double ConvFit::getInstrumentResolution(std::string workspaceName) {
   return resolution;
 }
 
+/**
+ * Intialises the property values for any of the fit type
+ * @param propName The name of the property group
+ * @return The popuated property group representing a fit type
+ */
 QtProperty *ConvFit::createFitType(const QString &propName) {
   QtProperty *fitTypeGroup = m_grpManager->addProperty(propName);
   QString cbName = propName;
-  if(propName.compare("Lorentzian 1") == 0){
-	  cbName = "One Lorentzian";
+  if (propName.compare("Lorentzian 1") == 0) {
+    cbName = "One Lorentzian";
   }
-  if(propName.compare("Lorentzian 2") == 0){
-	cbName = "Two Lorentzians";
+  if (propName.compare("Lorentzian 2") == 0) {
+    cbName = "Two Lorentzians";
   }
   auto params = getFunctionParameters(cbName);
 
   for (auto it = params.begin(); it != params.end(); ++it) {
     QString paramName = propName + "." + *it;
-	std::string test = paramName.toStdString();
-	m_properties[paramName] = m_dblManager->addProperty(*it);
-	m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
-	if(QString(*it).compare("FWHM") == 0){
-		m_dblManager->setValue(m_properties[paramName], 0.02);
-	}
-	fitTypeGroup->addSubProperty(m_properties[paramName]);
+    std::string test = paramName.toStdString();
+    m_properties[paramName] = m_dblManager->addProperty(*it);
+    m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
+    if (QString(*it).compare("FWHM") == 0) {
+      m_dblManager->setValue(m_properties[paramName], 0.02);
+    }
+    fitTypeGroup->addSubProperty(m_properties[paramName]);
   }
   return fitTypeGroup;
 }
@@ -780,22 +763,7 @@ QString ConvFit::fitTypeString() const {
   if (m_blnManager->value(m_properties["UseDeltaFunc"]))
     fitType += "Delta";
 
-  switch (m_uiForm.cbFitType->currentIndex()) {
-  case 0:
-    break;
-  case 1:
-    fitType += "1L";
-    break;
-  case 2:
-    fitType += "2L";
-    break;
-  case 3:
-    fitType += "DS";
-    break;
-  case 4:
-    fitType += "DC";
-    break;
-  }
+  fitType += m_fitStrings.at(m_uiForm.cbFitType->currentIndex() - 1);
 
   return fitType;
 }
@@ -856,8 +824,8 @@ QString ConvFit::minimizerString(QString outputName) const {
 }
 
 /**
- * Changes property tree appearance based on Fit Type
- * @param index A reference to the Fit Type (0-4)
+ * Changes property tree and plot appearance based on Fit Type
+ * @param index A reference to the Fit Type (0-9)
  */
 void ConvFit::typeSelection(int index) {
 
@@ -1329,9 +1297,6 @@ void ConvFit::fixItem() {
   item->parent()->property()->removeSubProperty(prop);
 }
 
-/**
- *
- */
 void ConvFit::unFixItem() {
   QtBrowserItem *item = m_cfTree->currentItem();
 
@@ -1355,7 +1320,6 @@ void ConvFit::showTieCheckbox(QString fitType) {
 
 /**
  * Gets a list of parameters for a given fit function.
- *
  * @return List fo parameters
  */
 QStringList ConvFit::getFunctionParameters(QString functionName) {
@@ -1369,11 +1333,13 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
       parameters << QString::fromStdString(func->parameterName(i));
     }
   }
+
   if (functionName.compare("One Lorentzian") == 0) {
     functionName = "Lorentzian";
   }
 
-  if (functionName.compare("Zero Lorentzians") == 0) {    parameters.append("Zero");
+  if (functionName.compare("Zero Lorentzians") == 0) {
+    parameters.append("Zero");
   } else {
     IFunction_sptr func =
         FunctionFactory::Instance().createFunction(functionName.toStdString());
@@ -1412,7 +1378,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   if (parameters[0].compare("Zero") != 0) {
     if (fitFunctionIndex == 2) {
       int count = 0;
-	  propName = "Lorentzian 2";
+      propName = "Lorentzian 2";
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
@@ -1426,11 +1392,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         count++;
       }
     } else {
-	  if(fitFunctionIndex == 1){
-		propName = "Lorentzian 1";
-	  }else{
-		propName = functionName;
-	  }
+      if (fitFunctionIndex == 1) {
+        propName = "Lorentzian 1";
+      } else {
+        propName = functionName;
+      }
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
@@ -1441,7 +1407,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     }
   }
 }
-
 
 } // namespace IDA
 } // namespace CustomInterfaces
