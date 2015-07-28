@@ -13,6 +13,7 @@ class PropertyMantager;
 /// Typedef for a shared pointer to a PropertyManager
 typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
 }
+
 namespace Algorithms {
 
 /** PDDetermineCharacterizations2 : TODO: DESCRIPTION
@@ -50,10 +51,7 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
-  double getFrequency(API::MatrixWorkspace_sptr ws,
-                      const std::vector<std::string> &names);
-  double getWavelength(API::MatrixWorkspace_sptr ws,
-                       const std::vector<std::string> &names);
+  double getLogValue(API::Run &run, const std::string &propName);
   void setDefaultsInPropManager();
   void overrideRunNumProperty(const std::string &inputName,
                               const std::string &propName);

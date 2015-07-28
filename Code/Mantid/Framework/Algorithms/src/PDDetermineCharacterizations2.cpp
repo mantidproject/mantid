@@ -29,6 +29,9 @@ const std::vector<std::string> COL_NAMES = {
     "tof_min",    // double
     "tof_max"     // double
 };
+
+const std::string FREQ_PROP_NAME("FrequencyLogNames");
+const std::string WL_PROP_NAME("WaveLengthLogNames");
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -116,13 +119,13 @@ void PDDetermineCharacterizations2::init() {
   const std::vector<std::string> DEFAULT_FREQUENCY_NAMES = {
       "SpeedRequest1", "Speed1", "frequency"};
   declareProperty(new Kernel::ArrayProperty<std::string>(
-                      "FrequencyLogNames", DEFAULT_FREQUENCY_NAMES),
+                      FREQ_PROP_NAME, DEFAULT_FREQUENCY_NAMES),
                   "Candidate log names for frequency");
 
   const std::vector<std::string> DEFAULT_WAVELENGTH_NAMES = {"LambdaRequest",
                                                              "lambda"};
   declareProperty(new Kernel::ArrayProperty<std::string>(
-                      "WaveLengthLogNames", DEFAULT_WAVELENGTH_NAMES),
+                      WL_PROP_NAME, DEFAULT_WAVELENGTH_NAMES),
                   "Candidate log names for wave length");
 }
 
@@ -187,46 +190,59 @@ void PDDetermineCharacterizations2::init() {
 
  */
 
-double PDDetermineCharacterizations2::getWavelength(
-    API::MatrixWorkspace_sptr ws, const std::vector<std::string> &names) {
-  auto run = ws->mutableRun();
+double getLogValue(API::Run &run, const std::string &label,
+                   const std::vector<std::string> &names,
+                   const std::set<std::string> &validUnits) {
   for (auto name : names) {
     if (run.hasProperty(name)) {
       const std::string units = run.getProperty(name)->units();
-      if ((units == "Angstrom") || (units == "A")) {
+
+      if (validUnits.find(units) != validUnits.end()) {
         double value = run.getLogAsSingleValue(name);
         if (value == 0.) {
           std::stringstream msg;
           msg << "'" << name << "' has a mean value of zero " << units;
-          g_log.information(msg.str());
+          //            g_log.information(msg.str());
         } else {
           std::stringstream msg;
           msg << "Found in log '" << name << "' with mean value " << value
               << " " << units;
-          g_log.information(msg.str());
+          //            g_log.information(msg.str());
           return value;
         }
-      } else {
-        std::stringstream msg;
-        msg << "When looking at " << name
-            << " log encountered unknown units for wavelength. "
-            << "Only know how to deal with "
-            << "wavelength in 'Angstrom' or 'A', not " << units;
-        g_log.warning(msg.str());
+        } else {
+          std::stringstream msg;
+          msg << "When looking at " << name
+              << " log encountered unknown units for " << label << ":" << units;
+          //          g_log.warning(msg.str());
+        }
       }
     }
-  }
-  g_log.warning("Failed to determine frequency");
-  return 0.;
+    //    g_log.warning("Failed to determine " + label);
+    return 0.;
 }
 
-double PDDetermineCharacterizations2::getFrequency(
-    API::MatrixWorkspace_sptr ws, const std::vector<std::string> &names) {
-  auto run = ws->mutableRun();
+double PDDetermineCharacterizations2::getLogValue(API::Run &run,
+                                                  const std::string &propName) {
+  std::vector<std::string> names = getProperty(propName);
+
+  std::string label = "frequency";
+  if (propName == WL_PROP_NAME)
+    label = "wavelength";
+
+  std::set<std::string> validUnits;
+  if (propName == WL_PROP_NAME) {
+    validUnits.insert("Angstrom");
+    validUnits.insert("A");
+  } else {
+    validUnits.insert("Hz");
+  }
+
   for (auto name : names) {
     if (run.hasProperty(name)) {
       const std::string units = run.getProperty(name)->units();
-      if (units == "Hz") {
+
+      if (validUnits.find(units) != validUnits.end()) {
         double value = run.getLogAsSingleValue(name);
         if (value == 0.) {
           std::stringstream msg;
@@ -234,22 +250,20 @@ double PDDetermineCharacterizations2::getFrequency(
           g_log.information(msg.str());
         } else {
           std::stringstream msg;
-          msg << "Found in log '" << name << "' with mean value " << value
-              << " " << units;
+          msg << "Found " << label << " in log '" << name
+              << "' with mean value " << value << " " << units;
           g_log.information(msg.str());
           return value;
         }
       } else {
         std::stringstream msg;
         msg << "When looking at " << name
-            << " log encountered unknown units for frequency. "
-            << "Only know how to deal with "
-            << "frequency in Hz, not " << units;
+            << " log encountered unknown units for " << label << ":" << units;
         g_log.warning(msg.str());
       }
     }
   }
-  g_log.warning("Failed to determine frequency");
+  g_log.warning("Failed to determine " + label);
   return 0.;
 }
 
@@ -324,12 +338,13 @@ void PDDetermineCharacterizations2::exec() {
   m_characterizations = getProperty("Characterizations");
   if (bool(m_characterizations) && (m_characterizations->rowCount() > 0)) {
     API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+    auto run = inputWS->mutableRun();
 
-    std::vector<std::string> freqLogNames = getProperty("FrequencyLogNames");
-    double frequency = getFrequency(inputWS, freqLogNames);
+    double frequency = getLogValue(run, FREQ_PROP_NAME);
+    std::cout << "frequency " << frequency << std::endl;
 
-    std::vector<std::string> wlLogNames = getProperty("WaveLengthLogNames");
-    double wavelength = getFrequency(inputWS, wlLogNames);
+    double wavelength = getLogValue(run, WL_PROP_NAME);
+    std::cout << "wavelength " << wavelength << std::endl;
   }
 
   overrideRunNumProperty("BackRun", "container");
