@@ -49,7 +49,8 @@ private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
   double getInstrumentResolution(std::string workspaceName);
-  QtProperty *createLorentzian(const QString &); 
+  QtProperty *createFitType(const QString &); 
+
   void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
   void populateFunction(Mantid::API::IFunction_sptr func,
                         Mantid::API::IFunction_sptr comp, QtProperty *group,
