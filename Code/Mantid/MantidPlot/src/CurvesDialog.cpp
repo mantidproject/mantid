@@ -451,19 +451,24 @@ bool CurvesDialog::addCurve(const QString& name)
   return false;
 }
 
+
+/**Remove curves function
+*
+*/
 void CurvesDialog::removeCurves()
 {
   int count = contents->count();
+  QList<QListWidgetItem *> lst = contents->selectedItems();
+  
   //disables user from deleting last graph from the graph
-  if(count == 1) {
+  if(count == 1 || count == lst.size()) {
   QMessageBox::information( 
     this, 
     tr("Error - Cannot Delete "), 
     tr("There should be at least one graph plotted in the graph contents ") );
 	return; 
   }
-
-  QList<QListWidgetItem *> lst = contents->selectedItems();
+  
   for (int i = 0; i < lst.size(); ++i){
     QListWidgetItem *it = lst.at(i);
     QString s = it->text();
