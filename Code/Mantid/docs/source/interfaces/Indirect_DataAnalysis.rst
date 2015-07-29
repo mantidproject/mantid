@@ -355,19 +355,33 @@ and *Use Delta Function* options in the interface.
 
       - :ref:`ProductFunction <func-ProductFunction>`
 
-        - :ref:`DiffSphere <func-DiffSphere>`
+        - :ref:`InelasticDiffSphere <func-DiffSphere>`
 
         - Temperature Correction
 
       - :ref:`ProductFunction <func-ProductFunction>`
 
-        - :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+        - :ref:`InelasticDiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
 
         - Temperature Correction
+		
+	  - :ref:`ProductFunction <func-ProductFunction>`
 
-Note that it is the Inelastic variants of :ref:`DiffSphere <func-DiffSphere>`
-and :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>` that are used in
-this interface.
+        - :ref:`ElasticDiffSphere <func-DiffSphere>`
+
+        - Temperature Correction
+		
+	  - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`ElasticDiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+		
+	  - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`StetchedExpFT <func-StretchedExpFT>`
+
+        - Temperature Correction
 
 The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
 formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
