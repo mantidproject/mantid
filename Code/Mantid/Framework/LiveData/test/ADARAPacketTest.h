@@ -121,7 +121,7 @@ public:
     if( pkt != NULL)
     {
       TS_ASSERT_EQUALS( pkt->cycle(), 60);
-      TS_ASSERT_EQUALS( pkt->veto(), 0x4);
+      TS_ASSERT_EQUALS( pkt->vetoFlags(), 0x4);
       TS_ASSERT_EQUALS( pkt->badVeto(), false);
       TS_ASSERT_EQUALS( pkt->timingStatus(), 0x1e);
       TS_ASSERT_EQUALS( pkt->flavor(), 1);
@@ -175,6 +175,7 @@ public:
 protected:
   // The rxPacket() functions just make a copy of the packet available in the public member
   // The test class will handle everything from there.
+  using ADARA::Parser::rxPacket;
 #define DEFINE_RX_PACKET( PktType) \
   virtual bool rxPacket( const PktType &pkt) { m_pkt.reset( new PktType( pkt)); return false; }
 
@@ -258,11 +259,14 @@ private:
     bufferBytesAppended( len);
 
     int packetsParsed = 0;
-    TS_ASSERT_THROWS_NOTHING( (packetsParsed = bufferParse( 1)));
+    std::string bufferParseLog;
+    // bufferParse() wants a string where it can save log messages.
+    // We don't actually use the messages for anything, though.
+    TS_ASSERT_THROWS_NOTHING( (packetsParsed = bufferParse( bufferParseLog, 1)));
     TS_ASSERT( packetsParsed == 1);
     TS_ASSERT( m_pkt != boost::shared_ptr<ADARA::Packet>());  // verify m_pkt has been updated
 
-    TS_ASSERT( bufferParse( 0) == 0); // try to parse again, make sure there's nothing to parse
+    TS_ASSERT( bufferParse( bufferParseLog, 0) == 0); // try to parse again, make sure there's nothing to parse
     TS_ASSERT( bufferFillAddress() == m_initialBufferAddr);  // verify that there's nothing in the buffer
   }
 
