@@ -1401,6 +1401,9 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
         }
+		if (QString(*it).compare("Amplitude") == 0 || QString(*it).compare("Intensity") == 0){
+		  m_dblManager->setValue(m_properties[name], 1.0);
+		}
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         if (count < 3) {
@@ -1425,6 +1428,9 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
         }
+		if (QString(*it).compare("Amplitude") == 0 || QString(*it).compare("Intensity") == 0){
+		  m_dblManager->setValue(m_properties[name], 1.0);
+		}
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         m_properties["FitFunction1"]->addSubProperty(m_properties[name]);

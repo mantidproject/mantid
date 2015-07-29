@@ -341,45 +341,45 @@ and *Use Delta Function* options in the interface.
 
       - DeltaFunction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (One Lorentzian)
 
         - :ref:`Lorentzian <func-Lorentzian>`
 
         - Temperature Correction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (Two Lorentzians)
 
         - :ref:`Lorentzian <func-Lorentzian>`
 
         - Temperature Correction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffSphere)
 
-        - :ref:`InelasticDiffSphere <func-DiffSphere>`
-
-        - Temperature Correction
-
-      - :ref:`ProductFunction <func-ProductFunction>`
-
-        - :ref:`InelasticDiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+        - :ref:`Inelastic Diff Sphere <func-DiffSphere>`
 
         - Temperature Correction
-		
-	  - :ref:`ProductFunction <func-ProductFunction>`
 
-        - :ref:`ElasticDiffSphere <func-DiffSphere>`
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
+
+        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
 
         - Temperature Correction
 		
-	  - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
 
-        - :ref:`ElasticDiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+        - :ref:`Elastic Diff Sphere <func-DiffSphere>`
 
         - Temperature Correction
 		
-	  - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
 
-        - :ref:`StetchedExpFT <func-StretchedExpFT>`
+        - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
+
+        - :ref:`StretchedExpFT <func-StretchedExpFT>`
 
         - Temperature Correction
 
