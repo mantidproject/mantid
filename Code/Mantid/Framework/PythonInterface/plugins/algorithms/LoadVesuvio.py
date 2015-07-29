@@ -9,7 +9,6 @@ from LoadEmptyVesuvio import LoadEmptyVesuvio
 
 import copy
 import numpy as np
-import os
 
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
