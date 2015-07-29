@@ -703,7 +703,6 @@ QtProperty *ConvFit::createFitType(const QString &propName) {
 
   for (auto it = params.begin(); it != params.end(); ++it) {
     QString paramName = propName + "." + *it;
-    std::string test = paramName.toStdString();
     m_properties[paramName] = m_dblManager->addProperty(*it);
     m_dblManager->setDecimals(m_properties[paramName], NUM_DECIMALS);
     if (QString(*it).compare("FWHM") == 0) {
