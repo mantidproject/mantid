@@ -12,31 +12,6 @@ Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size) :
 		m_restart_offset(0), m_oversize_len(0)
 {
 	m_buffer = new uint8_t[initial_buffer_size];
-
-	last_bytes_read = -1;
-	last_last_bytes_read = -1;
-	last_pkts_parsed = -1;
-	last_last_pkts_parsed = -1;
-	last_total_bytes = -1;
-	last_last_total_bytes = -1;
-	last_total_packets = -1;
-	last_last_total_packets = -1;
-	last_read_count = -1;
-	last_last_read_count = -1;
-	last_loop_count = -1;
-	last_last_loop_count = -1;
-
-	last_parse_elapsed_total = -1.0;
-	last_last_parse_elapsed_total = -1.0;
-	last_read_elapsed_total = -1.0;
-	last_last_read_elapsed_total = -1.0;
-	last_parse_elapsed = -1.0;
-	last_last_parse_elapsed = -1.0;
-	last_read_elapsed = -1.0;
-	last_last_read_elapsed = -1.0;
-	last_elapsed = -1.0;
-	last_last_elapsed = -1.0;
-
 	m_discarded_packets.clear();
 }
 

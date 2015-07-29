@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <stdexcept>
 #include <map>
-#include <unistd.h> // for ssize_t
 
 #include "ADARA.h"
 #include "ADARAPackets.h"
@@ -29,29 +28,6 @@ public:
 
   /// Destructor
   virtual ~Parser();
-
-  ssize_t last_bytes_read;
-  ssize_t last_last_bytes_read;
-  ssize_t last_pkts_parsed;
-  ssize_t last_last_pkts_parsed;
-  unsigned long last_total_bytes;
-  unsigned long last_last_total_bytes;
-  unsigned int last_total_packets;
-  unsigned int last_last_total_packets;
-  unsigned int last_read_count;
-  unsigned int last_last_read_count;
-  unsigned int last_loop_count;
-  unsigned int last_last_loop_count;
-  double last_parse_elapsed_total;
-  double last_last_parse_elapsed_total;
-  double last_read_elapsed_total;
-  double last_last_read_elapsed_total;
-  double last_parse_elapsed;
-  double last_last_parse_elapsed;
-  double last_read_elapsed;
-  double last_last_read_elapsed;
-  double last_elapsed;
-  double last_last_elapsed;
 
 protected:
   /** @name Buffer Manipulation Functions
