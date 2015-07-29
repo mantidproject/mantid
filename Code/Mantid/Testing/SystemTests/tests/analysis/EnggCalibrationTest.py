@@ -31,8 +31,8 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         self._precalc_van_ws = LoadNexus(Filename='ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
                                          OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
         self._precalc_van_integ_tbl = LoadNexus(Filename=
-                                               'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
-                                               OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
+                                                'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+                                                OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
         self.van_bank_curves_name = 'enginx_van_bank_curves'
         self.van_bank_curves_pre_integ_name = 'enginx_van_bank_curves_with_precalc_integ'
