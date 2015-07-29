@@ -1353,12 +1353,15 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
+  //remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
-  int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
+
   // Add new parameter elements
+  int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
   QStringList parameters = getFunctionParameters(functionName);
 
+  //Two Loremtzians Fit
   if (fitFunctionIndex == 2) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
@@ -1372,6 +1375,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   QString propName;
   // No fit function parameters required for Zero
   if (parameters[0].compare("Zero") != 0) {
+	//Two Lorentzians Fit
     if (fitFunctionIndex == 2) {
       int count = 0;
       propName = "Lorentzian 1";
@@ -1381,7 +1385,13 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         }
         QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
-        m_dblManager->setValue(m_properties[name], 0.0);
+
+        if (QString(*it).compare("FWHM") == 0) {
+          m_dblManager->setValue(m_properties[name], 0.0175);
+        } else {
+          m_dblManager->setValue(m_properties[name], 0.0);
+        }
+
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         if (count < 3) {
           m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
@@ -1399,7 +1409,13 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
         QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
-        m_dblManager->setValue(m_properties[name], 0.0);
+
+        if (QString(*it).compare("FWHM") == 0) {
+          m_dblManager->setValue(m_properties[name], 0.0175);
+        } else {
+          m_dblManager->setValue(m_properties[name], 0.0);
+        }
+
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
       }
