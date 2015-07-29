@@ -136,47 +136,35 @@ public:
   static FitTestPerformance *createSuite() { return new FitTestPerformance(); }
   static void destroySuite(FitTestPerformance *suite) { delete suite; }
 
+  FitTestPerformance() {
+    m_smoothWS = generateSmoothCurveWorkspace();
+    m_onePeakWS = generatePeaksCurveWorkspace();
+  }
+
   // Equivalent Python script. Fit a back-to-back exponential:
   // Fit(InputWorkspace=pws, Function='name=BackToBackExponential')
   void test_peaks_fit() {
-    API::MatrixWorkspace_sptr ws = generatePeaksCurveWorkspace();
-
     Fit fit;
     fit.setChild(true);
     fit.initialize();
 
     // example X0, S values after a good fit are 10079.0, 404.5
     fit.setProperty("Function", "name=BackToBackExponential, X0=8500, S=800");
-    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("InputWorkspace", m_onePeakWS);
     // fit.setProperty("MaxIterations", 99);
     fit.setProperty("CreateOutput", true);
 
     fit.execute();
+    TSM_ASSERT("The algorithm didn't execute correctly", fit.isExecuted());
 
-    TS_ASSERT(fit.existsProperty("OutputParameters"));
-    TS_ASSERT(fit.existsProperty("OutputWorkspace"));
-
-    API::MatrixWorkspace_sptr outWS = fit.getProperty("OutputWorkspace");
-    TS_ASSERT(outWS);
-
-    TS_ASSERT_EQUALS(3, outWS->getNumberHistograms());
-
-    // takes the third histogram (difference between data and fit)
-    auto &y = outWS->readY(2);
-    TS_ASSERT_EQUALS(y.size(), 1000);
-    for (size_t i = 0; i < y.size(); ++i) {
-      // the delta/difference includes a bit of tolerance for random variations
-      // of the generated/sample data
-      TSM_ASSERT_DELTA("The difference between data and fit too big", y[i], 0.0,
-                       1);
-    }
+    const double chi2 = fit.getProperty("OutputChi2overDoF");
+    TSM_ASSERT_DELTA("The difference between data and fit is too big", chi2, 0.2,
+                     0.05);
   }
 
   // Equivalent Python script. Fit with a BSpline function:
   // Fit(InputWorkspace=ws, Function='name=BSpline, Order=40')
   void test_smooth_curve_fit() {
-    API::MatrixWorkspace_sptr ws = generateSmoothCurveWorkspace();
-
     Fit fit;
     fit.setChild(true);
     fit.initialize();
@@ -184,27 +172,15 @@ public:
     // From a quick test, order 30 => ~2.5s; order 40 => ~6s; order 50 =>
     // ~14s
     fit.setProperty("Function", "name=BSpline, Order=40, StartX=0, EndX=10");
-    fit.setProperty("InputWorkspace", ws);
+    fit.setProperty("InputWorkspace", m_smoothWS);
     fit.setProperty("CreateOutput", true);
+
     fit.execute();
+    TSM_ASSERT("The algorithm didn't execute correctly", fit.isExecuted());
 
-    TS_ASSERT(fit.existsProperty("OutputParameters"));
-    TS_ASSERT(fit.existsProperty("OutputWorkspace"));
-
-    API::MatrixWorkspace_sptr outWS = fit.getProperty("OutputWorkspace");
-    TS_ASSERT(outWS);
-
-    TS_ASSERT_EQUALS(3, outWS->getNumberHistograms());
-
-    // takes the third histogram (difference between data and fit)
-    auto &y = outWS->readY(2);
-    TS_ASSERT_EQUALS(y.size(), 1000);
-    for (size_t i = 0; i < y.size(); ++i) {
-      // the difference includes a bit of tolerance for random variations of the
-      // generated/sample data
-      TSM_ASSERT_DELTA("The difference between data and fit is too big", y[i],
-                       0.0, 0.7);
-    }
+    const double chi2 = fit.getProperty("OutputChi2overDoF");
+    TSM_ASSERT_DELTA("The difference between data and fit is too big", chi2, 0.08,
+                     0.02);
   }
 
 private:
@@ -231,8 +207,8 @@ private:
     sampleAlg->setPropertyValue("OutputWorkspace", "sample_peak_curve_ws");
 
     sampleAlg->execute();
-
-    TS_ASSERT(sampleAlg->isExecuted());
+    TSM_ASSERT("The algorithm didn't execute correctly",
+               sampleAlg->isExecuted());
     TS_ASSERT(sampleAlg->existsProperty("OutputWorkspace"));
 
     API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
@@ -268,14 +244,17 @@ private:
     sampleAlg->setPropertyValue("OutputWorkspace", "sample_smooth_curve_ws");
 
     sampleAlg->execute();
-
-    TS_ASSERT(sampleAlg->isExecuted());
+    TSM_ASSERT("The algorithm didn't execute correctly",
+               sampleAlg->isExecuted());
     TS_ASSERT(sampleAlg->existsProperty("OutputWorkspace"));
     API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
 
     TS_ASSERT(ws);
     return ws;
   }
+
+  API::MatrixWorkspace_sptr m_smoothWS;
+  API::MatrixWorkspace_sptr m_onePeakWS;
 };
 
 #endif /*CURVEFITTING_FITMWTEST_H_*/
