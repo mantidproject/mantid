@@ -456,7 +456,8 @@ std::string createParName(size_t index, size_t subIndex,
  *					+- Temperature Correction(yes/no)
  *				+- ProductFunction
  *					|
- *					+- InelasticDiffRotDiscreteCircle(yes/no)
+ *					+-
+ *InelasticDiffRotDiscreteCircle(yes/no)
  *					+- Temperature Correction(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
@@ -1114,15 +1115,15 @@ void ConvFit::singleFitComplete(bool error) {
     functionName = "Lorentzian 1";
   }
 
-  for (auto it = params.begin(); it != params.end() - 3; ++it) {
-    QString functionParam = functionName + "." + *it;
-    QString paramValue = pref + *it;
-    m_dblManager->setValue(m_properties[functionParam], parameters[paramValue]);
-  }
-  funcIndex++;
   if (fitTypeIndex == 2) {
-    // Two Lorentz
-    QString pref = prefBase;
+    for (auto it = params.begin(); it != params.end() - 3; ++it) {
+      QString functionParam = functionName + "." + *it;
+      QString paramValue = pref + *it;
+      m_dblManager->setValue(m_properties[functionParam],
+                             parameters[paramValue]);
+    }
+
+    pref = prefBase;
     pref += "f" + QString::number(funcIndex) + ".f" +
             QString::number(subIndex) + ".";
 
@@ -1134,7 +1135,17 @@ void ConvFit::singleFitComplete(bool error) {
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
+
+  } else {
+    for (auto it = params.begin(); it != params.end(); ++it) {
+      QString functionParam = functionName + "." + *it;
+      QString paramValue = pref + *it;
+      m_dblManager->setValue(m_properties[functionParam],
+                             parameters[paramValue]);
+    }
   }
+  funcIndex++;
+
   m_pythonExportWsName = "";
 }
 
@@ -1352,7 +1363,7 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
-  //remove previous parameters from tree
+  // remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
 
@@ -1360,7 +1371,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
   QStringList parameters = getFunctionParameters(functionName);
 
-  //Two Loremtzians Fit
+  // Two Loremtzians Fit
   if (fitFunctionIndex == 2) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
@@ -1374,7 +1385,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   QString propName;
   // No fit function parameters required for Zero
   if (parameters[0].compare("Zero") != 0) {
-	//Two Lorentzians Fit
+    // Two Lorentzians Fit
     if (fitFunctionIndex == 2) {
       int count = 0;
       propName = "Lorentzian 1";
