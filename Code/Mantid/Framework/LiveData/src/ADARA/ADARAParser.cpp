@@ -334,7 +334,7 @@ void Parser::getDiscardedPacketsLogString(std::string & log_info)
 	// Append Each Discarded Packet Type Count...
 	for (std::map<PacketType::Enum, uint64_t>::iterator
 			it = m_discarded_packets.begin();
-			it != m_discarded_packets.end(); it++)
+			it != m_discarded_packets.end(); ++it)
 	{
 		std::stringstream ss;
 		ss << std::hex << "0x" << it->first << std::dec
