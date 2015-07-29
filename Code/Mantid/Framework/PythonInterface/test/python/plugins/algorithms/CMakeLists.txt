@@ -35,6 +35,7 @@ set ( TEST_PY_FILES
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
+  LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
