@@ -456,8 +456,7 @@ std::string createParName(size_t index, size_t subIndex,
  *					+- Temperature Correction(yes/no)
  *				+- ProductFunction
  *					|
- *					+-
- *InelasticDiffRotDiscreteCircle(yes/no)
+ *					+- InelasticDiffRotDiscreteCircle(yes/no)
  *					+- Temperature Correction(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
@@ -1112,15 +1111,13 @@ void ConvFit::singleFitComplete(bool error) {
     pref += "f" + QString::number(subIndex) + ".";
   }
 
-  if (m_uiForm.cbFitType->currentIndex() == 1) {
+  if (fitTypeIndex == 1 || fitTypeIndex == 2) {
     functionName = "Lorentzian 1";
   }
 
-  for (auto it = params.begin(); it != params.end(); ++it) {
+  for (auto it = params.begin(); it != params.end() - 3; ++it) {
     QString functionParam = functionName + "." + *it;
-    std::string fp = functionParam.toStdString();
     QString paramValue = pref + *it;
-    std::string pv = paramValue.toStdString();
     m_dblManager->setValue(m_properties[functionParam], parameters[paramValue]);
   }
   funcIndex++;
@@ -1132,7 +1129,7 @@ void ConvFit::singleFitComplete(bool error) {
 
     functionName = "Lorentzian 2";
 
-    for (auto it = params.begin(); it != params.end(); ++it) {
+    for (auto it = params.begin() + 3; it != params.end(); ++it) {
       QString functionParam = functionName + "." + *it;
       QString paramValue = pref + *it;
       m_dblManager->setValue(m_properties[functionParam],
@@ -1181,7 +1178,6 @@ void ConvFit::hwhmChanged(double val) {
   auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
   hwhmRangeSelector->blockSignals(true);
   m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], hwhm * 2);
-  m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], hwhm * 2);
   hwhmRangeSelector->blockSignals(false);
 }
 
@@ -1378,8 +1374,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   if (parameters[0].compare("Zero") != 0) {
     if (fitFunctionIndex == 2) {
       int count = 0;
-      propName = "Lorentzian 2";
+      propName = "Lorentzian 1";
       for (auto it = parameters.begin(); it != parameters.end(); ++it) {
+        if (count == 3) {
+          propName = "Lorentzian 2";
+        }
         QString name = propName + "." + *it;
         m_properties[name] = m_dblManager->addProperty(*it);
         m_dblManager->setValue(m_properties[name], 0.0);
