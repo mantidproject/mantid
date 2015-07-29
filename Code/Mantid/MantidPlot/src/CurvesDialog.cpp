@@ -462,9 +462,9 @@ void CurvesDialog::removeCurves()
   
   //disables user from deleting last graph from the graph
   if(count == 1 || count == lst.size()) {
-  QMessageBox::information( 
+  QMessageBox::warning( 
     this, 
-    tr("Error - Cannot Delete "), 
+    tr("Cannot Delete"), 
     tr("There should be at least one graph plotted in the graph contents ") );
 	return; 
   }
