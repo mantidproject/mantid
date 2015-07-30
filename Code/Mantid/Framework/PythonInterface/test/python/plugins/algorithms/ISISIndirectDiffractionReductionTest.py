@@ -1,4 +1,4 @@
-#pylint: disable=no-init,too-many-public-methods,invalid-name
+#pylint: disable=too-many-public-methods,invalid-name
 
 import unittest
 from mantid.simpleapi import *
@@ -22,6 +22,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNames()[0], 'IRS26176_diffspec_red')
 
         red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
 
@@ -41,6 +42,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNames()[0], 'IRS26176_diffspec_red')
 
         red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertEqual(red_ws.blocksize(), 10)
@@ -65,6 +67,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNames()[1], 'IRS26173_diffspec_red')
 
         red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
 
@@ -84,6 +87,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNames()[0], 'IRS26176_multi_diffspec_red')
 
         red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
         self.assertTrue('multi_run_numbers' in red_ws.getRun())
@@ -106,6 +110,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(wks.getNames()[0], 'IRS26176_diffspec_red')
 
         red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
         self.assertEqual(red_ws.getNumberHistograms(), 8)
 
 
@@ -124,6 +129,10 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(len(wks), 1)
         self.assertEqual(wks.getNames()[0], 'IRS26176_diffspec_red')
 
+        red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(red_ws.getNumberHistograms(), 1)
+
 
     def test_reduction_with_container_and_scale_completes(self):
         """
@@ -140,6 +149,10 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
         self.assertEqual(len(wks), 1)
         self.assertEqual(wks.getNames()[0], 'IRS26176_diffspec_red')
+
+        red_ws = wks[0]
+        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), 'dSpacing')
+        self.assertEqual(red_ws.getNumberHistograms(), 1)
 
 
 if __name__ == '__main__':
