@@ -1368,6 +1368,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   // remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
+  m_uiForm.ckTieCentres->setChecked(false);
 
   // Add new parameter elements
   int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
