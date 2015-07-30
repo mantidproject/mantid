@@ -15,6 +15,23 @@ only contains bin information and does not contain the underlying event
 data. The :ref:`EventWorkspace <EventWorkspace>` presents itself as a
 histogram (with X,Y,E values) but preserves the underlying event data.
 
+Workspaces Navigation
+=====================
+
+-  :ref:`MatrixWorkspace <MatrixWorkspace>` - A base class that contains
+   among others:
+
+   -  **Workspace2D** - A workspace for holding two
+      dimensional data in memory, this is the most commonly used
+      workspace.
+   -  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the
+      individual neutron event data.
+
+-  :ref:`TableWorkspace <Table Workspaces>` - A workspace holding data in
+   rows of columns having a particular type (e.g. text, integer, ...).
+-  :ref:`WorkspaceGroup <WorkspaceGroup>` - A container for a collection of
+   workspaces. Algorithms given a group as input run sequentially on
+   each member of the group.
 
 
 .. categories:: Concepts
