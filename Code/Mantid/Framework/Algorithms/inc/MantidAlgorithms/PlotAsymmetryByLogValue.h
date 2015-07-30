@@ -100,7 +100,7 @@ private:
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
-                        API::MatrixWorkspace_sptr ws_geen, double &Y,
+                        API::MatrixWorkspace_sptr ws_green, double &Y,
                         double &E);
   /// Group detectors
   void groupDetectors(API::MatrixWorkspace_sptr &ws,
