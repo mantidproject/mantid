@@ -175,5 +175,46 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                           GroupingMethod='Workspace')
 
 
+    def test_reduction_with_manual_efixed(self):
+        """
+        Sanity test to ensure a reduction with a manual Efixed value completes.
+        """
+
+        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
+                                         Instrument='IRIS',
+                                         Analyser='graphite',
+                                         Reflection='002',
+                                         SpectraRange=[3, 53],
+                                         Efixed=1.9)
+
+        self.assertTrue(isinstance(wks, WorkspaceGroup), 'Result workspace should be a workspace group.')
+        self.assertEqual(wks.getNames()[0], 'IRS26176_graphite002_red')
+
+        red_ws = wks.getItem(0)
+        self.assertEqual(red_ws.getNumberHistograms(), 51)
+
+
+    def test_reduction_with_manual_efixed_same_as_default(self):
+        """
+        Sanity test to ensure that manually setting the default Efixed value
+        gives the same results as not providing it.
+        """
+
+        ref = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
+                                         Instrument='IRIS',
+                                         Analyser='graphite',
+                                         Reflection='002',
+                                         SpectraRange=[3, 53])
+
+        wks = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
+                                         Instrument='IRIS',
+                                         Analyser='graphite',
+                                         Reflection='002',
+                                         SpectraRange=[3, 53],
+                                         Efixed=1.845)
+
+        self.assertTrue(CheckWorkspacesMatch(ref, wks), 'Success!')
+
+
 if __name__ == '__main__':
     unittest.main()
