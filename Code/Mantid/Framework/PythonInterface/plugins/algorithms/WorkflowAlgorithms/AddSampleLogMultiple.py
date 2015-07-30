@@ -24,6 +24,9 @@ class AddSampleLogMultiple(PythonAlgorithm):
         self.declareProperty(StringArrayProperty('LogValues', ''),
                              doc='Comma separated list of log values')
 
+        self.declareProperty(StringArrayProperty('LogUnits', ''),
+                             doc='Comma separated list of log units')
+
         self.declareProperty('ParseType', True,
                              doc='Determine the value type by parsing the string')
 
@@ -32,12 +35,17 @@ class AddSampleLogMultiple(PythonAlgorithm):
         workspace = self.getPropertyValue('Workspace')
         log_names = self.getProperty('LogNames').value
         log_values = self.getProperty('LogValues').value
+        log_units = self.getProperty('LogUnits').value
         parse_type = self.getProperty('ParseType').value
 
+        if len(log_units) == 0:
+            log_units = [""]*len(log_names)
+
         for idx in range(0, len(log_names)):
-            # Get the name and value
+            # Get the name, value, and unit
             name = log_names[idx]
             value = log_values[idx]
+            unit = log_units[idx]
 
             # Try to get the correct type
             value_type = 'String'
@@ -57,6 +65,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
             alg.setProperty('LogType', value_type)
             alg.setProperty('LogName', name)
             alg.setProperty('LogText', value)
+            alg.setProperty('LogUnit', unit)
             alg.execute()
 
 
@@ -65,9 +74,11 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
         log_names = self.getProperty('LogNames').value
         log_values = self.getProperty('LogValues').value
+        log_units = self.getProperty('LogUnits').value
 
         num_names = len(log_names)
         num_values = len(log_values)
+        num_units = len(log_units)
 
         # Ensure there is at leats 1 log name
         if num_names == 0:
@@ -79,6 +90,9 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
         if num_names > 0 and num_values > 0 and num_names != num_values:
             issues['LogValues'] = 'Number of log values must match number of log names'
+
+        if num_names > 0 and num_units != 0 and num_units != num_names:
+            issues['LogUnits'] = 'Number of log units must be 0 or match the number of log names'
 
         return issues
 

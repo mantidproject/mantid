@@ -78,3 +78,5 @@ Output:
    Number of corrected spectra: 2
 
 .. categories::
+
+.. sourcelink::

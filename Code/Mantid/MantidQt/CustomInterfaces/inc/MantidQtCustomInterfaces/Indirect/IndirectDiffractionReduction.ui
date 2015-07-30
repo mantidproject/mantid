@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
-    <height>500</height>
+    <width>500</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -59,60 +59,122 @@
       <property name="title">
        <string>Input</string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
+      <layout class="QGridLayout" name="gridLayout">
        <property name="margin">
         <number>6</number>
        </property>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_rawFiles" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>41</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="label" stdset="0">
-            <string>Run Numbers</string>
-           </property>
-           <property name="multipleFiles" stdset="0">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="dem_ckSumFiles">
-           <property name="text">
-            <string>Sum Files</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="2" column="0">
+        <widget class="QLabel" name="lbSpecMin">
+         <property name="text">
+          <string>Spectra Min:</string>
+         </property>
+        </widget>
        </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_11">
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Spectra Min</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="set_leSpecMin"/>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>Spectra Max</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="set_leSpecMax"/>
-         </item>
-        </layout>
+       <item row="2" column="1">
+        <widget class="QSpinBox" name="spSpecMin">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>5000</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="ckUseCan">
+         <property name="text">
+          <string>Use Container:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="lbSpecMax">
+         <property name="text">
+          <string>Spectra Max:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QCheckBox" name="ckSumFiles">
+         <property name="text">
+          <string>Sum Files</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QSpinBox" name="spSpecMax">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>5000</number>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QCheckBox" name="ckLoadLogs">
+         <property name="text">
+          <string>Load Log Files</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1" colspan="2">
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCanFiles" native="true">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="label" stdset="0">
+          <string/>
+         </property>
+         <property name="multipleFiles" stdset="0">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="3">
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfSampleFiles" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>41</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="label" stdset="0">
+          <string>Run Numbers</string>
+         </property>
+         <property name="multipleFiles" stdset="0">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="ckCanScale">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Scale Container:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QDoubleSpinBox" name="spCanScale">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="decimals">
+          <number>3</number>
+         </property>
+         <property name="singleStep">
+          <double>0.100000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -126,7 +188,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="pageCalibration">
        <property name="sizePolicy">
@@ -144,12 +206,60 @@
           <property name="title">
            <string>Calibration</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout">
+          <layout class="QGridLayout" name="gridLayout_2">
            <property name="margin">
             <number>6</number>
            </property>
-           <item>
-            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_calFile" native="true">
+           <item row="4" column="0" colspan="2">
+            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfVanadiumFile" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
+             <property name="label" stdset="0">
+              <string>Vanadium Runs</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="instrumentOverride" stdset="0">
+              <string>OSIRIS</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QSpinBox" name="spDRange">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>11</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="ckManualDRange">
+             <property name="text">
+              <string>Manual dRange:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfCalFile" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>21</height>
+              </size>
+             </property>
              <property name="label" stdset="0">
               <string>Cal File</string>
              </property>
@@ -163,19 +273,6 @@
               <stringlist>
                <string>.cal</string>
               </stringlist>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dem_vanadiumFile" native="true">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="label" stdset="0">
-              <string>Vanadium Runs</string>
-             </property>
-             <property name="multipleFiles" stdset="0">
-              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -443,6 +540,94 @@
    <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>iicInstrumentConfiguration</tabstop>
+  <tabstop>spSpecMin</tabstop>
+  <tabstop>ckSumFiles</tabstop>
+  <tabstop>spSpecMax</tabstop>
+  <tabstop>ckLoadLogs</tabstop>
+  <tabstop>ckUseCan</tabstop>
+  <tabstop>ckCanScale</tabstop>
+  <tabstop>spCanScale</tabstop>
+  <tabstop>leRebinStart</tabstop>
+  <tabstop>leRebinWidth</tabstop>
+  <tabstop>leRebinEnd</tabstop>
+  <tabstop>ckManualDRange</tabstop>
+  <tabstop>spDRange</tabstop>
+  <tabstop>ckIndividualGrouping</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckGSS</tabstop>
+  <tabstop>ckNexus</tabstop>
+  <tabstop>ckAscii</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ckManualDRange</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spDRange</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>64</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>108</x>
+     <y>245</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rfCanFiles</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>174</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>371</x>
+     <y>174</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ckCanScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>168</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>55</x>
+     <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckCanScale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCanScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>141</x>
+     <y>194</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

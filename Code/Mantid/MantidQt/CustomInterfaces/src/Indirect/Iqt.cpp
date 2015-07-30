@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
@@ -23,7 +24,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  Iqt::Iqt(QWidget * parent) : IDATab(parent),
+  Iqt::Iqt(QWidget * parent) : IndirectDataAnalysisTab(parent),
     m_furTree(NULL),
     m_furyResFileType()
   {
@@ -76,6 +77,7 @@ namespace IDA
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
     connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
     connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   }
 
   void Iqt::run()
@@ -91,10 +93,7 @@ namespace IDA
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
     double numBins = m_dblManager->value(m_properties["SampleBinning"]);
 
-    bool plot = m_uiForm.ckPlot->isChecked();
-    bool save = m_uiForm.ckSave->isChecked();
-
-    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt", -1);
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt");
     furyAlg->initialize();
 
     furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
@@ -104,15 +103,33 @@ namespace IDA
     furyAlg->setProperty("EnergyMax", energyMax);
     furyAlg->setProperty("BinReductionFactor", numBins);
 
-    furyAlg->setProperty("Plot", plot);
-    furyAlg->setProperty("Save", save);
     furyAlg->setProperty("DryRun", false);
 
-    runAlgorithm(furyAlg);
+    m_batchAlgoRunner->addAlgorithm(furyAlg);
 
     // Set the result workspace for Python script export
     QString sampleName = m_uiForm.dsInput->getCurrentDataName();
     m_pythonExportWsName = sampleName.left(sampleName.lastIndexOf("_")).toStdString() + "_iqt";
+
+    // Add save step
+    if(m_uiForm.ckSave->isChecked())
+      addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  /**
+   * Handle algorithm completion.
+   *
+   * @param error If the algorithm failed
+   */
+  void Iqt::algorithmComplete(bool error)
+  {
+    if(error)
+      return;
+
+    if(m_uiForm.ckPlot->isChecked())
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
   }
 
   /**
@@ -203,8 +220,6 @@ namespace IDA
     furyAlg->setProperty("EnergyMax", energyMax);
     furyAlg->setProperty("BinReductionFactor", numBins);
 
-    furyAlg->setProperty("Plot", false);
-    furyAlg->setProperty("Save", false);
     furyAlg->setProperty("DryRun", true);
 
     furyAlg->execute();

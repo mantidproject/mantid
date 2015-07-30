@@ -64,3 +64,5 @@ Further Information
 See `Le Bail Fit <Le Bail Fit>`__.
 
 .. categories::
+
+.. sourcelink::

@@ -100,3 +100,5 @@ Usage
     within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::
+
+.. sourcelink::

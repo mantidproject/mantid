@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidKernel/V3D.h"
 
@@ -86,6 +87,11 @@ public:
 
     return equivalents;
   }
+
+  bool isAllowedReflection(const Kernel::V3D &hkl) const;
+
+  PointGroup_sptr getPointGroup() const;
+  Group_const_sptr getSiteSymmetryGroup(const Kernel::V3D &position) const;
 
 protected:
   size_t m_number;

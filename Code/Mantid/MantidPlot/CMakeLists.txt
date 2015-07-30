@@ -201,7 +201,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/GLColor.cpp
                    src/Mantid/InstrumentWidget/GLObject.cpp
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/InputController.cpp
                    src/Mantid/InstrumentWidget/InstrumentActor.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
@@ -438,7 +437,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/GLColor.h
                    src/Mantid/InstrumentWidget/GLObject.h
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/InputController.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
@@ -701,7 +699,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
-                       src/Mantid/InstrumentWidget/InputController.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h

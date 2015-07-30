@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.10
+Version:        1.12
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -12,6 +12,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: cmake-gui >= 2.8.12
 Requires: boost-devel
 %{?el6:Requires: epel-release}
+Requires: doxygen
 Requires: gperftools-devel
 Requires: gperftools-libs
 Requires: gcc-c++
@@ -31,6 +32,7 @@ Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
 %{?el6:Conflicts: python-ipython >= 2.0}
+Requires: python-matplotlib
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
@@ -69,7 +71,7 @@ Requires: graphviz
 BuildArch: noarch
 
 %description
-A virtual package which requires all the dependencies and tools that are 
+A virtual package which requires all the dependencies and tools that are
 required for Mantid development.
 
 %prep
@@ -87,6 +89,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Wed Jul 01 2015 Steven Hahn <hahnse@ornl.gov>
+- Added python-matplotlib dependency
+
 * Thu Feb 12 2015 Harry Jeffery <henry.jeffery@stfc.ac.uk>
 - Added graphviz dependency
 
@@ -133,7 +138,7 @@ required for Mantid development.
 - Added dependency on NeXus development after nexus rpm split.
 - Updated CMake dependency to 2.8.5 following 'the virus'!
 - Added Google Mock and GTest.
- 
+
 * Fri Jun  3 2011 Stuart Campbell <campbellsi@ornl.gov>
 - Added rpmdevtools and lsb dependencies
 

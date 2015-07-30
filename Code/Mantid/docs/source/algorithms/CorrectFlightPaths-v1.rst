@@ -23,3 +23,5 @@ This algorithm was coded as a proof of concept. It may be deprecated in the futu
 
 
 .. categories::
+
+.. sourcelink::

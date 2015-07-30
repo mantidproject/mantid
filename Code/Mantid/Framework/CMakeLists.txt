@@ -55,6 +55,8 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   if ( MPI_BUILD )
   include ( MPISetup )
         set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+        find_package ( OpenGL REQUIRED )
+        find_package ( GSL REQUIRED )
   endif ( MPI_BUILD )
 endif ()
 
@@ -131,8 +133,9 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
-                     PythonGeometryModule PythonAPIModule DataObjects
+set ( FRAMEWORK_LIBS Kernel Geometry API DataObjects
+                     PythonKernelModule PythonGeometryModule PythonAPIModule
+                     PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData ISISLiveData RemoteAlgorithms RemoteJobManagers

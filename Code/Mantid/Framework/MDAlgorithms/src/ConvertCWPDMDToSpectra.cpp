@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDIterator.h"

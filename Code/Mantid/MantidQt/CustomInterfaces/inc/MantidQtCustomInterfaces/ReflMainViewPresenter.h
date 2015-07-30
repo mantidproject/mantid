@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"

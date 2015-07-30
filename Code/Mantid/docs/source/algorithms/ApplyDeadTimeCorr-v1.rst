@@ -66,9 +66,9 @@ Output:
 
 .. testoutput:: ExCustomDeadTimes
 
-   Spectrum: 0; original: 6643.000; corrected: 6861.714
-   Spectrum: 32; original: 10384.000; corrected: 10928.727
-   Spectrum: 63; original: 8875.000; corrected: 9273.499
+   Spectrum: 0; original: 6643.000; corrected: 7100.833
+   Spectrum: 32; original: 10384.000; corrected: 11559.134
+   Spectrum: 63; original: 8875.000; corrected: 9724.937
 
 **Example - Applying the correction using dead times stored in the Nexus file:**
 
@@ -95,8 +95,10 @@ Output:
 
 .. testoutput:: ExLoadedDeadTimes
 
-   Spectrum: 0; original: 6643.000; corrected: 6670.079
-   Spectrum: 32; original: 10384.000; corrected: 10451.664
-   Spectrum: 63; original: 8875.000; corrected: 8922.105
+   Spectrum: 0; original: 6643.000; corrected: 6697.453
+   Spectrum: 32; original: 10384.000; corrected: 10520.529
+   Spectrum: 63; original: 8875.000; corrected: 8969.891
 
 .. categories::
+
+.. sourcelink::

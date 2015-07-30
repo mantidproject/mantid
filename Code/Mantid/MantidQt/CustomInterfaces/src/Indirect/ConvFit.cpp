@@ -28,7 +28,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   ConvFit::ConvFit(QWidget * parent) :
-    IDATab(parent),
+    IndirectDataAnalysisTab(parent),
     m_stringManager(NULL), m_cfTree(NULL),
     m_fixedProps(),
     m_cfInputWS(), m_cfInputWSName(),
@@ -231,14 +231,14 @@ namespace IDA
     pyInput +=
       "bg = '" + bgType + "'\n"
       "ftype = '" + fitType + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, max_iterations=max_iterations, minimizer=minimizer, Plot=plot, Save=save)\n";
+      "rws = confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, max_iterations=max_iterations, minimizer=minimizer, Plot=plot, Save=save)\n"
+      "AddSampleLog(Workspace=rws, LogName='res_workspace', LogText='" + m_uiForm.dsResInput->getCurrentDataName() + "')\n"
+      "print rws\n";
 
     QString pyOutput = runPythonCode(pyInput);
 
     // Set the result workspace for Python script export
-    QString inputWsName = QString::fromStdString(m_cfInputWS->getName());
-    QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_conv_" + fitType + bgType + specMin + "_to_" + specMax + "_Workspaces";
-    m_pythonExportWsName = resultWsName.toStdString();
+    m_pythonExportWsName = pyOutput.toStdString();
 
     updatePlot();
   }

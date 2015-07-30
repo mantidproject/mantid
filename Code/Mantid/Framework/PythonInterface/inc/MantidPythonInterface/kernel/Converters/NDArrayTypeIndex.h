@@ -22,7 +22,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidKernel/System.h"
+#include "MantidPythonInterface/kernel/DllConfig.h"
 
 namespace Mantid {
 namespace PythonInterface {
@@ -38,7 +38,7 @@ namespace Converters {
  * contain a static const NPY_TYPES definition giving
  * the result of the mapping
  */
-template <typename T> struct DLLExport NDArrayTypeIndex { static int typenum; };
+template <typename T> struct PYTHON_KERNEL_DLL NDArrayTypeIndex { static int typenum; };
 }
 }
 }

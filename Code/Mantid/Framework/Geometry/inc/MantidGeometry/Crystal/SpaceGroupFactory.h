@@ -12,7 +12,7 @@ namespace Mantid {
 namespace Geometry {
 
 bool MANTID_GEOMETRY_DLL
-    isValidGeneratorString(const std::string &generatorString);
+isValidGeneratorString(const std::string &generatorString);
 
 /**
  * @class AbstractSpaceGroupGenerator
@@ -58,7 +58,7 @@ private:
 };
 
 typedef boost::shared_ptr<AbstractSpaceGroupGenerator>
-    AbstractSpaceGroupGenerator_sptr;
+AbstractSpaceGroupGenerator_sptr;
 
 /// Concrete space group generator that uses space group generators as given in
 /// ITA.
@@ -142,6 +142,9 @@ public:
   std::vector<std::string> subscribedSpaceGroupSymbols(size_t number) const;
   std::vector<size_t> subscribedSpaceGroupNumbers() const;
 
+  std::vector<std::string>
+  subscribedSpaceGroupSymbols(const PointGroup_sptr &pointGroup);
+
   void unsubscribeSpaceGroup(const std::string &hmSymbol);
 
   void subscribeGeneratedSpaceGroup(size_t number, const std::string &hmSymbol,
@@ -171,8 +174,11 @@ protected:
   SpaceGroup_const_sptr
   constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
 
+  void fillPointGroupMap();
+
   std::multimap<size_t, std::string> m_numberMap;
   std::map<std::string, AbstractSpaceGroupGenerator_sptr> m_generatorMap;
+  std::multimap<std::string, std::string> m_pointGroupMap;
 
   SpaceGroupFactoryImpl();
 
@@ -183,11 +189,11 @@ private:
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
+Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<SpaceGroupFactoryImpl>
-    SpaceGroupFactory;
+SpaceGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid

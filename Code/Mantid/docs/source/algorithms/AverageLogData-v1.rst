@@ -46,3 +46,5 @@ Output:
     ChopperStatus5 : 3.942 +/- 0.309
 
 .. categories::
+
+.. sourcelink::

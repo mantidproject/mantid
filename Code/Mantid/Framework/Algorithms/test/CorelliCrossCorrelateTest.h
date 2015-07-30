@@ -68,6 +68,11 @@ public:
     }
     ws->mutableRun().addLogData(tdc);
 
+    // Add motorSpeed to the workspace
+    auto motorSpeed = new TimeSeriesProperty<double>("BL9:Chop:Skf4:MotorSpeed");
+    motorSpeed->addValue(startTime,293.383);
+    ws->mutableRun().addLogData(motorSpeed);
+
     CorelliCrossCorrelate alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_LOADMD_H_
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include <boost/scoped_ptr.hpp>

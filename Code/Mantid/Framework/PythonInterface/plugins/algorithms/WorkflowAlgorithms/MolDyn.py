@@ -172,12 +172,14 @@ class MolDyn(PythonAlgorithm):
                     # as the Symmetrise algorithm will do this
                     if self._symmetrise:
                         # Symmetrise the sample workspace in x=0
-                        Symmetrise(Sample=ws_name, XMin=0, XMax=e_max,
-                                   Plot=False, Save=False,
+                        Symmetrise(InputWorkspace=ws_name,
+                                   XMin=0,
+                                   XMax=e_max,
                                    OutputWorkspace=ws_name)
 
                     elif self._emax is not None:
-                        CropWorkspace(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                        CropWorkspace(InputWorkspace=ws_name,
+                                      OutputWorkspace=ws_name,
                                       XMax=self._emax)
 
         # Do convolution if given a resolution workspace

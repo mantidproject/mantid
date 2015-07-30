@@ -9,20 +9,23 @@
 Description
 -----------
 
-Converts loaded/prepared Muon data to a data suitable for analysis.
+Converts loaded/prepared Muon data to a data suitable for analysis. Either one or two data acquisition period
+workspaces may be provided (only the first one is mandatory). When both of them are supplied, the algorithm merges the counts and
+then calculates the asymmetry. PeriodOperation determines in which way period data will be
+merged before the asymmetry calculation.
 
-Supports three modes:
+The algorithm supports three asymmetry types or modes:
 
 -  PairAsymmetry - asymmetry is calculated for a given pair of groups,
-   using the alpha value provided.
--  GroupAsymmetry - asymmetry between given group and Muon exponential
-   decay is calculated.
+   using the alpha value provided. The pair to use is specified via
+   PairFirstIndex and PairSecondIndex.
+-  GroupAsymmetry - asymmetry between given group (specified via GroupIndex)
+   and Muon exponential decay is calculated.
 -  GroupCount - **no asymmetry is calculated**, pure counts of the
-   specified group are used.
+   specified group (via GroupIndex) are used.
 
-For every mode, either one or two data acquisition period workspaces can
-be provided. PeriodOperation determines in which way period data will be
-merged at the end.
+Note that this algorithm is intended to be executed on input workspaces whose spectra correspond to previously grouped spectra, hence
+the term 'group' is used instead of 'spectrum'.
 
 Usage
 -----
@@ -54,7 +57,7 @@ Output:
 .. testcode:: ExGroupAsymmetryMultiperiod
 
    y1 = [100,50,10]
-   y2 = [150,20,1]
+   y2 = [ 50,25, 5]
    x = [1,2,3]
 
    input1 = CreateWorkspace(x, y1)
@@ -72,6 +75,8 @@ Output:
 
 .. testoutput:: ExGroupAsymmetryMultiperiod
 
-   Output: [-0.28634067  0.60594273  0.26255546]
+   Output: [ 0.1524242  -0.0916425  -0.71360777]
 
 .. categories::
+
+.. sourcelink::

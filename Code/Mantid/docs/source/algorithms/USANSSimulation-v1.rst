@@ -28,3 +28,5 @@ A monitor workspace is created with a fake beam profile.
 of limited use for non-developers.
 
 .. categories::
+
+.. sourcelink::

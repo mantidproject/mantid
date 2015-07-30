@@ -14,7 +14,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
     _back_range = None
     _spec_range = None
     _intensity_scale = None
-    _plot = None
     _run_numbers = None
 
 
@@ -47,9 +46,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Factor by which to scale the result.')
-
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot the calibration data as a spectra plot.')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                direction=Direction.Output),
@@ -88,11 +84,12 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def PyExec(self):
+        from IndirectCommon import get_run_number
 
         self._setup()
 
         runs = []
-        self._run_numbers = list()
+        self._run_numbers = []
         for in_file in self._input_files:
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
@@ -104,6 +101,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                      LoadLogFiles=False)
 
                 runs.append(root)
+                self._run_numbers.append(get_run_number(root))
             except (RuntimeError,ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 
@@ -155,10 +153,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._add_logs()
         self.setProperty('OutputWorkspace', self._out_ws)
 
-        if self._plot:
-            from mantidplot import plotBin
-            plotBin(mtd[self._out_ws], 0)
-
 
     def _setup(self):
         """
@@ -175,8 +169,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._intensity_scale = self.getProperty('ScaleFactor').value
         if self._intensity_scale == 1.0:
             self._intensity_scale = None
-
-        self._plot = self.getProperty('Plot').value
 
 
     def _add_logs(self):

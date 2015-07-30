@@ -35,3 +35,5 @@ Usage
   LoadMappingTable('HRP39180.RAW',ws)
 
 .. categories::
+
+.. sourcelink::

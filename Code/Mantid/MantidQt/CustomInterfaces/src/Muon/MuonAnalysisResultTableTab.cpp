@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisResultTableTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 #include "MantidQtMantidWidgets/MuonSequentialFitDialog.h"

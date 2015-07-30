@@ -15,7 +15,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -929,6 +928,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
+ * @param nxFilename :: the filename of the nexus file
  * @param[out] parameterStr :: special string for all the parameters.
  *             Feed that to ExperimentInfo::readParameterMap() after the
  * instrument is done.
@@ -936,16 +936,18 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File *file,
+void ExperimentInfo::loadExperimentInfoNexus(const std::string& nxFilename,
+                                             ::NeXus::File *file,
                                              std::string &parameterStr) {
   // load sample and log info
   loadSampleAndLogInfoNexus(file);
 
-  loadInstrumentInfoNexus(file, parameterStr);
+  loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 
 //--------------------------------------------------------------------------------------------
 /** Load the instrument from an open NeXus file.
+ * @param nxFilename :: the filename of the nexus file
  * @param file :: open NeXus file
  * @param[out] parameterStr :: special string for all the parameters.
  *             Feed that to ExperimentInfo::readParameterMap() after the
@@ -954,14 +956,67 @@ void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File *file,
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
+                                             ::NeXus::File *file,
                                              std::string &parameterStr) {
+
+
+   // Open instrument group                                    
+  file->openGroup("instrument", "NXinstrument");
+
+   // Try to get the instrument embedded in the Nexus file
   std::string instrumentName;
   std::string instrumentXml;
-  std::string instrumentFilename;
+  loadEmbeddedInstrumentInfoNexus( file,  instrumentName,  instrumentXml);
 
-  // Try to get the instrument file
+  // load parameters if found
+  loadInstrumentParametersNexus( file, parameterStr );
+
+  // Close the instrument group
+  file->closeGroup();
+
+  // Set the instrument given the name and and XML obtained
+  setInstumentFromXML( nxFilename, instrumentName, instrumentXml );
+
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the instrument from an open NeXus file without reading any parameters (yet).
+ * @param nxFilename :: the filename of the nexus file
+ * @param file :: open NeXus file
+ * instrument is done.
+ * @throws Exception::NotFoundError If instrument definition is not in the nexus
+ * file and cannot
+ *                                  be loaded from the IDF.
+ */
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
+                                             ::NeXus::File *file ) {
+
+
+   // Open instrument group                                    
   file->openGroup("instrument", "NXinstrument");
+
+   // Try to get the instrument embedded in the Nexus file
+  std::string instrumentName;
+  std::string instrumentXml;
+  loadEmbeddedInstrumentInfoNexus( file,  instrumentName,  instrumentXml);
+
+  // Close the instrument group
+  file->closeGroup();
+
+  // Set the instrument given the name and and XML obtained
+  setInstumentFromXML( nxFilename, instrumentName, instrumentXml );
+
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Attempt to load an IDF embedded in the Nexus file.
+ * @param file :: open NeXus file with instrument group open
+ * @param[out] instrumentName :: name of instrument
+ * @param[out] instrumentXml  :: XML string of embedded instrument definition or empty if not found
+ */
+void ExperimentInfo::loadEmbeddedInstrumentInfoNexus( ::NeXus::File *file, std::string &instrumentName, std::string &instrumentXml) {
+
   file->readData("name", instrumentName);
 
   try {
@@ -969,70 +1024,45 @@ void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
     file->readData("data", instrumentXml);
     file->closeGroup();
   } catch (NeXus::Exception &ex) {
-    // Just carry on - it might not be there (e.g. old-style processed files)
-    g_log.debug(ex.what());
+    g_log.debug(std::string("Unable to load instrument_xml: ") + ex.what());
   }
 
-  // We first assume this is a new version file, but if the next step fails we
-  // assume its and old version file.
-  int version = 1;
-  try {
-    file->readData("instrument_source", instrumentFilename);
-  } catch (NeXus::Exception &) {
-    version = 0;
-    // In the old version 'processed' file, this was held at the top level (as
-    // was the parameter map)
-    file->closeGroup();
-    try {
-      file->readData("instrument_source", instrumentFilename);
-    } catch (NeXus::Exception &ex) {
-      // Just carry on - it might not be there (e.g. for SNS files)
-      g_log.debug(ex.what());
-    }
-  }
+}
 
-  try {
-    file->openGroup("instrument_parameter_map", "NXnote");
-    file->readData("data", parameterStr);
-    file->closeGroup();
-  } catch (NeXus::Exception &ex) {
-    // Just carry on - it might not be there (e.g. for SNS files)
-    g_log.debug(ex.what());
-  }
+//-------------------------------------------------------------------------------------------------
+/** Set the instrument given its name and definition in XML
+ *  If the XML string is empty the definition is loaded from the IDF file 
+ *  specified by the name
+ * @param nxFilename :: the filename of the nexus file, needed to check whether instrument already exists in ADS.
+ * @param instrumentName :: name of instrument
+ * @param instrumentXml  :: XML string of instrument or empty to indicate load of instrument definition file
+ */
+void ExperimentInfo::setInstumentFromXML( const std::string& nxFilename, std::string &instrumentName, std::string &instrumentXml ) {
 
-  if (version == 1) {
-    file->closeGroup();
-  }
-
-  instrumentFilename = Strings::strip(instrumentFilename);
+    
   instrumentXml = Strings::strip(instrumentXml);
   instrumentName = Strings::strip(instrumentName);
-  if (instrumentXml.empty() && !instrumentName.empty()) {
-    // XML was not included or was empty.
-    // Use the instrument name to find the file
-    try {
-      std::string filename =
-          getInstrumentFilename(instrumentName, getWorkspaceStartDate());
-      // And now load the contents
-      instrumentFilename = filename;
-      instrumentXml = Strings::loadFile(filename);
-    } catch (std::exception &e) {
-      g_log.error() << "Error loading instrument IDF file for '"
-                    << instrumentName << "'.\n";
-      g_log.debug() << e.what() << std::endl;
-      throw;
-    }
-  } else {
-    if (!instrumentFilename.empty())
-      instrumentFilename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/" + instrumentFilename;
+  std::string instrumentFilename;
+  if (!instrumentXml.empty()) {
+    // instrument xml is being loaded from the nxs file, set the instrumentFilename
+    // to identify the Nexus file as the source of the data
+    instrumentFilename = nxFilename;
     g_log.debug() << "Using instrument IDF XML text contained in nexus file.\n";
+  }
+  else
+  {
+    // XML was not included or was empty
+    // Use the instrument name to find the file
+    instrumentFilename =
+        getInstrumentFilename(instrumentName, getWorkspaceStartDate());
+    // And now load the contents
+    instrumentXml = loadInstrumentXML(instrumentFilename);
   }
 
   // ---------- Now parse that XML to make the instrument -------------------
   if (!instrumentXml.empty() && !instrumentName.empty()) {
-    InstrumentDefinitionParser parser;
-    parser.initialize(instrumentFilename, instrumentName, instrumentXml);
+    InstrumentDefinitionParser parser(instrumentFilename, instrumentName, instrumentXml);
+
     std::string instrumentNameMangled = parser.getMangledName();
     Instrument_sptr instr;
     // Check whether the instrument is already in the InstrumentDataService
@@ -1048,6 +1078,46 @@ void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
     // Now set the instrument
     this->setInstrument(instr);
   }
+
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Loads the contents of a file and returns the string
+ *  The file is assumed to be an IDF, and already checked that
+ *  the path is correct.
+ *
+ * @param filename :: the path to the file
+ */
+std::string ExperimentInfo::loadInstrumentXML(const std::string &filename) {
+  try {
+    return Strings::loadFile(filename);
+  } catch (std::exception &e) {
+    g_log.error() << "Error loading instrument IDF file: "
+                  << filename << ".\n";
+    g_log.debug() << e.what() << std::endl;
+    throw;
+  }
+}
+
+//--------------------------------------------------------------------------------------------
+/** Load the instrument parameters from an open NeXus file if found there.
+ * @param file :: open NeXus file in its Instrument group
+ * @param[out] parameterStr :: special string for all the parameters.
+ *             Feed that to ExperimentInfo::readParameterMap() after the
+ * instrument is done.
+ */
+void ExperimentInfo::loadInstrumentParametersNexus( ::NeXus::File *file, 
+                                                    std::string &parameterStr) {
+  try 
+  {
+    file->openGroup("instrument_parameter_map", "NXnote");
+    file->readData("data", parameterStr);
+    file->closeGroup();
+  } catch (NeXus::Exception &ex) {
+    g_log.debug(std::string("Unable to load instrument_parameter_map: ") + ex.what());
+    g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
+  }
+
 }
 
 //-------------------------------------------------------------------------------------------------

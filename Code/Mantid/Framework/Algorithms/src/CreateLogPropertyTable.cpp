@@ -33,6 +33,8 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
                      GroupPolicy groupPolicy);
 GroupPolicy getGroupPolicyByName(const std::string &name);
 std::set<std::string> getAllGroupPolicyNames();
+Math::StatisticType getStatisticTypeByName(const std::string &name);
+std::set<std::string> getAllStatisticTypeNames();
 }
 
 /**
@@ -57,6 +59,12 @@ void CreateLogPropertyTable::init() {
           "LogPropertyNames",
           boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the log properties to place in table.");
+
+  // How to handle time series logs
+  const std::set<std::string> statisticNames = getAllStatisticTypeNames();
+  declareProperty("TimeSeriesStatistic", "Mean",
+                  boost::make_shared<StringListValidator>(statisticNames),
+                  "The statistic to use when adding a time series log.");
 
   // How to handle workspace groups
   const std::set<std::string> groupPolicies = getAllGroupPolicyNames();
@@ -110,12 +118,15 @@ void CreateLogPropertyTable::exec() {
   for (size_t i = 0; i < matrixWsList.size(); ++i)
     outputTable->appendRow();
 
-  // Change all "plot designation" fields to "None". (This basically means that
-  // column headings
-  // appear as, for example, "inst_abrv" instead of "inst_abrv [X]" or similar.)
+  // Set the first column to X and all others to Y
+  // This is to reduce the number of steps required to plot the data
   for (size_t i = 0; i < outputTable->columnCount(); ++i)
-    outputTable->getColumn(i)->setPlotType(0);
+    outputTable->getColumn(i)->setPlotType(i == 0 ? 1 : 2);
 
+  const std::string timeSeriesStatName =
+      this->getPropertyValue("TimeSeriesStatistic");
+  const Math::StatisticType timeSeriesStat =
+      getStatisticTypeByName(timeSeriesStatName);
   // Populate output table with the requested run properties.
   for (size_t i = 0; i < outputTable->rowCount(); ++i) {
     TableRow row = outputTable->getRow(i);
@@ -123,9 +134,17 @@ void CreateLogPropertyTable::exec() {
 
     for (auto propName = propNames.begin(); propName != propNames.end();
          ++propName) {
-      const std::string propValue =
-          matrixWs->run().getProperty(*propName)->value();
-      row << propValue;
+      Property *prop = matrixWs->run().getProperty(*propName);
+      std::stringstream propValue;
+
+      if (prop->type().find("TimeValue") != std::string::npos) {
+        propValue << matrixWs->run().getLogAsSingleValue(*propName,
+                                                         timeSeriesStat);
+      } else {
+        propValue << prop->value();
+      }
+
+      row << propValue.str();
     }
   }
 
@@ -261,7 +280,61 @@ std::set<std::string> getAllGroupPolicyNames() {
 
   return groupPolicyNames;
 }
+
+/**
+ * Returns a constant reference to a static map, which maps statistic
+ * names to Kernel::Math::StatisticType members.
+ *
+ * @returns map of statistic names and StatisticType members
+ */
+const std::map<std::string, Math::StatisticType> &getStatisticTypeMap() {
+  static std::map<std::string, Math::StatisticType> map;
+
+  // Populate the map if empty.
+  if (map.empty()) {
+    map.insert(std::make_pair("FirstValue", Math::StatisticType::FirstValue));
+    map.insert(std::make_pair("LastValue", Math::StatisticType::LastValue));
+    map.insert(std::make_pair("Minimum", Math::StatisticType::Minimum));
+    map.insert(std::make_pair("Maximum", Math::StatisticType::Maximum));
+    map.insert(std::make_pair("Mean", Math::StatisticType::Mean));
+    map.insert(std::make_pair("Median", Math::StatisticType::Median));
+  }
+
+  return map;
 }
 
+/**
+ * Given a statistic type name, will return the corresponding StatisticType.
+ *
+ * @param name :: name of statistic
+ * @returns StatisticType
+ */
+Math::StatisticType getStatisticTypeByName(const std::string &name) {
+  const std::map<std::string, Math::StatisticType> &map = getStatisticTypeMap();
+
+  // If we can find a policy with the given name, return it.
+  auto policy = map.find(name);
+  if (policy != map.end())
+    return policy->second;
+
+  // Else return ALL as default.  Assert since we should never reach here.
+  return Math::StatisticType::Mean;
+}
+
+/**
+ * Returns a set of all statistic type names.
+ *
+ * @returns a set of all statistic type names.
+ */
+std::set<std::string> getAllStatisticTypeNames() {
+  const std::map<std::string, Math::StatisticType> &map = getStatisticTypeMap();
+  std::set<std::string> statisticTypeNames;
+
+  for (auto policy = map.begin(); policy != map.end(); ++policy)
+    statisticTypeNames.insert(policy->first);
+
+  return statisticTypeNames;
+}
+}
 } // namespace Algorithms
 } // namespace Mantid

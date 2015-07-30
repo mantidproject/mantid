@@ -8,9 +8,6 @@
 #include <QFileDialog>
 #include <QPrinter>
 #include <QPrintDialog>
-#include <QMessageBox>
-#include <QTextStream>
-#include <QApplication>
 
 /**
  * Constructor
@@ -21,8 +18,15 @@
 ScriptOutputDisplay::ScriptOutputDisplay(QWidget * parent) :
   QTextEdit(parent), m_copy(NULL), m_clear(NULL), m_save(NULL)
 {
-  setReadOnly(true);
-  setLineWrapMode(QTextEdit::FixedColumnWidth);
+  //the control is readonly, but if you set it read only then ctrl+c for copying does not work
+  //this approach allows ctrl+c and disables user editing through the use of the KeyPress handler
+  //and disabling drag and drop
+  //also the mouseMoveEventHandler prevents dragging out of the control affecting the text.
+  setReadOnly(false);
+  this->setAcceptDrops(false);
+  
+
+  setLineWrapMode(QTextEdit::WidgetWidth);
   setLineWrapColumnOrWidth(105);
   setAutoFormatting(QTextEdit::AutoNone);
   // Change to fix width font so that table formatting isn't screwed up
@@ -34,6 +38,17 @@ ScriptOutputDisplay::ScriptOutputDisplay(QWidget * parent) :
 
   initActions();
 }
+
+/** Mouse move event handler - overridden to prevent dragging out of the control affecting the text
+ * it does this by temporarily setting the control to read only while the base event handler operates
+ * @param e the mouse move event
+ */
+void ScriptOutputDisplay::mouseMoveEvent(QMouseEvent * e)
+  {
+    this->setReadOnly(true);
+    QTextEdit::mouseMoveEvent(e);
+    this->setReadOnly(false);
+  }
 
 /**
  * Is there anything here
@@ -50,6 +65,22 @@ bool ScriptOutputDisplay::isEmpty() const
 void ScriptOutputDisplay::populateEditMenu(QMenu &editMenu)
 {
   editMenu.addAction(m_clear);
+}
+
+
+
+/** 
+ * Capture key presses. 
+ * @param event A pointer to the QKeyPressEvent object
+ */
+void ScriptOutputDisplay::keyPressEvent(QKeyEvent* event)
+{
+  if ((event->key() == Qt::Key_C) && (event->modifiers() == Qt::KeyboardModifier::ControlModifier))
+  {
+    this->copy();
+  }
+  //accept all key presses to prevent keyboard interaction
+  event->accept();
 }
 
 /**

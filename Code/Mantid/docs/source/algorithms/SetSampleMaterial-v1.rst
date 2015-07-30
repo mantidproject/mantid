@@ -61,7 +61,7 @@ Number Density
 
 The number density is defined as
 
-.. math:: \rho_n = \frac{ZParameter}{UnitCellVolume}
+.. math:: \rho_n = \frac{N_{atoms}ZParameter}{UnitCellVolume}
 
 It can can be generated in one of two ways:
 
@@ -69,5 +69,29 @@ It can can be generated in one of two ways:
 2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
    the algorithm calculate it from the OrientedLattice on the 
    ``InputWorkspace``).
+   
+Linear Absorption Coefficients
+##############################
+
+.. math:: \mu_s = \rho_n \frac{1}{N_{atoms}}\sum_{i}s_{i}n_{i} \text{ units of 1/cm}
+.. math:: s = \sigma_{total scattering}
+.. math:: \mu_a = \rho_n \frac{1}{N_{atoms}}\sum_{i}a_{i}n_{i} \text{ units of 1/cm}
+.. math:: a = \sigma_{absorption} (\lambda=1.8)
+
+A detailed version of this is found in [2]. 
+
+References
+----------
+
+The data used in this algorithm comes from the following paper.
+
+#. Varley F. Sears, *Neutron scattering lengths and cross sections*, Neutron News **3:3** (1992) 26
+   `doi: 10.1080/10448639208218770 <http://dx.doi.org/10.1080/10448639208218770>`_
+#. J. A. K. Howard, O. Johnson, A. J. Schultz and A. M. Stringer, *Determination of the neutron
+   absorption cross section for hydrogen as a function of wavelength with a pulsed neutron 
+   source*, J. Appl. Cryst. (1987). 20, 120-122
+   `doi: 10.1107/S0021889887087028 <http://dx.doi.org/10.1107/S0021889887087028>`_
 
 .. categories::
+
+.. sourcelink::

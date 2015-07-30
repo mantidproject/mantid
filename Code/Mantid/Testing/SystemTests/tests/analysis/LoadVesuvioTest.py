@@ -102,8 +102,18 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
 
-    def test_using_ip_file_adjusts_instrument_and_attaches_parameters(self):
-        self._run_load("14188", "3", "SingleDifference","IP0005.dat")
+    def test_using_ip_file_adjusts_instrument_and_attaches_parameters_difference_mode(self):
+        self._run_load("14188", "3", "SingleDifference", "IP0005.dat")
+
+        # Check some data
+        evs_raw = mtd[self.ws_name]
+        det0 = evs_raw.getDetector(0)
+        param = det0.getNumberParameter("t0")
+        self.assertEqual(1, len(param))
+        self.assertAlmostEqual(-0.4157, param[0],places=4)
+
+    def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
+        self._run_load("14188", "3", "FoilOut", "IP0005.dat")
 
         # Check some data
         evs_raw = mtd[self.ws_name]
@@ -221,7 +231,7 @@ class VesuvioTests(unittest.TestCase):
 
     def _do_ads_check(self, name):
         self.assertTrue(name in mtd)
-        self.assertTrue(type(mtd[name]) == MatrixWorkspace)
+        self.assertTrue(isinstance(mtd[name], MatrixWorkspace))
 
     def _do_size_check(self,name, expected_nhist):
         loaded_data = mtd[name]

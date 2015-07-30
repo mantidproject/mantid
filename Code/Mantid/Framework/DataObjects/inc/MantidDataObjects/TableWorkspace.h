@@ -8,6 +8,7 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -76,12 +77,16 @@ namespace DataObjects {
 */
 
 class MANTID_DATAOBJECTS_DLL TableWorkspace
-    : virtual public API::ITableWorkspace {
+    : public API::ITableWorkspace {
 public:
   /// Constructor.
   TableWorkspace(size_t nrows = 0);
   /// Virtual destructor.
   virtual ~TableWorkspace();
+  /// Returns a clone of the workspace
+  std::unique_ptr<TableWorkspace> clone() const {
+    return std::unique_ptr<TableWorkspace>(doClone());
+  }
   /// Return the workspace typeID
   virtual const std::string id() const { return "TableWorkspace"; }
   /// Get the footprint in memory in KB.
@@ -212,8 +217,6 @@ public:
   size_t insertRow(size_t index);
   /// Delets a row if it exists.
   void removeRow(size_t index);
-  /// Clone table workspace instance.
-  TableWorkspace *clone() const;
 
   /** This method finds the row and column index of an integer cell value in a
    * table workspace
@@ -286,7 +289,17 @@ public:
   /// Sort this table. @see ITableWorkspace::sort
   void sort(std::vector<std::pair<std::string, bool>> &criteria);
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  TableWorkspace(const TableWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  TableWorkspace &operator=(const TableWorkspace &other);
+
 private:
+  virtual TableWorkspace *doClone() const {
+    return new TableWorkspace(*this);
+  }
+
   /// template method to find a given value in a table.
   template <typename Type>
   void findValue(const Type value, size_t &row, const size_t &colIndex) {
@@ -397,11 +410,6 @@ private:
   /// shared pointer to the logManager, responsible for the workspace
   /// properties.
   API::LogManager_sptr m_LogManager;
-
-  // not asignable, not copy constructable, clonable
-  /// Copy constructor
-  TableWorkspace(const TableWorkspace &other);
-  TableWorkspace &operator=(const TableWorkspace &rhs);
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

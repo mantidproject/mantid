@@ -5,7 +5,7 @@
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidAPI/MDGeometry.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
@@ -57,6 +57,10 @@ public:
   virtual void zoomToPeak(const int index);
   virtual bool isHidden() const;
   virtual bool contentsDifferent(PeaksPresenter const *  other) const;
+  virtual void peakEditMode(EditMode mode);
+  virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox);
+  virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY);
+  virtual bool hasPeakAddMode() const;
 
 private:
   /// Peak overlay view.
@@ -77,6 +81,11 @@ private:
   UpdateableOnDemand *m_owningPresenter;
   /// Flag to indicate that this is hidden.
   bool m_isHidden;
+  /// Flag to indicate the current edit mode.
+  EditMode m_editMode;
+  /// Can we add to this peaks workspace
+  bool m_hasAddPeaksMode;
+
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views
@@ -99,7 +108,13 @@ private:
   void informOwnerUpdate();
   /// initialize the setup
   void initialize();
+  /// Find visible peak indexes.
+  std::vector<size_t> findVisiblePeakIndexes(const PeakBoundingBox &box);
+  /// Set the visible peak list.
+  void setVisiblePeaks(const std::vector<size_t>& indexes);
 };
+
+
 }
 }
 

@@ -57,3 +57,5 @@ and :math:`fwhm` as the peak's fitted width. Then,
 .. seealso :: Algorithm :ref:`algm-EstimateResolutionDiffraction`
 
 .. categories::
+
+.. sourcelink::

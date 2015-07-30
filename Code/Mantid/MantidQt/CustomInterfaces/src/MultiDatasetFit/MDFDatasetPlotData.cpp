@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFErrorCurve.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -24,7 +24,8 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
   m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))),
   m_dataErrorCurve(NULL),
   m_calcCurve(NULL),
-  m_diffCurve(NULL)
+  m_diffCurve(NULL),
+  m_showDataErrorBars(false)
 {
   // get the data workspace
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
@@ -109,7 +110,7 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
     m_dataErrorCurve->detach();
     delete m_dataErrorCurve;
   }
-  m_dataErrorCurve = new ErrorCurve(m_dataCurve, ws->readE(wsIndex));
+  m_dataErrorCurve = new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, ws->readE(wsIndex));
 
   if ( haveFitCurves )
   {

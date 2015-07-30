@@ -111,6 +111,37 @@ public:
     TS_ASSERT_EQUALS(axis, expectedAxis);
   }
 
+  void test_ConvertToBinBoundary_EmptyInputVector() {
+    std::vector<double> bin_centers;
+    std::vector<double> bin_edges;
+    VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
+
+    TS_ASSERT_EQUALS(bin_edges.size(), 0);
+  }
+
+  void test_ConvertToBinBoundary_Size1InputVector() {
+    std::vector<double> bin_centers = boost::assign::list_of(0.4);
+    std::vector<double> bin_edges;
+    VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
+
+    TS_ASSERT_EQUALS(bin_edges.size(), 2);
+    // In lack of a better guess for the bin width it is set to 1.0.
+    TS_ASSERT_DELTA(bin_edges[0], -0.1, 1e-12);
+    TS_ASSERT_DELTA(bin_edges[1], 0.9, 1e-12);
+  }
+
+  void test_ConvertToBinBoundary_Size2InputVector() {
+    std::vector<double> bin_centers = boost::assign::list_of(0.5)(1.5);
+    std::vector<double> bin_edges;
+
+    VectorHelper::convertToBinBoundary(bin_centers, bin_edges);
+
+    TS_ASSERT_EQUALS(bin_edges.size(), 3);
+    TS_ASSERT_DELTA(bin_edges[0], 0.0, 1e-12);
+    TS_ASSERT_DELTA(bin_edges[1], 1.0, 1e-12);
+    TS_ASSERT_DELTA(bin_edges[2], 2.0, 1e-12);
+  }
+
   // TODO: More tests of other methods
 
   void test_splitStringIntoVector()

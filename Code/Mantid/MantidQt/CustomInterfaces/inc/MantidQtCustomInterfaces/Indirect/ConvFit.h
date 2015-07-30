@@ -2,8 +2,8 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
 #include "ui_ConvFit.h"
-#include "IDATab.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "IndirectDataAnalysisTab.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/CompositeFunction.h"
 
 namespace MantidQt
@@ -12,7 +12,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport ConvFit : public IDATab
+  class DLLExport ConvFit : public IndirectDataAnalysisTab
   {
     Q_OBJECT
 

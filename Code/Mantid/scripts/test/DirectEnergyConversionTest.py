@@ -545,9 +545,80 @@ class DirectEnergyConversionTest(unittest.TestCase):
         rez = CheckWorkspacesMatch(result[1],result2[1])
         self.assertEqual(rez,'Success!')
 
+    def test_sum_monitors(self):
+        # create test workspace
+        monitor_ws=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1,\
+                                            NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
+
+        # Place all detectors into appropriate positions as the distance for all detectors
+        # to sum have to be equal
+        mon1_det = monitor_ws.getDetector(0)
+        mon1_pos = mon1_det.getPos()
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=2,
+                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
+                                 RelativePosition=False)
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=3,
+                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
+                                 RelativePosition=False)
+        mon2_det = monitor_ws.getDetector(3)
+        mon2_pos = mon2_det.getPos()
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=4,
+                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
+                                 RelativePosition=False)
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=5,
+                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
+                                 RelativePosition=False)
+        ConvertUnits(InputWorkspace=monitor_ws, OutputWorkspace='monitor_ws', Target='TOF')
+        # Rebin to "formally" make common bin boundaries as it is not considered as such
+        #any more after converting units (Is this a bug?)
+        xx = monitor_ws.readX(0)
+        x_min = min(xx[0],xx[-1])
+        x_max= max(xx[0],xx[-1])
+        x_step = (x_max-x_min)/(len(xx)-1)
+        monitor_ws = Rebin(monitor_ws,Params=[x_min,x_step,x_max])
+        monitor_ws = mtd['monitor_ws']
+        #
+        # keep this workspace for second test below -- clone and give
+        # special name for RunDescriptor to recognize as monitor workspace for
+        # fake data workspace we will provide.
+        _TMPmonitor_ws_monitors = CloneWorkspace(monitor_ws)
+
+        # Estimate energy from two monitors
+        ei,mon1_peak,mon1_index,tzero = \
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1,Monitor2Spec=4,
+                  EnergyEstimate=62.2,FixEi=False)
+        self.assertAlmostEqual(ei,62.1449,3)
+
+        # Provide instrument parameter, necessary to define
+        # DirectEnergyConversion class properly
+        SetInstrumentParameter(monitor_ws,ParameterName='fix_ei',ParameterType='Number',Value='0')
+        SetInstrumentParameter(monitor_ws,DetectorList=[1,2,3,6],ParameterName='DelayTime',\
+                               ParameterType='Number',Value='0.5') 
+        # initiate test reducer
+        tReducer = DirectEnergyConversion(monitor_ws.getInstrument())
+        tReducer.prop_man.ei_mon_spectra= ([1,2,3],6)
+        tReducer.prop_man.normalise_method = 'current'
+        ei_mon_spectra  = tReducer.prop_man.ei_mon_spectra
+        ei_mon_spectra,monitor_ws  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+        #
+        # Check GetEi with summed monitors. Try to run separately.
+        ei1,mon1_peak,mon1_index,tzero = \
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1,Monitor2Spec=6,
+                  EnergyEstimate=62.2,FixEi=False)
+        self.assertAlmostEqual(ei1,ei,2)
+
+        # Second test Check get_ei as part of the reduction
+        tReducer.prop_man.ei_mon_spectra= ([1,2,3],[4,5,6])
+        tReducer.prop_man.fix_ei = False
+        # DataWorkspace == monitor_ws data workspace is not used anyway. The only thing we
+        # use it for is to retrieve monitor workspace from Mantid using its name
+        ei2,mon1_peak2=tReducer.get_ei(monitor_ws,62.2)
+        self.assertAlmostEqual(ei2,64.95,2)
+
+
 
 
 if __name__=="__main__":
-        test = DirectEnergyConversionTest('test_abs_multirep_with_bkg_and_bleed')
-        test.test_abs_multirep_with_bkg_and_bleed()
-   #unittest.main()
+   #test = DirectEnergyConversionTest('test_sum_monitors')
+   #test.test_sum_monitors()
+   unittest.main()

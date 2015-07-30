@@ -151,3 +151,5 @@ Output:
    [17 32]
 
 .. categories::
+
+.. sourcelink::

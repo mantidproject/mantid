@@ -19,6 +19,11 @@ either sample temperature or run number of temperature is not available.
 The ELT workspace shows the normalisation of the ELF workspace to run with the
 lowest sample temperature.
 
+Workflow
+--------
+
+.. diagram:: ElasticWindowMultiple-v1_wkflw.dot
+
 Usage
 -----
 
@@ -81,3 +86,5 @@ Usage
     ELF bin count: 7
 
 .. categories::
+
+.. sourcelink::

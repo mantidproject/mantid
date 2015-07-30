@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
 
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include <QMessageBox>
 
@@ -11,8 +12,17 @@ namespace MantidQt
 namespace CustomInterfaces
 {
   ALCDataLoadingView::ALCDataLoadingView(QWidget* widget)
-    : m_widget(widget), m_dataCurve(new QwtPlotCurve())
+    : m_widget(widget), m_dataCurve(new QwtPlotCurve()), m_dataErrorCurve(NULL)
   {}
+
+  ALCDataLoadingView::~ALCDataLoadingView() {
+    m_dataCurve->detach();
+    delete m_dataCurve;
+    if (m_dataErrorCurve) {
+      m_dataErrorCurve->detach();
+      delete m_dataErrorCurve;
+    }
+  }
 
   void ALCDataLoadingView::initialize()
   {
@@ -131,9 +141,21 @@ namespace CustomInterfaces
     return boost::make_optional(range);
   }
 
-  void ALCDataLoadingView::setDataCurve(const QwtData& data)
-  {
+  void ALCDataLoadingView::setDataCurve(const QwtData &data,
+                                        const std::vector<double> &errors) {
+
+    // Set data
     m_dataCurve->setData(data);
+
+    // Set errors
+    if (m_dataErrorCurve) {
+      m_dataErrorCurve->detach();
+      delete m_dataErrorCurve;
+    }
+    m_dataErrorCurve =
+        new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
+    m_dataErrorCurve->attach(m_ui.dataPlot);
+
     m_ui.dataPlot->replot();
   }
 

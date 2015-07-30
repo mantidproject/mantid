@@ -47,9 +47,11 @@ add_subdirectory ( kernel )
 add_dependencies ( PythonKernelModule PythonModule ) # Ensure the module files are in place
 add_subdirectory ( geometry )
 add_subdirectory ( api )
+add_subdirectory ( dataobjects )
 
 # Create an overall target
-add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule PythonAPIModule  )
+add_custom_target ( PythonInterface DEPENDS PythonKernelModule PythonGeometryModule 
+                    PythonAPIModule PythonDataObjectsModule )
 set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 ###########################################################################

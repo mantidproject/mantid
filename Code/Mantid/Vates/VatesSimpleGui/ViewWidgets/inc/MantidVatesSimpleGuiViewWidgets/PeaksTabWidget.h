@@ -3,7 +3,7 @@
 
 #include "ui_PeaksTabWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 
 #include <QWidget>
 #include <QTabWidget>

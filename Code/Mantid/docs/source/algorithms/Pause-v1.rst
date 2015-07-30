@@ -38,3 +38,5 @@ Output:
    The algorithm paused for ... seconds.
 
 .. categories::
+
+.. sourcelink::

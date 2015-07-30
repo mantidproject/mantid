@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"

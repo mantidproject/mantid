@@ -9,7 +9,6 @@ set ( SRC_FILES
 	src/BooleanBinaryOperationMD.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CalculateCoverageDGS.cpp
-	src/CalculateReflectometryQBase.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
@@ -19,6 +18,7 @@ set ( SRC_FILES
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
 	src/ConvertCWPDMDToSpectra.cpp
+	src/ConvertCWSDExpToMomentum.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
@@ -96,7 +96,6 @@ set ( SRC_FILES
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/QueryMDWorkspace.cpp
-	src/ReflectometryTransform.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
@@ -129,13 +128,13 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
-	inc/MantidMDAlgorithms/CalculateReflectometryQBase.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
+	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
 	inc/MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
@@ -215,7 +214,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/QueryMDWorkspace.h
-	inc/MantidMDAlgorithms/ReflectometryTransform.h
 	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
 	inc/MantidMDAlgorithms/ReflectometryTransformP.h
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
@@ -252,6 +250,7 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertCWPDMDToSpectraTest.h
+	ConvertCWSDExpToMomentumTest.h
 	ConvertEventsToMDTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpiceDataToRealSpaceTest.h
@@ -321,8 +320,8 @@ set ( TEST_FILES
 	ReflectometryTransformQxQzTest.h
 	ResolutionConvolvedCrossSectionTest.h
 	SaveIsawQvectorTest.h
-	SaveMDTest.h
 	SaveMD2Test.h
+	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h

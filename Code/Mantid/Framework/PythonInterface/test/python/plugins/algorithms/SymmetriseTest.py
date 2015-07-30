@@ -87,7 +87,7 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests a very minimal execution.
         """
-        symm_test_out_ws = Symmetrise(Sample=self._sample_ws,
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
                                       XMin=0.05, XMax=0.2)
 
         self._validate_workspace(symm_test_out_ws)
@@ -97,7 +97,7 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests symmetrising about x=0.
         """
-        symm_test_out_ws = Symmetrise(Sample=self._sample_ws,
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
                                       XMin=0.0, XMax=0.2)
 
         self._validate_workspace(symm_test_out_ws)
@@ -109,7 +109,7 @@ class SymmetriseTest(unittest.TestCase):
         self._sample_ws = _generate_big_sample_ws('symm_test_sample_ws', 10)
         self._spec_range = [3, 7]
 
-        symm_test_out_ws = Symmetrise(Sample=self._sample_ws,
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
                                       XMin=0.05, XMax=0.2,
                                       SpectraRange=self._spec_range)
 
@@ -120,7 +120,7 @@ class SymmetriseTest(unittest.TestCase):
         """
         Tests running with a given spectra range.
         """
-        symm_test_out_ws = Symmetrise(Sample=self._sample_ws,
+        symm_test_out_ws = Symmetrise(InputWorkspace=self._sample_ws,
                                       XMin=0.05, XMax=0.2,
                                       SpectraRange=[1, 1])
 
@@ -132,7 +132,7 @@ class SymmetriseTest(unittest.TestCase):
         Tests validation on entering an XMin value lower than the smallest value in the X range.
         """
         self.assertRaises(RuntimeError, Symmetrise,
-                          Sample=self._sample_ws,
+                          InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
                           XMin=-5, XMax=0.2)
 
@@ -142,7 +142,7 @@ class SymmetriseTest(unittest.TestCase):
         Tests validation on entering an XMax value greater than the largest value in the X range.
         """
         self.assertRaises(RuntimeError, Symmetrise,
-                          Sample=self._sample_ws,
+                          InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
                           XMin=0.05, XMax=15)
 
@@ -152,7 +152,7 @@ class SymmetriseTest(unittest.TestCase):
         Tests validation on entering an XMax value lower then XMin.
         """
         self.assertRaises(RuntimeError, Symmetrise,
-                          Sample=self._sample_ws,
+                          InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
                           XMin=0.2, XMax=0.1)
 
@@ -162,7 +162,7 @@ class SymmetriseTest(unittest.TestCase):
         Tests validation on entering a minimum spectra number lower then that of the workspace.
         """
         self.assertRaises(RuntimeError, Symmetrise,
-                          Sample=self._sample_ws,
+                          InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
                           XMin=0.05, XMax=0.2,
                           SpectraRange=[0, 1])
@@ -173,7 +173,7 @@ class SymmetriseTest(unittest.TestCase):
         Tests validation on entering a maximum spectra number higher then that of the workspace.
         """
         self.assertRaises(RuntimeError, Symmetrise,
-                          Sample=self._sample_ws,
+                          InputWorkspace=self._sample_ws,
                           OutputWOrkspace='__Symmetrise_TestWS',
                           XMin=0.05, XMax=0.2,
                           SpectraRange=[1, 2])

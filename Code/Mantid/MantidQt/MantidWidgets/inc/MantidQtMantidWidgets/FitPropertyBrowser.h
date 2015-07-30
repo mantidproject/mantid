@@ -1,7 +1,7 @@
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "WidgetDllOption.h"
 
@@ -15,7 +15,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 
     /* Forward declarations */

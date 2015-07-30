@@ -58,3 +58,5 @@ Output:
   Source Mask workspace # Detectors masked =  32258
 
 .. categories::
+
+.. sourcelink::

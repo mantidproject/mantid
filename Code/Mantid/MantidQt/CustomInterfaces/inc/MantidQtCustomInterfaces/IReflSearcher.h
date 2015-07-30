@@ -4,7 +4,7 @@
 #include <string>
 
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace MantidQt
 {

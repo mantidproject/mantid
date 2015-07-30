@@ -7,7 +7,7 @@
 #include "ui_DataComparison.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>

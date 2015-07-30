@@ -1,10 +1,8 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
 
@@ -13,25 +11,18 @@
 #include "MantidQtAPI/MantidWidget.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/FilePropertyWidget.h"
-#include "MantidQtAPI/PropertyWidgetFactory.h"
 
 #include <QIcon>
 #include <QLabel>
 #include <QMessageBox>
-#include <QFileDialog>
-#include <QFileInfo>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
-#include <QDesktopServices>
-#include <QUrl>
 #include <QHBoxLayout>
-#include <QSignalMapper>
 #include <QCheckBox>
 #include <QtGui>
 
-#include <Poco/AbstractObserver.h>
 #include <Poco/ActiveResult.h>
 
 using namespace MantidQt::API;
@@ -52,8 +43,10 @@ namespace
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
   QDialog(parent), m_algorithm(), m_algName(""), m_algProperties(),
   m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(),
-  m_enabled(), m_disabled(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), m_autoParseOnInit(true),
-  m_validators(), m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker()
+  m_enabled(), m_disabled(), m_strMessage(""), m_keepOpen(false), 
+  m_msgAvailable(false), m_isInitialized(false),   m_autoParseOnInit(true),  m_validators(), 
+  m_noValidation(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
+  m_keepOpenCheckBox(NULL), m_okButton(NULL)
 {
 }
 
@@ -62,6 +55,38 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
  */
 AlgorithmDialog::~AlgorithmDialog()
 {
+  m_observers.clear();
+  this->stopObserving(m_algorithm);
+}
+
+/**
+ * Set if the keep open option is shown.
+ * This must be set after calling initializeLayout.
+ * @param showOption false to hide the control, otherwise true
+ */
+void AlgorithmDialog::setShowKeepOpen(const bool showOption) {
+  if (m_keepOpenCheckBox)
+  {    
+    //if hidden then turn it off
+    if (!showOption)
+    {
+      m_keepOpenCheckBox->setCheckState(Qt::CheckState::Unchecked);
+    }
+    m_keepOpenCheckBox->setVisible(showOption);
+  }
+}
+/**
+ * Is the keep open option going to be shown?
+ * @returns true if it will be shown
+ */
+bool AlgorithmDialog::isShowKeepOpen() const
+{
+  bool retval = true;
+  if (m_keepOpenCheckBox)
+  {
+    retval = m_keepOpenCheckBox->isVisible();
+  }
+  return retval;
 }
 
 /**
@@ -103,6 +128,8 @@ void AlgorithmDialog::initializeLayout()
 
   executeOnAccept(true);
 
+  connect(this, SIGNAL(algCompletedSignal()), this, SLOT(algorithmCompleted()));
+    
   m_isInitialized = true;
 }
 
@@ -221,7 +248,7 @@ QString AlgorithmDialog::getInputValue(const QString& propName) const
     if( prop ) return QString::fromStdString(prop->getDefault());
     else return "";
   }
-  else return value;
+
   return value;
 }
 
@@ -675,22 +702,34 @@ void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textFiel
 
 //-------------------------------------------------------------------------------------------------
 /** Layout the buttons and others in the generic dialog */
-QHBoxLayout *
+QLayout *
 AlgorithmDialog::createDefaultButtonLayout(const QString & helpText,
                        const QString & loadText,
-                       const QString & cancelText)
+                       const QString & cancelText,
+                       const QString & keepOpenText)
 {
-  QPushButton *okButton = new QPushButton(loadText);
-  connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
-  okButton->setDefault(true);
+  m_okButton = new QPushButton(loadText);
+  connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
+  m_okButton->setDefault(true);
 
   QPushButton *exitButton = new QPushButton(cancelText);
   connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
+  
 
   QHBoxLayout *buttonRowLayout = new QHBoxLayout;
   buttonRowLayout->addWidget(createHelpButton(helpText));
   buttonRowLayout->addStretch();
-  buttonRowLayout->addWidget(okButton);
+  
+  m_keepOpenCheckBox = new QCheckBox(keepOpenText);
+  m_keepOpenCheckBox->setLayoutDirection(Qt::LayoutDirection::RightToLeft);
+  connect(m_keepOpenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(keepOpenChanged(int)));
+  buttonRowLayout->addWidget(m_keepOpenCheckBox);
+  if (keepOpenText.isEmpty())
+  {
+    setShowKeepOpen(false);
+  }
+
+  buttonRowLayout->addWidget(m_okButton);
   buttonRowLayout->addWidget(exitButton);
 
   return buttonRowLayout;
@@ -738,7 +777,12 @@ void AlgorithmDialog::accept()
   {
     //Store input for next time
     saveInput();
-    QDialog::accept();
+    if (!this->m_keepOpen) {
+      QDialog::accept();
+    }
+    else {
+       executeAlgorithmAsync();
+    }
   }
   else
   {
@@ -765,23 +809,40 @@ void AlgorithmDialog::helpClicked()
 }
 
 //-------------------------------------------------------------------------------------------------
+
+/**
+ * A slot to handle the keep open button click
+ */
+void AlgorithmDialog::keepOpenChanged(int state)
+{
+  m_keepOpen = (state == QCheckBox::On);
+}
+
+
+//-------------------------------------------------------------------------------------------------
 /**
  * Execute the underlying algorithm
  */
 void AlgorithmDialog::executeAlgorithmAsync()
 {
+  Mantid::API::IAlgorithm_sptr algToExec = m_algorithm;
   try
   {
-    // Add AlgorithmObservers to the algorithm
+    // Add any custom AlgorithmObservers to the algorithm
     for(auto it = m_observers.begin(); it != m_observers.end(); ++it)
-      (*it)->observeAll(m_algorithm);
+      (*it)->observeAll(algToExec);
 
-    m_algorithm->executeAsync();
-    m_observers.clear();
+    this->observeFinish(algToExec);
+    this->observeError(algToExec);
+
+    algToExec->executeAsync();
+    if (m_okButton) {
+      m_okButton->setEnabled(false);
+    }
   }
   catch (Poco::NoThreadAvailableException &)
   {
-    g_log.error() << "No thread was available to run the " << m_algorithm->name() << " algorithm in the background." << std::endl;
+    g_log.error() << "No thread was available to run the " << algToExec->name() << " algorithm in the background." << std::endl;
   }
 }
 
@@ -1069,4 +1130,40 @@ void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
 void AlgorithmDialog::addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer)
 {
   m_observers.push_back(observer);
+  //turn off the keep open option - it would only confuse things if someone is watching
+  setShowKeepOpen(false);
+}
+
+/**Handle completion of algorithm started while staying open.
+ * emits another signal to marshal the call to the main ui thread
+ *
+ * @param alg Completed algorithm (unused)
+ */
+void AlgorithmDialog::finishHandle(const IAlgorithm *alg)
+{
+  UNUSED_ARG(alg);
+  emit algCompletedSignal();
+}
+
+/**Handle error signal of algorithm started while staying open.
+ * emits another signal to marshal the call to the main ui thread
+ *
+ * @param alg Completed algorithm (unused)
+ * @param what the error message (unused)
+ */
+void AlgorithmDialog::errorHandle(const IAlgorithm *alg, const std::string &what)
+{
+  UNUSED_ARG(alg);
+  UNUSED_ARG(what);
+  emit algCompletedSignal();
+}
+
+
+/**Handle completion of algorithm started while staying open.
+ * reenables the OK button when the algorithms finishes.
+ *
+ */
+void AlgorithmDialog::algorithmCompleted()
+{
+  if (m_okButton) m_okButton->setEnabled(true);
 }

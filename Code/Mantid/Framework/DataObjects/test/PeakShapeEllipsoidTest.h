@@ -127,6 +127,19 @@ public:
     TS_ASSERT_EQUALS(a.algorithmVersion(), b.algorithmVersion());
   }
 
+  void test_radius() {
+
+      std::vector<double> radius = list_of(1)(2)(3);
+
+
+      PeakShapeEllipsoid shape(list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
+                                   .convert_to_container<std::vector<V3D>>(),
+                               radius, radius, radius, Mantid::Kernel::HKL);
+
+      TSM_ASSERT_EQUALS("Radius should be taken to be the max of the ABC radii", 3.0, shape.radius());
+
+  }
+
   void test_shape_name() {
 
     // Construct it.

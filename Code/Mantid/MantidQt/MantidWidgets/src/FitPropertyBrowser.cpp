@@ -232,8 +232,7 @@ void FitPropertyBrowser::init()
 
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares" << "Rwp";
-                  //<< "Ignore positive peaks";
+  m_costFunctions << "Least squares" << "Rwp" << "Unweighted least squares";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
   m_maxIterations = m_intManager->addProperty("Max Iterations");
   m_intManager->setValue( m_maxIterations, settings.value("Max Iterations",500).toInt() );

@@ -504,7 +504,8 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       if (polarization.compare(PolStateNone) != 0)
         loadAlg->setProperty("NXentryName", polarization);
       loadAlg->executeAsChildAlg();
-      rawWS = loadAlg->getProperty("OutputWorkspace");
+      Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
+      rawWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
       if (rawWS->getNumberEvents() == 0) {
         g_log.notice() << "No data in " << polarization << std::endl;
         m_output_message += "    |No data for " + polarization + "\n";

@@ -22,7 +22,8 @@ bool isValidGeneratorString(const std::string &generatorString) {
   for (auto it = generatorStrings.begin(); it != generatorStrings.end(); ++it) {
     try {
       SymmetryOperationSymbolParser::parseIdentifier(*it);
-    } catch (Kernel::Exception::ParseError) {
+    }
+    catch (Kernel::Exception::ParseError) {
       return false;
     }
   }
@@ -180,6 +181,24 @@ std::vector<size_t> SpaceGroupFactoryImpl::subscribedSpaceGroupNumbers() const {
   return numbers;
 }
 
+std::vector<std::string> SpaceGroupFactoryImpl::subscribedSpaceGroupSymbols(
+    const PointGroup_sptr &pointGroup) {
+  if (m_pointGroupMap.empty()) {
+    fillPointGroupMap();
+  }
+
+  std::string pointGroupSymbol = pointGroup->getSymbol();
+
+  std::vector<std::string> symbols;
+  auto keyPair = m_pointGroupMap.equal_range(pointGroupSymbol);
+
+  for (auto it = keyPair.first; it != keyPair.second; ++it) {
+    symbols.push_back(it->second);
+  }
+
+  return symbols;
+}
+
 /// Unsubscribes the space group with the given Hermann-Mauguin symbol, but
 /// throws std::invalid_argument if symbol is not registered.
 void SpaceGroupFactoryImpl::unsubscribeSpaceGroup(const std::string &hmSymbol) {
@@ -237,6 +256,19 @@ SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(
   return boost::make_shared<const SpaceGroup>(*prototype);
 }
 
+/// Fills the internal multimap that maintains the mapping between space and
+/// point groups.
+void SpaceGroupFactoryImpl::fillPointGroupMap() {
+  m_pointGroupMap.clear();
+
+  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
+    SpaceGroup_const_sptr spaceGroup = getPrototype(it->first);
+
+    m_pointGroupMap.insert(
+        std::make_pair(spaceGroup->getPointGroup()->getSymbol(), it->first));
+  }
+}
+
 /// Returns a prototype object for the requested space group.
 SpaceGroup_const_sptr
 SpaceGroupFactoryImpl::getPrototype(const std::string &hmSymbol) {
@@ -260,11 +292,14 @@ void SpaceGroupFactoryImpl::subscribe(
   m_numberMap.insert(
       std::make_pair(generator->getNumber(), generator->getHMSymbol()));
   m_generatorMap.insert(std::make_pair(generator->getHMSymbol(), generator));
+
+  // Clear the point group map
+  m_pointGroupMap.clear();
 }
 
 /// Constructor cannot be called, since SingletonHolder is used.
 SpaceGroupFactoryImpl::SpaceGroupFactoryImpl()
-    : m_numberMap(), m_generatorMap() {
+    : m_numberMap(), m_generatorMap(), m_pointGroupMap() {
   Kernel::LibraryManager::Instance();
 }
 

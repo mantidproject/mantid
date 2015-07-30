@@ -1,6 +1,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -56,6 +57,22 @@ void LoadCalFile::getInstrument3WaysInit(Algorithm *alg) {
   alg->setPropertyGroup("InputWorkspace", grpName);
   alg->setPropertyGroup("InstrumentName", grpName);
   alg->setPropertyGroup("InstrumentFilename", grpName);
+}
+
+bool LoadCalFile::instrumentIsSpecified(API::Algorithm *alg) {
+  MatrixWorkspace_sptr inWS = alg->getProperty("InputWorkspace");
+  if (bool(inWS))
+    return true;
+
+  std::string InstrumentName = alg->getPropertyValue("InstrumentName");
+  if (!InstrumentName.empty())
+    return true;
+
+  std::string InstrumentFilename = alg->getPropertyValue("InstrumentFilename");
+  if (!InstrumentFilename.empty())
+    return true;
+
+  return false;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -134,7 +151,7 @@ void LoadCalFile::init() {
   declareProperty(
       new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
       "The base of the output workspace names. Names will have '_group', "
-      "'_offsets', '_mask' appended to them.");
+      "'_cal', '_offsets', '_mask' appended to them.");
 }
 
 //----------------------------------------------------------------------------------------------

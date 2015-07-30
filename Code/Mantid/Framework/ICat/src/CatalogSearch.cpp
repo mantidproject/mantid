@@ -11,6 +11,7 @@ GCC_DIAG_ON(literal-suffix)
 #endif
 
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateValidator.h"

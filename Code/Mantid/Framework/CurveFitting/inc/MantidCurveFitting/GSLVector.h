@@ -1,10 +1,10 @@
 #ifndef MANTID_CURVEFITTING_GSLVECTOR_H_
 #define MANTID_CURVEFITTING_GSLVECTOR_H_
 
+#include "MantidCurveFitting/DllConfig.h"
 #include <gsl/gsl_vector.h>
 
-#include <stdexcept>
-#include <sstream>
+#include <ostream>
 #include <vector>
 
 namespace Mantid {
@@ -36,133 +36,66 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class GSLVector {
-  /// The pointer to the GSL vector
-  gsl_vector *m_vector;
-
+class MANTID_CURVEFITTING_DLL GSLVector {
 public:
   /// Constructor
-  GSLVector() : m_vector(NULL) {}
-
+  GSLVector();
   /// Constructor
-  /// @param n :: The length of the vector.
-  GSLVector(const size_t n) { m_vector = gsl_vector_alloc(n); }
-
+  explicit GSLVector(const size_t n);
   /// Construct from a std vector
-  /// @param v :: A std vector.
-  GSLVector(const std::vector<double> &v) {
-    m_vector = gsl_vector_alloc(v.size());
-    for (size_t i = 0; i < v.size(); ++i) {
-      set(i, v[i]);
-    }
-  }
-
+  explicit GSLVector(const std::vector<double> &v);
+  /// Copy from a gsl vector
+  explicit GSLVector(const gsl_vector *v);
   /// Copy constructor.
-  /// @param v :: The other vector
-  GSLVector(const GSLVector &v) {
-    m_vector = gsl_vector_alloc(v.size());
-    gsl_vector_memcpy(m_vector, v.gsl());
-  }
-
+  GSLVector(const GSLVector &v);
   /// Copy assignment operator
-  /// @param v :: The other vector
-  GSLVector &operator=(const GSLVector &v) {
-    if (m_vector && size() != v.size()) {
-      gsl_vector_free(m_vector);
-      m_vector = NULL;
-    }
-    if (!m_vector) {
-      m_vector = gsl_vector_alloc(v.size());
-    }
-    gsl_vector_memcpy(m_vector, v.gsl());
-    return *this;
-  }
-
-  /// Destructor.
-  ~GSLVector() {
-    if (m_vector) {
-      gsl_vector_free(m_vector);
-    }
-  }
+  GSLVector &operator=(const GSLVector &v);
 
   /// Get the pointer to the GSL vector
-  gsl_vector *gsl() { return m_vector; }
-
+  gsl_vector *gsl();
   /// Get the pointer to the GSL vector
-  const gsl_vector *gsl() const { return m_vector; }
+  const gsl_vector *gsl() const;
 
   /// Resize the vector
-  /// @param n :: The new length
-  void resize(const size_t n) {
-    if (m_vector) {
-      gsl_vector_free(m_vector);
-    }
-    m_vector = gsl_vector_alloc(n);
-  }
-
+  void resize(const size_t n);
   /// Size of the vector
-  size_t size() const { return m_vector ? m_vector->size : 0; }
+  size_t size() const;
 
-  /// set an element
-  /// @param i :: The element index
-  /// @param value :: The new value
-  void set(size_t i, double value) {
-    if (i < m_vector->size)
-      gsl_vector_set(m_vector, i, value);
-    else {
-      std::stringstream errmsg;
-      errmsg << "GSLVector index = " << i
-             << " is out of range = " << m_vector->size
-             << " in GSLVector.set()";
-      throw std::out_of_range(errmsg.str());
-    }
-  }
-  /// get an element
-  /// @param i :: The element index
-  double get(size_t i) const {
-    if (i < m_vector->size)
-      return gsl_vector_get(m_vector, i);
-
-    std::stringstream errmsg;
-    errmsg << "GSLVector index = " << i
-           << " is out of range = " << m_vector->size << " in GSLVector.get()";
-    throw std::out_of_range(errmsg.str());
-  }
-
+  /// Set an element
+  void set(size_t i, double value);
+  /// Get an element
+  double get(size_t i) const;
+  /// Get a const reference to an element
+  const double& operator[](size_t i) const {return m_data[i];}
+  /// Get a reference to an element
+  double& operator[](size_t i) {return m_data[i];}
   // Set all elements to zero
-  void zero() {
-    if (m_vector) {
-      gsl_vector_set_zero(m_vector);
-    }
-  }
+  void zero();
+  /// Normalise this vector
+  void normalize();
+  /// Get vector norm (length)
+  double norm() const;
+  /// Get vector norm squared
+  double norm2() const;
+  /// Calculate the dot product
+  double dot(const GSLVector &v) const;
 
   /// Add a vector
-  /// @param v :: The other vector
-  GSLVector &operator+=(const GSLVector &v) {
-    if (m_vector) {
-      gsl_vector_add(m_vector, v.gsl());
-    }
-    return *this;
-  }
-
+  GSLVector &operator+=(const GSLVector &v);
   /// Subtract a vector
-  /// @param v :: The other vector
-  GSLVector &operator-=(const GSLVector &v) {
-    if (m_vector) {
-      gsl_vector_sub(m_vector, v.gsl());
-    }
-    return *this;
-  }
-
+  GSLVector &operator-=(const GSLVector &v);
   /// Multiply by a number
-  /// @param d :: The number
-  GSLVector &operator*=(const double d) {
-    if (m_vector) {
-      gsl_vector_scale(m_vector, d);
-    }
-    return *this;
-  }
+  GSLVector &operator*=(const double d);
+
+private:
+  /// Default element storage
+  std::vector<double> m_data;
+  /// The pointer to the GSL vector
+  gsl_vector_view m_view;
 };
+
+/// The << operator.
+MANTID_CURVEFITTING_DLL std::ostream &operator<<(std::ostream &ostr, const GSLVector &v);
 
 } // namespace CurveFitting
 } // namespace Mantid

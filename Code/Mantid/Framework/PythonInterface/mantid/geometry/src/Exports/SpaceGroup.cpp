@@ -31,15 +31,39 @@ boost::python::list getEquivalentPositions(SpaceGroup &self,
 
   return pythonEquivalents;
 }
+
+bool isAllowedReflection(SpaceGroup &self, const object &hkl) {
+    const Mantid::Kernel::V3D &hklV3d = Converters::PyObjectToV3D(hkl)();
+
+    return self.isAllowedReflection(hklV3d);
+}
+
+Mantid::Geometry::Group_sptr getSiteSymmetryGroup(
+        SpaceGroup &self,
+        const object &position) {
+    const Mantid::Kernel::V3D &posV3d = Converters::PyObjectToV3D(position)();
+
+    Mantid::Geometry::Group_sptr group = boost::const_pointer_cast<Group>(
+                self.getSiteSymmetryGroup(posV3d));
+
+    return group;
+}
 }
 
 void export_SpaceGroup() {
-  register_ptr_to_python<boost::shared_ptr<SpaceGroup>>();
+  register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
 
-  class_<SpaceGroup, boost::noncopyable, bases<Group>>("SpaceGroup", no_init)
+  class_<SpaceGroup, boost::noncopyable, bases<Group> >("SpaceGroup", no_init)
       .def("getNumber", &SpaceGroup::number)
       .def("getHMSymbol", &SpaceGroup::hmSymbol)
       .def("getEquivalentPositions", &getEquivalentPositions,
            "Returns an array with all symmetry equivalents of the supplied "
-           "HKL.");
+           "HKL.")
+      .def("isAllowedReflection", &isAllowedReflection,
+           "Returns True if the supplied reflection is allowed with respect to "
+           "space group symmetry operations.")
+      .def("getPointGroup", &SpaceGroup::getPointGroup,
+           "Returns the point group of the space group.")
+      .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,
+           "Returns the site symmetry group for supplied point coordinates.");
 }

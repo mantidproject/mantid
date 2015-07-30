@@ -3,6 +3,7 @@
 
 #include "ui_CatalogSearch.h"
 #include "WidgetDllOption.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtMantidWidgets/CatalogHelper.h"
 #include "MantidQtMantidWidgets/CatalogSelector.h"
 #include "MantidQtMantidWidgets/CheckboxHeader.h"

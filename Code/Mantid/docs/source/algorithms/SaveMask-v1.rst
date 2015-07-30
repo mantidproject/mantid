@@ -55,3 +55,5 @@ Example 1:
    </detector-masking>
 
 .. categories::
+
+.. sourcelink::

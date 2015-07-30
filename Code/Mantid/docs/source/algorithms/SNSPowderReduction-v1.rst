@@ -30,3 +30,5 @@ This is a worksflow algorithm used to process and the results of scattering expe
 Its usage sample can be found in `Mantid System tests repository <https://github.com/mantidproject/systemtests/blob/master/SystemTests/AnalysisTests/SNSPowderRedux.py>`_.
 
 .. categories::
+
+.. sourcelink::

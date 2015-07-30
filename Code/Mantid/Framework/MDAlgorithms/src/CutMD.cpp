@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Projection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"

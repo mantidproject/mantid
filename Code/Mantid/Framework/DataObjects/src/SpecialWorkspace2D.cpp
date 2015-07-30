@@ -72,6 +72,9 @@ SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
   }
 }
 
+SpecialWorkspace2D::SpecialWorkspace2D(const SpecialWorkspace2D &other)
+    : Workspace2D(other), detID_to_WI(other.detID_to_WI) {}
+
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */

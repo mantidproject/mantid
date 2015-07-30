@@ -42,6 +42,7 @@
 #include "MantidCrystal/PeakClusterProjection.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -163,8 +164,7 @@ void IntegratePeaksHybrid::exec() {
   const double peakOuterRadius = getProperty("BackgroundOuterRadius");
   const double halfPeakOuterRadius = peakOuterRadius / 2;
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(
-        dynamic_cast<IPeaksWorkspace *>(inPeakWS->clone()));
+    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
   }
 
   {

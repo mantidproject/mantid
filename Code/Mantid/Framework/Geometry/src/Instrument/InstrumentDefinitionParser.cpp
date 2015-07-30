@@ -17,6 +17,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
 
+#include <Poco/Path.h>
 #include <Poco/String.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -29,7 +30,6 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/assign/list_of.hpp>
-#include <MantidKernel/ChecksumHelper.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -47,126 +47,162 @@ namespace {
 // initialize the static logger
 Kernel::Logger g_log("InstrumentDefinitionParser");
 }
-
-//----------------------------------------------------------------------------------------------
-/** Constructor
+  //----------------------------------------------------------------------------------------------
+/** Default Constructor - not very functional in this state
  */
-InstrumentDefinitionParser::InstrumentDefinitionParser()
-    : m_xmlFile(boost::make_shared<NullIDFObject>()),
-      m_cacheFile(boost::make_shared<NullIDFObject>()), pDoc(NULL),
-      pRootElem(NULL), m_hasParameterElement_beenSet(false),
+  InstrumentDefinitionParser::InstrumentDefinitionParser():
+      m_xmlFile(boost::make_shared<NullIDFObject>()),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_hasParameterElement_beenSet(false),
       m_haveDefaultFacing(false), m_deltaOffsets(false),
       m_angleConvertConst(1.0), m_indirectPositions(false),
-      m_cachingOption(NoneApplied) {}
-
+      m_cachingOption(NoneApplied)
+  {
+    initialise("","","","");
+  }
 //----------------------------------------------------------------------------------------------
-/** Destructor
- */
-InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
-
-//----------------------------------------------------------------------------------------------
-/** Initialize the XML parser based on an IDF xml file path.
- *
- *  Note that this convenience initialize method actually translates the inputs
- *into the other initialize method.
- *
+/** Constructor
  * @param filename :: IDF .xml path (full). This is needed mostly to find the
  *instrument geometry cache.
  * @param instName :: name of the instrument
  * @param xmlText :: XML contents of IDF
  */
-void InstrumentDefinitionParser::initialize(const std::string &filename,
-                                            const std::string &instName,
-                                            const std::string &xmlText) {
-  IDFObject_const_sptr xmlFile = boost::make_shared<const IDFObject>(filename);
-  // Use the filename to construct the cachefile name so that there is a 1:1 map
-  // between a definition file & cache
-  std::string idfExt = xmlFile->getExtension();
-  std::string vtpFilename = filename;
-  static const char *vtpExt = ".vtp";
-  if (idfExt.empty()) {
-    vtpFilename += vtpExt;
-  } else {
-    boost::replace_last(vtpFilename, idfExt, vtpExt);
-  }
-  IDFObject_const_sptr vtpFile =
-      boost::make_shared<const IDFObject>(vtpFilename);
-
-  this->initialize(xmlFile, vtpFile, instName, xmlText);
+InstrumentDefinitionParser::InstrumentDefinitionParser(const std::string &filename, 
+                                                       const std::string &instName,
+                                                       const std::string &xmlText)
+    : m_xmlFile(boost::make_shared<NullIDFObject>()),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_hasParameterElement_beenSet(false),
+      m_haveDefaultFacing(false), m_deltaOffsets(false),
+      m_angleConvertConst(1.0), m_indirectPositions(false),
+      m_cachingOption(NoneApplied)
+{
+  initialise(filename,instName,xmlText,"");
 }
 
 //----------------------------------------------------------------------------------------------
-/** Initialize the XML parser based on an IDF xml and cached vtp file objects.
+/** Construct the XML parser based on an IDF xml and cached vtp file objects.
  *
  * @param xmlFile :: The xml file, here wrapped in a IDFObject
  * @param expectedCacheFile :: Expected vtp cache file
  * @param instName :: Instrument name
  * @param xmlText :: XML contents of IDF
  */
-void InstrumentDefinitionParser::initialize(
+InstrumentDefinitionParser::InstrumentDefinitionParser (
     const IDFObject_const_sptr xmlFile,
-    const IDFObject_const_sptr expectedCacheFile, const std::string &instName,
-    const std::string &xmlText) {
+    const IDFObject_const_sptr expectedCacheFile, 
+    const std::string &instName,
+    const std::string &xmlText) 
+    : m_xmlFile(boost::make_shared<NullIDFObject>()),
+      m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(NULL),
+      m_hasParameterElement_beenSet(false),
+      m_haveDefaultFacing(false), m_deltaOffsets(false),
+      m_angleConvertConst(1.0), m_indirectPositions(false),
+      m_cachingOption(NoneApplied) 
+{
+  initialise(xmlFile->getFileFullPathStr(),instName,xmlText,expectedCacheFile->getFileFullPathStr());
 
+  m_cacheFile = expectedCacheFile;
+}
+
+  //----------------------------------------------------------------------------------------------
+/** Initialise method used in Constructor
+ * @param filename :: IDF .xml path (full). This is needed mostly to find the
+ *instrument geometry cache.
+ * @param instName :: name of the instrument
+ * @param xmlText :: XML contents of IDF
+ * @param vtpFilename :: the path to the vtp file if you want to override the default
+ */
+void InstrumentDefinitionParser::initialise(const std::string &filename, 
+                                                       const std::string &instName,
+                                                       const std::string &xmlText,
+                                                       const std::string &vtpFilename) 
+{
+  
+  IDFObject_const_sptr xmlFile = boost::make_shared<const IDFObject>(filename);
+  
   // Handle the parameters
-  const std::string filename = xmlFile->getFileFullPathStr();
   m_instName = instName;
   m_xmlFile = xmlFile;
-  m_cacheFile = expectedCacheFile;
-
-  // Set up the DOM parser and parse xml file
-  DOMParser pParser;
-  try {
-    pDoc = pParser.parseString(xmlText);
-  } catch (Poco::Exception &exc) {
-    throw Kernel::Exception::FileError(
-        exc.displayText() + ". Unable to parse XML", filename);
-  } catch (...) {
-    throw Kernel::Exception::FileError("Unable to parse XML", filename);
-  }
-  // Get pointer to root element
-  pRootElem = pDoc->documentElement();
-  if (!pRootElem->hasChildNodes()) {
-    g_log.error("XML file: " + filename + "contains no root element.");
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML instrument file", filename);
-  }
-
+  
   // Create our new instrument
   // We don't want the instrument name taken out of the XML file itself, it
   // should come from the filename (or the property)
   m_instrument = boost::make_shared<Instrument>(m_instName);
-
+  
   // Save the XML file path and contents
   m_instrument->setFilename(filename);
   m_instrument->setXmlText(xmlText);
+
+  // Use the filename to construct the cachefile name so that there is a 1:1 map
+  // between a definition file & cache
+  if (vtpFilename.empty()) {
+    m_cacheFile = boost::make_shared<const IDFObject>(createVTPFileName());
+  }
+  else
+  {
+    m_cacheFile = boost::make_shared<const IDFObject>(vtpFilename);
+  }
+
 }
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+InstrumentDefinitionParser::~InstrumentDefinitionParser() {}
 
 //----------------------------------------------------------------------------------------------
 /**
  * Handle used in the singleton constructor for instrument file should append
  *the value
- * of the last-modified tag inside the file to determine if it is already in
+ * file sha-1 checksum to determine if it is already in
  *memory so that
  * changes to the instrument file will cause file to be reloaded.
  *
- * @return a mangled name combining the filename and the "last-modified"
+ * @return a mangled name combining the filename and the checksum
  *attribute of the XML contents
  * */
 std::string InstrumentDefinitionParser::getMangledName() {
   
-  // Use the file in preference if possible.
-  if (this->m_xmlFile->exists()) {
-    return m_xmlFile->getMangledName();
-  } 
+  std::string retVal = "";
+  //use the xml in preference if available
   auto xml = Poco::trim(m_instrument->getXmlText());
   if (!(xml.empty())) {
     std::string checksum = Kernel::ChecksumHelper::sha1FromString(xml);
-    return m_instName + checksum;
-  } else  {
-    throw std::runtime_error(
-        "Call InstrumentDefinitionParser::initialize() before getMangledName.");
+    retVal = m_instName + checksum; 
+  } 
+  else if (this->m_xmlFile->exists()) {// Use the file
+    retVal =  m_xmlFile->getMangledName();
+  } 
+
+  return retVal;
+
+}
+
+//----------------------------------------------------------------------------------------------
+/** Lazy loads the document and returns a autopointer
+ *
+ * @return an autopointer to the xml document
+ */
+Poco::AutoPtr<Poco::XML::Document> InstrumentDefinitionParser::getDocument()
+{
+  if (!m_pDoc) {
+    //instantiate if not created
+    if (m_instrument->getXmlText().empty())
+    {
+      throw std::invalid_argument("Instrument XML string is empty");
+    }
+    // Set up the DOM parser and parse xml file
+    DOMParser pParser;
+    try {
+      m_pDoc = pParser.parseString(m_instrument->getXmlText());
+    } catch (Poco::Exception &exc) {
+      throw std::invalid_argument(
+          exc.displayText() + ". Unable to parse XML");
+    } catch (...) {
+      throw std::invalid_argument("Unable to parse XML");
+    }
   }
+  return m_pDoc;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -178,9 +214,16 @@ std::string InstrumentDefinitionParser::getMangledName() {
  */
 Instrument_sptr
 InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
-  if (!pDoc)
-    throw std::runtime_error(
-        "Call InstrumentDefinitionParser::initialize() before parseXML.");
+  auto pDoc = getDocument();
+
+  // Get pointer to root element
+  Poco::XML::Element * pRootElem = pDoc->documentElement();
+  
+  if (!pRootElem->hasChildNodes()) {
+    g_log.error("Instrument XML contains no root element.");
+    throw Kernel::Exception::InstrumentDefinitionError(
+        "No root element in XML instrument");
+  }
 
   setValidityRange(pRootElem);
   readDefaults(pRootElem->getChildElement("defaults"));
@@ -189,8 +232,21 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
-  Poco::AutoPtr<NodeList> pNL_type = pRootElem->getElementsByTagName("type");
-  if (pNL_type->length() == 0) {
+  // Get all the type and component element pointers.
+  std::vector<Element*> typeElems;
+  std::vector<Element*> compElems;
+  for (Node *pNode = pRootElem->firstChild(); pNode != 0;
+       pNode = pNode->nextSibling()) {
+    auto pElem = dynamic_cast<Element*>(pNode);
+    if(pElem) {
+      if (pElem->tagName() == "type")
+        typeElems.push_back(pElem);
+      else if (pElem->tagName() == "component")
+        compElems.push_back(pElem);
+    }
+  }
+
+  if (typeElems.empty()) {
     g_log.error("XML file: " + filename + "contains no type elements.");
     throw Kernel::Exception::InstrumentDefinitionError(
         "No type elements in XML instrument file", filename);
@@ -204,9 +260,9 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   //  * If 'Outline' attribute set for assembly add attribute object_created=no
   //  to tell
   //  create shape for such assembly also later
-  unsigned long numberTypes = pNL_type->length();
-  for (unsigned long iType = 0; iType < numberTypes; iType++) {
-    Element *pTypeElem = static_cast<Element *>(pNL_type->item(iType));
+  const size_t numberTypes = typeElems.size();
+  for (size_t iType = 0; iType < numberTypes; ++iType) {
+    Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
     // check if contain <combine-components-into-one-shape>. If this then such
@@ -249,8 +305,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   }
 
   // Deal with adjusting types containing <combine-components-into-one-shape>
-  for (unsigned long iType = 0; iType < numberTypes; iType++) {
-    Element *pTypeElem = static_cast<Element *>(pNL_type->item(iType));
+  for (size_t iType = 0; iType < numberTypes; ++iType) {
+    Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
     // In this loop only interested in types containing
@@ -312,22 +368,15 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   //
   // do analysis for each top level component element
   //
-  Poco::AutoPtr<NodeList> pNL_comp =
-      pRootElem->childNodes(); // here get all child nodes
-  unsigned long pNL_comp_length = pNL_comp->length();
-
   if (prog)
-    prog->resetNumSteps(pNL_comp_length, 0.0, 1.0);
-  for (unsigned long i = 0; i < pNL_comp_length; i++) {
+    prog->resetNumSteps(compElems.size(), 0.0, 1.0);
+
+  for (size_t i = 0; i < compElems.size(); ++i) {
     if (prog)
       prog->report("Loading instrument Definition");
 
-    // we are only interest in the top level component elements hence
-    // the reason for the if statement below
-    if ((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
-        ((pNL_comp->item(i))->nodeName()).compare("component") == 0) {
-      const Element *pElem = static_cast<Element *>(pNL_comp->item(i));
-
+    const Element *pElem = compElems[i];
+    {
       IdList idList; // structure to possibly be populated with detector IDs
 
       // Get all <location> and <locations> elements contained in component
@@ -360,36 +409,22 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       // order they are listed in the IDF. The latter needed to get detector IDs
       // assigned
       // as expected
-      Poco::AutoPtr<NodeList> pNL_childs =
-          pElem->childNodes(); // here get all child nodes
-      unsigned long pNL_childs_length = pNL_childs->length();
-      for (unsigned long iLoc = 0; iLoc < pNL_childs_length; iLoc++) {
-        if ((pNL_childs->item(iLoc))->nodeType() == Node::ELEMENT_NODE &&
-            (((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0 ||
-             ((pNL_childs->item(iLoc))->nodeName()).compare("locations") ==
-                 0)) {
-          // if a <location> element
-          if (((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0) {
-            const Element *pLocElem =
-                static_cast<Element *>(pNL_childs->item(iLoc));
-            // process differently depending on whether component is and
-            // assembly or leaf
-            if (isAssembly(pElem->getAttribute("type"))) {
-              appendAssembly(m_instrument.get(), pLocElem, pElem, idList);
-            } else {
-              appendLeaf(m_instrument.get(), pLocElem, pElem, idList);
-            }
+      for (Node *pNode = pElem->firstChild(); pNode != 0;
+          pNode = pNode->nextSibling()) {
+        auto pChildElem = dynamic_cast<Element*>(pNode);
+        if (!pChildElem)
+          continue;
+        if (pChildElem->tagName() == "location") {
+          // process differently depending on whether component is and
+          // assembly or leaf
+          if (isAssembly(pElem->getAttribute("type"))) {
+            appendAssembly(m_instrument.get(), pChildElem, pElem, idList);
+          } else {
+            appendLeaf(m_instrument.get(), pChildElem, pElem, idList);
           }
-
-          // if a <locations> element
-          if (((pNL_childs->item(iLoc))->nodeName()).compare("locations") ==
-              0) {
-            const Element *pLocElems =
-                static_cast<Element *>(pNL_childs->item(iLoc));
-
-            // append <locations> elements in <locations>
-            appendLocations(m_instrument.get(), pLocElems, pElem, idList);
-          }
+        } else if (pChildElem->tagName() == "locations") {
+          // append <locations> elements in <locations>
+          appendLocations(m_instrument.get(), pChildElem, pElem, idList);
         }
       } // finished looping over all childs of this component
 
@@ -461,36 +496,28 @@ void InstrumentDefinitionParser::appendLocations(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElems,
     const Poco::XML::Element *pCompElem, IdList &idList) {
   // create detached <location> elements from <locations> element
-  const std::string xmlLocation = convertLocationsElement(pLocElems);
-
-  // parse converted <locations> output
-  DOMParser pLocationsParser;
-  Poco::AutoPtr<Document> pLocationsDoc;
-  try {
-    pLocationsDoc = pLocationsParser.parseString(xmlLocation);
-  } catch (...) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to parse XML string", xmlLocation);
-  }
+  Poco::AutoPtr<Document> pLocationsDoc = convertLocationsElement(pLocElems);
 
   // Get pointer to root element
   const Element *pRootLocationsElem = pLocationsDoc->documentElement();
-  if (!pRootLocationsElem->hasChildNodes()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML string", xmlLocation);
-  }
+  const bool assembly = isAssembly(pCompElem->getAttribute("type"));
 
-  Poco::AutoPtr<NodeList> pNL_locInLocs =
-      pRootLocationsElem->getElementsByTagName("location");
-  unsigned long pNL_locInLocs_length = pNL_locInLocs->length();
-  for (unsigned long iInLocs = 0; iInLocs < pNL_locInLocs_length; iInLocs++) {
-    const Element *pLocInLocsElem =
-        static_cast<Element *>(pNL_locInLocs->item(iInLocs));
-    if (isAssembly(pCompElem->getAttribute("type"))) {
-      appendAssembly(parent, pLocInLocsElem, pCompElem, idList);
-    } else {
-      appendLeaf(parent, pLocInLocsElem, pCompElem, idList);
+  Poco::XML::Element *pElem =
+    dynamic_cast<Poco::XML::Element*>(pRootLocationsElem->firstChild());
+
+  while (pElem) {
+    if (pElem->tagName() != "location") {
+      pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
+      continue;
     }
+
+    if (assembly) {
+      appendAssembly(parent, pElem, pCompElem, idList);
+    } else {
+      appendLeaf(parent, pElem, pCompElem, idList);
+    }
+
+    pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
   }
 }
 
@@ -508,7 +535,8 @@ void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
   Poco::XML::DOMWriter writer;
   writer.setNewLine("\n");
   writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
-
+  
+  auto pDoc = getDocument();
   std::ofstream outFile(outFilename.c_str());
   writer.writeNode(outFile, pDoc);
   outFile.close();
@@ -951,8 +979,7 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
     Handedness handedness = s_handedness.compare("right") == 0 ? Right : Left;
 
     // Overwrite the default reference frame.
-    m_instrument->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(
-        new ReferenceFrame(pointingUp, alongBeam, handedness, s_origin)));
+    m_instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(pointingUp, alongBeam, handedness, s_origin));
   }
 }
 
@@ -1298,7 +1325,7 @@ void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly *parent,
               boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
           if (detector) {
             // Make default facing for the pixel
-            Geometry::IComponent *comp = (Geometry::IComponent *)detector.get();
+            Geometry::IComponent *comp = static_cast<IComponent *>(detector.get());
             if (m_haveDefaultFacing)
               makeXYplaneFaceComponent(comp, m_defaultFacing);
             // Mark it as a detector (add to the instrument cache)
@@ -2087,7 +2114,7 @@ void InstrumentDefinitionParser::setComponentLinks(
   unsigned long numberLinks = pNL_link->length();
 
   if (progress)
-    progress->resetNumSteps((int64_t)numberLinks, 0.0, 0.95);
+    progress->resetNumSteps(static_cast<int64_t>(numberLinks), 0.0, 0.95);
 
   Node *curNode = pRootElem->firstChild();
   while (curNode) {
@@ -2110,7 +2137,7 @@ void InstrumentDefinitionParser::setComponentLinks(
         int detid;
         std::stringstream(id) >> detid;
         boost::shared_ptr<const Geometry::IComponent> detector =
-            instrument->getDetector((detid_t)detid);
+            instrument->getDetector(static_cast<detid_t>(detid));
 
         // If we didn't find anything with the detector id, explain why to the
         // user, and throw an exception.
@@ -2178,17 +2205,6 @@ void InstrumentDefinitionParser::setComponentLinks(
   }
 }
 
-/**
-Check that the cache file does actually exist and that it was modified last
-after the last modification to the xml def file. i.e. the vtp file contains the
-most recent set of changes.
-@param cacheCandiate : candidate cache file object to use the geometries.
-*/
-bool InstrumentDefinitionParser::canUseProposedCacheFile(
-    IDFObject_const_sptr cacheCandiate) const {
-  return m_xmlFile->exists() && cacheCandiate->exists() &&
-         (m_xmlFile->getLastModified() < cacheCandiate->getLastModified());
-}
 
 /**
 Apply the cache.
@@ -2209,22 +2225,22 @@ void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
 
 /**
 Write the cache file from the IDF file and apply it.
-@param fallBackCache : File location for a fallback cache if required.
+@param firstChoiceCache : File location for a first choice cache.
+@param fallBackCache : File location for a fallback cache if required. 
 */
 InstrumentDefinitionParser::CachingOption
-InstrumentDefinitionParser::writeAndApplyCache(
+InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
     IDFObject_const_sptr fallBackCache) {
-  IDFObject_const_sptr usedCache = m_cacheFile;
-  InstrumentDefinitionParser::CachingOption cachingOption = WroteCacheAdjacent;
+  IDFObject_const_sptr usedCache = firstChoiceCache;
+  auto cachingOption = WroteGeomCache;
 
   g_log.information("Geometry cache is not available");
   try {
-    Poco::File dir = m_xmlFile->getParentDirectory();
-    if (!m_xmlFile->exists() || dir.path().empty() || !dir.exists() ||
-        !dir.canWrite()) {
+    Poco::File dir = usedCache->getParentDirectory();
+    if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
       usedCache = fallBackCache;
       cachingOption = WroteCacheTemp;
-      g_log.information() << "Instrument directory is read only, writing cache "
+      g_log.information() << "Geometrycache directory is read only, writing cache "
                              "to system temp.\n";
     }
   } catch (Poco::FileNotFoundException &) {
@@ -2257,17 +2273,17 @@ InstrumentDefinitionParser::setupGeometryCache() {
   // directory.
   IDFObject_const_sptr fallBackCache = boost::make_shared<const IDFObject>(
       Poco::Path(ConfigService::Instance().getTempDir())
-          .append(m_instName + ".vtp")
+          .append(this->getMangledName()+".vtp")
           .toString());
   CachingOption cachingOption = NoneApplied;
-  if (canUseProposedCacheFile(m_cacheFile)) {
+  if (m_cacheFile->exists()) {
     applyCache(m_cacheFile);
-    cachingOption = ReadAdjacent;
-  } else if (canUseProposedCacheFile(fallBackCache)) {
+    cachingOption = ReadGeomCache;
+  } else if (fallBackCache->exists()) {
     applyCache(fallBackCache);
     cachingOption = ReadFallBack;
   } else {
-    cachingOption = writeAndApplyCache(fallBackCache);
+    cachingOption = writeAndApplyCache(m_cacheFile,fallBackCache);
   }
   return cachingOption;
 }
@@ -2570,10 +2586,11 @@ std::string InstrumentDefinitionParser::translateRotateXMLcuboid(
 /// notation for a sequence of \<location\> elements.
 /// This method return this sequence as a xml string
 /// @param pElem Input \<locations\> element
-/// @return XML string
+/// @return XML document containing \<location\> elements
 /// @throw InstrumentDefinitionError Thrown if issues with the content of XML
 /// instrument file
-std::string InstrumentDefinitionParser::convertLocationsElement(
+Poco::AutoPtr<Poco::XML::Document>
+InstrumentDefinitionParser::convertLocationsElement(
     const Poco::XML::Element *pElem) {
   // Number of <location> this <locations> element is shorthand for
   size_t nElements(0);
@@ -2650,25 +2667,22 @@ std::string InstrumentDefinitionParser::convertLocationsElement(
     }
   }
 
-  std::ostringstream xml;
-
-  Poco::XML::XMLWriter writer(xml, Poco::XML::XMLWriter::CANONICAL);
-  writer.startDocument();
-  writer.startElement("", "", "expansion-of-locations-element");
+  Poco::AutoPtr<Document> pDoc = new Document;
+  Poco::AutoPtr<Element> pRoot = pDoc->createElement("expansion-of-locations-element");
+  pDoc->appendChild(pRoot);
 
   for (size_t i = 0; i < nElements; ++i) {
-    Poco::XML::AttributesImpl attr;
+    Poco::AutoPtr<Element> pLoc = pDoc->createElement("location");
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      attr.addAttribute(
-          "", "", "name", "",
+      pLoc->setAttribute("name",
           name + boost::lexical_cast<std::string>(nameCountStart + i));
     }
 
     // Copy values of all the attributes set
     for (auto it = attrValues.begin(); it != attrValues.end(); ++it) {
-      attr.addAttribute("", "", it->first, "",
+      pLoc->setAttribute(it->first,
                         boost::lexical_cast<std::string>(it->second));
 
       // If attribute has a step, increase the value by the step
@@ -2677,13 +2691,28 @@ std::string InstrumentDefinitionParser::convertLocationsElement(
       }
     }
 
-    writer.emptyElement("", "", "location", attr);
+    pRoot->appendChild(pLoc);
   }
 
-  writer.endElement("", "", "expansion-of-locations-element");
-  writer.endDocument();
+  return pDoc;
+}
 
-  return xml.str();
+ /** Generates a vtp filename from a xml filename
+ *
+ *  @return The vtp filename
+ *
+ */
+const std::string InstrumentDefinitionParser::createVTPFileName()
+{
+  std::string retVal;
+  std::string filename = getMangledName();
+  if (!filename.empty())  {
+    Poco::Path path(ConfigService::Instance().getVTPFileDirectory());
+    path.makeDirectory();
+    path.append(filename + ".vtp");
+    retVal = path.toString();
+  }
+  return retVal;
 }
 
 /** Return a subelement of an XML element, but also checks that there exist

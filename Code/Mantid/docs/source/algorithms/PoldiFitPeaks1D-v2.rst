@@ -13,6 +13,8 @@ Version two of PoldiFitPeaks1D was introduced to solve problems with overlapping
 
 Another thing that's different from version 1 of the algorithm is the background description. When peaks overlap, the description with a quadratic function is not particularly suitable. Instead, Chebyshev-polynomes of degrees 0, 1 and 2 are fitted and the best solution (with respect to quality of the fit) is selected automatically.
 
+Furthermore, after fitting peaks are inspected for meaningful results. Peaks with intensities below zero, too narrow or too broad profiles (the upper limit is specified by the MaximumRelativeFwhm-parameters) are excluded.
+
 Usage
 -----
 
@@ -45,3 +47,5 @@ Variation of the `AllowedOverlap`-parameter influences the quality of the fit at
     PoldiFitPeaks1D(InputWorkspace='correlation_spectrum', FwhmMultiples=2, AllowedOverlap=0.9, PoldiPeakTable='peaks')
     
 .. categories::
+
+.. sourcelink::

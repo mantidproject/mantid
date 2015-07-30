@@ -22,15 +22,19 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
-#include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
-
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
+
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
 
 #include <boost/python/converter/arg_from_python.hpp>
 #include <boost/python/call_method.hpp>
+#include <boost/python/extract.hpp>
+#include <boost/weak_ptr.hpp>
+
 #include <string>
 
 namespace Mantid {
@@ -87,7 +91,7 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
 };
 
 //
-// Specialization for shared_ptr types that can be set via weak pointers
+// Specialization for shared_ptr types. They need special handling for workspaces
 //
 template <typename T>
 struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
@@ -108,13 +112,7 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
    */
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::object &value) const {
-    using namespace boost::python;
-    using Registry::DowncastRegistry;
-
-    const auto &entry =
-        DowncastRegistry::retrieve(call_method<std::string>(value.ptr(), "id"));
-    alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(
-                                         entry.fromPythonAsSharedPtr(value)));
+    alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(ExtractWorkspace(value)()));
   }
 
   /**
@@ -147,6 +145,7 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
     }
     return valueProp;
   }
+
 };
 }
 }

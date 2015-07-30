@@ -67,8 +67,8 @@ void PoldiSpectrumDomainFunction::function1DSpectrum(
 
     double dWidth = 2.0 * fwhm;
     double dCalcMin = centre - dWidth;
-    size_t dWidthN = static_cast<size_t>(std::min(
-        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1)));
+    size_t dWidthN = static_cast<size_t>(
+        std::max(2, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
 
     int pos = 0;
 
@@ -123,8 +123,8 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
 
     double dWidth = 2.0 * fwhm;
     double dCalcMin = centre - dWidth;
-    size_t dWidthN = static_cast<size_t>(std::min(
-        50, std::max(10, 2 * static_cast<int>(dWidth / helper->deltaD) + 1)));
+    size_t dWidthN = static_cast<size_t>(
+        std::max(2, 2 * static_cast<int>(dWidth / helper->deltaD) + 1));
 
     int pos = 0;
 

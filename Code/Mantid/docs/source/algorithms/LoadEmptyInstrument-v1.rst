@@ -40,3 +40,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

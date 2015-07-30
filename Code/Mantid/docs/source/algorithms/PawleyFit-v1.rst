@@ -99,3 +99,5 @@ It's important to check the output data, which is found in the workspace labeled
 .. [Pawley] Pawley, G. S. “Unit-Cell Refinement from Powder Diffraction Scans.”, J. Appl. Crystallogr. 14, 1981, 357. doi:10.1107/S0021889881009618.
 
 .. categories::
+
+.. sourcelink::

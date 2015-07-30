@@ -4,12 +4,18 @@
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
+#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
+#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
+#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
+
 #include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
 
 #include "QInputDialog"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace MantidQt
 {
@@ -37,6 +43,7 @@ namespace CustomInterfaces
     connect(m_ui.nextStep, SIGNAL(clicked()), SLOT(nextStep()));
     connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
     connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
+    connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
 
     auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
     m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
@@ -68,22 +75,12 @@ namespace CustomInterfaces
       {
         m_baselineModellingModel->setData(m_dataLoading->loadedData());
       }
-      else
-      {
-        QMessageBox::critical(this, "Error", "Please load some data first");
-        return;
-      }
     }
     if (nextWidget == m_ui.peakFittingView)
     {
       if (m_baselineModellingModel->correctedData())
       {
         m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
-      }
-      else
-      {
-        QMessageBox::critical(this, "Error", "Please fit a baseline first");
-        return;
       }
     }
 
@@ -157,16 +154,20 @@ namespace CustomInterfaces
     results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
 
     // Check if any of the above is not empty
+    bool nothingToExport = true;
     for (auto it=results.begin(); it!=results.end(); ++it) {
     
       if ( it->second ) {
-        AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+        nothingToExport = false;
         break;
       }
     }
 
     // There is something to export
-    if (AnalysisDataService::Instance().doesExist(groupName)) {
+    if (!nothingToExport) {
+
+      // Add output group to the ADS
+      AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
 
       for(auto it = results.begin(); it != results.end(); ++it)
       {
@@ -179,6 +180,115 @@ namespace CustomInterfaces
     } else {
       // Nothing to export, show error message
       QMessageBox::critical(this, "Error", "Nothing to export");
+    }
+  }
+
+  void ALCInterface::importResults() {
+
+    bool ok;
+    QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ",
+      QLineEdit::Normal, "ALCResults", &ok);
+
+    if (!ok) // Cancelled
+    {
+      return;
+    }
+
+    std::string groupName = label.toStdString();
+
+    using namespace Mantid::API;
+
+    int currentStep = m_ui.stepView->currentIndex();
+
+    if (currentStep == 0) {
+      // DataLoading step
+
+      std::string wsData = groupName + "_Loaded_Data";
+
+      if(AnalysisDataService::Instance().doesExist(wsData)) {
+
+        MatrixWorkspace_sptr ws =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+
+        // Check that ws contains one spectrum only
+        if (ws->getNumberHistograms() != 1) {
+          QMessageBox::critical(this, "Error",
+                                "Workspace " + QString::fromStdString(wsData) +
+                                    " must contain one spectrum only");
+          return;
+        }
+
+        // Set the retrieved data
+        m_dataLoading->setData(ws);
+
+      } else {
+        // Error message
+        QMessageBox::critical(this, "Error",
+                              "Workspace " + QString::fromStdString(wsData) +
+                                  " was not found");
+      }
+
+
+    } else if (currentStep == 1) {
+      // BaselineModelling step
+
+      std::string wsData = groupName + "_Baseline_Workspace";
+
+      if (AnalysisDataService::Instance().doesExist(wsData)) {
+
+        MatrixWorkspace_sptr dataWs =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+
+        // Check that ws contains three spectra
+        if (dataWs->getNumberHistograms() != 3) {
+          QMessageBox::critical(this, "Error",
+                                "Workspace " + QString::fromStdString(wsData) +
+                                    " must contain three spectra");
+          return;
+        }
+
+        // Set the retrieved workspace
+        m_baselineModellingModel->setData(dataWs);
+        m_baselineModellingModel->setCorrectedData(dataWs);
+
+      } else {
+        // Error message
+        QMessageBox::critical(this, "Error",
+                              "Workspace " + QString::fromStdString(wsData) +
+                                  " was not found");
+      }
+
+    } else if (currentStep == 2) {
+      // PeakFitting step
+
+      std::string wsData = groupName + "_Peaks_Workspace";
+
+      if (AnalysisDataService::Instance().doesExist(wsData)) {
+
+        MatrixWorkspace_sptr data =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsData);
+
+        // Check that ws contains one spectrum only
+        if (data->getNumberHistograms() < 3) {
+          QMessageBox::critical(this, "Error",
+                                "Workspace " + QString::fromStdString(wsData) +
+                                    " must contain at least three spectra");
+          return;
+        }
+
+        // Set the retrieved data
+        m_peakFittingModel->setData(data);
+
+      } else {
+        // Error message
+        QMessageBox::critical(this, "Error",
+                              "Workspace " + QString::fromStdString(wsData) +
+                                  " was not found");
+      }
+
+    } else {
+      // Exception: we can never get here
+      throw std::runtime_error("Fatal error in ALC interface");
     }
   }
 

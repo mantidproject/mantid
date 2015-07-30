@@ -6,6 +6,8 @@
 #include "MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using Mantid::MDAlgorithms::GetSpiceDataRawCountsFromMD;

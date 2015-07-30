@@ -309,3 +309,5 @@ Output:
     [ 8.]]
 
 .. categories::
+
+.. sourcelink::
