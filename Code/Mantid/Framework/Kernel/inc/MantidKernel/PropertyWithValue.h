@@ -307,7 +307,9 @@ public:
       : Property(name, typeid(TYPE), direction),
         m_value(extractToValueVector<TYPE>(defaultValueStr)),
         m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
-        m_validator(validator) {}
+        m_validator(validator) {
+            UNUSED_ARG(defaultValue);
+  }
 
   /**Copy constructor
   *  Note the default value of the copied object is the initial value of
