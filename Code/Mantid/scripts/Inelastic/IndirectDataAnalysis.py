@@ -1,4 +1,5 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,too-many-locals,too-many-arguments
+
 from IndirectImport import import_mantidplot
 MTD_PLOT = import_mantidplot()
 from IndirectCommon import *
