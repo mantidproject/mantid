@@ -27,7 +27,7 @@ class MuscatSofQW(DataProcessorAlgorithm):
 
 
     def summary(self):
-        return "Calculates an S(Q,w) from fitted parameters for use in Muscat."
+        return "Calculates an S(Q, w) from fitted parameters for use in Muscat."
 
 
     def PyInit(self):
@@ -55,7 +55,7 @@ class MuscatSofQW(DataProcessorAlgorithm):
 
     def PyExec(self):
         self._setup()
-        self._load_input()
+        self._cache_parameter_data()
         self._get_conv_fit_result()
 
 
@@ -70,25 +70,41 @@ class MuscatSofQW(DataProcessorAlgorithm):
         self._out_ws_name = self.getPropertyValue('OutputWorkspace')
 
 
-    def _create_conv_fit_fun(self, ip, D1, H1, W1, H2, W2):
-        pk_1 = '(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution, Workspace="'+self._res_rebin+'"'
-        if  self._lor >= 1:
-            lor_fun = ('composite=ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude='+str(H1[ip])+',PeakCentre=0.0,FWHM='+str(W1[ip]))
-        if self._lor == 2:
+    def _create_conv_fit_fun(self, peak_idx, delta_1, l_height_1, l_width_1, l_height_2, l_width_2):
+        """
+        Creates a fit function string based on the ConvFit parameters.
+
+        @param peak_idx Peak index
+        @param delta_1 Delta function value
+        @param l_height_1 Height of Lorentzian 1
+        @param l_width_1 FWHM of Lorentzian 1
+        @param l_height_2 Height of Lorentzian 2
+        @param l_width_2 FWHM of Lorentzian 2
+        @return Fit function string
+        """
+
+        pk_1 = '(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution, Workspace="{0}"'.format(self._res_rebin)
+
+        if self._lor >= 1:
+            lor_fun = 'composite=ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude={0},PeakCentre=0.0,FWHM={1}'.format(
+                    l_height_1[peak_idx], l_width_1[peak_idx])
+        elif self._lor == 2:
             funcIndex = 1 if self._delta else 0
-            lor_2 = 'name=Lorentzian,Amplitude='+str(H2[ip])+',PeakCentre=0.0,FWHM='+str(W2[ip])
+            lor_2 = 'name=Lorentzian,Amplitude='+str(l_height_2[peak_idx])+',PeakCentre=0.0,FWHM='+str(l_width_2[peak_idx])
             lor_fun = lor_fun +';'+ lor_2 +';ties=(f'+str(funcIndex)+'.PeakCentre=f'+str(funcIndex+1)+'.PeakCentre)'
+
         if self._delta:
-            delta_fun = 'name=DeltaFunction,Height='+str(D1[ip])
+            delta_fun = 'name=DeltaFunction,Height='+str(delta_1[peak_idx])
             lor_fun = delta_fun +';' + lor_fun
-        func = pk_1 +';('+ lor_fun +'))'
+
+        func = '{0};({1}))'.format(pk_1, lor_fun)
         return func
 
 
     def _get_conv_fit_result(self):
         sam_ws = mtd[self._sam_ws]
-        x = sam_ws.readX(0)
-        xmax = max(abs(x[0]),x[len(x)-1])
+        x_data = sam_ws.readX(0)
+        xmax = max(abs(x_data[0]), x_data[-1])
         rebin = str(-self._emax)+','+str(self._einc)+','+str(self._emax)
         self._sam_rebin = '__sam_rebin'
         Rebin(InputWorkspace=self._sam_ws,
@@ -100,25 +116,25 @@ class MuscatSofQW(DataProcessorAlgorithm):
               Params=rebin)
         logger.information('energy range ; input : %f rebin : %f' % (xmax, self._emax))
         par_ws = mtd[self._par_ws]
-        Q = par_ws.readX(0)
-        specMax = len(Q)
+        q_values = par_ws.readX(0)
+        specMax = len(q_values)
 
         if self._delta:
-            D1 = par_ws.readY(0) #delta
+            delta_1 = par_ws.readY(0) #delta
         else:
-            D1 = []
+            delta_1 = []
 
         if self._lor >= 1:
-            H1 = par_ws.readY(0) #height1
-            W1 = par_ws.readY(1) #width1
-            H2 = []
-            W2 = []
+            l_height_1 = par_ws.readY(0) #height1
+            l_width_1 = par_ws.readY(1) #width1
+            l_height_2 = []
+            l_width_2 = []
         if self._lor == 2:
-            H2 = par_ws.readY(2) #height2
-            W2 = par_ws.readY(3) #width2
+            l_height_2 = par_ws.readY(2) #height2
+            l_width_2 = par_ws.readY(3) #width2
 
         for i in range(specMax):
-            func = self._create_conv_fit_fun(i, D1, H1, W1, H2, W2)
+            func = self._create_conv_fit_fun(i, delta_1, l_height_1, l_width_1, l_height_2, l_width_2)
             logger.information('Fit func : %s' % func)
             fit_output_name = '%s_%i' % (self._out_ws_name, i)
 
@@ -133,26 +149,26 @@ class MuscatSofQW(DataProcessorAlgorithm):
             dataE=np.array(mtd[fit_output_name + '_Workspace'].readE(1))
 
             if i == 0:
-                x = dataX
-                y = dataY
-                e = dataE
+                x_data = dataX
+                y_data = dataY
+                e_data = dataE
             else:
-                x = np.append(x, dataX)
-                y = np.append(y, dataY)
-                e = np.append(e, dataE)
+                x_data = np.append(x_data, dataX)
+                y_data = np.append(y_data, dataY)
+                e_data = np.append(e_data, dataE)
 
             DeleteWorkspace(fit_output_name + '_Workspace')
             DeleteWorkspace(fit_output_name + '_NormalisedCovarianceMatrix')
             DeleteWorkspace(fit_output_name + '_Parameters')
 
         CreateWorkspace(OutputWorkspace=self._out_ws_name,
-                        DataX=x,
-                        DataY=y,
-                        DataE=e,
+                        DataX=x_data,
+                        DataY=y_data,
+                        DataE=e_data,
                         Nspec=specMax,
                         UnitX='Energy',
                         VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=Q,
+                        VerticalAxisValues=q_values,
                         ParentWorkspace=self._sam_ws)
 
         CopyLogs(InputWorkspace=self._par_ws,
@@ -161,22 +177,22 @@ class MuscatSofQW(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
 
-    def _load_input(self):
-        logger.information('Sample run : %s' % self._sam_ws)
-        logger.information('Resolution run : %s' % self._res_ws)
-        logger.information('Parameter file : %s' % self._par_ws)
+    def _cache_parameter_data(self):
+        """
+        Validates and caches data from parameter workspace.
+        """
 
-        inGR = mtd[self._par_ws].getRun()
+        sample_run = mtd[self._par_ws].getRun()
 
-        program = inGR.getLogData('fit_program').value
+        program = sample_run.getLogData('fit_program').value
         if program != 'ConvFit':
             raise ValueError('Fit program MUST be ConvFit')
 
-        self._delta = inGR.getLogData('delta_function').value
+        self._delta = sample_run.getLogData('delta_function').value
         logger.information('delta_function : %s' % self._delta)
 
-        if 'lorentzians' in inGR:
-            lor = inGR.getLogData('lorentzians').value
+        if 'lorentzians' in sample_run:
+            lor = sample_run.getLogData('lorentzians').value
             self._lor = int(lor)
             logger.information('lorentzians : %i' % self._lor)
         else:
