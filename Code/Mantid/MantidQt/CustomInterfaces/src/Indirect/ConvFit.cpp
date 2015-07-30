@@ -36,7 +36,8 @@ void ConvFit::setup() {
   m_stringManager = new QtStringPropertyManager();
 
   // Initialise fitTypeStrings
-  m_fitStrings = QStringList() << "1L"
+  m_fitStrings = QStringList() << ""
+                               << "1L"
                                << "2L"
                                << "IDS"
                                << "IDC"
@@ -456,8 +457,7 @@ std::string createParName(size_t index, size_t subIndex,
  *					+- Temperature Correction(yes/no)
  *				+- ProductFunction
  *					|
- *					+-
- *InelasticDiffRotDiscreteCircle(yes/no)
+ *					+- InelasticDiffRotDiscreteCircle(yes/no)
  *					+- Temperature Correction(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
@@ -541,47 +541,49 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
   std::string prefix2;
 
   int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
-
-  auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-      FunctionFactory::Instance().createFunction("ProductFunction"));
-
-  if (useTempCorrection) {
-    createTemperatureCorrection(product);
-  }
-  // Add 1st Lorentzian
-
-  // if temperature not included then product is lorentzian * 1
-  // create product function for temp * lorentzian
-
-  std::string functionName = m_uiForm.cbFitType->currentText().toStdString();
-
-  if (fitTypeIndex == 1 || fitTypeIndex == 2) {
-    functionName = "Lorentzian";
-  }
-  func = FunctionFactory::Instance().createFunction(functionName);
-  subIndex = product->addFunction(func);
-  index = model->addFunction(product);
-  prefix1 = createParName(index, subIndex);
-
-  populateFunction(func, model, m_properties["FitFunction1"], prefix1, false);
-
-  // Add 2nd Lorentzian
-  if (fitTypeIndex == 2) {
-    // if temperature not included then product is lorentzian * 1
-    // create product function for temp * lorentzian
+  if (fitTypeIndex > 0) {
     auto product = boost::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createFunction("ProductFunction"));
 
     if (useTempCorrection) {
       createTemperatureCorrection(product);
     }
+    // Add 1st Lorentzian
 
+    // if temperature not included then product is lorentzian * 1
+    // create product function for temp * lorentzian
+
+    std::string functionName = m_uiForm.cbFitType->currentText().toStdString();
+
+    if (fitTypeIndex == 1 || fitTypeIndex == 2) {
+      functionName = "Lorentzian";
+    }
     func = FunctionFactory::Instance().createFunction(functionName);
     subIndex = product->addFunction(func);
     index = model->addFunction(product);
-    prefix2 = createParName(index, subIndex);
+    prefix1 = createParName(index, subIndex);
 
-    populateFunction(func, model, m_properties["FitFunction2"], prefix2, false);
+    populateFunction(func, model, m_properties["FitFunction1"], prefix1, false);
+
+    // Add 2nd Lorentzian
+    if (fitTypeIndex == 2) {
+      // if temperature not included then product is lorentzian * 1
+      // create product function for temp * lorentzian
+      auto product = boost::dynamic_pointer_cast<CompositeFunction>(
+          FunctionFactory::Instance().createFunction("ProductFunction"));
+
+      if (useTempCorrection) {
+        createTemperatureCorrection(product);
+      }
+
+      func = FunctionFactory::Instance().createFunction(functionName);
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix2 = createParName(index, subIndex);
+
+      populateFunction(func, model, m_properties["FitFunction2"], prefix2,
+                       false);
+    }
   }
 
   conv->addFunction(model);
@@ -762,7 +764,7 @@ QString ConvFit::fitTypeString() const {
   if (m_blnManager->value(m_properties["UseDeltaFunc"]))
     fitType += "Delta";
 
-  fitType += m_fitStrings.at(m_uiForm.cbFitType->currentIndex() - 1);
+  fitType += m_fitStrings.at(m_uiForm.cbFitType->currentIndex());
 
   return fitType;
 }
@@ -1401,9 +1403,10 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
         }
-		if (QString(*it).compare("Amplitude") == 0 || QString(*it).compare("Intensity") == 0){
-		  m_dblManager->setValue(m_properties[name], 1.0);
-		}
+        if (QString(*it).compare("Amplitude") == 0 ||
+            QString(*it).compare("Intensity") == 0) {
+          m_dblManager->setValue(m_properties[name], 1.0);
+        }
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         if (count < 3) {
@@ -1428,9 +1431,10 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
         }
-		if (QString(*it).compare("Amplitude") == 0 || QString(*it).compare("Intensity") == 0){
-		  m_dblManager->setValue(m_properties[name], 1.0);
-		}
+        if (QString(*it).compare("Amplitude") == 0 ||
+            QString(*it).compare("Intensity") == 0) {
+          m_dblManager->setValue(m_properties[name], 1.0);
+        }
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
         m_properties["FitFunction1"]->addSubProperty(m_properties[name]);
