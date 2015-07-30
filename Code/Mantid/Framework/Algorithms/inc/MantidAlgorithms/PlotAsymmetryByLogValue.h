@@ -79,16 +79,18 @@ private:
   void init();
   void exec();
   // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad (int64_t runNumber );
+  API::Workspace_sptr doLoad(int64_t runNumber);
   // Analyse loaded run
-  void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
+  void doAnalysis(API::Workspace_sptr loadedWs, int64_t index);
   // Parse run names
-  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
+  void parseRunNames(std::string &firstFN, std::string &lastFN,
+                     std::string &fnBase, std::string &fnExt, int &fnZeros);
   // Load dead-time corrections from specified file
   API::Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
       const std::string &deadTimeFile);
   // Apply dead-time corrections
-  void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
+  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs,
+                         API::Workspace_sptr deadTimes);
   /// Create custom detector grouping
   API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
                                            const std::vector<int> &bwd);
@@ -98,17 +100,20 @@ private:
   /// Calculate the integral asymmetry for a workspace (single period)
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
+  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
+                        API::MatrixWorkspace_sptr ws_geen, double &Y,
+                        double &E);
   /// Group detectors
-  void groupDetectors (API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
+  void groupDetectors(API::MatrixWorkspace_sptr &ws,
+                      const std::vector<int> &spectraList);
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
-  void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
+  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
-  void checkProperties (size_t &is, size_t &ie);
+  void checkProperties(size_t &is, size_t &ie);
   /// Clear previous results
-  void clearResultsFromTo (size_t is, size_t ie);
+  void clearResultsFromTo(size_t is, size_t ie);
 
   /// Stores base name shared by all runs
   static std::string g_filenameBase;

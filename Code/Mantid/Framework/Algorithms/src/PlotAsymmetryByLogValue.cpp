@@ -426,9 +426,8 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 *   @param outWS :: [input/output] Output workspace to populate
 *   @param nplots :: [input] Number of histograms
 */
-void
-PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outWS,
-                                                 int nplots) {
+void PlotAsymmetryByLogValue::populateOutputWorkspace(
+    MatrixWorkspace_sptr &outWS, int nplots) {
   TextAxis *tAxis = new TextAxis(nplots);
   if (nplots == 1) {
 
@@ -760,10 +759,9 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
 *   @param Y :: Reference to a variable receiving the value of asymmetry
 *   @param E :: Reference to a variable receiving the value of the error
 */
-void
-PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
-                                          MatrixWorkspace_sptr ws_green,
-                                          double &Y, double &E) {
+void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
+                                               MatrixWorkspace_sptr ws_green,
+                                               double &Y, double &E) {
   if (!m_int) { //  "Differential asymmetry"
 
     MatrixWorkspace_sptr tmpWS = WorkspaceFactory::Instance().create(
@@ -796,16 +794,14 @@ PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
     integr->setProperty("RangeLower", g_minTime);
     integr->setProperty("RangeUpper", g_maxTime);
     integr->execute();
-    MatrixWorkspace_sptr intWS_red =
-        integr->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
 
     integr = createChildAlgorithm("Integration");
     integr->setProperty("InputWorkspace", ws_green);
     integr->setProperty("RangeLower", g_minTime);
     integr->setProperty("RangeUpper", g_maxTime);
     integr->execute();
-    MatrixWorkspace_sptr intWS_green =
-        integr->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");
 
     double YIF = (intWS_green->readY(0)[0] - intWS_red->readY(0)[0]) /
                  (intWS_green->readY(0)[0] + intWS_red->readY(0)[0]);
