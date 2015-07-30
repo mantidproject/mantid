@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 """
 This is an example Python algorithm, showing how
 to write a workspace to file in ascii format.
