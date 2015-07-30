@@ -86,8 +86,7 @@ private:
   void parseRunNames(std::string &firstFN, std::string &lastFN,
                      std::string &fnBase, std::string &fnExt, int &fnZeros);
   // Load dead-time corrections from specified file
-  API::Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
-      const std::string &deadTimeFile);
+  API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
   void applyDeadtimeCorr(API::Workspace_sptr &loadedWs,
                          API::Workspace_sptr deadTimes);
