@@ -35,14 +35,14 @@ class ExampleSaveAscii(PythonAlgorithm):
         # Open the file with write permissions
         # The 'with' statement will take care of closing the file when we are done,
         # or if an error occurs
-        with open(self.getPropertyValue('OutputFilename'), 'w') as f:
+        with open(self.getPropertyValue('OutputFilename'), 'w') as file_handle:
 
             # Get the units from the workspace to use in the file header
             x_label = input_workspace.getAxis(0).getUnit().caption()
             y_label = input_workspace.getAxis(1).getUnit().caption()
 
             # Write column header to file
-            f.write('# ' + x_label + ' , ' + y_label + ' , E\n')
+            file_handle.write('# ' + x_label + ' , ' + y_label + ' , E\n')
 
             # Loop through each spectrum histogram
             for histogram_n in range(input_workspace.getNumberHistograms()):
@@ -53,7 +53,7 @@ class ExampleSaveAscii(PythonAlgorithm):
                 edata = input_workspace.readE(histogram_n)
 
                 # Write the spectrum histogram index to file
-                f.write(str(histogram_n+1) + '\n')  # +1 to convert to 1 indexed
+                file_handle.write(str(histogram_n+1) + '\n')  # +1 to convert to 1 indexed
 
                 # Loop through each bin
                 for bin_n in range(input_workspace.blocksize()):
@@ -63,7 +63,7 @@ class ExampleSaveAscii(PythonAlgorithm):
 
                     # Write the data for the nth bin to file
                     # with a precision of 4 decimal places
-                    f.write('{0:.4f},{1:.4f},{2:.4f}\n'.format(bin_center,
+                    file_handle.write('{0:.4f},{1:.4f},{2:.4f}\n'.format(bin_center,
                                                                ydata[bin_n],
                                                                edata[bin_n]))
 
