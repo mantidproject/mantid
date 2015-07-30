@@ -514,8 +514,6 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
 
   bool useDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
 
-  size_t subIndex = 0;
-
   if (useDeltaFunc) {
     func = FunctionFactory::Instance().createFunction("DeltaFunction");
     index = model->addFunction(func);
@@ -542,12 +540,14 @@ CompositeFunction_sptr ConvFit::createFunction(bool tieCentres) {
 
   int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
   if (fitTypeIndex > 0) {
+    size_t subIndex = 0;
     auto product = boost::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createFunction("ProductFunction"));
 
     if (useTempCorrection) {
       createTemperatureCorrection(product);
     }
+
     // Add 1st Lorentzian
 
     // if temperature not included then product is lorentzian * 1
