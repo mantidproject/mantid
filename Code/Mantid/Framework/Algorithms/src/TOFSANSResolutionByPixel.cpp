@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
+#include "MantidAlgorithms/GravitySANSHelper.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -47,6 +48,11 @@ void TOFSANSResolutionByPixel::init() {
                   "Sigma moderator spread in units of microsec as a function "
                   "of wavelength.");
   declareProperty("CollimationLength", 0.0, positiveDouble, "Collimation length (m)");
+  declareProperty("AccountForGravity", false,
+                  "Whether to correct for the effects of gravity");
+  declareProperty(
+      "ExtraLength", 0.0, positiveDouble,
+      "Additional length for gravity correction.");
 }
 
 /*
@@ -62,6 +68,8 @@ void TOFSANSResolutionByPixel::exec() {
   double deltaR = getProperty("DeltaR");
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
+  const bool doGravity = getProperty("AccountForGravity");
+
   // Convert to meters
   deltaR /= 1000.0;
   R1 /= 1000.0;
@@ -135,7 +143,8 @@ void TOFSANSResolutionByPixel::exec() {
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
     const double theta = inOutWS->detectorTwoTheta(det);
-    const double factor = 4.0 * M_PI * sin(theta / 2.0);
+    double sinTheta = sin(theta / 2.0);
+    double factor = 4.0 * M_PI * sinTheta;
 
     const MantidVec &xIn = inOutWS->readX(i);
     MantidVec &yIn = inOutWS->dataY(i);
@@ -146,6 +155,13 @@ void TOFSANSResolutionByPixel::exec() {
       // use the midpoint of each bin
       const double wl = (xIn[j + 1] + xIn[j]) / 2.0;
       // Calculate q. Alternatively q could be calculated using ConvertUnit
+      // If we include a gravity correction we need to adjust sinTheta
+      // for each wavelength (in Angstrom)
+      if (doGravity) {
+        GravitySANSHelper grav(inOutWS, det, getProperty("ExtraLength"));
+        double sinThetaGrav = grav.calcSinTheta(wl);
+        factor = 4.0 * M_PI * sinThetaGrav;
+      }
       const double q = factor / wl;
 
       // wavelenght spread from bin assumed to be
