@@ -155,11 +155,6 @@ public:
     fit.setProperty("CreateOutput", true);
 
     fit.execute();
-    TSM_ASSERT("The algorithm didn't execute correctly", fit.isExecuted());
-
-    const double chi2 = fit.getProperty("OutputChi2overDoF");
-    TSM_ASSERT_DELTA("The difference between data and fit is too big", chi2, 0.2,
-                     0.05);
   }
 
   // Equivalent Python script. Fit with a BSpline function:
@@ -171,16 +166,11 @@ public:
 
     // From a quick test, order 30 => ~2.5s; order 40 => ~6s; order 50 =>
     // ~14s
-    fit.setProperty("Function", "name=BSpline, Order=40, StartX=0, EndX=10");
+    fit.setProperty("Function", "name=BSpline, Order=20, StartX=0, EndX=10");
     fit.setProperty("InputWorkspace", m_smoothWS);
     fit.setProperty("CreateOutput", true);
 
     fit.execute();
-    TSM_ASSERT("The algorithm didn't execute correctly", fit.isExecuted());
-
-    const double chi2 = fit.getProperty("OutputChi2overDoF");
-    TSM_ASSERT_DELTA("The difference between data and fit is too big", chi2, 0.08,
-                     0.02);
   }
 
 private:
@@ -207,12 +197,7 @@ private:
     sampleAlg->setPropertyValue("OutputWorkspace", "sample_peak_curve_ws");
 
     sampleAlg->execute();
-    TSM_ASSERT("The algorithm didn't execute correctly",
-               sampleAlg->isExecuted());
-    TS_ASSERT(sampleAlg->existsProperty("OutputWorkspace"));
-
     API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
-    TS_ASSERT(ws);
 
     return ws;
   }
@@ -244,12 +229,8 @@ private:
     sampleAlg->setPropertyValue("OutputWorkspace", "sample_smooth_curve_ws");
 
     sampleAlg->execute();
-    TSM_ASSERT("The algorithm didn't execute correctly",
-               sampleAlg->isExecuted());
-    TS_ASSERT(sampleAlg->existsProperty("OutputWorkspace"));
     API::MatrixWorkspace_sptr ws = sampleAlg->getProperty("OutputWorkspace");
 
-    TS_ASSERT(ws);
     return ws;
   }
 
