@@ -39,7 +39,7 @@ class MuscatSofQW(DataProcessorAlgorithm):
                                                      direction=Direction.Input),
                              doc="Name for the input Resolution workspace.")
 
-        self.declareProperty(MatrixWorkspaceProperty('ParametersWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
                                                      direction=Direction.Input),
                              doc="Name for the input Parameters workspace.")
 
@@ -62,7 +62,7 @@ class MuscatSofQW(DataProcessorAlgorithm):
     def _setup(self):
         self._sam_ws = self.getPropertyValue('SampleWorkspace')
         self._res_ws = self.getPropertyValue('ResolutionWorkspace')
-        self._par_ws = self.getPropertyValue('ParametersWorkspace')
+        self._par_ws = self.getPropertyValue('ParameterWorkspace')
 
         self._emax = self.getProperty('EnergyMax').value
         self._einc = self.getProperty('EnergyInc').value
