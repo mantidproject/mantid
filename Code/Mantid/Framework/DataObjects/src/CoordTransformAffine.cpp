@@ -226,31 +226,30 @@ void CoordTransformAffine::buildNonOrthogonal(
 
   // Start with identity
   m_affineMatrix.identityMatrix();
-  Mantid::Kernel::Matrix<coord_t> A(outD,inD);
+  //A matrix is columns of basis vectors
+  Mantid::Kernel::Matrix<coord_t> A(inD,outD);
   for(size_t i = 0; i < outD; i++){
       for(size_t j = 0; j < inD; j++){
-          A[i][j]=axes[i][j];
+          A[j][i]=axes[i][j];
       }
   }
-
   Mantid::Kernel::Matrix<coord_t> AT=A;
   AT.Transpose();
-  Mantid::Kernel::Matrix<coord_t> AAT=A*AT;
-  AAT.Invert();
-  Mantid::Kernel::Matrix<coord_t> Ainv=AT*AAT;
-  Mantid::Kernel::Matrix<coord_t> offset(1,inD);
+  Mantid::Kernel::Matrix<coord_t> ATA=AT*A;
+  ATA.Invert();
+  Mantid::Kernel::Matrix<coord_t> Ainv=ATA*AT;
+  Mantid::Kernel::Matrix<coord_t> offset(inD,1);
   for(size_t j = 0; j < inD; j++){
-      offset[0][j]=origin[j];
+      offset[j][0]=origin[j];
   }
-  Mantid::Kernel::Matrix<coord_t> outoffset=offset*Ainv;
+  Mantid::Kernel::Matrix<coord_t> outoffset=Ainv*offset;
 
   for(size_t i = 0; i < outD; i++){
       for(size_t j = 0; j < inD; j++){
           m_affineMatrix[i][j]=Ainv[i][j]*scaling[i];
       }
-      m_affineMatrix[i][inD]=-outoffset[0][i]*scaling[i];
+      m_affineMatrix[i][inD]=-outoffset[i][0]*scaling[i];
   }
-
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
 }
