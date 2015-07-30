@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "PropertyWithValue.h"
 
-
 namespace Mantid {
 namespace Kernel {
 /** Support for a property that holds an array of values.
@@ -82,9 +81,11 @@ public:
 
   /** Constructor from which you can set the property's values through a string:
    *
-   * Inherits from the constructor of PropertyWithValue specifically made to handle a list
-   * of numeric values in a string format so that initial value is set correctly.
-   * 
+   * Inherits from the constructor of PropertyWithValue specifically made to
+   * handle a list
+   * of numeric values in a string format so that initial value is set
+   * correctly.
+   *
    *  @param name ::      The name to assign to the property
    *  @param values ::    A comma-separated string containing the values to
    * store in the property
@@ -96,9 +97,8 @@ public:
   ArrayProperty(const std::string &name, const std::string &values,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input)
-      : PropertyWithValue<std::vector<T>>(name,std::vector<T>(),values, validator,
-                                          direction){
-  }
+      : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values,
+                                          validator, direction) {}
 
   /// Copy constructor
   ArrayProperty(const ArrayProperty &right)

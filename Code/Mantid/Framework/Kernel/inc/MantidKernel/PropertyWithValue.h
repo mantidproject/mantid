@@ -187,11 +187,10 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
  * given to it from strvalue parameter, Using toValue method.
  (See constructor used specifically for vector assignments)
  */
-template <typename T>
-T extractToValueVector(const std::string &strvalue){
-    T valueVec;
-    toValue(strvalue, valueVec);
-    return valueVec;
+template <typename T> T extractToValueVector(const std::string &strvalue) {
+  T valueVec;
+  toValue(strvalue, valueVec);
+  return valueVec;
 }
 
 /// Macro for the vector<int> specializations
@@ -289,25 +288,26 @@ public:
         m_validator(boost::make_shared<NullValidator>()) {}
 
   /*
-    Constructor to handle vector value assignments to m_initialValue 
+    Constructor to handle vector value assignments to m_initialValue
     so they can be remembered when the algorithm dialog is reloaded.
   */
- /**Constructor
-   *  @param name :: The name to assign to the property.
-   *  @param defaultValue :: A vector of numerical type, empty to comply with other definitions.
-   *  @param defaultValueStr :: The numerical values you wish to assign to the property
-   *  @param validator :: The validator to use for this property
-   *  @param direction :: Whether this is a Direction::Input, Direction::Output
-   * or Direction::InOut (Input & Output) property
-   */
+  /**Constructor
+    *  @param name :: The name to assign to the property.
+    *  @param defaultValue :: A vector of numerical type, empty to comply with
+   * other definitions.
+    *  @param defaultValueStr :: The numerical values you wish to assign to the
+   * property
+    *  @param validator :: The validator to use for this property
+    *  @param direction :: Whether this is a Direction::Input, Direction::Output
+    * or Direction::InOut (Input & Output) property
+    */
   PropertyWithValue(const std::string &name, const TYPE &defaultValue,
                     const std::string defaultValueStr,
-                    IValidator_sptr validator,
-                    const unsigned int direction)
-                    : Property(name, typeid(TYPE), direction), m_value(extractToValueVector<TYPE>(defaultValueStr)),
-                    m_initialValue(extractToValueVector<TYPE>(defaultValueStr)), m_validator(validator){
-  }
-
+                    IValidator_sptr validator, const unsigned int direction)
+      : Property(name, typeid(TYPE), direction),
+        m_value(extractToValueVector<TYPE>(defaultValueStr)),
+        m_initialValue(extractToValueVector<TYPE>(defaultValueStr)),
+        m_validator(validator) {}
 
   /**Copy constructor
   *  Note the default value of the copied object is the initial value of
@@ -505,7 +505,7 @@ protected:
   /// The value of the property
   TYPE m_value;
   /// the property's default value which is also its initial value
-  //const TYPE m_initialValue;
+  // const TYPE m_initialValue;
   TYPE m_initialValue;
 
 private:
