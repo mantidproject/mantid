@@ -118,7 +118,7 @@ private:
   friend class MappedDataPkt;
 };
 
-class MappedDataPkt : public RawDataPkt {
+class DLLExport MappedDataPkt : public RawDataPkt {
 public:
   MappedDataPkt(const MappedDataPkt &pkt);
 private:
@@ -127,7 +127,7 @@ private:
   friend class Parser;
 };
 
-class RTDLPkt : public Packet {
+class DLLExport RTDLPkt : public Packet {
 public:
   RTDLPkt(const RTDLPkt &pkt);
 
