@@ -40,7 +40,7 @@ add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 
-target_link_libraries( ${PROJECT_NAME} LINK_PRIVATE 
+target_link_libraries( ${PROJECT_NAME} LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS}

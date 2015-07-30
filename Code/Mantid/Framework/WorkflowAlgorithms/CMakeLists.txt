@@ -114,7 +114,7 @@ set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc )
 
-target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
+target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

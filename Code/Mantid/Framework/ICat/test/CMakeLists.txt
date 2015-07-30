@@ -10,7 +10,7 @@ if ( CXXTEST_FOUND )
 
   # The actual test suite
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
-  target_link_libraries( ICatTest LINK_PRIVATE 
+  target_link_libraries( ICatTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             ICat
             API
             DataObjects

@@ -37,11 +37,11 @@ set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Nexus LINK_PRIVATE ${MANTIDLIBS} ${NEXUS_C_LIBRARIES} ${NEXUS_LIBRARIES} )
+target_link_libraries ( Nexus LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${NEXUS_C_LIBRARIES} ${NEXUS_LIBRARIES} )
 
 # if ( CXXTEST_FOUND )
 #  cxxtest_add_test ( NexusTest ${TEST_FILES} )
-# target_link_libraries( NexusTest LINK_PRIVATE Nexus  )
+# target_link_libraries( NexusTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} Nexus  )
 #  add_dependencies ( FrameworkTests NexusTest )
 #  set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
 # endif ()
