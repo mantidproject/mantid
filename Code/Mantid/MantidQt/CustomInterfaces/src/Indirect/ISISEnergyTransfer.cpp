@@ -111,9 +111,9 @@ void ISISEnergyTransfer::run() {
   reductionAlg->initialize();
   BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
-  reductionAlg->setProperty(
-      "Instrument",
-      getInstrumentConfiguration()->getInstrumentName().toStdString());
+  QString instName = getInstrumentConfiguration()->getInstrumentName();
+
+  reductionAlg->setProperty("Instrument", instName.toStdString());
   reductionAlg->setProperty(
       "Analyser",
       getInstrumentConfiguration()->getAnalyserName().toStdString());
@@ -121,7 +121,12 @@ void ISISEnergyTransfer::run() {
       "Reflection",
       getInstrumentConfiguration()->getReflectionName().toStdString());
 
-  reductionAlg->setProperty("Efixed", m_uiForm.spEfixed->value());
+  // Override the efixed for QENS spectrometers only
+  QStringList qens;
+  qens << "IRIS"
+       << "OSIRIS";
+  if (qens.contains(instName))
+    reductionAlg->setProperty("Efixed", m_uiForm.spEfixed->value());
 
   QString files = m_uiForm.dsRunFiles->getFilenames().join(",");
   reductionAlg->setProperty("InputFiles", files.toStdString());
@@ -233,6 +238,11 @@ void ISISEnergyTransfer::setInstrumentDefault() {
 
   // Set the search instrument for runs
   m_uiForm.dsRunFiles->setInstrumentOverride(instDetails["instrument"]);
+
+  QStringList qens;
+  qens << "IRIS"
+       << "OSIRIS";
+  m_uiForm.spEfixed->setEnabled(qens.contains(instDetails["instrument"]));
 
   if (instDetails["spectra-min"].isEmpty() ||
       instDetails["spectra-max"].isEmpty()) {
