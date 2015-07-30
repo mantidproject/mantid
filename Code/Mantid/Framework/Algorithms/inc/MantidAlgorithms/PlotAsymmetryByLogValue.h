@@ -89,8 +89,12 @@ private:
       const std::string &deadTimeFile);
   // Apply dead-time corrections
   void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
-  /// Group detectors from run file
-  void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
+  /// Create custom detector grouping
+  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
+                                           const std::vector<int> &bwd);
+  /// Group detectors
+  void groupDetectors(API::Workspace_sptr &loadedWs,
+                      API::Workspace_sptr grouping);
   /// Calculate the integral asymmetry for a workspace (single period)
   void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
@@ -118,8 +122,6 @@ private:
   static std::vector<int> g_forward_list;
   /// Store backward spectra
   static std::vector<int> g_backward_list;
-  /// If true call LoadMuonNexus with Autogroup on
-  bool m_autogroup;
   /// Store type of dead time corrections
   static std::string g_dtcType;
   /// File to read corrections from
