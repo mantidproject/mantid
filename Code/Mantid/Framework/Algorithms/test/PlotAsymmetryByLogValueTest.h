@@ -356,6 +356,38 @@ public:
     TS_ASSERT (!alg.isExecuted());
   }
 
+  void test_customTimeLimits ()
+  {
+    const std::string ws = "Test_customTimeLimits";
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue","run_number");
+    alg.setPropertyValue("TimeMin","0.5");
+    alg.setPropertyValue("TimeMax","0.6");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
+
+    const Mantid::MantidVec& Y = outWs->readY(0);
+    TS_ASSERT_DELTA(Y[0], 0.14700, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.13042, 0.00001);
+
+    AnalysisDataService::Instance().remove(ws);
+  }
+
 private:
   std::string firstRun,lastRun;
   

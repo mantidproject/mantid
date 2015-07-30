@@ -78,82 +78,79 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad (int64_t runNumber );
-  // Analyse loaded run
-  void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
+  /// Reads input properties supplied by user and initialises member variables
+  void readProperties();
   // Parse run names
-  void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
+  void parseRunNames(std::string &firstFN, std::string &lastFN,
+                     std::string &fnBase, std::string &fnExt, int &fnZeros);
+  // Load run, apply dead time corrections and detector grouping
+  API::Workspace_sptr doLoad(size_t runNumber);
   // Load dead-time corrections from specified file
-  void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
+  API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
-  void applyDeadtimeCorr (API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
-  /// Group detectors from run file
-  void groupDetectors (API::Workspace_sptr &loadedWs, API::Workspace_sptr loadedDetGrouping);
-  /// Calculate the integral asymmetry for a workspace (single period)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
-  /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red, API::MatrixWorkspace_sptr ws_geen, double &Y, double &E);
+  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs,
+                         API::Workspace_sptr deadTimes);
+  /// Creates a table workspace containing custom grouping
+  API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd,
+                                           const std::vector<int> &bwd);
   /// Group detectors
-  void groupDetectors (API::MatrixWorkspace_sptr &ws, const std::vector<int> &spectraList);
-  /// Get log value
-  double getLogValue(API::MatrixWorkspace &ws);
-  /// Populate output workspace with results
-  void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
-  /// Check input properties
-  void checkProperties (size_t &is, size_t &ie);
-  /// Clear previous results
-  void clearResultsFromTo (size_t is, size_t ie);
+  void groupDetectors(API::Workspace_sptr &loadedWs,
+                      API::Workspace_sptr loadedDetGrouping);
+  // Analyse the asymmetry for a loaded run
+  void doAnalysis(API::Workspace_sptr loadedWs, std::vector<double> &y,
+                  std::vector<double> &e);
+  /// Calculates the asymmetry for a workspace (single period)
+  void calculateAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
+  /// Calculates the asymmetry for a pair of workspaces (red & green)
+  void calculateAsymmetry(API::MatrixWorkspace_sptr ws_red,
+                          API::MatrixWorkspace_sptr ws_geen, double &Y,
+                          double &E);
+  /// Get log value from ws
+  double getLogValue(API::Workspace_sptr ws);
+  /// Returns previously loaded data if they exist
+  API::ITableWorkspace_sptr
+  previousDataAsTable(API::ITableWorkspace_sptr prevData, size_t runNumber);
 
+  /// Properties needed for the loading process
+  /// Number of the first run in the set
+  size_t m_is;
+  /// Number of the last run in the set
+  size_t m_ie;
   /// Stores base name shared by all runs
-  static std::string g_filenameBase;
+  std::string m_filenameBase;
   /// Stores extension shared by all runs
-  static std::string g_filenameExt;
+  std::string m_filenameExt;
   /// Sotres number of zeros in run name
-  static int g_filenameZeros;
-  /// Stores property "Int"
-  bool m_int;
-  /// Store forward spectra
-  static std::vector<int> g_forward_list;
-  /// Store backward spectra
-  static std::vector<int> g_backward_list;
-  /// If true call LoadMuonNexus with Autogroup on
-  bool m_autogroup;
+  int m_filenameZeros;
   /// Store type of dead time corrections
-  static std::string g_dtcType;
+  std::string m_dtcType;
   /// File to read corrections from
-  static std::string g_dtcFile;
-  /// Store red period
-  static int g_red;
-  /// Store green period
-  static int g_green;
-  // Mantid vectors to store results
-  // Red mantid vectors
-  static std::map<int64_t, double> g_redX;
-  static std::map<int64_t, double> g_redY;
-  static std::map<int64_t, double> g_redE;
-  // Green mantid vectors
-  static std::map<int64_t, double> g_greenX;
-  static std::map<int64_t, double> g_greenY;
-  static std::map<int64_t, double> g_greenE;
-  // Mantid vectors to store Red + Green
-  static std::map<int64_t, double> g_sumX;
-  static std::map<int64_t, double> g_sumY;
-  static std::map<int64_t, double> g_sumE;
-  // Mantid vectors to store Red - Green
-  static std::map<int64_t, double> g_diffX;
-  static std::map<int64_t, double> g_diffY;
-  static std::map<int64_t, double> g_diffE;
+  std::string m_dtcFile;
+  /// Store forward spectra
+  std::vector<int> m_forward_list;
+  /// Store backward spectra
+  std::vector<int> m_backward_list;
+
+  /// Properties needed for the analysis process
+  /// Type of calculation, if true, integral asymmetry
+  bool m_int;
+  /// Red period
+  int m_red;
+  /// Green period
+  int m_green;
+  /// Minimum time for the analysis
+  double m_minTime;
+  /// Maximum time for the analysis
+  double m_maxTime;
+
+  /// Properties needed to get the X value
   // LogValue name
-  static std::string g_logName;
+  std::string m_logName;
   // LogValue function
-  static std::string g_logFunc;
-  // Type of computation: integral or differential
-  static std::string g_stype;
-  // Minimum time for the analysis
-  static double g_minTime;
-  // Maximum time for the analysis
-  static double g_maxTime;
+  std::string m_logFunc;
+
+  /// Name of the table containing previous results
+  std::ostringstream m_prevDataName;
 };
 
 } // namespace Algorithm

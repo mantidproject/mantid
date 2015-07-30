@@ -31,6 +31,8 @@ workspace will contain four spectra with asymmetries:
 | 3                 | 4          | Sum of Red and Green               |
 +-------------------+------------+------------------------------------+
 
+"Green" and "Red" properties are ignored for single-period datasets.
+
 If ForwardSpectra and BackwardSpectra are set the Muon workspaces will
 be grouped according to the user input, otherwise the Autogroup option
 of LoadMuonNexus will be used for grouping.
