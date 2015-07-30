@@ -45,6 +45,9 @@ Usage
         print f.readline()
         print f.readline()
         print f.readline()
+    
+    # Delete the test file
+    os.remove(filepath)
 
 Output:
 
