@@ -7,7 +7,6 @@ The [developer documentation](http://www.mantidproject.org/Category:Development)
 
 Hints to make the integration of your changes easy (and happen faster):
 - Keep your pull requests small
-- Some comments are part of the build server infrastructure (e.g. 'test this please')
 - Don't forget your unit tests
 - All algorithms need documentation, don't forget the .rst file
 - Don't take changes requests to change your code personally
