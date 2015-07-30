@@ -81,10 +81,13 @@ public:
 
   void testConstructorByString()
   {
-	  ArrayProperty<int> i("i","1,2,3");
-	  TS_ASSERT_EQUALS( i.operator()()[0], 1 )
-    TS_ASSERT_EQUALS( i.operator()()[1], 2 )
-    TS_ASSERT_EQUALS( i.operator()()[2], 3 )
+     const std::string &i_stringValue = "1,2,3";
+    ArrayProperty<int> i("i",i_stringValue);
+    TS_ASSERT_EQUALS( i.operator()()[0], 1 );
+    TS_ASSERT_EQUALS( i.operator()()[1], 2 );
+    TS_ASSERT_EQUALS( i.operator()()[2], 3 );
+    TS_ASSERT_EQUALS(i.getDefault(), i_stringValue);
+    TS_ASSERT(i.isDefault());
 
     ArrayProperty<int> i2("i", "-1-1");
     TS_ASSERT_EQUALS( i2.operator()()[0], -1);
@@ -134,16 +137,17 @@ public:
     TS_ASSERT_EQUALS( d2.operator()()[0], 0.3 )
     TS_ASSERT_EQUALS( d2.operator()()[1], 0.1)
     TS_ASSERT_EQUALS( d2.operator()()[2], -0.2 )
-	TS_ASSERT(! d2.isDefault());
+    TS_ASSERT_EQUALS(d2.value(), "0.3,0.1,-0.2");
+	TS_ASSERT(!d2.isDefault());
 
     ArrayProperty<std::string> s("d","a,b,c");
     TS_ASSERT( ! s.operator()()[0].compare("a") )
     TS_ASSERT( ! s.operator()()[1].compare("b") )
     TS_ASSERT( ! s.operator()()[2].compare("c") )
 
-    TS_ASSERT_THROWS( ArrayProperty<int> ii("ii","aa,bb"), std::invalid_argument )
-    TS_ASSERT_THROWS( ArrayProperty<int> ii("ii","5.5,6.6"), std::invalid_argument )
-    TS_ASSERT_THROWS( ArrayProperty<double> dd("dd","aa,bb"), std::invalid_argument )
+    TS_ASSERT_THROWS( ArrayProperty<int> ii("ii","aa,bb"), std::bad_cast )
+    TS_ASSERT_THROWS( ArrayProperty<int> ii("ii","5.5,6.6"), std::bad_cast )
+    TS_ASSERT_THROWS( ArrayProperty<double> dd("dd","aa,bb"), std::bad_cast )
   }
 	
   void testCopyConstructor()
