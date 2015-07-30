@@ -27,8 +27,6 @@ Usage
 
 .. testcode:: ExSaveAscii
 
-    from IndirectCommon import getDefaultWorkingDirectory
-
     # Load sample workspace
     temp_ws_ = CreateSampleWorkspace()
 
@@ -37,14 +35,14 @@ Usage
     ExampleSaveAscii(temp_ws_, filename)
 
     # Get the default save path
-    workdir = getDefaultWorkingDirectory()
+    workdir = config['defaultsave.directory']
     filepath = os.path.join(workdir, filename)
     
     # Read and print first 3 lines from file
     with open(filepath, 'r') as f:
-        print f.readline()
-        print f.readline()
-        print f.readline()
+        print f.readline()[:-1]
+        print f.readline()[:-1]
+        print f.readline()[:-1]
     
     # Delete the test file
     os.remove(filepath)
@@ -53,11 +51,10 @@ Output:
 
 .. testoutput:: ExSaveAscii
 
-# Time-of-flight , Spectrum , E
-1
-100.0000,0.3000,0.5477
+    # Time-of-flight , Spectrum , E
+    1
+    100.0000,0.3000,0.5477
 
-  
 .. categories::
 
 .. sourcelink::
