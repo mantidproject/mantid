@@ -640,62 +640,48 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
                                          int64_t index) {
 
   // Check if workspace is a workspace group
-  WorkspaceGroup_sptr loadedGroup =
+  WorkspaceGroup_sptr group =
       boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
 
   // If it is not, we only have 'red' data
-  if (!loadedGroup) {
-    Workspace2D_sptr loadedWs2D =
-        boost::dynamic_pointer_cast<Workspace2D>(loadedWs);
+  if (!group) {
+    MatrixWorkspace_sptr ws_red =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
 
     double Y, E;
-    calcIntAsymmetry(loadedWs2D, Y, E);
-    g_redX[index] = getLogValue(*loadedWs2D);
+    calcIntAsymmetry(ws_red, Y, E);
+    g_redX[index] = getLogValue(*ws_red);
     g_redY[index] = Y;
     g_redE[index] = E;
+
   } else {
+    // It is a group
 
-    DataObjects::Workspace2D_sptr ws_red;
-    DataObjects::Workspace2D_sptr ws_green;
-    // Run through the periods of the loaded file and save the
-    // selected ones
-    for (int mi = 0; mi < loadedGroup->getNumberOfEntries(); mi++) {
+    // Process red data
+    MatrixWorkspace_sptr ws_red;
+    try {
+      ws_red = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          group->getItem(g_red - 1));
+    } catch (std::out_of_range &) {
+      throw std::out_of_range("Red period out of range");
+    }
+    double YR, ER;
+    calcIntAsymmetry(ws_red, YR, ER);
+    double logValue = getLogValue(*ws_red);
+    g_redX[index] = logValue;
+    g_redY[index] = YR;
+    g_redE[index] = ER;
 
-      Workspace2D_sptr memberWs =
-          boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
-      int period = mi + 1;
-      if (period == g_red) {
-        ws_red = memberWs;
+    if (g_green != EMPTY_INT()) {
+      // Process green period if supplied by user
+      MatrixWorkspace_sptr ws_green;
+      try {
+        ws_green = boost::dynamic_pointer_cast<MatrixWorkspace>(
+            group->getItem(g_green - 1));
+      } catch (std::out_of_range &) {
+        throw std::out_of_range("Green period out of range");
       }
-      if (g_green != EMPTY_INT()) {
-        if (period == g_green) {
-          ws_green = memberWs;
-        }
-      }
-    }
-
-    // Check ws_red
-    if (!ws_red) {
-      throw std::invalid_argument("Red period is out of range");
-    }
-    // Check ws_green
-    if ((g_green != EMPTY_INT()) && (!ws_green)) {
-      throw std::invalid_argument("Green period is out of range");
-    }
-
-    if (g_green == EMPTY_INT()) {
-      double Y, E;
-      calcIntAsymmetry(ws_red, Y, E);
-      g_redX[index] = getLogValue(*ws_red);
-      g_redY[index] = Y;
-      g_redE[index] = E;
-
-    } else {
-
-      double YR, ER;
       double YG, EG;
-      double logValue = getLogValue(*ws_red);
-      calcIntAsymmetry(ws_red, YR, ER);
       calcIntAsymmetry(ws_green, YG, EG);
       // Red data
       g_redX[index] = logValue;
@@ -709,8 +695,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
       g_sumX[index] = logValue;
       g_sumY[index] = YR + YG;
       g_sumE[index] = sqrt(ER * ER + EG * EG);
-      // move to last for safety since some grouping takes place in the
-      // calcIntAsymmetry call below
+      // Diff
       calcIntAsymmetry(ws_red, ws_green, YR, ER);
       g_diffX[index] = logValue;
       g_diffY[index] = YR;
@@ -731,12 +716,13 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
 
   if (!m_int) { //  "Differential asymmetry"
     IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
-    asym->initialize();
+    asym->setLogging(false);
     asym->setProperty("InputWorkspace", ws);
     asym->execute();
     MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", asymWS);
     integr->setProperty("RangeLower", g_minTime);
     integr->setProperty("RangeUpper", g_maxTime);
@@ -748,6 +734,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
   } else {
     //  "Integral asymmetry"
     IAlgorithm_sptr integr = createChildAlgorithm("Integration");
+    integr->setLogging(false);
     integr->setProperty("InputWorkspace", ws);
     integr->setProperty("RangeLower", g_minTime);
     integr->setProperty("RangeUpper", g_maxTime);
@@ -755,7 +742,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
     MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr asym = createChildAlgorithm("AsymmetryCalc");
-    asym->initialize();
+    asym->setLogging(false);
     asym->setProperty("InputWorkspace", intWS);
     asym->execute();
     MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
