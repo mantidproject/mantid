@@ -354,6 +354,40 @@ public:
 
     TS_ASSERT_THROWS (alg.execute(),std::runtime_error);
     TS_ASSERT (!alg.isExecuted());
+
+    AnalysisDataService::Instance().remove(ws);
+  }
+
+  void test_singlePeriodGreen() {
+    // Load a single-period dataset and set the green period to a
+    // number. The algorithm should ignore the supplied green and/or red periods
+    // as the input nexus file is single-period
+    const std::string ws = "Test_singlePeriodGreen";
+
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("FirstRun", "emu00006473.nxs");
+    alg.setPropertyValue("LastRun", "emu00006473.nxs");
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("Red", "3");
+    alg.setPropertyValue("Green", "1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 1);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
+
+    TS_ASSERT_EQUALS(outWS->readX(0)[0], 6473);
+    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.283444, 0.000001);
+    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.000145, 0.000001);
+
+    AnalysisDataService::Instance().remove(ws);
   }
 
 private:
