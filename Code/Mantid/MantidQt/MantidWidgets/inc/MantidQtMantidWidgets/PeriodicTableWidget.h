@@ -55,7 +55,7 @@ private:
   void ColourNobleGases(const QVector<QPushButton *> &nobleGases);
 
   // Methods to colour single element button
-  void ColourButton(QPushButton *elementButton, QColor colour);
+  void ColourButton(QPushButton *elementButton, QString colour);
 };
 
 #endif // !MANTID_MANTIDWIDGETS_PERIODICTABLE_H_
