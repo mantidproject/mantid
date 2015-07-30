@@ -3,9 +3,6 @@
 //----------------------------------------------------------------------
 #include <cmath>
 #include <vector>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
 
 #include "MantidAPI/FileProperty.h"
 #include <MantidAPI/FileFinder.h>
@@ -15,7 +12,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -23,9 +19,6 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
-
-#include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
 
 namespace // anonymous
     {
@@ -351,6 +344,7 @@ void PlotAsymmetryByLogValue::clearResultsFromTo(size_t is, size_t ie) {
 /**  Loads one run and applies dead-time corrections and detector grouping if
 * required
 *   @param runNumber :: [input] Run number specifying run to load
+*   @return :: Loaded workspace
 */
 Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
 
@@ -704,8 +698,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 }
 
 /**  Calculate the integral asymmetry for a workspace.
-*   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
-* algorithms.
+*   The calculation is done by AsymmetryCalc and Integration algorithms.
 *   @param ws :: The workspace
 *   @param Y :: Reference to a variable receiving the value of asymmetry
 *   @param E :: Reference to a variable receiving the value of the error
@@ -751,9 +744,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
   }
 }
 
-/**  Calculate the integral asymmetry for a workspace (red & green).
-*   The calculation is done by MuonAsymmetryCalc and SimpleIntegration
-* algorithms.
+/**  Calculate the integral asymmetry for a pair of workspaces (red & green).
 *   @param ws_red :: The red workspace
 *   @param ws_green :: The green workspace
 *   @param Y :: Reference to a variable receiving the value of asymmetry
@@ -822,7 +813,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
 /**
  * Get log value from a workspace. Convert to double if possible.
  *
- * @param ws :: The input workspace.
+ * @param ws :: [Input] The input workspace.
  * @return :: Log value.
  * @throw :: std::invalid_argument if the log cannot be converted to a double or
  *doesn't exist.
