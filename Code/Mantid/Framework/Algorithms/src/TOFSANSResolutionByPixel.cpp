@@ -4,15 +4,18 @@
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
+#include "MantidAlgorithms/ConvertToPointData.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include "boost/math/special_functions/fpclassify.hpp"
 #include "boost/lexical_cast.hpp"
+#include <algorithm>
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,11 +33,14 @@ TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
 
 void TOFSANSResolutionByPixel::init() {
   declareProperty(new WorkspaceProperty<>(
-                      "Workspace", "", Direction::InOut,
+                  "InputWorkspace", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
-                  "each pixel and wavelenght");
-
+                  "each pixel and wavelength");
+  declareProperty(
+      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      "Name of the workspace that will contain the result of the calculation. It contains "
+      " the Q resolotion for each pixel as a function of Q.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("DeltaR", 0.0, positiveDouble, "Pixel size (mm).");
@@ -64,11 +70,14 @@ double TOFSANSResolutionByPixel::getTOFResolution(double wl) {
 }
 
 void TOFSANSResolutionByPixel::exec() {
-  MatrixWorkspace_sptr inOutWS = getProperty("Workspace");
+  MatrixWorkspace_sptr inWS = getProperty("Workspace");
   double deltaR = getProperty("DeltaR");
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
   const bool doGravity = getProperty("AccountForGravity");
+
+  // Setup outputworkspace
+  auto outWS = setupOutputWorkspace(inWS);
 
   // Convert to meters
   deltaR /= 1000.0;
@@ -101,23 +110,23 @@ void TOFSANSResolutionByPixel::exec() {
 
   // Get the collimation length
   double LCollim = getProperty("CollimationLength");
-  const V3D samplePos = inOutWS->getInstrument()->getSample()->getPos();
+  const V3D samplePos = inWS->getInstrument()->getSample()->getPos();
 
   if (LCollim == 0.0) {
     auto collimationLengthEstimator = SANSCollimationLengthEstimator();
-    LCollim = collimationLengthEstimator.provideCollimationLength(inOutWS);
+    LCollim = collimationLengthEstimator.provideCollimationLength(inWS);
     g_log.information() << "No collimation length was specified. A default collimation length was estimated to be " << LCollim << std::endl;
   } else {
     g_log.information() << "The collimation length is  " << LCollim << std::endl;
   }
 
-  const int numberOfSpectra = static_cast<int>(inOutWS->getNumberHistograms());
+  const int numberOfSpectra = static_cast<int>(inWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
   for (int i = 0; i < numberOfSpectra; i++) {
     IDetector_const_sptr det;
     try {
-      det = inOutWS->getDetector(i);
+      det = inWS->getDetector(i);
     } catch (Exception::NotFoundError &) {
       g_log.information() << "Spectrum index " << i
                           << " has no detector assigned to it - discarding"
@@ -142,13 +151,17 @@ void TOFSANSResolutionByPixel::exec() {
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
-    const double theta = inOutWS->detectorTwoTheta(det);
+    const double theta = inWS->detectorTwoTheta(det);
     double sinTheta = sin(theta / 2.0);
     double factor = 4.0 * M_PI * sinTheta;
 
-    const MantidVec &xIn = inOutWS->readX(i);
-    MantidVec &yIn = inOutWS->dataY(i);
+    const MantidVec &xIn = inWS->readX(i);
+    MantidVec &yIn = inWS->dataY(i);
     const size_t xLength = xIn.size();
+
+    // Get handles on the outputWorkspace
+    MantidVec &xOut = outWS->dataX(i);
+    MantidVec &yOut = outWS->dataY(i);
 
     // for each wavelenght bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
@@ -158,7 +171,7 @@ void TOFSANSResolutionByPixel::exec() {
       // If we include a gravity correction we need to adjust sinTheta
       // for each wavelength (in Angstrom)
       if (doGravity) {
-        GravitySANSHelper grav(inOutWS, det, getProperty("ExtraLength"));
+        GravitySANSHelper grav(inWS, det, getProperty("ExtraLength"));
         double sinThetaGrav = grav.calcSinTheta(wl);
         factor = 4.0 * M_PI * sinThetaGrav;
       }
@@ -182,12 +195,38 @@ void TOFSANSResolutionByPixel::exec() {
       const double sigmaQ = std::sqrt(
           dTheta2 / (wl * wl) + sigmaOverLambdaTimesQ * sigmaOverLambdaTimesQ);
 
-      // update inout workspace with this sigmaQ
-      yIn[j] = sigmaQ;
+      // Insert the Q value and the Q resolution into the outputworkspace
+      yOut[j] = sigmaQ;
+      xOut[j] = q;
     }
+
+    // Reverse x and y entries to produce the correct Q value ordering
+    std::reverse(xOut.begin(), xOut.end());
+    std::reverse(yOut.begin(), yOut.end());
 
     progress.report("Computing Q resolution");
   }
+
+  setProperty("OutputWorkspace", outWS);
+}
+
+/**
+ * Setup output workspace
+ * @param inputWorkspace: the input workspace
+ */
+MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
+  // Convert to point data
+  IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertToPointData");
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
+  childAlg->executeAsChildAlg();
+  MatrixWorkspace_sptr outputWorkspace = childAlg->getProperty("OutputWorkspace");
+
+  // Set the axis information
+  outputWorkspace->getAxis(0)->unit() =
+      UnitFactory::Instance().create("MomentumTransfer");
+  //outputWorkspace->setYUnitLabel("1/cm");
+
+  return outputWorkspace;
 }
 
 

@@ -46,6 +46,8 @@ private:
   virtual double getTOFResolution(double wl);
   /// Get the collimation length when we evaluate it using 5 Guards
   double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inOutWS, const double L1, const double collimationLengthCorrection) const;
+  /// Create an output workspace
+  Mantid::API::MatrixWorkspace_sptr setupOutputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
   /// Wavelength resolution (constant for all wavelengths)
   double m_wl_resolution;
 };
