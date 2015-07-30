@@ -45,13 +45,13 @@ void PredictFractionalPeaks::init() {
 
 
   declareProperty(
-	  new Kernel::ArrayProperty<double>(string("HOffset"), hOffsetDefault),
+	  new Kernel::ArrayProperty<double>(string("HOffset"), "-0.5,0.0,0.5"),
       "Offset in the h direction");
 
   //const std::vector<double> kOffsetDefault(1, 0);
   //std::vector<double>(1, 0)
   declareProperty(
-      new Kernel::ArrayProperty<double>(string("KOffset"), std::vector<double>(1, 0)),
+      new Kernel::ArrayProperty<double>(string("KOffset"), "0"),
       "Offset in the h direction");
 
   std::vector<double> lOffsetDefault(3);
@@ -59,7 +59,7 @@ void PredictFractionalPeaks::init() {
   lOffsetDefault[1] = 0.5;
 
   declareProperty(
-	  new Kernel::ArrayProperty<double>(string("LOffset"), lOffsetDefault),
+	  new Kernel::ArrayProperty<double>(string("LOffset"), "-0.5,0.5"),
       "Offset in the h direction");
 
   declareProperty("IncludeAllPeaksInRange", false,
