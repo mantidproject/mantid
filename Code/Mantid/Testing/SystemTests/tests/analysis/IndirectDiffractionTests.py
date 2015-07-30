@@ -1,4 +1,6 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,non-parent-init-called
+# non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
+
 from abc import ABCMeta, abstractmethod
 import stresstesting
 

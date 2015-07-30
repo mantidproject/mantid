@@ -1,6 +1,6 @@
 #pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
-from mantid.simpleapi import *
+import mantid.simpleapi as ms
 
 #====================================================================================================
 class IN10SiliconTest(stresstesting.MantidStressTest):
@@ -42,10 +42,10 @@ class IN13CaFTest(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 1e-2
 
-        from mantid.simpleapi import Load
-
-        Load(Filename='ISISIndirectLoadAscii_IN13CaFTest.nxs',OutputWorkspace='ISISIndirectLoadAscii_IN13CaFTest')
-        Load(Filename='ISISIndirectLoadAscii_IN13CaFTest2.nxs',OutputWorkspace='ISISIndirectLoadAscii_IN13CaFTest2')
+        ms.Load(Filename='ISISIndirectLoadAscii_IN13CaFTest.nxs',
+                OutputWorkspace='ISISIndirectLoadAscii_IN13CaFTest')
+        ms.Load(Filename='ISISIndirectLoadAscii_IN13CaFTest2.nxs',
+                OutputWorkspace='ISISIndirectLoadAscii_IN13CaFTest2')
 
         # check each of the resulting workspaces match
         ws1Match = self.checkWorkspacesMatch('IN13_16347_CaF422_q', 'ISISIndirectLoadAscii_IN13CaFTest2')
@@ -56,8 +56,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
     # function to check two workspaces match
     # Used when the result of a test produces more than a single workspace
     def checkWorkspacesMatch(self, ws1, ws2):
-        from mantid.simpleapi import SaveNexus, AlgorithmManager
-        checker = AlgorithmManager.create("CheckWorkspacesMatch")
+        checker = ms.AlgorithmManager.create("CheckWorkspacesMatch")
         checker.setLogging(True)
         checker.setPropertyValue("Workspace1", ws1)
         checker.setPropertyValue("Workspace2", ws2)
@@ -68,7 +67,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
 
         if checker.getPropertyValue("Result") != 'Success!':
             print self.__class__.__name__
-            SaveNexus(InputWorkspace=ws2,Filename=self.__class__.__name__+'-mismatch.nxs')
+            ms.SaveNexus(InputWorkspace=ws2,Filename=self.__class__.__name__+'-mismatch.nxs')
             return False
 
         return True

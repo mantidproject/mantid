@@ -151,7 +151,7 @@ class MolDyn(PythonAlgorithm):
             else:
                 raise RuntimeError('Unrecognised file format: %s' % ext)
 
-        except Exception as ex:
+        except RuntimeError as ex:
             logger.error('Error parsing file %s' % (self._sam_path))
             logger.debug('Error is: %s' % (str(ex)))
 

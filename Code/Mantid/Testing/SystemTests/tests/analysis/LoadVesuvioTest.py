@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-many-public-methods,too-many-arguments
 import stresstesting
 
 from mantid.api import MatrixWorkspace, mtd
@@ -123,7 +123,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(-0.4157, param[0],places=4)
 
     def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs(self):
-        self._run_load("14188", "135-142", "SingleDifference","IP0005.dat",sum=True)
+        self._run_load("14188", "135-142", "SingleDifference","IP0005.dat",sum_runs=True)
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -136,7 +136,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.10617318614513051, evs_raw.readE(0)[-1], places=DIFF_PLACES)
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups(self):
-        self._run_load("14188", "135-148;152-165", "SingleDifference","IP0005.dat",sum=True)
+        self._run_load("14188", "135-148;152-165", "SingleDifference","IP0005.dat",sum_runs=True)
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -157,7 +157,7 @@ class VesuvioTests(unittest.TestCase):
                                        range(3118,3132))
 
     def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs_with_foil_in(self):
-        self._run_load("14188", "3-15", "FoilIn", "IP0005.dat", sum=True)
+        self._run_load("14188", "3-15", "FoilIn", "IP0005.dat", sum_runs=True)
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -174,7 +174,7 @@ class VesuvioTests(unittest.TestCase):
 
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups_with_foil_in(self):
-        self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum=True)
+        self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum_runs=True)
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -199,23 +199,23 @@ class VesuvioTests(unittest.TestCase):
         for expected_id, det_id in zip(expected_ids, det_ids):
             self.assertEqual(expected_id, det_id)
 
-    def _run_load(self, runs, spectra, diff_opt, ip_file="", sum=False):
+    def _run_load(self, runs, spectra, diff_opt, ip_file="", sum_runs=False):
         LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
                     SpectrumList=spectra,Mode=diff_opt,InstrumentParFile=ip_file,
-                    SumSpectra=sum)
+                    SumSpectra=sum_runs)
 
         self._do_ads_check(self.ws_name)
 
         def expected_size():
-            if sum:
+            if sum_runs:
                 if ";" in spectra:
                     return 2
                 else:
                     return 1
             elif "-" in spectra:
                 elements = spectra.split("-")
-                min,max=(int(elements[0]), int(elements[1]))
-                return max - min + 1
+                min_e, max_e = (int(elements[0]), int(elements[1]))
+                return max_e - min_e + 1
             elif "," in spectra:
                 elements = spectra.strip().split(",")
                 return len(elements)
