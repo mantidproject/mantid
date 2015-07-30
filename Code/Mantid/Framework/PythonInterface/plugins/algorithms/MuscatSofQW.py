@@ -152,7 +152,9 @@ class MuscatSofQW(DataProcessorAlgorithm):
                         Nspec=specMax,
                         UnitX='Energy',
                         VerticalAxisUnit='MomentumTransfer',
-                        VerticalAxisValues=Q)
+                        VerticalAxisValues=Q,
+                        ParentWorkspace=self._sam_ws)
+
         CopyLogs(InputWorkspace=self._par_ws,
                  OutputWorkspace=self._out_ws_name)
 
