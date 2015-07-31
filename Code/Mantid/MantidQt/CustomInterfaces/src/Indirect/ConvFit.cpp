@@ -1459,7 +1459,6 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
 /**
  * Populates the plot combobox
- * @param params The values to append to the list of plot Types
  */
 void ConvFit::updatePlotOptions() {
   m_uiForm.cbPlotType->clear();
