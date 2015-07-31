@@ -208,14 +208,14 @@ public:
     if ( !loader.isInitialized() ) loader.initialize();
 
     //Create a workspace with some sample data and add a run with a start date
-    wsName = "LoadIDFFromNexusTest2";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    Run &runDetails = ws2D->mutableRun();
+    wsName = "LoadIDFFromNexusTestParameterCorrectionFile";
+    Workspace_sptr wsd = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr wsd2D = boost::dynamic_pointer_cast<Workspace2D>(wsd);
+    Run &runDetails = wsd2D->mutableRun();
     runDetails.addProperty("run_start", std::string("2015-08-01 12:00:00"));
 
     //Put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, wsd2D));
 
     // Create correction file and a parameter file to which it refers
     std::string cContents = 
@@ -253,7 +253,7 @@ public:
     loader.setPropertyValue("Workspace", wsName);
     loader.setPropertyValue("Filename", "LOQ48127.nxs"); 
     loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
-    loader.setPropertyValue("ParameterCorrectionFilePath","pFullfilename"); 
+    loader.setPropertyValue("ParameterCorrectionFilePath",cFullFilename); 
     inputFile = loader.getPropertyValue("Filename"); // get full pathname
 
     // Execute
