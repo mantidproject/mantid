@@ -871,7 +871,7 @@ void ConvFit::updatePlot() {
     return;
   }
 
-  const bool plotGuess = m_uiForm.ckPlotGuess->isChecked();
+  bool plotGuess = m_uiForm.ckPlotGuess->isChecked();
   m_uiForm.ckPlotGuess->setChecked(false);
 
   int specNo = m_uiForm.spPlotSpectrum->text().toInt();
@@ -921,6 +921,10 @@ void ConvFit::plotGuess() {
   if (!(m_uiForm.dsSampleInput->isValid() && m_uiForm.dsResInput->isValid() &&
         m_uiForm.ckPlotGuess->isChecked()))
     return;
+
+  if(m_uiForm.cbFitType->currentIndex() > 2){
+	return;
+  }
 
   bool tieCentres = (m_uiForm.cbFitType->currentIndex() > 1);
   CompositeFunction_sptr function = createFunction(tieCentres);
@@ -1368,7 +1372,10 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   // remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
+  
+  m_uiForm.ckPlotGuess->setChecked(false);
   m_uiForm.ckTieCentres->setChecked(false);
+  
 
   // Add new parameter elements
   int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
