@@ -88,7 +88,8 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name, const Inte
  */
 PythonScript::~PythonScript()
 {
-  GlobalInterpreterLock pythonLock;
+  GlobalInterpreterLock lock;
+  this->abort();
   observeAdd(false);
   observeAfterReplace(false);
   observePostDelete(false);
