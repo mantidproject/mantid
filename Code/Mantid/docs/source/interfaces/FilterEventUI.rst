@@ -8,13 +8,13 @@ Description
 -----------
  
 The Filter Events interface provides aid to users in order to set up event filter with different 
-`Functionalities <http://docs.mantidproject.org/nightly/algorithms/GenerateEventsFilter-v1.html#functionalities>`_. 
-This interface utilises the algorithm :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>`  
-which is able to generate event splitters according to user’s requirement for filtering events. 
-The generated time splitters are stored either 
-in a SplittersWorkspace or a :ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used 
-by algorithm :ref:`FilterEvents <algm-FilterEvents>` which filters the events from a EventWorkspace 
-to one or multiple EventWorkspaces according to an input `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_
+:ref:`functionalities-GenerateEventFilter-ref`. This interface utilises the algorithm 
+:ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` which is able to generate event splitters
+according to user’s requirement for filtering events. 
+The generated time splitters are stored either in a SplittersWorkspace or a 
+:ref:`MatrixWorkspace <MatrixWorkspace>`. Both of them will be used by algorithm 
+:ref:`FilterEvents <algm-FilterEvents>` which filters the events from a EventWorkspace to one or 
+multiple EventWorkspaces according to an input `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_
 containing a series of splitters. 
 
 On the bottom section the user has an option of :ref:`filterbylogv-GenerateEventFilter-ref`  
@@ -34,13 +34,13 @@ Data Loading
 ------------
 
 For the data loading step, MantidPlot provides an interface in which the user shall select the 
-appropriate file via ``Browse`` button in the ``File/Run`` field. The user must provide a file, 
+appropriate file via *Browse* button in the *File/Run* field. The user must provide a file, 
 which contains valid sample logs 
 for splitting and :ref:`EventWorkspace <EventWorkspace>`. The data will be loaded once the user 
-has clicked upon the ``Load`` button. 
-With the help of ``drop-down`` list, user is be able to load more than one file and then click 
-on the ``Use`` button which will load the selected
-file. If the file cannot be found in the ``drop-down* list then user can click `Refresh` button 
+has clicked upon the *Load* button. 
+With the help of *drop-down* list, user is be able to load more than one file and then click 
+on the *Use* button which will load the selected
+file. If the file cannot be found in the *drop-down* list then user can click `Refresh` button 
 which should update 
 the *drop-down* list and enable user to select any browsed file.
 
@@ -49,7 +49,7 @@ Plotting
 
 Once the file has been selected then the Interface would automatically generate the plot using 
 the provided file. If the user wish to plot another file then that could be achieved by selecting 
-another file from ``drop-down`` list and clicking on the ``Use`` button, which will automatically 
+another file from *drop-down* list and clicking on the *Use* button, which will automatically 
 plot the new graph generated from the selected file. 
 
 
@@ -58,7 +58,7 @@ Output & Storing Event Splitters
 
 The output will be one or multiple workspaces according to the number of index in splitters. The 
 output workspace name is the combination of parameter OutputWorkspaceBaseName and the index in 
-splitter. The ``Splitter Title`` field is used as title of output splitters workspace and information 
+splitter. The *Splitter Title* field is used as title of output splitters workspace and information 
 workspace. An event splitter used in Mantid contains start time, stop time and target workspace. Any 
 data structure that has the above 3 properties can serve as an event splitter. There are two types of 
 output workspaces for storing event splitters that are supported by 
@@ -69,14 +69,14 @@ output workspaces for storing event splitters that are supported by
   stop time and target workspace for events within start time and stop time. This type of workspace is 
   appropriate for the case that the amount of generated event splitters are not huge.
 
-  :math:`[v_j, v_{j+1})`
 
-- :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time stamp in 
-  total nanoseconds and Y-axis to store target workspace. For example, :math:`[x_i, x_i+1]' and y_i construct an 
-  event filter as start time is x_i, stop time is x_i+1, and target workspace is y_i-th workspace. 
-  If y_i is less than 0, then it means that all events between time x_i and x_i+1 will be discarded. 
-  This type of workspace is appropriate for the case that the amount of generated event splitters are 
-  huge, because processing a :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a 
+- :ref:`MatrixWorkspace <MatrixWorkspace>`: It uses X-axis to store time stamp in total nanoseconds 
+  and Y-axis to store target workspace. For example, :math:`[x_i, x_i+1]` and :math:`[y_i]` construct 
+  an event filter as start time is :math:`[x_i]`, stop time is :math:`[x_i+1]`, and target workspace 
+  is :math:`[y_i-th]` workspace. If :math:`[y_i]`, is less than 0, then it means 
+  that all events between time :math:`[x_i]` and :math:`[x_i+1]` will be discarded. This type of 
+  workspace is appropriate for the case that the amount of generated event splitters are huge, because 
+  processing a :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a 
   `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
 
 .. _advsetup-FilterEventUI-ref:

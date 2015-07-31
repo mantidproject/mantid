@@ -56,6 +56,8 @@ event splitters that are supported by this algorithm.
    :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
    `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
 
+.. _functionalities-GenerateEventFilter-ref:
+
 Functionalities
 ###############
 
