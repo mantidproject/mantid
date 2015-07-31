@@ -258,9 +258,11 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
             // The first spectrum contains: X -> run number, Y -> log value
             // The second spectrum contains: Y -> redY, E -> redE
             size_t run = static_cast<size_t>(prevResults->readX(0)[i]);
-            m_logValue[run] = prevResults->readY(0)[i];
-            m_redY[run] = prevResults->readY(1)[i];
-            m_redE[run] = prevResults->readE(1)[i];
+            if ( (run>=is) && (run<=ie) ) {
+              m_logValue[run] = prevResults->readY(0)[i];
+              m_redY[run] = prevResults->readY(1)[i];
+              m_redE[run] = prevResults->readE(1)[i];
+            }
           }
         } else {
           // 'Red' and 'Green' data
@@ -271,15 +273,17 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
             // The fourth spectrum contains: Y -> greenY, E -> greeE
             // The fifth spectrum contains: Y -> sumY, E -> sumE
             size_t run = static_cast<size_t>(prevResults->readX(0)[i]);
-            m_logValue[run] = prevResults->readY(0)[i];
-            m_diffY[run] = prevResults->readY(1)[i];
-            m_diffE[run] = prevResults->readE(1)[i];
-            m_redY[run] = prevResults->readY(2)[i];
-            m_redE[run] = prevResults->readE(2)[i];
-            m_greenY[run] = prevResults->readY(3)[i];
-            m_greenE[run] = prevResults->readE(3)[i];
-            m_sumY[run] = prevResults->readY(4)[i];
-            m_sumE[run] = prevResults->readE(4)[i];
+            if ((run >= is) && (run <= ie)) {
+              m_logValue[run] = prevResults->readY(0)[i];
+              m_diffY[run] = prevResults->readY(1)[i];
+              m_diffE[run] = prevResults->readE(1)[i];
+              m_redY[run] = prevResults->readY(2)[i];
+              m_redE[run] = prevResults->readE(2)[i];
+              m_greenY[run] = prevResults->readY(3)[i];
+              m_greenE[run] = prevResults->readE(3)[i];
+              m_sumY[run] = prevResults->readY(4)[i];
+              m_sumE[run] = prevResults->readE(4)[i];
+            }
           }
         }
       }
