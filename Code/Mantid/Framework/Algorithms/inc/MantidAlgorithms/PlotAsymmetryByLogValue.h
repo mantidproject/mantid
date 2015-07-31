@@ -157,6 +157,11 @@ private:
   double m_minTime;
   // Maximum time for the analysis
   double m_maxTime;
+
+  // String containing all the properties
+  std::string m_allProperties;
+  // Name of the hidden ws
+  std::string m_currResName;
 };
 
 } // namespace Algorithm

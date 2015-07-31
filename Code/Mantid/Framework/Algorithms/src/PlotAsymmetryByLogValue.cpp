@@ -71,7 +71,7 @@ using namespace DataObjects;
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
 PlotAsymmetryByLogValue::PlotAsymmetryByLogValue()
-    : Algorithm(), m_int(false) {}
+    : Algorithm(), m_int(false), m_currResName("__PABLV_results") {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -143,6 +143,11 @@ void PlotAsymmetryByLogValue::init() {
                                    FileProperty::OptionalLoad, nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
+  // This property is invisible to the user. Also, the ws will be hidden in the
+  // ADS
+  declareProperty(
+      new WorkspaceProperty<>("CurrentResults", m_currResName, Direction::Output),
+      "The name of a workspace to store current results.");
 }
 
 /**
@@ -194,10 +199,6 @@ void PlotAsymmetryByLogValue::exec() {
 */
 void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 
-  // If any of the following properties has a different value from the
-  // previous call, we need to re-do all the computations, which means
-  // clearing static maps that store previous results
-
   // Log Value
   m_logName = getPropertyValue("LogValue");
   // Get function to apply to logValue
@@ -229,6 +230,61 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
         "First run number is greater than last run number");
   }
 
+  // Create a string holding all the properties
+  std::ostringstream ss;
+  ss << m_filenameBase << "," << m_filenameExt << "," << m_filenameZeros << ",";
+  ss << m_dtcType << "," << m_dtcFile << ",";
+  ss << getPropertyValue("ForwardSpectra") << ","
+     << getPropertyValue("BackwardSpectra") << ",";
+  ss << m_int << "," << m_minTime << "," << m_maxTime << ",";
+  ss << m_red << "," << m_green << ",";
+  ss << m_logName << ", " << m_logFunc;
+  m_allProperties = ss.str();
+
+  // Check if we can re-use results from previous run
+  if (AnalysisDataService::Instance().doesExist(m_currResName)) {
+    MatrixWorkspace_sptr prevResults =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            m_currResName);
+    if (prevResults) {
+      if (m_allProperties == prevResults->getTitle()) {
+        // We can re-use results
+        size_t nPoints = prevResults->blocksize();
+        size_t nHisto = prevResults->getNumberHistograms();
+
+        if (nHisto==2) {
+          // Only 'red' data
+          for (size_t i = 0; i < nPoints; i++) {
+            // The first spectrum contains: X -> run number, Y -> log value
+            // The second spectrum contains: Y -> redY, E -> redE
+            size_t run = static_cast<size_t>(prevResults->readX(0)[i]);
+            m_logValue[run] = prevResults->readY(0)[i];
+            m_redY[run] = prevResults->readY(1)[i];
+            m_redE[run] = prevResults->readE(1)[i];
+          }
+        } else {
+          // 'Red' and 'Green' data
+          for (size_t i = 0; i < nPoints; i++) {
+            // The first spectrum contains: X -> run number, Y -> log value
+            // The second spectrum contains: Y -> diffY, E -> diffE
+            // The third spectrum contains: Y -> redY, E -> redE
+            // The fourth spectrum contains: Y -> greenY, E -> greeE
+            // The fifth spectrum contains: Y -> sumY, E -> sumE
+            size_t run = static_cast<size_t>(prevResults->readX(0)[i]);
+            m_logValue[run] = prevResults->readY(0)[i];
+            m_diffY[run] = prevResults->readY(1)[i];
+            m_diffE[run] = prevResults->readE(1)[i];
+            m_redY[run] = prevResults->readY(2)[i];
+            m_redE[run] = prevResults->readE(2)[i];
+            m_greenY[run] = prevResults->readY(3)[i];
+            m_greenE[run] = prevResults->readE(3)[i];
+            m_sumY[run] = prevResults->readY(4)[i];
+            m_sumE[run] = prevResults->readE(4)[i];
+          }
+        }
+      }
+    }
+  }
 }
 
 /**  Loads one run and applies dead-time corrections and detector grouping if
