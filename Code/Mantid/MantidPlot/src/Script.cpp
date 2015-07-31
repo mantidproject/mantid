@@ -161,7 +161,7 @@ QFuture<bool> Script::executeAsync(const ScriptCode & code)
 /// Request that this script be aborted
 void Script::abort()
 {
-  this->abortImpl();
+  if(isExecuting()) this->abortImpl();
 }
 
 /**
@@ -202,4 +202,3 @@ QString Script::normaliseLineEndings(QString text) const
   text = text.replace(QRegExp("\\r"), QString("\n"));
   return text;
 }
-
