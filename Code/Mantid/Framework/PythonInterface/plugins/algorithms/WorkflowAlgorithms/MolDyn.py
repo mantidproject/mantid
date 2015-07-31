@@ -139,21 +139,16 @@ class MolDyn(PythonAlgorithm):
         # Do setup
         self._setup()
 
-        try:
-            # Load data file
-            data, name, ext = self._load_file()
+        # Load data file
+        data, name, ext = self._load_file()
 
-            # Run nMOLDYN import
-            if ext == 'cdl':
-                self._cdl_import(data, name)
-            elif ext == 'dat':
-                self._ascii_import(data, name)
-            else:
-                raise RuntimeError('Unrecognised file format: %s' % ext)
-
-        except RuntimeError as ex:
-            logger.error('Error parsing file %s' % (self._sam_path))
-            logger.debug('Error is: %s' % (str(ex)))
+        # Run nMOLDYN import
+        if ext == 'cdl':
+            self._cdl_import(data, name)
+        elif ext == 'dat':
+            self._ascii_import(data, name)
+        else:
+            raise RuntimeError('Unrecognised file format: %s' % ext)
 
         # Do processing specific to workspaces in energy
         if isinstance(mtd[self._out_ws], WorkspaceGroup):
@@ -270,18 +265,14 @@ class MolDyn(PythonAlgorithm):
         logger.information('Got file path for %s: %s' % (self._sam_path, path))
 
         # Open file and get data
-        try:
-            handle = open(path, 'r')
-            data = []
-            for line in handle:
-                line = line.rstrip()
-                data.append(line)
-            handle.close()
+        handle = open(path, 'r')
+        data = []
+        for line in handle:
+            line = line.rstrip()
+            data.append(line)
+        handle.close()
 
-            return data, name, ext
-
-        except:
-            raise RuntimeError('Could not load file: %s' % path)
+        return data, name, ext
 
 
     def _find_dimensions(self, data):
@@ -307,6 +298,7 @@ class MolDyn(PythonAlgorithm):
         logger.debug(data[6][1:-1])
 
         return num_q, num_t, num_f
+
 
     #pylint: disable=too-many-locals,too-many-branches
     def _cdl_import(self, data, name):
@@ -424,11 +416,21 @@ class MolDyn(PythonAlgorithm):
                     yDat = np.append(yDat, np.array(S))
                     eDat = np.append(eDat, eZero)
             outWS = name + '_' + func
-            CreateWorkspace(OutputWorkspace=outWS, DataX=xDat, DataY=yDat, DataE=eDat,
-                            Nspec=nQ, UnitX=xUnit, VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
+
+            CreateWorkspace(OutputWorkspace=outWS,
+                            DataX=xDat,
+                            DataY=yDat,
+                            DataE=eDat,
+                            Nspec=nQ,
+                            UnitX=xUnit,
+                            VerticalAxisUnit='MomentumTransfer',
+                            VerticalAxisValues=Qaxis)
+
             output_ws_list.append(outWS)
 
-        GroupWorkspaces(InputWorkspaces=output_ws_list, OutputWorkspace=self._out_ws)
+        GroupWorkspaces(InputWorkspaces=output_ws_list,
+                        OutputWorkspace=self._out_ws)
+
 
     #pylint: disable=too-many-locals
     def _ascii_import(self, data, name):
@@ -439,7 +441,8 @@ class MolDyn(PythonAlgorithm):
         @param name Name of data file
         """
 
-        from IndirectNeutron import ChangeAngles, InstrParas, RunParas
+        from IndirectCommon import getEfixed
+        from IndirectNeutron import ChangeAngles, InstrParas
 
         logger.notice('Loading ASCII data: %s' % name)
 
@@ -482,18 +485,22 @@ class MolDyn(PythonAlgorithm):
                 yDat = np.append(yDat, np.array(S))
                 eDat = np.append(eDat, eZero)
 
-        CreateWorkspace(OutputWorkspace=self._out_ws, DataX=xDat, DataY=yDat, DataE=eDat,
+        CreateWorkspace(OutputWorkspace=self._out_ws,
+                        DataX=xDat,
+                        DataY=yDat,
+                        DataE=eDat,
                         Nspec=nQ, UnitX='TOF')
+
         Qmax = Q[nQ - 1]
         instr = 'MolDyn'
-        ana = 'qmax'
+        ana = 'simul'
         if Qmax <= 2.0:
             refl = '2'
         else:
             refl = '4'
 
         InstrParas(self._out_ws, instr, ana, refl)
-        efixed = RunParas(self._out_ws, instr, name, name)
+        efixed = getEfixed(self._out_ws)# RunParas(self._out_ws, instr, name, name)
         logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
         pi4 = 4.0 * math.pi
         wave = 1.8 * math.sqrt(25.2429 / efixed)
@@ -537,7 +544,8 @@ class MolDyn(PythonAlgorithm):
         elif num_sample_hist < num_res_hist:
             logger.information('Cropping resolution workspace to sample')
 
-            resolution_ws = CropWorkspace(InputWorkspace=self._res_ws, StartWorkspaceIndex=0,
+            resolution_ws = CropWorkspace(InputWorkspace=self._res_ws,
+                                          StartWorkspaceIndex=0,
                                           EndWorkspaceIndex=num_sample_hist)
 
         # If the spectra counts match then just use the resolution as it is
@@ -562,7 +570,8 @@ class MolDyn(PythonAlgorithm):
 
         # Convolve the symmetrised sample with the resolution
         ConvolveWorkspaces(OutputWorkspace=function_ws_name,
-                           Workspace1=function_ws_name, Workspace2=resolution_ws)
+                           Workspace1=function_ws_name,
+                           Workspace2=resolution_ws)
 
 
     def _plot_spectra(self, ws_name):

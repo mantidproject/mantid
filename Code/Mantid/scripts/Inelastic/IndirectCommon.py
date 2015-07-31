@@ -115,7 +115,7 @@ def getEfixed(workspace):
         analyser_name = inst.getStringParameter('analyser')[0]
         analyser_comp = inst.getComponentByName(analyser_name)
 
-        if analyser_comp.hasParameter('Efixed'):
+        if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
             return analyser_comp.getNumberParameter('EFixed')[0]
 
     raise ValueError('No Efixed parameter found')
