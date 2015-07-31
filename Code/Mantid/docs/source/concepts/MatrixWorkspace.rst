@@ -25,21 +25,10 @@ Optionally:
 Documentation on the :ref:`CreateWorkspace <algm-CreateWorkspace>` 
 algorithm may also be useful.
 
-Concrete Matrix Workspaces
---------------------------
-
--  WorkspaceSingleValue - Holds a single number (and X & error value, if
-   desired). Mainly used for workspace algebra, e.g. to divide all bins
-   in a 2D workspace by a single value.
--  :ref:`Workspace2D <Workspace2D>` - A workspace for holding two
-   dimensional data in memory. This is the most commonly used workspace.
--  :ref:`EventWorkspace <EventWorkspace>` - A workspace that retains the
-   individual neutron event data.
-
+.. include:: WorkspaceNavigation.txt
+   
 More information on working with them: `Interacting with Matrix
 Workspaces <http://www.mantidproject.org/Interacting_with_Workspaces>`__.
-
-.. include:: WorkspaceNavigation.txt
 
 
 
