@@ -16,10 +16,6 @@ using Mantid::Kernel::V3D;
 using namespace Mantid::Geometry;
 
 
-namespace{
-  Mantid::Kernel::Logger g_log("SANSCollimationLengthEstimator");
-}
-
 namespace {
 
 // don't care about Y values, just use 1.0 everywhere

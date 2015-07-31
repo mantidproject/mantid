@@ -34,8 +34,6 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "SANS"; }
-  /// Return the default collimation length
-  double provideDefaultLCollimationLength(Mantid::API::MatrixWorkspace_sptr inOutWS) const;
 
 private:
   /// Initialisation code
@@ -45,7 +43,11 @@ private:
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
   /// Get the collimation length when we evaluate it using 5 Guards
-  double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inOutWS, const double L1, const double collimationLengthCorrection) const;
+  double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS, const double L1, const double collimationLengthCorrection) const;
+  /// Return the default collimation length
+  double provideDefaultLCollimationLength(Mantid::API::MatrixWorkspace_sptr inWS) const;
+  /// Get the moderator workspace
+  Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inWS);
   /// Create an output workspace
   Mantid::API::MatrixWorkspace_sptr setupOutputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
   /// Wavelength resolution (constant for all wavelengths)

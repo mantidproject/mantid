@@ -248,6 +248,7 @@ set ( SRC_FILES
 	src/SumSpectra.cpp
 	src/TOFSANSResolution.cpp
 	src/TOFSANSResolutionByPixel.cpp
+	src/TOFSANSResolutionByPixelCalculator.cpp
 	src/TimeAtSampleStrategyDirect.cpp
 	src/TimeAtSampleStrategyElastic.cpp
 	src/TimeAtSampleStrategyIndirect.cpp
@@ -517,6 +518,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/TOFSANSResolution.h
 	inc/MantidAlgorithms/TOFSANSResolutionByPixel.h
+	inc/MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h
 	inc/MantidAlgorithms/TimeAtSampleStrategy.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyDirect.h
 	inc/MantidAlgorithms/TimeAtSampleStrategyElastic.h
@@ -774,6 +776,7 @@ set ( TEST_FILES
 	SumRowColumnTest.h
 	SumSpectraTest.h
 	TOFSANSResolutionByPixelTest.h
+	TOFSANSResolutionByPixelCalculatorTest.h
 	TimeAtSampleStrategyDirectTest.h
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h

@@ -2,9 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
+#include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include "MantidAlgorithms/GravitySANSHelper.h"
-#include "MantidAlgorithms/ConvertToPointData.h"
+#include "MantidAlgorithms/CloneWorkspace.h"
+#include "MantidAlgorithms/RebinToWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -15,7 +17,7 @@
 
 #include "boost/math/special_functions/fpclassify.hpp"
 #include "boost/lexical_cast.hpp"
-#include <algorithm>
+
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,10 +39,9 @@ void TOFSANSResolutionByPixel::init() {
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Name of the workspace that will contain the result of the calculation. It contains "
-      " the Q resolotion for each pixel as a function of Q.");
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
+                                                   Direction::Output),
+                  "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("DeltaR", 0.0, positiveDouble, "Pixel size (mm).");
@@ -70,7 +71,7 @@ double TOFSANSResolutionByPixel::getTOFResolution(double wl) {
 }
 
 void TOFSANSResolutionByPixel::exec() {
-  MatrixWorkspace_sptr inWS = getProperty("Workspace");
+  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   double deltaR = getProperty("DeltaR");
   double R1 = getProperty("SourceApertureRadius");
   double R2 = getProperty("SampleApertureRadius");
@@ -84,8 +85,9 @@ void TOFSANSResolutionByPixel::exec() {
   R1 /= 1000.0;
   R2 /= 1000.0;
 
-  const MatrixWorkspace_sptr sigmaModeratorVSwavelength =
-      getProperty("SigmaModerator");
+  // The moderator workspace needs to match the data workspace
+  // in terms of wavelength binning
+  const MatrixWorkspace_sptr sigmaModeratorVSwavelength = getModeratorWorkspace(inWS);
 
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
@@ -141,13 +143,10 @@ void TOFSANSResolutionByPixel::exec() {
     const V3D scatteredFlightPathV3D = det->getPos() - samplePos;
 
     const double L2 = scatteredFlightPathV3D.norm();
-    const double Lsum = LCollim + L2;
 
-    // calculate part that is wavelenght independent
-    const double dTheta2 = (4.0 * M_PI * M_PI / 12.0) *
-                           (3.0 * R1 * R1 / (LCollim * LCollim) +
-                            3.0 * R2 * R2 * Lsum * Lsum / (LCollim * LCollim * L2 * L2) +
-                            (deltaR * deltaR) / (L2 * L2));
+
+    TOFSANSResolutionByPixelCalculator calculator;
+    const double waveLengthIndependentFactor = calculator.getWavelengthIndependentFactor(R1, R2, deltaR, LCollim, L2);
 
     // Multiplicative factor to go from lambda to Q
     // Don't get fooled by the function name...
@@ -160,7 +159,6 @@ void TOFSANSResolutionByPixel::exec() {
     const size_t xLength = xIn.size();
 
     // Get handles on the outputWorkspace
-    MantidVec &xOut = outWS->dataX(i);
     MantidVec &yOut = outWS->dataY(i);
 
     // for each wavelenght bin of each pixel calculate a q-resolution
@@ -180,30 +178,12 @@ void TOFSANSResolutionByPixel::exec() {
       // wavelenght spread from bin assumed to be
       const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
 
-      // wavelenght spread from moderatorm, converted from microseconds to
-      // wavelengths
-      const double sigmaModerator =
-          lookUpTable.value(wl) * 3.9560 / (1000.0 * Lsum);
-
-      // calculate wavelenght resolution from moderator and histogram time bin
-      const double sigmaLambda =
-          std::sqrt(sigmaSpreadFromBin * sigmaSpreadFromBin / 12.0 +
-                    sigmaModerator * sigmaModerator);
-
-      // calculate sigmaQ for a given lambda and pixel
-      const double sigmaOverLambdaTimesQ = q * sigmaLambda / wl;
-      const double sigmaQ = std::sqrt(
-          dTheta2 / (wl * wl) + sigmaOverLambdaTimesQ * sigmaOverLambdaTimesQ);
+      // Get the uncertainty in Q
+      auto sigmaQ = calculator.getSigmaQValue(lookUpTable.value(wl), waveLengthIndependentFactor, q, wl, sigmaSpreadFromBin, LCollim, L2);
 
       // Insert the Q value and the Q resolution into the outputworkspace
       yOut[j] = sigmaQ;
-      xOut[j] = q;
     }
-
-    // Reverse x and y entries to produce the correct Q value ordering
-    std::reverse(xOut.begin(), xOut.end());
-    std::reverse(yOut.begin(), yOut.end());
-
     progress.report("Computing Q resolution");
   }
 
@@ -213,22 +193,34 @@ void TOFSANSResolutionByPixel::exec() {
 /**
  * Setup output workspace
  * @param inputWorkspace: the input workspace
+ * @returns a copy of the input workspace
  */
 MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
-  // Convert to point data
-  IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertToPointData");
-  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
-  childAlg->executeAsChildAlg();
-  MatrixWorkspace_sptr outputWorkspace = childAlg->getProperty("OutputWorkspace");
-
-  // Set the axis information
-  outputWorkspace->getAxis(0)->unit() =
-      UnitFactory::Instance().create("MomentumTransfer");
-  //outputWorkspace->setYUnitLabel("1/cm");
-
-  return outputWorkspace;
+  IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
+  duplicate->initialize();
+  duplicate->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
+  duplicate->execute();
+  Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 }
 
+/**
+ * Get the moderator workspace
+ * @param inputWorkspace: the input workspace
+ * @returns the moderator workspace wiht the correct wavelength binning
+ */
+MatrixWorkspace_sptr TOFSANSResolutionByPixel::getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace)  {
+  
+  MatrixWorkspace_sptr sigmaModerator = getProperty("SigmaModerator");
+  IAlgorithm_sptr rebinned = createChildAlgorithm("RebinToWorkspace");
+  rebinned->initialize();
+  rebinned->setProperty("WorkspaceToRebin", sigmaModerator);
+  rebinned->setProperty("WorkspaceToMatch", inputWorkspace);
+  rebinned->setPropertyValue("OutputWorkspace", "SigmaModeratorRebinned");
+  rebinned->execute();
+  MatrixWorkspace_sptr outWS = rebinned->getProperty("OutputWorkspace");
+  return outWS;
+}
 
 } // namespace Algorithms
 } // namespace Mantid
