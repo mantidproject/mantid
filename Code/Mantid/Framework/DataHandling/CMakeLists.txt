@@ -8,12 +8,12 @@ set ( SRC_FILES
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
-	src/DecoratorWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
 	src/DownloadFile.cpp
 	src/DownloadInstrument.cpp
+	src/EventWorkspaceCollection.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -167,12 +167,12 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
-	inc/MantidDataHandling/DecoratorWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
 	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/DownloadInstrument.h
+	inc/MantidDataHandling/EventWorkspaceCollection.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -325,12 +325,12 @@ set ( TEST_FILES
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
-	DecoratorWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
 	DownloadFileTest.h
 	DownloadInstrumentTest.h
+	EventWorkspaceCollectionTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h

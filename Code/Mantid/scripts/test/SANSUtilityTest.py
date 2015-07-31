@@ -709,5 +709,148 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
 
+
+class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):
+    monitor_appendix="_monitors"
+    def test_monitors_are_renamed_correctly(self):
+        #Arrange
+        ws_1 = CreateSampleWorkspace()
+        ws_2 = CreateSampleWorkspace()
+        ws_3 = CreateSampleWorkspace()
+
+        ws_mon_1 = CreateSampleWorkspace()
+        ws_mon_2 = CreateSampleWorkspace()
+        ws_mon_3 = CreateSampleWorkspace()
+
+        ws_group = GroupWorkspaces(InputWorkspaces=[ws_1, ws_2, ws_3])
+        ws_mon_group = GroupWorkspaces(InputWorkspaces=[ws_mon_1, ws_mon_2, ws_mon_3])
+
+        # Act
+        su.rename_monitors_for_multiperiod_event_data(ws_mon_group, ws_group, self.monitor_appendix)
+
+        # Assert
+        self.assertTrue(ws_mon_1.name() == ws_1.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertTrue(ws_mon_2.name() == ws_2.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertTrue(ws_mon_3.name() == ws_3.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+
+        # Clean up
+        for element in mtd.getObjectNames():
+            if element in mtd:
+                DeleteWorkspace(element)
+
+    def test_expection_is_raised_when_workspaec_and_monitor_mismatch(self):
+        #Arrange
+        ws_1 = CreateSampleWorkspace()
+        ws_2 = CreateSampleWorkspace()
+        ws_3 = CreateSampleWorkspace()
+
+        ws_mon_1 = CreateSampleWorkspace()
+        ws_mon_2 = CreateSampleWorkspace()
+
+        ws_group = GroupWorkspaces(InputWorkspaces=[ws_1, ws_2, ws_3])
+        ws_mon_group = GroupWorkspaces(InputWorkspaces=[ws_mon_1, ws_mon_2])
+
+        # Act + Assert
+        args = {'monitor_worksapce': ws_mon_group, 'workspace':ws_group, 'appendix':self.monitor_appendix}
+        self.assertRaises(RuntimeError, su.rename_monitors_for_multiperiod_event_data, *args)
+
+        # Clean up
+        for element in mtd.getObjectNames():
+            if element in mtd:
+                DeleteWorkspace(element)
+
+class TestConvertibleToInteger(unittest.TestCase):
+    def test_converts_true_to_integer_when_integer(self):
+        # Arrange
+        input = 3
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_converts_true_to_integer_when_convertible_string(self):
+        # Arrange
+        input = '34'
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test__converts_false_to_integer_when_non_convertible_string(self):
+        # Arrange
+        input = '34_gt'
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestConvertibleToFloat(unittest.TestCase):
+    def test_converts_true_to_float_when_float(self):
+        # Arrange
+        input = 3.8
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_convertible_true_to_float_when_convertible_string(self):
+        # Arrange
+        input = "4.78"
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_converts_false_to_float_when_convertible_string(self):
+        # Arrange
+        input = "4.78_tg"
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestValidXmlFileList(unittest.TestCase):
+    def test_finds_valid_xml_file_list(self):
+        # Arrange
+        input = ["test1.xml", "test2.xml", "test3.xml"]
+        # Act
+        result =su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_finds_invalid_xml_file_list(self):
+        # Arrange
+        input = ["test1.xml", "test2.ccl", "test3.xml"]
+        # Act
+        result =su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertFalse(result)
+
+    def test_finds_empty_list(self):
+        # Arrange
+        input = []
+        # Act
+        result = su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestConvertToAndFromPythonStringList(unittest.TestCase):
+    def test_converts_from_string_to_list(self):
+        # Arrange
+        input = "test1.xml, test2.xml, test3.xml"
+        # Act
+        result = su.convert_to_string_list(input)
+        # Assert
+        expected = "['test1.xml','test2.xml','test3.xml']"
+        self.assertEqual(expected, result)
+    def test_converts_from_list_to_string(self):
+        # Arrange
+        input = ["test1.xml", "test2.xml", "test3.xml"]
+        # Act
+        result = su.convert_from_string_list(input)
+        # Assert
+        expected = "test1.xml,test2.xml,test3.xml"
+        self.assertEqual(expected, result)
+
 if __name__ == "__main__":
     unittest.main()

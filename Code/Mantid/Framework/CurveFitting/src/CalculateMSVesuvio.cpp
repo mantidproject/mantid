@@ -32,7 +32,8 @@ using Geometry::ParameterMap;
 using Geometry::Track;
 
 namespace {
-const size_t MAX_SCATTER_PT_TRIES = 100;
+/// Number of times to try generating a scatter point before giving up
+const size_t MAX_SCATTER_PT_TRIES = 500;
 /// Conversion constant
 const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
@@ -120,7 +121,8 @@ void CalculateMSVesuvio::init() {
       "Workspace to store the calculated total scattering counts");
   declareProperty(
       new WorkspaceProperty<>("MultipleScatteringWS", "", Direction::Output),
-      "Workspace to store the calculated multiple scattering counts summed for all orders");
+      "Workspace to store the calculated multiple scattering counts summed for "
+      "all orders");
 }
 
 /**
@@ -350,10 +352,9 @@ void CalculateMSVesuvio::calculateMS(const size_t wsIndex,
  * @param simulCounts Simulation object used to storing the calculated number of
  * counts
  */
-void
-CalculateMSVesuvio::simulate(const DetectorParams &detpar,
-                             const ResolutionParams &respar,
-                             MSVesuvioHelper::Simulation &simulCounts) const {
+void CalculateMSVesuvio::simulate(
+    const DetectorParams &detpar, const ResolutionParams &respar,
+    MSVesuvioHelper::Simulation &simulCounts) const {
   for (size_t i = 0; i < m_nevents; ++i) {
     calculateCounts(detpar, respar, simulCounts);
   }
@@ -431,8 +432,7 @@ double CalculateMSVesuvio::calculateCounts(
   V3D startPos(srcPos);
   neutronDirs[0] = m_beamDir;
 
-  generateScatter(startPos, neutronDirs[0], detpar.pos, weights[0],
-                  scatterPts[0]);
+  generateScatter(startPos, neutronDirs[0], weights[0], scatterPts[0]);
   double distFromStart = startPos.distance(scatterPts[0]);
   // Compute TOF for first scatter event
   const double vel0 = sqrt(en1[0] / MASS_TO_MEV);
@@ -456,7 +456,7 @@ double CalculateMSVesuvio::calculateCounts(
 
       // Update weight
       const double wgt = weights[i];
-      if (generateScatter(prevSc, newDir, detpar.pos, weights[i], curSc))
+      if (generateScatter(prevSc, newDir, weights[i], curSc))
         break;
       else {
         weights[i] = wgt; // put it back to what it was
@@ -464,8 +464,9 @@ double CalculateMSVesuvio::calculateCounts(
       }
     } while (ntries < MAX_SCATTER_PT_TRIES);
     if (ntries == MAX_SCATTER_PT_TRIES) {
-      throw std::runtime_error(
-          "Unable to generate scatter point in sample. Check sample shape.");
+      throw std::runtime_error("Cannot generate valid trajectory from within "
+                               "the sample that intersects the sample. Does it "
+                               "have a valid shape?");
     }
 
     const double scang = newDir.angle(oldDir);
@@ -602,16 +603,13 @@ double CalculateMSVesuvio::generateTOF(const double en0, const double dtof,
  * amount the beam would be attenuted by the sample
  * @param startPos Starting position
  * @param direc Direction of travel for the neutron
- * @param detPos Position of the detector that the neutron will end up in. Used
- * to verify that the trajectory is actually possible from any generated scatter
- * point
- * @param weight [InOut] Multiply the incoming weight by the attenuation factor
+ * @param weight [InOut] Multiply the incoming weight by the attenuation
+ * factor
  * @param scatterPt [Out] Generated scattering point
  * @return True if the scatter event was generated, false otherwise
  */
 bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos,
                                          const Kernel::V3D &direc,
-                                         const Kernel::V3D &detPos,
                                          double &weight, V3D &scatterPt) const {
   Track scatterTrack(startPos, direc);
   if (m_sampleShape->interceptSurface(scatterTrack) != 1) {
@@ -630,15 +628,6 @@ bool CalculateMSVesuvio::generateScatter(const Kernel::V3D &startPos,
   scatterPt = link->entryPoint;
   V3D edgeDistances = (link->exitPoint - link->entryPoint);
   scatterPt += edgeDistances * fraction;
-
-  // Check that this point would for a valid track to the nominal detector
-  // position
-  V3D scToDet = detPos - scatterPt;
-  scToDet.normalize();
-  Geometry::Track scatterToDet(scatterPt, scToDet);
-  if (m_sampleShape->interceptSurface(scatterToDet) != 1) {
-    return false;
-  }
   // Update weight
   weight *= scatterProb;
   return true;
@@ -725,7 +714,8 @@ double CalculateMSVesuvio::partialDiffXSec(const double en0, const double en1,
  * Generate a random position within the final detector in the lab frame
  * @param nominalPos The poisiton of the centre point of the detector
  * @param energy The final energy of the neutron
- * @param scatterPt The position of the scatter event that lead to this detector
+ * @param scatterPt The position of the scatter event that lead to this
+ * detector
  * @param direcBeforeSc Directional vector that lead to scatter point that hit
  * this detector
  * @param scang [Output] The value of the scattering angle for the generated
@@ -737,12 +727,10 @@ double CalculateMSVesuvio::partialDiffXSec(const double en0, const double en1,
 V3D CalculateMSVesuvio::generateDetectorPos(
     const V3D &nominalPos, const double energy, const V3D &scatterPt,
     const V3D &direcBeforeSc, double &scang, double &distToExit) const {
-  const double mu =
-      7430.0 /
-      sqrt(energy); // Inverse attenuation length (m-1) for vesuvio det.
-  const double ps =
-      1.0 -
-      exp(-mu * m_detThick); // Probability of detection in path thickness.
+  // Inverse attenuation length (m-1) for vesuvio det.
+  const double mu = 7430.0 / sqrt(energy);
+  // Probability of detection in path thickness.
+  const double ps = 1.0 - exp(-mu * m_detThick);
   V3D detPos;
   scang = 0.0;
   distToExit = 0.0;
@@ -774,8 +762,10 @@ V3D CalculateMSVesuvio::generateDetectorPos(
     ++ntries;
   } while (ntries < MAX_SCATTER_PT_TRIES);
   if (ntries == MAX_SCATTER_PT_TRIES) {
-    throw std::runtime_error("Unable to create track from sample to detector. "
-                             "Detector shape may be too small.");
+    // Assume it is very close to the surface so that the distance travelled
+    // would
+    // be a neglible contribution
+    distToExit = 0.0;
   }
   return detPos;
 }

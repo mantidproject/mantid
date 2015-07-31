@@ -102,7 +102,6 @@ private:
   double generateTOF(const double gaussTOF, const double dtof,
                      const double dl1) const;
   bool generateScatter(const Kernel::V3D &startPos, const Kernel::V3D &direc,
-                       const Kernel::V3D &detPos,
                        double &weight, Kernel::V3D &scatterPt) const;
   std::pair<double, double> calculateE1Range(const double theta,
                                              const double en0) const;

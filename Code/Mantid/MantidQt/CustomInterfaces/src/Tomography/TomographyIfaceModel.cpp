@@ -571,8 +571,10 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
   auto alg = Algorithm::fromString("LoadFITS");
   alg->initialize();
   alg->setPropertyValue("Filename", path);
-  std::string wsName = "__fits_ws_imat_tomography_gui";
+  std::string wsName = "__fits_ws_tomography_gui";
   alg->setProperty("OutputWorkspace", wsName);
+  // this is way faster when loading into a MatrixWorkspace
+  alg->setProperty("LoadAsRectImg", true);
   try {
     alg->execute();
   } catch (std::exception &e) {

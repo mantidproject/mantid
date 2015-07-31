@@ -923,6 +923,89 @@ class TimeShifter(object):
             pass# Log here
         return float_element
 
+def load_monitors_for_multiperiod_event_data(workspace, data_file, monitor_appendix):
+    '''
+    Takes a multi-period event workspace and loads the monitors
+    as a group workspace
+    @param workspace: Multi-period event workspace
+    @param data_file: The data file
+    @param monitor_appendix: The appendix for monitor data
+    '''
+    # Load all monitors
+    mon_ws_group_name = "temp_ws_group"
+    LoadNexusMonitors(Filename=data_file, OutputWorkspace=mon_ws_group_name)
+    mon_ws = mtd["temp_ws_group"]
+    # Rename all monitor workspces
+    rename_monitors_for_multiperiod_event_data(monitor_workspace = mon_ws, workspace=workspace, appendix=monitor_appendix)
+
+def rename_monitors_for_multiperiod_event_data(monitor_workspace, workspace, appendix):
+    '''
+    Takes a multi-period event workspace and loads the monitors
+    as a group workspace
+    @param workspace: Multi-period event workspace
+    @param data_file: The data file
+    @param monitor_appendix: The appendix for monitor data
+    '''
+    if len(monitor_workspace) != len(workspace):
+        raise RuntimeError("The workspace and monitor workspace lengths do not match.")
+    for index in range(0,len(monitor_workspace)):
+        monitor_name = workspace[index].name() + appendix
+        RenameWorkspace(InputWorkspace=monitor_workspace[index], OutputWorkspace=monitor_name)
+    # Finally rename the group workspace
+    monitor_group_ws_name = workspace.name() + appendix
+    RenameWorkspace(InputWorkspace=monitor_workspace, OutputWorkspace=monitor_group_ws_name)
+
+def is_convertible_to_int(input_value):
+    '''
+    Check if the input can be converted to int
+    @param input_value :: a general input
+    '''
+    try:
+        dummy_converted = int(input_value)
+    except ValueError:
+        return False
+    return True
+
+def is_convertible_to_float(input_value):
+    '''
+    Check if the input can be converted to float
+    @param input_value :: a general input
+    '''
+    try:
+        dummy_converted = float(input_value)
+    except ValueError:
+        return False
+    return True
+
+def is_valid_xml_file_list(input_value):
+    '''
+    Check if the input is a valid xml file list. We only check
+    the form and not the existence of the file
+    @param input :: a list input
+    '''
+    if not isinstance(input_value, list) or not input or len(input_value) == 0:
+        return False
+    for element in input_value:
+        if not isinstance(element, str) or not element.endswith('.xml'):
+            return False
+    return True
+
+def convert_from_string_list(to_convert):
+    '''
+    Convert a Python string list to a comma-separted string
+    @param to_convert :: a string list input
+    '''
+    return ','.join(element.replace(" ", "") for element in to_convert)
+
+def convert_to_string_list(to_convert):
+    '''
+    Convert a comma-separted string to a Python string list in a string form
+    "file1.xml, file2.xml" -> "['file1.xml','file2.xml']"
+    @param to_convert :: a comma-spearated string
+    '''
+    string_list = to_convert.replace(" ", "").split(",")
+    output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
+    return output_string
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

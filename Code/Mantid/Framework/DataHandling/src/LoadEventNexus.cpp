@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/DecoratorWorkspace.h"
+#include "MantidDataHandling/EventWorkspaceCollection.h"
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
+#include <boost/function.hpp>
+#include <functional>
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ThreadPool.h"
@@ -50,7 +52,7 @@ namespace {
  * @param from source of log entries
  * @param to workspace where to add the log entries
  */
-void copyLogs(const EventWorkspace_sptr& from,
+  void copyLogs(const Mantid::DataHandling::EventWorkspaceCollection_sptr& from,
                                   EventWorkspace_sptr& to)
 {
   // from the logs, get all the properties that don't overwrite any
@@ -1227,6 +1229,38 @@ void LoadEventNexus::setTopEntryName() {
   }
 }
 
+template<typename T>
+void LoadEventNexus::filterDuringPause(T workspace) {
+  try {
+    if ((!ConfigService::Instance().hasProperty(
+            "loadeventnexus.keeppausedevents")) &&
+        (m_ws->run().getLogData("pause")->size() > 1)) {
+      g_log.notice("Filtering out events when the run was marked as paused. "
+                   "Set the loadeventnexus.keeppausedevents configuration "
+                   "property to override this.");
+
+      auto filter = createChildAlgorithm("FilterByLogValue");
+      filter->setProperty("InputWorkspace", workspace);
+      filter->setProperty("OutputWorkspace", workspace);
+      filter->setProperty("LogName", "pause");
+      // The log value is set to 1 when the run is paused, 0 otherwise.
+      filter->setProperty("MinimumValue", 0.0);
+      filter->setProperty("MaximumValue", 0.0);
+      filter->setProperty("LogBoundary", "Left");
+      filter->execute();
+    }
+  } catch (Exception::NotFoundError &) {
+    // No "pause" log, just carry on
+  }
+}
+
+template<>
+void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace) {
+  // We provide a function pointer to the filter method of the object
+  boost::function<void (MatrixWorkspace_sptr)> func = std::bind1st(std::mem_fun(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>), this);
+  workspace->applyFilter(func);
+}
+
 //------------------------------------------------------------------------------------------------
 /** Executes the algorithm. Reading in the file and creating and populating
 *  the output workspace
@@ -1256,7 +1290,7 @@ void LoadEventNexus::exec() {
   Progress prog(this, 0.0, 0.3, reports);
 
   // Load the detector events
-  m_ws = boost::make_shared<DecoratorWorkspace>(); // Algorithm currently relies on an
+  m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm currently relies on an
                                     // object-level workspace ptr
   loadEvents(&prog, false);         // Do not load monitor blocks
 
@@ -1427,6 +1461,121 @@ void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
                                             pixelID_to_wi_offset, true);
 }
 
+
+/** Load the instrument from the nexus file
+*
+* @param nexusfilename :: The name of the nexus file being loaded
+* @param localWorkspace :: Templated workspace in which to put the instrument
+*geometry
+* @param alg :: Handle of the algorithm
+* @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
+*otherwise NULL.
+* @param nPeriods : Number of periods (write to)
+* @param periodLog : Period logs DateAndTime to int map.
+*
+* @return Pulse times given in the DAS logs
+*/
+template<typename T>
+boost::shared_ptr<BankPulseTimes>
+LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
+                                 T localWorkspace,
+                                 API::Algorithm &alg, bool returnpulsetimes, int& nPeriods, std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
+  // --------------------- Load DAS Logs -----------------
+  // The pulse times will be empty if not specified in the DAS logs.
+  // BankPulseTimes * out = NULL;
+  boost::shared_ptr<BankPulseTimes> out;
+  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    alg.getLogger().information() << "Loading logs from NeXus file..."
+                                  << "\n";
+    loadLogs->setPropertyValue("Filename", nexusfilename);
+    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
+                                                     localWorkspace);
+    loadLogs->execute();
+
+    const Run& run = localWorkspace->run();
+    // Get the number of periods
+    if(run.hasProperty("nperiods")){
+        nPeriods  = run.getPropertyValueAsType<int>("nperiods");
+    }
+    // Get the period log. Map of DateAndTime to Period int values.
+    if(run.hasProperty("period_log")){
+        auto* temp = run.getProperty("period_log");
+        periodLog.reset(dynamic_cast<TimeSeriesProperty<int>*>(temp->clone()));
+    }
+
+    // If successful, we can try to load the pulse times
+    Kernel::TimeSeriesProperty<double> *log =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+            localWorkspace->mutableRun().getProperty("proton_charge"));
+    std::vector<Kernel::DateAndTime> temp;
+    if (log)
+      temp = log->timesAsVector();
+    // if (returnpulsetimes) out = new BankPulseTimes(temp);
+    if (returnpulsetimes)
+      out = boost::make_shared<BankPulseTimes>(temp);
+
+    // Use the first pulse as the run_start time.
+    if (!temp.empty()) {
+      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
+        alg.getLogger().warning() << "Found entries in the proton_charge "
+                                     "sample log with invalid pulse time!\n";
+
+      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
+      // add the start of the run as a ISO8601 date/time string. The start =
+      // first non-zero time.
+      // (this is used in LoadInstrument to find the right instrument file to
+      // use).
+      localWorkspace->mutableRun().addProperty(
+          "run_start", run_start.toISO8601String(), true);
+    } else {
+      alg.getLogger().warning() << "Empty proton_charge sample log. You will "
+                                   "not be able to filter by time.\n";
+    }
+    /// Attempt to make a gonoimeter from the logs
+    try {
+      Geometry::Goniometer gm;
+      gm.makeUniversalGoniometer();
+      localWorkspace->mutableRun().setGoniometer(gm, true);
+    } catch (std::runtime_error &) {
+    }
+  } catch (...) {
+    alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
+                               "sample logs may be missing."
+                            << "\n";
+    return out;
+  }
+  return out;
+}
+
+/** Load the instrument from the nexus file
+*
+* @param nexusfilename :: The name of the nexus file being loaded
+* @param localWorkspace :: EventWorkspaceCollection in which to put the instrument
+*geometry
+* @param alg :: Handle of the algorithm
+* @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
+*otherwise NULL.
+* @param nPeriods : Number of periods (write to)
+* @param periodLog : Period logs DateAndTime to int map.
+*
+* @return Pulse times given in the DAS logs
+*/
+template<>
+boost::shared_ptr<BankPulseTimes>
+LoadEventNexus::runLoadNexusLogs<EventWorkspaceCollection_sptr>(const std::string &nexusfilename,
+                                 EventWorkspaceCollection_sptr localWorkspace,
+                                 API::Algorithm &alg, bool returnpulsetimes,
+                                 int& nPeriods,
+                                 std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
+  auto ws = localWorkspace->getSingleHeldWorkspace();
+  auto ret = runLoadNexusLogs<MatrixWorkspace_sptr>(nexusfilename, ws, alg, returnpulsetimes, nPeriods, periodLog);
+  return ret;
+}
+
+
 //-----------------------------------------------------------------------------
 /**
 * Load events from the file.
@@ -1454,7 +1603,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     if (loadlogs) {
       prog->doReport("Loading DAS logs");
 
-      m_allBanksPulseTimes = runLoadNexusLogs(m_filename, m_ws, *this, true, nPeriods, periodLog);
+      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods, periodLog);
 
       run_start = m_ws->getFirstPulseTime();
       m_logs_loaded_correctly = true;
@@ -1549,7 +1698,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   try {
     // this is a static method that is why it is passing the
     // file object and the file path
-    loadEntryMetadata(m_filename, m_ws, m_top_entry_name);
+    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws, m_top_entry_name);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << std::endl;
@@ -1807,184 +1956,27 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   loadTimeOfFlight(m_ws, m_top_entry_name, classType);
 }
 
-//-----------------------------------------------------------------------------
-/** Load the run number and other meta data from the given bank */
-  void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename,
-                                         Mantid::API::MatrixWorkspace_sptr WS,
-                                         const std::string &entry_name) {
-  // Open the file
-  ::NeXus::File file(nexusfilename);
-  file.openGroup(entry_name, "NXentry");
-
-  // get the title
-  try {
-  file.openData("title");
-  if (file.getInfo().type == ::NeXus::CHAR) {
-    string title = file.getStrData();
-    if (!title.empty())
-      WS->setTitle(title);
-  }
-  file.closeData();
-  } catch (std::exception&)
-  {
-    //don't set the title if the field is not loaded
-  }
-
-  // get the notes
-  try {
-    file.openData("notes");
-    if (file.getInfo().type == ::NeXus::CHAR) {
-      string notes = file.getStrData();
-      if (!notes.empty())
-        WS->mutableRun().addProperty("file_notes", notes);
-    }
-    file.closeData();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
-  }
-
-  // Get the run number
-  file.openData("run_number");
-  string run("");
-  if (file.getInfo().type == ::NeXus::CHAR) {
-    run = file.getStrData();
-  } else if (file.isDataInt()) {
-    // inside ISIS the run_number type is int32
-    vector<int> value;
-    file.getData(value);
-    if (value.size() > 0)
-      run = boost::lexical_cast<std::string>(value[0]);
-  }
-  if (!run.empty()) {
-    WS->mutableRun().addProperty("run_number", run);
-  }
-  file.closeData();
-
-  // get the experiment identifier
-  try {
-    file.openData("experiment_identifier");
-    string expId("");
-    if (file.getInfo().type == ::NeXus::CHAR) {
-      expId = file.getStrData();
-    }
-    if (!expId.empty()) {
-      WS->mutableRun().addProperty("experiment_identifier", expId);
-    }
-    file.closeData();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
-  }
-
-  // get the sample name
-  try {
-    file.openGroup("sample", "NXsample");
-    file.openData("name");
-    string name("");
-    if (file.getInfo().type == ::NeXus::CHAR) {
-      name = file.getStrData();
-    }
-    if (!name.empty()) {
-      WS->mutableSample().setName(name);
-    }
-    file.closeData();
-    file.closeGroup();
-  } catch (::NeXus::Exception &) {
-    // let it drop on floor
-  }
-
-  // get the duration
-  file.openData("duration");
-  std::vector<double> duration;
-  file.getDataCoerce(duration);
-  if (duration.size() == 1) {
-    // get the units
-    std::vector<AttrInfo> infos = file.getAttrInfos();
-    std::string units("");
-    for (std::vector<AttrInfo>::const_iterator it = infos.begin();
-         it != infos.end(); ++it) {
-      if (it->name.compare("units") == 0) {
-        units = file.getStrAttr(*it);
-        break;
-      }
-    }
-
-    // set the property
-    WS->mutableRun().addProperty("duration", duration[0], units);
-  }
-  file.closeData();
-
-  // close the file
-  file.close();
-}
-
-//-----------------------------------------------------------------------------
-/** Load the instrument from the nexus file or if not found from the IDF file
-*  specified by the info in the Nexus file
-*
-*  @param nexusfilename :: The Nexus file name
-*  @param localWorkspace :: MatrixWorkspace in which to put the instrument
-*geometry
-*  @param top_entry_name :: entry name at the top of the Nexus file
-*  @param alg :: Handle of the algorithm
-*  @return true if successful
-*/
-bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
-                                    MatrixWorkspace_sptr localWorkspace,
-                                    const std::string &top_entry_name,
-                                    Algorithm *alg) {
-  bool foundInstrument =
-      runLoadIDFFromNexus(nexusfilename, localWorkspace, top_entry_name, alg);
-  if (!foundInstrument)
-    foundInstrument =
-        runLoadInstrument(nexusfilename, localWorkspace, top_entry_name, alg);
-  return foundInstrument;
-}
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file
 *
 *  @param nexusfilename :: The name of the nexus file being loaded
-*  @param localWorkspace :: MatrixWorkspace in which to put the instrument
+*  @param localWorkspace :: EventWorkspaceCollection in which to put the instrument
 *geometry
 *  @param top_entry_name :: entry name at the top of the Nexus file
 *  @param alg :: Handle of the algorithm
 *  @return true if successful
 */
-bool LoadEventNexus::runLoadIDFFromNexus(
-    const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg) {
-  // Test if IDF exists in file, move on quickly if not
-  try {
-    ::NeXus::File nxsfile(nexusfilename);
-    nxsfile.openPath(top_entry_name + "/instrument/instrument_xml");
-  } catch (::NeXus::Exception &) {
-    alg->getLogger().information("No instrument definition found in " +
-                                 nexusfilename + " at " + top_entry_name +
-                                 "/instrument");
-    return false;
-  }
-
-  IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    loadInst->setPropertyValue("Filename", nexusfilename);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setPropertyValue("InstrumentParentPath", top_entry_name);
-    loadInst->execute();
-  } catch (std::invalid_argument &) {
-    alg->getLogger().error(
-        "Invalid argument to LoadIDFFromNexus Child Algorithm ");
-  } catch (std::runtime_error &) {
-    alg->getLogger().debug("No instrument definition found in " +
-                           nexusfilename + " at " + top_entry_name +
-                           "/instrument");
-  }
-
-  if (!loadInst->isExecuted())
-    alg->getLogger().information("No IDF loaded from Nexus file.");
-  return loadInst->isExecuted();
+template<>
+bool LoadEventNexus::runLoadIDFFromNexus<EventWorkspaceCollection_sptr>(
+                    const std::string &nexusfilename, EventWorkspaceCollection_sptr localWorkspace,
+                    const std::string &top_entry_name, Algorithm *alg) {
+  auto ws = localWorkspace->getSingleHeldWorkspace();
+  auto hasLoaded = runLoadIDFFromNexus<MatrixWorkspace_sptr>(nexusfilename, ws, top_entry_name, alg);
+  localWorkspace->setInstrument(ws->getInstrument());
+  return hasLoaded;
 }
+
 /** method used to return instrument name for some old ISIS files where it is
 * not written properly within the instrument
 * @param hFile :: A reference to the NeXus file opened at the root entry
@@ -2011,127 +2003,26 @@ LoadEventNexus::readInstrumentFromISIS_VMSCompat(::NeXus::File &hFile) {
   return instrumentName;
 }
 
+
 //-----------------------------------------------------------------------------
-/** Load the instrument definition file specified by info in the NXS file.
+/** Load the instrument definition file specified by info in the NXS file for
+* a EventWorkspaceCollection
 *
 *  @param nexusfilename :: Used to pick the instrument.
-*  @param localWorkspace :: MatrixWorkspace in which to put the instrument
+*  @param localWorkspace :: EventWorkspaceCollection in which to put the instrument
 *geometry
 *  @param top_entry_name :: entry name at the top of the NXS file
 *  @param alg :: Handle of the algorithm
 *  @return true if successful
 */
-bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
-                                       MatrixWorkspace_sptr localWorkspace,
-                                       const std::string &top_entry_name,
-                                       Algorithm *alg) {
-  string instrument = "";
-
-  // Get the instrument name
-  ::NeXus::File nxfile(nexusfilename);
-  // Start with the base entry
-  nxfile.openGroup(top_entry_name, "NXentry");
-  // Open the instrument
-  nxfile.openGroup("instrument", "NXinstrument");
-  try {
-    nxfile.openData("name");
-    instrument = nxfile.getStrData();
-    alg->getLogger().debug() << "Instrument name read from NeXus file is "
-                             << instrument << std::endl;
-  } catch (::NeXus::Exception &) {
-    // Try to fall back to isis compatibility options
-    nxfile.closeGroup();
-    instrument = readInstrumentFromISIS_VMSCompat(nxfile);
-    if (instrument.empty()) {
-      // Get the instrument name from the file instead
-      size_t n = nexusfilename.rfind('/');
-      if (n != std::string::npos) {
-        std::string temp =
-            nexusfilename.substr(n + 1, nexusfilename.size() - n - 1);
-        n = temp.find('_');
-        if (n != std::string::npos && n > 0) {
-          instrument = temp.substr(0, n);
-        }
-      }
-    }
-  }
-  if (instrument.compare("POWGEN3") ==
-      0) // hack for powgen b/c of bad long name
-    instrument = "POWGEN";
-  if (instrument.compare("NOM") == 0) // hack for nomad
-    instrument = "NOMAD";
-
-  if (instrument.empty())
-    throw std::runtime_error("Could not find the instrument name in the NXS "
-                             "file or using the filename. Cannot load "
-                             "instrument!");
-
-  // Now let's close the file as we don't need it anymore to load the
-  // instrument.
-  nxfile.close();
-
-  // do the actual work
-  IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  bool executionSuccessful(true);
-  try {
-    loadInst->setPropertyValue("InstrumentName", instrument);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap", false);
-    loadInst->execute();
-
-    // Populate the instrument parameters in this workspace - this works around
-    // a bug
-    localWorkspace->populateInstrumentParameters();
-  } catch (std::invalid_argument &e) {
-    alg->getLogger().information()
-        << "Invalid argument to LoadInstrument Child Algorithm : " << e.what()
-        << std::endl;
-    executionSuccessful = false;
-  } catch (std::runtime_error &e) {
-    alg->getLogger().information(
-        "Unable to successfully run LoadInstrument Child Algorithm");
-    alg->getLogger().information(e.what());
-    executionSuccessful = false;
-  }
-
-  // If loading instrument definition file fails
-  if (!executionSuccessful) {
-    alg->getLogger().error() << "Error loading Instrument definition file\n";
-    return false;
-  }
-
-  // Ticket #2049: Cleanup all loadinstrument members to a single instance
-  // If requested update the instrument to positions in the data file
-  const Geometry::ParameterMap &pmap = localWorkspace->instrumentParameters();
-  if (!pmap.contains(localWorkspace->getInstrument()->getComponentID(),
-                     "det-pos-source"))
-    return executionSuccessful;
-
-  boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
-      localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
-  std::string value = updateDets->value<std::string>();
-  if (value.substr(0, 8) == "datafile") {
-    IAlgorithm_sptr updateInst =
-        alg->createChildAlgorithm("UpdateInstrumentFromFile");
-    updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-    updateInst->setPropertyValue("Filename", nexusfilename);
-    if (value == "datafile-ignore-phi") {
-      updateInst->setProperty("IgnorePhi", true);
-      alg->getLogger().information("Detector positions in IDF updated with "
-                                   "positions in the data file except for the "
-                                   "phi values");
-    } else {
-      alg->getLogger().information(
-          "Detector positions in IDF updated with positions in the data file");
-    }
-    // We want this to throw if it fails to warn the user that the information
-    // is not correct.
-    updateInst->execute();
-  }
-
-  return executionSuccessful;
+template <>
+bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
+    const std::string &nexusfilename, EventWorkspaceCollection_sptr localWorkspace,
+    const std::string &top_entry_name, Algorithm *alg) {
+  auto ws = localWorkspace->getSingleHeldWorkspace();
+  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(nexusfilename, ws, top_entry_name, alg);
+  localWorkspace->setInstrument(ws->getInstrument());
+  return hasLoaded;
 }
 
 //-----------------------------------------------------------------------------
@@ -2140,7 +2031,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 * @param workspace :: The workspace to contain the spectra mapping
 * @param bankNames :: Bank names that are in Nexus file
 */
-void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace,
+void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
                                  std::vector<std::string> bankNames) {
   Instrument_sptr inst = boost::const_pointer_cast<Instrument>(
       workspace->getInstrument()->baseInstrument());
@@ -2264,7 +2155,7 @@ void LoadEventNexus::createSpectraMapping(
       // Make an event list for each.
       for (size_t wi = 0; wi < allDets.size(); wi++) {
         const detid_t detID = allDets[wi]->getID();
-        m_ws->getSpectrum(wi)->setDetectorID(detID);
+        m_ws->setDetectorIdsForAllPeriods(wi,detID);
       }
       spectramap = true;
       g_log.debug() << "Populated spectra map for select banks\n";
@@ -2337,7 +2228,7 @@ void LoadEventNexus::runLoadMonitorsAsEvents(API::Progress *const prog) {
     // Note the reuse of the m_ws member variable below. Means I need to grab a
     // copy of its current value.
     auto dataWS = m_ws;
-    m_ws = boost::make_shared<DecoratorWorkspace>(); // Algorithm currently relies on an
+    m_ws = boost::make_shared<EventWorkspaceCollection>(); // Algorithm currently relies on an
                                       // object-level workspace ptr
     // add filename
     m_ws->mutableRun().addProperty("Filename", m_filename);
@@ -2529,10 +2420,9 @@ void LoadEventNexus::runLoadMonitors() {
       std::vector<int32_t>::const_iterator it =
           std::find(udet.begin(), udet.end(), id);
       if (it != udet.end()) {
-        auto spectrum = m_ws->getSpectrum(i);
         const specid_t &specNo = spec[it - udet.begin()];
-        spectrum->setSpectrumNo(specNo);
-        spectrum->setDetectorID(id);
+        m_ws->setSpectrumNumberForAllPeriods(i, specNo);
+        m_ws->setDetectorIdsForAllPeriods(i, id);
       }
     }
   } else {
@@ -2563,12 +2453,7 @@ void LoadEventNexus::runLoadMonitors() {
     m_ws->resizeTo(mapping.getMapping().size());
     // Make sure spectrum numbers are correct
     auto uniqueSpectra = mapping.getSpectrumNumbers();
-    auto itend = uniqueSpectra.end();
-    size_t counter = 0;
-    for (auto it = uniqueSpectra.begin(); it != itend; ++it) {
-      m_ws->getSpectrum(counter)->setSpectrumNo(*it);
-      ++counter;
-    }
+    m_ws->setSpectrumNumbersFromUniqueSpectra(uniqueSpectra);
     // Fill detectors based on this mapping
     m_ws->updateSpectraUsing(mapping);
   }
@@ -2609,11 +2494,11 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
 /**
 * Check if time_of_flight can be found in the file and load it
 *
-* @param WS :: The event workspace which events will be modified.
+* @param WS :: The event workspace collection which events will be modified.
 * @param entry_name :: An NXentry tag in the file
 * @param classType :: The type of the events: either detector or monitor
 */
-void LoadEventNexus::loadTimeOfFlight(DataObjects::EventWorkspace_sptr WS,
+void LoadEventNexus::loadTimeOfFlight(EventWorkspaceCollection_sptr WS,
                                       const std::string &entry_name,
                                       const std::string &classType) {
   bool done = false;
@@ -2720,13 +2605,13 @@ void LoadEventNexus::loadTimeOfFlight(DataObjects::EventWorkspace_sptr WS,
 * Load the time of flight data. file must have open the group containing
 * "time_of_flight" data set.
 * @param file :: The nexus file to read from.
-* @param WS :: The event workspace to write to.
+* @param WS :: The event workspace collection to write to.
 * @param binsName :: bins name
 * @param start_wi :: First workspace index to process
 * @param end_wi :: Last workspace index to process
 */
 void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
-                                          DataObjects::EventWorkspace_sptr WS,
+                                          EventWorkspaceCollection_sptr WS,
                                           const std::string &binsName,
                                           size_t start_wi, size_t end_wi) {
   // first check if the data is already randomized
@@ -2820,7 +2705,7 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File &file,
 * @param WS : pointer to the workspace
 */
 void LoadEventNexus::loadSampleDataISIScompatibility(
-  ::NeXus::File &file, DecoratorWorkspace& WS) {
+  ::NeXus::File &file, EventWorkspaceCollection& WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -2850,117 +2735,6 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
   }
 
   file.closeGroup();
-}
-
-void LoadEventNexus::filterDuringPause(API::MatrixWorkspace_sptr workspace) {
-  try {
-    if ((!ConfigService::Instance().hasProperty(
-            "loadeventnexus.keeppausedevents")) &&
-        (m_ws->run().getLogData("pause")->size() > 1)) {
-      g_log.notice("Filtering out events when the run was marked as paused. "
-                   "Set the loadeventnexus.keeppausedevents configuration "
-                   "property to override this.");
-
-      auto filter = createChildAlgorithm("FilterByLogValue");
-      filter->setProperty("InputWorkspace", workspace);
-      filter->setProperty("OutputWorkspace", workspace);
-      filter->setProperty("LogName", "pause");
-      // The log value is set to 1 when the run is paused, 0 otherwise.
-      filter->setProperty("MinimumValue", 0.0);
-      filter->setProperty("MaximumValue", 0.0);
-      filter->setProperty("LogBoundary", "Left");
-      filter->execute();
-    }
-  } catch (Exception::NotFoundError &) {
-    // No "pause" log, just carry on
-  }
-}
-
-/** Load the instrument from the nexus file
-*
-* @param nexusfilename :: The name of the nexus file being loaded
-* @param localWorkspace :: MatrixWorkspace in which to put the instrument
-*geometry
-* @param alg :: Handle of the algorithm
-* @param returnpulsetimes :: flag to return shared pointer for BankPulseTimes,
-*otherwise NULL.
-* @param nPeriods : Number of periods (write to)
-* @param periodLog : Period logs DateAndTime to int map.
-*
-* @return Pulse times given in the DAS logs
-*/
-boost::shared_ptr<BankPulseTimes>
-LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename,
-                                 API::MatrixWorkspace_sptr localWorkspace,
-                                 API::Algorithm &alg, bool returnpulsetimes, int& nPeriods, std::unique_ptr<const TimeSeriesProperty<int> >& periodLog) {
-  // --------------------- Load DAS Logs -----------------
-  // The pulse times will be empty if not specified in the DAS logs.
-  // BankPulseTimes * out = NULL;
-  boost::shared_ptr<BankPulseTimes> out;
-  API::IAlgorithm_sptr loadLogs = alg.createChildAlgorithm("LoadNexusLogs");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    alg.getLogger().information() << "Loading logs from NeXus file..."
-                                  << "\n";
-    loadLogs->setPropertyValue("Filename", nexusfilename);
-    loadLogs->setProperty<API::MatrixWorkspace_sptr>("Workspace",
-                                                     localWorkspace);
-    loadLogs->execute();
-
-    const Run& run = localWorkspace->run();
-    // Get the number of periods
-    if(run.hasProperty("nperiods")){
-        nPeriods  = run.getPropertyValueAsType<int>("nperiods");
-    }
-    // Get the period log. Map of DateAndTime to Period int values.
-    if(run.hasProperty("period_log")){
-        auto* temp = run.getProperty("period_log");
-        periodLog.reset(dynamic_cast<TimeSeriesProperty<int>*>(temp->clone()));
-    }
-
-    // If successful, we can try to load the pulse times
-    Kernel::TimeSeriesProperty<double> *log =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            localWorkspace->mutableRun().getProperty("proton_charge"));
-    std::vector<Kernel::DateAndTime> temp;
-    if (log)
-      temp = log->timesAsVector();
-    // if (returnpulsetimes) out = new BankPulseTimes(temp);
-    if (returnpulsetimes)
-      out = boost::make_shared<BankPulseTimes>(temp);
-
-    // Use the first pulse as the run_start time.
-    if (!temp.empty()) {
-      if (temp[0] < Kernel::DateAndTime("1991-01-01T00:00:00"))
-        alg.getLogger().warning() << "Found entries in the proton_charge "
-                                     "sample log with invalid pulse time!\n";
-
-      Kernel::DateAndTime run_start = localWorkspace->getFirstPulseTime();
-      // add the start of the run as a ISO8601 date/time string. The start =
-      // first non-zero time.
-      // (this is used in LoadInstrument to find the right instrument file to
-      // use).
-      localWorkspace->mutableRun().addProperty(
-          "run_start", run_start.toISO8601String(), true);
-    } else {
-      alg.getLogger().warning() << "Empty proton_charge sample log. You will "
-                                   "not be able to filter by time.\n";
-    }
-    /// Attempt to make a gonoimeter from the logs
-    try {
-      Geometry::Goniometer gm;
-      gm.makeUniversalGoniometer();
-      localWorkspace->mutableRun().setGoniometer(gm, true);
-    } catch (std::runtime_error &) {
-    }
-  } catch (...) {
-    alg.getLogger().error() << "Error while loading Logs from SNS Nexus. Some "
-                               "sample logs may be missing."
-                            << "\n";
-    return out;
-  }
-  return out;
 }
 
 /**
