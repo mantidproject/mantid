@@ -129,6 +129,8 @@ void Q1D2::exec() {
   MantidVec normSum(YOut.size(), 0.0);
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
+  // the averaged Q resolution
+  MantidVec &qResolutionOut = outputWS->dataDx(0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
@@ -167,6 +169,7 @@ void Q1D2::exec() {
       continue;
     }
 
+
     const size_t numWavbins = m_dataWS->readY(i).size() - wavStart;
     // make just one call to new to reduce CPU overhead on each thread, access
     // to these
@@ -191,13 +194,17 @@ void Q1D2::exec() {
     MantidVec::const_iterator YIn = m_dataWS->readY(i).begin() + wavStart;
     MantidVec::const_iterator EIn = m_dataWS->readE(i).begin() + wavStart;
 
+    // Pointers to the QResolution data. Note that the xdata was initially the same, hence
+    // the same indexing applies to the y values of m_dataWS and qResolution
+    MantidVec::const_iterator QResIn = qResolution->readY(i).begin() + wavStart;
+
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
     MantidVec::const_iterator loc = QOut.end();
     // sum the Q contributions from each individual spectrum into the output
     // array
     const MantidVec::const_iterator end = m_dataWS->readY(i).end();
-    for (; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
+    for (; YIn != end; ++YIn, ++QResIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
       // find the output bin that each input y-value will fall into, remembering
       // there is one more bin boundary than bins
       getQBinPlus1(QOut, *QIn, loc);
@@ -212,13 +219,13 @@ void Q1D2::exec() {
           // at the end
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
+          qResolutionOut[bin] += (*YIn) *(*QResIn);
         }
       }
     }
 
     PARALLEL_CRITICAL(q1d_spectra_map) {
       progress.report("Computing I(Q)");
-
       // Add up the detector IDs in the output spectrum at workspace index 0
       const ISpectrum *inSpec = m_dataWS->getSpectrum(i);
       ISpectrum *outSpec = outputWS->getSpectrum(0);
@@ -229,12 +236,21 @@ void Q1D2::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  // Calculate the QResolution and add it as a DX value to the outputworkspace
+  Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
+  Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
+  for (;countsIterator != YOut.end(); ++countsIterator, ++qResolutionIterator) {
+    // Divide by the counts of the Qbin
+    *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+  }
+
   bool doOutputParts = getProperty("OutputParts");
   if (doOutputParts) {
     MatrixWorkspace_sptr ws_sumOfCounts =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
+    ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -242,6 +258,7 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
+    ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);
