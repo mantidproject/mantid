@@ -90,9 +90,11 @@ private slots:
   /// Update menus based on current tab counts
   void setMenuStates(int nTabs);
   /// Sets the execution actions based on the flag
-  void setEditActionsDisabled(bool state);
+  void setEditActionsDisabled(bool off);
   /// Sets the execution actions based on the flag
-  void setExecutionActionsDisabled(bool state);
+  void setExecutionActionsDisabled(bool off);
+  /// Sets the abort actions based on the flag or the environment
+  void setAbortActionsDisabled(bool off);
 
   /// Finds the script corresponding to the action and
   /// asks the manager to open it
@@ -129,6 +131,8 @@ private:
   /// Create the help menu actions
   void initHelpMenuActions();
 
+  /// Should we enable abort functionality
+  bool shouldEnableAbort() const;
   /// Opens tabs based on QStringList
   void openPreviousTabs(const QStringList &tabsToOpen);
   /// Returns the current execution mode

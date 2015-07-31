@@ -69,6 +69,8 @@ public:
 
   // Python supports progress monitoring
   bool supportsProgressReporting() const { return true; }
+  /// Does this support abort requests?
+  bool supportsAbortRequests() const { return true; }
 
   /// Return a string represenation of the given object
   QString toString(PyObject *object, bool decref = false);

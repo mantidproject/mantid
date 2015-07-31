@@ -316,26 +316,37 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 
 /**
  * Set the state of the execution actions depending on the flag
- * @param state :: If the true the items are disabled, otherwise the are enabled
+ * @param off :: If the true the items are disabled, otherwise the are enabled
  */
-void ScriptingWindow::setEditActionsDisabled(bool state) {
+void ScriptingWindow::setEditActionsDisabled(bool off) {
   auto actions = m_editMenu->actions();
   foreach (QAction *action, actions) {
     if(strcmp("Find", action->name()) != 0) {
-       action->setDisabled(state);
+       action->setDisabled(off);
     }
   }
 }
 
 /**
  * Set the state of the execution actions/menu depending on the flag
- * @param state :: If the true the items are enabled, otherwise the are disabled
+ * @param off :: If the true the items are disabled, otherwise the are enabled
  */
-void ScriptingWindow::setExecutionActionsDisabled(bool state) {
-  m_execSelect->setDisabled(state);
-  m_execAll->setDisabled(state);
-  m_execModeMenu->setDisabled(state);
-  m_clearScriptVars->setDisabled(state);
+void ScriptingWindow::setExecutionActionsDisabled(bool off) {
+  m_execSelect->setDisabled(off);
+  m_execAll->setDisabled(off);
+  m_execModeMenu->setDisabled(off);
+  m_clearScriptVars->setDisabled(off);
+  // Abort should be opposite
+  setAbortActionsDisabled(!off);
+}
+
+/**
+ * Set the state of the execution actions/menu depending on the flag
+ * @param off :: If the true the items are disabled else they are enabled
+ */
+void ScriptingWindow::setAbortActionsDisabled(bool off) {
+  if(!shouldEnableAbort()) off = true;
+  m_abortCurrent->setDisabled(off);
 }
 
 /**
@@ -640,6 +651,7 @@ void ScriptingWindow::initExecMenuActions() {
 
   m_abortCurrent = new QAction(tr("A&bort"), this);
   connect(m_abortCurrent, SIGNAL(triggered()), this, SLOT(abortCurrent()));
+  setAbortActionsDisabled(false);
 
   m_clearScriptVars = new QAction(tr("&Clear Variables"), this);
   connect(m_clearScriptVars, SIGNAL(triggered()), this,
@@ -735,6 +747,11 @@ void ScriptingWindow::initHelpMenuActions() {
   // Show Qt help window for Python API
   m_showPythonHelp = new QAction(tr("Python API Help"), this);
   connect(m_showPythonHelp, SIGNAL(triggered()), this, SLOT(showPythonHelp()));
+}
+
+/// Should we enable abort functionality
+bool ScriptingWindow::shouldEnableAbort() const {
+  return m_manager->scriptingEnv()->supportsAbortRequests();
 }
 
 /**
