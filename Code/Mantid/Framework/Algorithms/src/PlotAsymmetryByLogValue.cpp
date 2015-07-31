@@ -312,57 +312,39 @@ Workspace_sptr PlotAsymmetryByLogValue::loadCorrectionsFromFile(
 */
 void PlotAsymmetryByLogValue::populateOutputWorkspace(
     MatrixWorkspace_sptr &outWS, int nplots) {
+
   TextAxis *tAxis = new TextAxis(nplots);
   if (nplots == 1) {
-
-    std::vector<double> vecRedX, vecRedY, vecRedE;
+    size_t i=0;
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      vecRedX.push_back(m_logValue[it->first]);
-      vecRedY.push_back(m_redY[it->first]);
-      vecRedE.push_back(m_redE[it->first]);
+      outWS->dataX(0)[i] = it->second;
+      outWS->dataY(0)[i] = m_redY[it->first];
+      outWS->dataE(0)[i] = m_redE[it->first];
+      i++;
     }
-
     tAxis->setLabel(0, "Asymmetry");
-    outWS->dataX(0) = vecRedX;
-    outWS->dataY(0) = vecRedY;
-    outWS->dataE(0) = vecRedE;
+
   } else {
-
-    std::vector<double> vecRedX, vecRedY, vecRedE;
-    std::vector<double> vecGreenX, vecGreenY, vecGreenE;
-    std::vector<double> vecSumX, vecSumY, vecSumE;
-    std::vector<double> vecDiffX, vecDiffY, vecDiffE;
+    size_t i=0;
     for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
-      vecRedX.push_back(m_logValue[it->first]);
-      vecRedY.push_back(m_redY[it->first]);
-      vecRedE.push_back(m_redE[it->first]);
-      vecGreenX.push_back(m_logValue[it->first]);
-      vecGreenY.push_back(m_greenY[it->first]);
-      vecGreenE.push_back(m_greenE[it->first]);
-      vecSumX.push_back(m_logValue[it->first]);
-      vecSumY.push_back(m_sumY[it->first]);
-      vecSumE.push_back(m_sumE[it->first]);
-      vecDiffX.push_back(m_logValue[it->first]);
-      vecDiffY.push_back(m_diffY[it->first]);
-      vecDiffE.push_back(m_diffE[it->first]);
+      outWS->dataX(0)[i] = it->second;
+      outWS->dataY(0)[i] = m_diffY[it->first];
+      outWS->dataE(0)[i] = m_diffE[it->first];
+      outWS->dataX(1)[i] = it->second;
+      outWS->dataY(1)[i] = m_redY[it->first];
+      outWS->dataE(1)[i] = m_redE[it->first];
+      outWS->dataX(2)[i] = it->second;
+      outWS->dataY(2)[i] = m_greenY[it->first];
+      outWS->dataE(2)[i] = m_greenE[it->first];
+      outWS->dataX(3)[i] = it->second;
+      outWS->dataY(3)[i] = m_sumY[it->first];
+      outWS->dataE(3)[i] = m_sumE[it->first];
+      i++;
     }
-
     tAxis->setLabel(0, "Red-Green");
     tAxis->setLabel(1, "Red");
     tAxis->setLabel(2, "Green");
     tAxis->setLabel(3, "Red+Green");
-    outWS->dataX(0) = vecDiffX;
-    outWS->dataY(0) = vecDiffY;
-    outWS->dataE(0) = vecDiffE;
-    outWS->dataX(1) = vecRedX;
-    outWS->dataY(1) = vecRedY;
-    outWS->dataE(1) = vecRedE;
-    outWS->dataX(2) = vecGreenX;
-    outWS->dataY(2) = vecGreenY;
-    outWS->dataE(2) = vecGreenE;
-    outWS->dataX(3) = vecSumX;
-    outWS->dataY(3) = vecSumY;
-    outWS->dataE(3) = vecSumE;
   }
   outWS->replaceAxis(1, tAxis);
   outWS->getAxis(0)->title() = m_logName;
