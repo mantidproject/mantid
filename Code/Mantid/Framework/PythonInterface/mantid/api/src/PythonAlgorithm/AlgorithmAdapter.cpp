@@ -2,7 +2,7 @@
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 #include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 
 #include <boost/python/class.hpp>

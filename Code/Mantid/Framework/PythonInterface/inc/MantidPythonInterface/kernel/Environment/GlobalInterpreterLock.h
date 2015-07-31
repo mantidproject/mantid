@@ -1,7 +1,8 @@
-#ifndef MANTID_PYTHONINTERFACE_PYTHONTHREADING_H_
-#define MANTID_PYTHONINTERFACE_PYTHONTHREADING_H_
+#ifndef MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_
+#define MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_
 /**
-    Defines utility functions and classes for dealing with Python threads
+    Defines an RAII class for dealing with the Python GIL in non-python
+    created C-threads
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -24,46 +25,47 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidPythonInterface/kernel/DllConfig.h"
 #include <boost/python/detail/wrap_python.hpp>
+
 
 namespace Mantid {
 namespace PythonInterface {
 namespace Environment {
 
-/// Saves a pointer to the PyThreadState of the main thread
-void saveMainThreadState(PyThreadState *threadState);
-
-/**
- * Defines a structure for creating and destroying a
- * Python thread state using the RAII pattern
- */
-struct PythonThreadState {
-  explicit PythonThreadState();
-  ~PythonThreadState();
-
-private:
-  PythonThreadState(const PythonThreadState &);
-  PythonThreadState &operator=(const PythonThreadState &);
-
-  PyThreadState *m_mainThreadState;
-  PyThreadState *m_thisThreadState;
-};
-
 /**
  * Defines a structure for acquiring/releasing the Python GIL
- * using the RAII pattern
+ * using the RAII pattern.
+ *
+ * This class is copied in
+ * MantidQt/API/inc/MantidQtAPI/PythonThreading.h as we have no good
+ * way to share code with that without tight coupling the GUI layer
+ * to PythonInterface
  */
-struct GlobalInterpreterLock {
-  GlobalInterpreterLock() : m_state(PyGILState_Ensure()) {}
+class PYTHON_KERNEL_DLL GlobalInterpreterLock
+{
+public:
+  /// @name Static Helpers
+  ///@{
+  /// Call PyGILState_Ensure
+  static PyGILState_STATE acquire();
+  /// Call PyGILState_Release
+  static void release(PyGILState_STATE tstate);
+  ///@}
 
-  ~GlobalInterpreterLock() { PyGILState_Release(m_state); }
+  /// Default constructor
+  GlobalInterpreterLock();
+  /// Destructor
+  ~GlobalInterpreterLock();
 
 private:
+  GlobalInterpreterLock(const GlobalInterpreterLock&);
   /// Current GIL state
   PyGILState_STATE m_state;
 };
+
 }
 }
 }
 
-#endif /* MANTID_PYTHONAPI_PYTHONTHREADING_H_ */
+#endif /* MANTID_PYTHONINTERFACE_GLOBALINTERPRETERLOCK_H_ */
