@@ -155,7 +155,6 @@ void TOFSANSResolutionByPixel::exec() {
     double factor = 4.0 * M_PI * sinTheta;
 
     const MantidVec &xIn = inWS->readX(i);
-    MantidVec &yIn = inWS->dataY(i);
     const size_t xLength = xIn.size();
 
     // Get handles on the outputWorkspace

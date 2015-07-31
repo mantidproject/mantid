@@ -264,9 +264,8 @@ public:
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
 
   const Mantid::MantidVec& xOUT = result->dataX(0);
-  const Mantid::MantidVec& yOUT = result->dataY(0);
   const Mantid::MantidVec& xIN = testWorkspace->dataX(0);
-  const Mantid::MantidVec& yIN = testWorkspace->dataY(0);
+
   TSM_ASSERT_EQUALS("Output should have the same binning as the input.", xOUT.size(), xIN.size());
 
   // Clean up
