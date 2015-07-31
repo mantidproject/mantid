@@ -64,7 +64,7 @@ Usage
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
    Load('ENGINX00193749.nxs', OutputWorkspace=van_ws_name)
    Difc1, Zero1 = EnggCalibrate(InputWorkspace=ws_name,
-                                VanadiumWorkspace= van_ws_name,
+                                VanadiumWorkspace=van_ws_name,
                                 ExpectedPeaks=[1.097, 2.1], Bank='1',
                                 OutputParametersTableName=out_tbl_name)
 
