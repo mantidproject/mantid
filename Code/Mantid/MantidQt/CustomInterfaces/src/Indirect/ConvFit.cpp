@@ -206,6 +206,8 @@ void ConvFit::setup() {
   connect(m_uiForm.cbFitType, SIGNAL(currentIndexChanged(QString)),
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
+
+  updatePlotOptions();
 }
 
 /**
@@ -846,6 +848,8 @@ void ConvFit::typeSelection(int index) {
   // DiffRotDiscreteCircle
   m_uiForm.ckPlotGuess->setEnabled(index < 3);
   m_properties["UseDeltaFunc"]->setEnabled(index < 3);
+
+  updatePlotOptions();
 }
 
 /**
@@ -1230,7 +1234,9 @@ void ConvFit::hwhmUpdateRS(double val) {
 void ConvFit::checkBoxUpdate(QtProperty *prop, bool checked) {
   UNUSED_ARG(checked);
 
-  if (prop == m_properties["UseFABADA"]) {
+  if (prop == m_properties["UseDeltaFunc"])
+    updatePlotOptions();
+  else if (prop == m_properties["UseFABADA"]) {
     if (checked) {
       // FABADA needs a much higher iteration limit
       m_dblManager->setValue(m_properties["MaxIterations"], 20000);
@@ -1372,14 +1378,14 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   // remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
-  
+
   m_uiForm.ckPlotGuess->setChecked(false);
   m_uiForm.ckTieCentres->setChecked(false);
-  
 
   // Add new parameter elements
   int fitFunctionIndex = m_uiForm.cbFitType->currentIndex();
   QStringList parameters = getFunctionParameters(functionName);
+  updatePlotOptions();
 
   // Two Loremtzians Fit
   if (fitFunctionIndex == 2) {
@@ -1449,6 +1455,39 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       }
     }
   }
+}
+
+/**
+ * Populates the plot combobox
+ * @param params The values to append to the list of plot Types
+ */
+void ConvFit::updatePlotOptions() {
+  m_uiForm.cbPlotType->clear();
+
+  const bool deltaFunction = m_blnManager->value(m_properties["UseDeltaFunc"]);
+  const int fitFunctionType = m_uiForm.cbFitType->currentIndex();
+  QStringList plotOptions;
+  plotOptions << "None";
+
+  if (deltaFunction && fitFunctionType < 3){
+    plotOptions << "Height";
+  }
+ 
+  QStringList params = QStringList();
+  
+  if (fitFunctionType != 2) {
+    params = getFunctionParameters(m_uiForm.cbFitType->currentText());
+  } else {
+    params = getFunctionParameters(QString("One Lorentzian"));
+  }
+  if (fitFunctionType != 0) {
+    plotOptions.append(params);
+  }
+
+  if(fitFunctionType != 0 || deltaFunction){
+	plotOptions << "All";
+  }
+  m_uiForm.cbPlotType->addItems(plotOptions);
 }
 
 } // namespace IDA

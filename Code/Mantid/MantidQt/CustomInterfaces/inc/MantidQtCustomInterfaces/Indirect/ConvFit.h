@@ -45,6 +45,7 @@ private slots:
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
 
+
 private:
   boost::shared_ptr<Mantid::API::CompositeFunction>
   createFunction(bool tieCentres = false);
@@ -59,6 +60,7 @@ private:
   QString backgroundString() const;
   QString minimizerString(QString outputName) const;
   QStringList getFunctionParameters(QString);
+  void updatePlotOptions();
 
   Ui::ConvFit m_uiForm;
   QtStringPropertyManager *m_stringManager;
