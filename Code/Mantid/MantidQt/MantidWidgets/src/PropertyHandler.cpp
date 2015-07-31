@@ -829,6 +829,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     }
     catch(std::exception& e)
     {
+	  initAttributes();
       initParameters();
       QMessageBox::critical(m_browser,"Mantid - Error",e.what());
       return false;
