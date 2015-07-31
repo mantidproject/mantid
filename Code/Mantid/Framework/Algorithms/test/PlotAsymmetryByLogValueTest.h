@@ -216,8 +216,7 @@ public:
     TS_ASSERT_DELTA(Y[0], 0.15214, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.14492, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
-    AnalysisDataService::Instance().remove(deadTimeWs);
+    AnalysisDataService::Instance().clear();
     Poco::File(deadTimeFile).remove();
   }
 
@@ -252,7 +251,7 @@ public:
     TS_ASSERT_DELTA(Y[0], 0.151202, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.144008, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
     void test_customGrouping()
@@ -330,7 +329,7 @@ public:
     TS_ASSERT_DELTA(Y[0], 0.14700, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.13042, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_LogValueFunction() {
@@ -367,7 +366,7 @@ public:
     TS_ASSERT_DELTA(X[0], 178.740476, 0.00001);
     TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_invalidRunNumbers ()
@@ -385,7 +384,7 @@ public:
     TS_ASSERT_THROWS (alg.execute(),std::runtime_error);
     TS_ASSERT (!alg.isExecuted());
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_singlePeriodGreen() {
@@ -417,7 +416,7 @@ public:
     TS_ASSERT_DELTA(outWS->readY(0)[0], 0.283444, 0.000001);
     TS_ASSERT_DELTA(outWS->readE(0)[0], 0.000145, 0.000001);
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
 private:
