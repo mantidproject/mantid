@@ -409,6 +409,63 @@ void ScriptingWindow::acceptCloseEvent(const bool value) {
 }
 
 //-------------------------------------------
+// Protected non-slot member functions
+//-------------------------------------------
+/**
+ * Accept a custom event and in this case test if it is a ScriptingChangeEvent
+ * @param event :: The custom event
+ */
+void ScriptingWindow::customEvent(QEvent *event) {
+  if (!m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {
+    ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent *>(event);
+    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() +
+                   " Window");
+  }
+}
+
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
+void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
+  const QMimeData *mimeData = de->mimeData();
+  if (mimeData->hasUrls()) {
+    if (extractPyFiles(mimeData->urls()).size() > 0) {
+      de->acceptProposedAction();
+    }
+  }
+}
+
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
+void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
+  const QMimeData *mimeData = de->mimeData();
+  if (mimeData->hasUrls()) {
+    if (extractPyFiles(mimeData->urls()).size() > 0) {
+      de->accept();
+    }
+  }
+}
+
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void ScriptingWindow::dropEvent(QDropEvent *de) {
+  const QMimeData *mimeData = de->mimeData();
+  if (mimeData->hasUrls()) {
+    QStringList filenames = extractPyFiles(mimeData->urls());
+    de->acceptProposedAction();
+
+    for (int i = 0; i < filenames.size(); ++i) {
+      m_manager->openInNewTab(filenames[i]);
+    }
+  }
+}
+
+//-------------------------------------------
 // Private non-slot member functions
 //-------------------------------------------
 
@@ -681,6 +738,21 @@ void ScriptingWindow::initHelpMenuActions() {
 }
 
 /**
+ * Opens a set of files in new tabs
+ * @param tabsToOpen A list of filenames to open in new tabs
+ */
+void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
+  const int totalFiles = tabsToOpen.size();
+  if (totalFiles == 0) {
+    m_manager->newTab();
+  } else {
+    for (int i = 0; i < totalFiles; i++) {
+      m_manager->newTab(i, tabsToOpen[i]);
+    }
+  }
+}
+
+/**
  * Returns the current execution mode set in the menu
  */
 Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
@@ -690,59 +762,6 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Serialised;
 }
 
-/**
- * Accept a custom event and in this case test if it is a ScriptingChangeEvent
- * @param event :: The custom event
- */
-void ScriptingWindow::customEvent(QEvent *event) {
-  if (!m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {
-    ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent *>(event);
-    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() +
-                   " Window");
-  }
-}
-
-/**
- * Accept a drag move event and selects whether to accept the action
- * @param de :: The drag move event
- */
-void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
-      de->accept();
-    }
-  }
-}
-
-/**
- * Accept a drag enter event and selects whether to accept the action
- * @param de :: The drag enter event
- */
-void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
-      de->acceptProposedAction();
-    }
-  }
-}
-
-/**
- * Accept a drag drop event and process the data appropriately
- * @param de :: The drag drop event
- */
-void ScriptingWindow::dropEvent(QDropEvent *de) {
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    QStringList filenames = extractPyFiles(mimeData->urls());
-    de->acceptProposedAction();
-
-    for (int i = 0; i < filenames.size(); ++i) {
-      m_manager->openInNewTab(filenames[i]);
-    }
-  }
-}
 
 QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
   QStringList filenames;
@@ -757,15 +776,4 @@ QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
     }
   }
   return filenames;
-}
-
-void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
-  const int totalFiles = tabsToOpen.size();
-  if (totalFiles == 0) {
-    m_manager->newTab();
-  } else {
-    for (int i = 0; i < totalFiles; i++) {
-      m_manager->newTab(i, tabsToOpen[i]);
-    }
-  }
 }

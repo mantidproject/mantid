@@ -65,9 +65,11 @@ signals:
   void hideMe();
 
 protected:
-  void dropEvent(QDropEvent *de);
-  void dragMoveEvent(QDragMoveEvent *de);
+  /// Accept a custom defined event
+  void customEvent(QEvent *event);
   void dragEnterEvent(QDragEnterEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dropEvent(QDropEvent *de);
 
 private slots:
   /// Populate file menu
@@ -126,14 +128,11 @@ private:
   void initWindowMenuActions();
   /// Create the help menu actions
   void initHelpMenuActions();
+
   /// Opens tabs based on QStringList
   void openPreviousTabs(const QStringList &tabsToOpen);
-
   /// Returns the current execution mode
   Script::ExecutionMode getExecutionMode() const;
-
-  /// Accept a custom defined event
-  void customEvent(QEvent *event);
 
   /// Extract py files from urllist
   QStringList extractPyFiles(const QList<QUrl> &urlList) const;
