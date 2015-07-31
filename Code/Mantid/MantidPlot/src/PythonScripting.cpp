@@ -166,13 +166,13 @@ bool PythonScripting::start()
     GlobalInterpreterLock gil;
 
     //Keep a hold of the globals, math and sys dictionary objects
-    PyObject *pymodule = PyImport_AddModule("__main__");
-    if( !pymodule )
+    PyObject *mainmod = PyImport_AddModule("__main__");
+    if( !mainmod )
     {
       finalize();
       return false;
     }
-    m_globals = PyModule_GetDict(pymodule);
+    m_globals = PyModule_GetDict(mainmod);
     if( !m_globals )
     {
       finalize();
@@ -181,14 +181,18 @@ bool PythonScripting::start()
 
     //Create a new dictionary for the math functions
     m_math = PyDict_New();
-
-    pymodule = PyImport_ImportModule("sys");
-    m_sys = PyModule_GetDict(pymodule);
+    // Keep a hold of the sys dictionary for accessing stdout/stderr
+    PyObject *sysmod = PyImport_ImportModule("sys");
+    m_sys = PyModule_GetDict(sysmod);
     if( !m_sys )
     {
       finalize();
       return false;
     }
+    // Set a smaller check interval so that it takes fewer 'ticks' to respond to a KeyboardInterrupt
+    // The choice of 5 is really quite arbitrary
+    PyObject_CallMethod(sysmod, "setcheckinterval", "i", 5);
+    Py_DECREF(sysmod);
 
     // Our use of the IPython console requires that we use the v2 api for these PyQt types
     // This has to be set before the very first import of PyQt (which happens in init_qti)
@@ -196,14 +200,14 @@ bool PythonScripting::start()
     //Embedded qti module needs sip definitions initializing before it can be used
     init_qti();
 
-    pymodule = PyImport_ImportModule("_qti");
-    if( pymodule )
+    PyObject *qtimod = PyImport_ImportModule("_qti");
+    if( qtimod )
     {
-      PyDict_SetItemString(m_globals, "_qti", pymodule);
-      PyObject *qti_dict = PyModule_GetDict(pymodule);
+      PyDict_SetItemString(m_globals, "_qti", qtimod);
+      PyObject *qti_dict = PyModule_GetDict(qtimod);
       setQObject(d_parent, "app", qti_dict);
       PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
-      Py_DECREF(pymodule);
+      Py_DECREF(qtimod);
     }
     else
     {
