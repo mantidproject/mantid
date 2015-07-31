@@ -22,6 +22,9 @@ Optionally:
 -  A distribution flag
 -  A list of 'masked' bins
 
+Documentation on the :ref:`CreateWorkspace <algm-CreateWorkspace>` 
+algorithm may also be useful.
+
 Concrete Matrix Workspaces
 --------------------------
 

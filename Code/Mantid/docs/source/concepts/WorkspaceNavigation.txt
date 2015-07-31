@@ -1,5 +1,5 @@
 Other Information on Workspaces
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 -  :ref:`Workspace <Workspace>` - Overview of workspaces, which include the following classes:
     -  :ref:`MatrixWorkspace <MatrixWorkspace>` - A base class that contains
