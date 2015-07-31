@@ -123,7 +123,7 @@ void ScriptingWindow::readSettings() {
   m_manager->m_replaceTabs = settings.value("ReplaceTabs", true).toBool();
   m_manager->m_tabWhitespaceCount =
       settings.value("TabWhitespaceCount", 4).toInt();
-  m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();      
+  m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();
   openPreviousTabs(settings.value("/PreviousFiles", "").toStringList());
 
   settings.endGroup();
@@ -245,11 +245,10 @@ void ScriptingWindow::populateExecMenu() {
   m_runMenu->clear();
   m_runMenu->addAction(m_execSelect);
   m_runMenu->addAction(m_execAll);
-
   m_runMenu->addSeparator();
-
+  m_runMenu->addAction(m_abortCurrent);
+  m_runMenu->addSeparator();
   m_runMenu->addAction(m_clearScriptVars);
-
   m_runMenu->addSeparator();
 
   m_execModeMenu->clear();
@@ -316,11 +315,16 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 }
 
 /**
- * Set the state of the execution actions/menu depending on the flag
- * @param state :: If the true the items are enabled, otherwise the are disabled
+ * Set the state of the execution actions depending on the flag
+ * @param state :: If the true the items are disabled, otherwise the are enabled
  */
 void ScriptingWindow::setEditActionsDisabled(bool state) {
-  m_editMenu->setDisabled(state);
+  auto actions = m_editMenu->actions();
+  foreach (QAction *action, actions) {
+    if(strcmp("Find", action->name()) != 0) {
+       action->setDisabled(state);
+    }
+  }
 }
 
 /**
@@ -331,7 +335,7 @@ void ScriptingWindow::setExecutionActionsDisabled(bool state) {
   m_execSelect->setDisabled(state);
   m_execAll->setDisabled(state);
   m_execModeMenu->setDisabled(state);
-  m_runMenu->setDisabled(state);
+  m_clearScriptVars->setDisabled(state);
 }
 
 /**
@@ -358,6 +362,13 @@ void ScriptingWindow::executeAll() {
  */
 void ScriptingWindow::executeSelection() {
   m_manager->executeSelection(this->getExecutionMode());
+}
+
+/**
+ * Ask the manager to abort the script execution for the current script.
+ */
+void ScriptingWindow::abortCurrent() {
+  m_manager->abortCurrentScript();
 }
 
 /**
@@ -569,6 +580,9 @@ void ScriptingWindow::initExecMenuActions() {
   shortcuts << Qt::CTRL + Qt::SHIFT + Qt::Key_Return
             << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
   m_execAll->setShortcuts(shortcuts);
+
+  m_abortCurrent = new QAction(tr("A&bort"), this);
+  connect(m_abortCurrent, SIGNAL(triggered()), this, SLOT(abortCurrent()));
 
   m_clearScriptVars = new QAction(tr("&Clear Variables"), this);
   connect(m_clearScriptVars, SIGNAL(triggered()), this,

@@ -44,7 +44,7 @@ class PythonScripting: public ScriptingEnv
 {
 
   Q_OBJECT
-  
+
 public:
   /// Factory function
   static ScriptingEnv *constructor(ApplicationWindow *parent);
@@ -78,6 +78,8 @@ public:
   PyObject * toPyList(const QStringList & items);
   /// Returns an integer representation of the object. No check is performed to see if it is an integer
   long toLong(PyObject *object, bool decref = false);
+  /// Raise an asynchronous exception in the given thread
+  void raiseAsyncException(long id, PyObject *exc);
 
   ///Return a list of file extensions for Python
   const QStringList fileExtensions() const;
@@ -113,7 +115,7 @@ private:
   void shutdown();
   /// Run execfile on a given file
   bool loadInitFile(const QString &path);
-  
+
 private:
   /// The global dictionary
   PyObject *m_globals;

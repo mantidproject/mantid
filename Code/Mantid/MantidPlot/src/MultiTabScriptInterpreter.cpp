@@ -271,7 +271,7 @@ void MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode) {
   m_current->executeAll(mode);
 }
 
-/* Execute the highlighted code from the current tab using the
+/** Execute the highlighted code from the current tab using the
  * given execution mode
  * @param mode :: The mode used to execute
  */
@@ -279,6 +279,12 @@ void MultiTabScriptInterpreter::executeSelection(
     const Script::ExecutionMode mode) {
   m_current->executeSelection(mode);
 }
+
+/**
+ * Requests that the current script be aborted. The environment has
+ * to support this.
+ */
+void MultiTabScriptInterpreter::abortCurrentScript() { m_current->abort(); }
 
 /**
  * Evaluate

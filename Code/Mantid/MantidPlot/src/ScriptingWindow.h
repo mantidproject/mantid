@@ -100,6 +100,8 @@ private slots:
   void executeAll();
   /// Execute selection using the current mode option
   void executeSelection();
+  /// Abort the current script
+  void abortCurrent();
   /// Clear out any previous variable definitions in the current script
   void clearScriptVariables();
 
@@ -154,7 +156,7 @@ private:
   /// Run menu
   QMenu *m_runMenu;
   /// Execute menu actions
-  QAction *m_execSelect, *m_execAll, *m_clearScriptVars;
+  QAction *m_execSelect, *m_execAll, *m_abortCurrent, *m_clearScriptVars;
   /// Execution mode menu
   QMenu *m_execModeMenu;
   /// Execute mode actions

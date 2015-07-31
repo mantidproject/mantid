@@ -82,10 +82,10 @@ void ScriptFileInterpreter::tabsToSpaces()
 {
   int selFromLine, selFromInd, selToLine, selToInd;
 
-  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);
   if(selFromLine == -1)
     m_editor->selectAll();
-  
+
   QString text = m_editor->selectedText();
 
   // Use the tab space count for each converted character
@@ -103,10 +103,10 @@ void ScriptFileInterpreter::spacesToTabs()
 {
   int selFromLine, selFromInd, selToLine, selToInd;
 
-  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);
   if(selFromLine == -1)
     m_editor->selectAll();
-  
+
   QString text = m_editor->selectedText();
 
   // Use the tab space count for each converted characters
@@ -124,10 +124,10 @@ void ScriptFileInterpreter::setFont(const QString &fontFamily)
 {
   // This needs to check if the font exists and use default if not
   QFontDatabase database;
-  
+
   // Select saved choice. If not available, use current font
   QString fontToUse = m_editor->lexer()->defaultFont().family();
-  
+
   if(database.families().contains(fontFamily))
     fontToUse = fontFamily;
 
@@ -143,9 +143,9 @@ void ScriptFileInterpreter::setFont(const QString &fontFamily)
     QFont font = m_editor->lexer()->font(count);
     font.setFamily(fontToUse);
     m_editor->lexer()->setFont(font,count);
-      
+
     count++;
-  }    
+  }
 }
 
 /// Toggle replacing tabs with whitespace
@@ -164,11 +164,11 @@ void ScriptFileInterpreter::setTabWhitespaceCount(int count)
 void ScriptFileInterpreter::toggleWhitespace(bool state)
 {
   m_editor->setEolVisibility(state);
-  
-  if(state) 
+
+  if(state)
       m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsVisible);
   else
-    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsInvisible);  
+    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsInvisible);
 }
 
 /// Comment a block of code
@@ -185,11 +185,11 @@ void ScriptFileInterpreter::uncomment()
 
 void ScriptFileInterpreter::toggleComment(bool addComment)
 {
-  // Get selected text  
+  // Get selected text
   std::string whitespaces (" \t\f\r");
   int selFromLine, selFromInd, selToLine, selToInd;
-  
-  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);
 
   // Expand selection to first character on start line to the end char on second line.
   if(selFromLine == -1)
@@ -197,20 +197,20 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
     m_editor->getCursorPosition(&selFromLine, &selFromInd);
     selToLine = selFromLine;
   }
-    
+
   // For each line, select it, copy the line into a new string minus the comment
   QString replacementText = "";
 
   // If it's adding comment, check all lines to find the lowest index for a non space character
   int minInd = -1;
   if(addComment)
-  { 
+  {
     for(int i=selFromLine;i<=selToLine;++i)
     {
-      std::string thisLine = m_editor->text(i).toUtf8().constData();   
+      std::string thisLine = m_editor->text(i).toUtf8().constData();
       int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
-     
-  	  if(minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd))
+
+      if(minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd))
       {
           minInd = lineFirstChar;
       }
@@ -220,21 +220,21 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
   for(int i=selFromLine;i<=selToLine;++i)
   {
     std::string thisLine = m_editor->text(i).toUtf8().constData();
-   
+
     int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
-     
+
     if(lineFirstChar != -1)
-    {     
-      if(addComment) 
-      { 
+    {
+      if(addComment)
+      {
         thisLine.insert(minInd,"#");
       }
       else
-      { 
+      {
         // Check that the first character is a #
         if(thisLine[lineFirstChar] == '#') // Remove the comment, or ignore to add as is
         {
-          thisLine = thisLine.erase(lineFirstChar,1);    
+          thisLine = thisLine.erase(lineFirstChar,1);
         }
       }
     }
@@ -242,7 +242,7 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
     replacementText = replacementText + QString::fromStdString(thisLine);
   }
 
-  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));  
+  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));
   replaceSelectedText(m_editor, replacementText);
   m_editor->setCursorPosition(selFromLine,selFromInd);
 }
@@ -252,8 +252,8 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
 // using an older version(2.4.6) of the library missing the method, and too close to code freeze to update.
 inline void ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor, const QString &text)
 {
-  int UTF8_CodePage = 65001; 
-  const char *b = (( editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData() : text.latin1());    
+  int UTF8_CodePage = 65001;
+  const char *b = (( editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData() : text.latin1());
   editor->SendScintilla( editor->SCI_REPLACESEL, b );
 }
 
@@ -442,6 +442,13 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
   {
     executeAll(mode);
   }
+}
+
+/**
+ * The environment has to support this behaviour or is does nothing
+ */
+void ScriptFileInterpreter::abort() {
+  m_runner->abort();
 }
 
 /**

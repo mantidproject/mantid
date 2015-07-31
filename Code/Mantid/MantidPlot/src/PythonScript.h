@@ -43,7 +43,7 @@ class PythonScripting;
 struct _sipWrapperType;
 
 /**
- * This class holds, compiles and executes the Python code. 
+ * This class holds, compiles and executes the Python code.
  */
 class PythonScript : public Script, MantidQt::API::WorkspaceObserver
 {
@@ -82,9 +82,9 @@ public:
   /// Special handle for syntax errors as they have no traceback
   QString constructSyntaxErrorStr(PyObject *syntaxError);
   /// Convert a traceback to a string
-  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback, 
+  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback,
                       bool root=true);
-  
+
   /// Set the name of the passed object so that Python can refer to it
   bool setQObject(QObject *val, const char *name);
   /// Set the name of the integer so that Python can refer to it
@@ -161,6 +161,10 @@ private:
   QVariant evaluateImpl();
   /// Execute the current code and return a boolean indicating success/failure
   bool executeImpl();
+  /// Request that this script be aborted
+  void abortImpl();
+  /// Save the value of the Python thread ID when a script is executed
+  void saveThreadID();
 
   /// Performs the call to Python from a string
   bool executeString();
@@ -170,6 +174,7 @@ private:
   bool checkResult(PyObject *result);
   /// Compile to bytecode
   PyObject * compileToByteCode(bool for_eval=true);
+
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS
@@ -190,7 +195,8 @@ private:
 
   PythonScripting * m_pythonEnv;
   PyObject *localDict, *stdoutSave, *stderrSave;
-  PyObject *m_CodeFileObject;
+  PyObject *m_codeFileObject;
+  long m_threadID; ///< Python thread id
   bool isFunction;
   QString fileName;
   bool m_isInitialized;

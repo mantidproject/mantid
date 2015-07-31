@@ -59,9 +59,8 @@ namespace
     Q_UNUSED(arg);
     int retcode(0);
     if(event != PyTrace_LINE) return retcode;
-      std::string str1 = "lineNumberChanged";
-      std::string str2 = "O i";
-    PyObject_CallMethod(scriptObj,&str1[0],&str2[0], frame->f_code->co_filename, frame->f_lineno);
+    PyObject_CallMethod(scriptObj, "lineNumberChanged", "O i",
+                        frame->f_code->co_filename, frame->f_lineno);
     return retcode;
   }
 
@@ -78,8 +77,8 @@ namespace
 PythonScript::PythonScript(PythonScripting *env, const QString &name, const InteractionType interact,
                            QObject * context)
   : Script(env, name, interact, context), m_pythonEnv(env), localDict(NULL),
-    stdoutSave(NULL), stderrSave(NULL), m_CodeFileObject(NULL), isFunction(false), m_isInitialized(false),
-    m_pathHolder(name), m_workspaceHandles()
+    stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL), m_threadID(-1), isFunction(false),
+    m_isInitialized(false), m_pathHolder(name), m_workspaceHandles()
 {
   initialize(name, context);
 }
@@ -180,7 +179,7 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
  */
 void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo)
 {
-  if(codeObject == m_CodeFileObject)
+  if(codeObject == m_codeFileObject)
   {
     sendLineChangeSignal(getRealLineNo(lineNo), false);
   }
@@ -342,7 +341,7 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
     QString text = m_pythonEnv->toString(textObject, true).trimmed();
     int offset = static_cast<int>(m_pythonEnv->toLong(PyObject_GetAttrString(syntaxError, "offset")));
     QString offsetMarker = QString(offset-1, ' ') + "^";
-    msg = 
+    msg =
       "File \"%1\", line %2\n"
       "    %3\n"
       "    %4\n"
@@ -353,7 +352,7 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
   }
   else
   {
-    msg = 
+    msg =
       "File \"%1\", line %2\n"
       "SyntaxError: %3";
     msg = msg.arg(filename);
@@ -373,15 +372,15 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
    * @param traceback A traceback object
    * @param root If true then this is the root of the traceback
    */
-void PythonScript::tracebackToMsg(QTextStream &msgStream, 
-                                  PyTracebackObject* traceback, 
+void PythonScript::tracebackToMsg(QTextStream &msgStream,
+                                  PyTracebackObject* traceback,
                                   bool root)
 {
   if(traceback == NULL) return;
   msgStream << "\n  ";
   if (root) msgStream << "at";
   else msgStream << "caused by";
-  
+
   int lineno = traceback->tb_lineno;
   QString filename = QString::fromAscii(PyString_AsString(traceback->tb_frame->f_code->co_filename));
   if(filename == identifier().c_str())
@@ -390,7 +389,7 @@ void PythonScript::tracebackToMsg(QTextStream &msgStream,
     sendLineChangeSignal(lineno, true);
 
   }
-  
+
   msgStream << " line " << lineno << " in \'" << filename  << "\'";
   tracebackToMsg(msgStream, traceback->tb_next, false);
 }
@@ -621,7 +620,20 @@ QVariant PythonScript::evaluateImpl()
 
 bool PythonScript::executeImpl()
 {
+  saveThreadID();
   return executeString();
+}
+
+void PythonScript::abortImpl()
+{
+  GlobalInterpreterLock lock;
+  m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
+}
+
+void PythonScript::saveThreadID()
+{
+  GlobalInterpreterLock lock;
+  m_threadID = PyThreadState_Get()->thread_id;
 }
 
 
@@ -817,14 +829,14 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
   {
   }
 
-  if(success) 
+  if(success)
   {
-    m_CodeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
+    m_codeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
   }
   else
   {
     compiledCode = NULL;
-    m_CodeFileObject = NULL;
+    m_codeFileObject = NULL;
   }
   return compiledCode;
 }
@@ -876,7 +888,7 @@ void PythonScript::clearADSHandle()
     // i.e. the postfix operator
     this->deletePythonReference(*(itr++));
   }
-  
+
   assert(m_workspaceHandles.empty());
 }
 

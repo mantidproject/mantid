@@ -152,6 +152,8 @@ public slots:
   void executeAll(const Script::ExecutionMode mode);
   /// Execute selection using the given mode
   void executeSelection(const Script::ExecutionMode mode);
+  /// Abort the current script
+  void abortCurrentScript();
   /// Evaluate
   void evaluate();
   /// Clear out any previous variable definitions in the current script
