@@ -8,9 +8,8 @@ namespace ICatTestHelper
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::ICat::CatalogLogin loginobj;
     loginobj.initialize();
-    loginobj.setPropertyValue("Username", "mantid_test");
-    loginobj.setPropertyValue("Password", "mantidtestuser");
-    loginobj.setPropertyValue("FacilityName", "ISIS");
+    loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+    loginobj.setPropertyValue("Password", "MantidTestUser4");
 
     loginobj.execute();
     if (!loginobj.isExecuted())

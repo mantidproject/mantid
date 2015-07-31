@@ -23,7 +23,8 @@ public:
 		TS_ASSERT_THROWS_NOTHING( loginobj.initialize());
 		TS_ASSERT( loginobj.isInitialized() );
 	}
-	void testLogin()
+
+	void testLoginMandatoryParams()
 	{
 		CatalogLogin loginobj;
 
@@ -31,11 +32,16 @@ public:
 
 		// Should fail because mandatory parameter has not been set
 		TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
+	}
 
-		// Now set it...
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
-		//loginobj.setPropertyValue("DBServer", "");
+	void testLogin()
+	{
+		CatalogLogin loginobj;
+
+	   if ( !loginobj.isInitialized() ) loginobj.initialize();
+
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT(loginobj.isExecuted() );
@@ -47,9 +53,6 @@ public:
 		CatalogLogin loginobj;
 
 	   if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		// Should fail because mandatory parameter has not been set
-		TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
 
 		//invalid username
 		loginobj.setPropertyValue("Username", "mantid_test");

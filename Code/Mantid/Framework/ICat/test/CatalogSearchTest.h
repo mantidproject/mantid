@@ -41,8 +41,8 @@ public:
 
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 		//loginobj.setPropertyValue("DBServer", "");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
@@ -50,8 +50,7 @@ public:
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
-		searchobj.setPropertyValue("StartRun", "100.0");
-		searchobj.setPropertyValue("EndRun", "109.0");
+		searchobj.setPropertyValue("RunRange", "100-109");
 		searchobj.setPropertyValue("Instrument","LOQ");
 		searchobj.setPropertyValue("OutputWorkspace","Investigations");
 					
@@ -67,8 +66,8 @@ public:
 
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 		//loginobj.setPropertyValue("DBServer", "");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
@@ -91,8 +90,8 @@ public:
 
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 			
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
@@ -114,8 +113,8 @@ public:
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		// Now set it...
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 		//loginobj.setPropertyValue("DBServer", "");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
@@ -124,8 +123,7 @@ public:
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
 		// start run number > end run number
-		searchobj.setPropertyValue("StartRun", "150.0");
-		searchobj.setPropertyValue("EndRun", "102.0");
+		searchobj.setPropertyValue("RunRange", "150-102");
 		searchobj.setPropertyValue("Instrument","LOQ");
 				
     	searchobj.setPropertyValue("OutputWorkspace","Investigations");
@@ -142,8 +140,8 @@ public:
 
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
@@ -166,8 +164,8 @@ public:
 
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
@@ -176,7 +174,7 @@ public:
 				
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate","39/22/2009"),std::runtime_error);
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::runtime_error);
-		searchobj.setPropertyValue("OutputWorkspace","Investigations");
+		//searchobj.setPropertyValue("OutputWorkspace","Investigations");
 		
 		TS_ASSERT_THROWS(searchobj.execute(),std::runtime_error);
 

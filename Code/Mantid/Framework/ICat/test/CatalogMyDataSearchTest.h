@@ -34,8 +34,8 @@ public:
 
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 	
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());

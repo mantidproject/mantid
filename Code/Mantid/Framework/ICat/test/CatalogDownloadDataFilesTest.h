@@ -71,8 +71,7 @@ public:
 
 				
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("StartRun", "100.0");
-		searchobj.setPropertyValue("EndRun", "102.0");
+		searchobj.setPropertyValue("RunRange", "100-102");
 		searchobj.setPropertyValue("Instrument","HET");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				
@@ -130,8 +129,7 @@ public:
 
 				
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("StartRun", "17440.0");
-		searchobj.setPropertyValue("EndRun", "17556.0");
+		searchobj.setPropertyValue("RunRange", "17440-17556");
 		searchobj.setPropertyValue("Instrument","EMU");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				
@@ -189,8 +187,7 @@ public:
 
 				
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("StartRun", "600.0");
-		searchobj.setPropertyValue("EndRun", "601.0");
+		searchobj.setPropertyValue("RunRange", "600-601");
 		searchobj.setPropertyValue("Instrument","MERLIN");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				

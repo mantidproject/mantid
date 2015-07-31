@@ -32,16 +32,15 @@ public:
 	{	
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
+		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+		loginobj.setPropertyValue("Password", "MantidTestUser4");
 	
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("StartRun", "100.0");
-		searchobj.setPropertyValue("EndRun", "102.0");
+		searchobj.setPropertyValue("RunRange", "100-102");
 		searchobj.setPropertyValue("Instrument","LOQ");
 		searchobj.setPropertyValue("OutputWorkspace","investigations");
 				
