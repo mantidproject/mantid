@@ -36,6 +36,8 @@ Concrete Matrix Workspaces
 More information on working with them: `Interacting with Matrix
 Workspaces <http://www.mantidproject.org/Interacting_with_Workspaces>`__.
 
+.. include:: WorkspaceNavigation.txt
+
 
 
 .. categories:: Concepts
