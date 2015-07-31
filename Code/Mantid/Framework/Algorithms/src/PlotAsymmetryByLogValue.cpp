@@ -161,7 +161,7 @@ void PlotAsymmetryByLogValue::exec() {
   for (size_t i = is; i <= ie; i++) {
 
     // Check if run i was already loaded
-    if (!m_redX.count(i)) {
+    if (!m_logValue.count(i)) {
       // Load run, apply dead time corrections and detector grouping
       Workspace_sptr loadedWs = doLoad(i);
 
@@ -174,7 +174,7 @@ void PlotAsymmetryByLogValue::exec() {
   }
 
   // Create the 2D workspace for the output
-  int nplots = m_greenX.size() ? 4 : 1;
+  int nplots = m_greenY.size() ? 4 : 1;
   size_t npoints = ie - is + 1;
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       "Workspace2D",
@@ -236,7 +236,7 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
 *   @param runNumber :: [input] Run number specifying run to load
 *   @return :: Loaded workspace
 */
-Workspace_sptr PlotAsymmetryByLogValue::doLoad(int64_t runNumber) {
+Workspace_sptr PlotAsymmetryByLogValue::doLoad(size_t runNumber) {
 
   // Get complete run name
   std::ostringstream fn, fnn;
@@ -316,8 +316,8 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
   if (nplots == 1) {
 
     std::vector<double> vecRedX, vecRedY, vecRedE;
-    for (auto it = m_redX.begin(); it != m_redX.end(); ++it) {
-      vecRedX.push_back(m_redX[it->first]);
+    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
+      vecRedX.push_back(m_logValue[it->first]);
       vecRedY.push_back(m_redY[it->first]);
       vecRedE.push_back(m_redE[it->first]);
     }
@@ -332,17 +332,17 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
     std::vector<double> vecGreenX, vecGreenY, vecGreenE;
     std::vector<double> vecSumX, vecSumY, vecSumE;
     std::vector<double> vecDiffX, vecDiffY, vecDiffE;
-    for (auto it = m_redX.begin(); it != m_redX.end(); ++it) {
-      vecRedX.push_back(m_redX[it->first]);
+    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
+      vecRedX.push_back(m_logValue[it->first]);
       vecRedY.push_back(m_redY[it->first]);
       vecRedE.push_back(m_redE[it->first]);
-      vecGreenX.push_back(m_greenX[it->first]);
+      vecGreenX.push_back(m_logValue[it->first]);
       vecGreenY.push_back(m_greenY[it->first]);
       vecGreenE.push_back(m_greenE[it->first]);
-      vecSumX.push_back(m_sumX[it->first]);
+      vecSumX.push_back(m_logValue[it->first]);
       vecSumY.push_back(m_sumY[it->first]);
       vecSumE.push_back(m_sumE[it->first]);
-      vecDiffX.push_back(m_diffX[it->first]);
+      vecDiffX.push_back(m_logValue[it->first]);
       vecDiffY.push_back(m_diffY[it->first]);
       vecDiffE.push_back(m_diffE[it->first]);
     }
@@ -520,7 +520,7 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
 *   @param index :: [input] Vector index where results will be stored
 */
 void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
-                                         int64_t index) {
+                                         size_t index) {
 
   // Check if workspace is a workspace group
   WorkspaceGroup_sptr group =
@@ -533,7 +533,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
 
     double Y, E;
     calcIntAsymmetry(ws_red, Y, E);
-    m_redX[index] = getLogValue(*ws_red);
+    m_logValue[index] = getLogValue(*ws_red);
     m_redY[index] = Y;
     m_redE[index] = E;
 
@@ -551,7 +551,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
     double YR, ER;
     calcIntAsymmetry(ws_red, YR, ER);
     double logValue = getLogValue(*ws_red);
-    m_redX[index] = logValue;
+    m_logValue[index] = logValue;
     m_redY[index] = YR;
     m_redE[index] = ER;
 
@@ -567,20 +567,16 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
       double YG, EG;
       calcIntAsymmetry(ws_green, YG, EG);
       // Red data
-      m_redX[index] = logValue;
       m_redY[index] = YR;
       m_redE[index] = ER;
       // Green data
-      m_greenX[index] = logValue;
       m_greenY[index] = YG;
       m_greenE[index] = EG;
       // Sum
-      m_sumX[index] = logValue;
       m_sumY[index] = YR + YG;
       m_sumE[index] = sqrt(ER * ER + EG * EG);
       // Diff
       calcIntAsymmetry(ws_red, ws_green, YR, ER);
-      m_diffX[index] = logValue;
       m_diffY[index] = YR;
       m_diffE[index] = ER;
     }

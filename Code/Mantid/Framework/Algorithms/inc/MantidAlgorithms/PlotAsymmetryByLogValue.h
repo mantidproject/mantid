@@ -79,9 +79,9 @@ private:
   void init();
   void exec();
   // Load run, apply dead time corrections and detector grouping
-  API::Workspace_sptr doLoad(int64_t runNumber);
+  API::Workspace_sptr doLoad(size_t runNumber);
   // Analyse loaded run
-  void doAnalysis(API::Workspace_sptr loadedWs, int64_t index);
+  void doAnalysis(API::Workspace_sptr loadedWs, size_t index);
   // Parse run names
   void parseRunNames(std::string &firstFN, std::string &lastFN,
                      std::string &fnBase, std::string &fnExt, int &fnZeros);
@@ -132,23 +132,21 @@ private:
   int m_red;
   /// Store green period
   int m_green;
-  // Mantid vectors to store results
-  // Red mantid vectors
-  std::map<int64_t, double> m_redX;
-  std::map<int64_t, double> m_redY;
-  std::map<int64_t, double> m_redE;
-  // Green mantid vectors
-  std::map<int64_t, double> m_greenX;
-  std::map<int64_t, double> m_greenY;
-  std::map<int64_t, double> m_greenE;
-  // Mantid vectors to store Red + Green
-  std::map<int64_t, double> m_sumX;
-  std::map<int64_t, double> m_sumY;
-  std::map<int64_t, double> m_sumE;
-  // Mantid vectors to store Red - Green
-  std::map<int64_t, double> m_diffX;
-  std::map<int64_t, double> m_diffY;
-  std::map<int64_t, double> m_diffE;
+  // Mantid maps to store intermediate results
+  // Map to store log value
+  std::map<size_t, double> m_logValue;
+  // Red values
+  std::map<size_t, double> m_redY;
+  std::map<size_t, double> m_redE;
+  // Green values
+  std::map<size_t, double> m_greenY;
+  std::map<size_t, double> m_greenE;
+  // Sum values (Red + Green)
+  std::map<size_t, double> m_sumY;
+  std::map<size_t, double> m_sumE;
+  // Diff values (Red - Green)
+  std::map<size_t, double> m_diffY;
+  std::map<size_t, double> m_diffE;
   // LogValue name
   std::string m_logName;
   // LogValue function
