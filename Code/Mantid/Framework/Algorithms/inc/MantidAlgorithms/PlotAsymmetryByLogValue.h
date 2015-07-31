@@ -137,15 +137,13 @@ private:
   int m_red;
   /// Green period
   int m_green;
-  // LogValue name
-  // Type of computation: integral or differential
-  std::string m_stype;
   /// Minimum time for the analysis
   double m_minTime;
   /// Maximum time for the analysis
   double m_maxTime;
 
   /// Properties needed to get the log value
+  // LogValue name
   std::string m_logName;
   /// LogValue function
   std::string m_logFunc;
