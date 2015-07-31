@@ -72,6 +72,14 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                        PeakWidth='0.1*energy')
         self.assertEquals(wks.getNumberHistograms(), 1)
 
+    def test_peak_width_function_error(self):
+        """
+        Using an invalid peak width function should raise RuntimeError.
+        """
+        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
+                          PHONONFile=self._phonon_file,
+                          PeakWidth='10*')
+
     def test_temperature(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        Temperature=50)
@@ -194,13 +202,10 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                           CASTEPFile=self._castep_file,
                           SpectrumType='BondAnalysis')
 
-    def test_peak_width_function_error(self):
-        """
-        Using an invalid peak width function should raise RuntimeError.
-        """
-        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
-                          PHONONFile=self._phonon_file,
-                          PeakWidth='10*')
+    def test_bond_analysis_happy_case(self):
+        ws = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
+                                      CASTEPFile=self._castep_file,
+                                      SpectrumType='BondAnalysis')
 
 
 if __name__=="__main__":
