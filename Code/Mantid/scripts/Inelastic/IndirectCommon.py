@@ -105,7 +105,7 @@ def getWSprefix(wsname):
     return prefix
 
 
-def getEfixed(workspace, detIndex=0):
+def getEfixed(workspace):
     inst = mtd[workspace].getInstrument()
 
     if inst.hasParameter('Efixed'):
@@ -115,7 +115,7 @@ def getEfixed(workspace, detIndex=0):
         analyser_name = inst.getStringParameter('analyser')[0]
         analyser_comp = inst.getComponentByName(analyser_name)
 
-        if analyser_comp.hasParameter('Efixed'):
+        if analyser_comp is not None and analyser_comp.hasParameter('Efixed'):
             return analyser_comp.getNumberParameter('EFixed')[0]
 
     raise ValueError('No Efixed parameter found')
@@ -151,7 +151,7 @@ def createQaxis(inputWS):
         sample_pos = inst.getSample().getPos()
         beam_pos = sample_pos - inst.getSource().getPos()
         for i in range(0, num_hist):
-            efixed = getEfixed(inputWS, i)
+            efixed = getEfixed(inputWS)
             detector = workspace.getDetector(i)
             theta = detector.getTwoTheta(sample_pos, beam_pos) / 2
             lamda = math.sqrt(81.787 / efixed)
@@ -225,7 +225,7 @@ def ExtractFloat(data_string):
     Extract float values from an ASCII string
     """
     values = data_string.split()
-    values = map(float, values)
+    values = [float(v) for v in values]
     return values
 
 
@@ -234,7 +234,7 @@ def ExtractInt(data_string):
     Extract int values from an ASCII string
     """
     values = data_string.split()
-    values = map(int, values)
+    values = [int(v) for v in values]
     return values
 
 
