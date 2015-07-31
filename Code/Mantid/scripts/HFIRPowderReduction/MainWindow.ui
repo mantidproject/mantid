@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1412</width>
-    <height>1216</height>
+    <width>1086</width>
+    <height>823</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -334,7 +334,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -479,10 +479,16 @@
                 <item>
                  <widget class="QTextBrowser" name="textBrowser_RawDetInfo">
                   <property name="sizePolicy">
-                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>10</height>
+                   </size>
                   </property>
                  </widget>
                 </item>
@@ -555,7 +561,7 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="checkBox">
+                 <widget class="QCheckBox" name="checkBox_indDetErrorBar">
                   <property name="text">
                    <string>Error Bar</string>
                   </property>
@@ -2171,7 +2177,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1412</width>
+     <width>1086</width>
      <height>25</height>
     </rect>
    </property>

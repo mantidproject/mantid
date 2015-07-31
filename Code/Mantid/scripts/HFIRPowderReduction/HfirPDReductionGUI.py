@@ -1567,12 +1567,12 @@ class MainWindow(QtGui.QMainWindow):
         
         # Plot
         marker, color = self.ui.graphicsView_indvDet.getNextLineMarkerColorCombo()
-        self.ui.graphicsView_indvDet.addPlot(x=vecx, 
-                                             y=vecy,
+        self.ui.graphicsView_indvDet.add_plot1d(vec_x=vecx,
+                                             vec_y=vecy,
                                              marker=marker,
                                              color=color,
-                                             xlabel=samplename,
-                                             ylabel='Counts',
+                                             x_label=samplename,
+                                             y_label='Counts',
                                              label='DetID = %d'%(detid))
         
         self._graphIndDevMode = (samplename, 'Counts')
@@ -1590,9 +1590,12 @@ class MainWindow(QtGui.QMainWindow):
          - xaxis :: string as 'XLabel'
         """
         # Validate input
+        global y_err
         expno = int(expno)
         scanno = int(scanno)
         detid = int(detid)
+
+        plot_error_bar = self.ui.checkBox_indDetErrorBar.isChecked()
 
         # Reject if data is not loaded
         if self._myControl.hasDataLoaded(expno, scanno) is False:
@@ -1609,6 +1612,12 @@ class MainWindow(QtGui.QMainWindow):
         if len(xaxis) == 0:
             xaxis = None
         vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xaxis)
+        if isinstance(vecx, numpy.ndarray) is False:
+            raise NotImplementedError('vecx, vecy must be numpy arrays.')
+        if plot_error_bar is True:
+            y_err = numpy.sqrt(vecy)
+        else:
+            y_err = None
 
         # Plot to canvas
         marker, color = canvas.getNextLineMarkerColorCombo()
@@ -1621,10 +1630,10 @@ class MainWindow(QtGui.QMainWindow):
 
         label = "Detector ID: %d" % (detid)
 
-        if self._tabLineDict[canvas].count( (expno, scanno, detid) ) == 0:
-            canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
-                ylabel='Counts',label=label)
-            self._tabLineDict[canvas].append( (expno, scanno, detid) )
+        if self._tabLineDict[canvas].count((expno, scanno, detid)) == 0:
+            canvas.add_plot1d(vecx, vecy, marker=marker, color=color, xlabel=xlabel,
+                              ylabel='Counts', label=label, y_err=y_err)
+            self._tabLineDict[canvas].append((expno, scanno, detid))
             
             if resetboundary is True:
                 # Set xmin and xmax about the data for first time
@@ -1663,7 +1672,7 @@ class MainWindow(QtGui.QMainWindow):
             if pos >= rangex[0] and pos <= rangex[1]:
                 vecx = numpy.array([pos, pos])
                 vecy = numpy.array([rangey[0], rangey[1]])
-                canvas.addPlot(vecx, vecy, color='black', linestyle='--')
+                canvas.add_plot1d(vecx, vecy, color='black', line_style='--')
         # ENDFOR
 
         return
@@ -1729,8 +1738,8 @@ class MainWindow(QtGui.QMainWindow):
                 continue
 
             marker, color = canvas.getNextLineMarkerColorCombo()
-            canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=unit, \
-                    ylabel='intensity',label=label)
+            canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=unit, \
+                    y_label='intensity',label=label)
 
             # set up line tuple
             self._tabLineDict[canvas].append( (expno, scanno, ptno) )
@@ -1771,8 +1780,8 @@ class MainWindow(QtGui.QMainWindow):
         marker, color = canvas.getNextLineMarkerColorCombo()
         xlabel = self._getXLabelFromUnit(self.ui.comboBox_mscanUnit.currentText())
 
-        canvas.addPlot(vecx, vecy, marker=marker, color=color,
-            xlabel=xlabel, ylabel='intensity',label=label)
+        canvas.add_plot1d(vecx, vecy, marker=marker, color=color,
+            x_label=xlabel, y_label='intensity',label=label)
 
         xmax = max(vecx)
         xmin = min(vecx)
@@ -1789,7 +1798,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def _plotReducedData(self, exp, scan, canvas, xlabel, label=None, clearcanvas=True,
-        spectrum=0):
+                         spectrum=0, plot_error=False):
         """ Plot reduced data for exp and scan
          self._plotReducedData(exp, scan, self.ui.canvas1, clearcanvas, xlabel=self._currUnit, 0, clearcanvas)
         """
@@ -1810,6 +1819,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot
         vecx, vecy = self._myControl.getVectorToPlot(exp, scan)
+        if isinstance(vecx, numpy.array) is False:
+            vecx = numpy.array(vecx)
+            vecy = numpy.array(vecy)
+            # FIXME - Should check y_err set up correctly in Mantid or not
 
 
         # get the marker color for the line
@@ -1819,8 +1832,9 @@ class MainWindow(QtGui.QMainWindow):
         if label is None:
             label = "Exp %d Scan %d" % (exp, scan)
 
-        canvas.addPlot(vecx, vecy, marker=marker, color=color,
-            xlabel=xlabel, ylabel='intensity',label=label)
+        canvas.add_plot1d(vecx, vecy, marker=marker, color=color,
+                          x_label=xlabel, y_label='intensity',label=label,
+                          y_err=y_err)
 
         if clearcanvas is True:
             xmax = max(vecx)
@@ -1877,8 +1891,8 @@ class MainWindow(QtGui.QMainWindow):
 
         label = samplelogname
 
-        canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
-            ylabel='Counts',label=label)
+        canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=xlabel, \
+            y_label='Counts',label=label)
 
         # auto setup for image boundary
         xmin = min(vecx)
@@ -1934,12 +1948,12 @@ class MainWindow(QtGui.QMainWindow):
             marker, color = canvas.getNextLineMarkerColorCombo()
 
         # plot
-        canvas.addPlot(vecx, vecy, marker=marker, color=color,
-            xlabel=xlabel, ylabel='intensity',label=label)
+        canvas.add_plot1d(vecx, vecy, marker=marker, color=color,
+            x_label=xlabel, y_label='intensity',label=label)
 
         if TempData is False:
-            canvas.addPlot(vecx, diffY, marker='+', color='green',
-                xlabel=xlabel, ylabel='intensity',label='Diff')
+            canvas.add_plot1d(vecx, diffY, marker='+', color='green',
+                x_label=xlabel, y_label='intensity',label='Diff')
 
         # reset canvas limits
         if clearcanvas is True:

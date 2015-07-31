@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called
 import os
+import numpy as np
 
 from PyQt4 import QtGui
 
@@ -70,10 +71,21 @@ class MplFigureCanvas(QtGui.QWidget):
 
         return
 
-    def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
-        """ Add a new plot
+    def add_plot1d(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None,
+                   linestyle=None, linewidth=1, y_err=None):
+        """ Add a 1D plot to
+        :param x:
+        :param y:
+        :param color:
+        :param label:
+        :param xlabel:
+        :param ylabel:
+        :param marker:
+        :param linestyle:
+        :param linewidth:
+        :return:
         """
-        self.canvas.addPlot(x, y, color, label, xlabel, ylabel, marker, linestyle, linewidth)
+        self.canvas.add_plot1d(x, y, color, label, xlabel, ylabel, marker, linestyle, linewidth, y_err)
 
         return
 
@@ -255,50 +267,79 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-    def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
-        """ Plot a set of data
-        Argument:
-        - x: numpy array X
-        - y: numpy array Y
+    def add_plot1d(self, vec_x, vec_y, color=None, label="", x_label=None, y_label=None,
+                   marker=None, line_style=None, line_width=1, y_err=None):
+        """ Add a 1D plot (line) to canvas
+        :param vec_x:
+        :param vec_y:
+        :param color:
+        :param label:
+        :param x_label:
+        :param y_label:
+        :param marker:
+        :param line_style:
+        :param line_width:
+        :param y_err:
+        :return:
         """
+        # Check input
+        if isinstance(vec_x, np.ndarray) is False or isinstance(vec_y, np.ndarray) is False:
+            raise NotImplementedError('Input vec_x or vec_y for addPlot() must be numpy.array.')
+        plot_error = y_err is not None
+        if plot_error is True:
+            if isinstance(y_err, np.ndarray) is False:
+                raise NotImplementedError('Input y_err must be either None or numpy.array.')
+
+        if len(vec_x) != len(vec_y):
+            raise NotImplementedError('Input vec_x and vec_y must have same size.')
+        if plot_error is True and len(y_err) != len(vec_x):
+            raise NotImplementedError('Input vec_x, vec_y and y_error must have same size.')
+
         # Hold previous data
         self.axes.hold(True)
 
         # process inputs and defaults
-        self.x = x
-        self.y = y
+        # self.x = vec_x
+        # self.y = vec_y
 
         if color is None:
             color = (0,1,0,1)
         if marker is None:
             marker = 'o'
-        if linestyle is None:
-            linestyle = '-'
+        if line_style is None:
+            line_style = '-'
 
         # color must be RGBA (4-tuple)
-        if False:
-            r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
-                               label=label, linewidth=linewidth) # return: list of matplotlib.lines.Line2D object
+        if plot_error is False:
+            r = self.axes.plot(vec_x, vec_y, color=color, marker=marker, linestyle=line_style,
+                               label=label, linewidth=line_width)
+            # return: list of matplotlib.lines.Line2D object
         else:
-            r = self.axes.errorbar(x, y, yerr=10, color=color, marker=marker, linestyle=linestyle,
-                                   label=label, linewidth=linewidth)
+            r = self.axes.errorbar(vec_x, vec_y, yerr=y_err, color=color, marker=marker, linestyle=line_style,
+                                   label=label, linewidth=line_width)
 
         self.axes.set_aspect('auto')
 
         # set x-axis and y-axis label
-        if xlabel is not None:
-            self.axes.set_xlabel(xlabel, fontsize=20)
-        if ylabel is not None:
-            self.axes.set_ylabel(ylabel, fontsize=20)
+        if x_label is not None:
+            self.axes.set_xlabel(x_label, fontsize=20)
+        if y_label is not None:
+            self.axes.set_ylabel(y_label, fontsize=20)
 
         # set/update legend
         self._setupLegend()
 
         # Register
-        if len(r) == 1:
+        if plot_error is True and len(r) == 3:
+            self._lineDict[self._lineIndex] = r[2]
+        elif plot_error is False and len(r) == 1:
             self._lineDict[self._lineIndex] = r[0]
         else:
-            print "Impoooooooooooooooosible!"
+            print "Impoooooooooooooooosible! Number of returned tuple is %d"%(len(r))
+            dbmsg = ''
+            for sub_r in r:
+                dbmsg += 'Type: %s, Value: %s\n' % (str(type(sub_r)), str(sub_r))
+            print dbmsg
         self._lineIndex += 1
 
         # Flush/commit
