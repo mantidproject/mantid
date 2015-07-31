@@ -114,27 +114,43 @@ private:
   /// Check input properties
   void checkProperties(size_t &is, size_t &ie);
 
+  /// Properties needed to load a run
   /// Stores base name shared by all runs
   std::string m_filenameBase;
   /// Stores extension shared by all runs
   std::string m_filenameExt;
   /// Sotres number of zeros in run name
   int m_filenameZeros;
-  /// Stores property "Int"
-  bool m_int;
-  /// Store forward spectra
-  std::vector<int> m_forward_list;
-  /// Store backward spectra
-  std::vector<int> m_backward_list;
   /// Store type of dead time corrections
   std::string m_dtcType;
   /// File to read corrections from
   std::string m_dtcFile;
-  /// Store red period
+  /// Store forward spectra
+  std::vector<int> m_forward_list;
+  /// Store backward spectra
+  std::vector<int> m_backward_list;
+
+  /// Properties needed to analyse a run
+  /// Type of calculation: integral or differential
+  bool m_int;
+  /// Red period
   int m_red;
-  /// Store green period
+  /// Green period
   int m_green;
-  // Mantid maps to store intermediate results
+  // LogValue name
+  // Type of computation: integral or differential
+  std::string m_stype;
+  /// Minimum time for the analysis
+  double m_minTime;
+  /// Maximum time for the analysis
+  double m_maxTime;
+
+  /// Properties needed to get the log value
+  std::string m_logName;
+  /// LogValue function
+  std::string m_logFunc;
+
+  /// Mantid maps to store intermediate results
   // Map to store log value
   std::map<size_t, double> m_logValue;
   // Red values
@@ -149,16 +165,6 @@ private:
   // Diff values (Red - Green)
   std::map<size_t, double> m_diffY;
   std::map<size_t, double> m_diffE;
-  // LogValue name
-  std::string m_logName;
-  // LogValue function
-  std::string m_logFunc;
-  // Type of computation: integral or differential
-  std::string m_stype;
-  // Minimum time for the analysis
-  double m_minTime;
-  // Maximum time for the analysis
-  double m_maxTime;
 
   // String containing all the properties
   std::string m_allProperties;

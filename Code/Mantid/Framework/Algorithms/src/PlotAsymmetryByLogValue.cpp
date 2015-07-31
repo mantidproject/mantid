@@ -242,6 +242,11 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &is, size_t &ie) {
   m_allProperties = ss.str();
 
   // Check if we can re-use results from previous run
+  // We can reuse results if:
+  // 1. There is a ws in the ADS with name m_currResName
+  // 2. It is a MatrixWorkspace
+  // 3. It has a title equatl to m_allProperties
+  // This ws stores previous results as described below
   if (AnalysisDataService::Instance().doesExist(m_currResName)) {
     MatrixWorkspace_sptr prevResults =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
