@@ -1,9 +1,9 @@
 #ifndef MANTID_ALGORITHMS_TOFSANSRESOLUTIONBYPIXELCALCULATOR_H_
 #define MANTID_ALGORITHMS_TOFSANSRESOLUTIONBYPIXELCALCULATOR_H_
-
+#include "MantidKernel/System.h"
 namespace Mantid {
 namespace Algorithms {
-#include "MantidKernel/System.h"
+
   /**Helper class which provides the uncertainty calculations for the TOFSANSResolutionByPixel class
 
 

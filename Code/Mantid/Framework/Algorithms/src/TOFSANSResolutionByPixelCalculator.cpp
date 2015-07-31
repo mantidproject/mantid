@@ -1,5 +1,5 @@
 #include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
-#include <cmath>
+#include <math.h>
 namespace Mantid {
 namespace Algorithms {
 
@@ -28,6 +28,7 @@ double TOFSANSResolutionByPixelCalculator::getWavelengthIndependentFactor(double
  * @param deltaWavelength: the wavelength spread for that wavelength
  * @param lCollim: the collimation length
  * @param l2: the L2 length
+ * @returns the sigma q value
  */
 
 double TOFSANSResolutionByPixelCalculator::getSigmaQValue(double moderatorValue, double wavlengthIndependentFactor, double q, double wavelength, double deltaWavelength, double lCollim, double l2) const {
@@ -39,7 +40,9 @@ double TOFSANSResolutionByPixelCalculator::getSigmaQValue(double moderatorValue,
 
   // Calculate the q uncertainty
   const double qbyWavelengthSquared= q*q / (wavelength*wavelength);
-  return std::sqrt(wavlengthIndependentFactor / (wavelength * wavelength) + (sigWavelengthSquared * qbyWavelengthSquared));
+
+  return sqrt(wavlengthIndependentFactor / (wavelength * wavelength) + (sigWavelengthSquared * qbyWavelengthSquared));
 }
 }
 }
+
