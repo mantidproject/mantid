@@ -143,11 +143,6 @@ void PlotAsymmetryByLogValue::init() {
                                    FileProperty::OptionalLoad, nexusExt),
                   "Custom file with Dead Times. Will be used only if "
                   "appropriate DeadTimeCorrType is set.");
-  // This property is invisible to the user. Also, the ws will be hidden in the
-  // ADS
-  declareProperty(
-      new WorkspaceProperty<>("CurrentResults", m_currResName, Direction::Output),
-      "The name of a workspace to store current results.");
 }
 
 /**
@@ -191,6 +186,11 @@ void PlotAsymmetryByLogValue::exec() {
   populateOutputWorkspace(outWS, nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
+
+  outWS = WorkspaceFactory::Instance().create("Workspace2D", nplots + 1,
+                                              npoints, npoints);
+  // Populate ws holding current results
+  saveResultsToADS(outWS, nplots+1);
 }
 
 /**  Checks input properties and compares them to previous values
@@ -406,6 +406,52 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(
   outWS->getAxis(0)->title() = m_logName;
   outWS->setYUnitLabel("Asymmetry");
 }
+
+/**  Populate output workspace with results
+*   @param outWS :: [input/output] Output workspace to populate
+*   @param nplots :: [input] Number of histograms
+*/
+void PlotAsymmetryByLogValue::saveResultsToADS(
+    MatrixWorkspace_sptr &outWS, int nplots) {
+
+  if (nplots == 2) {
+    size_t i = 0;
+    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
+      size_t run = it->first;
+      outWS->dataX(0)[i] = static_cast<double>(run); // run number
+      outWS->dataY(0)[i] = it->second; // log value
+      outWS->dataY(1)[i] = m_redY[run]; // redY
+      outWS->dataE(1)[i] = m_redE[run]; // redE
+      i++;
+    }
+  } else {
+    size_t i = 0;
+    for (auto it = m_logValue.begin(); it != m_logValue.end(); ++it) {
+      size_t run = it->first;
+      outWS->dataX(0)[i] = static_cast<double>(run); // run number
+      outWS->dataY(0)[i] = it->second; // log value
+      outWS->dataY(1)[i] = m_diffY[run]; // diffY
+      outWS->dataE(1)[i] = m_diffE[run]; // diffE
+      outWS->dataY(2)[i] = m_redY[run]; // redY
+      outWS->dataE(2)[i] = m_redE[run]; // redE
+      outWS->dataY(3)[i] = m_greenY[run]; // greenY
+      outWS->dataE(3)[i] = m_greenE[run]; // greenE
+      outWS->dataY(4)[i] = m_sumY[run]; // sumY
+      outWS->dataE(4)[i] = m_sumE[run]; // sumE
+      i++;
+    }
+  }
+  // Set the title!
+  outWS->setTitle(m_allProperties);
+
+  // Save results to ADS
+  // We can't set an output property to store the results as this algorithm
+  // is executed as a child algorithm in the Muon ALC interface
+  // If current results were saved as a property we couln't used
+  // the functionality to re-use previous results in ALC
+  AnalysisDataService::Instance().addOrReplace(m_currResName,outWS);
+}
+
 /**  Parse run names
 *   @param firstFN :: [input/output] First run's name
 *   @param lastFN :: [input/output] Last run's name

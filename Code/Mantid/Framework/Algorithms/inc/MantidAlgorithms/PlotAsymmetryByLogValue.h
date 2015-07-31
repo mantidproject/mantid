@@ -109,6 +109,8 @@ private:
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
   void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots);
+  /// Populate the hidden ws storing current results
+  void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
   void checkProperties(size_t &is, size_t &ie);
 
