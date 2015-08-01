@@ -8,6 +8,8 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
     _van_integ_tbl = None
     _van_curves_ws = None
 
+    NUM_SPEC = 2513
+
     # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
     # unittest of rhel6
     def setUp(self):
@@ -46,7 +48,6 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
                           InputWorkspace='anything_goes')
 
         # mispelled VanadiumWorkspace
-        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace='test_table')
         self.assertRaises(RuntimeError,
                           sapi.EnggVanadiumCorrections,
                           VanWorkspace=self.__class__._data_ws,
@@ -66,17 +67,18 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
                           CurvesWorkspace=self.__class__._van_curves_ws)
 
     def _check_corrected_ws(self, ws):
-        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'dSpacing')
-        self.assertEqual(ws.getAxis(1).getUnit().unitID(), 'dSpacing')
-        self.assertEqual(ws.getNumberHistograms(), 1000)
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'TOF')
+        self.assertEqual(ws.getAxis(1).getUnit().unitID(), 'Label')
+        self.assertEqual(ws.getNumberHistograms(), self.NUM_SPEC)
 
-    def _check_integ_ws(self, wsName):
-        ws = mtd[wsName]
-        self.assertTrue(isinstance(ws, MatrixWorkspace),
-                        'The integration workspace should be a matrix workspace.')
+    def _check_integ_ws(self, ws):
+        self.assertTrue(isinstance(ws, ITableWorkspace),
+                        'The integration workspace should be a table workspace.')
+        self.assertEqual(ws.columnCount(), 1)
+        self.assertEqual(ws.rowCount(), self.NUM_SPEC)
 
-    def _check_curves_ws(self, wsName):
-        ws = mtd[wsName]        
+    def _check_curves_ws(self, ws):
+        self.assertTrue(0 == ws.getNumberHistograms() % 3)
         self.assertTrue(isinstance(ws, MatrixWorkspace),
                         'The integration workspace should be a matrix workspace.')
 
@@ -88,12 +90,13 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         sample_ws = self.__class__._data_ws
         int_ws = self.__class__._van_integ_tbl
         curves_ws = self.__class__._van_curves_ws
-        out = sapi.EnggVanadiumCorrections(Workspace=sample_ws,
-                                           IntegrationWorkspace=int_ws,
-                                           CurvesWorkspace=curves_ws)
+        sapi.EnggVanadiumCorrections(Workspace=sample_ws,
+                                     IntegrationWorkspace=int_ws,
+                                     CurvesWorkspace=curves_ws)
 
         self._check_corrected_ws(sample_ws)
-        self._check_integ_ws(ws=out, ws_name=out_name, y_dim_max=1, yvalues=self._expected_yvals_bank1)
+        self._check_integ_ws(int_ws)
+        self._check_curves_ws(curves_ws)
 
     # This is disabled because it would require loading the big vanadium run file. This is tested
     # in the EnggCalibration system test
