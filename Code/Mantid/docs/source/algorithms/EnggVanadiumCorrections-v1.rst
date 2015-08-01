@@ -61,10 +61,8 @@ using pre-calculated features from a previous run of this algorithm
 (both IntegrationWorkspace and CurvesWorkspace have to be passed as
 input properties, If these two properties are not passed, they will be
 re-calculated provided that a VanadiumWorkspace is passed which is not
-recommended).
-
-alternatively but not recommended if it can be avoided, calculating
-the correction features from the Vanadium diffraction data.
+recommended). All the calculations (integration, sums, divisions,
+etc.) are done in the d-spacing space.
 
 This algorithm is used as a child algorithm in the algorithms
 :ref:`algm-EnggFocus` and :ref:`algm-EnggCalibrateFull`.
@@ -76,7 +74,7 @@ Usage
 
 **Example - apply Vanadium corrections on a sample workspace from an EnginX run file:**
 
-.. testcode:: ExSimpleVanadiumCorr
+.. testcode:: ExVanadiumCorr
 
    # # To generate the pre-calculated features (integration and curves), for a new
    # Vanadium run, and apply the corrections on a workspace:
@@ -101,33 +99,36 @@ Usage
    sample_ws = Load('ENGINX00213855.nxs')
    integ_ws = LoadNexus('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    curves_ws = LoadNexus('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
-   corr_ws =  EnggVanadiumCorrections(Workspace = sample_ws,
-                                      IntegrationWorkspace = integ_ws,
-                                      CurvesWorkspace = curves_ws)
+   EnggVanadiumCorrections(Workspace = sample_ws,
+                           IntegrationWorkspace = integ_ws,
+                           CurvesWorkspace = curves_ws)
 
    # Should have one spectrum only
-   print "No. of spectra:", focussed_ws.getNumberHistograms()
+   print "No. of spectra:", sample_ws.getNumberHistograms()
 
-   # Print a few arbitrary bins where higher intensities are expected
-   fmt = "For TOF of {0:.3f} intensity is {1:.3f}"
-   for bin in [3169, 6037, 7124]:
-     print fmt.format(focussed_ws.readX(0)[bin], focussed_ws.readY(0)[bin])
+   # Print a few arbitrary integrated spectra
+   ws_idx = 400
+   idx_count = 3
+   integ_ws = Integration(sample_ws, StartWorkspaceIndex=ws_idx,
+                          EndWorkspaceIndex=ws_idx+idx_count)
+   fmt = "For workspace index {0:d} the spectrum integration is {1:.3f}"
+   for i in range(idx_count):
+      print fmt.format(ws_idx+i, integ_ws.readY(i)[0])
 
 .. testcleanup:: ExVanadiumCorr
 
    DeleteWorkspace(sample_ws)
    DeleteWorkspace(integ_ws)
    DeleteWorkspace(curves_ws)
-   DeleteWorkspace(corr_ws)
 
 Output:
 
 .. testoutput:: ExVanadiumCorr
 
-   No. of spectra: 1
-   For TOF of 20165.642 intensity is 13.102
-   For TOF of 33547.826 intensity is 17.844
-   For TOF of 38619.804 intensity is 32.768
+   No. of spectra: 2513
+   For workspace index 400 the spectrum integration is 23.998
+   For workspace index 401 the spectrum integration is 23.799
+   For workspace index 402 the spectrum integration is 22.872
    
 .. categories::
 

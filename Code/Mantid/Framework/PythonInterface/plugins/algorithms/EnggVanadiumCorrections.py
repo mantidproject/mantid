@@ -1,10 +1,17 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import math
+import mantid.simpleapi as sapi
+
+import numpy as np
+
 import EnggUtils
 
 class EnggVanadiumCorrections(PythonAlgorithm):
+    # banks (or groups) to which the pixel-by-pixel correction should be applied
+    _ENGINX_BANKS_FOR_PIXBYPIX_CORR = [1,2]
+
+
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
@@ -24,15 +31,25 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                                      PropertyMode.Optional),
                              "Workspace with the reference Vanadium diffraction data.")
 
-        self.declareProperty(TableWorkspaceProperty("IntegrationWorkspace", "", Direction.InOut,
+        self.declareProperty(ITableWorkspaceProperty("OutIntegrationWorkspace", "", Direction.Output,
+                                                    PropertyMode.Optional),
+                             'Output integration workspace produced when given an input Vanadium workspace')
+
+        self.declareProperty(MatrixWorkspaceProperty("OutCurvesWorkspace", "", Direction.Output,
+                                                     PropertyMode.Optional),
+                             'Output curves workspace produced when given an input Vanadium workspace')
+
+        self.declareProperty(ITableWorkspaceProperty("IntegrationWorkspace", "", Direction.Input,
                                                     PropertyMode.Optional),
                              "Workspace with the integrated values for every spectra of the reference "
                              "Vanadium diffraction data. One row per spectrum.")
 
-        self.declareProperty(MatrixWorkspaceProperty("CurvesWorkspace", "", Direction.InOut,
+        self.declareProperty(MatrixWorkspaceProperty("CurvesWorkspace", "", Direction.Input,
                                                      PropertyMode.Optional),
-                             "Workspace with the curves fitted on bank-aggregated Vanadium diffraction "
-                             "data, one per bank.")
+                             'Workspace with the curves fitted on bank-aggregated Vanadium diffraction '
+                             'data, one per bank. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace')
 
     def PyExec(self):
         """
@@ -58,9 +75,9 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         if vanWS:
             self.log().information("A workspace with reference Vanadium data was passed. Calculating "
                                    "corrections")
-            integWS, curvesWS = self._calcVanadiumCorrections(vanWS)
-            self.setProperty('IntegrationWorkspace', integWS)
-            self.setProperty('CurvesWorkspace', curvesWS)
+            integWS, curvesWS = self._calcVanadiumCorrection(vanWS)
+            self.setProperty('OutIntegrationWorkspace', integWS)
+            self.setProperty('OutCurvesWorkspace', curvesWS)
 
         elif not integWS or not curvesWS:
             raise ValueError('When a VanadiumWorkspace is not passed, both the IntegrationWorkspace and '
@@ -68,6 +85,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         if ws:
             self._applyVanadiumCorrections(ws, integWS, curvesWS)
+            self.setProperty('Workspace', ws)
 
     def _applyVanadiumCorrections(self, ws, integWS, curvesWS):
         """
@@ -78,27 +96,28 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         @param integWS :: table workspace with spectra integration values, one row per spectra
         @param curvesWS ::workspace with "Vanadium curves" for every bank
         """
-        integSpectra = integWS.getNumberHistograms()
+        integSpectra = integWS.rowCount()
         spectra = ws.getNumberHistograms()
-        if rows < spectra:
+        if integSpectra < spectra:
             raise ValueError("The number of histograms in the input data workspace (%d) is bigger "
-                             "than the number of rows (spectra) in the integration workspace (%d)"%
-                             (integSpectra, spectra))
+                             "than the number of spectra (rows) in the integration workspace (%d)"%
+                             (spectra, integSpectra))
 
-        self._applySensitivityCorrections(ws, integWS)
+        self._applySensitivityCorrection(ws, integWS, curvesWS)
         self._applyPixByPixCorrection(ws, curvesWS)
 
-    def _applySensitivityCorrection(self, ws, vanWS, integWS):
+    def _applySensitivityCorrection(self, ws, integWS, curvesWS):
         """
         Applies the first step of the Vanadium corrections on the given workspace.
         Operations are done in ToF
 
         @param ws :: workspace (in/out)
         @param vanWS :: workspace with Vanadium data
-        @param integWS :: pre-calculated integral of every spectrum for the vanadium data
+        @param integWS :: pre-calculated integral of every spectrum for the Vanadium data
+        @param curvesWS :: pre-calculated per-bank curves from the Vanadium data
         """
         for i in range(0, ws.getNumberHistograms()):
-            scaleFactor = integWS.cell(i,0) / vanWS.blocksize()
+            scaleFactor = integWS.cell(i,0) / curvesWS.blocksize()
             ws.setY(i, np.divide(ws.dataY(i), scaleFactor))
 
     def _applyPixByPixCorrection(self, ws, curvesWS):
@@ -128,7 +147,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         integWS = self._calcIntegrationSpectra(vanWS)
 
         # Have to calculate curves. get one curve per bank, in d-spacing
-        curves = self._fitCurvesPerBank(vanWS, ENGINX_BANKS_FOR_PIXBYPIX_CORR)
+        curvesWS = self._fitCurvesPerBank(vanWS, self._ENGINX_BANKS_FOR_PIXBYPIX_CORR)
         
         return integWS, curvesWS
 
@@ -138,7 +157,9 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         the 'Integration' algorithm, for when we are given raw data from a Vanadium run.
 
         @param vanWS :: workspace with data from a Vanadium run
-        @returns Integration workspace with Vanadium spectra integration values
+
+        @returns Integration workspace with Vanadium spectra integration values, as a table workspace
+        with one row per spectrum
         """
         expectedDim = 'Time-of-flight'
         dimType = vanWS.getXDimension().getName()
@@ -154,7 +175,12 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                                (integWS.blocksize(), integWS.getNumberHistograms(),
                                 vanWS.getNumberHistograms()))
 
-        return integWS
+        integTbl = sapi.CreateEmptyTableWorkspace()
+        integTbl.addColumn('double', 'Spectra Integration')
+        for i in range(integWS.getNumberHistograms()):
+            integTbl.addRow([integWS.readY(i)[0]])
+
+        return integTbl
 
     def _fitCurvesPerBank(self, vanWS, banks):
         """
@@ -169,7 +195,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         """
         curves = {}
         for b in banks:
-            indices = getWsIndicesForBank(vanWS, b)
+            indices = EnggUtils.getWsIndicesForBank(vanWS, b)
             if not indices:
                 # no indices at all for this bank, not interested in it, don't add it to the dictionary
                 # (as when doing Calibrate (not-full)) which does CropData() the original workspace
@@ -179,12 +205,12 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             wsToFit = EnggUtils.convertToDSpacing(self, wsToFit)
             wsToFit = EnggUtils.sumSpectra(self, wsToFit)
 
-            fitWS = self._fitBankCurve(self, wsToFit, b)
+            fitWS = self._fitBankCurve(wsToFit, b)
             curves.update({b: fitWS})
 
-        curvesWS = self._prepareCurvesWS(curvesDict)
+        curvesWS = self._prepareCurvesWS(curves)
 
-        return curves
+        return curvesWS
 
     def _fitBankCurve(self, vanWS, bank):
         """
@@ -298,11 +324,11 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         # This is simple and more efficient than using divide workspace, which requires
         # cropping separate workspaces, dividing them separately, then appending them
         # with AppendSpectra, etc.
-        ws = ENGGUtils._convertToDSpacing(self, ws)
+        ws = EnggUtils.convertToDSpacing(self, ws)
         for b in curves:
             # process all the spectra (indices) in one bank
             fittedCurve = curves[b]
-            idxs = getWsIndicesForBank(ws, b)
+            idxs = EnggUtils.getWsIndicesForBank(ws, b)
 
             if not idxs:
                 pass
@@ -317,7 +343,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                 ws.setY(i, np.divide(ws.dataY(i), rebinnedFitCurve.readY(1)))
 
         # finally, convert back to ToF
-        ws = EnggUtils.convertToToF(self, ws)
+        EnggUtils.convertToToF(self, ws)
 
     def _precalcWStoDict(self, ws):
         """
