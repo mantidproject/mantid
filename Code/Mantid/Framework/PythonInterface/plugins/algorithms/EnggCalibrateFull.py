@@ -20,7 +20,8 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
 
-        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
+                                                     PropertyMode.Optional),
                              "Workspace with the Vanadium (correction and calibration) run.")
 
         self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',

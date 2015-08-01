@@ -27,6 +27,27 @@ class EnggCalibrate(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
+                                                     PropertyMode.Optional),
+                             'Workspace with the Vanadium (correction and calibration) run. '
+                             'Alternatively, when the Vanadium run has been already processed, '
+                             'the properties can be used')
+
+        self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             '(integration result) and one row per spectrum. This can be used in '
+                             'combination with OutVanadiumCurveFits from a previous execution and '
+                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+
+        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc = 'A workspace2D with the fitting workspaces corresponding to '
+                             'the instrument banks. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                             'workspace is generated.')
+
         import EnggUtils
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
@@ -49,27 +70,6 @@ class EnggCalibrate(PythonAlgorithm):
                              'from this algorithm: difc and zero parameters for GSAS. these two parameters '
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
-
-        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
-                                                     PropertyMode.Optional),
-                             'Workspace with the Vanadium (correction and calibration) run. '
-                             'Alternatively, when the Vanadium run has been already processed, '
-                             'the properties can be used')
-
-        self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
-                                                     Direction.Input, PropertyMode.Optional),
-                             'Results of integrating the spectra of a Vanadium run, with one column '
-                             '(integration result) and one row per spectrum. This can be used in '
-                             'combination with OutVanadiumCurveFits from a previous execution and '
-                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
-
-        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
-                                                     PropertyMode.Optional),
-                             doc = 'A workspace2D with the fitting workspaces corresponding to '
-                             'the instrument banks. This workspace has three spectra per bank, as produced '
-                             'by the algorithm Fit. This is meant to be used as an alternative input '
-                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
-                             'workspace is generated.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,
                              doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
