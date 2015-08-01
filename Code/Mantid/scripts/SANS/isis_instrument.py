@@ -755,7 +755,8 @@ class ISISInstrument(BaseInstrument):
             self.changeCalibration(ws_name)
 
         # centralize the bank to the centre
-        self.move_components(ws_name, beamcentre[0], beamcentre[1])
+        dummy_centre, centre_shift = self.move_components(ws_name, beamcentre[0], beamcentre[1])
+        return centre_shift
 
     def load_transmission_inst(self, ws_trans, ws_direct, beamcentre):
         """
@@ -1452,12 +1453,13 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        self._rotate_around_y_axis(workspace = ws,
-                                   component_name = detBench.name(),
-                                   x_beam = xbeam,
-                                   x_scale_factor = XSF,
-                                   bench_rotation = BENCH_ROT)
-        # beam centre, translation
+        new_xbeam = self._rotate_around_y_axis(workspace = ws,
+                                               component_name = detBench.name(),
+                                               x_beam = xbeam,
+                                               x_scale_factor = XSF,
+                                               bench_rotation = BENCH_ROT)
+        new_ybeam = ybeam
+        # beam centre, translation, new beam position
         return [0.0, 0.0], [-xbeam, -ybeam]
 
     def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
@@ -1501,6 +1503,7 @@ class LARMOR(ISISInstrument):
             xshift = bench_rotation -x_beam*x_scale_factor
             sanslog.notice("Setup rotate " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
             RotateInstrumentComponent(workspace, ComponentName=component_name, X=0, Y=1, Z=0, Angle=xshift)
+        return xshift
 
     def append_marked(self, detNames):
         self._marked_dets.append(detNames)

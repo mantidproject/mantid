@@ -1074,6 +1074,9 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
+    xstart = original[0]
+    ystart = original[1]
+
     if ReductionSingleton().instrument.lowAngDetSet:
         det_bank = 'rear'
     else:
@@ -1086,7 +1089,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     beamcoords = ReductionSingleton().get_beam_center()
 
-
     COORD1NEW = beamcoords[0]
     COORD2NEW = beamcoords[1]
 
@@ -1094,11 +1096,11 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
 
-    # Create an object which handles the the positions and increments
+    # Create an object which handles the positions and increments
     centre_positioner = CentrePositioner(reducer = centre_reduction,
-                                         position_type=find_direction,
-                                         coord1_start=beamcoords[0],
-                                         coord2_start=beamcoords[1],
+                                         position_type = find_direction,
+                                         coord1_start = beamcoords[0],
+                                         coord2_start = beamcoords[1],
                                          coord1_step = COORD1STEP,
                                          coord2_step = COORD2STEP,
                                          tolerance = tolerance)
@@ -1120,7 +1122,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     it = 0
     for i in range(1, MaxIter+1):
         it = i
-
         centre_reduction.set_beam_finder(
             isis_reduction_steps.BaseBeamFinder(COORD1NEW, COORD2NEW), det_bank)
 

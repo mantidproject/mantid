@@ -229,6 +229,8 @@ class CentreFinder(object):
         quat.rotate(cylinder_direction)
         return cylinder_direction.X(), cylinder_direction.Y(), cylinder_direction.Z()
 
+
+
 class CentrePositioner(object):
     '''
     Handles the positions and increments for beam finding.
@@ -243,10 +245,15 @@ class CentrePositioner(object):
         @param coord1_step: The initial step size for the first coordinate
         @param coord2_step: The initial step size for the second coordinate
         @param tolerance: The tolerance
+        @param scale_factor_coord1: the scale factor for the first coordinate
+        @param scale_factor_coord2: the scale factor for the second coordinate
         '''
         super(CentrePositioner,self).__init__()
         self.coord1_start = coord1_start
         self.coord2_start = coord2_start
+
+        self.current_coord1 = coord1_start
+        self.current_coord2 = coord2_start
 
         # Create the appropriate position updater
         pos_factory = BeamCentrePositionUpdaterFactory()
@@ -301,6 +308,7 @@ class CentrePositioner(object):
         @returns True if the increment of the second coordinate is smaller than tolerance else False
         '''
         return self.increment_provider.is_coord2_increment_smaller_than_tolerance()
+
 
 # -- Beam Position Manager
 class BeamCentrePositionUpdaterFactory(object):
@@ -430,8 +438,9 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
         dummy_2 = x_initial
         return x_new, y_initial
 
-# --- Incrementor
-class IncrementProviderFactory(object):
+
+# --- Provides the positions and increments with the correct scaling
+class PositionProviderFactory(object):
     '''
     Creates the required increment provider. The increments for the two coordinates
     depend on the instrument, eg Larmor's first coordinate is an angle for certain
@@ -444,7 +453,7 @@ class IncrementProviderFactory(object):
         @param increment_coord2: The increment for the second coordinate
         @param tolerance: The tolerance setting
         '''
-        super(IncrementProviderFactory,self).__init__()
+        super(PositionProviderFactory,self).__init__()
         self.increment_coord1 = increment_coord1
         self.increment_coord2 = increment_coord2
         self.tolerance = tolerance
@@ -458,8 +467,10 @@ class IncrementProviderFactory(object):
         if self.is_workspace_which_requires_angle(reducer):
             # The angle increment is currently not specified in the instrument parameters file,
             # hence we set a value here. This is also true for the tolerance
-            increment_coord1_angle = self.get_increment_coord1_angle(reducer, self.tolerance)
-            tolerance_angle = self.get_tolerance_for_angle(self.tolerance, self.increment_coord1, increment_coord1_angle)
+            #increment_coord1_angle = self.get_increment_coord1_angle(reducer, self.tolerance)
+            #tolerance_angle = self.get_tolerance_for_angle(self.tolerance, self.increment_coord1, increment_coord1_angle)
+            increment_coord1_angle = self.increment_coord1 /1000. # The tolerance needs to be specified in angles
+            tolerance_angle = self.tolerance
             return IncrementProviderAngleY(increment_coord1 = increment_coord1_angle,
                                            increment_coord2 = self.increment_coord2,
                                            tolerance = self.tolerance,
@@ -519,9 +530,9 @@ class IncrementProviderFactory(object):
             ws_ref = mtd[workspace_name]
             return LARMOR.is_run_new_style_run(ws_ref)
 
-class IncrementProvider(object):
+class PositionProvider(object):
     def __init__(self, increment_coord1, increment_coord2, tolerance):
-        super(IncrementProvider,self).__init__()
+        super(PositionProvider,self).__init__()
         dummy_1 = increment_coord1
         dummy_2 = increment_coord2
         dummy_3 = tolerance
@@ -550,7 +561,7 @@ class IncrementProvider(object):
         else:
             return False
 
-class IncrementProviderXY(IncrementProvider):
+class PositionProviderXY(IncrementProvider):
     '''
     Handles the increments for the case when both coordinates are cartesian
     '''
@@ -592,7 +603,7 @@ class IncrementProviderXY(IncrementProvider):
     def get_increment_coord2(self):
         return self.increment_y
 
-class IncrementProviderAngleY(IncrementProvider):
+class PositionProviderAngleY(IncrementProvider):
     '''
     Handles the increments for the case when the first coordinate is an angle
     and the second is a cartesian coordinate
