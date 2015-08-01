@@ -1,11 +1,11 @@
 import unittest
-from mantid.simpleapi import *
 from mantid.api import *
+import mantid.simpleapi as sapi
 
 class EnggCalibrateTest(unittest.TestCase):
 
     _data_ws = None
-    _van_ws = None
+    _van_curves_ws = None
     _van_integ_tbl = None
 
     # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
@@ -15,17 +15,17 @@ class EnggCalibrateTest(unittest.TestCase):
         Set up dependencies for one or more of the tests below.
         """
         if not self.__class__._data_ws:
-            self.__class__._data_ws = LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
+            self.__class__._data_ws = sapi.LoadNexus("ENGINX00228061.nxs", OutputWorkspace='ENGIN-X_test_ws')
 
-        if not self.__class__._van_ws:
+        if not self.__class__._van_curves_ws:
             # Note the pre-calculated file instead of the too big vanadium run
             # self.__class__._van_ws = LoadNexus("ENGINX00236516.nxs", OutputWorkspace='ENGIN-X_test_vanadium_ws')
-            self.__class__._van_ws = LoadNexus(Filename=
-                                               'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
-                                               OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
-            self.__class__._van_integ_tbl = LoadNexus(Filename=
-                                                      'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
-                                                      OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
+            self.__class__._van_curves_ws = sapi.LoadNexus(Filename=
+                                                           'ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs',
+                                                           OutputWorkspace='ENGIN-X_vanadium_curves_test_ws')
+            self.__class__._van_integ_tbl = sapi.LoadNexus(Filename=
+                                                           'ENGINX_precalculated_vanadium_run000236516_integration.nxs',
+                                                           OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
 
     def test_issues_with_properties(self):
@@ -36,28 +36,28 @@ class EnggCalibrateTest(unittest.TestCase):
 
         # No InputWorkspace property (required)
         self.assertRaises(RuntimeError,
-                          EnggCalibrate,
+                          sapi.EnggCalibrate,
                           File='foo', Bank='1')
 
         # Wrong (mispelled) InputWorkspace property
         self.assertRaises(RuntimeError,
-                          EnggCalibrate,
+                          sapi.EnggCalibrate,
                           InputWorkpace='anything_goes', Bank='2')
 
         # mispelled ExpectedPeaks
-        tbl = CreateEmptyTableWorkspace(OutputWorkspace='test_table')
+        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace='test_table')
         self.assertRaises(RuntimeError,
-                          EnggCalibrate,
+                          sapi.EnggCalibrate,
                           Inputworkspace=self.__class__._data_ws, DetectorPositions=tbl, Bank='2', Peaks='2')
 
         # mispelled DetectorPositions
         self.assertRaises(RuntimeError,
-                          EnggCalibrate,
+                          sapi.EnggCalibrate,
                           InputWorkspace=self.__class__._data_ws, Detectors=tbl, Bank='2', Peaks='2')
 
         # There's no output workspace
         self.assertRaises(RuntimeError,
-                          EnggCalibrate,
+                          sapi.EnggCalibrate,
                           InputWorkspace=self.__class__._data_ws, Bank='1')
 
 
@@ -69,7 +69,7 @@ class EnggCalibrateTest(unittest.TestCase):
         # This should produce 'given peak center ... is outside of data range' warnings
         # and finally raise after a 'some peaks not found' error
         self.assertRaises(RuntimeError,
-                          EnggCalibrate,
+                          sapi.EnggCalibrate,
                           InputWorkspace=self.__class__._data_ws, ExpectedPeaks=[0.2, 0.4], Bank='2')
 
     def test_runs_ok(self):
@@ -77,10 +77,10 @@ class EnggCalibrateTest(unittest.TestCase):
         Checks normal operation.
         """
 
-        difc, zero = EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                   VanadiumWorkspace=self.__class__._van_ws,
-                                   VanadiumIntegWorkspace=self.__class__._van_integ_tbl,
-                                   ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
+        difc, zero = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
+                                        VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                        VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                        ExpectedPeaks=[1.6, 1.1, 1.8], Bank='2')
 
         self.check_3peaks_values(difc, zero)
 
@@ -91,22 +91,22 @@ class EnggCalibrateTest(unittest.TestCase):
         """
         # This file has: 1.6, 1.1, 1.8 (as the test above)
         filename = 'EnginX_3_expected_peaks_unittest.csv'
-        difc, zero = EnggCalibrate(InputWorkspace=self.__class__._data_ws,
-                                   VanadiumWorkspace=self.__class__._van_ws,
-                                   VanadiumIntegWorkspace=self.__class__._van_integ_tbl,
-                                   ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
-                                   ExpectedPeaksFromFile=filename,
-                                   Bank='2')
+        difc, zero = sapi.EnggCalibrate(InputWorkspace=self.__class__._data_ws,
+                                        VanIntegrationWorkspace=self.__class__._van_integ_tbl,
+                                        VanCurvesWorkspace=self.__class__._van_curves_ws,
+                                        ExpectedPeaks=[-4, 40, 323], # nonsense, but FromFile should prevail
+                                        ExpectedPeaksFromFile=filename,
+                                        Bank='2')
 
         self.check_3peaks_values(difc, zero)
 
     def check_3peaks_values(self, difc, zero):
         # There are platform specific differences in final parameter values
         # For example in earlier versions, debian: 369367.57492582797; win7: 369242.28850305633
-        expected_difc = -1910618.2889
-        # assertLess would be nices, but only available in unittest >= 2.7
+        expected_difc = 19110.7598121
+        # assertLess would be nice, but only available in unittest >= 2.7
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
-        expected_zero = 2120458.99303
+        expected_zero = -724.337353801
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 

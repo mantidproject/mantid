@@ -23,6 +23,21 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
                              "Workspace with the Vanadium (correction and calibration) run.")
 
+        self.declareProperty(ITableWorkspaceProperty('VanIntegrationWorkspace', '',
+                                                     Direction.Input, PropertyMode.Optional),
+                             doc = 'Results of integrating the spectra of a Vanadium run, with one column '
+                             '(integration result) and one row per spectrum. This can be used in '
+                             'combination with OutVanadiumCurveFits from a previous execution and '
+                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+
+        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc = 'A workspace2D with the fitting workspaces corresponding to '
+                             'the instrument banks. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                             'workspace is generated.')
+
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
                              "calibration information. The table includes: the old positions in V3D format "
@@ -55,13 +70,6 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
-        self.declareProperty('OutVanadiumCurveFits', '', direction=Direction.Input,
-                             doc = 'Name for a workspace2D with the fitting workspaces corresponding to '
-                             'the banks processed. This workspace has three spectra per bank, as produced '
-                             'by the algorithm Fit. This is meant to be used as an alternative input '
-                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
-                             'workspace is generated.')
-
     def PyExec(self):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
@@ -76,9 +84,11 @@ class EnggCalibrateFull(PythonAlgorithm):
                                                            self.getProperty(self.INDICES_PROP_NAME).value)
 
         vanWS = self.getProperty("VanadiumWorkspace").value
+        vanIntegWS = self.getProperty('VanIntegrationWorkspace').value
+        vanCurvesWS = self.getProperty('VanCurvesWorkspace').value
         # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
         # calibration step, which creates a cycle / chicken-and-egg issue.
-        EnggUtils.applyVanadiumCorrection(self, inWS, vanWS)
+        EnggUtils.applyVanadiumCorrections(self, inWS, WSIndices, vanWS, vanIntegWS, vanCurvesWS)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
         posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
