@@ -206,6 +206,7 @@ class SANS2DGUIBatchReduction(SANS2DMinimalBatchReduction):
     def validate(self):
         self.tolerance_is_reller = True
         self.tolerance = 1.0e-2
+        self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"
 
 class SANS2DGUIReduction(SANS2DGUIBatchReduction):
