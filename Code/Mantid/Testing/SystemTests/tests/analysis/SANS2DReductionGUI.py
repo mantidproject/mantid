@@ -49,7 +49,7 @@ class SANS2DMinimalBatchReduction(stresstesting.MantidStressTest):
         fit_settings = batch.BatchReduce(BATCHFILE,'.nxs', combineDet='rear')
 
     def validate(self):
-
+        self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"
 
 
