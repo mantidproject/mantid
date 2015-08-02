@@ -198,23 +198,34 @@ std::string createDocString(IAlgorithm &self) {
 
 /**
  * RAII struct to drop the GIL and reacquire it on destruction.
- * The algorithm is added to the map of tracked algorithms. See
- * executeProxy for the reason why
+ * If the algorithm is not a child then it added to the map of
+ * tracked algorithms. See executeProxy for a more
+ * detailed explanation
  */
 struct AllowCThreads {
   AllowCThreads(const object & algm)
-    : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL) {
+    : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL),
+      m_tracking(false) {
     PyThreadState *curThreadState = PyThreadState_GET();
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
     PyEval_SetTrace(NULL, NULL);
-    _trackAlgorithmInThread(curThreadState->thread_id, algm);
+    if(!algm.is_none()) {
+      _trackAlgorithmInThread(curThreadState->thread_id, algm);
+      m_tracking = true;
+    }
     m_saved = PyEval_SaveThread();
   }
   ~AllowCThreads() {
     PyEval_RestoreThread(m_saved);
-    api::delitem(THREAD_ID_MAP, m_saved->thread_id);
+    if(m_tracking) {
+      try {
+        api::delitem(THREAD_ID_MAP, m_saved->thread_id);
+      } catch(error_already_set&) {
+        PyErr_Clear();
+      }
+    }
     PyEval_SetTrace(m_tracefunc, m_tracearg);
     Py_XDECREF(m_tracearg);
   }
@@ -223,6 +234,7 @@ private:
   Py_tracefunc m_tracefunc;
   PyObject *m_tracearg;
   PyThreadState *m_saved;
+  bool m_tracking;
 };
 
 /**
@@ -239,15 +251,14 @@ bool executeProxy(object &self) {
 
   // Extract this before dropping GIL as I'm not sure if it calls any Python
   auto & calg = extract<IAlgorithm&>(self)();
-  AllowCThreads threadStateHolder(self);
+  AllowCThreads threadStateHolder((!calg.isChild()) ? self : object());
   return calg.execute();
 }
 
 /**
  * @param self A reference to the calling object
  * @return An AlgorithmID wrapped in a AlgorithmIDProxy container or None if
- * there is
- *         no ID
+ * there is no ID
  */
 PyObject *getAlgorithmID(IAlgorithm &self) {
   AlgorithmID id = self.getAlgorithmID();
