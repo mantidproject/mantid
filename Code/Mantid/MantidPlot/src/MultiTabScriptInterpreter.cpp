@@ -682,7 +682,7 @@ MultiTabScriptInterpreter::createTabTitle(const QString &filename) const {
  */
 void MultiTabScriptInterpreter::closeTabAtIndex(int index) {
   ScriptFileInterpreter *interpreter = interpreterAt(index);
-  interpreter->prepareToClose();
+  if(!interpreter->shouldClose()) return;
   emit tabClosing(index);
   removeTab(index);
   emit tabClosed(index);

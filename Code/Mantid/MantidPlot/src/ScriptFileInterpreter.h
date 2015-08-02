@@ -3,19 +3,23 @@
 
 #include "Script.h"
 
-#include <QWidget>
-#include <QTextEdit>
 #include <QPoint>
 #include <QSplitter>
 #include <QStatusBar>
+#include <QTextEdit>
 
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
+class QMessageBox;
+class ScriptCloseDialog;
 class ScriptingEnv;
 class ScriptEditor;
 class ScriptOutputDisplay;
 
+//-----------------------------------------------------------------------------
+// ScriptFileInterpreter
+//-----------------------------------------------------------------------------
 /**
  * Defines a widget that uses a ScriptEditor, a Script object and a
  * text display widget to give a single widget that can
@@ -31,8 +35,8 @@ public:
   ScriptFileInterpreter(QWidget *parent = NULL, const QString & settingsGroup = "");
   /// Destroy the object
   ~ScriptFileInterpreter();
-  /// Make sure we are in a safe state to delete the widget
-  virtual void prepareToClose();
+  /// Determine if the script is ready to be closed
+  virtual bool shouldClose();
   /// Setup from a script environment
   virtual void setup(const ScriptingEnv & environ, const QString & identifier);
 
@@ -125,6 +129,8 @@ private slots:
   void setStoppedStatus();
 
 private:
+  friend class ScriptCloseDialog;
+
   Q_DISABLE_COPY(ScriptFileInterpreter)
   void setupChildWidgets();
 
@@ -160,7 +166,7 @@ public:
     ScriptFileInterpreter(NULL) {}
 
   /// Does nothing
-  void prepareToClose() {}
+  bool shouldClose() { return false; }
   /// Does nothing
   void setup(const ScriptingEnv &, const QString &) {}
 
@@ -213,6 +219,24 @@ private slots:
   virtual void printScript() {}
   /// Does nothing
   virtual void printOutput() {}
+};
+
+//-----------------------------------------------------------------------------
+// ScriptCloseDialog - Specific message for closing the widget
+//-----------------------------------------------------------------------------
+class ScriptCloseDialog : public QWidget
+{
+  Q_OBJECT
+
+public:
+  ScriptCloseDialog(ScriptFileInterpreter &interpreter,
+                    QWidget *parent = NULL);
+
+  bool shouldScriptClose();
+
+private:
+  QMessageBox *m_msgBox;
+  ScriptFileInterpreter &m_interpreter;
 };
 
 #endif /* SCRIPTFILEINTERPRETER_H_ */

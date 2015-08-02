@@ -2,18 +2,19 @@
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
-#include <iostream>
 #include <QAction>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <q3cstring.h>
 #include <qscilexer.h>
 
 #include <stdexcept>
 
+//-----------------------------------------------------------------------------
+// ScriptFileInterpreter
+//-----------------------------------------------------------------------------
 
 /**
  * Construct a widget
@@ -38,43 +39,13 @@ ScriptFileInterpreter::~ScriptFileInterpreter()
 }
 
 /**
- * Make sure the widget is ready to be deleted, i.e. saved etc
+ * Check if the interpreter is running and the script is saved
+ * @return True if the interpreter should be closed
  */
-void ScriptFileInterpreter::prepareToClose()
+bool ScriptFileInterpreter::shouldClose()
 {
-  if( !isScriptModified() ) return;
-
-  QMessageBox msgBox(this);
-  msgBox.setModal(true);
-  msgBox.setWindowTitle("MantidPlot");
-  msgBox.setText(tr("The current script has been modified."));
-  msgBox.setInformativeText(tr("Save changes?"));
-  msgBox.addButton(QMessageBox::Save);
-  QPushButton *saveAsButton = msgBox.addButton("Save As...", QMessageBox::AcceptRole);
-  msgBox.addButton(QMessageBox::Discard);
-  int ret = msgBox.exec();
-
-  try
-  {
-    if( msgBox.clickedButton() == saveAsButton )
-    {
-      m_editor->saveAs();
-    }
-    else if( ret == QMessageBox::Save )
-    {
-      m_editor->saveToCurrentFile();
-    }
-    else
-    {
-      m_editor->setModified(false);
-    }
-  }
-  //Catch cancelling save dialogue
-  catch( ScriptEditor::SaveCancelledException& sce )
-  {
-    UNUSED_ARG(sce);
-    m_editor->setModified(false);
-  }
+  ScriptCloseDialog dialog(*this, this);
+  return dialog.shouldScriptClose();
 }
 
 /// Convert tabs in selection to spaces
@@ -600,3 +571,88 @@ void ScriptFileInterpreter::executeCode(const ScriptCode & code, const Script::E
   }
 }
 
+//-----------------------------------------------------------------------------
+// ScriptCloseDialog
+//-----------------------------------------------------------------------------
+ScriptCloseDialog::ScriptCloseDialog(ScriptFileInterpreter &interpreter,
+                                     QWidget *parent)
+  : QWidget(parent), m_msgBox(new QMessageBox(this)), m_interpreter(interpreter) {
+  QVBoxLayout *layout = new QVBoxLayout;
+  layout->addWidget(m_msgBox);
+  setLayout(layout);
+}
+
+/**
+ * Raise the the dialog as modal if necessary and ask the user
+ * if the script should close
+ * @return True or False depending on whether the script should be closed
+ */
+bool ScriptCloseDialog::shouldScriptClose() {
+  const bool executing(m_interpreter.isExecuting()),
+    modified(m_interpreter.isScriptModified());
+  // Is the dialog even necessary?
+  if(!modified && !executing) return true;
+
+  m_msgBox->setModal(true);
+  m_msgBox->setWindowTitle("MantidPlot");
+  m_msgBox->setIcon(QMessageBox::Question);
+
+  QString filename = m_interpreter.filename();
+  bool close(true);
+  if(modified) {
+    m_msgBox->addButton(QMessageBox::Save);
+    m_msgBox->addButton(QMessageBox::Cancel);
+    m_msgBox->addButton(QMessageBox::Discard);
+    m_msgBox->setDefaultButton(QMessageBox::Save);
+    if(filename.isEmpty()) {
+      m_msgBox->setText(QString("Save changes before closing?"));
+      m_msgBox->button(QMessageBox::Save)->setText("Save As");
+    } else {
+      m_msgBox->setText(QString("Save changes to '%1' before closing?").arg(filename));
+    }
+    if(executing) {
+      m_msgBox->setInformativeText(tr("The script will be aborted."));
+    }
+    // show dialog
+    int ret = m_msgBox->exec();
+    try {
+      switch(ret)
+      {
+      case QMessageBox::Save:
+        m_interpreter.saveToCurrentFile();
+        close = true;
+        break;
+      case QMessageBox::Discard:
+        close = true;
+        break;
+      default:
+        close = false;
+        break;
+      }
+    }
+    catch(ScriptEditor::SaveCancelledException &) {
+      close = false;
+    }
+  }
+  else if(executing) {
+    if(filename.isEmpty()) {
+      m_msgBox->setText(tr("Abort and close?"));
+    } else {
+      m_msgBox->setText(tr("Abort '%1' and close?").arg(m_interpreter.filename()));
+    }
+    m_msgBox->addButton(QMessageBox::Abort);
+    m_msgBox->addButton(QMessageBox::Cancel);
+    m_msgBox->setDefaultButton(QMessageBox::Abort);
+    int ret = m_msgBox->exec();
+    switch(ret) {
+      case QMessageBox::Abort:
+        m_interpreter.m_runner->abort();
+        close = true;
+        break;
+      default:
+        close = false;
+        break;
+    }
+  }
+  return close;
+}
