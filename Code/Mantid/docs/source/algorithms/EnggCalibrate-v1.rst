@@ -11,8 +11,9 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
-   removed without a notification, should instrument scientists decide to do so.
+   This algorithm is being developed for a specific instrument. It
+   might get changed or even removed without a notification, should
+   instrument scientists decide to do so.
 
 
 Utilises :ref:`algm-EnggFocus` which performs a TOF to dSpacing
@@ -60,16 +61,21 @@ Usage
 
    out_tbl_name = 'out_params'
    ws_name = 'test'
-   van_ws_name = 'test_vanadium'
    Load('ENGINX00213855.nxs', OutputWorkspace=ws_name)
-   Load('ENGINX00193749.nxs', OutputWorkspace=van_ws_name)
+
+   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
+   van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
+
    Difc1, Zero1 = EnggCalibrate(InputWorkspace=ws_name,
-                                VanadiumWorkspace=van_ws_name,
+                                VanIntegrationWorkspace=van_integ_ws,
+                                VanCurvesWorkspace=van_curves_ws,
                                 ExpectedPeaks=[1.097, 2.1], Bank='1',
                                 OutputParametersTableName=out_tbl_name)
 
    Difc2, Zero2 = EnggCalibrate(InputWorkspace=ws_name,
-                                VanadiumWorkspace= van_ws_name,
+                                VanIntegrationWorkspace=van_integ_ws,
+                                VanCurvesWorkspace=van_curves_ws,
                                 ExpectedPeaks=[1.097, 2.1], Bank='2')
 
    # You can produce an instrument parameters (iparam) file for GSAS.
@@ -91,7 +97,8 @@ Usage
 
    DeleteWorkspace(out_tbl_name)
    DeleteWorkspace(ws_name)
-   DeleteWorkspace(van_ws_name)
+   DeleteWorkspace(van_integ_ws)
+   DeleteWorkspace(van_curves_ws)
 
    os.remove(GSAS_iparm_fname)
 
@@ -99,9 +106,9 @@ Output:
 
 .. testoutput:: ExampleCalib
 
-   Difc1: 18404.35
-   Zero1: -8.77
+   Difc1: 18400.71
+   Zero1: -3.17
    The output table has 1 row(s)
-   Parameters from the table, Difc1: 18404.35, Zero1: -8.77
+   Parameters from the table, Difc1: 18400.71, Zero1: -3.17
    Output GSAS iparam file was written? True
    Number of lines of the GSAS iparam file: 35

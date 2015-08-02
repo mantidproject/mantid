@@ -25,27 +25,32 @@ corrections with respect to a reference Vanadium diffraction dataset
 The algorithm outputs the features extracted from the Vanadium data
 that are used to perform the two types of corrections, respectively:
 
-1. the integration of every individual Vanadium spectrum
-2. a list of curves of aggregated counts as a function of
+1. the *integration* of every individual Vanadium spectrum
+2. a list of *curves* of aggregated counts as a function of
    time-of-flight (one per bank)
+
+If an input/output workspace with diffraction data is passed, the
+algorithm applies the corrections on the diffraction data workspace by
+using the integration and curves calculated from the reference
+Vanadium datasset.
 
 These outputs can be used to apply the corrections on a diffraction
 data workspace in the same algorithm run, or be used subsequently to
 apply corrections to different input workspaces. In practice, both
 outputs need to be calculated only once for every reference Vanadium
-dataset, while they would normally be used to correct a series of
-different diffraction data workspaces.
+dataset, while they would normally be used to correct a (possibly
+long) series of different diffraction data workspaces.
 
-If no input/output workspace with diffraction data is passed, the
-algorithm will calculate features that can then be used to apply
-Vanadium corrections in other *Engg* algorithms. These corrections
-will need to be applied in subsequent runs of the algorithm, but the
-same correction features (integration and curves) can be re-used for
-as long as the same reference Vanadium diffraction data is used.
-
-If an input/output workspace with diffraction data is passed, the
-algorithm applies the corrections on the diffraction data workspace by
-using the integration and curves from a reference Vanadium datasset.
+If a vanadium data workspace is passed, the algorithm will calculate
+features that can then be used to apply Vanadium corrections in other
+*Engg* algorithms. If in addition an input/output workspace with
+diffraction data is passed, the corrections will be applied on
+it. Afterwards the same corrections can be applied on different
+diffraction data workspaces by calling again this algorithm and
+providing as inputs the integraion and curves workspaces produced by
+the first call. The same correction features (integration and curves)
+can be re-used for as long as the same reference Vanadium diffraction
+data is still valid.
 
 Normally this algorithm can be used in two different ways:
 1. Pre-calculate correction features from a Vanadium data workspace.
@@ -54,12 +59,13 @@ Normally this algorithm can be used in two different ways:
 
 Examples of these two alternatives are shown below. In the first
 option, only the input VanadiumWorkspace is required, and the two
-outputs are produced normally. Optionally, a diffraction data
-workspace can be passed in the input property InputWorkspace for it to
-be corrected. In the second option, the corrections can be applied by
-using pre-calculated features from a previous run of this algorithm
-(both IntegrationWorkspace and CurvesWorkspace have to be passed as
-input properties, If these two properties are not passed, they will be
+outputs (integration and curves workspaces) are produced
+normally. Optionally, a diffraction data workspace can be passed in
+the input property InputWorkspace for it to be corrected. In the
+second option, the corrections can be applied by using pre-calculated
+features from a previous run of this algorithm (both
+IntegrationWorkspace and CurvesWorkspace have to be passed as input
+properties, If these two properties are not passed, they will be
 re-calculated provided that a VanadiumWorkspace is passed which is not
 recommended). All the calculations (integration, sums, divisions,
 etc.) are done in the d-spacing space.
