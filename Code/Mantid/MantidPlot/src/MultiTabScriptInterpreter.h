@@ -191,6 +191,8 @@ public slots:
   void showSelectFont();
 
 private slots:
+  /// Close a tab with a given index
+  void closeTabAtIndex(int index);
   /// Close clicked tab
   void closeClickedTab();
   /// Current editor's modification status has changed
@@ -213,8 +215,6 @@ private:
   void setTabTitle(QWidget *widget, const QString &filename);
   /// Returns the tab title for the given filename
   QString createTabTitle(const QString &filename) const;
-  /// Close a tab with a given index
-  void closeTabAtIndex(int index);
   /// Close a tab at a given position
   void closeTabAtPosition(const QPoint &pos);
 

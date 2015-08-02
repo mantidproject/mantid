@@ -46,6 +46,9 @@ MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env,
       m_tabWhitespaceCount(4), m_fontFamily(), m_codeFolding(false) {
   connect(this, SIGNAL(currentChanged(int)), this,
           SLOT(tabSelectionChanged(int)));
+  setTabsClosable(true);
+  connect(this, SIGNAL(tabCloseRequested(int)),
+          this, SLOT(closeTabAtIndex(int)));
 }
 
 /**
@@ -509,6 +512,22 @@ void MultiTabScriptInterpreter::showSelectFont() {
 //--------------------------------------------
 
 /**
+ * Close a given tab
+ * @param index :: The tab index
+ */
+void MultiTabScriptInterpreter::closeTabAtIndex(int index) {
+  ScriptFileInterpreter *interpreter = interpreterAt(index);
+  if(!interpreter->shouldClose()) return;
+  emit tabClosing(index);
+  removeTab(index);
+  emit tabClosed(index);
+  const int nTabs = count();
+  emit tabCountChanged(nTabs);
+  if (nTabs == 0)
+    emit lastTabClosed();
+}
+
+/**
  * Close clicked tab. Qt cannot give the position where an action is clicked so
  * this just gets
  * the current cursor position and calls the closeAtPosition function
@@ -522,13 +541,15 @@ void MultiTabScriptInterpreter::closeClickedTab() {
  * modifications
  */
 void MultiTabScriptInterpreter::currentEditorModified(bool state) {
-  static const QString modifiedLabel("*");
+  static const QChar modifiedLabel('*');
   const int index = currentIndex();
   QString tabLabel = tabText(index);
   if (state) {
-    tabLabel += modifiedLabel;
+    tabLabel = modifiedLabel + tabLabel;
   } else {
-    tabLabel.chop(modifiedLabel.length());
+    if(tabLabel.at(0) == modifiedLabel) {
+      tabLabel.remove(0, 1);
+    }
   }
   setTabText(index, tabLabel);
 }
@@ -669,27 +690,11 @@ QString
 MultiTabScriptInterpreter::createTabTitle(const QString &filename) const {
   QString title;
   if (filename.isEmpty()) {
-    title = "New script";
+    title = "Untitled";
   } else {
     title = QFileInfo(filename).fileName();
   }
   return title;
-}
-
-/**
- * Close a given tab
- * @param index :: The tab index
- */
-void MultiTabScriptInterpreter::closeTabAtIndex(int index) {
-  ScriptFileInterpreter *interpreter = interpreterAt(index);
-  if(!interpreter->shouldClose()) return;
-  emit tabClosing(index);
-  removeTab(index);
-  emit tabClosed(index);
-  const int nTabs = count();
-  emit tabCountChanged(nTabs);
-  if (nTabs == 0)
-    emit lastTabClosed();
 }
 
 /**
