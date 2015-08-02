@@ -13,8 +13,10 @@
 
 #include <Poco/Thread.h>
 
+#include <boost/python/arg_from_python.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
+#include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
 #include <boost/python/operators.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
@@ -30,11 +32,30 @@ using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
 namespace {
-/***********************************************************************
- *
- * Useful functions within Python to have on the algorithm interface
- *
- ***********************************************************************/
+
+// Global map of the thread ID to the current algorithm object
+dict THREAD_ID_MAP;
+
+/**
+ * Private method to add an algorithm reference to the thread id map.
+ * It replaces any current reference with the same ID
+ * @param threadID The current Python thread ID
+ * @param alg A Python reference to the algorithm object
+ */
+void _trackAlgorithmInThread(long threadID, const object & alg) {
+  THREAD_ID_MAP[threadID] = alg;
+}
+
+/**
+ * Return the algorithm object for the given thread ID or None
+ * if one doesn't exist. The entry is removed from the map
+ * if it is found
+ */
+object _algorithmInThread(long threadID) {
+  auto value = THREAD_ID_MAP.get(threadID);
+  if(value) api::delitem(THREAD_ID_MAP, threadID);
+  return value;
+}
 
 /// Functor for use with sorting algorithm to put the properties that do not
 /// have valid values first
@@ -130,7 +151,6 @@ PyObject *getOutputProperties(IAlgorithm &self) {
   return names;
 }
 
-// ---------------------- Documentation -------------------------------------
 /**
  * Create a doc string for the simple API
  * @param self :: A pointer to the python object wrapping and Algorithm
@@ -176,18 +196,25 @@ std::string createDocString(IAlgorithm &self) {
   return buffer.str();
 }
 
+/**
+ * RAII struct to drop the GIL and reacquire it on destruction.
+ * The algorithm is added to the map of tracked algorithms. See
+ * executeProxy for the reason why
+ */
 struct AllowCThreads {
-  AllowCThreads() : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL) {
+  AllowCThreads(const object & algm)
+    : m_tracefunc(NULL), m_tracearg(NULL), m_saved(NULL) {
     PyThreadState *curThreadState = PyThreadState_GET();
-    assert(curThreadState != NULL);
     m_tracefunc = curThreadState->c_tracefunc;
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
     PyEval_SetTrace(NULL, NULL);
+    _trackAlgorithmInThread(curThreadState->thread_id, algm);
     m_saved = PyEval_SaveThread();
   }
   ~AllowCThreads() {
     PyEval_RestoreThread(m_saved);
+    api::delitem(THREAD_ID_MAP, m_saved->thread_id);
     PyEval_SetTrace(m_tracefunc, m_tracearg);
     Py_XDECREF(m_tracearg);
   }
@@ -199,22 +226,21 @@ private:
 };
 
 /**
- * Releases the GIL and disables any tracer functions, executes the calling
- *algorithm object
- * and re-acquires the GIL and resets the tracing functions.
- * The trace functions are disabled as they can seriously hamper performance of
- *Python algorithms
- *
- * As an algorithm is a potentially time-consuming operation, this allows other
- *threads
- * to execute python code while this thread is executing C code
+ * Execute the algorithm
  * @param self :: A reference to the calling object
  */
-bool executeWhileReleasingGIL(IAlgorithm &self) {
-  bool result(false);
-  AllowCThreads threadStateHolder;
-  result = self.execute();
-  return result;
+bool executeProxy(object &self) {
+  // We need to do 2 things before we execute the algorthm:
+  //   1. store a reference to this algorithm mapped to the current thread ID to
+  //      allow it to be looked up when an abort request is received
+  //   2. release the GIL, drop the Python threadstate and reset anything installed
+  //      via PyEval_SetTrace while we execute the C++ code - AllowCThreads()
+  //      does this for us
+
+  // Extract this before dropping GIL as I'm not sure if it calls any Python
+  auto & calg = extract<IAlgorithm&>(self)();
+  AllowCThreads threadStateHolder(self);
+  return calg.execute();
 }
 
 /**
@@ -258,8 +284,6 @@ std::string getWikiSummary(IAlgorithm &self) {
 void export_ialgorithm() {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init).def(self == self);
 
-  // --------------------------------- IAlgorithm
-  // ------------------------------------------------
   register_ptr_to_python<boost::shared_ptr<IAlgorithm>>();
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>(
@@ -336,8 +360,11 @@ void export_ialgorithm() {
       .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
       .def("validateInputs", &IAlgorithm::validateInputs,
            "Cross-check all inputs and return any errors as a dictionary")
-      .def("execute", &executeWhileReleasingGIL,
+      .def("execute", &executeProxy,
            "Runs the algorithm and returns whether it has been successful")
+      // 'Private' static methods
+      .def("_algorithmInThread", &_algorithmInThread)
+      .staticmethod("_algorithmInThread")
       // Special methods
       .def("__str__", &IAlgorithm::toString)
 

@@ -197,6 +197,8 @@ private:
   PyObject *localDict, *stdoutSave, *stderrSave;
   PyObject *m_codeFileObject;
   long m_threadID; ///< Python thread id
+  /// A reference to the IAlgorithm._algorithmInThread static method
+  PyObject * m_algorithmInThread;
   bool isFunction;
   QString fileName;
   bool m_isInitialized;

@@ -96,6 +96,7 @@ PythonScript::~PythonScript()
   observeADSClear(false);
 
   this->disconnect();
+  Py_XDECREF(m_algorithmInThread);
   Py_XDECREF(localDict);
 }
 
@@ -457,6 +458,10 @@ void PythonScript::initialize(const QString & name, QObject *context)
   GlobalInterpreterLock pythonlock;
   PythonScript::setIdentifier(name);
   setContext(context);
+
+  PyObject *ialgorithm = PyObject_GetAttrString(PyImport_AddModule("mantid.api"), "IAlgorithm");
+  m_algorithmInThread = PyObject_GetAttrString(ialgorithm, "_algorithmInThread");
+  Py_INCREF(m_algorithmInThread);
 }
 
 
@@ -627,8 +632,20 @@ bool PythonScript::executeImpl()
 
 void PythonScript::abortImpl()
 {
+  // The current thread for this script could be
+  // in one of two states:
+  //   1. A C++ algorithm is being executed so it must be
+  //      interrupted using algorithm.cancel()
+  //   2. Pure Python is executing and can be interrupted
+  //      with a KeyboardInterrupt exception
   GlobalInterpreterLock lock;
-  m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
+
+  PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, "l", m_threadID);
+  if(curAlg && curAlg != Py_None){
+    PyObject_CallMethod(curAlg, "cancel", "");
+  } else {
+    m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
+  }
 }
 
 void PythonScript::saveThreadID()
