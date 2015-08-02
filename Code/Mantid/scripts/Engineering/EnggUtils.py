@@ -194,9 +194,9 @@ def applyVanadiumCorrections(self, ws, indices, vanWS, vanIntegWS, vanCurvesWS):
     @param vanIntegWS :: alternatively to vanWS, pre-calculated bank curves from Vanadium data
     """
     if vanWS and vanWS.getNumberHistograms() < len(indices):
-        raise("Inconsistency in inputs: the Vanadium workspace has less spectra (%d) than "
-              "the number of workspace indices to process (%d)"%
-              (vanWS.getNumberHistograms(),len(indices)))
+        raise ValueError("Inconsistency in inputs: the Vanadium workspace has less spectra (%d) than "
+                         "the number of workspace indices to process (%d)"%
+                         (vanWS.getNumberHistograms(),len(indices)))
     elif vanIntegWS and vanCurvesWS:
         # filter only indices from vanIntegWS (crop the table)
         tbl = sapi.CreateEmptyTableWorkspace()

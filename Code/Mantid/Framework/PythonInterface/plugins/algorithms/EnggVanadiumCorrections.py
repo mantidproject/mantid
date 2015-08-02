@@ -148,7 +148,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         # Have to calculate curves. get one curve per bank, in d-spacing
         curvesWS = self._fitCurvesPerBank(vanWS, self._ENGINX_BANKS_FOR_PIXBYPIX_CORR)
-        
+
         return integWS, curvesWS
 
     def _calcIntegrationSpectra(self, vanWS):
