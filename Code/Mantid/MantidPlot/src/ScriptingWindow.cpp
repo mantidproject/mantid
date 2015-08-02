@@ -651,6 +651,9 @@ void ScriptingWindow::initExecMenuActions() {
 
   m_abortCurrent = new QAction(tr("A&bort"), this);
   connect(m_abortCurrent, SIGNAL(triggered()), this, SLOT(abortCurrent()));
+  shortcuts.clear();
+  shortcuts << Qt::CTRL + Qt::Key_D;
+  m_abortCurrent->setShortcuts(shortcuts);
   setAbortActionsDisabled(false);
 
   m_clearScriptVars = new QAction(tr("&Clear Variables"), this);
