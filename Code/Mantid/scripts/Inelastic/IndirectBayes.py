@@ -1,9 +1,12 @@
-#pylint: disable=invalid-name
-# Bayes routines
-# Fortran programs use fixed length arrays whereas Python has variable lenght lists
-# Input : the Python list is padded to Fortrans length using procedure PadArray
-# Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
-#
+#pylint: disable=invalid-name,too-many-arguments,too-many-locals
+
+"""
+Bayes routines
+Fortran programs use fixed length arrays whereas Python has variable lenght lists
+Input : the Python list is padded to Fortrans length using procedure PadArray
+Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
+"""
+
 from IndirectImport import *
 if is_supported_f2py_platform():
     QLr     = import_f2py("QLres")
@@ -41,7 +44,7 @@ def CalcErange(inWS,ns,erange,binWidth):
     bnorm = 1.0/binWidth
 
     #get data from input workspace
-    N,X,Y,E = GetXYE(inWS,ns,array_len)
+    _,X,Y,E = GetXYE(inWS,ns,array_len)
     Xdata = mtd[inWS].readX(0)
 
     #get all x values within the energy range
@@ -56,7 +59,7 @@ def CalcErange(inWS,ns,erange,binWidth):
     Xin = Xin.reshape(len(Xin)/binWidth, binWidth)
 
     #sum and normalise values in bins
-    Xout = [sum(bin) * bnorm for bin in Xin]
+    Xout = [sum(bin_val) * bnorm for bin_val in Xin]
 
     #count number of bins
     nbins = len(Xout)
@@ -85,7 +88,7 @@ def GetResNorm(resnormWS,ngrp):
     else:                                        # constant values
         dtnorm = []
         xscale = []
-        for m in range(0,ngrp):
+        for _ in range(0,ngrp):
             dtnorm.append(1.0)
             xscale.append(1.0)
     dtn=PadArray(dtnorm,51)                      # pad for Fortran call
@@ -156,12 +159,12 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
     StartTime(program)
 
     #expand fit options
-    elastic, background, width, resnorm = Fit
+    elastic, background, width, res_norm = Fit
 
     #convert true/false to 1/0 for fortran
     o_el = 1 if elastic else 0
     o_w1 = 1 if width else 0
-    o_res = 1 if resnorm else 0
+    o_res = 1 if res_norm else 0
 
     #fortran code uses background choices defined using the following numbers
     if background == 'Sloping':
@@ -175,7 +178,6 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
 
     workdir = getDefaultWorkingDirectory()
 
-    facility = config['default.facility']
     array_len = 4096                           # length of array in Fortran
     CheckXrange(erange,'Energy')
 
@@ -196,7 +198,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
     if Loop != True:
         nsam = 1
 
-    nres,ntr = CheckHistZero(resWS)
+    nres = CheckHistZero(resWS)[0]
 
     if program == 'QL':
         if nres == 1:
@@ -215,19 +217,17 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
     logger.information(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 
     Wy,We = ReadWidthFile(width,wfile,totalNoSam)
-    dtn,xsc = ReadNormFile(resnorm,resnormWS,totalNoSam)
+    dtn,xsc = ReadNormFile(res_norm,resnormWS,totalNoSam)
 
     fname = samWS[:-4] + '_'+ prog
     probWS = fname + '_Prob'
     fitWS = fname + '_Fit'
-    datWS = fname + '_Data'
     wrks=os.path.join(workdir, samWS[:-4])
     logger.information(' lptfile : '+wrks+'_'+prog+'.lpt')
     lwrk=len(wrks)
     wrks.ljust(140,' ')
     wrkr=resWS
     wrkr.ljust(140,' ')
-    wrk = [wrks, wrkr]
 
     # initialise probability list
     if program == 'QL':
@@ -278,11 +278,9 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Plot,Save):
         dataX = xout[:nd]
         dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
         yfit_list = np.split(yfit[:4*nd],4)
-        dataF0 = yfit_list[0]
         dataF1 = yfit_list[1]
         if program == 'QL':
             dataF2 = yfit_list[2]
-            dataF3 = yfit_list[3]
         dataG = np.zeros(nd)
         datX = dataX
         datY = yout[:nd]
@@ -431,7 +429,7 @@ def read_ql_file(file_name, nl):
 
         #Q,AMAX,HWHM,BSCL,GSCL
         line = line_pointer.next()
-        Q, AMAX, HWHM, BSCL, GSCL = line
+        Q, AMAX, HWHM, _, _ = line
         q_data.append(Q)
 
         #A0,A1,A2,A4
@@ -441,7 +439,7 @@ def read_ql_file(file_name, nl):
         #parse peak data from block
         block_FWHM = []
         block_amplitude = []
-        for i in range(nl):
+        for _ in range(nl):
             #Amplitude,FWHM for each peak
             line = line_pointer.next()
             amp = AMAX*line[0]
@@ -456,7 +454,7 @@ def read_ql_file(file_name, nl):
 
         block_FWHM_e = []
         block_amplitude_e = []
-        for i in range(nl):
+        for _ in range(nl):
             #Amplitude error,FWHM error for each peak
             #SIGIK
             line = line_pointer.next()
@@ -549,7 +547,6 @@ def C2Fw(prog,sname):
 
 
 def SeBlock(a,first):                                 #read Ascii block of Integers
-    line1 = a[first]
     first += 1
     val = ExtractFloat(a[first])               #Q,AMAX,HWHM
     Q = val[0]
@@ -561,13 +558,13 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
     first += 1
     val = ExtractFloat(a[first])                #AI,FWHM first peak
     fw = [2.*HWHM*val[1]]
-    int = [AMAX*val[0]]
+    integer = [AMAX*val[0]]
     first += 1
     val = ExtractFloat(a[first])                 #SIG0
     int0.append(val[0])
     first += 1
     val = ExtractFloat(a[first])                  #SIG3K
-    int.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
+    integer.append(AMAX*math.sqrt(math.fabs(val[0])+1.0e-20))
     first += 1
     val = ExtractFloat(a[first])                  #SIG1K
     fw.append(2.0*HWHM*math.sqrt(math.fabs(val[0])+1.0e-20))
@@ -577,17 +574,14 @@ def SeBlock(a,first):                                 #read Ascii block of Integ
     val = ExtractFloat(a[first])                  #SIG2K
     be.append(math.sqrt(math.fabs(val[0])+1.0e-20))
     first += 1
-    return first,Q,int0,fw,int,be                                      #values as list
+    return first,Q,int0,fw,integer,be                                      #values as list
 
 
 def C2Se(sname):
-    prog = 'QSe'
     outWS = sname+'_Result'
     asc = readASCIIFile(sname+'.qse')
-    lasc = len(asc)
     var = asc[3].split()                            #split line on spaces
     nspec = var[0]
-    ndat = var[1]
     var = ExtractInt(asc[6])
     first = 7
     Xout = []
@@ -603,8 +597,8 @@ def C2Se(sname):
     dataY = np.array([])
     dataE = np.array([])
 
-    for m in range(0,ns):
-        first,Q,int0,fw,it,be = SeBlock(asc,first)
+    for _ in range(0,ns):
+        first,Q,_,fw,it,be = SeBlock(asc,first)
         Xout.append(Q)
         Yf.append(fw[0])
         Ef.append(fw[1])
@@ -694,12 +688,12 @@ def CheckBetSig(nbs):
 def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
     StartTime('Quest')
     #expand fit options
-    elastic, background, width, resnorm = Fit
+    elastic, background, width, res_norm = Fit
 
     #convert true/false to 1/0 for fortran
     o_el = 1 if elastic else 0
     o_w1 = 1 if width else 0
-    o_res = 1 if resnorm else 0
+    o_res = 1 if res_norm else 0
 
     #fortran code uses background choices defined using the following numbers
     if background == 'Sloping':
@@ -726,7 +720,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
 
     efix = getEfixed(samWS)
     theta,Q = GetThetaQ(samWS)
-    nres,ntr = CheckHistZero(resWS)
+    nres = CheckHistZero(resWS)[0]
     if nres == 1:
         prog = 'Qst'                        # res file
     else:
@@ -741,7 +735,6 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
     wrks.ljust(140,' ')
     wrkr=resWS
     wrkr.ljust(140,' ')
-    wrk = [wrks, wrkr]
     Nbet,Nsig = nbs[0], nbs[1]
     eBet0 = np.zeros(Nbet)                  # set errors to zero
     eSig0 = np.zeros(Nsig)                  # set errors to zero
@@ -754,7 +747,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Plot,Save):
         Ndat = nout[0]
         Imin = nout[1]
         Imax = nout[2]
-        Nb,Xb,Yb,Eb = GetXYE(resWS,0,array_len)
+        Nb,Xb,Yb,_ = GetXYE(resWS,0,array_len)
         numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin, Nbet, Nsig]
         reals = [efix, theta[m], rscl, bnorm]
         xsout,ysout,xbout,ybout,zpout=Que.quest(numb,Xv,Yv,Ev,reals,fitOp,\
@@ -881,9 +874,8 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     CheckXrange(erange,'Energy')
     CheckAnalysers(vname,rname)
     nvan,ntc = CheckHistZero(vname)
-    theta,Q = GetThetaQ(vname)
+    theta = GetThetaQ(vname)[0]
     efix = getEfixed(vname)
-    nres,ntr = CheckHistZero(rname)
     print "begining erange calc"
     nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
     print "end of erange calc"
@@ -897,12 +889,11 @@ def ResNormRun(vname,rname,erange,nbin,Plot='None',Save=False):
     wrks.ljust(140,' ')                              # pad for fioxed Fortran length
     wrkr=rname
     wrkr.ljust(140,' ')
-    Nb,Xb,Yb,Eb = GetXYE(rname,0,array_len)
+    Nb,Xb,Yb,_ = GetXYE(rname,0,array_len)
     rscl = 1.0
     xPar = np.array([theta[0]])
     for m in range(1,nvan):
         xPar = np.append(xPar,theta[m])
-    ePar = np.zeros(nvan)
     fname = vname[:-4]
     for m in range(0,nvan):
         logger.information('Group ' +str(m)+ ' at angle '+ str(theta[m]))

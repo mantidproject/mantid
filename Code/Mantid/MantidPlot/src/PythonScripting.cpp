@@ -154,16 +154,7 @@ bool PythonScripting::start()
   {
     if( Py_IsInitialized() ) return true;
     Py_Initialize();
-    PyEval_InitThreads(); // Acquires the GIL as well
-    // Release the lock & reset the current thread state to NULL
-    // This is necessary to ensure that PyGILState_Ensure/Release can
-    // be used correctly from now on. If not then the current thread-state
-    // blocks the first call to PyGILState_Ensure and a dead-lock ensues
-    // (doesn't seem to happen on Linux though)
-    m_mainThreadState = PyEval_SaveThread();
-
-    // Acquire the GIL in an OO way...
-    GlobalInterpreterLock gil;
+    // Assume this is called at startup by the the main thread so no GIL required...yet
 
     //Keep a hold of the globals, math and sys dictionary objects
     PyObject *mainmod = PyImport_AddModule("__main__");
@@ -249,6 +240,20 @@ bool PythonScripting::start()
   {
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     d_initialized = false;
+  }
+  if(d_initialized) {
+    // We will be using C threads created outside of the Python threading module
+    // so we need the GIL. This creates and acquires the lock for this thread
+    PyEval_InitThreads();
+    // We immediately release the lock and threadstate so that other points in
+    // the code can simply use the PyGILstate_Ensure/PyGILstate_Release()
+    // mechanism (through the GlobalInterpreterLock class) and they don't
+    // need to worry about swapping out the threadstate before hand.
+    // It would be better if the GlobalInterpreterLock handled this but
+    // PyEval_SaveThread() needs to be called in the thread that spawns the
+    // new C thread meaning that GlobalInterpreterLock could no longer
+    // be used as a simple RAII class on the stack from within the new thread.
+    m_mainThreadState = PyEval_SaveThread();
   }
   return d_initialized;
 }

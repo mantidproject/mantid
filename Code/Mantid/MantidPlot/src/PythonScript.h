@@ -29,8 +29,10 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-#include "PythonSystemHeader.h"
-#include "PythonThreading.h"
+// Python headers have to go first!
+#include "MantidQtAPI/PythonSystemHeader.h"
+#include "MantidQtAPI/PythonThreading.h"
+
 #include "Script.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 

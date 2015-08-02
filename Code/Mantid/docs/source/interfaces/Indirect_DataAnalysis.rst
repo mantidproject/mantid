@@ -341,33 +341,47 @@ and *Use Delta Function* options in the interface.
 
       - DeltaFunction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (One Lorentzian)
 
         - :ref:`Lorentzian <func-Lorentzian>`
 
         - Temperature Correction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (Two Lorentzians)
 
         - :ref:`Lorentzian <func-Lorentzian>`
 
         - Temperature Correction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffSphere)
 
-        - :ref:`DiffSphere <func-DiffSphere>`
-
-        - Temperature Correction
-
-      - :ref:`ProductFunction <func-ProductFunction>`
-
-        - :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+        - :ref:`Inelastic Diff Sphere <func-DiffSphere>`
 
         - Temperature Correction
 
-Note that it is the Inelastic variants of :ref:`DiffSphere <func-DiffSphere>`
-and :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>` that are used in
-this interface.
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
+
+        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
+
+        - :ref:`Elastic Diff Sphere <func-DiffSphere>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
+
+        - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
+
+        - :ref:`StretchedExpFT <func-StretchedExpFT>`
+
+        - Temperature Correction
 
 The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
 formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
