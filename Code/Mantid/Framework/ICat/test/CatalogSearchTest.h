@@ -35,7 +35,7 @@ public:
 	}
 	void testSearchByRunNumberandInstrumentExecutes()
 	{
-		// Uses an unused runrange to produce an empty workspace and be fast
+		// Uses an unused keyword to produce an empty workspace and be fast
 		
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
@@ -154,7 +154,7 @@ public:
 
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate","sssss"),std::invalid_argument(errorMsg));
 		
-		errorMsg="Invalid value for property StartDate (string) ""aaaaa"": Invalid Date:date format must be DD/MM/YYYY";
+		errorMsg="Invalid value for property EndDate (string) ""aaaaa"": Invalid Date:date format must be DD/MM/YYYY";
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::invalid_argument(errorMsg));
 
 	}
@@ -175,14 +175,11 @@ public:
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 				
-		TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate","39/22/2009"),std::runtime_error);
-		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::runtime_error);
-		//searchobj.setPropertyValue("OutputWorkspace","Investigations");
-		
-		TS_ASSERT_THROWS(searchobj.execute(),std::runtime_error);
+		std::string errorMsg="Invalid value for property StartDate (string) ""39/22/2009"": Invalid Date:Day part of the Date parameter must be between 1 and 31";
+		TS_ASSERT_THROWS(searchobj.setPropertyValue("StartDate","39/22/2009"),std::invalid_argument(errorMsg));
 
-		//should fail
-		TS_ASSERT(! searchobj.isExecuted() );
+		errorMsg="Invalid value for property EndDate (string) ""1/22/2009"": Invalid Date:Month part of the Date parameter must be between 1 and 12";
+		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","1/22/2009"),std::invalid_argument(errorMsg));
 
 	}
 		
