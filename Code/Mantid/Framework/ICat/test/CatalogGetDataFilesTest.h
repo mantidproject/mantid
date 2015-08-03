@@ -27,28 +27,18 @@ public:
 		TS_ASSERT( invstObj.isInitialized() );
 	}
 
-	void testgetDataFiles()
+	void testgetDataFilesExecutes()
 	{	
 		if ( !loginobj.isInitialized() ) loginobj.initialize();
 
 		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
 		loginobj.setPropertyValue("Password", "MantidTestUser4");
-	
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT( loginobj.isExecuted() );
-		
-		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("RunRange", "100-102");
-		searchobj.setPropertyValue("Instrument","LOQ");
-		searchobj.setPropertyValue("OutputWorkspace","investigations");
-				
-		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
-		TS_ASSERT( searchobj.isExecuted() );
 
 		if (!invstObj.isInitialized() ) invstObj.initialize();
 		invstObj.setPropertyValue("InvestigationId","12576918");
-		//invstObj.setPropertyValue("InputWorkspace", "investigations");//records of investigations
 		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation data files
 		
 		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
@@ -56,7 +46,6 @@ public:
 	}
 private:
 	CatalogLogin loginobj;
-	CatalogSearch searchobj;
 	CatalogGetDataFiles invstObj;
 };
 #endif
