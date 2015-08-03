@@ -20,7 +20,6 @@ typedef boost::shared_ptr<Mantid::Kernel::PropertyManager> PropertyManager_sptr;
 class PDDetermineCharacterizationsTest : public CxxTest::TestSuite {
 private:
   std::string m_propertyManagerName = "__pd_reduction_properties";
-  //    std::string m_charWSName;
   std::string m_logWSName;
 
 public:
@@ -173,7 +172,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
+    PropertyManager_sptr expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
                                     m_propertyManagerName));
@@ -193,7 +192,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
+    PropertyManager_sptr expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
                                     m_propertyManagerName));
@@ -213,7 +212,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(60., 0.533, 1, 17702, 17711, 0,
+    PropertyManager_sptr expectedInfo = createExpectedInfo(60., 0.533, 1, 17702, 17711, 0,
                                            "0.05", "2.20", 0000.00, 16666.67);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
@@ -237,7 +236,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    auto expectedInfo = createExpectedInfo(60., 0.533, 1, 0, 0, 0, "0.05",
+    PropertyManager_sptr expectedInfo = createExpectedInfo(60., 0.533, 1, 0, 0, 0, "0.05",
                                            "2.20", 0000.00, 16666.67);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
