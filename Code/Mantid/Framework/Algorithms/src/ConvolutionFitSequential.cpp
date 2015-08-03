@@ -61,7 +61,7 @@ void ConvolutionFitSequential::init() {
                   "The end of the range for the fit function.",
                   Direction::Input);
   //Needs validation
-  declareProperty("Temperature", "", "The Temperature correction for the fit.", Direction::Input);
+  declareProperty("Temperature", std::string(""), "The Temperature correction for the fit.", Direction::Input);
 
   declareProperty("Spec Min", 0, boost::make_shared<MandatoryValidator<int>>(),
                   "The first spectrum to be used in the fit.", Direction::Input);
