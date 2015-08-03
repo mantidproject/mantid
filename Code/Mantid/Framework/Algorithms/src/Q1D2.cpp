@@ -135,6 +135,9 @@ void Q1D2::exec() {
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
 
+  // Flag to decide if Q Resolution is to be used
+  auto useQResolution = qResolution ? true : false; 
+
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -196,7 +199,9 @@ void Q1D2::exec() {
 
     // Pointers to the QResolution data. Note that the xdata was initially the same, hence
     // the same indexing applies to the y values of m_dataWS and qResolution
-    MantidVec::const_iterator QResIn = qResolution->readY(i).begin() + wavStart;
+    // If we want to use it set it to the correct value, else to YIN, although that does not matter, as
+    // we won't use it
+    MantidVec::const_iterator QResIn = useQResolution ? (qResolution->readY(i).begin() + wavStart) : YIn;
 
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
@@ -204,7 +209,11 @@ void Q1D2::exec() {
     // sum the Q contributions from each individual spectrum into the output
     // array
     const MantidVec::const_iterator end = m_dataWS->readY(i).end();
-    for (; YIn != end; ++YIn, ++QResIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
+    for (; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
+      if (useQResolution) {
+        ++QResIn;
+      }
+
       // find the output bin that each input y-value will fall into, remembering
       // there is one more bin boundary than bins
       getQBinPlus1(QOut, *QIn, loc);
@@ -219,7 +228,9 @@ void Q1D2::exec() {
           // at the end
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
-          qResolutionOut[bin] += (*YIn) *(*QResIn);
+          if (useQResolution) {
+            qResolutionOut[bin] += (*YIn) *(*QResIn);
+          }
         }
       }
     }
@@ -235,13 +246,14 @@ void Q1D2::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  // Calculate the QResolution and add it as a DX value to the outputworkspace
-  Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
-  Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
-  for (;countsIterator != YOut.end(); ++countsIterator, ++qResolutionIterator) {
-    // Divide by the counts of the Qbin
-    *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+  if (useQResolution) {
+    // Calculate the QResolution and add it as a DX value to the outputworkspace
+    Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
+    Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
+    for (;qResolutionIterator!= qResolutionOut.end(); ++countsIterator, ++qResolutionIterator) {
+      // Divide by the counts of the Qbin
+      *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+    }
   }
 
   bool doOutputParts = getProperty("OutputParts");
