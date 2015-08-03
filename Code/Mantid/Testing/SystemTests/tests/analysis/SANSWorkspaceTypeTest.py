@@ -39,15 +39,15 @@ class SANSProcessedEventWorkspaceInFile(stresstesting.MantidStressTest):
         can_load = can_load_as_event_workspace(filename)
         # Assert
         if can_load:
-            self.success = True
+            self._success = True
         else:
-            self.success = False
+            self._success = False
         # Clean up
         remove_temporary_file(filename)
         clean_up_workspaces()
 
     def validate(self):
-        return self.success
+        return self._success
 
 
 class SANSProcessedHistoWorkspaceInFile(stresstesting.MantidStressTest):
@@ -69,12 +69,12 @@ class SANSProcessedHistoWorkspaceInFile(stresstesting.MantidStressTest):
         can_load = can_load_as_event_workspace(filename)
         # Assert
         if not can_load:
-            self.success = True
+            self._success = True
         else:
-            self.success = False
+            self._success = False
         # Clean up
         remove_temporary_file(filename)
         clean_up_workspaces()
 
     def validate(self):
-        return self.success
+        return self._success
