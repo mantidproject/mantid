@@ -39,7 +39,7 @@ public:
   virtual ~EQSANSDarkCurrentSubtraction2() {}
   /// Algorithm's name
   virtual const std::string name() const {
-    return "EQSANSDarkCurrentSubtraction2";
+    return "EQSANSDarkCurrentSubtraction";
   }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
