@@ -9,6 +9,7 @@
 #pragma warning(default : 4250)
 #endif
 #include "MantidKernel/Strings.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <Poco/Thread.h>
@@ -28,6 +29,7 @@ using Mantid::API::AlgorithmID;
 using Mantid::API::IAlgorithm;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::PythonInterface::AlgorithmIDProxy;
+using Mantid::PythonInterface::isNone;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
@@ -211,7 +213,7 @@ struct AllowCThreads {
     m_tracearg = curThreadState->c_traceobj;
     Py_XINCREF(m_tracearg);
     PyEval_SetTrace(NULL, NULL);
-    if(!algm.is_none()) {
+    if(!isNone(algm)) {
       _trackAlgorithmInThread(curThreadState->thread_id, algm);
       m_tracking = true;
     }
