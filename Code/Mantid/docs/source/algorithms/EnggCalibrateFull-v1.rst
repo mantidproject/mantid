@@ -123,14 +123,18 @@ Output:
    import os, csv
 
    ws_name = 'ws_focussed'
-   van_ws_name = 'test_vanadium'
    pos_filename = 'detectors_pos.csv'
    # Note that this is a small file which is not very meaningful but simple enough for
    # this test to run fast. Please user your (proper) run file.
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
-   Load('ENGINX00193749.nxs', OutputWorkspace=van_ws_name)
+
+   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
+   van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
+
    posTable = EnggCalibrateFull(Workspace=ws_name,
-                                VanadiumWorkspace=van_ws_name,
+                                VanIntegrationWorkspace=van_integ_ws,
+                                VanCurvesWorkspace=van_curves_ws,
                                 ExpectedPeaks=[1.097, 2.1], Bank='1',
                                 OutDetPosFilename=pos_filename)
 
@@ -154,7 +158,8 @@ Output:
 .. testcleanup:: ExCalFullWithOutputFile
 
    DeleteWorkspace(ws_name)
-   DeleteWorkspace(van_ws_name)
+   DeleteWorkspace(van_integ_ws)
+   DeleteWorkspace(van_curves_ws)
    import os
    os.remove(pos_filename)
 

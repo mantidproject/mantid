@@ -101,6 +101,7 @@ class EnggCalibrateTest(unittest.TestCase):
         self.check_3peaks_values(difc, zero)
 
     def check_3peaks_values(self, difc, zero):
+        # win7 results were ~0.831% different from linux, osx were ~0.995 different
         err_epsilon = 7.5e-3
 
         # There are platform specific differences in final parameter values
