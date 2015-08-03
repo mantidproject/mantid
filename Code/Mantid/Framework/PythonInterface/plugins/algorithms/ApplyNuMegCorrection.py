@@ -17,11 +17,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
     except RuntimeError:
          print runno+' '+s+"not found"
 
-
-    #xdata1=A2000*ws2000.readX(0)[:]+B2000
-
-    #xdata4=A3000*ws3000.readX(0)[:]+B3000
-   # print type(ws3000.readX(0)[:])
    #Correcting for Gain and offset of the detectors
     ws2000_corr=CreateWorkspace(A2000*ws2000.readX(0)[:]+B2000,ws2000.readY(0)[:])
     ws3000_corr=CreateWorkspace(A3000*ws3000.readX(0)[:]+B3000,ws3000.readY(0)[:])
@@ -34,7 +29,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
             ws2000_total=ws2000_corr.readY(0)[x]+ws2000_total
             ws3000_total=ws3000_corr.readY(0)[x]+ws3000_total
         except:
-             #print 'hello'
              continue
 
     print ws2000_total
@@ -57,11 +51,8 @@ class ApplyNegMuCorrection(PythonAlgorithm):
     RenameWorkspaces(ws2000_corr,Suffix=suf)
     RenameWorkspaces(ws3000_corr,Suffix=suf)
 
-  #  mantidplot.plot_spectrum(ws_ral,0)
     DeleteWorkspace(ws2000)
     DeleteWorkspace(ws3000)
-  #  DeleteWorkspace(ws2000_corr)
-   # DeleteWorkspace(ws3000_corr)
     DeleteWorkspace(ws2000_corr_rebin)
     DeleteWorkspace(ws3000_corr_rebin)
 
@@ -83,22 +74,22 @@ class ApplyNegMuCorrection(PythonAlgorithm):
 
     def PyExec(self):
 
-                spec=1
-                dd = self.getProperty("Data Directory").value
-                first = self.getProperty("First Run Number").value
-                last = self.getProperty("Last Run Number").value+1
-                GRHE=self.getProperty("Gain RIKEN High E").value
-                ORHE=self.getProperty("Offset RIKEN High E").value
-                GIHE=self.getProperty("Gain ISIS High E").value
-                OIHE=self.getProperty("Offset ISIS High E").value
-                GILE=self.getProperty("Gain ISIS Low E").value
-                OILE=self.getProperty("Offset ISIS Low E").value
+        spec=1
+        dd = self.getProperty("Data Directory").value
+        first = self.getProperty("First Run Number").value
+        last = self.getProperty("Last Run Number").value+1
+        GRHE=self.getProperty("Gain RIKEN High E").value
+        ORHE=self.getProperty("Offset RIKEN High E").value
+        GIHE=self.getProperty("Gain ISIS High E").value
+        OIHE=self.getProperty("Offset ISIS High E").value
+        GILE=self.getProperty("Gain ISIS Low E").value
+        OILE=self.getProperty("Offset ISIS Low E").value
 
-                for x in range(first,last):
-                    for spec in range(0,3):
-                        runno=str(x)
-                        self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
-                    self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
+         for x in range(first,last):
+            for spec in range(0,3):
+                runno=str(x)
+                self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
+                self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
 
 
 
