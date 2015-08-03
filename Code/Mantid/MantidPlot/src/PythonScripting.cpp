@@ -50,6 +50,9 @@
 
 #include "sipAPI_qti.h"
 
+// Avoids a compiler warning about implicit 'const char *'->'char*' conversion under clang
+#define STR_LITERAL(str) const_cast<char*>(str)
+
 // Function is defined in a sip object file that is linked in later. There is no header file
 // so this is necessary
 extern "C" void init_qti();
@@ -182,7 +185,7 @@ bool PythonScripting::start()
     }
     // Set a smaller check interval so that it takes fewer 'ticks' to respond to a KeyboardInterrupt
     // The choice of 5 is really quite arbitrary
-    PyObject_CallMethod(sysmod, "setcheckinterval", "i", 5);
+    PyObject_CallMethod(sysmod, STR_LITERAL("setcheckinterval"), STR_LITERAL("i"), 5);
     Py_DECREF(sysmod);
 
     // Our use of the IPython console requires that we use the v2 api for these PyQt types

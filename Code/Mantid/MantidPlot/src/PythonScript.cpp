@@ -45,6 +45,9 @@
 
 namespace
 {
+  // Avoids a compiler warning about implicit 'const char *'->'char*' conversion under clang
+  #define STR_LITERAL(str) const_cast<char*>(str)
+
   /**
    * A callback, set using PyEval_SetTrace, that is called by Python
    * to allow inspection into the current execution frame. It is currently
@@ -59,7 +62,7 @@ namespace
     Q_UNUSED(arg);
     int retcode(0);
     if(event != PyTrace_LINE) return retcode;
-    PyObject_CallMethod(scriptObj, "lineNumberChanged", "O i",
+    PyObject_CallMethod(scriptObj, STR_LITERAL("lineNumberChanged"), STR_LITERAL("O i"),
                         frame->f_code->co_filename, frame->f_lineno);
     return retcode;
   }
@@ -640,9 +643,9 @@ void PythonScript::abortImpl()
   //      with a KeyboardInterrupt exception
   GlobalInterpreterLock lock;
 
-  PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, "l", m_threadID);
+  PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
   if(curAlg && curAlg != Py_None){
-    PyObject_CallMethod(curAlg, "cancel", "");
+    PyObject_CallMethod(curAlg, STR_LITERAL("cancel"), STR_LITERAL(""));
   } else {
     m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   }
