@@ -26,7 +26,7 @@ set ( SRC_FILES
     src/MuonFitPropertyBrowser.cpp
     src/MuonSequentialFitDialog.cpp
     src/PeakPicker.cpp
-	src/PeriodicTableWidget.cpp
+    src/PeriodicTableWidget.cpp
     src/PreviewPlot.cpp
     src/ProcessingAlgoWidget.cpp
     src/PropertyHandler.cpp
