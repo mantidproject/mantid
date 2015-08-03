@@ -118,16 +118,19 @@ void PDDetermineCharacterizations::init() {
   declareProperty("NormRun", 0, "Normalization" + defaultMsg);
   declareProperty("NormBackRun", 0, "Normalization background" + defaultMsg);
 
-  const std::vector<std::string> DEFAULT_FREQUENCY_NAMES = {
-      "SpeedRequest1", "Speed1", "frequency"};
+  std::vector<std::string> defaultFrequencyNames;
+  defaultFrequencyNames.push_back("SpeedRequest1");
+  defaultFrequencyNames.push_back("Speed1");
+  defaultFrequencyNames.push_back("frequency");
   declareProperty(new Kernel::ArrayProperty<std::string>(
-                      FREQ_PROP_NAME, DEFAULT_FREQUENCY_NAMES),
+                      FREQ_PROP_NAME, defaultFrequencyNames),
                   "Candidate log names for frequency");
 
-  const std::vector<std::string> DEFAULT_WAVELENGTH_NAMES = {"LambdaRequest",
-                                                             "lambda"};
+  std::vector<std::string> defaultWavelengthNames;
+  defaultWavelengthNames.push_back("LambdaRequest");
+  defaultWavelengthNames.push_back("lambda");
   declareProperty(new Kernel::ArrayProperty<std::string>(
-                      WL_PROP_NAME, DEFAULT_WAVELENGTH_NAMES),
+                      WL_PROP_NAME, defaultWavelengthNames),
                   "Candidate log names for wave length");
 }
 
