@@ -218,26 +218,26 @@ double PDDetermineCharacterizations::getLogValue(API::Run &run,
     validUnits.insert("Hz");
   }
 
-  for (auto name : names) {
-    if (run.hasProperty(name)) {
-      const std::string units = run.getProperty(name)->units();
+  for (auto name = names.begin(); name != names.end(); ++name) {
+    if (run.hasProperty(*name)) {
+      const std::string units = run.getProperty(*name)->units();
 
       if (validUnits.find(units) != validUnits.end()) {
-        double value = run.getLogAsSingleValue(name);
+        double value = run.getLogAsSingleValue(*name);
         if (value == 0.) {
           std::stringstream msg;
-          msg << "'" << name << "' has a mean value of zero " << units;
+          msg << "'" << *name << "' has a mean value of zero " << units;
           g_log.information(msg.str());
         } else {
           std::stringstream msg;
-          msg << "Found " << label << " in log '" << name
+          msg << "Found " << label << " in log '" << *name
               << "' with mean value " << value << " " << units;
           g_log.information(msg.str());
           return value;
         }
       } else {
         std::stringstream msg;
-        msg << "When looking at " << name
+        msg << "When looking at " << *name
             << " log encountered unknown units for " << label << ":" << units;
         g_log.warning(msg.str());
       }
