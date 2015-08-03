@@ -74,7 +74,7 @@ void ConvolutionFitSequential::init() {
                   Direction::Input);
 
   declareProperty(
-      "Maximum Iterations", 500, boost::make_shared<MandatoryValidator<int>>(),
+      "Max Iterations", 500, boost::make_shared<MandatoryValidator<int>>(),
       "The maximum number of iterations permitted", Direction::Input);
 
   declareProperty(
@@ -86,7 +86,40 @@ void ConvolutionFitSequential::init() {
 /** Execute the algorithm.
  */
 void ConvolutionFitSequential::exec() {
-  // TODO Auto-generated execute stub
+  // Start Timer
+  // Initialise variables with properties
+  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  std::string function = getProperty("Function");
+  double startX = getProperty("Start X");
+  double endX = getProperty("End X");
+  std::string temperature = getProperty("Temperature");
+  int specMin = getProperty("Spec Min");
+  int specMax = getProperty("Spec max");
+  bool convolve = getProperty("Convolve");
+  int maxIter = getProperty("Max Iterations");
+  MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
+  // Handle empty/non-empty temp property
+  // Pull in UI settings (Plot / Save (minimizer?)
+  // Inspect function to obtain fit Type and background
+  // Check if a delta function is being used
+  // Check number of lorentzians used (may be redundant)
+
+
+  // Add logger information
+  // Convert input workspace to get Q axis
+  // Fit all spectra in workspace
+  // Fit args
+  // Run PlotPeaksByLogValue
+  // Delete possible pre-existing workspaces
+  // Construct output workspace name
+  // Define params for use in convertParametersToWorkSpace
+  // Run convertParametersToWorkspace
+  // Set x units to be momentum transfer
+  // Handle sample logs 
+  // Rename workspaces 
+  // Save
+  // Plot
+  // End Timer
 }
 
 } // namespace Algorithms
