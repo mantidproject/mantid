@@ -15,6 +15,11 @@ only contains bin information and does not contain the underlying event
 data. The :ref:`EventWorkspace <EventWorkspace>` presents itself as a
 histogram (with X,Y,E values) but preserves the underlying event data.
 
+For more information on what a Workspace2D contains, see 
+:ref:`MatrixWorkspace <MatrixWorkspace>`.
+
+.. include:: WorkspaceNavigation.txt
+
 
 
 .. categories:: Concepts
