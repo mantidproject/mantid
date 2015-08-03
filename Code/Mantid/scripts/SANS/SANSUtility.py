@@ -12,18 +12,21 @@ import math
 import os
 import re
 import types
-import nxs
 
 sanslog = Logger("SANS")
-
 ADDED_EVENT_DATA_TAG = '_added_event_data'
-
 REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
-
 ZERO_ERROR_DEFAULT = 1e6
-
 INCIDENT_MONITOR_TAG = '_incident_monitor'
+
+# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
+CAN_IMPORT_NXS = True
+try:
+    import nxs
+except ImportError:
+    CAN_IMPORT_NXS = False
+# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- STOP
 
 def deprecated(obj):
     """
