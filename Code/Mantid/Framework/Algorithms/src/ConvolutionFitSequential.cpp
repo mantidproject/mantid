@@ -55,10 +55,10 @@ void ConvolutionFitSequential::init() {
                   Direction::Input);
 
   declareProperty(
-      "Start X", "", boost::make_shared<MandatoryValidator<double>>(),
+      "Start X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The start of the range for the fit function.", Direction::Input);
 
-  declareProperty("End X", "", boost::make_shared<MandatoryValidator<double>>(),
+  declareProperty("End X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
                   "The end of the range for the fit function.",
                   Direction::Input);
   // Needs validation
@@ -79,6 +79,12 @@ void ConvolutionFitSequential::init() {
   declareProperty("Convolve", true,
                   "If true, the fit is treated as a convolution workspace.",
                   Direction::Input);
+
+  declareProperty("Minimizer", std::string("Levenberg-Marquardt"),
+                  "Minimizer to use for fitting. Minimizers available are: "
+                  "'Levenberg-Marquardt', 'Simplex', 'FABADA', 'Conjugate "
+                  "gradient (Fletcher-Reeves imp.)', 'Conjugate gradient "
+                  "(Polak-Ribiere imp.)' and 'BFGS'", Direction::Input);
 
   declareProperty(
       "Max Iterations", 500, boost::make_shared<MandatoryValidator<int>>(),
@@ -105,10 +111,36 @@ void ConvolutionFitSequential::exec() {
   bool convolve = getProperty("Convolve");
   int maxIter = getProperty("Max Iterations");
   MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
+
   // Handle empty/non-empty temp property
+  if(temperature.compare("") == 0){
+	temperature = "None";
+  }
   // Pull in UI settings (Plot / Save (minimizer?)
-  // Inspect function to obtain fit Type and background
+
+  // Inspect function to obtain fit Type and background (Easy to refactor)
+  std::string fitType = "";
+  std::string::size_type pos = function.rfind("name=");
+  if (pos != std::string::npos) {
+    fitType = function.substr(pos, function.size());
+    pos = fitType.find_first_of(",");
+    fitType = fitType.substr(5, pos - 5);
+  }
+
+  std::string background = "";
+  pos = function.find_first_of("name=");
+  if (pos != std::string::npos) {
+    background = function.substr(pos, function.size());
+    pos = background.find_first_of(",");
+    background = background.substr(5, pos - 5);
+  }
+
   // Check if a delta function is being used
+  bool delta = false;
+  pos = function.find("Delta");
+  if(pos != std::string::npos){
+	  delta = true;
+  }
   // Check number of lorentzians used (may be redundant)
 
   // Add logger information
