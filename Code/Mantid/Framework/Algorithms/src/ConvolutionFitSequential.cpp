@@ -129,8 +129,8 @@ void ConvolutionFitSequential::exec() {
   if (pos != std::string::npos) {
     delta = true;
   }
-  // Check number of lorentzians used (may be redundant)
   // Add logger information
+
   // Convert input workspace to get Q axis
   // Fit all spectra in workspace
   // Fit args
@@ -188,8 +188,12 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(function.substr(0, startPos));
       if (isTwoL == true) {
-        fitType = "Two Lorentzian";
+        fitType = "2";
+      } else {
+        fitType = "1";
       }
+    } else {
+      fitType = "0";
     }
     result.push_back(fitType);
   }
