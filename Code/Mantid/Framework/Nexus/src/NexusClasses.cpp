@@ -178,8 +178,9 @@ bool NXClass::isValid(const std::string &path) const {
 void NXClass::open() {
   // if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),NX_class().c_str()))
   //{
-  if (NX_ERROR == NXopengrouppath(m_fileID, m_path.c_str())) {
-    throw std::runtime_error("Cannot open group " + m_path + " of class " +
+  if (NX_ERROR == NXopengrouppath(m_fileID, name().c_str())) {
+
+    throw std::runtime_error("Cannot open group " + name() + " of class " +
                              NX_class());
   }
   //}
@@ -215,7 +216,7 @@ bool NXClass::openLocal(const std::string &nxclass) {
 
 void NXClass::close() {
   if (NX_ERROR == NXclosegroup(m_fileID)) {
-    throw std::runtime_error("Cannot close group " + m_path + " of class " +
+    throw std::runtime_error("Cannot close group " + name() + " of class " +
                              NX_class());
   }
   m_open = false;
