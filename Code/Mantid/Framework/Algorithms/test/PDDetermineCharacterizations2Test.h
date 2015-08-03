@@ -51,6 +51,7 @@ public:
       alg->setPropertyValue("LogName", "frequency");
       alg->setPropertyValue("LogText", "60.");
       alg->setPropertyValue("LogUnit", "Hz");
+      alg->setPropertyValue("LogType", "Number");
       alg->setPropertyValue("Workspace", m_logWSName);
       TS_ASSERT(alg->execute());
     }
@@ -58,7 +59,8 @@ public:
       auto alg = FrameworkManager::Instance().createAlgorithm("AddSampleLog");
       alg->setPropertyValue("LogName", "LambdaRequest");
       alg->setPropertyValue("LogText", "0.533");
-      alg->setPropertyValue("LogUnit", "Angtrom");
+      alg->setPropertyValue("LogUnit", "Angstrom");
+      alg->setPropertyValue("LogType", "Number");
       alg->setPropertyValue("Workspace", m_logWSName);
       TS_ASSERT(alg->execute());
     }
