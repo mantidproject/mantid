@@ -49,7 +49,6 @@ set ( TEST_PY_FILES
   MSDFitTest.py
   MuscatSofQWTest.py
   OSIRISDiffractionReductionTest.py
-  PDDetermineCharacterizationsTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py

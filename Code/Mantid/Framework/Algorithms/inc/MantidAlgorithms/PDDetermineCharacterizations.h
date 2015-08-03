@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS2_H_
-#define MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS2_H_
+#ifndef MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS_H_
+#define MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -16,7 +16,7 @@ typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
 
 namespace Algorithms {
 
-/** PDDetermineCharacterizations2 : TODO: DESCRIPTION
+/** PDDetermineCharacterizations
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,10 +39,10 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PDDetermineCharacterizations2 : public API::Algorithm {
+class DLLExport PDDetermineCharacterizations : public API::Algorithm {
 public:
-  PDDetermineCharacterizations2();
-  virtual ~PDDetermineCharacterizations2();
+  PDDetermineCharacterizations();
+  virtual ~PDDetermineCharacterizations();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -66,4 +66,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS2_H_ */
+#endif /* MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS_H_ */

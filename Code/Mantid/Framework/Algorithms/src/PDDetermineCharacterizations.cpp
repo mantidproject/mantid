@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/PDDetermineCharacterizations2.h"
+#include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -35,33 +35,33 @@ const std::string WL_PROP_NAME("WaveLengthLogNames");
 }
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(PDDetermineCharacterizations2)
+DECLARE_ALGORITHM(PDDetermineCharacterizations)
 
 //----------------------------------------------------------------------------------------------
 /// Constructor
-PDDetermineCharacterizations2::PDDetermineCharacterizations2() {}
+PDDetermineCharacterizations::PDDetermineCharacterizations() {}
 
 //----------------------------------------------------------------------------------------------
 /// Destructor
-PDDetermineCharacterizations2::~PDDetermineCharacterizations2() {}
+PDDetermineCharacterizations::~PDDetermineCharacterizations() {}
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string PDDetermineCharacterizations2::name() const {
+const std::string PDDetermineCharacterizations::name() const {
   return "PDDetermineCharacterizations";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PDDetermineCharacterizations2::version() const { return 2; }
+int PDDetermineCharacterizations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PDDetermineCharacterizations2::category() const {
+const std::string PDDetermineCharacterizations::category() const {
   return "Workflow/Diffraction/UsesPropertyManager";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string PDDetermineCharacterizations2::summary() const {
+const std::string PDDetermineCharacterizations::summary() const {
   return "Determines the characterizations of a workspace.";
 }
 
@@ -69,7 +69,7 @@ const std::string PDDetermineCharacterizations2::summary() const {
 
 /// More intesive input checking. @see Algorithm::validateInputs
 std::map<std::string, std::string>
-PDDetermineCharacterizations2::validateInputs() {
+PDDetermineCharacterizations::validateInputs() {
   std::map<std::string, std::string> result;
 
   ITableWorkspace_const_sptr characterizations = getProperty(CHAR_PROP_NAME);
@@ -97,7 +97,7 @@ PDDetermineCharacterizations2::validateInputs() {
 }
 
 /// Initialize the algorithm's properties.
-void PDDetermineCharacterizations2::init() {
+void PDDetermineCharacterizations::init() {
   declareProperty(
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
                               API::PropertyMode::Optional),
@@ -152,7 +152,7 @@ bool closeEnough(const double left, const double right) {
 }
 
 /// Fill in the property manager from the correct line in the table
-void PDDetermineCharacterizations2::getInformationFromTable(
+void PDDetermineCharacterizations::getInformationFromTable(
     const double frequency, const double wavelength) {
   size_t numRows = m_characterizations->rowCount();
 
@@ -202,7 +202,7 @@ void PDDetermineCharacterizations2::getInformationFromTable(
  * @param propName
  * @return
  */
-double PDDetermineCharacterizations2::getLogValue(API::Run &run,
+double PDDetermineCharacterizations::getLogValue(API::Run &run,
                                                   const std::string &propName) {
   std::vector<std::string> names = getProperty(propName);
 
@@ -248,7 +248,7 @@ double PDDetermineCharacterizations2::getLogValue(API::Run &run,
 }
 
 /// Set the default values in the property manager
-void PDDetermineCharacterizations2::setDefaultsInPropManager() {
+void PDDetermineCharacterizations::setDefaultsInPropManager() {
   if (!m_propertyManager->existsProperty("frequency")) {
     m_propertyManager->declareProperty(
         new PropertyWithValue<double>("frequency", 0.));
@@ -295,7 +295,7 @@ void PDDetermineCharacterizations2::setDefaultsInPropManager() {
  * @param inputName
  * @param propName
  */
-void PDDetermineCharacterizations2::overrideRunNumProperty(
+void PDDetermineCharacterizations::overrideRunNumProperty(
     const std::string &inputName, const std::string &propName) {
   int32_t runnumber = this->getProperty(inputName);
   if (runnumber != 0) {
@@ -306,7 +306,7 @@ void PDDetermineCharacterizations2::overrideRunNumProperty(
 }
 
 /// Execute the algorithm.
-void PDDetermineCharacterizations2::exec() {
+void PDDetermineCharacterizations::exec() {
   // setup property manager to return
   const std::string managerName = getPropertyValue("ReductionProperties");
   if (PropertyManagerDataService::Instance().doesExist(managerName)) {

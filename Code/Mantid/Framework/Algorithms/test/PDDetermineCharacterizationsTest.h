@@ -1,9 +1,9 @@
-#ifndef MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS2TEST_H_
-#define MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONS2TEST_H_
+#ifndef MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONSTEST_H_
+#define MANTID_ALGORITHMS_PDDETERMINECHARACTERIZATIONSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/PDDetermineCharacterizations2.h"
+#include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/PropertyManagerDataService.h"
@@ -11,13 +11,13 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-using Mantid::Algorithms::PDDetermineCharacterizations2;
+using Mantid::Algorithms::PDDetermineCharacterizations;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 typedef boost::shared_ptr<Mantid::Kernel::PropertyManager> PropertyManager_sptr;
 
-class PDDetermineCharacterizations2Test : public CxxTest::TestSuite {
+class PDDetermineCharacterizationsTest : public CxxTest::TestSuite {
 private:
   std::string m_propertyManagerName = "__pd_reduction_properties";
   //    std::string m_charWSName;
@@ -26,10 +26,10 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static PDDetermineCharacterizations2Test *createSuite() {
-    return new PDDetermineCharacterizations2Test();
+  static PDDetermineCharacterizationsTest *createSuite() {
+    return new PDDetermineCharacterizationsTest();
   }
-  static void destroySuite(PDDetermineCharacterizations2Test *suite) {
+  static void destroySuite(PDDetermineCharacterizationsTest *suite) {
     delete suite;
   }
 
@@ -155,7 +155,7 @@ public:
   }
 
   void test_Init() {
-    PDDetermineCharacterizations2 alg;
+    PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
@@ -164,7 +164,7 @@ public:
     createLogWksp();
     // don't create characterization table
 
-    PDDetermineCharacterizations2 alg;
+    PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", m_logWSName));
@@ -183,7 +183,7 @@ public:
     createLogWksp();
     auto tableWS = createTableWksp(false);
 
-    PDDetermineCharacterizations2 alg;
+    PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", m_logWSName));
@@ -203,7 +203,7 @@ public:
     createLogWksp();
     auto tableWS = createTableWksp(true);
 
-    PDDetermineCharacterizations2 alg;
+    PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", m_logWSName));
@@ -224,7 +224,7 @@ public:
     createLogWksp();
     auto tableWS = createTableWksp(true);
 
-    PDDetermineCharacterizations2 alg;
+    PDDetermineCharacterizations alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", m_logWSName));
