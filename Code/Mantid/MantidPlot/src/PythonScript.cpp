@@ -627,9 +627,25 @@ QVariant PythonScript::evaluateImpl()
   return qret;
 }
 
+/**
+ * On construction set a reference to a given value and at destruction reset it
+ * to its original
+ */
+struct TemporaryValue {
+  TemporaryValue(long & refVal, long tmp) : initial(refVal), ref(refVal){
+    ref = tmp;
+  }
+  ~TemporaryValue() {
+    ref = initial;
+  }
+private:
+  long initial;
+  long & ref;
+};
+
 bool PythonScript::executeImpl()
 {
-  saveThreadID();
+  TemporaryValue holder(m_threadID, getThreadID());
   return executeString();
 }
 
@@ -641,20 +657,26 @@ void PythonScript::abortImpl()
   //      interrupted using algorithm.cancel()
   //   2. Pure Python is executing and can be interrupted
   //      with a KeyboardInterrupt exception
+  // In both situations we issue a KeyboardInterrupt just in case the algorithm
+  // hasn't implemented cancel() checking so that when control returns the Python the
+  // interrupt should be picked up.
   GlobalInterpreterLock lock;
-
+  m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
   if(curAlg && curAlg != Py_None){
     PyObject_CallMethod(curAlg, STR_LITERAL("cancel"), STR_LITERAL(""));
-  } else {
-    m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
   }
 }
 
-void PythonScript::saveThreadID()
+/**
+ * The value returned here is only valid when called by a valid
+ * thread that has a valid Python threadstate
+ * @return A long int giving a unique ID for the thread
+ */
+long PythonScript::getThreadID()
 {
   GlobalInterpreterLock lock;
-  m_threadID = PyThreadState_Get()->thread_id;
+  return PyThreadState_Get()->thread_id;
 }
 
 
@@ -677,6 +699,11 @@ bool PythonScript::executeString()
   if(!result)
   {
     emit_error();
+    // If a script was aborted we both raise a KeyboardInterrupt and 
+    // call Algorithm::cancel to make sure we capture it. The doubling
+    // can leave an interrupt in the pipeline so we clear it was we've
+    // got the error info out
+    m_pythonEnv->raiseAsyncException(m_threadID, NULL);
   }
   else
   {

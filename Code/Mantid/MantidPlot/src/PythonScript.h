@@ -165,8 +165,8 @@ private:
   bool executeImpl();
   /// Request that this script be aborted
   void abortImpl();
-  /// Save the value of the Python thread ID when a script is executed
-  void saveThreadID();
+  /// Get the value of the Python thread ID when a script is executed
+  long getThreadID();
 
   /// Performs the call to Python from a string
   bool executeString();
