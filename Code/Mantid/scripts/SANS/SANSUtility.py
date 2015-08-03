@@ -4,7 +4,7 @@
 # SANS data reduction scripts
 ########################################################
 from mantid.simpleapi import *
-from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
 import mantid
 from mantid.kernel import time_duration
 import inspect
@@ -12,6 +12,7 @@ import math
 import os
 import re
 import types
+import nxs
 
 sanslog = Logger("SANS")
 
@@ -1006,6 +1007,37 @@ def convert_to_string_list(to_convert):
     string_list = to_convert.replace(" ", "").split(",")
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string
+
+def can_load_as_event_workspace(filename):
+    '''
+    Check if an file can be loaded into an event workspace
+    Currently we check if the file
+    1. can be loaded with LoadEventNexus
+    2. contains an "event_workspace" nexus group in its first level
+    Note that this assumes a specific directory structure for the nexus file.
+    @param filename: the name of the input file name
+    @returns true if the file can be loaded as an event workspace else false
+    '''
+    is_event_workspace = False
+
+    # Check if it can be loaded with LoadEventNexus
+    is_event_workspace = FileLoaderRegistry.canLoad("LoadEventNexus", filename)
+
+    if is_event_workspace == False:
+        try:
+            # We only check the first entry in the root
+            # and check for event_eventworkspace in the next level
+            nxs_file =nxs.open(filename, 'r')
+            rootKeys =  nxs_file.getentries().keys()
+            nxs_file.opengroup(rootKeys[0])
+            nxs_file.opengroup('event_workspace')
+            is_event_workspace = True
+        except ValueError, NexusError:
+            pass
+        finally:
+            nxs_file.close()
+
+    return is_event_workspace
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

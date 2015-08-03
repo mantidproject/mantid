@@ -13,7 +13,7 @@ import isis_reducer
 from centre_finder import CentreFinder as CentreFinder
 #import SANSReduction
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, FileLoaderRegistry
+from mantid.api import WorkspaceGroup
 import copy
 from SANSadd2 import *
 import SANSUtility as su
@@ -1206,6 +1206,8 @@ def check_if_event_workspace(file_name):
     @param file_name: The file name to test
     @returns true if the workspace is an event workspace otherwise false
     '''
+
+
     result = FileLoaderRegistry.canLoad("LoadEventNexus", file_name)
     print result
     return result
