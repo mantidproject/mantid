@@ -33,8 +33,9 @@ public:
 		TS_ASSERT_THROWS_NOTHING( searchobj.initialize());
 		TS_ASSERT( searchobj.isInitialized() );
 	}
-	void testSearchByRunNumberandInstrument()
+	void testSearchByRunNumberandInstrumentExecutes()
 	{
+		// Uses an unused runrange to produce an empty workspace and be fast
 		
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
@@ -50,7 +51,7 @@ public:
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
-		searchobj.setPropertyValue("RunRange", "100-109");
+		searchobj.setPropertyValue("RunRange", "1000000-1000001");
 		searchobj.setPropertyValue("Instrument","LOQ");
 		searchobj.setPropertyValue("OutputWorkspace","Investigations");
 					
@@ -58,7 +59,7 @@ public:
 		TS_ASSERT( searchobj.isExecuted() );
 
 	}
-	void testSearchByKeywords()
+	void testSearchByKeywordsExecutes()
 	{
 		
 		CatalogSearch searchobj;
@@ -83,8 +84,10 @@ public:
 		TS_ASSERT( searchobj.isExecuted() );
 
 	}
-	void testSearchByStartDateEndDate()
+	void testSearchByStartDateEndDateExecutes()
 	{
+		// Uses a search date outside of general operation to produce an empty workspace and be fast
+
 		CatalogSearch searchobj;
 		CatalogLogin loginobj;
 
@@ -98,8 +101,8 @@ public:
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
-		searchobj.setPropertyValue("StartDate","10/08/2008");
-		searchobj.setPropertyValue("EndDate","22/08/2008");
+		searchobj.setPropertyValue("StartDate","10/08/1980");
+		searchobj.setPropertyValue("EndDate","22/08/1980");
 		searchobj.setPropertyValue("OutputWorkspace","Investigations");
 				
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
@@ -156,7 +159,7 @@ public:
 
 	}
 
-	void xtestSearchByInvalidDates2()
+	void testSearchByInvalidDates2()
 	{
 
 		CatalogSearch searchobj;
