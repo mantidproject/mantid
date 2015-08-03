@@ -74,6 +74,9 @@ PDDetermineCharacterizations2::validateInputs() {
 
   ITableWorkspace_const_sptr characterizations = getProperty(CHAR_PROP_NAME);
 
+  if (!bool(characterizations))
+    return result;
+
   std::vector<std::string> names = characterizations->getColumnNames();
   if (names.size() < COL_NAMES.size()) { // allow for extra columns
     std::stringstream msg;
@@ -96,12 +99,14 @@ PDDetermineCharacterizations2::validateInputs() {
 /// Initialize the algorithm's properties.
 void PDDetermineCharacterizations2::init() {
   declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
+                              API::PropertyMode::Optional),
       "Workspace with logs to help identify frequency and wavelength");
 
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
-                      CHAR_PROP_NAME, "", Direction::Input),
-                  "Table of characterization information");
+  declareProperty(
+      new WorkspaceProperty<API::ITableWorkspace>(
+          CHAR_PROP_NAME, "", Direction::Input, API::PropertyMode::Optional),
+      "Table of characterization information");
 
   declareProperty("ReductionProperties", "__pd_reduction_properties",
                   "Property manager name for the reduction");

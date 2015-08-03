@@ -160,6 +160,25 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
+  void testNoChar() {
+    createLogWksp();
+    // don't create characterization table
+
+    PDDetermineCharacterizations2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", m_logWSName));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("ReductionProperties", m_propertyManagerName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    auto expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
+
+    compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
+                                    m_propertyManagerName));
+  }
+
   void testEmptyChar() {
     createLogWksp();
     auto tableWS = createTableWksp(false);
