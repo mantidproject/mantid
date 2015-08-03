@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=invalid-name,no-init
 import stresstesting
 from mantid.simpleapi import *
 from SANSUtility import can_load_as_event_workspace
@@ -6,7 +6,7 @@ import os
 
 def create_file_name(base_name):
     temp_save_dir = config['defaultsave.directory']
-    if (temp_save_dir == ''):
+    if temp_save_dir == '':
         temp_save_dir = os.getcwd()
     filename = os.path.join(temp_save_dir, base_name + '.nxs')
     return filename
@@ -25,6 +25,10 @@ class SANSProcessedEventWorkspaceInFile(stresstesting.MantidStressTest):
     Check if a processed nexus file is correctly detected to contain
     an event workspace.
     '''
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self._success = False
+
     def runTest(self):
         # Arrange
         base_name = "processed_event"
@@ -51,6 +55,10 @@ class SANSProcessedHistoWorkspaceInFile(stresstesting.MantidStressTest):
     Check if a processed nexus file is correctly detected to contain
     a histo workspace.
     '''
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self._success = False
+
     def runTest(self):
         # Arrange
         base_name = "processed_histo"

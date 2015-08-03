@@ -1024,6 +1024,7 @@ def can_load_as_event_workspace(filename):
     is_event_workspace = FileLoaderRegistry.canLoad("LoadEventNexus", filename)
 
     if is_event_workspace == False:
+        # pylint: disable=bare-except
         try:
             # We only check the first entry in the root
             # and check for event_eventworkspace in the next level
@@ -1032,7 +1033,7 @@ def can_load_as_event_workspace(filename):
             nxs_file.opengroup(rootKeys[0])
             nxs_file.opengroup('event_workspace')
             is_event_workspace = True
-        except ValueError, NexusError:
+        except:
             pass
         finally:
             nxs_file.close()

@@ -1206,9 +1206,7 @@ def check_if_event_workspace(file_name):
     @param file_name: The file name to test
     @returns true if the workspace is an event workspace otherwise false
     '''
-
-
-    result = FileLoaderRegistry.canLoad("LoadEventNexus", file_name)
+    result = su.can_load_as_event_workspace(filename = file_name)
     print result
     return result
 
