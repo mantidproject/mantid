@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ConvolutionFitSequential.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -60,14 +61,20 @@ void ConvolutionFitSequential::init() {
   declareProperty("End X", "", boost::make_shared<MandatoryValidator<double>>(),
                   "The end of the range for the fit function.",
                   Direction::Input);
-  //Needs validation
-  declareProperty("Temperature", std::string(""), "The Temperature correction for the fit.", Direction::Input);
+  // Needs validation
+  declareProperty("Temperature", std::string(""),
+                  "The Temperature correction for the fit.", Direction::Input);
 
-  declareProperty("Spec Min", 0, boost::make_shared<MandatoryValidator<int>>(),
-                  "The first spectrum to be used in the fit.", Direction::Input);
+  auto boundedV = boost::make_shared<BoundedValidator<int>>();
+  boundedV->setLower(0);
 
-  declareProperty("Spec Max", 0, boost::make_shared<MandatoryValidator<int>>(),
-                  "The final spectrum to be used in the fit.", Direction::Input);
+  declareProperty("Spec Min", 0, boundedV,
+                  "The first spectrum to be used in the fit.",
+                  Direction::Input);
+
+  declareProperty("Spec Max", 0, boundedV,
+                  "The final spectrum to be used in the fit.",
+                  Direction::Input);
 
   declareProperty("Convolve", true,
                   "If true, the fit is treated as a convolution workspace.",
@@ -104,7 +111,6 @@ void ConvolutionFitSequential::exec() {
   // Check if a delta function is being used
   // Check number of lorentzians used (may be redundant)
 
-
   // Add logger information
   // Convert input workspace to get Q axis
   // Fit all spectra in workspace
@@ -115,8 +121,8 @@ void ConvolutionFitSequential::exec() {
   // Define params for use in convertParametersToWorkSpace
   // Run convertParametersToWorkspace
   // Set x units to be momentum transfer
-  // Handle sample logs 
-  // Rename workspaces 
+  // Handle sample logs
+  // Rename workspaces
   // Save
   // Plot
   // End Timer

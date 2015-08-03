@@ -75,6 +75,12 @@ public:
   // required
   void test_empty_temperature_is_allowed() {}
 
+  void test_spectra_number_is_not_negative(){
+	  Mantid::Algorithms::ConvolutionFitSequential alg;
+	  TS_ASSERT_THROWS_NOTHING(alg.initialize());
+	  TS_ASSERT_THROWS(alg.setPropertyValue("Spec Min", "-2"), std::invalid_argument);
+  }
+
   //------------------------- Execution cases ---------------------------
   void test_exec() {}
 
