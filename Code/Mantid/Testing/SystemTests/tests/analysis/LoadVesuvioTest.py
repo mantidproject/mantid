@@ -12,7 +12,6 @@ class VesuvioTests(unittest.TestCase):
 
     ws_name = "evs_raw"
 
-
     def tearDown(self):
         if self.ws_name in mtd:
             mtd.remove(self.ws_name)
@@ -110,7 +109,7 @@ class VesuvioTests(unittest.TestCase):
         det0 = evs_raw.getDetector(0)
         param = det0.getNumberParameter("t0")
         self.assertEqual(1, len(param))
-        self.assertAlmostEqual(-0.4157, param[0],places=4)
+        self.assertAlmostEqual(-0.4157, param[0], places=4)
 
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters_foil_mode(self):
         self._run_load("14188", "3", "FoilOut", "IP0005.dat")
@@ -120,7 +119,7 @@ class VesuvioTests(unittest.TestCase):
         det0 = evs_raw.getDetector(0)
         param = det0.getNumberParameter("t0")
         self.assertEqual(1, len(param))
-        self.assertAlmostEqual(-0.4157, param[0],places=4)
+        self.assertAlmostEqual(-0.4157, param[0], places=4)
 
     def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs(self):
         self._run_load("14188", "135-142", "SingleDifference","IP0005.dat",sum_runs=True)
