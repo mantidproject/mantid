@@ -141,7 +141,7 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
-            if not can_load_as_event_workspace(self.data_file):
+            if not can_load_as_event_workspace(self._data_file):
                 extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
