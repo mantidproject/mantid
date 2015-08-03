@@ -12,49 +12,73 @@ class ConvolutionFitSequentialTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ConvolutionFitSequentialTest *createSuite() { return new ConvolutionFitSequentialTest(); }
-  static void destroySuite( ConvolutionFitSequentialTest *suite ) { delete suite; }
-
-
-  void test_Init()
-  {
-    ConvolutionFitSequential alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+  static ConvolutionFitSequentialTest *createSuite() {
+    return new ConvolutionFitSequentialTest();
+  }
+  static void destroySuite(ConvolutionFitSequentialTest *suite) {
+    delete suite;
   }
 
-  void test_exec()
-  {
-    // Name of the output workspace.
-    std::string outWSName("ConvolutionFitSequentialTest_OutputWS");
+  // TODO: Check if this test is required (may only realistically be called by
+  // convFitUI
+  void test_function_is_in_correct_format() {}
 
-    ConvolutionFitSequential alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+  //-------------------------- Failure cases ----------------------------
+  void test_empty_function_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-
-    // TODO: Check the results
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-  }
-  
-  void test_Something()
-  {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Function", ""),
+                     std::invalid_argument);
   }
 
+  void test_empty_startX_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
+    TS_ASSERT_THROWS(alg.setPropertyValue("Start X", ""),
+                     std::invalid_argument);
+  }
+
+  void test_empty_endX_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("End X", ""), std::invalid_argument);
+  }
+
+  void test_empty_specMin_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Min", ""),
+                     std::invalid_argument);
+  }
+
+  void test_empty_specMax_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Max", ""),
+                     std::invalid_argument);
+  }
+
+  void test_empty_maxIterations_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("Max Iterations", ""),
+                     std::invalid_argument);
+  }
+
+  // Temperature is allowed to be empty as there is not always a correction
+  // required
+  void test_empty_temperature_is_allowed() {}
+
+  //------------------------- Execution cases ---------------------------
+  void test_exec() {}
+
+  void test_Something() {}
 };
-
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */
