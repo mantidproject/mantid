@@ -18,20 +18,17 @@ using Mantid::Kernel::TimeSeriesProperty;
 namespace { // anonymous namespace
 /// this should match those in LoadPDCharacterizations
 const std::vector<std::string> COL_NAMES =
-#ifdef _WIN32
-        std::initializer_list<std::vector<std::string>>
-#endif
 {
-    "frequency",  // double
-    "wavelength", // double
-    "bank",       // integer
-    "container",  // string
-    "vanadium",   // string
-    "empty",      // string
-    "d_min",      // string
-    "d_max",      // string
-    "tof_min",    // double
-    "tof_max"     // double
+    std::string("frequency"),  // double
+    std::string("wavelength"), // double
+    std::string("bank"),       // integer
+    std::string("container"),  // string
+    std::string("vanadium"),   // string
+    std::string("empty"),      // string
+    std::string("d_min"),      // string
+    std::string("d_max"),      // string
+    std::string("tof_min"),    // double
+    std::string("tof_max")     // double
 };
 const std::string CHAR_PROP_NAME("Characterizations");
 const std::string FREQ_PROP_NAME("FrequencyLogNames");
@@ -281,11 +278,11 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
   }
   if (!m_propertyManager->existsProperty("d_min")) {
     m_propertyManager->declareProperty(
-        new ArrayProperty<std::vector<double>>("d_min"));
+        new ArrayProperty<double>("d_min"));
   }
   if (!m_propertyManager->existsProperty("d_max")) {
     m_propertyManager->declareProperty(
-        new ArrayProperty<std::vector<double>>("d_max"));
+        new ArrayProperty<double>("d_max"));
   }
   if (!m_propertyManager->existsProperty("tof_min")) {
     m_propertyManager->declareProperty(
