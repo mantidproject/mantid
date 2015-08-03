@@ -1026,20 +1026,22 @@ def can_load_as_event_workspace(filename):
     # Check if it can be loaded with LoadEventNexus
     is_event_workspace = FileLoaderRegistry.canLoad("LoadEventNexus", filename)
 
-    if is_event_workspace == False:
-        # pylint: disable=bare-except
-        try:
-            # We only check the first entry in the root
-            # and check for event_eventworkspace in the next level
-            nxs_file =nxs.open(filename, 'r')
-            rootKeys =  nxs_file.getentries().keys()
-            nxs_file.opengroup(rootKeys[0])
-            nxs_file.opengroup('event_workspace')
-            is_event_workspace = True
-        except:
-            pass
-        finally:
-            nxs_file.close()
+    # Ubuntu does not provide NEXUS for python currently, need to hedge for that
+    if CAN_IMPORT_NXS:
+        if is_event_workspace == False:
+            # pylint: disable=bare-except
+            try:
+                # We only check the first entry in the root
+                # and check for event_eventworkspace in the next level
+                nxs_file =nxs.open(filename, 'r')
+                rootKeys =  nxs_file.getentries().keys()
+                nxs_file.opengroup(rootKeys[0])
+                nxs_file.opengroup('event_workspace')
+                is_event_workspace = True
+            except:
+                pass
+            finally:
+                nxs_file.close()
 
     return is_event_workspace
 

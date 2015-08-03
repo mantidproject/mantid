@@ -7,7 +7,7 @@ import os
 # WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
 CAN_IMPORT_NXS_TEST = True
 try:
-    import nxs
+    import nxs # pylint: disable=unused-import
 except ImportError:
     CAN_IMPORT_NXS_TEST = False
 # WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- STOP
