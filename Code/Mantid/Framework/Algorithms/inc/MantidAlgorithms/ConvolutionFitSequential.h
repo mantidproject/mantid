@@ -42,6 +42,9 @@ public:
 private:
   void init();
   void exec();
+
+  bool checkForTwoLorentz(const std::string &);
+  std::vector<std::string> findValuesFromFunction(const std::string &);
 };
 
 } // namespace Algorithms
