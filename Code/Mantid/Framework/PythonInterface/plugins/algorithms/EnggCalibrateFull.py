@@ -66,7 +66,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
         expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                         self.getProperty('ExpectedPeaks').value)
+                                                       self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
@@ -143,7 +143,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             oldPos = det.getPos()
 
             posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
-                                  difc, zero])
+                           difc, zero])
             prog.report()
 
         return posTbl

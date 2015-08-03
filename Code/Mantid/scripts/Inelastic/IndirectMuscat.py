@@ -1,5 +1,8 @@
-#pylint: disable=invalid-name
-# MUSIC : Version of Minus for MIDAS
+#pylint: disable=invalid-name,too-many-arguments,too-many-locals
+
+"""
+MUSIC : Version of Minus for MIDAS
+"""
 
 from IndirectImport import *
 if is_supported_f2py_platform():

@@ -15,4 +15,4 @@ Algorithms
    :glob:
    :maxdepth: 1
 
-   algorithms/*
+   ./*
