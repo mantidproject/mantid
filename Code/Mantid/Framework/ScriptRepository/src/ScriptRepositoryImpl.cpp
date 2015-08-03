@@ -858,6 +858,39 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       g_log.information() << "ScriptRepository update local json " << std::endl;
       updateLocalJson(file_path, entry); /// FIXME: performance!
 
+      // add the entry to the repository.json. The
+      // repository.json should change at the
+      // remote repository, and we could just download the new one, but
+      // we can not rely on the server updating it fast enough.
+      // So add to the file locally to avoid race condition.
+      {
+	        ptree pt;
+	        std::string filename =
+		      std::string(local_repository).append(".repository.json");
+	        try {
+	        read_json(filename, pt);
+	        pt.erase(relative_path); // TODO add stuff here instead of erase!
+      #if defined(_WIN32) || defined(_WIN64)
+	        // set the .repository.json and .local.json not hidden (to be able to
+	        // edit it)
+	        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+      #endif
+	        write_json(filename, pt);
+      #if defined(_WIN32) || defined(_WIN64)
+	        // set the .repository.json and .local.json hidden
+	        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+      #endif
+	        } catch (boost::property_tree::json_parser_error &ex) {
+	        std::stringstream ss;
+	        ss << "corrupted central copy of database : " << filename;
+
+	        g_log.error() << "ScriptRepository: " << ss.str()
+					        << "\nDetails: adding entry - json_parser_error: "
+					        << ex.what() << std::endl;
+	        throw ScriptRepoException(ss.str(), ex.what());
+	        }
+      }
+
     } else
       throw ScriptRepoException(info, detail);
 
