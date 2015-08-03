@@ -15,11 +15,10 @@ using Mantid::Algorithms::PDDetermineCharacterizations;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-typedef boost::shared_ptr<Mantid::Kernel::PropertyManager> PropertyManager_sptr;
+const std::string PROPERTY_MANAGER_NAME = "__pd_reduction_properties";
 
 class PDDetermineCharacterizationsTest : public CxxTest::TestSuite {
 private:
-  std::string m_propertyManagerName = "__pd_reduction_properties";
   std::string m_logWSName;
 
 public:
@@ -168,14 +167,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", m_propertyManagerName));
+        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    PropertyManager_sptr expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
+    auto expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    m_propertyManagerName));
+                                    PROPERTY_MANAGER_NAME));
   }
 
   void testEmptyChar() {
@@ -188,14 +187,14 @@ public:
         alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", m_propertyManagerName));
+        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    PropertyManager_sptr expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
+    auto expectedInfo = createExpectedInfo(0., 0., 1, 0, 0, 0, "", "", 0., 0.);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    m_propertyManagerName));
+                                    PROPERTY_MANAGER_NAME));
   }
 
   void testFullChar() {
@@ -208,15 +207,15 @@ public:
         alg.setPropertyValue("InputWorkspace", m_logWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Characterizations", tableWS));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", m_propertyManagerName));
+        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    PropertyManager_sptr expectedInfo = createExpectedInfo(60., 0.533, 1, 17702, 17711, 0,
+    auto expectedInfo = createExpectedInfo(60., 0.533, 1, 17702, 17711, 0,
                                            "0.05", "2.20", 0000.00, 16666.67);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    m_propertyManagerName));
+                                    PROPERTY_MANAGER_NAME));
   }
 
   void testFullCharDisableChar() {
@@ -232,15 +231,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NormRun", -1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NormBackRun", -1));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("ReductionProperties", m_propertyManagerName));
+        alg.setPropertyValue("ReductionProperties", PROPERTY_MANAGER_NAME));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    PropertyManager_sptr expectedInfo = createExpectedInfo(60., 0.533, 1, 0, 0, 0, "0.05",
+    auto expectedInfo = createExpectedInfo(60., 0.533, 1, 0, 0, 0, "0.05",
                                            "2.20", 0000.00, 16666.67);
 
     compareResult(expectedInfo, PropertyManagerDataService::Instance().retrieve(
-                                    m_propertyManagerName));
+                                    PROPERTY_MANAGER_NAME));
   }
 };
 
