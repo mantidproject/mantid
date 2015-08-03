@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>EnggDiffractionQtTabSettings</class>
+ <widget class="QWidget" name="EnggDiffractionQtTabSettings">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -61,7 +61,6 @@
           </widget>
          </item>
         </layout>
-        <zorder>groupBox</zorder>
         <zorder>label</zorder>
         <zorder>lineEdit</zorder>
         <zorder>pushButton_2</zorder>
