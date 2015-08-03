@@ -101,47 +101,33 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbPlotTime">
+    <widget class="QGroupBox" name="gbC2E">
      <property name="title">
-      <string>Plot Time</string>
+      <string>Conversion to Energy Transfer</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLabel" name="lbPlotTimeSpecMin">
+       <widget class="QLabel" name="lbEFixed">
         <property name="text">
-         <string>Spectra Min:</string>
+         <string>Efixed value:</string>
+        </property>
+        <property name="buddy">
+         <cstring>leEfixed</cstring>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spPlotTimeSpecMin">
-        <property name="minimum">
-         <number>1</number>
+       <widget class="QLineEdit" name="leEfixed">
+        <property name="enabled">
+         <bool>false</bool>
         </property>
-        <property name="maximum">
-         <number>1200</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lbPlotTimeSpecMax">
-        <property name="text">
-         <string>Spectra Max:</string>
+        <property name="toolTip">
+         <string>Value of Efixed for conversion from time to energy.</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spPlotTimeSpecMax">
-        <property name="minimum">
-         <number>1</number>
-        </property>
-        <property name="maximum">
-         <number>1200</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="space_plotTime">
+       <spacer name="horizontalSpacer_1">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -154,13 +140,173 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="pbPlotTime">
-        <property name="toolTip">
-         <string>Plot raw time values.</string>
+       <widget class="QLabel" name="lbSpectraMin">
+        <property name="text">
+         <string>Spectra Min:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spSpectraMin">
+        <property name="maximum">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbSpectraMax">
+        <property name="text">
+         <string>Spectra Max</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spSpectraMax">
+        <property name="maximum">
+         <number>0</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbGrouping">
+     <property name="title">
+      <string>Detector Grouping</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
+      <item>
+       <widget class="QLabel" name="lbGroupingMode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>Plot</string>
+         <string>Mode:</string>
         </property>
+        <property name="buddy">
+         <cstring>cbGroupingOptions</cstring>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbGroupingOptions">
+        <property name="toolTip">
+         <string>Select type of detector grouping to apply.</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>Default</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Individual</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Groups</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>File</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="swGrouping">
+        <property name="lineWidth">
+         <number>0</number>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="pgMapFile">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsMapFile" native="true">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>41</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="findRunFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="label" stdset="0">
+             <string/>
+            </property>
+            <property name="multipleFiles" stdset="0">
+             <bool>false</bool>
+            </property>
+            <property name="algorithmAndProperty" stdset="0">
+             <string/>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.map</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgMappingGroups">
+         <layout class="QHBoxLayout" name="horizontalLayout_26">
+          <item>
+           <widget class="QLabel" name="lbNoGroups">
+            <property name="text">
+             <string>Number of Groups: </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="spNumberGroups"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgMappingBlank"/>
        </widget>
       </item>
      </layout>
@@ -309,89 +455,6 @@
         </property>
         <property name="value">
          <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="gbC2E">
-     <property name="title">
-      <string>Conversion to Energy Transfer</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLabel" name="lbEFixed">
-        <property name="text">
-         <string>Efixed value:</string>
-        </property>
-        <property name="buddy">
-         <cstring>leEfixed</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="leEfixed">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="toolTip">
-         <string>Value of Efixed for conversion from time to energy.</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_1">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="lbSpectraMin">
-        <property name="text">
-         <string>Spectra Min:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spSpectraMin">
-        <property name="maximum">
-         <number>0</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="lbSpectraMax">
-        <property name="text">
-         <string>Spectra Max</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spSpectraMax">
-        <property name="maximum">
-         <number>0</number>
         </property>
        </widget>
       </item>
@@ -664,129 +727,66 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbGrouping">
+    <widget class="QGroupBox" name="gbPlotTime">
      <property name="title">
-      <string>Detector Grouping</string>
+      <string>Plot Time</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
-       <widget class="QLabel" name="lbGroupingMode">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
+       <widget class="QLabel" name="lbPlotTimeSpecMin">
+        <property name="text">
+         <string>Spectra Min:</string>
         </property>
-        <property name="layoutDirection">
-         <enum>Qt::LeftToRight</enum>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spPlotTimeSpecMin">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1200</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbPlotTimeSpecMax">
+        <property name="text">
+         <string>Spectra Max:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spPlotTimeSpecMax">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1200</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="space_plotTime">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlotTime">
+        <property name="toolTip">
+         <string>Plot raw time values.</string>
         </property>
         <property name="text">
-         <string>Mode:</string>
+         <string>Plot</string>
         </property>
-        <property name="buddy">
-         <cstring>cbGroupingOptions</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="cbGroupingOptions">
-        <property name="toolTip">
-         <string>Select type of detector grouping to apply.</string>
-        </property>
-        <item>
-         <property name="text">
-          <string>Default</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Individual</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Groups</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>File</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item>
-       <widget class="QStackedWidget" name="swGrouping">
-        <property name="lineWidth">
-         <number>0</number>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <widget class="QWidget" name="pgMapFile">
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="dsMapFile" native="true">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>41</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="findRunFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="label" stdset="0">
-             <string/>
-            </property>
-            <property name="multipleFiles" stdset="0">
-             <bool>false</bool>
-            </property>
-            <property name="algorithmAndProperty" stdset="0">
-             <string/>
-            </property>
-            <property name="fileExtensions" stdset="0">
-             <stringlist>
-              <string>.map</string>
-             </stringlist>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="pgMappingGroups">
-         <layout class="QHBoxLayout" name="horizontalLayout_26">
-          <item>
-           <widget class="QLabel" name="lbNoGroups">
-            <property name="text">
-             <string>Number of Groups: </string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QSpinBox" name="spNumberGroups"/>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
-        <widget class="QWidget" name="pgMappingBlank"/>
        </widget>
       </item>
      </layout>
@@ -961,38 +961,38 @@
  </customwidgets>
  <tabstops>
   <tabstop>ckSumFiles</tabstop>
-  <tabstop>cbLoadLogFiles</tabstop>
+  <tabstop>ckLoadLogFiles</tabstop>
   <tabstop>ckUseCalib</tabstop>
-  <tabstop>spPlotTimeSpecMin</tabstop>
-  <tabstop>spPlotTimeSpecMax</tabstop>
-  <tabstop>pbPlotTime</tabstop>
-  <tabstop>ckBackgroundRemoval</tabstop>
-  <tabstop>spBackgroundStart</tabstop>
-  <tabstop>spBackgroundEnd</tabstop>
-  <tabstop>ckDetailedBalance</tabstop>
-  <tabstop>ckScaleMultiplier</tabstop>
-  <tabstop>spDetailedBalance</tabstop>
-  <tabstop>spScaleMultiplier</tabstop>
   <tabstop>leEfixed</tabstop>
   <tabstop>spSpectraMin</tabstop>
   <tabstop>spSpectraMax</tabstop>
   <tabstop>cbGroupingOptions</tabstop>
+  <tabstop>spNumberGroups</tabstop>
+  <tabstop>ckBackgroundRemoval</tabstop>
+  <tabstop>spBackgroundStart</tabstop>
+  <tabstop>spBackgroundEnd</tabstop>
+  <tabstop>ckDetailedBalance</tabstop>
+  <tabstop>spDetailedBalance</tabstop>
+  <tabstop>ckScaleMultiplier</tabstop>
+  <tabstop>spScaleMultiplier</tabstop>
   <tabstop>ckDoNotRebin</tabstop>
   <tabstop>cbRebinType</tabstop>
   <tabstop>spRebinLow</tabstop>
   <tabstop>spRebinWidth</tabstop>
   <tabstop>spRebinHigh</tabstop>
   <tabstop>leRebinString</tabstop>
-  <tabstop>spNumberGroups</tabstop>
+  <tabstop>spPlotTimeSpecMin</tabstop>
+  <tabstop>spPlotTimeSpecMax</tabstop>
+  <tabstop>pbPlotTime</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckFold</tabstop>
+  <tabstop>ckCm1Units</tabstop>
   <tabstop>ckSaveSPE</tabstop>
   <tabstop>ckSaveNexus</tabstop>
   <tabstop>ckSaveNXSPE</tabstop>
   <tabstop>ckSaveASCII</tabstop>
   <tabstop>ckSaveAclimax</tabstop>
   <tabstop>ckSaveDaveGrp</tabstop>
-  <tabstop>cbPlotType</tabstop>
-  <tabstop>ckFold</tabstop>
-  <tabstop>ckCm1Units</tabstop>
  </tabstops>
  <resources/>
  <connections>

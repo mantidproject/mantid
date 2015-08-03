@@ -26,3 +26,5 @@ Usage
     CatalogKeepALive(Session = session.getPropertyValue("Session"))
 
 .. categories::
+
+.. sourcelink::

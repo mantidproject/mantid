@@ -52,3 +52,5 @@ attibute is empty.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

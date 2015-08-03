@@ -518,12 +518,14 @@ void LoadTOFRawNexus::exec() {
   prog->doReport("Loading DAS logs");
   g_log.debug() << "Loading DAS logs" << std::endl;
 
-  LoadEventNexus::runLoadNexusLogs(filename, WS, *this, false);
+  int nPeriods = 1; // Unused
+  std::unique_ptr<const TimeSeriesProperty<int> > periodLog(new const TimeSeriesProperty<int>("period_log")); // Unused
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, WS, *this, false, nPeriods, periodLog);
 
   // Load the instrument
   prog->report("Loading instrument");
   g_log.debug() << "Loading instrument" << std::endl;
-  LoadEventNexus::runLoadInstrument(filename, WS, entry_name, this);
+  LoadEventNexus::runLoadInstrument<MatrixWorkspace_sptr>(filename, WS, entry_name, this);
 
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");

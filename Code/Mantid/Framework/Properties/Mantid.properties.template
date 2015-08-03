@@ -42,6 +42,11 @@ instrumentDefinition.directory = @MANTID_ROOT@/instrument
 UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
 UpdateInstrumentDefinitions.URL = https://api.github.com/repos/mantidproject/mantid/contents/Code/Mantid/instrument
 
+# Whether to check for newer mantid versions on startup
+CheckMantidVersion.OnStartup = @CHECK_FOR_NEW_MANTID_VERSION@
+CheckMantidVersion.GitHubReleaseURL = https://api.github.com/repos/mantidproject/mantid/releases/latest
+CheckMantidVersion.DownloadURL = http://download.mantidproject.org
+
 # Whether to report usage statistics back to central server
 usagereports.enabled = @ENABLE_USAGE_REPORTS@
 
@@ -145,19 +150,28 @@ graph1d.autodistribution = On
 #AlgorithmChaining.SwitchedOn = 1
 
 # logging configuration
-# root level message filter (drop to debug for more messages)
-logging.loggers.root.level = notice
+# root level message filter (This sets a minimal level possible for any channel)
+logging.loggers.root.level = information
+
 # splitting the messages to many logging channels
 logging.loggers.root.channel.class = SplitterChannel
-logging.loggers.root.channel.channel1 = consoleChannel
+logging.loggers.root.channel.channel1 = consoleFilterChannel
 logging.loggers.root.channel.channel2 = fileFilterChannel
+
+# specific filter for the console channel raising the level to notice (drop to debug for debugging)
+logging.channels.consoleFilterChannel.class= FilterChannel
+logging.channels.consoleFilterChannel.channel= consoleChannel
+logging.channels.consoleFilterChannel.level= notice
+
+# specific filter for the file channel raising the level to information (drop to debug for debugging)
+logging.channels.fileFilterChannel.class= FilterChannel
+logging.channels.fileFilterChannel.channel= fileChannel
+logging.channels.fileFilterChannel.level= information
+
 # output to the console - primarily for console based apps
 logging.channels.consoleChannel.class = ConsoleChannel
 logging.channels.consoleChannel.formatter = f1
-# specific filter for the file channel raising the level to notice (drop to debug for debugging)
-logging.channels.fileFilterChannel.class= FilterChannel
-logging.channels.fileFilterChannel.channel= fileChannel
-logging.channels.fileFilterChannel.level= notice
+
 # output to a file (For error capturing and debugging)
 logging.channels.fileChannel.class = @FILECHANNEL@
 logging.channels.fileChannel.path =
@@ -165,10 +179,10 @@ logging.channels.fileChannel.rotation = 1 M
 logging.channels.fileChannel.purgeCount = 9
 logging.channels.fileChannel.formatter.class = PatternFormatter
 logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
+logging.channels.fileChannel.formatter.times = local
 logging.formatters.f1.class = PatternFormatter
 logging.formatters.f1.pattern = @CONSOLEPATTERN@
 logging.formatters.f1.times = local
-logging.channels.fileChannel.formatter.times = local
 
 workspace.sendto.SansView.arguments=[file]
 workspace.sendto.SansView.saveusing=SaveCanSAS1D

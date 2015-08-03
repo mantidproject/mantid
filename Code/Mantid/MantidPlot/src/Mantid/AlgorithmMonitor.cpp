@@ -130,11 +130,16 @@ void AlgorithmMonitor::showDialog()
 
 //-----------------------------------------------------------------------------
 /** Cancel the given algorithm's execution */
-void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id)
+void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id, QPushButton* cancelBtn = NULL)
 {
-  IAlgorithm_sptr a = Mantid::API::AlgorithmManager::Instance().getAlgorithm(id);
-  if (!a.get()) return;
-  a->cancel();
+  if ((cancelBtn) && (cancelBtn->text() == "Cancel"))
+  {
+    cancelBtn->setText("Cancelling");
+    cancelBtn->setEnabled(false);
+    IAlgorithm_sptr a = Mantid::API::AlgorithmManager::Instance().getAlgorithm(id);
+    if (!a.get()) return;
+    a->cancel();
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -229,7 +234,7 @@ void MonitorDlg::update()
       algItem->addChild(new QTreeWidgetItem(lstr));
     }
 
-    connect(cancelButton,SIGNAL(clicked(Mantid::API::AlgorithmID)),m_algMonitor,SLOT(cancel(Mantid::API::AlgorithmID)));
+    connect(cancelButton,SIGNAL(clicked(Mantid::API::AlgorithmID, QPushButton*)),m_algMonitor,SLOT(cancel(Mantid::API::AlgorithmID, QPushButton*)));
   }
   m_algMonitor->unlock();
 }

@@ -101,3 +101,5 @@ Output:
    Selected data 1.485135, 0.741801
 
 .. categories::
+
+.. sourcelink::

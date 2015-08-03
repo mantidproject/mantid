@@ -60,3 +60,5 @@ Output:
    Alpha value: 2.000
 
 .. categories::
+
+.. sourcelink::

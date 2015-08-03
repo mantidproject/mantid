@@ -26,7 +26,8 @@ Usage
 
 .. testcode:: ExCalculateSampleTransmissionSimple
 
-    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0', ChemicalFormula='H2-O')
+    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
+                                     ChemicalFormula='H2-O')
 
     print 'Transmission: %f, %f, %f ...' % tuple(ws.readY(0)[:3])
     print 'Scattering: %f, %f, %f ...' % tuple(ws.readY(1)[:3])
@@ -44,8 +45,10 @@ Output:
 
 .. testcode:: ExCalculateSampleTransmissionParams
 
-    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0', ChemicalFormula='H2-O',
-                                    NumberDensity=0.2, Thickness=0.58)
+    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
+                                     ChemicalFormula='H2-O',
+                                     NumberDensity=0.2,
+                                     Thickness=0.58)
 
     print 'Transmission: %f, %f, %f ...' % tuple(ws.readY(0)[:3])
     print 'Scattering: %f, %f, %f ...' % tuple(ws.readY(1)[:3])
@@ -58,3 +61,5 @@ Output:
     Scattering: 0.998506, 0.998506, 0.998506 ...
 
 .. categories::
+
+.. sourcelink::

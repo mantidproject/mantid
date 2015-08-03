@@ -509,7 +509,7 @@ void EQSANSLoad::exec() {
         loadAlg->setProperty("FilterByTofMax", m_high_TOF_cut);
     }
     loadAlg->execute();
-    IEventWorkspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
+    Workspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
     dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_asWks);
 
     // Get monitor workspace as necessary

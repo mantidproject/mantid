@@ -80,3 +80,5 @@ Then:
 .. properties::
 
 .. categories::
+
+.. sourcelink::

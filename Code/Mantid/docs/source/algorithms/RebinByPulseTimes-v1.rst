@@ -77,3 +77,5 @@ Output:
    X-axis relative end time in seconds:  100.0
 
 .. categories::
+
+.. sourcelink::

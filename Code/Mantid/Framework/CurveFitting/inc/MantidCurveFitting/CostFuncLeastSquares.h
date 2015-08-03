@@ -64,8 +64,7 @@ public:
   /// @return :: The value of the function
   virtual double valAndDeriv(std::vector<double> &der) const;
 
-  virtual double valDerivHessian(bool evalFunction = true,
-                                 bool evalDeriv = true,
+  virtual double valDerivHessian(bool evalDeriv = true,
                                  bool evalHessian = true) const;
   const GSLVector &getDeriv() const;
   const GSLMatrix &getHessian() const;
@@ -85,7 +84,7 @@ protected:
   void addValDerivHessian(API::IFunction_sptr function,
                           API::FunctionDomain_sptr domain,
                           API::FunctionValues_sptr values,
-                          bool evalFunction = true, bool evalDeriv = true,
+                          bool evalDeriv = true,
                           bool evalHessian = true) const;
 
   /// Get mapped weights from FunctionValues

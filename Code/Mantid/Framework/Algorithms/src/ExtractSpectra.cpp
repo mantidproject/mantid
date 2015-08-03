@@ -8,6 +8,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
+#include <algorithm>
 #include <iostream>
 
 namespace {
@@ -202,6 +203,30 @@ void ExtractSpectra::execHistogram() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
+namespace { // anonymous namespace
+
+template <class T>
+struct eventFilter {
+    eventFilter(const double minValue, const double maxValue):
+        minValue(minValue), maxValue(maxValue)
+    {}
+
+    bool operator()(const T &value) {
+        const double tof = value.tof();
+        return (tof <= maxValue && tof >= minValue);
+    }
+
+    double minValue;
+    double maxValue;
+};
+
+template <class T>
+void copyEventsHelper(const std::vector<T> &inputEvents, std::vector<T> &outputEvents, const double xmin, const double xmax) {
+    copy_if(inputEvents.begin(), inputEvents.end(), std::back_inserter(outputEvents), eventFilter<T>(xmin, xmax));
+}
+
+}
+
 /** Executes the algorithm
  *  @throw std::out_of_range If a property is set to an invalid value for the
  * input workspace
@@ -272,45 +297,23 @@ void ExtractSpectra::execEvent() {
 
     switch (el.getEventType()) {
     case TOF: {
-      std::vector<TofEvent>::const_iterator itev = el.getEvents().begin();
-      std::vector<TofEvent>::const_iterator end = el.getEvents().end();
       std::vector<TofEvent> moreevents;
       moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      for (; itev != end; ++itev) {
-        const double tof = itev->tof();
-        if (tof <= maxX_val && tof >= minX_val)
-          moreevents.push_back(*itev);
-      }
+      copyEventsHelper(el.getEvents(), moreevents, minX_val, maxX_val);
       outEL += moreevents;
       break;
     }
     case WEIGHTED: {
-      std::vector<WeightedEvent>::const_iterator itev =
-          el.getWeightedEvents().begin();
-      std::vector<WeightedEvent>::const_iterator end =
-          el.getWeightedEvents().end();
       std::vector<WeightedEvent> moreevents;
       moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      for (; itev != end; ++itev) {
-        const double tof = itev->tof();
-        if (tof <= maxX_val && tof >= minX_val)
-          moreevents.push_back(*itev);
-      }
+      copyEventsHelper(el.getWeightedEvents(), moreevents, minX_val, maxX_val);
       outEL += moreevents;
       break;
     }
     case WEIGHTED_NOTIME: {
-      std::vector<WeightedEventNoTime>::const_iterator itev =
-          el.getWeightedEventsNoTime().begin();
-      std::vector<WeightedEventNoTime>::const_iterator end =
-          el.getWeightedEventsNoTime().end();
       std::vector<WeightedEventNoTime> moreevents;
       moreevents.reserve(el.getNumberEvents()); // assume all will make it
-      for (; itev != end; ++itev) {
-        const double tof = itev->tof();
-        if (tof <= maxX_val && tof >= minX_val)
-          moreevents.push_back(*itev);
-      }
+      copyEventsHelper(el.getWeightedEventsNoTime(), moreevents, minX_val, maxX_val);
       outEL += moreevents;
       break;
     }

@@ -100,7 +100,7 @@ DensityOfStates
   :widget: dos
 
 The DensityOfStates interface is used to load CASTEP simulations using the
-:ref:`DensityOfStates <algm-DensityOfStates>` algorithm. It supports loading
+:ref:`SimulatedDensityOfStates <algm-SimulatedDensityOfStates>` algorithm. It supports loading
 full and partial densities of states, raman and IR spectroscopy.
 
 Options

@@ -55,3 +55,5 @@ definition
 but extensions and/or different variants might be added in the future.
 
 .. categories::
+
+.. sourcelink::

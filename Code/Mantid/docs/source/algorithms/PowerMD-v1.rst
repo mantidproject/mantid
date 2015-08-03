@@ -20,3 +20,5 @@ This algorithm cannot be run on a
 :ref:`MatrixWorkspace <MatrixWorkspace>` is called :ref:`algm-Power`.
 
 .. categories::
+
+.. sourcelink::

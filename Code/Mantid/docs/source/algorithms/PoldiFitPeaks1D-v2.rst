@@ -47,3 +47,5 @@ Variation of the `AllowedOverlap`-parameter influences the quality of the fit at
     PoldiFitPeaks1D(InputWorkspace='correlation_spectrum', FwhmMultiples=2, AllowedOverlap=0.9, PoldiPeakTable='peaks')
     
 .. categories::
+
+.. sourcelink::

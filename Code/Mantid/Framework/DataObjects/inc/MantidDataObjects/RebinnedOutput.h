@@ -45,6 +45,11 @@ public:
   /// Class destructor.
   virtual ~RebinnedOutput();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<RebinnedOutput> clone() const {
+    return std::unique_ptr<RebinnedOutput>(doClone());
+  }
+
   /// Get the workspace ID.
   virtual const std::string id() const;
 
@@ -64,6 +69,11 @@ public:
   void setF(const std::size_t index, const MantidVecPtr &F);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  RebinnedOutput(const RebinnedOutput &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  RebinnedOutput &operator=(const RebinnedOutput &other);
+
   /// Called by initialize() in MatrixWorkspace
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,
                     const std::size_t &YLength);
@@ -72,10 +82,7 @@ protected:
   std::vector<MantidVec> fracArea;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  RebinnedOutput(const RebinnedOutput &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  RebinnedOutput &operator=(const RebinnedOutput &);
+  virtual RebinnedOutput *doClone() const { return new RebinnedOutput(*this); }
 };
 
 /// shared pointer to the RebinnedOutput class

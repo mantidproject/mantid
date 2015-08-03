@@ -35,6 +35,7 @@ namespace API {
 */
 class DLLExport IMaskWorkspace {
 public:
+  IMaskWorkspace() {}
   /// Return the workspace typeID
   virtual const std::string id() const { return "IMaskWorkspace"; }
   /// Total number of masked pixels
@@ -48,6 +49,12 @@ public:
   /// Set / remove masks of all detectors in a set
   virtual void setMasked(const std::set<detid_t> &detectorIDs,
                          const bool mask = true) = 0;
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMaskWorkspace(const IMaskWorkspace &other) { (void)other; }
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMaskWorkspace &operator=(const IMaskWorkspace &other);
 };
 
 /// shared pointer to the matrix workspace base class

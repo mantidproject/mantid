@@ -64,3 +64,5 @@ Output:
    The wide cylinder contains 64 of the detectors.
 
 .. categories::
+
+.. sourcelink::

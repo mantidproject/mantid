@@ -46,3 +46,5 @@ Output:
     Is the workspace a distribution? False
 
 .. categories::
+
+.. sourcelink::

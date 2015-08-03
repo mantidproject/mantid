@@ -48,3 +48,5 @@ Output:
     Max(norm)= 1.03
 
 .. categories::
+
+.. sourcelink::

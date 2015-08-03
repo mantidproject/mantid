@@ -39,8 +39,12 @@ class DLLExport IMDHistoWorkspace : public IMDWorkspace,
                                     public MultipleExperimentInfos {
 public:
   IMDHistoWorkspace();
-  IMDHistoWorkspace(const IMDHistoWorkspace &other);
   virtual ~IMDHistoWorkspace();
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<IMDHistoWorkspace> clone() const {
+    return std::unique_ptr<IMDHistoWorkspace>(doClone());
+  }
 
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
@@ -92,11 +96,17 @@ public:
   virtual void setCoordinateSystem(
       const Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
 
-  virtual boost::shared_ptr<IMDHistoWorkspace> clone() const = 0;
-
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMDHistoWorkspace(const IMDHistoWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMDHistoWorkspace &operator=(const IMDHistoWorkspace &other);
+
   virtual const std::string toString() const;
+
+private:
+  virtual IMDHistoWorkspace *doClone() const = 0;
 };
 
 } // namespace API

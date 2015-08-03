@@ -86,3 +86,5 @@ Output:
    No. of grouped spectra in second period: 2
 
 .. categories::
+
+.. sourcelink::

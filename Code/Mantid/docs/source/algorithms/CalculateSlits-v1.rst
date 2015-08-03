@@ -37,3 +37,5 @@ Usage
   Slit 2: 0.344 mm
 
 .. categories::
+
+.. sourcelink::

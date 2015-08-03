@@ -20,3 +20,5 @@ Usage
     UpdateScriptRepository()
 
 .. categories::
+
+.. sourcelink::

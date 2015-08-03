@@ -1,16 +1,16 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File
 see http://www.mantidproject.org/IDF -->
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd"
 name="IMAT" valid-from ="1900-01-31 23:59:59"
-valid-to ="2014-08-12 23:59:59"
-last-modified="2014-08-12 00:00:00">
+valid-to ="2015-07-31 23:59:59"
+last-modified="2015-07-31 12:49:00">
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
     <reference-frame>
       <!-- The z-axis is set parallel to and in the direction of the beam. the
-y-axis points up and the coordinate system is right handed. -->
+           y-axis points up and the coordinate system is right handed. -->
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
       <handedness val="right"/>
@@ -18,36 +18,28 @@ y-axis points up and the coordinate system is right handed. -->
     <default-view axis-view="z"/>
   </defaults>
   <!-- BRIEF DESCRIPTION OF IMAT INSTRUMENT:
-
+       IMAT (Imaging and Materials Science & Engineering)
   -->
+
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+
   <!-- source and sample-position components -->
+
   <component type="source">
     <location />
   </component>
   <type name="source" is="Source" />
+
   <component type="some-sample-holder">
     <location z="19.281"/>
   </component>
   <type name="some-sample-holder" is="SamplePos" />
+
   <!-- detector components (including monitors) -->
   <component type="monitors" idlist="monitors">
     <location />
   </component>
-  <type name="monitors">
-    <component type="monitor-tbd">
-      <location z="7.217" name="monitor1"/>
-      <location z="17.937" name="monitor2"/>
-    </component>   
-  </type>
-  <type name="monitor-tbd" is="monitor">
-    <cylinder id="some-shape">
-      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-      <axis x="0.0" y="0.0" z="1.0" />
-      <radius val="0.01" />
-      <height val="0.03" />
-    </cylinder>
-  </type>
+
   <component type="detector-bank" idstart="0" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
     <location z="23.281" x="-0.7" name="detector"/>
   </component>
@@ -64,8 +56,49 @@ y-axis points up and the coordinate system is right handed. -->
     </cuboid>
     <algebra val="shape" />
   </type>
+
+  <!-- DEFINITION OF TYPES -->
+
+  <type name="monitors">
+    <component type="monitor-cylinder">
+      <!-- the original theoretical positions of the 4 monitors to the center,
+           in mm were:
+           M1: 11653.4, M2: 19814.4, M3: 20894.4, M4: 46177.4
+           which were " taken the CAD dimensions from a datum plane running
+           through the EPB axis – datum 4"
+      -->
+      <location z="11.6534" name="monitor1"/>
+      <location z="19.8144" name="monitor2"/>
+      <location z="20.8944" name="monitor3"/>
+      <location z="46.1774" name="monitor4"/>
+    </component>
+  </type>
+
+  <!-- shape for monitors, borrowed from GEM -->
+  <type name="monitor-cylinder" is="monitor">
+    <properties>
+      Copied from monitor.dat:
+
+      name:: box
+      rank:: 2
+      dimensions:: 2 4
+      values:: -45.00  -2.00
+      45.00  -2.00
+      135.00  -2.00
+      225.00  -2.00
+    </properties>
+
+    <cylinder id="cylinder-shape">
+      <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+      <axis x="0.0" y="0.0" z="1.0" />
+      <radius val="0.01" />
+      <height val="0.03" />
+    </cylinder>
+  </type>
+
   <!-- DETECTOR and MONITOR ID LISTS -->
   <idlist idname="monitors">
-    <id start="1" end="2" />
+    <id start="1" end="4" />
   </idlist>
+
 </instrument>

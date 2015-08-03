@@ -82,3 +82,5 @@ Output
   False
 
 .. categories::
+
+.. sourcelink::

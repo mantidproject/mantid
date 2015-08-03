@@ -41,3 +41,5 @@ to the last {X,Y,Z}. Applying this masking will result in two completely
 separate areas masked in a single call to the algorithm.
 
 .. categories::
+
+.. sourcelink::

@@ -143,14 +143,29 @@
              </item>
              <item>
               <property name="text">
-               <string>Diffusion Sphere</string>
+               <string>InelasticDiffSphere</string>
               </property>
              </item>
              <item>
               <property name="text">
-               <string>Diffusion Circle</string>
+               <string>InelasticDiffRotDiscreteCircle</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+                <string>ElasticDiffSphere</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+                <string>ElasticDiffRotDiscreteCircle</string>
+              </property>
+             </item>
+              <item>
+                <property name="text">
+                  <string>StretchedExpFT</string>
+                </property>
+              </item>
             </widget>
            </item>
           </layout>

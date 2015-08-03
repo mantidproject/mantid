@@ -70,3 +70,5 @@ inner one in brackets:
 .. properties::
 
 .. categories::
+
+.. sourcelink::

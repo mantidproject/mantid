@@ -56,3 +56,5 @@ Instruction
 | ``  to set up the focused detectors' parameters for spectrum 1, 3 and 2.``
 
 .. categories::
+
+.. sourcelink::

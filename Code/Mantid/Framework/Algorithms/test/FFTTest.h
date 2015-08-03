@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -382,6 +383,10 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
       (AnalysisDataService::Instance().retrieve("FFT_out"));
 
+    // Test the output label
+    TS_ASSERT_EQUALS(fWS->getAxis(0)->unit()->caption(), "Quantity");
+    TS_ASSERT_EQUALS(fWS->getAxis(0)->unit()->label(), "");
+
     const MantidVec& X = fWS->readX(0);
     const MantidVec& Yr = fWS->readY(0);
     const MantidVec& Yi = fWS->readY(1);
@@ -405,6 +410,49 @@ public:
     }
     FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points_real");
     FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points_imag");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+  }
+
+  void testUnitsEnergy() {
+
+    const int N = 100;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    MatrixWorkspace_sptr WS = createWS(N,1,"even_hist");
+
+    // Set a label
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Energy");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_even_hist");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_out"));
+
+    // Test X values
+    // When the input unit is 'Energy' in 'meV'
+    // there is a factor of 1/2.418e2 in X
+    const MantidVec& X = fWS->readX(0);
+
+    const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
+    int i0 = static_cast<int>(it - X.begin());
+
+    for (int i = 0; i < N / 4; i++) {
+      int j = i0 + i;
+      double x = X[j];
+      TS_ASSERT_DELTA(x, dx * i /2.418e2, 0.00001);
+    }
+
+    // Test the output label
+    TS_ASSERT_EQUALS(fWS->getAxis(0)->unit()->caption(),"Time");
+    TS_ASSERT_EQUALS(fWS->getAxis(0)->unit()->label(),"ns");
+
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_hist");
     FrameworkManager::Instance().deleteWorkspace("FFT_out");
   }
 

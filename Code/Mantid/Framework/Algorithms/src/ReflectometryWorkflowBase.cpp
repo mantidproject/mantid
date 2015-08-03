@@ -373,7 +373,7 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   cropWorkspaceAlg->execute();
   monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
-  //If min&max are both 0, we won't do the flat background normalization.
+  // If min&max are both 0, we won't do the flat background normalization.
   if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
     return monitorWS;
 
@@ -405,8 +405,7 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
                                          const MatrixWorkspace_sptr &toConvert,
                                          const MinMax &wavelengthMinMax,
                                          const double &wavelengthStep) {
-  // Process the input workspace according to the processingCommands to get a
-  // detector workspace
+
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
   convertUnitsAlg->setProperty("InputWorkspace", toConvert);
@@ -415,6 +414,9 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
   convertUnitsAlg->execute();
   MatrixWorkspace_sptr detectorWS =
       convertUnitsAlg->getProperty("OutputWorkspace");
+
+  // Process the input workspace according to the processingCommands to get a
+  // detector workspace
 
   auto performIndexAlg = this->createChildAlgorithm("GroupDetectors");
   performIndexAlg->initialize();

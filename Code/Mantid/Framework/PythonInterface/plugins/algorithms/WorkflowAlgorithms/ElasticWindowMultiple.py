@@ -37,6 +37,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     _background_range_end = None
     _mtd_plot = None
 
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
@@ -49,11 +50,15 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('InputWorkspaces', '', Direction.Input),
                              doc='Grouped input workspaces')
 
-        self.declareProperty(name='IntegrationRangeStart', defaultValue=0.0, doc='Range 1 start')
-        self.declareProperty(name='IntegrationRangeEnd', defaultValue=0.0, doc='Range 1 end')
+        self.declareProperty(name='IntegrationRangeStart', defaultValue=0.0,
+                             doc='Start of integration range in time of flight')
+        self.declareProperty(name='IntegrationRangeEnd', defaultValue=0.0,
+                             doc='End of integration range in time of flight')
 
-        self.declareProperty(name='BackgroundRangeStart', defaultValue='', doc='Range 2 start')
-        self.declareProperty(name='BackgroundRangeEnd', defaultValue='', doc='Range 2 end')
+        self.declareProperty(name='BackgroundRangeStart', defaultValue=Property.EMPTY_DBL,
+                             doc='Start of background range in time of flight')
+        self.declareProperty(name='BackgroundRangeEnd', defaultValue=Property.EMPTY_DBL,
+                             doc='End of background range in time of flight')
 
         self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
                              doc='Name of the sample environment log entry')
@@ -83,26 +88,14 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        background_range_start = self.getPropertyValue('BackgroundRangeStart')
-        background_range_end = self.getPropertyValue('BackgroundRangeEnd')
+        background_range_start = self.getProperty('BackgroundRangeStart').value
+        background_range_end = self.getProperty('BackgroundRangeEnd').value
 
-        if background_range_start != '' and background_range_end == '':
+        if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
             issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
 
-        if background_range_start == '' and background_range_end != '':
+        if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
             issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
-
-        if background_range_start != '':
-            try:
-                _ = float(background_range_start)
-            except ValueError:
-                issues['BackgroundRangeStart'] = 'Background range start is not a double number'
-
-        if background_range_end != '':
-            try:
-                _ = float(background_range_end)
-            except ValueError:
-                issues['BackgroundRangeEnd'] = 'Background range end is not a double number'
 
         return issues
 
@@ -132,14 +125,14 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             q_ws = '__' + input_ws + '_q'
             q2_ws = '__' + input_ws + '_q2'
 
-            if self._background_range_start != '' and self._background_range_end != '':
+            if self._background_range_start != Property.EMPTY_DBL and self._background_range_end != Property.EMPTY_DBL:
                 ElasticWindow(InputWorkspace=input_ws,
                               OutputInQ=q_ws,
                               OutputInQSquared=q2_ws,
                               IntegrationRangeStart=self._integration_range_start,
                               IntegrationRangeEnd=self._integration_range_end,
-                              BackgroundRangeStart=float(self._background_range_start),
-                              BackgroundRangeEnd=float(self._background_range_end))
+                              BackgroundRangeStart=self._background_range_start,
+                              BackgroundRangeEnd=self._background_range_end)
             else:
                 ElasticWindow(InputWorkspace=input_ws,
                               OutputInQ=q_ws,
@@ -295,8 +288,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._integration_range_start = self.getProperty('IntegrationRangeStart').value
         self._integration_range_end = self.getProperty('IntegrationRangeEnd').value
 
-        self._background_range_start = self.getPropertyValue('BackgroundRangeStart')
-        self._background_range_end = self.getPropertyValue('BackgroundRangeEnd')
+        self._background_range_start = self.getProperty('BackgroundRangeStart').value
+        self._background_range_end = self.getProperty('BackgroundRangeEnd').value
 
 
     def _plot_spectra(self, ws_name):

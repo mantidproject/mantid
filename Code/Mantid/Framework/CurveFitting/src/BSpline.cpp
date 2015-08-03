@@ -232,7 +232,7 @@ void BSpline::resetKnots() {
       resetGSLObjects();
       resetParameters();
     }
-    GSLVector bp = breakPoints;
+    GSLVector bp(breakPoints);
     gsl_bspline_knots(bp.gsl(), m_bsplineWorkspace.get());
     storeAttributeValue("StartX", Attribute(breakPoints.front()));
     storeAttributeValue("EndX", Attribute(breakPoints.back()));

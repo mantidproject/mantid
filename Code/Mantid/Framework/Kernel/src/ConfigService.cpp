@@ -4,7 +4,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/ParaViewVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
@@ -29,6 +28,10 @@
 #ifdef _WIN32
 #pragma warning(disable : 4250)
 #endif
+#include <Poco/Logger.h>
+#include <Poco/Channel.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
@@ -995,7 +998,7 @@ void ConfigServiceImpl::getKeysRecursive(const std::string &root,
   }
 }
 
-/**
+  /**
  * Recursively gets a list of all config options.
  *
  * This function is needed as Boost Python does not like calling function with
@@ -1946,6 +1949,59 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   }
   return m_proxyInfo;
 }
+
+/** Sets the log level priority for the File log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
+void ConfigServiceImpl::setFileLogLevel(int logLevel)
+{
+  setFilterChannelLogLevel("fileFilterChannel",logLevel);
+}
+/** Sets the log level priority for the Console log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
+void ConfigServiceImpl::setConsoleLogLevel(int logLevel)
+{
+  setFilterChannelLogLevel("consoleFilterChannel",logLevel);
+}
+
+
+/** Sets the Log level for a filter channel
+* @param filterChannelName the channel name of the filter channel to change
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @throws std::invalid_argument if the channel name is incorrect or it is not a filterChannel
+*/
+void ConfigServiceImpl::setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel)
+{
+  Poco::Channel* channel = NULL;
+  try
+  {
+    channel = Poco::LoggingRegistry::defaultRegistry().channelForName(filterChannelName);
+  }
+  catch(Poco::NotFoundException&)
+  {
+    throw std::invalid_argument(filterChannelName + " not found in the Logging Registry");
+  }
+
+  auto *filterChannel = dynamic_cast<Poco::FilterChannel*>(channel);
+  if (filterChannel)
+  {
+    filterChannel->setPriority(logLevel);      
+    //set root level if required
+    int rootLevel = Poco::Logger::root().getLevel();
+    if (rootLevel < logLevel)
+    {
+        Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    }
+    g_log.log(filterChannelName + " log channel set to " + Logger::PriorityNames[logLevel] + " priority",static_cast<Logger::Priority>(logLevel));
+  }
+  else
+  {
+    throw std::invalid_argument(filterChannelName + " was not a filter channel");
+  }
+}
+
+
 
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,

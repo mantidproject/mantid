@@ -2,16 +2,11 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FunctionProperty.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -87,6 +82,17 @@ void CreateSampleWorkspace::init() {
       "Flat background", "name=LinearBackground, A0=1;"));
   m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
       "Exp Decay", "name=ExpDecay, Height=100, Lifetime=1000;"));
+  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+      "Powder Diffraction", "name= LinearBackground,A0=0.0850208,A1=-4.89583e-06;"
+      "name=Gaussian,Height=0.584528,PeakCentre=$PC1$,Sigma=14.3772;"
+      "name=Gaussian,Height=1.33361,PeakCentre=$PC2$,Sigma=15.2516;"
+      "name=Gaussian,Height=1.74691,PeakCentre=$PC3$,Sigma=15.8395;"
+      "name=Gaussian,Height=0.950388,PeakCentre=$PC4$,Sigma=19.8408;"
+      "name=Gaussian,Height=1.92185,PeakCentre=$PC5$,Sigma=18.0844;"
+      "name=Gaussian,Height=3.64069,PeakCentre=$PC6$,Sigma=19.2404;"
+      "name=Gaussian,Height=2.8998,PeakCentre=$PC7$,Sigma=21.1127;"
+      "name=Gaussian,Height=2.05237,PeakCentre=$PC8$,Sigma=21.9932;"
+      "name=Gaussian,Height=8.40976,PeakCentre=$PC9$,Sigma=25.2751;"));
   m_preDefinedFunctionmap.insert(
       std::pair<std::string, std::string>("User Defined", ""));
   std::vector<std::string> functionOptions;
@@ -106,14 +112,14 @@ void CreateSampleWorkspace::init() {
                   "The Number of banks in the instrument (default:2)");
   declareProperty("BankPixelWidth", 10,
                   boost::make_shared<BoundedValidator<int>>(0, 10000),
-                  "The width & height of each bank in pixels (default:10).");
+                  "The number of pixels in horizontally and vertically in a bank (default:10)");
   declareProperty("NumEvents", 1000,
                   boost::make_shared<BoundedValidator<int>>(0, 100000),
                   "The number of events per detector, this is only used for "
-                  "EventWorkspaces (default:1000).");
+                  "EventWorkspaces (default:1000)");
   declareProperty(
       "Random", false,
-      "Whether to randomise the placement of events and data (default:false).");
+      "Whether to randomise the placement of events and data (default:false)");
 
   declareProperty("XUnit", "TOF",
                   "The unit to assign to the XAxis (default:\"TOF\")");
@@ -121,7 +127,7 @@ void CreateSampleWorkspace::init() {
   declareProperty("XMax", 20000.0, "The maximum X axis value (default:20000)");
   declareProperty("BinWidth", 200.0,
                   boost::make_shared<BoundedValidator<double>>(0, 100000, true),
-                  "The bin width of the X axis (default:200).");
+                  "The bin width of the X axis (default:200)");
   declareProperty("PixelSpacing", 0.008,
                   boost::make_shared<BoundedValidator<double>>(0, 100000, true),
                   "The spacing between detector pixels in M (default:0.008)");
@@ -129,6 +135,10 @@ void CreateSampleWorkspace::init() {
                   boost::make_shared<BoundedValidator<double>>(0, 1000, true),
                   "The distance along the beam direction from the sample to "
                   "bank in M (default:5.0)");
+  declareProperty("SourceDistanceFromSample", 10.0,
+                  boost::make_shared<BoundedValidator<double>>(0, 1000, true),
+                  "The distance along the beam direction from the source to "
+                  "the sample in M (default:10.0)");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -148,6 +158,7 @@ void CreateSampleWorkspace::exec() {
   double binWidth = getProperty("BinWidth");
   const double pixelSpacing = getProperty("PixelSpacing");
   const double bankDistanceFromSample = getProperty("BankDistanceFromSample");
+  const double sourceSampleDistance = getProperty("SourceDistanceFromSample");
 
   if (xMax <= xMin) {
     throw std::invalid_argument("XMax must be larger than XMin");
@@ -181,7 +192,8 @@ void CreateSampleWorkspace::exec() {
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
-      numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample);
+      numBanks, bankPixelWidth, pixelSpacing, 
+      bankDistanceFromSample,sourceSampleDistance);
 
   int num_bins = static_cast<int>((xMax - xMin) / binWidth);
   MatrixWorkspace_sptr ws;
@@ -404,10 +416,13 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  * @param pixelSpacing :: padding between pixels
  * @param bankDistanceFromSample :: Distance of first bank from sample (defaults
  *to 5.0m)
+ * @param sourceSampleDistance :: The distance from the source to the sample
+ * @returns A shared pointer to the generated instrument
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     int num_banks, int pixels, double pixelSpacing,
-    const double bankDistanceFromSample) {
+    const double bankDistanceFromSample,
+    const double sourceSampleDistance) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
@@ -447,7 +462,7 @@ Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
   // Define a source component
   ObjComponent *source =
       new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
-  source->setPos(V3D(0.0, 0.0, -10.));
+  source->setPos(V3D(0.0, 0.0, -sourceSampleDistance));
   testInst->add(source);
   testInst->markAsSource(source);
 

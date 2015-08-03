@@ -133,12 +133,26 @@ void LoadBBY::init() {
                                             Kernel::Direction::Input),
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
+  declareProperty(new Kernel::PropertyWithValue<double>(
+                  "PeriodMaster", 0.0, Kernel::Direction::Input),
+                  "Optional:");
+  declareProperty(new Kernel::PropertyWithValue<double>(
+                  "PeriodSlave", 0.0, Kernel::Direction::Input),
+                  "Optional:");
+  declareProperty(new Kernel::PropertyWithValue<double>(
+                  "PhaseSlave", 0.0, Kernel::Direction::Input),
+                  "Optional:");
 
   std::string grpOptional = "Optional";
   setPropertyGroup("FilterByTofMin", grpOptional);
   setPropertyGroup("FilterByTofMax", grpOptional);
   setPropertyGroup("FilterByTimeStart", grpOptional);
   setPropertyGroup("FilterByTimeStop", grpOptional);
+
+  std::string grpPhaseCorrection = "Phase Correction";
+  setPropertyGroup("PeriodMaster", grpPhaseCorrection);
+  setPropertyGroup("PeriodSlave", grpPhaseCorrection);
+  setPropertyGroup("PhaseSlave", grpPhaseCorrection);
 }
 /**
  * Execute the algorithm.
@@ -176,7 +190,7 @@ void LoadBBY::exec() {
           mask[s0 + (size_t)y] = false;
       }
       else { // if (offset < 0)
-        for (size_t y = static_cast<size_t>(static_cast<int>(HISTO_BINS_Y) + offset); y != HISTO_BINS_Y; y++)
+        for (size_t y = (HISTO_BINS_Y + static_cast<size_t>(offset)); y != HISTO_BINS_Y; y++)
           mask[s0 + y] = false;
       }
     }
@@ -240,8 +254,19 @@ void LoadBBY::exec() {
   std::vector<size_t> eventCounts(numberHistograms, 0);
   std::vector<detid_t> detIDs = instrument->getDetectorIDs();
 
+  // phase correction
+  double periodMaster = getProperty("PeriodMaster");
+  double periodSlave = getProperty("PeriodSlave");
+  double phaseSlave = getProperty("PhaseSlave");
+
+  double periode = periodSlave > 0.0 ? periodSlave : periodMaster;
+  double shift = -1.0/6.0*periodMaster + periodSlave * phaseSlave / 360.0;
+
+
+
   // count total events per pixel to reserve necessary memory
-  ANSTO::EventCounter eventCounter(eventCounts, mask, offsets, HISTO_BINS_Y);
+  ANSTO::EventCounter eventCounter(eventCounts, mask, offsets, HISTO_BINS_Y,
+                                   periode, shift);
   loadEvents(prog, "loading neutron counts", file, tofMinBoundary,
              tofMaxBoundary, eventCounter);
 
@@ -266,7 +291,7 @@ void LoadBBY::exec() {
   progTracker.complete();
 
   ANSTO::EventAssigner eventAssigner(eventVectors, mask, offsets,
-                                     HISTO_BINS_Y);
+                                     HISTO_BINS_Y, periode, shift);
   loadEvents(prog, "loading neutron events", file, tofMinBoundary,
              tofMaxBoundary, eventAssigner);
 

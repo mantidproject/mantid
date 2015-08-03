@@ -66,3 +66,5 @@ Usage
   Bank2 was cleared successfully.
 
 .. categories::
+
+.. sourcelink::

@@ -91,7 +91,7 @@ void AsymmetryCalc::exec() {
     // If some spectra were not found, can't continue
     if (specIDs.size() != indices.size())
       throw std::invalid_argument(
-          "Some of the spectra specified do not exist in a workspace");
+          "Could not find two spectra in the input workspace");
 
     forward = static_cast<int>(indices[0]);
     backward = static_cast<int>(indices[1]);
