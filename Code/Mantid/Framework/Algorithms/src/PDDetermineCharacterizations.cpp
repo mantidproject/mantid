@@ -17,7 +17,11 @@ using Mantid::Kernel::TimeSeriesProperty;
 
 namespace { // anonymous namespace
 /// this should match those in LoadPDCharacterizations
-const std::vector<std::string> COL_NAMES = {
+const std::vector<std::string> COL_NAMES =
+#ifdef _WIN32
+        std::initializer_list<std::vector<std::string>>
+#endif
+{
     "frequency",  // double
     "wavelength", // double
     "bank",       // integer
@@ -57,7 +61,7 @@ int PDDetermineCharacterizations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PDDetermineCharacterizations::category() const {
-  return "Workflow/Diffraction/UsesPropertyManager";
+  return "Workflow\\Diffraction\\UsesPropertyManager";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
