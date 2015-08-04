@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 
-#include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
@@ -38,7 +38,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class EnggDiffractionPresenter
+// needs to be dll-exported for the tests
+class DLLExport EnggDiffractionPresenter
     : public IEnggDiffractionPresenter {
 
 public:
