@@ -129,7 +129,7 @@ std::string MDHWNexusLoadingPresenter::getWorkspaceTypeName()
 
 std::vector<int> MDHWNexusLoadingPresenter::getExtents()
 {
-  // Hack which only works in 3D. Needs to be updated for 4 dimensions!
+
   std::vector<int> extents(6, 0);
 
   if(this->shouldLoad() || !m_histoWs)
@@ -137,9 +137,9 @@ std::vector<int> MDHWNexusLoadingPresenter::getExtents()
 
   if(m_histoWs)
   {
-    extents[1] = m_histoWs->getDimension(0)->getNBins();
-    extents[3] = m_histoWs->getDimension(1)->getNBins();
-    extents[5] = m_histoWs->getDimension(2)->getNBins();
+    extents[1] = m_histoWs->getXDimension()->getNBins();
+    extents[3] = m_histoWs->getYDimension()->getNBins();
+    extents[5] = m_histoWs->getZDimension()->getNBins();
   }
 
   return extents;
