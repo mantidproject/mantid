@@ -260,14 +260,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     samRun = temp
                     info = tempinfo
                 else:
-                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
-                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
+                    if (tempinfo["frequency"].value is not None) and (info["frequency"].value is not None) \
+                            and (abs(tempinfo["frequency"].value - info["frequency"].value)/info["frequency"].value > .05):
                         raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                           % (tempinfo["frequency"], info["frequency"]))
-                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
-                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
+                                           % (tempinfo["frequency"].value, info["frequency"].value))
+                    if (tempinfo["wavelength"].value is not None) and (info["wavelength"].value is not None) \
+                            and abs(tempinfo["wavelength"].value - info["wavelength"].value)/info["wavelength"].value > .05:
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                           % (tempinfo["wavelength"], info["wavelength"]))
+                                           % (tempinfo["wavelength"].value, info["wavelength"].value))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
                     if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
