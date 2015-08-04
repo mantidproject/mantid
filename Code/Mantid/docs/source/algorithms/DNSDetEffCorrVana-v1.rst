@@ -17,7 +17,7 @@ Description
 This algorithm applies detector efficiency correction to a given data :ref:`Workspace2D <Workspace2D>`. As a result, two workspaces will be created: 
 
 -  output workspace with corrected data. Sample logs will be copied from the data workspace. 
--  workspace with normalization data (monitor counts or experiment duration by user's choice; copied from the data workspace). The normalization workspace is named same as the data workspace, but has suffix "_NORM". 
+-  if **InputWorkspace** has the normalization workspace (which contains monitor counts or experiment duration by user's choice), the copy of it will be created with name **OutputWorkspace_NORM**. 
 
 Detector efficiency correction is performed using the measurements of vanadium standard sample (hereafter Vanadium). Background for Vanadium must be also measured and provided to the algorithm as an input **BkgWorkspace**. Vanadium and its background can be measured at several detector bank positions.  This algorithm does the detector efficiency for a particular run in following steps:
 
@@ -36,7 +36,7 @@ Detector efficiency correction is performed using the measurements of vanadium s
 .. warning::
 
     Normalization workspaces are created by the :ref:`algm-LoadDNSLegacy` algorithm. 
-    It is responsibility of the user to take care about the same type of normalization for Vanadium and Background.
+    It is responsibility of the user to take care about the same type of normalization (monitor counts or run duration) for Vanadium and Background.
 
 3. Subtract Background from Vanadium:
 
@@ -69,11 +69,11 @@ The input workspaces (**InputWorkspace**, **VanaWorkspace**, **BkgWorkspace**) h
 -  The same number of dimensions
 -  The same number of spectra
 -  The same number of bins
--  Have the corresponding normalization workspace
+-  **VanaWorkspace** and **BkgWorkspace** must have the corresponding normalization workspaces
 
-For the physically meaningfull correction it is also important that these workspaces have the same slits size, polarisation, detector bank rotation angle, flipper status and the neutron wavelength. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.
+For the physically meaningful correction it is also important that these workspaces have the same slits size, polarisation, detector bank rotation angle, flipper status and the neutron wavelength. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.
 
-The workspace **VanadiumMean** is an optional parameter. However, if it is specified, it must be a :ref:`Workspace2D <Workspace2D>` with 2 dimensions, 1 histogramm and 1 bin.
+The workspace **VanadiumMean** is an optional parameter. However, if it is specified, it must be a :ref:`Workspace2D <Workspace2D>` with 2 dimensions, 1 histogram and 1 bin.
 
 
 Usage

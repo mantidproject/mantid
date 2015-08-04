@@ -93,6 +93,13 @@ class DNSDetEffCorrVanaTest(unittest.TestCase):
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
         return
 
+    def test_NegativeValues(self):
+        outputWorkspaceName = "DNSDetCorrVanaTest_Test4"
+        self.assertRaises(RuntimeError, DNSDetEffCorrVana, InputWorkspace=self.__dataws.getName(),
+                          OutputWorkspace=outputWorkspaceName, VanaWorkspace=self.__bkgrws.getName(),
+                          BkgWorkspace=self.__vanaws.getName())
+        return
+
 
 if __name__ == '__main__':
     unittest.main()
