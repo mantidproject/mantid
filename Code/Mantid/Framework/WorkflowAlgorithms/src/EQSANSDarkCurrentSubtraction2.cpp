@@ -152,13 +152,9 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   };
 
   // The scaling factor should account for the TOF cuts on each side of a frame
-  double high_tof_cut = 0.0;
-  double low_tof_cut = 0.0;
-  if (inputWS->run().hasProperty("high_tof_cut"))
-    high_tof_cut = inputWS->run().getPropertyValueAsType<double>("high_tof_cut");
-  if (inputWS->run().hasProperty("low_tof_cut"))
-    low_tof_cut = inputWS->run().getPropertyValueAsType<double>("low_tof_cut");
-  scaling_factor *= (1.0e6/60.0 - low_tof_cut - high_tof_cut)/(1.0e6/60.0);
+  // The EQSANSLoad algorithm cuts the beginning and end of the TOF distribution
+  // so we don't need to correct the scaling factor here. When using LoadEventNexus
+  // we have to scale by (t_frame-t_low_cut-t_high_cut)/t_frame.
 
   progress.report("Scaling dark current");
 
