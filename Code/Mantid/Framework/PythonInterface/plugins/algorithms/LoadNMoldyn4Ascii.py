@@ -39,7 +39,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Filename', '',
+        self.declareProperty(FileProperty('Directory', '',
                                           action=FileAction.Directory),
                              doc='Path to directory containg .dat files')
 
@@ -116,7 +116,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         Gets algorithm properties.
         """
         self._axis_cache = {}
-        self._data_directory = self.getPropertyValue('Filename')
+        self._data_directory = self.getPropertyValue('Directory')
         self._functions = [x.strip() for x in self.getProperty('Functions').value]
 
 #------------------------------------------------------------------------------

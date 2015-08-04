@@ -40,6 +40,7 @@ set ( TEST_PY_FILES
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  LoadNMoldyn4AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
