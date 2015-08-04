@@ -82,8 +82,8 @@ void LoadISISNexus2::init() {
   declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-                  "The particular entry number to read (default: Load all "
-                  "workspaces and creates a workspace group)");
+                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into one worskspace");
 
   std::vector<std::string> monitorOptions;
   monitorOptions.push_back("Include");
