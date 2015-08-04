@@ -867,8 +867,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       if (!published_date.empty())
           remote_entry.pub_date = DateAndTime(published_date);
       remote_entry.status = BOTH_UNCHANGED;
-      std::string &filename = std::string(local_repository).append(".repository.json");
-      updateRepositoryJson(filename, remote_entry);
+      updateRepositoryJson(file_path, remote_entry);
 
     } else
       throw ScriptRepoException(info, detail);
@@ -890,28 +889,35 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
                                                const RepositoryEntry &entry) {
                                            
-  ptree local_json;
+  ptree repository_json;
   std::string filename = std::string(local_repository).append(".repository.json");
-  read_json(filename, local_json);
+  read_json(filename, repository_json);
 
-  local_json.put(boost::property_tree::ptree::path_type(
-                      std::string(path).append("!downloaded_pubdate"), '!'),
-                  entry.downloaded_pubdate.toFormattedString().c_str());
-  local_json.put(boost::property_tree::ptree::path_type(
-                      std::string(path).append("!downloaded_date"), '!'),
-                  entry.downloaded_date.toFormattedString().c_str());
-  std::string auto_update_op =
-      (const char *)((entry.auto_update) ? "true" : "false");
-  std::string key = std::string(path).append("!auto_update");
-  local_json.put(boost::property_tree::ptree::path_type(key, '!'),
-                  auto_update_op);
-     
+  ptree::const_assoc_iterator it = repository_json.find(path);
+  if (it == repository_json.not_found()) {
+    boost::property_tree::ptree array;
+    array.put(std::string("author"),
+              entry.author);
+    array.put(std::string("description"),
+              entry.description);
+    std::string directory =
+        (const char *)((entry.directory) ? "true" : "false");
+    array.put(std::string("directory"),
+              directory);
+    array.put(std::string("pub_date"),
+              entry.pub_date.toFormattedString());
+    repository_json.push_back(
+        std::pair<std::string,
+                  boost::property_tree::basic_ptree<std::string, std::string>>(
+            path, array));
+  }
+  
   g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
   #if defined(_WIN32) || defined(_WIN64)
     // set the .repository.json and .local.json not hidden to be able to edit it
     SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
   #endif
-    write_json(filename, local_json);
+    write_json(filename, repository_json);
   #if defined(_WIN32) || defined(_WIN64)
     // set the .repository.json and .local.json hidden
     SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
