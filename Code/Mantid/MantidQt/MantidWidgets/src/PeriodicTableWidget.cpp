@@ -5,6 +5,20 @@ PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   ui.setupUi(this);
   populateGroupVectors();
   ColourElements();
+  ui.Groups->setVisible(false);
+  connect(ui.showLegend, SIGNAL(clicked()), this, SLOT(showGroupLegend()));
+  
+}
+
+void PeriodicTableWidget::showGroupLegend(){
+    if (ui.showLegend->isChecked())
+    {
+        ui.Groups->setVisible(true);
+    }
+    else
+    {
+        ui.Groups->setVisible(false);
+    }
 }
 
 void PeriodicTableWidget::ColourElements() {
@@ -111,14 +125,43 @@ void PeriodicTableWidget::ColourUnknownProperties(
   }
 }
 
-  QVector<QString> PeriodicTableWidget::getCheckedElements() {
-  QVector<QString> temp;
-  return temp;
-}
-
 void PeriodicTableWidget::ColourButton(QPushButton *element, QString colour) {
   element->setStyleSheet("QPushButton{border:1px solid rgb(0, 0, 0); " +
-      colour + ";}" + "QPushButton:checked{ background-color:rgb(255,255,255)}");
+      colour + ";}" + "QPushButton:checked{ background-color:rgb(175,255,255)}");
+}
+
+QString PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements){
+    QString selectedElements = "";
+   /* Loop through QPushButtons and if they are checked
+    * then retrieve the text on the button i.e the 
+    * element and add it to the string (space delimiter).
+    */
+    for (auto i = elements.begin(); i != elements.end(); i++){
+        if ((*i)->isChecked()){
+            selectedElements += (*i)->text() + ",";
+        }
+    }
+    return selectedElements;
+}
+
+QString PeriodicTableWidget::getAllCheckedElementsStr(){
+    /*checking all groups of buttons to see if they 
+    * have been selected in the Widget
+    */
+    QString allCheckedElementsStr = "";
+    allCheckedElementsStr += elementsSelectedToString(Actinides);
+    allCheckedElementsStr += elementsSelectedToString(AlkaliMetals);
+    allCheckedElementsStr += elementsSelectedToString(AlkalineEarthMetals);
+    allCheckedElementsStr += elementsSelectedToString(Halogens);
+    allCheckedElementsStr += elementsSelectedToString(Lanthanides);
+    allCheckedElementsStr += elementsSelectedToString(NobleGases);
+    allCheckedElementsStr += elementsSelectedToString(Metalloids);
+    allCheckedElementsStr += elementsSelectedToString(OtherNonMetals);
+    allCheckedElementsStr += elementsSelectedToString(PostTransitionMetals);
+    allCheckedElementsStr += elementsSelectedToString(TransitionMetals);
+    allCheckedElementsStr += elementsSelectedToString(UnknownProperties);
+    //return a string with all the elements that have been selected
+    return allCheckedElementsStr;
 }
 
 void PeriodicTableWidget::populateGroupVectors() {

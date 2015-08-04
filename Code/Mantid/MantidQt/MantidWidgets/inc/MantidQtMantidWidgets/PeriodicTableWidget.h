@@ -11,20 +11,10 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS PeriodicTableWidget : public QWidget {
 
 public:
   PeriodicTableWidget(QWidget *parent = 0);
-  std::string
-  elementsSelectedToString(QVector<QString> elementsSelected);
+  QString elementsSelectedToString(QVector<QPushButton *> elementsSelected);
+  QString getAllCheckedElementsStr();
   void populateGroupVectors();
   void ColourElements();
-
-signals:
-  void clicked();
-  void ischecked();
-
-private slots:
-  QVector<QString> getCheckedElements();
-
-private:
-  Ui::PeriodicTable ui;
   // vectors for storing Element buttons in associated groups
   QVector<QPushButton *> OtherNonMetals;
   QVector<QPushButton *> AlkaliMetals;
@@ -38,6 +28,10 @@ private:
   QVector<QPushButton *> Halogens;
   QVector<QPushButton *> NobleGases;
 
+private slots:
+  void showGroupLegend();
+private:
+  Ui::PeriodicTable ui;
   // Methods to colour by group
   void ColourNonMetals(const QVector<QPushButton *> &nonMetals);
   void ColourAlkaliMetals(const QVector<QPushButton *> &alkaliMetals);

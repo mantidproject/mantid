@@ -2,19 +2,22 @@
 #define MANTIDQT_CUSTOM_DIALOGS_GETNEGMUMUONICXRD_H_
 
 #include "MantidQtAPI/AlgorithmDialog.h"
-
 namespace MantidQt {
 
-  namespace CustomDialogs {
+namespace CustomDialogs {
 
    class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   Q_OBJECT
 
-     public:
-       GetNegMuMuonicXRDDialog(QWidget *parent = 0);
-
-   protected:
-	   void initLayout();
+  public:
+  GetNegMuMuonicXRDDialog(QWidget *parent = 0);
+  ~GetNegMuMuonicXRDDialog(){};
+  private slots:
+  //void SelectElementsClicked();
+  void runClicked();
+  protected:
+  void initLayout();
+  //void parseInput();
     };
   }
 }
