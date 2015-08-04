@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ConvolutionFitSequential.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -62,7 +63,8 @@ void ConvolutionFitSequential::init() {
       "End X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The end of the range for the fit function.", Direction::Input);
 
-  declareProperty("Temperature", "0", boost::make_shared<MandatoryValidator<double>>(),
+  declareProperty("Temperature", "0",
+                  boost::make_shared<MandatoryValidator<double>>(),
                   "The Temperature correction for the fit.", Direction::Input);
 
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
@@ -73,15 +75,24 @@ void ConvolutionFitSequential::init() {
                                            "negative",
                   Direction::Input);
 
-  declareProperty("Spec Max", 0, boundedV,
-                  "The final spectrum to be used in the fit.",
+  declareProperty("Spec Max", 0, boundedV, "The final spectrum to be used in "
+                                           "the fit. Spectra values can not be "
+                                           "negative",
                   Direction::Input);
 
   declareProperty("Convolve", true,
                   "If true, the fit is treated as a convolution workspace.",
                   Direction::Input);
 
+  std::vector<std::string> minimizers;
+  minimizers.push_back("Levenberg-Marquardt");
+  minimizers.push_back("Simplex");
+  minimizers.push_back("FABADA");
+  minimizers.push_back("Conjugate gradient (Fletcher-Reeves imp.)");
+  minimizers.push_back("Conjugate gradient (Polak-Ribiere imp.)");
+  minimizers.push_back("BFGS");
   declareProperty("Minimizer", std::string("Levenberg-Marquardt"),
+                  boost::make_shared<StringListValidator>(minimizers),
                   "Minimizer to use for fitting. Minimizers available are: "
                   "'Levenberg-Marquardt', 'Simplex', 'FABADA', 'Conjugate "
                   "gradient (Fletcher-Reeves imp.)', 'Conjugate gradient "
@@ -89,7 +100,7 @@ void ConvolutionFitSequential::init() {
                   Direction::Input);
 
   declareProperty(
-      "Max Iterations", 500, boost::make_shared<MandatoryValidator<int>>(),
+      "Max Iterations", 500, boundedV,
       "The maximum number of iterations permitted", Direction::Input);
 
   declareProperty(
@@ -112,7 +123,7 @@ void ConvolutionFitSequential::exec() {
   int specMax = getProperty("Spec max");
   bool convolve = getProperty("Convolve");
   int maxIter = getProperty("Max Iterations");
-  std::stirng minimizer = getProperty("Minimizer");
+  std::string minimizer = getProperty("Minimizer");
   MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
 
   // Handle empty/non-empty temp property
@@ -133,7 +144,7 @@ void ConvolutionFitSequential::exec() {
   // Add logger information
 
   // Convert input workspace to get Q axis
-  
+
   // Fit all spectra in workspace
   // Fit args
   // Run PlotPeaksByLogValue
@@ -149,7 +160,6 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("ConvoleMembers", convolve);
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
-  
 
   // Delete possible pre-existing workspaces
   // Construct output workspace name

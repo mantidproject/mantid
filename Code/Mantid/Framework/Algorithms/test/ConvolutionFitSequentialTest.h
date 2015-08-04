@@ -19,9 +19,7 @@ public:
     delete suite;
   }
 
-  // TODO: Check if this test is required (may only realistically be called by
-  // convFitUI
-  void test_function_is_in_correct_format() {}
+  void test_fit_function_is_valid_for_convolution_fitting(){}
 
   //-------------------------- Failure cases ----------------------------
   void test_empty_function_is_not_allowed() {
@@ -71,20 +69,33 @@ public:
                      std::invalid_argument);
   }
 
-  // Temperature is allowed to be empty as there is not always a correction
-  // required
-  void test_empty_temperature_is_allowed() {}
+  void test_empty_temperature_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-  void test_spectra_number_is_not_negative(){
-	  Mantid::Algorithms::ConvolutionFitSequential alg;
-	  TS_ASSERT_THROWS_NOTHING(alg.initialize());
-	  TS_ASSERT_THROWS(alg.setPropertyValue("Spec Min", "-2"), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Temperature", ""),
+                     std::invalid_argument);
+  }
+
+  void test_spectra_min_or_max_number_can_not_be_negative() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Min", "-1"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Max", "-1"),
+                     std::invalid_argument);
+  }
+
+  void test_max_iterations_can_not_be_a_negative_number() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS(alg.setPropertyValue("Max Iterations", "-1"),
+                     std::invalid_argument);
   }
 
   //------------------------- Execution cases ---------------------------
   void test_exec() {}
 
-  void test_Something() {}
 };
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */
