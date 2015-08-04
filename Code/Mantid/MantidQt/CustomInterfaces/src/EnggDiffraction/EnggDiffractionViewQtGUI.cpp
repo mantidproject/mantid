@@ -42,7 +42,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_ui.tabMain->addTab(wCalib, QString("Calibration"));
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
-  m_ui.tabMain->addTab(wSettings, QString("Setup"));
+  m_ui.tabMain->addTab(wSettings, QString("Settings"));
 
   readSettings();
 
@@ -61,7 +61,27 @@ void EnggDiffractionViewQtGUI::initLayout() {
   m_presenter->notify(IEnggDiffractionPresenter::Start);
 }
 
-void EnggDiffractionViewQtGUI::doSetupTabCalib() {}
+void EnggDiffractionViewQtGUI::doSetupTabCalib() {
+  const std::string vanadiumRun = "236516";
+  const std::string ceriaRun = "241391";
+
+  // line edits with calibration parameters
+  m_uiTabCalib.lineEdit_vanadium_num->setText(
+      QString::fromStdString(vanadiumRun));
+  m_uiTabCalib.lineEdit_ceria_num->setText(QString::fromStdString(ceriaRun));
+
+  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+      QString::fromStdString(vanadiumRun));
+  m_uiTabCalib.lineEdit_new_ceria_num->setText(
+      QString::fromStdString(ceriaRun));
+
+  // push button signals/slots
+  connect(m_uiTabCalib.pushButton_load_calib, SIGNAL(released()), this,
+          SLOT(loadCalibrationClicked()));
+
+  connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
+          SLOT(calibrateClicked()));
+}
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   QString path =
@@ -78,6 +98,16 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   templ.append("Engineering");
   templ.append("template_ENGINX_241391_236516_North_and_South_banks.par");
   m_calibSettings.m_templateGSAS_PRM = templ.toString();
+
+  // line edits that display paths and the like
+  m_uiTabSettings.lineEdit_input_dir_calib->setText(
+      QString::fromStdString(m_calibSettings.m_inputDirCalib));
+  m_uiTabSettings.lineEdit_input_dir_raw->setText(
+      QString::fromStdString(m_calibSettings.m_inputDirRaw));
+  m_uiTabSettings.lineEdit_pixel_calib_filename->setText(
+      QString::fromStdString(m_calibSettings.m_pixelCalibFilename));
+  m_uiTabSettings.lineEdit_template_gsas_prm->setText(
+      QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
 
   // push button signals/slots
   connect(m_uiTabSettings.pushButton_browse_input_dir_calib, SIGNAL(released()),
@@ -127,7 +157,28 @@ std::string EnggDiffractionViewQtGUI::getRBNumber() const {
   return "not available";
 }
 
-void EnggDiffractionViewQtGUI::loadCalibrationClicked() {}
+void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  QString dir = QFileDialog::getExistingDirectory(
+      this, tr("Open Directory"), prevPath,
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+  if (dir.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+
+  m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
+}
+
+void EnggDiffractionViewQtGUI::calibrateClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
+}
 
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
@@ -190,8 +241,8 @@ void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
 
 void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
   const QString iparStr = QString("GSAS instrument parameters file "
-                            "(*.prm *.par *.tiff *.ipar *.iparam);;"
-                            "Other extensions/all files (*.*)");
+                                  "(*.prm *.par *.tiff *.ipar *.iparam);;"
+                                  "Other extensions/all files (*.*)");
 
   QString prevPath = QString::fromStdString(m_calibSettings.m_templateGSAS_PRM);
   QString path(QFileDialog::getOpenFileName(
@@ -204,7 +255,7 @@ void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
   m_calibSettings.m_templateGSAS_PRM = path.toStdString();
 }
 
-void EnggDiffractionViewQtGUI::instrumentChanged() {
+void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
   QComboBox *inst = m_ui.comboBox_instrument;
   if (!inst)
     return;

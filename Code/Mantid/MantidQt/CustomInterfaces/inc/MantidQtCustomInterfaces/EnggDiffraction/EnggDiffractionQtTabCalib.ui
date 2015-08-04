@@ -115,10 +115,18 @@
        </spacer>
       </item>
       <item row="1" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_ceria_num"/>
+       <widget class="QLineEdit" name="lineEdit_ceria_num">
+        <property name="text">
+         <string>241391</string>
+        </property>
+       </widget>
       </item>
       <item row="0" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_vanadium_num"/>
+       <widget class="QLineEdit" name="lineEdit_vanadium_num">
+        <property name="text">
+         <string>236516</string>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1" colspan="4">
        <widget class="QLineEdit" name="lineEdit_current_calib_path"/>
@@ -158,7 +166,11 @@
          </widget>
         </item>
         <item row="0" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_new_van_num"/>
+         <widget class="QLineEdit" name="lineEdit_new_vanadium_num">
+          <property name="text">
+           <string>236516</string>
+          </property>
+         </widget>
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_3">
@@ -168,7 +180,11 @@
          </widget>
         </item>
         <item row="1" column="1" colspan="2">
-         <widget class="QLineEdit" name="lineEdit_new_ceria_num"/>
+         <widget class="QLineEdit" name="lineEdit_new_ceria_num">
+          <property name="text">
+           <string>241391</string>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0" colspan="2">
          <spacer name="horizontalSpacer">
@@ -184,7 +200,7 @@
          </spacer>
         </item>
         <item row="2" column="2">
-         <widget class="QPushButton" name="pushButton_calib">
+         <widget class="QPushButton" name="pushButton_new_calib">
           <property name="text">
            <string>Calibrate</string>
           </property>

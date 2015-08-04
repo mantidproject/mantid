@@ -80,6 +80,7 @@ public:
 private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();
+  void calibrateClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -90,7 +91,7 @@ private slots:
   // slots of the calibration tab/section of the interface
 
   // slots of the general part of the interface
-  void instrumentChanged();
+  void instrumentChanged(int idx);
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 
