@@ -77,6 +77,9 @@ void TOFSANSResolutionByPixel::exec() {
   double R2 = getProperty("SampleApertureRadius");
   const bool doGravity = getProperty("AccountForGravity");
 
+  // Check the input
+  checkInput(inWS);
+
   // Setup outputworkspace
   auto outWS = setupOutputWorkspace(inWS);
 
@@ -112,7 +115,6 @@ void TOFSANSResolutionByPixel::exec() {
 
   // Get the collimation length
   double LCollim = getProperty("CollimationLength");
-  const V3D samplePos = inWS->getInstrument()->getSample()->getPos();
 
   if (LCollim == 0.0) {
     auto collimationLengthEstimator = SANSCollimationLengthEstimator();
@@ -140,10 +142,9 @@ void TOFSANSResolutionByPixel::exec() {
       continue;
 
     // Get the flight path from the sample to the detector pixel
+    const V3D samplePos = inWS->getInstrument()->getSample()->getPos();
     const V3D scatteredFlightPathV3D = det->getPos() - samplePos;
-
     const double L2 = scatteredFlightPathV3D.norm();
-
 
     TOFSANSResolutionByPixelCalculator calculator;
     const double waveLengthIndependentFactor = calculator.getWavelengthIndependentFactor(R1, R2, deltaR, LCollim, L2);
@@ -159,7 +160,6 @@ void TOFSANSResolutionByPixel::exec() {
 
     // Get handles on the outputWorkspace
     MantidVec &yOut = outWS->dataY(i);
-
     // for each wavelenght bin of each pixel calculate a q-resolution
     for (size_t j = 0; j < xLength - 1; j++) {
       // use the midpoint of each bin
@@ -185,6 +185,9 @@ void TOFSANSResolutionByPixel::exec() {
     }
     progress.report("Computing Q resolution");
   }
+
+  // Set the y axis label
+  outWS->setYUnitLabel("QResolution");
 
   setProperty("OutputWorkspace", outWS);
 }
@@ -219,6 +222,18 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::getModeratorWorkspace(Mantid::API
   rebinned->execute();
   MatrixWorkspace_sptr outWS = rebinned->getProperty("OutputWorkspace");
   return outWS;
+}
+
+/**
+ * Check the input workspace
+ * @param inWS: the input workspace
+ */
+void TOFSANSResolutionByPixel::checkInput(Mantid::API::MatrixWorkspace_sptr inWS) {
+  // Make sure that input workspace has an instrument as we rely heavily on thisa
+  auto inst = inWS->getInstrument();
+  if (inst->getName().empty()) {
+    throw std::invalid_argument("TOFSANSResolutionByPixel: The input workspace does not contain an instrument");
+  }
 }
 
 } // namespace Algorithms

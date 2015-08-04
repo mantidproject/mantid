@@ -46,6 +46,8 @@ private:
   double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS, const double L1, const double collimationLengthCorrection) const;
   /// Return the default collimation length
   double provideDefaultLCollimationLength(Mantid::API::MatrixWorkspace_sptr inWS) const;
+  /// Check input
+  void checkInput(Mantid::API::MatrixWorkspace_sptr inWS);
   /// Get the moderator workspace
   Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inWS);
   /// Create an output workspace
