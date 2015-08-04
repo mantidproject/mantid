@@ -863,33 +863,12 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       // remote repository, and we could just download the new one, but
       // we can not rely on the server updating it fast enough.
       // So add to the file locally to avoid race condition.
-      {
-	        ptree pt;
-	        std::string filename =
-		      std::string(local_repository).append(".repository.json");
-	        try {
-	        read_json(filename, pt);
-	        pt.erase(relative_path); // TODO add stuff here instead of erase!
-      #if defined(_WIN32) || defined(_WIN64)
-	        // set the .repository.json and .local.json not hidden (to be able to
-	        // edit it)
-	        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
-      #endif
-	        write_json(filename, pt);
-      #if defined(_WIN32) || defined(_WIN64)
-	        // set the .repository.json and .local.json hidden
-	        SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
-      #endif
-	        } catch (boost::property_tree::json_parser_error &ex) {
-	        std::stringstream ss;
-	        ss << "corrupted central copy of database : " << filename;
-
-	        g_log.error() << "ScriptRepository: " << ss.str()
-					        << "\nDetails: adding entry - json_parser_error: "
-					        << ex.what() << std::endl;
-	        throw ScriptRepoException(ss.str(), ex.what());
-	        }
-      }
+      RepositoryEntry &remote_entry = repo.at(file_path);
+      if (!published_date.empty())
+          remote_entry.pub_date = DateAndTime(published_date);
+      remote_entry.status = BOTH_UNCHANGED;
+      std::string &filename = std::string(local_repository).append(".repository.json");
+      updateRepositoryJson(filename, remote_entry);
 
     } else
       throw ScriptRepoException(info, detail);
@@ -897,6 +876,46 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
   } catch (Poco::Exception &ex) {
     throw ScriptRepoException(ex.displayText(), ex.className());
   }
+}
+
+/*
+* Adds an entry to .repository.json
+* This is necessary when uploading a file to keep .repository.json and
+* .local.json in sync, and thus display correct file status in the GUI.
+* Requesting an updated .repository.json from the server is not possible
+* at such a time as it would create a race condition.
+* @param path: path to repository json files
+* @param entry: the entry to add to the json file
+*/
+void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
+                                               const RepositoryEntry &entry) {
+                                           
+  ptree local_json;
+  std::string filename = std::string(local_repository).append(".repository.json");
+  read_json(filename, local_json);
+
+  local_json.put(boost::property_tree::ptree::path_type(
+                      std::string(path).append("!downloaded_pubdate"), '!'),
+                  entry.downloaded_pubdate.toFormattedString().c_str());
+  local_json.put(boost::property_tree::ptree::path_type(
+                      std::string(path).append("!downloaded_date"), '!'),
+                  entry.downloaded_date.toFormattedString().c_str());
+  std::string auto_update_op =
+      (const char *)((entry.auto_update) ? "true" : "false");
+  std::string key = std::string(path).append("!auto_update");
+  local_json.put(boost::property_tree::ptree::path_type(key, '!'),
+                  auto_update_op);
+     
+  g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
+  #if defined(_WIN32) || defined(_WIN64)
+    // set the .repository.json and .local.json not hidden to be able to edit it
+    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+  #endif
+    write_json(filename, local_json);
+  #if defined(_WIN32) || defined(_WIN64)
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+  #endif
 }
 
 /**
