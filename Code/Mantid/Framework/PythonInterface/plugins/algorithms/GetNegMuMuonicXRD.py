@@ -1,5 +1,6 @@
 from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.kernel import *
+from mantid.simpleapi import *
 
 #pylint: disable=no-init
 class GetNegMuMuonicXRD(PythonAlgorithm):
@@ -18,12 +19,10 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
 
     def PyInit(self):
         element_type = self.Muonic_XR.keys()
-        self.declareProperty("Element List", "None", StringListValidator(element_type),
-                             doc="List of available elements")
         self.declareProperty(StringArrayProperty("Elements", values=[],
                              direction=Direction.Input
                              ))
-        self.declareProperty(name="YAxis Position",
+        self.declareProperty(name="YAxisPosition",
                                     defaultValue=-0.001,
                                     doc="Position for Markers on the y-axis")
 
@@ -41,13 +40,14 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         WS_Muon_XR = CreateWorkspace(xvalues, YPos_WS[:])
         RenameWorkspaces(WS_Muon_XR, WorkspaceNames="MuonXRWorkspace_"+element)
         return WS_Muon_XR
+        
 
     def category(self):
         return "Muon"
 
     def PyExec(self):
         elements = self.getProperty("Elements").value
-        yposition = self.getProperty("YAxis Position").value
+        yposition = self.getProperty("YAxisPosition").value
         workspace_list = [None]*len(elements)
         for idx,element in enumerate(elements):
             curr_workspace = self.Create_MuonicXR_WS(element, yposition)
