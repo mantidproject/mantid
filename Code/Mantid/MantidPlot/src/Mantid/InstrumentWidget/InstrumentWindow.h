@@ -6,6 +6,7 @@
 
 #include "MantidGLWidget.h"
 #include "BinDialog.h"
+#include "InstrumentWindowTypes.h"
 
 #include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -58,7 +59,7 @@ class QSettings;
   and needs to be updated whenever the instrument view functionality changes.
 
  */
-class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public Mantid::IProjectSerialisable
+class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver, public Mantid::IProjectSerialisable, public InstrumentWindowTypes
 {
   Q_OBJECT
 
