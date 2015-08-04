@@ -35,6 +35,7 @@ set ( TEST_PY_FILES
   ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
+  LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -46,6 +47,7 @@ set ( TEST_PY_FILES
   MergeCalFilesTest.py
   MolDynTest.py
   MSDFitTest.py
+  MuscatSofQWTest.py
   OSIRISDiffractionReductionTest.py
   PDDetermineCharacterizationsTest.py
   ResNorm2Test.py

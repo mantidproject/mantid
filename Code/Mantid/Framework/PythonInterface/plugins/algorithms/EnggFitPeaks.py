@@ -56,7 +56,7 @@ class EnggFitPeaks(PythonAlgorithm):
 
         # Get peaks in dSpacing from file
         expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                         self.getProperty('ExpectedPeaks').value)
+                                                       self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
@@ -88,8 +88,8 @@ class EnggFitPeaks(PythonAlgorithm):
     def _getDefaultPeaks(self):
         """ Gets default peaks for Engg algorithm. Values from CeO2 """
         defaultPeaks = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
-                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
-                       0.8252, 0.8158, 0.7811]
+                        1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
+                        0.8252, 0.8158, 0.7811]
 
         return defaultPeaks
 
