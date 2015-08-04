@@ -56,6 +56,8 @@ void export_Quat() {
            "Returns the 'length' of the quaternion")
       .def("len2", &Quat::len2, arg("self"),
            "Returns the square of the 'length' of the quaternion")
+      .def("getEulerAngles", &Quat::getEulerAngles,args("self", "convention"),
+	   "Default convention is \'YZX\'.")
       .def("__add__", &Quat::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &Quat::operator+=, boost::python::return_self<>(),
            (arg("self"), arg("other")))
