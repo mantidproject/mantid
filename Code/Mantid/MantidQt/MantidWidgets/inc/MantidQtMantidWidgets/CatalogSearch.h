@@ -94,7 +94,7 @@ namespace MantidQt
       ///////////////////////////////////////////////////////////////////////////////
 
       /// Outputs the results of the query into a table.
-      void populateResultTable();
+      void populateResultTable(int sort_section, Qt::SortOrder sort_order);
       /// Obtain the sessionID for the selected investigation.
       std::string selectedInvestigationSession();
 
