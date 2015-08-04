@@ -130,7 +130,6 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
-inc/MantidVatesAPI/vtkMDHWPointsArray.h
 inc/MantidVatesAPI/vtkMDHWSignalArray.h
 )
 
@@ -183,7 +182,6 @@ test/vtkDataSetToPeaksFilteredDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
 test/vtkNullStructuredGridTest.h
-test/vtkMDHWPointsArrayTest.h
 test/vtkMDHWSignalArrayTest.h
 test/vtkEllipsoidTransformerTest.h
 test/NullPeaksPresenterVsiTest.h
