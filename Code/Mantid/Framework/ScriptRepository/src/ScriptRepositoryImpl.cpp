@@ -867,6 +867,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       if (!published_date.empty())
           remote_entry.pub_date = DateAndTime(published_date);
       remote_entry.status = BOTH_UNCHANGED;
+      g_log.debug() << "ScriptRepository updating repository json " << std::endl;
       updateRepositoryJson(file_path, remote_entry);
 
     } else
@@ -881,9 +882,9 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
 * Adds an entry to .repository.json
 * This is necessary when uploading a file to keep .repository.json and
 * .local.json in sync, and thus display correct file status in the GUI.
-* Requesting an updated .repository.json from the server is not possible
+* Requesting an updated .repository.json from the server is not viable
 * at such a time as it would create a race condition.
-* @param path: path to repository json files
+* @param path: relative path of uploaded file
 * @param entry: the entry to add to the json file
 */
 void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
