@@ -14,11 +14,14 @@ class EnggCalibrateFull(PythonAlgorithm):
         return "EnggCalibrateFull"
 
     def summary(self):
-        return "Calibrates every pixel position by performing single peak fitting."
+        return "Calibrates every detector/pixel position by performing single peak fitting."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut),
                              "Workspace with the calibration run to use. The calibration will be applied on it.")
+
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
+                             "Workspace with the Vanadium (correction and calibration) run.")
 
         self.declareProperty(ITableWorkspaceProperty("OutDetPosTable", "", Direction.Output),\
                              "A table with the detector IDs and calibrated detector positions and additional "
@@ -29,13 +32,13 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
                              doc = "Which bank to calibrate: It can be specified as 1 or 2, or "
-                             "equivalently,North or South. See also " + self.INDICES_PROP_NAME + " "
+                             "equivalently, North or South. See also " + self.INDICES_PROP_NAME + " "
                              "for a more flexible alternative to select specific detectors")
 
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
                              doc = 'Sets the spectrum numbers for the detectors '
                              'that should be considered in the calibration (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(FileProperty("OutDetPosFilename", "", FileAction.OptionalSave, [".csv"]),
@@ -52,18 +55,30 @@ class EnggCalibrateFull(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        self.declareProperty('OutVanadiumCurveFits', '', direction=Direction.Input,
+                             doc = 'Name for a workspace2D with the fitting workspaces corresponding to '
+                             'the banks processed. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                             'workspace is generated.')
+
     def PyExec(self):
 
         # Get peaks in dSpacing from file, and check we have what we need, before doing anything
         expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                         self.getProperty('ExpectedPeaks').value)
+                                                       self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         inWS = self.getProperty('Workspace').value
         WSIndices = EnggUtils.getWsIndicesFromInProperties(inWS, self.getProperty('Bank').value,
-                                                             self.getProperty(self.INDICES_PROP_NAME).value)
+                                                           self.getProperty(self.INDICES_PROP_NAME).value)
+
+        vanWS = self.getProperty("VanadiumWorkspace").value
+        # These corrections rely on ToF<->Dspacing conversions, so ideally they'd be done after the
+        # calibration step, which creates a cycle / chicken-and-egg issue.
+        EnggUtils.applyVanadiumCorrection(self, inWS, vanWS)
 
         rebinnedWS = self._prepareWsForFitting(inWS)
         posTbl = self._calculateCalibPositionsTbl(rebinnedWS, WSIndices, expectedPeaksD)
@@ -128,7 +143,7 @@ class EnggCalibrateFull(PythonAlgorithm):
             oldPos = det.getPos()
 
             posTbl.addRow([det.getID(), oldPos, newPos, newL2, det2Theta, detPhi, newL2-oldL2,
-                                  difc, zero])
+                           difc, zero])
             prog.report()
 
         return posTbl

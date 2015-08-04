@@ -12,6 +12,10 @@ Description
 Performs a diffraction reduction for OSIRIS using normalisation to a set of
 vanadium sample runs.
 
+The dRanges are numbered as per the `OSIRIS manual
+<http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
+Otherwise the dRange is determined based on the table provided in the manual.
+
 Usage
 -----
 

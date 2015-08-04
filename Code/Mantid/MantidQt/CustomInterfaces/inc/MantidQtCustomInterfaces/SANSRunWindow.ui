@@ -650,6 +650,11 @@
                 <string>Output Name</string>
                </property>
               </column>
+              <column>
+               <property name="text">
+                <string>User File</string>
+               </property>
+              </column>
              </widget>
             </item>
            </layout>
@@ -1615,83 +1620,113 @@ intermediate ranges are there for comparison</string>
         <item row="1" column="1">
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
-           <widget class="QGroupBox" name="groupBox_14">
+           <widget class="QGroupBox" name="groupBox_18">
             <property name="title">
-             <string>Incident Monitors</string>
+             <string>Transmission Settings</string>
             </property>
-            <layout class="QGridLayout" name="gridLayout_9">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_41">
-               <property name="text">
-                <string>For scattering</string>
-               </property>
-              </widget>
+            <layout class="QVBoxLayout" name="verticalLayout_15">
+             <item>
+              <layout class="QGridLayout" name="gridLayout_32">
+               <item row="1" column="4">
+                <widget class="QLineEdit" name="trans_roi_files_line_edit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>200</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QLineEdit" name="trans_radius_line_edit"/>
+               </item>
+               <item row="0" column="0">
+                <layout class="QHBoxLayout" name="horizontalLayout_25">
+                 <item>
+                  <widget class="QCheckBox" name="trans_M3_check_box">
+                   <property name="text">
+                    <string>M3</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="trans_M4_check_box">
+                   <property name="text">
+                    <string>M4</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="trans_radius_check_box">
+                 <property name="text">
+                  <string>Radius</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="4">
+                <widget class="QCheckBox" name="trans_roi_files_checkbox">
+                 <property name="text">
+                  <string>ROI files</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1" rowspan="2">
+                <widget class="QFrame" name="frame">
+                 <property name="frameShape">
+                  <enum>QFrame::VLine</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3" rowspan="2">
+                <widget class="QFrame" name="frame_2">
+                 <property name="frameShape">
+                  <enum>QFrame::VLine</enum>
+                 </property>
+                 <property name="frameShadow">
+                  <enum>QFrame::Raised</enum>
+                 </property>
+                 <property name="lineWidth">
+                  <number>1</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <layout class="QHBoxLayout" name="horizontalLayout_28">
+                 <item>
+                  <widget class="QLabel" name="label_17">
+                   <property name="text">
+                    <string>Shift:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="trans_M3M4_line_edit"/>
+                 </item>
+                </layout>
+               </item>
+              </layout>
              </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="monitor_spec">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>40</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <spacer name="horizontalSpacer_6">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="0" column="2">
-              <widget class="QCheckBox" name="monitor_interp">
-               <property name="text">
-                <string>Interpolate</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_39">
-               <property name="text">
-                <string>For transmissions</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QLineEdit" name="trans_monitor">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>40</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="2">
-              <widget class="QCheckBox" name="trans_interp">
-               <property name="text">
-                <string>Interpolate</string>
-               </property>
-              </widget>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_26">
+               <item>
+                <widget class="QLabel" name="label_16">
+                 <property name="text">
+                  <string>Masking files:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="trans_masking_line_edit"/>
+               </item>
+              </layout>
              </item>
             </layout>
            </widget>
@@ -2186,6 +2221,92 @@ intermediate ranges are there for comparison</string>
                  <width>70</width>
                  <height>16777215</height>
                 </size>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <item>
+           <widget class="QGroupBox" name="groupBox_14">
+            <property name="title">
+             <string>Incident Monitors</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_9">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_41">
+               <property name="text">
+                <string>For scattering</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="monitor_spec">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="monitor_interp">
+               <property name="text">
+                <string>Interp.</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="0" column="6">
+              <widget class="QCheckBox" name="trans_interp">
+               <property name="text">
+                <string>Interp.</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5">
+              <widget class="QLineEdit" name="trans_monitor">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>40</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QLabel" name="label_39">
+               <property name="text">
+                <string>For transmissions</string>
                </property>
               </widget>
              </item>
@@ -3963,13 +4084,6 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="12" column="2">
-         <widget class="QLineEdit" name="eventToHistBinning">
-          <property name="text">
-           <string>5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0</string>
-          </property>
-         </widget>
-        </item>
         <item row="10" column="2">
          <widget class="QComboBox" name="comboBox_histogram_choice">
           <item>
@@ -3988,6 +4102,37 @@ p, li { white-space: pre-wrap; }
            </property>
           </item>
          </widget>
+        </item>
+        <item row="11" column="2">
+         <widget class="QCheckBox" name="overlayCheckBox">
+          <property name="text">
+           <string>OverlayEventWorkspaces</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_24">
+          <item>
+           <widget class="QLabel" name="labelBinning">
+            <property name="minimumSize">
+             <size>
+              <width>70</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Bin Settings:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="eventToHistBinning">
+            <property name="text">
+             <string>5.5,45.5,50.0, 50.0,1000.0, 500.0,1500.0, 750.0,99750.0, 255.0,100005.0</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -4319,8 +4464,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>wavRanges</tabstop>
   <tabstop>monitor_spec</tabstop>
   <tabstop>monitor_interp</tabstop>
-  <tabstop>trans_monitor</tabstop>
-  <tabstop>trans_interp</tabstop>
   <tabstop>tof_min</tabstop>
   <tabstop>tof_max</tabstop>
   <tabstop>scale_factor</tabstop>

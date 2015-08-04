@@ -29,8 +29,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _LRef = None
     _DIFCref = None
     _wavelengthMin = None
+    _wavelengthMax = None
     _vanPeakFWHM = None
     _vanSmoothing = None
+    _vanRadius = None
     _scaleFactor = None
     _outDir = None
     _outPrefix = None
@@ -92,6 +94,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "Reference DIFC for resolution removal. Zero skips the correction")
         self.declareProperty("CropWavelengthMin", 0.,
                              "Crop the data at this minimum wavelength. Overrides LowResRef.")
+        self.declareProperty("CropWavelengthMax", 0.,
+                             "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.")
         self.declareProperty("RemovePromptPulseWidth", 0.0,
                              "Width of events (in microseconds) near the prompt pulse to remove. 0 disables")
         self.declareProperty("MaxChunkSize", 0.0, "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
@@ -111,6 +115,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "\
                              "Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
+        self.declareProperty("VanadiumRadius", .3175, "Radius for MultipleScatteringCylinderAbsorption")
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
         self.declareProperty("FilterBadPulses", 95.,
                              doc="Filter out events measured while proton charge is more than 5% below average")
@@ -171,8 +176,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._LRef = self.getProperty("UnwrapRef").value
         self._DIFCref = self.getProperty("LowResRef").value
         self._wavelengthMin = self.getProperty("CropWavelengthMin").value
+        self._wavelengthMax = self.getProperty("CropWavelengthMax").value
         self._vanPeakFWHM = self.getProperty("VanadiumFWHM").value
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams").value
+        self._vanRadius = self.getProperty("VanadiumRadius").value
         calib = self.getProperty("CalibrationFile").value
         self._scaleFactor = self.getProperty("ScaleData").value
         self._outDir = self.getProperty("OutputDirectory").value
@@ -253,14 +260,14 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     samRun = temp
                     info = tempinfo
                 else:
-                    if (tempinfo["frequency"] is not None) and (info["frequency"] is not None) \
-                            and (abs(tempinfo["frequency"] - info["frequency"])/info["frequency"] > .05):
+                    if (tempinfo["frequency"].value is not None) and (info["frequency"].value is not None) \
+                            and (abs(tempinfo["frequency"].value - info["frequency"].value)/info["frequency"].value > .05):
                         raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                           % (tempinfo["frequency"], info["frequency"]))
-                    if (tempinfo["wavelength"] is not None) and (info["wavelength"] is not None) \
-                            and abs(tempinfo["wavelength"] - info["wavelength"])/info["wavelength"] > .05:
+                                           % (tempinfo["frequency"].value, info["frequency"].value))
+                    if (tempinfo["wavelength"].value is not None) and (info["wavelength"].value is not None) \
+                            and abs(tempinfo["wavelength"].value - info["wavelength"].value)/info["wavelength"].value > .05:
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                           % (tempinfo["wavelength"], info["wavelength"]))
+                                           % (tempinfo["wavelength"].value, info["wavelength"].value))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
                     if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
@@ -322,7 +329,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self._info = self._getinfo(samRun)
 
             # process the container
-            canRun = self._info["container"]
+            canRun = self._info["container"].value
             if canRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     canFilterWall = timeFilterWall
@@ -345,7 +352,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 canRun = None
 
             # process the vanadium run
-            vanRun = self._info["vanadium"]
+            vanRun = self._info["vanadium"].value
             if vanRun > 0:
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = timeFilterWall
@@ -369,7 +376,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
 
                     # load the vanadium background (if appropriate)
-                    vbackRun = self._info["empty"]
+                    vbackRun = self._info["empty"].value
                     if vbackRun > 0:
                         vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
@@ -393,18 +400,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # do the absorption correction
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     api.SetSampleMaterial(InputWorkspace=vanRun, ChemicalFormula="V", SampleNumberDensity=0.0721)
-                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    vanRun = api.MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun,
+                                                                      CylinderSampleRadius=self._vanRadius)
 
                     # focus the data
                     vanRun = api.AlignAndFocusPowder(InputWorkspace=vanRun, OutputWorkspace=vanRun, CalFileName=calib,
                                                      Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
-                                                     DMin=self._info["d_min"], DMax=self._info["d_max"],
-                                                     TMin=self._info["tof_min"], TMax=self._info["tof_max"],
                                                      RemovePromptPulseWidth=self._removePromptPulseWidth,
                                                      CompressTolerance=self.COMPRESS_TOL_TOF,
                                                      UnwrapRef=self._LRef, LowResRef=self._DIFCref,
                                                      LowResSpectrumOffset=self._lowResTOFoffset,
-                                                     CropWavelengthMin=self._wavelengthMin, **(focuspos))
+                                                     CropWavelengthMin=self._wavelengthMin,
+                                                     CropWavelengthMax=self._wavelengthMax,
+                                                     ReductionProperties="__snspowderreduction", **(focuspos))
 
 
                     # strip peaks
@@ -701,11 +709,11 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 focuspos = self._focusPos
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,\
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,\
-                    DMin=self._info["d_min"], DMax=self._info["d_max"], TMin=self._info["tof_min"], TMax=self._info["tof_max"],\
                     PreserveEvents=preserveEvents,\
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=self.COMPRESS_TOL_TOF,\
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,\
-                    CropWavelengthMin=self._wavelengthMin, **(focuspos))
+                    CropWavelengthMin=self._wavelengthMin, CropWavelengthMax=self._wavelengthMax,
+                    ReductionProperties="__snspowderreduction", **(focuspos))
                 for iws in xrange(temp.getNumberHistograms()):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
@@ -776,8 +784,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             return wksplist
 
     def _getinfo(self, wksp):
-        rowValues = {}
-
         if mtd.doesExist("characterizations"):
             # get the correct row of the table
 
@@ -790,23 +796,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                       NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
                                                       FrequencyLogNames = self.getProperty("FrequencyLogNames").value,
                                                       WaveLengthLogNames = self.getProperty("WaveLengthLogNames").value)
-            # convert the result into a dict
-            manager = PropertyManagerDataService.retrieve("__snspowderreduction")
-            for name in ["frequency", "wavelength", "bank", "vanadium", "container",
-                         "empty", "d_min", "d_max", "tof_min", "tof_max"]:
-                rowValues[name] = manager.getProperty(name).value
         else:
-            # "frequency", "wavelength"
-            rowValues["bank"] = 0
-            rowValues["container"] = self.getProperty("BackgroundNumber").value
-            rowValues["vanadium"]  = self.getProperty("VanadiumNumber").value
-            rowValues["empty"]     = self.getProperty("VanadiumBackgroundNumber").value
-            rowValues["d_min"]     = 0.
-            rowValues["d_max"]     = 0.
-            rowValues["tof_min"]   = 0.
-            rowValues["tof_max"]   = 0.
+            charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
+                                                      ReductionProperties="__snspowderreduction",
+                                                      BackRun=self.getProperty("BackgroundNumber").value,
+                                                      NormRun=self.getProperty("VanadiumNumber").value,
+                                                      NormBackRun=self.getProperty("VanadiumBackgroundNumber").value,
+                                                      FrequencyLogNames = self.getProperty("FrequencyLogNames").value,
+                                                      WaveLengthLogNames = self.getProperty("WaveLengthLogNames").value)
 
-        return rowValues
+        # convert the result into a dict
+        return PropertyManagerDataService.retrieve("__snspowderreduction")
 
     def _save(self, wksp, info, normalized, pdfgetn):
         prefix = str(wksp)
@@ -818,16 +818,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 pdfwksp = str(wksp)+"_norm"
                 pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
                 api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles=False, Append=False,\
-                        MultiplyByBinWidth=False, Bank=info["bank"], Format="SLOG", ExtendedHeader=True)
+                        MultiplyByBinWidth=False, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
                 api.DeleteWorkspace(pdfwksp)
             return # don't do the other bits of saving
         if "gsas" in self._outTypes:
             api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles=False, Append=False,\
-                    MultiplyByBinWidth=normalized, Bank=info["bank"], Format="SLOG", ExtendedHeader=True)
+                    MultiplyByBinWidth=normalized, Bank=info["bank"].value, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"], Filename=filename+".dat")
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"].value, Filename=filename+".dat")
         if "topas" in self._outTypes:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"], Filename=filename+".xye",
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"].value, Filename=filename+".xye",
                                Format="TOPAS")
         if "nexus" in self._outTypes:
             api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)

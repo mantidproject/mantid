@@ -94,6 +94,8 @@ c\_plus\_plus\_type must be a copyable type and operators << and >> must
 be defined. There is also DECLARE\_TABLEPOINTERCOLUMN macro for
 declaring non-copyable types, but it has never been used.
 
+.. include:: WorkspaceNavigation.txt
+
 
 
 .. categories:: Concepts

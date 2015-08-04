@@ -6,246 +6,405 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>456</width>
-    <height>312</height>
+    <width>410</width>
+    <height>422</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>410</width>
+    <height>422</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>410</width>
+    <height>422</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>TofConverter</string>
   </property>
+  <property name="animated">
+   <bool>true</bool>
+  </property>
+  <property name="documentMode">
+   <bool>true</bool>
+  </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>441</width>
-      <height>261</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>CONVERTER</string>
-    </property>
-    <widget class="QComboBox" name="inputUnits">
-     <property name="geometry">
-      <rect>
-       <x>230</x>
-       <y>20</y>
-       <width>191</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <item>
-      <property name="text">
-       <string>Energy  (meV)</string>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QGroupBox" name="groupBox">
+      <property name="minimumSize">
+       <size>
+        <width>401</width>
+        <height>422</height>
+       </size>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Wavelength (Angstroms)</string>
+      <property name="maximumSize">
+       <size>
+        <width>401</width>
+        <height>422</height>
+       </size>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Nu (THz)</string>
+      <property name="title">
+       <string/>
       </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Velocity (m/s)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Momentum ( k Angstroms^-1)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Temperature (K)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Energy (cm^-1)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Momentum transfer (Q Angstroms^-1)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>d-Spacing (Angstroms)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Time of flight (microseconds)</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_5">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>211</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Total flight path (meters)</string>
-     </property>
-     <widget class="QLineEdit" name="lineEdit_3">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>191</width>
-        <height>31</height>
-       </rect>
-      </property>
+      <widget class="QComboBox" name="inputUnits">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>50</y>
+         <width>181</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>A list of the units for the input value</string>
+       </property>
+       <property name="whatsThis">
+        <string>Drop down menu of the units for the input value</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Energy (meV)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Wavelength (Angstroms)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Nu (THz)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Velocity (m/s)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Momentum (k Angstroms^-1)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Temperature (K)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Energy (cm^-1)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Momentum transfer (Q Angstroms^-1)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>d-spacing (Angstroms)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Time of flight (microseconds)</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLineEdit" name="InputVal">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>141</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The value that you wish to convert</string>
+       </property>
+       <property name="whatsThis">
+        <string>An input box for entering the value that you wish to convert</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>91</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Input value:</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>170</x>
+         <y>50</y>
+         <width>16</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>in</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_3">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>30</y>
+         <width>46</width>
+         <height>13</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Units:</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="scatteringAngleInput">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>110</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The angle through which a scattered particle or beam is deflected in degrees</string>
+       </property>
+       <property name="whatsThis">
+        <string>An input box for entering the scattering angle in Degrees (if necessary)</string>
+       </property>
+       <property name="accessibleName">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="outputUnits">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>220</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The units that you wish to convert your input value to.</string>
+       </property>
+       <property name="whatsThis">
+        <string>Drop down menu of the units for the input value to be converted to</string>
+       </property>
+       <item>
+        <property name="text">
+         <string>Energy (meV)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Wavelength (Angstroms)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Nu (Thz)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Velocity (m/s)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Momentum (k Angstroms^-1)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Temperature (K)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Energy (cm^-1)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Momentum transfer (Q Angstroms^-1)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>d-spacing (Angstroms)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Time of flight (microseconds)</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLabel" name="label_4">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>200</y>
+         <width>71</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Convert To:</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="convert">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>260</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="whatsThis">
+        <string>A button to produce the converted value</string>
+       </property>
+       <property name="text">
+        <string>Convert</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="convertedVal">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>320</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The converted value produced</string>
+       </property>
+       <property name="whatsThis">
+        <string>A output box for displaying the converted value</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_6">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>90</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Scattering Angle (Degrees):</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="totalFlightPathInput">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>170</y>
+         <width>201</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The distance travelled by the object measured in meters</string>
+       </property>
+       <property name="statusTip">
+        <string/>
+       </property>
+       <property name="whatsThis">
+        <string>An input box for entering the total flight path in meters (if necessary)</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>150</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Total flight path (Meters):</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="helpButton">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>340</y>
+         <width>31</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Help</string>
+       </property>
+       <property name="whatsThis">
+        <string>Help button</string>
+       </property>
+       <property name="text">
+        <string>?</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>80</x>
+         <y>300</y>
+         <width>201</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Converted value:</string>
+       </property>
+      </widget>
      </widget>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_4">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>211</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>Scattering Angle (degrees)</string>
-     </property>
-     <widget class="QLineEdit" name="lineEdit_4">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>191</width>
-        <height>31</height>
-       </rect>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QPushButton" name="convert">
-     <property name="geometry">
-      <rect>
-       <x>230</x>
-       <y>60</y>
-       <width>191</width>
-       <height>121</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>CONVERT</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>190</y>
-       <width>421</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>OUTPUT</string>
-     </property>
-     <widget class="QLineEdit" name="lineEdit_2">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>20</y>
-        <width>201</width>
-        <height>31</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="outputUnits">
-      <property name="geometry">
-       <rect>
-        <x>220</x>
-        <y>20</y>
-        <width>191</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>Energy  (meV)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Wavelength (Angstroms)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Nu (THz)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Velocity (m/s)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Momentum ( k Angstroms^-1)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Temperature (K)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Energy (cm^-1)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Momentum transfer (Q Angstroms^-1)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>d-Spacing (Angstroms)</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Time of flight (microseconds)</string>
-       </property>
-      </item>
-     </widget>
-    </widget>
-    <widget class="QLineEdit" name="InputVal">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>19</y>
-       <width>211</width>
-       <height>31</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>456</width>
+     <width>410</width>
      <height>21</height>
     </rect>
    </property>

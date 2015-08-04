@@ -181,23 +181,50 @@ the fit. Zero error values are not allowed and are replaced with ones.
 Output
 ######
 
-Setting the Output property defines the names of the two output
-workspaces. One of them is a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with
-the fitted parameter values. The other is a
-:ref:`Workspace2D <Workspace2D>` which compares the fit with the original
-data. It has three spectra. The first (index 0) contains the original
-data, the second one the data simulated with the fitting function and
-the third spectrum is the difference between the first two. For example,
-if the Output was set to "MyResults" the parameter TableWorkspace will
-have name "MyResults\_Parameters" and the Workspace2D will be named
-"MyResults\_Workspace". If the function's derivatives can be evaluated
-an additional TableWorkspace is returned. When the Output is set to
-"MyResults" this TableWorkspace will have the name
-"MyResults\_NormalisedCovarianceMatrix" and it returns a calculated
-correlation matrix. Denote this matrix C and its elements Cij then the
-diagonal elements are listed as 1.0 and the off diagnonal elements as
-percentages of correlation between parameter i and j equal to
-100\*Cij/sqrt(Cii\*Cjj).
+Two output properties are added if the property 'CreateOutput' is set:
+
+1. OutputParameters
+2. OutputWorkspace (only if OutputParametersOnly is not set)
+
+These two properties are not shown in the table of properties above,
+as they are declared dynamically, but they can be retrieved after
+executing the algorithm (as long as the property 'CreateOutput' was
+used). These two output properties provide workspaces which are also
+added in the Analysis Data Service (ADS) with names defined by
+appending a suffix to the name of the original data workspace. You can
+replace the name of the workspace with a different name if you give a
+value to the property 'Output' which redefines the base name of the
+output workspaces.
+
+OutputParameters is is a `TableWorkspace
+<http://www.mantidproject.org/TableWorkspace>`_ with the fitted
+parameter values. OutputWorkspace is a :ref:`Workspace2D
+<Workspace2D>` which compares the fit with the original data. The
+names given to these workspaces are built by appending the suffixes
+"_Parameters" and "_Workspace" to the name given in the input property
+'Output'. For example, if 'Output' was set to "MyResults" the name of
+the parameter TableWorkspace will be "MyResults\_Parameters" and the
+name of the Workspace2D will be "MyResults\_Workspace".
+
+The :ref:`Workspace2D <Workspace2D>` produced in the output property
+'OutputWorkspace' (example name: "MyResults\_Workspace") has three
+spectra:
+
+1. The first spectrum (workspace index 0) contains the original data.
+2. The second spectrum is the data simulated with the fitted function.
+3. The third spectrum is the difference between the first two.
+
+Also, if the function's derivatives can be evaluated an additional
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ is
+produced. If for example the property Output is set to "MyResults"
+then this TableWorkspace will have the name
+"MyResults\_NormalisedCovarianceMatrix" and it contains a calculated
+correlation matrix. Denote this matrix :math:`\rm C` and its elements
+:math:`c_{ij}` then the diagonal elements are listed as 1.0 and the
+off diagonal elements as percentages of correlation between parameter
+:math:`i` and :math:`j` equal to
+
+.. math:: 100 \cdot c_{ij} / \sqrt{c_{ii} \cdot c_{jj}}.
 
 Examples
 --------

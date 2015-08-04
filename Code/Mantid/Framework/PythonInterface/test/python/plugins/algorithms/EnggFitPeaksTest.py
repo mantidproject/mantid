@@ -51,6 +51,8 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         @returns if val differs from ref by less than epsilon
         """
+        if 0 == ref:
+            return False
         return (abs((ref-val)/ref) < epsilon)
 
     def _check_outputs_ok(self, tblName, numPeaks, cell00, cell01, cell10, cell14):

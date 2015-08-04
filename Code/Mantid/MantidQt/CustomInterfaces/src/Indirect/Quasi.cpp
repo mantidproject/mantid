@@ -4,354 +4,367 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt
-{
-	namespace CustomInterfaces
-	{
-		Quasi::Quasi(QWidget * parent) :
-			IndirectBayesTab(parent),
-      m_previewSpec(0)
-		{
-			m_uiForm.setupUi(parent);
+namespace MantidQt {
+namespace CustomInterfaces {
+Quasi::Quasi(QWidget *parent) : IndirectBayesTab(parent), m_previewSpec(0) {
+  m_uiForm.setupUi(parent);
 
-      // Create range selector
-      auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
-      connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-      connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+  // Create range selector
+  auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
+  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this,
+          SLOT(minValueChanged(double)));
+  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this,
+          SLOT(maxValueChanged(double)));
 
-			// Add the properties browser to the UI form
-			m_uiForm.treeSpace->addWidget(m_propTree);
+  // Add the properties browser to the UI form
+  m_uiForm.treeSpace->addWidget(m_propTree);
 
-			m_properties["EMin"] = m_dblManager->addProperty("EMin");
-			m_properties["EMax"] = m_dblManager->addProperty("EMax");
-			m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
-			m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
+  m_properties["EMin"] = m_dblManager->addProperty("EMin");
+  m_properties["EMax"] = m_dblManager->addProperty("EMax");
+  m_properties["SampleBinning"] = m_dblManager->addProperty("Sample Binning");
+  m_properties["ResBinning"] = m_dblManager->addProperty("Resolution Binning");
 
-			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
-			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-			m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
-			m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
+  m_dblManager->setDecimals(m_properties["SampleBinning"], INT_DECIMALS);
+  m_dblManager->setDecimals(m_properties["ResBinning"], INT_DECIMALS);
 
-			m_propTree->addProperty(m_properties["EMin"]);
-			m_propTree->addProperty(m_properties["EMax"]);
-			m_propTree->addProperty(m_properties["SampleBinning"]);
-			m_propTree->addProperty(m_properties["ResBinning"]);
+  m_propTree->addProperty(m_properties["EMin"]);
+  m_propTree->addProperty(m_properties["EMax"]);
+  m_propTree->addProperty(m_properties["SampleBinning"]);
+  m_propTree->addProperty(m_properties["ResBinning"]);
 
-			//Set default values
-			m_dblManager->setValue(m_properties["SampleBinning"], 1);
-			m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
-			m_dblManager->setValue(m_properties["ResBinning"], 1);
-			m_dblManager->setMinimum(m_properties["ResBinning"], 1);
+  // Set default values
+  m_dblManager->setValue(m_properties["SampleBinning"], 1);
+  m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
+  m_dblManager->setValue(m_properties["ResBinning"], 1);
+  m_dblManager->setMinimum(m_properties["ResBinning"], 1);
 
-			//Connect optional form elements with enabling checkboxes
-			connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat, SLOT(setEnabled(bool)));
-			connect(m_uiForm.chkUseResNorm, SIGNAL(toggled(bool)), m_uiForm.dsResNorm, SLOT(setEnabled(bool)));
+  // Connect optional form elements with enabling checkboxes
+  connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat,
+          SLOT(setEnabled(bool)));
+  connect(m_uiForm.chkUseResNorm, SIGNAL(toggled(bool)), m_uiForm.dsResNorm,
+          SLOT(setEnabled(bool)));
 
-			//Connect the data selector for the sample to the mini plot
-			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
+  // Connect the data selector for the sample to the mini plot
+  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
+          SLOT(handleSampleInputReady(const QString &)));
 
-      // Connect the progrm selector to its handler
-			connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
+  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
+          SLOT(handleResolutionInputReady(const QString &)));
 
-      // Connect preview spectrum spinner to handler
-      connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
-		}
+  // Connect the progrm selector to its handler
+  connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(handleProgramChange(int)));
 
-		/**
-		 * Set the data selectors to use the default save directory
-		 * when browsing for input files.
-		 *
-     * @param settings :: The current settings
-		 */
-		void Quasi::loadSettings(const QSettings& settings)
-		{
-			m_uiForm.dsSample->readSettings(settings.group());
-			m_uiForm.dsResolution->readSettings(settings.group());
-			m_uiForm.dsResNorm->readSettings(settings.group());
-			m_uiForm.mwFixWidthDat->readSettings(settings.group());
-		}
+  // Connect preview spectrum spinner to handler
+  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this,
+          SLOT(previewSpecChanged(int)));
+}
 
-    void Quasi::setup()
-    {
+/**
+ * Set the data selectors to use the default save directory
+ * when browsing for input files.
+ *
+* @param settings :: The current settings
+ */
+void Quasi::loadSettings(const QSettings &settings) {
+  m_uiForm.dsSample->readSettings(settings.group());
+  m_uiForm.dsResolution->readSettings(settings.group());
+  m_uiForm.dsResNorm->readSettings(settings.group());
+  m_uiForm.mwFixWidthDat->readSettings(settings.group());
+}
+
+void Quasi::setup() {}
+
+/**
+ * Validate the form to check the program can be run
+ *
+ * @return :: Whether the form was valid
+ */
+bool Quasi::validate() {
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+
+  // check that the ResNorm file is valid if we are using it
+  if (m_uiForm.chkUseResNorm->isChecked()) {
+    uiv.checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
+  }
+
+  // check fixed width file exists
+  if (m_uiForm.chkFixWidth->isChecked() && !m_uiForm.mwFixWidthDat->isValid()) {
+    uiv.checkMWRunFilesIsValid("Width", m_uiForm.mwFixWidthDat);
+  }
+
+  QString errors = uiv.generateErrorMessage();
+  if (!errors.isEmpty()) {
+    emit showMessageBox(errors);
+    return false;
+  }
+
+  QString program = m_uiForm.cbProgram->currentText();
+  if (program == "Stretched Exponential") {
+    QString resName = m_uiForm.dsResolution->getCurrentDataName();
+    if (!resName.endsWith("_res")) {
+      emit showMessageBox("Stretched Exponential program can only be used with "
+                          "a resolution file.");
+      return false;
     }
+  }
 
-		/**
-		 * Validate the form to check the program can be run
-		 *
-		 * @return :: Whether the form was valid
-		 */
-		bool Quasi::validate()
-		{
-			UserInputValidator uiv;
-			uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-			uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+  return true;
+}
 
-			//check that the ResNorm file is valid if we are using it
-			if(m_uiForm.chkUseResNorm->isChecked())
-			{
-				uiv.checkDataSelectorIsValid("ResNorm", m_uiForm.dsResNorm);
-			}
+/**
+ * Collect the settings on the GUI and build a python
+ * script that runs Quasi
+ */
+void Quasi::run() {
+  // Using 1/0 instead of True/False for compatibility with underlying Fortran
+  // code
+  // in some places
+  QString save("False");
+  QString elasticPeak("False");
+  QString sequence("False");
 
-			//check fixed width file exists
-			if(m_uiForm.chkFixWidth->isChecked() &&
-					 !m_uiForm.mwFixWidthDat->isValid())
-			{
-				uiv.checkMWRunFilesIsValid("Width", m_uiForm.mwFixWidthDat);
-			}
+  QString fixedWidth("False");
+  QString fixedWidthFile("");
 
-			QString errors = uiv.generateErrorMessage();
-			if (!errors.isEmpty())
-			{
-				emit showMessageBox(errors);
-				return false;
-			}
+  QString useResNorm("False");
+  QString resNormFile("");
 
-			QString program = m_uiForm.cbProgram->currentText();
-      if(program == "Stretched Exponential")
-      {
-			  QString resName = m_uiForm.dsResolution->getCurrentDataName();
-        if(!resName.endsWith("_res"))
-        {
-          emit showMessageBox("Stretched Exponential program can only be used with a resolution file.");
-          return false;
-        }
-      }
+  QString pyInput = "from IndirectBayes import QLRun\n";
 
-			return true;
-		}
+  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+  QString resName = m_uiForm.dsResolution->getCurrentDataName();
 
-		/**
-		 * Collect the settings on the GUI and build a python
-		 * script that runs Quasi
-		 */
-		void Quasi::run()
-		{
-			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
-			// in some places
-			QString save("False");
-			QString elasticPeak("False");
-			QString sequence("False");
+  QString program = m_uiForm.cbProgram->currentText();
 
-			QString fixedWidth("False");
-			QString fixedWidthFile("");
+  if (program == "Lorentzians") {
+    program = "QL";
+  } else {
+    program = "QSe";
+  }
 
-			QString useResNorm("False");
-			QString resNormFile("");
+  // Collect input from fit options section
+  QString background = m_uiForm.cbBackground->currentText();
 
-			QString pyInput =
-				"from IndirectBayes import QLRun\n";
+  if (m_uiForm.chkElasticPeak->isChecked()) {
+    elasticPeak = "True";
+  }
+  if (m_uiForm.chkSequentialFit->isChecked()) {
+    sequence = "True";
+  }
 
-			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+  if (m_uiForm.chkFixWidth->isChecked()) {
+    fixedWidth = "True";
+    fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
+  }
 
-			QString program = m_uiForm.cbProgram->currentText();
+  if (m_uiForm.chkUseResNorm->isChecked()) {
+    useResNorm = "True";
+    resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
+  }
 
-			if(program == "Lorentzians")
-			{
-				program = "QL";
-			}
-			else
-			{
-				program = "QSe";
-			}
+  QString fitOps = "[" + elasticPeak + ", '" + background + "', " + fixedWidth +
+                   ", " + useResNorm + "]";
 
-			// Collect input from fit options section
-			QString background = m_uiForm.cbBackground->currentText();
+  // Collect input from the properties browser
+  QString eMin = m_properties["EMin"]->valueText();
+  QString eMax = m_properties["EMax"]->valueText();
+  QString eRange = "[" + eMin + "," + eMax + "]";
 
-			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "True"; }
-			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
+  QString sampleBins = m_properties["SampleBinning"]->valueText();
+  QString resBins = m_properties["ResBinning"]->valueText();
+  QString nBins = "[" + sampleBins + "," + resBins + "]";
 
-			if(m_uiForm.chkFixWidth->isChecked())
-			{
-				fixedWidth = "True";
-				fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
-			}
+  // Output options
+  if (m_uiForm.chkSave->isChecked()) {
+    save = "True";
+  }
+  QString plot = m_uiForm.cbPlot->currentText();
 
-			if(m_uiForm.chkUseResNorm->isChecked())
-			{
-				useResNorm = "True";
-				resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
-			}
+  pyInput += "QLRun('" + program + "','" + sampleName + "','" + resName +
+             "','" + resNormFile + "'," + eRange + ","
+                                                   " " +
+             nBins + "," + fitOps + ",'" + fixedWidthFile + "'," + sequence +
+             ", "
+             " Save=" +
+             save + ", Plot='" + plot + "')\n";
 
-			QString fitOps = "[" + elasticPeak + ", '" + background + "', " + fixedWidth + ", " + useResNorm + "]";
+  runPythonScript(pyInput);
 
-			// Collect input from the properties browser
-			QString eMin = m_properties["EMin"]->valueText();
-			QString eMax = m_properties["EMax"]->valueText();
-			QString eRange = "[" + eMin + "," + eMax + "]";
+  updateMiniPlot();
+}
 
-			QString sampleBins = m_properties["SampleBinning"]->valueText();
-			QString resBins = m_properties["ResBinning"]->valueText();
-			QString nBins = "[" + sampleBins + "," + resBins + "]";
+/**
+ * Updates the data and fit curves on the mini plot.
+ */
+void Quasi::updateMiniPlot() {
+  // Update sample plot
+  if (!m_uiForm.dsSample->isValid())
+    return;
 
-			// Output options
-			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
-			QString plot = m_uiForm.cbPlot->currentText();
+  m_uiForm.ppPlot->clear();
 
-			pyInput += "QLRun('"+program+"','"+sampleName+"','"+resName+"','"+resNormFile+"',"+eRange+","
-										" "+nBins+","+fitOps+",'"+fixedWidthFile+"',"+sequence+", "
-										" Save="+save+", Plot='"+plot+"')\n";
+  QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
 
-			runPythonScript(pyInput);
+  // Update fit plot
+  QString program = m_uiForm.cbProgram->currentText();
+  if (program == "Lorentzians")
+    program = "QL";
+  else
+    program = "QSe";
 
-      updateMiniPlot();
-		}
+  QString resName = m_uiForm.dsResolution->getCurrentDataName();
 
-    /**
-     * Updates the data and fit curves on the mini plot.
-     */
-    void Quasi::updateMiniPlot()
-    {
-      // Update sample plot
-      if(!m_uiForm.dsSample->isValid())
-        return;
+  // Should be either "red", "sqw" or "res"
+  QString resType = resName.right(3);
 
-	  m_uiForm.ppPlot->clear();
+  // Get the correct workspace name based on the type of resolution file
+  if (program == "QL") {
+    if (resType == "res")
+      program += "r";
+    else
+      program += "d";
+  }
 
-      QString sampleName = m_uiForm.dsSample->getCurrentDataName();
-	  m_uiForm.ppPlot->addSpectrum("Sample", sampleName, m_previewSpec);
+  QString outWsName = sampleName.left(sampleName.size() - 3) + program +
+                      "_Workspace_" + QString::number(m_previewSpec);
+  if (!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
+    return;
 
-      // Update fit plot
-			QString program = m_uiForm.cbProgram->currentText();
-			if(program == "Lorentzians")
-				program = "QL";
-			else
-				program = "QSe";
+  MatrixWorkspace_sptr outputWorkspace =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          outWsName.toStdString());
 
-			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+  TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
-      // Should be either "red", "sqw" or "res"
-      QString resType = resName.right(3);
+  for (size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms();
+       histIndex++) {
+    QString specName = QString::fromStdString(axis->label(histIndex));
+    QColor curveColour;
 
-      // Get the correct workspace name based on the type of resolution file
-      if(program == "QL")
-      {
-        if(resType == "res")
-          program += "r";
-        else
-          program += "d";
-      }
+    if (specName.contains("fit.1"))
+      curveColour = Qt::red;
+    else if (specName.contains("fit.2"))
+      curveColour = Qt::magenta;
 
-      QString outWsName = sampleName.left(sampleName.size() - 3) + program + "_Workspace_" + QString::number(m_previewSpec);
-      if(!AnalysisDataService::Instance().doesExist(outWsName.toStdString()))
-        return;
+    else if (specName.contains("diff.1"))
+      curveColour = Qt::green;
+    else if (specName.contains("diff.2"))
+      curveColour = Qt::cyan;
 
-      MatrixWorkspace_sptr outputWorkspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName.toStdString());
+    else
+      continue;
 
-      TextAxis* axis = dynamic_cast<TextAxis*>(outputWorkspace->getAxis(1));
+    m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex,
+                                 curveColour);
+  }
+}
 
-      for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
-      {
-        QString specName = QString::fromStdString(axis->label(histIndex));
-        QColor curveColour;
+/**
+ * Plots the loaded file to the miniplot and sets the guides
+ * and the range
+ *
+ * @param filename :: The name of the workspace to plot
+ */
+void Quasi::handleSampleInputReady(const QString &filename) {
+  MatrixWorkspace_sptr inWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          filename.toStdString());
+  int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
+  m_uiForm.spPreviewSpectrum->setMaximum(numHist);
+  updateMiniPlot();
 
-        if(specName.contains("fit.1"))
-          curveColour = Qt::red;
-        else if(specName.contains("fit.2"))
-          curveColour = Qt::magenta;
+  QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+  auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
-        else if(specName.contains("diff.1"))
-          curveColour = Qt::green;
-        else if(specName.contains("diff.2"))
-          curveColour = Qt::cyan;
+  setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                   range);
+  setPlotPropertyRange(eRangeSelector, m_properties["EMin"],
+                       m_properties["EMax"], range);
+}
 
-        else
-          continue;
+/**
+ * Toggles the use ResNorm option depending on if the resolution file is a
+ * resolution or vanadoum reduction.
+ * @param wsName The name of the workspace loaded
+ */
+void Quasi::handleResolutionInputReady(const QString &wsName) {
+  bool isResolution(wsName.endsWith("_res"));
 
-        m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, curveColour);
-      }
-    }
+  m_uiForm.chkUseResNorm->setEnabled(isResolution);
+  if (!isResolution)
+    m_uiForm.chkUseResNorm->setChecked(false);
+}
 
-		/**
-		 * Plots the loaded file to the miniplot and sets the guides
-		 * and the range
-		 *
-		 * @param filename :: The name of the workspace to plot
-		 */
-		void Quasi::handleSampleInputReady(const QString& filename)
-		{
-      MatrixWorkspace_sptr inWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
-      int numHist = static_cast<int>(inWs->getNumberHistograms()) - 1;
-      m_uiForm.spPreviewSpectrum->setMaximum(numHist);
-      updateMiniPlot();
+/**
+ * Updates the property manager when the lower guide is moved on the mini plot
+ *
+ * @param min :: The new value of the lower guide
+ */
+void Quasi::minValueChanged(double min) {
+  m_dblManager->setValue(m_properties["EMin"], min);
+}
 
-			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
+/**
+ * Updates the property manager when the upper guide is moved on the mini plot
+ *
+ * @param max :: The new value of the upper guide
+ */
+void Quasi::maxValueChanged(double max) {
+  m_dblManager->setValue(m_properties["EMax"], max);
+}
 
-			setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-			setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-		}
+/**
+ * Handles when properties in the property manager are updated.
+ *
+ * @param prop :: The property being updated
+ * @param val :: The new value for the property
+ */
+void Quasi::updateProperties(QtProperty *prop, double val) {
+  UNUSED_ARG(val);
 
-		/**
-		 * Updates the property manager when the lower guide is moved on the mini plot
-		 *
-		 * @param min :: The new value of the lower guide
-		 */
-		void Quasi::minValueChanged(double min)
-    {
-      m_dblManager->setValue(m_properties["EMin"], min);
-    }
+  auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
-		/**
-		 * Updates the property manager when the upper guide is moved on the mini plot
-		 *
-		 * @param max :: The new value of the upper guide
-		 */
-    void Quasi::maxValueChanged(double max)
-    {
-			m_dblManager->setValue(m_properties["EMax"], max);
-    }
+  if (prop == m_properties["EMin"] || prop == m_properties["EMax"]) {
+    auto bounds = qMakePair(m_dblManager->value(m_properties["EMin"]),
+                            m_dblManager->value(m_properties["EMax"]));
+    setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"],
+                     bounds);
+  }
+}
 
-		/**
-		 * Handles when properties in the property manager are updated.
-		 *
-		 * @param prop :: The property being updated
-		 * @param val :: The new value for the property
-		 */
-    void Quasi::updateProperties(QtProperty* prop, double val)
-    {
-      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
+/**
+ * Handles when the slected item in the program combobox
+ * is changed
+ *
+ * @param index :: The current index of the combobox
+ */
+void Quasi::handleProgramChange(int index) {
+  int numberOptions = m_uiForm.cbPlot->count();
+  switch (index) {
+  case 0:
+    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Prob");
+    break;
+  case 1:
+    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Beta");
+    break;
+  }
+}
 
-    	if(prop == m_properties["EMin"])
-    	{
-    		updateLowerGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
-    	}
-    	else if (prop == m_properties["EMax"])
-    	{
-				updateUpperGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
-    	}
-    }
+/**
+ * Handles setting a new preview spectrum on the preview plot.
+ *
+ * @param value Spectrum index
+ */
+void Quasi::previewSpecChanged(int value) {
+  m_previewSpec = value;
+  updateMiniPlot();
+}
 
-		/**
-		 * Handles when the slected item in the program combobox
-		 * is changed
-		 *
-		 * @param index :: The current index of the combobox
-		 */
-    void Quasi::handleProgramChange(int index)
-    {
-    	int numberOptions = m_uiForm.cbPlot->count();
-    	switch(index)
-    	{
-    		case 0:
-    			m_uiForm.cbPlot->setItemText(numberOptions-1, "Prob");
-    			break;
-    		case 1:
-    			m_uiForm.cbPlot->setItemText(numberOptions-1, "Beta");
-    			break;
-    	}
-    }
-
-    /**
-     * Handles setting a new preview spectrum on the preview plot.
-     *
-     * @param value Spectrum index
-     */
-    void Quasi::previewSpecChanged(int value)
-    {
-      m_previewSpec = value;
-      updateMiniPlot();
-    }
-
-	} // namespace CustomInterfaces
+} // namespace CustomInterfaces
 } // namespace MantidQt

@@ -30,11 +30,11 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-Calculate Corrections
----------------------
+Calculate Paalman Pings
+-----------------------
 
 .. interface:: Corrections
-  :widget: tabCalcCorr
+  :widget: tabCalculatePaalmanPings
 
 Calculates absorption corrections in the Paalman & Pings absorption factors that
 could be applied to the data when given information about the sample (and
@@ -167,13 +167,13 @@ References:
 
 1. C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 2. A K Soper, W S Howells & A C Hannon, `RAL Report RAL-89-046 (1989) <http://wwwisis2.isis.rl.ac.uk/Disordered/Manuals/ATLAS/ATLAS%20manual%20v1.0%20Intro.pdf>`_
-3. H H Paalman & C J Pings, `J Appl Phys 33 2635 (1962) <http://dx.doi.org/10.1063/1.1729034>
+3. H H Paalman & C J Pings, `J Appl Phys 33 2635 (1962) <http://dx.doi.org/10.1063/1.1729034>`_
 
-Apply Corrections
------------------
+Apply Paalman Pings
+-------------------
 
 .. interface:: Corrections
-  :widget: tabApplyCorr
+  :widget: tabApplyPaalmanPings
 
 The Apply Corrections tab applies the corrections calculated in the Calculate
 Corrections tab of the Indirect Data Analysis interface.

@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
+#pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -8,11 +8,37 @@ import os
 
 
 _str_or_none = lambda s: s if s != '' else None
-_float_or_none = lambda i: float(i) if i != '' else None
+_ws_or_none = lambda s: mtd[s] if s != '' else None
 _elems_or_none = lambda l: l if len(l) != 0 else None
 
 
 class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
+
+    _chopped_data = None
+    _data_files = None
+    _load_logs = None
+    _calibration_ws = None
+    _instrument_name = None
+    _analyser = None
+    _reflection = None
+    _efixed = None
+    _spectra_range = None
+    _background_range = None
+    _rebin_string = None
+    _detailed_balance = None
+    _scale_factor = None
+    _fold_multiple_frames = None
+    _grouping_method = None
+    _grouping_ws = None
+    _grouping_map_file = None
+    _output_x_units = None
+    _plot_type = None
+    _save_formats = None
+    _output_ws = None
+    _sum_files = None
+    _ipf_filename = None
+    _workspace_names = None
+
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
@@ -33,24 +59,37 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='LoadLogFiles', defaultValue=True,
                              doc='Load log files when loading runs')
 
-        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '', direction=Direction.Input, optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
                              doc='Workspace contining calibration data')
 
         # Instrument configuration properties
-        self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run.',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'TFXA']))
-        self.declareProperty(name='Analyser', defaultValue='', doc='Analyser bank used during run.',
-                             validator=StringListValidator(['graphite', 'mica', 'fmica']))
-        self.declareProperty(name='Reflection', defaultValue='', doc='Reflection number for instrument setup during run.',
-                             validator=StringListValidator(['002', '004', '006']))
+        self.declareProperty(name='Instrument', defaultValue='',
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'TFXA']),
+                             doc='Instrument used during run.')
+        self.declareProperty(name='Analyser', defaultValue='',
+                             validator=StringListValidator(['graphite', 'mica', 'fmica']),
+                             doc='Analyser bank used during run.')
+        self.declareProperty(name='Reflection', defaultValue='',
+                             validator=StringListValidator(['002', '004', '006']),
+                             doc='Reflection number for instrument setup during run.')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1], validator=IntArrayMandatoryValidator()),
+        self.declareProperty(name='Efixed', defaultValue=Property.EMPTY_DBL,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Overrides the default Efixed value for the analyser/reflection selection.')
+
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
+                                              validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Range of background to subtact from raw data in time of flight.')
-        self.declareProperty(name='RebinString', defaultValue='', doc='Rebin string parameters.')
-        self.declareProperty(name='DetailedBalance', defaultValue='', doc='')
-        self.declareProperty(name='ScaleFactor', defaultValue=1.0, doc='Factor by which to scale result.')
+        self.declareProperty(name='RebinString', defaultValue='',
+                             doc='Rebin string parameters.')
+        self.declareProperty(name='DetailedBalance', defaultValue=Property.EMPTY_DBL,
+                             doc='')
+        self.declareProperty(name='ScaleFactor', defaultValue=1.0,
+                             doc='Factor by which to scale result.')
         self.declareProperty(name='FoldMultipleFrames', defaultValue=True,
                              doc='Folds multiple framed data sets into a single workspace.')
 
@@ -58,22 +97,31 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='GroupingMethod', defaultValue='IPF',
                              validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
                              doc='Method used to group spectra.')
-        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '', direction=Direction.Input, optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
+                                               direction=Direction.Input,
+                                               optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
-        self.declareProperty(FileProperty('MapFile', '', action=FileAction.OptionalLoad, extensions=['.map']),
+        self.declareProperty(FileProperty('MapFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['.map']),
                              doc='Workspace containing spectra grouping.')
 
         # Output properties
-        self.declareProperty(name='UnitX', defaultValue='DeltaE', doc='X axis units for the result workspace.',
-                             validator=StringListValidator(['DeltaE', 'DeltaE_inWavenumber']))
-        self.declareProperty(StringArrayProperty(name='SaveFormats'), doc='Comma seperated list of save formats')
-        self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction.',
-                             validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']))
+        self.declareProperty(name='UnitX', defaultValue='DeltaE',
+                             validator=StringListValidator(['DeltaE', 'DeltaE_inWavenumber']),
+                             doc='X axis units for the result workspace.')
+        self.declareProperty(StringArrayProperty(name='SaveFormats'),
+                             doc='Comma seperated list of save formats')
+        self.declareProperty(name='Plot', defaultValue='None',
+                             validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']),
+                             doc='Type of plot to output after reduction.')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                                                    direction=Direction.Output),
                              doc='Workspace group for the resulting workspaces.')
 
 
+    #pylint: disable=too-many-locals
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
                                              get_multi_frame_rebin,
@@ -91,11 +139,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self._setup()
         self._workspace_names, self._chopped_data = load_files(self._data_files,
-                                                              self._ipf_filename,
-                                                              self._spectra_range[0],
-                                                              self._spectra_range[1],
-                                                              self._sum_files,
-                                                              self._load_logs)
+                                                               self._ipf_filename,
+                                                               self._spectra_range[0],
+                                                               self._spectra_range[1],
+                                                               self._sum_files,
+                                                               self._load_logs)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -114,6 +162,14 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
             # Process workspaces
             for ws_name in workspaces:
+                # Set Efixed if given to algorithm
+                if self._efixed != Property.EMPTY_DBL:
+                    SetInstrumentParameter(Workspace=ws_name,
+                                           ComponentName=self._analyser,
+                                           ParameterName='Efixed',
+                                           ParameterType='Number',
+                                           Value=str(self._efixed))
+
                 monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
@@ -138,6 +194,14 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Divide by the calibration workspace if one was provided
                 if self._calibration_ws is not None:
+                    index_min = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[0]))
+                    index_max = self._calibration_ws.getIndexFromSpectrumNumber(int(self._spectra_range[1]))
+
+                    CropWorkspace(InputWorkspace=self._calibration_ws,
+                                  OutputWorkspace=self._calibration_ws,
+                                  StartWorkspaceIndex=index_min,
+                                  EndWorkspaceIndex=index_max)
+
                     Divide(LHSWorkspace=ws_name,
                            RHSWorkspace=self._calibration_ws,
                            OutputWorkspace=ws_name)
@@ -164,7 +228,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                 num_bins)
 
                 # Detailed balance
-                if self._detailed_balance is not None:
+                if self._detailed_balance is not Property.EMPTY_DBL:
                     corr_factor = 11.606 / (2 * self._detailed_balance)
                     ExponentialCorrection(InputWorkspace=ws_name,
                                           OutputWorkspace=ws_name,
@@ -181,10 +245,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Group spectra
                 group_spectra(ws_name,
-                              masked_detectors,
-                              self._grouping_method,
-                              self._grouping_map_file,
-                              self._grouping_ws)
+                              masked_detectors=masked_detectors,
+                              method=self._grouping_method,
+                              group_file=self._grouping_map_file,
+                              group_ws=self._grouping_ws)
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -254,7 +318,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # Validate grouping method
         grouping_method = self.getPropertyValue('GroupingMethod')
-        grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
+        grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
 
         if grouping_method == 'Workspace' and grouping_ws is None:
             issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
@@ -266,6 +330,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             if format_name not in valid_formats:
                 issues['SaveFormats'] = '%s is not a valid save format' % format_name
                 break
+
+        efixed = self.getProperty('Efixed').value
+        if efixed != Property.EMPTY_DBL and instrument_name not in ['IRIS', 'OSIRIS']:
+            issues['Efixed'] = 'Can only override Efixed on IRIS and OSIRIS'
 
         return issues
 
@@ -279,21 +347,22 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._data_files = self.getProperty('InputFiles').value
         self._sum_files = self.getProperty('SumFiles').value
         self._load_logs = self.getProperty('LoadLogFiles').value
-        self._calibration_ws = _str_or_none(self.getPropertyValue('CalibrationWorkspace'))
+        self._calibration_ws = _ws_or_none(self.getPropertyValue('CalibrationWorkspace'))
 
         self._instrument_name = self.getPropertyValue('Instrument')
         self._analyser = self.getPropertyValue('Analyser')
         self._reflection = self.getPropertyValue('Reflection')
+        self._efixed = self.getProperty('Efixed').value
 
         self._spectra_range = self.getProperty('SpectraRange').value
         self._background_range = _elems_or_none(self.getProperty('BackgroundRange').value)
         self._rebin_string = _str_or_none(self.getPropertyValue('RebinString'))
-        self._detailed_balance = _float_or_none(self.getPropertyValue('DetailedBalance'))
+        self._detailed_balance = self.getProperty('DetailedBalance').value
         self._scale_factor = self.getProperty('ScaleFactor').value
         self._fold_multiple_frames = self.getProperty('FoldMultipleFrames').value
 
         self._grouping_method = self.getPropertyValue('GroupingMethod')
-        self._grouping_ws = _str_or_none(self.getPropertyValue('GroupingWorkspace'))
+        self._grouping_ws = _ws_or_none(self.getPropertyValue('GroupingWorkspace'))
         self._grouping_map_file = _str_or_none(self.getPropertyValue('MapFile'))
 
         self._output_x_units = self.getPropertyValue('UnitX')

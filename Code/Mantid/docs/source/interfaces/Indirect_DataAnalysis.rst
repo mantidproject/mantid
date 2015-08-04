@@ -341,33 +341,47 @@ and *Use Delta Function* options in the interface.
 
       - DeltaFunction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (One Lorentzian)
 
         - :ref:`Lorentzian <func-Lorentzian>`
 
         - Temperature Correction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (Two Lorentzians)
 
         - :ref:`Lorentzian <func-Lorentzian>`
 
         - Temperature Correction
 
-      - :ref:`ProductFunction <func-ProductFunction>`
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffSphere)
 
-        - :ref:`DiffSphere <func-DiffSphere>`
-
-        - Temperature Correction
-
-      - :ref:`ProductFunction <func-ProductFunction>`
-
-        - :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+        - :ref:`Inelastic Diff Sphere <func-DiffSphere>`
 
         - Temperature Correction
 
-Note that it is the Inelastic variants of :ref:`DiffSphere <func-DiffSphere>`
-and :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>` that are used in
-this interface.
+      - :ref:`ProductFunction <func-ProductFunction>` (InelasticDiffRotDiscreteCircle)
+
+        - :ref:`Inelastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>` 
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffSphere)
+
+        - :ref:`Elastic Diff Sphere <func-DiffSphere>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (ElasticDiffRotDiscreteCircle)
+
+        - :ref:`Elastic Diff Rot Discrete Circle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+		
+      - :ref:`ProductFunction <func-ProductFunction>` (StretchedExpFT)
+
+        - :ref:`StretchedExpFT <func-StretchedExpFT>`
+
+        - Temperature Correction
 
 The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
 formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
@@ -522,5 +536,41 @@ References:
 
 1. J S Higgins, R E Ghosh, W S Howells & G Allen, `JCS Faraday II 73 40 (1977) <http://dx.doi.org/10.1039/F29777300040>`_
 2. J S Higgins, G Allen, R E Ghosh, W S Howells & B Farnoux, `Chem Phys Lett 49 197 (1977) <http://dx.doi.org/10.1016/0009-2614(77)80569-1>`_
+
+JumpFit
+-------
+
+.. interface:: Data Analysis
+  :widget: tabJumpFit
+
+One of the models used to interpret diffusion is that of jump diffusion in which
+it is assumed that an atom remains at a given site for a time :math:`\tau`; and
+then moves rapidly, that is, in a time negligible compared to :math:`\tau`;
+hence ‘jump’.
+
+Options
+~~~~~~~
+
+Sample
+  A sample workspace created with either ConvFit or Quasi.
+
+Fit Funcion
+  Selects the model to be used for fitting.
+
+Width
+  Spectrum in the sample workspace to fit.
+
+QMin & QMax
+  The Q range to perform fitting within.
+
+Fitting Parameters
+  Provides the option to change the defautl fitting parameters passed to the
+  chosen function.
+
+Plot Result
+  Plots the result workspaces.
+
+Save Result
+  Saves the result in the default save directory.
 
 .. categories:: Interfaces Indirect

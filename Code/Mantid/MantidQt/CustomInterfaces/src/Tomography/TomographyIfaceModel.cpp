@@ -118,11 +118,11 @@ void TomographyIfaceModel::setupComputeResource() {
   // m_computeRes is initialized in the constructor and doesn't change
   m_computeResStatus.clear();
 
-  const Mantid::Kernel::FacilityInfo &fac =
-      Mantid::Kernel::ConfigService::Instance().getFacility();
-  if (fac.name() != m_facility) {
+  if (!facilitySupported()) {
+    const std::string facName =
+        Mantid::Kernel::ConfigService::Instance().getFacility().name();
     throw std::runtime_error(
-        "Failed to initialize because the facility is  " + fac.name() +
+        "Failed to initialize because the facility is  " + facName +
         " (and not " + m_facility +
         "). "
         "Facility not supported. This interface is designed "
@@ -130,7 +130,7 @@ void TomographyIfaceModel::setupComputeResource() {
         m_facility +
         ". You will probably not be able to use it in a useful way "
         "because your facility is " +
-        fac.name() +
+        facName +
         ". If you have set that facility by mistake in your settings, "
         "please update it.");
   }
@@ -150,11 +150,11 @@ void TomographyIfaceModel::setupComputeResource() {
         "Required compute resource: '" + required +
         "' not found. "
         "This interface requires the " +
-        required + " compute resource. Even though your facility is " +
-        fac.name() + ", the compute resource was not found. "
-                     "In principle the compute resource should have been "
-                     "defined in the facilities file for you facility. "
-                     "Please check your settings.");
+        required + " compute resource. Even though your current facility is " +
+        "in principle supported, the compute resource was not found. "
+        "In principle the compute resource should have been "
+        "defined in the facilities file for you facility. "
+        "Please check your settings.");
   }
   m_computeResStatus.push_back(true);
 
@@ -198,6 +198,41 @@ void TomographyIfaceModel::setupRunTool(const std::string &compRes) {
       m_reconToolsStatus.push_back(true);
     }
   }
+}
+
+bool TomographyIfaceModel::facilitySupported() {
+  const Mantid::Kernel::FacilityInfo &fac =
+      Mantid::Kernel::ConfigService::Instance().getFacility();
+
+  return (fac.name() == m_facility);
+}
+
+/**
+ * Ping the compute resource / server to check if it's alive and
+ * responding.
+ *
+ * @return True if ping succeeded
+ */
+bool TomographyIfaceModel::doPing(const std::string &compRes) {
+  // This actually does more than a simple ping. Ping and check that a
+  // transaction can be created succesfully
+  auto alg = Algorithm::fromString("StartRemoteTransaction");
+  alg->initialize();
+  alg->setProperty("ComputeResource", compRes);
+  std::string tid;
+  try {
+    alg->execute();
+    tid = alg->getPropertyValue("TransactionID");
+    g_log.information() << "Pinged '" << compRes
+                        << "'succesfully. Checked that a transaction could "
+                           "be created, with ID: " << tid << std::endl;
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error("Error. Failed to ping and start a transaction on "
+                             "the remote resource." +
+                             std::string(e.what()));
+  }
+
+  return true;
 }
 
 /**
@@ -244,32 +279,25 @@ void TomographyIfaceModel::doLogout(const std::string &compRes,
   m_loggedInUser = "";
 }
 
-/**
- * Ping the compute resource / server to check if it's alive and
- * responding.
- *
- * @return True if ping succeeded
- */
-bool TomographyIfaceModel::doPing(const std::string &compRes) {
-  // This actually does more than a simple ping. Ping and check that a
-  // transaction can be created succesfully
-  auto alg = Algorithm::fromString("StartRemoteTransaction");
+void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
+                                            std::vector<std::string> &ids,
+                                            std::vector<std::string> &names,
+                                            std::vector<std::string> &status,
+                                            std::vector<std::string> &cmds) {
+  auto alg = Algorithm::fromString("QueryAllRemoteJobs");
   alg->initialize();
-  alg->setProperty("ComputeResource", compRes);
-  std::string tid;
+  alg->setPropertyValue("ComputeResource", compRes);
   try {
     alg->execute();
-    tid = alg->getPropertyValue("TransactionID");
-    g_log.information() << "Pinged '" << compRes
-                        << "'succesfully. Checked that a transaction could "
-                           "be created, with ID: " << tid << std::endl;
   } catch (std::runtime_error &e) {
-    throw std::runtime_error("Error. Failed to ping and start a transaction on "
-                             "the remote resource." +
-                             std::string(e.what()));
+    throw std::runtime_error(
+        "Error when trying to query the status of jobs in " + compRes + ": " +
+        e.what());
   }
-
-  return true;
+  ids = alg->getProperty("JobId");
+  names = alg->getProperty("JobName");
+  status = alg->getProperty("JobStatusString");
+  cmds = alg->getProperty("CommandLine");
 }
 
 /**
@@ -315,27 +343,6 @@ TomographyIfaceModel::doSubmitReconstructionJob(const std::string &compRes) {
         "Error when trying to submit a reconstruction job: " +
         std::string(e.what()));
   }
-}
-
-void TomographyIfaceModel::doQueryJobStatus(const std::string &compRes,
-                                            std::vector<std::string> &ids,
-                                            std::vector<std::string> &names,
-                                            std::vector<std::string> &status,
-                                            std::vector<std::string> &cmds) {
-  auto alg = Algorithm::fromString("QueryAllRemoteJobs");
-  alg->initialize();
-  alg->setPropertyValue("ComputeResource", compRes);
-  try {
-    alg->execute();
-  } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        "Error when trying to query the status of jobs in " + compRes + ": " +
-        e.what());
-  }
-  ids = alg->getProperty("JobId");
-  names = alg->getProperty("JobName");
-  status = alg->getProperty("JobStatusString");
-  cmds = alg->getProperty("CommandLine");
 }
 
 void TomographyIfaceModel::doCancelJobs(const std::string &compRes,
@@ -564,8 +571,10 @@ TomographyIfaceModel::loadFITSImage(const std::string &path) {
   auto alg = Algorithm::fromString("LoadFITS");
   alg->initialize();
   alg->setPropertyValue("Filename", path);
-  std::string wsName = "__fits_ws_imat_tomography_gui";
+  std::string wsName = "__fits_ws_tomography_gui";
   alg->setProperty("OutputWorkspace", wsName);
+  // this is way faster when loading into a MatrixWorkspace
+  alg->setProperty("LoadAsRectImg", true);
   try {
     alg->execute();
   } catch (std::exception &e) {
