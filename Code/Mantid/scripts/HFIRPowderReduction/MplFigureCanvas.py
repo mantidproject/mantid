@@ -71,21 +71,21 @@ class MplFigureCanvas(QtGui.QWidget):
 
         return
 
-    def add_plot1d(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None,
+    def add_plot1d(self, x, y, color=None, label="", x_label=None, y_label=None, marker=None,
                    linestyle=None, linewidth=1, y_err=None):
         """ Add a 1D plot to
         :param x:
         :param y:
         :param color:
         :param label:
-        :param xlabel:
-        :param ylabel:
+        :param x_label:
+        :param y_label:
         :param marker:
         :param linestyle:
         :param linewidth:
         :return:
         """
-        self.canvas.add_plot1d(x, y, color, label, xlabel, ylabel, marker, linestyle, linewidth, y_err)
+        self.canvas.add_plot1d(x, y, color, label, x_label, y_label, marker, linestyle, linewidth, y_err)
 
         return
 
@@ -244,7 +244,7 @@ class Qt4MplCanvas(FigureCanvas):
     def __init__(self, parent):
         """  Initialization
         """
-        # Instantialize matplotlib Figure
+        # Instantiate matplotlib Figure
         self.fig = Figure()
         self.fig.patch.set_facecolor('white')
         self.axes = self.fig.add_subplot(111) # return: matplotlib.axes.AxesSubplot
@@ -427,12 +427,14 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-
     def clearCanvas(self):
-        """ Clear data from canvas
+        """ Clear data including lines and image from canvas
         """
         # clear the image for next operation
         self.axes.hold(False)
+
+        # Clear all lines
+        self.clearAllLines()
 
         # clear image
         self.axes.cla()

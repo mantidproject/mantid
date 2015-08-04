@@ -36,6 +36,74 @@ class EmptyError(Exception):
     def __str__(self):
         return repr(self.value)
 
+
+class MultiScanTabState(object):
+    """ Description of the state of the multi-scan-tab is in
+    """
+    NO_OPERATION = 0
+    RELOAD_DATA = 1
+    REDUCE_DATA = 2
+
+    def __init__(self):
+        """ Initialization
+        :return:
+        """
+        self._expNo = -1
+        self._scanList = []
+        self._xMin = None
+        self._xMax = None
+        self._binSize = 0
+        self._unit = ''
+        self._plotRaw = False
+        self._useDetEfficiencyCorrection = False
+        self._excludeDetectors = []
+
+    def compare_state(self, tab_state):
+        """ Compare this tab state and another tab state
+        :param tab_state:
+        :return:
+        """
+        if isinstance(tab_state, MultiScanTabState) is False:
+            raise NotImplementedError('compare_state must have MultiScanTabStatus as input.')
+
+        if self._expNo != tab_state._expNo or self._scanList != tab_state._scanList:
+            return self.RELOAD_DATA
+
+        for attname in self.__dict__.keys():
+            if self.__getattribute__(attname) != tab_state.__getattribute__(attname):
+                return self.REDUCE_DATA
+
+        return self.NO_OPERATION
+
+    def setup(self, exp_no, scan_list, min_x, max_x, bin_size, unit, raw, correct_det_eff, exclude_dets):
+        """
+        Set up the object
+        :param exp_no:
+        :param scan_list:
+        :param min_x:
+        :param max_x:
+        :param bin_size:
+        :param unit:
+        :param raw:
+        :param correct_det_eff:
+        :param exclude_dets:
+        :return:
+        """
+        self._expNo = int(exp_no)
+        if isinstance(scan_list, list) is False:
+            raise NotImplementedError('Scan_List must be list!')
+        self._scanList = scan_list
+        self._xMin = min_x
+        self._xMax = max_x
+        self._binSize = float(bin_size)
+        self._unit = str(unit)
+        self._plotRaw = raw
+        self._useDetEfficiencyCorrection = correct_det_eff
+        self._excludeDetectors = exclude_dets
+
+        return
+
+
 #pylint: disable=too-many-public-methods,too-many-branches,too-many-locals,too-many-arguments
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
@@ -50,7 +118,7 @@ class MainWindow(QtGui.QMainWindow):
     #     self.mainplot = self.graphicsView.getPlot()
 
     def __init__(self, parent=None):
-        """ Intialization and set up
+        """ Initialization and set up
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
@@ -63,15 +131,17 @@ class MainWindow(QtGui.QMainWindow):
 
         # menu
         self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
-                self.doExist)
+                     self.doExist)
         self.connect(self.ui.actionFind_Help, QtCore.SIGNAL('triggered()'),
                 self.doHelp)
 
         # main
         self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
-                self.doUpdateWavelength)
-        self.connect(self.ui.pushButton_browseExcludedDetFile, QtCore.SIGNAL('clicked'),
-                self.doBrowseExcludedDetetorFile)
+                     self.doUpdateWavelength)
+        self.connect(self.ui.pushButton_browseExcludedDetFile, QtCore.SIGNAL('clicked()'),
+                     self.doBrowseExcludedDetetorFile)
+        self.connect(self.ui.checkBox_useDetExcludeFile, QtCore.SIGNAL('stateChanged(int)'),
+                     self.do_enable_excluded_dets)
 
         # tab 'Raw Detectors'
         self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
@@ -79,9 +149,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
                      self.do_plot_raw_pt_prev)
         self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
-                self.doPlotRawPtNext)
+                     self.doPlotRawPtNext)
         self.connect(self.ui.pushButton_clearRawDets, QtCore.SIGNAL('clicked()'),
-                self.doClearRawDetCanvas)
+                     self.doClearRawDetCanvas)
 
         # tab 'Individual Detectors'
         self.connect(self.ui.pushButton_plotIndvDet, QtCore.SIGNAL('clicked()'),
@@ -115,7 +185,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # tab 'Multiple Scans'
         self.connect(self.ui.pushButton_loadMultData, QtCore.SIGNAL('clicked()'),
-                self.doLoadSetData)
+                     self.doLoadSetData)
         self.connect(self.ui.pushButton_mscanBin, QtCore.SIGNAL('clicked()'),
                 self.doReduceSetData)
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
@@ -133,7 +203,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_saveMerge, QtCore.SIGNAL('clicked()'),
                 self.doSaveMergedScan)
         self.connect(self.ui.pushButton_plotRawMultiScans, QtCore.SIGNAL('clicked()'),
-                     self.doPlotMultiScanRaw)
+                     self.do_convert_plot_multi_scans)
 
         # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
@@ -249,6 +319,7 @@ class MainWindow(QtGui.QMainWindow):
         # RELEASE 2.0 : Need to disable some widgets... consider to refactor the code
         self.ui.radioButton_useServer.setChecked(True)
         self.ui.radioButton_useLocal.setChecked(False)
+        self.ui.checkBox_useDetExcludeFile.setChecked(True)
 
         self.ui.comboBox_wavelength.setCurrentIndex(0)
         self.ui.lineEdit_wavelength.setText('2.41')
@@ -295,6 +366,10 @@ class MainWindow(QtGui.QMainWindow):
         self._rawDetPtNo = None
 
         self._indvDetCanvasMode = 'samplelog'
+
+        # Multiple scan tab
+        self._multiScanExp = None
+        self._multiScanList = []
 
         #help
         self.assistantProcess = QtCore.QProcess(self)
@@ -494,7 +569,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def doLoadData(self, exp=None, scan=None):
         """ Load and reduce data
-        It does not support for tab 'Multiple Scans' and 'Advanced Setup'
+        It does not support for tab 'Advanced Setup'
         For tab 'Raw Detector' and 'Individual Detector', this method will load data to MDEventWorkspaces
         For tab 'Normalized' and 'Vanadium', this method will load data to MDEVentWorkspaces but NOT reduce to single spectrum
         """
@@ -502,11 +577,6 @@ class MainWindow(QtGui.QMainWindow):
         itab = self.ui.tabWidget.currentIndex()
         tabtext = str(self.ui.tabWidget.tabText(itab))
         print "[DB] Current active tab is No. %d as %s." % (itab, tabtext)
-
-        #if itab == 3:
-        #    # 'multiple scans'
-        #    self._logNotice("Tab %s does not support 'Load Data'.  Use 'Load All' instead." % (tabtext))
-        #    return
 
         if itab == 5:
             # 'advanced'
@@ -1040,41 +1110,65 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_detID.setText(str(self._detID))
 
         return
-    
 
-    def doPlotMultiScanRaw(self):
-        """ Plot multiple scans before merging
+    def do_convert_plot_multi_scans(self):
+        """ Convert individual plots from normalized to raw or vice verse
         """
+        # Identify the mode
+        if str(self.ui.pushButton_plotRawMultiScans.text()) == 'Plot Raw':
+            new_mode = 'Plot Raw'
+        else:
+            new_mode = 'Plot Normalized'
+
         # Get information
-        minX = self._getFloat(self.ui.lineEdit_mergeMinX)
-        maxX = self._getFloat(self.ui.lineEdit_mergeMaxX)
-        binsize = self._getFloat(self.ui.lineEdit_mergeBinSize)
+        # FIXME - min_x and max_x are not used!
+        try:
+            min_x = self._getFloat(self.ui.lineEdit_mergeMinX)
+        except EmptyError:
+            min_x = None
+        try:
+            max_x = self._getFloat(self.ui.lineEdit_mergeMaxX)
+        except EmptyError:
+            max_x = None
+        bin_size = self._getFloat(self.ui.lineEdit_mergeBinSize)
         
         # Process input experiment number and scan list
         try:
             r = self._uiGetExpScanTabMultiScans()
-            expno = r[0]
-            scanlist = r[1]
+            exp_no = r[0]
+            scan_list = r[1]
         except NotImplementedError as e:
             self._logError(str(e))
             return False
         
         # Re-process the data
-        self._myControl.scaleupToRawMonitorCounts(expno, scanlist)
+        if new_mode == 'Plot Raw':
+            if self._multiScanList is None or self._multiScanExp is None:
+                raise NotImplementedError('Experiment and scan list are not set up for plot raw.')
+            self._myControl.scale_to_raw_monitor_counts(self._multiScanExp, self._multiScanList, min_x, max_x, bin_size)
+        else:
+            self._myControl.reset_to_normalized(self._multiScanExp, self._multiScanList, min_x, max_x, bin_size)
 
         # Clear image
         canvas = self.ui.graphicsView_mergeRun
         canvas.clearAllLines()
         canvas.clearCanvas()
+        canvas.resetLineColorStyle()
 
         # Plot data
         unit = str(self.ui.comboBox_mscanUnit.currentText())
         xlabel = self._getXLabelFromUnit(unit)
 
-        for scanno in scanlist:
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=False)
-        # ENDFOR        
+        for scan_no in scan_list:
+            label = "Exp %s Scan %s"%(str(exp_no), str(scan_no))
+            self._plotReducedData(exp_no, scan_no, canvas, xlabel, label=label, clearcanvas=False)
+        # END_FOR
+
+        # Change the button name
+        if new_mode == 'Plot Raw':
+            self.ui.pushButton_plotRawMultiScans.setText('Plot Normalized')
+        else:
+            self.ui.pushButton_plotRawMultiScans.setText('Plot Raw')
         
         return
 
@@ -1136,6 +1230,17 @@ class MainWindow(QtGui.QMainWindow):
         if execstatus is True:
             self._rawDetPtNo = ptno
             self.ui.lineEdit_ptNo.setText(str(ptno))
+
+        return
+
+    def do_enable_excluded_dets(self):
+        """ Enable or disable the line editor for excluded detectors
+        :return:
+        """
+        if self.ui.checkBox_useDetExcludeFile.isChecked() is True:
+            self.ui.lineEdit_detExcluded.setEnabled(True)
+        else:
+            self.ui.lineEdit_detExcluded.setDisabled(True)
 
         return
 
@@ -1213,6 +1318,9 @@ class MainWindow(QtGui.QMainWindow):
         except NotImplementedError as e:
             self._logError(str(e))
             return False
+        else:
+            self._multiScanExp = expno
+            self._multiScanList = scanlist
 
         # Reduce and plot data
         unit = str(self.ui.comboBox_mscanUnit.currentText())
@@ -1502,10 +1610,8 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-
     def on_mouseMotion(self, event):
-        """
+        """ Event handler for mouse being detected to move
         """
         #prex = self._viewMerge_X
         prey = self._viewMerge_Y
@@ -1518,24 +1624,24 @@ class MainWindow(QtGui.QMainWindow):
         self._viewMerge_X = event.xdata
         self._viewMerge_Y = event.ydata
 
-        if prey is None or int(prey) != int(self._viewMerge_Y):
-            print "Mouse is moving to ", event.xdata, event.ydata
+        #if prey is None or int(prey) != int(self._viewMerge_Y):
+        #    print "Mouse is moving to ", event.xdata, event.ydata
 
         return
-
 
     def addSomething(self):
         """
         """
+        # TODO - Need to implement how to deal with this
         print "Add scan back to merge"
 
         return
 
-
     def rmSomething(self):
         """
         """
-        print "Remove a scan from mergin."
+        # TODO - Need to implement how to deal with this
+        print "Remove a scan from merged data."
 
         return
 
@@ -1590,7 +1696,6 @@ class MainWindow(QtGui.QMainWindow):
          - xaxis :: string as 'XLabel'
         """
         # Validate input
-        global y_err
         expno = int(expno)
         scanno = int(scanno)
         detid = int(detid)
@@ -1631,8 +1736,8 @@ class MainWindow(QtGui.QMainWindow):
         label = "Detector ID: %d" % (detid)
 
         if self._tabLineDict[canvas].count((expno, scanno, detid)) == 0:
-            canvas.add_plot1d(vecx, vecy, marker=marker, color=color, xlabel=xlabel,
-                              ylabel='Counts', label=label, y_err=y_err)
+            canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=xlabel,
+                              y_label='Counts', label=label, y_err=y_err)
             self._tabLineDict[canvas].append((expno, scanno, detid))
             
             if resetboundary is True:
@@ -1795,12 +1900,9 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-
     def _plotReducedData(self, exp, scan, canvas, xlabel, label=None, clearcanvas=True,
                          spectrum=0, plot_error=False):
         """ Plot reduced data for exp and scan
-         self._plotReducedData(exp, scan, self.ui.canvas1, clearcanvas, xlabel=self._currUnit, 0, clearcanvas)
         """
         if spectrum != 0:
             raise NotImplementedError("Unable to support spectrum = %d case."%(spectrum))
@@ -1814,16 +1916,15 @@ class MainWindow(QtGui.QMainWindow):
         if clearcanvas is True:
             canvas.clearAllLines()
             canvas.setLineMarkerColorIndex(0)
-            #self.ui.graphicsView_reducedData.clearAllLines()
-            #self._myLineMarkerColorIndex = 0
 
         # plot
-        vecx, vecy = self._myControl.getVectorToPlot(exp, scan)
-        if isinstance(vecx, numpy.array) is False:
-            vecx = numpy.array(vecx)
-            vecy = numpy.array(vecy)
-            # FIXME - Should check y_err set up correctly in Mantid or not
+        vec_x, vec_y = self._myControl.getVectorToPlot(exp, scan)
+        if isinstance(vec_x, numpy.ndarray) is False:
+            vec_x = numpy.array(vec_x)
+            vec_y = numpy.array(vec_y)
 
+        # FIXME - Should check y_err set up correctly in Mantid or not
+        y_err = None
 
         # get the marker color for the line
         marker, color = canvas.getNextLineMarkerColorCombo()
@@ -1832,17 +1933,17 @@ class MainWindow(QtGui.QMainWindow):
         if label is None:
             label = "Exp %d Scan %d" % (exp, scan)
 
-        canvas.add_plot1d(vecx, vecy, marker=marker, color=color,
+        canvas.add_plot1d(vec_x, vec_y, marker=marker, color=color,
                           x_label=xlabel, y_label='intensity',label=label,
                           y_err=y_err)
 
         if clearcanvas is True:
-            xmax = max(vecx)
-            xmin = min(vecx)
+            xmax = max(vec_x)
+            xmin = min(vec_x)
             dx = xmax-xmin
 
-            ymax = max(vecy)
-            ymin = min(vecy)
+            ymax = max(vec_y)
+            ymin = min(vec_y)
             dy = ymax-ymin
 
             canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
@@ -2220,8 +2321,8 @@ class MainWindow(QtGui.QMainWindow):
         try:
             # rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
             excludeddetlist = self._uiGetExcludedDetectors()
-            self._myControl.reduceSpicePDData(expno, scanno, \
-                    unit, xmin, xmax, binsize, wavelength, excludeddetlist, scalefactor)
+            self._myControl.reduceSpicePDData(expno, scanno,
+                                              unit, xmin, xmax, binsize, wavelength, excludeddetlist, scalefactor)
 
             # Record binning
             self._tabBinParamDict[itab] = [xmin, binsize, xmax]
