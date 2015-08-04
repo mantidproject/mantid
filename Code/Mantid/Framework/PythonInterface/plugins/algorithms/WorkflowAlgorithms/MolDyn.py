@@ -30,7 +30,7 @@ class MolDyn(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
-                                          action=FileAction.OptionalLoad,
+                                          action=FileAction.Load,
                                           extensions=['.cdl', '.dat']),
                                           doc='File path for data')
 

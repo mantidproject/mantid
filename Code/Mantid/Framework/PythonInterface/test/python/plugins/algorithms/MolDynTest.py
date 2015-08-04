@@ -7,39 +7,6 @@ from mantid.api import *
 
 class MolDynTest(unittest.TestCase):
 
-    def test_loadFqt(self):
-        # Load an Fwt function from a nMOLDYN file
-        moldyn_group = MolDyn(Filename='NaF_DISF.cdl',
-                              Functions=['Fqt-total'])
-
-        self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
-        self.assertEqual(len(moldyn_group), 1)
-        self.assertEqual(moldyn_group[0].name(), 'NaF_DISF_Fqt-total')
-
-        iqt_ws = moldyn_group[0]
-        self.assertTrue(isinstance(iqt_ws, MatrixWorkspace))
-
-        # X axis should be in TOF for an Fqt function
-        units = iqt_ws.getAxis(0).getUnit().unitID()
-        self.assertEqual(units, 'TOF')
-
-
-    def test_loadSqw(self):
-        # Load an Sqw function from a nMOLDYN file
-        moldyn_group = MolDyn(Filename='NaF_DISF.cdl',
-                              Functions=['Sqw-total'])
-
-        self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
-        self.assertEqual(moldyn_group[0].name(), 'NaF_DISF_Sqw-total')
-
-        sqw_ws = moldyn_group[0]
-        self.assertTrue(isinstance(sqw_ws, MatrixWorkspace))
-
-        # X axis should be in Energy for an Sqw function
-        units = sqw_ws.getAxis(0).getUnit().unitID()
-        self.assertEqual(units, 'Energy')
-
-
     def test_loadSqwWithEMax(self):
         # Load an Sqw function from a nMOLDYN file
         moldyn_group = MolDyn(Filename='NaF_DISF.cdl',

@@ -1,4 +1,5 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-many-locals,too-many-branches
+
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -60,7 +61,6 @@ def _make_list(a, l1, l2):
     return alist
 
 
-#pylint: disable=too-many-instance-attributes
 class LoadNMoldyn3Ascii(PythonAlgorithm):
 
     _file_name = None
@@ -78,7 +78,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
-                                          action=FileAction.OptionalLoad,
+                                          action=FileAction.Load,
                                           extensions=['.cdl', '.dat']),
                                           doc='File path for data')
 
@@ -94,18 +94,18 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         issues = dict()
 
         sample_filename = self.getPropertyValue('Filename')
+        file_type = os.path.splitext(sample_filename)[1]
         function_list = self.getProperty('Functions').value
 
-        if len(function_list) == 0 and os.path.splitext(sample_filename)[1] == 'cdl':
+        if len(function_list) == 0 and file_type == '.cdl':
             issues['Functions'] = 'Must specify at least one function when loading a CDL file'
 
-        if len(function_list) > 0 and os.path.splitext(sample_filename)[1] == 'dat':
+        if len(function_list) > 0 and file_type == '.dat':
             issues['Functions'] = 'Cannot specify functions when loading an ASCII file'
 
         return issues
 
 
-    #pylint: disable=too-many-branches
     def PyExec(self):
         # Do setup
         self._setup()
@@ -197,7 +197,6 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         return num_q, num_t, num_f
 
 
-    #pylint: disable=too-many-locals,too-many-branches
     def _cdl_import(self, data, name):
         """
         Import data from CDL file.
@@ -329,7 +328,6 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
                         OutputWorkspace=self._out_ws)
 
 
-    #pylint: disable=too-many-locals
     def _ascii_import(self, data, name):
         """
         Import ASCII data.
