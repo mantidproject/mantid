@@ -784,8 +784,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             return wksplist
 
     def _getinfo(self, wksp):
-        rowValues = {}
-
         if mtd.doesExist("characterizations"):
             # get the correct row of the table
 
