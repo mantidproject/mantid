@@ -18,7 +18,6 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
                'Sn' : [3457.3,3412.8,1022.6,982.5,349.953,345.226]}
 
     def PyInit(self):
-        element_type = self.Muonic_XR.keys()
         self.declareProperty(StringArrayProperty("Elements", values=[],
                              direction=Direction.Input
                              ))
@@ -40,7 +39,7 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         WS_Muon_XR = CreateWorkspace(xvalues, YPos_WS[:])
         RenameWorkspaces(WS_Muon_XR, WorkspaceNames="MuonXRWorkspace_"+element)
         return WS_Muon_XR
-        
+
 
     def category(self):
         return "Muon"
