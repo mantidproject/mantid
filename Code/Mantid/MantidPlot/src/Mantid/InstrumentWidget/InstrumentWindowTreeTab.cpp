@@ -36,11 +36,11 @@ void InstrumentWindowTreeTab::selectComponentByName(const QString &name)
       QModelIndex component = m_instrumentTree->findComponentByName(name);
       if( !component.isValid() )
       {
-        QMessageBox::critical(this,"Instrument Window - Tree Tab - Error",
-                              "No component named '" +  name + "' was found in the instrument. "
-                              "Please use the name of a component from the instrument tree.");
+        QMessageBox::warning(this,"Instrument Window - Tree Tab - Error",
+                              "No component named '" +  name + "' was found. "
+                              "Please use a valid component name ");
         return;
-      }
+	  }
 
       m_instrumentTree->clearSelection();
       m_instrumentTree->scrollTo(component, QAbstractItemView::EnsureVisible );

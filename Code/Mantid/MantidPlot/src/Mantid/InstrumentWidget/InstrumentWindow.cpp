@@ -1071,8 +1071,25 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
 bool InstrumentWindow::overlay(const QString & wsName)
 {
   using namespace Mantid::API;
-  auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  Workspace_sptr workspace;
+  try {
+	workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  } catch(std::runtime_error &re) {
+	  QMessageBox::warning(this, "MantidPlot - Warning", "No workspace called '" + wsName + "' found. ");
+	  return workspace;
+  }
+  auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
+  if (!pws) {
+	  QMessageBox::warning(this, "MantidPlot - Warning", "Work space called '" +wsName+ "' is not suitable."
+									" Please select another workspace. ");
+	  return pws;
+  }
   auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
+  if (!surface) {
+	  QMessageBox::warning(this, "MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
+	  return surface;
+  }
+
   bool success(false);
   if (pws && surface)
   {
@@ -1080,10 +1097,7 @@ bool InstrumentWindow::overlay(const QString & wsName)
     updateInstrumentView();
     success = true;
   }
-  else if (pws && !surface)
-  {
-    QMessageBox::warning(this,"MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
-  }
+
   return success;
 }
 
