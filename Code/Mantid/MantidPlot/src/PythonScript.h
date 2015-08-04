@@ -163,6 +163,10 @@ private:
   QVariant evaluateImpl();
   /// Execute the current code and return a boolean indicating success/failure
   bool executeImpl();
+  /// Request that this script be aborted
+  void abortImpl();
+  /// Get the value of the Python thread ID when a script is executed
+  long getThreadID();
 
   /// Performs the call to Python from a string
   bool executeString();
@@ -172,6 +176,7 @@ private:
   bool checkResult(PyObject *result);
   /// Compile to bytecode
   PyObject * compileToByteCode(bool for_eval=true);
+
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS
@@ -192,7 +197,10 @@ private:
 
   PythonScripting * m_pythonEnv;
   PyObject *localDict, *stdoutSave, *stderrSave;
-  PyObject *m_CodeFileObject;
+  PyObject *m_codeFileObject;
+  long m_threadID; ///< Python thread id
+  /// A reference to the IAlgorithm._algorithmInThread static method
+  PyObject * m_algorithmInThread;
   bool isFunction;
   QString fileName;
   bool m_isInitialized;
