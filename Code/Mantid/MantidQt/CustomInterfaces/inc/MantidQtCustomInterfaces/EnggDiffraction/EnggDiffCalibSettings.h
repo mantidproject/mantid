@@ -3,6 +3,9 @@
 
 #include <string>
 
+namespace MantidQt {
+namespace CustomInterfaces {
+
 /**
 Settings related to calibration in the engineering diffraction custom
 interface. This is just a data holder.
@@ -34,6 +37,9 @@ struct EnggDiffCalibSettings {
   std::string m_pixelCalibFilename;
   std::string m_templateGSAS_PRM;
 };
+
+} // namespace CustomInterfaces
+} // namespace MantidQt
 
 #endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFCALIBSETTINGS_H_
 

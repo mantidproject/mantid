@@ -69,7 +69,7 @@ public:
 
   std::vector<std::string> logMsgs() const { return m_logMsgs; }
 
-  virtual std::string getRBNumber() const;
+  std::string getRBNumber() const;
 
   EnggDiffCalibSettings currentCalibSettings() const {
     return m_calibSettings;

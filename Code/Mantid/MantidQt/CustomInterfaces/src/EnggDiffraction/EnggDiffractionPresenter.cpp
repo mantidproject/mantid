@@ -66,20 +66,28 @@ void EnggDiffractionPresenter::notify(
 }
 
 void EnggDiffractionPresenter::processStart() {
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+}
+
+void EnggDiffractionPresenter::processLoadExistingCalib() {
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+}
+
+void EnggDiffractionPresenter::processCalcCalib() {
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+}
+
+void EnggDiffractionPresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
   for (size_t i = 0; i < msgs.size(); i++) {
     g_log.information() << msgs[i] << std::endl;
   }
 }
 
-void EnggDiffractionPresenter::processLoadExistingCalib() {}
-
-void EnggDiffractionPresenter::processCalcCalib() {}
-
-void EnggDiffractionPresenter::processLogMsg() {}
-
 void EnggDiffractionPresenter::processInstChange() {
-  g_log.error() << "Changing instrument is not supported!" << std::endl;
+  const std::string err = "Changing instrument is not supported!";
+  g_log.error() << err << std::endl;
+  m_view->userError("Fatal error", err);
 }
 
 void EnggDiffractionPresenter::processShutDown() {

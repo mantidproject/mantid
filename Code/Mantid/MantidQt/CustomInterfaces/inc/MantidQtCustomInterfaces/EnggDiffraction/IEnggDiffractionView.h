@@ -80,6 +80,19 @@ public:
   virtual std::string getRBNumber() const = 0;
 
   /**
+   *
+   * @return calibration settings object with current user settings
+   */
+  virtual EnggDiffCalibSettings currentCalibSettings() const = 0;
+
+  /**
+   * What's the instrument this interface is using?
+   *
+   * @param current instrumentselection
+   */
+  virtual std::string currentInstrument() const = 0;
+
+  /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and
    * geometry, preferences etc. of the user interface.
