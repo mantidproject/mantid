@@ -716,14 +716,17 @@ class ISISInstrument(BaseInstrument):
         """Define how to move the bank to position beamX and beamY must be implemented"""
         raise RuntimeError("Not Implemented")
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
         """
         A simple elementary displacement of a single component.
         This provides the adequate displacement for finding the beam centre.
         @param workspace: the workspace which needs to have the move applied to it
         @param component_name: the name of the component which being displaced
-        @param coord1: the first coordinate
-        @param coord2: the second coordinate
+        @param coord1: the first coordinate, which is x here
+        @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
         dummy_1 = workspace
@@ -731,6 +734,8 @@ class ISISInstrument(BaseInstrument):
         dummy_3 = coord1
         dummy_3 = coord2
         dummy_4 = relative_displacement
+        dummy_5 = coord1_scale_factor
+        dummy_6 = coord2_scale_factor 
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):
@@ -834,7 +839,8 @@ class LOQ(ISISInstrument):
 
         return [xshift, yshift], [xshift, yshift]
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
         """
         A simple elementary displacement of a single component.
         This provides the adequate displacement for finding the beam centre.
@@ -842,6 +848,8 @@ class LOQ(ISISInstrument):
         @param component_name: the name of the component which being displaced
         @param coord1: the first coordinate, which is x here
         @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
         MoveInstrumentComponent(Workspace=workspace,
@@ -1086,7 +1094,8 @@ class SANS2D(ISISInstrument):
 
         return beam_cen, det_cen
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
         """
         A simple elementary displacement of a single component.
         This provides the adequate displacement for finding the beam centre.
@@ -1094,6 +1103,8 @@ class SANS2D(ISISInstrument):
         @param component_name: the name of the component which being displaced
         @param coord1: the first coordinate, which is x here
         @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
         MoveInstrumentComponent(Workspace=workspace,
@@ -1476,13 +1487,14 @@ class LARMOR(ISISInstrument):
                                                bench_rotation = BENCH_ROT)
 
         # Set the beam centre position afte the move
-        self.beam_centre_pos1_after_move = -total_x_shift/XSF # Need to provide the angle in 1000th of a degree
+        self.beam_centre_pos1_after_move = xbeam # Need to provide the angle in 1000th of a degree
         self.beam_centre_pos2_after_move = ybeam
 
         # beam centre, translation, new beam position
         return [0.0, 0.0], [-xbeam, -ybeam]
 
-    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2, relative_displacement = True):
+    def elementary_displacement_of_single_component(self, workspace, component_name, coord1, coord2,
+                                                    coord1_scale_factor = 1., coord2_scale_factor = 1.,relative_displacement = True):
         """
         A simple elementary displacement of a single component.
         This provides the adequate displacement for finding the beam centre.
@@ -1490,10 +1502,11 @@ class LARMOR(ISISInstrument):
         @param component_name: the name of the component which being displaced
         @param coord1: the first coordinate, which is x here
         @param coord2: the second coordinate, which is y here
+        @param coord1_scale_factor: scale factor for the first coordinate
+        @param coord2_scale_factor: scale factor for the second coordinate
         @param relative_displacement: If the the displacement is to be relative (it normally should be)
         """
-        XSF = self.beam_centre_scale_factor1
-
+        dummy_coord2_scale_factor = coord2_scale_factor
         # Shift the component in the y direction
         MoveInstrumentComponent(Workspace=workspace,
                                 ComponentName=component_name,
@@ -1504,10 +1517,17 @@ class LARMOR(ISISInstrument):
         self._rotate_around_y_axis(workspace = workspace,
                                    component_name = component_name,
                                    x_beam = coord1,
-                                   x_scale_factor = XSF,
+                                   x_scale_factor = coord1_scale_factor,
                                    bench_rotation = 0.)
 
     def _rotate_around_y_axis(self,workspace, component_name, x_beam, x_scale_factor, bench_rotation):
+        '''
+        Rotates the component of the workspace around the y axis or shift along x, depending on the run number
+        @param workspace: a workspace name
+        @param component_name: the component to rotate
+        @param x_beam: either a shift in mm or a angle in degree
+        @param x_scale_factor: 
+        '''
         # in order to avoid rewriting old mask files from initial commisioning during 2014.
         ws_ref=mtd[workspace]
 

@@ -4254,7 +4254,7 @@ void SANSRunWindow::resetAllTransFields() {
   m_uiForm.trans_radius_check_box->setChecked(state);
 }
 
-/** 
+/**
  *  Update the beam centre coordinates
  */
 void SANSRunWindow::updateBeamCenterCoordinates() {
@@ -4282,6 +4282,21 @@ void SANSRunWindow::updateBeamCenterCoordinates() {
 }
 
 
+/**
+ * Set the beam finder details
+ */
+void SANSRunWindow::setBeamFinderDetails() {
+  // The instrument name
+  auto instrumentName = m_uiForm.inst_opt->currentText();
+
+  // Set the labels according to the instrument
+
+
+
+  // Set the values according to the instrument
+
+  // Select the correct 
+}
 
 } //namespace CustomInterfaces
 

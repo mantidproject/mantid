@@ -14,6 +14,22 @@ class FindDirectionEnum(object):
     def __init__(self):
         super(FindDirectionEnum,self).__init__()
 
+
+def is_workspace_which_requires_angle(reducer):
+    '''
+    Check if the sample worksapce requires the first
+    coordinate to be an angle
+    @param reducer: the reducer object
+    @returns true if the workspace requires an angle otherwise false
+    '''
+    instrument_name = reducer.instrument.name()
+    if instrument_name != LARMOR._NAME:
+        return False
+    workspace_name = reducer.get_sample().wksp_name
+    if workspace_name:
+        ws_ref = mtd[workspace_name]
+        return LARMOR.is_run_new_style_run(ws_ref)
+
 class CentreFinder(object):
     """
         Aids estimating the effective centre of the particle beam by calculating Q in four
@@ -32,8 +48,8 @@ class CentreFinder(object):
         self.logger = Logger("CentreFinder")
         self._last_pos = guess_centre
         self.detector = None
-        self.XSF = 1.0
-        self.YSF = 1.0
+        self.coord1_scale_factor = 1.0
+        self.coord2_scale_factor = 1.0
         self.find_direction = find_direction
 
     def SeekCentre(self, setup, trial):
@@ -47,8 +63,8 @@ class CentreFinder(object):
         self.detector = setup.instrument.cur_detector().name()
 
         # populate the x and y scale factor values at this point for the text box
-        self.XSF = setup.instrument.beam_centre_scale_factor1
-        self.YSF = setup.instrument.beam_centre_scale_factor2
+        self.coord1_scale_factor = setup.instrument.beam_centre_scale_factor1
+        self.coord2_scale_factor = setup.instrument.beam_centre_scale_factor2
 
         self.move(setup, trial[0]-self._last_pos[0], trial[1]-self._last_pos[1])
 
@@ -93,20 +109,6 @@ class CentreFinder(object):
 
         return self._calculate_residue()
 
-    def status_str(self, iter_value, x_res, y_res):
-        """
-            Creates a human readble string from the numbers passed to it
-            @param iter_value: iteration number
-            @param x_res: asymmetry in the x direction
-            @param y_res: asymmetry in y
-            @return: a human readable string
-        """
-        x_str = str(self._last_pos[0] * self.XSF).ljust(10)[0:9]
-        y_str = str(self._last_pos[1] * self.YSF).ljust(10)[0:9]
-        x_res = '    SX='+str(x_res).ljust(7)[0:6]
-        y_res = '    SY='+str(y_res).ljust(7)[0:6]
-        return 'Itr '+str(iter_value)+':  ('+x_str+',  '+y_str+')'+x_res+y_res
-
     def move(self, setup, x, y):
         """
             Move the selected detector in both the can and sample workspaces, remembering the
@@ -122,12 +124,16 @@ class CentreFinder(object):
                                                                      component_name=self.detector,
                                                                      coord1 = x,
                                                                      coord2 = y,
+                                                                     coord1_scale_factor = 1.,
+                                                                     coord2_scale_factor = 1.,
                                                                      relative_displacement = True)
         if setup.get_can():
             setup.instrument.elementary_displacement_of_single_component(workspace=setup.get_can().wksp_name,
                                                                          component_name=self.detector,
                                                                          coord1 = x,
                                                                          coord2 = y,
+                                                                         coord1_scale_factor = 1.,
+                                                                         coord2_scale_factor = 1.,
                                                                          relative_displacement = True)
 
     # Create a workspace with a quadrant value in it
@@ -249,19 +255,21 @@ class CentrePositioner(object):
         @param scale_factor_coord2: the scale factor for the second coordinate
         '''
         super(CentrePositioner,self).__init__()
-        self.coord1_start = coord1_start
-        self.coord2_start = coord2_start
-
-        self.current_coord1 = coord1_start
-        self.current_coord2 = coord2_start
-
         # Create the appropriate position updater
         pos_factory = BeamCentrePositionUpdaterFactory()
         self.position_updater = pos_factory.create_beam_centre_position_updater(position_type)
 
         # Create the appropriate increment converter
-        increment_provider_factory = PositionProviderFactory(coord1_step,coord2_step, tolerance)
-        self.increment_provider = increment_provider_factory.create_increment_provider(reducer)
+        position_provider_factory = PositionProviderFactory(coord1_step,coord2_step, tolerance)
+        self.position_provider = position_provider_factory.create_position_provider(reducer)
+
+        # set the correct units starting coordinate. such that we are dealing with units of
+        # either [m,m] or [degree, m]
+        self.coord1_start = self.position_provider.get_coord1_for_input_with_correct_scaling(coord1_start)
+        self.coord2_start = coord2_start
+
+        self.current_coord1 = self.coord1_start
+        self.current_coord2 = self.coord2_start
 
     def increment_position(self, coord1_old, coord2_old):
         '''
@@ -270,21 +278,21 @@ class CentrePositioner(object):
         @param coord2_old: the seocond old coordinate
         @returns the incremented coordinates
         '''
-        coord1_increment = self.increment_provider.get_increment_coord1()
-        coord2_increment = self.increment_provider.get_increment_coord2()
+        coord1_increment = self.position_provider.get_increment_coord1()
+        coord2_increment = self.position_provider.get_increment_coord2()
         return self.position_updater.increment_position(coord1_old, coord2_old, coord1_increment, coord2_increment)
 
     def set_new_increment_coord1(self):
         '''
         Set the new increment for the first coordinate.
         '''
-        self.increment_provider.half_and_reverse_increment_coord1()
+        self.position_provider.half_and_reverse_increment_coord1()
 
     def set_new_increment_coord2(self):
         '''
         Set the new increment for the second coordinate.
         '''
-        self.increment_provider.half_and_reverse_increment_coord2()
+        self.position_provider.half_and_reverse_increment_coord2()
 
     def produce_final_position(self, coord1_new, coord2_new):
         '''
@@ -293,24 +301,37 @@ class CentrePositioner(object):
         @param coord2_new: the newest version of coordinate 2
         @returns the final coordinates
         '''
-        return self.position_updater.produce_final_position(coord1_new, self.coord1_start, coord2_new, self.coord2_start)
+        coord1, coord2 = self.position_updater.produce_final_position(coord1_new, self.coord1_start, coord2_new, self.coord2_start)
+        # We need to make sure that the first coordinate is returned with the correct scaling for the BaseBeamFinder,
+        # ie either [m, m] or [degree/1000, m]
+        coord1 = self.position_provider.get_coord1_for_output_with_correct_scaling(coord1)
+        return coord1, coord2
+
+    def produce_initial_position(self):
+        '''
+        Produce the initial position. This is important especially for the LARMOR
+        case where we can have an additional BENCH Rotation.
+        @returns the initital position for coord1 and coord2
+        '''
+        return self.position_provider.produce_initial_position(self.coord1_start, self.coord2_start)
 
     def is_increment_coord1_smaller_than_tolerance(self):
         '''
         Check if the increment for the first coordinate is smaller than the tolerance
         @returns True if the increment of the first coordinate is smaller than tolerance else False
         '''
-        return self.increment_provider.is_coord1_increment_smaller_than_tolerance()
+        return self.position_provider.is_coord1_increment_smaller_than_tolerance()
 
     def is_increment_coord2_smaller_than_tolerance(self):
         '''
         Check if the increment for the second coordinate is smaller than the tolerance
         @returns True if the increment of the second coordinate is smaller than tolerance else False
         '''
-        return self.increment_provider.is_coord2_increment_smaller_than_tolerance()
+        return self.position_provider.is_coord2_increment_smaller_than_tolerance()
 
 
-# -- Beam Position Manager
+# Thes classes make sure that only the relevant directions are updated
+# They are not instrument dependent, they should only dependt on the user's choice.
 class BeamCentrePositionUpdaterFactory(object):
     '''
     Creates the required beam centre position updater.
@@ -335,7 +356,7 @@ class BeamCentrePositionUpdaterFactory(object):
 
 class BeamCentrePositionUpdater(object):
     '''
-    Handles the position updates
+    Handles the position updates, ie if we are only intereseted in left/right or up/down or all
     '''
     def __init__(self):
         super(BeamCentrePositionUpdater, self).__init__()
@@ -439,7 +460,9 @@ class BeamCentrePositionUpdaterLeftRight(BeamCentrePositionUpdater):
         return x_new, y_initial
 
 
-# --- Provides the positions and increments with the correct scaling
+
+# Provides the positions and increments with the correct scaling
+# These set of classes are instrument dependent.
 class PositionProviderFactory(object):
     '''
     Creates the required increment provider. The increments for the two coordinates
@@ -458,23 +481,32 @@ class PositionProviderFactory(object):
         self.increment_coord2 = increment_coord2
         self.tolerance = tolerance
 
-    def create_increment_provider(self, reducer):
+    def create_position_provider(self, reducer):
         '''
         Factory method for the PositionProvider
         @param reducer: The reducer object
         @returns The correct increment provider
         '''
-        if self.is_workspace_which_requires_angle(reducer):
+        if is_workspace_which_requires_angle(reducer):
             # The angle increment is currently not specified in the instrument parameters file,
             # hence we set a value here. This is also true for the tolerance
             #increment_coord1_angle = self.get_increment_coord1_angle(reducer, self.tolerance)
             #tolerance_angle = self.get_tolerance_for_angle(self.tolerance, self.increment_coord1, increment_coord1_angle)
             increment_coord1_angle = self.increment_coord1 /1000. # The tolerance needs to be specified in angles
             tolerance_angle = self.tolerance
+
+            # Find the bench rotation if any
+            bench_rotation = self.get_bench_rotation(reducer)
+
+            # Get the scale factor for the first coordinate
+            coord1_scale_factor = reducer.get_beam_center_scale_factor1()
+
             return PositionProviderAngleY(increment_coord1 = increment_coord1_angle,
                                            increment_coord2 = self.increment_coord2,
                                            tolerance = self.tolerance,
-                                           tolerance_angle = tolerance_angle)
+                                           tolerance_angle = tolerance_angle,
+                                           bench_rotation = bench_rotation,
+                                           coord1_scale_factor = coord1_scale_factor)
         else:
             return PositionProviderXY(increment_coord1 = self.increment_coord1,
                                        increment_coord2 = self.increment_coord2,
@@ -515,20 +547,21 @@ class PositionProviderFactory(object):
         '''
         return (increment_angle/increment_linear)*tolerance_linear
 
-    def is_workspace_which_requires_angle(self, reducer):
+
+
+    def get_bench_rotation(self, reducer):
         '''
-        Check if the sample worksapce requires the first
-        coordinate to be an angle
+        Extract the bench rotation if any exists
         @param reducer: the reducer object
-        @returns true if the workspace requires an angle otherwise false
+        @returns the bench rotation in degrees
         '''
-        instrument_name = reducer.instrument.name()
-        if instrument_name != LARMOR._NAME:
-            return False
-        workspace_name = reducer.get_sample().wksp_name
-        if workspace_name:
-            ws_ref = mtd[workspace_name]
-            return LARMOR.is_run_new_style_run(ws_ref)
+        bench_rotation = 0.0
+        try:
+            ws = mtd[str(reducer.get_sample().get_wksp_name())]
+            bench_rotation = reducer.instrument.getDetValues(ws)[0]
+        except:
+            bench_rotation = 0.0
+        return bench_rotation
 
 class PositionProvider(object):
     def __init__(self, increment_coord1, increment_coord2, tolerance):
@@ -536,6 +569,15 @@ class PositionProvider(object):
         dummy_1 = increment_coord1
         dummy_2 = increment_coord2
         dummy_3 = tolerance
+
+    def get_coord1_for_input_with_correct_scaling(self, coord1):
+        RuntimeError("The PositionProvider interface is not implemented")
+
+    def get_coord1_for_output_with_correct_scaling(self, coord1):
+        RuntimeError("The PositionProvider interface is not implemented")
+
+    def produce_initial_position(self, coord1, coord2):
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def half_and_reverse_increment_coord1(self):
         RuntimeError("The PositionProvider interface is not implemented")
@@ -570,6 +612,26 @@ class PositionProviderXY(PositionProvider):
         self.increment_x = increment_coord1
         self.increment_y = increment_coord2
         self.tolerance = tolerance
+
+    def get_coord1_for_input_with_correct_scaling(self, coord1):
+        '''
+        Get the coordinate with the correct scaling;
+        in this case it is already correct as we have [m,m]
+        @param coord1: first coordinate in m
+        @returns the first coordinate in m
+        '''
+        return coord1
+
+    def get_coord1_for_output_with_correct_scaling(self, coord1):
+        '''
+        Get the coordinate with the correct scaling
+        @param coord1: first coordinate in m
+        @returns the first coordinate in m
+        '''
+        return coord1
+
+    def produce_initial_position(self, coord1, coord2):
+        return coord1, coord2
 
     def half_and_reverse_increment_coord1(self):
         '''
@@ -608,12 +670,36 @@ class PositionProviderAngleY(PositionProvider):
     Handles the increments for the case when the first coordinate is an angle
     and the second is a cartesian coordinate
     '''
-    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle):
+    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, bench_rotation,coord1_scale_factor):
         super(PositionProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_angle = increment_coord1
         self.increment_y = increment_coord2
         self.tolerance = tolerance
         self.tolerance_angle = tolerance_angle
+        self.bench_rotation = bench_rotation
+        self.coord1_scale_factor = coord1_scale_factor
+
+    def get_coord1_for_input_with_correct_scaling(self, coord1):
+        '''
+        Get the coordinate with the correct scaling
+        @param coord1: first coordinate in degree/COORD1SF
+        @returns the first coordinate in degree
+        '''
+        return coord1*self.coord1_scale_factor
+
+    def get_coord1_for_output_with_correct_scaling(self, coord1):
+        '''
+        Get the coordinate with the correct scaling
+        @param coord1: first coordinate in degree
+        @returns the first coordinate in degree/COORD1SF
+        '''
+        return coord1/self.coord1_scale_factor
+
+    def produce_initial_position(self, coord1, coord2):
+        '''
+        The initial position might require a correction for the bench rotation.
+        '''
+        return coord1 - self.bench_rotation, coord2
 
     def half_and_reverse_increment_coord1(self):
         '''
@@ -642,7 +728,83 @@ class PositionProviderAngleY(PositionProvider):
         return self.check_is_smaller_than_tolerance(self.increment_y,self.tolerance)
 
     def get_increment_coord1(self):
-        return self.increment_angle
+        return self.increment_angle*self.coord1_scale_factor
 
     def get_increment_coord2(self):
         return self.increment_y
+
+# The classes below provide a logging facility for the Beam Centre Finder mechanism
+class BeamCenterLogger(object):
+    '''
+    Factory class for logging during the beam centre operation. The logging will
+    depend partially on the type of the first coordinate, ie [m, m] or [degree, m]
+    '''
+    def __init__(self, reducer, coord1_scale_factor, coord2_scale_factor):
+        super(BeamCenterLogger, self).__init__()
+        self.logger = Logger("CentreFinder")
+        self.using_angle = False
+        if is_workspace_which_requires_angle(reducer):
+            self.coord1_scale_factor = 1.
+            self.using_angle = True
+        else:
+            self.coord1_scale_factor = coord1_scale_factor
+        self.coord2_scale_factor = coord2_scale_factor
+
+    def report_init(self, coord1, coord2):
+        '''
+        Report the initial setup
+        @param coord1: the first coordinate
+        @param coord2: the second coordinate
+        '''
+        if self.using_angle:
+            initial_msg = "beta_start"
+        else:
+            initial_msg = "x_start"
+        msg = initial_msg + ",ystart= %s    %s" % (str(coord1*self.coord1_scale_factor), str(coord2*self.coord2_scale_factor))
+        self.logger.notice(msg)
+        self.logger.notice("Starting centre finding routine ...")
+
+    def report_status(self, iteration, coord1, coord2, resid1, resid2):
+        '''
+        Report the status of a beam finder iteration
+        @param iteration: the number of the iteration
+        @param coord1: the first coordinate
+        @param coord2: the second coordinate
+        @param resid1: the residual of the first coordinate
+        @param resid2: the residual of the second coordinate
+        '''
+        msg = self.get_status_message(iteration, coord1, coord2, resid1, resid2)
+        self.logger.notice(msg)
+
+    def get_status_message(self, iteration, coord1, coord2, resid1, resid2):
+        '''
+        Report the status of a beam finder iteration
+        @param iteration: the number of the iteration
+        @param coord1: the first coordinate
+        @param coord2: the second coordinate
+        @param resid1: the residual of the first coordinate
+        @param resid2: the residual of the second coordinate
+        '''
+        coord1str = str(coord1 * self.coord1_scale_factor).ljust(10)[0:9]
+        coord2str = str(coord2 * self.coord2_scale_factor).ljust(10)[0:9]
+        res1str = str(resid1).ljust(7)[0:6]
+        res2str = str(resid2).ljust(7)[0:6]
+        msg = "Itr %i: (%s,   %s)    SX=%s   SY=%s" %(iteration, coord1str, coord2str, res1str, res2str)
+        return msg
+
+    def report(self, msg):
+        '''
+        Report a general message
+        @param msg: the message to report
+        '''
+        self.logger.notice(msg)
+
+    def report_final(self, coord1, coord2):
+        '''
+        Report the final coordinates which are set in the reducer
+        @param coord1: the first coordinate
+        @param coord2: the second coordinate
+        '''
+        msg = "Centre coordinates updated: [ %f,  %f ]" %(coord1*self.coord1_scale_factor, coord2*self.coord2_scale_factor)
+        self.logger.notice(msg)
+

@@ -416,9 +416,10 @@ private:
   void resetAllTransFields();
   /// Update the beam center fields
   void updateBeamCenterCoordinates();
+  /// Set the beam finder details
+  void setBeamFinderDetails();
 
   UserSubWindow * slicingWindow;
-
 };
 
 }
