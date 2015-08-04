@@ -57,11 +57,11 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         nh = data_ws.getNumberHistograms()
         nb = data_ws.blocksize()
 
-        if (vana_ws.getNumDims() != nd or vana_ws.getNumberHistograms() != nh or vana_ws.blocksize() != nb):
+        if vana_ws.getNumDims() != nd or vana_ws.getNumberHistograms() != nh or vana_ws.blocksize() != nb:
             self.log().error("The dimensions of Vanadium workspace are not valid.")
             return False
 
-        if (bkgr_ws.getNumDims() != nd or bkgr_ws.getNumberHistograms() != nh or bkgr_ws.blocksize() != nb):
+        if bkgr_ws.getNumDims() != nd or bkgr_ws.getNumberHistograms() != nh or bkgr_ws.blocksize() != nb:
             self.log().error("The dimensions of Background workspace are not valid.")
             return False
 
