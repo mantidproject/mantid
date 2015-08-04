@@ -105,6 +105,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/DllConfig.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
   inc/MantidQtCustomInterfaces/Homer.h

@@ -11,6 +11,10 @@ using namespace MantidQt::CustomInterfaces;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+namespace {
+Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
+}
+
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
@@ -52,6 +56,9 @@ void EnggDiffractionPresenter::notify(
     processLogMsg();
     break;
 
+  case IEnggDiffractionPresenter::InstrumentChange:
+    processInstChange();
+
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
     break;
@@ -61,7 +68,7 @@ void EnggDiffractionPresenter::notify(
 void EnggDiffractionPresenter::processStart() {
   std::vector<std::string> msgs = m_view->logMsgs();
   for (size_t i = 0; i < msgs.size(); i++) {
-    //m_model->logMsg(msgs[i]);
+    g_log.information() << msgs[i] << std::endl;
   }
 }
 
@@ -70,6 +77,10 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {}
 void EnggDiffractionPresenter::processCalcCalib() {}
 
 void EnggDiffractionPresenter::processLogMsg() {}
+
+void EnggDiffractionPresenter::processInstChange() {
+  g_log.error() << "Changing instrument is not supported!" << std::endl;
+}
 
 void EnggDiffractionPresenter::processShutDown() {
   m_view->saveSettings();

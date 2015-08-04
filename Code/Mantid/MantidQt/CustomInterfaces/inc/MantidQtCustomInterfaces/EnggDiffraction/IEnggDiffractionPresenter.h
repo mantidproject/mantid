@@ -42,6 +42,7 @@ public:
     LoadExistingCalib,     ///< Load a calibration already availble on disk
     CalcCalib,             ///< Calculate a (new) calibration
     LogMsg,                ///< need to send a message to the Mantid log system
+    InstrumentChange,      ///< Instrument selection updated
     ShutDown               ///< closing the interface
   };
 
