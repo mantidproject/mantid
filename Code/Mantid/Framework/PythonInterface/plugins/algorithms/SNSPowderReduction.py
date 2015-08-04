@@ -17,6 +17,13 @@ else:
 
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
+def noRunSpecified(runs):
+    if len(runs) <= 0:
+        return True
+    if len(runs) == 1:
+        return (runs[0] <= 0)
+    return False
+
 #pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = .01
@@ -306,7 +313,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # process the container
             canRuns = self._info["container"].value
-            if canRuns[samRunIndex] <= 0:
+            if noRunSpecified(canRuns):
                 canRun = None
             else:
                 if self.getProperty("FilterCharacterizations").value:
@@ -332,8 +339,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 workspacelist.append(str(canRun))
 
             # process the vanadium run
-            vanRun = self._info["vanadium"].value[samRunIndex]
-            if vanRun > 0:
+            vanRun = self._info["vanadium"].value
+            if not noRunSpecified(vanRun):
+                vanRun = vanRuns[samRunIndex]
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = timeFilterWall
                 else:
@@ -356,9 +364,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
 
                     # load the vanadium background (if appropriate)
-                    vbackRun = self._info["empty"].value[samRunIndex]
-                    if vbackRun > 0:
-                        vbackRun = self._loadData(vbackRun, SUFFIX, vanFilterWall, outname="vbackRun")
+                    vbackRuns = self._info["empty"].value[samRunIndex]
+                    if not noRunSpecified(vbackRuns):
+                        vbackRun = self._loadData(vbackRuns[samRunIndex], SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
                             if self._normalisebycurrent is True:
                                 vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun,
