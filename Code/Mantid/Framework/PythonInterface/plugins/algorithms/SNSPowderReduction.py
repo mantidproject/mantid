@@ -21,7 +21,7 @@ def noRunSpecified(runs):
     if runs.size <= 0:
         return True
     if runs.size == 1:
-        return (runs[0] <= 0)
+        return runs[0] <= 0
     return False
 
 #pylint: disable=too-many-instance-attributes
