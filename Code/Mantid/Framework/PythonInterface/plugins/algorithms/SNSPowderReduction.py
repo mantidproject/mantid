@@ -18,9 +18,9 @@ else:
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
 def noRunSpecified(runs):
-    if len(runs) <= 0:
+    if runs.size <= 0:
         return True
-    if len(runs) == 1:
+    if runs.size == 1:
         return (runs[0] <= 0)
     return False
 
@@ -339,8 +339,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 workspacelist.append(str(canRun))
 
             # process the vanadium run
-            vanRun = self._info["vanadium"].value
-            if not noRunSpecified(vanRun):
+            vanRuns = self._info["vanadium"].value
+            if not noRunSpecified(vanRuns):
                 vanRun = vanRuns[samRunIndex]
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = timeFilterWall
@@ -364,7 +364,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
 
                     # load the vanadium background (if appropriate)
-                    vbackRuns = self._info["empty"].value[samRunIndex]
+                    vbackRuns = self._info["empty"].value
                     if not noRunSpecified(vbackRuns):
                         vbackRun = self._loadData(vbackRuns[samRunIndex], SUFFIX, vanFilterWall, outname="vbackRun")
                         try:
