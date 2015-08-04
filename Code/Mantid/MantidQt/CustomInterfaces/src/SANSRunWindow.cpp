@@ -947,29 +947,8 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().instrument.SAMPLE_Z_CORR").toDouble();
   m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
 
-  //Centre coordinates
-  // from the ticket #5942 both detectors have center coordinates
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
-  // get the scale factor1 for the beam centre to scale it correctly
-  double dbl_paramsf = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center_scale_factor1()").toDouble();
-  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*dbl_paramsf));
-  // get scale factor2 for the beam centre to scale it correctly
-  dbl_paramsf = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center_scale_factor2()").toDouble();
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
-  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*dbl_paramsf));
-  // front
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('front')[0]").toDouble();
-  m_uiForm.front_beam_x->setText(QString::number(dbl_param*1000.0));
-  dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton().get_beam_center('front')[1]").toDouble();
-  m_uiForm.front_beam_y->setText(QString::number(dbl_param*1000.0));
-
-
+  // Update the beam centre coordinates
+  updateBeamCenterCoordinates();
 
   //Gravity switch
   QString param = runReduceScriptFunction(
@@ -2142,6 +2121,10 @@ bool SANSRunWindow::handleLoadButtonClick()
   m_sample_file = sample;
   setProcessingState(Ready);
   m_uiForm.load_dataBtn->setText("Load Data");
+
+  // Update the beam center position
+  updateBeamCenterCoordinates();
+
   return true;
 }
 /** Queries the number of periods from the Python object whose name was passed
@@ -4270,6 +4253,35 @@ void SANSRunWindow::resetAllTransFields() {
   m_uiForm.trans_roi_files_checkbox->setChecked(state);
   m_uiForm.trans_radius_check_box->setChecked(state);
 }
+
+/** 
+ *  Update the beam centre coordinates
+ */
+void SANSRunWindow::updateBeamCenterCoordinates() {
+   //Centre coordinates
+  // from the ticket #5942 both detectors have center coordinates
+  double dbl_param = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+  // get the scale factor1 for the beam centre to scale it correctly
+  double dbl_paramsf = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center_scale_factor1()").toDouble();
+  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*dbl_paramsf));
+  // get scale factor2 for the beam centre to scale it correctly
+  dbl_paramsf = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center_scale_factor2()").toDouble();
+  dbl_param = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
+  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*dbl_paramsf));
+  // front
+  dbl_param = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center('front')[0]").toDouble();
+  m_uiForm.front_beam_x->setText(QString::number(dbl_param*1000.0));
+  dbl_param = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center('front')[1]").toDouble();
+  m_uiForm.front_beam_y->setText(QString::number(dbl_param*1000.0));
+}
+
+
 
 } //namespace CustomInterfaces
 

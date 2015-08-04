@@ -414,6 +414,8 @@ private:
   void initTransmissionSettings();
   /// Set all trans fields to a certain enabled state
   void resetAllTransFields();
+  /// Update the beam center fields
+  void updateBeamCenterCoordinates();
 
   UserSubWindow * slicingWindow;
 

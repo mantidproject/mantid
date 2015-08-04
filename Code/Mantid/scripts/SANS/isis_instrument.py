@@ -508,6 +508,9 @@ class ISISInstrument(BaseInstrument):
         self.monitor_zs = {}
         # Used when new calibration required.
         self._newCalibrationWS = None
+        # Centre of beam after a move has been applied, 
+        self.beam_centre_pos1_after_move = 0.0
+        self.beam_centre_pos2_after_move = 0.0
 
     def get_incident_mon(self):
         """
@@ -775,6 +778,11 @@ class ISISInstrument(BaseInstrument):
         # this forces us to have 'copyable' objects.
         self._newCalibrationWS = str(ws_reference)
 
+    def get_updated_beam_centre_after_move(self):
+        '''
+        @returns the beam centre position after the instrument has moved
+        '''
+        return self.beam_centre_pos1_after_move, self.beam_centre_pos2_after_move
 
 
 class LOQ(ISISInstrument):
@@ -819,6 +827,10 @@ class LOQ(ISISInstrument):
             MoveInstrumentComponent(Workspace=ws,ComponentName= det.name(), X = det.x_corr/1000.0, Y = det.y_corr/1000.0, Z = det.z_corr/1000.0, RelativePosition="1")
             xshift = xshift + det.x_corr/1000.0
             yshift = yshift + det.y_corr/1000.0
+
+        # Set the beam centre position afte the move, leave as they were
+        self.beam_centre_pos1_after_move = xbeam
+        self.beam_centre_pos2_after_move = ybeam
 
         return [xshift, yshift], [xshift, yshift]
 
@@ -1067,6 +1079,10 @@ class SANS2D(ISISInstrument):
         else:
             beam_cen = [0.0,0.0]
             det_cen = [-xbeam, -ybeam]
+
+        # Set the beam centre position afte the move, leave as they were
+        self.beam_centre_pos1_after_move = xbeam
+        self.beam_centre_pos2_after_move = ybeam
 
         return beam_cen, det_cen
 
@@ -1453,12 +1469,16 @@ class LARMOR(ISISInstrument):
         MoveInstrumentComponent(ws, ComponentName=detBench.name(), X=xshift, Y=yshift, Z=zshift)
 
         # Deal with the angle value
-        new_xbeam = self._rotate_around_y_axis(workspace = ws,
+        total_x_shift = self._rotate_around_y_axis(workspace = ws,
                                                component_name = detBench.name(),
                                                x_beam = xbeam,
                                                x_scale_factor = XSF,
                                                bench_rotation = BENCH_ROT)
-        new_ybeam = ybeam
+
+        # Set the beam centre position afte the move
+        self.beam_centre_pos1_after_move = -total_x_shift/XSF # Need to provide the angle in 1000th of a degree
+        self.beam_centre_pos2_after_move = ybeam
+
         # beam centre, translation, new beam position
         return [0.0, 0.0], [-xbeam, -ybeam]
 

@@ -260,7 +260,7 @@ class CentrePositioner(object):
         self.position_updater = pos_factory.create_beam_centre_position_updater(position_type)
 
         # Create the appropriate increment converter
-        increment_provider_factory = IncrementProviderFactory(coord1_step,coord2_step, tolerance)
+        increment_provider_factory = PositionProviderFactory(coord1_step,coord2_step, tolerance)
         self.increment_provider = increment_provider_factory.create_increment_provider(reducer)
 
     def increment_position(self, coord1_old, coord2_old):
@@ -448,7 +448,7 @@ class PositionProviderFactory(object):
     '''
     def __init__(self, increment_coord1, increment_coord2, tolerance):
         '''
-        Initialize the IncrementProviderFactory
+        Initialize the PositionProviderFactory
         @param increment_coord1: The increment for the first coordinate
         @param increment_coord2: The increment for the second coordinate
         @param tolerance: The tolerance setting
@@ -460,7 +460,7 @@ class PositionProviderFactory(object):
 
     def create_increment_provider(self, reducer):
         '''
-        Factory method for the IncrementProvider
+        Factory method for the PositionProvider
         @param reducer: The reducer object
         @returns The correct increment provider
         '''
@@ -471,12 +471,12 @@ class PositionProviderFactory(object):
             #tolerance_angle = self.get_tolerance_for_angle(self.tolerance, self.increment_coord1, increment_coord1_angle)
             increment_coord1_angle = self.increment_coord1 /1000. # The tolerance needs to be specified in angles
             tolerance_angle = self.tolerance
-            return IncrementProviderAngleY(increment_coord1 = increment_coord1_angle,
+            return PositionProviderAngleY(increment_coord1 = increment_coord1_angle,
                                            increment_coord2 = self.increment_coord2,
                                            tolerance = self.tolerance,
                                            tolerance_angle = tolerance_angle)
         else:
-            return IncrementProviderXY(increment_coord1 = self.increment_coord1,
+            return PositionProviderXY(increment_coord1 = self.increment_coord1,
                                        increment_coord2 = self.increment_coord2,
                                        tolerance = self.tolerance)
 
@@ -538,22 +538,22 @@ class PositionProvider(object):
         dummy_3 = tolerance
 
     def half_and_reverse_increment_coord1(self):
-        RuntimeError("The IncrementProvider interface is not implemented")
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def half_and_reverse_increment_coord2(self):
-        RuntimeError("The IncrementProvider interface is not implemented")
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def is_coord1_increment_smaller_than_tolerance(self):
-        RuntimeError("The IncrementProvider interface is not implemented")
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def is_coord2_increment_smaller_than_tolerance(self):
-        RuntimeError("The IncrementProvider interface is not implemented")
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def get_increment_coord1(self):
-        RuntimeError("The IncrementProvider interface is not implemented")
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def get_increment_coord2(self):
-        RuntimeError("The IncrementProvider interface is not implemented")
+        RuntimeError("The PositionProvider interface is not implemented")
 
     def check_is_smaller_than_tolerance(self,to_check,tolerance):
         if abs(to_check) < tolerance:
@@ -561,12 +561,12 @@ class PositionProvider(object):
         else:
             return False
 
-class PositionProviderXY(IncrementProvider):
+class PositionProviderXY(PositionProvider):
     '''
     Handles the increments for the case when both coordinates are cartesian
     '''
     def __init__(self, increment_coord1, increment_coord2, tolerance):
-        super(IncrementProviderXY,self).__init__(increment_coord1, increment_coord2, tolerance)
+        super(PositionProviderXY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_x = increment_coord1
         self.increment_y = increment_coord2
         self.tolerance = tolerance
@@ -603,13 +603,13 @@ class PositionProviderXY(IncrementProvider):
     def get_increment_coord2(self):
         return self.increment_y
 
-class PositionProviderAngleY(IncrementProvider):
+class PositionProviderAngleY(PositionProvider):
     '''
     Handles the increments for the case when the first coordinate is an angle
     and the second is a cartesian coordinate
     '''
     def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle):
-        super(IncrementProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
+        super(PositionProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_angle = increment_coord1
         self.increment_y = increment_coord2
         self.tolerance = tolerance

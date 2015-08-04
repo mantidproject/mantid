@@ -271,7 +271,6 @@ class ISISReducer(Reducer):
         center = self.instrument.get_default_beam_center()
         self._beam_finder = isis_reduction_steps.BaseBeamFinder(center[0], center[1])
 
-
     def set_sample(self, run, reload, period):
         """
             Assigns and load the run that this reduction chain will analysis
@@ -670,4 +669,15 @@ class ISISReducer(Reducer):
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
+
+    def update_beam_center(self):
+        """
+        Gets a possible new beam center position from the instrument after translation
+        or rotation. Previously this was not necessary as the reducer told the instrument
+        how to position, but now the instrument can get further positioning information
+        from the Instrument Parameter File.
+        """
+        centre_pos1, centre_pos2 = self.instrument.get_updated_beam_centre_after_move()
+        # Update the beam centre finder for the rear
+        self._beam_finder.update_beam_center(centre_pos1, centre_pos2)
 
