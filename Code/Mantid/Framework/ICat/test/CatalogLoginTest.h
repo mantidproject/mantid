@@ -42,9 +42,12 @@ public:
 
 		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
 		loginobj.setPropertyValue("Password", "MantidTestUser4");
+		loginobj.setProperty("KeepSessionAlive", false);
 		
 		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
 		TS_ASSERT(loginobj.isExecuted() );
+
+		ICatTestHelper::logout();
 		
 	}
 	void testLoginFail()

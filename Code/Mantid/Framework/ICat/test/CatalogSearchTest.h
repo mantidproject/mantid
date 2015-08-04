@@ -38,16 +38,8 @@ public:
 		// Uses an unused keyword to produce an empty workspace and be fast
 		
 		CatalogSearch searchobj;
-		CatalogLogin loginobj;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-		//loginobj.setPropertyValue("DBServer", "");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
@@ -58,21 +50,15 @@ public:
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
 
+		ICatTestHelper::logout();
+
 	}
 	void testSearchByKeywordsExecutes()
 	{
 		
 		CatalogSearch searchobj;
-		CatalogLogin loginobj;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-		//loginobj.setPropertyValue("DBServer", "");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 				
@@ -83,21 +69,16 @@ public:
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
 
+		ICatTestHelper::logout();
+
 	}
 	void testSearchByStartDateEndDateExecutes()
 	{
 		// Uses a search date outside of general operation to produce an empty workspace and be fast
 
 		CatalogSearch searchobj;
-		CatalogLogin loginobj;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-			
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
@@ -108,21 +89,15 @@ public:
 		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
 		TS_ASSERT( searchobj.isExecuted() );
 
+		ICatTestHelper::logout();
+
 	}
 	void testSearchByRunNumberInvalidInput()
 	{		
-		CatalogLogin loginobj;
-
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		// Now set it...
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-		//loginobj.setPropertyValue("DBServer", "");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
 		CatalogSearch searchobj;
+
+		TS_ASSERT( ICatTestHelper::login() );
+
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		
 		// start run number > end run number
@@ -134,20 +109,15 @@ public:
 		//should fail
 		TS_ASSERT( !searchobj.isExecuted() );
 
+		ICatTestHelper::logout();
+
 	}
 
 	void testSearchByInvalidDates1()
 	{
 		CatalogSearch searchobj;
-		CatalogLogin loginobj;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		std::string errorMsg="Invalid value for property StartDate (string) ""sssss"": Invalid Date:date format must be DD/MM/YYYY";
@@ -157,21 +127,16 @@ public:
 		errorMsg="Invalid value for property EndDate (string) ""aaaaa"": Invalid Date:date format must be DD/MM/YYYY";
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","aaaaa"),std::invalid_argument(errorMsg));
 
+		ICatTestHelper::logout();
+
 	}
 
 	void testSearchByInvalidDates2()
 	{
 
 		CatalogSearch searchobj;
-		CatalogLogin loginobj;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 				
@@ -180,6 +145,8 @@ public:
 
 		errorMsg="Invalid value for property EndDate (string) ""1/22/2009"": Invalid Date:Month part of the Date parameter must be between 1 and 12";
 		TS_ASSERT_THROWS(searchobj.setPropertyValue("EndDate","1/22/2009"),std::invalid_argument(errorMsg));
+
+		ICatTestHelper::logout();
 
 	}
 		

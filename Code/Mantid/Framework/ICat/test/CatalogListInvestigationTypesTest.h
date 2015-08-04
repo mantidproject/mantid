@@ -29,13 +29,7 @@ public:
 
 	void testListInvestigationTypes()
 	{
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-			
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if (!invstTypesList.isInitialized() ) invstTypesList.initialize();
 		//invstTypesList.setPropertyValue("OutputWorkspace","investigationtypes_list");
@@ -43,11 +37,10 @@ public:
 		TS_ASSERT_THROWS_NOTHING(invstTypesList.execute());
 		TS_ASSERT( invstTypesList.isExecuted() );
 
-
+		ICatTestHelper::logout();
 	}
 private:
 	CatalogListInvestigationTypes invstTypesList;
-	CatalogLogin loginobj;
 };
 
  

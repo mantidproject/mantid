@@ -30,16 +30,8 @@ public:
 	void testMyDataSearch()
 	{
 		CatalogMyDataSearch mydata;
-		CatalogLogin loginobj;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-	
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+		TS_ASSERT( ICatTestHelper::login() );
 
 		if ( !mydata.isInitialized() ) mydata.initialize();
 			
@@ -48,6 +40,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING(mydata.execute());
 		TS_ASSERT( mydata.isExecuted() );
 
+		ICatTestHelper::logout();
 	}
 			
 };

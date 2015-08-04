@@ -6,6 +6,7 @@
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogSearch.h"
+#include "ICatTestHelper.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -60,15 +61,7 @@ public:
 	}
 	void xtestDownLoadDataFile()
 	{		
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
-
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-	
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
-
+		TS_ASSERT( ICatTestHelper::login() );
 				
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("RunRange", "100-102");
@@ -105,7 +98,8 @@ public:
 		}
 		ofs<<"Time taken to  download files with investigation id 12576918 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 		
-						
+		ICatTestHelper::logout();
+
 		TS_ASSERT( downloadobj.isExecuted() );
 		//delete the file after execution
 		//remove("HET00097.RAW");
@@ -118,16 +112,8 @@ public:
 
 	void xtestDownLoadNexusFile()
 	{				
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
+		TS_ASSERT( ICatTestHelper::login() );
 
-		// Now set it...
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-			
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
-
-				
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("RunRange", "17440-17556");
 		searchobj.setPropertyValue("Instrument","EMU");
@@ -165,6 +151,8 @@ public:
 		ofs<<"Time taken to download files with investigation id 24070400 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 		//ofs.close();
 		
+		ICatTestHelper::logout();
+
 		TS_ASSERT( downloadobj.isExecuted() );
 		//delete the file after execution
 		//remove("EMU00017452.nxs");
@@ -176,16 +164,8 @@ public:
 
 	void xtestDownLoadDataFile_Merlin()
 	{
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
+		TS_ASSERT( ICatTestHelper::login() );
 
-		loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
-		loginobj.setPropertyValue("Password", "MantidTestUser4");
-	
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
-
-				
 		if ( !searchobj.isInitialized() ) searchobj.initialize();
 		searchobj.setPropertyValue("RunRange", "600-601");
 		searchobj.setPropertyValue("Instrument","MERLIN");
@@ -221,6 +201,7 @@ public:
 		}
 		ofs<<"Time taken to download files with investigation id 24022007 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 		
+		ICatTestHelper::logout();
 						
 		TS_ASSERT( downloadobj.isExecuted() );
 		AnalysisDataService::Instance().remove("investigations");
@@ -256,6 +237,8 @@ public:
 
      ofs<<"Time taken for http download from mantidwebserver over internet for a small file of size 1KB is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 
+	 ICatTestHelper::logout();
+
      //delete the file after execution
      remove("test.htm");
 
@@ -269,6 +252,5 @@ private:
    CatalogSearch searchobj;
    CatalogGetDataFiles invstObj;
    CatalogDownloadDataFiles downloadobj;
-   CatalogLogin loginobj;
 };
 #endif
