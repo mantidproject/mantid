@@ -46,67 +46,68 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
         return
 
-    def _dimensions_valid(self, data_ws, vana_ws, bkgr_ws):
+    def _dimensions_valid(self):
         """
         Checks validity of the workspace dimensions:
         all given workspaces must have the same number of dimensions
         and the same number of histograms
         and the same number of bins
         """
-        nd = data_ws.getNumDims()
-        nh = data_ws.getNumberHistograms()
-        nb = data_ws.blocksize()
+        nd = self.dataws.getNumDims()
+        nh = self.dataws.getNumberHistograms()
+        nb = self.dataws.blocksize()
 
-        if vana_ws.getNumDims() != nd or vana_ws.getNumberHistograms() != nh or vana_ws.blocksize() != nb:
+        if self.vanaws.getNumDims() != nd or self.vanaws.getNumberHistograms() != nh or self.vanaws.blocksize() != nb:
             self.log().error("The dimensions of Vanadium workspace are not valid.")
             return False
 
-        if bkgr_ws.getNumDims() != nd or bkgr_ws.getNumberHistograms() != nh or bkgr_ws.blocksize() != nb:
+        if self.bkgws.getNumDims() != nd or self.bkgws.getNumberHistograms() != nh or self.bkgws.blocksize() != nb:
             self.log().error("The dimensions of Background workspace are not valid.")
             return False
 
         return True
 
-    def _norm_ws_exist(self, vana_ws, bkgr_ws):
+    def _norm_ws_exist(self):
         """
         Checks whether the normalization workspaces exist
         normalization workspaces are created by the loader,
         but could be ocasionally deleted by the user
         """
-        if not api.mtd.doesExist(bkgr_ws.getName() + '_NORM'):
-            self.log().error("Normalization workspace for " + bkgr_ws.getName() + " is not found!")
+        if not api.mtd.doesExist(self.bkgws.getName() + '_NORM'):
+            self.log().error("Normalization workspace for " + self.bkgws.getName() + " is not found!")
             return False
-        if not api.mtd.doesExist(vana_ws.getName() + '_NORM'):
-            self.log().error("Normalization workspace for " + vana_ws.getName() + " is not found!")
+        if not api.mtd.doesExist(self.vanaws.getName() + '_NORM'):
+            self.log().error("Normalization workspace for " + self.vanaws.getName() + " is not found!")
             return False
 
         return True
 
-    def _vana_mean(self, vana_ws, vana_mean_ws_name, nd=2):
+    def _vana_mean(self, ws):
         """
         checks whether the workspace with mean counts for Vanadium exists
         creates one if not
         """
-        if api.mtd.doesExist(vana_mean_ws_name):
-            vana_mean = api.mtd[vana_mean_ws_name]
-            if vana_mean.getNumDims() != nd:
+        if api.mtd.doesExist(self.vana_mean_name):
+            nd = self.dataws.getNumDims()
+            vmean = api.mtd[self.vana_mean_name]
+            if vmean.getNumDims() != nd:
                 message = "Specified VanadiumMean Workspace has wrong dimensions! Must be 2."
                 self.log().error(message)
                 return None
-            if vana_mean.getNumberHistograms() != 1:
+            if vmean.getNumberHistograms() != 1:
                 message = "Specified VanadiumMean Workspace has wrong number of histograms! Must be 1."
                 self.log().error(message)
                 return None
-            if vana_mean.blocksize() != 1:
+            if vmean.blocksize() != 1:
                 message = "Specified VanadiumMean Workspace has wrong number of bins! Must be 1."
                 self.log().error(message)
                 return None
 
         else:
-            nh = vana_ws.getNumberHistograms()
-            vana_mean = api.SumSpectra(vana_ws, IncludeMonitors=False) / nh
+            nh = self.vanaws.getNumberHistograms()
+            vmean = api.SumSpectra(ws, IncludeMonitors=False) / nh
 
-        return vana_mean
+        return vmean
 
     def _cleanup(self, wslist):
         """
@@ -116,17 +117,17 @@ class DNSDetEffCorrVana(PythonAlgorithm):
             api.DeleteWorkspace(w)
         return
 
-    def _vana_correct(self, data_ws, vana_ws, bkgr_ws, vana_mean_ws_name, outws_name):
+    def _vana_correct(self):
         """
         creates the corrected workspace
         """
         wslist = []
         # 1. normalize Vanadium and Background
-        vana_normws = api.mtd[vana_ws.getName() + '_NORM']
-        bkg_normws = api.mtd[bkgr_ws.getName() + '_NORM']
-        _vana_norm_ = api.Divide(vana_ws, vana_normws)
+        vana_normws = api.mtd[self.vanaws.getName() + '_NORM']
+        bkg_normws = api.mtd[self.bkgws.getName() + '_NORM']
+        _vana_norm_ = api.Divide(self.vanaws, vana_normws)
         wslist.append(_vana_norm_.getName())
-        _bkg_norm_ = api.Divide(bkgr_ws, bkg_normws)
+        _bkg_norm_ = api.Divide(self.bkgws, bkg_normws)
         wslist.append(_bkg_norm_.getName())
         # 2. substract background from Vanadium
         _vana_bg_ = _vana_norm_ - _bkg_norm_
@@ -136,24 +137,24 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         neg_values = np.where(arr < 0)[0]
         if len(neg_values):
             self._cleanup(wslist)
-            message = "Background " + bkgr_ws.getName() + " is higher than Vanadium " + \
-                vana_ws.getName() + " signal!"
+            message = "Background " + self.bkgws.getName() + " is higher than Vanadium " + \
+                self.vanaws.getName() + " signal!"
             self.log().error(message)
             raise RuntimeError(message)
 
         # 3. calculate correction coefficients
-        _vana_mean_ws_ = self._vana_mean(_vana_bg_, vana_mean_ws_name, data_ws.getNumDims())
+        _vana_mean_ws_ = self._vana_mean(_vana_bg_)
         if not _vana_mean_ws_:
             self._cleanup(wslist)
             return None
-        if not vana_mean_ws_name:
+        if not self.vana_mean_name:
             wslist.append(_vana_mean_ws_)
         _coef_ws_ = api.Divide(LHSWorkspace=_vana_bg_, RHSWorkspace=_vana_mean_ws_, WarnOnZeroDivide=True)
         wslist.append(_coef_ws_)
         # 4. correct raw data (not normalized!)
-        api.Divide(LHSWorkspace=data_ws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True,
-                   OutputWorkspace=outws_name)
-        outws = api.mtd[outws_name]
+        api.Divide(LHSWorkspace=self.dataws, RHSWorkspace=_coef_ws_, WarnOnZeroDivide=True,
+                   OutputWorkspace=self.outws_name)
+        outws = api.mtd[self.outws_name]
         # cleanup
         self._cleanup(wslist)
         return outws
@@ -199,38 +200,38 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
     def PyExec(self):
         # Input
-        dataws = api.mtd[self.getPropertyValue("InputWorkspace")]
-        outws_name = self.getPropertyValue("OutputWorkspace")
-        vanaws = api.mtd[self.getPropertyValue("VanaWorkspace")]
-        bkgws = api.mtd[self.getPropertyValue("BkgWorkspace")]
-        vana_mean = self.getPropertyValue("VanadiumMean")
+        self.dataws = api.mtd[self.getPropertyValue("InputWorkspace")]
+        self.outws_name = self.getPropertyValue("OutputWorkspace")
+        self.vanaws = api.mtd[self.getPropertyValue("VanaWorkspace")]
+        self.bkgws = api.mtd[self.getPropertyValue("BkgWorkspace")]
+        self.vana_mean_name = self.getPropertyValue("VanadiumMean")
 
-        if not self._dimensions_valid(dataws, vanaws, bkgws):
+        if not self._dimensions_valid():
             raise RuntimeError("Error: all input workspaces must have the same dimensions!.")
         # check if the _NORM workspaces exist
-        if not self._norm_ws_exist(vanaws, bkgws):
+        if not self._norm_ws_exist():
             message = "Normalization workspace is not found!"
             raise RuntimeError(message)
         # check sample logs, produce warnings if different
-        drun = dataws.getRun()
-        vrun = vanaws.getRun()
-        brun = bkgws.getRun()
+        drun = self.dataws.getRun()
+        vrun = self.vanaws.getRun()
+        brun = self.bkgws.getRun()
         self._check_properties(drun, vrun)
         self._check_properties(vrun, brun)
         # apply correction
-        outws = self._vana_correct(dataws, vanaws, bkgws, vana_mean, outws_name)
+        outws = self._vana_correct()
         if not outws:
             raise RuntimeError("Correction failed. Invalid VanadiumMean workspace dimensions.")
 
         # copy sample logs from data workspace to the output workspace
-        api.CopyLogs(InputWorkspace=dataws.getName(), OutputWorkspace=outws.getName(),
+        api.CopyLogs(InputWorkspace=self.dataws.getName(), OutputWorkspace=outws.getName(),
                      MergeStrategy='MergeReplaceExisting')
         self.setProperty("OutputWorkspace", outws)
 
         # clone the normalization workspace for data if it exists
-        if api.mtd.doesExist(dataws.getName()+'_NORM'):
-            api.CloneWorkspace(InputWorkspace=dataws.getName()+'_NORM', OutputWorkspace=outws_name+'_NORM')
-        self.log().debug('DNSDetEffCorrVana: OK. The result has been saved to ' + outws_name)
+        if api.mtd.doesExist(self.dataws.getName()+'_NORM'):
+            api.CloneWorkspace(InputWorkspace=self.dataws.getName()+'_NORM', OutputWorkspace=self.outws_name+'_NORM')
+        self.log().debug('DNSDetEffCorrVana: OK. The result has been saved to ' + self.outws_name)
 
         return
 
