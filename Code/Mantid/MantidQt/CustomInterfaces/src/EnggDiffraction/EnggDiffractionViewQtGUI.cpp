@@ -158,20 +158,26 @@ std::string EnggDiffractionViewQtGUI::getRBNumber() const {
 }
 
 void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
+  const QString calExt =
+      QString("Supported formats: CSV, NXS "
+              "(*.csv *.nxs *.nexus);;"
+              "Comma separated values text file with calibration table "
+              "(*.csv);;"
+              "Nexus file with calibration table "
+              "(*.nxs *.nexus);;"
+              "Other extensions/all files (*.*)");
+
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
-    prevPath =
+    QString prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
-  QString dir = QFileDialog::getExistingDirectory(
-      this, tr("Open Directory"), prevPath,
-      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-  if (dir.isEmpty()) {
-    return;
-  }
+  QString filename = (QFileDialog::getOpenFileName(
+      this, tr("Open calibration file"), prevPath,
+      calExt));
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(filename);
 
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
