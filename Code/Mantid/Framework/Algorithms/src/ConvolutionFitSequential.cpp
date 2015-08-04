@@ -61,8 +61,8 @@ void ConvolutionFitSequential::init() {
   declareProperty(
       "End X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The end of the range for the fit function.", Direction::Input);
-  // Needs validation
-  declareProperty("Temperature", std::string(""),
+
+  declareProperty("Temperature", "0", boost::make_shared<MandatoryValidator<double>>(),
                   "The Temperature correction for the fit.", Direction::Input);
 
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
@@ -112,10 +112,11 @@ void ConvolutionFitSequential::exec() {
   int specMax = getProperty("Spec max");
   bool convolve = getProperty("Convolve");
   int maxIter = getProperty("Max Iterations");
+  std::stirng minimizer = getProperty("Minimizer");
   MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
 
   // Handle empty/non-empty temp property
-  if (temperature.compare("") == 0) {
+  if (temperature.compare("0") == 0) {
     temperature = "None";
   }
   // Pull in UI settings (Plot / Save (minimizer?)
@@ -132,12 +133,28 @@ void ConvolutionFitSequential::exec() {
   // Add logger information
 
   // Convert input workspace to get Q axis
+  
   // Fit all spectra in workspace
   // Fit args
   // Run PlotPeaksByLogValue
+  auto plotPeaks = createChildAlgorithm("PlotPeaksByLogValue", -1, -1, true);
+  plotPeaks->setProperty("Input", "");
+  plotPeaks->setProperty("OutputWorkspace", outWS);
+  plotPeaks->setProperty("Function", function);
+  plotPeaks->setProperty("StartX", startX);
+  plotPeaks->setProperty("EndX", endX);
+  plotPeaks->setProperty("FitType", "Sequential");
+  plotPeaks->setProperty("CreateOutput", true);
+  plotPeaks->setProperty("OutputCompositeMembers", true);
+  plotPeaks->setProperty("ConvoleMembers", convolve);
+  plotPeaks->setProperty("MaxIterations", maxIter);
+  plotPeaks->setProperty("Minimizer", minimizer);
+  
+
   // Delete possible pre-existing workspaces
   // Construct output workspace name
   // Define params for use in convertParametersToWorkSpace
+
   // Run convertParametersToWorkspace
   // Set x units to be momentum transfer
   // Handle sample logs
@@ -208,5 +225,6 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   }
   return result;
 }
+
 } // namespace Algorithms
 } // namespace Mantid

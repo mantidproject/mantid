@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** ConvolutionFitSequential : TODO: DESCRIPTION
+/** ConvolutionFitSequential : Performs a sequential fit for a convolution workspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
