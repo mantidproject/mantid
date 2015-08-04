@@ -46,6 +46,7 @@ Mantid::Geometry::Instrument_sptr createTestInstrument(const Mantid::detid_t id,
 
   // Requires an instrument.
   auto inst = boost::make_shared<Instrument>();
+  inst->setName("TestName");
 
   // Source/sample
   auto *source = new ObjComponent("source");
