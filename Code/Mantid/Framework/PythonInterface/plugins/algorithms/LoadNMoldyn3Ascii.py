@@ -63,17 +63,17 @@ def _make_list(a, l1, l2):
 #pylint: disable=too-many-instance-attributes
 class LoadNMoldyn3Ascii(PythonAlgorithm):
 
-    _sam_path = None
+    _file_name = None
     _functions = None
     _out_ws = None
 
 
     def category(self):
-        return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic;Simulation'
+        return 'PythonAlgorithms;Inelastic;Simulation'
 
 
     def summary(self):
-        return 'Imports nMOLDYN simulations from CDL and ASCII files.'
+        return 'Imports functions from CDL and ASCII files output by nMOLDYN 3.'
 
 
     def PyInit(self):
@@ -129,7 +129,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         """
         Gets algorithm properties.
         """
-        self._sam_path = self.getPropertyValue('Filename')
+        self._file_name = self.getPropertyValue('Filename')
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
         raw_functions = self.getProperty('Functions').value
@@ -144,7 +144,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         """
 
         # Get some data about the file
-        path = self._sam_path
+        path = self._file_name
         base = os.path.basename(path)
         name = os.path.splitext(base)[0]
         ext = os.path.splitext(path)[1]
@@ -153,13 +153,13 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         if len(ext) > 1:
             ext = ext[1:]
 
-        logger.debug('Base filename for %s is %s' % (self._sam_path, name))
-        logger.debug('File type of %s is %s' % (self._sam_path, ext))
+        logger.debug('Base filename for %s is %s' % (self._file_name, name))
+        logger.debug('File type of %s is %s' % (self._file_name, ext))
 
         if not os.path.isfile(path):
             path = FileFinder.getFullPath(path)
 
-        logger.information('Got file path for %s: %s' % (self._sam_path, path))
+        logger.information('Got file path for %s: %s' % (self._file_name, path))
 
         # Open file and get data
         handle = open(path, 'r')

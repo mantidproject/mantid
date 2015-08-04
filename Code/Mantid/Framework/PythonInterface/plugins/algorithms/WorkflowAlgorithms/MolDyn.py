@@ -19,11 +19,14 @@ class MolDyn(PythonAlgorithm):
     _out_ws = None
     _mtd_plot = None
 
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic;Simulation'
 
+
     def summary(self):
-        return 'Imports nMOLDYN simulations from CDL and ASCII files.'
+        return 'Imports and processes simulated functions from nMOLDYN.'
+
 
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
