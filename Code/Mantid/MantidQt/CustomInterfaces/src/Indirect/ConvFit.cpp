@@ -926,8 +926,8 @@ void ConvFit::plotGuess() {
         m_uiForm.ckPlotGuess->isChecked()))
     return;
 
-  if(m_uiForm.cbFitType->currentIndex() > 2){
-	return;
+  if (m_uiForm.cbFitType->currentIndex() > 2) {
+    return;
   }
 
   bool tieCentres = (m_uiForm.cbFitType->currentIndex() > 1);
@@ -1132,7 +1132,7 @@ void ConvFit::singleFitComplete(bool error) {
       m_dblManager->setValue(m_properties[functionParam],
                              parameters[paramValue]);
     }
-
+    funcIndex++;
     pref = prefBase;
     pref += "f" + QString::number(funcIndex) + ".f" +
             QString::number(subIndex) + ".";
@@ -1154,7 +1154,6 @@ void ConvFit::singleFitComplete(bool error) {
                              parameters[paramValue]);
     }
   }
-  funcIndex++;
 
   m_pythonExportWsName = "";
 }
@@ -1468,12 +1467,12 @@ void ConvFit::updatePlotOptions() {
   QStringList plotOptions;
   plotOptions << "None";
 
-  if (deltaFunction && fitFunctionType < 3){
+  if (deltaFunction && fitFunctionType < 3) {
     plotOptions << "Height";
   }
- 
+
   QStringList params = QStringList();
-  
+
   if (fitFunctionType != 2) {
     params = getFunctionParameters(m_uiForm.cbFitType->currentText());
   } else {
@@ -1483,8 +1482,8 @@ void ConvFit::updatePlotOptions() {
     plotOptions.append(params);
   }
 
-  if(fitFunctionType != 0 || deltaFunction){
-	plotOptions << "All";
+  if (fitFunctionType != 0 || deltaFunction) {
+    plotOptions << "All";
   }
   m_uiForm.cbPlotType->addItems(plotOptions);
 }
