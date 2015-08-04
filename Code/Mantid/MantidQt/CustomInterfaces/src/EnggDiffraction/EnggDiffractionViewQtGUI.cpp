@@ -1,4 +1,6 @@
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
@@ -7,9 +9,11 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
+#include <Poco/Path.h>
 
 #include <QCheckBox>
 #include <QCloseEvent>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
 
@@ -42,7 +46,8 @@ void EnggDiffractionViewQtGUI::initLayout() {
 
   readSettings();
 
-  // basic UI setup
+  // basic UI setup, connect signals, etc.
+  doSetupGeneralWidgets();
   doSetupTabCalib();
   doSetupTabSettings();
 
@@ -58,7 +63,47 @@ void EnggDiffractionViewQtGUI::initLayout() {
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {}
 
-void EnggDiffractionViewQtGUI::doSetupTabSettings() {}
+void EnggDiffractionViewQtGUI::doSetupTabSettings() {
+  QString path =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  m_calibSettings.m_inputDirCalib = path.toStdString();
+  m_calibSettings.m_inputDirRaw = path.toStdString();
+  m_calibSettings.m_pixelCalibFilename = "";
+
+  // +scripts/Engineering/template_ENGINX_241391_236516_North_and_South_banks.par
+  Poco::Path templ =
+      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
+  templ = templ.makeParent();
+  templ.append("scripts");
+  templ.append("Engineering");
+  templ.append("template_ENGINX_241391_236516_North_and_South_banks.par");
+  m_calibSettings.m_templateGSAS_PRM = templ.toString();
+
+  // push button signals/slots
+  connect(m_uiTabSettings.pushButton_browse_input_dir_calib, SIGNAL(released()),
+          this, SLOT(browseInputDirCalib()));
+
+  connect(m_uiTabSettings.pushButton_browse_input_dir_raw, SIGNAL(released()),
+          this, SLOT(browseInputDirRaw()));
+
+  connect(m_uiTabSettings.pushButton_browse_pixel_calib_filename,
+          SIGNAL(released()), this, SLOT(browsePixelCalibFilename()));
+
+  connect(m_uiTabSettings.pushButton_browse_template_gsas_prm,
+          SIGNAL(released()), this, SLOT(browseTemplateGSAS_PRM()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
+  // change instrument
+  connect(m_ui.comboBox_instrument, SIGNAL(currentIndexChanged(int)), this,
+          SLOT(instrumentChanged(int)));
+
+  connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
+  // note connection to the parent window, otherwise an empty frame window
+  // may remain open and visible after this close
+  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
+          SLOT(close()));
+}
 
 void EnggDiffractionViewQtGUI::readSettings() {}
 
@@ -84,27 +129,113 @@ std::string EnggDiffractionViewQtGUI::getRBNumber() const {
 
 void EnggDiffractionViewQtGUI::loadCalibrationClicked() {}
 
+void EnggDiffractionViewQtGUI::browseInputDirCalib() {
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  QString dir = QFileDialog::getExistingDirectory(
+      this, tr("Open Directory"), prevPath,
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+  if (dir.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+  m_calibSettings.m_inputDirCalib = dir.toStdString();
+}
+
+void EnggDiffractionViewQtGUI::browseInputDirRaw() {
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirRaw);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  QString dir = QFileDialog::getExistingDirectory(
+      this, tr("Open Directory"), prevPath,
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+  if (dir.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+  m_calibSettings.m_inputDirRaw = dir.toStdString();
+}
+
+void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
+  const QString calExt =
+      QString("Supported formats: CSV, NXS "
+              "(*.csv *.nxs *.nexus);;"
+              "Comma separated values text file with calibration table "
+              "(*.csv);;"
+              "Nexus file with calibration table "
+              "(*.nxs *.nexus);;"
+              "Other extensions/all files (*.*)");
+
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
+  if (prevPath.isEmpty()) {
+    QString prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+
+  QString filename = (QFileDialog::getOpenFileName(
+      this, tr("Open pixel calibration (full calibration) file"), prevPath,
+      calExt));
+
+  m_calibSettings.m_pixelCalibFilename = filename.toStdString();
+}
+
+void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
+  const QString iparStr = QString("GSAS instrument parameters file "
+                            "(*.prm *.par *.tiff *.ipar *.iparam);;"
+                            "Other extensions/all files (*.*)");
+
+  QString prevPath = QString::fromStdString(m_calibSettings.m_templateGSAS_PRM);
+  QString path(QFileDialog::getOpenFileName(
+      this, tr("Open GSAS IPAR template file"), prevPath, iparStr));
+
+  if (path.isEmpty()) {
+    return;
+  }
+
+  m_calibSettings.m_templateGSAS_PRM = path.toStdString();
+}
+
+void EnggDiffractionViewQtGUI::instrumentChanged() {
+  QComboBox *inst = m_ui.comboBox_instrument;
+  if (!inst)
+    return;
+
+  m_currentInst = inst->currentText().toStdString();
+  m_presenter->notify(IEnggDiffractionPresenter::InstrumentChange);
+}
+
 void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
   int answer = QMessageBox::AcceptRole;
 
   QMessageBox msgBox;
-  msgBox.setWindowTitle("Close the engineering diffraction interface");
-  // with something like this, we'd have layout issues:
-  // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-  // msgBox.setDefaultButton(QMessageBox::Yes);
-  msgBox.setIconPixmap(QPixmap(":/win/unknown.png"));
-  QCheckBox confirmCheckBox("Always ask for confirmation", &msgBox);
-  confirmCheckBox.setCheckState(Qt::Checked);
-  msgBox.layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
-  msgBox.layout()->addWidget(&confirmCheckBox);
-  QPushButton *bYes = msgBox.addButton("Yes", QMessageBox::YesRole);
-  bYes->setIcon(style()->standardIcon(QStyle::SP_DialogYesButton));
-  QPushButton *bNo = msgBox.addButton("No", QMessageBox::NoRole);
-  bNo->setIcon(style()->standardIcon(QStyle::SP_DialogNoButton));
-  msgBox.setDefaultButton(bNo);
-  msgBox.setText("You are about to close this interface");
-  msgBox.setInformativeText("Are you sure?");
-  answer = msgBox.exec();
+  if (false /* TODO: get this from user settings */) {
+    msgBox.setWindowTitle("Close the engineering diffraction interface");
+    // with something like this, we'd have layout issues:
+    // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    // msgBox.setDefaultButton(QMessageBox::Yes);
+    msgBox.setIconPixmap(QPixmap(":/win/unknown.png"));
+    QCheckBox confirmCheckBox("Always ask for confirmation", &msgBox);
+    confirmCheckBox.setCheckState(Qt::Checked);
+    msgBox.layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
+    msgBox.layout()->addWidget(&confirmCheckBox);
+    QPushButton *bYes = msgBox.addButton("Yes", QMessageBox::YesRole);
+    bYes->setIcon(style()->standardIcon(QStyle::SP_DialogYesButton));
+    QPushButton *bNo = msgBox.addButton("No", QMessageBox::NoRole);
+    bNo->setIcon(style()->standardIcon(QStyle::SP_DialogNoButton));
+    msgBox.setDefaultButton(bNo);
+    msgBox.setText("You are about to close this interface");
+    msgBox.setInformativeText("Are you sure?");
+    answer = msgBox.exec();
+  }
 
   if (answer == QMessageBox::AcceptRole) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);

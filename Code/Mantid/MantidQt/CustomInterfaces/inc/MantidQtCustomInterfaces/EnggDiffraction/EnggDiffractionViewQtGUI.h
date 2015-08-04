@@ -1,13 +1,11 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
 
-#include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
@@ -73,13 +71,33 @@ public:
 
   virtual std::string getRBNumber() const;
 
+  EnggDiffCalibSettings currentCalibSettings() const {
+    return m_calibSettings;
+  }
+
+  std::string currentInstrument() const { return m_currentInst; }
+
 private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();
 
+  // slots of the settings tab/section of the interface
+  void browseInputDirCalib();
+  void browseInputDirRaw();
+  void browsePixelCalibFilename();
+  void browseTemplateGSAS_PRM();
+
+  // slots of the calibration tab/section of the interface
+
+  // slots of the general part of the interface
+  void instrumentChanged();
+  // show the standard Mantid help window with this interface's help
+  void openHelpWin();
+
 private:
   /// Setup the interface (tab UI)
   virtual void initLayout();
+  void doSetupGeneralWidgets();
   void doSetupTabCalib();
   void doSetupTabSettings();
 
@@ -91,9 +109,6 @@ private:
   // window (custom interface) close
   virtual void closeEvent(QCloseEvent *ev);
 
-  // show the standard Mantid help window with this interface's help
-  void openHelpWin();
-
   // here the view puts messages before notifying the presenter to show them
   std::vector<std::string> m_logMsgs;
 
@@ -104,6 +119,10 @@ private:
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
+
+  EnggDiffCalibSettings m_calibSettings;
+  // instrument selected (ENGIN-X, etc.)
+  std::string m_currentInst;
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
