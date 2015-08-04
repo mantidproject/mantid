@@ -16,20 +16,6 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::TimeSeriesProperty;
 
 namespace { // anonymous namespace
-/// this should match those in LoadPDCharacterizations
-const std::vector<std::string> COL_NAMES =
-{
-    std::string("frequency"),  // double
-    std::string("wavelength"), // double
-    std::string("bank"),       // integer
-    std::string("container"),  // string
-    std::string("vanadium"),   // string
-    std::string("empty"),      // string
-    std::string("d_min"),      // string
-    std::string("d_max"),      // string
-    std::string("tof_min"),    // double
-    std::string("tof_max")     // double
-};
 const std::string CHAR_PROP_NAME("Characterizations");
 const std::string FREQ_PROP_NAME("FrequencyLogNames");
 const std::string WL_PROP_NAME("WaveLengthLogNames");
@@ -66,7 +52,24 @@ const std::string PDDetermineCharacterizations::summary() const {
   return "Determines the characterizations of a workspace.";
 }
 
-//----------------------------------------------------------------------------------------------
+/**
+ * These should match those in LoadPDCharacterizations
+ * @return The list of expected column names
+ */
+std::vector<std::string> getColumnNames() {
+  std::vector<std::string> names;
+  names.push_back("frequency");  // double
+  names.push_back("wavelength"); // double
+  names.push_back("bank");       // integer
+  names.push_back("container");  // string
+  names.push_back("vanadium");   // string
+  names.push_back("empty");      // string
+  names.push_back("d_min");      // string
+  names.push_back("d_max");      // string
+  names.push_back("tof_min");    // double
+  names.push_back("tof_max");    // double
+  return names;
+}
 
 /// More intesive input checking. @see Algorithm::validateInputs
 std::map<std::string, std::string>
@@ -78,15 +81,16 @@ PDDetermineCharacterizations::validateInputs() {
   if (!bool(characterizations))
     return result;
 
+  std::vector<std::string> expectedNames = getColumnNames();
   std::vector<std::string> names = characterizations->getColumnNames();
-  if (names.size() < COL_NAMES.size()) { // allow for extra columns
+  if (names.size() < expectedNames.size()) { // allow for extra columns
     std::stringstream msg;
     msg << "Encountered invalid number of columns in "
         << "TableWorkspace. Found " << names.size() << " expected "
-        << COL_NAMES.size();
+        << expectedNames.size();
     result[CHAR_PROP_NAME] = msg.str();
   } else {
-    for (auto it = COL_NAMES.begin(); it != COL_NAMES.end(); ++it) {
+    for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
       if (std::find(names.begin(), names.end(), *it) == names.end()) {
         std::stringstream msg;
         msg << "Failed to find column named " << (*it);
@@ -340,12 +344,13 @@ void PDDetermineCharacterizations::exec() {
   overrideRunNumProperty("NormRun", "vanadium");
   overrideRunNumProperty("NormBackRun", "empty");
 
-  for (auto it = COL_NAMES.begin(); it != COL_NAMES.end(); ++it) {
+  std::vector<std::string> expectedNames = getColumnNames();
+  for (auto it = expectedNames.begin(); it != expectedNames.end(); ++it) {
     if (m_propertyManager->existsProperty(*it)) {
       g_log.debug() << (*it) << ":" << m_propertyManager->getPropertyValue(*it)
                     << "\n";
     } else {
-      std::cout << (*it) << " DOES NOT EXIST\n";
+      g_log.warning() << (*it) << " DOES NOT EXIST\n";
     }
   }
 }
