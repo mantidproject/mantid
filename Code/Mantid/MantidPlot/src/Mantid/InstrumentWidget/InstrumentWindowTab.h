@@ -1,6 +1,8 @@
 #ifndef INSTRUMENTWINDOWTAB_H
 #define INSTRUMENTWINDOWTAB_H
 
+#include "InstrumentWindowTypes.h"
+
 #include <QFrame>
 #include <boost/shared_ptr.hpp>
 
@@ -13,7 +15,7 @@ class ProjectionSurface;
 class QSettings;
 class QMenu;
 
-class InstrumentWindowTab : public QFrame
+class InstrumentWindowTab : public QFrame, public InstrumentWindowTypes
 {
     Q_OBJECT
 public:

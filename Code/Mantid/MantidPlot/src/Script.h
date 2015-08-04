@@ -93,7 +93,7 @@ class Script : public QObject
   void redirectStdOut(bool on) { m_redirectOutput = on; }
 
   /// Create a list of keywords for the code completion API
-  virtual void generateAutoCompleteList() {};
+  virtual void generateAutoCompleteList() {}
   // Does the code compile to a complete statement, i.e no more input is required
   virtual bool compilesToCompleteStatement(const QString & code) const = 0;
 
@@ -106,6 +106,8 @@ public slots:
   bool execute(const ScriptCode & code);
   /// Execute the code asynchronously, returning immediately after the execution has started
   QFuture<bool> executeAsync(const ScriptCode & code);
+  /// Request that execution of this script be aborted
+  void abort();
 
   /// Asks Mantid to release all free memory
   void releaseFreeMemory();
@@ -113,13 +115,13 @@ public slots:
   void setNotExecuting();
   /// Sets the execution mode to Running to indicate something is running
   void setIsRunning();
- 
+
   // local variables
   virtual bool setQObject(QObject*, const char*) { return false; }
   virtual bool setInt(int, const char*) { return false; }
   virtual bool setDouble(double, const char*) { return false; }
   virtual void clearLocals() {}
-  
+
 signals:
   /// A signal defining when this script has started executing
   void started(const QString & message);
@@ -133,7 +135,7 @@ signals:
   void currentLineChanged(int lineno, bool error);
   // Signal that new keywords are available
   void autoCompleteListGenerated(const QStringList & keywords);
-  
+
 protected:
   /// Return the true line number by adding the offset
   inline int getRealLineNo(const int codeLine) const { return codeLine + m_code.offset(); }
@@ -147,6 +149,8 @@ protected:
   virtual QVariant evaluateImpl() = 0;
   /// Execute the Code, returning false on an error / exception.
   virtual bool executeImpl() = 0;
+  /// Implementation of the abort request
+  virtual void abortImpl() = 0;
 
 private:
   /**

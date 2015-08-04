@@ -1,4 +1,5 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,too-many-locals,too-many-arguments
+
 from IndirectImport import import_mantidplot
 MTD_PLOT = import_mantidplot()
 from IndirectCommon import *
@@ -81,7 +82,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd,
                     for i in xrange(specMin, specMax+1)]
 
     fit_args = dict()
-    if 'DS' in ftype or 'DC' in ftype:
+    if 'DS' in ftype or 'DC' in ftype or 'SFT' in ftype:
         fit_args['PassWSIndexToFunction'] = True
 
     PlotPeakByLogValue(Input=';'.join(input_params),
@@ -107,6 +108,8 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd,
         parameter_names = ['Height', 'Intensity', 'Radius', 'Diffusion', 'Shift']
     elif 'DC' in ftype:
         parameter_names = ['Height', 'Intensity', 'Radius', 'Decay', 'Shift']
+    elif 'SFT' in ftype:
+        parameter_names = ['height', 'tau', 'beta']
     else:
         parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
 

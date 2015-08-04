@@ -1,8 +1,9 @@
 #pylint: disable=invalid-name
-import os
-
+#pylint: disable=too-many-arguments
+# R0913: Too many arguments - strictly for write_GSAS_iparam_file()
 from mantid.api import *
 import mantid.simpleapi as sapi
+
 # numpy needed only for Vanadium calculations, at the moment
 import numpy as np
 
@@ -44,7 +45,7 @@ def readInExpectedPeaks(filename, expectedGiven):
             if [] == expectedGiven:
                 raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
                                  filename + "', and no expected peaks were given in the property "
-                                     "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
+                                 "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
             expectedPeaksD = sorted(expectedGiven)
 
         else:
@@ -82,13 +83,13 @@ def getWsIndicesFromInProperties(ws, bank, detIndices):
         indices = getWsIndicesForBank(ws, bank)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
-                                "bank passed: %s. Please check the inputs." % bank)
+                               "bank passed: %s. Please check the inputs." % bank)
         return indices
     elif detIndices:
         indices = parseSpectrumIndices(ws, detIndices)
         if not indices:
             raise RuntimeError("Unable to find a meaningful list of workspace indices for the "
-                                "range(s) of detectors passed: %s. Please check the inputs." % detIndices)
+                               "range(s) of detectors passed: %s. Please check the inputs." % detIndices)
         return indices
     else:
         raise ValueError("You have not given any value for the properties 'Bank' and 'DetectorIndices' "
@@ -147,6 +148,7 @@ def getDetIDsForBank(bank):
 
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
+    import os
     groupingFilePath = os.path.join(sapi.config.getInstrumentDirectory(),
                                     'Grouping', 'ENGINX_Grouping.xml')
 
@@ -259,6 +261,81 @@ def sumSpectra(parent, ws):
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value
+
+def write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
+                                  vanadium_run=236516, template_file=None):
+    """
+    Produces and writes an ENGIN-X instrument parameter file for GSAS
+    (in the GSAS iparam format, as partially described in the GSAS
+    manual). It simply uses a template (found in template_path) where
+    some values are replaced with the values (difc, zero) passed to
+    this function.
+
+    Possible extensions for the file are .par (used here as default),
+    .prm, .ipar, etc.
+
+    @param output_file :: name of the file where to write the output
+    @param difc :: list of DIFC values, one per bank, to pass on to GSAS
+                   (as produced by EnggCalibrate)
+    @param zero :: list of TZERO values, one per bank, to pass on to GSAS
+                   (also from EnggCalibrate)
+    @param ceria_run :: number of the ceria (CeO2) run used for this calibration.
+                        this number goes in the file and should also be used to
+                        name the file
+    @param vanadium_run :: number of the vanadium (VNb) run used for this
+                           calibration. This number goes in the file and should
+                           also be used to name the file.
+    @param template_file :: file to use as template (with relative or full path)
+
+    @returns
+
+    """
+    if not isinstance(difc, list) or not isinstance(zero, list):
+        raise ValueError("The parameters difc and zero must be lists, with as many elements as "
+                         "banks")
+
+    if len(difc) != len(zero):
+        raise ValueError("The lengths of the difc and zero lists must be the same")
+
+    if not template_file:
+        import os
+        template_file = os.path.join(os.path.dirname(__file__),
+                                     'template_ENGINX_241391_236516_North_and_South_banks.par')
+
+    temp_lines = []
+    with open(template_file) as tf:
+        temp_lines = tf.readlines()
+
+
+    def replace_patterns(line, patterns, replacements):
+        """
+        If line starts with any of the strings passed in the list 'pattern', return the
+        corresponding 'replacement'
+        """
+        for idx, pat in enumerate(patterns):
+            if line[0:len(pat)] == pat:
+                return replacements[idx]
+
+        return line
+
+    # need to replace two types of lines/patterns:
+    # - instrument constants/parameters (ICONS)
+    # - instrument calibration comment with run numbers (CALIB)
+    output_lines = []
+    for bank_idx in range(0, len(difc)):
+        patterns = ["INS  %d ICONS"%bank_idx,
+                    "INS    CALIB"]
+        difa = 0.0
+        # the ljust(80) ensure a length of 80 characters for the lines (GSAS rules...)
+        replacements = [ ("INS  %d ICONS  %.2f    %.2f    %.2f" %
+                          (bank_idx, difc[bank_idx], difa, zero[bank_idx])).ljust(80) + '\r\n',
+                         ("INS    CALIB   %d   %d ceo2" %
+                          (ceria_run, vanadium_run)).ljust(80) + '\r\n']
+
+        output_lines = [ replace_patterns(line, patterns, replacements) for line in temp_lines]
+
+    with open(output_file, 'w') as of:
+        of.writelines(output_lines)
 
 # ----------------------------------------------------------------------------------------
 # Functions for Vanadium corrections follow. These could be converted into an algorithm

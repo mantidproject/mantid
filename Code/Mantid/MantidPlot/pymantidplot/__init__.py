@@ -20,7 +20,7 @@ import mantid.api
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker,
-                  GraphOptions, InstrumentWindow, InstrumentWindowPickTab, InstrumentWindowMaskTab)
+                  GraphOptions, InstrumentWindow, InstrumentWindowRenderTab, InstrumentWindowPickTab, InstrumentWindowMaskTab)
 
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
