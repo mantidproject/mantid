@@ -55,7 +55,7 @@ public:
   }
 
   void
-  test_that_error_is_produced_if_string_does_not_contain_any_of_substrings() {
+  test_that_error_is_produced_if_string_does_not_contain_all_the_required_substrings() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back("not");
@@ -69,7 +69,7 @@ public:
   }
 
   void
-  test_that_error_is_produced_if_string_does_not_contain_every_substrings() {
+  test_that_error_is_produced_if_string_only_contains_some_of_the_substrings() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back("not");
@@ -89,6 +89,16 @@ public:
     validator.setRequiredStrings(required);
     const std::string input = "This, is a test string";
     TS_ASSERT_EQUALS("", validator.isValid(input));
+  }
+
+  void test_that_an_empty_string_produces_an_error() {
+    StringContainsValidator validator;
+    auto required = std::vector<std::string>();
+    required.push_back(",");
+    validator.setRequiredStrings(required);
+    const std::string input = "";
+    const std::string error = "A value must be entered for this parameter.";
+    TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 };
 
