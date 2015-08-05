@@ -115,6 +115,13 @@ def coords_of_str_index(string, index):
         if curr_pos + len(line) > index:
             return linenum + 1, index-curr_pos
         curr_pos += len(line)
+
+def ensureDirectoriesExist(path):
+    try:
+        os.makedirs(path)
+    except OSError:
+        pass
+
 ################################################################################################################
 
 parser = argparse.ArgumentParser(description='Extracts code blocks marked as python from mediawiki pages and tests they run.')
@@ -136,21 +143,27 @@ if args.i is None:
 else:
     urlList.append(args.i)
 
+outputDir = None
+if args.o is not None:
+    ensureDirectoriesExist(args.o)
+    if not os.path.isdir(args.o):
+        print "Output directory not found", args.o
+        print "Output will be to stdout"
+    else:
+        outputDir = args.o
+
 for url in urlList:
     pageName = "mwTest_" + url.replace(" ","_").replace(":","")
     print "Parsing ", pageName,
 
-    outputDir = None
-    if args.o is not None:
-        if not os.path.isdir(args.o):
-            print "Output directory not found", args.o
-        else:
-            outputDir = os.path.join(args.o, pageName+".rst")
-    print "->", outputDir
+    outputFile = None
+    if outputDir is not None:
+        outputFile = os.path.join(outputDir, pageName+".rst")
+    print "->", outputFile
 
     #run pandoc and get the output in rst
     mediawikiText = readWebPage(convertURLToRaw(baseUrl + url))
-    writeTestRst(outputDir,mediawikiText,pageName)
+    writeTestRst(outputFile,mediawikiText,pageName)
 
 
 
