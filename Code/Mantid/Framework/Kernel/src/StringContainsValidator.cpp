@@ -40,9 +40,9 @@ StringContainsValidator::checkValidity(const std::string &value) const {
     if (value.empty()) {
       error += "A value must be entered for this parameter.";
     } else {
-      int validityCount = 0;
+      size_t validityCount = 0;
       const size_t total = m_requiredStrings.size();
-      for (int i = 0; i < total; i++) {
+      for (size_t i = 0; i < total; i++) {
         auto position = value.find(m_requiredStrings.at(i));
         if (position != std::string::npos) {
           validityCount++;
