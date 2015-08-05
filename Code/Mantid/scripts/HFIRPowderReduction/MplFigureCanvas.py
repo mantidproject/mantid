@@ -202,7 +202,7 @@ class MplFigureCanvas(QtGui.QWidget):
         if self._myLineMarkerColorIndex == len(self._myLineMarkerColorList):
             self._myLineMarkerColorIndex = 0
 
-        return (marker, color)
+        return marker, color
     
     def resetLineColorStyle(self):
         """ Reset the auto index for line's color and style 
@@ -254,8 +254,7 @@ class Qt4MplCanvas(FigureCanvas):
         self.setParent(parent)
 
         # Set size policy to be able to expanding and resizable with frame
-        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,\
-                QtGui.QSizePolicy.Expanding)
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 
         FigureCanvas.updateGeometry(self)
 
@@ -362,8 +361,12 @@ class Qt4MplCanvas(FigureCanvas):
         # yticks = [1, 4, 23, 24, 30]
         # self.axes.set_yticks(yticks)
 
+        print "[DBNOW] Before imshow(), number of axes = %d" % (len(self.fig.axes))
+
         # show image
         imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
+        print "[DBNOW] After imshow(), number of axes = %d" % (len(self.fig.axes))
+
         # set y ticks as an option:
         if yticklabels is not None:
             # it will always label the first N ticks even image is zoomed in
@@ -380,6 +383,7 @@ class Qt4MplCanvas(FigureCanvas):
             self.colorBar = self.fig.colorbar(imgplot)
         else:
             self.colorBar.update_bruteforce(imgplot)
+        print "[DBNOW] After colorbar is added, number of axes = %d" % (len(self.fig.axes))
 
         # Flush...
         self._flush()
@@ -418,7 +422,10 @@ class Qt4MplCanvas(FigureCanvas):
         for ikey in self._lineDict.keys():
             plot = self._lineDict[ikey]
             if plot is not None:
-                self.axes.lines.remove(plot)
+                try:
+                    self.axes.lines.remove(plot)
+                except ValueError as e:
+                    print "[Error] Plot %s is not in axes.lines which has %d lines." % (str(plot), len(self.axes.lines))
                 self._lineDict[ikey] = None
             # ENDIF(plot)
         # ENDFOR
@@ -442,6 +449,12 @@ class Qt4MplCanvas(FigureCanvas):
         if len(self.fig.axes) > 1:
             self.fig.delaxes(self.fig.axes[1])
             self.colorBar = None
+            # This clears the space claimed by color bar but destroys sub_plot too.
+            self.fig.clear()
+            # Re-create subplot
+            self.axes = self.fig.add_subplot(111)
+        if len(self.fig.axes) > 0:
+            print "[DBNOW] Type of axes[0] = %s" % (str(type(self.fig.axes[0])))
 
         # flush/commit
         self._flush()

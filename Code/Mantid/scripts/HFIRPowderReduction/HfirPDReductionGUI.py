@@ -591,9 +591,11 @@ class MainWindow(QtGui.QMainWindow):
         tabtext = str(self.ui.tabWidget.tabText(itab))
         print "[DB] Current active tab is No. %d as %s." % (itab, tabtext)
 
+        # Rule out unsupported tab
         if itab == 5:
             # 'advanced'
-            self._logNotice("Tab %s does not support 'Load Data'. Request is ambiguous." % (tabtext))
+            msg = "Tab %s does not support 'Load Data'. Request is ambiguous." % tabtext
+            QtGui.QMessageBox.information(self, "Click!", msg)
             return
 
         # Get exp number and scan number
@@ -648,8 +650,8 @@ class MainWindow(QtGui.QMainWindow):
         localdir = os.path.dirname(datafilename)
         try:
             status, returnbody = self._myControl.retrieveCorrectionData(instrument='HB2A',
-                                                                    exp=expno, scan=scanno,
-                                                                    localdatadir=localdir)
+                                                                        exp=expno, scan=scanno,
+                                                                        localdatadir=localdir)
         except NotImplementedError as e:
             errmsg = str(e)
             if errmsg.count('m1') > 0:
@@ -737,7 +739,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Parse SPICE data to MDEventWorkspaces
         try:
-            print "Det EFF Table WS: ", str(detefftablews)
+            print "Det Efficiency Table WS: ", str(detefftablews)
             execstatus = self._myControl.parseSpiceData(expno, scanno, detefftablews)
             if execstatus is False:
                 cause = "Parse data failed."
@@ -767,6 +769,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set up some widgets for raw detector data.  Won't be applied to tab 3
         if itab != 3:
+            QtGui.QMessageBox.information(self, 'Debug Return', 'Time to set up logs')
             floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
             self.ui.comboBox_indvDetXLabel.clear()
             self.ui.comboBox_indvDetXLabel.addItem("2theta/Scattering Angle")
@@ -2419,7 +2422,8 @@ class MainWindow(QtGui.QMainWindow):
         """ Log error information
         """
         msg = '[Notice] %s' % loginfo
-        QtGui.QMessageBox.information(self, "Click!", msg)
+        print msg
+        # QtGui.QMessageBox.information(self, "Click!", msg)
 
 
     def _logWarning(self, warning_info):
