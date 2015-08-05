@@ -129,7 +129,11 @@
        </widget>
       </item>
       <item row="2" column="1" colspan="4">
-       <widget class="QLineEdit" name="lineEdit_current_calib_path"/>
+       <widget class="QLineEdit" name="lineEdit_current_calib_path">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -88,7 +88,7 @@ public:
   /**
    * What's the instrument this interface is using?
    *
-   * @param current instrumentselection
+   * @return current instrument selection
    */
   virtual std::string currentInstrument() const = 0;
 

@@ -34,7 +34,14 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit_input_dir_calib"/>
+          <widget class="QLineEdit" name="lineEdit_input_dir_calib">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="0" column="2">
           <widget class="QPushButton" name="pushButton_browse_input_dir_calib">
@@ -51,7 +58,11 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEdit_input_dir_raw"/>
+          <widget class="QLineEdit" name="lineEdit_input_dir_raw">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="1" column="2">
           <widget class="QPushButton" name="pushButton_browse_input_dir_raw">
@@ -83,7 +94,11 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit_pixel_calib_filename"/>
+          <widget class="QLineEdit" name="lineEdit_pixel_calib_filename">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="0" column="2">
           <widget class="QPushButton" name="pushButton_browse_pixel_calib_filename">
@@ -102,7 +117,11 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="2" column="1">
-          <widget class="QLineEdit" name="lineEdit_template_gsas_prm"/>
+          <widget class="QLineEdit" name="lineEdit_template_gsas_prm">
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item row="2" column="2">
           <widget class="QPushButton" name="pushButton_browse_template_gsas_prm">
