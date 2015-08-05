@@ -20,28 +20,28 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-	void testInit()
-	{
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-		TS_ASSERT_THROWS_NOTHING( invstTypesList.initialize());
-		TS_ASSERT( invstTypesList.isInitialized() );
-	}
+  void testInit()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+    TS_ASSERT_THROWS_NOTHING( invstTypesList.initialize());
+    TS_ASSERT( invstTypesList.isInitialized() );
+  }
 
-	void testListInvestigationTypes()
-	{
-		TS_ASSERT( ICatTestHelper::login() );
+  void testListInvestigationTypes()
+  {
+    TS_ASSERT( ICatTestHelper::login() );
 
-		if (!invstTypesList.isInitialized() ) invstTypesList.initialize();
-		//invstTypesList.setPropertyValue("OutputWorkspace","investigationtypes_list");
-						
-		TS_ASSERT_THROWS_NOTHING(invstTypesList.execute());
-		TS_ASSERT( invstTypesList.isExecuted() );
+    if (!invstTypesList.isInitialized() ) invstTypesList.initialize();
+    //invstTypesList.setPropertyValue("OutputWorkspace","investigationtypes_list");
 
-		ICatTestHelper::logout();
-	}
+    TS_ASSERT_THROWS_NOTHING(invstTypesList.execute());
+    TS_ASSERT( invstTypesList.isExecuted() );
+
+    ICatTestHelper::logout();
+  }
 private:
-	CatalogListInvestigationTypes invstTypesList;
+  CatalogListInvestigationTypes invstTypesList;
 };
 
- 
+
 #endif

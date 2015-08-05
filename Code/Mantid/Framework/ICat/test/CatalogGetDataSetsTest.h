@@ -20,28 +20,28 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-	void testInit()
-	{
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+  void testInit()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
-		TS_ASSERT_THROWS_NOTHING( datasets.initialize());
-		TS_ASSERT( datasets.isInitialized() );
-	}
+    TS_ASSERT_THROWS_NOTHING( datasets.initialize());
+    TS_ASSERT( datasets.isInitialized() );
+  }
 
-	void testgetDataFilesExecutes()
-	{	
-		TS_ASSERT( ICatTestHelper::login() );
+  void testgetDataFilesExecutes()
+  {
+    TS_ASSERT( ICatTestHelper::login() );
 
-		if(!datasets.isInitialized()) datasets.initialize();
-		datasets.setPropertyValue("InvestigationId","12576918");
-		datasets.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
-				
-		TS_ASSERT_THROWS_NOTHING(datasets.execute());
-		TS_ASSERT( datasets.isExecuted() );
+    if(!datasets.isInitialized()) datasets.initialize();
+    datasets.setPropertyValue("InvestigationId","12576918");
+    datasets.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
 
-		ICatTestHelper::logout();
-	}
+    TS_ASSERT_THROWS_NOTHING(datasets.execute());
+    TS_ASSERT( datasets.isExecuted() );
+
+    ICatTestHelper::logout();
+  }
 private:
-	CatalogGetDataSets datasets;
+  CatalogGetDataSets datasets;
 };
 #endif

@@ -54,161 +54,162 @@ public:
 
   }
 
-	void testInit()
-	{
-		TS_ASSERT_THROWS_NOTHING( downloadobj.initialize());
-		TS_ASSERT( downloadobj.isInitialized() );
-	}
-	void xtestDownLoadDataFile()
-	{		
-		TS_ASSERT( ICatTestHelper::login() );
-				
-		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("RunRange", "100-102");
-		searchobj.setPropertyValue("Instrument","HET");
-		searchobj.setPropertyValue("OutputWorkspace","investigations");
-				
-		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
-		TS_ASSERT( searchobj.isExecuted() );
+    void testInit()
+    {
+        TS_ASSERT_THROWS_NOTHING( downloadobj.initialize());
+        TS_ASSERT( downloadobj.isInitialized() );
+    }
+    void xtestDownLoadDataFile()
+    {
+        TS_ASSERT( ICatTestHelper::login() );
 
-		if ( !invstObj.isInitialized() ) invstObj.initialize();
-		invstObj.setPropertyValue("InvestigationId","13539191");
-		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
-		//		
-		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
-		TS_ASSERT( invstObj.isExecuted() );
-		
-		clock_t start=clock();
-		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
+        if ( !searchobj.isInitialized() ) searchobj.initialize();
+        searchobj.setPropertyValue("RunRange", "100-102");
+        searchobj.setPropertyValue("Instrument","HET");
+        searchobj.setPropertyValue("OutputWorkspace","investigations");
 
-		downloadobj.setPropertyValue("Filenames","HET00097.RAW");
-		
-		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
+        TS_ASSERT_THROWS_NOTHING(searchobj.execute());
+        TS_ASSERT( searchobj.isExecuted() );
 
-		clock_t end=clock();
-		float diff = float(end - start)/CLOCKS_PER_SEC;
+        if ( !invstObj.isInitialized() ) invstObj.initialize();
+        invstObj.setPropertyValue("InvestigationId","13539191");
+        invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
+        //
+        TS_ASSERT_THROWS_NOTHING(invstObj.execute());
+        TS_ASSERT( invstObj.isExecuted() );
 
-		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
-		filepath += "download_time.txt";
+        clock_t start=clock();
+        if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
-		std::ofstream ofs(filepath.c_str(), std::ios_base::out );
-		if ( ofs.rdstate() & std::ios::failbit )
-		{
-			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
-		}
-		ofs<<"Time taken to  download files with investigation id 12576918 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
-		
-		ICatTestHelper::logout();
+        downloadobj.setPropertyValue("Filenames","HET00097.RAW");
 
-		TS_ASSERT( downloadobj.isExecuted() );
-		//delete the file after execution
-		//remove("HET00097.RAW");
+        TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
 
-		AnalysisDataService::Instance().remove("investigations");
-		AnalysisDataService::Instance().remove("investigation");
+        clock_t end=clock();
+        float diff = float(end - start)/CLOCKS_PER_SEC;
+
+        std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
+        filepath += "download_time.txt";
+
+        std::ofstream ofs(filepath.c_str(), std::ios_base::out );
+        if ( ofs.rdstate() & std::ios::failbit )
+        {
+            throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
+        }
+        ofs<<"Time taken to  download files with investigation id 12576918 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+
+        ICatTestHelper::logout();
+
+        TS_ASSERT( downloadobj.isExecuted() );
+        //delete the file after execution
+        //remove("HET00097.RAW");
+
+        AnalysisDataService::Instance().remove("investigations");
+        AnalysisDataService::Instance().remove("investigation");
     // Clean up test files
     if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
-	}
+    }
 
-	void xtestDownLoadNexusFile()
-	{				
-		TS_ASSERT( ICatTestHelper::login() );
+    void xtestDownLoadNexusFile()
+    {
+      TS_ASSERT( ICatTestHelper::login() );
 
-		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("RunRange", "17440-17556");
-		searchobj.setPropertyValue("Instrument","EMU");
-		searchobj.setPropertyValue("OutputWorkspace","investigations");
-				
-		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
-		TS_ASSERT( searchobj.isExecuted() );
+      if ( !searchobj.isInitialized() ) searchobj.initialize();
+      searchobj.setPropertyValue("RunRange", "17440-17556");
+      searchobj.setPropertyValue("Instrument","EMU");
+      searchobj.setPropertyValue("OutputWorkspace","investigations");
 
-		if ( !invstObj.isInitialized() ) invstObj.initialize();
-	
-		invstObj.setPropertyValue("InvestigationId", "24070400");
+      TS_ASSERT_THROWS_NOTHING(searchobj.execute());
+      TS_ASSERT( searchobj.isExecuted() );
 
-		invstObj.setPropertyValue("OutputWorkspace","investigation");
-		//		
-		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
-		TS_ASSERT( invstObj.isExecuted() );
-		
-		clock_t start=clock();
-		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
+      if ( !invstObj.isInitialized() ) invstObj.initialize();
 
-		downloadobj.setPropertyValue("Filenames","EMU00017452.nxs");
-		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
+      invstObj.setPropertyValue("InvestigationId", "24070400");
 
-		clock_t end=clock();
-		float diff = float(end -start)/CLOCKS_PER_SEC;
-		
-		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
-		filepath += "download_time.txt";
-		
-		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
-		if ( ofs.rdstate() & std::ios::failbit )
-		{
-			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
-		}
-		ofs<<"Time taken to download files with investigation id 24070400 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
-		//ofs.close();
-		
-		ICatTestHelper::logout();
+      invstObj.setPropertyValue("OutputWorkspace","investigation");
 
-		TS_ASSERT( downloadobj.isExecuted() );
-		//delete the file after execution
-		//remove("EMU00017452.nxs");
-		AnalysisDataService::Instance().remove("investigations");
-		AnalysisDataService::Instance().remove("investigation");
-    // Clean up test files
-    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
-	}
+      TS_ASSERT_THROWS_NOTHING(invstObj.execute());
+      TS_ASSERT( invstObj.isExecuted() );
 
-	void xtestDownLoadDataFile_Merlin()
-	{
-		TS_ASSERT( ICatTestHelper::login() );
+      clock_t start=clock();
+      if ( !downloadobj.isInitialized() ) downloadobj.initialize();
 
-		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("RunRange", "600-601");
-		searchobj.setPropertyValue("Instrument","MERLIN");
-		searchobj.setPropertyValue("OutputWorkspace","investigations");
-				
-		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
-		TS_ASSERT( searchobj.isExecuted() );
+      downloadobj.setPropertyValue("Filenames","EMU00017452.nxs");
+      TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
 
-		if ( !invstObj.isInitialized() ) invstObj.initialize();
-		invstObj.setPropertyValue("InvestigationId","24022007");
-		invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
-		//		
-		TS_ASSERT_THROWS_NOTHING(invstObj.execute());
-		TS_ASSERT( invstObj.isExecuted() );
-		
-		clock_t start=clock();
-		if ( !downloadobj.isInitialized() ) downloadobj.initialize();
+      clock_t end=clock();
+      float diff = float(end -start)/CLOCKS_PER_SEC;
 
-		downloadobj.setPropertyValue("Filenames","MER00599.raw");
-			
-		TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
+      std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
+      filepath += "download_time.txt";
 
-		clock_t end=clock();
-		float diff = float(end - start)/CLOCKS_PER_SEC;
+      std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
+      if ( ofs.rdstate() & std::ios::failbit )
+      {
+        throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
+      }
+      ofs<<"Time taken to download files with investigation id 24070400 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+      //ofs.close();
 
-		std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
-		filepath += "download_time.txt";
+      ICatTestHelper::logout();
 
-		std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
-		if ( ofs.rdstate() & std::ios::failbit )
-		{
-			throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
-		}
-		ofs<<"Time taken to download files with investigation id 24022007 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
-		
-		ICatTestHelper::logout();
-						
-		TS_ASSERT( downloadobj.isExecuted() );
-		AnalysisDataService::Instance().remove("investigations");
-		AnalysisDataService::Instance().remove("investigation");
-    // Clean up test files
-    if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
-	}
+      TS_ASSERT( downloadobj.isExecuted() );
+      //delete the file after execution
+      //remove("EMU00017452.nxs");
+      AnalysisDataService::Instance().remove("investigations");
+      AnalysisDataService::Instance().remove("investigation");
+      // Clean up test files
+      if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
+    }
+
+    void xtestDownLoadDataFile_Merlin()
+    {
+      TS_ASSERT( ICatTestHelper::login() );
+
+      if ( !searchobj.isInitialized() ) searchobj.initialize();
+      searchobj.setPropertyValue("RunRange", "600-601");
+      searchobj.setPropertyValue("Instrument","MERLIN");
+      searchobj.setPropertyValue("OutputWorkspace","investigations");
+
+      TS_ASSERT_THROWS_NOTHING(searchobj.execute());
+      TS_ASSERT( searchobj.isExecuted() );
+
+      if ( !invstObj.isInitialized() ) invstObj.initialize();
+      invstObj.setPropertyValue("InvestigationId","24022007");
+      invstObj.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
+      //
+      TS_ASSERT_THROWS_NOTHING(invstObj.execute());
+      TS_ASSERT( invstObj.isExecuted() );
+
+      clock_t start=clock();
+      if ( !downloadobj.isInitialized() ) downloadobj.initialize();
+
+      downloadobj.setPropertyValue("Filenames","MER00599.raw");
+
+      TS_ASSERT_THROWS_NOTHING(downloadobj.execute());
+
+      clock_t end=clock();
+      float diff = float(end - start)/CLOCKS_PER_SEC;
+
+      std::string filepath=Kernel::ConfigService::Instance().getString("defaultsave.directory");
+      filepath += "download_time.txt";
+
+      std::ofstream ofs(filepath.c_str(), std::ios_base::out | std::ios_base::app);
+      if ( ofs.rdstate() & std::ios::failbit )
+      {
+        throw Mantid::Kernel::Exception::FileError("Error on creating File","download_time.txt");
+      }
+      ofs<<"Time taken to download files with investigation id 24022007 is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
+
+      ICatTestHelper::logout();
+
+      TS_ASSERT( downloadobj.isExecuted() );
+      AnalysisDataService::Instance().remove("investigations");
+      AnalysisDataService::Instance().remove("investigation");
+
+      // Clean up test files
+      if (Poco::File(filepath).exists()) Poco::File(filepath).remove();
+    }
 
    void xtestDownloaddataFile1()
    {
@@ -237,7 +238,7 @@ public:
 
      ofs<<"Time taken for http download from mantidwebserver over internet for a small file of size 1KB is "<<std::fixed << std::setprecision(2) << diff << " seconds" << std::endl;
 
-	 ICatTestHelper::logout();
+     ICatTestHelper::logout();
 
      //delete the file after execution
      remove("test.htm");

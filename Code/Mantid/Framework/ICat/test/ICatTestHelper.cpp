@@ -12,27 +12,27 @@ namespace ICatTestHelper
       return true;
     }
     else {
-	  logout();
-	  return false;
-	}
+      logout();
+      return false;
+    }
   }
 
   bool login()
   {
     Mantid::ICat::CatalogLogin loginobj;
-	loginobj.initialize();
-	loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+    loginobj.initialize();
+    loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
     loginobj.setPropertyValue("Password", "MantidTestUser4");
-	loginobj.setProperty("KeepSessionAlive", false);
-	loginobj.execute();
-	return loginobj.isExecuted();
+    loginobj.setProperty("KeepSessionAlive", false);
+    loginobj.execute();
+    return loginobj.isExecuted();
   }
 
   void logout()
   {
-	  Mantid::ICat::CatalogLogout logoutobj;
-	  logoutobj.initialize();
-	  logoutobj.execute();
+    Mantid::ICat::CatalogLogout logoutobj;
+    logoutobj.initialize();
+    logoutobj.execute();
   }
 
 }
