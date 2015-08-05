@@ -22,8 +22,9 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
-                         extract_child_ws_for_added_eventdata,
-                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG)
+                         extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
+                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
+                          can_load_as_event_workspace)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -140,7 +141,8 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
-            extra_options['EntryNumber'] = self._period
+            if not can_load_as_event_workspace(self._data_file):
+                extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
 
@@ -152,11 +154,8 @@ class LoadRun(object):
 
         # We need to check if we are dealing with a group workspace which is made up of added event data. Note that
         # we can also have a group workspace which is associated with period data, which don't want to deal with here.
-
         added_event_data_flag = False
         if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
-            if self._period != self.UNSET_PERIOD:
-                raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
             extract_child_ws_for_added_eventdata(outWs, appendix)
             added_event_data_flag = True
             # Reload the outWs, it has changed from a group workspace to an event workspace
@@ -164,6 +163,7 @@ class LoadRun(object):
 
         monitor_ws_name = workspace + appendix
 
+        # Handle simple EventWorkspace data
         if not added_event_data_flag:
             if isinstance(outWs, IEventWorkspace):
                 try:
@@ -176,6 +176,11 @@ class LoadRun(object):
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
 
+        # Handle Multi-period Event data
+        if not added_event_data_flag:
+            if isinstance(outWs, WorkspaceGroup) and len(outWs)>0 and isinstance(outWs[0], IEventWorkspace):
+                load_monitors_for_multiperiod_event_data(workspace=outWs, data_file=self._data_file, monitor_appendix= appendix)
+
         loader_name = ''
         try:
             last_algorithm = outWs.getHistory().lastAlgorithm()
@@ -187,7 +192,7 @@ class LoadRun(object):
             self._loadSampleDetails(workspace)
 
         if self._period != self.UNSET_PERIOD and isinstance(outWs, WorkspaceGroup):
-            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
+            outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period, appendix)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
 
@@ -313,7 +318,7 @@ class LoadRun(object):
 
         return
 
-    def _leaveSinglePeriod(self, workspace, period):
+    def _leaveSinglePeriod(self, workspace, period, appendix):
         groupW = mtd[workspace]
         if not isinstance(groupW, WorkspaceGroup):
             logger.warning("Invalid request for getting single period in a non group workspace")
@@ -322,14 +327,30 @@ class LoadRun(object):
             raise ValueError('Period number ' + str(period) + ' doesn\'t exist in workspace ' + groupW.getName())
         ws_name = groupW[period].name()
 
+        # If we are dealing with event data, then we also want to extract and rename the according monitor data set
+        monitor_name = ""
+        if isEventWorkspace(groupW[period]):
+            # Check if the monitor ws exists and extract it
+            expected_mon_name = ws_name + appendix
+            expected_mon_group_name = groupW.name() + appendix
+            if mtd.doesExist(expected_mon_name):
+                monitor_name = expected_mon_name
+            if mtd.doesExist(expected_mon_group_name):
+                group_mon_ws = mtd[expected_mon_group_name]
+                group_mon_ws.remove(expected_mon_name)
+                DeleteWorkspace(expected_mon_group_name)
+
         # remove this workspace from the group
         groupW.remove(ws_name)
         # remove the entire group
         DeleteWorkspace(groupW)
 
         new_name = self._get_workspace_name(period)
+        new_mon_name = new_name + appendix
         if new_name != ws_name:
             RenameWorkspace(ws_name, OutputWorkspace=new_name)
+        if monitor_name != "" and new_mon_name != monitor_name:
+            RenameWorkspace(monitor_name, OutputWorkspace=new_mon_name)
         return new_name
 
     def _extract_run_details(self, run_string):

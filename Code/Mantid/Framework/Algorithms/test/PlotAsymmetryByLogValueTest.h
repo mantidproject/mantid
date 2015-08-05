@@ -43,7 +43,7 @@ public:
     alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
     alg.setPropertyValue("LogValue","Field_Danfysik");
     alg.setPropertyValue("Red","2");
-  alg.setPropertyValue("Green","1");
+    alg.setPropertyValue("Green", "1");
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -216,8 +216,7 @@ public:
     TS_ASSERT_DELTA(Y[0], 0.15214, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.14492, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
-    AnalysisDataService::Instance().remove(deadTimeWs);
+    AnalysisDataService::Instance().clear();
     Poco::File(deadTimeFile).remove();
   }
 
@@ -252,11 +251,88 @@ public:
     TS_ASSERT_DELTA(Y[0], 0.151202, 0.00001);
     TS_ASSERT_DELTA(Y[1], 0.144008, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
-  void test_LogValueFunction ()
+    void test_customGrouping()
   {
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue","run_number");
+    alg.setPropertyValue("Red","2");
+    alg.setPropertyValue("Green","1");
+    alg.setPropertyValue("ForwardSpectra","1-16,33-48");
+    alg.setPropertyValue("BackwardSpectra","17-32,49-64");
+    alg.setPropertyValue("DeadTimeCorrType","None");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    if(!alg.isExecuted()) return;
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "PlotAsymmetryByLogValueTest_WS"));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),4);
+
+    const Mantid::MantidVec& YDiff = outWs->readY(0);
+    const Mantid::MantidVec& EDiff = outWs->readE(0);
+    const Mantid::MantidVec& YSum = outWs->readY(3);
+    const Mantid::MantidVec& ESum = outWs->readE(3);
+
+    TS_ASSERT_DELTA(YDiff[0], 0.001135, 0.000001);
+    TS_ASSERT_DELTA(EDiff[0], 0.001805, 0.000001);
+    TS_ASSERT_DELTA(YDiff[1], -0.000151, 0.000001);
+    TS_ASSERT_DELTA(EDiff[1], 0.001806, 0.000001);
+
+    TS_ASSERT_DELTA(YSum[0], 0.170842, 0.000001);
+    TS_ASSERT_DELTA(ESum[0], 0.001805, 0.000001);
+    TS_ASSERT_DELTA(YSum[1], 0.171467, 0.000001);
+    TS_ASSERT_DELTA(ESum[1], 0.001806, 0.000001);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_customTimeLimits() {
+    const std::string ws = "Test_customTimeLimits";
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("TimeMin", "0.5");
+    alg.setPropertyValue("TimeMax", "0.6");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(), 1);
+
+    const Mantid::MantidVec &Y = outWs->readY(0);
+    TS_ASSERT_DELTA(Y[0], 0.14700, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.13042, 0.00001);
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_LogValueFunction() {
     const std::string ws = "Test_LogValueFunction";
 
     PlotAsymmetryByLogValue alg;
@@ -290,7 +366,7 @@ public:
     TS_ASSERT_DELTA(X[0], 178.740476, 0.00001);
     TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);
 
-    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().clear();
   }
 
   void test_invalidRunNumbers ()
@@ -307,6 +383,40 @@ public:
 
     TS_ASSERT_THROWS (alg.execute(),std::runtime_error);
     TS_ASSERT (!alg.isExecuted());
+
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_singlePeriodGreen() {
+    // Load a single-period dataset and set the green period to a
+    // number. The algorithm should ignore the supplied green and/or red periods
+    // as the input nexus file is single-period
+    const std::string ws = "Test_singlePeriodGreen";
+
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("FirstRun", "emu00006473.nxs");
+    alg.setPropertyValue("LastRun", "emu00006473.nxs");
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("Red", "3");
+    alg.setPropertyValue("Green", "1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 1);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
+
+    TS_ASSERT_EQUALS(outWS->readX(0)[0], 6473);
+    TS_ASSERT_DELTA(outWS->readY(0)[0], 0.283444, 0.000001);
+    TS_ASSERT_DELTA(outWS->readE(0)[0], 0.000145, 0.000001);
+
+    AnalysisDataService::Instance().clear();
   }
 
 private:

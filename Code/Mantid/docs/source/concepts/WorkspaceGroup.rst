@@ -21,6 +21,8 @@ Un-grouping Workspaces
 -  Select the WorkspaceGroup and click "Ungroup".
 -  Use the :ref:`UnGroupWorkspace <algm-UnGroupWorkspace>` algorithm.
 
+.. include:: WorkspaceNavigation.txt
+
 
 
 .. categories:: Concepts

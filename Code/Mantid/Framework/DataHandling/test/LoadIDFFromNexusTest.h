@@ -14,13 +14,16 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <vector>
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using ScopedFileHelper::ScopedFile;
 
 class LoadIDFFromNexusTest : public CxxTest::TestSuite
 {
@@ -194,6 +197,55 @@ public:
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "main-detector-bank");
 
+  }
+
+  void test_get_parameter_correction_file() {
+
+    // We test the function the looks for a parameter correction file 
+    // for a given instrument.
+
+    // TEST1 file exists
+    std::string testpath1 = loader.getParameterCorrectionFile("TEST1");
+    Poco::Path iPath( true );  // Absolute path
+    TS_ASSERT(iPath.tryParse(testpath1)); // Result has correct syntax
+    TS_ASSERT(iPath.isFile()); // Result is a file
+    TS_ASSERT(iPath.getFileName()=="TEST1_Parameter_Corrections.xml"); // Correct filename
+    TS_ASSERT(iPath.directory(iPath.depth()-1)=="embedded_instrument_corrections"); // Correct folder
+
+    // TEST0 file does not exist
+    std::string testpath0 = loader.getParameterCorrectionFile("TEST0"); 
+    TS_ASSERT(testpath0 == ""); // Nothing should be found
+  }
+
+  void test_read_parameter_correction_file() {
+    std::string contents = 
+      "<EmbeddedParameterCorrections name='XXX'>"
+      "   <correction  valid-from='2015-06-26 00:00:00'  valid-to='2015-07-21 23:59:59' file='test1.xml' append='false'/>"
+      "   <correction  valid-from='2015-07-22 00:00:00'  valid-to='2015-07-31 11:59:59' file='test2.xml' append='true'/>"
+      "</EmbeddedParameterCorrections>";
+    std::string correctionFilename = "parameter_correction_test.xml";
+    ScopedFile file( contents, correctionFilename, "." );
+    std::string parameterFile;
+    bool append;
+
+    // Date too early for correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-06-25 23:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == ""); 
+
+    // Date for first correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-06-30 13:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == "test1.xml");
+    TS_ASSERT(append == false);
+
+    // Date for second correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-07-30 13:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == "test2.xml");
+    TS_ASSERT(append == true);
+
+    // Date too late for correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-07-31 12:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == ""); 
+    
   }
 
 

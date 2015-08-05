@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Knut Franke
     Email (use @ for *)  : knut.franke*gmx.de
     Description          : Implementations of generic scripting classes
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -93,7 +93,7 @@ Script::Script(ScriptingEnv *env, const QString &name,
   m_env->incref();
 
   connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
-  /** On some systems it has been observed that 
+  /** On some systems it has been observed that
    * after a script has run that has created & deleted
    * workspaces the OS does not report all of the
    * memory as freed. In actual fact the next allocation will
@@ -117,7 +117,7 @@ Script::~Script()
  * Sets a new name for the script
  */
 void Script::setIdentifier(const QString & name)
-{ 
+{
   m_name = name.toStdString();
 }
 
@@ -158,9 +158,15 @@ QFuture<bool> Script::executeAsync(const ScriptCode & code)
   return asyncScript->start();
 }
 
+/// Request that this script be aborted
+void Script::abort()
+{
+  if(isExecuting()) this->abortImpl();
+}
+
 /**
  * Asks Mantid to release all free memory.
- */ 
+ */
 void Script::releaseFreeMemory()
 {
   Mantid::API::MemoryManager::Instance().releaseFreeMemory();
@@ -196,4 +202,3 @@ QString Script::normaliseLineEndings(QString text) const
   text = text.replace(QRegExp("\\r"), QString("\n"));
   return text;
 }
-

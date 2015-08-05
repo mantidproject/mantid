@@ -45,7 +45,7 @@ ELSE(EXISTS PYQT4_VERSION)
     SET(PYQT4_VERSION_TAG "${CMAKE_MATCH_1}" CACHE STRING "The Qt4 version tag used by PyQt4's .sip files")
 
     STRING(REGEX MATCH ".*\npyqt_sip_dir:([^\n]+).*$" _dummy ${pyqt_config})
-    SET(PYQT4_SIP_DIR "${CMAKE_MATCH_1}" CACHE FILEPATH "The base directory where PyQt4's .sip files are installed")
+    SET(PYQT4_SIP_DIR "${CMAKE_MATCH_1}" CACHE PATH "The base directory where PyQt4's .sip files are installed")
 
     STRING(REGEX MATCH ".*\npyqt_sip_flags:([^\n]+).*$" _dummy ${pyqt_config})
     SET(PYQT4_SIP_FLAGS "${CMAKE_MATCH_1}" CACHE STRING "The SIP flags used to build PyQt4")

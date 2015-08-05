@@ -11,8 +11,9 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even
-   removed without a notification, should instrument scientists decide to do so.
+   This algorithm is being developed for a specific instrument. It
+   might get changed or even removed without a notification, should
+   instrument scientists decide to do so.
 
 
 The pattern is specified by providing a list of dSpacing values where

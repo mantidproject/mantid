@@ -240,14 +240,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QGraphicsView" name="graphicsView">
-          <property name="minimumSize">
-           <size>
-            <width>160</width>
-            <height>160</height>
-           </size>
-          </property>
-         </widget>
+         <widget class="MplFigureCanvas" name="graphicsView"/>
         </item>
         <item>
          <spacer name="horizontalSpacer_9">
@@ -1356,6 +1349,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MplFigureCanvas</class>
+   <extends>QGraphicsView</extends>
+   <header>MplFigureCanvas.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

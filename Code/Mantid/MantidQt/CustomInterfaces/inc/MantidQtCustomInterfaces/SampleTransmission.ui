@@ -82,6 +82,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="spSingleLow">
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="minimum">
               <double>-99.989999999999995</double>
              </property>
@@ -99,6 +102,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="spSingleWidth">
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="minimum">
               <double>-99.989999999999995</double>
              </property>
@@ -116,6 +122,9 @@
            </item>
            <item>
             <widget class="QDoubleSpinBox" name="spSingleHigh">
+             <property name="decimals">
+              <number>3</number>
+             </property>
              <property name="minimum">
               <double>-99.989999999999995</double>
              </property>
@@ -175,7 +184,10 @@
        <item row="1" column="1">
         <widget class="QDoubleSpinBox" name="spNumberDensity">
          <property name="suffix">
-          <string> Å^3</string>
+          <string notr="true"> atoms/Å³</string>
+         </property>
+         <property name="decimals">
+          <number>5</number>
          </property>
          <property name="singleStep">
           <double>0.100000000000000</double>
@@ -189,6 +201,9 @@
         <widget class="QDoubleSpinBox" name="spThickness">
          <property name="suffix">
           <string> cm</string>
+         </property>
+         <property name="decimals">
+          <number>5</number>
          </property>
          <property name="singleStep">
           <double>0.100000000000000</double>
