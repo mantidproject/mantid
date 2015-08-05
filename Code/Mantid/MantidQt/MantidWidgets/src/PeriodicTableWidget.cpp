@@ -121,7 +121,7 @@ void PeriodicTableWidget::ColourUnknownProperties(
   }
 }
 
-void PeriodicTableWidget::enableButtonsByGroup(QString groupToEnable) {}
+//void PeriodicTableWidget::enableButtonsByGroup(QString groupToEnable) {}
 
 void PeriodicTableWidget::enableButtonByName(QString elementStr) {
   for (auto vector_i = AllElementButtons.begin();

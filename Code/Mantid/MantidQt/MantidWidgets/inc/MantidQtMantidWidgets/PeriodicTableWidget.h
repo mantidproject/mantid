@@ -15,7 +15,7 @@ public:
   QString getAllCheckedElementsStr();
   void disableButtons(QVector<QPushButton *> buttons);
   void disableAllElementButtons();
-  void enableButtonsByGroup(QString groupNameStr);
+  //void enableButtonsByGroup(QString groupNameStr);
   void enableButtonByName(QString elementStr);
   bool compareButtonNameToStr(QPushButton * buttonToCompare,QString stringToCompare);
   // vectors for storing Element buttons in associated groups
