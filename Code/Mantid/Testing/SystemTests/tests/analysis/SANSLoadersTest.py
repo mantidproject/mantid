@@ -242,6 +242,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00022023-add.nxs'))
 
     def validate(self):
+        self.disableChecking.append('Instrument')
         return self._success
 
 

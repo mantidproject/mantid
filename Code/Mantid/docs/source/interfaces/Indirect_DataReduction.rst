@@ -79,6 +79,11 @@ Sum Files
 Load Log Files
   If selected the sample logs will be laoded from each of the run files.
 
+Efixed
+  This option allows you to override the default fixed final energy for the
+  analyser and reflection number setting. This can be useful in correcting an
+  offset peak caused by the sample being slightly out of centre.
+
 Grouping
   Provides option of how data should be grouped.
 

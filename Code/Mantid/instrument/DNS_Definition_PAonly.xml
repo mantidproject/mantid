@@ -22,13 +22,14 @@
   </component>
   <type name="moderator" is="Source"></type>
   <!-- monitor -->
-  <component type="monitor" idlist="monitor">
+  <!--<component type="monitor" idlist="monitor">
     <location z="-0.229" />
   </component>
   <type name="monitor" is="monitor"></type>
   <idlist idname="monitor">
     <id val="-1"/>
   </idlist>
+  -->
   <!-- Sample position -->
   <component type="sample-position">
     <location y="0.0" x="0.0" z="0.0" />

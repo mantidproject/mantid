@@ -5,7 +5,7 @@
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "PythonThreading.h"
+#include "MantidQtAPI/PythonThreading.h"
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/DynamicFactory.h"
@@ -56,6 +56,7 @@
 #include <pqServerManagerModel.h>
 #include <pqStatusBar.h>
 #include <vtkCamera.h>
+#include <vtkMathTextUtilities.h>
 #include <vtkPVOrthographicSliceView.h>
 #include <vtkPVXMLElement.h>
 #include <vtkSMDoubleVectorProperty.h>
@@ -168,7 +169,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
-  
+
   // Calling workspace observer functions.
   observeAfterReplace();
   observePreDelete();
@@ -188,10 +189,10 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
  */
 MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent), m_rebinAlgorithmDialogProvider(this)
 {
-  
+
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
-  
+
   // We're in the standalone application mode
   this->internalSetup(false);
   this->setupUiAndConnections();
@@ -258,7 +259,7 @@ void MdViewerWidget::setupUiAndConnections()
   QAction* temp = new QAction(this);
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
-  
+
   pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
   applyBehavior->registerPanel(this->ui.propertiesPanel);
   VatesParaViewApplication::instance()->setupParaViewBehaviors();
@@ -477,7 +478,7 @@ void MdViewerWidget::onRebin(std::string algorithmType)
 void MdViewerWidget::onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Create the rebinned workspace
-  pqPipelineSource* rebinnedSource = prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType); 
+  pqPipelineSource* rebinnedSource = prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType);
 
   try
   {
@@ -530,9 +531,9 @@ void MdViewerWidget::onResetViewsStateToAllData()
 }
 
 /**
- * Creates and renders a rebinned workspace source 
+ * Creates and renders a rebinned workspace source
  * @param rebinnedWorkspaceName The name of the rebinned workspace.
- * @param sourceType The name of the source plugin. 
+ * @param sourceType The name of the source plugin.
  */
 pqPipelineSource* MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
 {
@@ -554,7 +555,7 @@ pqPipelineSource* MdViewerWidget::prepareRebinnedWorkspace(const std::string reb
 }
 
 /**
- * Creates and renders back to the original source 
+ * Creates and renders back to the original source
  * @param originalWorkspaceName The name of the original workspace
  */
 pqPipelineSource* MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspaceName)
@@ -596,7 +597,7 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
     std::string rebinnedWorkspaceName;
     m_rebinnedSourcesManager.getStoredWorkspaceNames(source, originalWorkspaceName, rebinnedWorkspaceName);
 
-    // If the active source has not been rebinned, then send a reminder to the user that only rebinned sources 
+    // If the active source has not been rebinned, then send a reminder to the user that only rebinned sources
     // can be unbinned
     if (originalWorkspaceName.empty() || rebinnedWorkspaceName.empty())
     {
@@ -709,7 +710,7 @@ void MdViewerWidget::renderingDone()
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
   GlobalInterpreterLock gil;
-  // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the 
+  // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the
   //             VSI window to not close properly. Moving it here ensures that we have the switch, but
   //             after the window is started again.
   if (this->currentView->getNumSources() == 0)
@@ -750,8 +751,8 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
 
   // Reset the current view to the correct initial view
   // Note that we can only reset if a source plugin exists.
-  // Also note that we can only reset the current view to the 
-  // correct initial after calling renderAndFinalSetup. We first 
+  // Also note that we can only reset the current view to the
+  // correct initial after calling renderAndFinalSetup. We first
   // need to load in the current view and then switch to be inline
   // with the current architecture.
   if (VatesViewerInterface::PEAKS != workspaceType)
@@ -769,7 +770,7 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
  */
 void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& instrumentName)
 {
-  // Check if the current view is the correct initial view for the workspace type and the instrument 
+  // Check if the current view is the correct initial view for the workspace type and the instrument
   ModeControlWidget::Views initialView = getInitialView(workspaceType, instrumentName);
 
   bool isSetToCorrectInitialView = false;
@@ -781,7 +782,7 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
       isSetToCorrectInitialView = dynamic_cast<StandardView *>(this->currentView) != 0;
     }
     break;
-    
+
     case ModeControlWidget::MULTISLICE:
     {
       isSetToCorrectInitialView = dynamic_cast<MultiSliceView *>(this->currentView) != 0;
@@ -818,7 +819,7 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
 }
 
 /*
- * Provides an initial view. This view is specified either in the 
+ * Provides an initial view. This view is specified either in the
  * Mantid.user.properties file or by the most common technique of the
  * instrument which is associated with the workspace data.
  * @param workspaceType The work space type.
@@ -899,7 +900,7 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
 /**
  * Check if a set of techniques contains a technique which matches specified keyword
  * @param techniques A set of techniques
- * @param keyword A keyword 
+ * @param keyword A keyword
  * @returns True if the keyword is contained in at least one technique else false.
  */
 bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const
@@ -922,7 +923,7 @@ bool MdViewerWidget::checkIfTechniqueContainsKeyword(const std::set<std::string>
   *
   * @param view An initial view.
   * @param workspaceType The type of workspace.
-  * @returns A user-specified inital view or the standard view. 
+  * @returns A user-specified inital view or the standard view.
 */
 ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWidget::Views view, int workspaceType)
 {
@@ -930,16 +931,16 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
 
   if (VatesViewerInterface::MDHW == workspaceType)
   {
-    // Histo workspaces cannot have a splatter plot, 
+    // Histo workspaces cannot have a splatter plot,
     if (view == ModeControlWidget::SPLATTERPLOT)
     {
       g_log.notice() << "The preferred initial view favours the splatterplot as initial view, "
                           << "but an MDHisto workspace is being loaded. An MDHisto workspace "
-                          << "cannot be loaded into a splatterplot view. Defaulted to standard view. \n";  
+                          << "cannot be loaded into a splatterplot view. Defaulted to standard view. \n";
 
       selectedView =  ModeControlWidget::STANDARD;
-    } 
-    else 
+    }
+    else
     {
       selectedView = view;
     }
@@ -994,7 +995,7 @@ void MdViewerWidget::renderAndFinalSetup()
 }
 
 /**
- * Set the background color for this view. 
+ * Set the background color for this view.
  */
 void MdViewerWidget::setColorForBackground()
 {
@@ -1082,10 +1083,10 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->setColorForBackground();
-  
+
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
-  this->initialView = v; 
+  this->initialView = v;
 
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
@@ -1172,6 +1173,10 @@ void MdViewerWidget::shutdown()
 {
   // This seems to cure a XInitThreads error.
   pqPVApplicationCore::instance()->deleteLater();
+  GlobalInterpreterLock gil;
+  // Ensure that the MathText utilties are cleaned up as they call Python cleanup code
+  // and we need to make sure this can happen before MantidPlot shuts down the interpreter
+  vtkMathTextUtilitiesCleanup();
 }
 
 /**
@@ -1401,8 +1406,8 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
 
 /**
  * This function responds to a workspace being deleted. If there are one or
- * more PeaksWorkspaces present, the requested one will be deleted. 
- * Otherwise, if it is an IMDWorkspace, everything goes! 
+ * more PeaksWorkspaces present, the requested one will be deleted.
+ * Otherwise, if it is an IMDWorkspace, everything goes!
  * @param wsName : Name of workspace being deleted
  * @param ws : Pointer to workspace being deleted
  */
@@ -1410,7 +1415,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
                                      const boost::shared_ptr<Workspace> ws)
 {
   UNUSED_ARG(ws);
-  
+
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (NULL != src)
   {

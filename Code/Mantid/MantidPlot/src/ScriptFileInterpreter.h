@@ -1,21 +1,25 @@
-#ifndef SCRIPTRUNNERWIDGET_H_
-#define SCRIPTRUNNERWIDGET_H_
+#ifndef SCRIPTFILEINTERPRETER_H_
+#define SCRIPTFILEINTERPRETER_H_
 
 #include "Script.h"
 
-#include <QWidget>
-#include <QTextEdit>
 #include <QPoint>
 #include <QSplitter>
 #include <QStatusBar>
+#include <QTextEdit>
 
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
+class QMessageBox;
+class ScriptCloseDialog;
 class ScriptingEnv;
 class ScriptEditor;
 class ScriptOutputDisplay;
 
+//-----------------------------------------------------------------------------
+// ScriptFileInterpreter
+//-----------------------------------------------------------------------------
 /**
  * Defines a widget that uses a ScriptEditor, a Script object and a
  * text display widget to give a single widget that can
@@ -31,8 +35,8 @@ public:
   ScriptFileInterpreter(QWidget *parent = NULL, const QString & settingsGroup = "");
   /// Destroy the object
   ~ScriptFileInterpreter();
-  /// Make sure we are in a safe state to delete the widget
-  virtual void prepareToClose();
+  /// Determine if the script is ready to be closed
+  virtual bool shouldClose();
   /// Setup from a script environment
   virtual void setup(const ScriptingEnv & environ, const QString & identifier);
 
@@ -84,13 +88,15 @@ public slots:
   virtual void executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
   /// Execute the current selection
   virtual void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
+  /// Request that the script execution be aborted
+  virtual void abort();
   /// Clear the script variable cache
   virtual void clearVariables();
 
   /// Toggles the progress reports on/off
   virtual void toggleProgressReporting(bool state);
   /// Toggles the code folding on/off
-  virtual void toggleCodeFolding(bool state);  
+  virtual void toggleCodeFolding(bool state);
   /// Toggles the whitespace visibility
   virtual void toggleWhitespace(bool state);
   /// Toggle replacing tabs with whitespace
@@ -123,12 +129,14 @@ private slots:
   void setStoppedStatus();
 
 private:
+  friend class ScriptCloseDialog;
+
   Q_DISABLE_COPY(ScriptFileInterpreter)
   void setupChildWidgets();
 
   void setupEditor(const ScriptingEnv & environ, const QString & identifier);
   void setupScriptRunner(const ScriptingEnv & environ, const QString & identifier);
-  
+
   bool readFileIntoEditor(const QString & filename);
   void executeCode(const ScriptCode & code, const Script::ExecutionMode mode);
 
@@ -157,60 +165,78 @@ public:
   NullScriptFileInterpreter() :
     ScriptFileInterpreter(NULL) {}
 
-  /// Make sure we are in a safe state to delete the widget
-  void prepareToClose() {};
-  /// Setup from a script environment
-  void setup(const ScriptingEnv &, const QString &) {};
+  /// Does nothing
+  bool shouldClose() { return false; }
+  /// Does nothing
+  void setup(const ScriptingEnv &, const QString &) {}
 
-  /// Return the filename of the script in the editor
+  /// Does nothing
   QString filename() const { return QString(); }
-  /// Has the script text been modified
+  /// Does nothing
   bool isScriptModified() const { return false; }
 
 private slots:
-  /// Undo
+  /// Does nothing
   void undo() {}
-  /// Redo
+  /// Does nothing
   void redo() {}
-  /// Copy from the editor
+  /// Does nothing
   void copy() {}
-  /// Cut from the editor
+  /// Does nothing
   void cut() {}
-  /// Paste into the editor
+  /// Does nothing
   void paste() {}
-  /// Find in editor
-  void showFindReplaceDialog() {};
+  /// Does nothing
+  void showFindReplaceDialog() {}
 
-  /// Execute the whole script.
+  /// Does nothing
   virtual void executeAll(const Script::ExecutionMode) {}
-  /// Execute the current selection
+  /// Does nothing
   virtual void executeSelection(const Script::ExecutionMode) {}
-  /// Clear the script variable cache
+  /// Does nothing
+  virtual void abort() {}
+  /// Does nothing
   virtual void clearVariables() {}
 
-  /// Zoom in on script
+  /// Does nothing
   virtual void zoomInOnScript() {}
-  /// Zoom out on script
+  /// Does nothing
   virtual void zoomOutOnScript() {}
-  /// Toggles the progress reports on/off
+  /// Does nothing
   virtual void toggleProgressReporting(bool) {}
-  /// Toggles the code folding on/off
+  /// Does nothing
   virtual void toggleCodeFolding(bool) {}
 
-
-  /// Save to the currently stored name
+  /// Does nothing
   virtual void saveToCurrentFile() {}
-  /// Save to a different name
+  /// Does nothing
   virtual void saveAs() {}
-  /// Save to the given filename
-  virtual void saveScript(const QString &) {};
-  /// Save the current output
-  virtual void saveOutput(const QString &) {};
-  /// Print the script
+  /// Does nothing
+  virtual void saveScript(const QString &) {}
+  /// Does nothing
+  virtual void saveOutput(const QString &) {}
+  /// Does nothing
   virtual void printScript() {}
-  /// Print the script
+  /// Does nothing
   virtual void printOutput() {}
-
 };
 
-#endif /* SCRIPTRUNNERWIDGET_H_ */
+//-----------------------------------------------------------------------------
+// ScriptCloseDialog - Specific message for closing the widget
+//-----------------------------------------------------------------------------
+class ScriptCloseDialog : public QWidget
+{
+  Q_OBJECT
+
+public:
+  ScriptCloseDialog(ScriptFileInterpreter &interpreter,
+                    QWidget *parent = NULL);
+
+  bool shouldScriptClose();
+
+private:
+  QMessageBox *m_msgBox;
+  ScriptFileInterpreter &m_interpreter;
+};
+
+#endif /* SCRIPTFILEINTERPRETER_H_ */
