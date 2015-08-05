@@ -158,6 +158,12 @@ void TOFSANSResolutionByPixel::exec() {
     const MantidVec &xIn = inWS->readX(i);
     const size_t xLength = xIn.size();
 
+    // Gravity correction
+    boost::shared_ptr<GravitySANSHelper> grav;
+    if (doGravity) {
+      grav = boost::make_shared<GravitySANSHelper>(inWS, det, getProperty("ExtraLength"));
+    }
+
     // Get handles on the outputWorkspace
     MantidVec &yOut = outWS->dataY(i);
     // for each wavelenght bin of each pixel calculate a q-resolution
@@ -168,8 +174,7 @@ void TOFSANSResolutionByPixel::exec() {
       // If we include a gravity correction we need to adjust sinTheta
       // for each wavelength (in Angstrom)
       if (doGravity) {
-        GravitySANSHelper grav(inWS, det, getProperty("ExtraLength"));
-        double sinThetaGrav = grav.calcSinTheta(wl);
+        double sinThetaGrav = grav->calcSinTheta(wl);
         factor = 4.0 * M_PI * sinThetaGrav;
       }
       const double q = factor / wl;
