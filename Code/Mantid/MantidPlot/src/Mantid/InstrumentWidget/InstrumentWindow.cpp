@@ -978,9 +978,8 @@ bool InstrumentWindow::overlay(const QString &wsName) {
   } catch (std::runtime_error) {
     QMessageBox::warning(this, "MantidPlot - Warning",
                          "No workspace called '" + wsName + "' found. ");
-    success = true;
+    return success;
   }
-  return success;
 
   auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
   if (!pws) {
@@ -988,18 +987,16 @@ bool InstrumentWindow::overlay(const QString &wsName) {
                          "Work space called '" + wsName +
                              "' is not suitable."
                              " Please select another workspace. ");
-    success = true;
+    return success;
   }
-  return success;
 
   auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(getSurface());
   if (!surface) {
     QMessageBox::warning(
         this, "MantidPlot - Warning",
         "Please change to an unwrapped view to see peak labels.");
-    success = true;
+    return success;
   }
-  return success;
 
   if (pws && surface) {
     surface->setPeaksWorkspace(pws);
