@@ -69,9 +69,9 @@ class PDRManager(object):
         self._applySmoothVan = smoothaccept
 
         return
-    
+
     def getAverageMonitorCounts(self):
-        """ Return the average monitor counts 
+        """ Return the average monitor counts
         """
         # Check
         if self._rawSpiceTableWS is None:
@@ -85,14 +85,14 @@ class PDRManager(object):
             imonitor = colnames.index("monitor")
         except ValueError:
             raise RuntimeError("monitor is not a column name in SPICE table workspace.")
-        
+
         # Sum and average
         numpts = self._rawSpiceTableWS.rowCount()
         totalcounts = 0
         for irow in xrange(numpts):
             moncounts = self._rawSpiceTableWS.cell(irow, imonitor)
             totalcounts += moncounts
-        
+
         return float(totalcounts)/float(numpts)
 
 
@@ -249,16 +249,13 @@ class HFIRPDRedControl(object):
 
         return
 
-
     def getIndividualDetCounts(self, exp, scan, detid, xlabel, raw=False):
         """ Get individual detector counts
-        
         Arguments:
         - exp    :: experiment number
         - scan   :: scan number
         - detid  :: detector ID
         - xlabel :: x-axis for detector's counts. (1) None for Pt. Or (2) any valid sample log name
-                    
         Return: 2-tuple (vecX, vecY) for plotting
         """
         # Check and get data
@@ -301,9 +298,7 @@ class HFIRPDRedControl(object):
         vecx = tempoutws.readX(0)[:]
         vecy = tempoutws.readY(0)[:]
 
-        return (vecx, vecy)
-    
-
+        return vecx, vecy
 
     def getRawDetectorCounts(self, exp, scan, ptnolist=None):
         """ Return raw detector counts as a list of 3-tuples
@@ -762,7 +757,7 @@ class HFIRPDRedControl(object):
         # END_FOR(scan)
 
         return True, ''
-    
+
     def scale_to_raw_monitor_counts(self, exp, scan_list, min_x, max_x, bin_size):
         """ Scale up the reduced powder spectrum to its average monitor counts
         :param exp:
@@ -799,7 +794,7 @@ class HFIRPDRedControl(object):
             print '[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts)
             wsmanager.reducedws = wsmanager.reducedws * monitorcounts
         # END_FOR(scan)
-            
+
         return True, ''
 
     def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None,
