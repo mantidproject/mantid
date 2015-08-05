@@ -1072,32 +1072,37 @@ bool InstrumentWindow::overlay(const QString & wsName)
 {
   using namespace Mantid::API;
   Workspace_sptr workspace;
+  bool success(false);
   try {
-	workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
-  } catch(std::runtime_error &re) {
-	  QMessageBox::warning(this, "MantidPlot - Warning", "No workspace called '" + wsName + "' found. ");
-	  return workspace;
+    workspace = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+  } catch (std::runtime_error &re) {
+    QMessageBox::warning(this, "MantidPlot - Warning",
+                         "No workspace called '" + wsName + "' found. ");
+	success = true;
   }
+  return success;
+
   auto pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
   if (!pws) {
 	  QMessageBox::warning(this, "MantidPlot - Warning", "Work space called '" +wsName+ "' is not suitable."
 									" Please select another workspace. ");
-	  return pws;
+	  success = true;
   }
+  return success;
+
   auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
   if (!surface) {
 	  QMessageBox::warning(this, "MantidPlot - Warning","Please change to an unwrapped view to see peak labels.");
-	  return surface;
+	  success = true;
   }
+  return success;
+  
 
-  bool success(false);
-  if (pws && surface)
-  {
+  if (pws && surface){
     surface->setPeaksWorkspace(pws);
     updateInstrumentView();
     success = true;
   }
-
   return success;
 }
 
