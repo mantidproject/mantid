@@ -17,13 +17,14 @@ from mantid.kernel import Logger
 sanslog = Logger("SANS")
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace, FileLoaderRegistry
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
-                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG)
+                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
+                          can_load_as_event_workspace)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -140,7 +141,7 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
-            if not FileLoaderRegistry.canLoad("LoadEventNexus", self._data_file):
+            if not can_load_as_event_workspace(self._data_file):
                 extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()

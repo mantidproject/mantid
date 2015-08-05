@@ -1,18 +1,8 @@
-#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
-import stresstesting
-import os
-import platform
-from abc import ABCMeta, abstractmethod
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines,too-many-instance-attributes,non-parent-init-called,abstract-method
+# non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
+# abstract-mehod checking seems to ignore the fact some classes are declared abstract using abc
 
-from mantid.simpleapi import *
-
-# For debugging only.
-from mantid.api import FileFinder
-
-# Import our workflows.
-from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq
-
-'''
+"""
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
 - OSIRIS/IRIS supported by all tabs / interfaces.
 - VESUVIO is not supported by any interface as of yet.
@@ -74,8 +64,20 @@ stresstesting.MantidStressTest
      |   +--IRISConvFit
      |   +--OSIRISConvFit
      |
-'''
+"""
 
+import stresstesting
+import os
+import platform
+from abc import ABCMeta, abstractmethod
+
+from mantid.simpleapi import *
+
+# For debugging only.
+from mantid.api import FileFinder
+
+# Import our workflows.
+from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
@@ -420,10 +422,10 @@ class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
         working_directory = config['defaultsave.directory']
 
         output_names = {}
-        for format, ext in zip(self.file_formats, self.file_extensions):
+        for file_format, ext in zip(self.file_formats, self.file_extensions):
             output_file_name = self.result_name + ext
             output_file_name = os.path.join(working_directory, output_file_name)
-            output_names[format] = output_file_name
+            output_names[file_format] = output_file_name
 
         return output_names
 
@@ -836,12 +838,12 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
-                                             ResolutionWorkspace=self.resolution,
-                                             EnergyMin=self.e_min,
-                                             EnergyMax=self.e_max,
-                                             BinReductionFactor=self.num_bins,
-                                             DryRun=False)
+        _, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                    ResolutionWorkspace=self.resolution,
+                                    EnergyMin=self.e_min,
+                                    EnergyMax=self.e_max,
+                                    BinReductionFactor=self.num_bins,
+                                    DryRun=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
@@ -954,12 +956,12 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
-                                             ResolutionWorkspace=self.resolution,
-                                             EnergyMin=self.e_min,
-                                             EnergyMax=self.e_max,
-                                             BinReductionFactor=self.num_bins,
-                                             DryRun=False)
+        _, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                    ResolutionWorkspace=self.resolution,
+                                    EnergyMin=self.e_min,
+                                    EnergyMax=self.e_max,
+                                    BinReductionFactor=self.num_bins,
+                                    DryRun=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitMult(fury_ws.getName(),
