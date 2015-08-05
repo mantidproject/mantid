@@ -735,7 +735,7 @@ class ISISInstrument(BaseInstrument):
         dummy_3 = coord2
         dummy_4 = relative_displacement
         dummy_5 = coord1_scale_factor
-        dummy_6 = coord2_scale_factor 
+        dummy_6 = coord2_scale_factor
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):

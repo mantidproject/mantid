@@ -3,7 +3,7 @@ import isis_reducer
 from isis_reduction_steps import StripEndNans
 from isis_instrument import LARMOR
 from mantid.simpleapi import *
-from mantid.kernel import Logger, V3D
+from mantid.kernel import Logger
 import SANSUtility
 
 class FindDirectionEnum(object):
@@ -66,6 +66,7 @@ class CentreFinder(object):
         self.coord1_scale_factor = setup.instrument.beam_centre_scale_factor1
         self.coord2_scale_factor = setup.instrument.beam_centre_scale_factor2
 
+         # We are looking only at the differnce between the old position and the trial.
         self.move(setup, trial[0]-self._last_pos[0], trial[1]-self._last_pos[1])
 
         #phi masking will remove areas of the detector that we need
@@ -241,7 +242,7 @@ class CentrePositioner(object):
     '''
     Handles the positions and increments for beam finding.
     '''
-    def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance):
+    def __init__(self, reducer, position_type, coord1_start, coord2_start,coord1_step,coord2_step, tolerance): #pylint: disable=too-many-arguments
         '''
         Set the CentrePositioner. It requires:
         @param reducer:: The reducer
@@ -539,7 +540,7 @@ class PositionProviderFactory(object):
 
     def get_tolerance_for_angle(self, tolerance_linear, increment_linear, increment_angle):
         '''
-        The tolerance associated with a linear disaplacement is translated into 
+        The tolerance associated with a linear disaplacement is translated into
         a tolerance for an angle. Tol_Angle = Increment_Angle *(Tol_Linear/Increment_Linear)
         @param tolerance_linear: the tolerance for the linear displacement
         @param increment_lienar: the increment of the linear displacement
@@ -571,12 +572,16 @@ class PositionProvider(object):
         dummy_3 = tolerance
 
     def get_coord1_for_input_with_correct_scaling(self, coord1):
+        dummy_coord1 = coord1
         RuntimeError("The PositionProvider interface is not implemented")
 
     def get_coord1_for_output_with_correct_scaling(self, coord1):
+        dummy_coord1 = coord1
         RuntimeError("The PositionProvider interface is not implemented")
 
     def produce_initial_position(self, coord1, coord2):
+        dummy_coord1 = coord1
+        dummy_coord2 = coord2
         RuntimeError("The PositionProvider interface is not implemented")
 
     def half_and_reverse_increment_coord1(self):
@@ -670,7 +675,7 @@ class PositionProviderAngleY(PositionProvider):
     Handles the increments for the case when the first coordinate is an angle
     and the second is a cartesian coordinate
     '''
-    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, bench_rotation,coord1_scale_factor):
+    def __init__(self, increment_coord1, increment_coord2, tolerance, tolerance_angle, bench_rotation,coord1_scale_factor):  #pylint: disable=too-many-arguments
         super(PositionProviderAngleY,self).__init__(increment_coord1, increment_coord2, tolerance)
         self.increment_angle = increment_coord1
         self.increment_y = increment_coord2
@@ -764,7 +769,7 @@ class BeamCenterLogger(object):
         self.logger.notice(msg)
         self.logger.notice("Starting centre finding routine ...")
 
-    def report_status(self, iteration, coord1, coord2, resid1, resid2):
+    def report_status(self, iteration, coord1, coord2, resid1, resid2):  #pylint: disable=too-many-arguments
         '''
         Report the status of a beam finder iteration
         @param iteration: the number of the iteration
@@ -776,7 +781,7 @@ class BeamCenterLogger(object):
         msg = self.get_status_message(iteration, coord1, coord2, resid1, resid2)
         self.logger.notice(msg)
 
-    def get_status_message(self, iteration, coord1, coord2, resid1, resid2):
+    def get_status_message(self, iteration, coord1, coord2, resid1, resid2):  #pylint: disable=too-many-arguments
         '''
         Report the status of a beam finder iteration
         @param iteration: the number of the iteration
