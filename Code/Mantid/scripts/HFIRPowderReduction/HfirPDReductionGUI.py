@@ -450,8 +450,8 @@ class MainWindow(QtGui.QMainWindow):
     def doBrowseLocalDataSrc(self):
         """ Browse local data storage
         """
-        print "Browse local data storage location."
-
+        msg = "Browse local data storage location. Implement ASAP"
+        QtGui.QMessageBox.information(self, "Click!", msg)
         return
 
 
@@ -489,8 +489,8 @@ class MainWindow(QtGui.QMainWindow):
     def doCheckSrcServer(self):
         """" Check source data server's availability
         """
-
-        print "Check source data server!"
+        msg = "Check source data server! Implement ASAP"
+        QtGui.QMessageBox.information(self, "Click!", msg)
 
         return
 
@@ -2049,8 +2049,10 @@ class MainWindow(QtGui.QMainWindow):
                 vecx, vecyOrig = self._myControl.getVectorToPlot(exp, scan)
                 diffY = vecyOrig - vecy
         except NotImplementedError as e:
-            print '[Error] Unable to retrieve processed vanadium spectrum for exp %d scan %d.  \
-                    Reason: %s' % (exp, scan, str(e))
+            errmsg = '[Error] Unable to retrieve processed vanadium spectrum for exp %d scan %d. ' \
+                     'Reason: %s' % (exp, scan, str(e))
+            QtGui.QMessageBox.information(self, "Return!", errmsg)
+
             return
 
         # Get to know whether it is required to clear the image
@@ -2411,19 +2413,20 @@ class MainWindow(QtGui.QMainWindow):
     def _logError(self, errinfo):
         """ Log error information
         """
-        print "Log(Error): %s" % (errinfo)
+        QtGui.QMessageBox.information(self, "Click!", errinfo)
 
-
-    def _logNotice(self, errinfo):
+    def _logNotice(self, loginfo):
         """ Log error information
         """
-        print "Log(Notice): %s" % (errinfo)
+        msg = '[Notice] %s' % loginfo
+        QtGui.QMessageBox.information(self, "Click!", msg)
 
 
-    def _logWarning(self, errinfo):
+    def _logWarning(self, warning_info):
         """ Log error information
         """
-        print "Log(Warning): %s" % (errinfo)
+        msg = "[Warning]: %s" % (warning_info)
+        QtGui.QMessageBox.information(self, "OK!", msg)
 
         return
 
