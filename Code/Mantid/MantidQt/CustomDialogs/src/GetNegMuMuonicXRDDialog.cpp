@@ -1,6 +1,5 @@
 #include "MantidQtCustomDialogs/GetNegMuMuonicXRDDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtMantidWidgets/PeriodicTableWidget.h"
 #include "MantidQtCustomDialogs/MantidGLWidget.h"
 #include <QMessageBox>
 #include <QLineEdit>
@@ -11,20 +10,19 @@ namespace MantidQt {
 namespace CustomDialogs {
 DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
 
-auto *periodicTable = new PeriodicTableWidget();
-auto *yPosition = new QLineEdit();
-
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
     : API::AlgorithmDialog(parent) {}
 
 void GetNegMuMuonicXRDDialog::initLayout() {
+  auto *periodicTable = new PeriodicTableWidget();
+  auto *yPosition = new QLineEdit();
   periodicTable->disableAllElementButtons();
 
   /*Elements Enabled Correspond to those for which we
   * have data for in the dictionary found in 
   * GetNegMuMuonicXRD.py file
   */
-  enableElementsForGetNegMuMuonicXRD();
+  enableElementsForGetNegMuMuonicXRD(periodicTable);
   auto *main_layout = new QVBoxLayout(this);
   auto *runButton = new QPushButton("Run");
   auto *yPositionLabel = new QLabel("Y Position");
@@ -45,7 +43,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   main_layout->addWidget(runButton);
 }
 
-void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD(){
+void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD(PeriodicTableWidget *periodicTable){
     periodicTable->enableButtonByName("Au");
     periodicTable->enableButtonByName("Ag");
     periodicTable->enableButtonByName("Cu");
@@ -55,21 +53,17 @@ void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD(){
     periodicTable->enableButtonByName("Sn");
 }
 
-QString getElementsSelectedFromPeriodicTable() {
-  return periodicTable->getAllCheckedElementsStr();
-}
-
 bool GetNegMuMuonicXRDDialog::validateDialogInput(QString input) {
   return (input != "");
 }
 
-void GetNegMuMuonicXRDDialog::runClicked() {
+void GetNegMuMuonicXRDDialog::runClicked(PeriodicTableWidget *p, QLineEdit *yPosition) {
   if (yPosition->text() == "") {
     QMessageBox::information(this, "GetNegMuMuonicXRDDialog",
                              "No Y Axis Position was specified, please enter a "
                              "value or run with default value of -0.001");
   }
-  QString elementsSelectedStr = getElementsSelectedFromPeriodicTable();
+  QString elementsSelectedStr = p->getAllCheckedElementsStr();
   if (elementsSelectedStr == "") {
     QMessageBox::information(
         this, "GetNegMuMuonicXRDDialog",

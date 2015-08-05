@@ -2,6 +2,8 @@
 #define MANTIDQT_CUSTOM_DIALOGS_GETNEGMUMUONICXRD_H_
 
 #include "MantidQtAPI/AlgorithmDialog.h"
+#include "MantidQtMantidWidgets/PeriodicTableWidget.h"
+
 namespace MantidQt {
 
 namespace CustomDialogs {
@@ -15,15 +17,14 @@ namespace CustomDialogs {
   private:
   bool validateDialogInput(QString input);
   void enableElementsFromString(QString elementToEnable);
-  void enableElementsForGetNegMuMuonicXRD();
-  //void setEnabledElementsInPeriodicTable()
+  void enableElementsForGetNegMuMuonicXRD(PeriodicTableWidget *periodicTable);
   private slots:
-  //void SelectElementsClicked();
-  void runClicked();
+  void runClicked(PeriodicTableWidget *periodicTable, QLineEdit *yPosition);
 signals:
   void validInput();
   protected:
-  void initLayout();    };
+  void initLayout();    
+  };
   }
 }
 #endif // !MANTIDQT_CUSTOM_DIALOGS_GETNEGMUMUONICXRD_H_
