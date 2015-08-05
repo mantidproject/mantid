@@ -251,8 +251,10 @@ void Q1D2::exec() {
     Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
     Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
     for (;qResolutionIterator!= qResolutionOut.end(); ++countsIterator, ++qResolutionIterator) {
-      // Divide by the counts of the Qbin
-      *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+      // Divide by the counts of the Qbin, if the counts are 0, the the qresolution will also be 0
+      if ((*countsIterator) > 0.0) {
+        *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+      }
     }
   }
 
