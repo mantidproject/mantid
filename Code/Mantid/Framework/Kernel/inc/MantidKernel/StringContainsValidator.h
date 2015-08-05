@@ -37,8 +37,22 @@ namespace Kernel {
 class DLLExport StringContainsValidator : public TypedValidator<std::string> {
 public:
   StringContainsValidator();
+
+  /// Clone the current state
+  IValidator_sptr clone() const;
+
+  /// Allows a for a vector of required strings to be passed to the validator
+  void setRequiredStrings(const std::vector<std::string> &);
+
   virtual ~StringContainsValidator();
 
+private:
+  /// Checks the value is valid
+  std::string checkValidity(const std::string &value) const;
+
+  /// A vector of the sub strings the string must contain in order to pass
+  /// validation
+  std::vector<std::string> m_requiredStrings;
 };
 
 } // namespace Kernel
