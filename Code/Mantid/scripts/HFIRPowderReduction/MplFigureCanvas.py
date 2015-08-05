@@ -263,7 +263,7 @@ class Qt4MplCanvas(FigureCanvas):
         self._lineDict = {}
         self._lineIndex = 0
 
-        self.colorbar = None
+        self.colorBar = None
 
         return
 
@@ -374,12 +374,12 @@ class Qt4MplCanvas(FigureCanvas):
         self.axes.set_aspect('auto')
 
         # Set color bar.  plt.colorbar() does not work!
-        if self.colorbar is None:
+        if self.colorBar is None:
             # set color map type
             imgplot.set_cmap('spectral')
-            self.colorbar = self.fig.colorbar(imgplot)
+            self.colorBar = self.fig.colorbar(imgplot)
         else:
-            self.colorbar.update_bruteforce(imgplot)
+            self.colorBar.update_bruteforce(imgplot)
 
         # Flush...
         self._flush()
@@ -400,12 +400,12 @@ class Qt4MplCanvas(FigureCanvas):
         imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
 
         # Set color bar.  plt.colorbar() does not work!
-        if self.colorbar is None:
+        if self.colorBar is None:
             # set color map type
             imgplot.set_cmap('spectral')
-            self.colorbar = self.fig.colorbar(imgplot)
+            self.colorBar = self.fig.colorbar(imgplot)
         else:
-            self.colorbar.update_bruteforce(imgplot)
+            self.colorBar.update_bruteforce(imgplot)
 
         self._flush()
 
@@ -438,6 +438,10 @@ class Qt4MplCanvas(FigureCanvas):
 
         # clear image
         self.axes.cla()
+        # Try to clear the color bar
+        if len(self.fig.axes) > 1:
+            self.fig.delaxes(self.fig.axes[1])
+            self.colorBar = None
 
         # flush/commit
         self._flush()

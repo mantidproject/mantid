@@ -66,7 +66,7 @@ class MultiScanTabState(object):
         if isinstance(tab_state, MultiScanTabState) is False:
             raise NotImplementedError('compare_state must have MultiScanTabStatus as input.')
 
-        if self._expNo != tab_state._expNo or self._scanList != tab_state._scanList:
+        if self._expNo != tab_state.getExpNumber() or self._scanList != tab_state.getScanList:
             return self.RELOAD_DATA
 
         for attname in self.__dict__.keys():
@@ -75,6 +75,19 @@ class MultiScanTabState(object):
 
         return self.NO_OPERATION
 
+    def getExpNumber(self):
+        """ Get experiment number
+        :return:
+        """
+        return self._expNo
+
+    def getScanList(self):
+        """ Get the list of scans
+        :return:
+        """
+        return self._scanList[:]
+
+    #  disable=too-many-arguments
     def setup(self, exp_no, scan_list, min_x, max_x, bin_size, unit, raw, correct_det_eff, exclude_dets):
         """
         Set up the object
@@ -1042,7 +1055,8 @@ class MainWindow(QtGui.QMainWindow):
         xlabel = str(self.ui.comboBox_indvDetXLabel.currentText()).strip()
         if xlabel != "" and xlabel != "Pt." and xlabel != "2theta/Scattering Angle":
             # Plot with sample logs other than Pt.
-            self._logNotice("New Feature: X-label %s is supported for plotting individual detector's counts.  Set to detector angle." % (xlabel))
+            self._logNotice("New Feature: X-label %s is supported for plotting individual detector's counts. "
+                            " Set to detector angle." % xlabel)
             xlabel = xlabel
         else:
             # Plot with Pt. or detector angles
@@ -1121,7 +1135,6 @@ class MainWindow(QtGui.QMainWindow):
             new_mode = 'Plot Normalized'
 
         # Get information
-        # FIXME - min_x and max_x are not used!
         try:
             min_x = self._getFloat(self.ui.lineEdit_mergeMinX)
         except EmptyError:
@@ -1131,7 +1144,7 @@ class MainWindow(QtGui.QMainWindow):
         except EmptyError:
             max_x = None
         bin_size = self._getFloat(self.ui.lineEdit_mergeBinSize)
-        
+
         # Process input experiment number and scan list
         try:
             r = self._uiGetExpScanTabMultiScans()
@@ -1140,7 +1153,7 @@ class MainWindow(QtGui.QMainWindow):
         except NotImplementedError as e:
             self._logError(str(e))
             return False
-        
+
         # Re-process the data
         if new_mode == 'Plot Raw':
             if self._multiScanList is None or self._multiScanExp is None:
@@ -1169,7 +1182,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.pushButton_plotRawMultiScans.setText('Plot Normalized')
         else:
             self.ui.pushButton_plotRawMultiScans.setText('Plot Raw')
-        
+
         return
 
 
@@ -1582,14 +1595,13 @@ class MainWindow(QtGui.QMainWindow):
 
 
         if x is not None and y is not None:
-
+            # mouse is clicked within graph
             if button == 1:
                 msg = "Mouse 1: You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
                 print msg
-            
             elif button == 2:
                 msg = "Mouse 2: You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
-                QtGui.QMessageBox.information(self, "Click!", msg)                
+                QtGui.QMessageBox.information(self, "Click!", msg)
 
             elif button == 3:
                 # right click of mouse will pop up a context-menu
@@ -1613,12 +1625,12 @@ class MainWindow(QtGui.QMainWindow):
     def on_mouseMotion(self, event):
         """ Event handler for mouse being detected to move
         """
-        #prex = self._viewMerge_X
-        prey = self._viewMerge_Y
+        # prev_x = self._viewMerge_X
+        # prev_y = self._viewMerge_Y
 
         curx = event.xdata
         cury = event.ydata
-        if curx is None or cury  is None:
+        if curx is None or cury is None:
             return
 
         self._viewMerge_X = event.xdata
@@ -1632,7 +1644,7 @@ class MainWindow(QtGui.QMainWindow):
     def addSomething(self):
         """
         """
-        # TODO - Need to implement how to deal with this
+        # FUTURE - Need to implement how to deal with this
         print "Add scan back to merge"
 
         return
@@ -1640,7 +1652,7 @@ class MainWindow(QtGui.QMainWindow):
     def rmSomething(self):
         """
         """
-        # TODO - Need to implement how to deal with this
+        # FUTURE - Need to implement how to deal with this
         print "Remove a scan from merged data."
 
         return
@@ -1648,48 +1660,52 @@ class MainWindow(QtGui.QMainWindow):
     #--------------------------------------------------------------------------
     # Private methods to plot data
     #--------------------------------------------------------------------------
-    
     def _plotIndividualDetCountsVsSampleLog(self, expno, scanno, detid, samplename, raw=True):
         """ Plot one specific detector's counts vs. one specified sample log's value
         along with all Pts.
-        
         For example: detector 11's counts vs. sample_b's value
+        :param expno:
+        :param scanno:
+        :param detid:
+        :param samplename:
+        :param raw: boolean whether the output is normalized by monitor counts
+        :return:
         """
         # Validate input
         try:
             expno = int(expno)
             scanno = int(scanno)
-            detid = int(detid)        
+            detid = int(detid)
             samplename = str(samplename)
         except ValueError:
             raise NotImplementedError("ExpNo, ScanNo or DetID is not integer.")
-        
+
         # Get the array for detector counts vs. sample log value by mapping Pt.
         vecx, vecy = self._myControl.getIndividualDetCountsVsSample(expno, scanno,
-                                                                    detid, samplename)
-        
+                                                                    detid, samplename, raw)
+
         # Clear canvas
         self.ui.graphicsView_indvDet.clearCanvas()
-        
+
         # Plot
         marker, color = self.ui.graphicsView_indvDet.getNextLineMarkerColorCombo()
         self.ui.graphicsView_indvDet.add_plot1d(vec_x=vecx,
-                                             vec_y=vecy,
-                                             marker=marker,
-                                             color=color,
-                                             x_label=samplename,
-                                             y_label='Counts',
-                                             label='DetID = %d'%(detid))
-        
-        self._graphIndDevMode = (samplename, 'Counts')
-        
+                                                vec_y=vecy,
+                                                marker=marker,
+                                                color=color,
+                                                x_label=samplename,
+                                                y_label='Counts',
+                                                label='DetID = %d'%(detid))
+
+        # FUTURE: In future, need to find out how to use self._graphIndDevMode
+        # self._graphIndDevMode = (samplename, 'Counts')
+
         return    
         
 
     def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis, resetboundary=False):
         """ Plot a specific detector's counts along all experiment points (pt)
-        
-        Arguments: 
+        Arguments:
          - expno ::
          - scanno ::
          - detid ::
@@ -1730,8 +1746,8 @@ class MainWindow(QtGui.QMainWindow):
             xlabel = r'$2\theta$'
         else:
             #xlabel = "Pt."
-            xlabel = xaxis 
-        # FIXME - If it works with any way of plotting, then refactor Pt. with any other sample names
+            xlabel = xaxis
+        # TODO - If it works with any way of plotting, then refactor Pt. with any other sample names
 
         label = "Detector ID: %d" % (detid)
 
@@ -1739,7 +1755,7 @@ class MainWindow(QtGui.QMainWindow):
             canvas.add_plot1d(vecx, vecy, marker=marker, color=color, x_label=xlabel,
                               y_label='Counts', label=label, y_err=y_err)
             self._tabLineDict[canvas].append((expno, scanno, detid))
-            
+
             if resetboundary is True:
                 # Set xmin and xmax about the data for first time
                 xmin = min(vecx)
@@ -1758,9 +1774,10 @@ class MainWindow(QtGui.QMainWindow):
             dx = xmax-xmin
             dy = ymax-ymin
             canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
-            
+
         # Set canvas mode
-        self._graphIndDevMode = (xlabel, 'Counts')
+        # FUTURE: Consider how to use self._graphIndDevMode in future
+        # self._graphIndDevMode = (xlabel, 'Counts')
 
         return True
 
@@ -1923,8 +1940,11 @@ class MainWindow(QtGui.QMainWindow):
             vec_x = numpy.array(vec_x)
             vec_y = numpy.array(vec_y)
 
-        # FIXME - Should check y_err set up correctly in Mantid or not
-        y_err = None
+        # FUTURE - Should check y_err set up correctly in Mantid or not
+        if plot_error is True:
+            raise RuntimeError('Implement how to return y_err ASAP.')
+        else:
+            y_err = None
 
         # get the marker color for the line
         marker, color = canvas.getNextLineMarkerColorCombo()
@@ -1973,7 +1993,7 @@ class MainWindow(QtGui.QMainWindow):
             floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
             self.ui.comboBox_indvDetXLabel.clear()
             self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
-            raise NotImplemented("This X-label combo box should be set up during loading data before.")
+            raise RuntimeError("This X-label combo box should be set up during loading data before.")
 
         xlabel=str(self.ui.comboBox_indvDetXLabel.currentText())
 
@@ -1982,8 +2002,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Plot to canvas
         canvas = self.ui.graphicsView_indvDet
-        # FIXME - Clear canvas (think of a case that no need to clear canvas)
-        canvas.clearCanvas()        
+        # FUTURE - Clear canvas (think of a case that no need to clear canvas)
+        canvas.clearCanvas()
         # canvas.clearAllLines()
 
         marker, color = canvas.getNextLineMarkerColorCombo()

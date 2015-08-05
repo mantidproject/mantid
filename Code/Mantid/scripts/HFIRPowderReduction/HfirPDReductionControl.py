@@ -250,7 +250,7 @@ class HFIRPDRedControl(object):
         return
 
 
-    def getIndividualDetCounts(self, exp, scan, detid, xlabel):
+    def getIndividualDetCounts(self, exp, scan, detid, xlabel, raw=False):
         """ Get individual detector counts
         
         Arguments:
@@ -295,6 +295,8 @@ class HFIRPDRedControl(object):
                                                     Mode='Detector',
                                                     DetectorID = detid,
                                                     XLabel=xlabel)
+        if raw is True:
+            raise RuntimeError('Implement ASAP if it is required to plot raw counts (not normalized)')
 
         vecx = tempoutws.readX(0)[:]
         vecy = tempoutws.readY(0)[:]
