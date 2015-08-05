@@ -99,6 +99,7 @@ void LoadIDFFromNexus::exec() {
     // Read parameter correction file 
     // to find out which parameter file to use 
     // and whether it is appended to default parameters.
+    g_log.notice() << "Using parameter correction file: " << parameterCorrectionFile << ".\n";
     readParameterCorrectionFile( parameterCorrectionFile, localWorkspace->getAvailableWorkspaceStartDate(), correctionParameterFile, append );
   }
 
@@ -106,6 +107,9 @@ void LoadIDFFromNexus::exec() {
   // Load default parameters if either there is no correction parameter file or it is to be appended.
   if( correctionParameterFile == "" || append ) {
     LoadParameters(  &nxfile, localWorkspace );
+  } else {  // Else clear the parameters
+    g_log.notice() << "Parameters to be replaced are cleared.\n";
+    localWorkspace->getInstrument()->getParameterMap()->clear();
   }
 
   // Load parameters from correction parameter file, if it exists
@@ -115,11 +119,17 @@ void LoadIDFFromNexus::exec() {
       Poco::Path corrDirPath = corrFilePath.parent();
       g_log.debug() << "Correction directory path: " << corrDirPath.toString() << "\n";
       Poco::Path corrParamFile( corrDirPath, correctionParameterFile );
-      g_log.debug() << "Using readParameterCorrectionFile: " << corrParamFile.toString() << " " << append << "\n";
+      if(append) {
+         g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to append parameters.\n";
+      } else {
+         g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to replace parameters.\n";
+      }
       bool ok = loadParameterFile( corrParamFile.toString(), localWorkspace );
       if(!ok) {
         g_log.error() << "Unable to load parameter file " << corrParamFile.toString() << " specified in " << corrFilePath.toString() << ".\n";
       }
+  } else {
+     g_log.notice() << "No correction parameter file applies to the date for correection file.\n";
   }
 
   return;
