@@ -438,6 +438,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
+				   src/Mantid/InstrumentWidget/InstrumentWindowTypes.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
                    src/Mantid/InstrumentWidget/InstrumentWindowTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h

@@ -1225,6 +1225,18 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
     else:
         return ""
 
+
+def check_if_event_workspace(file_name):
+    '''
+    Checks if a file is associated with an event workspace. It tests if
+    the workspace can be loaded.
+    @param file_name: The file name to test
+    @returns true if the workspace is an event workspace otherwise false
+    '''
+    result = su.can_load_as_event_workspace(filename = file_name)
+    print result
+    return result
+
 ################################################################################
 # Input check functions
 

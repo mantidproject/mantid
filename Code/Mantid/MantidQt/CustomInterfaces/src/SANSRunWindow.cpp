@@ -149,11 +149,7 @@ namespace
   }
 }
 
-//----------------------------------------------
-// Static key strings
-//----------------------------------------------
-const QString SANSRunWindow::m_pythonSuccessKeyword  = "pythonExecutionWasSuccessful";
-const QString SANSRunWindow::m_pythonEmptyKeyword = "None";
+
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -3030,7 +3026,7 @@ void SANSRunWindow::handleInstrumentChange()
   int ind = m_uiForm.detbank_sel->findText(detect);
   // We set the detector selection only if nothing is set yet.
   // Previously, we didn't handle merged and both at this point
-  if (detectorSelection == m_pythonEmptyKeyword || detectorSelection.isEmpty()) {
+  if (detectorSelection == m_constants.getPythonEmptyKeyword() || detectorSelection.isEmpty()) {
     if( ind != -1 ) {
       m_uiForm.detbank_sel->setCurrentIndex(ind);
     }
@@ -3891,11 +3887,11 @@ void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QSt
     QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += originalWorkspaceName + "',";
     pythonCode += " output_workspace_name='" + clonedWorkspaceName + "')\n";
-    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
+    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
-    if (result != m_pythonSuccessKeyword) {
-      result.replace(m_pythonSuccessKeyword, "");
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
       g_log.warning("Error creating a zerror error free cloned workspace. Will save original workspace. More info: " + result.toStdString());
     }
   }
@@ -3910,11 +3906,11 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
     // Run the python script which destroys the cloned workspace
     QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += clonedWorkspaceName + "')\n";
-    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
+    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
-    if (result != m_pythonSuccessKeyword) {
-      result.replace(m_pythonSuccessKeyword, "");
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
       g_log.warning("Error deleting a zerror error free cloned workspace. More info: " + result.toStdString());
     }
   }
@@ -3927,12 +3923,12 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
 bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString& wsName) {
     QString pythonCode("\nprint i.IsValidWsForRemovingZeroErrors(input_workspace_name='");
     pythonCode += wsName + "')";
-    pythonCode += "\nprint '" + m_pythonSuccessKeyword + "'";
+    pythonCode += "\nprint '" + m_constants.getPythonSuccessKeyword() + "'";
     QString result(runPythonCode(pythonCode, false));
     result = result.simplified();
     bool isValid = true;
-    if (result != m_pythonSuccessKeyword) {
-      result.replace(m_pythonSuccessKeyword, "");
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
       g_log.warning("Not a valid workspace for zero error replacement. Will save original workspace. More info: " + result.toStdString());
       isValid = false;
     }
@@ -4038,7 +4034,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionRadiusRequest("\nprint i.GetTransmissionRadiusInMM()");
   QString resultTransmissionRadius(runPythonCode(transmissionRadiusRequest, false));
   resultTransmissionRadius = resultTransmissionRadius.simplified();
-  if (resultTransmissionRadius != m_pythonEmptyKeyword) {
+  if (resultTransmissionRadius != m_constants.getPythonEmptyKeyword()) {
       this->m_uiForm.trans_radius_line_edit->setText(resultTransmissionRadius);
       this->m_uiForm.trans_radius_check_box->setChecked(true);
       setBeamStopLogic(TransSettings::RADIUS, true);
@@ -4048,7 +4044,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionROIRequest("\nprint i.GetTransmissionROI()");
   QString resultTransmissionROI(runPythonCode(transmissionROIRequest, false));
   resultTransmissionROI = resultTransmissionROI.simplified();
-  if (resultTransmissionROI != m_pythonEmptyKeyword) {
+  if (resultTransmissionROI != m_constants.getPythonEmptyKeyword()) {
       resultTransmissionROI = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionROI+ ")", false);
       this->m_uiForm.trans_roi_files_line_edit->setText(resultTransmissionROI);
       this->m_uiForm.trans_roi_files_checkbox->setChecked(true);
@@ -4060,7 +4056,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMaskRequest("\nprint i.GetTransmissionMask()");
   QString resultTransmissionMask(runPythonCode(transmissionMaskRequest, false));
   resultTransmissionMask = resultTransmissionMask.simplified();
-  if (resultTransmissionMask != m_pythonEmptyKeyword) {
+  if (resultTransmissionMask != m_constants.getPythonEmptyKeyword()) {
     resultTransmissionMask = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionMask+ ")", false);
     this->m_uiForm.trans_masking_line_edit->setText(resultTransmissionMask);
   }
@@ -4069,7 +4065,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMonitorSpectrumShiftRequest("\nprint i.GetTransmissionMonitorSpectrumShift()");
   QString resultTransmissionMonitorSpectrumShift(runPythonCode(transmissionMonitorSpectrumShiftRequest, false));
   resultTransmissionMonitorSpectrumShift = resultTransmissionMonitorSpectrumShift.simplified();
-  if (resultTransmissionMonitorSpectrumShift != m_pythonEmptyKeyword) {
+  if (resultTransmissionMonitorSpectrumShift != m_constants.getPythonEmptyKeyword()) {
     this->m_uiForm.trans_M3M4_line_edit->setText(resultTransmissionMonitorSpectrumShift);
   }
 
@@ -4078,7 +4074,7 @@ void SANSRunWindow::setTransmissionSettingsFromUserFile() {
   QString transmissionMonitorSpectrumRequest("\nprint i.GetTransmissionMonitorSpectrum()");
   QString resultTransmissionMonitorSpectrum(runPythonCode(transmissionMonitorSpectrumRequest, false));
   resultTransmissionMonitorSpectrum = resultTransmissionMonitorSpectrum.simplified();
-  if (resultTransmissionMonitorSpectrum != m_pythonEmptyKeyword) {
+  if (resultTransmissionMonitorSpectrum != m_constants.getPythonEmptyKeyword()) {
     if (resultTransmissionMonitorSpectrum == "3") {
       this->m_uiForm.trans_M3_check_box->setChecked(true);
       setM3M4Logic(TransSettings::M3, true);
