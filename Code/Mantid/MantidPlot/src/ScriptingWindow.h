@@ -65,9 +65,11 @@ signals:
   void hideMe();
 
 protected:
-  void dropEvent(QDropEvent *de);
-  void dragMoveEvent(QDragMoveEvent *de);
+  /// Accept a custom defined event
+  void customEvent(QEvent *event);
   void dragEnterEvent(QDragEnterEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dropEvent(QDropEvent *de);
 
 private slots:
   /// Populate file menu
@@ -88,9 +90,11 @@ private slots:
   /// Update menus based on current tab counts
   void setMenuStates(int nTabs);
   /// Sets the execution actions based on the flag
-  void setEditActionsDisabled(bool state);
+  void setEditActionsDisabled(bool off);
   /// Sets the execution actions based on the flag
-  void setExecutionActionsDisabled(bool state);
+  void setExecutionActionsDisabled(bool off);
+  /// Sets the abort actions based on the flag or the environment
+  void setAbortActionsDisabled(bool off);
 
   /// Finds the script corresponding to the action and
   /// asks the manager to open it
@@ -100,6 +104,8 @@ private slots:
   void executeAll();
   /// Execute selection using the current mode option
   void executeSelection();
+  /// Abort the current script
+  void abortCurrent();
   /// Clear out any previous variable definitions in the current script
   void clearScriptVariables();
 
@@ -124,14 +130,13 @@ private:
   void initWindowMenuActions();
   /// Create the help menu actions
   void initHelpMenuActions();
+
+  /// Should we enable abort functionality
+  bool shouldEnableAbort() const;
   /// Opens tabs based on QStringList
   void openPreviousTabs(const QStringList &tabsToOpen);
-
   /// Returns the current execution mode
   Script::ExecutionMode getExecutionMode() const;
-
-  /// Accept a custom defined event
-  void customEvent(QEvent *event);
 
   /// Extract py files from urllist
   QStringList extractPyFiles(const QList<QUrl> &urlList) const;
@@ -154,7 +159,7 @@ private:
   /// Run menu
   QMenu *m_runMenu;
   /// Execute menu actions
-  QAction *m_execSelect, *m_execAll, *m_clearScriptVars;
+  QAction *m_execSelect, *m_execAll, *m_abortCurrent, *m_clearScriptVars;
   /// Execution mode menu
   QMenu *m_execModeMenu;
   /// Execute mode actions

@@ -8,17 +8,16 @@
 </parameter>
 
 <parameter name="analyser" type="string">
-  <value val="qmax" />
+  <value val="simul" />
 </parameter>
 
 <parameter name="reflection" type="string">
-  <value val="4" />
+  <value val="2" />
 </parameter>
-
 </component-link>
 
 <component-link name="simul">
-<parameter name="Efixed"> <value val="7.3812" /> </parameter>
+<parameter name="Efixed"> <value val="1.8450" /> </parameter>
 </component-link>
 
 </parameter-file>

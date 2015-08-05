@@ -4,7 +4,7 @@
 # SANS data reduction scripts
 ########################################################
 from mantid.simpleapi import *
-from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry
 import mantid
 from mantid.kernel import time_duration
 import inspect
@@ -14,15 +14,19 @@ import re
 import types
 
 sanslog = Logger("SANS")
-
 ADDED_EVENT_DATA_TAG = '_added_event_data'
-
 REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
-
 ZERO_ERROR_DEFAULT = 1e6
-
 INCIDENT_MONITOR_TAG = '_incident_monitor'
+
+# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- START
+CAN_IMPORT_NXS = True
+try:
+    import nxs
+except ImportError:
+    CAN_IMPORT_NXS = False
+# WORKAROUND FOR IMPORT ISSUE IN UBUNTU --- STOP
 
 def deprecated(obj):
     """
@@ -1006,6 +1010,40 @@ def convert_to_string_list(to_convert):
     string_list = to_convert.replace(" ", "").split(",")
     output_string = "[" + ','.join("'"+element+"'" for element in string_list) + "]"
     return output_string
+
+def can_load_as_event_workspace(filename):
+    '''
+    Check if an file can be loaded into an event workspace
+    Currently we check if the file
+    1. can be loaded with LoadEventNexus
+    2. contains an "event_workspace" nexus group in its first level
+    Note that this assumes a specific directory structure for the nexus file.
+    @param filename: the name of the input file name
+    @returns true if the file can be loaded as an event workspace else false
+    '''
+    is_event_workspace = False
+
+    # Check if it can be loaded with LoadEventNexus
+    is_event_workspace = FileLoaderRegistry.canLoad("LoadEventNexus", filename)
+
+    # Ubuntu does not provide NEXUS for python currently, need to hedge for that
+    if CAN_IMPORT_NXS:
+        if is_event_workspace == False:
+            # pylint: disable=bare-except
+            try:
+                # We only check the first entry in the root
+                # and check for event_eventworkspace in the next level
+                nxs_file =nxs.open(filename, 'r')
+                rootKeys =  nxs_file.getentries().keys()
+                nxs_file.opengroup(rootKeys[0])
+                nxs_file.opengroup('event_workspace')
+                is_event_workspace = True
+            except:
+                pass
+            finally:
+                nxs_file.close()
+
+    return is_event_workspace
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
