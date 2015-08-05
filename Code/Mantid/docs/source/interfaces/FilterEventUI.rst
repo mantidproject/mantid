@@ -34,7 +34,8 @@ Data Loading
 ------------
 
 For the data loading step, MantidPlot provides an interface in which the user shall select the 
-appropriate file via *Browse* button in the *File/Run* field. The user must provide a file, 
+appropriate file via *Browse* button or by entering an integer as a valid run number in the 
+*File/Run* field, if the instrument name is set up in Mantid. The user must provide a file, 
 which contains valid sample logs 
 for splitting and :ref:`EventWorkspace <EventWorkspace>`. The data will be loaded once the user 
 has clicked upon the *Load* button. 
