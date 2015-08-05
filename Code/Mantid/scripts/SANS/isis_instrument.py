@@ -739,8 +739,12 @@ class ISISInstrument(BaseInstrument):
         raise RuntimeError("Not Implemented")
 
     def cur_detector_position(self, ws_name):
+        '''
+        Return the position of the center of the detector bank
+        @param ws_name: the input workspace name
+        @raise RuntimeError: Not implemented
+        '''
         dummy_1 = ws_name
-        """Return the position of the center of the detector bank"""
         raise RuntimeError("Not Implemented")
 
     def on_load_sample(self, ws_name, beamcentre, isSample):
@@ -823,7 +827,9 @@ class LOQ(ISISInstrument):
 
         xshift = (317.5/1000.) - xbeam
         yshift = (317.5/1000.) - ybeam
-        MoveInstrumentComponent(Workspace=ws,ComponentName= self.cur_detector().name(), X = xshift, Y = yshift, RelativePosition="1")
+        MoveInstrumentComponent(Workspace=ws,
+                                ComponentName= self.cur_detector().name(),
+                                X = xshift, Y = yshift, RelativePosition="1")
 
         # Have a separate move for x_corr, y_coor and z_coor just to make it more obvious in the
         # history, and to expert users what is going on
@@ -1023,7 +1029,8 @@ class SANS2D(ISISInstrument):
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
         # (Note that the X encoder values in NOT used for the rear detector.)
         # The front detector is translated using the difference in X encoder values, with a correction from the user file.
-        # 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for both detectors is unnecessary,
+        # 21/3/12 RKH [In reality only the DIFFERENCE in X encoders is used, having separate X corrections for
+        # both detectors is unnecessary,
         # but we will continue with this as it makes the mask file smore logical and avoids a retrospective change.]
         # 21/3/12 RKH add .side_corr    allows rotation axis of the front detector being offset from the detector X=0
         # this inserts *(1.0-math.cos(RotRadians)) into xshift, and
@@ -1031,13 +1038,16 @@ class SANS2D(ISISInstrument):
         # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
         xshift = (REAR_DET_X + rearDet.x_corr -frontDet.x_corr - FRONT_DET_X  -frontDet.side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr/1000.  - ybeam)
-        # Note don't understand the comment below (9/1/12 these are comments from the original python code, you may remove them if you like!)
+        # Note don't understand the comment below (9/1/12 these are comments from the original python code,
+        # you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
         # 21/3/12 RKH add .radius_corr
         zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
-        MoveInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+        MoveInstrumentComponent(Workspace=ws,
+                                ComponentName= self.getDetector('front').name(),
+                                X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 
 
         # deal with rear detector
