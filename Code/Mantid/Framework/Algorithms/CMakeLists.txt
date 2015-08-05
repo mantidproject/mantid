@@ -142,6 +142,7 @@ set ( SRC_FILES
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InvertMask.cpp
+	src/LoadEventAndCompress.cpp
 	src/Logarithm.cpp
 	src/LorentzCorrection.cpp
 	src/MaskBins.cpp
@@ -413,6 +414,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InvertMask.h
+	inc/MantidAlgorithms/LoadEventAndCompress.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/LorentzCorrection.h
 	inc/MantidAlgorithms/MaskBins.h
