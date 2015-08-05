@@ -8,7 +8,8 @@ namespace Mantid {
 namespace Kernel {
 
 /** StringContainsValidator : A validator designed to ensure that a string input
-  contain a given sub string or a set of sub strings
+  contain a given sub string or a set of sub strings. The sub strings should be
+  case sensitive
 
   @author Elliot Oram, ISIS, RAL
   @date 05/08/2015
