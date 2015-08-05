@@ -580,13 +580,13 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr & qResolution,
   alteredInput = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
 
   // Populate Y with Value1
-  for (int i = 0; i < qResolution->getNumberHistograms(); ++i) {
+  for (size_t i = 0; i < qResolution->getNumberHistograms(); ++i) {
     auto& data = qResolution->dataY(i);
     std::fill(data.begin(), data.end(), value1);
   }
 
   // Populate Y with Value2
-  for (int i = 0; i < alteredInput->getNumberHistograms(); ++i) {
+  for (size_t i = 0; i < alteredInput->getNumberHistograms(); ++i) {
     auto& data = alteredInput->dataY(i);
     std::fill(data.begin(), data.end(), value2);
   }
