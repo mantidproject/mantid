@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
   EnggCalibrateTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
+  EnggVanadiumCorrectionsTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py

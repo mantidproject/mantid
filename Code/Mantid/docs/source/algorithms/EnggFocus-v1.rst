@@ -11,8 +11,9 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
-   removed without a notification, should instrument scientists decide to do so.
+   This algorithm is being developed for a specific instrument. It
+   might get changed or even removed without a notification, should
+   instrument scientists decide to do so.
 
 Performs a Time-of-flight (TOF) to dSpacing conversion using
 calibrated pixel positions, focuses the values in dSpacing (summing
@@ -46,17 +47,15 @@ Usage
 
    # Run the algorithm on an EnginX file
    data_ws = Load('ENGINX00213855.nxs')
-   van_ws = Load('ENGINX00236516.nxs')
+
+   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
+   van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
    focussed_ws = EnggFocus(InputWorkspace=data_ws,
-                           VanadiumWorkspace=van_ws,
+                           VanIntegrationWorkspace=van_integ_ws,
+                           VanCurvesWorkspace=van_curves_ws,
                            Bank='1')
-   # Use this additional options if you want to see the curve fit for the summed up vanadium data for
-   # that bank. It will generate a workspace called 'vanadium_curve'
-   # focussed_ws = EnggFocus(InputWorkspace=data_ws,
-   #                         VanadiumWorkspace=van_ws,
-   #                         Bank='1',
-   #                         OutVanadiumCurveFits='vanadium_curve')
 
    # Should have one spectrum only
    print "No. of spectra:", focussed_ws.getNumberHistograms()
@@ -69,8 +68,9 @@ Usage
 .. testcleanup:: ExSimpleFocussing
 
    DeleteWorkspace(focussed_ws)
-   DeleteWorkspace(van_ws)
    DeleteWorkspace(data_ws)
+   DeleteWorkspace(van_integ_ws)
+   DeleteWorkspace(van_curves_ws)
 
 Output:
 
