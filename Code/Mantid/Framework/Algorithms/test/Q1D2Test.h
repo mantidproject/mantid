@@ -378,6 +378,7 @@ public:
     const double value2 = 2;
     createQResolutionWorkspace(qResolution, alteredInput, m_inputWS, value1, value2);
 
+    // Act
     Mantid::Algorithms::Q1D2 Q1D;
     TS_ASSERT_THROWS_NOTHING( Q1D.initialize() );
     TS_ASSERT( Q1D.isInitialized() )
@@ -390,6 +391,8 @@ public:
     Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
     Q1D.setProperty("QResolution", qResolution);
     Q1D.setProperty("OutputParts", true);
+
+    // Assert
     TS_ASSERT_THROWS_NOTHING(Q1D.execute());
 
     TS_ASSERT( Q1D.isExecuted() )
@@ -404,15 +407,51 @@ public:
 
     // That output will be SUM_i(Yin_i*QRES_in_i)/(SUM_i(Y_in_i)) for each q value
     // In our test workspace we set QRes_in_1 to 1, this means that all DX values should be SUM_i(Y_in_i)/(SUM_i(Y_in_i))
-    // which is either 1 or 0. It can be 0 if no data falls into this bin
+    // which is either 1 or 0. It can be 0 if no data falls into this bin. We make sure that there is at least one bin
+    // with a count of 1
     auto& dataDX = result->dataDx(0);
+    unsigned int counter = 0;
     for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
-      TS_ASSERT( (*it==1.0) || (*it==0.0));
+      if (*it==1.0) {
+        counter++;
+      }
+      // Make sure that the value is either 1 or 0
+      TSM_ASSERT("The DX value should be either 1 or 0", (*it==1.0) || (*it==0.0));
     }
+    TSM_ASSERT("There should be at least one bin which is not 0", counter > 0);
 
+    // Clean Up
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_sumOfCounts");
     Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_sumOfNormFactors");
+  }
+
+    void testThatDxIsNotPopulatedWhenQResolutionIsNotChoosen() {
+    // Arrange
+    Mantid::Algorithms::Q1D2 Q1D;
+    TS_ASSERT_THROWS_NOTHING( Q1D.initialize() );
+    TS_ASSERT( Q1D.isInitialized() )
+
+    const std::string outputWS("Q1D2Test_result");
+    Q1D.setProperty("DetBankWorkspace", m_inputWS); 
+    Q1D.setProperty("WavelengthAdj", m_wavNorm);
+    Q1D.setProperty("PixelAdj", m_pixel);
+    Q1D.setPropertyValue("OutputWorkspace", outputWS);
+    Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+    TS_ASSERT_THROWS_NOTHING(Q1D.execute());
+
+    TS_ASSERT( Q1D.isExecuted() )
+
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                              (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+
+    // Make sure that the Q resolution is not calculated
+    auto& dataDX = result->dataDx(0);
+    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
+      TSM_ASSERT("All Dx values should be 0, as we didn't use the QResolution ooption", (*it==0.0));
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
   ///stop the constructor from being run every time algorithms test suite is initialised
