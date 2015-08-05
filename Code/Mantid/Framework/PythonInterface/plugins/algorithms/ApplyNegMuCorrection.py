@@ -85,11 +85,11 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         GILE=self.getProperty("Gain ISIS Low E").value
         OILE=self.getProperty("Offset ISIS Low E").value
 
-         for x in range(first,last):
-            for spec in range(0,3):
-                runno=str(x)
-                self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
-                self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
+        for x in range(first,last):
+           for spec in range(0,3):
+               runno=str(x)
+               self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
+               self.combine(dd,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
 
 
 
