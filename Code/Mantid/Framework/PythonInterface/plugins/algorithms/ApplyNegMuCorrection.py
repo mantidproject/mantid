@@ -1,11 +1,11 @@
 from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 
-#pylint: disable=no-init
+#pylint: disable=no-init, too-many-arguments
 class ApplyNegMuCorrection(PythonAlgorithm):
 
     #Combining work spaces and normalising the correction.
     #_OILE and _OIHE are unused parameters for now to make PyLint happy
-    def combine(dataDir,runno,A2000,B2000,A3000,B3000,_OILE,_OIHE,spec):
+    def combine(self,dataDir,runno,A2000,B2000,A3000,B3000,_OILE,_OIHE,spec):
         if spec<10:
             specNo='0'+str(spec)
         else:
