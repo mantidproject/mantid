@@ -12,6 +12,17 @@ Description
 Loads data from version 4 of nMOLDYN saved in the ASCII format after being
 extracted from the ``.tar`` archive.
 
+Assumptions on data format
+--------------------------
+
+The ``Directory`` property must be given the directory that is produced when you
+extract the ``.tar`` archive from nMMOLDYN without modifications which must only
+contain the data files produces from a single export operation from nMOLDYN.
+
+The file names must match the function and axis names and preferably not contain
+any special characters, particularly ``,`` as this interferes with the string
+delimiter used in the user interface.
+
 Usage
 -----
 
