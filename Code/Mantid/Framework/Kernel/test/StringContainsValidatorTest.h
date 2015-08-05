@@ -42,7 +42,7 @@ public:
     TS_ASSERT_EQUALS("", validator.isValid(input));
   }
 
-  void test_that_capitalisation_is_enforced_correctly() {
+  void test_capitalisation_is_enforced_correctly() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back("this");
@@ -54,8 +54,7 @@ public:
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 
-  void
-  test_that_error_is_produced_if_string_does_not_contain_all_the_required_substrings() {
+  void test_error_produced_if_string_does_not_contain_all_the_substrings() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back("not");
@@ -68,8 +67,7 @@ public:
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 
-  void
-  test_that_error_is_produced_if_string_only_contains_some_of_the_substrings() {
+  void test_error_produced_if_string_only_contains_some_of_the_substrings() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back("not");
@@ -82,7 +80,7 @@ public:
     TS_ASSERT_EQUALS(error, validator.isValid(input));
   }
 
-  void test_that_substring_is_allowed_to_contain_punctuation() {
+  void test_substring_is_allowed_to_contain_punctuation() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back(",");
@@ -91,7 +89,7 @@ public:
     TS_ASSERT_EQUALS("", validator.isValid(input));
   }
 
-  void test_that_an_empty_string_produces_an_error() {
+  void test_an_empty_string_produces_an_error() {
     StringContainsValidator validator;
     auto required = std::vector<std::string>();
     required.push_back(",");
