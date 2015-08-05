@@ -137,9 +137,9 @@ std::vector<int> MDHWNexusLoadingPresenter::getExtents()
 
   if(m_histoWs)
   {
-    extents[1] = m_histoWs->getXDimension()->getNBins();
-    extents[3] = m_histoWs->getYDimension()->getNBins();
-    extents[5] = m_histoWs->getZDimension()->getNBins();
+    extents[1] = static_cast<int>(m_histoWs->getXDimension()->getNBins());
+    extents[3] = static_cast<int>(m_histoWs->getYDimension()->getNBins());
+    extents[5] = static_cast<int>(m_histoWs->getZDimension()->getNBins());
   }
 
   return extents;
