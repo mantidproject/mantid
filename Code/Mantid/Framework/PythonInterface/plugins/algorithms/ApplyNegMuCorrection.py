@@ -4,59 +4,59 @@ class ApplyNegMuCorrection(PythonAlgorithm):
 
     #Combining work spaces and normalising the correction.
     def combine(self,dd,runno,A2000,B2000,A3000,B3000,C,C1,spec):
-    if spec<10:
-        s='0'+str(spec)
-    else:
-        s=str(spec)
-    print dd+'ral0'+runno+'.rooth30'+s+'.dat'
-    #loading data
-    try:
-        ws3000=Load(Filename=dd+r'\ral0'+runno+'.rooth30'+s+'.dat', OutputWorkspace='ws3000')
-        print 'hello'
-        ws2000=Load(Filename=dd+r'\ral0'+runno+'.rooth20'+s+'.dat', OutputWorkspace='ws2000')
-    except RuntimeError:
-         print runno+' '+s+"not found"
-
-   #Correcting for Gain and offset of the detectors
-    ws2000_corr=CreateWorkspace(A2000*ws2000.readX(0)[:]+B2000,ws2000.readY(0)[:])
-    ws3000_corr=CreateWorkspace(A3000*ws3000.readX(0)[:]+B3000,ws3000.readY(0)[:])
-
-    #Summing total counts for normalisation
-    ws2000_total=0
-    ws3000_total=0
-    for x in range (0,8000):
+        if spec<10:
+            s='0'+str(spec)
+        else:
+            s=str(spec)
+        print dd+'ral0'+runno+'.rooth30'+s+'.dat'
+        #loading data
         try:
-            ws2000_total=ws2000_corr.readY(0)[x]+ws2000_total
-            ws3000_total=ws3000_corr.readY(0)[x]+ws3000_total
-        except:
-             continue
+            ws3000=Load(Filename=dd+r'\ral0'+runno+'.rooth30'+s+'.dat', OutputWorkspace='ws3000')
+            print 'hello'
+            ws2000=Load(Filename=dd+r'\ral0'+runno+'.rooth20'+s+'.dat', OutputWorkspace='ws2000')
+        except RuntimeError:
+            print runno+' '+s+"not found"
 
-    print ws2000_total
-    print ws3000_total
-    #normalising
-    ws2000_corr=ws2000_corr/ws2000_total
-    ws3000_corr=ws3000_corr/ws3000_total
+        #Correcting for Gain and offset of the detectors
+        ws2000_corr=CreateWorkspace(A2000*ws2000.readX(0)[:]+B2000,ws2000.readY(0)[:])
+        ws3000_corr=CreateWorkspace(A3000*ws3000.readX(0)[:]+B3000,ws3000.readY(0)[:])
 
-    #rebinning to add detectors together
-    bin=[100,ws2000.readX(0)[2]-ws2000.readX(0)[1],8000]
+        #Summing total counts for normalisation
+        ws2000_total=0
+        ws3000_total=0
+        for x in range (0,8000):
+            try:
+                ws2000_total=ws2000_corr.readY(0)[x]+ws2000_total
+                ws3000_total=ws3000_corr.readY(0)[x]+ws3000_total
+            except:
+                continue
 
-    ws2000_corr_rebin=Rebin(ws2000_corr,bin)
-    ws3000_corr_rebin=Rebin(ws3000_corr,bin)
+        print ws2000_total
+        print ws3000_total
+        #normalising
+        ws2000_corr=ws2000_corr/ws2000_total
+        ws3000_corr=ws3000_corr/ws3000_total
 
-    ws_ral=Plus(ws2000_corr_rebin,ws3000_corr_rebin)
+        #rebinning to add detectors together
+        bin=[100,ws2000.readX(0)[2]-ws2000.readX(0)[1],8000]
 
-    suf='_'+str(spec)+'_'+runno
+        ws2000_corr_rebin=Rebin(ws2000_corr,bin)
+        ws3000_corr_rebin=Rebin(ws3000_corr,bin)
 
-    RenameWorkspaces(ws_ral,Suffix=suf)
-    RenameWorkspaces(ws2000_corr,Suffix=suf)
-    RenameWorkspaces(ws3000_corr,Suffix=suf)
+        ws_ral=Plus(ws2000_corr_rebin,ws3000_corr_rebin)
 
-    DeleteWorkspace(ws2000)
-    DeleteWorkspace(ws3000)
-    DeleteWorkspace(ws2000_corr_rebin)
-    DeleteWorkspace(ws3000_corr_rebin)
+        suf='_'+str(spec)+'_'+runno
 
-    return
+        RenameWorkspaces(ws_ral,Suffix=suf)
+        RenameWorkspaces(ws2000_corr,Suffix=suf)
+        RenameWorkspaces(ws3000_corr,Suffix=suf)
+
+        DeleteWorkspace(ws2000)
+        DeleteWorkspace(ws3000)
+        DeleteWorkspace(ws2000_corr_rebin)
+        DeleteWorkspace(ws3000_corr_rebin)
+
+        return
 
     def PyInit(self):
         self.declareProperty(name="Data Directory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
