@@ -4068,7 +4068,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="9" column="2">
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="histogram_binning_label">
           <property name="text">
            <string>Histogram binning (when adding event data):</string>
           </property>
@@ -4113,7 +4113,7 @@ p, li { white-space: pre-wrap; }
         <item row="12" column="2">
          <layout class="QHBoxLayout" name="horizontalLayout_24">
           <item>
-           <widget class="QLabel" name="labelBinning">
+           <widget class="QLabel" name="binning_label">
             <property name="minimumSize">
              <size>
               <width>70</width>

@@ -107,22 +107,19 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLabel" name="lbEFixed">
+       <widget class="QLabel" name="lbEfixed">
         <property name="text">
-         <string>Efixed value:</string>
-        </property>
-        <property name="buddy">
-         <cstring>leEfixed</cstring>
+         <string>Efixed:</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="leEfixed">
-        <property name="enabled">
-         <bool>false</bool>
+       <widget class="QDoubleSpinBox" name="spEfixed">
+        <property name="decimals">
+         <number>4</number>
         </property>
-        <property name="toolTip">
-         <string>Value of Efixed for conversion from time to energy.</string>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
         </property>
        </widget>
       </item>
@@ -963,7 +960,7 @@
   <tabstop>ckSumFiles</tabstop>
   <tabstop>ckLoadLogFiles</tabstop>
   <tabstop>ckUseCalib</tabstop>
-  <tabstop>leEfixed</tabstop>
+  <tabstop>spEfixed</tabstop>
   <tabstop>spSpectraMin</tabstop>
   <tabstop>spSpectraMax</tabstop>
   <tabstop>cbGroupingOptions</tabstop>

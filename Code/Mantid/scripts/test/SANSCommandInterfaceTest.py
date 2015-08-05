@@ -4,7 +4,9 @@ import isis_instrument as instruments
 import ISISCommandInterface as command_iface
 from reducer_singleton import ReductionSingleton
 import isis_reduction_steps as reduction_steps
-
+from mantid.simpleapi import *
+from mantid.kernel import DateAndTime
+import random
 
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
@@ -191,6 +193,39 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         command_iface.SetTransmissionMask(trans_mask_files = trans_mask_files)
         # Assert
         self.assertEqual(0, len(ReductionSingleton().transmission_calculator.mask_files), 'The transmission mask list should be empty.')
+
+class TestEventWorkspaceCheck(unittest.TestCase):
+    def _create_file_name(self, name):
+        temp_save_dir = config['defaultsave.directory']
+        if (temp_save_dir == ''):
+            temp_save_dir = os.getcwd()
+        return os.path.join(temp_save_dir, name + '.nxs')
+
+    def addSampleLogEntry(self, log_name, ws, start_time, extra_time_shift):
+        number_of_times = 10
+        for i in range(0, number_of_times):
+
+            val = random.randrange(0, 10, 1)
+            date = DateAndTime(start_time)
+            date +=  int(i*1e9)
+            date += int(extra_time_shift*1e9)
+            AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
+
+    def _clean_up(self, file_name):
+        if os.path.exists(file_name):
+            os.remove(file_name)
+
+    def test_that_histogram_workspace_is_detected(self):
+        # Arrange
+        ws = CreateSampleWorkspace()
+        self.addSampleLogEntry('proton_charge', ws, "2010-01-01T00:00:00", 0.0)
+        file_name = self._create_file_name('dummy')
+        SaveNexus(Filename= file_name, InputWorkspace=ws)
+        # Act
+        result = command_iface.check_if_event_workspace(file_name)
+        self.assertFalse(result)
+        # Clean Up
+        self._clean_up(file_name)
 
 if __name__ == "__main__":
     unittest.main()

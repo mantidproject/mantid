@@ -28,7 +28,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/Instantiator.h"
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 #include <boost/python/extract.hpp>
 #include <boost/python/object.hpp>

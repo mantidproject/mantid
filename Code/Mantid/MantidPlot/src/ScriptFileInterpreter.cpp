@@ -2,18 +2,19 @@
 #include "ScriptOutputDisplay.h"
 #include "ScriptingEnv.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
-#include <iostream>
 #include <QAction>
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <q3cstring.h>
 #include <qscilexer.h>
 
 #include <stdexcept>
 
+//-----------------------------------------------------------------------------
+// ScriptFileInterpreter
+//-----------------------------------------------------------------------------
 
 /**
  * Construct a widget
@@ -38,43 +39,13 @@ ScriptFileInterpreter::~ScriptFileInterpreter()
 }
 
 /**
- * Make sure the widget is ready to be deleted, i.e. saved etc
+ * Check if the interpreter is running and the script is saved
+ * @return True if the interpreter should be closed
  */
-void ScriptFileInterpreter::prepareToClose()
+bool ScriptFileInterpreter::shouldClose()
 {
-  if( !isScriptModified() ) return;
-
-  QMessageBox msgBox(this);
-  msgBox.setModal(true);
-  msgBox.setWindowTitle("MantidPlot");
-  msgBox.setText(tr("The current script has been modified."));
-  msgBox.setInformativeText(tr("Save changes?"));
-  msgBox.addButton(QMessageBox::Save);
-  QPushButton *saveAsButton = msgBox.addButton("Save As...", QMessageBox::AcceptRole);
-  msgBox.addButton(QMessageBox::Discard);
-  int ret = msgBox.exec();
-
-  try
-  {
-    if( msgBox.clickedButton() == saveAsButton )
-    {
-      m_editor->saveAs();
-    }
-    else if( ret == QMessageBox::Save )
-    {
-      m_editor->saveToCurrentFile();
-    }
-    else
-    {
-      m_editor->setModified(false);
-    }
-  }
-  //Catch cancelling save dialogue
-  catch( ScriptEditor::SaveCancelledException& sce )
-  {
-    UNUSED_ARG(sce);
-    m_editor->setModified(false);
-  }
+  ScriptCloseDialog dialog(*this, this);
+  return dialog.shouldScriptClose();
 }
 
 /// Convert tabs in selection to spaces
@@ -82,10 +53,10 @@ void ScriptFileInterpreter::tabsToSpaces()
 {
   int selFromLine, selFromInd, selToLine, selToInd;
 
-  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);
   if(selFromLine == -1)
     m_editor->selectAll();
-  
+
   QString text = m_editor->selectedText();
 
   // Use the tab space count for each converted character
@@ -103,10 +74,10 @@ void ScriptFileInterpreter::spacesToTabs()
 {
   int selFromLine, selFromInd, selToLine, selToInd;
 
-  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);
   if(selFromLine == -1)
     m_editor->selectAll();
-  
+
   QString text = m_editor->selectedText();
 
   // Use the tab space count for each converted characters
@@ -124,10 +95,10 @@ void ScriptFileInterpreter::setFont(const QString &fontFamily)
 {
   // This needs to check if the font exists and use default if not
   QFontDatabase database;
-  
+
   // Select saved choice. If not available, use current font
   QString fontToUse = m_editor->lexer()->defaultFont().family();
-  
+
   if(database.families().contains(fontFamily))
     fontToUse = fontFamily;
 
@@ -143,9 +114,9 @@ void ScriptFileInterpreter::setFont(const QString &fontFamily)
     QFont font = m_editor->lexer()->font(count);
     font.setFamily(fontToUse);
     m_editor->lexer()->setFont(font,count);
-      
+
     count++;
-  }    
+  }
 }
 
 /// Toggle replacing tabs with whitespace
@@ -164,11 +135,11 @@ void ScriptFileInterpreter::setTabWhitespaceCount(int count)
 void ScriptFileInterpreter::toggleWhitespace(bool state)
 {
   m_editor->setEolVisibility(state);
-  
-  if(state) 
+
+  if(state)
       m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsVisible);
   else
-    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsInvisible);  
+    m_editor->setWhitespaceVisibility(QsciScintilla::WhitespaceVisibility::WsInvisible);
 }
 
 /// Comment a block of code
@@ -185,11 +156,11 @@ void ScriptFileInterpreter::uncomment()
 
 void ScriptFileInterpreter::toggleComment(bool addComment)
 {
-  // Get selected text  
+  // Get selected text
   std::string whitespaces (" \t\f\r");
   int selFromLine, selFromInd, selToLine, selToInd;
-  
-  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);    
+
+  m_editor->getSelection(&selFromLine, &selFromInd, &selToLine, &selToInd);
 
   // Expand selection to first character on start line to the end char on second line.
   if(selFromLine == -1)
@@ -197,20 +168,20 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
     m_editor->getCursorPosition(&selFromLine, &selFromInd);
     selToLine = selFromLine;
   }
-    
+
   // For each line, select it, copy the line into a new string minus the comment
   QString replacementText = "";
 
   // If it's adding comment, check all lines to find the lowest index for a non space character
   int minInd = -1;
   if(addComment)
-  { 
+  {
     for(int i=selFromLine;i<=selToLine;++i)
     {
-      std::string thisLine = m_editor->text(i).toUtf8().constData();   
+      std::string thisLine = m_editor->text(i).toUtf8().constData();
       int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
-     
-  	  if(minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd))
+
+      if(minInd == -1 || (lineFirstChar != -1 && lineFirstChar < minInd))
       {
           minInd = lineFirstChar;
       }
@@ -220,21 +191,21 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
   for(int i=selFromLine;i<=selToLine;++i)
   {
     std::string thisLine = m_editor->text(i).toUtf8().constData();
-   
+
     int lineFirstChar = static_cast<int>(thisLine.find_first_not_of(whitespaces + "\n"));
-     
+
     if(lineFirstChar != -1)
-    {     
-      if(addComment) 
-      { 
+    {
+      if(addComment)
+      {
         thisLine.insert(minInd,"#");
       }
       else
-      { 
+      {
         // Check that the first character is a #
         if(thisLine[lineFirstChar] == '#') // Remove the comment, or ignore to add as is
         {
-          thisLine = thisLine.erase(lineFirstChar,1);    
+          thisLine = thisLine.erase(lineFirstChar,1);
         }
       }
     }
@@ -242,7 +213,7 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
     replacementText = replacementText + QString::fromStdString(thisLine);
   }
 
-  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));  
+  m_editor->setSelection(selFromLine,0,selToLine, m_editor->lineLength(selToLine));
   replaceSelectedText(m_editor, replacementText);
   m_editor->setCursorPosition(selFromLine,selFromInd);
 }
@@ -252,8 +223,8 @@ void ScriptFileInterpreter::toggleComment(bool addComment)
 // using an older version(2.4.6) of the library missing the method, and too close to code freeze to update.
 inline void ScriptFileInterpreter::replaceSelectedText(const ScriptEditor *editor, const QString &text)
 {
-  int UTF8_CodePage = 65001; 
-  const char *b = (( editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData() : text.latin1());    
+  int UTF8_CodePage = 65001;
+  const char *b = (( editor->SCI_GETCODEPAGE == UTF8_CodePage) ? text.utf8().constData() : text.latin1());
   editor->SendScintilla( editor->SCI_REPLACESEL, b );
 }
 
@@ -445,6 +416,13 @@ void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
 }
 
 /**
+ * The environment has to support this behaviour or is does nothing
+ */
+void ScriptFileInterpreter::abort() {
+  m_runner->abort();
+}
+
+/**
  */
 void ScriptFileInterpreter::clearVariables()
 {
@@ -593,3 +571,88 @@ void ScriptFileInterpreter::executeCode(const ScriptCode & code, const Script::E
   }
 }
 
+//-----------------------------------------------------------------------------
+// ScriptCloseDialog
+//-----------------------------------------------------------------------------
+ScriptCloseDialog::ScriptCloseDialog(ScriptFileInterpreter &interpreter,
+                                     QWidget *parent)
+  : QWidget(parent), m_msgBox(new QMessageBox(this)), m_interpreter(interpreter) {
+  QVBoxLayout *layout = new QVBoxLayout;
+  layout->addWidget(m_msgBox);
+  setLayout(layout);
+}
+
+/**
+ * Raise the the dialog as modal if necessary and ask the user
+ * if the script should close
+ * @return True or False depending on whether the script should be closed
+ */
+bool ScriptCloseDialog::shouldScriptClose() {
+  const bool executing(m_interpreter.isExecuting()),
+    modified(m_interpreter.isScriptModified());
+  // Is the dialog even necessary?
+  if(!modified && !executing) return true;
+
+  m_msgBox->setModal(true);
+  m_msgBox->setWindowTitle("MantidPlot");
+  m_msgBox->setIcon(QMessageBox::Question);
+
+  QString filename = m_interpreter.filename();
+  bool close(true);
+  if(modified) {
+    m_msgBox->addButton(QMessageBox::Save);
+    m_msgBox->addButton(QMessageBox::Cancel);
+    m_msgBox->addButton(QMessageBox::Discard);
+    m_msgBox->setDefaultButton(QMessageBox::Save);
+    if(filename.isEmpty()) {
+      m_msgBox->setText(QString("Save changes before closing?"));
+      m_msgBox->button(QMessageBox::Save)->setText("Save As");
+    } else {
+      m_msgBox->setText(QString("Save changes to '%1' before closing?").arg(filename));
+    }
+    if(executing) {
+      m_msgBox->setInformativeText(tr("The script will be aborted."));
+    }
+    // show dialog
+    int ret = m_msgBox->exec();
+    try {
+      switch(ret)
+      {
+      case QMessageBox::Save:
+        m_interpreter.saveToCurrentFile();
+        close = true;
+        break;
+      case QMessageBox::Discard:
+        close = true;
+        break;
+      default:
+        close = false;
+        break;
+      }
+    }
+    catch(ScriptEditor::SaveCancelledException &) {
+      close = false;
+    }
+  }
+  else if(executing) {
+    if(filename.isEmpty()) {
+      m_msgBox->setText(tr("Abort and close?"));
+    } else {
+      m_msgBox->setText(tr("Abort '%1' and close?").arg(m_interpreter.filename()));
+    }
+    m_msgBox->addButton(QMessageBox::Abort);
+    m_msgBox->addButton(QMessageBox::Cancel);
+    m_msgBox->setDefaultButton(QMessageBox::Abort);
+    int ret = m_msgBox->exec();
+    switch(ret) {
+      case QMessageBox::Abort:
+        m_interpreter.m_runner->abort();
+        close = true;
+        break;
+      default:
+        close = false;
+        break;
+    }
+  }
+  return close;
+}

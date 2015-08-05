@@ -123,7 +123,7 @@ void ScriptingWindow::readSettings() {
   m_manager->m_replaceTabs = settings.value("ReplaceTabs", true).toBool();
   m_manager->m_tabWhitespaceCount =
       settings.value("TabWhitespaceCount", 4).toInt();
-  m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();      
+  m_manager->m_fontFamily = settings.value("ScriptFontFamily", "").toString();
   openPreviousTabs(settings.value("/PreviousFiles", "").toStringList());
 
   settings.endGroup();
@@ -245,11 +245,10 @@ void ScriptingWindow::populateExecMenu() {
   m_runMenu->clear();
   m_runMenu->addAction(m_execSelect);
   m_runMenu->addAction(m_execAll);
-
   m_runMenu->addSeparator();
-
+  m_runMenu->addAction(m_abortCurrent);
+  m_runMenu->addSeparator();
   m_runMenu->addAction(m_clearScriptVars);
-
   m_runMenu->addSeparator();
 
   m_execModeMenu->clear();
@@ -316,22 +315,38 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 }
 
 /**
- * Set the state of the execution actions/menu depending on the flag
- * @param state :: If the true the items are enabled, otherwise the are disabled
+ * Set the state of the execution actions depending on the flag
+ * @param off :: If the true the items are disabled, otherwise the are enabled
  */
-void ScriptingWindow::setEditActionsDisabled(bool state) {
-  m_editMenu->setDisabled(state);
+void ScriptingWindow::setEditActionsDisabled(bool off) {
+  auto actions = m_editMenu->actions();
+  foreach (QAction *action, actions) {
+    if(strcmp("Find", action->name()) != 0) {
+       action->setDisabled(off);
+    }
+  }
 }
 
 /**
  * Set the state of the execution actions/menu depending on the flag
- * @param state :: If the true the items are enabled, otherwise the are disabled
+ * @param off :: If the true the items are disabled, otherwise the are enabled
  */
-void ScriptingWindow::setExecutionActionsDisabled(bool state) {
-  m_execSelect->setDisabled(state);
-  m_execAll->setDisabled(state);
-  m_execModeMenu->setDisabled(state);
-  m_runMenu->setDisabled(state);
+void ScriptingWindow::setExecutionActionsDisabled(bool off) {
+  m_execSelect->setDisabled(off);
+  m_execAll->setDisabled(off);
+  m_execModeMenu->setDisabled(off);
+  m_clearScriptVars->setDisabled(off);
+  // Abort should be opposite
+  setAbortActionsDisabled(!off);
+}
+
+/**
+ * Set the state of the execution actions/menu depending on the flag
+ * @param off :: If the true the items are disabled else they are enabled
+ */
+void ScriptingWindow::setAbortActionsDisabled(bool off) {
+  if(!shouldEnableAbort()) off = true;
+  m_abortCurrent->setDisabled(off);
 }
 
 /**
@@ -358,6 +373,13 @@ void ScriptingWindow::executeAll() {
  */
 void ScriptingWindow::executeSelection() {
   m_manager->executeSelection(this->getExecutionMode());
+}
+
+/**
+ * Ask the manager to abort the script execution for the current script.
+ */
+void ScriptingWindow::abortCurrent() {
+  m_manager->abortCurrentScript();
 }
 
 /**
@@ -395,6 +417,63 @@ QString ScriptingWindow::saveToString() { return m_manager->saveToString(); }
  */
 void ScriptingWindow::acceptCloseEvent(const bool value) {
   m_acceptClose = value;
+}
+
+//-------------------------------------------
+// Protected non-slot member functions
+//-------------------------------------------
+/**
+ * Accept a custom event and in this case test if it is a ScriptingChangeEvent
+ * @param event :: The custom event
+ */
+void ScriptingWindow::customEvent(QEvent *event) {
+  if (!m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {
+    ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent *>(event);
+    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() +
+                   " Window");
+  }
+}
+
+/**
+ * Accept a drag enter event and selects whether to accept the action
+ * @param de :: The drag enter event
+ */
+void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
+  const QMimeData *mimeData = de->mimeData();
+  if (mimeData->hasUrls()) {
+    if (extractPyFiles(mimeData->urls()).size() > 0) {
+      de->acceptProposedAction();
+    }
+  }
+}
+
+/**
+ * Accept a drag move event and selects whether to accept the action
+ * @param de :: The drag move event
+ */
+void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
+  const QMimeData *mimeData = de->mimeData();
+  if (mimeData->hasUrls()) {
+    if (extractPyFiles(mimeData->urls()).size() > 0) {
+      de->accept();
+    }
+  }
+}
+
+/**
+ * Accept a drag drop event and process the data appropriately
+ * @param de :: The drag drop event
+ */
+void ScriptingWindow::dropEvent(QDropEvent *de) {
+  const QMimeData *mimeData = de->mimeData();
+  if (mimeData->hasUrls()) {
+    QStringList filenames = extractPyFiles(mimeData->urls());
+    de->acceptProposedAction();
+
+    for (int i = 0; i < filenames.size(); ++i) {
+      m_manager->openInNewTab(filenames[i]);
+    }
+  }
 }
 
 //-------------------------------------------
@@ -570,6 +649,13 @@ void ScriptingWindow::initExecMenuActions() {
             << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
   m_execAll->setShortcuts(shortcuts);
 
+  m_abortCurrent = new QAction(tr("A&bort"), this);
+  connect(m_abortCurrent, SIGNAL(triggered()), this, SLOT(abortCurrent()));
+  shortcuts.clear();
+  shortcuts << Qt::CTRL + Qt::Key_D;
+  m_abortCurrent->setShortcuts(shortcuts);
+  setAbortActionsDisabled(false);
+
   m_clearScriptVars = new QAction(tr("&Clear Variables"), this);
   connect(m_clearScriptVars, SIGNAL(triggered()), this,
           SLOT(clearScriptVariables()));
@@ -666,6 +752,26 @@ void ScriptingWindow::initHelpMenuActions() {
   connect(m_showPythonHelp, SIGNAL(triggered()), this, SLOT(showPythonHelp()));
 }
 
+/// Should we enable abort functionality
+bool ScriptingWindow::shouldEnableAbort() const {
+  return m_manager->scriptingEnv()->supportsAbortRequests();
+}
+
+/**
+ * Opens a set of files in new tabs
+ * @param tabsToOpen A list of filenames to open in new tabs
+ */
+void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
+  const int totalFiles = tabsToOpen.size();
+  if (totalFiles == 0) {
+    m_manager->newTab();
+  } else {
+    for (int i = 0; i < totalFiles; i++) {
+      m_manager->newTab(i, tabsToOpen[i]);
+    }
+  }
+}
+
 /**
  * Returns the current execution mode set in the menu
  */
@@ -676,59 +782,6 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
     return Script::Serialised;
 }
 
-/**
- * Accept a custom event and in this case test if it is a ScriptingChangeEvent
- * @param event :: The custom event
- */
-void ScriptingWindow::customEvent(QEvent *event) {
-  if (!m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT) {
-    ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent *>(event);
-    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() +
-                   " Window");
-  }
-}
-
-/**
- * Accept a drag move event and selects whether to accept the action
- * @param de :: The drag move event
- */
-void ScriptingWindow::dragMoveEvent(QDragMoveEvent *de) {
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
-      de->accept();
-    }
-  }
-}
-
-/**
- * Accept a drag enter event and selects whether to accept the action
- * @param de :: The drag enter event
- */
-void ScriptingWindow::dragEnterEvent(QDragEnterEvent *de) {
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    if (extractPyFiles(mimeData->urls()).size() > 0) {
-      de->acceptProposedAction();
-    }
-  }
-}
-
-/**
- * Accept a drag drop event and process the data appropriately
- * @param de :: The drag drop event
- */
-void ScriptingWindow::dropEvent(QDropEvent *de) {
-  const QMimeData *mimeData = de->mimeData();
-  if (mimeData->hasUrls()) {
-    QStringList filenames = extractPyFiles(mimeData->urls());
-    de->acceptProposedAction();
-
-    for (int i = 0; i < filenames.size(); ++i) {
-      m_manager->openInNewTab(filenames[i]);
-    }
-  }
-}
 
 QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
   QStringList filenames;
@@ -743,15 +796,4 @@ QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
     }
   }
   return filenames;
-}
-
-void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
-  const int totalFiles = tabsToOpen.size();
-  if (totalFiles == 0) {
-    m_manager->newTab();
-  } else {
-    for (int i = 0; i < totalFiles; i++) {
-      m_manager->newTab(i, tabsToOpen[i]);
-    }
-  }
 }
