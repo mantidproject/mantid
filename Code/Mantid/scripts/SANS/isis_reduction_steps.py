@@ -29,6 +29,9 @@ import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
 
+# A global name for the Q Resolution workspace which lives longer than a reducer core
+QRESOLUTION_WORKSPACE_NAME = "__Q_Resolution_ISIS_SANS"
+
 def _issueWarning(msg):
     """
         Prints a message to the log marked as warning
@@ -1840,6 +1843,8 @@ class ConvertToQISIS(ReductionStep):
         self.w_cut = 0.0
         # Whether to output parts when running either Q1D2 or Qxy
         self.outputParts = False
+        # Flag if a QResolution workspace should be used
+        self.use_q_resolution = False
 
     def set_output_type(self, descript):
         """
@@ -1914,6 +1919,11 @@ class ConvertToQISIS(ReductionStep):
         else:
             raise RuntimeError('Normalization workspaces must be created by CalculateNorm() and passed to this step')
 
+        # Create the QResolution workspace, but only if it A) is requested by the user and does not exist
+        #                                                  B) is requested by the user, exists, but does not
+        #                                                     have the correct binning
+        qResolution = self._get_q_resolution_worksapce(DetBanWorkspace = workspace)
+
         try:
             if self._Q_alg == 'Q1D':
                 Q1D(DetBankWorkspace=workspace,
@@ -1950,6 +1960,54 @@ class ConvertToQISIS(ReductionStep):
             raise
 
         reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+
+    def _get_q_resolution_workspace(self, det_bank_workspace):
+        '''
+        Calculates the QResolution workspace if this is required
+        @param det_bank_workspace: the main worspace which is being reduced
+        @returns the QResolution workspace or None
+        '''
+        # Check if the a calculation is asked for by the user
+        if self.use_q_resolution == False:
+            return None
+
+        # Check if Q Resolution exists in mtd
+        exists = mtd.doesExist(QRESOLUTION_WORKSPACE_NAME)
+
+        if exists:
+            return self._get_existing_q_resolution(det_bank_workspace)
+        else:
+            return self._create_q_resolution()
+
+    def _create_q_resolution(self):
+        '''
+        Creates the Q Resolution workspace
+        @returns the q resolution workspace
+        '''
+        # TODO: INSERT TOFSANSResolutionByPixel here
+
+    def _get_existing_q_resolution(self, det_bank_workspace):
+        '''
+        If the existing Q Resolution workspace has the correct binning,
+        then we use it, else we have to create it
+        @det_bank_workspace: the main workspace
+        '''
+        if self._has_matching_binning(det_bank_workspace):
+            return mtd[QRESOLUTION_WORKSPACE_NAME]
+        else:
+            # TODO: INSERT TOFSANSResolutionByPixel here
+            pass
+
+    def _has_matching_binning(self, det_bank_workspace):
+        '''
+        Check if the binning of the q resolution workspace
+        and the main workspace do not match
+        @det_bank_workspace: the main workspace
+        '''
+        ws  = mtd[QRESOLUTION_WORKSPACE_NAME]
+
+
+
 
 class UnitsConvert(ReductionStep):
     """
