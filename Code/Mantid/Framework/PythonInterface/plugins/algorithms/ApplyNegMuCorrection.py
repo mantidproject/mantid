@@ -4,7 +4,8 @@ from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspacePropert
 class ApplyNegMuCorrection(PythonAlgorithm):
 
     #Combining work spaces and normalising the correction.
-    def combine(self,dataDir,runno,A2000,B2000,A3000,B3000,spec):
+    #_OILE and _OIHE are unused parameters for now to make PyLint happy
+    def combine(self,dataDir,runno,A2000,B2000,A3000,B3000,_OILE,_OIHE,spec):
         if spec<10:
             specNo='0'+str(spec)
         else:
@@ -85,8 +86,8 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         for run in range(first,last):
             for spec in range(0,3):
                 runno=str(run)
-                self.combine(self,dataDir,runno,GRHE,ORHE,GIHE,OIHE,spec)
-                self.combine(self,dataDir,runno,GRHE,ORHE,GIHE,OIHE,10)
+                self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
+                self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
 
 
 
