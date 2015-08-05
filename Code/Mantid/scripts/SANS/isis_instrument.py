@@ -1049,7 +1049,6 @@ class SANS2D(ISISInstrument):
                                 ComponentName= self.getDetector('front').name(),
                                 X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 
-
         # deal with rear detector
 
         # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
@@ -1068,9 +1067,7 @@ class SANS2D(ISISInstrument):
         sanslog.notice("Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
         MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 
-
         self.move_all_components(ws)
-
         #this implements the TRANS/TRANSPEC=4/SHIFT=... line, this overrides any other monitor move
         if self.monitor_4_offset:
             #get the current location of the monitor
