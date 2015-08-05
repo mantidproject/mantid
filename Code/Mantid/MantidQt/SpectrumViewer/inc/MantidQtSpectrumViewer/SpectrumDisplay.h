@@ -6,6 +6,7 @@
 #include <QRect>
 #include <QTableWidget>
 #include <qwt_plot.h>
+#include <boost/weak_ptr.hpp>
 
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
@@ -89,13 +90,13 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      void setIntensity( double controlParameter );
 
      /// Record the point that the user is currently pointing at with the mouse
-     virtual QPair<double,double> setPointedAtPoint( QPoint point, int mouseClick = 2 );
+     virtual QPair<double,double> setPointedAtPoint( QPoint point, bool isFront = true );
 
      /// Set horizontal graph wit data from the array at the specified y value
-     void setHGraph( double y );
+     void setHGraph( double y, bool isFront = true );
 
      /// Set vertical graph with data from the array at the specified x value
-     void setVGraph( double x );
+     void setVGraph( double x, bool isFront = true );
 
      /// Show information about the point (x, y) on the image in the table
      std::vector<std::string> showInfoList( double x, double y );
@@ -113,6 +114,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double getPointedAtY();
 
      QwtPlot* spectrumPlot() const {return m_spectrumPlot;}
+
+     void addOrther(const boost::shared_ptr<SpectrumDisplay>& other);
+     void addOrthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others);
 
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;
@@ -152,6 +156,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double m_totalYMin;
      double m_totalYMax;
 
+     QList<boost::weak_ptr<SpectrumDisplay>> m_otherDisplays;
 };
 
 } // namespace SpectrumView

@@ -101,6 +101,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   auto spectrumPlot = m_ui->spectrumPlot;
   bool isFirstPlot = m_spectrumDisplay.isEmpty();
 
+  int tab = 0;
   if (isFirstPlot)
   {
     m_ui->imageTabs->setTabLabel(m_ui->imageTabs->currentWidget(),QString::fromStdString(wksp->name()));
@@ -116,7 +117,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
     auto layout = new QHBoxLayout();
     layout->addWidget(spectrumPlot);
     widget->setLayout(layout);
-    m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->name()));
+    tab = m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->name()));
   }
 
   auto spectrumDisplay = boost::make_shared<SpectrumDisplay>( spectrumPlot,
@@ -125,7 +126,6 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
                                            m_hGraph.get(), m_vGraph.get(),
                                            m_ui->image_table);
   spectrumDisplay->setDataSource( dataSource );
-  m_spectrumDisplay.append(spectrumDisplay);
 
   if (isFirstPlot)
   {
@@ -135,9 +135,16 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   }
   else
   {
+    foreach(boost::shared_ptr<SpectrumDisplay> sd, m_spectrumDisplay) {
+      sd->addOrther(spectrumDisplay);
+    }
+    spectrumDisplay->addOrthers(m_spectrumDisplay);
     spectrumPlot->canvas()->installEventFilter(m_svConnections.get());
     m_svConnections->initNewSpectrumDisplay(spectrumDisplay.get());
   }
+
+  m_spectrumDisplay.append(spectrumDisplay);
+  m_ui->imageTabs->setCurrentIndex(tab);
 }
 
 
@@ -221,6 +228,8 @@ void SpectrumView::changeSpectrumDisplay(int tab)
 {
   auto spectrumDisplay = m_spectrumDisplay[tab].get();
   m_svConnections->setSpectrumDisplay(spectrumDisplay);
+  m_hGraph->clear();
+  m_vGraph->clear();
 }
 
 } // namespace SpectrumView

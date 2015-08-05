@@ -60,7 +60,7 @@ RefImageDisplay::~RefImageDisplay()
 QPair<double,double> RefImageDisplay::setPointedAtPoint( QPoint point, int mouseClick)
 {
   // Call the base class method for most of the work
-  QPair<double,double> xy = SpectrumDisplay::setPointedAtPoint( point, mouseClick );
+  QPair<double,double> xy = SpectrumDisplay::setPointedAtPoint( point );
 
   // Now, for a left click, set the position in the appropriate lineedit
   if (mouseClick == 1)  //left click

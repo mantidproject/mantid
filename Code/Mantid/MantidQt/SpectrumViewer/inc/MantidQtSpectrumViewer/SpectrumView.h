@@ -72,6 +72,7 @@ public:
 
   ~SpectrumView();
   void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
+  QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const { return m_spectrumDisplay; }
 
 signals:
   void spectrumDisplayChanged(SpectrumDisplay*);

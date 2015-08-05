@@ -120,6 +120,7 @@ void SpectrumDisplay::setDataSource( SpectrumDataSource_sptr dataSource )
                                             m_totalYMin, m_totalYMax,
                                             n_rows, n_cols,
                                             false );
+  std::cerr << "Data array " << m_dataArray->getNRows() << ' ' << m_dataArray->getNCols() << ' ' << m_dataArray.get() << std::endl;
 
   m_spectrumPlot->setAxisScale( QwtPlot::xBottom, m_dataArray->getXMin(), m_dataArray->getXMax() );
   m_spectrumPlot->setAxisScale( QwtPlot::yLeft,   m_dataArray->getYMin(), m_dataArray->getYMax() );
@@ -394,20 +395,27 @@ QPair<double, double> SpectrumDisplay::getPlotInvTransform( QPoint point )
  *
  * @param point  The point that the user is currently pointing at with
  *               the mouse.
- * @param mouseClick Which mouse button was clicked (used by derived class)
+ * @param isFront Flag indicating if this is a call to the front (active) display.
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int /*mouseClick*/ )
+QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, bool isFront )
 {
   if ( m_dataSource == 0 || m_dataArray == 0 )
     return qMakePair(0.0, 0.0);
 
   QPair<double, double> transPoints = getPlotInvTransform(point);
 
-  setHGraph( transPoints.second );
-  setVGraph( transPoints.first );
+  setHGraph( transPoints.second, isFront );
+  //setVGraph( transPoints.first, isFront );
 
-  showInfoList( transPoints.first, transPoints.second );
+  if (isFront) {
+    showInfoList( transPoints.first, transPoints.second );
+    foreach(boost::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
+      if (auto display = sd.lock()) {
+        display->setPointedAtPoint(point, false);
+      }
+    }
+  }
 
   return transPoints;
 }
@@ -419,12 +427,14 @@ QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int /*mou
  *  return.
  *
  *  @param y   The y-value of the horizontal cut through the image.
+ *  @param isFront Is it a front curve?
  */
-void SpectrumDisplay::setHGraph( double y )
+void SpectrumDisplay::setHGraph( double y, bool isFront )
 {
   if ( y < m_dataArray->getYMin() || y > m_dataArray->getYMax() )
   {
-    m_hGraphDisplay->clear();
+    if (isFront)
+      m_hGraphDisplay->clear();
     return;
   }
 
@@ -433,6 +443,7 @@ void SpectrumDisplay::setHGraph( double y )
   std::vector<float>data   = m_dataArray->getData();
 
   size_t n_cols = m_dataArray->getNCols();
+  std::cerr << "n_cols=" << n_cols << ' ' << m_dataArray.get() << std::endl;
 
   double x_min = m_dataArray->getXMin();
   double x_max = m_dataArray->getXMax();
@@ -454,7 +465,7 @@ void SpectrumDisplay::setHGraph( double y )
   yData.push_back( data[ row * n_cols + n_cols-1 ] );
 
   m_hGraphDisplay->setLogX( m_dataArray->isLogX() );
-  m_hGraphDisplay->setData( xData, yData, y );
+  m_hGraphDisplay->setData( xData, yData, y, isFront );
 }
 
 
@@ -465,7 +476,7 @@ void SpectrumDisplay::setHGraph( double y )
  *
  *  @param x   The x-value of the vertical cut through the image.
  */
-void SpectrumDisplay::setVGraph( double x )
+void SpectrumDisplay::setVGraph( double x, bool isFront )
 {
   if ( x < m_dataArray->getXMin() || x > m_dataArray->getXMax() )
   {
@@ -500,7 +511,7 @@ void SpectrumDisplay::setVGraph( double x )
   v_yData.push_back( y_max );                     // end at y_max
   v_xData.push_back( data[ (n_rows-1) * n_cols + col] );
 
-  m_vGraphDisplay->setData( v_xData, v_yData, x );
+  m_vGraphDisplay->setData( v_xData, v_yData, x, isFront );
 }
 
 
@@ -608,6 +619,18 @@ bool SpectrumDisplay::dataSourceRangeChanged()
            m_totalXMax != m_dataSource->getXMax() );
 }
 
+void SpectrumDisplay::addOrther(const boost::shared_ptr<SpectrumDisplay>& other)
+{
+  m_otherDisplays.append(other);
+}
+
+void SpectrumDisplay::addOrthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others)
+{
+  foreach(boost::shared_ptr<SpectrumDisplay> sd, others)
+  {
+    m_otherDisplays.append(sd);
+  }
+}
 
 } // namespace SpectrumView
 } // namespace MantidQt
