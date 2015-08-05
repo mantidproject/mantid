@@ -166,7 +166,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
         self.labelS2=QtGui.QLabel('HYSPEC S2')
-        self.labelEi=QtGui.QLabel('Incident Energy:')
+        self.labelEi=QtGui.QLabel('Incident Energy')
         self.editS2=QtGui.QLineEdit()
         self.editS2.setValidator(self.validatorS2)
         self.editEi=QtGui.QLineEdit()
@@ -179,6 +179,10 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.fast=QtGui.QCheckBox("Fast",self)
         self.fast.toggle()
         self.updateFast()
+        #masking
+        self.labelMask=QtGui.QLabel('Mask file')
+        self.editMask=QtGui.QLineEdit()
+        self.buttonMask=QtGui.QPushButton("LoadMask")
         #goniometer settings
         self.labelGon=QtGui.QLabel('Goniometer')
         self.tableViewGon = QtGui.QTableView(self)
@@ -214,8 +218,13 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.gridI.addWidget(self.fast,0,6)
         self.setLayout(QtGui.QHBoxLayout())
         self.rightside=QtGui.QVBoxLayout()
+        self.maskLayout=QtGui.QHBoxLayout()
+        self.maskLayout.addWidget(self.labelMask)
+        self.maskLayout.addWidget(self.editMask)
+        self.maskLayout.addWidget(self.buttonMask)
         self.layout().addLayout(self.rightside)
         self.rightside.addLayout(self.gridI)
+        self.rightside.addLayout(self.maskLayout)
         self.rightside.addWidget(self.labelGon)
         self.rightside.addWidget(self.tableViewGon)
         self.layout().addWidget(self.canvas)
@@ -224,6 +233,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.editEi.textEdited.connect(self.checkValidInputs)
         self.combo.activated[str].connect(self.instrumentSelected)
         self.fast.stateChanged.connect(self.updateFast)
+        self.buttonMask.clicked.connect(self.loadMaskFromFile)
         #call instrumentSelected once
         self.instrumentSelected(self.instrument)
         #connect goniometer change with figure
@@ -308,6 +318,14 @@ class InstrumentSetupWidget(QtGui.QWidget):
         d=dict()
         d['makeFast']=self.fast.isChecked()
         self.updateAll(**d)
+
+    def loadMaskFromFile(self):
+        fileName = QtGui.QFileDialog.getOpenFileName(self,
+                                                     "Open Mask File", '',
+                                                     "Processed Nexus (*.nxs);;All Files (*)")
+        if not fileName:
+            return
+        self.editMask.setText(QString(fileName))
 
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()
