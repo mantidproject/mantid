@@ -13,77 +13,76 @@ DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
 
 auto *periodicTable = new PeriodicTableWidget();
 auto *yPosition = new QLineEdit();
-bool selectElementsIsClicked;
 
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
-    : API::AlgorithmDialog(parent) {
-}
-
+    : API::AlgorithmDialog(parent) {}
 
 void GetNegMuMuonicXRDDialog::initLayout() {
+  periodicTable->disableAllElementButtons();
+
+  /*Elements Enabled Correspond to those for which we
+  * have data for in the dictionary found in 
+  * GetNegMuMuonicXRD.py file
+  */
+  enableElementsForGetNegMuMuonicXRD();
   auto *main_layout = new QVBoxLayout(this);
-  auto *button_layout = new QFormLayout(this);
-  //auto *SelectElements = new QPushButton("Select Elements");
-  //SelectElements->setMaximumWidth(100);
- // connect(SelectElements, SIGNAL(clicked()), this, SLOT(SelectElementsClicked()));
- // selectElementsIsClicked = false;
-  yPosition->setMaximumWidth(100);
-  auto *yPositionLabel = new QLabel("Y Position");
-  storePropertyValue("YAxisPosition", yPosition->text());
-  auto yPositionNumericValidator = new QDoubleValidator();
-  yPosition->setMaxLength(10);
-  yPosition->setValidator(yPositionNumericValidator);
   auto *runButton = new QPushButton("Run");
+  auto *selectElementsButton = new QPushButton("Select Elements");
+  auto *yPositionLabel = new QLabel("Y Position");
+  auto yPositionNumericValidator = new QDoubleValidator();
+  /*YPosition LineEdit Attributes*/
+  yPosition->setMaximumWidth(250);
+  yPosition->setPlaceholderText("-0.01");
+  yPosition->setValidator(yPositionNumericValidator);
+  /*Run Button*/
   runButton->setMaximumWidth(100);
   connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(runButton, SIGNAL(clicked()), this, SLOT(accept()));
+  connect(this, SIGNAL(validInput()), this, SLOT(accept()));
+
+  /*Adding to Layout*/
   main_layout->addWidget(periodicTable);
-  //button_layout->addWidget(SelectElements);
-  button_layout->addWidget(yPositionLabel);
-  button_layout->addWidget(yPosition);
-  button_layout->addWidget(runButton);
-  main_layout->addLayout(button_layout);
+  main_layout->addWidget(yPositionLabel);
+  main_layout->addWidget(yPosition);
+  main_layout->addWidget(runButton);
+}
+
+void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD(){
+    periodicTable->enableButtonByName("Au");
+    periodicTable->enableButtonByName("Ag");
+    periodicTable->enableButtonByName("Cu");
+    periodicTable->enableButtonByName("Zn");
+    periodicTable->enableButtonByName("Pb");
+    periodicTable->enableButtonByName("As");
+    periodicTable->enableButtonByName("Sn");
 }
 
 QString getElementsSelectedFromPeriodicTable() {
   return periodicTable->getAllCheckedElementsStr();
 }
-/*
-void GetNegMuMuonicXRDDialog::SelectElementsClicked() {
-  selectElementsIsClicked = true;
-}
-*/
-void GetNegMuMuonicXRDDialog::runClicked(){
-  if (yPosition->text() == ""){
-      QMessageBox::information(
-          this, "GetNegMuMuonicXRDDialog",
-          "No Y Axis Position was specified, please enter a value for Y Axis Position");
-      return;
-  }
-  QString elementsSelectedStr = getElementsSelectedFromPeriodicTable();
-    if (elementsSelectedStr == "") {
-      QMessageBox::information(
-          this, "GetNegMuMuonicXRDDialog",
-          "No elements were selected, Please select an element from the table");
-      return;
-    }
-    storePropertyValue("Elements", elementsSelectedStr);
-    std::cout << elementsSelectedStr.toStdString();
-  storePropertyValue("YAxisPosition", yPosition->text());
+
+bool GetNegMuMuonicXRDDialog::validateDialogInput(QString input) {
+  return (input != "");
 }
 
-/*void GetNegMuMuonicXRDDialog::parseInput() {
-  if (selectElementsIsClicked) {
-    QString elementsSelectedStr = getElementsSelectedFromPeriodicTable();
-    if (elementsSelectedStr == "") {
-      QMessageBox::information(
-          this, "GetNegMuMuonicXRDDialog",
-          "No elements were selected, Please select an element from the table");
-      return;
-    }
-    storePropertyValue("Elements", elementsSelectedStr);
-    std::cout << elementsSelectedStr.toStdString();
+void GetNegMuMuonicXRDDialog::runClicked() {
+  if (yPosition->text() == "") {
+    QMessageBox::information(this, "GetNegMuMuonicXRDDialog",
+                             "No Y Axis Position was specified, please enter a "
+                             "value or run with default value of -0.001");
   }
-}*/
+  QString elementsSelectedStr = getElementsSelectedFromPeriodicTable();
+  if (elementsSelectedStr == "") {
+    QMessageBox::information(
+        this, "GetNegMuMuonicXRDDialog",
+        "No elements were selected, Please select an element from the table");
+  }
+  if (validateDialogInput(elementsSelectedStr) &&
+      validateDialogInput(yPosition->text())) {
+    storePropertyValue("Elements", elementsSelectedStr);
+    storePropertyValue("YAxisPosition", yPosition->text());
+    emit validInput();
+  }
+  yPosition->setText("-0.001");
+}
 }
 }
