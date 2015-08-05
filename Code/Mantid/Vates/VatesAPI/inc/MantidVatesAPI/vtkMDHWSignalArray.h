@@ -117,6 +117,7 @@ private:
   Scalar m_temporaryTuple[1];
 };
 
+//! @cond Doxygen_Suppress
 //------------------------------------------------------------------------------
 /// Can't use vtkStandardNewMacro on a templated class.
 /// create and return a pointer to a vtkMDHWSignalArray<Scalar> object.
@@ -124,7 +125,7 @@ template <class Scalar>
 vtkMDHWSignalArray<Scalar> *vtkMDHWSignalArray<Scalar>::New() {
   VTK_STANDARD_NEW_BODY(vtkMDHWSignalArray<Scalar>)
 }
-
+//! @endcond
 //------------------------------------------------------------------------------
 template <class Scalar>
 void vtkMDHWSignalArray<Scalar>::PrintSelf(ostream &os, vtkIndent indent) {
