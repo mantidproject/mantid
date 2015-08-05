@@ -2,6 +2,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringContainsValidator.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -50,8 +51,13 @@ void ConvolutionFitSequential::init() {
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "The input workspace for the fit.");
 
-  declareProperty("Function", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+  auto scv = boost::make_shared<StringContainsValidator>();
+  auto requires = std::vector<std::string>();
+  requires.push_back("convolution");
+  requires.push_back("resolution");
+  scv->setRequiredStrings(requires);
+
+  declareProperty("Function", "", scv,
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
