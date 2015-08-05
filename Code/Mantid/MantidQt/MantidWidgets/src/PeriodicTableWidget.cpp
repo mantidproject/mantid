@@ -4,21 +4,18 @@
 PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   ui.setupUi(this);
   populateGroupVectors();
+  populateAllButtonsVector();
   ColourElements();
   ui.Groups->setVisible(false);
   connect(ui.showLegend, SIGNAL(clicked()), this, SLOT(showGroupLegend()));
-  
 }
 
-void PeriodicTableWidget::showGroupLegend(){
-    if (ui.showLegend->isChecked())
-    {
-        ui.Groups->setVisible(true);
-    }
-    else
-    {
-        ui.Groups->setVisible(false);
-    }
+void PeriodicTableWidget::showGroupLegend() {
+  if (ui.showLegend->isChecked()) {
+    ui.Groups->setVisible(true);
+  } else {
+    ui.Groups->setVisible(false);
+  }
 }
 
 void PeriodicTableWidget::ColourElements() {
@@ -34,17 +31,17 @@ void PeriodicTableWidget::ColourElements() {
   ColourTransitionMetals(TransitionMetals);
   ColourUnknownProperties(UnknownProperties);
 }
-void PeriodicTableWidget::ColourActinides(const QVector<QPushButton *> &actinides) {
- QString buttonColourStr ="background-color: rgb(255, 85, 127, 255)";
+void PeriodicTableWidget::ColourActinides(
+    const QVector<QPushButton *> &actinides) {
+  QString buttonColourStr = "background-color: rgb(255, 85, 127, 255)";
   for (auto i = actinides.begin(); i != actinides.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
   }
-
 }
 void PeriodicTableWidget::ColourAlkaliMetals(
     const QVector<QPushButton *> &alkaliMetals) {
-  QString buttonColourStr ="background-color: rgb(255, 255, 0, 255)";
+  QString buttonColourStr = "background-color: rgb(255, 255, 0, 255)";
   for (auto i = alkaliMetals.begin(); i != alkaliMetals.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
@@ -52,7 +49,7 @@ void PeriodicTableWidget::ColourAlkaliMetals(
 }
 void PeriodicTableWidget::ColourAlkalineEarthMetals(
     const QVector<QPushButton *> &alkalineEarthMetals) {
-  QString buttonColourStr ="background-color: rgb(170, 170, 127, 255)";
+  QString buttonColourStr = "background-color: rgb(170, 170, 127, 255)";
   for (auto i = alkalineEarthMetals.begin(); i != alkalineEarthMetals.end();
        i++) {
     ColourButton(*i, buttonColourStr);
@@ -61,7 +58,7 @@ void PeriodicTableWidget::ColourAlkalineEarthMetals(
 }
 void PeriodicTableWidget::ColourHalogens(
     const QVector<QPushButton *> &halogens) {
-  QString buttonColourStr ="background-color: rgb(0, 255, 255, 255)";
+  QString buttonColourStr = "background-color: rgb(0, 255, 255, 255)";
   for (auto i = halogens.begin(); i != halogens.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
@@ -69,7 +66,7 @@ void PeriodicTableWidget::ColourHalogens(
 }
 void PeriodicTableWidget::ColourLanthanides(
     const QVector<QPushButton *> &lanthanides) {
-  QString buttonColourStr ="background-color: rgb(170, 85, 255, 255)";
+  QString buttonColourStr = "background-color: rgb(170, 85, 255, 255)";
   for (auto i = lanthanides.begin(); i != lanthanides.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
@@ -77,7 +74,7 @@ void PeriodicTableWidget::ColourLanthanides(
 }
 void PeriodicTableWidget::ColourMetalloids(
     const QVector<QPushButton *> &metalloids) {
-  QString buttonColourStr ="background-color: rgb(255, 170, 255, 255)";
+  QString buttonColourStr = "background-color: rgb(255, 170, 255, 255)";
   for (auto i = metalloids.begin(); i != metalloids.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
@@ -85,7 +82,7 @@ void PeriodicTableWidget::ColourMetalloids(
 }
 void PeriodicTableWidget::ColourNobleGases(
     const QVector<QPushButton *> &nobleGases) {
-  QString buttonColourStr ="background-color: rgb(255, 170, 0, 255)";
+  QString buttonColourStr = "background-color: rgb(255, 170, 0, 255)";
   for (auto i = nobleGases.begin(); i != nobleGases.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
@@ -93,24 +90,23 @@ void PeriodicTableWidget::ColourNobleGases(
 }
 void PeriodicTableWidget::ColourNonMetals(
     const QVector<QPushButton *> &nonMetals) {
-  QString buttonColourStr ="background-color: rgb(0, 170, 255, 255)";
+  QString buttonColourStr = "background-color: rgb(0, 170, 255, 255)";
   for (auto i = nonMetals.begin(); i != nonMetals.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
-    
   }
 }
 void PeriodicTableWidget::ColourPostTransitionMetals(
     const QVector<QPushButton *> &postTransMetals) {
-  QString buttonColourStr ="background-color: rgb(116, 116, 116, 255)";
+  QString buttonColourStr = "background-color: rgb(116, 116, 116, 255)";
   for (auto i = postTransMetals.begin(); i != postTransMetals.end(); i++) {
-      ColourButton(*i, buttonColourStr);
-      update();
+    ColourButton(*i, buttonColourStr);
+    update();
   }
 }
 void PeriodicTableWidget::ColourTransitionMetals(
     const QVector<QPushButton *> &transMetals) {
-  QString buttonColourStr ="background-color: rgb(0, 255, 127, 255)";
+  QString buttonColourStr = "background-color: rgb(0, 255, 127, 255)";
   for (auto i = transMetals.begin(); i != transMetals.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
@@ -118,50 +114,95 @@ void PeriodicTableWidget::ColourTransitionMetals(
 }
 void PeriodicTableWidget::ColourUnknownProperties(
     const QVector<QPushButton *> &UnknownProperties) {
-  QString buttonColourStr ="background-color: rgb(255, 0, 0, 255)";
+  QString buttonColourStr = "background-color: rgb(255, 0, 0, 255)";
   for (auto i = UnknownProperties.begin(); i != UnknownProperties.end(); i++) {
     ColourButton(*i, buttonColourStr);
     update();
   }
 }
 
-void PeriodicTableWidget::ColourButton(QPushButton *element, QString colour) {
-  element->setStyleSheet("QPushButton{border:1px solid rgb(0, 0, 0); " +
-      colour + ";}" + "QPushButton:checked{ background-color:rgb(175,255,255)}");
-}
+void PeriodicTableWidget::enableButtonsByGroup(QString groupToEnable) {}
 
-QString PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements){
-    QString selectedElements = "";
-   /* Loop through QPushButtons and if they are checked
-    * then retrieve the text on the button i.e the 
-    * element and add it to the string (space delimiter).
-    */
-    for (auto i = elements.begin(); i != elements.end(); i++){
-        if ((*i)->isChecked()){
-            selectedElements += (*i)->text() + ",";
-        }
+void PeriodicTableWidget::enableButtonByName(QString elementStr) {
+  for (auto vector_i = AllElementButtons.begin();
+       vector_i != AllElementButtons.end(); vector_i++) {
+    for (auto btn_i = (*vector_i).begin(); btn_i != (*vector_i).end();
+         btn_i++) {
+      if (compareButtonNameToStr((*btn_i), elementStr)) {
+        (*btn_i)->setDisabled(false);
+      }
     }
-    return selectedElements;
+  }
+}
+bool PeriodicTableWidget::compareButtonNameToStr(QPushButton *buttonToCompare,
+                                                 QString stringToCompare) {
+  return (strcmp(buttonToCompare->text().toStdString().c_str(),
+                 stringToCompare.toStdString().c_str()) == 0);
 }
 
-QString PeriodicTableWidget::getAllCheckedElementsStr(){
-    /*checking all groups of buttons to see if they 
-    * have been selected in the Widget
-    */
-    QString allCheckedElementsStr = "";
-    allCheckedElementsStr += elementsSelectedToString(Actinides);
-    allCheckedElementsStr += elementsSelectedToString(AlkaliMetals);
-    allCheckedElementsStr += elementsSelectedToString(AlkalineEarthMetals);
-    allCheckedElementsStr += elementsSelectedToString(Halogens);
-    allCheckedElementsStr += elementsSelectedToString(Lanthanides);
-    allCheckedElementsStr += elementsSelectedToString(NobleGases);
-    allCheckedElementsStr += elementsSelectedToString(Metalloids);
-    allCheckedElementsStr += elementsSelectedToString(OtherNonMetals);
-    allCheckedElementsStr += elementsSelectedToString(PostTransitionMetals);
-    allCheckedElementsStr += elementsSelectedToString(TransitionMetals);
-    allCheckedElementsStr += elementsSelectedToString(UnknownProperties);
-    //return a string with all the elements that have been selected
-    return allCheckedElementsStr;
+void PeriodicTableWidget::disableAllElementButtons() {
+  /*NEEDED TO SELECTIVELY ENABLE BUTTONS IN LIST
+   * FOUND IN getNegMuMuonicXRD.py
+   */
+  disableButtons(Actinides);
+  disableButtons(AlkaliMetals);
+  disableButtons(AlkalineEarthMetals);
+  disableButtons(Halogens);
+  disableButtons(Lanthanides);
+  disableButtons(Metalloids);
+  disableButtons(NobleGases);
+  disableButtons(OtherNonMetals);
+  disableButtons(PostTransitionMetals);
+  disableButtons(TransitionMetals);
+  disableButtons(UnknownProperties);
+}
+void PeriodicTableWidget::ColourButton(QPushButton *element, QString colour) {
+  element->setStyleSheet(
+      "QPushButton{border:1px solid rgb(0, 0, 0); " + colour + ";}" +
+      "QPushButton:checked{ background-color:rgb(175,255,255)}" +
+      "QPushButton:!enabled{background-color: rgb(204,204,204);}");
+}
+
+QString
+PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements) {
+  QString selectedElements = "";
+  /* Loop through QPushButtons and if they are checked
+   * then retrieve the text on the button i.e the
+   * element and add it to the string (space delimiter).
+   */
+  for (auto i = elements.begin(); i != elements.end(); i++) {
+    if ((*i)->isChecked()) {
+      selectedElements += (*i)->text() + ",";
+    }
+  }
+  return selectedElements;
+}
+
+QString PeriodicTableWidget::getAllCheckedElementsStr() {
+  /*checking all groups of buttons to see if they
+  * have been selected in the Widget
+  */
+  QString allCheckedElementsStr = "";
+  allCheckedElementsStr += elementsSelectedToString(Actinides);
+  allCheckedElementsStr += elementsSelectedToString(AlkaliMetals);
+  allCheckedElementsStr += elementsSelectedToString(AlkalineEarthMetals);
+  allCheckedElementsStr += elementsSelectedToString(Halogens);
+  allCheckedElementsStr += elementsSelectedToString(Lanthanides);
+  allCheckedElementsStr += elementsSelectedToString(NobleGases);
+  allCheckedElementsStr += elementsSelectedToString(Metalloids);
+  allCheckedElementsStr += elementsSelectedToString(OtherNonMetals);
+  allCheckedElementsStr += elementsSelectedToString(PostTransitionMetals);
+  allCheckedElementsStr += elementsSelectedToString(TransitionMetals);
+  allCheckedElementsStr += elementsSelectedToString(UnknownProperties);
+  // return a string with all the elements that have been selected
+  return allCheckedElementsStr;
+}
+
+void PeriodicTableWidget::disableButtons(
+    QVector<QPushButton *> buttonsToDisable) {
+  for (auto i = buttonsToDisable.begin(); i != buttonsToDisable.end(); i++) {
+    (*i)->setDisabled(true);
+  }
 }
 
 void PeriodicTableWidget::populateGroupVectors() {
@@ -296,4 +337,18 @@ void PeriodicTableWidget::populateGroupVectors() {
   NobleGases.push_back(ui.Ne); // Neon
   NobleGases.push_back(ui.Rn); // Radon
   NobleGases.push_back(ui.Xe); // Xenon
+}
+
+void PeriodicTableWidget::populateAllButtonsVector() {
+  AllElementButtons.push_back(Actinides);
+  AllElementButtons.push_back(OtherNonMetals);
+  AllElementButtons.push_back(AlkaliMetals);
+  AllElementButtons.push_back(AlkalineEarthMetals);
+  AllElementButtons.push_back(TransitionMetals);
+  AllElementButtons.push_back(Lanthanides);
+  AllElementButtons.push_back(UnknownProperties);
+  AllElementButtons.push_back(PostTransitionMetals);
+  AllElementButtons.push_back(Metalloids);
+  AllElementButtons.push_back(Halogens);
+  AllElementButtons.push_back(NobleGases);
 }

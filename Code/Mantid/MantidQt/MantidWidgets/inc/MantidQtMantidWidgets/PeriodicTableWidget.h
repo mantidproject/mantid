@@ -13,8 +13,11 @@ public:
   PeriodicTableWidget(QWidget *parent = 0);
   QString elementsSelectedToString(QVector<QPushButton *> elementsSelected);
   QString getAllCheckedElementsStr();
-  void populateGroupVectors();
-  void ColourElements();
+  void disableButtons(QVector<QPushButton *> buttons);
+  void disableAllElementButtons();
+  void enableButtonsByGroup(QString groupNameStr);
+  void enableButtonByName(QString elementStr);
+  bool compareButtonNameToStr(QPushButton * buttonToCompare,QString stringToCompare);
   // vectors for storing Element buttons in associated groups
   QVector<QPushButton *> OtherNonMetals;
   QVector<QPushButton *> AlkaliMetals;
@@ -27,7 +30,7 @@ public:
   QVector<QPushButton *> Metalloids;
   QVector<QPushButton *> Halogens;
   QVector<QPushButton *> NobleGases;
-
+  QVector<QVector <QPushButton *> > AllElementButtons;
 private slots:
   void showGroupLegend();
 private:
@@ -50,6 +53,11 @@ private:
 
   // Methods to colour single element button
   void ColourButton(QPushButton *elementButton, QString colour);
+  //Method to populate vector
+  void populateGroupVectors();
+  void populateAllButtonsVector();
+  //Colour All Elements
+  void ColourElements();
 };
 
 #endif // !MANTID_MANTIDWIDGETS_PERIODICTABLE_H_
