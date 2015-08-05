@@ -27,7 +27,6 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   enableElementsForGetNegMuMuonicXRD();
   auto *main_layout = new QVBoxLayout(this);
   auto *runButton = new QPushButton("Run");
-  auto *selectElementsButton = new QPushButton("Select Elements");
   auto *yPositionLabel = new QLabel("Y Position");
   auto yPositionNumericValidator = new QDoubleValidator();
   /*YPosition LineEdit Attributes*/
