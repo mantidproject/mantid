@@ -815,7 +815,7 @@ void RepoModel::setupModelData(RepoItem *root)
 
   QStringList lines;
   // check server for updates to repository
-  std::vector<std::string> f_list = repo_ptr->check4Update();
+  repo_ptr->check4Update();
   // get the list of entries inside the scriptrepository
   std::vector<std::string> list = repo_ptr->listFiles();
   
