@@ -194,7 +194,7 @@ void ConvolutionFitSequential::exec() {
   std::string plotPeakInput = "";
   for(int i = 0; i < specMax + 1; i++){
 	std::string nextWs = tempFitWs + ",i";
-	nextWs += i;
+	nextWs += std::to_string(i);
 	plotPeakInput += nextWs + ";";
 
   }
