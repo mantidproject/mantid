@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes
+#pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,too-many-public-methods
 from PyQt4 import QtGui, QtCore
 import sys
 import mantid

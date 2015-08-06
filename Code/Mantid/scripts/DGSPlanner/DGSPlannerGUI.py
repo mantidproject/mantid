@@ -140,6 +140,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.assistantProcess.waitForFinished()
         event.accept()
 
+    # pylint: disable=too-many-locals
     def updateFigure(self):
         # pylint: disable=too-many-branches
         if self.updatedInstrument or self.progress_canceled:
