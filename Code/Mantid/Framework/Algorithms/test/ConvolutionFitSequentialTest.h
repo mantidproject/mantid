@@ -23,7 +23,7 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "Function", "function=test,name=convolution,name=resolution"));
+        "Function", "function=test,name=Convolution,name=Resolution"));
   }
 
   //-------------------------- Failure cases ----------------------------
@@ -102,7 +102,7 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(
-        alg.setProperty("Function", "function=test,name=convolution"),
+        alg.setProperty("Function", "function=test,name=Convolution"),
         std::invalid_argument);
   }
 
@@ -110,7 +110,7 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(
-        alg.setProperty("Function", "function=test,name=resolution"),
+        alg.setProperty("Function", "function=test,name=Resolution"),
         std::invalid_argument);
   }
 

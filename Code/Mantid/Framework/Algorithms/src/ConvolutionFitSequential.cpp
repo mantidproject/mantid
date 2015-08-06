@@ -1,4 +1,9 @@
 #include "MantidAlgorithms/ConvolutionFitSequential.h"
+
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionFactory.h"
+
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -53,8 +58,8 @@ void ConvolutionFitSequential::init() {
 
   auto scv = boost::make_shared<StringContainsValidator>();
   auto requires = std::vector<std::string>();
-  requires.push_back("convolution");
-  requires.push_back("resolution");
+  requires.push_back("Convolution");
+  requires.push_back("Resolution");
   scv->setRequiredStrings(requires);
 
   declareProperty("Function", "", scv,
@@ -69,7 +74,7 @@ void ConvolutionFitSequential::init() {
       "End X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The end of the range for the fit function.", Direction::Input);
 
-  declareProperty("Temperature", "0",
+  declareProperty("Temperature", EMPTY_DBL(),
                   boost::make_shared<MandatoryValidator<double>>(),
                   "The Temperature correction for the fit.", Direction::Input);
 
@@ -105,13 +110,9 @@ void ConvolutionFitSequential::init() {
                   "(Polak-Ribiere imp.)' and 'BFGS'",
                   Direction::Input);
 
-  declareProperty(
-      "Max Iterations", 500, boundedV,
-      "The maximum number of iterations permitted", Direction::Input);
-
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The ouput workspace for the fit.");
+  declareProperty("Max Iterations", 500, boundedV,
+                  "The maximum number of iterations permitted",
+                  Direction::Input);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -130,7 +131,6 @@ void ConvolutionFitSequential::exec() {
   bool convolve = getProperty("Convolve");
   int maxIter = getProperty("Max Iterations");
   std::string minimizer = getProperty("Minimizer");
-  MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
 
   // Handle empty/non-empty temp property
   if (temperature.compare("0") == 0) {
@@ -147,16 +147,24 @@ void ConvolutionFitSequential::exec() {
   if (pos != std::string::npos) {
     delta = true;
   }
+
   // Add logger information
+
+  // Output workspace name
+  std::string outWSName = inWS->getName();
+  outWSName += "conv_" + functionValues[0] + functionValues[1] + "s_";
+  outWSName += specMin + "_to_" + specMax;
 
   // Convert input workspace to get Q axis
 
   // Fit all spectra in workspace
+
   // Fit args
+
   // Run PlotPeaksByLogValue
-  auto plotPeaks = createChildAlgorithm("PlotPeaksByLogValue", -1, -1, true);
-  plotPeaks->setProperty("Input", "");
-  plotPeaks->setProperty("OutputWorkspace", outWS);
+  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
+  plotPeaks->setProperty("Input", ""); // need input name
+  plotPeaks->setProperty("OutputWorkspace", outWSName);
   plotPeaks->setProperty("Function", function);
   plotPeaks->setProperty("StartX", startX);
   plotPeaks->setProperty("EndX", endX);
@@ -166,17 +174,56 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("ConvoleMembers", convolve);
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
+  // fit args?
+  plotPeaks->executeAsChildAlg();
 
-  // Delete possible pre-existing workspaces
+  // Delete workspaces
+
   // Construct output workspace name
+  std::string wsName = outWSName + "_Result";
+
   // Define params for use in convertParametersToWorkSpace
+  using namespace Mantid::API;
+  auto paramNames = std::vector<std::string>();
+  const std::string funcName = functionValues[2];
+  paramNames.push_back("Height");
+  if (funcName.find("Diffusion") != std::string::npos) {
+    paramNames.push_back("Intensity");
+    paramNames.push_back("Radius");
+  } else if (funcName.find("Sphere") != std::string::npos) {
+    paramNames.push_back("Diffusion");
+    paramNames.push_back("Shift");
+  } else if (funcName.find("Circle") != std::string::npos) {
+    paramNames.push_back("Decay");
+    paramNames.push_back("Shift");
+  } else if (funcName.find("Stretch") != std::string::npos) {
+    paramNames.pop_back();
+    paramNames.push_back("height");
+    paramNames.push_back("tau");
+    paramNames.push_back("beta");
+  } else {
+    paramNames.push_back("Amplitude");
+    paramNames.push_back("FWHM");
+    paramNames.push_back("EISF");
+  }
+
+  // Run calcEISF if Delta
+  if (delta) {
+    // calc EISF
+  }
 
   // Run convertParametersToWorkspace
+
   // Set x units to be momentum transfer
+
   // Handle sample logs
+
   // Rename workspaces
+
   // Save
+
   // Plot
+
   // End Timer
 }
 
@@ -206,17 +253,19 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
  * Finds specific values embedded in the function supplied to the algorithm
  * @param function The full function string
  * @return all values of interest from the function ((0 - fitType, 1 -
- * background)
+ * background, 2 - functionName)
  */
 std::vector<std::string>
 ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   std::vector<std::string> result;
   std::string fitType = "";
+  std::string functionName = "";
   auto startPos = function.rfind("name=");
   if (startPos != std::string::npos) {
     fitType = function.substr(startPos, function.size());
     auto nextPos = fitType.find_first_of(",");
     fitType = fitType.substr(5, nextPos - 5);
+    functionName = fitType;
     if (fitType.compare("Lorentzian") == 0) {
       std::string newSub = function.substr(0, startPos);
       bool isTwoL = checkForTwoLorentz(function.substr(0, startPos));
@@ -239,6 +288,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     background = background.substr(5, pos - 5);
     result.push_back(background);
   }
+  result.push_back(functionName);
   return result;
 }
 
