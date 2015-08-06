@@ -83,7 +83,7 @@ output workspaces for storing event splitters that are supported by
 .. _advsetup-FilterEventUI-ref:
 
 Advanced Setup
--------------
+--------------
 
 The **Advanced Setup** section on the bottom of the interface provides access to the following 
 functionality:
