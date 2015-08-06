@@ -57,8 +57,8 @@ protected:
   void setPropManagerPropName(const std::string &propName);
   void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager);
   void copyProperty(API::Algorithm_sptr alg, const std::string& name);
-  ITableWorkspace_sptr determineChunk();
-  void loadChunk();
+  ITableWorkspace_sptr determineChunk(const std::string &filename);
+  void loadChunk(const size_t rowIndex);
   Workspace_sptr load(const std::string &inputData,
                       const bool loadQuiet = false);
   std::vector<std::string> splitInput(const std::string &input);

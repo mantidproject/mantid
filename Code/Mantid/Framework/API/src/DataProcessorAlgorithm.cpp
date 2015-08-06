@@ -182,12 +182,15 @@ PropertyManagerOwner::TypedValue DataProcessorAlgorithm::getProperty(const std::
   return Algorithm::getProperty(name);
 }
 
-ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk() {
+ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk(const std::string &filename) {
+  UNUSED_ARG(filename);
+
   throw std::runtime_error(
       "DataProcessorAlgorithm::determineChunk is not implemented");
 }
 
-void DataProcessorAlgorithm::loadChunk() {
+void DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
+  UNUSED_ARG(rowIndex);
 
   throw std::runtime_error(
       "DataProcessorAlgorithm::loadChunk is not implemented");
