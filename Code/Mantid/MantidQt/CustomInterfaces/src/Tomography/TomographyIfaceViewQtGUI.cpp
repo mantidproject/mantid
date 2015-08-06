@@ -3,6 +3,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageCoRViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h"
 #include "MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigAstraToolbox.h"
@@ -72,14 +73,8 @@ void TomographyIfaceViewQtGUI::initLayout() {
   m_uiTabSetup.setupUi(tab2w);
   m_ui.tabMain->addTab(tab2w, QString("Setup"));
 
-  QWidget *tab3w = new QWidget(m_ui.tabMain);
-  m_uiTabCoR.setupUi(tab3w);
-  m_ui.tabMain->addTab(tab3w, QString("Center && select"));
-  QList<int> sizes;
-  sizes.push_back(700);
-  sizes.push_back(100);
-  m_uiTabCoR.splitter_img_horiz->setSizes(sizes);
-  m_uiTabCoR.horizontalScrollBar_img_stack->setEnabled(false);
+  ImageCoRViewQtGUI *tab3w = new ImageCoRViewQtGUI(m_ui.tabMain);
+  m_ui.tabMain->addTab(tab3w, QString("Center && regions"));
 
   QWidget *tab4w = new QWidget();
   m_ui.tabMain->addTab(tab4w, QString("Filters"));

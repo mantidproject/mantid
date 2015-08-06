@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGESTACKPREPARAMS_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/V2D.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -46,10 +47,10 @@ public:
 
   ImageStackPreParams();
 
-  size_t cor;
-  size_t roi;
-  size_t normalizationRegion;
-  size_t medianFilter;
+  Mantid::Kernel::V2D cor;
+  Mantid::Kernel::V2D roi;
+  Mantid::Kernel::V2D normalizationRegion;  //< also known as 'air'
+  bool medianFilter;
 };
 
 } // namespace CustomInterfaces

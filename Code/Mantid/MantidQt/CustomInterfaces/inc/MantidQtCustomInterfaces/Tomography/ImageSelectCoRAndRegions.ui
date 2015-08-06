@@ -34,7 +34,7 @@
      <widget class="QWidget" name="layoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="label_img_seq">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -66,7 +66,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_9">
+        <widget class="QLabel" name="label_img_name">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
            <horstretch>1</horstretch>
@@ -118,8 +118,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>147</width>
-             <height>529</height>
+             <width>153</width>
+             <height>526</height>
             </rect>
            </property>
            <property name="sizePolicy">

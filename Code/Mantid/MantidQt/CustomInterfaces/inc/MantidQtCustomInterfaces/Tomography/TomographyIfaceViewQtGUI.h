@@ -178,8 +178,9 @@ private:
   void processPathBrowseClick(QLineEdit *le, std::string &data);
 
   // Begin of Savu related functionality. This will grow and will need
-  // separation
-
+  // separation. They should find a better place to live.
+  ///@name Savu related methods
+  ///@{
   /// to load plugins (savu classification / API)
   void loadAvailablePlugins();
 
@@ -203,6 +204,7 @@ private:
                                       const std::string &name);
   std::string pluginParamValString(const Json::Value &jsonVal,
                                    const std::string &name);
+  ///@}
 
   static size_t g_nameSeqNo;
 
