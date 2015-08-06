@@ -123,21 +123,21 @@ void ConvolutionFitSequential::init() {
 void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  std::string function = getProperty("Function");
-  double startX = getProperty("Start X");
-  double endX = getProperty("End X");
-  std::string temperature = getProperty("Temperature");
-  int specMin = getProperty("Spec Min");
-  int specMax = getProperty("Spec max");
-  bool convolve = getProperty("Convolve");
-  int maxIter = getProperty("Max Iterations");
-  std::string minimizer = getProperty("Minimizer");
+  const std::string function = getProperty("Function");
+  const double startX = getProperty("Start X");
+  const double endX = getProperty("End X");
+  const double temperature = getProperty("Temperature");
+  const int specMin = getProperty("Spec Min");
+  const int specMax = getProperty("Spec max");
+  const bool convolve = getProperty("Convolve");
+  const int maxIter = getProperty("Max Iterations");
+  const std::string minimizer = getProperty("Minimizer");
+
+  bool tempUsed = false;
 
   // Handle empty/non-empty temp property
-  if (temperature.compare("0.0") == 0) {
-    temperature = "None";
-  }else{
-   //cast to double
+  if (temperature != 0.0) {
+	  tempUsed = true;
   }
 
   // Inspect function to obtain fit Type and background
@@ -145,13 +145,17 @@ void ConvolutionFitSequential::exec() {
 
   // Check if a delta function is being used
   bool delta = false;
+   std::string usingDelta = "false";
   auto pos = function.find("Delta");
   if (pos != std::string::npos) {
     delta = true;
+	usingDelta = "true";
   }
 
   // Add logger information
-
+  m_log.information("Input files: " + inWS->getName());
+  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" + functionValues[0]);
+  m_log.information("Background type: " + functionValues[1]);
 
   // Output workspace name
   std::string outWSName = inWS->getName();
@@ -160,9 +164,12 @@ void ConvolutionFitSequential::exec() {
 
   // Convert input workspace to get Q axis
 
+
   // Fit all spectra in workspace
 
+
   // Fit args
+
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
@@ -181,6 +188,7 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->executeAsChildAlg();
 
   // Delete workspaces
+
 
   // Construct output workspace name
   std::string wsName = outWSName + "_Result";
@@ -217,9 +225,12 @@ void ConvolutionFitSequential::exec() {
 
   // Run convertParametersToWorkspace
 
+
   // Set x units to be momentum transfer
 
+
   // Handle sample logs
+
   
   // Rename workspaces
 
