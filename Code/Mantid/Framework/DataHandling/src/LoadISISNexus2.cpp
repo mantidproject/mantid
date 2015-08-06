@@ -1196,6 +1196,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   if (ndets == 0) {
     separateMonitors = false; // only monitors in the main workspace. No
                               // detectors. Will be loaded in the main workspace
+    // Possible function exit point
     return separateMonitors;
   }
 
