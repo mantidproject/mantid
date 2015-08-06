@@ -19,8 +19,12 @@ public:
     delete suite;
   }
 
-  void test_fit_function_is_valid_for_convolution_fitting(){}
-
+  void test_fit_function_is_valid_for_convolution_fitting() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty(
+        "Function", "function=test,name=convolution,name=resolution"));
+  }
 
   //-------------------------- Failure cases ----------------------------
   void test_empty_function_is_not_allowed() {
@@ -94,8 +98,21 @@ public:
                      std::invalid_argument);
   }
 
-  //------------------------- Execution cases ---------------------------
-  void test_exec() {}
+  void test_fit_function_that_does_not_contain_resolution_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS(
+        alg.setProperty("Function", "function=test,name=convolution"),
+        std::invalid_argument);
+  }
+
+  void test_fit_function_that_does_not_contain_convolution_is_not_allowed() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS(
+        alg.setProperty("Function", "function=test,name=resolution"),
+        std::invalid_argument);
+  }
 
   //------------------------- Execution cases ---------------------------
   void test_exec() {}
