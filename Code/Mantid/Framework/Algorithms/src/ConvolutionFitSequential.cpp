@@ -76,7 +76,9 @@ void ConvolutionFitSequential::init() {
 
   declareProperty("Temperature", EMPTY_DBL(),
                   boost::make_shared<MandatoryValidator<double>>(),
-                  "The Temperature correction for the fit.", Direction::Input);
+                  "The Temperature correction for the fit. If no there is no "
+                  "temperature correction, use 0.0",
+                  Direction::Input);
 
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
@@ -119,7 +121,6 @@ void ConvolutionFitSequential::init() {
 /** Execute the algorithm.
  */
 void ConvolutionFitSequential::exec() {
-  // Start Timer
   // Initialise variables with properties
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   std::string function = getProperty("Function");
@@ -133,10 +134,11 @@ void ConvolutionFitSequential::exec() {
   std::string minimizer = getProperty("Minimizer");
 
   // Handle empty/non-empty temp property
-  if (temperature.compare("0") == 0) {
+  if (temperature.compare("0.0") == 0) {
     temperature = "None";
+  }else{
+   //cast to double
   }
-  // Pull in UI settings (Plot / Save (minimizer?)
 
   // Inspect function to obtain fit Type and background
   std::vector<std::string> functionValues = findValuesFromFunction(function);
@@ -149,6 +151,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Add logger information
+
 
   // Output workspace name
   std::string outWSName = inWS->getName();
@@ -182,7 +185,7 @@ void ConvolutionFitSequential::exec() {
   // Construct output workspace name
   std::string wsName = outWSName + "_Result";
 
-  // Define params for use in convertParametersToWorkSpace
+  // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   using namespace Mantid::API;
   auto paramNames = std::vector<std::string>();
   const std::string funcName = functionValues[2];
@@ -217,14 +220,9 @@ void ConvolutionFitSequential::exec() {
   // Set x units to be momentum transfer
 
   // Handle sample logs
-
+  
   // Rename workspaces
 
-  // Save
-
-  // Plot
-
-  // End Timer
 }
 
 /**
