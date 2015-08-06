@@ -110,6 +110,27 @@ void DataProcessorAlgorithm::mapPropertyName(const std::string &nameInProp,
 }
 
 /**
+ * Copy a property from an existing algorithm.
+ *
+ * @warning This only works if you algorithm is in the WorkflowAlgorithms sub-project.
+ *
+ * @param alg
+ * @param name
+ *
+ * @throws std::runtime_error If you ask to copy a non-existent property
+ */
+void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg, const std::string& name) {
+    if (! alg->existsProperty(name)) {
+        std::stringstream msg;
+        msg << "Algorithm \"" << alg->name() << "\" does not have property \"" << name << "\"";
+        throw std::runtime_error(msg.str());
+    }
+
+    auto prop = alg->getPointerToProperty(name);
+    declareProperty(prop->clone());
+}
+
+/**
  * Get the property held by this object. If the value is the default see if it
  * contained in the PropertyManager. @see Algorithm::getPropertyValue(const string &)
  *

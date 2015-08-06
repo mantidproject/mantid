@@ -56,6 +56,7 @@ protected:
   void setAccumAlg(const std::string &alg);
   void setPropManagerPropName(const std::string &propName);
   void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager);
+  void copyProperty(API::Algorithm_sptr alg, const std::string& name);
   ITableWorkspace_sptr determineChunk();
   void loadChunk();
   Workspace_sptr load(const std::string &inputData,
