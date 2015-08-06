@@ -230,10 +230,11 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.layout().addWidget(self.canvas)
         #connections
         self.editS2.textEdited.connect(self.checkValidInputs)
-        self.editEi.textEdited.connect(self.checkValidInputs)
+        self.editMask.textEdited.connect(self.setMaskFile)
         self.combo.activated[str].connect(self.instrumentSelected)
         self.fast.stateChanged.connect(self.updateFast)
         self.buttonMask.clicked.connect(self.loadMaskFromFile)
+        self.editEi.textEdited.connect(self.checkValidInputs)
         #call instrumentSelected once
         self.instrumentSelected(self.instrument)
         #connect goniometer change with figure
@@ -326,6 +327,12 @@ class InstrumentSetupWidget(QtGui.QWidget):
         if not fileName:
             return
         self.editMask.setText(QString(fileName))
+        self.setMaskFile()
+
+    def setMaskFile(self):
+        filename=str(self.editMask.text())
+        d={'maskFilename':filename}
+        self.updateAll(**d)
 
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()

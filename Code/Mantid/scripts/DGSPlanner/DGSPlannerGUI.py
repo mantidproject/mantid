@@ -168,6 +168,16 @@ class DGSPlannerGUI(QtGui.QWidget):
                                               LogText=str(self.masterDict['S2']),LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",InstrumentName="HYSPEC")
             #masking
+            if self.masterDict.has_key('maskFilename') and len(self.masterDict['maskFilename'].strip())>0:
+                try:
+                    __maskWS=mantid.simpleapi.Load(self.masterDict['maskFilename'])
+                    mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument",MaskedWorkspace=__maskWS)
+                except (ValueError,RuntimeError) as e:
+                    reply = QtGui.QMessageBox.critical(self, 'Error',"The following error has occured in loading the mask:\n"+
+                                                       str(e)+"\nDo you want to continue without mask?",
+                                                       QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+                    if reply==QtGui.QMessageBox.No:
+                        return
             if self.masterDict['makeFast']:
                 sp=range(mantid.mtd["__temp_instrument"].getNumberHistograms())
                 tomask=sp[::4]+sp[1::4]+sp[2::4]
@@ -254,8 +264,8 @@ class DGSPlannerGUI(QtGui.QWidget):
                     tempintensity=  __mdws.getSignalArray()[:,:,0,0]
                     intensity[numpy.where( tempintensity>0)]=1.
         progressDialog.close()
-        x = numpy.linspace(__mdws.getDimension(0).getMinimum(), __mdws.getDimension(0).getMaximum(),intensity.shape[1] )
-        y = numpy.linspace(__mdws.getDimension(1).getMinimum(), __mdws.getDimension(1).getMaximum(),intensity.shape[0] )
+        x = numpy.linspace(__mdws.getDimension(0).getMinimum(), __mdws.getDimension(0).getMaximum(),intensity.shape[0] )
+        y = numpy.linspace(__mdws.getDimension(1).getMinimum(), __mdws.getDimension(1).getMaximum(),intensity.shape[1] )
         Y,X = numpy.meshgrid(y,x)
         xx, yy = self.tr(X, Y)
         Z=numpy.ma.masked_array(intensity,intensity==0)
