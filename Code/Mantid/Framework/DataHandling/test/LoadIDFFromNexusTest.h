@@ -276,7 +276,7 @@ public:
 
   }
 
-    void test_parameter_correction_file_replace () {  
+    void xtest_parameter_correction_file_replace () {   // Disabled till fix of issue 13328. 
 
     // We load a processed Nexus file with embedded parameters, which are corrected by 
     // a correction file created for this test. Append is set to false and tested
