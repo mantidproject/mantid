@@ -189,7 +189,7 @@ ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk(const std::string &f
       "DataProcessorAlgorithm::determineChunk is not implemented");
 }
 
-void DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
+MatrixWorkspace_sptr DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
   UNUSED_ARG(rowIndex);
 
   throw std::runtime_error(
