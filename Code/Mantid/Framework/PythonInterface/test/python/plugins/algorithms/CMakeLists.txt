@@ -42,6 +42,7 @@ set ( TEST_PY_FILES
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
   LoadNMoldyn3AsciiTest.py
+  LoadNMoldyn4AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
