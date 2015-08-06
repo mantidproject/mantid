@@ -7,6 +7,10 @@ from mantid.api import *
 import os
 
 class LoadNMoldyn4AsciiTest(unittest.TestCase):
+    """
+    Note that the test files used here are not axactly in the same format as
+    what nMoldyn produces as CMake can't handle files with brackets or commas.
+    """
 
     def setUp(self):
         # This test requires the directory to be provided, this is in the
@@ -60,17 +64,46 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self._validate_sqf_ws(function_ws)
 
 
-    def test_load_multiple_functions(self):
+    def test_load_multiple_functions_list_short_name(self):
         """
-        Tests loading multiple functions from a data directory.
+        Tests loading multiple functions from a data directory giving the short
+        function name in a Python list.
         """
         function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
                                          Functions=['sqf_total', 'fqt_total'],
                                          OutputWorkspace='__LoadNMoldyn4Ascii_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
-        self._validate_sqf_ws(function_wsg[0])
-        self._validate_fqt_ws(function_wsg[1])
+        self._validate_sqf_ws(function_wsg[1])
+        self._validate_fqt_ws(function_wsg[0])
+
+
+    def test_load_multiple_functions_list_full_name(self):
+        """
+        Tests loading multiple functions from a data directory giving the full
+        function name as a Python list.
+        """
+        function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
+                                         Functions=['sq,f_total', 'fq,t_total'],
+                                         OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
+        self.assertEqual(len(function_wsg), 2)
+        self._validate_sqf_ws(function_wsg[1])
+        self._validate_fqt_ws(function_wsg[0])
+
+
+    def test_load_multiple_functions_string_short_name(self):
+        """
+        Tests loading multiple functions from a data directory giving the short
+        function name as a string.
+        """
+        function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
+                                         Functions='sqf_total,fqt_total',
+                                         OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
+        self.assertEqual(len(function_wsg), 2)
+        self._validate_sqf_ws(function_wsg[1])
+        self._validate_fqt_ws(function_wsg[0])
 
 
     def test_load_multiple_functions_some_skipped(self):
@@ -83,8 +116,8 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
                                          OutputWorkspace='__LoadNMoldyn4Ascii_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
-        self._validate_sqf_ws(function_wsg[0])
-        self._validate_fqt_ws(function_wsg[1])
+        self._validate_sqf_ws(function_wsg[1])
+        self._validate_fqt_ws(function_wsg[0])
 
 
     def test_load_all_functions_skipped(self):

@@ -6,6 +6,7 @@ from mantid.api import *
 
 import numpy as np
 import ast
+import fnmatch
 import re
 
 #------------------------------------------------------------------------------
@@ -23,9 +24,7 @@ SLICE_2D_HEADER_REGEX = re.compile(r'#slice:\[([0-9]+)L,\s+([0-9]+)L\]')
 class LoadNMoldyn4Ascii(PythonAlgorithm):
 
     _axis_cache = None
-
     _data_directory = None
-    _functions = None
 
 #------------------------------------------------------------------------------
 
@@ -53,10 +52,9 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def validateInputs(self):
-        self._setup()
         issues = dict()
 
-        if len(self._functions) == 0:
+        if len(self.getProperty('Functions').value) == 0:
             issues['Functions'] = 'Must specify at least one function to load'
 
         return issues
@@ -64,10 +62,18 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 #------------------------------------------------------------------------------
 
     def PyExec(self):
-        self._setup()
-        loaded_function_workspaces = []
+        self._axis_cache = {}
+        self._data_directory = self.getPropertyValue('Directory')
 
-        for func_name in self._functions:
+        # Convert the simplified function names to the actual file names
+        data_directory_files = [os.path.splitext(f)[0] for f in fnmatch.filter(os.listdir(self._data_directory), '*.dat')]
+        logger.debug('All data files: {0}'.format(data_directory_files))
+        functions_input = [x.strip().replace(',', '') for x in self.getProperty('Functions').value]
+        functions = [f for f in data_directory_files if f.replace(',', '') in functions_input]
+        logger.debug('Functions to load: {0}'.format(functions))
+
+        loaded_function_workspaces = []
+        for func_name in functions:
             try:
                 # Load the intensity data
                 function = self._load_function(func_name)
@@ -99,7 +105,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         out_ws_name = self.getPropertyValue('OutputWorkspace')
         if len(loaded_function_workspaces) == 0:
             raise RuntimeError('Failed to load any functions for data')
-        elif len(self._functions) == 1:
+        elif len(functions) == 1:
             RenameWorkspace(InputWorkspace=loaded_function_workspaces[0],
                             OutputWorkspace=out_ws_name)
         else:
@@ -108,16 +114,6 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', out_ws_name)
-
-#------------------------------------------------------------------------------
-
-    def _setup(self):
-        """
-        Gets algorithm properties.
-        """
-        self._axis_cache = {}
-        self._data_directory = self.getPropertyValue('Directory')
-        self._functions = [x.strip() for x in self.getProperty('Functions').value]
 
 #------------------------------------------------------------------------------
 
@@ -134,7 +130,6 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
             raise ValueError('File for function "{0}" not found'.format(function_name))
 
         data = None
-        dimensions = (0, 0)
         axis = (None, None)
         unit = None
 
@@ -188,7 +183,6 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
             raise ValueError('File for axis "{0}" not found'.format(axis_name))
 
         data = None
-        length = 0
         unit = None
 
         with open(axis_filename, 'rU') as f_handle:
