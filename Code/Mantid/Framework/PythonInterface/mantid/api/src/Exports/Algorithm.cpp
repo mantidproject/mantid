@@ -10,6 +10,7 @@
 
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
+#include <boost/python/exception_translator.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/scope.hpp>
@@ -49,11 +50,22 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType2_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 3, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload,
                                 PythonAlgorithm::declarePyAlgProperty, 4, 5)
+
+/**
+ * Map a CancelException to a Python KeyboardInterupt
+ * @param exc A cancel exception to translate. Unused here as the message is
+ * ignored
+ */
+void translateCancel(const Algorithm::CancelException &exc) {
+  UNUSED_ARG(exc);
+  PyErr_SetString(PyExc_KeyboardInterrupt, "");
+}
+
 }
 
 void export_leaf_classes() {
-
   register_ptr_to_python<boost::shared_ptr<Algorithm>>();
+  register_exception_translator<Algorithm::CancelException>(&translateCancel);
 
   // Export Algorithm but the actual held type in Python is
   // boost::shared_ptr<AlgorithmAdapter>

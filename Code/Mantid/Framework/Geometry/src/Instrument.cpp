@@ -1059,12 +1059,12 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // XML contents of instrument, as a NX note
   file->makeGroup("instrument_xml", "NXnote", true);
-  const std::string& xmlText = getXmlText();
+  const std::string &xmlText = getXmlText();
   if (xmlText.empty())
-    g_log.warning() << "Saving Instrument with no XML data. Mantid might NOT be"
-                    << " able to re-open the resulting Nexus file. This should"
-                    << " never happen. Please notify the Mantid development"
-                    << " team." << std::endl;
+    g_log.warning() << "Saving Instrument with no XML data. If this was "
+                       "instrument data you may not be able to load this data "
+                       "back into Mantid, for fitted/analysed data this "
+                       "warning can be ignored." << std::endl;
   file->writeData("data", xmlText);
   file->writeData("type", "text/xml"); // mimetype
   file->writeData("description", "XML contents of the instrument IDF file.");

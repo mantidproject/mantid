@@ -1,4 +1,4 @@
-#include "PythonThreading.h"
+#include "MantidQtAPI/PythonThreading.h"
 
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 #include "MantidKernel/ConfigService.h"

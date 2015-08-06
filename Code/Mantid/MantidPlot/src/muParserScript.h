@@ -1,6 +1,6 @@
 /***************************************************************************
     File                 : muParserScript.h
-	Project              : QtiPlot
+    Project              : QtiPlot
     --------------------------------------------------------------------
 
     Copyright            : (C) 2006 by Ion Vasilief, Knut Franke
@@ -55,6 +55,7 @@ class muParserScript: public Script
     QString evalSingleLineToString(const QLocale& locale, char f, int prec);
     bool compileImpl();
     bool executeImpl();
+    void abortImpl();
     bool setQObject(QObject *val, const char *name);
     bool setInt(int val, const char* name);
     bool setDouble(double val, const char* name);
@@ -80,8 +81,8 @@ class muParserScript: public Script
     mu::Parser parser, rparser;
     Q3AsciiDict<double> variables, rvariables;
     QStringList muCode;
-	//! Flag telling is the parser should warn users on multiline code input
-	bool d_warn_multiline_code;
+    //! Flag telling is the parser should warn users on multiline code input
+    bool d_warn_multiline_code;
 
   public:
     static muParserScript *current;
