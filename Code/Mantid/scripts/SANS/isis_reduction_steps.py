@@ -23,8 +23,8 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
-                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
-                          can_load_as_event_workspace)
+                         MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
+                         can_load_as_event_workspace,is_convertible_to_float)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -1981,6 +1981,9 @@ class ConvertToQISIS(ReductionStep):
         if self.use_q_resolution == False:
             return None
 
+        # Make sure that all parameters that are needed are available
+        self._set_up_q_resolution_parameters()
+
         # Check if Q Resolution exists in mtd
         exists = mtd.doesExist(QRESOLUTION_WORKSPACE_NAME)
 
@@ -2073,6 +2076,30 @@ class ConvertToQISIS(ReductionStep):
             dummy_file_path, dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
         except:
             raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
+
+    def _set_up_q_resolution_settings(self):
+        '''
+        Prepare the parameters which need preparing
+        '''
+        # If we have values for H1 and W1 then set A1 to the correct value
+        if self._q_resolution_H1 and self._q_resolution_W1:
+            self._q_resolution_A1 = self._set_up_diameter(self._q_resolution_H1, self._q_resolution_W1)
+
+        # If we have values for H2 and W2 then set A2 to the correct value
+        if self._q_resolution_H2 and self._q_resolution_W2:
+            self._q_resolution_A2 = self._set_up_diameter(self._q_resolution_H2, self._q_resolution_W2)
+
+    def _set_up_diameter(self, h, w):
+         '''
+         Prepare the diameter parameter. If there are corresponding H and W values, then
+         use them instead. Richard provided the formula: A = 2*sqrt((H^2 + W^2)/6)
+         @param h: the height
+         @param w: the width
+         @returns the new diameter
+         '''
+         return 2*sqrt((self._q_resolution_H1*self._q_resolution_H1
+                      + self._q_resolution_W1* self._q_resolution_W1)/6)
+
 
 class UnitsConvert(ReductionStep):
     """
@@ -2907,7 +2934,7 @@ class UserFile(ReductionStep):
         @param reducer: a reducer object
         '''
         if arguments.find('=') == -1:
-            return self._read_q_resolution_line_on_off(arguments)
+            return self._read_q_resolution_line_on_off(arguments, reducer)
 
         # Split and remove the white spaces
         arguments = arguments.split('=')
@@ -2919,44 +2946,50 @@ class UserFile(ReductionStep):
             return
 
         # All arguments need to be convertible to a float
-        if not su.is_convertible_to_float(arguments[1]):
+        if not is_convertible_to_float(arguments[1]):
              return 'Value not a float in line: '
 
         # Now check for the actual key
         if arguments[0].startswith('DELTAR'):
-             reducer.to_Q.set_q_resolution_delta_r(delta_r= arguments[1])
+             reducer.to_Q.set_q_resolution_delta_r(delta_r= float(arguments[1])/1000.)
         elif arguments[0].startswith('A1'):
-            reducer.to_Q.set_q_resolution_A1(a1 = arguments[1])
+            # Input is in mm but we need m later on 
+            reducer.to_Q.set_q_resolution_A1(a1 = float(arguments[1])/1000.)
         elif arguments[0].startswith('A2'):
-            reducer.to_Q.set_q_resolution_A2(a2 = arguments[1])
+            # Input is in mm but we need m later on 
+            reducer.to_Q.set_q_resolution_A2(a2 = float(arguments[1])/1000.)
         elif arguments[0].startswith('LCOLLIM'):
-            reducer.to_Q.set_q_resolution_collimation_length(collimation_length = arguments[1])
+            # Input is in m and we need it to be in m later on
+            reducer.to_Q.set_q_resolution_collimation_length(collimation_length = float(arguments[1]))
         elif arguments[0].startswith('H1'):
-            reducer.to_Q.set_q_resolution_H1(h1 = arguments[1])
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_H1(h1 = float(arguments[1])/1000.)
         elif arguments[0].startswith('W1'):
-            reducer.to_Q.set_q_resolution_W1(w1 = arguments[1])
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_W1(w1 = float(arguments[1])/1000.)
         elif arguments[0].startswith('H2'):
-            reducer.to_Q.set_q_resolution_H2(h2 = arguments[1])
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_H2(h2 = float(arguments[1])/1000.)
         elif arguments[0].startswith('W2'):
-            reducer.to_Q.set_q_resolution_W2(w2 = arguments[1])
+            # Input is in mm but we need m later on
+            reducer.to_Q.set_q_resolution_W2(w2 = float(arguments[1])/1000.)
         else:
             return 'Unrecognised line: '
 
-    def _read_q_resolution_line_on_off(self, arguments):
+    def _read_q_resolution_line_on_off(self, arguments, reducer):
         '''
         Handles the ON/OFF setting for QResolution
-        @oaram arguements: the line arguments
+        @param arguements: the line arguments
+        @param reducer: a reducer object
         '''
-        # Strip out the white spaces
-        arguments = [element.strip() for element in arguments]
-
-        # We expect only one argument
-        if len(arguments) != 1:
-            return 'Unrecognised line: '
+        # Remove white space
+        on_off = "".join(arguments.split())
 
         # We expect only ON or OFF
-        if arguments[0] == "ON" or arguments[0] == "OFF":
-            reducer.to_Q.set_use_q_resolution(enabled = arguments[1])
+        if on_off  == "ON":
+            reducer.to_Q.set_use_q_resolution(enabled = True)
+        elif on_off  == "OFF":
+            reducer.to_Q.set_use_q_resolution(enabled = False)
         else:
             return 'Unrecognised line: '
 
