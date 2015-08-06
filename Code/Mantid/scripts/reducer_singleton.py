@@ -37,6 +37,13 @@ class ReductionStep(object):
         """
         raise NotImplementedError
 
+    def run_consistency_check(self):
+        '''
+        Run a consistency check of the settings of the ReuctionStep
+        '''
+        return
+
+
 class Reducer(object):
     """
         Base reducer class. Instrument-specific reduction processes should be

@@ -670,4 +670,9 @@ class ISISReducer(Reducer):
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
-
+    def get_reduction_steps(self):
+        '''
+        Provides a way to access the reduction steps
+        @returns the reduction steps
+        '''
+        return self._reduction_steps

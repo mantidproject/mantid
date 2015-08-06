@@ -1845,6 +1845,16 @@ class ConvertToQISIS(ReductionStep):
         self.outputParts = False
         # Flag if a QResolution workspace should be used
         self.use_q_resolution = False
+        # QResolution settings
+        self._q_resolution_moderator_file_name = None
+        self._q_resolution_delta_r = None
+        self._q_resolution_A1 = None
+        self._q_resolution_A2 = None
+        self._q_resolution_H1 = None
+        self._q_resolution_W1 = None
+        self._q_resolution_H1 = None
+        self._q_resolution_W1 = None
+        self._q_resolution_collimation_length = None
 
     def set_output_type(self, descript):
         """
@@ -1984,6 +1994,7 @@ class ConvertToQISIS(ReductionStep):
         Creates the Q Resolution workspace
         @returns the q resolution workspace
         '''
+        pass
         # TODO: INSERT TOFSANSResolutionByPixel here
 
     def _get_existing_q_resolution(self, det_bank_workspace):
@@ -2006,8 +2017,62 @@ class ConvertToQISIS(ReductionStep):
         '''
         ws  = mtd[QRESOLUTION_WORKSPACE_NAME]
 
+    def set_q_resolution_moderator(self, file_name):
+        '''
+        Sets the moderator file name for Q Resolution
+        @param file_name: the name of the moderator file
+        '''
+        try:
+            q_res_file_path, dummy_suggested_name = getFileAndName(file_name)
+        except:
+            raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
+        self._q_resolution_moderator_file_name = q_res_file_path
 
+    def set_q_resolution_A1(self, a1):
+        self._q_resolution_A1 = a1
 
+    def set_q_resolution_A2(self, a2):
+        self._q_resolution_A2 = a2
+
+    def set_q_resolution_delta_r(self, delta_r):
+        self._q_resolution_delta_r = delta_r
+
+    def set_q_resolution_H1(self, h1):
+        self._q_resolution_H1 = h1
+
+    def set_q_resolution_H2(self, h2):
+        self._q_resolution_H2 = h2
+
+    def set_q_resolution_W1(self, w1):
+        self._q_resolution_W1 = w1
+
+    def set_q_resolution_W2(self, w2):
+        self._q_resolution_W2 = w2
+
+    def set_q_resolution_collimation_length(self, collimation_length):
+        self._q_resolution_collimation_length = collimation_length
+
+    def set_use_q_resolution(self, enabled):
+        self._use_q_resolution = enabled
+
+    def run_consistency_check(self):
+        '''
+        Provides the consistency check for the ConvertTOQISIS
+        '''
+        # Make sure that everythign for the QResolution calculation is setup correctly
+        if self.use_q_resolution:
+            self._check_q_settings_complete()
+
+    def _check_q_settings_complete(self):
+        '''
+        Check that the q resolution settings are complete.
+        We need a moderator file path. The other settings have default values
+        implemented
+        '''
+        try:
+            dummy_file_path, dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
+        except:
+            raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
 class UnitsConvert(ReductionStep):
     """
@@ -2181,7 +2246,8 @@ class UserFile(ReductionStep):
             'TRANS/': self._read_trans_line,
             'MON/' : self._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
-            'MASKFILE': self._read_maskfile_line}
+            'MASKFILE': self._read_maskfile_line,
+            'QRESOL/': self._read_q_resolution_line}
 
     def __deepcopy__(self, memo):
         """Called when a deep copy is requested
@@ -2194,8 +2260,8 @@ class UserFile(ReductionStep):
             'TRANS/': fresh._read_trans_line,
             'MON/' : fresh._read_mon_line,
             'TUBECALIBFILE': self._read_calibfile_line,
-            'MASKFILE': self._read_maskfile_line
-            }
+            'MASKFILE': self._read_maskfile_line,
+            'QRESOL/': self._read_q_resolution_line}
         return fresh
 
     def execute(self, reducer, workspace=None):
@@ -2228,6 +2294,9 @@ class UserFile(ReductionStep):
 
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
+
+        # Run a consistency check
+        self._consistency_check(reducer)
 
         self.executed = True
         return self.executed
@@ -2386,7 +2455,6 @@ class UserFile(ReductionStep):
         elif line.startswith('!') or not line:
             # this is a comment or empty line, these are allowed
             pass
-
         else:
             _issueWarning('Unrecognized line in user file the line %s, ignoring' % upper_line)
 
@@ -2832,6 +2900,66 @@ class UserFile(ReductionStep):
 
         reducer.transmission_calculator.calculated_can = arguments[1]
 
+    def _read_q_resolution_line(self, arguments, reducer):
+        '''
+        Parses the input for QResolution
+        @param arguments: the arguments of a QResolution line
+        @param reducer: a reducer object
+        '''
+        if arguments.find('=') == -1:
+            return self._read_q_resolution_line_on_off(arguments)
+
+        # Split and remove the white spaces
+        arguments = arguments.split('=')
+        arguments = [element.strip() for element in arguments]
+
+        # Check if it is the moderator file name, if so add it and return
+        if arguments[0].startswith('MODERATOR'):
+            reducer.to_Q.set_q_resolution_moderator_file_name(file_name = arguments[1])
+            return
+
+        # All arguments need to be convertible to a float
+        if not su.is_convertible_to_float(arguments[1]):
+             return 'Value not a float in line: '
+
+        # Now check for the actual key
+        if arguments[0].startswith('DELTAR'):
+             reducer.to_Q.set_q_resolution_delta_r(delta_r= arguments[1])
+        elif arguments[0].startswith('A1'):
+            reducer.to_Q.set_q_resolution_A1(a1 = arguments[1])
+        elif arguments[0].startswith('A2'):
+            reducer.to_Q.set_q_resolution_A2(a2 = arguments[1])
+        elif arguments[0].startswith('LCOLLIM'):
+            reducer.to_Q.set_q_resolution_collimation_length(collimation_length = arguments[1])
+        elif arguments[0].startswith('H1'):
+            reducer.to_Q.set_q_resolution_H1(h1 = arguments[1])
+        elif arguments[0].startswith('W1'):
+            reducer.to_Q.set_q_resolution_W1(w1 = arguments[1])
+        elif arguments[0].startswith('H2'):
+            reducer.to_Q.set_q_resolution_H2(h2 = arguments[1])
+        elif arguments[0].startswith('W2'):
+            reducer.to_Q.set_q_resolution_W2(w2 = arguments[1])
+        else:
+            return 'Unrecognised line: '
+
+    def _read_q_resolution_line_on_off(self, arguments):
+        '''
+        Handles the ON/OFF setting for QResolution
+        @oaram arguements: the line arguments
+        '''
+        # Strip out the white spaces
+        arguments = [element.strip() for element in arguments]
+
+        # We expect only one argument
+        if len(arguments) != 1:
+            return 'Unrecognised line: '
+
+        # We expect only ON or OFF
+        if arguments[0] == "ON" or arguments[0] == "OFF":
+            reducer.to_Q.set_use_q_resolution(enabled = arguments[1])
+        else:
+            return 'Unrecognised line: '
+
     def _check_instrument(self, inst_name, reducer):
         if reducer.instrument is None:
             raise RuntimeError('Use SANS2D() or LOQ() to set the instrument before Maskfile()')
@@ -2876,6 +3004,16 @@ class UserFile(ReductionStep):
             return "Invalid input: \"%s\".  Expected \"MASKFILE = path to file\"." % line
 
         reducer.settings["MaskFiles"] = value
+
+    def _consistency_check(self, reducer):
+        '''
+        Runs a consistency check over all specified reducer modules, provided they have a
+        check implemented
+        @param reducer: a reducer object
+        '''
+        to_check =  reducer.get_reduction_steps()
+        for element in to_check:
+            element.run_consistency_check()
 
 class GetOutputName(ReductionStep):
     def __init__(self):
