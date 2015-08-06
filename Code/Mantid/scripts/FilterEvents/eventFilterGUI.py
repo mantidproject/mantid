@@ -210,6 +210,9 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_filterLog, SIGNAL('clicked()'), self.filterByLogValue)
 
+        #Set up help button
+        self.connect(self.ui.helpBtn, QtCore.SIGNAL('clicked()'), self.helpClicked)
+
         # Set up vertical slide
         self._upperSlideValue = 99
         self._lowerSlideValue = 0
@@ -1196,6 +1199,10 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def helpClicked(self):
+        from pymantidplot.proxies import showCustomInterfaceHelp
+        showCustomInterfaceHelp("FilterEventUI")
+    
 
     def _resetGUI(self, resetfilerun=False, resetwslist=False):
         """ Reset GUI including all text edits and etc.
