@@ -193,7 +193,8 @@ void FindFilesThread::getFilesFromAlgorithm()
 ////////////////////////////////////////////////////////////////////
 
 MWRunFiles::MWRunFiles(QWidget *parent) 
-  : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
+  : MantidWidget(parent), m_findRunFiles(true), m_isForDirectory(false),
+    m_allowMultipleFiles(false),
     m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""),
     m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
     m_liveButtonState(Hide), m_foundFiles(), m_lastFoundFiles(), m_lastDir(), m_fileFilter()
@@ -278,6 +279,24 @@ bool MWRunFiles::isForRunFiles() const
 void MWRunFiles::isForRunFiles(const bool mode)
 {
   m_findRunFiles = mode;
+}
+
+/**
+ * Returns if this widget is for selecting a directory or not.
+ * @return True if selecting a directory
+ */
+bool MWRunFiles::isForDirectory() const
+{
+  return m_isForDirectory;
+}
+
+/**
+ * Sets directory searching mode.
+ * @param mode True to search for directories only
+ */
+void MWRunFiles::isForDirectory(const bool mode)
+{
+  m_isForDirectory = mode;
 }
 
 /**
@@ -755,6 +774,12 @@ void MWRunFiles::setFileTextWithoutSearch(const QString & text)
 */
 void MWRunFiles::findFiles()
 {
+  if(m_isForDirectory)
+  {
+    setFileProblem("");
+    return;
+  }
+
   if(m_uiForm.fileEditor->isModified())
   {
     // Reset modified flag.
@@ -1052,7 +1077,12 @@ QString MWRunFiles::openFileDialog()
     m_fileFilter = createFileFilter();
   }
 
-  if ( m_allowMultipleFiles )
+  if( m_isForDirectory )
+  {
+    QString file = QFileDialog::getExistingDirectory(this, "Select directory", dir);
+    if(  !file.isEmpty() ) filenames.append(file);
+  }
+  else if ( m_allowMultipleFiles )
   {
     filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
   }
@@ -1114,6 +1144,7 @@ void MWRunFiles::browseClicked()
 
   emit fileEditingFinished();
 }
+
 /** Currently just checks that entryNum contains an int > 0 and hence might be a
 *  valid entry number
 */

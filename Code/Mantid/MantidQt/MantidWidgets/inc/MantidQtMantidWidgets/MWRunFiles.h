@@ -95,6 +95,7 @@ namespace MantidQt
       Q_OBJECT
       
       Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
+      Q_PROPERTY(bool findDirectory READ isForDirectory WRITE isForDirectory)
       Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
       Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
       Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
@@ -141,6 +142,8 @@ namespace MantidQt
       // property accessors/modifiers
       bool isForRunFiles() const;
       void isForRunFiles(bool);
+      bool isForDirectory() const;
+      void isForDirectory(bool);
       QString getLabelText() const;
       void setLabelText(const QString & text);
       void setLabelMinWidth(int);
@@ -257,6 +260,8 @@ namespace MantidQt
     private:
       /// Is the widget for run files or standard files
       bool m_findRunFiles;
+      /// If the widget is for directories
+      bool m_isForDirectory;
       /// Allow multiple files
       bool m_allowMultipleFiles;
       /// Whether the widget can be empty
