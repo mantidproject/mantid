@@ -57,15 +57,15 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         return
 
     def PyInit(self):
-        self.declareProperty(name="Data Directory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
-        self.declareProperty(name="First Run Number",defaultValue=1718,doc="First Run Number")
-        self.declareProperty(name="Last Run Number",defaultValue=1719,doc="Last Run Number")
-        self.declareProperty(name="Gain RIKEN High E",defaultValue=1.077,doc="Gain RIKEN High E")
-        self.declareProperty(name="Offset RIKEN High E",defaultValue=-1,doc="OffSet RIKEN High E")
-        self.declareProperty(name="Gain ISIS High E",defaultValue=1.278,doc="Gain ISIS High E")
-        self.declareProperty(name="Offset ISIS High E",defaultValue=-12,doc="OffSet ISIS High E")
-        self.declareProperty(name="Gain ISIS Low E",defaultValue=1.2,doc="Gain ISIS Low E")
-        self.declareProperty(name="Offset ISIS Low E",defaultValue=0.0,doc="OffSet ISIS Low E")
+        self.declareProperty(name="DataDirectory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
+        self.declareProperty(name="FirstRunNumber",defaultValue=1718,doc="First Run Number")
+        self.declareProperty(name="LastRunNumber",defaultValue=1719,doc="Last Run Number")
+        self.declareProperty(name="GainRIKENHighE",defaultValue=1.077,doc="Gain RIKEN High E")
+        self.declareProperty(name="OffsetRIKENHighE",defaultValue=-1,doc="OffSet RIKEN High E")
+        self.declareProperty(name="GainISISHighE",defaultValue=1.278,doc="Gain ISIS High E")
+        self.declareProperty(name="OffsetISISHighE",defaultValue=-12,doc="OffSet ISIS High E")
+        self.declareProperty(name="GainISISLowE",defaultValue=1.2,doc="Gain ISIS Low E")
+        self.declareProperty(name="OffsetISISLowE",defaultValue=0.0,doc="OffSet ISIS Low E")
 
     def category(self):
         return "CorrectionFunctions;Muon"
@@ -73,15 +73,15 @@ class ApplyNegMuCorrection(PythonAlgorithm):
     def PyExec(self):
 
         spec=1
-        dataDir = self.getProperty("Data Directory").value
-        first = self.getProperty("First Run Number").value
-        last = self.getProperty("Last Run Number").value+1
-        GRHE=self.getProperty("Gain RIKEN High E").value
-        ORHE=self.getProperty("Offset RIKEN High E").value
-        GIHE=self.getProperty("Gain ISIS High E").value
-        OIHE=self.getProperty("Offset ISIS High E").value
-        GILE=self.getProperty("Gain ISIS Low E").value
-        OILE=self.getProperty("Offset ISIS Low E").value
+        dataDir = self.getProperty("DataDirectory").value
+        first = self.getProperty("FirstRunNumber").value
+        last = self.getProperty("LastRunNumber").value+1
+        GRHE=self.getProperty("GainRIKENHighE").value
+        ORHE=self.getProperty("OffsetRIKENHighE").value
+        GIHE=self.getProperty("GainISISHighE").value
+        OIHE=self.getProperty("OffsetISISHighE").value
+        GILE=self.getProperty("GainISISLowE").value
+        OILE=self.getProperty("OffsetISISLowE").value
 
         for run in range(first,last):
             for spec in range(0,3):
