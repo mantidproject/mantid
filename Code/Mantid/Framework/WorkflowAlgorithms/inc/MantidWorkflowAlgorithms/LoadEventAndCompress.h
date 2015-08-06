@@ -1,10 +1,11 @@
-#ifndef MANTID_ALGORITHMS_LOADEVENTANDCOMPRESS_H_
-#define MANTID_ALGORITHMS_LOADEVENTANDCOMPRESS_H_
+#ifndef MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_
+#define MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
+
 namespace Mantid {
-namespace Algorithms {
+namespace WorkflowAlgorithms {
 
 /** LoadEventAndCompress : TODO: DESCRIPTION
 
@@ -29,7 +30,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LoadEventAndCompress : public API::Algorithm {
+class DLLExport LoadEventAndCompress : public API::DataProcessorAlgorithm {
 public:
   LoadEventAndCompress();
   virtual ~LoadEventAndCompress();
@@ -44,7 +45,7 @@ private:
   void exec();
 };
 
-} // namespace Algorithms
+} // namespace WorkflowAlgorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_LOADEVENTANDCOMPRESS_H_ */
+#endif /* MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_ */
