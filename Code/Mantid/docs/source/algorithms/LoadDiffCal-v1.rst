@@ -15,3 +15,5 @@ This algorithm loads a :ref:`diffraction calibration workspace
 ``GroupingWorkspace`` from a hdf5 file.
 
 .. categories::
+
+.. sourcelink::

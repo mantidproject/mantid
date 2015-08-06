@@ -64,3 +64,5 @@ Output:
    os.remove(save_path)
 
 .. categories::
+
+.. sourcelink::

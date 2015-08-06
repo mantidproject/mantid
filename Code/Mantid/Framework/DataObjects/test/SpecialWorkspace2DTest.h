@@ -32,6 +32,32 @@ public:
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
   }
 
+  void testClone() {
+    // As test_setValue_getValue, set on ws, get on clone.
+    Instrument_sptr inst =
+        ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
+
+    auto cloned = ws->clone();
+    TS_ASSERT_DIFFERS(cloned->getValue(1), 12.3);
+    TS_ASSERT_THROWS_NOTHING(ws->setValue(1, 12.3));
+    cloned = ws->clone();
+    TS_ASSERT_DELTA(cloned->getValue(1), 12.3, 1e-6);
+    TS_ASSERT_THROWS_ANYTHING(ws->setValue(46, 789));
+    TS_ASSERT_THROWS_ANYTHING(ws->setValue(-1, 789));
+    cloned = ws->clone();
+    TS_ASSERT_THROWS_ANYTHING(cloned->getValue(47));
+    TS_ASSERT_THROWS_ANYTHING(cloned->getValue(-34));
+    TS_ASSERT_EQUALS(cloned->getValue(47, 5.0), 5.0);
+    TS_ASSERT_EQUALS(cloned->getValue(147, -12.0), -12.0);
+
+    // Some extra tests: 1. clone ws, 2. set on ws, 3. clone should differ.
+    cloned = ws->clone();
+    TS_ASSERT_DELTA(cloned->getValue(1), 12.3, 1e-6);
+    TS_ASSERT_THROWS_NOTHING(ws->setValue(1, 1.1));
+    TS_ASSERT_DIFFERS(cloned->getValue(1), 1.1);
+  }
+
   void test_constructor_from_Instrument()
   {
     // Fake instrument with 5*9 pixels with ID starting at 1

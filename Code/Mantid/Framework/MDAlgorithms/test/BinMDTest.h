@@ -2,6 +2,7 @@
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
@@ -1005,6 +1006,36 @@ public:
       TSM_ASSERT_THROWS("Cannot allow BinMD on a pure MDHistoWorkspace. Should throw.", alg.execute(), std::runtime_error&);
   }
 
+  void test_normalization(){
+
+   FrameworkManager::Instance().exec("CreateMDWorkspace", 16,
+       "Dimensions", "2",
+       "Extents", "-10,10,-10,10",
+       "Names", "x,y",
+       "Units", "m,m",
+       "SplitInto", "4",
+       "SplitThreshold", "100",
+       "MaxRecursionDepth", "20",
+       "OutputWorkspace", "mdew");
+
+  FrameworkManager::Instance().exec("BinMD", 20,
+      "InputWorkspace", "mdew",
+      "OutputWorkspace", "binned",
+      "AxisAligned", "0",
+      "BasisVector0", "tx, m, 2.0, 0.0",
+      "BasisVector1", "ty, m, 0.0, 2.0",
+      "NormalizeBasisVectors", "1",
+      "ForceOrthogonal", "0",
+      "Translation", "-2, -2",
+      "OutputExtents", "-4,6, -4,6", /* The extents are in the scaled OUTPUT dimensions */
+      "OutputBins", "10,10");
+
+  auto binned = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>("binned");
+  TSM_ASSERT("All basis vectors should have been normalized", binned->allBasisNormalized());
+
+
+  }
+
 };
 
 
@@ -1071,6 +1102,7 @@ public:
     for (size_t i=0; i<1; i++)
       do_test("2.0,8.0, 1", true);
   }
+
 
 
 };

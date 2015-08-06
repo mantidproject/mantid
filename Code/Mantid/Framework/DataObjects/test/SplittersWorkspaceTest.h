@@ -23,6 +23,26 @@ public:
   static void destroySuite( SplittersWorkspaceTest *suite ) { delete suite; }
 
 
+  void testClone()
+  {
+    SplittersWorkspace splitterws;
+
+    Kernel::SplittingInterval s1(Kernel::DateAndTime(10000), Kernel::DateAndTime(15000), 1);
+    Kernel::SplittingInterval s2(Kernel::DateAndTime(20000), Kernel::DateAndTime(30000), 3);
+    Kernel::SplittingInterval s3(Kernel::DateAndTime(40000), Kernel::DateAndTime(50000), 2);
+
+    splitterws.addSplitter(s1);
+    splitterws.addSplitter(s2);
+    splitterws.addSplitter(s3);
+
+    auto cloned = splitterws.clone();
+
+    // Check clone is same as original.
+    TS_ASSERT_EQUALS(splitterws.columnCount(), cloned->columnCount());
+    TS_ASSERT_EQUALS(splitterws.rowCount(), cloned->rowCount());
+    TS_ASSERT_EQUALS(splitterws.getNumberSplitters(), 3);
+  }
+
   void test_Add()
   {
     DataObjects::SplittersWorkspace splitterws;

@@ -18,3 +18,5 @@ Since the function requires special setup (assignment of HKLs, selection of crys
 .. properties::
 
 .. categories::
+
+.. sourcelink::

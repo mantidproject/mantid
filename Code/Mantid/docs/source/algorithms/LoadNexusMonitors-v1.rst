@@ -36,3 +36,5 @@ Output:
     Number of monitors = 3
 
 .. categories::
+
+.. sourcelink::

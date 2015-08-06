@@ -14,16 +14,23 @@ using namespace Mantid::API;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-JumpFit::JumpFit(QWidget *parent) : IndirectBayesTab(parent) {
-  m_uiForm.setupUi(parent);
+namespace IDA {
 
+JumpFit::JumpFit(QWidget *parent)
+    : IndirectDataAnalysisTab(parent), m_jfTree(NULL) {
+  m_uiForm.setupUi(parent);
+}
+
+void JumpFit::setup() {
   // Create range selector
   auto qRangeSelector = m_uiForm.ppPlot->addRangeSelector("JumpFitQ");
   connect(qRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
           SLOT(qRangeChanged(double, double)));
 
   // Add the properties browser to the ui form
-  m_uiForm.treeSpace->addWidget(m_propTree);
+  m_jfTree = new QtTreePropertyBrowser();
+  m_jfTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+  m_uiForm.treeSpace->addWidget(m_jfTree);
 
   // Fitting range
   m_properties["QMin"] = m_dblManager->addProperty("QMin");
@@ -32,12 +39,12 @@ JumpFit::JumpFit(QWidget *parent) : IndirectBayesTab(parent) {
   m_dblManager->setDecimals(m_properties["QMin"], NUM_DECIMALS);
   m_dblManager->setDecimals(m_properties["QMax"], NUM_DECIMALS);
 
-  m_propTree->addProperty(m_properties["QMin"]);
-  m_propTree->addProperty(m_properties["QMax"]);
+  m_jfTree->addProperty(m_properties["QMin"]);
+  m_jfTree->addProperty(m_properties["QMax"]);
 
   // Fitting function
   m_properties["FitFunction"] = m_grpManager->addProperty("Fitting Parameters");
-  m_propTree->addProperty(m_properties["FitFunction"]);
+  m_jfTree->addProperty(m_properties["FitFunction"]);
 
   m_uiForm.cbWidth->setEnabled(false);
 
@@ -56,10 +63,11 @@ JumpFit::JumpFit(QWidget *parent) : IndirectBayesTab(parent) {
   connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
           this, SLOT(fitFunctionSelected(const QString &)));
 
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateProperties(QtProperty *, double)));
+
   fitFunctionSelected(m_uiForm.cbFunction->currentText());
 }
-
-void JumpFit::setup() {}
 
 /**
  * Validate the form to check the program can be run
@@ -300,7 +308,7 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
     QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
 
     // Use the values from the instrument parameter file if we can
-    if (getInstrumentResolution(filename, res))
+    if (getResolutionRangeFromWs(filename, res))
       setRangeSelector(qRangeSelector, m_properties["QMin"],
                        m_properties["QMax"], res);
     else
@@ -409,14 +417,15 @@ void JumpFit::qRangeChanged(double min, double max) {
  * @param val :: The new value for the property
  */
 void JumpFit::updateProperties(QtProperty *prop, double val) {
+  UNUSED_ARG(val);
+
   auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
 
-  if (prop == m_properties["QMin"]) {
-    updateLowerGuide(qRangeSelector, m_properties["QMin"], m_properties["QMax"],
-                     val);
-  } else if (prop == m_properties["QMax"]) {
-    updateUpperGuide(qRangeSelector, m_properties["QMin"], m_properties["QMax"],
-                     val);
+  if (prop == m_properties["QMin"] || prop == m_properties["QMax"]) {
+    auto bounds = qMakePair(m_dblManager->value(m_properties["QMin"]),
+                            m_dblManager->value(m_properties["QMax"]));
+    setRangeSelector(qRangeSelector, m_properties["QMin"], m_properties["QMax"],
+                     bounds);
   }
 }
 
@@ -472,5 +481,6 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
   runPreviewAlgorithm();
 }
 
+} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

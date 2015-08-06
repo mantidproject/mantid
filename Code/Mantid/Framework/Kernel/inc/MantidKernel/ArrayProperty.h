@@ -60,6 +60,7 @@ public:
    *  @param validator :: The validator to use for this property, if required
    *  @param direction :: The direction (Input/Output/InOut) of this property
    */
+
   ArrayProperty(const std::string &name, IValidator_sptr validator,
                 const unsigned int direction = Direction::Input)
       : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), validator,
@@ -77,7 +78,14 @@ public:
       : PropertyWithValue<std::vector<T>>(name, std::vector<T>(),
                                           IValidator_sptr(new NullValidator),
                                           direction) {}
-  /** Constructor from which you can set the property's values through a string
+
+  /** Constructor from which you can set the property's values through a string:
+   *
+   * Inherits from the constructor of PropertyWithValue specifically made to
+   * handle a list
+   * of numeric values in a string format so that initial value is set
+   * correctly.
+   *
    *  @param name ::      The name to assign to the property
    *  @param values ::    A comma-separated string containing the values to
    * store in the property
@@ -89,14 +97,8 @@ public:
   ArrayProperty(const std::string &name, const std::string &values,
                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                 const unsigned int direction = Direction::Input)
-      : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), validator,
-                                          direction) {
-    std::string result = this->setValue(values);
-    if (!result.empty()) {
-      throw std::invalid_argument(
-          "Invalid values string passed to constructor: " + result);
-    }
-  }
+      : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values,
+                                          validator, direction) {}
 
   /// Copy constructor
   ArrayProperty(const ArrayProperty &right)

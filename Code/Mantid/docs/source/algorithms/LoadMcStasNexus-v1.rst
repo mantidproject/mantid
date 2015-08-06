@@ -21,3 +21,5 @@ general usage for simulating neutron scattering instruments and
 experiments visit the McStas homepage http://www.mcstas.org.
 
 .. categories::
+
+.. sourcelink::

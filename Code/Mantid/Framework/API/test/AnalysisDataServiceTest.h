@@ -16,6 +16,11 @@ namespace
     virtual const std::string id() const { return "MockWorkspace"; }
     virtual const std::string toString() const { return ""; }
     virtual size_t getMemorySize() const { return 1; }
+
+  private:
+    virtual MockWorkspace *doClone() const {
+      throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
+    }
   };
   typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
 }

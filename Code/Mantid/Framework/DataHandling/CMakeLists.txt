@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
+	src/CheckMantidVersion.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
@@ -12,6 +13,7 @@ set ( SRC_FILES
 	src/DetermineChunking.cpp
 	src/DownloadFile.cpp
 	src/DownloadInstrument.cpp
+	src/EventWorkspaceCollection.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -57,6 +59,7 @@ set ( SRC_FILES
 	src/LoadLLB.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
+        src/LoadMLZ.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMcStas.cpp
@@ -157,6 +160,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
+	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
@@ -168,6 +172,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/DetermineChunking.h
 	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/DownloadInstrument.h
+	inc/MantidDataHandling/EventWorkspaceCollection.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -213,6 +218,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
+        inc/MantidDataHandling/LoadMLZ.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMcStas.h
@@ -312,6 +318,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
+	CheckMantidVersionTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
@@ -323,6 +330,7 @@ set ( TEST_FILES
 	DetermineChunkingTest.h
 	DownloadFileTest.h
 	DownloadInstrumentTest.h
+	EventWorkspaceCollectionTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -361,6 +369,7 @@ set ( TEST_FILES
 	LoadIsawDetCalTest.h
 	LoadLLBTest.h
 	LoadLogTest.h
+        LoadMLZTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h

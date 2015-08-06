@@ -1,10 +1,12 @@
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
-
+#include "MantidAlgorithms/TimeAtSampleStrategyElastic.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/V3D.h"
 #include <boost/make_shared.hpp>
 #include <algorithm>
+#include <cmath>
 
 namespace Mantid {
 namespace Algorithms {
@@ -61,18 +63,17 @@ void RebinByTimeAtSample::doHistogramming(IEventWorkspace_sptr inWS,
   const int histnumber = static_cast<int>(inWS->getNumberHistograms());
 
   const double tofOffset = 0;
-  auto instrument = inWS->getInstrument();
-  auto source = instrument->getSource();
-  auto sample = instrument->getSample();
-  const double L1 = source->getDistance(*sample);
+
+  TimeAtSampleStrategyElastic strategy(inWS);
 
   // Go through all the histograms and set the data
   PARALLEL_FOR2(inWS, outputWS)
   for (int i = 0; i < histnumber; ++i) {
     PARALLEL_START_INTERUPT_REGION
 
-    const double L2 = inWS->getDetector(i)->getDistance(*sample);
-    const double tofFactor = L1 / (L1 + L2);
+    Correction correction = strategy.calculate(i);
+
+    const double tofFactor = correction.factor;
 
     const IEventList *el = inWS->getEventListPtr(i);
     MantidVec y_data, e_data;

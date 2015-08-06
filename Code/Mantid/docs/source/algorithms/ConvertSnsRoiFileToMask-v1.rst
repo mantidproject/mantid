@@ -56,3 +56,5 @@ Output:
     os.remove(os.path.join(".", mask_file))
 
 .. categories::
+
+.. sourcelink::

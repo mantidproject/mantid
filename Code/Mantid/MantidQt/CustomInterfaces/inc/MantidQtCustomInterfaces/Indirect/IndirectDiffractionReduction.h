@@ -9,12 +9,9 @@
 #include "MantidQtAPI/BatchAlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
-namespace MantidQt
-{
-namespace CustomInterfaces
-{
-class IndirectDiffractionReduction : public MantidQt::API::UserSubWindow
-{
+namespace MantidQt {
+namespace CustomInterfaces {
+class IndirectDiffractionReduction : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
 public:
@@ -29,9 +26,10 @@ public:
   ~IndirectDiffractionReduction();
 
 public slots:
-  void instrumentSelected(const QString & instrumentName, const QString & analyserName,
-      const QString & reflectionName);
-  void demonRun();
+  void instrumentSelected(const QString &instrumentName,
+                          const QString &analyserName,
+                          const QString &reflectionName);
+  void run();
   void openDirectoryDialog();
   void help();
   void plotResults(bool error);
@@ -51,23 +49,21 @@ private:
   bool validateVanCal();
 
   Mantid::API::MatrixWorkspace_sptr loadInstrument(std::string instrumentName,
-      std::string reflection = "");
+                                                   std::string reflection = "");
 
   void runGenericReduction(QString instName, QString mode);
   void saveGenericReductions();
   void runOSIRISdiffonlyReduction();
 
 private:
-  Ui::IndirectDiffractionReduction m_uiForm;  /// The form generated using Qt Designer
-  QIntValidator * m_valInt;
-  QDoubleValidator * m_valDbl;
-  QString m_settingsGroup;                    /// The settings group
+  Ui::IndirectDiffractionReduction
+      m_uiForm; /// The form generated using Qt Designer
+  QDoubleValidator *m_valDbl;
+  QString m_settingsGroup; /// The settings group
   MantidQt::API::BatchAlgorithmRunner *m_batchAlgoRunner;
   std::vector<std::string> m_plotWorkspaces;
-
 };
-
 }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_
+#endif // MANTIDQTCUSTOMINTERFACES_INDIRECTDIFFRACTIONREDUCTION_H_

@@ -18,3 +18,5 @@ used, and the matching peak removed from the output before moving onto
 the next RHSWorkspace peak.
 
 .. categories::
+
+.. sourcelink::

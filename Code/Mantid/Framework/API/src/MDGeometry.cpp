@@ -101,10 +101,6 @@ MDGeometry::~MDGeometry() {
  */
 void MDGeometry::initGeometry(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
-  if (dimensions.size() == 0)
-    throw std::invalid_argument(
-        "MDGeometry::initGeometry() 0 valid dimensions were given!");
-
   // Copy the dimensions array
   m_dimensions = dimensions;
   // Make sure the basis vectors are big enough
@@ -281,6 +277,20 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
   if (index >= m_basisVectors.size())
     throw std::invalid_argument("getBasisVector(): invalid index");
   m_basisVectors[index] = vec;
+}
+
+/**
+ * @return True ONLY if ALL the basis vectors have been normalized.
+ */
+bool MDGeometry::allBasisNormalized() const {
+  bool allNormalized = true;
+  for (auto it = m_basisVectors.begin(); it != m_basisVectors.end(); ++it) {
+      if (it->length() != 1.0) {
+        allNormalized = false;
+        break;
+      }
+  }
+  return allNormalized;
 }
 
 //---------------------------------------------------------------------------------------------------

@@ -49,7 +49,7 @@ class ConvertSnsRoiFileToMask(api.PythonAlgorithm):
         allowedInstruments = kernel.StringListValidator(INSTRUMENTS)
         self.declareProperty("Instrument", "",
                              validator=allowedInstruments,
-                             doc="One of the following instruments: "+" ".join(INSTRUMENTS))
+                             doc="One of the supported instruments")
         self.declareProperty("OutputFilePrefix", "",
                              "Overrides the default filename for the output "\
                              +"file (Optional). Default is <inst_name>_Mask.")

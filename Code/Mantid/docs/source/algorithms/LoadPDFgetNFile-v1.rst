@@ -26,3 +26,5 @@ The file types include
 | `` * .gr``
 
 .. categories::
+
+.. sourcelink::

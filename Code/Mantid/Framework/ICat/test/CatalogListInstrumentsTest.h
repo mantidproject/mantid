@@ -20,35 +20,28 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-	void testInit()
-	{
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-		TS_ASSERT_THROWS_NOTHING( instrList.initialize());
-		TS_ASSERT( instrList.isInitialized() );
-	}
+  void testInit()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+    TS_ASSERT_THROWS_NOTHING( instrList.initialize());
+    TS_ASSERT( instrList.isInitialized() );
+  }
 
-	void testListInstruments()
-	{
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
+  void testListInstruments()
+  {
+    TS_ASSERT( ICatTestHelper::login() );
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
-			
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+    if (!instrList.isInitialized() ) instrList.initialize();
+    //instrList.setPropertyValue("OutputWorkspace","instrument_list");
 
-		if (!instrList.isInitialized() ) instrList.initialize();
-		//instrList.setPropertyValue("OutputWorkspace","instrument_list");
-						
-		TS_ASSERT_THROWS_NOTHING(instrList.execute());
-		TS_ASSERT( instrList.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(instrList.execute());
+    TS_ASSERT( instrList.isExecuted() );
 
-
-	}
+    ICatTestHelper::logout();
+  }
 private:
-	CatalogListInstruments instrList;
-	CatalogLogin loginobj;
+  CatalogListInstruments instrList;
 };
 
- 
+
 #endif

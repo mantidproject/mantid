@@ -42,7 +42,7 @@
 #include <QTemporaryFile>
 #include <QTextStream>
 
-#include <Qsci/qscilexerpython.h> 
+#include <Qsci/qscilexerpython.h>
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/InterfaceManager.h"
 
@@ -50,14 +50,17 @@
 
 #include "sipAPI_qti.h"
 
+// Avoids a compiler warning about implicit 'const char *'->'char*' conversion under clang
+#define STR_LITERAL(str) const_cast<char*>(str)
+
 // Function is defined in a sip object file that is linked in later. There is no header file
 // so this is necessary
 extern "C" void init_qti();
 
 // Factory function
-ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
-{ 
-  return new PythonScripting(parent); 
+ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent)
+{
+  return new PythonScripting(parent);
 }
 
 /** Constructor */
@@ -70,7 +73,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 #if defined(Q_OS_DARWIN) || defined(Q_OS_LINUX)
   const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
   // MG: The documentation claims that if the third argument to setenv is non zero then it will update the
-  // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have 
+  // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have
   // to save it and update it ourself.
   const char * envname = "PYTHONPATH";
   char * pythonpath = getenv(envname);
@@ -154,25 +157,16 @@ bool PythonScripting::start()
   {
     if( Py_IsInitialized() ) return true;
     Py_Initialize();
-    PyEval_InitThreads(); // Acquires the GIL as well
-    // Release the lock & reset the current thread state to NULL
-    // This is necessary to ensure that PyGILState_Ensure/Release can
-    // be used correctly from now on. If not then the current thread-state
-    // blocks the first call to PyGILState_Ensure and a dead-lock ensues
-    // (doesn't seem to happen on Linux though)
-    m_mainThreadState = PyEval_SaveThread(); 
-
-    // Acquire the GIL in an OO way...
-    GlobalInterpreterLock gil;
+    // Assume this is called at startup by the the main thread so no GIL required...yet
 
     //Keep a hold of the globals, math and sys dictionary objects
-    PyObject *pymodule = PyImport_AddModule("__main__");
-    if( !pymodule )
+    PyObject *mainmod = PyImport_AddModule("__main__");
+    if( !mainmod )
     {
       finalize();
       return false;
     }
-    m_globals = PyModule_GetDict(pymodule);
+    m_globals = PyModule_GetDict(mainmod);
     if( !m_globals )
     {
       finalize();
@@ -181,14 +175,18 @@ bool PythonScripting::start()
 
     //Create a new dictionary for the math functions
     m_math = PyDict_New();
-
-    pymodule = PyImport_ImportModule("sys");
-    m_sys = PyModule_GetDict(pymodule);
+    // Keep a hold of the sys dictionary for accessing stdout/stderr
+    PyObject *sysmod = PyImport_ImportModule("sys");
+    m_sys = PyModule_GetDict(sysmod);
     if( !m_sys )
     {
       finalize();
       return false;
     }
+    // Set a smaller check interval so that it takes fewer 'ticks' to respond to a KeyboardInterrupt
+    // The choice of 5 is really quite arbitrary
+    PyObject_CallMethod(sysmod, STR_LITERAL("setcheckinterval"), STR_LITERAL("i"), 5);
+    Py_DECREF(sysmod);
 
     // Our use of the IPython console requires that we use the v2 api for these PyQt types
     // This has to be set before the very first import of PyQt (which happens in init_qti)
@@ -196,14 +194,14 @@ bool PythonScripting::start()
     //Embedded qti module needs sip definitions initializing before it can be used
     init_qti();
 
-    pymodule = PyImport_ImportModule("_qti");
-    if( pymodule )
+    PyObject *qtimod = PyImport_ImportModule("_qti");
+    if( qtimod )
     {
-      PyDict_SetItemString(m_globals, "_qti", pymodule);
-      PyObject *qti_dict = PyModule_GetDict(pymodule);
+      PyDict_SetItemString(m_globals, "_qti", qtimod);
+      PyObject *qti_dict = PyModule_GetDict(qtimod);
       setQObject(d_parent, "app", qti_dict);
       PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
-      Py_DECREF(pymodule);
+      Py_DECREF(qtimod);
     }
     else
     {
@@ -227,7 +225,7 @@ bool PythonScripting::start()
     pycode = pycode.arg(mantidbin.absolutePath());
     PyRun_SimpleString(pycode.toStdString().c_str());
 
-    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) ) 
+    if( loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
       d_initialized = true;
     }
@@ -245,6 +243,20 @@ bool PythonScripting::start()
   {
     std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     d_initialized = false;
+  }
+  if(d_initialized) {
+    // We will be using C threads created outside of the Python threading module
+    // so we need the GIL. This creates and acquires the lock for this thread
+    PyEval_InitThreads();
+    // We immediately release the lock and threadstate so that other points in
+    // the code can simply use the PyGILstate_Ensure/PyGILstate_Release()
+    // mechanism (through the GlobalInterpreterLock class) and they don't
+    // need to worry about swapping out the threadstate before hand.
+    // It would be better if the GlobalInterpreterLock handled this but
+    // PyEval_SaveThread() needs to be called in the thread that spawns the
+    // new C thread meaning that GlobalInterpreterLock could no longer
+    // be used as a simple RAII class on the stack from within the new thread.
+    m_mainThreadState = PyEval_SaveThread();
   }
   return d_initialized;
 }
@@ -264,7 +276,7 @@ QString PythonScripting::toString(PyObject *object, bool decref)
   QString ret;
   if (!object) return ret;
   PyObject *repr = PyObject_Str(object);
-  if (decref) 
+  if (decref)
   {
     Py_DECREF(object);
   }
@@ -327,12 +339,22 @@ long PythonScripting::toLong(PyObject *object, bool decref)
   return cvalue;
 }
 
+/**
+ * @brief Raise an exception in the target thread. The GIL must be held
+ * @param id The associated Python thread id
+ * @param exc The Python exception type
+ */
+void PythonScripting::raiseAsyncException(long id, PyObject *exc)
+{
+  PyThreadState_SetAsyncExc(id, exc);
+}
+
 
 bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 {
   if(!val) return false;
   PyObject *pyobj=NULL;
-  
+
   if (!sipAPI__qti)
   {
     throw std::runtime_error("sipAPI_qti is undefined");
@@ -344,9 +366,9 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   sipWrapperType *klass = sipFindClass(val->className());
   if ( !klass ) return false;
   pyobj = sipConvertFromInstance(val, klass, NULL);
-  
+
   if (!pyobj) return false;
-  
+
   if (dict)
     PyDict_SetItemString(dict,name,pyobj);
   else

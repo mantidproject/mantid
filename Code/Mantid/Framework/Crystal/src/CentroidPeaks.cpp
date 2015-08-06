@@ -72,7 +72,7 @@ void CentroidPeaks::integrate() {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
-    peakWS = inPeakWS->clone();
+    peakWS.reset(inPeakWS->clone().release());
 
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");
@@ -208,7 +208,7 @@ void CentroidPeaks::integrateEvent() {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
-    peakWS = inPeakWS->clone();
+    peakWS.reset(inPeakWS->clone().release());
 
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");

@@ -115,3 +115,5 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
 
 
 .. categories::
+
+.. sourcelink::

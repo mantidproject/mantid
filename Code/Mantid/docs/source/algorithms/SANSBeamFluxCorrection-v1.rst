@@ -47,3 +47,5 @@ Output:
    The actual value of the first bin is 4.13921144273e-09.
 
 .. categories::
+
+.. sourcelink::

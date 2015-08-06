@@ -38,3 +38,5 @@ Output:
     The created workspace has spectra:  [ 0.8451289   0.79101809  0.74254761  0.69867599  0.65861079  0.63477521]
 
 .. categories::
+
+.. sourcelink::

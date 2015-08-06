@@ -64,7 +64,15 @@ class MantidPlotInstrumentViewTest(unittest.TestCase):
         render_tab.setSurfaceType(0)
         render_tab.setAxis("Y-")
         render_tab.flipUnwrappedView(True)
-
+		
+    def test_window_render_tab(self):
+        render_tab = INST_WIN.getTab("Render")
+        render_tab.setSurfaceType(InstrumentWindowRenderTab.FULL3D)
+        self.assertTrue(render_tab is not None)
+        current_scale = render_tab.getScaleType()
+        self.assertTrue(isinstance(current_scale, GraphOptions.ScaleType))
+        render_tab.setScaleType(GraphOptions.Log10)
+        
     def test_closing_window_invalidates_reference(self):
         inst = getInstrumentView("loq_inst")
         inst.close()

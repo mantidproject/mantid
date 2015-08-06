@@ -37,3 +37,5 @@ a TOF peak:
    LorentzianWithConstBackground.png
 
 .. categories::
+
+.. sourcelink::

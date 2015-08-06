@@ -256,6 +256,29 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of transforms to original reported.", 2, g.getNumberTransformsToOriginal());
   }
 
+  void test_all_normalized(){
+      MDGeometry geometry;
+      std::vector<IMDDimension_sptr> dims;
+      IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 10));
+      IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 20));
+      dims.push_back(dim1);
+      dims.push_back(dim2);
+      geometry.initGeometry(dims);
+
+      //  Both basis vectors are not normalized
+      geometry.setBasisVector(0, VMD(2.0, 0.0));
+      geometry.setBasisVector(1, VMD(0.0, 4.0));
+      TSM_ASSERT("All Not all basis vectors are normalized", !geometry.allBasisNormalized());
+
+      //  First basis vector is now normalized. The other is not.
+      geometry.setBasisVector(1, VMD(0.0, 1.0));
+      TSM_ASSERT("Not all basis vectors are normalized", !geometry.allBasisNormalized());
+
+      // We overwrite the zeroth basis vector to be normalized. Now both are normalized
+      geometry.setBasisVector(0, VMD(1.0, 0.0));
+      TSM_ASSERT("All basis vectors are normalized", geometry.allBasisNormalized());
+  }
+
 
 };
 

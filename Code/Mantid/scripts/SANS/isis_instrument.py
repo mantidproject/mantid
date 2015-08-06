@@ -501,6 +501,9 @@ class ISISInstrument(BaseInstrument):
         self._back_start = None
         # default end region
         self._back_end = None
+        # the background TOF region for ROI data. Note that either this or a transmission monitor is used.
+        self._back_start_ROI = None
+        self._back_end_ROI = None
         #if the user moves a monitor to this z coordinate (with MON/LENGTH ...) this will be recorded here. These are overridden lines like TRANS/TRANSPEC=4/SHIFT=-100
         self.monitor_zs = {}
         # Used when new calibration required.
@@ -588,13 +591,8 @@ class ISISInstrument(BaseInstrument):
         if self.other_detector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True
-        else:
-            #there are only two detectors, they must have selected the current one so no change is need
-            if self.cur_detector().isAlias(detName):
-                return True
-            else:
-                sanslog.notice("setDetector: Detector not found")
-                sanslog.notice("setDetector: Detector set to " + self.cur_detector().name() + ' in ' + self.name())
+        elif self.cur_detector().isAlias(detName):
+            return True
 
     def setDefaultDetector(self):
         self.lowAngDetSet = True
@@ -660,6 +658,38 @@ class ISISInstrument(BaseInstrument):
             self._back_ground = {}
             self._back_start = None
             self._back_end = None
+            self.reset_TOFs_for_ROI()
+
+    def get_TOFs_for_ROI(self):
+        """
+            Gets the TOFs for the ROI which is required for the Transmission calculation. If it is
+            not available then use the default setting
+            @return: the start time, the end time
+        """
+        if self._back_start_ROI and self._back_end_ROI:
+            return self._back_start_ROI, self._back_end_ROI
+        else:
+            return None, None
+
+    def set_TOFs_for_ROI(self, start, end):
+        """
+            Sets the TOFs for the ROI which is required for the Transmission calculation.
+            @param: start : defines the start of the background region for ROI
+            @param: end : defines the end of the background region for ROI
+        """
+        if start != None:
+            start = float(start)
+        if end != None:
+            end = float(end)
+        self._back_start_ROI = start
+        self._back_end_ROI = end
+
+    def reset_TOFs_for_ROI(self):
+        """
+            Reset background region set by set_TOFs for ROI
+        """
+        self._back_start_ROI = None
+        self._back_end_ROI = None
 
     def move_all_components(self, ws):
         """
@@ -698,7 +728,7 @@ class ISISInstrument(BaseInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[0])
 
         if isSample:
             self.set_up_for_run(run_num)
@@ -1363,7 +1393,7 @@ class LARMOR(ISISInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws))[0])
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
@@ -1430,7 +1460,7 @@ class LARMOR(ISISInstrument):
         try:
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
-            run_num = int(re.findall(r'\d+',str(ws_name))[-1])
+            run_num = int(re.findall(r'\d+',str(ws_name))[0])
         if int(run_num) >= 2217:
             try:
                 #logger.warning("Trying get_detector_log")

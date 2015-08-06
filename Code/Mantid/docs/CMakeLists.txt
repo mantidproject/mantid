@@ -66,7 +66,7 @@ if ( SPHINX_FOUND )
   endif ( QT_QCOLLECTIONGENERATOR_EXECUTABLE )
 
   # HTML target
-  option (DOCS_HTML "Add target for building html docs" OFF)
+  option (DOCS_HTML "Add target for building html docs" ON)
   if (DOCS_HTML)
     set ( BUILDER html )
     set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
@@ -82,6 +82,26 @@ if ( SPHINX_FOUND )
                            EXCLUDE_FROM_DEFAULT_BUILD 1
                            EXCLUDE_FROM_ALL 1)
   endif (DOCS_HTML)
+  
+  
+  # EPUB target
+  option (DOCS_EPUB "Add target for building epub docs" OFF)
+  if (DOCS_EPUB)
+    set ( BUILDER epub )
+    set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
+    configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
+    configure_file ( runsphinx.py.in runsphinx_epub.py @ONLY )
+    add_custom_target ( ${TARGET_PREFIX}-epub
+                       COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_epub.py
+                       DEPENDS Framework MantidPlot MantidQt ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_epub.py ${SPHINX_CONF_DIR}/conf.py                        COMMENT "Building html documentation"
+                       )
+    # Group within VS and exclude from whole build
+    set_target_properties ( ${TARGET_PREFIX}-epub PROPERTIES FOLDER "Documentation"
+                           EXCLUDE_FROM_DEFAULT_BUILD 1
+                           EXCLUDE_FROM_ALL 1)
+  endif (DOCS_EPUB)
+
+  
 
   # LINKCHECK target
   set ( BUILDER linkcheck )

@@ -191,3 +191,5 @@ where
 .. properties::
 
 .. categories::
+
+.. sourcelink::

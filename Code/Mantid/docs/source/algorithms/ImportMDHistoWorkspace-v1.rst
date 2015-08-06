@@ -73,7 +73,7 @@ Output:
     ws = ImportMDHistoWorkspace('demo_mdhw.txt',Dimensionality='2',Extents='-1,1,-1,1',
                                 NumberOfBins='4,2',Names='A,B',Units='A,A')
     print "Number of Dimensions =", ws.getNumDims()
-    index = (1,2)
+    index = (2,1)
     print "Signal at "+str(index)+" =", ws.getSignalArray()[index]
     print "Error Squared at "+str(index)+" =", ws.getErrorSquaredArray()[index]
 
@@ -82,7 +82,9 @@ Output:
 .. testoutput:: Ex2D
 
     Number of Dimensions = 2
-    Signal at (1, 2) = 7.0
-    Error Squared at (1, 2) = 50.41
+    Signal at (2, 1) = 7.0
+    Error Squared at (2, 1) = 50.41
 
 .. categories::
+
+.. sourcelink::

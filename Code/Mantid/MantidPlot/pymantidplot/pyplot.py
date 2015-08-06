@@ -686,8 +686,8 @@ class Figure():
         """
         if not name:
             raise ValueError("Error: you need to specify a non-empty file name")
-        l = _graph.activeLayer()
-        l.saveImage(name);
+        l = self._graph.activeLayer()
+        l.export(name);
 
     @classmethod
     def fig_seq(cls):
@@ -1561,4 +1561,4 @@ def savefig(name):
     if not name:
         raise ValueError("Error: you need to specify a non-empty file name")
     l = __last_fig()._graph.activeLayer()
-    l.saveImage(name);
+    l.export(name);

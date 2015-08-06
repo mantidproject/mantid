@@ -39,3 +39,5 @@ MDHistoWorkspace and a scalar.
    -  This is not possible.
 
 .. categories::
+
+.. sourcelink::

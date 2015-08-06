@@ -32,6 +32,9 @@ const double ERROR_VALUE = 0.;
  */
 MaskWorkspace::MaskWorkspace() {}
 
+MaskWorkspace::MaskWorkspace(const MaskWorkspace &other)
+    : SpecialWorkspace2D(other), IMaskWorkspace(other) {}
+
 /**
  * Constructor - with a given dimension.
  * @param[in] numvectors Number of vectors/histograms for this workspace.

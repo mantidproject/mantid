@@ -498,7 +498,7 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   instrument->markAsMonitor(monitor);
 
   ObjComponent *sample = new ObjComponent("some-surface-holder");
-  source->setPos(V3D(15, 0, 0));
+  sample->setPos(V3D(15, 0, 0));
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -518,9 +518,8 @@ create2DWorkspaceWithReflectometryInstrument(double startX) {
   workspace->setYUnit("Counts");
 
   workspace->setInstrument(instrument);
-
-  workspace->getSpectrum(0)->addDetectorID(det->getID());
-  workspace->getSpectrum(1)->addDetectorID(monitor->getID());
+  workspace->getSpectrum(0)->setDetectorID(det->getID());
+  workspace->getSpectrum(1)->setDetectorID(monitor->getID());
   return workspace;
 }
 

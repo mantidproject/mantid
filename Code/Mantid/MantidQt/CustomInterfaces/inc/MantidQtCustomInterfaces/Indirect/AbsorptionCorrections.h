@@ -2,15 +2,13 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_ABSORPTIONCORRECTIONS_H_
 
 #include "ui_AbsorptionCorrections.h"
-#include "IDATab.h"
+#include "CorrectionsTab.h"
 
 namespace MantidQt
 {
 namespace CustomInterfaces
 {
-namespace IDA
-{
-  class DLLExport AbsorptionCorrections : public IDATab
+  class DLLExport AbsorptionCorrections : public CorrectionsTab
   {
     Q_OBJECT
 
@@ -34,7 +32,6 @@ namespace IDA
     Ui::AbsorptionCorrections m_uiForm;
 
   };
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

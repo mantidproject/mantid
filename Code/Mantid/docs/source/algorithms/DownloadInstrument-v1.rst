@@ -80,3 +80,5 @@ Output:
    The number of files updated was ...
 
 .. categories::
+
+.. sourcelink::

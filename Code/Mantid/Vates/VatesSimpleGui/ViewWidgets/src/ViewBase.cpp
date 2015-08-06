@@ -28,11 +28,15 @@
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqView.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMPropertyIterator.h>
 #include <vtkSMProxy.h>
+#include <vtkSMRenderViewProxy.h>
 #include <vtkSMSourceProxy.h>
+
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -40,6 +44,7 @@
 
 #include <QHBoxLayout>
 #include <QPointer>
+#include <QThread>
 #include <QSet>
 
 namespace Mantid
@@ -54,8 +59,11 @@ namespace SimpleGui
  * @param parent the parent widget for the view
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : QWidget(parent),
-                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi")
+ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
+  QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
+  m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
+  m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
+  m_gilStateStore()
 {
 }
 
@@ -83,12 +91,30 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
   pqActiveObjects::instance().setActiveView(view);
 
   // Place the widget for the render view in the frame provided.
-  hbox->addWidget(view->getWidget());
+  hbox->addWidget(view->widget());
 
-  /// Make a connection to the view's endRender signal for later checking.
+  // Make sure the Python threadstate is correct before and after rendering
+  // Direct connections so that the Python code runs in the activating thread
+  QObject::connect(view, SIGNAL(beginRender()), this, SLOT(lockPyGIL()),
+                   Qt::DirectConnection);
+  QObject::connect(view, SIGNAL(endRender()), this, SLOT(releasePyGIL()),
+                   Qt::DirectConnection);
+
+  // get right mouse pressed with high priority
+  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                            vtkCommand::RightButtonPressEvent,
+                            this,
+                            SLOT(lockPyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+  m_vtkConnections->Connect(view->getRenderViewProxy()->GetInteractor(),
+                            vtkCommand::RightButtonReleaseEvent,
+                            this,
+                            SLOT(releasePyGIL()),
+                            NULL, 1.0f, Qt::DirectConnection);
+
+  // Make a connection to the view's endRender signal for later checking.
   QObject::connect(view, SIGNAL(endRender()),
                    this, SIGNAL(renderingDone()));
-
   return view;
 }
 
@@ -153,6 +179,17 @@ void ViewBase::setAutoColorScale()
   emit this->dataRange(colorScale.minValue, colorScale.maxValue);
   emit this->setLogScale(colorScale.useLogScale);
 }
+
+/// Called when the rendering begins
+void ViewBase::lockPyGIL() {
+  PyGILStateService::acquireAndStore(this->m_gilStateStore);
+}
+
+/// Called when the rendering finishes
+void ViewBase::releasePyGIL() {
+  PyGILStateService::dropAndRelease(this->m_gilStateStore);
+}
+
 
 
 /**
@@ -305,9 +342,9 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
-  // WORKAROUND BEGIN 
+  // WORKAROUND BEGIN
   // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
-  // with top level splitting, but this is not updated in the plugin line edit field. 
+  // with top level splitting, but this is not updated in the plugin line edit field.
   // We do this here.
   if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
     vtkSMPropertyHelper(src->getProxy(),
@@ -801,9 +838,9 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
 /**
  * React to a change of the visibility of a representation of a source.
  * This can be a change of the status if the "eye" symbol in the PipelineBrowserWidget
- * as well as the addition or removal of a representation. 
+ * as well as the addition or removal of a representation.
  * @param source The pipeleine source assoicated with the call.
- * @param representation The representation associatied with the call 
+ * @param representation The representation associatied with the call
  */
 void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
 {
@@ -819,7 +856,7 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
 }
 
 /**
- * Initializes the settings of the color scale 
+ * Initializes the settings of the color scale
  */
 void ViewBase::initializeColorScale()
 {

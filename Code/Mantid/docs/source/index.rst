@@ -7,24 +7,35 @@
 
 .. _contents:
 
-===============
- Documentation
-===============
+.. image:: images/Mantid_Logo_Transparent.png
+   :alt: The logo for the Mantid Project
+   :align: center
+
+====================
+Mantid Documentation
+====================
 
 .. toctree::
    :hidden:
    :glob:
    :maxdepth: 1
 
+   algorithms/index
    algorithms/*
    concepts/index
    interfaces/index
    fitfunctions/*
    api/index
 
+
 This is the documentation for Mantid |release|.
 
-**Parts:**
+**Sections:**
+
+.. image:: images/mantid.png
+   :alt: A preying mantis with arms upraised
+   :width: 200px
+   :align: right
 
 * `Algorithms <algorithms/index.html>`_
 * `Concepts <concepts/index.html>`_
@@ -32,3 +43,5 @@ This is the documentation for Mantid |release|.
 * `Fit Functions <fitfunctions/index.html>`_
 * `API <api/index.html>`_
     - `Python <api/python/index.html>`_
+
+

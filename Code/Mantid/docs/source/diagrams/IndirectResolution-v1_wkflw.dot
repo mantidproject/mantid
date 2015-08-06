@@ -5,7 +5,6 @@ digraph IndirectResolution {
   subgraph descision {
     $decision_style
     ScaleFactorIsOne [label="ScaleFactor is 1?"]
-    Save [label="Save?"]
   }
 
   subgraph params {
@@ -27,7 +26,6 @@ digraph IndirectResolution {
     Scale
     CalculateFlatBackground
     Rebin
-    SaveNexusProcessed
   }
 
   InputFiles                  -> ISISIndirectEnergyTransfer
@@ -45,6 +43,4 @@ digraph IndirectResolution {
   CalculateFlatBackground     -> Rebin
   RebinParam                  -> Rebin
   Rebin                       -> OutputWorkspace
-  Rebin                       -> Save
-  Save                        -> SaveNexusProcessed [label="Yes"]
 }

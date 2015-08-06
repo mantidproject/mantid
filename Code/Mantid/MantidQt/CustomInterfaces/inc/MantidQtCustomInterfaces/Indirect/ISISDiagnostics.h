@@ -67,6 +67,7 @@ namespace CustomInterfaces
     virtual bool validate();
 
   private slots:
+    void algorithmComplete(bool error);
     void handleNewFile();
     void sliceTwoRanges(QtProperty*, bool);
     void sliceCalib(bool state);

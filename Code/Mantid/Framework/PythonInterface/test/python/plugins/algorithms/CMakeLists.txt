@@ -16,12 +16,12 @@ set ( TEST_PY_FILES
   CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
-  DensityOfStatesTest.py
   DSFinterpTest.py
-  EnginXCalibrateFullTest.py
-  EnginXCalibrateTest.py
-  EnginXFitPeaksTest.py
-  EnginXFocusTest.py
+  EnggCalibrateFullTest.py
+  EnggCalibrateTest.py
+  EnggFitPeaksTest.py
+  EnggFocusTest.py
+  EnggVanadiumCorrectionsTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -33,12 +33,15 @@ set ( TEST_PY_FILES
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
   ILLIN16BCalibrationTest.py
+  ISISIndirectDiffractionReductionTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
+  LoadEmptyVesuvioTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  LoadNMoldyn3AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
@@ -46,12 +49,14 @@ set ( TEST_PY_FILES
   MergeCalFilesTest.py
   MolDynTest.py
   MSDFitTest.py
-  PDDetermineCharacterizationsTest.py
+  MuscatSofQWTest.py
+  OSIRISDiffractionReductionTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py
   SavePlot1DTest.py
   SaveVulcanGSSTest.py
+  SimulatedDensityOfStatesTest.py
   SortByQVectorsTest.py
   SofQWMomentsTest.py
   SortDetectorsTest.py

@@ -77,3 +77,5 @@ Output:
    same bins after threshold greater than 4 [ 0.  4.  0.  0.]
 
 .. categories::
+
+.. sourcelink::

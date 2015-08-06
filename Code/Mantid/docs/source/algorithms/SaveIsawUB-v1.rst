@@ -63,3 +63,5 @@ Output:
     The third line is 0.2 0 0
 
 .. categories::
+
+.. sourcelink::

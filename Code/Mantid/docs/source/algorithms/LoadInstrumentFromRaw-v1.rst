@@ -51,3 +51,5 @@ Output:
    Is detector 8 a monitor? False
 
 .. categories::
+
+.. sourcelink::

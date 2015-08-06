@@ -33,7 +33,6 @@ set ( EXPORT_FILES
   src/Exports/ITableWorkspace.cpp
   src/Exports/ITableWorkspaceProperty.cpp
   src/Exports/ISplittersWorkspace.cpp
-  src/Exports/ISplittersWorkspaceProperty.cpp
   src/Exports/MDGeometry.cpp
   src/Exports/IMDWorkspace.cpp
   src/Exports/IMDWorkspaceProperty.cpp
@@ -57,6 +56,7 @@ set ( EXPORT_FILES
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
   src/Exports/FileFinder.cpp
+  src/Exports/FileLoaderRegistry.cpp
   src/Exports/Sample.cpp
   src/Exports/ScriptRepository.cpp
   src/Exports/ScriptRepositoryFactory.cpp

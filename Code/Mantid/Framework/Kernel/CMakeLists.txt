@@ -7,10 +7,10 @@ set ( SRC_FILES
 	src/BinFinder.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
+	src/ChecksumHelper.cpp
 	src/CompositeValidator.cpp
 	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
-	src/ChecksumHelper.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
 	src/DateTimeValidator.cpp
@@ -80,6 +80,7 @@ set ( SRC_FILES
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
+	src/StringContainsValidator.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
@@ -128,10 +129,10 @@ set ( INC_FILES
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
+	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
-	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
@@ -198,7 +199,7 @@ set ( INC_FILES
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
-        inc/MantidKernel/PocoVersion.h
+	inc/MantidKernel/PocoVersion.h
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
@@ -217,10 +218,11 @@ set ( INC_FILES
 	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
-        inc/MantidKernel/SpecialCoordinateSystem.h
+	inc/MantidKernel/SpecialCoordinateSystem.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
+	inc/MantidKernel/StringContainsValidator.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
@@ -265,10 +267,10 @@ set ( TEST_FILES
 	CPUTimerTest.h
 	CacheTest.h
 	CatalogInfoTest.h
+	ChecksumHelperTest.h
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
-	ChecksumHelperTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -333,9 +335,10 @@ set ( TEST_FILES
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	SpecialCoordinateSystemTest.h
-        StartsWithValidatorTest.h
+	StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
+	StringContainsValidatorTest.h
 	StringsTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
@@ -465,11 +468,12 @@ endif ()
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "0" )
 set ( ENABLE_USAGE_REPORTS "0" )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
 set ( DATADIRS ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
-set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository?debug=1" )
 set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
 # Construct script paths.
@@ -543,9 +547,10 @@ endif ()
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "1" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "1" )
 set ( ENABLE_USAGE_REPORTS "1" )
 set ( DATADIRS "" )
-set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
 set ( HTML_ROOT ../share/doc/html )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.

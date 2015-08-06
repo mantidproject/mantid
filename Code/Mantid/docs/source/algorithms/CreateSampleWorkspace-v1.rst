@@ -32,6 +32,18 @@ workspaces. If Random is selected the results will differ between runs
 of the algorithm and will not be comparable. If comparing the output is
 important set Random to false or uncheck the box.
 
+Instrument
+~~~~~~~~~~
+
+The instrument created by CreateSample workspace is very simple and looks like this.
+
+.. image:: ../images/CreateSampleWorkspaceInstrument.png
+    :width: 100%
+    :alt: A labelled image of the instrument created by CreateSampleWorkspace     
+
+The sample is placed at the origin.  The source is seperated from the sample in the negative direction by the vlue you specify in "SourceDistanceFromSample".  The instrument has "NumBanks" detector banks, each bank is moved down the X axis by "BankDistanceFromSample" from the Sample or the previous bank.
+Each bank is a square rectangular bank comprising of "BankPixelWidth" pixels in width and height.  The size of each pixel 4mm square, but additional padding can be set using "PixelSpacing".
+
 Usage
 -----
 
@@ -146,6 +158,8 @@ Output:
    Number of bins: 80
    
 .. categories::
+
+.. sourcelink::
 
 
 

@@ -5,9 +5,10 @@ from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as ms
 
+from LoadEmptyVesuvio import LoadEmptyVesuvio
+
 import copy
 import numpy as np
-import os
 
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
@@ -27,14 +28,11 @@ ITHICK = 2
 BACKWARD = 0
 FORWARD = 1
 
-# Instrument parameter headers. Key in the dictionary is the number of columns in the file
-IP_HEADERS = {5:"spectrum,theta,t0,-,R", 6:"spectrum,-,theta,t0,-,R"}
-
 # Child Algorithm logging
 _LOGGING_ = False
 
 #pylint: disable=too-many-instance-attributes
-class LoadVesuvio(PythonAlgorithm):
+class LoadVesuvio(LoadEmptyVesuvio):
 
     _ws_index = None
     _spectrum_no = None
@@ -88,8 +86,12 @@ class LoadVesuvio(PythonAlgorithm):
     mon_thick = None
     foil_out = None
 
+#----------------------------------------------------------------------------------------
+
     def summary(self):
         return "Loads raw data produced by the Vesuvio instrument at ISIS."
+
+#----------------------------------------------------------------------------------------
 
     def PyInit(self):
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
@@ -105,8 +107,8 @@ class LoadVesuvio(PythonAlgorithm):
         self.declareProperty(MODE_PROP, "DoubleDifference", StringListValidator(MODES),
                              doc="The difference option. Valid values: %s" % str(MODES))
 
-        self.declareProperty(FileProperty(INST_PAR_PROP,"",action=FileAction.OptionalLoad,
-                                          extensions=["dat"]),
+        self.declareProperty(FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad,
+                                          extensions=["dat", "par"]),
                              doc="An optional IP file. If provided the values are used to correct "
                                  "the default instrument values and attach the t0 values to each "
                                  "detector")
@@ -120,6 +122,7 @@ class LoadVesuvio(PythonAlgorithm):
                              doc="The name of the output workspace.")
 
 #----------------------------------------------------------------------------------------
+
     def PyExec(self):
         self._load_inst_parameters()
         self._retrieve_input()
@@ -154,7 +157,7 @@ class LoadVesuvio(PythonAlgorithm):
 
             ip_file = self.getPropertyValue(INST_PAR_PROP)
             if len(ip_file) > 0:
-                self._load_ip_file(ip_file)
+                self.foil_out = self._load_ip_file(self.foil_out, ip_file)
 
             if self._sumspectra:
                 self._sum_all_spectra()
@@ -216,6 +219,10 @@ class LoadVesuvio(PythonAlgorithm):
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
 
+        ip_file = self.getPropertyValue(INST_PAR_PROP)
+        if len(ip_file) > 0:
+            self.foil_out = self._load_ip_file(self.foil_out, ip_file)
+
         if self._sumspectra:
             self._sum_all_spectra()
 
@@ -230,11 +237,8 @@ class LoadVesuvio(PythonAlgorithm):
             parameters as attributes
         """
         isis = config.getFacility("ISIS")
-        inst_name = "VESUVIO"
-        inst_dir = config.getInstrumentDirectory()
-        inst_file = os.path.join(inst_dir, inst_name + "_Definition.xml")
-        __empty_vesuvio_ws = ms.LoadEmptyInstrument(Filename=inst_file, EnableLogging=_LOGGING_)
-        empty_vesuvio = __empty_vesuvio_ws.getInstrument()
+        empty_vesuvio_ws = self._load_empty_evs()
+        empty_vesuvio = empty_vesuvio_ws.getInstrument()
 
         def to_int_list(str_param):
             """Return the list of numbers described by the string range"""
@@ -242,7 +246,7 @@ class LoadVesuvio(PythonAlgorithm):
             return range(int(elements[0]),int(elements[1]) + 1) # range goes x_l,x_h-1
 
         # Attach parameters as attributes
-        self._inst_prefix = isis.instrument(inst_name).shortName()
+        self._inst_prefix = isis.instrument("VESUVIO").shortName()
         parnames = empty_vesuvio.getParameterNames(False)
         for name in parnames:
             # Irritating parameter access doesn't let you query the type
@@ -279,9 +283,8 @@ class LoadVesuvio(PythonAlgorithm):
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
 
-        ms.DeleteWorkspace(__empty_vesuvio_ws,EnableLogging=_LOGGING_)
-
 #----------------------------------------------------------------------------------------
+
     def _retrieve_input(self):
         self._diff_opt = self.getProperty(MODE_PROP).value
 
@@ -325,6 +328,7 @@ class LoadVesuvio(PythonAlgorithm):
         self.delta_tmon = (mon_raw_t[1:] - mon_raw_t[:-1])
 
 #----------------------------------------------------------------------------------------
+
     def _load_and_sum_runs(self, spectra):
         """Load the input set of runs & sum them if there
         is more than one.
@@ -381,6 +385,7 @@ class LoadVesuvio(PythonAlgorithm):
             runs = [run_str]
 
         return runs
+
 #----------------------------------------------------------------------------------------
 
     def _set_spectra_type(self, spectrum_no):
@@ -405,8 +410,8 @@ class LoadVesuvio(PythonAlgorithm):
             self._period_sum2_start, self._period_sum2_end = self._forw_period_sum2
             self._foil_out_norm_start, self._foil_out_norm_end = self._forw_foil_out_norm
 
-
 #----------------------------------------------------------------------------------------
+
     def _integrate_periods(self):
         """
             Calculates 2 arrays of sums, 1 per period, of the Y values from
@@ -498,6 +503,7 @@ class LoadVesuvio(PythonAlgorithm):
                             foil_thick_periods, mon_thick_periods)
 
 #----------------------------------------------------------------------------------------
+
     def _get_foil_periods(self):
         """
         Return the period numbers (starting from 1) that contribute to the
@@ -530,6 +536,7 @@ class LoadVesuvio(PythonAlgorithm):
         return foil_out_periods, foil_thin_periods, foil_thick_periods
 
 #----------------------------------------------------------------------------------------
+
     #pylint: disable=too-many-arguments
     def _sum_foils(self, foil_ws, mon_ws, sum_index, foil_periods, mon_periods=None):
         """
@@ -568,6 +575,7 @@ class LoadVesuvio(PythonAlgorithm):
         outY /= self.delta_tmon
 
 #----------------------------------------------------------------------------------------
+
     def _normalise_by_monitor(self):
         """
             Normalises by the monitor counts between mon_norm_start & mon_norm_end
@@ -595,6 +603,8 @@ class LoadVesuvio(PythonAlgorithm):
         if self._nperiods != 2:
             monitor_normalization(self.foil_thick, self.mon_thick)
 
+#----------------------------------------------------------------------------------------
+
     def _normalise_to_foil_out(self):
         """
             Normalises the thin/thick foil counts to the
@@ -621,6 +631,7 @@ class LoadVesuvio(PythonAlgorithm):
         normalise_to_out(self.foil_thin, "thin")
         if self._nperiods != 2:
             normalise_to_out(self.foil_thick, "thick")
+
 #----------------------------------------------------------------------------------------
 
     def _calculate_diffs(self):
@@ -639,6 +650,7 @@ class LoadVesuvio(PythonAlgorithm):
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
         self.foil_out.setX(wsindex, self.pt_times)
+
 #----------------------------------------------------------------------------------------
 
     def _calculate_thin_difference(self, ws_index):
@@ -662,6 +674,7 @@ class LoadVesuvio(PythonAlgorithm):
         np.sqrt((eout**2 + ethin**2), eout) # The second argument makes it happen in place
 
 #----------------------------------------------------------------------------------------
+
     def _calculate_double_difference(self, ws_index):
         """
             Calculates the difference between the foil out, thin & thick foils
@@ -684,6 +697,7 @@ class LoadVesuvio(PythonAlgorithm):
         np.sqrt((one_min_beta*eout)**2 + ethin**2 + (self._beta**2)*ethick**2, eout)
 
 #----------------------------------------------------------------------------------------
+
     def _calculate_thick_difference(self, ws_index):
         """
             Calculates the difference between the foil out & thick foils
@@ -698,30 +712,6 @@ class LoadVesuvio(PythonAlgorithm):
         eout = self.foil_out.dataE(ws_index)
         ethick = self.foil_thick.readE(ws_index)
         np.sqrt((eout**2 + ethick**2), eout) # The second argument makes it happen in place
-
-#----------------------------------------------------------------------------------------
-    def _load_ip_file(self, ip_file):
-        """
-            If provided, load the instrument parameter file into the result
-            workspace
-            @param ip_file A string containing the full path to an IP file
-        """
-        if ip_file == "":
-            raise ValueError("Empty filename string for IP file")
-
-        ip_header = self._get_header_format(ip_file)
-
-        # More verbose until the child algorithm stuff is sorted
-        update_inst = self.createChildAlgorithm("UpdateInstrumentFromFile")
-        update_inst.setLogging(_LOGGING_)
-        update_inst.setProperty("Workspace", self.foil_out)
-        update_inst.setProperty("Filename", ip_file)
-        update_inst.setProperty("MoveMonitors", False)
-        update_inst.setProperty("IgnorePhi", True)
-        update_inst.setProperty("AsciiHeader", ip_header)
-        update_inst.execute()
-
-        self.foil_out = update_inst.getProperty("Workspace").value
 
 #----------------------------------------------------------------------------------------
 
@@ -755,25 +745,7 @@ class LoadVesuvio(PythonAlgorithm):
         self.foil_out = ws_out
 
 #----------------------------------------------------------------------------------------
-    def _get_header_format(self, ip_filename):
-        """
-            Returns the header format to be used for the given
-            IP file. Currently supports 5/6 column files.
-            Raises ValueError if anything other than a 5/6 column
-            file is found.
-            @filename ip_filename :: Full path to the IP file.
-            @returns The header format string for use with UpdateInstrumentFromFile
-        """
-        ipfile = open(ip_filename, "r")
-        first_line = ipfile.readline()
-        columns = first_line.split() # splits on whitespace characters
-        try:
-            return IP_HEADERS[len(columns)]
-        except KeyError:
-            raise ValueError("Unknown format for IP file. Currently support 5/6 column "
-                             "variants. ncols=%d" % (len(columns)))
 
-#----------------------------------------------------------------------------------------
     def _store_results(self):
         """
            Sets the values of the output workspace properties
@@ -818,6 +790,8 @@ class SpectraToFoilPeriodMap(object):
             raise RuntimeError("Unsupported number of periods given: " + str(nperiods) +
                                ". Supported number of periods=2,3,6,9")
 
+#----------------------------------------------------------------------------------------
+
     def reorder(self, arr):
         """
            Orders the given array by increasing value. At the same time
@@ -833,6 +807,8 @@ class SpectraToFoilPeriodMap(object):
             self._one_to_one[index+1] = int(val)
         return arr
 
+#----------------------------------------------------------------------------------------
+
     def get_foilout_periods(self, spectrum_no):
         """Returns a list of the foil-out periods for the given
         spectrum number. Note that these start from 1 not zero
@@ -841,6 +817,8 @@ class SpectraToFoilPeriodMap(object):
         """
         return self.get_foil_periods(spectrum_no, state=0)
 
+#----------------------------------------------------------------------------------------
+
     def get_foilin_periods(self, spectrum_no):
         """Returns a list of the foil-out periods for the given
         spectrum number. Note that these start from 1 not zero
@@ -848,6 +826,8 @@ class SpectraToFoilPeriodMap(object):
             @returns A list of period numbers for foil out state
         """
         return self.get_foil_periods(spectrum_no, state=1)
+
+#----------------------------------------------------------------------------------------
 
     def get_foil_periods(self, spectrum_no, state):
         """Returns a list of the periods for the given
@@ -871,6 +851,8 @@ class SpectraToFoilPeriodMap(object):
             foil_periods = [1,3,5] if foil_out else [2,4,6]
         return foil_periods
 
+#----------------------------------------------------------------------------------------
+
     def get_indices(self, spectrum_no, foil_state_numbers):
         """
         Returns a tuple of indices that can be used to access the Workspace within
@@ -884,6 +866,8 @@ class SpectraToFoilPeriodMap(object):
         for state in foil_state_numbers:
             indices.append(self.get_index(spectrum_no, state))
         return tuple(indices)
+
+#----------------------------------------------------------------------------------------
 
     def get_index(self, spectrum_no, foil_state_no):
         """Returns an index that can be used to access the Workspace within
@@ -912,10 +896,14 @@ class SpectraToFoilPeriodMap(object):
         foil_period_no = foil_periods[foil_state_no]
         return foil_period_no - 1 # Minus 1 to get to WorkspaceGroup index
 
+#----------------------------------------------------------------------------------------
+
     def _validate_foil_number(self, foil_number):
         if foil_number < 1 or foil_number > 9:
             raise ValueError("Invalid foil state given, expected a number between "
                              "1 and 9. number=%d" % foil_number)
+
+#----------------------------------------------------------------------------------------
 
     def _validate_spectrum_number(self, spectrum_no):
         if spectrum_no < 1 or spectrum_no > 198:

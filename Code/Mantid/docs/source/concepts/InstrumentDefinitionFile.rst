@@ -1268,9 +1268,7 @@ apply facing.
 ^^^^^^^^^
 
 Originally introduced to handle detector position coordinates as defined
-by the
-`Ariel <http://www.isis.rl.ac.uk/Disordered/GEM/ariel/index_ariel.htm>`__
-software.
+by the Ariel software.
 
 .. code-block:: xml
 

@@ -33,3 +33,5 @@ Output:
     Poldi sample 6904 has 400 histograms.
 
 .. categories::
+
+.. sourcelink::

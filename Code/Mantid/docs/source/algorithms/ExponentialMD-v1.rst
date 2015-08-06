@@ -21,3 +21,5 @@ This algorithm cannot be run on a
 :ref:`algm-Exponential`.
 
 .. categories::
+
+.. sourcelink::
