@@ -178,7 +178,7 @@ void ConvolutionFitSequential::exec() {
     convSpec->executeAsChildAlg();
   } else if (axis->isNumeric()) {
     // Check that units are Momentum Transfer
-    if (axis->unit.unitID() != "MomentumTransfer") {
+    if (axis->unit()->unitID() != "MomentumTransfer") {
       throw std::runtime_error("Input must have axis values of Q");
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
@@ -191,7 +191,13 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Fit all spectra in workspace
+  std::string plotPeakInput = "";
+  for(int i = 0; i < specMax + 1; i++){
+	std::string nextWs = tempFitWs + ",i";
+	nextWs += i;
+	plotPeakInput += nextWs + ";";
 
+  }
 
   //passWSIndex
   bool passIndex = false;
@@ -202,7 +208,7 @@ void ConvolutionFitSequential::exec() {
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
-  plotPeaks->setProperty("Input", ""); // need input name
+  plotPeaks->setProperty("Input", plotPeakInput); // need input name
   plotPeaks->setProperty("OutputWorkspace", outWSName);
   plotPeaks->setProperty("Function", function);
   plotPeaks->setProperty("StartX", startX);
