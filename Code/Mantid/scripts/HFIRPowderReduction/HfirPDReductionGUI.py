@@ -392,6 +392,33 @@ class MainWindow(QtGui.QMainWindow):
         self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/HFIRPowderReduction.html'
         self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/HFIRPowderReduction.html'
 
+        # Initial setup for tab
+        self.ui.tabWidget.setCurrentIndex(0)
+        cache_dir = str(self.ui.lineEdit_cache.text()).strip()
+        if len(cache_dir) == 0 or os.path.exists(cache_dir) is False:
+            invalid_cache = cache_dir
+            if False:
+                cache_dir = os.path.expanduser('~')
+            else:
+                cache_dir = os.getcwd()
+            self.ui.lineEdit_cache.setText(cache_dir)
+            self._logWarning("Cache directory %s is not valid. "
+                             "Using current workspace directory %s as cache." %
+                             (invalid_cache, cache_dir))
+
+        # Get on hold of raw data file
+        useserver = self.ui.radioButton_useServer.isChecked()
+        uselocal = self.ui.radioButton_useLocal.isChecked()
+        if useserver == uselocal:
+            self._logWarning("It is logically wrong to set up (1) neither server or local dir to "
+                             "access data or (2) both server and local dir to retrieve data. "
+                             "As default, it is set up to download data from server.")
+            useserver = True
+            uselocal = False
+            self.ui.radioButton_useServer.setChecked(True)
+            self.ui.radioButton_useLocal.setChecked(False)
+        # ENDIF
+
         return
 
 
@@ -1070,7 +1097,7 @@ class MainWindow(QtGui.QMainWindow):
         # plot
         for detid in sorted(detidlist):
             try:
-                self._plotIndividualDetCounts(expno, scanno, detid, xlabel, resetboundary=not overplot)
+                self._plot_individual_detector_counts(expno, scanno, detid, xlabel, resetboundary=not overplot)
                 self._expNo = expno
                 self._scanNo = scanno
                 self._detID = detid
@@ -1092,7 +1119,7 @@ class MainWindow(QtGui.QMainWindow):
             if overplot is False:
                 self.doClearIndDetCanvas()
 
-            self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
+            self._plot_individual_detector_counts(self._expNo, self._scanNo, currdetid,
                     self._indvXLabel)
         except KeyError as e:
             self._logError(str(e))
@@ -1116,7 +1143,7 @@ class MainWindow(QtGui.QMainWindow):
             if overplot is False:
                 self.doClearIndDetCanvas()
 
-            self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
+            self._plot_individual_detector_counts(self._expNo, self._scanNo, currdetid,
                     self._indvXLabel)
         except KeyError as e:
             self._logError(str(e))
@@ -1704,15 +1731,15 @@ class MainWindow(QtGui.QMainWindow):
         # self._graphIndDevMode = (samplename, 'Counts')
 
         return    
-        
 
-    def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis, resetboundary=False):
+    def _plot_individual_detector_counts(self, expno, scanno, detid, xaxis, resetboundary=False):
         """ Plot a specific detector's counts along all experiment points (pt)
-        Arguments:
-         - expno ::
-         - scanno ::
-         - detid ::
-         - xaxis :: string as 'XLabel'
+        :param expno:
+        :param scanno:
+        :param detid:
+        :param xaxis:
+        :param resetboundary:
+        :return:
         """
         # Validate input
         expno = int(expno)
@@ -1720,6 +1747,7 @@ class MainWindow(QtGui.QMainWindow):
         detid = int(detid)
 
         plot_error_bar = self.ui.checkBox_indDetErrorBar.isChecked()
+        plot_normal = self.ui.checkBox_indDetNormByMon.isChecked()
 
         # Reject if data is not loaded
         if self._myControl.hasDataLoaded(expno, scanno) is False:
@@ -1735,7 +1763,8 @@ class MainWindow(QtGui.QMainWindow):
         self._logNotice("Input x-axis is '%s' for plotting individual detector's counts."%(xaxis))
         if len(xaxis) == 0:
             xaxis = None
-        vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xaxis)
+        # FIXME - plot_normal should be propagated to _myControl
+        vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xaxis, plot_normal)
         if isinstance(vecx, numpy.ndarray) is False:
             raise NotImplementedError('vecx, vecy must be numpy arrays.')
         if plot_error_bar is True:
@@ -2105,7 +2134,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get on hold of raw data file
         useserver = self.ui.radioButton_useServer.isChecked()
         uselocal = self.ui.radioButton_useLocal.isChecked()
-        if (useserver and uselocal) is False:
+        if useserver == uselocal:
             self._logError("It is logically wrong to set up server/local dir for data.")
             useserver = True
             uselocal = False
@@ -2127,8 +2156,8 @@ class MainWindow(QtGui.QMainWindow):
                 invalidcache = cachedir
                 cachedir = os.getcwd()
                 self.ui.lineEdit_cache.setText(cachedir)
-                self._logWarning("Cache directory %s is not valid. \
-                    Using current workspace directory %s as cache." % (invalidcache, cachedir) )
+                self._logWarning("Cache directory %s is not valid. "
+                                 "Using current workspace directory %s as cache." % (invalidcache, cachedir) )
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
             srcFileName = os.path.join(cachedir, filename)

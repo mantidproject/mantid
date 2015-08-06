@@ -331,6 +331,9 @@ class Qt4MplCanvas(FigureCanvas):
         # Register
         if plot_error is True and len(r) == 3:
             self._lineDict[self._lineIndex] = r[2]
+            for ir in xrange(3):
+                print '[DBNOW] %d'%(ir), r[ir], type(r[ir])
+            raise NotImplementedError('Stop here!')
         elif plot_error is False and len(r) == 1:
             self._lineDict[self._lineIndex] = r[0]
         else:
