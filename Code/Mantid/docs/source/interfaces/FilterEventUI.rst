@@ -25,7 +25,7 @@ or :ref:`filterbytime-GenerateEventFilter-ref`. User also has an option of filte
 Layout
 ------
 
-.. figure:: /images/FilterEventsUI.png
+.. figure:: /images/FilterEventsGUI.png
    :align: center
    :width: 400
 
