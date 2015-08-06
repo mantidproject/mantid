@@ -163,7 +163,32 @@ void ConvolutionFitSequential::exec() {
   outWSName += specMin + "_to_" + specMax;
 
   // Convert input workspace to get Q axis
+  const std::string tempFitWs = "__convfit_fit_ws";
+  auto axis = inWS->getAxis(1);
+  if (axis->isSpectra()) {
+    auto eFixed = inWS->getEFixed();
+    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
+    convSpec->setProperty("InputWorkSpace", inWS);
+    convSpec->setProperty("OutputWorkSpace", tempFitWs);
+    convSpec->setProperty("Target", "ElasticQ");
+    convSpec->setProperty("EMode", "Indirect");
+    convSpec->setProperty("EFixed", eFixed);
+    convSpec->executeAsChildAlg();
 
+  } else if (axis->isNumeric()) {
+    // Check that units are Momentum Transfer
+    if (axis->unit.unitID() != "MomentumTransfer") {
+      throw std::runtime_error("Input must have axis values of Q");
+    }
+    auto cloneWs = createChildAlgorithm("CloneWorkspace");
+    cloneWs->setProperty("InputWorkspace", inWS);
+    cloneWs->setProperty("OutputWorkspace", tempFitWs);
+    cloneWs->executeAsChildAlg();
+
+  } else {
+    throw std::runtime_error(
+        "Input workspace must have either spectra or numeric axis.");
+  }
 
   // Fit all spectra in workspace
 
