@@ -7,15 +7,19 @@ import os
 import sys
 import urllib2
 
-scriptdir = os.getcwd()
-sourcedir = scriptdir.split('scripts')[0]
-mantiddir = os.path.join( os.path.join(sourcedir, os.pardir), 'debug/bin')
-if os.path.exists(mantiddir) is False: 
-    raise RuntimeError('Mantid bin directory %s cannot be found.' % (mantiddir))
-else:
-    sys.path.append(mantiddir)
+try:
+    import mantid
+except ImportError:
+    # In case Mantid is not in the python path
+    homedir = os.path.expanduser('~')
+    mantiddir = os.path.join(os.path.join(homedir, 'Mantid/Code/debug/bin'))
+    print 'Mantid Dir = %s' % mantiddir
+    if os.path.exists(mantiddir) is False:
+        raise RuntimeError('Mantid bin directory %s cannot be found.' % (mantiddir))
 
-import mantid
+    # import again
+    sys.path.append(mantiddir)
+    import mantid
 import mantid.simpleapi as api
 
          

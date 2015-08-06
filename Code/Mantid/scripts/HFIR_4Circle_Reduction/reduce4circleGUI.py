@@ -26,6 +26,8 @@ finally:
     from mantid.simpleapi import AnalysisDataService
     from mantid.kernel import ConfigService
 
+import fourcircle_utility as fcutil
+
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -35,22 +37,12 @@ except AttributeError:
 
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
 
+
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
-
-    Copy to ui.setupUI
-
-    # Version 3.0 + Import for Ui_MainWindow.py
-        from MplFigureCanvas import Qt4MplCanvas
-
-        # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
-        self.graphicsView = Qt4MplCanvas(self.centralwidget)
-        self.mainplot = self.graphicsView.getPlot()
     """
-
-
     def __init__(self, parent=None):
-        """ Intialization and set up
+        """ Initialization and set up
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
@@ -63,11 +55,26 @@ class MainWindow(QtGui.QMainWindow):
         config = ConfigService.Instance()
         self._instrument = config["default.instrument"]
 
-        # Event handlings
+        # Event handling definitions
+        # Tab 'Data Access'
+        self.connect(self.ui.pushButton_browseLocalDataDir, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_local_spice_data)
+        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
+                     self.do_test_url)
+        self.connect(self.ui.pushButton_ListScans, QtCore.SIGNAL('clicked()'),
+                     self.do_list_scans)
+        self.connect(self.ui.pushButton_downloadExpData, QtCore.SIGNAL('clicked()'),
+                     self.do_download_spice_data)
+        self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.change_data_access_mode)
+
+        # Tab 'Advanced'
+        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_local_cache_dir)
+
+        # Tab ...
         self.connect(self.ui.pushButton_load, QtCore.SIGNAL('clicked()'), self.doLoad)
 
-        self.connect(self.ui.pushButton_testURLs, QtCore.SIGNAL('clicked()'),
-                self.doTestURL)
 
         self.connect(self.ui.pushButton_plotScan, QtCore.SIGNAL('clicked()'),
                 self.doPlotScanPt)
@@ -77,13 +84,6 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
                 self.doPlotNextScanPt)
-
-        self.connect(self.ui.pushButton_browseLocalData, QtCore.SIGNAL('clicked()'),
-                self.doBrowseLocalSrcDataDir)
-
-        self.connect(self.ui.pushButton_browseSaveDir, QtCore.SIGNAL('clicked()'),
-                self.doBrowseSaveDir)
-
 
         # Event handling for tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -118,11 +118,35 @@ class MainWindow(QtGui.QMainWindow):
         # Control
         self._myControl = r4c.CWSCDReductionControl()
 
+        # Initial setup
+        # Tab 'Access'
+        self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
+        self.ui.comboBox_mode.setCurrentIndex(0)
+        self.ui.lineEdit_localSpiceDir.setEnabled(False)
+        self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+
         return
 
     #---------------------------------------------------------------------------
     # Event handling methods
     #---------------------------------------------------------------------------
+    def change_data_access_mode(self):
+        """ Change data access mode between downloading from server and local
+        :return:
+        """
+        new_mode = str(self.ui.comboBox_mode.currentText())
+        print '[DB] New Mode = ', new_mode
+        if new_mode.startswith('Local') is True:
+            self.ui.lineEdit_localSpiceDir.setEnabled(True)
+            self.ui.pushButton_browseLocalDataDir.setEnabled(True)
+            self.ui.lineEdit_url.setEnabled(False)
+        else:
+            self.ui.lineEdit_localSpiceDir.setEnabled(False)
+            self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+            self.ui.lineEdit_url.setEnabled(True)
+
+        return
+
     def doAcceptCalUB(self):
         """ Accept the calculated UB matrix
         """
@@ -139,14 +163,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-    def doBrowseLocalSrcDataDir(self):
-        """ Browse local source dir
+    def do_browse_local_spice_data(self):
+        """ Browse local source SPICE data directory
         """
-        srcdatadir = str(QtGui.QFileDialog.getExistingDirectory(self,'Get Directory',self._homeSrcDir))
-        self._homeSrcDir = srcdatadir
-
-        self.ui.lineEdit_localSrcDir.setText(srcdatadir)
+        src_spice_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Directory',
+                                                                   self._homeSrcDir))
+        self._homeSrcDir = src_spice_dir
+        self.ui.lineEdit_localSpiceDir.setText(src_spice_dir)
 
         return
 
@@ -166,8 +189,40 @@ class MainWindow(QtGui.QMainWindow):
         """ Calculate UB matrix by 2 or 3 reflections
         """
 
-        return 
+        return
 
+    def do_download_spice_data(self):
+        """ Download SPICE data
+        :return:
+        """
+        # Check scans to download
+        scan_list_str = str(self.ui.lineEdit_downloadScans.text())
+        if len(scan_list_str) > 0:
+            # user specifies scans to download
+            valid, scan_list = fcutil.parse_int_array(scan_list_str)
+            if valid is False:
+                error_message = scan_list
+                self.pop_one_button_dialog(scan_list)
+        else:
+            # Get all scans
+            scan_list = fcutil.get_scans_list(server_url, exp_no, return_list=True)
+        self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
+
+        # Check location
+        destination_dir = str(self.ui.lineEdit_localSrcDir.text())
+        if os.path.exists(destination_dir) is False:
+            self.pop_one_button_dialog('Destination directory %s cannot be found.' % destination_dir)
+            return
+        else:
+            if os.access(destination_dir, os.W_OK) is False:
+                self.pop_one_button_dialog('Destination directory %s is not writable.' % destination_dir)
+                return
+            else:
+                self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
+
+        self._myControl.downloadSelectedDataSet(scan_list)
+
+        return
     
     def doFindPeak(self):
         """ Find peak in a given scan/pt
@@ -178,9 +233,26 @@ class MainWindow(QtGui.QMainWindow):
         self._myProject.findPeak(scanNo, ptNo)
 
 
-        return 
+        return
 
+    def do_list_scans(self):
+        """ List all scans available
+        :return:
+        """
+        # Experiment number
+        exp_no = int(self.ui.lineEdit_exp.text())
 
+        access_mode = str(self.ui.comboBox_mode.currentText())
+        if access_mode == 'Local':
+            spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
+            message = fcutil.get_scans_list_local_disk(spice_dir, exp_no)
+        else:
+            url = str(self.ui.lineEdit_url.text())
+            message = fcutil.get_scans_list(url, exp_no)
+
+        self.pop_one_button_dialog(message)
+
+        return
 
     def doLoad(self):
         """ Download and optinally load the data
@@ -264,20 +336,28 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-
-    def doTestURL(self):
+    def do_test_url(self):
         """ Test whether the root URL provided specified is good
         """
         url = str(self.ui.lineEdit_url.text())
 
-        if isGoodURL is True:
-            self.popOneButtonDialog("URL is good")
+        url_is_good = fcutil.check_url(url)
+        if url_is_good is True:
+            self.pop_one_button_dialog("URL %s is valid." % url)
         else:
-            self.popOneButtonDialog("Unable to access %s.  Check internet access." % (url))
+            self.pop_one_button_dialog("Unable to access %s.  Check internet access." % url)
 
-        raise NotImplementedError("ASAP")
+        return
 
+
+    def pop_one_button_dialog(self, message):
+        """ Pop up a one-button dialog
+        :param message:
+        :return:
+        """
+        QtGui.QMessageBox.information(self, '4-circle Data Reduction', message)
+
+        return
 
     #---------------------------------------------------------------------------
     # Private event handling methods
