@@ -1193,13 +1193,9 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
     m_loadBlockInfo = m_monBlockInfo;
   }
 
-  g_log.debug() << "Number of monitors nmons: "
-                << nmons << std::endl;
-
   if (ndets == 0) {
     separateMonitors = false; // only monitors in the main workspace. No
                               // detectors. Will be loaded in the main workspace
-    // Function exit point
     return separateMonitors;
   }
 
