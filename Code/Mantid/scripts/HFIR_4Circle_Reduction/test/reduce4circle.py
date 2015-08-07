@@ -61,11 +61,11 @@ def setExperimentInfo(step):
     """
     wkflow = mydata.getObject()
 
-    wkflow.setServerURL('http://neutron.ornl.gov/user_data/hb3a/')
+    wkflow.set_server_url('http://neutron.ornl.gov/user_data/hb3a/')
     wkflow.setWebAccessMode('download')
-    wkflow.setLocalCache('./temp/')
+    wkflow.set_local_cache('./temp/')
 
-    wkflow.setExpNumber(355)
+    wkflow.set_exp_number(355)
 
     return
 
@@ -77,7 +77,7 @@ def downloadData(step):
     wkflow = mydata.getObject()
 
     scanlist = [38, 83, 91]
-    wkflow.downloadSelectedDataSet(scanlist)
+    wkflow.download_data_set(scanlist)
 
     return
 
@@ -92,8 +92,8 @@ def addPeak1(step):
     # Download data
     wkflow = mydata.getObject()
     if wkflow.existDataFile(scanno, ptno)[0] is False: 
-        wkflow.downloadSpiceFile(scanno)
-        wkflow.downloadSpiceDetXMLFile(scanno, ptno)
+        wkflow.download_spice_file(scanno)
+        wkflow.download_spice_xml_file(scanno, ptno)
 
 
     status, retobj = wkflow.findPeak(scanno, ptno)

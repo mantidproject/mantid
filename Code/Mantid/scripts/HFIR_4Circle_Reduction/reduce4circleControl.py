@@ -54,30 +54,32 @@ class PeakInfo(object):
         raise NotImplementedError("ASAP")
 
 
-
 class CWSCDReductionControl(object):
     """ Controlling class for reactor-based single crystal diffraction reduction
     """
-    def __init__(self, instrumentname=None):
+    def __init__(self, instrument_name=None):
         """ init
         """
-        if isinstance(instrumentname, str):
-            self._instrumentName = instrumentname
-        elif instrumentname is None:
+        if isinstance(instrument_name, str):
+            self._instrumentName = instrument_name
+        elif instrument_name is None:
             self._instrumentName = ''
         else:
-            raise RuntimeError('Instrument name %s of type %s is not allowed.' % (str(instrumentname),
-                str(type(instrumentname))))
+            raise RuntimeError('Instrument name %s of type %s is not allowed.' % (str(instrument_name),
+                                                                                  str(type(instrument_name))))
 
-        # Experiment number
+        # Experiment number, data storage
         self._expNumber = 0
+
         self._dataDir = "/tmp"
+        self._localCacheDir = None
+
+        self._myServerURL = ''
 
         # Container for loaded workspaces 
         self._spiceTableDict = {}
 
         return
-
 
     def addPeakToCalUB(self, peakws, ipeak, matrixws):
         """ Add a peak to calculate ub matrix
@@ -108,82 +110,77 @@ class CWSCDReductionControl(object):
 
         return
 
-
-    def downloadSpiceFile(self, scanno):
+    def download_spice_file(self, scan_number):
         """ Download a scan/pt data from internet
         """
         # Generate the URL for SPICE data file
-        spicerunfileurl = self._myServerURL + 'exp%d/Datafiles/'%(self._expNumber) + \
-                "HB3A_exp%04d_scan%04d.dat" % (self._expNumber, scanno)
-
-        spicefilename = '%s_exp%04d_scan%04d.dat'%(self._instrumentName, self._expNumber, 
-                scanno)
-        spicefilename = os.path.join(self._dataDir, spicefilename)
+        file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, self._expNumber,
+                                                                    self._expNumber, scan_number)
+        file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, self._expNumber, scan_number)
+        file_name = os.path.join(self._dataDir, file_name)
 
         # Download
         try:
-            api.DownloadFile(Address=spicerunfileurl, Filename=spicefilename)
+            api.DownloadFile(Address=file_url, Filename=file_name)
         except Exception as e:
-            return (False, str(e))
+            return False, str(e)
 
         # Check file exist?
-        if os.path.exists(spicefilename) is False:
-            return (False, "Unable to locate downloaded file %s."%(spicefilename))
+        if os.path.exists(file_name) is False:
+            return False, "Unable to locate downloaded file %s." % file_name
 
-        return (True, spicefilename)
+        return True, file_name
 
-
-    def downloadSpiceDetXMLFile(self, scanno, ptno):
+    def download_spice_xml_file(self, scan_no, pt_no):
         """
         """
         # TODO - Doc
         # Generate the URL for XML file
-        xmlfilename = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, 
-                self._expNumber, scanno, ptno)
-        xmlfileurl = '%sexp%d/Datafiles/%s' % (self._myServerURL, self._expNumber,
-                xmlfilename)
-        targetxmlfilename = os.path.join(self._dataDir, xmlfilename)
+        xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, self._expNumber, scan_no, pt_no)
+        xml_file_url = '%sexp%d/Datafiles/%s' % (self._myServerURL, self._expNumber, xml_file_name)
+        local_xml_file_name = os.path.join(self._dataDir, xml_file_name)
 
         # Download
         try:
-            api.DownloadFile(Address=xmlfileurl, 
-                             Filename=targetxmlfilename)
+            api.DownloadFile(Address=xml_file_url,
+                             Filename=local_xml_file_name)
         except Exception as e:
-            return (False, 'Unable to download Detector XML file %s dur to %s.' % (
-                xmlfilename, str(e)))
+            return False, 'Unable to download Detector XML file %s dur to %s.' % (xml_file_name, str(e))
 
         # Check file exist?
-        if os.path.exists(targetxmlfilename) is False:
-            return (False, "Unable to locate downloaded file %s."%(targetxmlfilename))
+        if os.path.exists(local_xml_file_name) is False:
+            return False, "Unable to locate downloaded file %s."%(local_xml_file_name)
 
-        return (True, targetxmlfilename)
+        return True, local_xml_file_name
 
-
-    def downloadSelectedDataSet(self, scanlist):
-        """ Download data set
+    def download_data_set(self, scan_list):
+        """ Download data set including (1) spice file for a scan and (2) XML files for measurements
         """
-        for scanno in scanlist:
-            # Form SPICE file
-            status, retobj = self.downloadSpiceFile(scanno)
+        error_message = ''
+
+        for scan_no in scan_list:
+            # Download single spice file for a run
+            status, ret_obj = self.download_spice_file(scan_no)
 
             # Reject if SPICE file cannot download
             if status is False:
-                print retobj
+                error_message += '%s\n' % ret_obj
                 continue
-            else:
-                spicefilename = retobj
 
-            # Load SPICE file
-            spicetable = self.loadSpiceFile(scanno, spicefilename)
-            ptnolist = self._getPtListFromTable(spicetable)
-            for ptno in ptnolist:
-                status, retobj = self.downloadSpiceDetXMLFile(scanno, ptno)
+            # Load SPICE file to Mantid
+            spice_file_name = ret_obj
+            spice_table = self.loadSpiceFile(scan_no, spice_file_name)
+            pt_no_list = self._getPtListFromTable(spice_table)
+
+            # Download all single-measurement file
+            for pt_no in pt_no_list:
+                status, ret_obj = self.download_spice_xml_file(scan_no, pt_no)
                 if status is False:
-                    print retobj
-            # ENDFOR
-        # ENDFOR (scanno)
+                    error_message += '%s\n' % ret_obj
+            # END-FOR
+        # END-FOR (scan_no)
 
-        return
+        return True, error_message
 
 
     def downloadAllDataSet(self):
@@ -191,7 +188,7 @@ class CWSCDReductionControl(object):
         """
         # FIXME 
         for scanno in xrange(1, sys.maxint):
-            status, retobj = self.downloadSpiceFile(scanno)
+            status, retobj = self.download_spice_file(scanno)
             if status is False:
                 break
 
@@ -343,27 +340,27 @@ class CWSCDReductionControl(object):
         
         GroupWorkspaces(InputWorkspaces=inputws, OutputWorkspace='Group_exp0355_scan%04d'%(scanno))
 
-
-
-    def setServerURL(self, serverurl):
-        """ Set server's URL
+    def set_server_url(self, server_url):
+        """ Set data server's URL
         """
-        self._myServerURL = str(serverurl)
+        # Server URL must end with '/'
+        self._myServerURL = str(server_url)
         if self._myServerURL.endswith('/') is False:
             self._myServerURL + '/'
 
-        urlgood = False
+        # Test URL valid or not
+        is_url_good = False
         try:
-            urllib2.urlopen(self._myServerURL)
+            r = urllib2.urlopen(self._myServerURL)
         except urllib2.HTTPError, e:
             print(e.code) 
         except urllib2.URLError, e: 
             print(e.args)
         else:
-            urlgood = True
+            is_url_good = True
+            r.close()
 
-        return urlgood
-
+        return is_url_good
 
     def setWebAccessMode(self, mode):
         """ Set data access mode form server
@@ -378,11 +375,12 @@ class CWSCDReductionControl(object):
 
         return
 
-
-    def setLocalCache(self, localdir):
+    def set_local_cache(self, localdir):
         """ Set local cache diretory
         """
         # TODO Doc : ..., localdir is ...
+
+        # FIXME: (Improvement) move the algorithm to work with destination dir from reduce4circleGUI.do_download_spice_data here!
 
         # Get absolute path 
         if os.path.isabs(localdir) is True: 
@@ -401,13 +399,16 @@ class CWSCDReductionControl(object):
 
         return os.path.exists(self._localCacheDir)
 
-
-    def setExpNumber(self, expno):
+    def set_exp_number(self, expno):
         """ Set experiment number
         """
-        self._expNumber = expno
+        # TODO : need some verification on input expno
+        try:
+            self._expNumber = int(expno)
+        except TypeError:
+            return False
 
-        return
+        return True
 
     """
     Private Methods

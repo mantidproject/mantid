@@ -52,8 +52,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
         # Mantid configuration
-        config = ConfigService.Instance()
-        self._instrument = config["default.instrument"]
+        self._instrument = str(self.ui.comboBox_instrument.currentText())
+        # config = ConfigService.Instance()
+        # self._instrument = config["default.instrument"]
 
         # Event handling definitions
         # Tab 'Data Access'
@@ -72,18 +73,19 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_cache_dir)
 
+        # Tab 'View Raw Data'
+        self.connect(self.ui.pushButton_plotRawPt, QtCore.SIGNAL('clicked()'),
+                     self.do_plot_pt_raw)
+
+        self.connect(self.ui.pushButton_prevPtNumber, QtCore.SIGNAL('clicked()'),
+                     self.doPlotPrevScanPt)
+
+        self.connect(self.ui.pushButton_nextPtNumber, QtCore.SIGNAL('clicked()'),
+                     self.doPlotNextScanPt)
+
         # Tab ...
-        self.connect(self.ui.pushButton_load, QtCore.SIGNAL('clicked()'), self.doLoad)
 
 
-        self.connect(self.ui.pushButton_plotScan, QtCore.SIGNAL('clicked()'),
-                self.doPlotScanPt)
-
-        self.connect(self.ui.pushButton_prevScan, QtCore.SIGNAL('clicked()'),
-                self.doPlotPrevScanPt)
-
-        self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
-                self.doPlotNextScanPt)
 
         # Event handling for tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
@@ -116,7 +118,7 @@ class MainWindow(QtGui.QMainWindow):
         self._homeSaveDir = os.getcwd()
 
         # Control
-        self._myControl = r4c.CWSCDReductionControl()
+        self._myControl = r4c.CWSCDReductionControl(self._instrument)
 
         # Initial setup
         # Tab 'Access'
@@ -160,6 +162,22 @@ class MainWindow(QtGui.QMainWindow):
 
         """
         raise NotImplementedError("ASAP")
+
+        return
+
+    def do_browse_local_cache_dir(self):
+        """ Browse local cache directory
+        :return:
+        """
+        local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
+                                                                     'Get Local Cache Directory',
+                                                                     self._homeSaveDir))
+        if os.access(local_cache_dir, os.W_OK) is False:
+            error_message = 'Directory %s is not writable.' % local_cache_dir
+            self.pop_one_button_dialog(error_message)
+            return
+
+        self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
 
         return
 
@@ -219,8 +237,20 @@ class MainWindow(QtGui.QMainWindow):
                 return
             else:
                 self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
+        self._myControl.set_local_cache(destination_dir)
 
-        self._myControl.downloadSelectedDataSet(scan_list)
+        # Set up myControl for downloading data
+        exp_no = int(self.ui.lineEdit_exp.text())
+        self._myControl.set_exp_number(exp_no)
+
+        server_url = str(self.ui.lineEdit_url.text())
+        if self._myControl.set_server_url(server_url) is False:
+            error_message = 'Unable to open data server URL: %s.' % server_url
+            self.pop_one_button_dialog(error_message)
+            return
+
+        # Download
+        self._myControl.download_data_set(scan_list)
 
         return
     
@@ -254,21 +284,16 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def doLoad(self):
-        """ Download and optinally load the data
+    def XXX_do_load_pt(self):
+        """ Download and optinally load the data of one Pt. for viewing raw data
         """
-        # get experiment and run 
-        expid = int(self.ui.lineEdit_exp.text())
-        runid = int(self.ui.lineEdit_run.text())
+        # Get experiment, run and spice data directory
+        exp_id = int(self.ui.lineEdit_exp.text())
+        run_id = int(self.ui.lineEdit_run.text())
+        spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
 
-        workdir = str(self.ui.lineEdit_dirSave.text())
-
-        # load mode
-        uselocalfile = self.ui.checkBox_dataLocal.status()
-        if uselocalfile == 0:
-            uselocalfile = False
-        else:
-            uselocalfile = True
+        # Load mode
+        raise MYBAD()
 
         # determine operation mode
         if uselocalfile is True:
@@ -286,19 +311,26 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doPlotScanPt(self):
+    def do_plot_pt_raw(self):
         """ Plot the Pt. 
         """
-        # get measurement pt and the file number
-        pt = int(self.ui.lineEdit_ptPlot.text())
+        # Get measurement pt and the file number
+        # TODO : make it a method such that to get integer numbers
+        exp_no = int(self.ui.lineEdit_exp.text())
+        scan_no = int(self.ui.lineEdit_run.text())
+        pt_no = int(self.ui.lineEdit_rawDataPtNo.text())
 
+        #
+
+        '''
         xmlwsname = self._xmlwsbasename + "_%d" % (pt)
         if self._xmlwkspdict.has_key(xmlwsname) is False:
             self._logError('Pt %d does not does not exist.' % (pt))
         xmlws = self._xmlwkspdict[xmlwsname]
         self._currPt = xmlws
+        '''
 
-        self._plotRawXMLWksp(self._currPt)
+        self._plot_raw_xml_2d(self._currPt)
 
         return
 
@@ -311,7 +343,7 @@ class MainWindow(QtGui.QMainWindow):
         prevwsname = self._wkspNameList[curindex-1]
         self._currPt = prevwsname
 
-        self._plotRawXMLWksp(self._currPt)
+        self._plot_raw_xml_2d(self._currPt)
 
         return
 
@@ -326,7 +358,7 @@ class MainWindow(QtGui.QMainWindow):
         nextwsname = self._wkspNameList[nextindex]
         self._currPt = nextwsname
 
-        self._plotRawXMLWksp(self._currPt)
+        self._plot_raw_xml_2d(self._currPt)
 
         return
 
@@ -436,10 +468,13 @@ class MainWindow(QtGui.QMainWindow):
         return
         
 
-    def _plotRawXMLWksp(self, xmlws):
+    def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
         """ Plot raw workspace from XML file for a measurement/pt.
         """
-        # get data
+        # FIXME : Continue from here!!!
+        # 1. Put LoadSpiceAscii() in Control class
+        # 2. Convert a list of vector to 2D numpy array for imshow()
+        # Get data
         numspec = xmlws.getNumberHistograms()
         vecylist = []
         for iws in xrange(len(numspec)): 
