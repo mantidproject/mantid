@@ -10,37 +10,37 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This is a workflow algorithm that loads an event nexus file in chunks
+and compresses the resulting chunks before summing them. It uses the
+algorithms:
+
+#. :ref:`algm-DetermineChunking`
+#. :ref:`algm-LoadEventNexus`
+#. :ref:`algm-FilterBadPulses`
+#. :ref:`algm-CompressEvents`
+#. :ref:`algm-Plus` to accumulate
+
+
+Workflow
+########
+
+.. diagram:: LoadEventAndCompress-v1_wkflw.dot
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
-
 **Example - LoadEventAndCompress**
 
-.. testcode:: LoadEventAndCompressExample
+The files needed for this example are not present in our standard usage data
+download due to their size.  They can however be downloaded using these links:
+`PG3_9830_event.nxs <https://github.com/mantidproject/systemtests/blob/master/Data/PG3_9830_event.nxs?raw=true>`_.
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
 
-   wsOut = LoadEventAndCompress()
+.. code-block:: python
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: LoadEventAndCompressExample
-
-  The output workspace has ?? spectra
+   PG3_9830_event = LoadEventAndCompress(Filename='PG3_9830_event.nxs',
+                                         MaxChunkSize=1.)
 
 .. categories::
 
 .. sourcelink::
-
