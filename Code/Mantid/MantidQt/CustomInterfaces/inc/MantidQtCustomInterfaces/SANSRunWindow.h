@@ -109,6 +109,9 @@ private:
     LOGGING, ADD_RUNS, DIAGNOSTICS, ONE_D_ANALYSIS 
   };
 
+  /// Enum for the two states of the Q Resolution aperture selection
+  enum QResoluationAperture {CIRCULAR, RECTANGULAR};
+
   /// Initialize the layout
   virtual void initLayout();
   /// Init Python environment
@@ -284,6 +287,8 @@ private slots:
   void onTransmissionRadiusCheckboxChanged();
   /// Transmission setting for ROI files
   void onTransmissionROIFilesCheckboxChanged();
+  /// Handle a change of the aperture geometry for QResolution
+  void handleQResolutionApertureChange(int aperture);
 
 private:
   /// used to specify the range of validation to do
@@ -408,9 +413,26 @@ private:
   void initTransmissionSettings();
   /// Set all trans fields to a certain enabled state
   void resetAllTransFields();
-
+  /// Gets the QResolution settings and shows them in the GUI
+  void retrieveQResolutionSettings();
+  /// Gets the QResolution settings for the aperture, decides for the the correct setting and displays it
+  void retrieveQResolutionAperture();
+  /// General getter for aperture settings of Q Resolution
+  QString retrieveQResolutionGeometry(QString command);
+  /// Write the QResolution GUI changes to a python script
+  void writeQResolutionSettingsToPythonScript(QString& pythonCode);
+  /// Sets the cirucular aperture, ie labels and populates the values with what is available from the user file
+  void setupQResolutionCircularAperture();
+  /// Sets the rectuanular aperture
+  void setupQResolutionRectangularAperture(QString h1, QString w1, QString h2, QString w2 );
+  /// Set the rectangular aperture
+  void setupQResolutionRectangularAperture();
+  /// Set the aperture type
+  void setQResolutionApertureType(QResoluationAperture apertureType, QString a1H1Label, QString a2H2Label, QString a1H1,
+                                  QString a2H2,QString toolTipA1H1, QString toolTipA2H2, bool w1W2Disabled);
+  /// Initialize the QResolution settings
+  void initQResolutionSettings();
   UserSubWindow * slicingWindow;
-
 };
 
 }

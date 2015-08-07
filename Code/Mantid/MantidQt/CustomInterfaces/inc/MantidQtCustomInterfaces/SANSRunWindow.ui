@@ -2331,7 +2331,7 @@ intermediate ranges are there for comparison</string>
         <item row="7" column="0">
          <layout class="QHBoxLayout" name="horizontalLayout_27">
           <item>
-           <widget class="QGroupBox" name="groupBox_19">
+           <widget class="QGroupBox" name="q_resolution_group_box">
             <property name="title">
              <string>QResolution</string>
             </property>
@@ -2343,7 +2343,7 @@ intermediate ranges are there for comparison</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_33">
              <item row="2" column="9">
-              <widget class="QLabel" name="label_19">
+              <widget class="QLabel" name="q_resolution_delta_r_label">
                <property name="text">
                 <string>Delta R [mm]:</string>
                </property>
@@ -2360,7 +2360,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item row="2" column="7">
-              <widget class="QLabel" name="label_18">
+              <widget class="QLabel" name="q_resolution_collimation_length_label">
                <property name="text">
                 <string>LCollim [m]:</string>
                </property>
@@ -2419,7 +2419,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item row="0" column="4">
-              <widget class="QLabel" name="q_resolution_w2_label">
+              <widget class="QLabel" name="q_resolution_w1_label">
                <property name="maximumSize">
                 <size>
                  <width>40</width>
@@ -2488,7 +2488,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item row="2" column="4">
-              <widget class="QLabel" name="q_resolution_w2_label_2">
+              <widget class="QLabel" name="q_resolution_w2_label">
                <property name="maximumSize">
                 <size>
                  <width>40</width>
@@ -2501,7 +2501,7 @@ intermediate ranges are there for comparison</string>
               </widget>
              </item>
              <item row="0" column="7">
-              <widget class="QLabel" name="label">
+              <widget class="QLabel" name="q_resolution_moderator_label">
                <property name="text">
                 <string>Moderator:</string>
                </property>

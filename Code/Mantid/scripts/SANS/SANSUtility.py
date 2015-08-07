@@ -1045,6 +1045,22 @@ def can_load_as_event_workspace(filename):
 
     return is_event_workspace
 
+def meter_2_millimeter(num):
+    '''
+    Converts from mm to m
+    @param float in mm
+    @returns float in m
+    '''
+    return num/1000.
+
+def millimeter_2_meter(num):
+    '''
+    Converts from mm to m
+    @param float in mm
+    @returns float in m
+    '''
+    return num*1000.
+	
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

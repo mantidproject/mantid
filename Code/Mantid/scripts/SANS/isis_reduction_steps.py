@@ -1848,12 +1848,12 @@ class ConvertToQISIS(ReductionStep):
         # QResolution settings
         self._q_resolution_moderator_file_name = None
         self._q_resolution_delta_r = None
-        self._q_resolution_A1 = None
-        self._q_resolution_A2 = None
-        self._q_resolution_H1 = None
-        self._q_resolution_W1 = None
-        self._q_resolution_H1 = None
-        self._q_resolution_W1 = None
+        self._q_resolution_a1 = None
+        self._q_resolution_a2 = None
+        self._q_resolution_h1 = None
+        self._q_resolution_w1 = None
+        self._q_resolution_h2 = None
+        self._q_resolution_w2 = None
         self._q_resolution_collimation_length = None
 
     def set_output_type(self, descript):
@@ -2031,32 +2031,62 @@ class ConvertToQISIS(ReductionStep):
             raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
         self._q_resolution_moderator_file_name = q_res_file_path
 
-    def set_q_resolution_A1(self, a1):
-        self._q_resolution_A1 = a1
+    def get_q_resolution_moderator(self):
+        return self._q_resolution_moderator_file_name
 
-    def set_q_resolution_A2(self, a2):
-        self._q_resolution_A2 = a2
+    def set_q_resolution_a1(self, a1):
+        self._q_resolution_a1 = a1
+
+    def get_q_resolution_a1(self):
+        return self._q_resolution_a1
+
+    def set_q_resolution_a2(self, a2):
+        self._q_resolution_a2 = a2
+
+    def get_q_resolution_a2(self):
+        return self._q_resolution_a2
 
     def set_q_resolution_delta_r(self, delta_r):
         self._q_resolution_delta_r = delta_r
 
-    def set_q_resolution_H1(self, h1):
-        self._q_resolution_H1 = h1
+    def get_q_resolution_delta_r(self):
+        return self._q_resolution_delta_r
 
-    def set_q_resolution_H2(self, h2):
-        self._q_resolution_H2 = h2
+    def set_q_resolution_h1(self, h1):
+        self._q_resolution_h1 = h1
 
-    def set_q_resolution_W1(self, w1):
-        self._q_resolution_W1 = w1
+    def get_q_resolution_h1(self):
+        return self._q_resolution_h1
 
-    def set_q_resolution_W2(self, w2):
-        self._q_resolution_W2 = w2
+    def set_q_resolution_h2(self, h2):
+        self._q_resolution_h2 = h2
+
+    def get_q_resolution_h2(self):
+        return self._q_resolution_h2
+
+    def set_q_resolution_w1(self, w1):
+        self._q_resolution_w1 = w1
+
+    def get_q_resolution_w1(self):
+        return self._q_resolution_w1
+
+    def set_q_resolution_w2(self, w2):
+        self._q_resolution_w2 = w2
+
+    def get_q_resolution_w2(self):
+        return self._q_resolution_w2
 
     def set_q_resolution_collimation_length(self, collimation_length):
         self._q_resolution_collimation_length = collimation_length
 
+    def get_q_resolution_collimation_length(self):
+        return self._q_resolution_collimation_length
+
     def set_use_q_resolution(self, enabled):
-        self._use_q_resolution = enabled
+        self.use_q_resolution = enabled
+
+    def get_use_q_resolution(self):
+        return self.use_q_resolution
 
     def run_consistency_check(self):
         '''
@@ -2082,12 +2112,12 @@ class ConvertToQISIS(ReductionStep):
         Prepare the parameters which need preparing
         '''
         # If we have values for H1 and W1 then set A1 to the correct value
-        if self._q_resolution_H1 and self._q_resolution_W1:
-            self._q_resolution_A1 = self._set_up_diameter(self._q_resolution_H1, self._q_resolution_W1)
+        if self._q_resolution_h1 and self._q_resolution_w1:
+            self._q_resolution_a1 = self._set_up_diameter(self._q_resolution_h1, self._q_resolution_w1)
 
         # If we have values for H2 and W2 then set A2 to the correct value
-        if self._q_resolution_H2 and self._q_resolution_W2:
-            self._q_resolution_A2 = self._set_up_diameter(self._q_resolution_H2, self._q_resolution_W2)
+        if self._q_resolution_h2 and self._q_resolution_w2:
+            self._q_resolution_a2 = self._set_up_diameter(self._q_resolution_h2, self._q_resolution_w2)
 
     def _set_up_diameter(self, h, w):
          '''
@@ -2097,8 +2127,22 @@ class ConvertToQISIS(ReductionStep):
          @param w: the width
          @returns the new diameter
          '''
-         return 2*sqrt((self._q_resolution_H1*self._q_resolution_H1
-                      + self._q_resolution_W1* self._q_resolution_W1)/6)
+         return 2*sqrt((h*h + w*w)/6)
+
+    def reset_q_settings(self):
+        '''
+        Reset of the q resolution settings
+        '''
+        self.use_q_resolution = False
+        self._q_resolution_moderator_file_name = None
+        self._q_resolution_delta_r = None
+        self._q_resolution_a1 = None
+        self._q_resolution_a2 = None
+        self._q_resolution_h1 = None
+        self._q_resolution_w1 = None
+        self._q_resolution_h2 = None
+        self._q_resolution_w2 = None
+        self._q_resolution_collimation_length = None
 
 
 class UnitsConvert(ReductionStep):

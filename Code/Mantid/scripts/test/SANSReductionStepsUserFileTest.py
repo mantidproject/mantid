@@ -59,25 +59,25 @@ class MockConvertTOQISISQResolution(object):
     def set_q_resolution_delta_r(self, delta_r):
         self.delta_r = delta_r
 
-    def set_q_resolution_A1(self, a1):
+    def set_q_resolution_a1(self, a1):
         self.a1 = a1
 
-    def set_q_resolution_A2(self, a2):
+    def set_q_resolution_a2(self, a2):
         self.a2 = a2
 
     def set_q_resolution_collimation_length(self, collimation_length):
         self.collim = collimation_length
 
-    def set_q_resolution_H1(self, h1):
+    def set_q_resolution_g1(self, h1):
         self.h1 = h1
 
-    def set_q_resolution_H2(self, h2):
+    def set_q_resolution_g2(self, h2):
         self.h2 = h2
 
-    def set_q_resolution_W1(self, w1):
+    def set_q_resolution_w1(self, w1):
         self.w1 = w1
 
-    def set_q_resolution_W2(self, w2):
+    def set_q_resolution_w2(self, w2):
         self.w2 = w2
 
     def set_use_q_resolution(self, enabled):

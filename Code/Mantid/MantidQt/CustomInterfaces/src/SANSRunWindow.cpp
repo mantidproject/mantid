@@ -316,6 +316,9 @@ void SANSRunWindow::initLayout()
   // Setup the Transmission Settings
   initTransmissionSettings();
 
+  // Setup the QResolution Settings
+  initQResolutionSettings();
+
   // Set the validators
   setValidators();
 
@@ -1005,6 +1008,9 @@ bool SANSRunWindow::loadUserFile()
   //Masking table
   updateMaskTable();
 
+  // Setup the QResolution
+  retrieveQResolutionSettings();
+
   if ( runReduceScriptFunction(
     "print i.ReductionSingleton().mask.phi_mirror").trimmed() == "True" )
   {
@@ -1029,7 +1035,6 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
-  
 
   return true;
 }
@@ -2315,8 +2320,11 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ")\n";
 
-  //Set the Transmision settings
+  // Set the Transmision settings
   writeTransmissionSettingsToPythonScript(exec_reduce);
+
+  // Set the QResolution settings
+  writeQResolutionSettingsToPythonScript(exec_reduce);
 
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to the center
@@ -4226,6 +4234,291 @@ void SANSRunWindow::resetAllTransFields() {
   m_uiForm.trans_radius_check_box->setChecked(state);
 }
 
-} //namespace CustomInterfaces
+/**
+ * Retrieves the Q resolution settings and apply them to the GUI
+ */
+void SANSRunWindow::retrieveQResolutionSettings() {
+  // Set if the QResolution should be used at all
+  QString getUseage ="i.get_q_resultution_use()\n";
+  QString resultUsage(runPythonCode(getUseage, false));
+  resultUsage = resultUsage.simplified();
+  if (resultUsage == m_constants.getPythonTrueKeyword()) {
+    m_uiForm.q_resolution_group_box->setChecked(true);
+  } else if (resultUsage == m_constants.getPythonFalseKeyword()) {
+    m_uiForm.q_resolution_group_box->setChecked(false);
+  } else {
+    g_log.warning(resultUsage.toStdString());
+    g_log.warning("Not a valid setting for the useage of QResolution");
+    m_uiForm.q_resolution_group_box->setChecked(false);
+  }
 
+  // Set the Collimation length
+  QString getCollimationLength ="i.get_q_resolution_collimation_length()\n";
+  QString resultCollimationLength(runPythonCode(getCollimationLength, false));
+  m_uiForm.q_resolution_collimation_length_input->setText(resultCollimationLength);
+
+  // Set the Delta R value
+  QString getDeltaR ="i.get_q_resolution_delta_r()\n";
+  QString resultDeltaR(runPythonCode(getDeltaR, false));
+  m_uiForm.q_resolution_delta_r_input->setText(resultDeltaR);
+
+  // Set the moderator file
+  QString getModeratorFile = "i.get_q_resolution_moderator()\n";
+  QString resultModeratorFile = (runPythonCode(getModeratorFile, false));
+  m_uiForm.q_resolution_moderator_input->setText(resultModeratorFile);
+
+  // Set the geometry, ie if rectangular or circular aperture
+  retrieveQResolutionAperture();
+}
+
+/**
+ * Retrieve the QResolution setting for the aperture. Select the aperture
+ * type depending on the available values, ie if there are H1, W1, H2, W2 specified,
+ * then we are dealing with are rectangular aperture, else with a circular
+ */
+void SANSRunWindow::retrieveQResolutionAperture() {
+  // Get the H1, W1, H2, W2
+  auto h1 = retrieveQResolutionGeometry("i.get_q_resolution_h1()\n");
+  auto w1 = retrieveQResolutionGeometry("i.get_q_resolution_w1()\n");
+  auto h2 = retrieveQResolutionGeometry("i.get_q_resolution_h2()\n");
+  auto w2 = retrieveQResolutionGeometry("i.get_q_resolution_w2()\n");
+
+  // If at least one of them is empty, then use circular, otherwise use rectangular
+  auto useCircular = h1.isEmpty() || w1.isEmpty() || h2.isEmpty() || w2.isEmpty();
+  if (useCircular) {
+    setupQResolutionCircularAperture();
+  } else {
+    setupQResolutionRectangularAperture(h1, w1, h2, w2);
+  }
+}
+
+/**
+ * Gets the geometry settings and checks if they are empty or not
+ * @param command: the python command to execute
+ * @returns either a length (string) in mm or an empty string
+ */
+QString SANSRunWindow::retrieveQResolutionGeometry(QString command) {
+  QString result(runPythonCode(command, false));
+  if (result == m_constants.getPythonEmptyKeyword()) {
+    result = "";
+  }
+  return result;
+}
+
+/**
+ * Setup the GUI for use with a circular aperture
+ */
+void SANSRunWindow::setupQResolutionCircularAperture() {
+  // Get the apertures of the diameter
+  auto a1 = retrieveQResolutionGeometry("i.get_q_resolution_a1()\n");
+  auto a2 = retrieveQResolutionGeometry("i.get_q_resolution_a2()\n");
+
+  // Set to 0 if a1 and a2 are not available
+  if (a1.isEmpty())
+    a1 = "0";
+  if (a2.isEmpty())
+    a2 = "0";
+
+  setQResolutionApertureType(QResoluationAperture::CIRCULAR,
+                             "A1 [mm]", "A2 [mm]",
+                             a1, a2, m_constants.getQResolutionA1ToolTipText(),
+                             m_constants.getQResolutionA2ToolTipText(),true);
+}
+
+/**
+ * Setup the GUI for use with a rectangular aperture
+ * @param h1: the height of the first aperture
+ * @param w1: the width of the first aperture
+ * @param h2: the height of the second aperture
+ * @param w2: the width of the second aperture
+ */
+void SANSRunWindow::setupQResolutionRectangularAperture(QString h1, QString w1, QString h2, QString w2) {
+  // If any of the inputs is empty, then set the value to 0
+  if (h1.isEmpty())
+    h1 = "0";
+  if (w1.isEmpty())
+    w1 = "0";
+  if (h2.isEmpty())
+    h2 = "0";
+  if (w2.isEmpty())
+    w2 = "0";
+
+  // Set the QResolution Aperture
+  setQResolutionApertureType(QResoluationAperture::RECTANGULAR, "H1 [mm]", "H2 [mm]",
+                             h1, h2, m_constants.getQResolutionH1ToolTipText(),
+                             m_constants.getQResolutionH2ToolTipText(), false);
+
+  // Set the W1 and W2 values
+  m_uiForm.q_resolution_w1_input->setText(w1);
+  m_uiForm.q_resolution_w2_input->setText(w2);
+
+    // Set the ToolTip for a1
+  m_uiForm.q_resolution_a1_h1_input->setToolTip(m_constants.getQResolutionH1ToolTipText());
+  m_uiForm.q_resolution_a1_h1_label->setToolTip(m_constants.getQResolutionH1ToolTipText());
+
+  // Set the ToolTip for a2
+  m_uiForm.q_resolution_a2_h2_input->setToolTip(m_constants.getQResolutionH2ToolTipText());
+  m_uiForm.q_resolution_a2_h2_label->setToolTip(m_constants.getQResolutionH2ToolTipText());
+}
+
+/**
+ * Setup the GUI for use iwth a rectangular aperture
+ */
+void SANSRunWindow::setupQResolutionRectangularAperture() {
+  auto h1 = retrieveQResolutionGeometry("i.get_q_resolution_h1()\n");
+  auto w1 = retrieveQResolutionGeometry("i.get_q_resolution_w1()\n");
+  auto h2 = retrieveQResolutionGeometry("i.get_q_resolution_h2()\n");
+  auto w2 = retrieveQResolutionGeometry("i.get_q_resolution_w2()\n");
+
+  setupQResolutionRectangularAperture(h1, w1, h2, w2);
+}
+
+
+/**
+ * Set the QResolution aperture GUI
+ * @param apertureType: the type of the aperture
+ * @param a1H1Label: the label for the a1/h1 input
+ * @param a2H2Label: the label for the a2/h2 input
+ * @param a1H1: the a1H1 value
+ * @param a2H2: the a2H2 value
+ * @param toolTipA1H1: the tooltip text for the first aperture parameter
+ * @param toolTipA2H2: the tooltip text for the second aperture parameter
+ * @param w1W2Disabled: if the w1W2Inputs should be disabled
+ */
+void SANSRunWindow::setQResolutionApertureType(QResoluationAperture apertureType, QString a1H1Label, QString a2H2Label,
+                                               QString a1H1, QString a2H2, QString toolTipA1H1, QString toolTipA2H2, bool w1W2Disabled) {
+  // Set the labels
+  m_uiForm.q_resolution_a1_h1_label->setText(a1H1Label);
+  m_uiForm.q_resolution_a2_h2_label->setText(a2H2Label);
+
+  // Set the values
+  m_uiForm.q_resolution_a1_h1_input->setText(a1H1);
+  m_uiForm.q_resolution_a2_h2_input->setText(a2H2);
+
+  // Ensure that the W1 and W2 boxes are not accesible
+  m_uiForm.q_resolution_w1_label->setDisabled(w1W2Disabled);
+  m_uiForm.q_resolution_w2_label->setDisabled(w1W2Disabled);
+  m_uiForm.q_resolution_w1_input->setDisabled(w1W2Disabled);
+  m_uiForm.q_resolution_w2_input->setDisabled(w1W2Disabled);
+
+  // Set the QCheckBox to the correct value
+  m_uiForm.q_resolution_combo_box->setCurrentIndex(apertureType);
+
+ // Set the ToolTip for a1/a2
+  m_uiForm.q_resolution_a1_h1_input->setToolTip(toolTipA1H1);
+  m_uiForm.q_resolution_a1_h1_label->setToolTip(toolTipA1H1);
+
+  // Set the ToolTip for a2
+  m_uiForm.q_resolution_a2_h2_input->setToolTip(toolTipA2H2);
+  m_uiForm.q_resolution_a2_h2_label->setToolTip(toolTipA2H2);
+
+}
+
+/**
+ * Write the GUI changes for the QResolution settings to the python code string
+ * @param pythonCode: A reference to the python code
+ */
+void SANSRunWindow::writeQResolutionSettingsToPythonScript(QString& pythonCode) {
+  // Clear the current settings
+  pythonCode += "i.reset_q_resolution_settings()\n";
+
+  // Set usage of QResolution
+  auto usageGUI = m_uiForm.q_resolution_group_box->isChecked();
+  QString useage = usageGUI ? m_constants.getPythonTrueKeyword() : m_constants.getPythonFalseKeyword();
+  pythonCode += "i.set_q_resolution_use(use=" + useage+ ")\n";
+
+  // Set collimation length
+  auto collimationLength = m_uiForm.q_resolution_collimation_length_input->text().simplified();
+  pythonCode += "i.set_q_resolution_collimation_length(collimation_length="+ collimationLength +")\n";
+
+  // Set the moderator file
+  auto moderatorFile = m_uiForm.q_resolution_moderator_input->text().simplified();
+  pythonCode += "i.set_q_resolution_moderator(file_name="+ moderatorFile +")\n";
+
+  // Set the delta r value
+  auto deltaR = m_uiForm.q_resolution_delta_r_input->text().simplified();
+  pythonCode += "i.set_q_resolution_delta_r(delta_r="+ deltaR +")\n";
+
+  // Set the aperture properties depending on the aperture type
+  auto a1H1 = m_uiForm.q_resolution_a1_h1_input->text().simplified();
+  auto a2H2 = m_uiForm.q_resolution_a2_h2_input->text().simplified();
+  if (m_uiForm.q_resolution_combo_box->currentIndex() == QResoluationAperture::CIRCULAR) {
+    pythonCode += "i.set_q_resolution_a1(a1="+ a1H1 +")\n";
+    pythonCode += "i.set_q_resolution_a2(a2="+ a2H2 +")\n";
+  } else if (m_uiForm.q_resolution_combo_box->currentIndex() == QResoluationAperture::RECTANGULAR){
+    pythonCode += "i.set_q_resolution_h1(h1="+ a1H1 +")\n";
+    pythonCode += "i.set_q_resolution_h2(h2="+ a2H2 +")\n";
+    // Set the W1 and W2 parameters
+    auto w1 = m_uiForm.q_resolution_w1_input->text().simplified();
+    pythonCode += "i.set_q_resolution_w1(w1="+ w1 +")\n";
+    auto w2 = m_uiForm.q_resolution_w2_input->text().simplified();
+    pythonCode += "i.set_q_resolution_w2(w2="+ w2 +")\n";
+  } else {
+    g_log.error("SANSRunWindow: Tried to select a QResolution aperture which does not seem to exist");
+  }
+}
+
+
+/**
+ * Handle a chagne of the QResolution aperture selection
+ * @param aperture: the current index
+ */
+void SANSRunWindow::handleQResolutionApertureChange(int aperture) {
+  if (aperture == QResoluationAperture::CIRCULAR) {
+    setupQResolutionCircularAperture();
+  } else if (aperture == QResoluationAperture::RECTANGULAR) {
+    setupQResolutionRectangularAperture();
+  } else {
+    g_log.error("SANSRunWindow: Tried to select a QResolution aperture which does not seem to exist");
+  }
+}
+
+/**
+ * Initialize the QResolution settings
+ */
+void SANSRunWindow::initQResolutionSettings() {
+  // Connect the change of the change of the aperture
+  QObject::connect(m_uiForm.q_resolution_combo_box, SIGNAL(currentIndexChanged(int)),
+                   this, SLOT(handleQResolutionApertureChange(int)));
+
+  // Set the Tooltips for Moderator
+  const QString moderator("The full path to the moderator file.");
+  m_uiForm.q_resolution_moderator_input->setToolTip(moderator);
+  m_uiForm.q_resolution_moderator_label->setToolTip(moderator);
+
+  // Set the ToolTip for the Collimation length
+  const QString collimationLength("The collimation length in m.");
+  m_uiForm.q_resolution_collimation_length_input->setToolTip(collimationLength);
+  m_uiForm.q_resolution_collimation_length_label->setToolTip(collimationLength);
+
+  // Set the ToolTip for Delta R
+  const QString deltaR("The delta r in mm.");
+  m_uiForm.q_resolution_delta_r_input->setToolTip(deltaR);
+  m_uiForm.q_resolution_delta_r_label->setToolTip(deltaR);
+
+  // Set the ToolTip for w1
+  const QString w1("The width of the first aperture in mm.");
+  m_uiForm.q_resolution_w1_input->setToolTip(w1);
+  m_uiForm.q_resolution_w1_label->setToolTip(w1);
+
+  // Set the ToolTip for w2
+  const QString w2("The width of the second aperture in mm.");
+  m_uiForm.q_resolution_w2_input->setToolTip(w2);
+  m_uiForm.q_resolution_w2_label->setToolTip(w2);
+
+  // Set the dropdown menu
+  const QString aperture("Select if a circular or rectangular aperture \n"
+                         "should be used");
+  m_uiForm.q_resolution_combo_box->setToolTip(aperture);
+
+  // Set the ToolTip for a1
+  m_uiForm.q_resolution_a1_h1_input->setToolTip(m_constants.getQResolutionA1ToolTipText());
+  m_uiForm.q_resolution_a1_h1_label->setToolTip(m_constants.getQResolutionA1ToolTipText());
+
+  // Set the ToolTip for a2
+  m_uiForm.q_resolution_a2_h2_input->setToolTip(m_constants.getQResolutionA2ToolTipText());
+  m_uiForm.q_resolution_a2_h2_label->setToolTip(m_constants.getQResolutionA2ToolTipText());
+}
+
+} //namespace CustomInterfaces
 } //namespace MantidQt

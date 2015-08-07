@@ -16,6 +16,12 @@ public:
   QString getPythonSuccessKeyword();
   QString getPythonEmptyKeyword();
   QString getPythonTrueKeyword();
+  QString getPythonFalseKeyword();
+
+  QString getQResolutionH1ToolTipText();
+  QString getQResolutionH2ToolTipText();
+  QString getQResolutionA1ToolTipText();
+  QString getQResolutionA2ToolTipText();
 };
 
 }
