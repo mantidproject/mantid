@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes
+#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes too-many-statements
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
@@ -87,7 +87,7 @@ class MultiScanTabState(object):
         """
         return self._scanList[:]
 
-    #  disable=too-many-arguments
+    #pyline: disable=too-many-arguments
     def setup(self, exp_no, scan_list, min_x, max_x, bin_size, unit, raw, correct_det_eff, exclude_dets):
         """
         Set up the object
@@ -796,7 +796,6 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set up some widgets for raw detector data.  Won't be applied to tab 3
         if itab != 3:
-            QtGui.QMessageBox.information(self, 'Debug Return', 'Time to set up logs')
             floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
             self.ui.comboBox_indvDetXLabel.clear()
             self.ui.comboBox_indvDetXLabel.addItem("2theta/Scattering Angle")
@@ -1729,8 +1728,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # FUTURE: In future, need to find out how to use self._graphIndDevMode
         # self._graphIndDevMode = (samplename, 'Counts')
-
-        return    
+        return
 
     def _plot_individual_detector_counts(self, expno, scanno, detid, xaxis, resetboundary=False):
         """ Plot a specific detector's counts along all experiment points (pt)
@@ -1763,7 +1761,6 @@ class MainWindow(QtGui.QMainWindow):
         self._logNotice("Input x-axis is '%s' for plotting individual detector's counts."%(xaxis))
         if len(xaxis) == 0:
             xaxis = None
-        # FIXME - plot_normal should be propagated to _myControl
         vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xaxis, plot_normal)
         if isinstance(vecx, numpy.ndarray) is False:
             raise NotImplementedError('vecx, vecy must be numpy arrays.')
@@ -1779,7 +1776,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             #xlabel = "Pt."
             xlabel = xaxis
-        # TODO - If it works with any way of plotting, then refactor Pt. with any other sample names
+        # FUTURE - If it works with any way of plotting, then refactor Pt. with any other sample names
 
         label = "Detector ID: %d" % (detid)
 

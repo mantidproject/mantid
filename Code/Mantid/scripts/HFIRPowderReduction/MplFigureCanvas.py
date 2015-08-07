@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called, too-many-branches
 import os
 import numpy as np
 
@@ -7,6 +7,7 @@ from PyQt4 import QtGui
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib.image
 
 MplLineStyles = ['-' , '--' , '-.' , ':' , 'None' , ' ' , '']
 MplLineMarkers = [
@@ -203,9 +204,9 @@ class MplFigureCanvas(QtGui.QWidget):
             self._myLineMarkerColorIndex = 0
 
         return marker, color
-    
+
     def resetLineColorStyle(self):
-        """ Reset the auto index for line's color and style 
+        """ Reset the auto index for line's color and style
         """
         self._myLineMarkerColorIndex = 0
         return
@@ -330,11 +331,10 @@ class Qt4MplCanvas(FigureCanvas):
 
         # Register
         if plot_error is True and len(r) == 3:
-            self._lineDict[self._lineIndex] = r[2]
-            for ir in xrange(3):
-                print '[DBNOW] %d'%(ir), r[ir], type(r[ir])
-            raise NotImplementedError('Stop here!')
+            # plot line with error bar.  r[1] contains all lines
+            self._lineDict[self._lineIndex] = r
         elif plot_error is False and len(r) == 1:
+            # regular line
             self._lineDict[self._lineIndex] = r[0]
         else:
             print "Impoooooooooooooooosible! Number of returned tuple is %d"%(len(r))
@@ -401,7 +401,7 @@ class Qt4MplCanvas(FigureCanvas):
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
-        img = mpimg.imread(str(imagefilename))
+        img = matplotlib.image.imread(str(imagefilename))
         # lum_img = img[:,:,0]
         # FUTURE : refactor for image size, interpolation and origin
         imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
@@ -424,11 +424,22 @@ class Qt4MplCanvas(FigureCanvas):
         """
         for ikey in self._lineDict.keys():
             plot = self._lineDict[ikey]
-            if plot is not None:
+            if plot is None:
+                continue
+            if isinstance(plot, tuple) is False:
                 try:
                     self.axes.lines.remove(plot)
                 except ValueError as e:
-                    print "[Error] Plot %s is not in axes.lines which has %d lines." % (str(plot), len(self.axes.lines))
+                    print "[Error] Plot %s is not in axes.lines which has %d lines. Error mesage: %s" % (
+                        str(plot), len(self.axes.lines), str(e))
+                self._lineDict[ikey] = None
+            else:
+                # error bar
+                plot[0].remove()
+                for line in plot[1]:
+                    line.remove()
+                for line in plot[2]:
+                    line.remove()
                 self._lineDict[ikey] = None
             # ENDIF(plot)
         # ENDFOR

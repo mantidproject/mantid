@@ -249,14 +249,14 @@ class HFIRPDRedControl(object):
 
         return
 
-    def getIndividualDetCounts(self, exp, scan, detid, xlabel, raw=False):
+    def getIndividualDetCounts(self, exp, scan, detid, xlabel, normalized=True):
         """ Get individual detector counts
-        Arguments:
-        - exp    :: experiment number
-        - scan   :: scan number
-        - detid  :: detector ID
-        - xlabel :: x-axis for detector's counts. (1) None for Pt. Or (2) any valid sample log name
-        Return: 2-tuple (vecX, vecY) for plotting
+        :param exp:
+        :param scan:
+        :param detid:
+        :param xlabel:
+        :param normalized:
+        :return:
         """
         # Check and get data
         exp = int(exp)
@@ -283,7 +283,8 @@ class HFIRPDRedControl(object):
                     api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Detector',
-                                                    DetectorID = detid)
+                                                    DetectorID = detid,
+                                                    NormalizeByMonitorCounts=normalized)
         else:
             print "Plot detector %d's counts vs. sample log %s."%(detid, xlabel)
             tempoutws = \
@@ -291,9 +292,8 @@ class HFIRPDRedControl(object):
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Detector',
                                                     DetectorID = detid,
-                                                    XLabel=xlabel)
-        if raw is True:
-            raise RuntimeError('Implement ASAP if it is required to plot raw counts (not normalized)')
+                                                    XLabel=xlabel,
+                                                    NormalizeByMonitorCounts=normalized)
 
         vecx = tempoutws.readX(0)[:]
         vecy = tempoutws.readY(0)[:]
