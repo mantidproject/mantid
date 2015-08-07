@@ -220,10 +220,5 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-if ( WIN32 )
-  install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
-else()
-  install ( TARGETS DataObjects DESTINATION ${LIB_DIR} )
-endif ()
-
+install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
