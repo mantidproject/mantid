@@ -132,7 +132,11 @@ void EQSANSDarkCurrentSubtraction2::exec() {
 
   // Normalize the dark current and data to counting time
   double scaling_factor = 1.0;
-  if (inputWS->run().hasProperty("proton_charge")) {
+  if (inputWS->run().hasProperty("duration")) {
+      double duration = inputWS->run().getPropertyValueAsType<double>("duration");
+      double dark_duration = darkWS->run().getPropertyValueAsType<double>("duration");;
+      scaling_factor = duration / dark_duration;
+  } else if (inputWS->run().hasProperty("proton_charge")) {
     auto dp = inputWS->run().getTimeSeriesProperty<double>("proton_charge");
     double duration = dp->getStatistics().duration;
 
