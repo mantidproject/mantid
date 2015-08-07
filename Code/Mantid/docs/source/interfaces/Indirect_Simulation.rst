@@ -43,7 +43,7 @@ Options
 Version
   The version of nMOLDYN the imported data was exported from.
 
-Sample Run
+Data
   The data file (*.cdl* or *.dat*) to load when using nMOLDYN 3 or the directory
   for the export taken from nMOLDYN 4.
 
