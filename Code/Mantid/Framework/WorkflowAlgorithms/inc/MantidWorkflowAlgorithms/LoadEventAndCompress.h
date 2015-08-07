@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace WorkflowAlgorithms {
@@ -40,9 +41,18 @@ public:
   virtual const std::string category() const;
   virtual const std::string summary() const;
 
+protected:
+  API::ITableWorkspace_sptr determineChunk(const std::string &filename);
+  API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
+  void processChunk(API::MatrixWorkspace_sptr wksp);
+
 private:
   void init();
   void exec();
+
+  std::string m_filename;
+  double m_filterBadPulses;
+  API::ITableWorkspace_sptr m_chunkingTable;
 };
 
 } // namespace WorkflowAlgorithms

@@ -2,6 +2,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -9,9 +11,11 @@
 namespace Mantid {
 namespace WorkflowAlgorithms {
 
+using std::size_t;
 using std::string;
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventAndCompress)
@@ -27,7 +31,7 @@ namespace {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadEventAndCompress::LoadEventAndCompress() {}
+LoadEventAndCompress::LoadEventAndCompress() : m_filterBadPulses(EMPTY_DBL()) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -56,54 +60,22 @@ const string LoadEventAndCompress::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadEventAndCompress::init() {
-//    auto algLoadEventNexus = FrameworkManager::Instance().createAlgorithm("LoadEventNexus");
+  // algorithms to copy properties from
     auto algLoadEventNexus = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
-//    algLoadEventNexus->init();
-
     algLoadEventNexus->initialize();
+    auto algDetermineChunking =
+        AlgorithmManager::Instance().createUnmanaged("DetermineChunking");
+    algDetermineChunking->initialize();
 
-    auto prop = algLoadEventNexus->getPointerToProperty("Filename");
-    declareProperty(prop);
+    // declare properties
+    copyProperty(algLoadEventNexus, "Filename");
+    copyProperty(algLoadEventNexus, "OutputWorkspace");
+    copyProperty(algDetermineChunking, "MaxChunkSize");
 
-//    std::vector<std::string> exts;
-//    exts.push_back("_event.nxs");
-//    exts.push_back(".nxs.h5");
-//    exts.push_back(".nxs");
-//    declareProperty(
-//        new FileProperty("Filename", "", FileProperty::Load, exts),
-//        "The name of the Event NeXus file to read, including its full or "
-//        "relative path. "
-//        "The file name is typically of the form INST_####_event.nxs (N.B. case "
-//        "sensitive if running on Linux).");
-
-    declareProperty(new WorkspaceProperty<Workspace>(
-                              "OutputWorkspace", "", Direction::Output),
-                          "The name of the output EventWorkspace or WorkspaceGroup in which to "
-                          "load the EventNexus file.");
-
-    declareProperty(new PropertyWithValue<double>("FilterByTofMin", EMPTY_DBL(),
-                                                  Direction::Input),
-                    "Optional: To exclude events that do not fall within a range "
-                    "of times-of-flight. "
-                    "This is the minimum accepted value in microseconds. Keep "
-                    "blank to load all events.");
-
-    declareProperty(new PropertyWithValue<double>("FilterByTofMax", EMPTY_DBL(),
-                                                  Direction::Input),
-                    "Optional: To exclude events that do not fall within a range "
-                    "of times-of-flight. "
-                    "This is the maximum accepted value in microseconds. Keep "
-                    "blank to load all events.");
-
-    declareProperty(new PropertyWithValue<double>("FilterByTimeStart",
-                                                  EMPTY_DBL(), Direction::Input),
-                    "Optional: To only include events after the provided start "
-                    "time, in seconds (relative to the start of the run).");
-
-    declareProperty(new PropertyWithValue<double>("FilterByTimeStop", EMPTY_DBL(),
-                                                  Direction::Input),
-                    "Optional: To only include events before the provided stop "
-                    "time, in seconds (relative to the start of the run).");
+    copyProperty(algLoadEventNexus, "FilterByTofMin");
+    copyProperty(algLoadEventNexus, "FilterByTofMax");
+    copyProperty(algLoadEventNexus, "FilterByTimeStart");
+    copyProperty(algLoadEventNexus, "FilterByTimeStop");
 
     std::string grp1 = "Filter Events";
     setPropertyGroup("FilterByTofMin", grp1);
@@ -111,42 +83,13 @@ void LoadEventAndCompress::init() {
     setPropertyGroup("FilterByTimeStart", grp1);
     setPropertyGroup("FilterByTimeStop", grp1);
 
-    declareProperty(
-        new PropertyWithValue<string>("NXentryName", "", Direction::Input),
-        "Optional: Name of the NXentry to load if it's not the default.");
-
-    declareProperty(
-        new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
-        "Load the monitors from the file (optional, default False).");
-
-    declareProperty(
-        new PropertyWithValue<bool>("MonitorsAsEvents", false, Direction::Input),
-        "If present, load the monitors as events. '''WARNING:''' WILL "
-        "SIGNIFICANTLY INCREASE MEMORY USAGE (optional, default False). ");
-
-    declareProperty(new PropertyWithValue<double>("FilterMonByTofMin",
-                                                  EMPTY_DBL(), Direction::Input),
-                    "Optional: To exclude events from monitors that do not fall "
-                    "within a range of times-of-flight. "
-                    "This is the minimum accepted value in microseconds.");
-
-    declareProperty(new PropertyWithValue<double>("FilterMonByTofMax",
-                                                  EMPTY_DBL(), Direction::Input),
-                    "Optional: To exclude events from monitors that do not fall "
-                    "within a range of times-of-flight. "
-                    "This is the maximum accepted value in microseconds.");
-
-    declareProperty(new PropertyWithValue<double>("FilterMonByTimeStart",
-                                                  EMPTY_DBL(), Direction::Input),
-                    "Optional: To only include events from monitors after the "
-                    "provided start time, in seconds (relative to the start of "
-                    "the run).");
-
-    declareProperty(new PropertyWithValue<double>("FilterMonByTimeStop",
-                                                  EMPTY_DBL(), Direction::Input),
-                    "Optional: To only include events from monitors before the "
-                    "provided stop time, in seconds (relative to the start of "
-                    "the run).");
+    copyProperty(algLoadEventNexus, "NXentryName");
+    copyProperty(algLoadEventNexus, "LoadMonitors");
+    copyProperty(algLoadEventNexus, "MonitorsAsEvents");
+    copyProperty(algLoadEventNexus, "FilterMonByTofMin");
+    copyProperty(algLoadEventNexus, "FilterMonByTofMax");
+    copyProperty(algLoadEventNexus, "FilterMonByTimeStart");
+    copyProperty(algLoadEventNexus, "FilterMonByTimeStop");
 
     setPropertySettings(
         "MonitorsAsEvents",
@@ -166,29 +109,123 @@ void LoadEventAndCompress::init() {
     setPropertyGroup("FilterMonByTimeStart", grp4);
     setPropertyGroup("FilterMonByTimeStop", grp4);
 
-    auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
-    mustBePositive->setLower(1);
-    declareProperty("SpectrumMin", (int32_t)EMPTY_INT(), mustBePositive,
-                    "The number of the first spectrum to read.");
-    declareProperty("SpectrumMax", (int32_t)EMPTY_INT(), mustBePositive,
-                    "The number of the last spectrum to read.");
-    declareProperty(new ArrayProperty<int32_t>("SpectrumList"),
-                    "A comma-separated list of individual spectra to read.");
+    auto range = boost::make_shared<BoundedValidator<double>>();
+    range->setBounds(0., 100.);
+    declareProperty("FilterBadPulses", 95., range);
+}
 
-    declareProperty(
-        new PropertyWithValue<bool>("MetaDataOnly", false, Direction::Input),
-        "If true, only the meta data and sample logs will be loaded.");
+/// @see DataProcessorAlgorithm::determineChunk(const std::string &)
+ITableWorkspace_sptr
+LoadEventAndCompress::determineChunk(const std::string &filename) {
+  double maxChunkSize = getProperty("MaxChunkSize");
 
-    declareProperty(
-        new PropertyWithValue<bool>("LoadLogs", true, Direction::Input),
-        "Load the Sample/DAS logs from the file (default True).");
+  auto alg = createChildAlgorithm("DetermineChunking");
+  alg->setProperty("Filename", filename);
+  alg->setProperty("MaxChunkSize", maxChunkSize);
+  alg->executeAsChildAlg();
+  ITableWorkspace_sptr chunkingTable = alg->getProperty("OutputWorkspace");
+
+  if (chunkingTable->rowCount() > 1)
+    g_log.information() << "Will load data in " << chunkingTable->rowCount()
+                        << " chunks\n";
+  else
+    g_log.information("Not chunking");
+
+  return chunkingTable;
+}
+
+/// @see DataProcessorAlgorithm::loadChunk(const size_t)
+MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
+  g_log.debug() << "loadChunk(" << rowIndex << ")\n";
+
+  double rowCount = static_cast<double>(m_chunkingTable->rowCount());
+  double progStart = static_cast<double>(rowIndex) / rowCount;
+  double progStop = static_cast<double>(rowIndex + 1) / rowCount;
+
+  auto alg = createChildAlgorithm("LoadEventNexus", progStart, progStop, true);
+  alg->setProperty<string>("Filename", getProperty("Filename"));
+  alg->setProperty<double>("FilterByTofMin", getProperty("FilterByTofMin"));
+  alg->setProperty<double>("FilterByTofMax", getProperty("FilterByTofMax"));
+  alg->setProperty<double>("FilterByTimeStart",
+                           getProperty("FilterByTimeStart"));
+  alg->setProperty<double>("FilterByTimeStop", getProperty("FilterByTimeStop"));
+
+  alg->setProperty<string>("NXentryName", getProperty("NXentryName"));
+  alg->setProperty<bool>("LoadMonitors", getProperty("LoadMonitors"));
+  alg->setProperty<bool>("MonitorsAsEvents", getProperty("MonitorsAsEvents"));
+  alg->setProperty<double>("FilterMonByTofMin",
+                           getProperty("FilterMonByTofMin"));
+  alg->setProperty<double>("FilterMonByTofMax",
+                           getProperty("FilterMonByTofMax"));
+  alg->setProperty<double>("FilterMonByTimeStart",
+                           getProperty("FilterMonByTimeStart"));
+  alg->setProperty<double>("FilterMonByTimeStop",
+                           getProperty("FilterMonByTimeStop"));
+
+  // set chunking information
+  const std::vector<string> COL_NAMES = m_chunkingTable->getColumnNames();
+  for (auto name = COL_NAMES.begin(); name != COL_NAMES.end(); ++name) {
+    alg->setProperty(*name, m_chunkingTable->getRef<int>(*name, rowIndex));
+  }
+
+  alg->executeAsChildAlg();
+  Workspace_sptr wksp = alg->getProperty("OutputWorkspace");
+  return boost::dynamic_pointer_cast<MatrixWorkspace>(wksp);
+}
+
+/**
+ * Process a chunk in-place
+ *
+ * @param wksp
+ */
+void LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
+  EventWorkspace_sptr eventWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(wksp);
+
+  auto filterBadPulses = createChildAlgorithm("FilterBadPulses");
+  filterBadPulses->setProperty("InputWorkspace", eventWS);
+  filterBadPulses->setProperty("OutputWorkspace", eventWS);
+  filterBadPulses->setProperty("LowerCutoff", m_filterBadPulses);
+  filterBadPulses->executeAsChildAlg();
+
+  auto compressEvents = createChildAlgorithm("CompressEvents");
+  compressEvents->setProperty("InputWorkspace", eventWS);
+  compressEvents->setProperty("OutputWorkspace", eventWS);
+  compressEvents->executeAsChildAlg();
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void LoadEventAndCompress::exec() {
-  // TODO Auto-generated execute stub
+  m_filename = getPropertyValue("Filename");
+  m_filterBadPulses = getProperty("FilterBadPulses");
+
+  m_chunkingTable = determineChunk(m_filename);
+
+  // first run is free
+  EventWorkspace_sptr resultWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(loadChunk(0));
+  processChunk(resultWS);
+
+  // load the other chunks
+  const size_t numRows = m_chunkingTable->rowCount();
+  for (size_t i = 1; i < numRows; ++i) {
+    MatrixWorkspace_sptr temp = loadChunk(i);
+    processChunk(temp);
+    auto alg = createChildAlgorithm("Plus");
+    alg->setProperty("LHSWorkspace", resultWS);
+    alg->setProperty("RHSWorkspace", temp);
+    alg->setProperty("OutputWorkspace", resultWS);
+    alg->setProperty("ClearRHSWorkspace", true);
+    alg->executeAsChildAlg();
+  }
+
+  // Don't bother compressing combined workspace. DetermineChunking is designed
+  // to
+  // prefer loading full banks so no further savings should be available.
+
+  setProperty("OutputWorkspace", resultWS);
 }
 
 } // namespace WorkflowAlgorithms
