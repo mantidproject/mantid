@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes too-many-statements
+#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes,too-many-arguments
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
@@ -117,7 +117,7 @@ class MultiScanTabState(object):
         return
 
 
-#pylint: disable=too-many-public-methods,too-many-branches,too-many-locals,too-many-arguments
+#pylint: disable=too-many-public-methods,too-many-branches,too-many-locals,too-many-statements
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
