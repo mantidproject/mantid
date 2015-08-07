@@ -58,7 +58,9 @@ double SANSCollimationLengthEstimator::provideCollimationLength(Mantid::API::Mat
 
 
 /**
- * This extraction strategy gets applied when guides are
+ * This extraction strategy gets applied when guides are used to calculate the collimation length. The instrument
+ * parameter file contains the information about the number of guides to use. The guide data itself is fetched
+ * from the sample logs.
  * @param inOutWS: a matrix workspace
  * @param L1: the distance between sample and source
  * @param collimationLengthCorrection: The correction to get the collimation length
