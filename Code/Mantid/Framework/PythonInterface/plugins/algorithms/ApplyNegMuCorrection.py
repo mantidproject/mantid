@@ -14,7 +14,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         #loading data
         try:
             ws3000=Load(Filename=dataDir+r'\ral0'+runno+'.rooth30'+specNo+'.dat', OutputWorkspace='ws3000')
-            print 'hello'
             ws2000=Load(Filename=dataDir+r'\ral0'+runno+'.rooth20'+specNo+'.dat', OutputWorkspace='ws2000')
         except RuntimeError:
             print runno+' '+specNo+"not found"
@@ -54,8 +53,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         DeleteWorkspace(ws2000_corr_rebin)
         DeleteWorkspace(ws3000_corr_rebin)
 
-        return
-
     def PyInit(self):
         self.declareProperty(name="DataDirectory",defaultValue=r'M:\Data\Negative Muons\forMantid',doc="Data directory")
         self.declareProperty(name="FirstRunNumber",defaultValue=1718,doc="First Run Number")
@@ -87,7 +84,7 @@ class ApplyNegMuCorrection(PythonAlgorithm):
             for spec in range(0,3):
                 runno=str(run)
                 self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,spec)
-                self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
+            self.combine(dataDir,runno,GRHE,ORHE,GIHE,OIHE,GILE,OILE,10)
 
 
 
