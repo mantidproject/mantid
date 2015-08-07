@@ -122,7 +122,7 @@ void ConvolutionFitSequential::init() {
  */
 void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
-  MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
   const double startX = getProperty("Start X");
   const double endX = getProperty("End X");
@@ -136,7 +136,7 @@ void ConvolutionFitSequential::exec() {
   // Handle empty/non-empty temp property
   bool tempUsed = false;
   if (temperature != 0.0) {
-	  tempUsed = true;
+    tempUsed = true;
   }
 
   // Inspect function to obtain fit Type and background
@@ -147,30 +147,31 @@ void ConvolutionFitSequential::exec() {
 
   // Check if a delta function is being used
   bool delta = false;
-   std::string usingDelta = "false";
+  std::string usingDelta = "false";
   auto pos = function.find("Delta");
   if (pos != std::string::npos) {
     delta = true;
-	usingDelta = "true";
+    usingDelta = "true";
   }
 
   // Add logger information
-  m_log.information("Input files: " + inWS->getName());
-  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" + fTypeName);
+  m_log.information("Input files: " + inputWs->getName());
+  m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
+                    fTypeName);
   m_log.information("Background type: " + backgroundName);
 
   // Output workspace name
-  std::string outWSName = inWS->getName();
-  outWSName += "conv_" + fTypeName + backgroundName + "s_";
-  outWSName += specMin + "_to_" + specMax;
+  std::string outputWs = inputWs->getName();
+  outputWs += "conv_" + fTypeName + backgroundName + "s_";
+  outputWs += specMin + "_to_" + specMax;
 
   // Convert input workspace to get Q axis
   const std::string tempFitWs = "__convfit_fit_ws";
-  auto axis = inWS->getAxis(1);
+  auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
-    auto eFixed = inWS->getEFixed();
+    auto eFixed = inputWs->getEFixed();
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
-    convSpec->setProperty("InputWorkSpace", inWS);
+    convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", tempFitWs);
     convSpec->setProperty("Target", "ElasticQ");
     convSpec->setProperty("EMode", "Indirect");
@@ -182,7 +183,7 @@ void ConvolutionFitSequential::exec() {
       throw std::runtime_error("Input must have axis values of Q");
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
-    cloneWs->setProperty("InputWorkspace", inWS);
+    cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", tempFitWs);
     cloneWs->executeAsChildAlg();
   } else {
@@ -192,14 +193,13 @@ void ConvolutionFitSequential::exec() {
 
   // Fit all spectra in workspace
   std::string plotPeakInput = "";
-  for(int i = 0; i < specMax + 1; i++){
-	std::string nextWs = tempFitWs + ",i";
-	nextWs += std::to_string(i);
-	plotPeakInput += nextWs + ";";
-
+  for (int i = 0; i < specMax + 1; i++) {
+    std::string nextWs = tempFitWs + ",i";
+    nextWs += std::to_string(i);
+    plotPeakInput += nextWs + ";";
   }
 
-  //passWSIndex
+  // passWSIndex
   bool passIndex = false;
   if (funcName.find("Diffusion") != std::string::npos ||
       funcName.find("Stretched") != std::string::npos) {
@@ -209,7 +209,7 @@ void ConvolutionFitSequential::exec() {
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
   plotPeaks->setProperty("Input", plotPeakInput); // need input name
-  plotPeaks->setProperty("OutputWorkspace", outWSName);
+  plotPeaks->setProperty("OutputWorkspace", outputWs);
   plotPeaks->setProperty("Function", function);
   plotPeaks->setProperty("StartX", startX);
   plotPeaks->setProperty("EndX", endX);
@@ -219,13 +219,13 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("ConvoleMembers", convolve);
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
-  plotPeaks->setProperty("PassWSIndexToFunction", passIndex); 
+  plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
   plotPeaks->executeAsChildAlg();
 
   // Delete workspaces
   std::string deleteWorkspaces[] = {
-      (outWSName + "_NormalisedCovarianceMatrices"),
-      (outWSName + "_Parameters"), tempFitWs};
+      (outputWs + "_NormalisedCovarianceMatrices"), (outputWs + "_Parameters"),
+      tempFitWs};
   auto deleter = createChildAlgorithm("DeleteWorkspace", -1, -1, true);
   for (int i = 0; i < 3; i++) {
     deleter->setProperty("WorkSpace", deleteWorkspaces[i]);
@@ -233,7 +233,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct output workspace name
-  std::string wsName = outWSName + "_Result";
+  const std::string wsName = outputWs + "_Result";
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   using namespace Mantid::API;
@@ -266,15 +266,22 @@ void ConvolutionFitSequential::exec() {
 
   // Run convertParametersToWorkspace
 
-
   // Set x units to be momentum transfer
 
-
   // Handle sample logs
+  auto logCopier = createChildAlgorithm("CopyLogs", -1, -1, true);
+  logCopier->setProperty("InputWorkspace", inputWs);
+  logCopier->setProperty("OutputWorkspace", wsName);
+  logCopier->executeAsChildAlg();
 
-  
+  logCopier->setProperty("InputWorkspace", wsName);
+  logCopier->setProperty("OutputWorkspace", (outputWs + "_Workspace"));
+  logCopier->executeAsChildAlg();
+
   // Rename workspaces
-
+  auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
+  renamer->setProperty("InputWorkspace", outputWs);
+  renamer->setProperty("OutputWorkspace", outputWs + "_Parameters");
 }
 
 /**
