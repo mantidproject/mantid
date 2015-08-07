@@ -174,6 +174,9 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidp
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
 ")
+set (CPACK_NSIS_DELETE_ICONS_EXTRA "
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
+")
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
