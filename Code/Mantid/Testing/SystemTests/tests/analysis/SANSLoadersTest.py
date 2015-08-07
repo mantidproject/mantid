@@ -192,6 +192,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         Assumes that the items from self.validate() are many tuples  where the first item is a nexus file and loads it,
         to compare to the supplied workspace which is the second item.
         '''
+        self.disableChecking.append('Instrument')
         value_pairs = list(self._validateCustom())
 
         # Make sure we have pairs of two

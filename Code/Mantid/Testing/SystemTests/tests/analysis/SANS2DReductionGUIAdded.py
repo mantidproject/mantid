@@ -53,6 +53,7 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
         # almost the same
         self.tolerance_is_reller = True
         self.tolerance = 0.35
+        self.disableChecking.append('Instrument')
         return "trans_test_rear","SANSReductionGUI.nxs"
 
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
