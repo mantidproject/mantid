@@ -45,6 +45,8 @@ private:
 
   bool checkForTwoLorentz(const std::string &);
   std::vector<std::string> findValuesFromFunction(const std::string &);
+  std::vector<std::string> searchForFitParams(const std::string &,
+                                              const std::vector<std::string> &);
 };
 
 } // namespace Algorithms

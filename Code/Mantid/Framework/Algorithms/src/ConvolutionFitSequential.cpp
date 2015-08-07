@@ -161,9 +161,11 @@ void ConvolutionFitSequential::exec() {
   m_log.information("Background type: " + backgroundName);
 
   // Output workspace name
-  std::string outputWs = inputWs->getName();
-  outputWs += "conv_" + fTypeName + backgroundName + "s_";
-  outputWs += specMin + "_to_" + specMax;
+  std::string outputWsName = inputWs->getName();
+  outputWsName += "conv_" + fTypeName + backgroundName + "s_";
+  outputWsName += specMin + "_to_" + specMax;
+  auto outputWs = WorkspaceFactory::Instance().createTable();
+
 
   // Convert input workspace to get Q axis
   const std::string tempFitWs = "__convfit_fit_ws";
@@ -208,7 +210,7 @@ void ConvolutionFitSequential::exec() {
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
-  plotPeaks->setProperty("Input", plotPeakInput); // need input name
+  plotPeaks->setProperty("Input", plotPeakInput);
   plotPeaks->setProperty("OutputWorkspace", outputWs);
   plotPeaks->setProperty("Function", function);
   plotPeaks->setProperty("StartX", startX);
@@ -222,9 +224,11 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
   plotPeaks->executeAsChildAlg();
 
+  outputWs = plotPeaks->getProperty("OutputWorkspace");
+
   // Delete workspaces
   std::string deleteWorkspaces[] = {
-      (outputWs + "_NormalisedCovarianceMatrices"), (outputWs + "_Parameters"),
+      (outputWsName + "_NormalisedCovarianceMatrices"), (outputWsName + "_Parameters"),
       tempFitWs};
   auto deleter = createChildAlgorithm("DeleteWorkspace", -1, -1, true);
   for (int i = 0; i < 3; i++) {
@@ -233,10 +237,10 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct output workspace name
-  const std::string wsName = outputWs + "_Result";
+  auto wsName = API::WorkspaceFactory::Instance().create(
+      "MatrixWorkspace", inputWs->getNumberHistograms, 2, 1);
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
-  using namespace Mantid::API;
   auto paramNames = std::vector<std::string>();
   paramNames.push_back("Height");
   if (funcName.find("Diffusion") != std::string::npos) {
@@ -261,18 +265,29 @@ void ConvolutionFitSequential::exec() {
 
   // Run calcEISF if Delta
   if (delta) {
-    // calc EISF
+	  auto columns = outputWs.getColumnNames();
+	  std::string height = searchForFitParams("Height", columns).at(0);
+	  std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
+	  auto heightY = "";
+	  auto heightE = "";
+
+
   }
 
   // Run convertParametersToWorkspace
 
   // Set x units to be momentum transfer
+  axis = wsName->getAxis(0);
+  axis->setUnit("MomentumTransfer");
+
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs", -1, -1, true);
   logCopier->setProperty("InputWorkspace", inputWs);
   logCopier->setProperty("OutputWorkspace", wsName);
   logCopier->executeAsChildAlg();
+
+  
 
   logCopier->setProperty("InputWorkspace", wsName);
   logCopier->setProperty("OutputWorkspace", (outputWs + "_Workspace"));
@@ -348,6 +363,17 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   result.push_back(functionName);
   return result;
 }
+
+  std::vector<std::string> searchForFitParams(const std::string &suffix,
+                                              const std::vector<std::string> &columns){
+	auto fitParams = std::vector<std::string>();
+	const size_t totalColumns = columns.size();
+		for(size_t i = 0; i < totalColumns; i++){
+			if(columns.at(i).rfind(suffix) != std::string::npos){
+				fitParams.push_back(columns.at(i));
+			}
+		}
+  }
 
 } // namespace Algorithms
 } // namespace Mantid
