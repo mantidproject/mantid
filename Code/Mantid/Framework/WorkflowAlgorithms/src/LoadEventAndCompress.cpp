@@ -20,14 +20,6 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventAndCompress)
 
-namespace {
-#ifdef MPI_BUILD
-    const bool USE_MPI = true;
-#else
-    const bool USE_MPI = false;
-#endif
-}
-
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -226,8 +218,7 @@ void LoadEventAndCompress::exec() {
   }
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
-  // to
-  // prefer loading full banks so no further savings should be available.
+  // to prefer loading full banks so no further savings should be available.
 
   setProperty("OutputWorkspace", resultWS);
 }
