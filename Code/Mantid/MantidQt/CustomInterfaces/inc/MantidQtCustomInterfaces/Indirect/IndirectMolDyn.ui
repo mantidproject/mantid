@@ -23,7 +23,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="lblSample">
         <property name="text">
-         <string>Sample Run:</string>
+         <string>Data:</string>
         </property>
        </widget>
       </item>

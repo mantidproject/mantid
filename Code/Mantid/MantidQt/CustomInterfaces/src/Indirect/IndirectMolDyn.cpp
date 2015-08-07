@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/Indirect/IndirectMolDyn.h"
 
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
+
 #include <QFileInfo>
 #include <QString>
 
@@ -27,41 +29,36 @@ void IndirectMolDyn::setup() {}
  * @return :: Whether the form was valid
  */
 bool IndirectMolDyn::validate() {
-  if (!m_uiForm.mwRun->isValid())
-    return false;
+  UserInputValidator uiv;
 
-  QString filename = m_uiForm.mwRun->getFirstFilename();
-  QString version = m_uiForm.cbVersion->currentText();
-  QFileInfo finfo(filename);
-  QString ext = finfo.extension().toLower();
+  if (uiv.checkMWRunFilesIsValid("Data", m_uiForm.mwRun)) {
+    QString filename = m_uiForm.mwRun->getFirstFilename();
+    QString version = m_uiForm.cbVersion->currentText();
+    QFileInfo finfo(filename);
+    QString ext = finfo.extension().toLower();
 
-  if (version == "3") {
-    if (ext != "dat" && ext != "cdl") {
-      emit showMessageBox(
-          "File is not of expected type.\n File type must be .dat or .cdl");
-      return false;
-    }
+    if (version == "3") {
+      if (ext != "dat" && ext != "cdl")
+        uiv.addErrorMessage(
+            "File is not of expected type.\n File type must be .dat or .cdl");
 
-    QString functions = m_uiForm.leFunctionNames->text();
-    if (ext == "cdl" && functions.isEmpty()) {
-      emit showMessageBox(
-          "Must specify at least one function when loading CDL file.");
-      return false;
+      QString functions = m_uiForm.leFunctionNames->text();
+      if (ext == "cdl" && functions.isEmpty())
+        uiv.addErrorMessage(
+            "Must specify at least one function when loading CDL file.");
     }
   }
 
-  if (m_uiForm.ckResolution->isChecked() && !m_uiForm.dsResolution->isValid()) {
-    emit showMessageBox("Invalid resolution file.");
-    return false;
-  }
+  // Validate resolution
+  if (m_uiForm.ckResolution->isChecked())
+    uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-  if (m_uiForm.ckResolution->isChecked() &&
-      !m_uiForm.ckSymmetrise->isChecked()) {
-    emit showMessageBox("Must symmetrise when convolving with resolution.");
-    return false;
-  }
+  // Validate symmetrise on when resolution is convolved
+  if (m_uiForm.ckResolution->isChecked() && !m_uiForm.ckSymmetrise->isChecked())
+    uiv.addErrorMessage("Must symmetrise when convolving with resolution.");
 
-  return true;
+  emit showMessageBox(uiv.generateErrorMessage());
+  return uiv.isAllInputValid();
 }
 
 /**
