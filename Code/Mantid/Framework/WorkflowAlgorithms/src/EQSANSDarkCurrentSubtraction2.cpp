@@ -154,7 +154,6 @@ void EQSANSDarkCurrentSubtraction2::exec() {
         << "ERROR: Could not find proton charge or duration in sample logs"
         << std::endl;
   };
-
   // The scaling factor should account for the TOF cuts on each side of a frame
   // The EQSANSLoad algorithm cuts the beginning and end of the TOF distribution
   // so we don't need to correct the scaling factor here. When using LoadEventNexus
@@ -193,16 +192,20 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   progress.report("Subtracting dark current");
   // Loop over all tubes and patch as necessary
   for (int i = 0; i < numberOfSpectra; i++) {
+    IDetector_const_sptr det = inputWS->getDetector(i);
+    // If this detector is a monitor, skip to the next one
+    if (det->isMasked())
+      continue;
+
     const MantidVec &YDarkValues = scaledDarkWS->readY(i);
     const MantidVec &YDarkErrors = scaledDarkWS->readE(i);
-    const MantidVec &XValues = inputWS->readY(i);
+    const MantidVec &XValues = inputWS->readX(i);
     MantidVec &YValues = inputWS->dataY(i);
     MantidVec &YErrors = inputWS->dataE(i);
-    
     for (int j = 0; j < nBins; j++) {
       double bin_scale = (XValues[j+1] - XValues[j]) / (XValues[nBins] - XValues[0]);
       YValues[j] -= YDarkValues[0] * bin_scale;
-      YErrors[j] = sqrt(YErrors[j] * YErrors[j] + YDarkErrors[0] * YDarkErrors[0] * bin_scale * bin_scale);      
+      YErrors[j] = sqrt(YErrors[j] * YErrors[j] + YDarkErrors[0] * YDarkErrors[0] * bin_scale * bin_scale);
     }
   }
   setProperty("OutputWorkspace", inputWS);
