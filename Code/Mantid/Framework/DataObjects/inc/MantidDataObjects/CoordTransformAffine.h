@@ -43,6 +43,10 @@ public:
                        const std::vector<Mantid::Kernel::VMD> &axes,
                        const Mantid::Kernel::VMD &scaling);
 
+  void buildNonOrthogonal(const Mantid::Kernel::VMD &origin,
+                       const std::vector<Mantid::Kernel::VMD> &axes,
+                       const Mantid::Kernel::VMD &scaling);
+
   virtual void apply(const coord_t *inputVector, coord_t *outVector) const;
 
   static CoordTransformAffine *combineTransformations(CoordTransform *first,
