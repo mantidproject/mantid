@@ -25,7 +25,7 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
 
         self.assertTrue(group.isGroup(),
                         ("Space group " + str(group.getNumber()) + " (" + symbol + ") does not "
-                        "fulfill group axioms"))
+                         "fulfill group axioms"))
 
         groupOperations = set(group.getSymmetryOperationStrings())
         referenceOperations = self.spaceGroupData[group.getNumber()]
@@ -51,10 +51,9 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
         self.assertFalse(
             set(onlyMatrices.getSymmetryOperationStrings()).isdisjoint(pointGroup.getSymmetryOperationStrings()),
             ("Point group of space group " + spaceGroup.getHMSymbol() + " does not match group obtained from"
-            " matrices of symmetry operations."))
+             " matrices of symmetry operations."))
 
     def loadReferenceData(self):
-        from mantid.api import FileFinder
         # Reference data, generated using sginfo (http://cci.lbl.gov/sginfo/)
         # Dictionary has a string set for each space group number.
         separatorMatcher = re.compile(r"(\d+)")
