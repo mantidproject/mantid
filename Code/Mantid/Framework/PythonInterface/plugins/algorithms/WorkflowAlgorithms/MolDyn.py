@@ -20,13 +20,12 @@ class MolDyn(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Filename', '',
-                                          action=FileAction.Load,
-                                          extensions=['.cdl', '.dat']),
-                                          doc='File path for data')
+        self.declareProperty('Data', '',
+                             validator=StringMandatoryValidator(),
+                             doc='')
 
         self.declareProperty(StringArrayProperty('Functions'),
-                             doc='The Function to use')
+                             doc='A list of function to load')
 
         self.declareProperty(WorkspaceProperty('Resolution', '', Direction.Input, PropertyMode.Optional),
                              doc='Resolution workspace')
@@ -51,6 +50,11 @@ class MolDyn(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
+        try:
+            self._get_version_and_data_path()
+        except ValueError, vex:
+            issues['Data'] = str(vex)
+
         symm = self.getProperty('SymmetriseEnergy').value
         res_ws = self.getPropertyValue('Resolution')
         max_energy = self.getPropertyValue('MaxEnergy')
@@ -70,11 +74,21 @@ class MolDyn(PythonAlgorithm):
         self._mtd_plot = import_mantidplot()
 
         output_ws_name = self.getPropertyValue('OutputWorkspace')
+        version, data_name, _ = self._get_version_and_data_path()
+
+        logger.information('Detected data from nMoldyn version {0}'.format(version))
 
         # Run nMOLDYN import
-        LoadNMoldyn3Ascii(Filename=self.getPropertyValue('Filename'),
-                          OutputWorkspace=output_ws_name,
-                          Functions=self.getPropertyValue('Functions'))
+        if version == 3:
+            LoadNMoldyn3Ascii(Filename=data_name,
+                              OutputWorkspace=output_ws_name,
+                              Functions=self.getPropertyValue('Functions'))
+        elif version == 4:
+            LoadNMoldyn4Ascii(Directory=data_name,
+                              OutputWorkspace=output_ws_name,
+                              Functions=self.getPropertyValue('Functions'))
+        else:
+            raise RuntimeError('No loader for input data')
 
         symmetrise = self.getProperty('SymmetriseEnergy').value
         max_energy_param = self.getProperty('MaxEnergy').value
@@ -144,6 +158,32 @@ class MolDyn(PythonAlgorithm):
         # Plot contour plot
         if plot == 'Contour' or plot == 'Both':
             self._mtd_plot.plot2D(output_ws_name)
+
+
+    def _get_version_and_data_path(self):
+        """
+        Inspects the Data parameter to determine th eversion of nMoldyn it is
+        loading from.
+
+        @return Tuple of (version, data file/directory, file extension)
+        """
+        data = self.getPropertyValue('Data')
+        extension = None
+
+        if os.path.isdir(data):
+            version = 4
+        else:
+            file_path = FileFinder.getFullPath(data)
+            if os.path.isfile(file_path):
+                version = 3
+                extension = os.path.splitext(file_path)[1][1:]
+                if extension not in ['dat', 'cdl']:
+                    raise ValueError('Incorrect file type, expected file with extension .dat or .cdl')
+                data = file_path
+            else:
+                raise RuntimeError('Unknown input data')
+
+        return (version, data, extension)
 
 
     def _create_res_ws(self, num_sample_hist):
