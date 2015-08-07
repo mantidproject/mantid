@@ -263,7 +263,9 @@ class Qt4MplCanvas(FigureCanvas):
         self._lineDict = {}
         self._lineIndex = 0
 
+        # legend and color bar
         self.colorBar = None
+        # self._myLegend = None
 
         return
 
@@ -443,6 +445,13 @@ class Qt4MplCanvas(FigureCanvas):
                 self._lineDict[ikey] = None
             # ENDIF(plot)
         # ENDFOR
+
+        # Remove legend
+        # only appied in new version of matplotlib
+        # if self._myLegend is not None:
+        #     self._myLegend.remove()
+
+        self._setupLegend()
 
         self.draw()
 
@@ -636,6 +645,7 @@ class Qt4MplCanvas(FigureCanvas):
             location = 'best'
 
         handles, labels = self.axes.get_legend_handles_labels()
+        # self._myLegend =
         self.axes.legend(handles, labels, loc=location)
         # print handles
         # print labels

@@ -1369,8 +1369,9 @@ class MainWindow(QtGui.QMainWindow):
         xlabel = self._getXLabelFromUnit(unit)
 
         canvas = self.ui.graphicsView_mergeRun
-        canvas.clearAllLines()
+        # canvas.clearAllLines() NO NEED
         canvas.clearCanvas()
+        canvas.resetLineColorStyle()
 
         for scan in scanlist:
             r = self._uiReduceData(3, unit, expno, scan)

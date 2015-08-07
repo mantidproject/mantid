@@ -683,7 +683,7 @@ class HFIRPDRedControl(object):
 
 
     def parseSpiceData(self, expno, scanno, detefftablews=None):
-        """ Load SPICE data to MDWorkspaces
+        """ Load SPICE data to MDWorkspaces from raw table workspace
         """
         # Get reduction manager
         try:
@@ -799,7 +799,7 @@ class HFIRPDRedControl(object):
 
     def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None,
                           excludeddetlist=None,scalefactor=None):
-        """ Reduce SPICE powder diffraction data.
+        """ Reduce SPICE powder diffraction data from MDEventWorkspaces
         Return - Boolean as reduction is successful or not
         """
         # Get reduction manager
