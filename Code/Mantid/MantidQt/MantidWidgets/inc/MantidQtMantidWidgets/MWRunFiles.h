@@ -223,6 +223,8 @@ namespace MantidQt
       void setFileTextWithSearch(const QString & text);
       /// Just update the file text, useful for syncing two boxes
       void setFileTextWithoutSearch(const QString & text);
+      /// Clear the search from the widget
+      void clear();
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
       boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();

@@ -296,6 +296,7 @@ bool MWRunFiles::isForDirectory() const
  */
 void MWRunFiles::isForDirectory(const bool mode)
 {
+  clear();
   m_isForDirectory = mode;
 }
 
@@ -770,13 +771,34 @@ void MWRunFiles::setFileTextWithoutSearch(const QString & text)
 }
 
 /**
+ * Clears the search string and found files from the widget.
+ */
+void MWRunFiles::clear()
+{
+  m_foundFiles.clear();
+  m_uiForm.fileEditor->setText("");
+}
+
+/**
 * Finds the files specified by the user in a background thread.
 */
 void MWRunFiles::findFiles()
 {
+  // Set the values for the thread, and start it running.
+  QString searchText = m_uiForm.fileEditor->text();
+
   if(m_isForDirectory)
   {
-    setFileProblem("");
+    m_foundFiles.clear();
+    if(searchText.isEmpty())
+    {
+      setFileProblem("A directory must be provided");
+    }
+    else
+    {
+      setFileProblem("");
+      m_foundFiles.append(searchText);
+    }
     return;
   }
 
@@ -793,9 +815,6 @@ void MWRunFiles::findFiles()
     }
 
     emit findingFiles();
-
-    // Set the values for the thread, and start it running.
-    QString searchText = m_uiForm.fileEditor->text();
 
     // If we have an override instrument then add it in appropriate places to the search text
     if (!m_defaultInstrumentName.isEmpty())

@@ -27,6 +27,9 @@ void IndirectMolDyn::setup() {}
  * @return :: Whether the form was valid
  */
 bool IndirectMolDyn::validate() {
+  if (!m_uiForm.mwRun->isValid())
+    return false;
+
   QString filename = m_uiForm.mwRun->getFirstFilename();
   QString version = m_uiForm.cbVersion->currentText();
   QFileInfo finfo(filename);
@@ -72,7 +75,7 @@ void IndirectMolDyn::run() {
 
   // Setup algorithm
   IAlgorithm_sptr molDynAlg = AlgorithmManager::Instance().create("MolDyn");
-  molDynAlg->setProperty("Filename", filename.toStdString());
+  molDynAlg->setProperty("Data", filename.toStdString());
   molDynAlg->setProperty("Functions",
                          m_uiForm.leFunctionNames->text().toStdString());
   molDynAlg->setProperty("SymmetriseEnergy",
