@@ -1092,8 +1092,6 @@ private:
   void openScriptWindow     (const QStringList& lines);
   //@}
 
-  ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
-
 private slots:
   //! \name Initialization
   //@{
@@ -1186,6 +1184,8 @@ private slots:
   bool shouldWeShowFirstTimeSetup(const QStringList& commandArguments);
   /// Open up the FirstRunSetup dialog
   void showFirstTimeSetup();
+  
+  ApplicationWindow* loadScript(const QString& fn, bool existingProject = false);
 
 public:
   // TODO: a lot of this stuff should be private

@@ -8,7 +8,7 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewMDEWSourceSMPlugin "1.0"
 set_property( TARGET MantidParaViewMDEWSourceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
-target_link_libraries( MantidParaViewMDEWSourceSMPlugin LINK_PRIVATE 
+target_link_libraries( MantidParaViewMDEWSourceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
