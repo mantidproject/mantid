@@ -127,7 +127,7 @@ void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg, const std::st
     }
 
     auto prop = alg->getPointerToProperty(name);
-    declareProperty(prop->clone());
+    declareProperty(prop->clone(), prop->documentation());
 }
 
 /**
