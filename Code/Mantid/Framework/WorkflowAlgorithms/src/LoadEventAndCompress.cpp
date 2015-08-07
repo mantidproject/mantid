@@ -163,9 +163,11 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
                            getProperty("FilterMonByTimeStop"));
 
   // set chunking information
-  const std::vector<string> COL_NAMES = m_chunkingTable->getColumnNames();
-  for (auto name = COL_NAMES.begin(); name != COL_NAMES.end(); ++name) {
-    alg->setProperty(*name, m_chunkingTable->getRef<int>(*name, rowIndex));
+  if (rowCount > 0.) {
+    const std::vector<string> COL_NAMES = m_chunkingTable->getColumnNames();
+    for (auto name = COL_NAMES.begin(); name != COL_NAMES.end(); ++name) {
+      alg->setProperty(*name, m_chunkingTable->getRef<int>(*name, rowIndex));
+    }
   }
 
   alg->executeAsChildAlg();

@@ -4,57 +4,84 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using Mantid::WorkflowAlgorithms::LoadEventAndCompress;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 class LoadEventAndCompressTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LoadEventAndCompressTest *createSuite() { return new LoadEventAndCompressTest(); }
-  static void destroySuite( LoadEventAndCompressTest *suite ) { delete suite; }
+  static LoadEventAndCompressTest *createSuite() {
+    return new LoadEventAndCompressTest();
+  }
+  static void destroySuite(LoadEventAndCompressTest *suite) { delete suite; }
 
-
-  void test_Init()
-  {
+  void test_Init() {
     LoadEventAndCompress alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
-  void test_exec()
-  {
-    // Name of the output workspace.
-    std::string outWSName("LoadEventAndCompressTest_OutputWS");
+  void test_exec() {
+    const std::string FILENAME("CNCS_7860_event.nxs");
 
-    LoadEventAndCompress alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
+    // run without chunks
+    const std::string WS_NAME_NO_CHUNKS("LoadEventAndCompress_no_chunks");
+    LoadEventAndCompress algWithoutChunks;
+    TS_ASSERT_THROWS_NOTHING(algWithoutChunks.initialize());
+    TS_ASSERT(algWithoutChunks.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        algWithoutChunks.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+    TS_ASSERT_THROWS_NOTHING(algWithoutChunks.setPropertyValue(
+        "OutputWorkspace", WS_NAME_NO_CHUNKS));
+    TS_ASSERT_THROWS_NOTHING(algWithoutChunks.execute(););
+    TS_ASSERT(algWithoutChunks.isExecuted());
 
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
+    // Retrieve the workspace from data service
+    EventWorkspace_sptr wsNoChunks;
+    TS_ASSERT_THROWS_NOTHING(
+        wsNoChunks = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+            WS_NAME_NO_CHUNKS));
+    TS_ASSERT(wsNoChunks);
+    if (!wsNoChunks)
+      return;
+    TS_ASSERT_EQUALS(wsNoChunks->getEventType(), EventType::WEIGHTED_NOTIME);
 
-    // TODO: Check the results
+    // run without chunks
+    const std::string WS_NAME_CHUNKS("LoadEventAndCompress_chunks");
+    LoadEventAndCompress algWithChunks;
+    TS_ASSERT_THROWS_NOTHING(algWithChunks.initialize());
+    TS_ASSERT(algWithChunks.isInitialized());
+    TS_ASSERT_THROWS_NOTHING(
+        algWithChunks.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        algWithChunks.setPropertyValue("OutputWorkspace", WS_NAME_CHUNKS));
+    TS_ASSERT_THROWS_NOTHING(algWithChunks.execute(););
+    TS_ASSERT(algWithChunks.isExecuted());
+
+    // Retrieve the workspace from data service. TODO: Change to your desired
+    // type
+    EventWorkspace_sptr wsWithChunks;
+    TS_ASSERT_THROWS_NOTHING(
+        wsWithChunks =
+            AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+                WS_NAME_CHUNKS));
+    TS_ASSERT(wsWithChunks);
+    if (!wsWithChunks)
+      return;
+    TS_ASSERT_EQUALS(wsWithChunks->getEventType(), EventType::WEIGHTED_NOTIME);
+
+    // compare the two workspaces
+    TS_ASSERT_EQUALS(wsWithChunks->getNumberEvents(),
+                     wsNoChunks->getNumberEvents());
 
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().remove(WS_NAME_NO_CHUNKS);
+    AnalysisDataService::Instance().remove(WS_NAME_CHUNKS);
   }
-  
-  void test_Something()
-  {
-    TSM_ASSERT( "You forgot to write a test!", 0);
-  }
-
-
 };
-
 
 #endif /* MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESSTEST_H_ */
