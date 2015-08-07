@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -166,7 +167,6 @@ void ConvolutionFitSequential::exec() {
   outputWsName += specMin + "_to_" + specMax;
   auto outputWs = WorkspaceFactory::Instance().createTable();
 
-
   // Convert input workspace to get Q axis
   const std::string tempFitWs = "__convfit_fit_ws";
   auto axis = inputWs->getAxis(1);
@@ -228,8 +228,8 @@ void ConvolutionFitSequential::exec() {
 
   // Delete workspaces
   std::string deleteWorkspaces[] = {
-      (outputWsName + "_NormalisedCovarianceMatrices"), (outputWsName + "_Parameters"),
-      tempFitWs};
+      (outputWsName + "_NormalisedCovarianceMatrices"),
+      (outputWsName + "_Parameters"), tempFitWs};
   auto deleter = createChildAlgorithm("DeleteWorkspace", -1, -1, true);
   for (int i = 0; i < 3; i++) {
     deleter->setProperty("WorkSpace", deleteWorkspaces[i]);
@@ -237,8 +237,8 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct output workspace name
-  auto wsName = API::WorkspaceFactory::Instance().create(
-      "MatrixWorkspace", inputWs->getNumberHistograms, 2, 1);
+  auto resultWs = API::WorkspaceFactory::Instance().create(
+      (outputWsName + "_Result"), inputWs->getNumberHistograms, 2, 1);
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   auto paramNames = std::vector<std::string>();
@@ -265,38 +265,60 @@ void ConvolutionFitSequential::exec() {
 
   // Run calcEISF if Delta
   if (delta) {
-	  auto columns = outputWs.getColumnNames();
-	  std::string height = searchForFitParams("Height", columns).at(0);
-	  std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-	  auto heightY = "";
-	  auto heightE = "";
+    // Get height data from parameter table
+    auto columns = outputWs->getColumnNames();
+    std::string height = searchForFitParams("Height", columns).at(0);
+    std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
+    auto heightY = outputWs->getColumn(height);
+    auto heightE = outputWs->getColumn(heightErr);
 
+    // Get amplitude column names
+    auto ampNames = searchForFitParams("Amplitude", columns);
+    auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
 
+    // For each lorentzian, calculate EISF
+    size_t maxSize = ampNames.size();
+    if (ampErrorNames.size() > maxSize) {
+      maxSize = ampErrorNames.size();
+    }
+    for (size_t i = 0; i < maxSize; i++) {
+      // Get amplitude from column in table workspace
+    }
   }
 
   // Run convertParametersToWorkspace
 
   // Set x units to be momentum transfer
-  axis = wsName->getAxis(0);
+  axis = resultWs->getAxis(0);
   axis->setUnit("MomentumTransfer");
-
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs", -1, -1, true);
   logCopier->setProperty("InputWorkspace", inputWs);
-  logCopier->setProperty("OutputWorkspace", wsName);
+  logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
+  std::string logNames[] = {"sam_workspace",         "convolve_members",
+                            "fit_program",           "background",
+                            "delta_function",        "lorentzians",
+                            "temperature_correction"};
+  auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
+  logAdder->setProperty("Workspace", resultWs);
+  size_t total = logNames->size();
+  for (size_t i = 0; i < total; i++) {
+    logAdder->setProperty(logNames[i], "" /*logValues[i]*/);
+    logAdder->executeAsChildAlg();
+  }
 
-  
-
-  logCopier->setProperty("InputWorkspace", wsName);
-  logCopier->setProperty("OutputWorkspace", (outputWs + "_Workspace"));
+  logCopier->setProperty("InputWorkspace", resultWs);
+  logCopier->setProperty("OutputWorkspace", (outputWs->getName() +
+                                             "_Workspace")); // Replace with WS
   logCopier->executeAsChildAlg();
 
   // Rename workspaces
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setProperty("InputWorkspace", outputWs);
-  renamer->setProperty("OutputWorkspace", outputWs + "_Parameters");
+  renamer->setProperty("OutputWorkspace", (outputWs->getName() +
+                                           "_Parameters")); // Replace with WS
 }
 
 /**
@@ -364,16 +386,17 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   return result;
 }
 
-  std::vector<std::string> searchForFitParams(const std::string &suffix,
-                                              const std::vector<std::string> &columns){
-	auto fitParams = std::vector<std::string>();
-	const size_t totalColumns = columns.size();
-		for(size_t i = 0; i < totalColumns; i++){
-			if(columns.at(i).rfind(suffix) != std::string::npos){
-				fitParams.push_back(columns.at(i));
-			}
-		}
+std::vector<std::string>
+searchForFitParams(const std::string &suffix,
+                   const std::vector<std::string> &columns) {
+  auto fitParams = std::vector<std::string>();
+  const size_t totalColumns = columns.size();
+  for (size_t i = 0; i < totalColumns; i++) {
+    if (columns.at(i).rfind(suffix) != std::string::npos) {
+      fitParams.push_back(columns.at(i));
+    }
   }
+}
 
 } // namespace Algorithms
 } // namespace Mantid
