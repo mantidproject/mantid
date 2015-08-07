@@ -223,7 +223,14 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->executeAsChildAlg();
 
   // Delete workspaces
-
+  std::string deleteWorkspaces[] = {
+      (outWSName + "_NormalisedCovarianceMatrices"),
+      (outWSName + "_Parameters"), tempFitWs};
+  auto deleter = createChildAlgorithm("DeleteWorkspace", -1, -1, true);
+  for (int i = 0; i < 3; i++) {
+    deleter->setProperty("WorkSpace", deleteWorkspaces[i]);
+    deleter->executeAsChildAlg();
+  }
 
   // Construct output workspace name
   std::string wsName = outWSName + "_Result";
