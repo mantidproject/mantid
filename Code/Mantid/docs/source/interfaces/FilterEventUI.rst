@@ -66,7 +66,7 @@ output workspaces for storing event splitters that are supported by
 :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` algorithm.
 
 - `SplittersWorkspace <http://www.mantidproject.org/SplittersWorkspace>`_: It is a 
-  `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ that has 3 columns for start time, 
+  :ref:`TableWorkspace <Table Workspaces>` that has 3 columns for start time, 
   stop time and target workspace for events within start time and stop time. This type of workspace is 
   appropriate for the case that the amount of generated event splitters are not huge.
 
@@ -78,7 +78,7 @@ output workspaces for storing event splitters that are supported by
   that all events between time :math:`[x_i]` and :math:`[x_i+1]` will be discarded. This type of 
   workspace is appropriate for the case that the amount of generated event splitters are huge, because 
   processing a :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a 
-  `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
+  :ref:`TableWorkspace <Table Workspaces>` in Mantid.
 
 .. _advsetup-FilterEventUI-ref:
 
