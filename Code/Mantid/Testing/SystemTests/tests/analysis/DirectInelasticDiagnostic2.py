@@ -14,6 +14,8 @@ def getNamedParameter(ws, name):
 
 class DirectInelasticDiagnostic2(MantidStressTest):
 
+    saved_diag_file=''
+
     def requiredMemoryMB(self):
         """Requires 4Gb"""
         return 4000
