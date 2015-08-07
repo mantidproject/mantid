@@ -1010,10 +1010,8 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
 
     // prepare the request, and call doDeleteRemoteFile to request the server to
     // remove the file
-    std::string remote_delete = remote_upload;
-    boost::replace_all(remote_delete, "publish", "remove");
     std::stringstream answer;
-    answer << doDeleteRemoteFile(remote_delete, file_path, author, email,
+    answer << doDeleteRemoteFile(remote_upload, file_path, author, email,
                                  comment);
     g_log.debug() << "Answer from doDelete: " << answer.str() << std::endl;
 
