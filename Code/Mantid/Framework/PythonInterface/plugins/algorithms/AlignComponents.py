@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
     ITableWorkspaceProperty, FileAction, FileProperty
 from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger
@@ -6,6 +6,7 @@ import mantid.simpleapi as api
 from scipy.stats import chisquare
 from scipy.optimize import minimize
 import numpy as np
+
 
 class AlignComponents(PythonAlgorithm):
     """ Class to align components
@@ -128,9 +129,9 @@ class AlignComponents(PythonAlgorithm):
         calWS = self.getProperty('CalibrationTable').value
         if 'difc' not in calWS.getColumnNames() or 'detid' not in calWS.getColumnNames():
             issues['CalibrationTable'] = "Calibration table requires detid and difc"
-        # maskWS = self.getProperty("MaskWorkspace").value
-        # if maskWS != '':
-        #    issues['MaskWorkspace'] = "MaskWorkspace must be of type \"MaskWorkspace\""
+        maskWS = self.getProperty("MaskWorkspace").value
+        if maskWS != None and maskWS.id() != 'MaskWorkspace':
+            issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
         instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
         components = self.getProperty("ComponentList").value.split(',')
         for component in components:
@@ -142,7 +143,14 @@ class AlignComponents(PythonAlgorithm):
 
     def PyExec(self):
         calWS = self.getProperty('CalibrationTable').value
+        maskWS = self.getProperty("MaskWorkspace").value
+        Masking = False
+        if maskWS != None:
+            Masking = True
+            mask = maskWS.extractY().flatten()
         difc = calWS.column('difc')
+        if Masking:
+            difc = np.ma.masked_array(difc, mask)
         instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
         components = self.getProperty("ComponentList").value.split(',')
         optionsList = ["PosX", "PosY", "PosZ"]
@@ -151,41 +159,46 @@ class AlignComponents(PythonAlgorithm):
             optionsDict[opt] = self.getProperty(opt).value
         for component in components:
             comp = instrumentWS.getInstrument().getComponentByName(component)
-            logger.notice("Working on " + comp.getFullName())
             firstDetID = self._getFirstDetID(comp)
             lastDetID = self._getLastDetID(comp)
-            logger.debug(" Initial position is " + str(comp.getPos()) +
-                         " Initial rotation is " + str(comp.getRotation().getEulerAngles()) +
-                         " First DetID = " + str(firstDetID) +
-                         " Last DetID = " + str(lastDetID))
-            # TODO: get mask, mask difc
+            logger.notice("Working on " + comp.getFullName() +
+                          " Starting position is " + str(comp.getPos()) +
+                          " Starting rotation is " + str(comp.getRotation().getEulerAngles()))
             x0List = []
             initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ()]
             boundsList = []
+            if Masking:
+                mask_out = mask[firstDetID:lastDetID + 1]
+            else:
+                mask_out = None
             if optionsDict["PosX"]:
                 x0List.append(initialPos[0])
                 boundsList.append((initialPos[0] + self.getProperty("MinX").value,
-                               initialPos[0] + self.getProperty("MaxX").value))
+                                   initialPos[0] + self.getProperty("MaxX").value))
             if optionsDict["PosY"]:
                 x0List.append(initialPos[1])
                 boundsList.append((initialPos[1] + self.getProperty("MinY").value,
-                               initialPos[1] + self.getProperty("MaxY").value))
+                                   initialPos[1] + self.getProperty("MaxY").value))
             if optionsDict["PosZ"]:
                 x0List.append(initialPos[2])
                 boundsList.append((initialPos[2] + self.getProperty("MinZ").value,
-                               initialPos[2] + self.getProperty("MaxZ").value))
-            results = minimize(self._minimisation_func, x0=x0List,
-                               args=(instrumentWS,
-                                     comp.getFullName(),
-                                     firstDetID,
-                                     lastDetID,
-                                     difc[firstDetID:lastDetID+1],
-                                     optionsDict,
-                                     initialPos),
-                               bounds=boundsList)
-            print results
+                                   initialPos[2] + self.getProperty("MaxZ").value))
+            minimize(self._minimisation_func, x0=x0List,
+                     args=(instrumentWS,
+                           comp.getFullName(),
+                           firstDetID,
+                           lastDetID,
+                           difc[firstDetID:lastDetID + 1],
+                           mask_out,
+                           optionsDict,
+                           initialPos),
+                     bounds=boundsList)
+            comp = instrumentWS.getInstrument().getComponentByName(component)
+            logger.notice("Finshed " + comp.getFullName() +
+                          " Final position is " + str(comp.getPos()) +
+                          " Final rotation is " + str(comp.getRotation().getEulerAngles()))
 
-    def _minimisation_func(self, x0, ws, component, firstDetID, lastDetID, difc, optionsDict, initialPos):
+    def _minimisation_func(self, x0, ws, component, firstDetID, lastDetID, difc, mask, optionsDict, initialPos):
         optionsList = ["PosX", "PosY", "PosZ"]
         x0_index = 0
         x = []
@@ -197,8 +210,9 @@ class AlignComponents(PythonAlgorithm):
                 x.append(initialPos[optionsList.index(opt)])
         api.MoveInstrumentComponent(ws, component, X=x[0], Y=x[1], Z=x[2], RelativePosition=False)
         new_difc = api.CalculateDIFC(ws)
-        difc_new = new_difc.extractY().flatten()[firstDetID:lastDetID+1]
-        logger.debug("chisquare = " + str(chisquare(f_obs=difc, f_exp=difc_new)[0]))
+        difc_new = new_difc.extractY().flatten()[firstDetID:lastDetID + 1]
+        if mask != None:
+            difc_new = np.ma.masked_array(difc_new, mask)
         return chisquare(f_obs=difc, f_exp=difc_new)[0]
 
     def _getFirstDetID(self, component):
