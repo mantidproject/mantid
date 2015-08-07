@@ -138,7 +138,8 @@ public:
           Kernel::DataService<API::Workspace>::retrieve(name);
       // Cast to the desired type and return that.
       return boost::dynamic_pointer_cast<WSTYPE>(workspace);
-    } catch (...) {
+
+    } catch (Kernel::Exception::NotFoundError &) {
       throw Kernel::Exception::NotFoundError(
           "Unable to find workspace type with name '" + name +
               "': data service ",
