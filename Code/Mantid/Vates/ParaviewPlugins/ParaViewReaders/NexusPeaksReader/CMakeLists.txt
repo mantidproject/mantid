@@ -8,7 +8,7 @@ add_paraview_plugin( MantidParaViewNexusPeaksReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewNexusPeaksReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewNexusPeaksReaderSMPlugin LINK_PRIVATE 
+target_link_libraries( MantidParaViewNexusPeaksReaderSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
