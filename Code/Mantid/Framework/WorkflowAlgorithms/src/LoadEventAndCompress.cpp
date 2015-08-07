@@ -184,11 +184,13 @@ void LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(wksp);
 
-  auto filterBadPulses = createChildAlgorithm("FilterBadPulses");
-  filterBadPulses->setProperty("InputWorkspace", eventWS);
-  filterBadPulses->setProperty("OutputWorkspace", eventWS);
-  filterBadPulses->setProperty("LowerCutoff", m_filterBadPulses);
-  filterBadPulses->executeAsChildAlg();
+  if (m_filterBadPulses > 0.) {
+    auto filterBadPulses = createChildAlgorithm("FilterBadPulses");
+    filterBadPulses->setProperty("InputWorkspace", eventWS);
+    filterBadPulses->setProperty("OutputWorkspace", eventWS);
+    filterBadPulses->setProperty("LowerCutoff", m_filterBadPulses);
+    filterBadPulses->executeAsChildAlg();
+  }
 
   auto compressEvents = createChildAlgorithm("CompressEvents");
   compressEvents->setProperty("InputWorkspace", eventWS);

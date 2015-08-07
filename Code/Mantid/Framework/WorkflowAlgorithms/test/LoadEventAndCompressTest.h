@@ -3,8 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidWorkflowAlgorithms/LoadEventAndCompress.h"
 
 using Mantid::WorkflowAlgorithms::LoadEventAndCompress;
 using namespace Mantid::DataObjects;
@@ -26,7 +27,7 @@ public:
   }
 
   void test_exec() {
-    const std::string FILENAME("CNCS_7860_event.nxs");
+    const std::string FILENAME("ARCS_sim_event.nxs");
 
     // run without chunks
     const std::string WS_NAME_NO_CHUNKS("LoadEventAndCompress_no_chunks");
@@ -34,7 +35,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(algWithoutChunks.initialize());
     TS_ASSERT(algWithoutChunks.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        algWithoutChunks.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+        algWithoutChunks.setPropertyValue("Filename", FILENAME));
     TS_ASSERT_THROWS_NOTHING(algWithoutChunks.setPropertyValue(
         "OutputWorkspace", WS_NAME_NO_CHUNKS));
     TS_ASSERT_THROWS_NOTHING(algWithoutChunks.execute(););
@@ -56,9 +57,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(algWithChunks.initialize());
     TS_ASSERT(algWithChunks.isInitialized());
     TS_ASSERT_THROWS_NOTHING(
-        algWithChunks.setPropertyValue("Filename", "CNCS_7860_event.nxs"));
+        algWithChunks.setPropertyValue("Filename", FILENAME));
     TS_ASSERT_THROWS_NOTHING(
         algWithChunks.setPropertyValue("OutputWorkspace", WS_NAME_CHUNKS));
+    TS_ASSERT_THROWS_NOTHING(
+        algWithChunks.setProperty("MaxChunkSize", .005)); // REALLY small file
     TS_ASSERT_THROWS_NOTHING(algWithChunks.execute(););
     TS_ASSERT(algWithChunks.isExecuted());
 
@@ -77,6 +80,12 @@ public:
     // compare the two workspaces
     TS_ASSERT_EQUALS(wsWithChunks->getNumberEvents(),
                      wsNoChunks->getNumberEvents());
+    auto checkAlg =
+        FrameworkManager::Instance().createAlgorithm("CheckWorkspacesMatch");
+    checkAlg->setPropertyValue("Workspace1", WS_NAME_NO_CHUNKS);
+    checkAlg->setPropertyValue("Workspace2", WS_NAME_CHUNKS);
+    checkAlg->execute();
+    TS_ASSERT_EQUALS(checkAlg->getPropertyValue("Result"), "Success!");
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WS_NAME_NO_CHUNKS);
