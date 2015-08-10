@@ -4,7 +4,7 @@
     --------------------------------------------------------------------
     Copyright            : (C) 2009 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Return a transformation for reciprocal (1/t) scales
+    Description          : Return a transformation for power (X^n) scales
 
  ***************************************************************************/
 
@@ -141,15 +141,6 @@ void PowerScaleEngine::buildTicks(
     for ( int i = 0; i < QwtScaleDiv::NTickTypes; i++ )
     {
         ticks[i] = strip(ticks[i], interval);
-
-        // ticks very close to 0.0 are
-        // explicitely set to 0.0
-
-        for ( int j = 0; j < (int)ticks[i].count(); j++ )
-        {
-            if ( QwtScaleArithmetic::compareEps(ticks[i][j], 0.0, stepSize) == 0 )
-                ticks[i][j] = 0.0;
-        }
     }
 }
 
@@ -244,15 +235,33 @@ QwtScaleTransformation *PowerScaleTransformation::copy() const
 	return new PowerScaleTransformation(d_engine);
 }
 
+/*
+ * Transform a value between 2 linear intervals
+ *
+ * \param s value related to the interval [s1, s2]
+ * \param s1 first border of scale interval
+ * \param s2 second border of scale interval
+ * \param p1 first border of target interval
+ * \param p2 second border of target interval
+ */
 double PowerScaleTransformation::xForm(
     double s, double s1, double s2, double p1, double p2) const
 {
-	return p1 + (p2 - p1) * s2 * (s1 - s)/(s * (s1 - s2));
+	return p1 + (p2 - p1) / (pow(s2, nth_power) - pow(s1, nth_power)) * (pow(s, nth_power) - pow(s1, nth_power));
 }
 
+/*
+ * Transform a value from a linear to a power scale interval
+ *
+ * \param p value related to the linear interval [p1, p2]
+ * \param p1 first border of linear interval
+ * \param p2 second border of linear interval
+ * \param s1 first border of logarithmic interval
+ * \param s2 second border of logarithmic interval
+ */
 double PowerScaleTransformation::invXForm(double p, double p1, double p2,
     double s1, double s2) const
 {
-	return s1*s2*(p2 - p1)/(s2*(p2 - p) + s1*(p - p1));
+	return pow((p - p1) / (p2 - p1) * (pow(s2, nth_power) - pow(s1, nth_power)), 1.0/nth_power) * s1;
 }
 
