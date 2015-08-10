@@ -12,11 +12,16 @@ class ApplyNegMuCorrection(PythonAlgorithm):
             specNo=str(spec)
         print dataDir+'ral0'+runno+'.rooth30'+specNo+'.dat'
         #loading data
+        rooth30_filename = dataDir+r'\ral0'+runno+'.rooth30'+specNo+'.dat'
+        rooth20_filename = dataDir+r'\ral0'+runno+'.rooth20'+specNo+'.dat'
         try:
-            ws3000=Load(Filename=dataDir+r'\ral0'+runno+'.rooth30'+specNo+'.dat', OutputWorkspace='ws3000')
-            ws2000=Load(Filename=dataDir+r'\ral0'+runno+'.rooth20'+specNo+'.dat', OutputWorkspace='ws2000')
+            ws3000=Load(Filename=rooth30_filename, OutputWorkspace='ws3000')
         except RuntimeError:
-            print runno+' '+specNo+"not found"
+            print 'could not find file: ' + rooth30_filename
+        try:
+            ws2000=Load(Filename=rooth20_filename, OutputWorkspace='ws2000')
+        except RuntimeError:
+            print 'could not find file: ' + rooth20_filename
 
         #Correcting for Gain and offset of the detectors
         ws2000_corr=CreateWorkspace(A2000*ws2000.readX(0)[:]+B2000,ws2000.readY(0)[:])
