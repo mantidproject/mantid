@@ -33,7 +33,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   yPosition->setValidator(yPositionNumericValidator);
   /*Run Button*/
   runButton->setMaximumWidth(100);
-  connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked(periodicTable, yPosition)));
   connect(this, SIGNAL(validInput()), this, SLOT(accept()));
 
   /*Adding to Layout*/
