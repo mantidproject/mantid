@@ -2,7 +2,7 @@ from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.kernel import *
 
 #pylint: disable=no-init
-class get_neg_mu_muonic_xrd(PythonAlgorithm):
+class GetNegMuMuonicXRD(PythonAlgorithm):
     #Dictionary of <element>:<peaks> easily extendible by user.
     muonic_xr ={'Au' :[8135.2,8090.6,8105.4,8069.4,5764.89,5594.97,3360.2,
                        3206.8,2474.22,2341.21,2304.44,1436.05,1391.58,1104.9,
@@ -17,7 +17,6 @@ class get_neg_mu_muonic_xrd(PythonAlgorithm):
                'Sn' : [3457.3,3412.8,1022.6,982.5,349.953,345.226]}
 
     def PyInit(self):
-        element_type = self.muonic_xr.keys()
         self.declareProperty(StringArrayProperty("Elements", values=[],
                              direction=Direction.Input
                              ))
@@ -58,4 +57,4 @@ class get_neg_mu_muonic_xrd(PythonAlgorithm):
             muonic_xr_group = GroupWorkspaces(workspace_list)
             self.log().information(str("Created Group: "+muonic_xr_group.name()))
 
-AlgorithmFactory.subscribe(get_neg_mu_muonic_xrd)
+AlgorithmFactory.subscribe(GetNegMuMuonicXRD)
