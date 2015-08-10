@@ -1,7 +1,7 @@
 # pylint: disable=no-init,invalid-name,too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
-from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, FloatBoundedValidator
+from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
 import numpy as np
 
 
@@ -19,7 +19,6 @@ class DNSMergeRuns(PythonAlgorithm):
     wavelength = 0
     xaxis = '2theta'
     outws_name = None
-    tol = 0.05
 
     def category(self):
         """
@@ -45,8 +44,6 @@ class DNSMergeRuns(PythonAlgorithm):
         H_AXIS = ["2theta", "|Q|", "d-Spacing"]
         self.declareProperty("HorizontalAxis", "2theta", StringListValidator(H_AXIS),
                              doc="X axis in the merged workspace")
-        self.declareProperty("TwoThetaTolerance", 0.05, FloatBoundedValidator(lower=0.001, upper=1.0),
-                             doc="Hardware accuracy for 2Theta (degree).")
         self.declareProperty("Normalize", False, "If checked, the merged data will be normalized, "
                              "otherwise the separate normalization workspace will be created.")
         return
@@ -154,7 +151,7 @@ class DNSMergeRuns(PythonAlgorithm):
                         rhs_title + ": " + str(rhs_property.value)
                     self.log().warning(message)
             else:
-                message = "Property ' + property_name + ' is not present in " +\
+                message = "Property " + property_name + " is not present in " +\
                     lhs_title + " or " + rhs_title + " - skipping comparison."
                 self.log().warning(message)
         return True
@@ -200,8 +197,8 @@ class DNSMergeRuns(PythonAlgorithm):
             samplePos = ws.getInstrument().getSample().getPos()
             n_hists = ws.getNumberHistograms()
             two_theta = np.array([ws.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
-            # consider two_theta/tol +- 1 => two_theta +- tol as required
-            two_theta = np.rint(two_theta/self.tol)
+            # round to approximate hardware accuracy 0.05 degree ~ 1 mrad
+            two_theta = np.round(two_theta, 4)
             dataY = np.rot90(ws.extractY())[0]
             dataYnorm = np.rot90(wsnorm.extractY())[0]
             dataE = np.rot90(ws.extractE())[0]
@@ -236,13 +233,13 @@ class DNSMergeRuns(PythonAlgorithm):
 
         # define x axis
         if self.xaxis == "2theta":
-            data[:, 0] = np.round(np.degrees(data[:, 0])*self.tol, 2)
+            data[:, 0] = np.round(np.degrees(data[:, 0]), 2)
             unitx = "Degrees"
         elif self.xaxis == "|Q|":
-            data[:, 0] = np.fabs(4.0*np.pi*np.sin(0.5*data[:, 0]*self.tol)/self.wavelength)
+            data[:, 0] = np.fabs(4.0*np.pi*np.sin(0.5*data[:, 0])/self.wavelength)
             unitx = "MomentumTransfer"
         elif self.xaxis == "d-Spacing":
-            data[:, 0] = np.fabs(0.5*self.wavelength/np.sin(0.5*data[:, 0]*self.tol))
+            data[:, 0] = np.fabs(0.5*self.wavelength/np.sin(0.5*data[:, 0]))
             unitx = "dSpacing"
         else:
             message = "The value for X axis " + self.xaxis + " is invalid! Cannot merge."
@@ -264,7 +261,6 @@ class DNSMergeRuns(PythonAlgorithm):
         self.workspace_names = self.getProperty("WorkspaceNames").value
         self.outws_name = self.getProperty("OutputWorkspace").valueAsStr
         self.xaxis = self.getProperty("HorizontalAxis").value
-        self.tol = np.radians(self.getProperty("TwoThetaTolerance").value)
 
         self.log().information("Workspaces to merge: %i" % (len(self.workspace_names)))
         # check whether given workspaces can be merged

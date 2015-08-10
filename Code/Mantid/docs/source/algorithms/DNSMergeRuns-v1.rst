@@ -28,17 +28,15 @@ As a result, following output will be produced:
     Normalization workspaces are created by the :ref:`algm-LoadDNSLegacy` algorithm. 
     It is responsibility of the user to take care about the same type of normalization (monitor counts or run duration) for all given workspaces.
 
-If :math:`2\theta` scattering angles in the given workspaces are overlapping within the hardware positioning accuracy, sum of the corresponding intensities will be calculated. The hardware accuracy is set by the **TwoThetaTolerance** option. The default value must not be changed unless recommended by the instrument scientist. If chosen, conversion of the **HorizontalAxis** to :math:`|Q|` or d-Spacing is performed after with step. 
-
 Absolute value of the momentum transfer :math:`|Q|` is calculated as
 
-:math: `|Q| = \left|\frac{4\pi\sin\theta}{\lambda}\right|`
+:math:`|Q| = \left|\frac{4\pi\sin\theta}{\lambda}\right|`
 
 where :math:`\theta` is the scattering angle and :math:`\lambda` is the neutron wavelength.
 
 d-Spacing :math:`d` is calculated as:
 
-:math: `d = \left|\frac{\lambda}{2\,\sin\theta}\right|`
+:math:`d = \left|\frac{\lambda}{2\,\sin\theta}\right|`
 
 Valid input workspaces
 ######################
@@ -56,7 +54,7 @@ For the physically meaningfull merge result, it is also important that these wor
 Usage
 -----
 
-**Example - Apply correction to a single run:**
+**Example - Merge a set of selected runs**
 
 .. code-block:: python
 
@@ -82,7 +80,7 @@ Usage
         else:
             return False
 
-    datafiles = sorted( [ f for f in listdir(mypath) if isfile(join(mypath,f)) and is_in_filelist(f, p, filelist)])
+    datafiles = sorted([f for f in listdir(mypath) if isfile(join(mypath,f)) and is_in_filelist(f, p, filelist)])
 
     # load data to workspaces
     wslist = []
@@ -90,7 +88,7 @@ Usage
         try:
             wname = splitext(f)[0]
             #print "Processing ", wname  # uncomment if needed
-            LoadDNSLegacy(Filename=join(mypath,f), OutputWorkspace=wname, Polarisation='x', Normalization='duration')
+            LoadDNSLegacy(Filename=join(mypath, f), OutputWorkspace=wname, Polarisation='x', Normalization='duration')
         except RuntimeError as err:
             print err
         else:
