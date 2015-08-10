@@ -33,10 +33,28 @@
 #include <qwt_scale_map.h>
 #include <float.h>
 
+class ScaleEngine;
+
+class ScaleTransformation: public QwtScaleTransformation
+{
+public:
+	enum Type{Linear, Log10, Power};
+
+	ScaleTransformation(const ScaleEngine *engine):QwtScaleTransformation(Other), d_engine(engine){};
+	virtual double xForm(double x, double, double, double p1, double p2) const;
+	virtual double invXForm(double x, double s1, double s2, double p1, double p2) const;
+	QwtScaleTransformation* copy() const;
+
+protected:
+	QwtScaleTransformation* newScaleTransformation() const;
+    //! The scale engine that generates the transformation
+	const ScaleEngine* d_engine;
+};
+
 class ScaleEngine: public QwtScaleEngine
 {
 public:
-	ScaleEngine(QwtScaleTransformation::Type type = QwtScaleTransformation::Linear,
+	ScaleEngine(ScaleTransformation::Type type = ScaleTransformation::Linear,
 				double left_break = -DBL_MAX, double right_break = DBL_MAX);
 	QwtScaleTransformation* transformation() const;
 	virtual QwtScaleDiv divideScale(double x1, double x2, int maxMajSteps,
@@ -68,8 +86,8 @@ public:
     bool log10ScaleAfterBreak() const;
     void setLog10ScaleAfterBreak(bool on){d_log10_scale_after = on;};
 
-	QwtScaleTransformation::Type type() const;
-	void setType(QwtScaleTransformation::Type type){d_type = type;};
+	ScaleTransformation::Type type() const;
+	void setType(ScaleTransformation::Type type){d_type = type;};
 
 	bool hasBreak() const;
 	void clone(const ScaleEngine *engine);
@@ -78,7 +96,10 @@ public:
 	void drawBreakDecoration(bool draw){d_break_decoration = draw;};
 
 private:
-	QwtScaleTransformation::Type d_type;
+
+	QwtScaleEngine *newScaleEngine() const;
+
+	ScaleTransformation::Type d_type;
 	double d_break_left, d_break_right;
 	//! Position of axis break (% of axis length)
 	int d_break_pos;
@@ -92,19 +113,6 @@ private:
 	int d_break_width;
 	//! If true draw the break decoration
 	bool d_break_decoration;
-};
-
-class ScaleTransformation: public QwtScaleTransformation
-{
-public:
-	ScaleTransformation(const ScaleEngine *engine):QwtScaleTransformation(Other), d_engine(engine){};
-	virtual double xForm(double x, double, double, double p1, double p2) const;
-	virtual double invXForm(double x, double s1, double s2, double p1, double p2) const;
-	QwtScaleTransformation* copy() const;
-
-private:
-    //! The scale engine that generates the transformation
-	const ScaleEngine* d_engine;
 };
 
 #endif
