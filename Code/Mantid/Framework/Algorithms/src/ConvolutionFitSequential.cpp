@@ -170,27 +170,31 @@ void ConvolutionFitSequential::exec() {
   // Output workspace name
   std::string outputWsName = inputWs->getName();
   pos = outputWsName.rfind("_");
-  if(pos != std::string::npos){
-	outputWsName = outputWsName.substr(0, pos+1);
+  if (pos != std::string::npos) {
+    outputWsName = outputWsName.substr(0, pos + 1);
   }
-  outputWsName += "conv_" + fTypeName + "L" + backgroundName + "s_";
+  outputWsName += "conv_" + fTypeName + "L" + backgroundName + "_s";
   outputWsName += boost::lexical_cast<std::string>(specMin);
   outputWsName += "_to_";
   outputWsName += boost::lexical_cast<std::string>(specMax);
   auto outputWs = WorkspaceFactory::Instance().createTable();
 
   // Convert input workspace to get Q axis
-  const std::string tempFitWs = "__convfit_fit_ws";
+  const std::string tempFitWsName = "__convfit_fit_ws";
+  // May be incorrect type
+  auto tempFitWs = WorkspaceFactory::Instance().create(
+      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
-    //double eFixed = inputWs->getEFixed();
+    // double eFixed = inputWs->getEFixed();
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
     convSpec->setProperty("InputWorkSpace", inputWs);
-    convSpec->setProperty("OutputWorkSpace", tempFitWs);
+    convSpec->setProperty("OutputWorkSpace", tempFitWsName);
     convSpec->setProperty("Target", "ElasticQ");
     convSpec->setProperty("EMode", "Indirect");
     convSpec->setProperty("EFixed", 0.0);
     convSpec->executeAsChildAlg();
+    tempFitWs = convSpec->getProperty("OutputWorkspace");
   } else if (axis->isNumeric()) {
     // Check that units are Momentum Transfer
     if (axis->unit()->unitID() != "MomentumTransfer") {
@@ -198,8 +202,10 @@ void ConvolutionFitSequential::exec() {
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
     cloneWs->setProperty("InputWorkspace", inputWs);
-    cloneWs->setProperty("OutputWorkspace", tempFitWs);
+    cloneWs->setProperty("OutputWorkspace", tempFitWsName);
     cloneWs->executeAsChildAlg();
+    tempFitWs = cloneWs->getProperty("OutputWorkspace");
+    std::string tempName = tempFitWs->getName();
   } else {
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
@@ -208,7 +214,7 @@ void ConvolutionFitSequential::exec() {
   // Fit all spectra in workspace
   std::string plotPeakInput = "";
   for (int i = 0; i < specMax + 1; i++) {
-    std::string nextWs = tempFitWs + ",i";
+    std::string nextWs = tempFitWsName + ",i";
     nextWs += std::to_string(i);
     plotPeakInput += nextWs + ";";
   }
@@ -241,16 +247,16 @@ void ConvolutionFitSequential::exec() {
   // Delete workspaces
   std::string deleteWorkspaces[] = {
       (outputWsName + "_NormalisedCovarianceMatrices"),
-      (outputWsName + "_Parameters"), tempFitWs};
+      (outputWsName + "_Parameters"), tempFitWsName};
   auto deleter = createChildAlgorithm("DeleteWorkspace", -1, -1, true);
   for (int i = 0; i < 3; i++) {
     deleter->setProperty("WorkSpace", deleteWorkspaces[i]);
     deleter->executeAsChildAlg();
   }
 
-  // Construct output workspace name
-  auto resultWs = API::WorkspaceFactory::Instance().create(
-      (outputWsName + "_Result"), inputWs->getNumberHistograms(), 2, 1);
+  // Construct output workspace
+  auto resultWs = WorkspaceFactory::Instance().create(
+      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   auto paramNames = std::vector<std::string>();
@@ -281,7 +287,7 @@ void ConvolutionFitSequential::exec() {
     auto columns = outputWs->getColumnNames();
     std::string height = searchForFitParams("Height", columns).at(0);
     std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-	auto heightY = outputWs->getColumn(height);
+    auto heightY = outputWs->getColumn(height);
     auto heightE = outputWs->getColumn(heightErr);
 
     // Get amplitude column names
@@ -319,14 +325,14 @@ void ConvolutionFitSequential::exec() {
       outputWs->addColumn("double", columnName);
       outputWs->addColumn("double", errorColumnName);
       /* size_t maxEisf = eisfY.size();
-		 if (eisfErr.size() > maxEisf) {
-			maxEisf = eisfErr.size();
-		}
+                 if (eisfErr.size() > maxEisf) {
+                        maxEisf = eisfErr.size();
+                }
 
-		for (size_t j = 0; j < maxEisf; j++) {
-			outputWs->setCell(columnName, j, esifY.at(j));
-			outputWs->setCell(errorColumnName, j, esifErr.at(j));
-		}*/
+                for (size_t j = 0; j < maxEisf; j++) {
+                        outputWs->setCell(columnName, j, esifY.at(j));
+                        outputWs->setCell(errorColumnName, j, esifErr.at(j));
+                }*/
     }
   }
 
@@ -349,10 +355,12 @@ void ConvolutionFitSequential::exec() {
   sampleLog["background"] = backgroundName;
   sampleLog["delta_function"] = usingDelta;
   sampleLog["lorentzians"] = boost::lexical_cast<std::string>(usingLorentzians);
-  sampleLog["temperature_correction"] = boost::lexical_cast<std::string>(usingTemp);
+  sampleLog["temperature_correction"] =
+      boost::lexical_cast<std::string>(usingTemp);
 
   if (usingTemp) {
-    sampleLog["temperature_value"] = boost::lexical_cast<std::string>(temperature);
+    sampleLog["temperature_value"] =
+        boost::lexical_cast<std::string>(temperature);
   }
 
   auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
