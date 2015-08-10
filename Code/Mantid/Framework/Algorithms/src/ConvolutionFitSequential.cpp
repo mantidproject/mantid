@@ -169,21 +169,27 @@ void ConvolutionFitSequential::exec() {
 
   // Output workspace name
   std::string outputWsName = inputWs->getName();
-  outputWsName += "conv_" + fTypeName + backgroundName + "s_";
-  outputWsName += specMin + "_to_" + specMax;
+  pos = outputWsName.rfind("_");
+  if(pos != std::string::npos){
+	outputWsName = outputWsName.substr(0, pos+1);
+  }
+  outputWsName += "conv_" + fTypeName + "L" + backgroundName + "s_";
+  outputWsName += boost::lexical_cast<std::string>(specMin);
+  outputWsName += "_to_";
+  outputWsName += boost::lexical_cast<std::string>(specMax);
   auto outputWs = WorkspaceFactory::Instance().createTable();
 
   // Convert input workspace to get Q axis
   const std::string tempFitWs = "__convfit_fit_ws";
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
-    auto eFixed = inputWs->getEFixed();
+    //double eFixed = inputWs->getEFixed();
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", tempFitWs);
     convSpec->setProperty("Target", "ElasticQ");
     convSpec->setProperty("EMode", "Indirect");
-    convSpec->setProperty("EFixed", eFixed);
+    convSpec->setProperty("EFixed", 0.0);
     convSpec->executeAsChildAlg();
   } else if (axis->isNumeric()) {
     // Check that units are Momentum Transfer
@@ -217,14 +223,14 @@ void ConvolutionFitSequential::exec() {
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
   plotPeaks->setProperty("Input", plotPeakInput);
-  plotPeaks->setProperty("OutputWorkspace", outputWs);
+  plotPeaks->setProperty("OutputWorkspace", outputWsName);
   plotPeaks->setProperty("Function", function);
   plotPeaks->setProperty("StartX", startX);
   plotPeaks->setProperty("EndX", endX);
   plotPeaks->setProperty("FitType", "Sequential");
   plotPeaks->setProperty("CreateOutput", true);
   plotPeaks->setProperty("OutputCompositeMembers", true);
-  plotPeaks->setProperty("ConvoleMembers", convolve);
+  plotPeaks->setProperty("ConvolveMembers", convolve);
   plotPeaks->setProperty("MaxIterations", maxIter);
   plotPeaks->setProperty("Minimizer", minimizer);
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
@@ -340,7 +346,7 @@ void ConvolutionFitSequential::exec() {
   sampleLog["sam_workspace"] = inputWs->getName();
   sampleLog["convolve_members"] = boost::lexical_cast<std::string>(convolve);
   sampleLog["fit_program"] = "ConvFit";
-  sampleLog[("background"] = backgroundName;
+  sampleLog["background"] = backgroundName;
   sampleLog["delta_function"] = usingDelta;
   sampleLog["lorentzians"] = boost::lexical_cast<std::string>(usingLorentzians);
   sampleLog["temperature_correction"] = boost::lexical_cast<std::string>(usingTemp);
@@ -359,7 +365,7 @@ void ConvolutionFitSequential::exec() {
 
   logCopier->setProperty("InputWorkspace", resultWs);
   logCopier->setProperty("OutputWorkspace", (outputWs->getName() +
-                                             "_Workspace")); // Replace with WS
+                                             "_Workspaces")); // Replace with WS
   logCopier->executeAsChildAlg();
 
   // Rename workspaces
@@ -394,7 +400,7 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
 /**
  * Finds specific values embedded in the function supplied to the algorithm
  * @param function The full function string
- * @return all values of interest from the function ((0 - fitType, 1 -
+ * @return all values of interest from the function (0 - fitType, 1 -
  * background, 2 - functionName)
  */
 std::vector<std::string>
