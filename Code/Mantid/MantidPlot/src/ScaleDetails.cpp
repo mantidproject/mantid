@@ -350,9 +350,9 @@ void ScaleDetails::initWidgets()
       m_dspnStepBeforeBreak->setValue(sc_engine->stepBeforeBreak());
       m_dspnStepAfterBreak->setValue(sc_engine->stepAfterBreak());
 
-      QwtScaleTransformation::Type scale_type = sc_engine->type();
+      ScaleTransformation::Type scale_type = sc_engine->type();
       m_cmbMinorTicksBeforeBreak->clear();
-      if (scale_type == QwtScaleTransformation::Log10)
+      if (scale_type == ScaleTransformation::Log10)
       {
         m_cmbMinorTicksBeforeBreak->addItems(QStringList() << "0" << "2" << "4" << "8");
       }
@@ -368,7 +368,7 @@ void ScaleDetails::initWidgets()
       m_chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
       m_cmbScaleType->setCurrentItem(scale_type);
       m_cmbMinorValue->clear();
-      if (scale_type == QwtScaleTransformation::Log10)
+      if (scale_type == ScaleTransformation::Log10)
       {
         m_cmbMinorValue->addItems(QStringList() << "0" << "2" << "4" << "8");
       }
