@@ -17,11 +17,11 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         try:
             ws3000=Load(Filename=rooth30_filename, OutputWorkspace='ws3000')
         except RuntimeError:
-            print 'could not find file: ' + rooth30_filename
+            raise RuntimeError('could not find file: ' + rooth30_filename)
         try:
             ws2000=Load(Filename=rooth20_filename, OutputWorkspace='ws2000')
         except RuntimeError:
-            print 'could not find file: ' + rooth20_filename
+            raise RuntimeError('could not find file: ' + rooth20_filename)
 
         #Correcting for Gain and offset of the detectors
         ws2000_corr=CreateWorkspace(A2000*ws2000.readX(0)[:]+B2000,ws2000.readY(0)[:])
