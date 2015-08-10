@@ -6,7 +6,7 @@
 ################################################################################
 import sys
 import os
-import numpy
+import csv
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
@@ -69,9 +69,6 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.change_data_access_mode)
 
-        # Tab 'Advanced'
-        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
-                     self.do_browse_local_cache_dir)
 
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_plotRawPt, QtCore.SIGNAL('clicked()'),
@@ -82,6 +79,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_nextPtNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_next_pt_raw)
+
+        # Tab 'Advanced'
+        self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_local_cache_dir)
+
+        # Menu
+        self.connect(self.ui.actionSave_Session, QtCore.SIGNAL('triggered()'),
+                     self.save_current_session)
+        self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
+                     self.load_session)
 
         # Tab ...
 
@@ -119,13 +126,18 @@ class MainWindow(QtGui.QMainWindow):
 
         # Control
         self._myControl = r4c.CWSCDReductionControl(self._instrument)
+        self._allowDownload = True
 
         # Initial setup
+        self.ui.tabWidget.setCurrentIndex(0)
+
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.lineEdit_localSpiceDir.setEnabled(False)
         self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+
+
 
         return
 
@@ -142,10 +154,16 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_localSpiceDir.setEnabled(True)
             self.ui.pushButton_browseLocalDataDir.setEnabled(True)
             self.ui.lineEdit_url.setEnabled(False)
+            self.ui.lineEdit_localSrcDir.setEnabled(False)
+            self.ui.pushButton_browseLocalCache.setEnabled(False)
+            self._allowDownload = False
         else:
             self.ui.lineEdit_localSpiceDir.setEnabled(False)
             self.ui.pushButton_browseLocalDataDir.setEnabled(False)
             self.ui.lineEdit_url.setEnabled(True)
+            self.ui.lineEdit_localSrcDir.setEnabled(True)
+            self.ui.pushButton_browseLocalCache.setEnabled(True)
+            self._allowDownload = True
 
         return
 
@@ -172,12 +190,20 @@ class MainWindow(QtGui.QMainWindow):
         local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
                                                                      'Get Local Cache Directory',
                                                                      self._homeSaveDir))
-        if os.access(local_cache_dir, os.W_OK) is False:
-            error_message = 'Directory %s is not writable.' % local_cache_dir
+
+        # Set local directory to control
+        status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
+        if status is False:
             self.pop_one_button_dialog(error_message)
             return
 
+        # Synchronize to local data/spice directory and local cache directory
+        if str(self.ui.lineEdit_localSpiceDir.text()) != '':
+            prev_dir = str(self.ui.lineEdit_localSrcDir.text())
+            self.pop_one_button_dialog('Local data directory was set up as %s' %
+                                       prev_dir)
         self.ui.lineEdit_localSrcDir.setText(local_cache_dir)
+        self.ui.lineEdit_localSpiceDir.setText(local_cache_dir)
 
         return
 
@@ -186,11 +212,16 @@ class MainWindow(QtGui.QMainWindow):
         """
         src_spice_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Directory',
                                                                    self._homeSrcDir))
+        # Set local data directory to controller
+        status, error_message = self._myControl.set_local_data_dir(src_spice_dir)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
+            return
+
         self._homeSrcDir = src_spice_dir
         self.ui.lineEdit_localSpiceDir.setText(src_spice_dir)
 
         return
-
 
     def doBrowseSaveDir(self):
         """ Browse the local directory to save the data
@@ -223,21 +254,17 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog(scan_list)
         else:
             # Get all scans
+            # FIXME - Implement all scan case
             scan_list = fcutil.get_scans_list(server_url, exp_no, return_list=True)
         self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
 
         # Check location
         destination_dir = str(self.ui.lineEdit_localSrcDir.text())
-        if os.path.exists(destination_dir) is False:
-            self.pop_one_button_dialog('Destination directory %s cannot be found.' % destination_dir)
-            return
+        status, error_message = self._myControl.set_local_data_dir(destination_dir)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
         else:
-            if os.access(destination_dir, os.W_OK) is False:
-                self.pop_one_button_dialog('Destination directory %s is not writable.' % destination_dir)
-                return
-            else:
-                self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
-        self._myControl.set_local_cache(destination_dir)
+            self.pop_one_button_dialog('Spice files will be downloaded to %s.' % destination_dir)
 
         # Set up myControl for downloading data
         exp_no = int(self.ui.lineEdit_exp.text())
@@ -400,6 +427,58 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def save_current_session(self, filename=None):
+        """ Save current session/value setup to
+        :return:
+        """
+        # Set up dictionary
+        save_dict = {}
+        save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
+        save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
+
+        save_dict['comboBox_mode'] = self.ui.comboBox_mode.currentIndex()
+
+        # Save to csv file
+        if filename is None:
+            filename = 'session_backup.csv'
+        ofile = open(filename, 'w')
+        writer = csv.writer(ofile)
+        for key, value in save_dict.items():
+            writer.writerow([key, value])
+        ofile.close()
+
+        return
+
+    def load_session(self, filename=None):
+        """
+        To read it back:
+        :param filename:
+        :return:
+        """
+        # TODO - Doc!
+        if filename is None:
+            filename = 'session_backup.csv'
+
+        in_file = open(filename, 'r')
+        reader = csv.reader(in_file)
+        my_dict = dict(x for x in reader)
+
+        # ...
+        for key, value in my_dict.items():
+            if key.startswith('lineEdit') is True:
+                self.ui.__getattribute__(key).setText(value)
+            elif key.startswith('comboBox') is True:
+                self.ui.__getattribute__(key).setCurrentIndex(int(value))
+            else:
+                self.pop_one_button_dialog('Error! Widget name %s is not supported' % key)
+        # END-FOR
+
+        # ...
+        self._myControl.set_local_data_dir(str(self.ui.lineEdit_localSpiceDir.text()))
+
+        return
+
+
     #---------------------------------------------------------------------------
     # Private event handling methods
     #---------------------------------------------------------------------------
@@ -480,20 +559,31 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot raw workspace from XML file for a measurement/pt.
         """
         # Load Data including SPICE scan file (necessary???) and Pt's xml file
-        status, error_message = self._myControl.load_spice_scan_file(exp_no)
-        if status is False:
+        status, error_message = self._myControl.load_spice_scan_file(exp_no, scan_no)
+        if status is False and self._allowDownload is False:
             self.pop_one_button_dialog(error_message)
             return
+        elif status is False and self._allowDownload is True:
+            status, error_message = self._myControl.download_spice_file(exp_no, scan_no)
+            if status is False:
+                self.pop_one_button_dialog(error_message)
+                return
 
-        status, error_message = self._myControl.load_spice_xml_file(scan_no, pt_no)
+        status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
         if status is False:
-            self.pop_one_button_dialog(error_message)
-            return
+            if self._allowDownload is True:
+                status, error_message = self._myControl.download_spice_xml_file(exp_no, scan_no)
+                if status is False:
+                    self.pop_one_button_dialog(error_message)
+                    return
+            else:
+                self.pop_one_button_dialog(error_message)
 
         # Convert a list of vector to 2D numpy array for imshow()
         # Get data and plot
-        raw_det_data = self._myControl.get_raw_detector_counts(scan_no, pt_no)
-        self.ui.graphicsView_Raw.addPot2D(raw_det_data, xmin=0, xmax=256, ymin=0, ymax=256, holdprev=False)
+        raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
+        self.ui.graphicsView.clearCanvas()
+        self.ui.graphicsView.addPlot2D(raw_det_data, xmin=0, xmax=256, ymin=0, ymax=256, holdprev=False)
 
         return
 
@@ -516,6 +606,7 @@ class MainWindow(QtGui.QMainWindow):
                     error_message += 'Value %s is not a proper integer.\n' % str_value
                 else:
                     integer_list.append(int_value)
+                    print 'Value %s to %d' % (str_value, int_value)
             # END-TRY
         # END-FOR
 

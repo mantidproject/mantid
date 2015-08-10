@@ -63,7 +63,7 @@ def setExperimentInfo(step):
 
     wkflow.set_server_url('http://neutron.ornl.gov/user_data/hb3a/')
     wkflow.setWebAccessMode('download')
-    wkflow.set_local_cache('./temp/')
+    wkflow.set_local_data_dir('./temp/')
 
     wkflow.set_exp_number(355)
 

@@ -1,11 +1,17 @@
 ################################################################################
 #
-# Controlling class 
+# Controlling class
+#
+# == Data download and storage ==
+# - Local data storage (local-mode)
+# - Download from internet to cache (download-mode)
 #
 ################################################################################
 import os
 import sys
 import urllib2
+
+import numpy
 
 try:
     import mantid
@@ -25,6 +31,8 @@ import mantid.simpleapi as api
          
 DebugMode = True
 
+DET_X_SIZE = 256
+DET_Y_SIZE = 256
 
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
@@ -69,15 +77,16 @@ class CWSCDReductionControl(object):
                                                                                   str(type(instrument_name))))
 
         # Experiment number, data storage
-        self._expNumber = 0
+        # No Use/Confusing: self._expNumber = 0
 
         self._dataDir = "/tmp"
-        self._localCacheDir = None
 
         self._myServerURL = ''
 
         # Container for loaded workspaces 
         self._spiceTableDict = {}
+        # Container for loaded raw pt workspace
+        self._rawDataDict = {}
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         self._expDataDict = {}
 
@@ -257,7 +266,7 @@ class CWSCDReductionControl(object):
             return False, "Unable to locate scan %s/pt %s" % (str(scanno), str(ptno))
 
         # 
-        mdwksp = slef._getMDWorkspace(runnumber)
+        mdwksp = self._getMDWorkspace(runnumber)
         
         peakws = api.FindPeaksMD(InputWorkspace=mdwksp)
 
@@ -274,7 +283,7 @@ class CWSCDReductionControl(object):
 
         return True, peakinfo
 
-    def get_raw_detector_counts(self, scan_no, pt_no):
+    def get_raw_detector_counts(self, exp_no, scan_no, pt_no):
         """
         Get counts on raw detector
         :param scan_no:
@@ -282,36 +291,17 @@ class CWSCDReductionControl(object):
         :return: boolean, 2D numpy data
         """
         # Get workspace (in memory or loading)
-        status, ret_obj = self._locate_raw_det_counts(scan_no, pt_no)
-        if status is False:
-            error_message = ret_obj
-        else:
-            status, error_message = self.load_spice_xml_file()
+        raw_ws = self._get_raw_workspace(exp_no, scan_no, pt_no)
+        if raw_ws is None:
+            return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
 
-        # TODO - FROM HERE!
-        # QUESTION: SHALL LOAD/FIND FROM MEMORY BE HIDDEN BY MYCONTROL CLASS FROM GUI?
-        #
+        # Convert to numpy array
+        array2d = numpy.ndarray(shape=(DET_X_SIZE, DET_Y_SIZE), dtype='float')
+        for i in xrange(DET_X_SIZE):
+            for j in xrange(DET_Y_SIZE):
+                array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
 
-        '''
-        xmlwsname = self._xmlwsbasename + "_%d" % (pt)
-        if self._xmlwkspdict.has_key(xmlwsname) is False:
-            self._logError('Pt %d does not does not exist.' % (pt))
-        xmlws = self._xmlwkspdict[xmlwsname]
-        self._currPt = xmlws
-        '''
-
-        self._plot_raw_xml_2d(self._currPt)
-
-
-        numspec = xmlws.getNumberHistograms()
-        vecylist = []
-        for iws in xrange(len(numspec)):
-            vecy = xmlws.readY(0)
-            vecylist.append(vecy)
-        # ENDFOR(iws)
-
-        # plot
-        self._plot2DData(vecylist)
+        return array2d
 
     def indexPeaks(self, srcpeakws, targetpeakws):
         """ Index peaks in a peak workspace by UB matrix
@@ -340,13 +330,18 @@ class CWSCDReductionControl(object):
 
         return True, ""
 
-    def load_spice_scan_file(self, scan_no, spice_file_name=Non):
+    def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
+
+        :param scan_no:
+        :param spice_file_name:
+        :return:
         """
+
         # Form standard name for a SPICE file if name is not given
         if spice_file_name is None:
-            spice_file_name = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat' % (self._expNumber, scan_no))
-        out_ws_name = 'Table_Exp%d_Scan%04d' % (self._expNumber, scan_no)
+            spice_file_name = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat' % (exp_no, scan_no))
+        out_ws_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
 
         # Load SPICE file
         try:
@@ -357,31 +352,45 @@ class CWSCDReductionControl(object):
             return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(e))
 
         # Store
-        self._spiceTableDict[scan_no] = spice_table_ws
+        self._add_spice_workspace(exp_no, scan_no, spice_table_ws)
 
-        return True, spice_table_ws
+        return True, ''
 
-    def load_spice_xml_file(self, scan_no, pt_no):
-        """ Load SPICE's XML file to
+    def load_spice_xml_file(self, exp_no, scan_no, pt_no):
+        """
+        Load SPICE's XML file to
+        :param scan_no:
+        :param pt_no:
+        :return:
         """
         # Form XMIL file as ~/../HB3A_exp355_scan%04d_%04d.xml'%(scan_no, pt)
-        xml_file_name = os.path.join(self._dataDir, 'HB3A_exp355_scan%04d_%04d.xml' % (scan_no, pt_no))
+        xml_file_name = os.path.join(self._dataDir, 'HB3A_exp%d_scan%04d_%04d.xml' % (exp_no, scan_no, pt_no))
 
         # Load SPICE Pt. file
+        spice_table_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
         try:
             ret_obj = api.LoadSpiceXML2DDet(Filename=xml_file_name,
                                             OutputWorkspace='s%04d_%04d'%(scan_no, pt_no),
                                             DetectorGeometry='256,256',
-                                            SpiceTableWorkspace='Table_355_%04d' % scan_no,
+                                            SpiceTableWorkspace=spice_table_name,
                                             PtNumber=pt_no)
         except RuntimeError as e:
             return False, str(e)
 
         pt_ws = ret_obj
 
+        # Add data storage
+        self._add_raw_workspace(exp_no, scan_no, pt_no, pt_ws)
+
         return True, pt_ws
 
     def process_pt_wksp(self, scan_no, pt_no):
+        """
+
+        :param scan_no:
+        :param pt_no:
+        :return:
+        """
         """
         """
         # Rebin in momentum space: UB matrix only
@@ -405,12 +414,19 @@ class CWSCDReductionControl(object):
 
         return True, processed_ws
 
-    def import_data_to_mantid(self, scan_no, pt_no):
+    def import_data_to_mantid(self, exp_no, scan_no, pt_no):
+        """
+
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :return:
+        """
         """
         """
         # Check existence of SPICE workspace
         if self._spiceTableDict.has_key(scan_no) is False:
-            status, ret_obj = self.load_spice_scan_file(scan_no)
+            status, ret_obj = self.load_spice_scan_file(exp_no, scan_no)
             if status is False:
                 return False, ret_obj
 
@@ -421,6 +437,10 @@ class CWSCDReductionControl(object):
         return True, ''
 
     def groupWS(self):
+        """
+
+        :return:
+        """
         """
         """
         inputws = ''
@@ -434,6 +454,11 @@ class CWSCDReductionControl(object):
         GroupWorkspaces(InputWorkspaces=inputws, OutputWorkspace='Group_exp0355_scan%04d'%(scanno))
 
     def set_server_url(self, server_url):
+        """
+
+        :param server_url:
+        :return:
+        """
         """ Set data server's URL
         """
         # Server URL must end with '/'
@@ -456,6 +481,11 @@ class CWSCDReductionControl(object):
         return is_url_good
 
     def setWebAccessMode(self, mode):
+        """
+
+        :param mode:
+        :return:
+        """
         """ Set data access mode form server
         """
         if isinstance(mode, str) is False:
@@ -468,33 +498,41 @@ class CWSCDReductionControl(object):
 
         return
 
-    def set_local_cache(self, localdir):
-        """ Set local cache diretory
+    def set_local_data_dir(self, local_dir):
         """
-        # TODO Doc : ..., localdir is ...
-
-        # FIXME: (Improvement) move the algorithm to work with destination dir from reduce4circleGUI.do_download_spice_data here!
-
+        Set local data storage
+        :param local_dir:
+        :return:
+        """
         # Get absolute path 
-        if os.path.isabs(localdir) is True: 
-            self._localCacheDir = localdir
-        else:
-           cwd = os.getcwd() 
-           self._localCacheDir = os.path.join(cwd, localdir)
+        if os.path.isabs(local_dir) is False:
+            # Input is relative path to current working directory
+            cwd = os.getcwd()
+            local_dir = os.path.join(cwd, local_dir)
 
-        # Create cache directory
-        if os.path.exists(self._localCacheDir) is False:
-            os.mkdir(self._localCacheDir)
-            self._rmdirFlag = True
+        # Create cache directory if necessary
+        if os.path.exists(local_dir) is False:
+            try:
+                os.mkdir(local_dir)
+            except OSError as e:
+                return False, str(e)
 
-        # Synchronize with data directory
-        self._dataDir = self._localCacheDir
+        # Check whether the target is writable
+        if os.access(local_dir, os.W_OK) is False:
+            return False, 'Specified local data directory %s is not writable.' % local_dir
 
-        return os.path.exists(self._localCacheDir)
+        # Successful
+        self._dataDir = local_dir
+
+        return True, ''
 
     def set_exp_number(self, expno):
-        """ Set experiment number
         """
+
+        :param expno:
+        :return:
+        """
+
         # TODO : need some verification on input expno
         try:
             self._expNumber = int(expno)
@@ -503,9 +541,60 @@ class CWSCDReductionControl(object):
 
         return True
 
-    """
-    Private Methods
-    """
+    def _add_raw_workspace(self, exp_no, scan_no, pt_no, raw_ws):
+        """
+        """
+        if self._rawDataDict.has_key(exp_no) is False:
+            self._rawDataDict[exp_no] = {}
+
+        if self._rawDataDict[exp_no].has_key(scan_no) is False:
+            self._rawDataDict[exp_no][scan_no] = {}
+
+        self._rawDataDict[exp_no][scan_no][pt_no] = raw_ws
+
+        return
+
+    def _add_md_workspace(self, exp_no, scan_no, pt_no, md_ws):
+        """
+        """
+
+    def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
+        """
+        """
+        if self._spiceTableDict.has_key(exp_no) is False:
+            self._spiceTableDict[exp_no] = {}
+
+        self._spiceTableDict[exp_no][scan_no] = spice_table_ws
+
+        return
+
+    def _get_spice_workspace(self, exp_no, scan_no):
+        """
+        """
+        try:
+            ws = self._spiceTableDict[exp_no][scan_no]
+        except KeyError:
+            return None
+
+        return ws
+
+    def _get_raw_workspace(self, exp_no, scan_no, pt_no):
+        """
+        """
+        try:
+            ws = self._rawDataDict[exp_no][scan_no][pt_no]
+        except KeyError:
+            return None
+
+        return ws
+
+    def _get_md_workspace(self, exp_no, scan_no, pt_no):
+        """
+        """
+
+        return
+
+
     def _getPtListFromTable(self, spicetable):
         # TODO Doc
         """
