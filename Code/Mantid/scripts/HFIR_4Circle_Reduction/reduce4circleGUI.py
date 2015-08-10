@@ -78,10 +78,10 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_plot_pt_raw)
 
         self.connect(self.ui.pushButton_prevPtNumber, QtCore.SIGNAL('clicked()'),
-                     self.doPlotPrevScanPt)
+                     self.do_plot_prev_pt_raw)
 
         self.connect(self.ui.pushButton_nextPtNumber, QtCore.SIGNAL('clicked()'),
-                     self.doPlotNextScanPt)
+                     self.do_plot_next_pt_raw)
 
         # Tab ...
 
@@ -310,45 +310,55 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
     def do_plot_pt_raw(self):
         """ Plot the Pt. 
         """
         # Get measurement pt and the file number
-        # TODO : make it a method such that to get integer numbers
-        exp_no = int(self.ui.lineEdit_exp.text())
-        scan_no = int(self.ui.lineEdit_run.text())
-        pt_no = int(self.ui.lineEdit_rawDataPtNo.text())
+        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
+                                                       self.ui.lineEdit_run,
+                                                       self.ui.lineEdit_rawDataPtNo])
+        if status is True:
+            exp_no = ret_obj[0]
+            scan_no = ret_obj[1]
+            pt_no = ret_obj[2]
+        else:
+            self.pop_one_button_dialog(ret_obj)
+            return
 
-        #
-
-        '''
-        xmlwsname = self._xmlwsbasename + "_%d" % (pt)
-        if self._xmlwkspdict.has_key(xmlwsname) is False:
-            self._logError('Pt %d does not does not exist.' % (pt))
-        xmlws = self._xmlwkspdict[xmlwsname]
-        self._currPt = xmlws
-        '''
-
-        self._plot_raw_xml_2d(self._currPt)
+        # Call to plot 2D
+        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
 
         return
-
         
-    def doPlotPrevScanPt(self):
+    def do_plot_prev_pt_raw(self):
         """ Plot the Pt. 
         """
-        # get measurement pt and the file number
-        curindex = self._wkspNameList.index(self._currPt)
-        prevwsname = self._wkspNameList[curindex-1]
-        self._currPt = prevwsname
+        # Get measurement pt and the file number
+        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
+                                                       self.ui.lineEdit_run,
+                                                       self.ui.lineEdit_rawDataPtNo])
+        if status is True:
+            exp_no = ret_obj[0]
+            scan_no = ret_obj[1]
+            pt_no = ret_obj[2]
+        else:
+            self.pop_one_button_dialog(ret_obj)
+            return
 
-        self._plot_raw_xml_2d(self._currPt)
+        # Previous one
+        pt_no -= 1
+        if pt_no <= 0:
+            self.pop_one_button_dialog('Pt. = 1 is the first one.')
+            return
+        else:
+            self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
+
+        # Plot
+        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
 
         return
 
-
-    def doPlotNextScanPt(self):
+    def do_plot_next_pt_raw(self):
         """ Plot the Pt. 
         """
         # get measurement pt and the file number
@@ -380,7 +390,6 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog("Unable to access %s.  Check internet access." % url)
 
         return
-
 
     def pop_one_button_dialog(self, message):
         """ Pop up a one-button dialog
@@ -466,25 +475,52 @@ class MainWindow(QtGui.QMainWindow):
         # ENDIF
 
         return
-        
 
     def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
         """ Plot raw workspace from XML file for a measurement/pt.
         """
-        # FIXME : Continue from here!!!
-        # 1. Put LoadSpiceAscii() in Control class
-        # 2. Convert a list of vector to 2D numpy array for imshow()
-        # Get data
-        numspec = xmlws.getNumberHistograms()
-        vecylist = []
-        for iws in xrange(len(numspec)): 
-            vecy = xmlws.readY(0)
-            vecylist.append(vecy)
-        # ENDFOR(iws)
+        # Load Data including SPICE scan file (necessary???) and Pt's xml file
+        status, error_message = self._myControl.load_spice_scan_file(exp_no)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
+            return
 
-        # plot 
-        self._plot2DData(vecylist)
+        status, error_message = self._myControl.load_spice_xml_file(scan_no, pt_no)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
+            return
+
+        # Convert a list of vector to 2D numpy array for imshow()
+        # Get data and plot
+        raw_det_data = self._myControl.get_raw_detector_counts(scan_no, pt_no)
+        self.ui.graphicsView_Raw.addPot2D(raw_det_data, xmin=0, xmax=256, ymin=0, ymax=256, holdprev=False)
 
         return
 
+    def _parse_integers_editor(self, line_edit_list):
+        """
+        :param line_edit_list:
+        :return: (True, list of integers); (False, error message)
+        """
+        error_message = ''
+        integer_list = []
 
+        for line_edit in line_edit_list:
+            try:
+                str_value = str(line_edit.text()).strip()
+                int_value = int(str_value)
+            except ValueError as e:
+                error_message += 'Unable to parse to integer. %s\n' % (str(e))
+            else:
+                if str_value != '%d' % int_value:
+                    error_message += 'Value %s is not a proper integer.\n' % str_value
+                else:
+                    integer_list.append(int_value)
+            # END-TRY
+        # END-FOR
+
+        if len(error_message) > 0:
+            self.pop_one_button_dialog(error_message)
+            return False, error_message
+
+        return True, integer_list
