@@ -16,7 +16,7 @@ class ISISRawHistNexus(stresstesting.MantidStressTest):
 
     def runTest(self):
         # ISIS raw hist nexus file with A1_window at location (0,3,0)
-        #pylint: disable=(unused-variable
+        #pylint: disable=unused-variable
         MAPS00018314_raw_ISIS_hist = Load('MAPS00018314.nxs')
 
     def validate(self):

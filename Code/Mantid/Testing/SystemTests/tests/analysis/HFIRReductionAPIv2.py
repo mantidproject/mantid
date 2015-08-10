@@ -8,29 +8,28 @@ import os
 
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
-    "BioSANS_test_data_Iq.xml",
-    "BioSANS_test_data_Iq.txt",
-    "BioSANS_test_data_Iqxy.dat"]
-    for file in Files:
-        absfile = FileFinder.getFullPath(file)
+             "BioSANS_test_data_Iq.xml",
+             "BioSANS_test_data_Iq.txt",
+             "BioSANS_test_data_Iqxy.dat"]
+    for filename in Files:
+        absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
 
 class HFIRReductionAPIv2(stresstesting.MantidStressTest):
+    """
+        Simple reduction example
+    """
 
     def cleanup(self):
         do_cleanup()
         return True
 
-    """
-        Simple reduction example
-    """
-
     def runTest(self):
 
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -47,18 +46,17 @@ class HFIRReductionAPIv2(stresstesting.MantidStressTest):
         return "BioSANS_test_data_Iq", "HFIRReduction.nxs"
 
 class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
+    """
+        Test absolute scaling using a reference data set
+    """
 
     def cleanup(self):
         do_cleanup()
         return True
 
-    """
-        Test absolute scaling using a reference data set
-    """
-
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         SolidAngle(detector_tubes=True)
         MonitorNormalization()
@@ -76,18 +74,17 @@ class HFIRAbsoluteScalingReference(stresstesting.MantidStressTest):
         return "BioSANS_test_data_Iq", "HFIRAbsoluteScalingReference.nxs"
 
 class HFIRAbsoluteScalingValue(stresstesting.MantidStressTest):
+    """
+        Test absolute scaling using a reference data set
+    """
 
     def cleanup(self):
         do_cleanup()
         return True
 
-    """
-        Test absolute scaling using a reference data set
-    """
-
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         SolidAngle(detector_tubes=True)
         MonitorNormalization()

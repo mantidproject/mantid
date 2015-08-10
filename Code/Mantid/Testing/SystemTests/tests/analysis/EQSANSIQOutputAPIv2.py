@@ -9,29 +9,29 @@ import os
 
 def do_cleanup():
     Files = ["EQSANS_4061_event_reduction.log",
-    "EQSANS_1466_event_reduction.log"]
-    for file in Files:
-        absfile = FileFinder.getFullPath(file)
+             "EQSANS_1466_event_reduction.log"]
+    for filename in Files:
+        absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
 
 class EQSANSIQOutput(stresstesting.MantidStressTest):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
 
+    def cleanup(self):
+        do_cleanup()
+        return True
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS()
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_1466_event.nxs")
@@ -59,18 +59,18 @@ class EQSANSIQOutput(stresstesting.MantidStressTest):
         return "EQSANS_1466_event_Iq", 'EQSANSIQOutput.nxs'
 
 class EQSANSBeamMonitor(stresstesting.MantidStressTest):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
 
+    def cleanup(self):
+        do_cleanup()
+        return True
+
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS()
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_1466_event.nxs")
@@ -89,14 +89,14 @@ class EQSANSBeamMonitor(stresstesting.MantidStressTest):
         return "EQSANS_1466_event_Iq", 'EQSANSBeamMonitor.nxs'
 
 class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the Q resolution output of is correct
     """
+
+    def cleanup(self):
+        do_cleanup()
+        return True
 
     def runTest(self):
         """
@@ -104,8 +104,8 @@ class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
             even when background is larger than signal and I(q) is negative.
             (Non-physical value that's an experimental edge case)
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS()
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_1466_event.nxs")
@@ -126,14 +126,14 @@ class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
         return True
 
 class EQSANSDQOutput(stresstesting.MantidStressTest):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the Q resolution output of is correct
     """
+
+    def cleanup(self):
+        do_cleanup()
+        return True
 
     def runTest(self):
         """
@@ -141,8 +141,8 @@ class EQSANSDQOutput(stresstesting.MantidStressTest):
             even when background is larger than signal and I(q) is negative.
             (Non-physical value that's an experimental edge case)
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS()
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_1466_event.nxs")
@@ -192,14 +192,14 @@ class EQSANSDQOutput(stresstesting.MantidStressTest):
         return output
 
 class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the Q resolution output of is correct
     """
+
+    def cleanup(self):
+        do_cleanup()
+        return True
 
     def runTest(self):
         """
@@ -207,8 +207,8 @@ class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
             even when background is larger than signal and I(q) is negative.
             (Non-physical value that's an experimental edge case)
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS()
         SetBeamCenter(96.29, 126.15)
         AppendDataFile("EQSANS_4061_event.nxs")

@@ -132,12 +132,12 @@ class POLDIFitPeaks2DIntegratedIntensities(stresstesting.MantidStressTest):
         # Run the same analysis twice, once with integrated and once with maximum intensities
         # Since a Gaussian is used, the integration can be checked numerically.
         fit2d, fit1d, peaks_ref_2d = PoldiFitPeaks2D('si_data_6904', peaks_ref,
-                                                           OutputIntegratedIntensities=False,
-                                                           MaximumIterations=100)
+                                                     OutputIntegratedIntensities=False,
+                                                     MaximumIterations=100)
 
         fit2d, fit1d, peaks_ref_2d_integrated = PoldiFitPeaks2D('si_data_6904', peaks_ref,
-                                                                      OutputIntegratedIntensities=True,
-                                                                      MaximumIterations=100)
+                                                                OutputIntegratedIntensities=True,
+                                                                MaximumIterations=100)
 
         self.assertEquals(peaks_ref_2d.rowCount(), peaks_ref_2d_integrated.rowCount())
 
