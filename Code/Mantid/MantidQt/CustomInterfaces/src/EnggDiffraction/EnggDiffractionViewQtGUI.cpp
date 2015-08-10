@@ -23,6 +23,8 @@ namespace CustomInterfaces {
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
+const double EnggDiffractionViewQtGUI::s_defaultRebinWidth = -0.0005;
+
 /**
  * Default constructor.
  *
@@ -84,21 +86,6 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
-  QString path =
-      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  m_calibSettings.m_inputDirCalib = path.toStdString();
-  m_calibSettings.m_inputDirRaw = path.toStdString();
-  m_calibSettings.m_pixelCalibFilename = "";
-
-  // +scripts/Engineering/template_ENGINX_241391_236516_North_and_South_banks.par
-  Poco::Path templ =
-      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
-  templ = templ.makeParent();
-  templ.append("scripts");
-  templ.append("Engineering");
-  templ.append("template_ENGINX_241391_236516_North_and_South_banks.par");
-  m_calibSettings.m_templateGSAS_PRM = templ.toString();
-
   // line edits that display paths and the like
   m_uiTabSettings.lineEdit_input_dir_calib->setText(
       QString::fromStdString(m_calibSettings.m_inputDirCalib));
@@ -135,9 +122,67 @@ void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
           SLOT(close()));
 }
 
-void EnggDiffractionViewQtGUI::readSettings() {}
+void EnggDiffractionViewQtGUI::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
-void EnggDiffractionViewQtGUI::saveSettings() const {}
+  QString lastPath =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+
+  m_currentCalibFilename =
+      qs.value("current-calib-filename", "").toString().toStdString();
+
+  // TODO: this should become << >> operators on EnggDiffCalibSettings
+  m_calibSettings.m_inputDirCalib =
+      qs.value("input-dir-calib-files", lastPath).toString().toStdString();
+  m_calibSettings.m_inputDirRaw =
+      qs.value("input-dir-raw-files", lastPath).toString().toStdString();
+  m_calibSettings.m_pixelCalibFilename =
+      qs.value("pixel-calib-filename", "").toString().toStdString();
+  // 'advanced' block
+  m_calibSettings.m_forceRecalcOverwrite =
+      qs.value("force-recalc-overwrite", false).toBool();
+  std::string templ = guessGSASTemplatePath();
+  m_calibSettings.m_templateGSAS_PRM =
+      qs.value("template-gsas-prm", QString::fromStdString(templ))
+          .toString()
+          .toStdString();
+  m_calibSettings.m_forceRecalcOverwrite =
+      qs.value("rebin-calib", s_defaultRebinWidth).toFloat();
+
+  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+  qs.endGroup();
+}
+
+void EnggDiffractionViewQtGUI::saveSettings() const {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  qs.setValue("current-calib-filename", "");
+
+  // TODO: this should become << >> operators on EnggDiffCalibSettings
+  qs.setValue("input-dir-calib-files", QString::fromStdString(m_calibSettings.m_inputDirCalib));
+  qs.setValue("input-dir-raw-files", QString::fromStdString(m_calibSettings.m_inputDirRaw));
+  qs.setValue("pixel-calib-filename", QString::fromStdString(m_calibSettings.m_pixelCalibFilename));
+  // 'advanced' block
+  qs.setValue("force-recalc-overwrite", m_calibSettings.m_forceRecalcOverwrite);
+  qs.setValue("template-gsas-prm", QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
+  qs.setValue("rebin-calib", m_calibSettings.m_rebinCalibrate);
+
+  qs.setValue("interface-win-geometry", saveGeometry());
+  qs.endGroup();
+}
+
+std::string EnggDiffractionViewQtGUI::guessGSASTemplatePath() const {
+  // +scripts/Engineering/template_ENGINX_241391_236516_North_and_South_banks.par
+  Poco::Path templ =
+      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectory();
+  templ = templ.makeParent();
+  templ.append("scripts");
+  templ.append("Engineering");
+  templ.append("template_ENGINX_241391_236516_North_and_South_banks.par");
+  return templ.toString();
+}
 
 void EnggDiffractionViewQtGUI::userWarning(const std::string &err,
                                            const std::string &description) {
@@ -174,10 +219,10 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   }
 
   QString filename = (QFileDialog::getOpenFileName(
-      this, tr("Open calibration file"), prevPath,
-      calExt));
+      this, tr("Open calibration file"), prevPath, calExt));
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(filename);
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+      filename);
 
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }

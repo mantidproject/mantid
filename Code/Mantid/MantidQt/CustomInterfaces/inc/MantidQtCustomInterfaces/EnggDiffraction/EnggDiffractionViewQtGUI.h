@@ -101,6 +101,7 @@ private:
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
   void doSetupTabSettings();
+  std::string guessGSASTemplatePath() const;
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
@@ -124,9 +125,15 @@ private:
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
-  EnggDiffCalibSettings m_calibSettings;
   // instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
+  // current calibration produced in the 'Calibration' tab
+  std::string m_currentCalibFilename;
+  // calibration settings - from/to the 'settings' tab
+  EnggDiffCalibSettings m_calibSettings;
+
+  /// for the 'Rebin' parameter of some Engg* algorithms
+  static const double s_defaultRebinWidth;
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
