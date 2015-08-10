@@ -62,6 +62,7 @@ Calibration Parameters
 ^^^^^^^^^^^^^^^^^^^^^^
 
 The calibration settings are organized in three blocks:
+
 1. Input directories
 2. Pixel calibration
 3. Advanced settings
@@ -78,12 +79,15 @@ The Following advanced settings are available to customize the
 behavior of this interface:
 
 Force recalculate
-  Vanadium corrections will be recalculated even if previous correction
-  results are available for the current Vanadium run number.
+  If this is enabled, Vanadium corrections will be recalculated even
+  if previous correction results are available for the current Vanadium
+  run number. This is not required unless a modification is done to the
+  original Vanadium run file, or there is a change in the algorithms
+  that calculate the corrections
 
 Tempalte .prm file
-  Use a different template file for the output GSAS IPAR that is
-  generated in the Calibration tab.
+  By changing this option you can Use a different template file for the
+  output GSAS IPAR that is generated in the Calibration tab.
 
 Rebin for Calibrate
   This sets a rebin width parameter that can be used by underlying
@@ -95,9 +99,10 @@ Algorithms
 
 Most of the functionality provided by this interface is based on the
 engineering diffraction Mantid algorithms (which are named with the
-prefix *Engg*. This includes :ref:`EnggCalibrate
+prefix *Engg*). This includes :ref:`EnggCalibrate
 <algm-EnggCalibrate>`, :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`, :ref:`Engg <algm-EnggCalibrateFull>`,
-explained in detail in the Mantid algorithm description.
+<algm-EnggCalibrateFull>`, :ref:`EnggFocus <algm-EnggFocus>` and
+several other algorithms, explained in detail in the Mantid algorithm
+description.
 
 .. categories:: Interfaces Diffraction
