@@ -1,9 +1,8 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
-from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
+from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D, FloatBoundedValidator
 import numpy as np
-from math import pi
 
 
 class DNSMergeRuns(PythonAlgorithm):
@@ -18,6 +17,9 @@ class DNSMergeRuns(PythonAlgorithm):
     sample_logs = properties_to_compare + ['wavelength', 'huber', 'T1', 'T2', 'Tsp', 'Ei']
     workspace_names = []
     wavelength = 0
+    xaxis = '2theta'
+    outws_name = None
+    tol = 0.05
 
     def category(self):
         """
@@ -43,8 +45,10 @@ class DNSMergeRuns(PythonAlgorithm):
         H_AXIS = ["2theta", "|Q|", "d-Spacing"]
         self.declareProperty("HorizontalAxis", "2theta", StringListValidator(H_AXIS),
                              doc="X axis in the merged workspace")
+        self.declareProperty("TwoThetaTolerance", 0.05, FloatBoundedValidator(lower=0.001, upper=1.0),
+                             doc="Hardware accuracy for 2Theta (degree).")
         self.declareProperty("Normalize", False, "If checked, the merged data will be normalized,"
-                             "otherwise the separate normalization workspace will be produced.")
+                             "otherwise the separate normalization workspace will be created.")
         return
 
     def _dimensions_valid(self):
@@ -182,45 +186,30 @@ class DNSMergeRuns(PythonAlgorithm):
         wl = wls[0]
         if wls.count(wl) == len(wls):
             self.wavelength = wl
+            self.log().information("The wavelength is " + str(self.wavelength) + " Angstrom.")
             return True
         else:
             message = "Cannot merge workspaces with different wavelength!"
             self.log().error(message)
             return False
 
-    def PyExec(self):
-        # Input
-        normalize = self.getProperty("Normalize").value
-        self.workspace_names = self.getProperty("WorkspaceNames").value
-        outws_name = self.getProperty("OutputWorkspace").valueAsStr
-        xaxis = self.getProperty("HorizontalAxis").value
-
-        self.log().information("Workspaces to merge: %i" % (len(self.workspace_names)))
-        if not self._can_merge():
-            message = "Impossible to merge given workspaces."
-            raise RuntimeError(message)
-
+    def _merge_workspaces(self):
+        """
+        merges given workspaces into one,
+        corresponding normalization workspaces are also merged
+        """
         arr = []
         arr_norm = []
         beamDirection = V3D(0, 0, 1)
-        wl = self.wavelength
-
-        for wsName in self.workspace_names:
-            if not api.AnalysisDataService.doesExist(wsName):
-                message = "Workspace " + wsName + " does not exist! Cannot merge."
-                self.log().error(message)
-                raise KeyError(message)
-            wsnormName = wsName + '_NORM'
-            if not api.AnalysisDataService.doesExist(wsnormName):
-                message = "Workspace " + wsnormName + " does not exist! Cannot merge."
-                self.log().error(message)
-                raise KeyError(message)
-
-            ws = api.AnalysisDataService.retrieve(wsName)
-            wsnorm = api.AnalysisDataService.retrieve(wsnormName)
+        # merge workspaces, existance has been checked by _can_merge function
+        for ws_name in self.workspace_names:
+            ws = api.AnalysisDataService.retrieve(ws_name)
+            wsnorm = api.AnalysisDataService.retrieve(ws_name + '_NORM')
             samplePos = ws.getInstrument().getSample().getPos()
             n_hists = ws.getNumberHistograms()
             two_theta = np.array([ws.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
+            # consider two_theta/tol +- 1 => two_theta +- tol as required
+            two_theta = np.rint(two_theta/self.tol)
             dataY = np.rot90(ws.extractY())[0]
             dataYnorm = np.rot90(wsnorm.extractY())[0]
             dataE = np.rot90(ws.extractE())[0]
@@ -230,35 +219,75 @@ class DNSMergeRuns(PythonAlgorithm):
                 arr_norm.append([two_theta[i], dataYnorm[i], dataEnorm[i]])
         data = np.array(arr)
         norm = np.array(arr_norm)
-        if xaxis == "2theta":
-            data[:, 0] = np.degrees(data[:, 0])
+        # sum up intensities for dublicated angles
+        data_sorted = data[np.argsort(data[:, 0])]
+        norm_sorted = norm[np.argsort(norm[:, 0])]
+        # unique values
+        uX = np.unique(data_sorted[:, 0])
+        if len(data_sorted[:, 0]) - len(uX) > 1:
+            arr = []
+            arr_norm = []
+            self.log().information("There are dublicated 2Theta angles in the dataset. Sum up the intensities.")
+            # we must sum up the values
+            for i in range(len(uX)):
+                idx = np.where(np.fabs(data_sorted[:, 0] - uX[i]) < 1e-4)
+                new_y = sum(data_sorted[idx][:, 1])
+                new_y_norm = sum(norm_sorted[idx][:, 1])
+                err = data_sorted[idx][:, 2]
+                err_norm = norm_sorted[idx][:, 2]
+                new_e = np.sqrt(np.dot(err, err))
+                new_e_norm = np.sqrt(np.dot(err_norm, err_norm))
+                arr.append([uX[i], new_y, new_e])
+                arr_norm.append([uX[i], new_y_norm, new_e_norm])
+            data = np.array(arr)
+            norm = np.array(arr_norm)
+
+        # define x axis
+        if self.xaxis == "2theta":
+            data[:, 0] = np.round(np.degrees(data[:, 0])*self.tol, 2)
             unitx = "Degrees"
-        elif xaxis == "|Q|":
-            data[:, 0] = np.fabs(4.0*pi*np.sin(data[:, 0])/wl)
+        elif self.xaxis == "|Q|":
+            data[:, 0] = np.fabs(4.0*np.pi*np.sin(data[:, 0]*self.tol)/self.wavelength)
             unitx = "MomentumTransfer"
-        elif xaxis == "d-Spacing":
-            data[:, 0] = np.fabs(0.5*wl/np.sin(data[:, 0]))
+        elif self.xaxis == "d-Spacing":
+            data[:, 0] = np.fabs(0.5*self.wavelength/np.sin(data[:, 0]*self.tol))
             unitx = "dSpacing"
         else:
-            message = "The value for X axis " + xaxis + " is invalid! Cannot merge."
+            message = "The value for X axis " + self.xaxis + " is invalid! Cannot merge."
             self.log().error(message)
             raise RuntimeError(message)
 
         data_sorted = data[np.argsort(data[:, 0])]
         api.CreateWorkspace(dataX=data_sorted[:, 0], dataY=data_sorted[:, 1], dataE=data_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=outws_name)
+                            UnitX=unitx, OutputWorkspace=self.outws_name)
         norm[:, 0] = data[:, 0]
         norm_sorted = norm[np.argsort(norm[:, 0])]
         api.CreateWorkspace(dataX=norm_sorted[:, 0], dataY=norm_sorted[:, 1], dataE=norm_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=outws_name + '_NORM')
+                            UnitX=unitx, OutputWorkspace=self.outws_name + '_NORM')
+        return
 
-        outws = api.AnalysisDataService.retrieve(outws_name)
+    def PyExec(self):
+        # Input
+        normalize = self.getProperty("Normalize").value
+        self.workspace_names = self.getProperty("WorkspaceNames").value
+        self.outws_name = self.getProperty("OutputWorkspace").valueAsStr
+        self.xaxis = self.getProperty("HorizontalAxis").value
+        self.tol = np.radians(self.getProperty("TwoThetaTolerance").value)
+
+        self.log().information("Workspaces to merge: %i" % (len(self.workspace_names)))
+        # check whether given workspaces can be merged
+        if not self._can_merge():
+            message = "Impossible to merge given workspaces."
+            raise RuntimeError(message)
+
+        self._merge_workspaces()
+        outws = api.AnalysisDataService.retrieve(self.outws_name)
         api.CopyLogs(self.workspace_names[0], outws)
         api.RemoveLogs(outws, self.sample_logs)
 
         if normalize:
-            normws = api.AnalysisDataService.retrieve(outws_name + '_NORM')
-            api.Divide(LHSWorkspace=outws, RHSWorkspace=normws, OutputWorkspace=outws_name)
+            normws = api.AnalysisDataService.retrieve(self.outws_name + '_NORM')
+            api.Divide(LHSWorkspace=outws, RHSWorkspace=normws, OutputWorkspace=self.outws_name)
             api.DeleteWorkspace(normws)
 
         self.setProperty("OutputWorkspace", outws)
