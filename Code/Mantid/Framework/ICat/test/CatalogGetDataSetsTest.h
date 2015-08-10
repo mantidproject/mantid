@@ -20,45 +20,28 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-	void testInit()
-	{
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+  void testInit()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
-		TS_ASSERT_THROWS_NOTHING( datasets.initialize());
-		TS_ASSERT( datasets.isInitialized() );
-	}
+    TS_ASSERT_THROWS_NOTHING( datasets.initialize());
+    TS_ASSERT( datasets.isInitialized() );
+  }
 
-	void testgetDataFiles()
-	{	
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
+  void testgetDataFilesExecutes()
+  {
+    TS_ASSERT( ICatTestHelper::login() );
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
-	
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+    if(!datasets.isInitialized()) datasets.initialize();
+    datasets.setPropertyValue("InvestigationId","12576918");
+    datasets.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
 
-		if ( !searchobj.isInitialized() ) searchobj.initialize();
-		searchobj.setPropertyValue("StartRun", "100.0");
-		searchobj.setPropertyValue("EndRun", "102.0");
-		searchobj.setPropertyValue("Instrument","LOQ");
-		searchobj.setPropertyValue("OutputWorkspace","investigations");
-				
-		TS_ASSERT_THROWS_NOTHING(searchobj.execute());
-		TS_ASSERT( searchobj.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(datasets.execute());
+    TS_ASSERT( datasets.isExecuted() );
 
-		if(!datasets.isInitialized()) datasets.initialize();
-		datasets.setPropertyValue("InvestigationId","12576918");
-		datasets.setPropertyValue("OutputWorkspace","investigation");//selected invesigation
-		//		
-		TS_ASSERT_THROWS_NOTHING(datasets.execute());
-		TS_ASSERT( datasets.isExecuted() );
-	}
+    ICatTestHelper::logout();
+  }
 private:
-	CatalogLogin loginobj;
-	CatalogSearch searchobj;
-	//CatalogGetDataFiles datafiles;
-	CatalogGetDataSets datasets;
+  CatalogGetDataSets datasets;
 };
 #endif

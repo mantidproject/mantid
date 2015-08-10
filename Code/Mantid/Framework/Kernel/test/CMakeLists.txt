@@ -8,7 +8,7 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/NexusTestHelper.cpp ../../TestHelpers/src/LoggingCleaner.cpp )
 
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
-  target_link_libraries( KernelTest LINK_PRIVATE 
+  target_link_libraries( KernelTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             Kernel
             ${NEXUS_LIBRARIES}
             ${Boost_LIBRARIES}

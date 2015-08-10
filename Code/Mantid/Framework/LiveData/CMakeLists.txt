@@ -84,7 +84,7 @@ if ( WIN32 )
   set ( WINSOCK ws2_32 )
 endif ()
 
-target_link_libraries ( LiveData LINK_PRIVATE ${MANTIDLIBS} ${WINSOCK} )
+target_link_libraries ( LiveData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

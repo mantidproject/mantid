@@ -9,27 +9,32 @@
 Description
 -----------
 
-This algorithm is a loader from simulation data from the nMOLDYN software,
-simulations can be loaded form either a plain ASCII file or CDL file.
+This algorithm is used to load and process simualtion data from the nMOLDYN
+package.
 
-When loading from a CDL file one or multiple functions can be loaded, when
-loading a single function an instrument resolution workspace can be provided
-which the loaded function is convoluted with to allow comparison with actual
-instrument data.
+Currently this supports loading the ``.cdl`` and ``.dat`` files created by
+version 3 of nMOLDYN (using the :ref:`LoadNMoldyn3Ascii
+<algm-LoadNMoldyn3Ascii>` algorithm).
 
-When loading from ASCII function selection and convolution with an instrument
-resolution are unavailable.
+When loading from a ``.cdl`` file from nMOLDYN 3 one or multiple functions can
+be loaded, when loading a single function an instrument resolution workspace can
+be provided which the loaded function is convoluted with to allow comparison
+with actual instrument data.
+
+When loading from a ``.dat`` file from nMOLDYN 3 function selection and
+convolution with an instrument resolution are unavailable.
 
 Usage
 -----
 
 .. include:: ../usagedata-note.txt
 
-**Example - Loading a simulation from a CDL file..**
+**Example - Loading a simulation from a CDL file.**
 
 .. testcode:: ExLoadCDLFile
 
-    out_ws_group = MolDyn(Filename='NaF_DISF.cdl', Functions=['Fqt-total', 'Sqw-total'])
+    out_ws_group = MolDyn(Filename='NaF_DISF.cdl',
+                          Functions=['Fqt-total', 'Sqw-total'])
 
     for ws_name in out_ws_group.getNames():
       print ws_name

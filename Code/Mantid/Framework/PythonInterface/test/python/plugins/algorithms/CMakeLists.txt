@@ -21,6 +21,7 @@ set ( TEST_PY_FILES
   EnggCalibrateTest.py
   EnggFitPeaksTest.py
   EnggFocusTest.py
+  EnggVanadiumCorrectionsTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -40,6 +41,7 @@ set ( TEST_PY_FILES
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  LoadNMoldyn3AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py
@@ -49,7 +51,6 @@ set ( TEST_PY_FILES
   MSDFitTest.py
   MuscatSofQWTest.py
   OSIRISDiffractionReductionTest.py
-  PDDetermineCharacterizationsTest.py
   ResNorm2Test.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py

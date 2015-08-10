@@ -70,8 +70,8 @@ void LoadMuonNexus::init() {
   auto mustBeNonNegative = boost::make_shared<BoundedValidator<int64_t>>();
   mustBeNonNegative->setLower(0);
   declareProperty("EntryNumber", (int64_t)0, mustBeNonNegative,
-                  "The particular entry number to read (default: Load all "
-                  "workspaces and creates a workspace group)");
+                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into one worskspace");
 
   std::vector<std::string> FieldOptions;
   FieldOptions.push_back("Transverse");

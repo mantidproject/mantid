@@ -858,12 +858,71 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       g_log.information() << "ScriptRepository update local json " << std::endl;
       updateLocalJson(file_path, entry); /// FIXME: performance!
 
+      // add the entry to the repository.json. The
+      // repository.json should change at the
+      // remote repository, and we could just download the new one, but
+      // we can not rely on the server updating it fast enough.
+      // So add to the file locally to avoid race condition.
+      RepositoryEntry &remote_entry = repo.at(file_path);
+      if (!published_date.empty())
+          remote_entry.pub_date = DateAndTime(published_date);
+      remote_entry.status = BOTH_UNCHANGED;
+      g_log.debug() << "ScriptRepository updating repository json " << std::endl;
+      updateRepositoryJson(file_path, remote_entry);
+
     } else
       throw ScriptRepoException(info, detail);
 
   } catch (Poco::Exception &ex) {
     throw ScriptRepoException(ex.displayText(), ex.className());
   }
+}
+
+/*
+* Adds an entry to .repository.json
+* This is necessary when uploading a file to keep .repository.json and
+* .local.json in sync, and thus display correct file status in the GUI.
+* Requesting an updated .repository.json from the server is not viable
+* at such a time as it would create a race condition.
+* @param path: relative path of uploaded file
+* @param entry: the entry to add to the json file
+*/
+void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
+                                               const RepositoryEntry &entry) {
+                                           
+  ptree repository_json;
+  std::string filename = std::string(local_repository).append(".repository.json");
+  read_json(filename, repository_json);
+
+  ptree::const_assoc_iterator it = repository_json.find(path);
+  if (it == repository_json.not_found()) {
+    boost::property_tree::ptree array;
+    array.put(std::string("author"),
+              entry.author);
+    array.put(std::string("description"),
+              entry.description);
+    std::string directory =
+        (const char *)((entry.directory) ? "true" : "false");
+    array.put(std::string("directory"),
+              directory);
+    array.put(std::string("pub_date"),
+              entry.pub_date.toFormattedString());
+    repository_json.push_back(
+        std::pair<std::string,
+                  boost::property_tree::basic_ptree<std::string, std::string>>(
+            path, array));
+  }
+  
+  g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
+  #if defined(_WIN32) || defined(_WIN64)
+    // set the .repository.json and .local.json not hidden to be able to edit it
+    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+  #endif
+    write_json(filename, repository_json);
+  #if defined(_WIN32) || defined(_WIN64)
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+  #endif
 }
 
 /**
@@ -951,10 +1010,8 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
 
     // prepare the request, and call doDeleteRemoteFile to request the server to
     // remove the file
-    std::string remote_delete = remote_upload;
-    boost::replace_all(remote_delete, "publish", "remove");
     std::stringstream answer;
-    answer << doDeleteRemoteFile(remote_delete, file_path, author, email,
+    answer << doDeleteRemoteFile(remote_upload, file_path, author, email,
                                  comment);
     g_log.debug() << "Answer from doDelete: " << answer.str() << std::endl;
 

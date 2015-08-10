@@ -114,6 +114,12 @@ def parseDetEffCorrFile(vancorrfname):
 
 def parseDetExclusionFile(detexludefilename):
     """ Parse excluded detectors file
+    Detector ID from standard HB2A detector exclusion file start from 0,
+    while in the other circumstance, it starts from 1.
+    Therefore Det ID output from here must be plus by 1.
+    Return :: 2-tuple
+      Success: Excluded detector IDs list, empty string
+      Fail: None, error message
     """
     try:
         defile = open(detexludefilename)
@@ -131,7 +137,7 @@ def parseDetExclusionFile(detexludefilename):
         terms = line.split()
         for term in terms:
             try:
-                detid = int(term)
+                detid = int(term) + 1
                 detexcludelist.append(detid)
             except ValueError:
                 break

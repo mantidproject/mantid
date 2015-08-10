@@ -11,8 +11,6 @@ set( CPACK_NSIS_DISPLAY_NAME "Mantid${CPACK_PACKAGE_SUFFIX}")
 set( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}")
 set( CPACK_NSIS_INSTALL_ROOT "C:")
-set( CPACK_PACKAGE_EXECUTABLES "MantidPlot;MantidPlot")
-set( CPACK_NSIS_MENU_LINKS "bin\\\\MantidPlot.exe" "MantidPlot")
 set( CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/Images\\\\MantidPlot_Icon_32offset.png" )
 set( CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}/Images\\\\MantidPlot_Icon_32offset.ico" )
 set( CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}/Images\\\\MantidPlot_Icon_32offset.ico" )
@@ -81,6 +79,7 @@ set ( MISC_CORE_DIST_DLLS
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll
+    libtcmalloc_minimal.dll
     muparser.dll
     mxml1.dll
     ssleay32.dll
@@ -162,114 +161,41 @@ install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/P
 install ( FILES ${CMAKE_LIBRARY_PATH}/boost_date_time-vc110-mt-1_52.lib DESTINATION UserAlgorithms )
 
 ###########################################################################
-# Environment variables
+# Startup files
 ###########################################################################
-# Release deployments do modify environmental variables, other deployments do not.
-if ( CPACK_PACKAGE_SUFFIX STREQUAL "" )
-    # On install
-    set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "Push \\\"MANTIDPATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/mantidpython.bat DESTINATION bin )
 
-        Push \\\"PATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+###########################################################################
+# Extra NSIS commands for shortcuts, start menu items etc
+# Three backward slashes are required to escape a character to get the
+# character through to NSIS.
+###########################################################################
+# On install. The blank lines seem to be required or it doesn't create the shortcut
+set (CPACK_NSIS_CREATE_ICONS_EXTRA "
+  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
 
-        Push \\\"PATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
+")
+set (CPACK_NSIS_DELETE_ICONS_EXTRA "
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPython.lnk\\\"
+")
+# The blank lines seem to be required or it doesn't create the shortcut
+set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
+  CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
 
-        Push \\\"PATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\${PLUGINS_DIR}\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+  CreateShortCut \\\"$DESKTOP\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
 
-        Push \\\"PV_PLUGIN_PATH\\\"
-        Push \\\"A\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\\${PVPLUGINS_DIR}\\\"
-        Call EnvVarUpdate
-        Pop  \\\$0
+  CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
-        CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
-
-        CreateDirectory \\\"$INSTDIR\\\\logs\\\"
-
-        CreateDirectory \\\"$INSTDIR\\\\docs\\\"
-    ")
-    # On unistall reverse stages listed above.
-    set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
-        "Push \\\"PATH\\\"
-        Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
-
-        Push \\\"PATH\\\"
-        Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
-
-        Push \\\"PATH\\\"
-        Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\${PLUGINS_DIR}\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
-
-        Push \\\"MANTIDPATH\\\"
-        Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\bin\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
-
-        Push \\\"PV_PLUGIN_PATH\\\"
-        Push \\\"R\\\"
-        Push \\\"HKCU\\\"
-        Push \\\"$INSTDIR\\\\${PVPLUGINS_DIR}\\\\${PVPLUGINS_DIR}\\\"
-        Call un.EnvVarUpdate
-        Pop  \\\$0
-
-        Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
-
-        RMDir \\\"$INSTDIR\\\\logs\\\"
-
-        RMDir \\\"$INSTDIR\\\\docs\\\"
-    ")
-else ()
-  set( CPACK_PACKAGE_INSTALL_DIRECTORY "MantidInstall${CPACK_PACKAGE_SUFFIX}")
-  set( CPACK_NSIS_INSTALL_ROOT "C:")
-  # On install
-  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-    "CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\"
-
-     CreateDirectory \\\"$INSTDIR\\\\logs\\\"
-
-     CreateDirectory \\\"$INSTDIR\\\\docs\\\"
-    "
-  )
-  # On unistall reverse stages listed above.
-  set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
-    "Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
-
-     RMDir \\\"$INSTDIR\\\\logs\\\"
-
-     RMDir \\\"$INSTDIR\\\\docs\\\"
-    "
-  )
-endif()
+  CreateDirectory \\\"$INSTDIR\\\\docs\\\"
+")
+# On uninstall reverse stages listed above.
+set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
+  Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
+  Delete \\\"$DESKTOP\\\\MantidPython.lnk\\\"
+  RMDir \\\"$INSTDIR\\\\logs\\\"
+  RMDir \\\"$INSTDIR\\\\docs\\\"
+")

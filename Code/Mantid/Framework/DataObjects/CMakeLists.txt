@@ -211,7 +211,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( DataObjects LINK_PRIVATE ${MANTIDLIBS} ${JSONCPP_LIBRARIES} ${NEXUS_LIBRARIES} )
+target_link_libraries ( DataObjects LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${JSONCPP_LIBRARIES} ${NEXUS_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
@@ -220,10 +220,5 @@ add_subdirectory ( test )
 # Installation settings
 ###########################################################################
 
-if ( WIN32 )
-  install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
-else()
-  install ( TARGETS DataObjects DESTINATION ${LIB_DIR} )
-endif ()
-
+install ( TARGETS DataObjects ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 

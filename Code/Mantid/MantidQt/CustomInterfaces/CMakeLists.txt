@@ -81,6 +81,7 @@ set ( SRC_FILES
   src/ReflSearchModel.cpp
   src/SampleTransmission.cpp
   src/SANSAddFiles.cpp
+  src/SANSConstants.cpp
   src/SANSDiagnostics.cpp
   src/SANSEventSlicing.cpp
   src/SANSPlotSpecial.cpp
@@ -193,6 +194,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
   inc/MantidQtCustomInterfaces/SampleTransmission.h
   inc/MantidQtCustomInterfaces/SANSAddFiles.h
+  inc/MantidQtCustomInterfaces/SANSConstants.h
   inc/MantidQtCustomInterfaces/SANSDiagnostics.h
   inc/MantidQtCustomInterfaces/SANSEventSlicing.h
   inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
@@ -418,7 +420,7 @@ endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces LINK_PRIVATE
+target_link_libraries ( CustomInterfaces LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             MantidWidgets
             QtPropertyBrowser

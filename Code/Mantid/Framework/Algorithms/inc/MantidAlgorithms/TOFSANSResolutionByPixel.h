@@ -42,6 +42,16 @@ private:
   void exec();
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
+  /// Get the collimation length when we evaluate it using 5 Guards
+  double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS, const double L1, const double collimationLengthCorrection) const;
+  /// Return the default collimation length
+  double provideDefaultLCollimationLength(Mantid::API::MatrixWorkspace_sptr inWS) const;
+  /// Check input
+  void checkInput(Mantid::API::MatrixWorkspace_sptr inWS);
+  /// Get the moderator workspace
+  Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inWS);
+  /// Create an output workspace
+  Mantid::API::MatrixWorkspace_sptr setupOutputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
   /// Wavelength resolution (constant for all wavelengths)
   double m_wl_resolution;
 };
