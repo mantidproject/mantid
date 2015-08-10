@@ -135,9 +135,9 @@ void ConvolutionFitSequential::exec() {
   const std::string minimizer = getProperty("Minimizer");
 
   // Handle empty/non-empty temp property
-  bool tempUsed = false;
+  bool usingTemp = false;
   if (temperature != 0.0) {
-    tempUsed = true;
+    usingTemp = true;
   }
 
   // Inspect function to obtain fit Type and background
@@ -145,6 +145,10 @@ void ConvolutionFitSequential::exec() {
   const std::string fTypeName = functionValues[0];
   const std::string backgroundName = functionValues[1];
   const std::string funcName = functionValues[2];
+  bool usingLorentzians = false;
+  if (boost::lexical_cast<int>(fTypeName) > 0) {
+    usingLorentzians = true;
+  }
 
   // Check if a delta function is being used
   bool delta = false;
@@ -297,15 +301,34 @@ void ConvolutionFitSequential::exec() {
   logCopier->setProperty("InputWorkspace", inputWs);
   logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
-  std::string logNames[] = {"sam_workspace",         "convolve_members",
-                            "fit_program",           "background",
-                            "delta_function",        "lorentzians",
-                            "temperature_correction"};
+
+  auto logNames = std::vector<std::string>();
+  logNames.push_back("sam_workspace");
+  logNames.push_back("convolve_members");
+  logNames.push_back("fit_program");
+  logNames.push_back("background");
+  logNames.push_back("delta_function");
+  logNames.push_back("lorentzians");
+  logNames.push_back("temperature_correction");
+
+  auto logValues = std::vector<std::string>();
+  logValues.push_back(inputWs->getName());
+  logValues.push_back(boost::lexical_cast<std::string>(convolve));
+  logValues.push_back("ConvFit");
+  logValues.push_back(backgroundName);
+  logValues.push_back(usingDelta);
+  logValues.push_back(boost::lexical_cast<std::string>(usingLorentzians));
+  logValues.push_back(boost::lexical_cast<std::string>(usingTemp));
+  if (usingTemp) {
+    logNames.push_back("temperature_value");
+    logValues.push_back(boost::lexical_cast<std::string>(temperature));
+  }
+
   auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
   logAdder->setProperty("Workspace", resultWs);
-  size_t total = logNames->size();
+  size_t total = logNames.size();
   for (size_t i = 0; i < total; i++) {
-    logAdder->setProperty(logNames[i], "" /*logValues[i]*/);
+    logAdder->setProperty(logNames.at(i), logValues.at(i));
     logAdder->executeAsChildAlg();
   }
 
