@@ -27,6 +27,7 @@ class SANS2DMinimalBatchReductionSliced(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance = 0.02
         self.tolerance_is_reller=True
+        self.disableChecking.append('Instrument')
         return str(mtd['trans_test_rear'][0]), 'SANSReductionGUI.nxs'
 
 class SANS2DMinimalSingleReductionSliced(SANS2DMinimalBatchReductionSliced):

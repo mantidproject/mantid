@@ -44,7 +44,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtFactory LINK_PRIVATE 
+target_link_libraries ( MantidQtFactory LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidQtSliceViewer
             ${CORE_MANTIDLIBS}

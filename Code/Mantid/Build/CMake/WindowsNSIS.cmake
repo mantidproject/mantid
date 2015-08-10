@@ -81,6 +81,7 @@ set ( MISC_CORE_DIST_DLLS
     libeay32.dll
     libNeXus-0.dll
     libNeXusCPP-0.dll
+    libtcmalloc_minimal.dll
     muparser.dll
     mxml1.dll
     ssleay32.dll

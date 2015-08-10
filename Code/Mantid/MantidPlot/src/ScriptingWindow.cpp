@@ -321,8 +321,8 @@ void ScriptingWindow::setMenuStates(int ntabs) {
 void ScriptingWindow::setEditActionsDisabled(bool off) {
   auto actions = m_editMenu->actions();
   foreach (QAction *action, actions) {
-    if(strcmp("Find", action->name()) != 0) {
-       action->setDisabled(off);
+    if (strcmp("Find", action->name()) != 0) {
+      action->setDisabled(off);
     }
   }
 }
@@ -345,7 +345,8 @@ void ScriptingWindow::setExecutionActionsDisabled(bool off) {
  * @param off :: If the true the items are disabled else they are enabled
  */
 void ScriptingWindow::setAbortActionsDisabled(bool off) {
-  if(!shouldEnableAbort()) off = true;
+  if (!shouldEnableAbort())
+    off = true;
   m_abortCurrent->setDisabled(off);
 }
 
@@ -378,9 +379,7 @@ void ScriptingWindow::executeSelection() {
 /**
  * Ask the manager to abort the script execution for the current script.
  */
-void ScriptingWindow::abortCurrent() {
-  m_manager->abortCurrentScript();
-}
+void ScriptingWindow::abortCurrent() { m_manager->abortCurrentScript(); }
 
 /**
  */
@@ -763,11 +762,19 @@ bool ScriptingWindow::shouldEnableAbort() const {
  */
 void ScriptingWindow::openPreviousTabs(const QStringList &tabsToOpen) {
   const int totalFiles = tabsToOpen.size();
-  if (totalFiles == 0) {
+  QStringList validFiles = QStringList();
+  for (int i = 0; i < totalFiles; i++) {
+    if (FILE *file = fopen(tabsToOpen[i].toStdString().c_str(), "r")) {
+      fclose(file);
+      validFiles.append(tabsToOpen[i]);
+    }
+  }
+  const int validTotal = validFiles.size();
+  if (validTotal == 0) {
     m_manager->newTab();
   } else {
-    for (int i = 0; i < totalFiles; i++) {
-      m_manager->newTab(i, tabsToOpen[i]);
+    for (int i = 0; i < validTotal; i++) {
+      m_manager->newTab(i, validFiles[i]);
     }
   }
 }
@@ -781,7 +788,6 @@ Script::ExecutionMode ScriptingWindow::getExecutionMode() const {
   else
     return Script::Serialised;
 }
-
 
 QStringList ScriptingWindow::extractPyFiles(const QList<QUrl> &urlList) const {
   QStringList filenames;

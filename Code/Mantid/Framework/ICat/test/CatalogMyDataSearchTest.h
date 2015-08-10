@@ -20,35 +20,28 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-	void testInit()
-	{
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-		CatalogMyDataSearch mydata;
-		TS_ASSERT_THROWS_NOTHING( mydata.initialize());
-		TS_ASSERT( mydata.isInitialized() );
-	}
-	void testMyDataSearch()
-	{
-		CatalogMyDataSearch mydata;
-		CatalogLogin loginobj;
+  void testInit()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+    CatalogMyDataSearch mydata;
+    TS_ASSERT_THROWS_NOTHING( mydata.initialize());
+    TS_ASSERT( mydata.isInitialized() );
+  }
+  void testMyDataSearch()
+  {
+    CatalogMyDataSearch mydata;
 
-		if ( !loginobj.isInitialized() ) loginobj.initialize();
+    TS_ASSERT( ICatTestHelper::login() );
 
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
-	
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT( loginobj.isExecuted() );
+    if ( !mydata.isInitialized() ) mydata.initialize();
 
-		if ( !mydata.isInitialized() ) mydata.initialize();
-			
-		mydata.setPropertyValue("OutputWorkspace","MyInvestigations");
-				
-		TS_ASSERT_THROWS_NOTHING(mydata.execute());
-		TS_ASSERT( mydata.isExecuted() );
+    mydata.setPropertyValue("OutputWorkspace","MyInvestigations");
 
-	}
-			
+    TS_ASSERT_THROWS_NOTHING(mydata.execute());
+    TS_ASSERT( mydata.isExecuted() );
+
+    ICatTestHelper::logout();
+  }
+
 };
 #endif

@@ -205,7 +205,7 @@ set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 
-target_link_libraries( VatesAPI LINK_PRIVATE 
+target_link_libraries( VatesAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 vtkCommonCore
 vtkCommonDataModel
@@ -234,7 +234,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest LINK_PRIVATE 
+  target_link_libraries( VatesAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
   ${MANTID_SUBPROJECT_LIBS} 
   VatesAPI 
   DataHandling 
