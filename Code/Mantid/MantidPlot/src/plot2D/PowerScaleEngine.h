@@ -37,7 +37,7 @@
 class PowerScaleTransformation: public ScaleTransformation
 {
 public:
-	PowerScaleTransformation(const ScaleEngine *engine):ScaleTransformation(engine){nth_power = 2.0;};
+	PowerScaleTransformation(const ScaleEngine *engine):ScaleTransformation(engine){nth_power = -1.0;};
 	virtual double xForm(double x, double, double, double p1, double p2) const;
 	virtual double invXForm(double x, double s1, double s2, double p1, double p2) const;
 	QwtScaleTransformation* copy() const;

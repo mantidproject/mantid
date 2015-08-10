@@ -99,6 +99,13 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   middleLayout->addWidget(m_lblScaleTypeLabel, 2, 0);
   middleLayout->addWidget(m_cmbScaleType, 2, 1);
 
+  m_lblN = new QLabel(tr("n ="));
+  m_dspnN = new DoubleSpinBox();
+  m_dspnN->setLocale(m_app->locale());
+  m_dspnN->setDecimals(m_app->d_graphing_digits);
+  middleLayout->addWidget(m_lblN, 3, 0);
+  middleLayout->addWidget(m_dspnN, 3, 1);
+
   m_chkInvert = new QCheckBox();
   m_chkInvert->setText(tr("Inverted"));
   m_chkInvert->setChecked(false);
