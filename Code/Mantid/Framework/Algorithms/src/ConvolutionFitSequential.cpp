@@ -275,7 +275,7 @@ void ConvolutionFitSequential::exec() {
     auto columns = outputWs->getColumnNames();
     std::string height = searchForFitParams("Height", columns).at(0);
     std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-    auto heightY = outputWs->getColumn(height);
+	auto heightY = outputWs->getColumn(height);
     auto heightE = outputWs->getColumn(heightErr);
 
     // Get amplitude column names
@@ -295,12 +295,12 @@ void ConvolutionFitSequential::exec() {
       auto ampErr = outputWs->getColumn(ampErrorName);
 
       // Calculate EISF and EISF error
-     /* auto total = heightY + ampY;
-      auto eisfY = heightY / total;
+      /* auto total = heightY + ampY;
+       auto eisfY = heightY / total;
 
-      auto totalErr = pow(heightE, 2) + pow(ampErr, 2);
-      auto eisfErr = eisfY * sqrt((pow(heightE, 2) / pow(heightY, 2) +
-                                   (totalErr / pow(total, 2))));*/
+       auto totalErr = pow(heightE, 2) + pow(ampErr, 2);
+       auto eisfErr = eisfY * sqrt((pow(heightE, 2) / pow(heightY, 2) +
+                                    (totalErr / pow(total, 2))));*/
 
       // Append the calculated values to the table workspace
       std::string columnName =
@@ -312,16 +312,15 @@ void ConvolutionFitSequential::exec() {
 
       outputWs->addColumn("double", columnName);
       outputWs->addColumn("double", errorColumnName);
-	  /*
-      size_t maxEisf = eisfY.size();
-      if (eisfErr.size() > maxEisf) {
-        maxEisf = eisfErr.size();
-      }
+      /* size_t maxEisf = eisfY.size();
+		 if (eisfErr.size() > maxEisf) {
+			maxEisf = eisfErr.size();
+		}
 
-      for (size_t j = 0; j < maxEisf; j++) {
-        outputWs->setCell(columnName, j, esifY.at(j));
-        outputWs->setCell(errorColumnName, j, esifErr.at(j));
-      }*/
+		for (size_t j = 0; j < maxEisf; j++) {
+			outputWs->setCell(columnName, j, esifY.at(j));
+			outputWs->setCell(errorColumnName, j, esifErr.at(j));
+		}*/
     }
   }
 
@@ -337,33 +336,24 @@ void ConvolutionFitSequential::exec() {
   logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
 
-  auto logNames = std::vector<std::string>();
-  logNames.push_back("sam_workspace");
-  logNames.push_back("convolve_members");
-  logNames.push_back("fit_program");
-  logNames.push_back("background");
-  logNames.push_back("delta_function");
-  logNames.push_back("lorentzians");
-  logNames.push_back("temperature_correction");
+  auto sampleLog = std::map<std::string, std::string>();
+  sampleLog["sam_workspace"] = inputWs->getName();
+  sampleLog["convolve_members"] = boost::lexical_cast<std::string>(convolve);
+  sampleLog["fit_program"] = "ConvFit";
+  sampleLog[("background"] = backgroundName;
+  sampleLog["delta_function"] = usingDelta;
+  sampleLog["lorentzians"] = boost::lexical_cast<std::string>(usingLorentzians);
+  sampleLog["temperature_correction"] = boost::lexical_cast<std::string>(usingTemp);
 
-  auto logValues = std::vector<std::string>();
-  logValues.push_back(inputWs->getName());
-  logValues.push_back(boost::lexical_cast<std::string>(convolve));
-  logValues.push_back("ConvFit");
-  logValues.push_back(backgroundName);
-  logValues.push_back(usingDelta);
-  logValues.push_back(boost::lexical_cast<std::string>(usingLorentzians));
-  logValues.push_back(boost::lexical_cast<std::string>(usingTemp));
   if (usingTemp) {
-    logNames.push_back("temperature_value");
-    logValues.push_back(boost::lexical_cast<std::string>(temperature));
+    sampleLog["temperature_value"] = boost::lexical_cast<std::string>(temperature);
   }
 
   auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
   logAdder->setProperty("Workspace", resultWs);
-  size_t total = logNames.size();
-  for (size_t i = 0; i < total; i++) {
-    logAdder->setProperty(logNames.at(i), logValues.at(i));
+  size_t total = sampleLog.size();
+  for (auto it = sampleLog.begin(); it != sampleLog.end(); ++it) {
+    logAdder->setProperty(it->first, it->second);
     logAdder->executeAsChildAlg();
   }
 
