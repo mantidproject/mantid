@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_
 
 #include "ui_SANSRunWindow.h"
+#include "MantidQtCustomInterfaces/SANSConstants.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/NObserver.h>
@@ -55,6 +56,8 @@ private:
   void setInputEnabled(bool enabled);
   /// Create Python string list
   QString createPythonStringList(QString inputString);
+  /// SANS constants
+  SANSConstants m_constants;
 
   void initLayout();
   void setToolTips();
@@ -85,6 +88,12 @@ private slots:
   void onCurrentIndexChangedForHistogramChoice(int index);
   /// reacts to changes of the overlay check box
   void onStateChangedForOverlayCheckBox(int);
+  /// checks if a file corresponds to a histogram worksapce
+  bool isEventWorkspace(QString file_name);
+  /// checks if the files which are to be added are all based on event workspaces
+  bool existNonEventFiles();
+  /// sets the binning options
+  void setBinningOptions(bool enable);
 };
 
 }

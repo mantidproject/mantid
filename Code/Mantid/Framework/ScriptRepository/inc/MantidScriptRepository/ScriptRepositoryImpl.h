@@ -161,6 +161,7 @@ private:
   void download_directory(const std::string &);
   void download_file(const std::string &, RepositoryEntry &);
   void updateLocalJson(const std::string &, const RepositoryEntry &);
+  void updateRepositoryJson(const std::string &, const RepositoryEntry &);
 
   /// flag that indicate a valid repository
   bool valid;

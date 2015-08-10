@@ -6,20 +6,33 @@ namespace ICatTestHelper
   bool skipTests()
   {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-    Mantid::ICat::CatalogLogin loginobj;
-    loginobj.initialize();
-    loginobj.setPropertyValue("Username", "mantid_test");
-    loginobj.setPropertyValue("Password", "mantidtestuser");
-    loginobj.setPropertyValue("FacilityName", "ISIS");
-
-    loginobj.execute();
-    if (!loginobj.isExecuted())
+    if (!login())
     {
       std::cerr << "ICat server seems to be down. Skipping tests" << std::endl;
       return true;
     }
-    else
+    else {
+      logout();
       return false;
+    }
+  }
+
+  bool login()
+  {
+    Mantid::ICat::CatalogLogin loginobj;
+    loginobj.initialize();
+    loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+    loginobj.setPropertyValue("Password", "MantidTestUser4");
+    loginobj.setProperty("KeepSessionAlive", false);
+    loginobj.execute();
+    return loginobj.isExecuted();
+  }
+
+  void logout()
+  {
+    Mantid::ICat::CatalogLogout logoutobj;
+    logoutobj.initialize();
+    logoutobj.execute();
   }
 
 }

@@ -243,9 +243,8 @@ void LoadNexusProcessed::init() {
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-                  "The particular entry number to read. Default load all "
-                  "workspaces and creates a workspacegroup (default: read all "
-                  "entries).");
+                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into one worskspace");
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(

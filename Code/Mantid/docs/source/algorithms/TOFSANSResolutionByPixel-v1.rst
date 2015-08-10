@@ -33,9 +33,21 @@ algorithm as follows:
 * :math:`R_2` equals SampleApertureRadius
 * :math:`\Delta R` equals DeltaR
 * :math:`\sigma_{moderator}` equals SigmaModerator  
+* :math:`\L_1` equals CollimationLength
 
 :math:`\lambda` in the equation is the midtpoint of wavelength 
 histogram bin values of InputWorkspace.
+
+Collimation length :math:`L_1` in metres in the equation here is the distance between the
+first beam defining pinhole (Radius :math:`R_1`) and the sample aperture (radius :math:`R_2`).
+(Beware that :math:`L_1` is more often the moderator to sample distance.)
+ 
+For rectangular collimation apertures, size H x W, Mildner & Carpenter say to
+use :math:`R = \sqrt{( H^2 +W^2)/6 }`. Note that we are assuming isotropically averaged,
+scalar :math:`Q`, and making some small angle approximations. Results on higher angle detectors
+may not be accurate. For data reduction sliced in different directions on the detector
+(e.g. GISANS) adjust the calling parameters to suit the collimation in that direction.
+
 
 .. categories::
 

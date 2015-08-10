@@ -76,7 +76,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( CustomDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
 endif () 
 
-target_link_libraries ( CustomDialogs LINK_PRIVATE 
+target_link_libraries ( CustomDialogs LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidWidgets
             ${CORE_MANTIDLIBS}

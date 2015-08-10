@@ -4,7 +4,7 @@ from mantid.simpleapi import *
 
 def rel_err_less_delta(val, ref, epsilon):
     """
-    Checks that a value 'val' does not defer from a reference value 'ref' by 'epsilon'
+    Checks that a value 'val' does not differ from a reference value 'ref' by 'epsilon'
     or more. This method compares the relative error. An epsilon of 0.1 means a relative
     difference of 10 % = 100*0.1 %
 
@@ -35,7 +35,7 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
                                                 OutputWorkspace='ENGIN-X_vanadium_integ_test_ws')
 
         self.van_bank_curves_name = 'enginx_van_bank_curves'
-        self.van_bank_curves_pre_integ_name = 'enginx_van_bank_curves_with_precalc_integ'
+        self.van_integ_name = 'enginx_van_bank_curves_with_precalc_integ'
         self.out_ws_name = 'enginx_focussed'
         self.out_ws_precalc_name = 'enginx_focussed_with_precalculations'
 
@@ -49,21 +49,23 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
 
         # note: not giving calibrated detector positions
 
+        EnggVanadiumCorrections(VanadiumWorkspace = van_ws,
+                                OutIntegrationWorkspace = self.van_integ_name,
+                                OutCurvesWorkspace = self.van_bank_curves_name)
+
         # do all calculations from raw data
         EnggFocus(InputWorkspace = long_calib_ws,
                   VanadiumWorkspace = van_ws,
                   Bank = '1',
-                  OutVanadiumCurveFits = self.van_bank_curves_name,
                   OutputWorkspace=self.out_ws_name)
 
         # Now with pre-calculated curves and integration values. This makes sure that these do not
         # change too much AND the final results do not change too much as a result
         EnggFocus(InputWorkspace = long_calib_ws,
-                  VanadiumWorkspace = van_ws,
+                  VanIntegrationWorkspace = self._precalc_van_integ_tbl,
+                  VanCurvesWorkspace = self._precalc_van_ws,
                   Bank = '1',
-                  VanadiumIntegWorkspace = self._precalc_van_integ_tbl,
-                  OutVanadiumCurveFits = self.van_bank_curves_pre_integ_name,
-                  OutputWorkspace=self.out_ws_precalc_name)
+                  OutputWorkspace = self.out_ws_precalc_name)
 
     def validate(self):
         out_ws = mtd[self.out_ws_name]
@@ -99,11 +101,6 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
         precalc_curve_simul = self._precalc_van_ws.readY(1)
         self.assertEquals(len(simul), len(precalc_curve_simul))
 
-        # with precalculated curve and precalculated integration
-        van_pre_integ_out_ws = mtd[self.van_bank_curves_pre_integ_name]
-        precalc_all_curve_simul = van_pre_integ_out_ws.readY(1)
-        self.assertEquals(len(simul), len(precalc_all_curve_simul))
-
         delta = 1e-5
         for i in range(0, len(simul)):
             self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
@@ -111,11 +108,18 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
                             "against bank curves previously fitted. got: %f where I expect: %f"%
                             (delta, i, simul[i], precalc_curve_simul[i]))
 
-            self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
-                            "Relative difference bigger than acceptable error (%f) when comparing bin %d "
-                            "against bank curves previously fitted (and also using pre-calculated integration "
-                            "values). got: %f where I expect: %f"%
-                            (delta, i, simul[i], precalc_all_curve_simul[i]))
+        # === check the integration table against the previously saved integration table ===
+        integ_tbl = mtd[self.van_integ_name]
+        precalc_integ_tbl = self._precalc_van_integ_tbl
+        self.assertEquals(integ_tbl.rowCount(), 2513)
+        self.assertEquals(integ_tbl.rowCount(), precalc_integ_tbl.rowCount())
+        self.assertEquals(integ_tbl.columnCount(), precalc_integ_tbl.columnCount())
+        for i in range(integ_tbl.rowCount()):
+            self.assertTrue((0 == integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0)) or
+                            rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
+                            "Relative difference bigger than gaccepted error (%f) when comparing the "
+                            "integration of a spectrum (%f) against the integration previously calculated and "
+                            "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0) ))
 
         # === check the 'focussed' spectrum ===
         out_precalc_ws = mtd[self.out_ws_precalc_name]
@@ -127,13 +131,13 @@ class EnginXFocusWithVanadiumCorrection(stresstesting.MantidStressTest):
             self.assertTrue(rel_err_less_delta(simul[i], precalc_curve_simul[i], delta),
                             "Relative difference bigger than accepted delta (%f) when comparing bin %d "
                             "of the focussed spectrum against the focussed spectrum obtained using bank curves "
-                            "and spectra integration values pre-calculated. got: %f where I expect: %f"%
+                            "and spectra integration values pre-calculated. Got: %f where I expected: %f"%
                             (delta, i, focussed_sp[i], focussed_sp_precalc[i]))
 
     def cleanup(self):
         mtd.remove(self.out_ws_name)
-        mtd.remove(self.van_bank_curves_name)
-        mtd.remove(self.van_bank_curves_pre_integ_name)
+        mtd.remove(self.out_ws_precalc_name)
+        mtd.remove(self.van_integ_name)
         mtd.remove(self.van_bank_curves_name)
 
 

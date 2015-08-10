@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
 	src/HFIRSANSNormalise.cpp
+	src/LoadEventAndCompress.cpp
 	src/MuonCalculateAsymmetry.cpp
 	src/MuonLoad.cpp
 	src/RefReduction.cpp
@@ -57,6 +58,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
+	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
 	inc/MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h
 	inc/MantidWorkflowAlgorithms/MuonLoad.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
@@ -74,6 +76,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	LoadEventAndCompressTest.h
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
 	SANSSolidAngleCorrectionTest.h
@@ -114,7 +117,7 @@ set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc )
 
-target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
+target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

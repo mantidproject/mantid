@@ -99,11 +99,13 @@ __version__ = kernel.version_str()
 ################################################################################
 from . import simpleapi as _simpleapi
 from mantid.kernel import plugins as _plugins
+from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 
 _plugins_key = 'python.plugins.directories'
 _user_key = 'user.%s' % _plugins_key
 plugin_dirs = _plugins.get_plugin_paths_as_set(_plugins_key)
 plugin_dirs.update(_plugins.get_plugin_paths_as_set(_user_key))
+_update_sys_paths(plugin_dirs, recursive=True)
 
 # Load
 plugin_files = []
@@ -119,7 +121,7 @@ for directory in plugin_dirs:
 
 # Mockup the full API first so that any Python algorithm module has something to import
 _simpleapi._mockup(alg_files)
-# Load the plugins
+# Load the plugins.
 plugin_modules = _plugins.load(plugin_files)
 # Create the proper algorithm definitions in the module
 new_attrs = _simpleapi._translate()

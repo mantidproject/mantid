@@ -35,7 +35,7 @@ set_property ( TARGET ISISLiveData PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( ISISLiveData LINK_PRIVATE ${MANTIDLIBS} )
+target_link_libraries ( ISISLiveData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )
 
 # Add the unit tests directory
 # add_subdirectory ( test )

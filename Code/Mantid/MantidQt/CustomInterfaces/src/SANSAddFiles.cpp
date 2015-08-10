@@ -248,6 +248,11 @@ void SANSAddFiles::add2Runs2Add()
       if ( search.isValid() == "" )
       {//this means the file was found
         newL->setToolTip(QString::fromStdString(search.value()));
+
+        // If we don't have an event workspace data set, then we disable the event options
+        if (!isEventWorkspace(QString::fromStdString(search.value()))) {
+          setBinningOptions(false);
+        }
       }
     }
   }
@@ -422,6 +427,7 @@ void SANSAddFiles::clearClicked()
 {
   m_SANSForm->toAdd_List->clear();
   insertListFront("");
+  setBinningOptions(true);
 }
 
 void SANSAddFiles::removeSelected()
@@ -432,6 +438,11 @@ void SANSAddFiles::removeSelected()
     int selRow = m_SANSForm->toAdd_List->row(sels.front());
     delete m_SANSForm->toAdd_List->takeItem(selRow);
     sels = m_SANSForm->toAdd_List->selectedItems();
+  }
+
+  // Check if the remaining files correspond to only event workspaces
+  if (!existNonEventFiles()) {
+    setBinningOptions(true);
   }
 }
 
@@ -526,8 +537,8 @@ void SANSAddFiles::setHistogramUiLogic(QString label, QString toolTip, QString l
   m_SANSForm->eventToHistBinning->setToolTip(toolTip);
 
   // Label for line edit field
-  m_SANSForm->labelBinning->setText(label);
-  m_SANSForm->labelBinning->setToolTip(toolTip);
+  m_SANSForm->binning_label->setText(label);
+  m_SANSForm->binning_label->setToolTip(toolTip);
 
   setInputEnabled(enabled);
 }
@@ -539,7 +550,7 @@ void SANSAddFiles::setHistogramUiLogic(QString label, QString toolTip, QString l
  */
 void SANSAddFiles::setInputEnabled(bool enabled) {
   m_SANSForm->eventToHistBinning->setEnabled(enabled);
-  m_SANSForm->labelBinning->setEnabled(enabled);
+  m_SANSForm->binning_label->setEnabled(enabled);
 }
 
 /**
@@ -570,6 +581,59 @@ QString SANSAddFiles::createPythonStringList(QString inputString) {
   return formattedString;
 }
 
+/**
+ * Check if a file corresponds to a histogram workspace
+ * @param fileName: the file name
+ * @returns true if it is a histogram workspace
+ */
+bool SANSAddFiles::isEventWorkspace(QString fileName) {
+  auto isEvent = false;
+  fileName.replace("\\", "/");
+  QString code_torun = "import ISISCommandInterface as i\n";
+  code_torun += "i.check_if_event_workspace(file_name='";
+  code_torun += fileName;
+  code_torun += + "')\n";
+
+  auto status = runPythonCode(code_torun, false);
+  if (status.contains(m_constants.getPythonTrueKeyword())) {
+      isEvent = true;
+  }
+  return isEvent;
+}
+
+/**
+ * Enable or disable the binning options
+ * @param enable: If the options should be enabled or disabled
+ */
+void SANSAddFiles::setBinningOptions(bool enable) {
+  m_SANSForm->eventToHistBinning->setEnabled(enable);
+  m_SANSForm->comboBox_histogram_choice->setEnabled(enable);
+  m_SANSForm->overlayCheckBox->setEnabled(enable);
+  m_SANSForm->histogram_binning_label->setEnabled(enable);
+  m_SANSForm->binning_label->setEnabled(enable);
+}
+
+/**
+ * Check if non-event type files exist
+ * returns true if all are event files or if there are no files else false
+ */
+bool SANSAddFiles::existNonEventFiles() {
+  auto elements = m_SANSForm->toAdd_List->count();
+  for (int i = 0; i < elements; ++i) {
+     auto  fileName = m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
+    if ( !fileName.isEmpty() )
+    {
+      // Make sure that the file separators are valid
+      fileName.replace("\\", "/");
+      // Run the check
+      if (!isEventWorkspace(fileName)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
 
 
 }//namespace CustomInterfaces

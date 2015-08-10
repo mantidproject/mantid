@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
-  target_link_libraries( DataHandlingTest LINK_PRIVATE 
+  target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             DataHandling
             DataObjects
