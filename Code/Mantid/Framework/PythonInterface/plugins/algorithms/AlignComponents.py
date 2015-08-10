@@ -1,12 +1,12 @@
-pylint: disable=no-init
+#pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
     ITableWorkspaceProperty, FileAction, FileProperty
-from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger
+from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D
 import mantid.simpleapi as api
 from scipy.stats import chisquare
 from scipy.optimize import minimize
 import numpy as np
-
+import math
 
 class AlignComponents(PythonAlgorithm):
     """ Class to align components
@@ -211,7 +211,7 @@ class AlignComponents(PythonAlgorithm):
         api.MoveInstrumentComponent(ws, component, X=x[0], Y=x[1], Z=x[2], RelativePosition=False)
         new_difc = api.CalculateDIFC(ws)
         difc_new = new_difc.extractY().flatten()[firstDetID:lastDetID + 1]
-        if mask != None:
+        if mask is not None:
             difc_new = np.ma.masked_array(difc_new, mask)
         return chisquare(f_obs=difc, f_exp=difc_new)[0]
 
@@ -232,6 +232,23 @@ class AlignComponents(PythonAlgorithm):
             return component.getID()
         else:
             return self._getLastDetID(component[component.nelements() - 1])
+
+    def _eulerToQuat(self, a, b, c, convention="YZX"):
+        getV3D = {'X': V3D(1, 0, 0), 'Y': V3D(0, 1, 0), 'Z': V3D(0, 0, 1)}
+        q1 = Quat(a, getV3D[convention[0]])
+        q2 = Quat(b, getV3D[convention[1]])
+        q3 = Quat(c, getV3D[convention[2]])
+        return q1 * q2 * q3
+
+    def _eulerToAngleAxis(self, a, b, c, convention="YZX"):
+        q = self._eulerToQuat(a, b, c, convention)
+        deg = math.acos(q[0])
+        s = math.sin(deg)
+        deg *= 360.0 / math.pi
+        ax0 = q[1] / s
+        ax1 = q[2] / s
+        ax2 = q[3] / s
+        return deg, ax0, ax1, ax2
 
 
 AlgorithmFactory.subscribe(AlignComponents)
