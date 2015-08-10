@@ -161,12 +161,16 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("current-calib-filename", "");
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
-  qs.setValue("input-dir-calib-files", QString::fromStdString(m_calibSettings.m_inputDirCalib));
-  qs.setValue("input-dir-raw-files", QString::fromStdString(m_calibSettings.m_inputDirRaw));
-  qs.setValue("pixel-calib-filename", QString::fromStdString(m_calibSettings.m_pixelCalibFilename));
+  qs.setValue("input-dir-calib-files",
+              QString::fromStdString(m_calibSettings.m_inputDirCalib));
+  qs.setValue("input-dir-raw-files",
+              QString::fromStdString(m_calibSettings.m_inputDirRaw));
+  qs.setValue("pixel-calib-filename",
+              QString::fromStdString(m_calibSettings.m_pixelCalibFilename));
   // 'advanced' block
   qs.setValue("force-recalc-overwrite", m_calibSettings.m_forceRecalcOverwrite);
-  qs.setValue("template-gsas-prm", QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
+  qs.setValue("template-gsas-prm",
+              QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
   qs.setValue("rebin-calib", m_calibSettings.m_rebinCalibrate);
 
   qs.setValue("interface-win-geometry", saveGeometry());
@@ -227,7 +231,69 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
 
+/**
+ * Build a suggested name for a new calibration, by appending instrument name,
+ * relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
+ *
+ * @param vanNo number of the Vanadium run
+ * @param ceriaNo number of the Ceria run
+ *
+ * @return Suggested name for a new calibration file, following
+ * ENGIN-X practices
+ */
+std::string EnggDiffractionViewQtGUI::buildCalibrateSuggestedFilename(
+    const std::string &vanNo, const std::string &ceriaNo) const {
+  std::string instStr = "ENGINX";
+  if ("ENGIN-X" != currentInstrument()) {
+    instStr = "UNKNOWN_INST";
+  }
+
+  // default extension for calibration files
+  const std::string calibExt = ".prm";
+  std::string sugg = instStr + "_" + vanNo + "_" + ceriaNo + "_"
+                                                             "_both_banks" +
+                     "." + calibExt;
+
+  return sugg;
+}
+
 void EnggDiffractionViewQtGUI::calibrateClicked() {
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+
+  QString vanNo = m_uiTabCalib.lineEdit_new_vanadium_num->text();
+  if (vanNo.isEmpty()) {
+    userWarning(
+        "Error in the inputs",
+        "The Vanadium number cannot be empty and must be an integer number");
+  }
+  QString ceriaNo = m_uiTabCalib.lineEdit_new_ceria_num->text();
+  if (ceriaNo.isEmpty()) {
+    userWarning(
+        "Error in the inputs",
+        "The Ceria number cannot be empty and must be an integer number");
+  }
+  std::string fname = buildCalibrateSuggestedFilename(vanNo.toStdString(),
+                                                      ceriaNo.toStdString());
+
+  // append dir (basename) + filename
+  QDir path(prevPath);
+  QString suggFilename = path.filePath(QString::fromStdString(fname));
+
+  const QString calibExt = QString("Supported formats: IPARM file for GSAS "
+                                   "(*.prm *.par *.iparm);;"
+                                   "Other extensions/all files (*.*)");
+  QString filename = QFileDialog::getSaveFileName(
+      this, tr("Please select the name of the calibration file"), suggFilename,
+      calibExt);
+
+  if (filename.isEmpty()) {
+    return;
+  }
+
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }
 
@@ -247,6 +313,8 @@ void EnggDiffractionViewQtGUI::browseInputDirCalib() {
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   m_calibSettings.m_inputDirCalib = dir.toStdString();
+  m_uiTabSettings.lineEdit_input_dir_calib->setText(
+      QString::fromStdString(m_calibSettings.m_inputDirCalib));
 }
 
 void EnggDiffractionViewQtGUI::browseInputDirRaw() {
@@ -265,16 +333,18 @@ void EnggDiffractionViewQtGUI::browseInputDirRaw() {
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   m_calibSettings.m_inputDirRaw = dir.toStdString();
+  m_uiTabSettings.lineEdit_input_dir_raw->setText(
+      QString::fromStdString(m_calibSettings.m_inputDirRaw));
 }
 
 void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
   const QString calExt =
-      QString("Supported formats: CSV, NXS "
-              "(*.csv *.nxs *.nexus);;"
-              "Comma separated values text file with calibration table "
+      QString("Comma separated values text file with calibration table "
               "(*.csv);;"
               "Nexus file with calibration table "
               "(*.nxs *.nexus);;"
+              "Supported formats: CSV, NXS "
+              "(*.csv *.nxs *.nexus);;"
               "Other extensions/all files (*.*)");
 
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
@@ -288,6 +358,8 @@ void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
       calExt));
 
   m_calibSettings.m_pixelCalibFilename = filename.toStdString();
+  m_uiTabSettings.lineEdit_pixel_calib_filename->setText(
+      QString::fromStdString(m_calibSettings.m_pixelCalibFilename));
 }
 
 void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
@@ -304,6 +376,8 @@ void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
   }
 
   m_calibSettings.m_templateGSAS_PRM = path.toStdString();
+  m_uiTabSettings.lineEdit_template_gsas_prm->setText(
+      QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

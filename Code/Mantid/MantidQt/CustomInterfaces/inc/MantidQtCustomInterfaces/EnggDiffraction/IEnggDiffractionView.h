@@ -93,6 +93,27 @@ public:
   virtual std::string currentInstrument() const = 0;
 
   /**
+   * The Vanadium run number used in the current calibration
+   *
+   * @return Vanadium run number, as a string
+   */
+  virtual std::string currentVanadiumNo() const = 0;
+
+  /**
+   * The Ceria (CeO2) run number used in the current calibration
+   *
+   * @return Vanadium run number, as a string
+   */
+  virtual std::string currentCeriaNo() const = 0;
+
+  /**
+   * The filename (can be full path) selected to write a calibration
+   *
+   * @return file name
+   */
+  virtual std::string outCalibFilename() const = 0;
+
+  /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and
    * geometry, preferences etc. of the user interface.

@@ -31,6 +31,15 @@ public:
   // std::string currentInstrument() const;
   MOCK_CONST_METHOD0(currentInstrument, std::string());
 
+  // virtual std::string currentVanadiumNo() const;
+  MOCK_CONST_METHOD0(currentVanadiumNo, std::string());
+
+  // virtual std::string currentCeriaNo() const;
+  MOCK_CONST_METHOD0(currentCeriaNo, std::string());
+
+  // virtual std::string outCalibFilename() const;
+  MOCK_CONST_METHOD0(outCalibFilename, std::string());
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 };

@@ -71,11 +71,19 @@ public:
 
   std::string getRBNumber() const;
 
-  EnggDiffCalibSettings currentCalibSettings() const {
-    return m_calibSettings;
-  }
+  EnggDiffCalibSettings currentCalibSettings() const { return m_calibSettings; }
 
   std::string currentInstrument() const { return m_currentInst; }
+
+  std::string currentVanadiumNo() const;
+
+  std::string currentCeriaNo() const;
+
+  std::string newVanadiumNo() const;
+
+  std::string newCeriaNo() const;
+
+  std::string outCalibFilename() const { return m_outCalibFilename; }
 
 private slots:
   /// for buttons, do calibrate and similar
@@ -101,7 +109,10 @@ private:
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
   void doSetupTabSettings();
+
   std::string guessGSASTemplatePath() const;
+  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
+                                              const std::string &ceriaNo) const;
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
@@ -131,6 +142,7 @@ private:
   std::string m_currentCalibFilename;
   // calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
+  std::string m_outCalibFilename;
 
   /// for the 'Rebin' parameter of some Engg* algorithms
   static const double s_defaultRebinWidth;
