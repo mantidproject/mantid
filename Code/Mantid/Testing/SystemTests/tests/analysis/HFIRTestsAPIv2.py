@@ -23,8 +23,10 @@ for item in data_search_dirs:
 if len(TEST_DIR)==0:
     raise RuntimeError, "Could not locate test data directory: [...]/Data/SANS2D"
 
-def _diff_iq(x,y): return x-y
-def _add(x,y): return x+y
+def _diff_iq(x,y):
+    return x-y
+def _add(x,y):
+    return x+y
 
 def _read_IGOR(filepath):
     """
@@ -69,10 +71,14 @@ def _check_result(ws, test_file, tolerance=1e-6):
         return False
 
     # Utility methods for manipulating the lists
-    def _diff_chi2(x,y): return (x[1]-y[1])*(x[1]-y[1])/(x[2]*x[2])
-    def _diff_iq(x,y): return x[1]-y[1]
-    def _diff_err(x,y): return x[2]-y[2]
-    def _add(x,y): return x+y
+    def _diff_chi2(x,y):
+        return (x[1]-y[1])*(x[1]-y[1])/(x[2]*x[2])
+    def _diff_iq(x,y):
+        return x[1]-y[1]
+    def _diff_err(x,y):
+        return x[2]-y[2]
+    def _add(x,y):
+        return x+y
 
     # Check that I(q) is the same for both data sets
     deltas = map(_diff_iq, data_mantid, data_igor)
@@ -99,20 +105,20 @@ def _check_result(ws, test_file, tolerance=1e-6):
 
 def do_cleanup():
     Files = ["GPSANS_reduction.log",
-    "BioSANS_exp61_scan0004_0001_Iq.txt",
-    "BioSANS_exp61_scan0004_0001_Iq.xml",
-    "BioSANS_exp61_scan0004_0001_Iqxy.dat",
-    "BioSANS_exp61_scan0004_0001_reduction.log",
-    "BioSANS_test_data_Iq.txt",
-    "BioSANS_test_data_Iq.xml",
-    "BioSANS_test_data_Iqxy.dat",
-    "BioSANS_test_data_reduction.log",
-    "test_data_Iq.txt",
-    "test_data_Iq.xml",
-    "test_data_Iqxy.dat",
-    "test_data_reduction.log"]
-    for file in Files:
-        absfile = FileFinder.getFullPath(file)
+             "BioSANS_exp61_scan0004_0001_Iq.txt",
+             "BioSANS_exp61_scan0004_0001_Iq.xml",
+             "BioSANS_exp61_scan0004_0001_Iqxy.dat",
+             "BioSANS_exp61_scan0004_0001_reduction.log",
+             "BioSANS_test_data_Iq.txt",
+             "BioSANS_test_data_Iq.xml",
+             "BioSANS_test_data_Iqxy.dat",
+             "BioSANS_test_data_reduction.log",
+             "test_data_Iq.txt",
+             "test_data_Iq.xml",
+             "test_data_Iqxy.dat",
+             "test_data_reduction.log"]
+    for filename in Files:
+        absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
@@ -305,7 +311,16 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
         data = ws.dataY(0)
-        check = [0.19472,0.204269,0.215354,0.230114,0.238961,0.237201,0.247843,0.248424,0.253676,0.254327,0.254366,0.252931,0.258339,0.259297,0.257155,0.254059,0.252383,0.252826,0.256604,0.256754,0.255592,0.256813,0.248569,0.25331,0.251032,0.246424,0.249477,0.250939,0.251959,0.24925,0.250372,0.246148,0.250478,0.244621,0.247428,0.246431,0.245041,0.241647,0.24307,0.240096,0.242797,0.238182,0.237548,0.239789,0.241477,0.23456,0.237372,0.233715,0.233789,0.232262,0.231589,0.230986,0.231646,0.231331,0.230484,0.2277,0.226819,0.224341,0.227239,0.223228,0.221232,0.222011,0.224747,0.219533,0.216973,0.218734,0.21668,0.218366,0.214926,0.213985,0.214469,0.210473,0.209867,0.209066,0.208965,0.207498,0.204505,0.205786,0.202186,0.200442,0.200485,0.200554,0.200499,0.198152,0.193945,0.192082,0.193783,0.193787,0.190557,0.190471,0.186827,0.190088,0.188204,0.187547,0.182206,0.181384,0.180358,0.182663,0.178844,0.176556]
+        check = [0.19472,0.204269,0.215354,0.230114,0.238961,0.237201,0.247843,0.248424,0.253676,0.254327,
+                 0.254366,0.252931,0.258339,0.259297,0.257155,0.254059,0.252383,0.252826,0.256604,0.256754,
+                 0.255592,0.256813,0.248569,0.25331,0.251032,0.246424,0.249477,0.250939,0.251959,0.24925,0.250372,
+                 0.246148,0.250478,0.244621,0.247428,0.246431,0.245041,0.241647,0.24307,0.240096,0.242797,0.238182,
+                 0.237548,0.239789,0.241477,0.23456,0.237372,0.233715,0.233789,0.232262,0.231589,0.230986,0.231646,
+                 0.231331,0.230484,0.2277,0.226819,0.224341,0.227239,0.223228,0.221232,0.222011,0.224747,0.219533,
+                 0.216973,0.218734,0.21668,0.218366,0.214926,0.213985,0.214469,0.210473,0.209867,0.209066,
+                 0.208965,0.207498,0.204505,0.205786,0.202186,0.200442,0.200485,0.200554,0.200499,0.198152,0.193945,
+                 0.192082,0.193783,0.193787,0.190557,0.190471,0.186827,0.190088,0.188204,0.187547,0.182206,
+                 0.181384,0.180358,0.182663,0.178844,0.176556]
 
         deltas = map(_diff_iq, data, check)
         delta  = reduce(_add, deltas)/len(deltas)
@@ -506,6 +521,7 @@ class HFIRTestsAPIv2(stresstesting.MantidStressTest):
     def test_SampleGeometry_functions(self):
         print "SKIPPING test_SampleGeometry_functions()"
         return
+        #pylint: disable=unreachable
         GPSANS()
         DataPath(TEST_DIR)
         AppendDataFile("BioSANS_test_data.xml")
@@ -711,8 +727,8 @@ def assertAlmostEqual(first, second, places=None, msg=None, delta=None, rel_delt
             return True
         elif abs(first - second)/abs(second)<rel_delta:
             print '\n-----> %s != %s but within %s percent' % (str(first),
-                                                          str(second),
-                                                          str(rel_delta*100.0))
+                                                               str(second),
+                                                               str(rel_delta*100.0))
             return True
 
         standardMsg = '%s != %s within %s delta' % (str(first),
@@ -726,8 +742,8 @@ def assertAlmostEqual(first, second, places=None, msg=None, delta=None, rel_delt
             return True
 
         standardMsg = '%s != %s within %r places' % (str(first),
-                                                      str(second),
-                                                      places)
+                                                     str(second),
+                                                     places)
     print standardMsg
     return False
 
