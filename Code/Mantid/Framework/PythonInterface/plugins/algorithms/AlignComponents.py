@@ -8,9 +8,16 @@ from scipy.optimize import minimize
 import numpy as np
 import math
 
+
 class AlignComponents(PythonAlgorithm):
     """ Class to align components
     """
+
+    _optionsList = ["PosX", "PosY", "PosZ", "RotX", "RotY", "RotZ"]
+    _optionsDict = {}
+    _initialPos = None
+    _move = False
+    _rotate = False
 
     def category(self):
         """ Mantid required
@@ -33,19 +40,23 @@ class AlignComponents(PythonAlgorithm):
                                                      optional=PropertyMode.Mandatory,
                                                      direction=Direction.Input),
                              doc="Calibration table, currently only uses difc")
+
         self.declareProperty(MatrixWorkspaceProperty("MaskWorkspace",
                                                      "",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc="Mask workspace")
+
         self.declareProperty(FileProperty(name="InstrumentFilename",
                                           defaultValue="",
                                           action=FileAction.Load,
                                           extensions=[".xml"]),
                              doc="Instrument filename")
+
         self.declareProperty("ComponentList", "",
                              direction=Direction.Input,
                              doc="Comma separated list on instrument components to refine.")
+
         # X position
         self.declareProperty(name="PosX", defaultValue=True,
                              doc="Refine X position")
@@ -58,6 +69,7 @@ class AlignComponents(PythonAlgorithm):
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Maximum relative X bound (m)")
         self.setPropertySettings("MaxX", condition)
+
         # Y position
         self.declareProperty(name="PosY", defaultValue=True,
                              doc="Refine Y position")
@@ -70,6 +82,7 @@ class AlignComponents(PythonAlgorithm):
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Maximum relative Y bound (m)")
         self.setPropertySettings("MaxY", condition)
+
         # Z position
         self.declareProperty(name="PosZ", defaultValue=True,
                              doc="Refine Z position")
@@ -82,6 +95,7 @@ class AlignComponents(PythonAlgorithm):
                              validator=FloatBoundedValidator(-10.0, 10.0),
                              doc="Maximum relative Z bound (m)")
         self.setPropertySettings("MaxZ", condition)
+
         # X rotation
         self.declareProperty(name="RotX", defaultValue=True,
                              doc="Refine rotation around X")
@@ -94,6 +108,7 @@ class AlignComponents(PythonAlgorithm):
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Maximum relative X rotation (deg)")
         self.setPropertySettings("MaxRotX", condition)
+
         # Y rotation
         self.declareProperty(name="RotY", defaultValue=True,
                              doc="Refine rotation around Y")
@@ -106,6 +121,7 @@ class AlignComponents(PythonAlgorithm):
                              validator=FloatBoundedValidator(-90, 90),
                              doc="Maximum relative Y rotation (deg)")
         self.setPropertySettings("MaxRotY", condition)
+
         # Z rotation
         self.declareProperty(name="RotZ", defaultValue=True,
                              doc="Refine rotation around Z")
@@ -124,126 +140,144 @@ class AlignComponents(PythonAlgorithm):
         Does basic validation for inputs
         """
         issues = dict()
+
         calWS = self.getProperty('CalibrationTable').value
+
         if 'difc' not in calWS.getColumnNames() or 'detid' not in calWS.getColumnNames():
             issues['CalibrationTable'] = "Calibration table requires detid and difc"
+
         maskWS = self.getProperty("MaskWorkspace").value
         if maskWS != None and maskWS.id() != 'MaskWorkspace':
             issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
+
         instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
         components = self.getProperty("ComponentList").value.split(',')
         for component in components:
             if instrumentWS.getInstrument().getComponentByName(component) is None:
                 issues['ComponentList'] = "Instrument has no component \"" + component + "\""
+
         if not (self.getProperty("PosX").value + self.getProperty("PosY").value + self.getProperty("PosZ").value +
-                self.getProperty("RotX").value + self.getProperty("RotY").value + self.getProperty("RotZ").value):
+                    self.getProperty("RotX").value + self.getProperty("RotY").value + self.getProperty("RotZ").value):
             issues["PosX"] = "You must refine something"
+
         return issues
 
     def PyExec(self):
         calWS = self.getProperty('CalibrationTable').value
         maskWS = self.getProperty("MaskWorkspace").value
+
         Masking = False
         if maskWS != None:
             Masking = True
             mask = maskWS.extractY().flatten()
+
         difc = calWS.column('difc')
         if Masking:
             difc = np.ma.masked_array(difc, mask)
+
         instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
+
         components = self.getProperty("ComponentList").value.split(',')
-        optionsList = ["PosX", "PosY", "PosZ", "RotX", "RotY", "RotZ"]
-        optionsDict = {}
-        for opt in optionsList:
-            optionsDict[opt] = self.getProperty(opt).value
+
+        for opt in self._optionsList:
+            self._optionsDict[opt] = self.getProperty(opt).value
+
+        if self._optionsDict["PosX"] or self._optionsDict["PosY"] or self._optionsDict["PosZ"]:
+            self._move = True
+
+        if self._optionsDict["RotX"] or self._optionsDict["RotY"] or self._optionsDict["RotZ"]:
+            self._rotate = True
+
         for component in components:
             comp = instrumentWS.getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
             lastDetID = self._getLastDetID(comp)
+
             eulerAngles = comp.getRotation().getEulerAngles()
+
             logger.notice("Working on " + comp.getFullName() +
                           " Starting position is " + str(comp.getPos()) +
                           " Starting rotation is " + str(eulerAngles))
+
             x0List = []
-            initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
-                          eulerAngles[0], eulerAngles[1], eulerAngles[2]]
+            self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
+                                eulerAngles[0], eulerAngles[1], eulerAngles[2]]
+
             boundsList = []
+
             if Masking:
                 mask_out = mask[firstDetID:lastDetID + 1]
             else:
                 mask_out = None
-            if optionsDict["PosX"]:
-                x0List.append(initialPos[0])
-                boundsList.append((initialPos[0] + self.getProperty("MinX").value,
-                                   initialPos[0] + self.getProperty("MaxX").value))
-            if optionsDict["PosY"]:
-                x0List.append(initialPos[1])
-                boundsList.append((initialPos[1] + self.getProperty("MinY").value,
-                                   initialPos[1] + self.getProperty("MaxY").value))
-            if optionsDict["PosZ"]:
-                x0List.append(initialPos[2])
-                boundsList.append((initialPos[2] + self.getProperty("MinZ").value,
-                                   initialPos[2] + self.getProperty("MaxZ").value))
-            if optionsDict["RotX"]:
-                x0List.append(initialPos[2])
-                boundsList.append((initialPos[2] + self.getProperty("MinRotX").value,
-                                   initialPos[2] + self.getProperty("MaxRotX").value))
-            if optionsDict["RotY"]:
-                x0List.append(initialPos[2])
-                boundsList.append((initialPos[2] + self.getProperty("MinRotY").value,
-                                   initialPos[2] + self.getProperty("MaxRotY").value))
-            if optionsDict["RotZ"]:
-                x0List.append(initialPos[2])
-                boundsList.append((initialPos[2] + self.getProperty("MinRotZ").value,
-                                   initialPos[2] + self.getProperty("MaxRotZ").value))
+            if self._optionsDict["PosX"]:
+                x0List.append(self._initialPos[0])
+                boundsList.append((self._initialPos[0] + self.getProperty("MinX").value,
+                                   self._initialPos[0] + self.getProperty("MaxX").value))
+            if self._optionsDict["PosY"]:
+                x0List.append(self._initialPos[1])
+                boundsList.append((self._initialPos[1] + self.getProperty("MinY").value,
+                                   self._initialPos[1] + self.getProperty("MaxY").value))
+            if self._optionsDict["PosZ"]:
+                x0List.append(self._initialPos[2])
+                boundsList.append((self._initialPos[2] + self.getProperty("MinZ").value,
+                                   self._initialPos[2] + self.getProperty("MaxZ").value))
+            if self._optionsDict["RotX"]:
+                x0List.append(self._initialPos[3])
+                boundsList.append((self._initialPos[3] + self.getProperty("MinRotX").value,
+                                   self._initialPos[3] + self.getProperty("MaxRotX").value))
+            if self._optionsDict["RotY"]:
+                x0List.append(self._initialPos[4])
+                boundsList.append((self._initialPos[4] + self.getProperty("MinRotY").value,
+                                   self._initialPos[4] + self.getProperty("MaxRotY").value))
+            if self._optionsDict["RotZ"]:
+                x0List.append(self._initialPos[5])
+                boundsList.append((self._initialPos[5] + self.getProperty("MinRotZ").value,
+                                   self._initialPos[5] + self.getProperty("MaxRotZ").value))
+
             results = minimize(self._minimisation_func, x0=x0List,
                                args=(instrumentWS,
                                      component,
                                      firstDetID,
                                      lastDetID,
                                      difc[firstDetID:lastDetID + 1],
-                                     mask_out,
-                                     optionsDict,
-                                     initialPos),
+                                     mask_out),
                                bounds=boundsList)
+
             # Apply the results to the output workspace
-            results_index = 0
-            out = []
-            for opt in optionsList:
-                if optionsDict[opt]:
-                    out.append(results.x[results_index])
-                    results_index += 1
-                else:
-                    out.append(initialPos[optionsList.index(opt)])
-            if optionsDict["PosX"] or optionsDict["PosY"] or optionsDict["PosZ"]:
-                api.MoveInstrumentComponent(instrumentWS, component, X=out[0], Y=out[1], Z=out[2], RelativePosition=False)
-            if optionsDict["RotX"] or optionsDict["RotY"] or optionsDict["RotZ"]:
+            out = self._mapOptions(results.x)
+
+            if self._move:
+                api.MoveInstrumentComponent(instrumentWS, component, X=out[0], Y=out[1], Z=out[2],
+                                            RelativePosition=False)
+
+            if self._rotate:
                 (rw, rx, ry, rz) = self._eulerToAngleAxis(out[3], out[4], out[5])
-                api.RotateInstrumentComponent(instrumentWS, component, X=rx, Y=ry, Z=rz, Angle=rw, RelativeRotation=False)
+                api.RotateInstrumentComponent(instrumentWS, component, X=rx, Y=ry, Z=rz, Angle=rw,
+                                              RelativeRotation=False)
+
             comp = instrumentWS.getInstrument().getComponentByName(component)
+
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
 
-    def _minimisation_func(self, x0, ws, component, firstDetID, lastDetID, difc, mask, optionsDict, initialPos):
-        optionsList = ["PosX", "PosY", "PosZ", "RotX", "RotY", "RotZ"]
-        x0_index = 0
-        x = []
-        for opt in optionsList:
-            if optionsDict[opt]:
-                x.append(x0[x0_index])
-                x0_index += 1
-            else:
-                x.append(initialPos[optionsList.index(opt)])
-        if optionsDict["PosX"] or optionsDict["PosY"] or optionsDict["PosZ"]:
+    def _minimisation_func(self, x0, ws, component, firstDetID, lastDetID, difc, mask):
+        x = self._mapOptions(x0)
+
+        if self._move:
             api.MoveInstrumentComponent(ws, component, X=x[0], Y=x[1], Z=x[2], RelativePosition=False)
-        if optionsDict["RotX"] or optionsDict["RotY"] or optionsDict["RotZ"]:
+
+        if self._rotate:
             (rw, rx, ry, rz) = self._eulerToAngleAxis(x[3], x[4], x[5])
             api.RotateInstrumentComponent(ws, component, X=rx, Y=ry, Z=rz, Angle=rw, RelativeRotation=False)
-        new_difc = api.CalculateDIFC(ws)
-        difc_new = new_difc.extractY().flatten()[firstDetID:lastDetID + 1]
+
+        ws = api.CalculateDIFC(ws)
+
+        difc_new = ws.extractY().flatten()[firstDetID:lastDetID + 1]
+
         if mask is not None:
             difc_new = np.ma.masked_array(difc_new, mask)
+
         return chisquare(f_obs=difc, f_exp=difc_new)[0]
 
     def _getFirstDetID(self, component):
@@ -263,6 +297,17 @@ class AlignComponents(PythonAlgorithm):
             return component.getID()
         else:
             return self._getLastDetID(component[component.nelements() - 1])
+
+    def _mapOptions(self, x):
+        x0_index = 0
+        out = []
+        for opt in self._optionsList:
+            if self._optionsDict[opt]:
+                out.append(x[x0_index])
+                x0_index += 1
+            else:
+                out.append(self._initialPos[self._optionsList.index(opt)])
+        return out
 
     def _eulerToQuat(self, a, b, c, convention="YZX"):
         """
@@ -288,5 +333,6 @@ class AlignComponents(PythonAlgorithm):
         ax1 = q[2] / s
         ax2 = q[3] / s
         return deg, ax0, ax1, ax2
+
 
 AlgorithmFactory.subscribe(AlignComponents)
