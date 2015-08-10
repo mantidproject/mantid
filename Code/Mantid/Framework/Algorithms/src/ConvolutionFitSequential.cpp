@@ -10,6 +10,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringContainsValidator.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -287,6 +289,39 @@ void ConvolutionFitSequential::exec() {
     }
     for (size_t i = 0; i < maxSize; i++) {
       // Get amplitude from column in table workspace
+      std::string ampName = ampNames.at(i);
+      auto ampY = outputWs->getColumn(ampName);
+      std::string ampErrorName = ampErrorNames.at(i);
+      auto ampErr = outputWs->getColumn(ampErrorName);
+
+      // Calculate EISF and EISF error
+     /* auto total = heightY + ampY;
+      auto eisfY = heightY / total;
+
+      auto totalErr = pow(heightE, 2) + pow(ampErr, 2);
+      auto eisfErr = eisfY * sqrt((pow(heightE, 2) / pow(heightY, 2) +
+                                   (totalErr / pow(total, 2))));*/
+
+      // Append the calculated values to the table workspace
+      std::string columnName =
+          ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
+      columnName += "EISF";
+      std::string errorColumnName = ampErrorName.substr(
+          0, (ampName.size() - std::string("Amplitude_Err").size()));
+      errorColumnName += "EISF_Err";
+
+      outputWs->addColumn("double", columnName);
+      outputWs->addColumn("double", errorColumnName);
+	  /*
+      size_t maxEisf = eisfY.size();
+      if (eisfErr.size() > maxEisf) {
+        maxEisf = eisfErr.size();
+      }
+
+      for (size_t j = 0; j < maxEisf; j++) {
+        outputWs->setCell(columnName, j, esifY.at(j));
+        outputWs->setCell(errorColumnName, j, esifErr.at(j));
+      }*/
     }
   }
 
