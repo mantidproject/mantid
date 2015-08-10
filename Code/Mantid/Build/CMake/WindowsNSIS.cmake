@@ -164,27 +164,37 @@ install ( FILES ${CMAKE_LIBRARY_PATH}/boost_date_time-vc110-mt-1_52.lib DESTINAT
 ###########################################################################
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
 install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
+install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Build/CMake/Packaging/mantidpython.bat DESTINATION bin )
 
 ###########################################################################
 # Extra NSIS commands for shortcuts, start menu items etc
 # Three backward slashes are required to escape a character to get the
 # character through to NSIS.
 ###########################################################################
-# On install
+# On install. The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
+
+  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPython.lnk\\\"
 ")
+# The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
   CreateShortCut \\\"$DESKTOP\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
+
+  CreateShortCut \\\"$DESKTOP\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
+
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
+
   CreateDirectory \\\"$INSTDIR\\\\docs\\\"
 ")
 # On uninstall reverse stages listed above.
 set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
   Delete \\\"$DESKTOP\\\\MantidPlot.lnk\\\"
+  Delete \\\"$DESKTOP\\\\MantidPython.lnk\\\"
   RMDir \\\"$INSTDIR\\\\logs\\\"
   RMDir \\\"$INSTDIR\\\\docs\\\"
 ")
