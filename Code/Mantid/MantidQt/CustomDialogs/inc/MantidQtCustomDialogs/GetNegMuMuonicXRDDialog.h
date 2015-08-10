@@ -15,11 +15,13 @@ namespace CustomDialogs {
   GetNegMuMuonicXRDDialog(QWidget *parent = 0);
   ~GetNegMuMuonicXRDDialog(){};
   private:
+  PeriodicTableWidget *periodicTable;
+  QLineEdit *yPosition;
   bool validateDialogInput(QString input);
   void enableElementsFromString(QString elementToEnable);
-  void enableElementsForGetNegMuMuonicXRD(PeriodicTableWidget *periodicTable);
+  void enableElementsForGetNegMuMuonicXRD();
   private slots:
-  void runClicked(PeriodicTableWidget *periodicTable, QLineEdit *yPosition);
+  void runClicked();
 signals:
   void validInput();
   protected:
