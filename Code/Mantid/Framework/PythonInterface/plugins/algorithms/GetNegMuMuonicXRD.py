@@ -2,9 +2,9 @@ from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.kernel import *
 
 #pylint: disable=no-init
-class GetNegMuMuonicXRD(PythonAlgorithm):
+class get_neg_mu_muonic_xrd(PythonAlgorithm):
     #Dictionary of <element>:<peaks> easily extendible by user.
-    Muonic_XR={'Au' :[8135.2,8090.6,8105.4,8069.4,5764.89,5594.97,3360.2,
+    muonic_xr ={'Au' :[8135.2,8090.6,8105.4,8069.4,5764.89,5594.97,3360.2,
                        3206.8,2474.22,2341.21,2304.44,1436.05,1391.58,1104.9,
                        899.14,869.98,405.654,400.143],
                'Ag': [3184.7,3147.7,901.2,869.2,308.428,304.759],
@@ -17,9 +17,7 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
                'Sn' : [3457.3,3412.8,1022.6,982.5,349.953,345.226]}
 
     def PyInit(self):
-        element_type = self.Muonic_XR.keys()
-        self.declareProperty("ElementList", "None", StringListValidator(element_type),
-                             doc="List of available elements")
+        element_type = self.muonic_xr.keys()
         self.declareProperty(StringArrayProperty("Elements", values=[],
                              direction=Direction.Input
                              ))
@@ -27,37 +25,37 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
                                     defaultValue=-0.001,
                                     doc="Position for Markers on the y-axis")
 
-    def get_Muonic_XR(self, element):
+    def get_muonic_xr(self, element):
         #retrieve peak values from dictionary Muonic_XR
-        peak_values = self.Muonic_XR[element]
+        peak_values = self.muonic_xr[element]
         return peak_values
 
-    def Create_MuonicXR_WS(self, element, YPos):
+    def create_muonic_xr_ws(self, element, y_pos):
         #retrieve the values from Muonic_XR
-        xr_peak_values = self.get_Muonic_XR(element)
+        xr_peak_values = self.get_muonic_xr(element)
         #Calibrate y-axis for workspace
-        YPos_WS = [YPos]*len(xr_peak_values)
+        y_pos_ws = [y_pos]*len(xr_peak_values)
         xvalues = xr_peak_values
-        WS_Muon_XR = CreateWorkspace(xvalues, YPos_WS[:])
-        RenameWorkspaces(WS_Muon_XR, WorkspaceNames="MuonXRWorkspace_"+element)
-        return WS_Muon_XR
+        muon_xr_ws = CreateWorkspace(xvalues, y_pos_ws[:])
+        RenameWorkspaces(muon_xr_ws, WorkspaceNames="MuonXRWorkspace_"+element)
+        return muon_xr_ws
 
     def category(self):
-        return "Muon"
+        return "Muon;PythonAlgorithms"
 
     def PyExec(self):
         elements = self.getProperty("Elements").value
-        yposition = self.getProperty("YAxisPosition").value
+        y_position = self.getProperty("YAxisPosition").value
         workspace_list = [None]*len(elements)
         for idx,element in enumerate(elements):
-            curr_workspace = self.Create_MuonicXR_WS(element, yposition)
+            curr_workspace = self.create_muonic_xr_ws(element, y_position)
             workspace_list[idx] = curr_workspace
 
         if len(elements) == 1:
-            MuonXRWorkspace = workspace_list[0]
-            self.log().information(str("Created: "+MuonXRWorkspace.name()))
+            muonic_xr_workspace = workspace_list[0]
+            self.log().information(str("Created: "+muonic_xr_workspace.name()))
         else:
-            MuonicXR_group = GroupWorkspaces(workspace_list)
-            self.log().information(str("Created Group: "+MuonicXR_group.name()))
+            muonic_xr_group = GroupWorkspaces(workspace_list)
+            self.log().information(str("Created Group: "+muonic_xr_group.name()))
 
-AlgorithmFactory.subscribe(GetNegMuMuonicXRD)
+AlgorithmFactory.subscribe(get_neg_mu_muonic_xrd)
