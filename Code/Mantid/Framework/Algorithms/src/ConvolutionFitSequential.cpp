@@ -238,7 +238,7 @@ void ConvolutionFitSequential::exec() {
 
   // Construct output workspace name
   auto resultWs = API::WorkspaceFactory::Instance().create(
-      (outputWsName + "_Result"), inputWs->getNumberHistograms, 2, 1);
+      (outputWsName + "_Result"), inputWs->getNumberHistograms(), 2, 1);
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   auto paramNames = std::vector<std::string>();
@@ -386,9 +386,8 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   return result;
 }
 
-std::vector<std::string>
-searchForFitParams(const std::string &suffix,
-                   const std::vector<std::string> &columns) {
+std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
+    const std::string &suffix, const std::vector<std::string> &columns) {
   auto fitParams = std::vector<std::string>();
   const size_t totalColumns = columns.size();
   for (size_t i = 0; i < totalColumns; i++) {
@@ -396,6 +395,7 @@ searchForFitParams(const std::string &suffix,
       fitParams.push_back(columns.at(i));
     }
   }
+  return fitParams;
 }
 
 } // namespace Algorithms
