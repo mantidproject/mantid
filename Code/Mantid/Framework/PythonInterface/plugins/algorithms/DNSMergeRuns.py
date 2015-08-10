@@ -34,7 +34,7 @@ class DNSMergeRuns(PythonAlgorithm):
         return "DNSMergeRuns"
 
     def summary(self):
-        return "Merges runs made at different detector bank positions into one matrix workspace."
+        return "Merges runs performed at different detector bank positions into one matrix workspace."
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name="WorkspaceNames",
@@ -47,7 +47,7 @@ class DNSMergeRuns(PythonAlgorithm):
                              doc="X axis in the merged workspace")
         self.declareProperty("TwoThetaTolerance", 0.05, FloatBoundedValidator(lower=0.001, upper=1.0),
                              doc="Hardware accuracy for 2Theta (degree).")
-        self.declareProperty("Normalize", False, "If checked, the merged data will be normalized,"
+        self.declareProperty("Normalize", False, "If checked, the merged data will be normalized, "
                              "otherwise the separate normalization workspace will be created.")
         return
 
@@ -119,14 +119,6 @@ class DNSMergeRuns(PythonAlgorithm):
             run = ws.getRun()
             self._check_properties(run1, run)
         return True
-
-    def _cleanup(self, wslist):
-        """
-        deletes workspaces from list
-        """
-        for w in wslist:
-            api.DeleteWorkspace(w)
-        return
 
     def _check_properties(self, lhs_run, rhs_run):
         """
@@ -247,10 +239,10 @@ class DNSMergeRuns(PythonAlgorithm):
             data[:, 0] = np.round(np.degrees(data[:, 0])*self.tol, 2)
             unitx = "Degrees"
         elif self.xaxis == "|Q|":
-            data[:, 0] = np.fabs(4.0*np.pi*np.sin(data[:, 0]*self.tol)/self.wavelength)
+            data[:, 0] = np.fabs(4.0*np.pi*np.sin(0.5*data[:, 0]*self.tol)/self.wavelength)
             unitx = "MomentumTransfer"
         elif self.xaxis == "d-Spacing":
-            data[:, 0] = np.fabs(0.5*self.wavelength/np.sin(data[:, 0]*self.tol))
+            data[:, 0] = np.fabs(0.5*self.wavelength/np.sin(0.5*data[:, 0]*self.tol))
             unitx = "dSpacing"
         else:
             message = "The value for X axis " + self.xaxis + " is invalid! Cannot merge."
