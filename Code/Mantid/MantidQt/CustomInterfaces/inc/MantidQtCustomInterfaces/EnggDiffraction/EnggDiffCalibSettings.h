@@ -36,6 +36,8 @@ struct EnggDiffCalibSettings {
   std::string m_inputDirRaw;
   std::string m_pixelCalibFilename;
   std::string m_templateGSAS_PRM;
+  bool m_forceRecalcOverwrite;
+  float m_rebinCalibrate;
 };
 
 } // namespace CustomInterfaces
