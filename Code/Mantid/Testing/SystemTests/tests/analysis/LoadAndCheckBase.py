@@ -74,7 +74,7 @@ class LoadAndCheckBase(stresstesting.MantidStressTest):
             for i in range(0, a.size()):
                 self.do_check_workspace_shape(a[i], b[i])
             if self.enable_instrument_checking():
-                self.do_check_instrument_applied(a[-1], b[-1])
+                self.do_check_instrument_applied(a[a.size()-1], b[b.size()-1])
             if self.enable_reference_result_checking():
                 Integration(InputWorkspace=a[0], OutputWorkspace=self.__comparison_out_workspace_name)
         else:
