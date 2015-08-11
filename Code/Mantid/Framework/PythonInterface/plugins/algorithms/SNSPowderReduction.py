@@ -343,9 +343,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if not noRunSpecified(vanRuns):
                 vanRun = vanRuns[samRunIndex]
                 if self.getProperty("FilterCharacterizations").value:
-                    vanFilterWall = {FilterByTimeStart:timeFilterWall[0], FilterByTimeStop:timeFilterWall[1]}
+                    vanFilterWall = {'FilterByTimeStart':timeFilterWall[0], 'FilterByTimeStop':timeFilterWall[1]}
                 else:
-                    vanFilterWall = {FilterByTimeStart:Property.EMPTY_DBL, FilterByTimeStop:Property.EMPTY_DBL}
+                    vanFilterWall = {'FilterByTimeStart':Property.EMPTY_DBL, 'FilterByTimeStop':Property.EMPTY_DBL}
                 if "%s_%d" % (self._instrument, vanRun) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
