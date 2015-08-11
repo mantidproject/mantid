@@ -1318,7 +1318,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     sc_engine->setType(ScaleTransformation::Linear);
   }
 
-  if (type == GraphOptions::Log10 || type == GraphOptions::Power)
+  if (type == GraphOptions::Log10)
   {
     if (start <= 0)
     {
@@ -1364,6 +1364,53 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     }
     // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
     //start = start < 1e-90 ? 1e-10 : start;
+  }
+  else if (type == GraphOptions::Power)
+  {
+    g_log.debug() << "Axis type is: " << axis << std::endl;
+    g_log.debug() << "Start is: " << start << std::endl;
+    if (start <= 0)
+    {
+      double s_min = DBL_MAX;
+      // for the y axis rely on the bounding rects
+      for(int i=0;i<curves();++i)
+      {
+        QwtPlotCurve* c = curve(i);
+        if (c)
+        {
+          double s;
+          if (axis == QwtPlot::yRight || axis == QwtPlot::yLeft)
+          {
+            s = c->boundingRect().y();
+          }
+          else
+          {
+            s = c->boundingRect().x();
+          }
+          if (s > 0 && s < s_min)
+          {
+            s_min = s;
+          }
+        }
+      }
+
+      if (s_min != DBL_MAX && s_min > 0)
+      {
+        start = s_min;
+      }
+      else
+      {
+        if (end <= 0)
+        {
+          start = 1;
+          end = 1000;
+        }
+        else
+        {
+          start = 0.01 * end;
+        }
+      }
+    }
   }
 
   if (axis == QwtPlot::yRight)

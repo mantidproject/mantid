@@ -144,7 +144,6 @@ void PowerScaleEngine::buildTicks(
 
         // ticks very close to 0.0 are
         // explicitly set to 0.0
-        // important if nth_power is set to -ve value
 
         for ( int j = 0; j < (int)ticks[i].count(); j++ )
         {
