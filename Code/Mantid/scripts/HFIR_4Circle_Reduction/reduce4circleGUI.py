@@ -271,8 +271,8 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.set_exp_number(exp_no)
 
         server_url = str(self.ui.lineEdit_url.text())
-        if self._myControl.set_server_url(server_url) is False:
-            error_message = 'Unable to open data server URL: %s.' % server_url
+        status, error_message = self._myControl.set_server_url(server_url)
+        if status is False:
             self.pop_one_button_dialog(error_message)
             return
 
@@ -388,14 +388,33 @@ class MainWindow(QtGui.QMainWindow):
     def do_plot_next_pt_raw(self):
         """ Plot the Pt. 
         """
-        # get measurement pt and the file number
-        nextindex = self._wkspNameList.index(self._currPt) + 1
-        if nextindex == len(self._wkspNameList):
-            nextindex = 0
-        nextwsname = self._wkspNameList[nextindex]
-        self._currPt = nextwsname
+        # Get measurement pt and the file number
+        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
+                                                       self.ui.lineEdit_run,
+                                                       self.ui.lineEdit_rawDataPtNo])
+        if status is True:
+            exp_no = ret_obj[0]
+            scan_no = ret_obj[1]
+            pt_no = ret_obj[2]
+        else:
+            self.pop_one_button_dialog(ret_obj)
+            return
 
-        self._plot_raw_xml_2d(self._currPt)
+        # Previous one
+        pt_no += 1
+        # get last Pt. number
+        status, last_pt_no = self._myControl.get_pt_numbers(exp_no, scan_no)[-1]
+        if status is False:
+            error_message = last_pt_no
+            self.pop_one_button_dialog('Unable to access Spice table for scan %d due to %s.' % (scan_no, error_message))
+        if pt_no > last_pt_no:
+            self.pop_one_button_dialog('Pt. = %d is the last one of scan %d.' % (pt_no, scan_no))
+            return
+        else:
+            self.ui.lineEdit_rawDataPtNo.setText('%d' % pt_no)
+
+        # Plot
+        self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
 
         return
 
