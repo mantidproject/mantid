@@ -19,8 +19,8 @@ class EQSANSDarkCurrent(stresstesting.MantidStressTest):
 
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         # The new version of dark current subtraction only works on histograms
         EQSANS(False)
         SolidAngle()
