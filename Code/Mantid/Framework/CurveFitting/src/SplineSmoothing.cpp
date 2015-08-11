@@ -71,8 +71,8 @@ void SplineSmoothing::init() {
                   "The amount of error we wish to tolerate in smoothing");
 
   auto numOfBreaks = boost::make_shared<BoundedValidator<int>>();
-  numOfBreaks->setLower(M_START_SMOOTH_POINTS);
-  declareProperty("MaxNumberOfBreaks", 0, numOfBreaks,
+  numOfBreaks->setLower(0);
+  declareProperty("MaxNumberOfBreaks", M_START_SMOOTH_POINTS, numOfBreaks,
                   "To set the positions of the break-points");
 }
 
