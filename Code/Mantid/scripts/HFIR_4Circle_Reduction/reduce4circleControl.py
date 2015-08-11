@@ -283,6 +283,29 @@ class CWSCDReductionControl(object):
 
         return True, peakinfo
 
+    def get_pt_numbers(self, exp_no, scan_no):
+        """ Get Pt numbers (as a list) for a scan in an experiment
+        :param exp_no:
+        :param scan_no:
+        :return:
+        """
+        table_ws = self._get_spice_workspace(exp_no, scan_no)
+        if table_ws is False:
+            return False, 'Spice file for Exp %d Scan %d is not loaded.' % (exp_no, scan_no)
+
+        col_name_list = table_ws.getColumnNames()
+        i_pt = col_name_list.index('Pt.')
+        if i_pt < 0 or i_pt >= len(col_name_list):
+            return False, 'No column with name Pt. can be found in SPICE table.'
+
+        pt_number_list = []
+        num_rows = table_ws.rowCount()
+        for i in xrange(num_rows):
+            pt_number = table_ws.cell(i, i_pt)
+            pt_number_list.append(pt_number)
+
+        return True, pt_number_list
+
     def get_raw_detector_counts(self, exp_no, scan_no, pt_no):
         """
         Get counts on raw detector
@@ -455,7 +478,7 @@ class CWSCDReductionControl(object):
 
     def set_server_url(self, server_url):
         """
-
+        Set URL for server to download the data
         :param server_url:
         :return:
         """
@@ -468,17 +491,23 @@ class CWSCDReductionControl(object):
 
         # Test URL valid or not
         is_url_good = False
+        error_message = None
         try:
             r = urllib2.urlopen(self._myServerURL)
         except urllib2.HTTPError, e:
-            print(e.code) 
+            error_message = str(e.code)
         except urllib2.URLError, e: 
-            print(e.args)
+            error_message = str(e.args)
         else:
             is_url_good = True
             r.close()
 
-        return is_url_good
+        if error_message is None:
+            error_message = ''
+        else:
+            error_message = 'Unable to open data server URL: %s due to %s.' % (server_url, error_message)
+
+        return is_url_good, error_message
 
     def setWebAccessMode(self, mode):
         """
