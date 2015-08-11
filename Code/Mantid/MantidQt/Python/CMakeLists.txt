@@ -87,7 +87,7 @@ else ()
 endif ()
 
 # ... and links to other required libs ...
-target_link_libraries ( mantidqtpython LINK_PRIVATE 
+target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidQtSliceViewer
             MantidQtFactory

@@ -9,7 +9,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE 
+  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             WorkflowAlgorithms
             API
             Algorithms

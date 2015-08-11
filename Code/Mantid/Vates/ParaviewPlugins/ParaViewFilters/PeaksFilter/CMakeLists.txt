@@ -6,7 +6,7 @@ SERVER_MANAGER_SOURCES vtkPeaksFilter.cxx)
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewPeaksFilterSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
-target_link_libraries( MantidParaViewPeaksFilterSMPlugin LINK_PRIVATE 
+target_link_libraries( MantidParaViewPeaksFilterSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}

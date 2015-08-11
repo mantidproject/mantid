@@ -55,6 +55,10 @@ public:
     A[2][2]=-7.0;
 
     TS_ASSERT_DELTA(A.Invert(),105.0,1e-5);
+    Matrix<double> B(1,1);
+    B[0][0]=2.;
+    TS_ASSERT_DELTA(B.Invert(),2,1e-5);
+    TS_ASSERT_DELTA(B[0][0],0.5,1e-5);
   }
 
   void testIdent()

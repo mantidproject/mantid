@@ -171,8 +171,10 @@ void CalculateCoverageDGS::exec() {
   std::vector<double> tt, phi;
   for (int i = 0; i < static_cast<int>(detIDS.size()); i++) {
     auto detector = instrument->getDetector(detIDS[i]);
-    tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
-    phi.push_back(detector->getPhi());
+    if(!detector->isMasked()){
+        tt.push_back(detector->getTwoTheta(V3D(0, 0, 0), V3D(0, 0, 1)));
+        phi.push_back(detector->getPhi());
+    }
   }
 
   double ttmax = *(std::max_element(tt.begin(), tt.end()));

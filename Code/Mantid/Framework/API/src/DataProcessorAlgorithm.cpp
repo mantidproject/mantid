@@ -110,6 +110,27 @@ void DataProcessorAlgorithm::mapPropertyName(const std::string &nameInProp,
 }
 
 /**
+ * Copy a property from an existing algorithm.
+ *
+ * @warning This only works if you algorithm is in the WorkflowAlgorithms sub-project.
+ *
+ * @param alg
+ * @param name
+ *
+ * @throws std::runtime_error If you ask to copy a non-existent property
+ */
+void DataProcessorAlgorithm::copyProperty(API::Algorithm_sptr alg, const std::string& name) {
+    if (! alg->existsProperty(name)) {
+        std::stringstream msg;
+        msg << "Algorithm \"" << alg->name() << "\" does not have property \"" << name << "\"";
+        throw std::runtime_error(msg.str());
+    }
+
+    auto prop = alg->getPointerToProperty(name);
+    declareProperty(prop->clone(), prop->documentation());
+}
+
+/**
  * Get the property held by this object. If the value is the default see if it
  * contained in the PropertyManager. @see Algorithm::getPropertyValue(const string &)
  *
@@ -161,12 +182,15 @@ PropertyManagerOwner::TypedValue DataProcessorAlgorithm::getProperty(const std::
   return Algorithm::getProperty(name);
 }
 
-ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk() {
+ITableWorkspace_sptr DataProcessorAlgorithm::determineChunk(const std::string &filename) {
+  UNUSED_ARG(filename);
+
   throw std::runtime_error(
       "DataProcessorAlgorithm::determineChunk is not implemented");
 }
 
-void DataProcessorAlgorithm::loadChunk() {
+MatrixWorkspace_sptr DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
+  UNUSED_ARG(rowIndex);
 
   throw std::runtime_error(
       "DataProcessorAlgorithm::loadChunk is not implemented");

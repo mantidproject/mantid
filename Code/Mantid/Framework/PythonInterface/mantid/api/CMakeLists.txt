@@ -136,7 +136,7 @@ set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule LINK_PRIVATE
+target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             PythonGeometryModule
             PythonKernelModule
             API
