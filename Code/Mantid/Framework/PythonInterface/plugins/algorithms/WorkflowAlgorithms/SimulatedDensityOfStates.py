@@ -260,27 +260,49 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             if bonds is None or len(bonds) == 0:
                 raise RuntimeError('No bonds found in CASTEP file')
 
+            unit_cell = file_data.get('unit_cell')
+            self._convert_to_cartesian_coordinates(unit_cell, ions)
+
             #TODO
             output_ws = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
 
             print "UNIT CELL"
-            print file_data.get('unit_cell')
+            print unit_cell
 
             print "IONS"
             for i in ions:
                 print i
 
-            print "BONDS"
-            for b in bonds:
-                print b
+            # print "BONDS"
+            # for b in bonds:
+            #     print b
 
-            print "VECTORS"
-            print eigenvectors
-            print eigenvectors.shape
-            for v in eigenvectors:
-                print v
+            # print "VECTORS"
+            # print eigenvectors
+            # print eigenvectors.shape
+            # for v in eigenvectors:
+            #     print v
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
+
+#----------------------------------------------------------------------------------------
+
+    def _get_properties(self):
+        """
+        Set the properties passed to the algorithm
+        """
+        self._temperature = self.getProperty('Temperature').value
+        self._bin_width = self.getProperty('BinWidth').value
+        self._spec_type = self.getPropertyValue('SpectrumType')
+        self._peak_func = self.getPropertyValue('Function')
+        self._out_ws_name = self.getPropertyValue('OutputWorkspace')
+        self._peak_width = self.getProperty('PeakWidth').value
+        self._scale = self.getProperty('Scale').value
+        self._zero_threshold = self.getProperty('ZeroThreshold').value
+        self._ions = self.getProperty('Ions').value
+        self._sum_contributions = self.getProperty('SumContributions').value
+        self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
+        self._calc_partial = (len(self._ions) > 0)
 
 #----------------------------------------------------------------------------------------
 
@@ -327,22 +349,17 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    def _get_properties(self):
+    def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
-        Set the properties passed to the algorithm
+        Converts fractional coordinates to Cartesian coordinates given the unit
+        cell vectors and adds to existing list of ions.
+
+        @param unit_cell Unit cell vectors
+        @param ions Ion list to be updated
         """
-        self._temperature = self.getProperty('Temperature').value
-        self._bin_width = self.getProperty('BinWidth').value
-        self._spec_type = self.getPropertyValue('SpectrumType')
-        self._peak_func = self.getPropertyValue('Function')
-        self._out_ws_name = self.getPropertyValue('OutputWorkspace')
-        self._peak_width = self.getProperty('PeakWidth').value
-        self._scale = self.getProperty('Scale').value
-        self._zero_threshold = self.getProperty('ZeroThreshold').value
-        self._ions = self.getProperty('Ions').value
-        self._sum_contributions = self.getProperty('SumContributions').value
-        self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
-        self._calc_partial = (len(self._ions) > 0)
+        for ion in ions:
+            cell_pos = ion['fract_coord'] * unit_cell
+            ion['cartesian_coord'] = np.apply_along_axis(np.sum, 0, cell_pos)
 
 #----------------------------------------------------------------------------------------
 
