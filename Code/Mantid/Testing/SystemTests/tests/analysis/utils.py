@@ -173,7 +173,7 @@ def expecting():
 		print "---", a,b,c,d
 		a, b = c, d = f()
 		print "---", a,b,c,d
-        
+
         Developers Notes:
 
 		Now works with an multiple assigments correctly.  This is verified by
@@ -192,6 +192,7 @@ def expecting():
             if name == 'CALL_FUNCTION':
                 return 1
 
+#pylint: disable=too-many-locals,too-many-branches
 def lhs(output='names'):
     '''
 	call signature(s)::
@@ -265,7 +266,8 @@ def lhs(output='names'):
 		#              a,b=c=d=f() => [ ['a','b'] , 'c','d' ]  So on and so forth.
 
 		# put this in a loop and stack the results in an array.
-        count = 0; maxReturns = 0 # Must count the maxReturns ourselves in this case
+        count = 0
+        maxReturns = 0 # Must count the maxReturns ourselves in this case
         while count < len(ins[CallFunctionLocation[i][0] :CallFunctionLocation[i][1]]):
             (offset_, op_, name_, argument_, argtype_, argvalue_) = ins[CallFunctionLocation[i][0]+count]
 			#print 'i= ',i,'count = ', count, 'maxReturns = ',maxReturns

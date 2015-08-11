@@ -412,7 +412,7 @@ class PropertyManager(NonIDF_Properties):
                 except:
                     try:
                         cur_val = getattr(self,key)
-                    except: 
+                    except:
                         cur_val = "Undefined"
                     self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"\
                        .format(key,cur_val),'warning')
