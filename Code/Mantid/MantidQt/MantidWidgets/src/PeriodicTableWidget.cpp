@@ -332,7 +332,7 @@ void PeriodicTableWidget::populateGroupVectors() {
   Metalloids.push_back(ui.Te); // Tellurium
   // Populate Halogens
   Halogens.push_back(ui.At); // Astatine
-  Halogens.push_back(ui.Cl);
+  Halogens.push_back(ui.Cl); // Chlorine
   Halogens.push_back(ui.Br); // Bromine
   Halogens.push_back(ui.F);  // Flourine
   Halogens.push_back(ui.I);  // Iodine
