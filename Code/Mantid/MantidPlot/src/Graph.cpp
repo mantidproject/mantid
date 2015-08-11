@@ -1387,14 +1387,14 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
           {
             s = c->boundingRect().x();
           }
-          if (s > 0 && s < s_min)
+          if (s < s_min)
           {
             s_min = s;
           }
         }
       }
 
-      if (s_min != DBL_MAX && s_min > 0)
+      if (s_min != DBL_MAX)
       {
         start = s_min;
       }
