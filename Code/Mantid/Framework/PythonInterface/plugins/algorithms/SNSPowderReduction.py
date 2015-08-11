@@ -343,17 +343,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             if not noRunSpecified(vanRuns):
                 vanRun = vanRuns[samRunIndex]
                 if self.getProperty("FilterCharacterizations").value:
-                    vanFilterWall = timeFilterWall
+                    vanFilterWall = {FilterByTimeStart:timeFilterWall[0], FilterByTimeStop:timeFilterWall[1]}
                 else:
-                    vanFilterWall = (0., 0.)
+                    vanFilterWall = {FilterByTimeStart:Property.EMPTY_DBL, FilterByTimeStop:Property.EMPTY_DBL}
                 if "%s_%d" % (self._instrument, vanRun) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 else:
                     # load the vanadium
-                    vanRun = self._loadData(vanRun, SUFFIX, vanFilterWall)
-                    name = "_".join(str(vanRun).split("_")[:-1])
-                    vanRun = api.RenameWorkspace(InputWorkspace=vanRun, OutputWorkspace=name)
+                    name = "%s_%d" % (self._instrument, vanRun)
+                    vanRun = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace=name,
+                                                      MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
+                                                      **vanFilterWall)
+                    self.log().warning("vanRun = %s" % str(vanRun))
                     try:
                         if self._normalisebycurrent is True:
                             vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun,
@@ -366,7 +368,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # load the vanadium background (if appropriate)
                     vbackRuns = self._info["empty"].value
                     if not noRunSpecified(vbackRuns):
-                        vbackRun = self._loadData(vbackRuns[samRunIndex], SUFFIX, vanFilterWall, outname="vbackRun")
+                        name = "%s_%d" % (self._instrument, vbackRuns[samRunIndex])
+                        vbackRun = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace="vbackRun",
+                                                            MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
+                                                            **vanFilterWall)
                         try:
                             if self._normalisebycurrent is True:
                                 vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun,
