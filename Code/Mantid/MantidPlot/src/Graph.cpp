@@ -1308,6 +1308,18 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   if (type == GraphOptions::Log10)
   {
     sc_engine->setType(ScaleTransformation::Log10);
+  }
+  else if (type == GraphOptions::Power)
+  {
+    sc_engine->setType(ScaleTransformation::Power);
+  }
+  else
+  {
+    sc_engine->setType(ScaleTransformation::Linear);
+  }
+
+  if (type == GraphOptions::Log10 || type == GraphOptions::Power)
+  {
     if (start <= 0)
     {
       double s_min = DBL_MAX;
@@ -1352,14 +1364,6 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     }
     // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
     //start = start < 1e-90 ? 1e-10 : start;
-  }
-  else if (type == GraphOptions::Power)
-  {
-    sc_engine->setType(ScaleTransformation::Power);
-  }
-  else
-  {
-    sc_engine->setType(ScaleTransformation::Linear);
   }
 
   if (axis == QwtPlot::yRight)

@@ -141,6 +141,16 @@ void PowerScaleEngine::buildTicks(
     for ( int i = 0; i < QwtScaleDiv::NTickTypes; i++ )
     {
         ticks[i] = strip(ticks[i], interval);
+
+        // ticks very close to 0.0 are
+        // explicitly set to 0.0
+        // important if nth_power is set to -ve value
+
+        for ( int j = 0; j < (int)ticks[i].count(); j++ )
+        {
+            if ( QwtScaleArithmetic::compareEps(ticks[i][j], 0.0, stepSize) == 0 )
+                ticks[i][j] = 0.0;
+        }
     }
 }
 
