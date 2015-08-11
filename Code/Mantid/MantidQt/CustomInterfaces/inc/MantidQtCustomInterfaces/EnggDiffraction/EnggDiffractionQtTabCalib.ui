@@ -70,7 +70,7 @@
       <item row="2" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Folder/path:</string>
+         <string>Path:</string>
         </property>
        </widget>
       </item>
@@ -119,12 +119,18 @@
         <property name="text">
          <string>241391</string>
         </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item row="0" column="2" colspan="3">
        <widget class="QLineEdit" name="lineEdit_vanadium_num">
         <property name="text">
          <string>236516</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

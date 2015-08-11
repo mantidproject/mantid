@@ -18,6 +18,11 @@ public:
   MOCK_METHOD2(userError,
                void(const std::string &err, const std::string &description));
 
+  // std::string askNewCalibrationFilename(const std::string &suggestedFname) =
+  // 0;
+  MOCK_METHOD1(askNewCalibrationFilename,
+               std::string(const std::string &suggestedFname));
+
   // std::vector<std::string> logMsgs() const;
   MOCK_CONST_METHOD0(logMsgs, std::vector<std::string>());
 
@@ -36,6 +41,12 @@ public:
 
   // virtual std::string currentCeriaNo() const;
   MOCK_CONST_METHOD0(currentCeriaNo, std::string());
+
+  // virtual std::string newVanadiumNo() const;
+  MOCK_CONST_METHOD0(newVanadiumNo, std::string());
+
+  // virtual std::string newCeriaNo() const;
+  MOCK_CONST_METHOD0(newCeriaNo, std::string());
 
   // virtual std::string outCalibFilename() const;
   MOCK_CONST_METHOD0(outCalibFilename, std::string());

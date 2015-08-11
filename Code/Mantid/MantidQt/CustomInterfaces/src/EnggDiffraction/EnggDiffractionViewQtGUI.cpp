@@ -9,6 +9,7 @@ using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
 #include <boost/lexical_cast.hpp>
+
 #include <Poco/Path.h>
 
 #include <QCheckBox>
@@ -202,8 +203,45 @@ void EnggDiffractionViewQtGUI::userError(const std::string &err,
                         QMessageBox::Ok);
 }
 
+std::string EnggDiffractionViewQtGUI::askNewCalibrationFilename(
+    const std::string &suggestedFname) {
+  // append dir (basename) + filename
+  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  QDir path(prevPath);
+  QString suggestion = path.filePath(QString::fromStdString(suggestedFname));
+
+  const QString calibExt = QString("Supported formats: IPARM file for GSAS "
+                                   "(*.prm *.par *.iparm);;"
+                                   "Other extensions/all files (*.*)");
+  QString choice = QFileDialog::getOpenFileName(
+      this, tr("Please select the name of the calibration file"), suggestion,
+      calibExt);
+
+  return choice.toStdString();
+}
+
 std::string EnggDiffractionViewQtGUI::getRBNumber() const {
   return "not available";
+}
+
+std::string EnggDiffractionViewQtGUI::currentVanadiumNo() const {
+  return m_uiTabCalib.lineEdit_vanadium_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
+  return m_uiTabCalib.lineEdit_ceria_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
+  return m_uiTabCalib.lineEdit_new_vanadium_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
+  return m_uiTabCalib.lineEdit_new_ceria_num->text().toStdString();
 }
 
 void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
@@ -222,8 +260,8 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 
-  QString filename = (QFileDialog::getOpenFileName(
-      this, tr("Open calibration file"), prevPath, calExt));
+  QString filename = QFileDialog::getOpenFileName(
+      this, tr("Open calibration file"), prevPath, calExt);
 
   MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
       filename);
@@ -231,69 +269,7 @@ void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
 
-/**
- * Build a suggested name for a new calibration, by appending instrument name,
- * relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
- *
- * @param vanNo number of the Vanadium run
- * @param ceriaNo number of the Ceria run
- *
- * @return Suggested name for a new calibration file, following
- * ENGIN-X practices
- */
-std::string EnggDiffractionViewQtGUI::buildCalibrateSuggestedFilename(
-    const std::string &vanNo, const std::string &ceriaNo) const {
-  std::string instStr = "ENGINX";
-  if ("ENGIN-X" != currentInstrument()) {
-    instStr = "UNKNOWN_INST";
-  }
-
-  // default extension for calibration files
-  const std::string calibExt = ".prm";
-  std::string sugg = instStr + "_" + vanNo + "_" + ceriaNo + "_"
-                                                             "_both_banks" +
-                     "." + calibExt;
-
-  return sugg;
-}
-
 void EnggDiffractionViewQtGUI::calibrateClicked() {
-  QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
-  if (prevPath.isEmpty()) {
-    prevPath =
-        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  }
-
-  QString vanNo = m_uiTabCalib.lineEdit_new_vanadium_num->text();
-  if (vanNo.isEmpty()) {
-    userWarning(
-        "Error in the inputs",
-        "The Vanadium number cannot be empty and must be an integer number");
-  }
-  QString ceriaNo = m_uiTabCalib.lineEdit_new_ceria_num->text();
-  if (ceriaNo.isEmpty()) {
-    userWarning(
-        "Error in the inputs",
-        "The Ceria number cannot be empty and must be an integer number");
-  }
-  std::string fname = buildCalibrateSuggestedFilename(vanNo.toStdString(),
-                                                      ceriaNo.toStdString());
-
-  // append dir (basename) + filename
-  QDir path(prevPath);
-  QString suggFilename = path.filePath(QString::fromStdString(fname));
-
-  const QString calibExt = QString("Supported formats: IPARM file for GSAS "
-                                   "(*.prm *.par *.iparm);;"
-                                   "Other extensions/all files (*.*)");
-  QString filename = QFileDialog::getSaveFileName(
-      this, tr("Please select the name of the calibration file"), suggFilename,
-      calibExt);
-
-  if (filename.isEmpty()) {
-    return;
-  }
-
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }
 

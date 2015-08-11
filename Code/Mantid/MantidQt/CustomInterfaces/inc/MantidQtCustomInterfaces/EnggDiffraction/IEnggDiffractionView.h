@@ -65,8 +65,19 @@ public:
                          const std::string &description) = 0;
 
   /**
-   * Gives messages that this View wants to send to the logging
-   * system.
+   * Gets a filename from the user, to use for a new calibration file.
+   *
+   * @param suggested filename that the user can just accept without
+   * typing anything
+   *
+   * @return filename (can be empty if not given or an error happened)
+   */
+  virtual std::string
+  askNewCalibrationFilename(const std::string &suggestedFname) = 0;
+
+  /**
+   * Gives one or more messages that this View wants to send to the
+   * logging system.
    *
    * @return list of messages to log, one by one.
    */
@@ -102,9 +113,23 @@ public:
   /**
    * The Ceria (CeO2) run number used in the current calibration
    *
-   * @return Vanadium run number, as a string
+   * @return Ceria run number, as a string
    */
   virtual std::string currentCeriaNo() const = 0;
+
+  /**
+   * The Vanadium run number to use for a new calibration
+   *
+   * @return Vanadium run number, as a string
+   */
+  virtual std::string newVanadiumNo() const = 0;
+
+  /**
+   * The Ceria (CeO2) run number to use for a new calibration
+   *
+   * @return Ceria run number, as a string
+   */
+  virtual std::string newCeriaNo() const = 0;
 
   /**
    * The filename (can be full path) selected to write a calibration

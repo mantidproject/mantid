@@ -67,7 +67,9 @@ public:
 
   void userError(const std::string &err, const std::string &description);
 
-  std::vector<std::string> logMsgs() const { return m_logMsgs; }
+  std::string askNewCalibrationFilename(const std::string &suggestedFname);
+
+ std::vector<std::string> logMsgs() const { return m_logMsgs; }
 
   std::string getRBNumber() const;
 
@@ -111,8 +113,6 @@ private:
   void doSetupTabSettings();
 
   std::string guessGSASTemplatePath() const;
-  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) const;
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();

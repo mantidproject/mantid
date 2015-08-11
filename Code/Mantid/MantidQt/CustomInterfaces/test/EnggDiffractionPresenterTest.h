@@ -70,7 +70,24 @@ public:
     pres.notify(IEnggDiffractionPresenter::LoadExistingCalib);
   }
 
-  void test_calcCalib() {
+  void test_calcCalibWithoutRunNumbers() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
+        Return(calibSettings));
+
+    // No errors, 2 warnings (no Vanadium, no Ceria run numbers given)
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
+
+    pres.notify(IEnggDiffractionPresenter::CalcCalib);
+  }
+
+  // TODO: disabled for now, as this one would need to load files
+  void disabled_test_calcCalibOK() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
