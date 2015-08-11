@@ -49,7 +49,7 @@ The input workspaces (**WorkspaceNames**) have to have the following in order to
 -  Have the corresponding normalization workspace
 -  Have the same wavelength in the sample logs
 
-For the physically meaningfull merge result, it is also important that these workspaces have the same slits size, polarisation, and flipper status. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.
+For the physically meaningful merge result, it is also important that these workspaces have the same slits size, polarisation, and flipper status. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.
 
 Usage
 -----

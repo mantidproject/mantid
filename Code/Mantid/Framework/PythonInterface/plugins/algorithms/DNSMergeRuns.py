@@ -213,7 +213,7 @@ class DNSMergeRuns(PythonAlgorithm):
         norm_sorted = norm[np.argsort(norm[:, 0])]
         # unique values
         uX = np.unique(data_sorted[:, 0])
-        if len(data_sorted[:, 0]) - len(uX) > 1:
+        if len(data_sorted[:, 0]) - len(uX) > 0:
             arr = []
             arr_norm = []
             self.log().information("There are dublicated 2Theta angles in the dataset. Sum up the intensities.")

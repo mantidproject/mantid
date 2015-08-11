@@ -10,7 +10,7 @@ class DNSMergeRunsTest(unittest.TestCase):
     workspaces = []
     angles = None
 
-    def _create_fake_workspace(self, wsname, angle, dataY=None):
+    def _create_fake_workspace(self, wsname, angle):
         """
         creates DNS workspace with fake data
         """
@@ -18,8 +18,7 @@ class DNSMergeRunsTest(unittest.TestCase):
         dataX = np.zeros(2*ndet)
         dataX.fill(4.2 + 0.00001)
         dataX[::2] -= 0.000002
-        if not dataY:
-            dataY = np.ones(ndet)
+        dataY = np.ones(ndet)
         dataE = np.sqrt(dataY)
         # create workspace
         api.CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY,
