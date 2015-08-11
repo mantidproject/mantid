@@ -577,7 +577,7 @@ class IRISResolution(ISISIndirectInelasticResolution):
         self.analyser = 'graphite'
         self.reflection = '002'
         self.detector_range = [3, 53]
-        self.background = [-0.54, 0.65]
+        self.background = [-0.54, 0.54]
         self.rebin_params = '-0.2,0.002,0.2'
         self.files = ['IRS53664.raw']
 
