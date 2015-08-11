@@ -1367,9 +1367,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   }
   else if (type == GraphOptions::Power)
   {
-    g_log.debug() << "Axis type is: " << axis << std::endl;
-    g_log.debug() << "Start is: " << start << std::endl;
-    if (start <= 0)
+    if (start <= 0 && sc_engine->nthPower() < 0)
     {
       double s_min = DBL_MAX;
       // for the y axis rely on the bounding rects
@@ -1400,15 +1398,15 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
       }
       else
       {
-        if (end <= 0)
-        {
-          start = 1;
-          end = 1000;
-        }
-        else
-        {
-          start = 0.01 * end;
-        }
+        start = 0.01 * end;
+      }
+      if (start == 0)
+      {
+        start = 0.01 * end;
+      }
+      else if (end == 0)
+      {
+        end = 0.01 * start;
       }
     }
   }
