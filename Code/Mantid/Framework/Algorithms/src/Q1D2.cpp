@@ -210,10 +210,6 @@ void Q1D2::exec() {
     // array
     const MantidVec::const_iterator end = m_dataWS->readY(i).end();
     for (; YIn != end; ++YIn, ++EIn, ++QIn, ++norms, ++normETo2s) {
-      if (useQResolution) {
-        ++QResIn;
-      }
-
       // find the output bin that each input y-value will fall into, remembering
       // there is one more bin boundary than bins
       getQBinPlus1(QOut, *QIn, loc);
@@ -229,9 +225,14 @@ void Q1D2::exec() {
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
           if (useQResolution) {
-            qResolutionOut[bin] += (*YIn) *(*QResIn);
+            qResolutionOut[bin] += (*YIn) * (*QResIn);
           }
         }
+      }
+
+      // Increment the QResolution iterator
+      if (useQResolution) {
+        ++QResIn;
       }
     }
 
@@ -246,15 +247,21 @@ void Q1D2::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
   if (useQResolution) {
-    // Calculate the QResolution and add it as a DX value to the outputworkspace
+    // The number of Q (x)_ values is N, while the number of DeltaQ values is N-1,
+    // Richard Heenan suggested to duplicate the last entry of DeltaQ
     Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
     Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
-    for (;qResolutionIterator!= qResolutionOut.end(); ++countsIterator, ++qResolutionIterator) {
+    for (;countsIterator!= YOut.end(); ++countsIterator, ++qResolutionIterator) {
       // Divide by the counts of the Qbin, if the counts are 0, the the qresolution will also be 0
       if ((*countsIterator) > 0.0) {
         *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
       }
+    }
+    // Now duplicate write the second to last element into the last element of the deltaQ vector
+    if (qResolutionOut.size() > 1) {
+      qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
     }
   }
 

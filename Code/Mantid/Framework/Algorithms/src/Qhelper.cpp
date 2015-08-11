@@ -38,7 +38,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
   // Check the compatibility of the QResolution workspace
   if (qResolution) {
     // We require the same number of histograms
-    if (detectAdj->getNumberHistograms() != dataWS->getNumberHistograms()) {
+    if (qResolution->getNumberHistograms() != dataWS->getNumberHistograms()) {
       throw std::invalid_argument("The QResolution should have one spectrum"
                                    "per spectrum of the input workspace");
     }
