@@ -375,6 +375,7 @@ void ScaleDetails::initWidgets()
       m_chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
       m_chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
       m_cmbScaleType->setCurrentItem(scale_type);
+      m_dspnN->setValue(sc_engine->nthPower());
       m_cmbMinorValue->clear();
       if (scale_type == ScaleTransformation::Log10)
       {
