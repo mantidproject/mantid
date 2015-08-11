@@ -198,7 +198,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
                         rhs_title + ": " + str(rhs_property.value)
                     self.log().warning(message)
             else:
-                message = "Property ' + property_name + ' is not present in " +\
+                message = "Property " + property_name + " is not present in " +\
                     lhs_title + " or " + rhs_title + " - skipping comparison."
                 self.log().warning(message)
         return True
