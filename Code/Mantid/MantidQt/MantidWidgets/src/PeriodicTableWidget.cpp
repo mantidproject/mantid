@@ -1,15 +1,21 @@
 #include "MantidQtMantidWidgets/PeriodicTableWidget.h"
 #include <QVector>
 
+/**
+ * Default constructor
+ * @param parent :: default parameter
+ */
 PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   ui.setupUi(this);
   populateGroupVectors();
   populateAllButtonsVector();
   ColourElements();
+  ///Hide the legend by default
   ui.Groups->setVisible(false);
   connect(ui.showLegend, SIGNAL(clicked()), this, SLOT(showGroupLegend()));
 }
 
+// slot for showing group legend dependant on state of radioButton
 void PeriodicTableWidget::showGroupLegend() {
   if (ui.showLegend->isChecked()) {
     ui.Groups->setVisible(true);
@@ -121,7 +127,6 @@ void PeriodicTableWidget::ColourUnknownProperties(
   }
 }
 
-//void PeriodicTableWidget::enableButtonsByGroup(QString groupToEnable) {}
 
 void PeriodicTableWidget::enableButtonByName(QString elementStr) {
   for (auto vector_i = AllElementButtons.begin();
@@ -134,6 +139,7 @@ void PeriodicTableWidget::enableButtonByName(QString elementStr) {
     }
   }
 }
+
 bool PeriodicTableWidget::compareButtonNameToStr(QPushButton *buttonToCompare,
                                                  QString stringToCompare) {
   return (strcmp(buttonToCompare->text().toStdString().c_str(),
@@ -141,9 +147,6 @@ bool PeriodicTableWidget::compareButtonNameToStr(QPushButton *buttonToCompare,
 }
 
 void PeriodicTableWidget::disableAllElementButtons() {
-  /*NEEDED TO SELECTIVELY ENABLE BUTTONS IN LIST
-   * FOUND IN getNegMuMuonicXRD.py
-   */
   disableButtons(Actinides);
   disableButtons(AlkaliMetals);
   disableButtons(AlkalineEarthMetals);
@@ -180,7 +183,9 @@ PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements) {
 
 QString PeriodicTableWidget::getAllCheckedElementsStr() {
   /*checking all groups of buttons to see if they
-  * have been selected in the Widget
+  * have been selected in the Widget.
+  * if they have been selected, the button text is added to
+  * the comma-separated list of elements checked.
   */
   QString allCheckedElementsStr = "";
   allCheckedElementsStr += elementsSelectedToString(Actinides);
@@ -194,6 +199,7 @@ QString PeriodicTableWidget::getAllCheckedElementsStr() {
   allCheckedElementsStr += elementsSelectedToString(PostTransitionMetals);
   allCheckedElementsStr += elementsSelectedToString(TransitionMetals);
   allCheckedElementsStr += elementsSelectedToString(UnknownProperties);
+
   // return a string with all the elements that have been selected
   return allCheckedElementsStr;
 }
