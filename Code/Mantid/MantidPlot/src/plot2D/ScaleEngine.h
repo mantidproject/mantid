@@ -86,6 +86,9 @@ public:
     bool log10ScaleAfterBreak() const;
     void setLog10ScaleAfterBreak(bool on){d_log10_scale_after = on;};
 
+    double nthPower() const;
+    void setNthPower(double nth_power){d_nth_power = nth_power;};
+
 	ScaleTransformation::Type type() const;
 	void setType(ScaleTransformation::Type type){d_type = type;};
 
@@ -113,6 +116,8 @@ private:
 	int d_break_width;
 	//! If true draw the break decoration
 	bool d_break_decoration;
+  //! Nth Power for a power scale
+  double d_nth_power;
 };
 
 #endif

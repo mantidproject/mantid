@@ -573,7 +573,8 @@ void ScaleDetails::apply()
     m_graph->setScale(m_mappedaxis, start, end, step, m_spnMajorValue->value(), m_cmbMinorValue->currentText().toInt(),
       m_cmbScaleType->currentIndex(), m_chkInvert->isChecked(), breakLeft, breakRight, m_spnBreakPosition->value(),
       m_dspnStepBeforeBreak->value(),m_dspnStepAfterBreak->value(), m_cmbMinorTicksBeforeBreak->currentText().toInt(),
-      m_cmbMinorTicksAfterBreak->currentText().toInt(), m_chkLog10AfterBreak->isChecked(), m_spnBreakWidth->value(), m_chkBreakDecoration->isChecked());
+      m_cmbMinorTicksAfterBreak->currentText().toInt(), m_chkLog10AfterBreak->isChecked(), m_spnBreakWidth->value(),
+      m_chkBreakDecoration->isChecked(), m_dspnN->value());
     m_graph->changeIntensity(true);
     m_graph->notifyChanges();
     m_modified = false;

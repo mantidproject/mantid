@@ -213,7 +213,8 @@ d_minor_ticks_before(1),
 d_minor_ticks_after(1),
 d_log10_scale_after(false),
 d_break_width(4),
-d_break_decoration(true)
+d_break_decoration(true),
+d_nth_power(2.0)
 {}
 
 bool ScaleEngine::hasBreak() const
@@ -276,6 +277,11 @@ bool ScaleEngine::hasBreakDecoration() const
 	return d_break_decoration;
 }
 
+double ScaleEngine::nthPower() const
+{
+  return d_nth_power;
+}
+
 void ScaleEngine::clone(const ScaleEngine *engine)
 {
 	d_type = engine->type();
@@ -289,6 +295,7 @@ void ScaleEngine::clone(const ScaleEngine *engine)
 	d_log10_scale_after = engine->log10ScaleAfterBreak();
 	d_break_width = engine->breakWidth();
 	d_break_decoration = engine->hasBreakDecoration();
+  d_nth_power = engine->nthPower();
 	setAttributes(engine->attributes());
 	setMargins(engine->lowerMargin(), engine->upperMargin());
 }

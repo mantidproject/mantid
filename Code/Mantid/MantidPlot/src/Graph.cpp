@@ -1152,7 +1152,8 @@ void Graph::setScale(int axis, double start, double end, double step,
     int majorTicks, int minorTicks, int type, bool inverted,
     double left_break, double right_break, int breakPos,
     double stepBeforeBreak, double stepAfterBreak, int minTicksBeforeBreak,
-    int minTicksAfterBreak, bool log10AfterBreak, int breakWidth, bool breakDecoration)
+    int minTicksAfterBreak, bool log10AfterBreak, int breakWidth,
+    bool breakDecoration, double nth_power)
 {
   if (ScaleEngine* se = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis))){
     se->setBreakRegion(left_break, right_break);
@@ -1165,6 +1166,7 @@ void Graph::setScale(int axis, double start, double end, double step,
     se->setMinTicksAfterBreak(minTicksAfterBreak);
     se->setLog10ScaleAfterBreak(log10AfterBreak);
     se->setAttribute(QwtScaleEngine::Inverted, inverted);
+    se->setNthPower(nth_power);
   }
 
   setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
