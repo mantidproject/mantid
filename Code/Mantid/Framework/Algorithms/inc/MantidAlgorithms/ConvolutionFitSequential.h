@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Column.h"
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -47,6 +49,7 @@ private:
   std::vector<std::string> findValuesFromFunction(const std::string &);
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
+  std::vector<double> columnToVector(const API::Column_sptr &);
 };
 
 } // namespace Algorithms

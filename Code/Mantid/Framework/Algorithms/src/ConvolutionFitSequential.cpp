@@ -3,6 +3,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -259,24 +260,13 @@ void ConvolutionFitSequential::exec() {
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   auto paramNames = std::vector<std::string>();
-  paramNames.push_back("Height");
-  if (funcName.find("Diffusion") != std::string::npos) {
-    paramNames.push_back("Intensity");
-    paramNames.push_back("Radius");
-  } else if (funcName.find("Sphere") != std::string::npos) {
-    paramNames.push_back("Diffusion");
-    paramNames.push_back("Shift");
-  } else if (funcName.find("Circle") != std::string::npos) {
-    paramNames.push_back("Decay");
-    paramNames.push_back("Shift");
-  } else if (funcName.find("Stretch") != std::string::npos) {
-    paramNames.pop_back();
-    paramNames.push_back("height");
-    paramNames.push_back("tau");
-    paramNames.push_back("beta");
-  } else {
-    paramNames.push_back("Amplitude");
-    paramNames.push_back("FWHM");
+  auto func = FunctionFactory::Instance().createFunction(funcName);
+  for (size_t i = 0; i < func->nParams(); i++) {
+    paramNames.push_back(func->parameterName(i));
+  }
+  if (funcName.compare("Lorentzian") == 0) {
+    // remove peak centre
+    paramNames.erase(paramNames.begin() + 1);
     paramNames.push_back("EISF");
   }
 
@@ -286,8 +276,8 @@ void ConvolutionFitSequential::exec() {
     auto columns = outputWs->getColumnNames();
     std::string height = searchForFitParams("Height", columns).at(0);
     std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-    auto heightY = outputWs->getColumn(height);
-    auto heightE = outputWs->getColumn(heightErr);
+    auto heightY = columnToVector(outputWs->getColumn(height));
+    auto heightE = columnToVector(outputWs->getColumn(heightErr));
 
     // Get amplitude column names
     auto ampNames = searchForFitParams("Amplitude", columns);
@@ -301,17 +291,18 @@ void ConvolutionFitSequential::exec() {
     for (size_t i = 0; i < maxSize; i++) {
       // Get amplitude from column in table workspace
       std::string ampName = ampNames.at(i);
-      auto ampY = outputWs->getColumn(ampName);
+      auto ampY = columnToVector(outputWs->getColumn(ampName));
       std::string ampErrorName = ampErrorNames.at(i);
-      auto ampErr = outputWs->getColumn(ampErrorName);
+      auto ampErr = columnToVector(outputWs->getColumn(ampErrorName));
 
       // Calculate EISF and EISF error
-      /* auto total = heightY + ampY;
-       auto eisfY = heightY / total;
+	  /*
+      auto total = heightY + ampY;
+      auto eisfY = heightY / total;
 
-       auto totalErr = pow(heightE, 2) + pow(ampErr, 2);
-       auto eisfErr = eisfY * sqrt((pow(heightE, 2) / pow(heightY, 2) +
-                                    (totalErr / pow(total, 2))));*/
+      auto totalErr = pow(heightE, 2) + pow(ampErr, 2);
+      auto eisfErr = eisfY * sqrt((pow(heightE, 2) / pow(heightY, 2) +
+                                   (totalErr / pow(total, 2))));
 
       // Append the calculated values to the table workspace
       std::string columnName =
@@ -323,15 +314,15 @@ void ConvolutionFitSequential::exec() {
 
       outputWs->addColumn("double", columnName);
       outputWs->addColumn("double", errorColumnName);
-      /* size_t maxEisf = eisfY.size();
-                 if (eisfErr.size() > maxEisf) {
-                        maxEisf = eisfErr.size();
-                }
+      size_t maxEisf = eisfY.size();
+      if (eisfErr.size() > maxEisf) {
+        maxEisf = eisfErr.size();
+      }
 
-                for (size_t j = 0; j < maxEisf; j++) {
-                        outputWs->setCell(columnName, j, esifY.at(j));
-                        outputWs->setCell(errorColumnName, j, esifErr.at(j));
-                }*/
+      for (size_t j = 0; j < maxEisf; j++) {
+        outputWs->setCell(columnName, j, esifY.at(j));
+        outputWs->setCell(errorColumnName, j, esifErr.at(j));
+      }*/
     }
   }
 
@@ -457,6 +448,17 @@ std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
     }
   }
   return fitParams;
+}
+
+std::vector<double> ConvolutionFitSequential::columnToVector(
+    const API::Column_sptr &column) {
+  auto result = std::vector<double>();
+  const size_t columnSize = column->size();
+  for (size_t i = 0; i < columnSize; i++) {
+    double cellValue = column->cell<double>(i);
+    result.push_back(cellValue);
+  }
+  return result;
 }
 
 } // namespace Algorithms
