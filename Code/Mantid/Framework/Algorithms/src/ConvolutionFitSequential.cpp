@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -181,18 +182,16 @@ void ConvolutionFitSequential::exec() {
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
-  // May be incorrect type
   auto tempFitWs = WorkspaceFactory::Instance().create(
       "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
-    // double eFixed = inputWs->getEFixed();
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
+    convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", tempFitWsName);
     convSpec->setProperty("Target", "ElasticQ");
     convSpec->setProperty("EMode", "Indirect");
-    convSpec->setProperty("EFixed", 0.0);
     convSpec->executeAsChildAlg();
     tempFitWs = convSpec->getProperty("OutputWorkspace");
   } else if (axis->isNumeric()) {

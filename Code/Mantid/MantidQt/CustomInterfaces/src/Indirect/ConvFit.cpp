@@ -276,7 +276,7 @@ void ConvFit::run() {
     pyInput += "temp=None\n";
   }
 
-  pyInput += "bg = '" + bgType + "'\n"
+  /*pyInput += "bg = '" + bgType + "'\n"
                                  "ftype = '" +
              fitType +
              "'\n"
@@ -290,8 +290,25 @@ void ConvFit::run() {
   QString pyOutput = runPythonCode(pyInput);
 
   // Set the result workspace for Python script export
-  m_pythonExportWsName = pyOutput.toStdString();
+  m_pythonExportWsName = pyOutput.toStdString();*/
 
+  auto cfs =
+      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
+  cfs->setProperty("Function", function);
+  cfs->setProperty("Start X", stX.toStdString());
+  cfs->setProperty("End X", enX.toStdString());
+  double temp = 0.0;
+  if(temperature.toStdString().compare("") != 0){
+	  temp = boost::lexical_cast<double>(temperature.toStdString());
+  }
+  cfs->setProperty("Temperature", temp);
+  cfs->setProperty("Spec Min", specMin.toStdString());
+  cfs->setProperty("Spec Max", specMax.toStdString());
+  cfs->setProperty("Convolve", true);
+  cfs->setProperty("Minimizer", "Levenberg-Marquardt");
+  cfs->setProperty("Max Iterations", maxIterations);
+  cfs->execute();
   updatePlot();
 }
 
