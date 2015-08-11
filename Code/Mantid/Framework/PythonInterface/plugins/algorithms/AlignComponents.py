@@ -18,6 +18,7 @@ class AlignComponents(PythonAlgorithm):
     _initialPos = None
     _move = False
     _rotate = False
+    _masking = False
 
     def category(self):
         """ Mantid required
@@ -166,13 +167,12 @@ class AlignComponents(PythonAlgorithm):
         calWS = self.getProperty('CalibrationTable').value
         maskWS = self.getProperty("MaskWorkspace").value
 
-        Masking = False
         if maskWS != None:
-            Masking = True
+            self._masking = True
             mask = maskWS.extractY().flatten()
 
         difc = calWS.column('difc')
-        if Masking:
+        if self._masking:
             difc = np.ma.masked_array(difc, mask)
 
         instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
@@ -205,10 +205,11 @@ class AlignComponents(PythonAlgorithm):
 
             boundsList = []
 
-            if Masking:
+            if self._masking:
                 mask_out = mask[firstDetID:lastDetID + 1]
             else:
                 mask_out = None
+
             if self._optionsDict["PosX"]:
                 x0List.append(self._initialPos[0])
                 boundsList.append((self._initialPos[0] + self.getProperty("MinX").value,
@@ -255,8 +256,8 @@ class AlignComponents(PythonAlgorithm):
                 api.RotateInstrumentComponent(instrumentWS, component, X=rx, Y=ry, Z=rz, Angle=rw,
                                               RelativeRotation=False)
 
+            # Need to grab the component again, as things have changed
             comp = instrumentWS.getInstrument().getComponentByName(component)
-
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
@@ -275,7 +276,7 @@ class AlignComponents(PythonAlgorithm):
 
         difc_new = ws.extractY().flatten()[firstDetID:lastDetID + 1]
 
-        if mask is not None:
+        if self._masking and mask is not None:
             difc_new = np.ma.masked_array(difc_new, mask)
 
         return chisquare(f_obs=difc, f_exp=difc_new)[0]
@@ -299,6 +300,9 @@ class AlignComponents(PythonAlgorithm):
             return self._getLastDetID(component[component.nelements() - 1])
 
     def _mapOptions(self, x):
+        """
+        Creates an array combining the refining and constant variables
+        """
         x0_index = 0
         out = []
         for opt in self._optionsList:
@@ -325,7 +329,7 @@ class AlignComponents(PythonAlgorithm):
         """
         q = self._eulerToQuat(a, b, c, convention)
         if q[0] == 1:
-            return 0, 1, 0, 0
+            return 0, 0, 0, 1
         deg = math.acos(q[0])
         s = math.sin(deg)
         deg *= 360.0 / math.pi
