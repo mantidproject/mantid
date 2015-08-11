@@ -403,6 +403,7 @@ void ScaleDetails::initWidgets()
     m_spnMajorValue->setValue(lst.count());
 
     checkstep();
+    checkscaletype();
 
     connect(m_grpAxesBreaks,SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_chkInvert,SIGNAL(clicked()), this, SLOT(setModified()));
@@ -415,8 +416,10 @@ void ScaleDetails::initWidgets()
     connect(m_cmbMinorValue,SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
     connect(m_cmbUnit,SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
     connect(m_cmbScaleType,SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbScaleType,SIGNAL(currentIndexChanged(int)), this, SLOT(checkscaletype()));
     connect(m_dspnEnd, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_dspnN, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnStep, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnBreakStart, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnStepBeforeBreak, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
@@ -629,6 +632,22 @@ void ScaleDetails::checkstep()
     m_cmbUnit->setEnabled(false);
     m_radMajor->setChecked(true);
     m_spnMajorValue->setEnabled(true);
+  }
+}
+
+/*
+ * Enable the "n =" widget if X^n scale type is selected
+ */
+void ScaleDetails::checkscaletype()
+{
+  // If "power X^n" scale option is selected
+  if (m_cmbScaleType->currentIndex() == 2)
+  {
+    m_dspnN->setEnabled(true);
+  }
+  else
+  {
+    m_dspnN->setEnabled(false);
   }
 }
 

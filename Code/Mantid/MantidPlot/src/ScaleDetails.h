@@ -67,6 +67,7 @@ private slots:
   void radiosSwitched();
   void setModified();
   void recalcStepMin();
+  void checkscaletype();
 
 private:
   bool m_modified, m_initialised;
