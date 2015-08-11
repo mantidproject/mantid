@@ -8,6 +8,7 @@ import numpy as np
 import ast
 import fnmatch
 import re
+import os
 
 #------------------------------------------------------------------------------
 
@@ -16,8 +17,8 @@ TYPE_REGEX = re.compile(r'#\s+type:\s+([A-z]+)')
 AXIS_REGEX = re.compile(r'#\s+axis:\s+([A-z]+)\|([A-z]+)')
 UNIT_REGEX = re.compile(r'#\s+units:\s+(.*)')
 
-SLICE_1D_HEADER_REGEX = re.compile(r'#slice:\[([0-9]+)L\]')
-SLICE_2D_HEADER_REGEX = re.compile(r'#slice:\[([0-9]+)L,\s+([0-9]+)L\]')
+SLICE_1D_HEADER_REGEX = re.compile(r'#slice:\[([0-9]+)[A-z]*\]')
+SLICE_2D_HEADER_REGEX = re.compile(r'#slice:\[([0-9]+)[A-z]*,\s+([0-9]+)[A-z]*\]')
 
 #------------------------------------------------------------------------------
 
