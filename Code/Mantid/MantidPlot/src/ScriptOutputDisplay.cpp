@@ -44,11 +44,63 @@ ScriptOutputDisplay::ScriptOutputDisplay(QWidget * parent) :
  * @param e the mouse move event
  */
 void ScriptOutputDisplay::mouseMoveEvent(QMouseEvent * e)
-  {
-    this->setReadOnly(true);
-    QTextEdit::mouseMoveEvent(e);
-    this->setReadOnly(false);
-  }
+{
+  this->setReadOnly(true);
+  QTextEdit::mouseMoveEvent(e);
+  this->setReadOnly(false);
+}
+
+void ScriptOutputDisplay::wheelEvent(QWheelEvent *e) {
+    if (e->modifiers() & Qt::ControlModifier) {
+        const int delta = e->delta();
+        if (delta < 0) {
+            zoom(-1);
+            emit textZoomedOut(); // allows tracking
+        }
+        else if (delta > 0) {
+            zoom(1);
+            emit textZoomedIn(); // allows tracking
+        }
+        return;
+    }
+    else 
+    {
+      QTextEdit::wheelEvent(e);
+    }
+}
+
+void ScriptOutputDisplay::zoom(int range)
+{
+  if (range == 0) 
+    return; 
+  QFont f = this->currentFont();
+  const int newSize = f.pointSize() + range; 
+  if (newSize <= 0) 
+    return; 
+  f.setPointSize(newSize); 
+  this->setCurrentFont(f); 
+  QTextCursor cursor = this->textCursor();
+  this->selectAll();
+  this->setFontPointSize(newSize);
+  this->setTextCursor( cursor );
+}
+
+void ScriptOutputDisplay::zoomUp()
+{
+  zoom(1);
+}
+
+void ScriptOutputDisplay::zoomDown()
+{
+  zoom(-1);
+}
+
+void ScriptOutputDisplay::setZoom(int value)
+{ 
+  // 8 is the default font size
+  QFont f = this->currentFont();
+  zoom(8 - f.pointSize());
+}
 
 /**
  * Is there anything here
