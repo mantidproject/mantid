@@ -89,12 +89,14 @@ void EnggDiffractionPresenter::processCalcCalib() {
     m_view->userWarning(
         "Error in the inputs",
         "The Vanadium number cannot be empty and must be an integer number");
+    return;
   }
   std::string ceriaNo = m_view->newCeriaNo();
   if (ceriaNo.empty()) {
     m_view->userWarning(
         "Error in the inputs",
         "The Ceria number cannot be empty and must be an integer number");
+    return;
   }
 
   std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
@@ -253,9 +255,8 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 
   // default extension for calibration files
   const std::string calibExt = ".prm";
-  std::string sugg = instStr + "_" + vanNo + "_" + ceriaNo + "_"
-                                                             "_both_banks" +
-                     "." + calibExt;
+  std::string sugg =
+      instStr + "_" + vanNo + "_" + ceriaNo + "_both_banks" + calibExt;
 
   return sugg;
 }
@@ -295,10 +296,12 @@ void EnggDiffractionPresenter::loadVanadiumWorkspaces(
 void EnggDiffractionPresenter::calcVanadiumWorkspaces(
     const std::string &vanNo, MatrixWorkspace_sptr &vanIntegWS,
     MatrixWorkspace_sptr &vanCurvesWS) {
-  MatrixWorkspace_sptr vanWS;
-  auto load = Algorithm::fromString("EnggVanadiumCorrections");
+
+  auto load = Algorithm::fromString("Load");
   load->initialize();
   load->setProperty("Filename", vanNo); // TODO build Vanadium filename
+  load->execute();
+  MatrixWorkspace_sptr vanWS = load->getProperty("OutputWorkspace");
 
   auto alg = Algorithm::fromString("EnggVanadiumCorrections");
   alg->initialize();
@@ -358,12 +361,40 @@ void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
     g_log.notice()
         << "Calculating Vanadium corrections. This may take a few seconds..."
         << std::endl;
-    calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
+    try {
+      calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
+    } catch (std::invalid_argument &ia) {
+      m_view->userError("Failed to calculate Vanadium corrections",
+                        "There was an error in the execution of the algorithms "
+                        "required to calculate Vanadium corrections. Some "
+                        "properties passed to the algorithms were invalid. "
+                        "This is possibly because some of the settings are not "
+                        "consistent. Please check the log messages for "
+                        "details.");
+    } catch (std::runtime_error &re) {
+      m_view->userError("Failed to calculate Vanadium corrections",
+                        "There was an error while executing one of the "
+                        "algorithms used to perform Vanadium corrections. "
+                        "There was no obvious error in the input properties "
+                        "but the algorithm failed. Please check the log "
+                        "messages for details.");
+    }
   } else {
     g_log.notice()
         << "Found precalculated Vanadium correction features for Vanadium run "
         << vanNo << ". Re-using them." << std::endl;
-    loadVanadiumWorkspaces(vanNo, inputDirCalib, vanIntegWS, vanCurvesWS);
+    try {
+      loadVanadiumWorkspaces(vanNo, inputDirCalib, vanIntegWS, vanCurvesWS);
+    } catch (std::runtime_error &re) {
+      m_view->userError(
+          "Error while loading precalculated Vanadium corrections",
+          "The files with precalculated Vanadium corection features (spectra "
+          "integration and per-bank curves) were found (with names '" +
+              preIntegFilename + "' and '" + preCurvesFilename +
+              "', respectively, but there was a problem while loading them. "
+              "Please check the log messages for details. You might want to "
+              "delete those files or force recalculations (in settings).");
+    }
   }
 }
 
