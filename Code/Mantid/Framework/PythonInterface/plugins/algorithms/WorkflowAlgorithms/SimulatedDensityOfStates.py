@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,too-many-locals
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -168,10 +168,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             for ion in ions:
                 ion_column = ion_table.column('Ion')
-                if ion[0] not in ion_column:
-                    ion_table.addRow([ion[0], 1])
+                if ion['species'] not in ion_column:
+                    ion_table.addRow([ion['species'], 1])
                 else:
-                    ion_row_idx = ion_column.index(ion[0])
+                    ion_row_idx = ion_column.index(ion['species'])
                     prev_count = ion_table.cell('Count', ion_row_idx)
                     prev_count += 1
                     ion_table.setCell('Count', ion_row_idx, prev_count)
@@ -184,7 +184,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             # Build a dictionary of ions that the user cares about
             partial_ions = dict()
             for ion in self._ions:
-                partial_ions[ion] = [i[1] for i in ions if i[0] == ion]
+                partial_ions[ion] = [i['mode'] for i in ions if i['species'] == ion]
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
@@ -209,8 +209,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             # Build a dict of all ions
             all_ions = dict()
-            for ion in set([i[0] for i in ions]):
-                all_ions[ion] = [i[1] for i in ions if i[0] == ion]
+            for ion in set([i['species'] for i in ions]):
+                all_ions[ion] = [i['mode'] for i in ions if i[0] == ion]
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(all_ions, frequencies, eigenvectors, weights)
 
@@ -260,18 +260,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             if bonds is None or len(bonds) == 0:
                 raise RuntimeError('No bonds found in CASTEP file')
 
+            #TODO
             output_ws = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
 
-            # Create a list of all ions in the same format as the bond list
-            all_ions = []
-            for ion in set([i[0] for i in ions]):
-                all_numbers = [i[1] for i in ions if i[0] == ion]
-                for i in range(max(all_numbers) - min(all_numbers) + 1):
-                    all_ions.append((ion[0], i))
+            print "UNIT CELL"
+            print file_data.get('unit_cell')
 
-            #TODO
             print "IONS"
-            for i in all_ions:
+            for i in ions:
                 print i
 
             print "BONDS"
@@ -285,6 +281,49 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 print v
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
+
+#----------------------------------------------------------------------------------------
+
+    def _choose_close_bonded_atom(self, atom, bonds, length=10.0, is_not=None):
+        """
+        Choose an atom that is bonded to the atom specified that is closest to
+        it within the length specified.
+
+        @param atom Atom chosen atom must be bonded to
+        @param bonds List of all bonds
+        @param length Maximum length of a considered bond
+        @param is_non List of atoms that cannot be considered
+        @return A tuple defining an atom as (element, ion number) or None if no
+                suitable atom is found
+        """
+        if is_not is None:
+            is_not = []
+        is_not.append(atom)
+        is_not = [i[:2] for i in is_not if i is not None]
+
+        best_bond = None
+        best_atom = None
+
+        for bond in [b for b in bonds if b['atom_a'] == atom[:2]]:
+            if bond['atom_b'] in is_not:
+                continue
+
+            if best_bond is None or bond['length'] < best_bond['length']:
+                best_bond = bond
+                best_atom = bond['atom_b']
+
+        for bond in [b for b in bonds if b['atom_b'] == atom[:2]]:
+            if bond['atom_a'] in is_not:
+                continue
+
+            if best_bond is None or bond['length'] < best_bond['length']:
+                best_bond = bond
+                best_atom = bond['atom_a']
+
+        if best_bond is not None and best_bond['length'] > length:
+            best_bond = None
+
+        return best_atom
 
 #----------------------------------------------------------------------------------------
 
@@ -601,7 +640,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         return weight, q_vector
 
 #----------------------------------------------------------------------------------------
-    #pylint: disable=too-many-branches
+
     def _parse_phonon_file_header(self, f_handle):
         """
         Read information from the header of a <>.phonon file
@@ -609,7 +648,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param f_handle - handle to the file.
         @return List of ions in file as list of tuple of (ion, mode number)
         """
-        ions = []
+        file_data = {'ions': []}
 
         while True:
             line = f_handle.readline()
@@ -621,6 +660,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 self._num_ions = int(line.strip().split()[-1])
             elif 'Number of branches' in line:
                 self._num_branches = int(line.strip().split()[-1])
+            elif 'Unit cell vectors' in line:
+                file_data['unit_cell'] = self._parse_phonon_unit_cell_vectors(f_handle)
             elif 'Fractional Co-ordinates' in line:
                 if self._num_ions is None:
                     raise IOError("Failed to parse file. Invalid file header.")
@@ -629,17 +670,21 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 for _ in xrange(self._num_ions):
                     line = f_handle.readline()
                     line_data = line.strip().split()
-                    ion = line_data[4]
-                    # -1 to convert to zero based indexing
-                    mode = int(line_data[0]) - 1
-                    ions.append((ion, mode))
 
-                logger.debug('All ions: ' + str(ions))
+                    species = line_data[4]
+                    ion = {'species': species}
+                    ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
+                    # -1 to convert to zero based indexing
+                    ion['mode'] = int(line_data[0]) - 1
+                    ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
+                    file_data['ions'].append(ion)
+
+                logger.debug('All ions: ' + str(file_data['ions']))
 
             if 'END header' in line:
                 if self._num_ions is None or self._num_branches is None:
                     raise IOError("Failed to parse file. Invalid file header.")
-                return ions
+                return file_data
 
 #----------------------------------------------------------------------------------------
 
@@ -659,6 +704,25 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         prog_reporter.report("Reading frequencies.")
 
 #----------------------------------------------------------------------------------------
+
+    def _parse_phonon_unit_cell_vectors(self, f_handle):
+        """
+        Parses the unit cell vectors in a .phonon file.
+
+        @param f_handle Handle to the file
+        @return Numpy array of unit vectors
+        """
+        data = []
+        for _ in range(3):
+            line = f_handle.readline()
+            line_data = line.strip().split()
+            line_data = [float(x) for x in line_data]
+            data.append(line_data)
+
+        return np.array(data)
+
+#----------------------------------------------------------------------------------------
+
     def _parse_phonon_eigenvectors(self, f_handle):
         vectors = []
         prog_reporter = Progress(self, 0.0, 1.0, self._num_branches * self._num_ions)
@@ -685,11 +749,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param file_name - file path of the file to read
         @return the frequencies, infra red and raman intensities and weights of frequency blocks
         """
+        file_data = {}
+
         # Header regex. Looks for lines in the following format:
         #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
         header_regex_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': self._float_regex}
         header_regex = re.compile(header_regex_str)
-
         eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
         block_count = 0
 
@@ -697,10 +762,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                            or (self._spec_type == 'DOS' and self._scale_by_cross_section != 'None') \
                            or self._spec_type == 'BondAnalysis'
 
-        frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors, ions = [], [], [], [], [], [], []
+        frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors = [], [], [], [], [], []
         data_lists = (frequencies, ir_intensities, raman_intensities)
         with open(file_name, 'rU') as f_handle:
-            ions = self._parse_phonon_file_header(f_handle)
+            file_data.update(self._parse_phonon_file_header(f_handle))
 
             while True:
                 line = f_handle.readline()
@@ -741,15 +806,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         raman_intensities = np.asarray(raman_intensities)
         warray = np.repeat(weights, self._num_branches)
 
-        file_data = {
+        file_data.update({
                 'frequencies': frequencies,
                 'ir_intensities': ir_intensities,
                 'raman_intensities': raman_intensities,
                 'weights': warray,
                 'q_vectors':q_vectors,
-                'eigenvectors': eigenvectors,
-                'ions': ions
-                }
+                'eigenvectors': eigenvectors
+                })
 
         return file_data
 
@@ -842,7 +906,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         bond['atom_a'] = (bond_match.group(1), int(bond_match.group(2)) - 1)
         bond['atom_b'] = (bond_match.group(3), int(bond_match.group(4)) - 1)
         bond['population'] = bond_match.group(5)
-        bond['length'] = bond_match.group(6)
+        bond['length'] = float(bond_match.group(6))
 
         return bond
 
