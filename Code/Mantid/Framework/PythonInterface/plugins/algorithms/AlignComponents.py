@@ -170,8 +170,8 @@ class AlignComponents(PythonAlgorithm):
             if wks.getInstrument().getComponentByName(component) is None:
                 issues['ComponentList'] = "Instrument has no component \"" + component + "\""
 
-        if not (self.getProperty("PosX").value + self.getProperty("PosY").value + self.getProperty("PosZ").value +
-                self.getProperty("RotX").value + self.getProperty("RotY").value + self.getProperty("RotZ").value):
+        if not (self.getProperty("PosX").value or self.getProperty("PosY").value or self.getProperty("PosZ").value or
+                    self.getProperty("RotX").value or self.getProperty("RotY").value or self.getProperty("RotZ").value):
             issues["PosX"] = "You must calibrate at least one property"
 
         return issues
@@ -188,6 +188,8 @@ class AlignComponents(PythonAlgorithm):
         difc = calWS.column('difc')
         if self._masking:
             difc = np.ma.masked_array(difc, mask)
+
+        detID = calWS.column('detid')
 
         wks = self.getProperty("InputWorkspace").value
         if wks is None:
@@ -208,7 +210,11 @@ class AlignComponents(PythonAlgorithm):
         for component in components:
             comp = wks.getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
+            firstIndex = detID.index(firstDetID)
             lastDetID = self._getLastDetID(comp)
+            lastIndex = detID.index(lastDetID)
+            if lastDetID - firstDetID != lastIndex - firstIndex:
+                raise RuntimeError("Calibration detid doesn't match instrument")
 
             eulerAngles = comp.getRotation().getEulerAngles()
 
@@ -223,7 +229,7 @@ class AlignComponents(PythonAlgorithm):
             boundsList = []
 
             if self._masking:
-                mask_out = mask[firstDetID:lastDetID + 1]
+                mask_out = mask[firstIndex:lastIndex + 1]
             else:
                 mask_out = None
 
@@ -255,9 +261,9 @@ class AlignComponents(PythonAlgorithm):
             results = minimize(self._minimisation_func, x0=x0List,
                                args=(wks,
                                      component,
-                                     firstDetID,
-                                     lastDetID,
-                                     difc[firstDetID:lastDetID + 1],
+                                     firstIndex,
+                                     lastIndex,
+                                     difc[firstIndex:lastIndex + 1],
                                      mask_out),
                                bounds=boundsList)
 
@@ -280,7 +286,7 @@ class AlignComponents(PythonAlgorithm):
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
 
     #pylint: disable=too-many-arguments
-    def _minimisation_func(self, x_0, wks, component, firstDetID, lastDetID, difc, mask):
+    def _minimisation_func(self, x_0, wks, component, firstIndex, lastIndex, difc, mask):
         xmap = self._mapOptions(x_0)
 
         if self._move:
@@ -293,9 +299,9 @@ class AlignComponents(PythonAlgorithm):
 
         wks = api.CalculateDIFC(wks)
 
-        difc_new = wks.extractY().flatten()[firstDetID:lastDetID + 1]
+        difc_new = wks.extractY().flatten()[firstIndex:lastIndex + 1]
 
-        if self._masking and mask is not None:
+        if self._masking:
             difc_new = np.ma.masked_array(difc_new, mask)
 
         return chisquare(f_obs=difc, f_exp=difc_new)[0]
@@ -304,7 +310,7 @@ class AlignComponents(PythonAlgorithm):
         """
         recursive search to find first detID
         """
-        if component.type() == 'DetectorComponent':
+        if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
             return component.getID()
         else:
             return self._getFirstDetID(component[0])
@@ -313,7 +319,7 @@ class AlignComponents(PythonAlgorithm):
         """
         recursive search to find last detID
         """
-        if component.type() == 'DetectorComponent':
+        if component.type() == 'DetectorComponent' or component.type() == 'RectangularDetectorPixel':
             return component.getID()
         else:
             return self._getLastDetID(component[component.nelements() - 1])
