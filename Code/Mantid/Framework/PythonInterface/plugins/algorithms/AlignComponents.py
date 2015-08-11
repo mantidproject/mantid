@@ -155,27 +155,28 @@ class AlignComponents(PythonAlgorithm):
         if maskWS is not None and maskWS.id() != 'MaskWorkspace':
             issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
 
-        ws = self.getProperty("InputWorkspace").value
-        if ws is None:
+        wks = self.getProperty("InputWorkspace").value
+        if wks is None:
             inputFilename = self.getProperty("InstrumentFilename").value
             if inputFilename == "":
                 issues["InputWorkspace"] = "A InputWorkspace or InstrumentFilename must be defined"
                 return issues
             else:
-                ws = api.LoadEmptyInstrument(Filename=inputFilename,
-                                             OutputWorkspace="alignedWorkspace")
+                wks = api.LoadEmptyInstrument(Filename=inputFilename,
+                                              OutputWorkspace="alignedWorkspace")
 
         components = self.getProperty("ComponentList").value.split(',')
         for component in components:
-            if ws.getInstrument().getComponentByName(component) is None:
+            if wks.getInstrument().getComponentByName(component) is None:
                 issues['ComponentList'] = "Instrument has no component \"" + component + "\""
 
         if not (self.getProperty("PosX").value + self.getProperty("PosY").value + self.getProperty("PosZ").value +
-                    self.getProperty("RotX").value + self.getProperty("RotY").value + self.getProperty("RotZ").value):
+                self.getProperty("RotX").value + self.getProperty("RotY").value + self.getProperty("RotZ").value):
             issues["PosX"] = "You must calibrate at least one property"
 
         return issues
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
         calWS = self.getProperty('CalibrationTable').value
         maskWS = self.getProperty("MaskWorkspace").value
@@ -188,10 +189,10 @@ class AlignComponents(PythonAlgorithm):
         if self._masking:
             difc = np.ma.masked_array(difc, mask)
 
-        ws = self.getProperty("InputWorkspace").value
-        if ws is None:
-            ws = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
-                                         OutputWorkspace="alignedWorkspace")
+        wks = self.getProperty("InputWorkspace").value
+        if wks is None:
+            wks = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
+                                          OutputWorkspace="alignedWorkspace")
 
         components = self.getProperty("ComponentList").value.split(',')
 
@@ -205,7 +206,7 @@ class AlignComponents(PythonAlgorithm):
             self._rotate = True
 
         for component in components:
-            comp = ws.getInstrument().getComponentByName(component)
+            comp = wks.getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
             lastDetID = self._getLastDetID(comp)
 
@@ -252,7 +253,7 @@ class AlignComponents(PythonAlgorithm):
                                    self._initialPos[5] + self.getProperty("MaxRotZ").value))
 
             results = minimize(self._minimisation_func, x0=x0List,
-                               args=(ws,
+                               args=(wks,
                                      component,
                                      firstDetID,
                                      lastDetID,
@@ -261,36 +262,38 @@ class AlignComponents(PythonAlgorithm):
                                bounds=boundsList)
 
             # Apply the results to the output workspace
-            out = self._mapOptions(results.x)
+            xmap = self._mapOptions(results.x)
 
             if self._move:
-                api.MoveInstrumentComponent(ws, component, X=out[0], Y=out[1], Z=out[2],
+                api.MoveInstrumentComponent(wks, component, X=xmap[0], Y=xmap[1], Z=xmap[2],
                                             RelativePosition=False)
 
             if self._rotate:
-                (rw, rx, ry, rz) = self._eulerToAngleAxis(out[3], out[4], out[5])
-                api.RotateInstrumentComponent(ws, component, X=rx, Y=ry, Z=rz, Angle=rw,
+                (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5])
+                api.RotateInstrumentComponent(wks, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
                                               RelativeRotation=False)
 
             # Need to grab the component again, as things have changed
-            comp = ws.getInstrument().getComponentByName(component)
+            comp = wks.getInstrument().getComponentByName(component)
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
 
-    def _minimisation_func(self, x0, ws, component, firstDetID, lastDetID, difc, mask):
-        x = self._mapOptions(x0)
+    #pylint: disable=too-many-arguments
+    def _minimisation_func(self, x_0, wks, component, firstDetID, lastDetID, difc, mask):
+        xmap = self._mapOptions(x_0)
 
         if self._move:
-            api.MoveInstrumentComponent(ws, component, X=x[0], Y=x[1], Z=x[2], RelativePosition=False)
+            api.MoveInstrumentComponent(wks, component, X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
 
         if self._rotate:
-            (rw, rx, ry, rz) = self._eulerToAngleAxis(x[3], x[4], x[5])
-            api.RotateInstrumentComponent(ws, component, X=rx, Y=ry, Z=rz, Angle=rw, RelativeRotation=False)
+            (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5])
+            api.RotateInstrumentComponent(wks, component, X=rotx, Y=roty, Z=rotz, Angle=rotw,
+                                          RelativeRotation=False)
 
-        ws = api.CalculateDIFC(ws)
+        wks = api.CalculateDIFC(wks)
 
-        difc_new = ws.extractY().flatten()[firstDetID:lastDetID + 1]
+        difc_new = wks.extractY().flatten()[firstDetID:lastDetID + 1]
 
         if self._masking and mask is not None:
             difc_new = np.ma.masked_array(difc_new, mask)
@@ -315,7 +318,7 @@ class AlignComponents(PythonAlgorithm):
         else:
             return self._getLastDetID(component[component.nelements() - 1])
 
-    def _mapOptions(self, x):
+    def _mapOptions(self, inX):
         """
         Creates an array combining the refining and constant variables
         """
@@ -323,35 +326,33 @@ class AlignComponents(PythonAlgorithm):
         out = []
         for opt in self._optionsList:
             if self._optionsDict[opt]:
-                out.append(x[x0_index])
+                out.append(inX[x0_index])
                 x0_index += 1
             else:
                 out.append(self._initialPos[self._optionsList.index(opt)])
         return out
 
-    def _eulerToQuat(self, a, b, c, convention="YZX"):
+    def _eulerToQuat(self, alpha, beta, gamma, convention="YZX"):
         """
         Convert Euler angles to a quaternion
         """
         getV3D = {'X': V3D(1, 0, 0), 'Y': V3D(0, 1, 0), 'Z': V3D(0, 0, 1)}
-        q1 = Quat(a, getV3D[convention[0]])
-        q2 = Quat(b, getV3D[convention[1]])
-        q3 = Quat(c, getV3D[convention[2]])
-        return q1 * q2 * q3
+        return (Quat(alpha, getV3D[convention[0]]) * Quat(beta, getV3D[convention[1]]) *
+                Quat(gamma, getV3D[convention[2]]))
 
-    def _eulerToAngleAxis(self, a, b, c, convention="YZX"):
+    def _eulerToAngleAxis(self, alpha, beta, gamma, convention="YZX"):
         """
         Convert Euler angles to a angle rotation around an axis
         """
-        q = self._eulerToQuat(a, b, c, convention)
-        if q[0] == 1:
+        quat = self._eulerToQuat(alpha, beta, gamma, convention)
+        if quat[0] == 1:
             return 0, 0, 0, 1
-        deg = math.acos(q[0])
-        s = math.sin(deg)
+        deg = math.acos(quat[0])
+        scale = math.sin(deg)
         deg *= 360.0 / math.pi
-        ax0 = q[1] / s
-        ax1 = q[2] / s
-        ax2 = q[3] / s
+        ax0 = quat[1] / scale
+        ax1 = quat[2] / scale
+        ax2 = quat[3] / scale
         return deg, ax0, ax1, ax2
 
 
