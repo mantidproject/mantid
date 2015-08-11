@@ -296,13 +296,55 @@ void ConvolutionFitSequential::exec() {
       auto ampErr = columnToVector(outputWs->getColumn(ampErrorName));
 
       // Calculate EISF and EISF error
-	  /*
-      auto total = heightY + ampY;
-      auto eisfY = heightY / total;
+      // total = heightY + ampY
+      auto total = cloneVector(heightY);
+      std::transform(total.begin(), total.end(), ampY.begin(), total.begin(),
+                     std::plus<double>());
+      // eisfY = heightY / total
+      auto eisfY = cloneVector(heightY);
+      std::transform(eisfY.begin(), eisfY.end(), total.begin(), eisfY.begin(),
+                     std::divides<double>());
+      // heightE squared
+      auto heightESq = cloneVector(heightE);
+      heightE = squareVector(heightESq);
+      // ampErr squared
+      auto ampErrSq = cloneVector(ampErr);
+      ampErrSq = squareVector(ampErrSq);
+      // totalErr = heightE squared + ampErr squared
+      auto totalErr = cloneVector(heightESq);
+      std::transform(totalErr.begin(), totalErr.end(), ampErrSq.begin(),
+                     totalErr.begin(), std::plus<double>());
+      // heightY squared
+      auto heightYSq = cloneVector(heightY);
+      heightYSq = squareVector(heightYSq);
+      // total Squared
+      auto totalSq = cloneVector(total);
+      totalSq = squareVector(totalSq);
+      // errOverTotalSq = totalErr / total squared
+      auto errOverTotalSq = cloneVector(totalErr);
+      std::transform(errOverTotalSq.begin(), errOverTotalSq.end(),
+                     totalSq.begin(), errOverTotalSq.begin(),
+                     std::divides<double>());
+      // heightESqOverYSq = heightESq / heightYSq
+      auto heightESqOverYSq = cloneVector(heightESq);
+      std::transform(heightESqOverYSq.begin(), heightESqOverYSq.end(),
+                     heightYSq.begin(), heightESqOverYSq.begin(),
+                     std::divides<double>());
+      // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
+      auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
+      std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
+                     sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+      // eisfYSumRoot = eisfY * sqrtESqOverYSq
+      auto eisfYSumRoot = cloneVector(eisfY);
+      std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),
+                     sqrtESqOverYSq.begin(), eisfYSumRoot.begin(),
+                     std::multiplies<double>());
+      // eisfErr = eisfYSumRoot + errOverTotalSq
+      auto eisfErr = cloneVector(eisfYSumRoot);
+      std::transform(eisfErr.begin(), eisfErr.end(), errOverTotalSq.begin(),
+                     eisfErr.begin(), std::plus<double>());
 
-      auto totalErr = pow(heightE, 2) + pow(ampErr, 2);
-      auto eisfErr = eisfY * sqrt((pow(heightE, 2) / pow(heightY, 2) +
-                                   (totalErr / pow(total, 2))));
+      /*
 
       // Append the calculated values to the table workspace
       std::string columnName =
@@ -450,8 +492,8 @@ std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
   return fitParams;
 }
 
-std::vector<double> ConvolutionFitSequential::columnToVector(
-    const API::Column_sptr &column) {
+std::vector<double>
+ConvolutionFitSequential::columnToVector(const API::Column_sptr &column) {
   auto result = std::vector<double>();
   const size_t columnSize = column->size();
   for (size_t i = 0; i < columnSize; i++) {
@@ -459,6 +501,18 @@ std::vector<double> ConvolutionFitSequential::columnToVector(
     result.push_back(cellValue);
   }
   return result;
+}
+
+static inline double computeSquare (double x) { return x*x; }
+
+std::vector<double> ConvolutionFitSequential::squareVector(std::vector<double> target){
+	std::transform(target.begin(), target.end(), target.begin(), computeSquare);
+	return target;
+}
+
+std::vector<double> ConvolutionFitSequential::cloneVector(const std::vector<double> &original){
+	auto result = std::vector<double>(original.begin(), original.end());
+	return result;
 }
 
 } // namespace Algorithms

@@ -50,6 +50,8 @@ private:
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
   std::vector<double> columnToVector(const API::Column_sptr &);
+  std::vector<double> squareVector(std::vector<double>);
+  std::vector<double> cloneVector(const std::vector<double> &);
 };
 
 } // namespace Algorithms
