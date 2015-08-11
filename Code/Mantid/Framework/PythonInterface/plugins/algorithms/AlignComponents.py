@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, \
-    ITableWorkspaceProperty, FileAction, FileProperty
+    ITableWorkspaceProperty, FileAction, FileProperty, WorkspaceProperty, InstrumentValidator
 from mantid.kernel import Direction, FloatBoundedValidator, PropertyCriterion, EnabledWhenProperty, logger, Quat, V3D
 import mantid.simpleapi as api
 from scipy.stats import chisquare
@@ -36,23 +36,27 @@ class AlignComponents(PythonAlgorithm):
         return "Align a component by minimising difference to an offset workspace"
 
     def PyInit(self):
-        self.declareProperty(ITableWorkspaceProperty("CalibrationTable",
-                                                     "",
+        self.declareProperty(ITableWorkspaceProperty("CalibrationTable", "",
                                                      optional=PropertyMode.Mandatory,
                                                      direction=Direction.Input),
                              doc="Calibration table, currently only uses difc")
 
-        self.declareProperty(MatrixWorkspaceProperty("MaskWorkspace",
-                                                     "",
+        self.declareProperty(MatrixWorkspaceProperty("MaskWorkspace", "",
                                                      optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
                              doc="Mask workspace")
 
         self.declareProperty(FileProperty(name="InstrumentFilename",
                                           defaultValue="",
-                                          action=FileAction.Load,
+                                          action=FileAction.OptionalLoad,
                                           extensions=[".xml"]),
                              doc="Instrument filename")
+
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
+                                               validator=InstrumentValidator(),
+                                               optional=PropertyMode.Optional,
+                                               direction=Direction.InOut),
+                             doc="Workspace containing the instrument to be calibrated.")
 
         self.declareProperty("ComponentList", "",
                              direction=Direction.Input,
@@ -148,18 +152,27 @@ class AlignComponents(PythonAlgorithm):
             issues['CalibrationTable'] = "Calibration table requires detid and difc"
 
         maskWS = self.getProperty("MaskWorkspace").value
-        if maskWS != None and maskWS.id() != 'MaskWorkspace':
+        if maskWS is not None and maskWS.id() != 'MaskWorkspace':
             issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
 
-        instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
+        ws = self.getProperty("InputWorkspace").value
+        if ws is None:
+            inputFilename = self.getProperty("InstrumentFilename").value
+            if inputFilename == "":
+                issues["InputWorkspace"] = "A InputWorkspace or InstrumentFilename must be defined"
+                return issues
+            else:
+                ws = api.LoadEmptyInstrument(Filename=inputFilename,
+                                             OutputWorkspace="alignedWorkspace")
+
         components = self.getProperty("ComponentList").value.split(',')
         for component in components:
-            if instrumentWS.getInstrument().getComponentByName(component) is None:
+            if ws.getInstrument().getComponentByName(component) is None:
                 issues['ComponentList'] = "Instrument has no component \"" + component + "\""
 
         if not (self.getProperty("PosX").value + self.getProperty("PosY").value + self.getProperty("PosZ").value +
                     self.getProperty("RotX").value + self.getProperty("RotY").value + self.getProperty("RotZ").value):
-            issues["PosX"] = "You must refine something"
+            issues["PosX"] = "You must calibrate at least one property"
 
         return issues
 
@@ -175,7 +188,10 @@ class AlignComponents(PythonAlgorithm):
         if self._masking:
             difc = np.ma.masked_array(difc, mask)
 
-        instrumentWS = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value)
+        ws = self.getProperty("InputWorkspace").value
+        if ws is None:
+            ws = api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value,
+                                         OutputWorkspace="alignedWorkspace")
 
         components = self.getProperty("ComponentList").value.split(',')
 
@@ -189,7 +205,7 @@ class AlignComponents(PythonAlgorithm):
             self._rotate = True
 
         for component in components:
-            comp = instrumentWS.getInstrument().getComponentByName(component)
+            comp = ws.getInstrument().getComponentByName(component)
             firstDetID = self._getFirstDetID(comp)
             lastDetID = self._getLastDetID(comp)
 
@@ -236,7 +252,7 @@ class AlignComponents(PythonAlgorithm):
                                    self._initialPos[5] + self.getProperty("MaxRotZ").value))
 
             results = minimize(self._minimisation_func, x0=x0List,
-                               args=(instrumentWS,
+                               args=(ws,
                                      component,
                                      firstDetID,
                                      lastDetID,
@@ -248,16 +264,16 @@ class AlignComponents(PythonAlgorithm):
             out = self._mapOptions(results.x)
 
             if self._move:
-                api.MoveInstrumentComponent(instrumentWS, component, X=out[0], Y=out[1], Z=out[2],
+                api.MoveInstrumentComponent(ws, component, X=out[0], Y=out[1], Z=out[2],
                                             RelativePosition=False)
 
             if self._rotate:
                 (rw, rx, ry, rz) = self._eulerToAngleAxis(out[3], out[4], out[5])
-                api.RotateInstrumentComponent(instrumentWS, component, X=rx, Y=ry, Z=rz, Angle=rw,
+                api.RotateInstrumentComponent(ws, component, X=rx, Y=ry, Z=rz, Angle=rw,
                                               RelativeRotation=False)
 
             # Need to grab the component again, as things have changed
-            comp = instrumentWS.getInstrument().getComponentByName(component)
+            comp = ws.getInstrument().getComponentByName(component)
             logger.notice("Finshed " + comp.getFullName() +
                           " Final position is " + str(comp.getPos()) +
                           " Final rotation is " + str(comp.getRotation().getEulerAngles()))
