@@ -6,10 +6,12 @@ import os
 import numpy as n
 from abc import ABCMeta, abstractmethod
 
+#pylint: disable=too-many-instance-attributes
 class PEARL_Reduction(stresstesting.MantidStressTest):
     '''Test adapted from actual script used by the scientists'''
 
     __metaclass__ = ABCMeta # Mark as an abstract class
+    validate=None
 
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
@@ -60,13 +62,12 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
 
     def validateGSS(self):
         '''Validate the created gss file'''
-        from mantid.api import FileFinder
         return self.saved_gssfile,FileFinder.getFullPath(self.reference_gss)
 
     def PEARL_getlambdarange(self):
         return 0.03,6.00
 
-    def PEARL_getmonitorspectrum(self, runno):
+    def PEARL_getmonitorspectrum(self, dummy_runno):
         return 1
 
     def PEARL_getfilename(self, run_number,ext):
@@ -75,7 +76,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         numdigits=8
         filename="PEARL"
 
-        for i in range(0,numdigits-digit):
+        for dummy_i in range(0,numdigits-digit):
             filename=filename+"0"
 
         filename+=str(run_number)+"."+ext
@@ -167,6 +168,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         mtd.remove(monitor)
         return
 
+    #pylint: disable=too-many-arguments,too-many-branches
     def PEARL_focus(self, number,ext="raw",fmode="trans",ttmode="TT70",atten=True,van_norm=True):
 
         self.tt_mode=ttmode
@@ -357,6 +359,7 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
 
 #================================================================================
 class PEARL_Mode_trans(PEARL_Reduction):
+    validate=None
     def do_focus(self):
 		#self.reference_nexus = "PRL75318_75323.nxs"
         return self.PEARL_focus("75318_75323","raw",fmode="trans",ttmode="TT70",atten=True)
@@ -373,12 +376,14 @@ class PEARL_Mode_trans(PEARL_Reduction):
         return 'PRL75318_75323_noatten','PEARL75318_75323_noatten.nxs'
 
 #================================================================================
+#pylint: disable=too-few-public-methods
 class PEARL_Mode_all_Si(PEARL_Reduction):
     def do_focus(self):
 		#self.reference_nexus = "PRL74798_74800.nxs"
         return self.PEARL_focus("74798_74800","raw",fmode="all",ttmode="TT70",atten=False)
 
 #================================================================================
+#pylint: disable=too-few-public-methods
 class PEARL_Mode_all_CeO2(PEARL_Reduction):
     def do_focus(self):
 		#self.reference_nexus = "PRL74795_74797.nxs"
