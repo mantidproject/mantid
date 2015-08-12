@@ -69,7 +69,7 @@ public:
   /**
    * Gets a filename from the user, to use for a new calibration file.
    *
-   * @param suggested filename that the user can just accept without
+   * @param suggestedFname filename that the user can just accept without
    * typing anything
    *
    * @return filename (can be empty if not given or an error happened)
@@ -161,7 +161,7 @@ public:
    * widgets. This becomes the new 'current' calibration.
    *
    * @param vanadiumNo new Vanadium run number
-   * @param ceraNo new Ceria run number
+   * @param ceriaNo new Ceria run number
    * @param fname new calibration file name
    */
   virtual void newCalibLoaded(const std::string &vanadiumNo,

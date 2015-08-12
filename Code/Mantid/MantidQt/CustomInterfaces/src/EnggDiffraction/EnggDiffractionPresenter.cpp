@@ -173,13 +173,13 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     g_log.error() << "Unable to load or calculate Vanadium corrections. Giving "
                      "up. There was a problem while executing algorithms: " +
                          std::string(re.what());
-    throw re;
+    throw;
   } catch (std::invalid_argument &ia) {
     g_log.error() << "Unable to load or calculate Vanadium corrections. Giving "
                      "up. There was a problem with the inputs to the "
                      "correction algorithms: " +
                          std::string(ia.what());
-    throw ia;
+    throw;
   }
 
   // Bank 1 and 2 - ENGIN-X
@@ -221,7 +221,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                             " Please check also the log messages for details.");
       g_log.information() << "Could not write calibration file because of the "
                              "errors (see log). " << std::endl;
-      throw re;
+      throw;
     }
     difc[i] = alg->getProperty("Difc");
     tzero[i] = alg->getProperty("Zero");
@@ -459,6 +459,9 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
  *
  * @param vanCurvesWS workspace where to create/load the Vanadium
  * aggregated per-bank curve
+ *
+ * @param forceRecalc whether to calculate Vanadium corrections even
+ * if the files of pre-calculated results are found
  */
 void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     const std::string &vanNo, const std::string &inputDirCalib,
@@ -484,7 +487,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                         "This is possibly because some of the settings are not "
                         "consistent. Please check the log messages for "
                         "details. Details: ");
-      throw ia;
+      throw;
     } catch (std::runtime_error &re) {
       m_view->userError("Failed to calculate Vanadium corrections",
                         "There was an error while executing one of the "
@@ -492,7 +495,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                         "There was no obvious error in the input properties "
                         "but the algorithm failed. Please check the log "
                         "messages for details.");
-      throw re;
+      throw;
     }
   } else {
     g_log.notice()
@@ -511,7 +514,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
               "', respectively, but there was a problem while loading them. "
               "Please check the log messages for details. You might want to "
               "delete those files or force recalculations (in settings).");
-      throw re;
+      throw;
     }
   }
 }
