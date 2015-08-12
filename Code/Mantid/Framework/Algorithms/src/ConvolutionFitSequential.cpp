@@ -368,8 +368,6 @@ void ConvolutionFitSequential::exec() {
         col->cell<double>(j) = eisfY.at(j);
         errCol->cell<double>(j) = eisfErr.at(j);
       }
-	  auto x = columnToVector(col);
-	  auto y = columnToVector(errCol);
     }
   }
 
@@ -490,8 +488,12 @@ std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
   auto fitParams = std::vector<std::string>();
   const size_t totalColumns = columns.size();
   for (size_t i = 0; i < totalColumns; i++) {
-    if (columns.at(i).rfind(suffix) != std::string::npos) {
-      fitParams.push_back(columns.at(i));
+    auto pos = columns.at(i).rfind(suffix);
+    if (pos != std::string::npos) {
+      auto endCheck = pos + suffix.size();
+      if (endCheck == columns.at(i).size()) {
+        fitParams.push_back(columns.at(i));
+      }
     }
   }
   return fitParams;
