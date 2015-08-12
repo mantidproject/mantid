@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
 #
-# Created: Mon Aug 10 16:04:21 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Tue Aug 11 20:47:52 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -257,7 +257,7 @@ class Ui_MainWindow(object):
         spacerItem9 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_5.addItem(spacerItem9)
         self.gridLayout_3.addLayout(self.verticalLayout_5, 0, 3, 1, 1)
-        self.graphicsView = MplFigureCanvas(self.tab_4)
+        self.graphicsView = MplGraphicsView(self.tab_4)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -506,9 +506,9 @@ class Ui_MainWindow(object):
         self.lineEdit_workDir = QtGui.QLineEdit(self.tab_advsetup)
         self.lineEdit_workDir.setObjectName(_fromUtf8("lineEdit_workDir"))
         self.gridLayout_10.addWidget(self.lineEdit_workDir, 2, 2, 1, 1)
-        self.pushButton_3 = QtGui.QPushButton(self.tab_advsetup)
-        self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
-        self.gridLayout_10.addWidget(self.pushButton_3, 2, 6, 1, 1)
+        self.pushButton_browseWorkDir = QtGui.QPushButton(self.tab_advsetup)
+        self.pushButton_browseWorkDir.setObjectName(_fromUtf8("pushButton_browseWorkDir"))
+        self.gridLayout_10.addWidget(self.pushButton_browseWorkDir, 2, 6, 1, 1)
         self.label_4 = QtGui.QLabel(self.tab_advsetup)
         self.label_4.setObjectName(_fromUtf8("label_4"))
         self.gridLayout_10.addWidget(self.label_4, 1, 0, 1, 1)
@@ -546,7 +546,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11.addLayout(self.verticalLayout_3)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1266, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1266, 22))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -664,7 +664,7 @@ class Ui_MainWindow(object):
         self.label_22.setText(_translate("MainWindow", "gamma", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Refine UB", None))
         self.label_instrument.setText(_translate("MainWindow", "Instrument", None))
-        self.pushButton_3.setText(_translate("MainWindow", "Browse", None))
+        self.pushButton_browseWorkDir.setText(_translate("MainWindow", "Browse", None))
         self.label_4.setText(_translate("MainWindow", "Data Cache", None))
         self.label_2.setText(_translate("MainWindow", "Working Dir", None))
         self.pushButton_browseLocalCache.setText(_translate("MainWindow", "Browse", None))
@@ -686,4 +686,4 @@ class Ui_MainWindow(object):
         self.actionLoad_Session.setText(_translate("MainWindow", "Load Session", None))
         self.actionLoad_Session.setShortcut(_translate("MainWindow", "Ctrl+Shift+L", None))
 
-from MplFigureCanvas import MplFigureCanvas
+from mplgraphicsview import MplGraphicsView

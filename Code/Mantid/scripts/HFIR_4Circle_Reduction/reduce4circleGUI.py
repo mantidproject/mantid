@@ -69,20 +69,23 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.comboBox_mode, QtCore.SIGNAL('currentIndexChanged(int)'),
                      self.change_data_access_mode)
 
-
         # Tab 'View Raw Data'
         self.connect(self.ui.pushButton_plotRawPt, QtCore.SIGNAL('clicked()'),
                      self.do_plot_pt_raw)
-
         self.connect(self.ui.pushButton_prevPtNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_prev_pt_raw)
-
         self.connect(self.ui.pushButton_nextPtNumber, QtCore.SIGNAL('clicked()'),
                      self.do_plot_next_pt_raw)
+        self.connect(self.ui.pushButton_showPtList, QtCore.SIGNAL('clicked()'),
+                     self.show_scan_pt_list)
 
         # Tab 'Advanced'
         self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_cache_dir)
+        self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
+                     self.do_browse_working_dir)
+        self.connect(self.ui.comboBox_instrument, QtCore.SIGNAL('currentIndexChanged(int)'),
+                     self.change_instrument_name)
 
         # Menu
         self.connect(self.ui.actionSave_Session, QtCore.SIGNAL('triggered()'),
@@ -90,13 +93,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
                      self.load_session)
 
-        # Tab ...
-
-
-
-        # Event handling for tab 'calculate ub matrix'
+        # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
-                self.doFindPeak)
+                     self.do_find_peak)
 
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
                 self.doCalUBMatrix)
@@ -122,11 +121,12 @@ class MainWindow(QtGui.QMainWindow):
         
         # Some configuration
         self._homeSrcDir = os.getcwd()
-        self._homeSaveDir = os.getcwd()
+        self._homeDir = os.getcwd()
 
         # Control
         self._myControl = r4c.CWSCDReductionControl(self._instrument)
         self._allowDownload = True
+        self._dataAccessMode = 'Download'
 
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
@@ -137,19 +137,16 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_localSpiceDir.setEnabled(False)
         self.ui.pushButton_browseLocalDataDir.setEnabled(False)
 
-
-
         return
 
-    #---------------------------------------------------------------------------
-    # Event handling methods
-    #---------------------------------------------------------------------------
     def change_data_access_mode(self):
         """ Change data access mode between downloading from server and local
+        Event handling methods
         :return:
         """
         new_mode = str(self.ui.comboBox_mode.currentText())
-        print '[DB] New Mode = ', new_mode
+        self._dataAccessMode = new_mode
+
         if new_mode.startswith('Local') is True:
             self.ui.lineEdit_localSpiceDir.setEnabled(True)
             self.ui.pushButton_browseLocalDataDir.setEnabled(True)
@@ -164,6 +161,18 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_localSrcDir.setEnabled(True)
             self.ui.pushButton_browseLocalCache.setEnabled(True)
             self._allowDownload = True
+
+        return
+
+    def change_instrument_name(self):
+        """ Handing the event as the instrument name is changed
+        :return:
+        """
+        new_instrument = str(self.ui.comboBox_instrument.currentText())
+        self.pop_one_button_dialog('Change of instrument during data processing is dangerous.')
+        status, error_message = self._myControl.set_instrument_name(new_instrument)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
 
         return
 
@@ -223,16 +232,17 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def doBrowseSaveDir(self):
-        """ Browse the local directory to save the data
+    def do_browse_working_dir(self):
         """
-        targetdatadir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Directory', self._homeSaveDir))
-        self._homeSaveDir = targetdatadir
+        Browse and set up working directory
+        :return:
+        """
+        work_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Working Directory'), self._homeDir)
+        status, error_message = self._myControl.set_working_directory(work_dir)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
 
-        self.ui.lineEdit_dirSave.setText(targetdatadir)
-
-        return 
-    
+        return
     
     def doCalUBMatrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
@@ -281,14 +291,23 @@ class MainWindow(QtGui.QMainWindow):
 
         return
     
-    def doFindPeak(self):
-        """ Find peak in a given scan/pt
+    def do_find_peak(self):
+        """ Find peak in a given scan/pt and record it
         """
-        scanNo = self._getInt(self.ui.lineEdit_scanNumber)
-        ptNo = self._getInt(self.ui.lineEdit_ptNumber)
+        # Get experiment, scan and pt
+        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp, self.ui.lineEdit_scanNumber,
+                                                       self.ui.lineEdit_ptNumber])
+        if status is True:
+            exp_no, scan_no, pt_no = ret_obj
+        else:
+            self.pop_one_button_dialog(ret_obj)
 
-        self._myProject.findPeak(scanNo, ptNo)
+        # Find peak
+        status, error_message = self._myProject.findPeak(exp_no, scan_no, pt_no)
+        if status is False:
+            self.pop_one_button_dialog(error_message)
 
+        # Set up correct values
 
         return
 
@@ -308,32 +327,6 @@ class MainWindow(QtGui.QMainWindow):
             message = fcutil.get_scans_list(url, exp_no)
 
         self.pop_one_button_dialog(message)
-
-        return
-
-    def XXX_do_load_pt(self):
-        """ Download and optinally load the data of one Pt. for viewing raw data
-        """
-        # Get experiment, run and spice data directory
-        exp_id = int(self.ui.lineEdit_exp.text())
-        run_id = int(self.ui.lineEdit_run.text())
-        spice_dir = str(self.ui.lineEdit_localSpiceDir.text())
-
-        # Load mode
-        raise MYBAD()
-
-        # determine operation mode
-        if uselocalfile is True:
-            source = str(self.ui.lineEdit_localSrcDir.text())
-            mode = ['Copy', 'Reduce']
-        else:
-            source = str(self.ui.lineEdit_url.text())
-            modestr = str(self.ui.comboBox_mode.currentText())
-            mode = ['Download']
-            if modestr.count('Reduce') == 1:
-                mode.append('Reduce')
-
-        self._loadData(source, workdir, expid, runid, mode)
 
         return
 
@@ -497,80 +490,42 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-    #---------------------------------------------------------------------------
-    # Private event handling methods
-    #---------------------------------------------------------------------------
-    def _loadData(self, source, targetdir, expid, runid, mode):
-        """ Copy/download data to a directory and reduce them as an option
-        Arguments:
-         - source
-         - targetdir
-         - mode: 
+    def show_scan_pt_list(self):
+        """ Show the range of Pt. in a scan
+        :return:
         """
-        basefilename =  "HB3A_exp%d_scan%0d.txt" % (expid, runid)
-        localfilename = os.path.join(targetdir, basefilename)
-
-        # load SPICE's run file
-        if 'Download' in mode:
-            # download from internet
-            # generate the URL from 
-            if source.endswith('/') is False:
-                source = source+'/'
-            spicerunfileurl = source + "HB3A_exp%d_scan%0d.txt" % (expid, runid)
-
-            # download
-            try:
-                api.DownloadFile(Address=spicerunfileurl, Filename=localfilename)
-            except Exception as e:
-                return (False, str(e))
-
-            # check file exist?
-            if os.path.doesExist(localfilename) is False:
-                return (False, "NO DOWNLOADED FILE")
-            
+        # Get parameters
+        status, inp_list = self._parse_integers_editor([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        if status is False:
+            self.pop_one_button_dialog(inp_list)
+            return
         else:
-            # copy from local disk
-            # check whether the source and target directory are same
-            source = os.path.absolutePath(source)
-            targetdir = os.path.abosolutePath(targetdir)
+            exp_no = inp_list[0]
+            scan_no = inp_list[1]
 
-            # copy file
-            if source != targetdir:
-                sourcefilename = os.path.join(source, basefilename)
-                os.copyFile(sourcefilename, localfilename)
+        # Find a way to find out the list
+        if self._dataAccessMode.startswith('Local'):
+            # Local access mode
+            status, ret_obj = fcutil.get_pt_list_local(exp_no, scan_no)
+        else:
+            status, ret_obj = fcutil.get_pt_list_server(exp_no, scan_no)
 
-            # check file exist?
-            if os.path.doesExist(localfilename) is False:
-                return (False, "NO COPIED FILE")
+        # Form message
+        if status is False:
+            # Failed to get Pt. list
+            error_message = ret_obj
+            self.pop_one_button_dialog(error_message)
+        else:
+            # Form message
+            pt_list = sorted(ret_obj)
+            num_pts = len(pt_list)
+            info = 'Exp %d Scan %d has %d Pt. ranging from %d to %d.\n' % (exp_no, scan_no, num_pts,
+                                                                           pt_list[0], pt_list[-1])
+            num_miss_pt = pt_list[-1] - pt_list[0] + 1 - num_pts
+            if num_miss_pt > 0:
+                info += 'There are %d Pt. skipped.\n' % num_miss_pt
 
-        # ENDIFELSE
-
-        # process SPICE's scan data file
-        if 'Reduce' in mode:
-            # load scan/run spice file
-            spicetablews, infows = api.LoadSpiceAscii(Filename=localfilename, OutputWorkspace=spicetablewsname, 
-                    RunInfoWorkspace=infowsname)
-
-            # get Pt. data 
-            ptlist = self._getPtList(spicetablews)
-
-            self._xmlwkspdict = {} 
-            for pt in ptlist:
-                # generate xml file name
-                basename = 'HB3A_exp%d_scan%04d_%04d.xml' % (expid, runid, pt)
-                xmlfilename = os.path.join(targetdir, basename)
-                if os.path.doesExist(xmlfilename) is False:
-                    self._logError("File %s does not exist for exp %d scan %d pt %d" % (xmlfilename, expid, runid, pt))
-
-                # load
-                xmlwkspname = 'HB3A_e%d_s%d_m%d_raw' % (expid, runid, pt)
-                xmlwksp = api.LoadSpiceXMLData(Filename=xmlfilename, OutputWorkspace=xmlwkspname)
-                # FIXME - emit an signal?: for tree structure and log
-
-                self._xmlwkspdict[pt] = xmlwksp
-            # ENDFOR
-        # ENDIF
+            self.pop_one_button_dialog(info)
 
         return
 
@@ -601,8 +556,9 @@ class MainWindow(QtGui.QMainWindow):
         # Convert a list of vector to 2D numpy array for imshow()
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
-        self.ui.graphicsView.clearCanvas()
-        self.ui.graphicsView.addPlot2D(raw_det_data, xmin=0, xmax=256, ymin=0, ymax=256, holdprev=False)
+        self.ui.graphicsView.clear_canvas()
+        self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
+                                         hold_prev_image=False)
 
         return
 

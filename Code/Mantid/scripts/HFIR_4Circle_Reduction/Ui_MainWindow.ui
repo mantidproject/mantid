@@ -589,7 +589,7 @@
                </layout>
               </item>
               <item row="0" column="0">
-               <widget class="MplFigureCanvas" name="graphicsView">
+               <widget class="MplGraphicsView" name="graphicsView">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                   <horstretch>0</horstretch>
@@ -1003,7 +1003,7 @@
                  <widget class="QLineEdit" name="lineEdit_workDir"/>
                 </item>
                 <item row="2" column="6">
-                 <widget class="QPushButton" name="pushButton_3">
+                 <widget class="QPushButton" name="pushButton_browseWorkDir">
                   <property name="text">
                    <string>Browse</string>
                   </property>
@@ -1093,7 +1093,7 @@
      <x>0</x>
      <y>0</y>
      <width>1266</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1197,9 +1197,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MplFigureCanvas</class>
+   <class>MplGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>MplFigureCanvas.h</header>
+   <header>mplgraphicsview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -79,7 +79,8 @@ class CWSCDReductionControl(object):
         # Experiment number, data storage
         # No Use/Confusing: self._expNumber = 0
 
-        self._dataDir = "/tmp"
+        self._dataDir = None
+        self._workDir = '/tmp'
 
         self._myServerURL = ''
 
@@ -132,16 +133,17 @@ class CWSCDReductionControl(object):
 
         return
 
-    def download_spice_file(self, scan_number):
+    def download_spice_file(self, exp_number, scan_number):
         """
         Download a scan/pt data from internet
+        :param exp_number: experiment number
         :param scan_number:
         :return:
         """
         # Generate the URL for SPICE data file
-        file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, self._expNumber,
-                                                                    self._expNumber, scan_number)
-        file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, self._expNumber, scan_number)
+        file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
+                                                                    exp_number, scan_number)
+        file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, exp_number, scan_number)
         file_name = os.path.join(self._dataDir, file_name)
 
         # Download
@@ -555,9 +557,40 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
+    def set_working_directory(self, work_dir):
+        """
+        Set up the directory for working result
+        :return: (boolean, string)
+        """
+        if os.path.exists(work_dir) is False:
+            try:
+                os.mkdir(work_dir)
+            except OSError as e:
+                return False, 'Unable to create working directory %s due to %s.' % (work_dir, str(e))
+        elif os.access(work_dir, os.W_OK) is False:
+            return False, 'User specified working directory %s is not writable.' % work_dir
+
+        return True, ''
+
+    def set_instrument_name(self, instrument_name):
+        """
+        Set instrument name
+        :param instrument_name:
+        :return:
+        """
+        # Check
+        if isinstance(instrument_name, str) is False:
+            return False, 'Input instrument name is not a string but of type %s.' % str(type(instrument_name))
+        if len(instrument_name) == 0:
+            return False, 'Input instrument name is an empty string.'
+
+        self._instrumentName = instrument_name
+
+        return True, ''
+
     def set_exp_number(self, expno):
         """
-
+        Set experiment number
         :param expno:
         :return:
         """
