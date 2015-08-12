@@ -44,6 +44,8 @@ void AppendSpectra::init() {
       "ValidateInputs", true,
       "Perform a set of checks that the two input workspaces are compatible.");
 
+  declareProperty("Repeat", 1, "Append the spectra from InputWorkspace2 multiple times");
+
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name of the output workspace");
@@ -79,10 +81,13 @@ void AppendSpectra::exec() {
   }
 
   const bool mergeLogs = getProperty("MergeLogs");
+  const int number = getProperty("Repeat");
 
   if (event_ws1 && event_ws2) {
     // Both are event workspaces. Use the special method
     MatrixWorkspace_sptr output = this->execEvent();
+    if (number > 1)
+      g_log.warning("Number property is ignored for event workspaces");
     if (mergeLogs)
       combineLogs(ws1->run(), ws2->run(), output->mutableRun());
     // Set the output workspace
@@ -96,7 +101,12 @@ void AppendSpectra::exec() {
     throw std::runtime_error(
         "Workspace2D's must have the same number of bins.");
 
+
   MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+  if (number > 1) {
+    for(int i = 1; i < number; i++)
+      output = execWS2D(output, ws2);
+  }
   if (mergeLogs)
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 
