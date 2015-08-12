@@ -120,11 +120,11 @@ void EnggDiffractionPresenter::processCalcCalib() {
   try {
     doCalib(cs, vanNo, ceriaNo, outFilename);
     m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
-  } catch (std::runtime_error &re) {
+  } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
                      "for details. " << std::endl;
-  } catch (std::invalid_argument &re) {
+  } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. " << std::endl;
