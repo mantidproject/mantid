@@ -7,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
@@ -344,7 +345,7 @@ void ConvolutionFitSequential::exec() {
       std::transform(eisfErr.begin(), eisfErr.end(), errOverTotalSq.begin(),
                      eisfErr.begin(), std::plus<double>());
 
-      /*
+     
 
       // Append the calculated values to the table workspace
       std::string columnName =
@@ -361,10 +362,14 @@ void ConvolutionFitSequential::exec() {
         maxEisf = eisfErr.size();
       }
 
+      Column_sptr col = outputWs->getColumn(columnName);
+      Column_sptr errCol = outputWs->getColumn(errorColumnName);
       for (size_t j = 0; j < maxEisf; j++) {
-        outputWs->setCell(columnName, j, esifY.at(j));
-        outputWs->setCell(errorColumnName, j, esifErr.at(j));
-      }*/
+        col->cell<double>(j) = eisfY.at(j);
+        errCol->cell<double>(j) = eisfErr.at(j);
+      }
+	  auto x = columnToVector(col);
+	  auto y = columnToVector(errCol);
     }
   }
 
