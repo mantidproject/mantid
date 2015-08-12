@@ -49,9 +49,9 @@ class TOPAZPeakFinding(stresstesting.MantidStressTest):
 
         # Bin to a line (H=0 to 6, L=3, K=3)
         BinMD(InputWorkspace='topaz_3132_HKL',AxisAligned='0',
-            BasisVector0='X,units,1,0,0',BasisVector1='Y,units,6.12323e-17,1,0',BasisVector2='2,units,-0,0,1',
-            Translation='-0,3,6',OutputExtents='0,6, -0.1,0.1, -0.1,0.1',OutputBins='60,1,1',
-            OutputWorkspace='topaz_3132_HKL_line')
+              BasisVector0='X,units,1,0,0',BasisVector1='Y,units,6.12323e-17,1,0',BasisVector2='2,units,-0,0,1',
+              Translation='-0,3,6',OutputExtents='0,6, -0.1,0.1, -0.1,0.1',OutputBins='60,1,1',
+              OutputWorkspace='topaz_3132_HKL_line')
 
         # Now check the integrated bin and the peaks
         w = mtd["topaz_3132_HKL_line"]
@@ -93,8 +93,8 @@ class TOPAZPeakFinding(stresstesting.MantidStressTest):
         for c in xrange(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
-                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (
-                                originalUB, newUB) )
+                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n"
+                                "%s\nQ (sample frame):\n%s" % (originalUB, newUB) )
 
     def doValidation(self):
         # If we reach here, no validation failed

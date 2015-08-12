@@ -8,24 +8,24 @@ import os
 
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
-    "BioSANS_test_data_Iq.xml",
-    "BioSANS_test_data_Iq.txt",
-    "BioSANS_test_data_Iqxy.dat"]
-    for file in Files:
-        absfile = FileFinder.getFullPath(file)
+             "BioSANS_test_data_Iq.xml",
+             "BioSANS_test_data_Iq.txt",
+             "BioSANS_test_data_Iqxy.dat"]
+    for filename in Files:
+        absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
 
-class HFIRTrans(stresstesting.MantidStressTest):
+class HFIRTrans1(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -43,15 +43,15 @@ class HFIRTrans(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTrans.nxs'
 
-class HFIRTrans(stresstesting.MantidStressTest):
+class HFIRTrans2(stresstesting.MantidStressTest):
 
     def cleanup(self):
         do_cleanup()
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -75,8 +75,8 @@ class HFIRTransmissionDarkCurrent(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -102,8 +102,8 @@ class HFIRTransmissionDirectBeamCenter(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -129,8 +129,8 @@ class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -157,8 +157,8 @@ class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -187,8 +187,8 @@ class HFIRTransmissionBeamSpreaderDC(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -218,8 +218,8 @@ class HFIRTransmissionBeamSpreaderDBC(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -249,8 +249,8 @@ class HFIRTransmissionBeamSpreaderBC(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()

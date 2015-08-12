@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-many-arguments,too-many-branches
 #This script creates numerous PeaksWorkspaces for different Crystal Types and Centerings. Random errors
 #are also introduced into the peak's.  Each PeaksWorkspace is sent through the algorithm's FindPeaksMD,
 #FindUBUsingFFT, and SelectByForm to determine the corresponding Primitive and Conventional cells. These
@@ -8,7 +8,7 @@
 #!!!!!!!!!  REPLACE THE "XXX" OR else !!!!!!!!!!
 
 
-import stresstesting
+#import stresstesting
 import numpy
 from numpy import matrix
 import math
@@ -18,7 +18,7 @@ from mantid.simpleapi import *
 #from mantid.simpleapi import *
 #TODO premultiply cases, fix up.. Maybe not needed Cause Conv cell was "Nigglied"
 #TODO: SWitch cases, if use approx inequality, may get error cause low level code  [does Not](does) premult but when it [should](should not)
-class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
+class Peak2ConvCell_Test(object):#(stresstesting.MantidStressTest):
     conventionalUB=numpy.zeros(shape=(3,3))
     Cubic=[1,3,5]
     Tetr=[6,7,11,15,18,21]
@@ -34,16 +34,16 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
     CentC=[10,13,14,17,20,23,25,27,28,29,30,36,37,38,39,40,41]
 
 
-    def CalcConventionalUB(self,a,b,c,alpha,beta,gamma,type):
+    def CalcConventionalUB(self,a,b,c,alpha,beta,gamma,celltype):
         Res= matrix([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])
 
-        if type=='O':
+        if celltype=='O':
 
             Res[0,0]=1./a
             Res[1,1]=1./b
             Res[2,2]=1./c
 
-        elif type=='H':
+        elif celltype=='H':
             Res[0,0]= a*1.0
             Res[1,0]= -a/2.
             Res[1,1]= a*.866
@@ -160,21 +160,21 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
 
         return RUB.I
 
-    def CalcNiggliUB( self,a, b,c,alpha, beta, gamma,type, Center):
+    def CalcNiggliUB( self,a, b,c,alpha, beta, gamma,celltype, Center):
 
         if  Center=='P':
-            X = self.CalcConventionalUB( a,b,c,alpha,beta,gamma,type)
+            X = self.CalcConventionalUB( a,b,c,alpha,beta,gamma,celltype)
             return X
 
         Res= matrix([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])
-        ConvUB = self.CalcConventionalUB(a,b,c,alpha,beta,gamma,type)
+        ConvUB = self.CalcConventionalUB(a,b,c,alpha,beta,gamma,celltype)
         if  ConvUB== None:
             return None
 
         ResP =  numpy.matrix.copy(ConvUB)
         ResP =ResP.I
 
-        if  type=='H' and Center =='I':
+        if  celltype=='H' and Center =='I':
             Center ='R'
 
         if  Center == 'I':
@@ -198,7 +198,7 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
 
         elif  Center =='F':
 
-            if  type =='H'  or  type=='M':
+            if  celltype =='H'  or  celltype=='M':
                 return None
 
             ss = [0,0,0]
@@ -217,25 +217,25 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
 
         elif  Center =='A' or Center=='B'or Center=='C':
 
-            if  type =='H' :
+            if  celltype =='H' :
                 return None
-            if  type =='M'  and  Center== 'B':
+            if  celltype =='M'  and  Center== 'B':
                 return None
 
             r=2
             if  Center =='A' :
 
                 r=0
-                if  b==c  and  type=='O':# result would be orthorhombic primitive
+                if  b==c  and  celltype=='O':# result would be orthorhombic primitive
                     return None
 
             elif  Center =='B':
 
                 r=1
-                if  a==c and  type=='O':
+                if  a==c and  celltype=='O':
                     return None
 
-            elif  a==b  and  type=='O':
+            elif  a==b  and  celltype=='O':
                 return None
 
             k=0
@@ -262,7 +262,7 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
 
         elif  Center =='R':
 
-            if  type != 'H' or alpha >120:#alpha =120 planar, >120 no go or c under a-b plane.
+            if  celltype != 'H' or alpha >120:#alpha =120 planar, >120 no go or c under a-b plane.
 
                 self.conventionalUB=NiggliUB = None
                 return None
@@ -803,7 +803,7 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
                     print ["Formnum,Lat1,Lat0",FormXtal[i1],Lat1,Lat0]
                     if  math.fabs(Lat0[0]-Lat1[0])<tolerance and math.fabs(Lat0[1]-Lat1[1])<tolerance and math.fabs(Lat0[2]-Lat1[2])<tolerance:
 
-                        for i in range(3):
+                        for dummy_i in range(3):
                             if math.fabs(Lat0[3]-Lat1[3])<angTolerance and math.fabs(Lat0[4]-Lat1[4])<angTolerance and math.fabs(Lat0[5]-Lat1[5])<angTolerance:
                                 break
                             if Lat1[0]>Lat1[1]-tolerance:
@@ -900,7 +900,8 @@ class Peak2ConvCell_Test:#(stresstesting.MantidStressTest):
                                             InPks=IndexPeaks(Peaks,.10)
 
 
-                                            CopySample(Peaks,"Sws",CopyMaterial="0",CopyEnvironment="0",CopyName="0",CopyShape="0",CopyLattice="1")
+                                            CopySample(Peaks,"Sws",CopyMaterial="0",
+                                                       CopyEnvironment="0",CopyName="0",CopyShape="0",CopyLattice="1")
                                             OrLat= mtd["Sws"].sample().getOrientedLattice()
 
                                             Lat1= [OrLat.a(),OrLat.b(),OrLat.c(),OrLat.alpha(),OrLat.beta(),OrLat.gamma()]

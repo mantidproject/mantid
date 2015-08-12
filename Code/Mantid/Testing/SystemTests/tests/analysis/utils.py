@@ -173,19 +173,17 @@ def expecting():
 		print "---", a,b,c,d
 		a, b = c, d = f()
 		print "---", a,b,c,d
-	'''
-	#}}}
 
-    """ Developers Notes:
+        Developers Notes:
 
 		Now works with an multiple assigments correctly.  This is verified by
 		test() and test1() below
-	"""
+	'''
     f = inspect.currentframe().f_back.f_back
     i = f.f_lasti  # index of the last attempted instruction in byte code
     ins=decompile(f.f_code)
 	#pretty_print(ins)
-    for (offset, op, name, argument, argtype, argvalue) in ins:
+    for (offset, dummy_op, name, argument, dummy_argtype, dummy_argvalue) in ins:
         if offset > i:
             if name == 'POP_TOP':
                 return 0
@@ -194,6 +192,7 @@ def expecting():
             if name == 'CALL_FUNCTION':
                 return 1
 
+#pylint: disable=too-many-locals,too-many-branches
 def lhs(output='names'):
     '''
 	call signature(s)::
@@ -215,17 +214,23 @@ def lhs(output='names'):
 	follow the form below.
 
 	'''
-    """ Developers Notes:
-	"""
+
     f = inspect.currentframe().f_back.f_back
     i = f.f_lasti  # index of the last attempted instruction in byte code
     ins=decompile(f.f_code)
 	#pretty_print(ins)
 
     CallFunctionLocation={}
-    first=False; StartIndex=0; StartOffset=0
+    first=False
+    StartIndex=0
+    StartOffset=0
 	# we must list all of the operators that behave like a function call in byte-code
-    OperatorNames=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_NOT','UNARY_CONVERT','UNARY_INVERT','GET_ITER', 'BINARY_POWER','BINARY_MULTIPLY','BINARY_DIVIDE', 'BINARY_FLOOR_DIVIDE', 'BINARY_TRUE_DIVIDE', 'BINARY_MODULO','BINARY_ADD','BINARY_SUBTRACT','BINARY_SUBSCR','BINARY_LSHIFT','BINARY_RSHIFT','BINARY_AND','BINARY_XOR','BINARY_OR'])
+    OperatorNames=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE',
+                       'UNARY_NOT','UNARY_CONVERT','UNARY_INVERT','GET_ITER',
+                       'BINARY_POWER','BINARY_MULTIPLY','BINARY_DIVIDE',
+                       'BINARY_FLOOR_DIVIDE', 'BINARY_TRUE_DIVIDE', 'BINARY_MODULO',
+                       'BINARY_ADD','BINARY_SUBTRACT','BINARY_SUBSCR',
+                       'BINARY_LSHIFT','BINARY_RSHIFT','BINARY_AND','BINARY_XOR','BINARY_OR'])
 
     for index in range(len(ins)):
         (offset, op, name, argument, argtype, argvalue) = ins[index]
@@ -261,7 +266,8 @@ def lhs(output='names'):
 		#              a,b=c=d=f() => [ ['a','b'] , 'c','d' ]  So on and so forth.
 
 		# put this in a loop and stack the results in an array.
-        count = 0; maxReturns = 0 # Must count the maxReturns ourselves in this case
+        count = 0
+        maxReturns = 0 # Must count the maxReturns ourselves in this case
         while count < len(ins[CallFunctionLocation[i][0] :CallFunctionLocation[i][1]]):
             (offset_, op_, name_, argument_, argtype_, argvalue_) = ins[CallFunctionLocation[i][0]+count]
 			#print 'i= ',i,'count = ', count, 'maxReturns = ',maxReturns

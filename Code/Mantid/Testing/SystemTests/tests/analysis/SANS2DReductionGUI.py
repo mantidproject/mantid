@@ -248,7 +248,7 @@ class SANS2DGUIReduction(SANS2DGUIBatchReduction):
 
     def checkFittingSettings(self):
         settings = {'scale':i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale,
-                'shift':i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift}
+                    'shift':i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift}
         super(SANS2DGUIReduction,self).checkFittingSettings(settings)
 
 
