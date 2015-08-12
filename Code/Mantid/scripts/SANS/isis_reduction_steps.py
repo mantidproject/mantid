@@ -12,7 +12,7 @@ import math
 import copy
 import re
 import traceback
-
+import math
 from mantid.kernel import Logger
 sanslog = Logger("SANS")
 
@@ -30,8 +30,8 @@ import isis_reducer
 from reducer_singleton import ReductionStep
 
 # A global name for the Q Resolution workspace which lives longer than a reducer core
-QRESOLUTION_WORKSPACE_NAME = "__Q_Resolution_ISIS_SANS"
-QRESOLUTION_MODERATOR_WORKSPACE_NAME = "__Q_Resolution_MODERATOR_ISIS_SANS"
+QRESOLUTION_WORKSPACE_NAME = "Q_Resolution_ISIS_SANS"
+QRESOLUTION_MODERATOR_WORKSPACE_NAME = "Q_Resolution_MODERATOR_ISIS_SANS"
 def _issueWarning(msg):
     """
         Prints a message to the log marked as warning
@@ -1931,7 +1931,8 @@ class ConvertToQISIS(ReductionStep):
 
         # Create the QResolution workspace, but only if it A) is requested by the user and does not exist
         #                                                  B) is requested by the user, exists, but does not
-        #                                                     have the correct binning
+        #                                                     have the correct binning --> This is currently not implemented,
+        #                                                     but should be addressed in an optimization step
         qResolution = self._get_q_resolution_workspace(det_bank_workspace = workspace)
 
         try:
@@ -1946,7 +1947,8 @@ class ConvertToQISIS(ReductionStep):
                     WaveCut=self.w_cut,
                     OutputParts=self.outputParts,
                     WavePixelAdj = wavepixeladj,
-                    ExtraLength=self._grav_extra_length)
+                    ExtraLength=self._grav_extra_length,
+                    QResolution=qResolution)
             elif self._Q_alg == 'Qxy':
                 Qxy(InputWorkspace=workspace,
                     OutputWorkspace= workspace,
@@ -1987,6 +1989,8 @@ class ConvertToQISIS(ReductionStep):
         # Check if Q Resolution exists in mtd
         exists = mtd.doesExist(QRESOLUTION_WORKSPACE_NAME)
 
+        # Future improvement here: If the binning has not changed and the instrument is
+        # the same then we can reuse the existing QResolution workspace if it exists
         if exists:
             #return self._get_existing_q_resolution(det_bank_workspace)
             return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
@@ -2032,8 +2036,7 @@ class ConvertToQISIS(ReductionStep):
         if self._has_matching_binning(det_bank_workspace):
             return mtd[QRESOLUTION_WORKSPACE_NAME]
         else:
-            # TODO: INSERT TOFSANSResolutionByPixel here
-            pass
+            return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
 
     def _has_matching_binning(self, det_bank_workspace):
         '''
@@ -2041,7 +2044,9 @@ class ConvertToQISIS(ReductionStep):
         and the main workspace do not match
         @det_bank_workspace: the main workspace
         '''
-        ws  = mtd[QRESOLUTION_WORKSPACE_NAME]
+        # Here we need to check if the binning has changed, ie if the
+        # existing 
+        raise RuntimeError("The QResolution optimization has not been implemented yet")
 
     def set_q_resolution_moderator(self, file_name):
         '''
@@ -2136,11 +2141,8 @@ class ConvertToQISIS(ReductionStep):
         Prepare the parameters which need preparing
         '''
         # If we have values for H1 and W1 then set A1 to the correct value
-        if self._q_resolution_h1 and self._q_resolution_w1:
+        if self._q_resolution_h1 and self._q_resolution_w1 and self._q_resolution_h2 and self._q_resolution_w2:
             self._q_resolution_a1 = self._set_up_diameter(self._q_resolution_h1, self._q_resolution_w1)
-
-        # If we have values for H2 and W2 then set A2 to the correct value
-        if self._q_resolution_h2 and self._q_resolution_w2:
             self._q_resolution_a2 = self._set_up_diameter(self._q_resolution_h2, self._q_resolution_w2)
 
     def _set_up_diameter(self, h, w):
@@ -2151,7 +2153,7 @@ class ConvertToQISIS(ReductionStep):
          @param w: the width
          @returns the new diameter
          '''
-         return 2*sqrt((h*h + w*w)/6)
+         return 2*math.sqrt((h*h + w*w)/6)
 
     def reset_q_settings(self):
         '''
