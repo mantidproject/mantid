@@ -27,14 +27,14 @@ DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
 const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
-    "GSAS instrument parameters / IPARM file: PRM, PAR, IPAR, IPARAM "
+    "GSAS instrument parameters, IPARM file: PRM, PAR, IPAR, IPARAM "
     "(*.prm *.par *.ipar *.iparam);;"
     "Other extensions/all files (*.*)";
 
 const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
-    "Comma separated values text file with calibration table (CSV)"
+    "Comma separated values text file with calibration table, CSV"
     "(*.csv);;"
-    "Nexus file with calibration table (NXS, NEXUS)"
+    "Nexus file with calibration table: NXS, NEXUS"
     "(*.nxs *.nexus);;"
     "Supported formats: CSV, NXS "
     "(*.csv *.nxs *.nexus);;"
@@ -46,7 +46,8 @@ const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
  * @param parent Parent window (most likely the Mantid main app window).
  */
 EnggDiffractionViewQtGUI::EnggDiffractionViewQtGUI(QWidget *parent)
-    : UserSubWindow(parent), IEnggDiffractionView(), m_presenter(NULL) {}
+    : UserSubWindow(parent), IEnggDiffractionView(), m_currentInst("ENGIN-X"),
+      m_currentCalibFilename(""), m_presenter(NULL) {}
 
 EnggDiffractionViewQtGUI::~EnggDiffractionViewQtGUI() {}
 
@@ -79,15 +80,17 @@ void EnggDiffractionViewQtGUI::initLayout() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
+  // empty defaults for current calibration
+  m_uiTabCalib.lineEdit_RBNumber->setText("");
+  m_uiTabCalib.lineEdit_current_vanadium_num->setText("");
+  m_uiTabCalib.lineEdit_current_ceria_num->setText("");
+  m_uiTabCalib.lineEdit_current_calib_filename->setText("");
+
+  // Last available runs. This (as well as the empty defaults just
+  // above) should probably be made persistent - and encapsulated into a
+  // CalibrationParameters or similar class/structure
   const std::string vanadiumRun = "236516";
   const std::string ceriaRun = "241391";
-
-  // line edits with calibration parameters
-  m_uiTabCalib.lineEdit_vanadium_num->setText(
-      QString::fromStdString(vanadiumRun));
-  m_uiTabCalib.lineEdit_ceria_num->setText(QString::fromStdString(ceriaRun));
-  m_uiTabCalib.lineEdit_current_calib_filename->setText(QString(""));
-
   m_uiTabCalib.lineEdit_new_vanadium_num->setText(
       QString::fromStdString(vanadiumRun));
   m_uiTabCalib.lineEdit_new_ceria_num->setText(
@@ -111,6 +114,9 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
       QString::fromStdString(m_calibSettings.m_pixelCalibFilename));
   m_uiTabSettings.lineEdit_template_gsas_prm->setText(
       QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
+  m_calibSettings.m_forceRecalcOverwrite = false;
+  m_uiTabSettings.checkBox_force_recalculate_overwrite->setChecked(
+      m_calibSettings.m_forceRecalcOverwrite);
 
   // push button signals/slots
   connect(m_uiTabSettings.pushButton_browse_input_dir_calib, SIGNAL(released()),
@@ -228,8 +234,7 @@ std::string EnggDiffractionViewQtGUI::askNewCalibrationFilename(
   }
   QDir path(prevPath);
   QString suggestion = path.filePath(QString::fromStdString(suggestedFname));
-
-  QString choice = QFileDialog::getOpenFileName(
+  QString choice = QFileDialog::getSaveFileName(
       this, tr("Please select the name of the calibration file"), suggestion,
       QString::fromStdString(g_iparmExtStr));
 
@@ -241,11 +246,11 @@ std::string EnggDiffractionViewQtGUI::getRBNumber() const {
 }
 
 std::string EnggDiffractionViewQtGUI::currentVanadiumNo() const {
-  return m_uiTabCalib.lineEdit_vanadium_num->text().toStdString();
+  return m_uiTabCalib.lineEdit_current_vanadium_num->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentCeriaNo() const {
-  return m_uiTabCalib.lineEdit_ceria_num->text().toStdString();
+  return m_uiTabCalib.lineEdit_current_ceria_num->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::newVanadiumNo() const {
@@ -264,11 +269,17 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
                                               const std::string &ceriaNo,
                                               const std::string &fname) {
 
-  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+  m_uiTabCalib.lineEdit_current_vanadium_num->setText(
       QString::fromStdString(vanadiumNo));
-  m_uiTabCalib.lineEdit_new_ceria_num->setText(QString::fromStdString(ceriaNo));
+  m_uiTabCalib.lineEdit_current_ceria_num->setText(
+      QString::fromStdString(ceriaNo));
   m_uiTabCalib.lineEdit_current_calib_filename->setText(
       QString::fromStdString(fname));
+
+  if (!fname.empty()) {
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+        QString::fromStdString(fname));
+  }
 }
 
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
@@ -345,9 +356,13 @@ void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 
-  QString filename = (QFileDialog::getOpenFileName(
+  QString filename = QFileDialog::getOpenFileName(
       this, tr("Open pixel calibration (full calibration) file"), prevPath,
-      QString::fromStdString(g_pixelCalibExt)));
+      QString::fromStdString(g_pixelCalibExt));
+
+  if (filename.isEmpty()) {
+    return;
+  }
 
   m_calibSettings.m_pixelCalibFilename = filename.toStdString();
   m_uiTabSettings.lineEdit_pixel_calib_filename->setText(

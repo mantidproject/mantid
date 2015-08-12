@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
 
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
@@ -73,13 +74,13 @@ private:
                               std::string &vanNo, std::string &ceriaNo);
 
   void
-  loadVanadiumPrecalcWorkspaces(const std::string &vanNo,
-                                const std::string &dir,
-                                Mantid::API::MatrixWorkspace_sptr &vanIntegWS,
+  loadVanadiumPrecalcWorkspaces(const std::string &preIntegFilename,
+                                const std::string &preCurvesFilename,
+                                Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                                 Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
-                              Mantid::API::MatrixWorkspace_sptr &vanIntegWS,
+                              Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
   void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
@@ -88,9 +89,9 @@ private:
                                         std::string &preCurvesFilename,
                                         bool &found);
 
-  void loadOrCalcanadiumWorkspaces(
+  void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
-      Mantid::API::MatrixWorkspace_sptr &vanIntegWS,
+      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
       Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, bool forceRecalc);
 
   /// string to use for ENGINX file names (as a prefix, etc.)

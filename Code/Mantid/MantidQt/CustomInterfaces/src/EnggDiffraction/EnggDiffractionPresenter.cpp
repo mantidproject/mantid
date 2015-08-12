@@ -1,3 +1,4 @@
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
@@ -81,6 +82,9 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
 
   std::string fname = m_view->askExistingCalibFilename();
+  if (fname.empty()) {
+    return;
+  }
 
   std::string instName, vanNo, ceriaNo;
   parseCalibrateFilename(fname, instName, vanNo, ceriaNo);
@@ -109,13 +113,21 @@ void EnggDiffractionPresenter::processCalcCalib() {
   std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
 
   std::string outFilename = m_view->askNewCalibrationFilename(sugg);
+  if (outFilename.empty()) {
+    return;
+  }
+
   try {
     doCalib(cs, vanNo, ceriaNo, outFilename);
     m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
   } catch (std::runtime_error &re) {
+    g_log.error() << "The calibration calculations failed. One of the "
+                     "algorithms did not execute correctly. See log messages "
+                     "for details. " << std::endl;
+  } catch (std::invalid_argument &re) {
     g_log.error()
-        << "The calibration calculations failed. See log messages for details. "
-        << std::endl;
+        << "The calibration calculations failed. Some input properties "
+           "were not valid. See log messages for details. " << std::endl;
   }
 }
 
@@ -150,23 +162,56 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &vanNo,
                                        const std::string &ceriaNo,
                                        const std::string &outFilename) {
-  MatrixWorkspace_sptr vanIntegWS;
+  ITableWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
-  loadOrCalcanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
-                              vanCurvesWS, cs.m_forceRecalcOverwrite);
+  try {
+    loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+                                 vanCurvesWS, cs.m_forceRecalcOverwrite);
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Unable to load or calculate Vanadium corrections. Giving "
+                     "up. There was a problem while executing algorithms: " +
+                         std::string(re.what());
+    throw re;
+  } catch (std::invalid_argument &ia) {
+    g_log.error() << "Unable to load or calculate Vanadium corrections. Giving "
+                     "up. There was a problem with the inputs to the "
+                     "correction algorithms: " +
+                         std::string(ia.what());
+    throw ia;
+  }
 
   // Bank 1 and 2 - ENGIN-X
   const size_t numBanks = 2;
   std::vector<double> difc, tzero;
-  difc.reserve(numBanks);
-  tzero.reserve(numBanks);
+  difc.resize(numBanks);
+  tzero.resize(numBanks);
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Algorithm::fromString("EnggCalibrate");
     try {
+      auto load = Algorithm::fromString("Load");
+      load->initialize();
+      load->setPropertyValue(
+          "Filename",
+          ceriaNo); // TODO more specific build Ceria filename
+      std::string ceriaWSName = "engggui_calibration_ceria_ws";
+      load->setPropertyValue("OutputWorkspace", ceriaWSName);
+      load->execute();
+      AnalysisDataServiceImpl &ADS =
+          Mantid::API::AnalysisDataService::Instance();
+      MatrixWorkspace_sptr ceriaWS =
+          ADS.retrieveWS<MatrixWorkspace>(ceriaWSName);
+
       alg->initialize();
       alg->setProperty("InputWorkspace", ceriaWS);
+      alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
+      alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
+      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
+      // TODO: figure out what should be done about the list of expected peaks
+      // to
+      // EnggCalibrate
+      alg->setPropertyValue("ExpectedPeaks", "0.9566, 2.7057");
       alg->execute();
     } catch (std::runtime_error &re) {
       m_view->userError("Error in calibration",
@@ -195,10 +240,11 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   // Writes a file doing this:
   // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
   // vanadium_run=236516, template_file=None):
+
   std::string pyCode = "import EnggUtils\n";
-  pyCode += "GSAS_iparm_fname=" + outFilename + "\n";
-  pyCode += "Difc = []\n";
-  pyCode += "Zero = []\n";
+  pyCode += "GSAS_iparm_fname= '" + outFilename + "'\n";
+  pyCode += "Difcs = []\n";
+  pyCode += "Zeros = []\n";
   for (size_t i = 0; i < difc.size(); i++) {
     pyCode +=
         "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
@@ -210,8 +256,11 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 
   MantidQt::API::PythonRunner pyRunner;
   std::string status = pyRunner.runPythonCode(QString::fromStdString(pyCode),
-                                              false).toStdString();
-  g_log.information() << "Written calibration file as " << outFilename
+                                              true).toStdString();
+  g_log.information()
+      << "Saved output calibration file through Python. Status: " << status
+      << std::endl;
+  g_log.information() << "Calibration file written as " << outFilename
                       << std::endl;
 }
 
@@ -289,9 +338,11 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
  * Load precalculated results from Vanadium corrections previously
  * calculated.
  *
- * @param dir directory where the vanadium run should be looked for
- * (normally the input calibration directory chosen in the settings of
- * the GUI
+ * @param preIntegFilename filename (can be full path) where the
+ * vanadium spectra integration table should be loaded from
+ *
+ * @param preCurvesFilename filename (can be full path) where the
+ * vanadium per-bank curves should be loaded from
  *
  * @param vanIntegWS output (matrix) workspace loaded from the
  * precalculated Vanadium correction file, with the integration
@@ -301,41 +352,57 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
  * precalculated Vanadium correction file, with the per-bank curves
  */
 void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
-    const std::string &vanNo, const std::string &dir,
-    MatrixWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
-  std::string integFullPath = "";
-  std::string curvesFullPath = "";
+    const std::string &preIntegFilename, const std::string &preCurvesFilename,
+    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
 
   auto alg = Algorithm::fromString("LoadNexus");
   alg->initialize();
-  alg->setPropertyValue("Filename", integFullPath);
+  alg->setPropertyValue("Filename", preIntegFilename);
+  std::string integWSName = "engggui_vanadium_integration_ws";
+  alg->setPropertyValue("OutputWorkspace", integWSName);
   alg->execute();
-  vanIntegWS = alg->getProperty("OutputWorkspace");
+  // alg->getProperty("OutputWorkspace");
+  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integWSName);
 
   auto algCurves = Algorithm::fromString("LoadNexus");
   algCurves->initialize();
-  algCurves->setPropertyValue("Filename", curvesFullPath);
+  algCurves->setPropertyValue("Filename", preCurvesFilename);
+  std::string curvesWSName = "engggui_vanadium_curves_ws";
+  algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
   algCurves->execute();
-  vanCurvesWS = algCurves->getProperty("OutputWorkspace");
+  // algCurves->getProperty("OutputWorkspace");
+  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
 }
 
 void EnggDiffractionPresenter::calcVanadiumWorkspaces(
-    const std::string &vanNo, MatrixWorkspace_sptr &vanIntegWS,
+    const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
     MatrixWorkspace_sptr &vanCurvesWS) {
 
   auto load = Algorithm::fromString("Load");
   load->initialize();
-  load->setProperty("Filename", vanNo); // TODO build Vanadium filename
+  load->setPropertyValue("Filename",
+                         vanNo); // TODO more specific build Vanadium filename
+  std::string vanWSName = "engggui_vanadium_ws";
+  load->setPropertyValue("OutputWorkspace", vanWSName);
   load->execute();
-  MatrixWorkspace_sptr vanWS = load->getProperty("OutputWorkspace");
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
+  // TODO: maybe use setChild() and then load->getProperty("OutputWorkspace");
 
   auto alg = Algorithm::fromString("EnggVanadiumCorrections");
   alg->initialize();
   alg->setProperty("VanadiumWorkspace", vanWS);
+  std::string integName = "engggui_van_integration_ws";
+  alg->setPropertyValue("IntegrationWorkspace", integName);
+  std::string curvesName = "engggui_van_curves_ws";
+  alg->setPropertyValue("CurvesWorkspace", curvesName);
   alg->execute();
 
-  vanIntegWS = alg->getProperty("IntegrationWorkspace");
-  vanCurvesWS = alg->getProperty("CurvesWorkspace");
+  ADS.remove(vanWSName);
+
+  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
+  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
 }
 
 /**
@@ -356,17 +423,24 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
     bool &found) {
   found = false;
 
+  const std::string runNo = std::string(2, '0').append(vanNo);
   preIntegFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + vanNo + "_bank_curves.nxs";
+      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
 
   preCurvesFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + vanNo + "_bank_curves.nxs";
+      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
 
-  Poco::Path path(inputDirCalib);
-  path.append(preIntegFilename);
-  Poco::File(path).exists();
+  Poco::Path pathInteg(inputDirCalib);
+  pathInteg.append(preIntegFilename);
 
-  found = true;
+  Poco::Path pathCurves(inputDirCalib);
+  pathCurves.append(preCurvesFilename);
+
+  if (Poco::File(pathInteg).exists() && Poco::File(pathCurves).exists()) {
+    preIntegFilename = pathInteg.toString();
+    preCurvesFilename = pathCurves.toString();
+    found = true;
+  }
 }
 
 /**
@@ -386,9 +460,9 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
  * @param vanCurvesWS workspace where to create/load the Vanadium
  * aggregated per-bank curve
  */
-void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
+void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     const std::string &vanNo, const std::string &inputDirCalib,
-    MatrixWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
+    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS,
     bool forceRecalc) {
   bool foundPrecalc = false;
 
@@ -409,7 +483,8 @@ void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
                         "properties passed to the algorithms were invalid. "
                         "This is possibly because some of the settings are not "
                         "consistent. Please check the log messages for "
-                        "details.");
+                        "details. Details: ");
+      throw ia;
     } catch (std::runtime_error &re) {
       m_view->userError("Failed to calculate Vanadium corrections",
                         "There was an error while executing one of the "
@@ -417,14 +492,16 @@ void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
                         "There was no obvious error in the input properties "
                         "but the algorithm failed. Please check the log "
                         "messages for details.");
+      throw re;
     }
   } else {
     g_log.notice()
         << "Found precalculated Vanadium correction features for Vanadium run "
-        << vanNo << ". Re-using them." << std::endl;
+        << vanNo << ". Re-using these files: " << preIntegFilename << ", and "
+        << preCurvesFilename << std::endl;
     try {
-      loadVanadiumPrecalcWorkspaces(vanNo, inputDirCalib, vanIntegWS,
-                                    vanCurvesWS);
+      loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
+                                    vanIntegWS, vanCurvesWS);
     } catch (std::runtime_error &re) {
       m_view->userError(
           "Error while loading precalculated Vanadium corrections",
@@ -434,6 +511,7 @@ void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
               "', respectively, but there was a problem while loading them. "
               "Please check the log messages for details. You might want to "
               "delete those files or force recalculations (in settings).");
+      throw re;
     }
   }
 }

@@ -17,14 +17,14 @@
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_RBNumber">
        <property name="text">
         <string>RB Number:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_RBNumer"/>
+      <widget class="QLineEdit" name="lineEdit_RBNumber"/>
      </item>
      <item>
       <spacer name="horizontalSpacer_5">
@@ -68,21 +68,21 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="label_current_calib_filename">
         <property name="text">
          <string>Path:</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QLabel" name="label_4">
+       <widget class="QLabel" name="label_vanadium_num">
         <property name="text">
          <string>Vanadium #:</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="label_ceria_num">
         <property name="text">
          <string>CeO2 #:</string>
         </property>
@@ -115,9 +115,9 @@
        </spacer>
       </item>
       <item row="1" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_ceria_num">
+       <widget class="QLineEdit" name="lineEdit_current_ceria_num">
         <property name="text">
-         <string>241391</string>
+         <string/>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -125,9 +125,9 @@
        </widget>
       </item>
       <item row="0" column="2" colspan="3">
-       <widget class="QLineEdit" name="lineEdit_vanadium_num">
+       <widget class="QLineEdit" name="lineEdit_current_vanadium_num">
         <property name="text">
-         <string>236516</string>
+         <string/>
         </property>
         <property name="readOnly">
          <bool>true</bool>
@@ -169,7 +169,7 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="label_new_vanadium_num">
           <property name="text">
            <string>Vanadium #:</string>
           </property>
@@ -183,7 +183,7 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="label_new_ceria_num">
           <property name="text">
            <string>CeO2 #:</string>
           </property>
