@@ -12,49 +12,44 @@ class ProcessIndirectFitParametersTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ProcessIndirectFitParametersTest *createSuite() { return new ProcessIndirectFitParametersTest(); }
-  static void destroySuite( ProcessIndirectFitParametersTest *suite ) { delete suite; }
-
-
-  void test_Init()
-  {
-    ProcessIndirectFitParameters alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+  static ProcessIndirectFitParametersTest *createSuite() {
+    return new ProcessIndirectFitParametersTest();
+  }
+  static void destroySuite(ProcessIndirectFitParametersTest *suite) {
+    delete suite;
   }
 
-  void test_exec()
-  {
-    // Name of the output workspace.
-    std::string outWSName("ProcessIndirectFitParametersTest_OutputWS");
+  void test_empty_input_is_not_allowed() {
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    ProcessIndirectFitParameters alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-
-    // TODO: Check the results
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-  }
-  
-  void test_Something()
-  {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    TS_ASSERT_THROWS(alg.setPropertyValue("InputWorkspace", ""),
+                     std::invalid_argument);
   }
 
+  void test_empty_x_column_is_not_allowed() {
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
+    TS_ASSERT_THROWS(alg.setPropertyValue("X Column", ""),
+                     std::invalid_argument);
+  }
+
+  void test_that_empty_param_names_is_not_allowed() {
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("Parameter Names", ""),
+                     std::invalid_argument);
+  }
+
+  void test_empty_output_is_not_allowed() {
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace", ""),
+                     std::invalid_argument);
+  }
 };
-
 
 #endif /* MANTID_ALGORITHMS_PROCESSINDIRECTFITPARAMETERSTEST_H_ */
