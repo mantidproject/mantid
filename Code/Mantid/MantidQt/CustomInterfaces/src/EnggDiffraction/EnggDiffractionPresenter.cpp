@@ -486,7 +486,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                         "properties passed to the algorithms were invalid. "
                         "This is possibly because some of the settings are not "
                         "consistent. Please check the log messages for "
-                        "details. Details: ");
+                        "details. Details: " + std::string(ia.what()));
       throw;
     } catch (std::runtime_error &re) {
       m_view->userError("Failed to calculate Vanadium corrections",
@@ -494,7 +494,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                         "algorithms used to perform Vanadium corrections. "
                         "There was no obvious error in the input properties "
                         "but the algorithm failed. Please check the log "
-                        "messages for details.");
+                        "messages for details." + std::string(re.what()));
       throw;
     }
   } else {
@@ -505,7 +505,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS);
-    } catch (std::runtime_error &re) {
+    } catch (std::runtime_error &) {
       m_view->userError(
           "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
