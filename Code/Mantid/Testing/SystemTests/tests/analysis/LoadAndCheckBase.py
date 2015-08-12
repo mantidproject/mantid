@@ -5,7 +5,7 @@ These system tests are to verify the behaviour of the ISIS reflectometry reducti
 
 import stresstesting
 from mantid.simpleapi import *
-import mantid.api._api
+import mantid.api
 
 from abc import ABCMeta, abstractmethod
 
@@ -67,14 +67,14 @@ class LoadAndCheckBase(stresstesting.MantidStressTest):
         self.assertTrue(type(a) == type(b))
 
         #raise NotImplementedError()
-        if isinstance(a,mantid.api._api.WorkspaceGroup):
+        if isinstance(a,mantid.api.WorkspaceGroup):
             self.assertEqual(a.size(), b.size())
             self.assertEqual(a.size(), n_periods)
             # Loop through each workspace in the group and apply some simple comaprison checks.
             for i in range(0, a.size()):
                 self.do_check_workspace_shape(a[i], b[i])
             if self.enable_instrument_checking():
-                self.do_check_instrument_applied(a[i], b[i])
+                self.do_check_instrument_applied(a[a.size()-1], b[b.size()-1])
             if self.enable_reference_result_checking():
                 Integration(InputWorkspace=a[0], OutputWorkspace=self.__comparison_out_workspace_name)
         else:

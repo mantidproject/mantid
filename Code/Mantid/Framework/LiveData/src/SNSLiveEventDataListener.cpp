@@ -265,7 +265,12 @@ void SNSLiveEventDataListener::run() {
           bufferBytesAppended(bytesRead);
         }
       }
-      int packetsParsed = bufferParse();
+
+      std::string bufferParseLog;
+      // bufferParse() wants a string where it can save log messages.
+      // We don't actually use the messages for anything, though.
+      int packetsParsed = bufferParse( bufferParseLog);
+      bufferParseLog.clear();  // keep the string from growing without bound
       if (packetsParsed == 0) {
         // No packets were parsed.  Sleep a little to let some data accumulate
         // before calling read again.  (Keeps us from spinlocking the cpu...)
@@ -1157,7 +1162,7 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::AnnotationPkt &pkt) {
   {
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
     // We have to lock the mutex prior to calling mutableRun()
-    switch (pkt.type()) {
+    switch (pkt.marker_type()) {
     case ADARA::MarkerType::GENERIC:
       // Do nothing.  We log the comment field below for all types
       break;

@@ -13,7 +13,7 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( LiveDataTest ${TEST_FILES} )
-  target_link_libraries( LiveDataTest LINK_PRIVATE 
+  target_link_libraries( LiveDataTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             DataObjects
             Geometry

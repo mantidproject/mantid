@@ -418,7 +418,7 @@ endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces LINK_PRIVATE
+target_link_libraries ( CustomInterfaces LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             MantidWidgets
             QtPropertyBrowser

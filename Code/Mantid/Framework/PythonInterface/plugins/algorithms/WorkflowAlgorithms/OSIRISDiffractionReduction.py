@@ -22,17 +22,17 @@ class DRange(object):
 
 
 TIME_REGIME_TO_DRANGE = {
-     1.17e4: DRange( 0.7,  2.5),
-     2.94e4: DRange( 2.1,  3.3),
-     4.71e4: DRange( 3.1,  4.3),
-     6.48e4: DRange( 4.1,  5.3),
-     8.25e4: DRange( 5.2,  6.2),
-    10.02e4: DRange( 6.2,  7.3),
-    11.79e4: DRange( 7.3,  8.3),
-    13.55e4: DRange( 8.3,  9.5),
-    15.32e4: DRange( 9.4, 10.6),
-    17.09e4: DRange(10.4, 11.6),
-    18.86e4: DRange(11.0, 12.5)
+                         1.17e4: DRange( 0.7,  2.5),
+                         2.94e4: DRange( 2.1,  3.3),
+                         4.71e4: DRange( 3.1,  4.3),
+                         6.48e4: DRange( 4.1,  5.3),
+                         8.25e4: DRange( 5.2,  6.2),
+                         10.02e4: DRange( 6.2,  7.3),
+                         11.79e4: DRange( 7.3,  8.3),
+                         13.55e4: DRange( 8.3,  9.5),
+                         15.32e4: DRange( 9.4, 10.6),
+                         17.09e4: DRange(10.4, 11.6),
+                         18.86e4: DRange(11.0, 12.5)
 }
 
 

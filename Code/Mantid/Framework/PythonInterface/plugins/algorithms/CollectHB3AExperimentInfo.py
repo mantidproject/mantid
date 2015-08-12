@@ -307,7 +307,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         self.log().notice("[DB] Load SPICE file %s to %s." % (xmlfilename, outwsname))
         dataws = api.LoadSpiceXML2DDet(Filename=xmlfilename, LoadInstrument=True,
-                    OutputWorkspace=outwsname, DetectorGeometry='256,256')
+                                       OutputWorkspace=outwsname, DetectorGeometry='256,256')
 
         return dataws
 

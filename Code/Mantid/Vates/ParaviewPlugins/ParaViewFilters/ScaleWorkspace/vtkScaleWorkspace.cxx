@@ -11,6 +11,10 @@
 #include <vtkUnstructuredGridAlgorithm.h>
 #include <vtkUnstructuredGrid.h>
 
+#include <vtkSmartPointer.h>
+#include <vtkPolyData.h>
+#include <vtkAppendFilter.h>
+
 vtkStandardNewMacro(vtkScaleWorkspace)
 
 using namespace Mantid::VATES;
@@ -37,7 +41,19 @@ vtkScaleWorkspace::~vtkScaleWorkspace()
 int vtkScaleWorkspace::RequestData(vtkInformation*, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkUnstructuredGrid *inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  
+  // Try to cast to vktUnstructuredGrid, if this fails then cast it to vtkPolyData
+  vtkUnstructuredGrid* inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  // This follows the example given here:
+  // http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/PolyDataToUnstructuredGrid
+  auto appendFilter = vtkSmartPointer<vtkAppendFilter>::New();
+  if (!inputDataSet) {
+    auto polyDataSet = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+    appendFilter->AddInputData(polyDataSet);
+    appendFilter->Update();
+    inputDataSet = appendFilter->GetOutput();
+  }
 
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
   vtkUnstructuredGrid *outputDataSet = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
@@ -56,7 +72,16 @@ int vtkScaleWorkspace::RequestInformation(vtkInformation*, vtkInformationVector*
 {
   // Set the meta data 
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-  vtkUnstructuredGrid *inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkSmartPointer<vtkUnstructuredGrid> inputDataSet = vtkSmartPointer<vtkUnstructuredGrid>(vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT())));
+  // This follows the example given here:
+  // http://www.vtk.org/Wiki/VTK/Examples/Cxx/PolyData/PolyDataToUnstructuredGrid
+  auto appendFilter = vtkSmartPointer<vtkAppendFilter>::New();
+  if (!inputDataSet) {
+    auto polyDataSet = vtkPolyData::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
+    appendFilter->AddInputData(polyDataSet);
+    appendFilter->Update();
+    inputDataSet = appendFilter->GetOutput();
+  }
   updateMetaData(inputDataSet);
   return 1;
 }
@@ -157,3 +182,24 @@ void vtkScaleWorkspace::updateMetaData(vtkUnstructuredGrid *inputDataSet) {
   m_instrument = m_metadataJsonManager->getInstrument();
   m_specialCoordinates = m_metadataJsonManager->getSpecialCoordinates();
 }
+
+/**
+ * Set the input types that we expect for this algorithm. These are naturally
+ * vtkUnstructredGrid data sets. In order to accomodate for the cut filter's
+ * output we need to allow also for vtkPolyData data sets.
+ * @param port: the input port
+ * @param info: the information object
+ * @retuns either success flag (1) or a failure flag (0)
+ */
+int vtkScaleWorkspace::FillInputPortInformation (int port, vtkInformation *info) {
+    // We only have port 0 as an input
+    if (port == 0)
+    {
+      info->Remove(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE());
+      info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(),"vtkUnstructuredGrid");
+      info->Append(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(),"vtkPolyData");
+      return 1;
+    }
+  return 0;
+}
+
