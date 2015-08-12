@@ -100,6 +100,31 @@ class DNSDetEffCorrVanaTest(unittest.TestCase):
                           BkgWorkspace=self.__vanaws.getName())
         return
 
+    def test_TwoTheta(self):
+        # check whether the 2theta angles the same as in the data workspace
+        outputWorkspaceName = "DNSDetCorrVanaTest_Test5"
+        # rotate detector bank to different angles
+        api.RotateInstrumentComponent(self.__dataws, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
+        api.RotateInstrumentComponent(self.__vanaws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)
+        api.RotateInstrumentComponent(self.__bkgrws, "bank0", X=0, Y=1, Z=0, Angle=-8.54)
+        # run correction
+        alg_test = run_algorithm("DNSDetEffCorrVana", InputWorkspace=self.__dataws.getName(),
+                                 OutputWorkspace=outputWorkspaceName, VanaWorkspace=self.__vanaws.getName(),
+                                 BkgWorkspace=self.__bkgrws.getName())
+        self.assertTrue(alg_test.isExecuted())
+        # check dimensions and angles
+        ws = AnalysisDataService.retrieve(outputWorkspaceName)
+        # dimensions
+        self.assertEqual(24, ws.getNumberHistograms())
+        self.assertEqual(2,  ws.getNumDims())
+        # angles
+        tthetas = np.array([7.53 + i*5 for i in range(24)])
+        for i in range(24):
+            det = ws.getDetector(i)
+            self.assertAlmostEqual(tthetas[i], np.degrees(ws.detectorSignedTwoTheta(det)))
+
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName)
+        return
 
 if __name__ == '__main__':
     unittest.main()
