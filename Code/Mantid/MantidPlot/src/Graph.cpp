@@ -1367,7 +1367,8 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   }
   else if (type == GraphOptions::Power)
   {
-    if (start <= 0 && sc_engine->nthPower() < 0)
+    double const nth_power = sc_engine->nthPower();
+    if (start <= 0 && nth_power < 0)
     {
       double s_min = DBL_MAX;
       // for the y axis rely on the bounding rects
@@ -1407,6 +1408,18 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
       else if (end == 0)
       {
         end = 0.01 * start;
+      }
+    }
+    // If n is +ve even integer then negative scale values are not valid
+    // so set start of axis to 0
+    if (start < 0 &&
+      std::floor(nth_power) == nth_power &&
+      (long)nth_power % 2 == 0)
+    {
+      start = 0;
+      if (end < 0)
+      {
+        end = 1;
       }
     }
   }
