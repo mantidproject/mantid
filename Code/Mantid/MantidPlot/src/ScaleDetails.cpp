@@ -95,7 +95,7 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_cmbScaleType = new QComboBox();
   m_cmbScaleType->addItem(tr("linear"));
   m_cmbScaleType->addItem(tr("logarithmic"));
-  m_cmbScaleType->addItem(tr("power (X^n)"));
+  m_cmbScaleType->addItem(tr("power"));
   middleLayout->addWidget(m_lblScaleTypeLabel, 2, 0);
   middleLayout->addWidget(m_cmbScaleType, 2, 1);
 
