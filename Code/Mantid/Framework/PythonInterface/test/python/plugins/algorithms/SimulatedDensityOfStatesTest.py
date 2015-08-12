@@ -2,6 +2,7 @@
 
 import unittest
 from mantid import logger
+from mantid.api import ITableWorkspace
 from mantid.simpleapi import (SimulatedDensityOfStates, CheckWorkspacesMatch,
                               Scale, CreateEmptyTableWorkspace)
 
@@ -172,20 +173,37 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        SpectrumType='IonTable')
 
-        # Build the expected output
-        expected = CreateEmptyTableWorkspace()
-        expected.addColumn('str', 'Ion')
-        expected.addColumn('int', 'Count')
-        expected.addRow(['H', 4])
-        expected.addRow(['C', 8])
-        expected.addRow(['O', 8])
+        self.assertTrue(isinstance(wks, ITableWorkspace))
+        self.assertEqual(wks.columnCount(), 9)
+        self.assertEqual(wks.rowCount(), 20)
 
-        self.assertEquals(CheckWorkspacesMatch(wks, expected), 'Success!')
+        all_species = wks.column('Species')
+
+        self.assertEqual(all_species.count('H'), 4)
+        self.assertEqual(all_species.count('C'), 8)
+        self.assertEqual(all_species.count('O'), 8)
 
     def test_ion_table_castep_error(self):
         """
         Creating an ion table from a castep file is not possible and should fail
         validation.
+        """
+        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
+                          CASTEPFile=self._castep_file,
+                          SpectrumType='IonTable')
+
+    def test_bond_table(self):
+        wks = SimulatedDensityOfStates(CASTEPFile=self._castep_file,
+                                       SpectrumType='BondTable')
+
+        self.assertTrue(isinstance(wks, ITableWorkspace))
+        self.assertEqual(wks.columnCount(), 6)
+        self.assertEqual(wks.rowCount(), 74)
+
+    def test_bond_table_phonon_error(self):
+        """
+        Creating a bond table from a phonon file is not possible and should
+        fail validation.
         """
         self.assertRaises(RuntimeError, SimulatedDensityOfStates,
                           PHONONFile=self._phonon_file,
