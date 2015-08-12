@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
 
 using namespace Mantid::Kernel;
@@ -44,7 +45,10 @@ void AppendSpectra::init() {
       "ValidateInputs", true,
       "Perform a set of checks that the two input workspaces are compatible.");
 
-  declareProperty("Repeat", 1, "Append the spectra from InputWorkspace2 multiple times");
+  declareProperty("Repeat", 1,
+                  boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
+                  "Append the spectra from InputWorkspace2 multiple times (for "
+                  "MatrixWorkspaces only)");
 
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
@@ -101,12 +105,9 @@ void AppendSpectra::exec() {
     throw std::runtime_error(
         "Workspace2D's must have the same number of bins.");
 
-
   MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
-  if (number > 1) {
-    for(int i = 1; i < number; i++)
-      output = execWS2D(output, ws2);
-  }
+  for (int i = 1; i < number; i++)
+    output = execWS2D(output, ws2);
   if (mergeLogs)
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 
