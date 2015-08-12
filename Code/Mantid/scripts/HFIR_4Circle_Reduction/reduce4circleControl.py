@@ -285,15 +285,25 @@ class CWSCDReductionControl(object):
 
         return True, peakinfo
 
-    def get_pt_numbers(self, exp_no, scan_no):
+    def get_pt_numbers(self, exp_no, scan_no, load_spice_scan=False):
         """ Get Pt numbers (as a list) for a scan in an experiment
         :param exp_no:
         :param scan_no:
+        :param load_spice_scan:
         :return:
         """
         table_ws = self._get_spice_workspace(exp_no, scan_no)
         if table_ws is False:
-            return False, 'Spice file for Exp %d Scan %d is not loaded.' % (exp_no, scan_no)
+            if load_spice_scan is False:
+                return False, 'Spice file for Exp %d Scan %d is not loaded.' % (exp_no, scan_no)
+            else:
+                status, error_message = self.load_spice_scan_file(exp_no, scan_no)
+                if status is True:
+                    table_ws = self._get_spice_workspace(exp_no, scan_no)
+                    if table_ws is None:
+                        raise NotImplementedError('Logic error! Cannot happen!')
+                else:
+                    return False, 'Unable to load Spice file for Exp %d Scan %d.' % (exp_no, scan_no)
 
         col_name_list = table_ws.getColumnNames()
         i_pt = col_name_list.index('Pt.')
@@ -360,7 +370,7 @@ class CWSCDReductionControl(object):
 
         :param scan_no:
         :param spice_file_name:
-        :return:
+        :return: status (boolean), error message (string)
         """
 
         # Form standard name for a SPICE file if name is not given

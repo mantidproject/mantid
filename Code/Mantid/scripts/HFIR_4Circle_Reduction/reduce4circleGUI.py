@@ -198,7 +198,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         local_cache_dir = str(QtGui.QFileDialog.getExistingDirectory(self,
                                                                      'Get Local Cache Directory',
-                                                                     self._homeSaveDir))
+                                                                     self._homeSrcDir))
 
         # Set local directory to control
         status, error_message = self._myControl.set_local_data_dir(local_cache_dir)
@@ -503,12 +503,7 @@ class MainWindow(QtGui.QMainWindow):
             exp_no = inp_list[0]
             scan_no = inp_list[1]
 
-        # Find a way to find out the list
-        if self._dataAccessMode.startswith('Local'):
-            # Local access mode
-            status, ret_obj = fcutil.get_pt_list_local(exp_no, scan_no)
-        else:
-            status, ret_obj = fcutil.get_pt_list_server(exp_no, scan_no)
+        status, ret_obj = self._myControl.get_pt_numbers(exp_no, scan_no)
 
         # Form message
         if status is False:
