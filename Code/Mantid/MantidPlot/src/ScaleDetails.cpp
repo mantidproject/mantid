@@ -106,6 +106,10 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   middleLayout->addWidget(m_lblN, 3, 0);
   middleLayout->addWidget(m_dspnN, 3, 1);
 
+  m_lblWarn = new QLabel(tr("Ensure axis and data ranges are\ncompatible with chosen axis scale."));
+  middleLayout->addWidget(m_lblWarn, 4, 0, 1, 2);
+  m_lblWarn->setVisible(false);
+
   m_chkInvert = new QCheckBox();
   m_chkInvert->setText(tr("Inverted"));
   m_chkInvert->setChecked(false);
@@ -638,7 +642,8 @@ void ScaleDetails::checkstep()
 }
 
 /*
- * Enable the "n =" widget if X^n scale type is selected
+ * Enable the "n =" widget and display warning message
+ * if power scale type is selected
  */
 void ScaleDetails::checkscaletype()
 {
@@ -646,10 +651,12 @@ void ScaleDetails::checkscaletype()
   if (m_cmbScaleType->currentIndex() == 2)
   {
     m_dspnN->setEnabled(true);
+    m_lblWarn->setVisible(true);
   }
   else
   {
     m_dspnN->setEnabled(false);
+    m_lblWarn->setVisible(false);
   }
 }
 

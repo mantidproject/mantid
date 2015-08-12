@@ -81,7 +81,7 @@ private:
   QSpinBox *m_spnMajorValue, *m_spnBreakPosition, *m_spnBreakWidth;
   QGroupBox *m_grpAxesBreaks;
   QComboBox *m_cmbMinorTicksBeforeBreak, *m_cmbMinorTicksAfterBreak, *m_cmbScaleType, *m_cmbMinorValue, *m_cmbUnit;
-  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox, *m_lblStart, *m_lblEnd, *m_lblN;
+  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox, *m_lblStart, *m_lblEnd, *m_lblN, *m_lblWarn;
   QDateTimeEdit *m_dteStartDateTime, *m_dteEndDateTime;
   QTimeEdit *m_timStartTime, *m_timEndTime;
 
