@@ -63,6 +63,11 @@ public:
     EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
         Return(calibSettings));
 
+    const std::string mockFname = "foo.par";
+    EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(Return(mockFname));
+    EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
+        .Times(1);
+
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
@@ -82,6 +87,10 @@ public:
     // No errors, 1 warning (no Vanadium, no Ceria run numbers given)
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    // does not update the current calibration as it must have failed
+    EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, testing::_))
+        .Times(0);
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
@@ -117,6 +126,10 @@ public:
     // and an error shown to the user
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+
+    // does not update the current calibration as it must have failed
+    EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, testing::_))
+        .Times(0);
 
     TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
   }

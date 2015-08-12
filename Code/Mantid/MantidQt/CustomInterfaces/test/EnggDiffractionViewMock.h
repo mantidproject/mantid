@@ -10,18 +10,23 @@ class MockEnggDiffractionView
     : public MantidQt::CustomInterfaces::IEnggDiffractionView {
 
 public:
-  // void userWarning(const std::string &warn, const std::string &description);
+  // virtual void userWarning(const std::string &warn, const std::string
+  // &description);
   MOCK_METHOD2(userWarning,
                void(const std::string &warn, const std::string &description));
 
-  // void userError(const std::string &err, const std::string &description);
+  // virtual void userError(const std::string &err, const std::string
+  // &description);
   MOCK_METHOD2(userError,
                void(const std::string &err, const std::string &description));
 
-  // std::string askNewCalibrationFilename(const std::string &suggestedFname) =
-  // 0;
+  // virtual std::string askNewCalibrationFilename(const std::string
+  // &suggestedFname);
   MOCK_METHOD1(askNewCalibrationFilename,
                std::string(const std::string &suggestedFname));
+
+  // std::string askExistingCalibFilename();
+  MOCK_METHOD0(askExistingCalibFilename, std::string());
 
   // std::vector<std::string> logMsgs() const;
   MOCK_CONST_METHOD0(logMsgs, std::vector<std::string>());
@@ -29,7 +34,7 @@ public:
   // virtual std::string getRBNumber() const;
   MOCK_CONST_METHOD0(getRBNumber, std::string());
 
-  // EnggDiffCalibSettings currentCalibSettings() const;
+  // virtual EnggDiffCalibSettings currentCalibSettings() const;
   MOCK_CONST_METHOD0(currentCalibSettings,
                      MantidQt::CustomInterfaces::EnggDiffCalibSettings());
 
@@ -42,6 +47,9 @@ public:
   // virtual std::string currentCeriaNo() const;
   MOCK_CONST_METHOD0(currentCeriaNo, std::string());
 
+  // virtual std::string currentCalibFile() const;
+  MOCK_CONST_METHOD0(currentCalibFile, std::string());
+
   // virtual std::string newVanadiumNo() const;
   MOCK_CONST_METHOD0(newVanadiumNo, std::string());
 
@@ -50,6 +58,11 @@ public:
 
   // virtual std::string outCalibFilename() const;
   MOCK_CONST_METHOD0(outCalibFilename, std::string());
+
+  // virtual void newCalibLoaded(const std::string &vanadiumNo, const
+  // std::string &ceriaNo, std::string &fname);
+  MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
+                                    const std::string &));
 
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
