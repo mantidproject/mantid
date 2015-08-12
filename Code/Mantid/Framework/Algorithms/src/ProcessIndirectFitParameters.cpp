@@ -5,7 +5,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-
 using namespace API;
 using namespace Kernel;
 
@@ -25,7 +24,9 @@ ProcessIndirectFitParameters::~ProcessIndirectFitParameters() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string ProcessIndirectFitParameters::name() const { return "ProcessIndirectFitParameters"; }
+const std::string ProcessIndirectFitParameters::name() const {
+  return "ProcessIndirectFitParameters";
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
 int ProcessIndirectFitParameters::version() const { return 1; }
@@ -67,11 +68,28 @@ void ProcessIndirectFitParameters::init() {
 /** Execute the algorithm.
  */
 void ProcessIndirectFitParameters::exec() {
+  // Get Properties
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
   std::string xColumn = getProperty("X Column");
   std::string parameterNamesProp = getProperty("Parameter Names");
   auto parameterNames = listToVector(parameterNamesProp);
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+
+  // Search for any parameters in the table with the given parameter names,
+  // ignoring their function index and output them to a workspace
+
+
+  // Transpose list of workspaces, ignoring unequal length of lists
+  // this handles the case where a parameter occurs only once in the whole
+  // workspace
+
+
+  // Join all the parameters for each peak into a single workspace per peak
+
+
+  // Join all peaks into a single workspace
+
+
 }
 
 std::vector<std::string>
@@ -79,10 +97,10 @@ ProcessIndirectFitParameters::listToVector(std::string &commaList) {
   auto listVector = std::vector<std::string>();
   auto pos = commaList.find(",");
   while (pos != std::string::npos) {
-	  std::string nextItem = commaList.substr(0, pos);
-	  listVector.push_back(nextItem);
-	  commaList = commaList.substr(pos, commaList.size());
-	  pos = commaList.find(",");
+    std::string nextItem = commaList.substr(0, pos);
+    listVector.push_back(nextItem);
+    commaList = commaList.substr(pos, commaList.size());
+    pos = commaList.find(",");
   }
   return listVector;
 }
