@@ -79,11 +79,46 @@ public:
     EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
         Return(calibSettings));
 
-    // No errors, 2 warnings (no Vanadium, no Ceria run numbers given)
+    // No errors, 1 warning (no Vanadium, no Ceria run numbers given)
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(2);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
+  }
+
+  void test_calcCalibWithRunNumbersButError() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
+        Return(calibSettings));
+
+    const std::string vanNo = "9999999999"; // use a number that won't be found!
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
+
+    const std::string instr = "FAKE_INSTR";
+    EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
+
+    const std::string filename = "fake_calib_filename.par";
+    EXPECT_CALL(mockView,
+                askNewCalibrationFilename("UNKNOWN_INST_" + vanNo + "_" +
+                                          ceriaNo + "_both_banks.prm"))
+        .Times(1)
+        .WillOnce(Return(filename));
+
+    // No warnings, 1 error: some exception(s) are thrown (because there are
+    // missing settings and/or files) but these must be caught
+    // and an error shown to the user
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+
+    TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
   }
 
   // TODO: disabled for now, as this one would need to load files
