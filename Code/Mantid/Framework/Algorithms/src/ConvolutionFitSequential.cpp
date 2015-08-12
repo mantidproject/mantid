@@ -256,8 +256,10 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Construct output workspace
+  std::string resultWsName = outputWsName + "_Result";
   auto resultWs = WorkspaceFactory::Instance().create(
       "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
+
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   auto paramNames = std::vector<std::string>();
