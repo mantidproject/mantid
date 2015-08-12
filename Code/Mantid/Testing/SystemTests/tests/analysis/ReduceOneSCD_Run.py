@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-many-locals
 # File: ReduceOneSCD_Run.py
 #
 # Version 2.0, modified to work with Mantid's new python interface.
@@ -17,12 +17,16 @@ import time
 
 import stresstesting
 
-
+import os
 from mantid.api import *
 from mantid.simpleapi import *
 
 class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
+    __reduced_ws_name=""
+    saved=False
+    output_directory=""
+    run_conventional_matrix_file=""
 
     def requiredMemoryMB(self):
         """ Require about 12GB free """
@@ -80,15 +84,15 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 #
 # Name the files to write for this run
 #
-        run_niggli_matrix_file = self.output_directory + "/" + run + "_Niggli.mat"
-        run_niggli_integrate_file = self.output_directory + "/" + run + "_Niggli.integrate"
+#        run_niggli_matrix_file = self.output_directory + "/" + run + "_Niggli.mat"
+#        run_niggli_integrate_file = self.output_directory + "/" + run + "_Niggli.integrate"
 
 
 #
 # Load the run data and find the total monitor counts
 #
-        event_ws = LoadEventNexus( Filename=full_name,
-                           FilterByTofMin=min_tof, FilterByTofMax=max_tof )
+        event_ws = LoadEventNexus(Filename=full_name,
+                                  FilterByTofMin=min_tof, FilterByTofMax=max_tof )
 
         if (calibration_file_1 is not None) or (calibration_file_2 is not None):
             LoadIsawDetCal(event_ws, Filename=calibration_file_1)
@@ -141,10 +145,10 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 #
         if integrate_predicted_peaks:
             print "PREDICTING peaks to integrate...."
-            peaks_ws = PredictPeaks( InputWorkspace=peaks_ws,
-                WavelengthMin=min_pred_wl, WavelengthMax=max_pred_wl,
-                MinDSpacing=min_pred_dspacing, MaxDSpacing=max_pred_dspacing,
-                ReflectionCondition='Primitive' )
+            peaks_ws = PredictPeaks(InputWorkspace=peaks_ws,
+                                    WavelengthMin=min_pred_wl, WavelengthMax=max_pred_wl,
+                                    MinDSpacing=min_pred_dspacing, MaxDSpacing=max_pred_dspacing,
+                                    ReflectionCondition='Primitive' )
         else:
             print "Only integrating FOUND peaks ...."
 #
@@ -167,14 +171,14 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
                                                     SplitInto='2', SplitThreshold='500', MaxRecursionDepth='5' )
 
             peaks_ws = IntegratePeaksMD(InputWorkspace=MDEW, PeakRadius=peak_radius,
-	                                    BackgroundOuterRadius=bkg_outer_radius,
+                                        BackgroundOuterRadius=bkg_outer_radius,
                                         BackgroundInnerRadius=bkg_inner_radius,
-	                                    PeaksWorkspace=peaks_ws,
+                                        PeaksWorkspace=peaks_ws,
                                         IntegrateIfOnEdge=integrate_if_edge_peak )
 
         elif use_fit_peaks_integration:
             event_ws = Rebin(InputWorkspace=event_ws,
-                                Params=rebin_params, PreserveEvents=preserve_events )
+                             Params=rebin_params, PreserveEvents=preserve_events )
             peaks_ws = PeakIntegration( InPeaksWorkspace=peaks_ws, InputWorkspace=event_ws,
                                         IkedaCarpenterTOF=use_ikeda_carpenter,
                                         MatchingRunNo=True,
@@ -194,11 +198,11 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
         if (not cell_type is None) and (not centering is None) :
             self.run_conventional_matrix_file = self.output_directory + "/" + run + "_" +    \
                                  cell_type + "_" + centering + ".mat"
-            run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
-                                    cell_type + "_" + centering + ".integrate"
+        #    run_conventional_integrate_file = self.output_directory + "/" + run + "_" + \
+        #                            cell_type + "_" + centering + ".integrate"
             SelectCellOfType( PeaksWorkspace=peaks_ws,
-                                CellType=cell_type, Centering=centering,
-                                Apply=True, Tolerance=tolerance )
+                              CellType=cell_type, Centering=centering,
+                              Apply=True, Tolerance=tolerance )
          # UNCOMMENT the line below to get new output values if an algorithm changes
          #SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=run_conventional_integrate_file )
             SaveIsawUB( InputWorkspace=peaks_ws, Filename=self.run_conventional_matrix_file )
@@ -218,9 +222,9 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
         CreateSingleValuedWorkspace(OutputWorkspace="XX2",DataValue="3")
         LoadIsawUB(InputWorkspace="XX2",Filename="3132_Orthorhombic_P.mat")
 
-        s2 = mtd["XX2"].sample()
+        #s2 = mtd["XX2"].sample()
         ol = s1.getOrientedLattice()
-        o2 = s2.getOrientedLattice()
+        #o2 = s2.getOrientedLattice()
         self.assertDelta( ol.a(), ol.a(), 0.01, "Correct lattice a value not found.")
         self.assertDelta( ol.b(), ol.b(), 0.01, "Correct lattice b value not found.")
         self.assertDelta( ol.c(), ol.c(), 0.01, "Correct lattice c value not found.")
@@ -235,7 +239,6 @@ class ReduceOneSCD_Run( stresstesting.MantidStressTest):
 
     def cleanup(self):
         if self.saved:
-            import os
             os.remove( self.run_conventional_matrix_file)
 
     def validateMethod(self):
