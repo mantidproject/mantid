@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   CylinderPaalmanPingsCorrectionTest.py
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
+  DNSFlippingRatioCorrTest.py
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
