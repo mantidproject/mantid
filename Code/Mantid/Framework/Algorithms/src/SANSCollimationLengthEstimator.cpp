@@ -2,12 +2,28 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Property.h"
 #include "MantidKernel/V3D.h"
-
+#include "boost/lexical_cast.hpp"
 
 
 namespace{
-  Mantid::Kernel::Logger g_log("SANSCollimationLengthEstimator");
+Mantid::Kernel::Logger g_log("SANSCollimationLengthEstimator");
+
+/**
+ * Provide an string and check if it can be converted to a double
+ * @param val: a value as a string
+ * @returns true if it is convertible else false
+ */
+bool checkForDouble(std::string val) {
+  auto isDouble = false;
+  try {
+    boost::lexical_cast<double>(val);
+    isDouble = true;
+  } catch (boost::bad_lexical_cast const &) {
+  }
+  return isDouble;
+}
 }
 
 
@@ -48,15 +64,19 @@ double SANSCollimationLengthEstimator::provideCollimationLength(Mantid::API::Mat
   if (workspace->getInstrument()->hasParameter("special-default-collimation-length-method")){
     auto specialCollimationMethod =workspace->getInstrument()->getStringParameter("special-default-collimation-length-method");
     if (specialCollimationMethod[0] == "guide") {
-      return getCollimationLengthWithGuides(workspace, L1, collimationLengthCorrection[0]);
+      try {
+        return getCollimationLengthWithGuides(workspace, L1, collimationLengthCorrection[0]);
+      } catch (std::invalid_argument &ex) {
+        g_log.notice() << ex.what();
+        g_log.notice() << "SANSCollimationLengthEstimator: Not using any guides";
+        return L1 - collimationLengthCorrection[0];
+      }
     } else {
       throw std::invalid_argument("Error in SANSCollimationLengthEstimator: Unknown special collimation method.");
     }
-  } else {
-    return L1 - collimationLengthCorrection[0];
   }
+    return L1 - collimationLengthCorrection[0];
 }
-
 
 /**
  * This extraction strategy gets applied when guides are used to calculate the collimation length. The instrument
@@ -89,13 +109,12 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(MatrixWork
 
 
   // Make sure that all guides are there. They are labelled as Guide1, Guide2, Guide3, ...
-  // The entry is a numeric TimeSeriesProperty
+  // The entry is a numeric TimeSeriesProperty or a numeric entry, if something else then default
   std::vector<double> guideValues;
   for (unsigned int i = 1; i <= numberOfGuides; i++) {
     auto guideName = "Guide" + boost::lexical_cast<std::string>(i);
     if (inOutWS->run().hasProperty(guideName)) {
-      auto guideProperty = inOutWS->run().getTimeSeriesProperty<double>(guideName);
-      guideValues.push_back(guideProperty->firstValue());
+
     } else {
       throw std::invalid_argument("TOFSANSResolutionByPixel: Mismatch between specified number of Guides and actual Guides.");
     }
@@ -122,6 +141,24 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(MatrixWork
     largerSmallerCounter++;
   }
   return lCollim;
+}
+
+/**
+ * Extracts the value of the guide
+ * @param prop: a property
+ * @returns the guide value
+ */
+double SANSCollimationLengthEstimator::getGuideValue(Mantid::Kernel::Property* prop) const {
+  if (auto timeSeriesProperty = dynamic_cast<TimeSeriesProperty<double>*>(prop)) {
+    return timeSeriesProperty->firstValue();
+  } else if (auto doubleProperty = dynamic_cast<PropertyWithValue<double> *>(prop)){
+    auto val = doubleProperty->value();
+    if (checkForDouble(val)) {
+      g_log.warning("SANSCollimationLengthEstimator: The Guide was not recoginized as a TimeSeriesProperty, but rather as a Numeric.");
+      return boost::lexical_cast<double, std::string>(val);
+    }
+  }
+  throw std::invalid_argument("TOFSANSResolutionByPixel: Unknown type for Guides. Currently only Numeric and TimeSeries are supported.");
 }
 }
 }

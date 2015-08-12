@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
   /**Helper class which provides the Collimation Length for SANS instruments
 
-
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
   This file is part of Mantid.
@@ -35,6 +34,7 @@ public:
   double provideCollimationLength(Mantid::API::MatrixWorkspace_sptr workspace);
 private:
   double getCollimationLengthWithGuides(Mantid::API::MatrixWorkspace_sptr inOutWS, const double L1, const double collimationLengthCorrection) const;
+  double getGuideValue(Mantid::Kernel::Property* prop) const;
 };
 }
 }
