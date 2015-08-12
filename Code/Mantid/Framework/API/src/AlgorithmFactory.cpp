@@ -350,6 +350,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
 
     boost::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
     std::vector<std::string> categories = alg->categories();
+    desc.alias = alg->alias();
 
     // For each category
     auto itCategoriesEnd = categories.end();

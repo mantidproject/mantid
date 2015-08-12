@@ -22,7 +22,7 @@ class SXDAnalysis(stresstesting.MantidStressTest):
 
         #  NaCl has a relatively small unit cell, so the distance between peaks is relatively large.  Setting the PeakDistanceThreshold
         #  higher avoids finding high count regions on the sides of strong peaks as separate peaks.
-        peaks_qLab = FindPeaksMD(InputWorkspace='QLab', MaxPeaks=300, DensityThresholdFactor=10, PeakDistanceThreshold=1.0)
+        peaks_qLab = FindPeaksMD(InputWorkspace=QLab, MaxPeaks=300, DensityThresholdFactor=10, PeakDistanceThreshold=1.0)
 
         FindUBUsingFFT(PeaksWorkspace=peaks_qLab, MinD='3', MaxD='5',Tolerance=0.08)
 

@@ -4,7 +4,6 @@ from mantid.simpleapi import *
 from ISISCommandInterface import *
 import unittest
 
-## export PYTHONPATH=/apps/workspace/mantid_debug/bin/:/apps/mantid/systemtests/StressTestFramework/:/apps/mantid/mantid/Code/Mantid/scripts/SANS/:/apps/mantid/mantid/Code/Mantid/scripts/reduction
 
 
 """

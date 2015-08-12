@@ -29,8 +29,8 @@ class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
     def runPeakSearch(self, filenames, deleteList):
         for dataFile,deleteRowList in zip(filenames, deleteList):
             PoldiPeakSearch(InputWorkspace=dataFile,
-                      MinimumPeakSeparation=8,
-                      OutputWorkspace="%s_Peaks" % (dataFile))
+                            MinimumPeakSeparation=8,
+                            OutputWorkspace="%s_Peaks" % (dataFile))
 
             for deleteRows in deleteRowList:
                 DeleteTableRows(TableWorkspace="%s_Peaks" % (dataFile), Rows=deleteRows)
@@ -42,11 +42,11 @@ class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
     def runPoldiFitPeaks1D(self, filenames, versions):
         for dataFile, version in zip(filenames, versions):
             args = {"InputWorkspace": dataFile,
-                          "FwhmMultiples": 4,
-                          "PoldiPeakTable": "%s_Peaks" % (dataFile),
-                          "OutputWorkspace": "%s_Peaks_Refined" % (dataFile),
-                          "FitPlotsWorkspace": "%s_FitPlots" % (dataFile),
-                          "Version": version}
+                    "FwhmMultiples": 4,
+                    "PoldiPeakTable": "%s_Peaks" % (dataFile),
+                    "OutputWorkspace": "%s_Peaks_Refined" % (dataFile),
+                    "FitPlotsWorkspace": "%s_FitPlots" % (dataFile),
+                    "Version": version}
 
             if version == 2:
                 args["AllowedOverlap"] = 0.1

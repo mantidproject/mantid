@@ -23,7 +23,7 @@ class ReflectometryQuickPointDetectorMakeTransmission(stresstesting.MantidStress
             runNo = '13460'
             incidentAngle = 0.7
             transmissionWs=quick.make_trans_corr(transmissionRuns, stitch_start_overlap=10,
-                                  stitch_end_overlap=12, stitch_params=[1.5,0.02,17])
+                                                 stitch_end_overlap=12, stitch_params=[1.5,0.02,17])
             quick.quick(runNo, trans=transmissionWs, theta=incidentAngle)
         finally:
             config[defaultInstKey] = defaultInstrument
