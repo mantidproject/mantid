@@ -221,7 +221,8 @@ void LoadEventAndCompress::exec() {
     alg->setProperty("OutputWorkspace", resultWS);
     alg->setProperty("ClearRHSWorkspace", true);
     alg->executeAsChildAlg();
-    resultWS = alg->getProperty("OutputWorkspace");
+    temp = alg->getProperty("OutputWorkspace");
+    resultWS = boost::dynamic_pointer_cast<EventWorkspace>(temp);
   }
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
