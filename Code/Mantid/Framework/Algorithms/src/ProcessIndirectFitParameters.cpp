@@ -1,8 +1,6 @@
 #include "MantidAlgorithms/ProcessIndirectFitParameters.h"
 
-#include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -39,7 +37,8 @@ const std::string ProcessIndirectFitParameters::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ProcessIndirectFitParameters::summary() const {
-  return "Convert a parameter table output by PlotPeakByLogValue to a MatrixWorkspace.";
+  return "Convert a parameter table output by PlotPeakByLogValue to a "
+         "MatrixWorkspace.";
 }
 
 //----------------------------------------------------------------------------------------------
@@ -48,19 +47,35 @@ const std::string ProcessIndirectFitParameters::summary() const {
 void ProcessIndirectFitParameters::init() {
   declareProperty(
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "An input workspace.");
+      "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
+      "X Column", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "The column in the table to use for the x values.", Direction::Input);
+
+  declareProperty("Parameter Names", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "List of the parameter names to add to the workspace.",
+                  Direction::Input);
+  /*May change to a string*/
+  declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+      "The name to call the output workspace.");
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void ProcessIndirectFitParameters::exec() {
-  // TODO Auto-generated execute stub
+  ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
+  std::string xColumn = getProperty("X Column");
+  std::string parameterNames = getProperty("Parameter Names");
+  MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+
+
 }
+
+
 
 } // namespace Algorithms
 } // namespace Mantid
