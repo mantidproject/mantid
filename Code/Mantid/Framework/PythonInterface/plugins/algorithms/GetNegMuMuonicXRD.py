@@ -1,5 +1,6 @@
 from mantid.api import * # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
 from mantid.kernel import *
+from mantid.simpleapi import *
 
 #pylint: disable=no-init
 class GetNegMuMuonicXRD(PythonAlgorithm):
@@ -23,6 +24,10 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
         self.declareProperty(name="YAxisPosition",
                                     defaultValue=-0.001,
                                     doc="Position for Markers on the y-axis")
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
+                            doc='The output workspace will always be a GroupWorkspaces '
+                                'that will have the workspaces of each'
+                                  ' muonicXR workspace created')
 
     def get_muonic_xr(self, element):
         #retrieve peak values from dictionary Muonic_XR
@@ -50,11 +55,8 @@ class GetNegMuMuonicXRD(PythonAlgorithm):
             curr_workspace = self.create_muonic_xr_ws(element, y_position)
             workspace_list[idx] = curr_workspace
 
-        if len(elements) == 1:
-            muonic_xr_workspace = workspace_list[0]
-            self.log().information(str("Created: "+muonic_xr_workspace.name()))
-        else:
-            muonic_xr_group = GroupWorkspaces(workspace_list)
-            self.log().information(str("Created Group: "+muonic_xr_group.name()))
+        muonic_xr_group = GroupWorkspaces(workspace_list)
+        self.setProperty('OutputWorkspace', muonic_xr_group)
+        self.log().information(str("Created Group: "+muonic_xr_group.name()))
 
 AlgorithmFactory.subscribe(GetNegMuMuonicXRD)
