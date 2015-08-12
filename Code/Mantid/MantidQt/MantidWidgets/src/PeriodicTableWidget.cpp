@@ -159,11 +159,12 @@ void PeriodicTableWidget::disableAllElementButtons() {
   disableButtons(TransitionMetals);
   disableButtons(UnknownProperties);
 }
-void PeriodicTableWidget::ColourButton(QPushButton *element, QString colour) {
+void PeriodicTableWidget::ColourButton(QPushButton *element, QString colourStr) {
   element->setStyleSheet(
-      "QPushButton{border:1px solid rgb(0, 0, 0); " + colour + ";}" +
+      "QPushButton{border:1px solid rgb(0, 0, 0); " + colourStr + ";}" +
       "QPushButton:checked{ background-color:rgb(175,255,255)}" +
-      "QPushButton:!enabled{background-color: rgb(204,204,204);}");
+      "QPushButton:!enabled{background-color: rgb(204,204,204);" +
+      "}");
 }
 
 QString

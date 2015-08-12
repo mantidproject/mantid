@@ -20,6 +20,9 @@ GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
 
 ///Initialise the layout
 void GetNegMuMuonicXRDDialog::initLayout() {
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  this->setMaximumHeight(400);
+  this->setMaximumWidth(675);
   //assign periodicTable member to a new periodicTable
   periodicTable = new PeriodicTableWidget();
 
