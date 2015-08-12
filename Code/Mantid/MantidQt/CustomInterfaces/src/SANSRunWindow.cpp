@@ -52,6 +52,8 @@
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <fstream>
+
 using Mantid::detid_t;
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -4253,18 +4255,19 @@ void SANSRunWindow::retrieveQResolutionSettings() {
   }
 
   // Set the Collimation length
-  QString getCollimationLength ="i.get_q_resolution_collimation_length()\n";
-  QString resultCollimationLength(runPythonCode(getCollimationLength, false));
+  auto resultCollimationLength = retrieveQResolutionGeometry("i.get_q_resolution_collimation_length()\n");
   m_uiForm.q_resolution_collimation_length_input->setText(resultCollimationLength);
 
   // Set the Delta R value
-  QString getDeltaR ="i.get_q_resolution_delta_r()\n";
-  QString resultDeltaR(runPythonCode(getDeltaR, false));
+  auto resultDeltaR= retrieveQResolutionGeometry("i.get_q_resolution_delta_r()\n");
   m_uiForm.q_resolution_delta_r_input->setText(resultDeltaR);
 
   // Set the moderator file
   QString getModeratorFile = "i.get_q_resolution_moderator()\n";
-  QString resultModeratorFile = (runPythonCode(getModeratorFile, false));
+  QString resultModeratorFile = runPythonCode(getModeratorFile, false);
+  if (resultModeratorFile == m_constants.getPythonEmptyKeyword()) {
+    resultModeratorFile = "";
+  }
   m_uiForm.q_resolution_moderator_input->setText(resultModeratorFile);
 
   // Set the geometry, ie if rectangular or circular aperture
@@ -4299,6 +4302,7 @@ void SANSRunWindow::retrieveQResolutionAperture() {
  */
 QString SANSRunWindow::retrieveQResolutionGeometry(QString command) {
   QString result(runPythonCode(command, false));
+  result = result.simplified();
   if (result == m_constants.getPythonEmptyKeyword()) {
     result = "";
   }
@@ -4312,12 +4316,6 @@ void SANSRunWindow::setupQResolutionCircularAperture() {
   // Get the apertures of the diameter
   auto a1 = retrieveQResolutionGeometry("i.get_q_resolution_a1()\n");
   auto a2 = retrieveQResolutionGeometry("i.get_q_resolution_a2()\n");
-
-  // Set to 0 if a1 and a2 are not available
-  if (a1.isEmpty())
-    a1 = "0";
-  if (a2.isEmpty())
-    a2 = "0";
 
   setQResolutionApertureType(QResoluationAperture::CIRCULAR,
                              "A1 [mm]", "A2 [mm]",
@@ -4333,16 +4331,6 @@ void SANSRunWindow::setupQResolutionCircularAperture() {
  * @param w2: the width of the second aperture
  */
 void SANSRunWindow::setupQResolutionRectangularAperture(QString h1, QString w1, QString h2, QString w2) {
-  // If any of the inputs is empty, then set the value to 0
-  if (h1.isEmpty())
-    h1 = "0";
-  if (w1.isEmpty())
-    w1 = "0";
-  if (h2.isEmpty())
-    h2 = "0";
-  if (w2.isEmpty())
-    w2 = "0";
-
   // Set the QResolution Aperture
   setQResolutionApertureType(QResoluationAperture::RECTANGULAR, "H1 [mm]", "H2 [mm]",
                              h1, h2, m_constants.getQResolutionH1ToolTipText(),
@@ -4433,8 +4421,8 @@ void SANSRunWindow::writeQResolutionSettingsToPythonScript(QString& pythonCode) 
 
   // Set the moderator file
   auto moderatorFile = m_uiForm.q_resolution_moderator_input->text().simplified();
-  pythonCode += "i.set_q_resolution_moderator(file_name="+ moderatorFile +")\n";
-
+  pythonCode += "i.set_q_resolution_moderator(file_name='"+ moderatorFile +"')\n";
+  
   // Set the delta r value
   auto deltaR = m_uiForm.q_resolution_delta_r_input->text().simplified();
   pythonCode += "i.set_q_resolution_delta_r(delta_r="+ deltaR +")\n";

@@ -974,12 +974,18 @@ def is_convertible_to_float(input_value):
     '''
     Check if the input can be converted to float
     @param input_value :: a general input
+    @returns true if input can be converted to float else false
     '''
-    try:
-        dummy_converted = float(input_value)
-    except ValueError:
-        return False
-    return True
+    is_convertible = True
+    if not input_value:
+        is_convertible = False
+    else:
+        try:
+            dummy_converted = float(input_value)
+            is_convertible = True
+        except ValueError:
+            is_convertible = False
+    return is_convertible
 
 def is_valid_xml_file_list(input_value):
     '''
@@ -1047,11 +1053,11 @@ def can_load_as_event_workspace(filename):
 
 def meter_2_millimeter(num):
     '''
-    Converts from mm to m
-    @param float in mm
-    @returns float in m
+    Converts from m to mm
+    @param float in m
+    @returns float in mm
     '''
-    return num/1000.
+    return num*1000.
 
 def millimeter_2_meter(num):
     '''
@@ -1059,7 +1065,7 @@ def millimeter_2_meter(num):
     @param float in mm
     @returns float in m
     '''
-    return num*1000.
+    return num/1000.
 	
 ###############################################################################
 ######################### Start of Deprecated Code ############################

@@ -31,7 +31,7 @@ from reducer_singleton import ReductionStep
 
 # A global name for the Q Resolution workspace which lives longer than a reducer core
 QRESOLUTION_WORKSPACE_NAME = "__Q_Resolution_ISIS_SANS"
-
+QRESOLUTION_MODERATOR_WORKSPACE_NAME = "__Q_Resolution_MODERATOR_ISIS_SANS"
 def _issueWarning(msg):
     """
         Prints a message to the log marked as warning
@@ -1932,7 +1932,7 @@ class ConvertToQISIS(ReductionStep):
         # Create the QResolution workspace, but only if it A) is requested by the user and does not exist
         #                                                  B) is requested by the user, exists, but does not
         #                                                     have the correct binning
-        qResolution = self._get_q_resolution_worksapce(DetBanWorkspace = workspace)
+        qResolution = self._get_q_resolution_workspace(det_bank_workspace = workspace)
 
         try:
             if self._Q_alg == 'Q1D':
@@ -1988,17 +1988,40 @@ class ConvertToQISIS(ReductionStep):
         exists = mtd.doesExist(QRESOLUTION_WORKSPACE_NAME)
 
         if exists:
-            return self._get_existing_q_resolution(det_bank_workspace)
+            #return self._get_existing_q_resolution(det_bank_workspace)
+            return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
         else:
-            return self._create_q_resolution()
+            return self._create_q_resolution(det_bank_workspace = det_bank_workspace)
 
-    def _create_q_resolution(self):
+    def _create_q_resolution(self, det_bank_workspace):
         '''
         Creates the Q Resolution workspace
         @returns the q resolution workspace
         '''
-        pass
-        # TODO: INSERT TOFSANSResolutionByPixel here
+        sigma_moderator = self._get_sigma_moderator_workspace()
+
+        TOFSANSResolutionByPixel(InputWorkspace = det_bank_workspace,
+                                 OutputWorkspace = QRESOLUTION_WORKSPACE_NAME,
+                                 DeltaR = self.get_q_resolution_delta_r(),
+                                 SampleApertureRadius = self.get_q_resolution_a2(),
+                                 SourceApertureRadius = self.get_q_resolution_a1(),
+                                 SigmaModerator = sigma_moderator,
+                                 AccountForGravity=self._use_gravity,
+                                 ExtraLength=self._grav_extra_length)
+
+        if not mtd.doesExist(QRESOLUTION_WORKSPACE_NAME):
+            raise RuntimeError("ConvertTpQIsis: Could not create the q resolution workspace")
+        return mtd[QRESOLUTION_WORKSPACE_NAME]
+
+    def _get_sigma_moderator_workspace(self):
+        '''
+        Gets the sigma moderator workspace.
+        @returns the sigma moderator workspace
+        '''
+        moderator_ws = Load(Filename = self.get_q_resolution_moderator())
+        moderator_historgram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
+        moderator_wavelength_ws = ConvertUnits(InputWorkspace=moderator_historgram_ws,Target="Wavelength")
+        return moderator_wavelength_ws
 
     def _get_existing_q_resolution(self, det_bank_workspace):
         '''
@@ -2029,6 +2052,7 @@ class ConvertToQISIS(ReductionStep):
             q_res_file_path, dummy_suggested_name = getFileAndName(file_name)
         except:
             raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
+        q_res_file_path = q_res_file_path.replace("\\", "/")
         self._q_resolution_moderator_file_name = q_res_file_path
 
     def get_q_resolution_moderator(self):
@@ -2107,7 +2131,7 @@ class ConvertToQISIS(ReductionStep):
         except:
             raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
 
-    def _set_up_q_resolution_settings(self):
+    def _set_up_q_resolution_parameters(self):
         '''
         Prepare the parameters which need preparing
         '''
@@ -2986,7 +3010,7 @@ class UserFile(ReductionStep):
 
         # Check if it is the moderator file name, if so add it and return
         if arguments[0].startswith('MODERATOR'):
-            reducer.to_Q.set_q_resolution_moderator_file_name(file_name = arguments[1])
+            reducer.to_Q.set_q_resolution_moderator(file_name = arguments[1])
             return
 
         # All arguments need to be convertible to a float
@@ -2998,25 +3022,25 @@ class UserFile(ReductionStep):
              reducer.to_Q.set_q_resolution_delta_r(delta_r= float(arguments[1])/1000.)
         elif arguments[0].startswith('A1'):
             # Input is in mm but we need m later on 
-            reducer.to_Q.set_q_resolution_A1(a1 = float(arguments[1])/1000.)
+            reducer.to_Q.set_q_resolution_a1(a1 = float(arguments[1])/1000.)
         elif arguments[0].startswith('A2'):
             # Input is in mm but we need m later on 
-            reducer.to_Q.set_q_resolution_A2(a2 = float(arguments[1])/1000.)
+            reducer.to_Q.set_q_resolution_a2(a2 = float(arguments[1])/1000.)
         elif arguments[0].startswith('LCOLLIM'):
             # Input is in m and we need it to be in m later on
             reducer.to_Q.set_q_resolution_collimation_length(collimation_length = float(arguments[1]))
         elif arguments[0].startswith('H1'):
             # Input is in mm but we need m later on
-            reducer.to_Q.set_q_resolution_H1(h1 = float(arguments[1])/1000.)
+            reducer.to_Q.set_q_resolution_h1(h1 = float(arguments[1])/1000.)
         elif arguments[0].startswith('W1'):
             # Input is in mm but we need m later on
-            reducer.to_Q.set_q_resolution_W1(w1 = float(arguments[1])/1000.)
+            reducer.to_Q.set_q_resolution_w1(w1 = float(arguments[1])/1000.)
         elif arguments[0].startswith('H2'):
             # Input is in mm but we need m later on
-            reducer.to_Q.set_q_resolution_H2(h2 = float(arguments[1])/1000.)
+            reducer.to_Q.set_q_resolution_h2(h2 = float(arguments[1])/1000.)
         elif arguments[0].startswith('W2'):
             # Input is in mm but we need m later on
-            reducer.to_Q.set_q_resolution_W2(w2 = float(arguments[1])/1000.)
+            reducer.to_Q.set_q_resolution_w2(w2 = float(arguments[1])/1000.)
         else:
             return 'Unrecognised line: '
 

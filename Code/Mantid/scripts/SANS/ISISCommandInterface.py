@@ -1373,7 +1373,9 @@ def get_q_resolution_moderator():
     Gets the moderator file path
     @returns the moderator file path or nothing
     '''
-    return ReductionSingleton().to_Q.get_q_resolution_moderator()
+    val = ReductionSingleton().to_Q.get_q_resolution_moderator()
+    print str(val)
+    return val
 
 def set_q_resolution_moderator(file_name):
     '''
@@ -1397,9 +1399,9 @@ def set_q_resolution_use(use):
     Sets if the q resolution option is being used
     @param use: use flag
     '''
-    if use == "True":
+    if use == True:
         ReductionSingleton().to_Q.set_use_q_resolution(True)
-    elif use == "False":
+    elif use == False:
         ReductionSingleton().to_Q.set_use_q_resolution(False)
     else:
         sanslog.warning('Warning: Could could not set useage of QResolution')
@@ -1410,14 +1412,29 @@ def get_q_resolution_collimation_length():
     Get the collimation length
     @returns the collimation length in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_collimation_length, "CollimationLength")
+    element = ReductionSingleton().to_Q.get_q_resolution_collimation_length()
+    msg = "CollimationLength"
+    if su.is_convertible_to_float(element) or not element:
+        pass
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+    print str(element)
+    return element
 
 def set_q_resolution_collimation_length(collimation_length):
     '''
     Sets the collimation length
     @param collimation_length: the collimation length
     '''
-    set_q_resolution_float(ReductionSingleton().to_Q.set_q_resolution_collimation_length, collimationLength, "Collimation Length")
+    if collimation_length == None:
+        return
+    msg = "Collimation Length"
+    if su.is_convertible_to_float(collimation_length):
+        c_l = float(collimation_length)
+        ReductionSingleton().to_Q.set_q_resolution_collimation_length(c_l)
+    else:
+        sanslog.warning('Warning: Could not convert %s to float.' % msg)
+
 
 #-- Delta R
 def get_q_resolution_delta_r():
@@ -1425,7 +1442,9 @@ def get_q_resolution_delta_r():
     Get the delta r value
     @returns the delta r in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_delta_r, "DeltaR")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_delta_r, "DeltaR")
+    print str(val)
+    return val
 
 def set_q_resolution_delta_r(delta_r):
     '''
@@ -1440,7 +1459,9 @@ def get_q_resolution_a1():
     Get the A1 diameter
     @returns the diameter for the first aperature in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a1, "A1")
+    print str(val)
+    return val
 
 def set_q_resolution_a1(a1):
     '''
@@ -1455,7 +1476,9 @@ def get_q_resolution_a2():
     Get the A2 diameter
     @returns the diameter for the second aperature in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_a2, "A2")
+    print str(val)
+    return val
 
 def set_q_resolution_a2(a2):
     '''
@@ -1470,7 +1493,9 @@ def get_q_resolution_h1():
     Get the first height for rectangular apertures
     @returns the first height in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h1, "H1")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h1, "H1")
+    print str(val)
+    return val
 
 def set_q_resolution_h1(h1):
     '''
@@ -1485,7 +1510,9 @@ def get_q_resolution_h2():
     Get the second height for rectangular apertures
     @returns the second height in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h2, "H2")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_h2, "H2")
+    print str(val)
+    return val
 
 def set_q_resolution_h2(h2):
     '''
@@ -1500,7 +1527,9 @@ def get_q_resolution_w1():
     Get the first width for rectangular apertures
     @returns the first width in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w1, "W1")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w1, "W1")
+    print str(val)
+    return val
 
 def set_q_resolution_w1(w1):
     '''
@@ -1515,7 +1544,9 @@ def get_q_resolution_w2():
     Get the second width for rectangular apertures
     @returns the second width in mm
     '''
-    return get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w2, "W2")
+    val = get_q_resolution_float(ReductionSingleton().to_Q.get_q_resolution_w2, "W2")
+    print str(val)
+    return val
 
 def set_q_resolution_w2(w2):
     '''
@@ -1544,7 +1575,7 @@ def set_q_resolution_float(func, arg, msg):
         return
 
     if su.is_convertible_to_float(arg):
-        d_r = su.millimeter_2_meter(float(delta_r))
+        d_r = su.millimeter_2_meter(float(arg))
         func(d_r)
     else:
         sanslog.warning('Warning: Could not convert %s to float.' % msg)
@@ -1558,13 +1589,11 @@ def get_q_resolution_float(func, msg):
     '''
     element = func()
 
-    if element == None:
-        element = 0.0
-
     if su.is_convertible_to_float(element):
         element = su.meter_2_millimeter(element)
+    elif not element:
+        pass
     else:
-        element = 0.0
         sanslog.warning('Warning: Could not convert %s to float.' % msg)
     return element
 

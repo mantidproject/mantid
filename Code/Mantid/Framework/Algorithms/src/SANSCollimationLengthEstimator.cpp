@@ -30,6 +30,7 @@ double SANSCollimationLengthEstimator::provideCollimationLength(Mantid::API::Mat
   // If the instrument does not have a correction specified then set the length to 4
   const double defaultLColim = 4.0;
   auto collimationLengthID = "collimation-length-correction";
+
   if (!workspace->getInstrument()->hasParameter(collimationLengthID)) {
     g_log.error("Error in SANSCollimtionLengthEstimator: The instrument parameter file does not contain a collimation length correction,"
                 "a default of 4 is provided. Please update the instrument parameter file.");
@@ -80,7 +81,7 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(MatrixWork
 
   // Make sure we have a guide increment specified 
   if (!inOutWS->getInstrument()->hasParameter("guide-collimation-length-increment")) {
-    throw std::invalid_argument("TOFSANSResolutionByPixel: Could not find a guid increment.");
+    throw std::invalid_argument("TOFSANSResolutionByPixel: Could not find a guide increment.");
   }
 
   auto numberOfGuides = static_cast<unsigned int>(inOutWS->getInstrument()->getNumberParameter("number-of-guides")[0]);
