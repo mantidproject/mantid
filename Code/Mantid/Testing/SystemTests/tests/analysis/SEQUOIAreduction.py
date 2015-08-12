@@ -12,6 +12,8 @@ from mantid.simpleapi import *
 from numpy import *
 
 class DirectInelaticSNSTest(stresstesting.MantidStressTest):
+    _nxspe_filename=""
+    customDataDir=""
 
     #setup routines
     def topbottom(self):
@@ -100,12 +102,12 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         newruns=[]
         try:
             len(runs)
-        except:
+        except TypeError:
             runs=[runs]
         for r in runs:
             try:
                 len(r)
-            except:
+            except TypeError:
                 r=[r]
             temppath=[]
             tempnewruns=[]
@@ -152,6 +154,7 @@ class DirectInelaticSNSTest(stresstesting.MantidStressTest):
         if os.path.exists(self.customDataDir):
             shutil.rmtree(self.customDataDir)
 
+    #pylint: disable=too-many-locals,too-many-branches
     def runTest(self):
         self.setupFiles()
         runs=[[12384,12385]]

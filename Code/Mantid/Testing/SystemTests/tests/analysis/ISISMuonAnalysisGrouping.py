@@ -1,4 +1,4 @@
-#pylint: disable=no-init,attribute-defined-outside-init
+#pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
 import stresstesting
 from mantid.simpleapi import *
 
@@ -27,7 +27,7 @@ class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
         raise NotImplementedError("Implmenent get_reference_file to return "
-                                "the name of the file to compare against.")
+                                  "the name of the file to compare against.")
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""

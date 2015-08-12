@@ -50,8 +50,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
 
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input,
-                             validator=ws_validator),
+                                                     direction=Direction.Input,
+                                                     validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -66,9 +66,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample outer radius')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
-                             direction=Direction.Input,
-                             optional=PropertyMode.Optional,
-                             validator=ws_validator),
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -96,7 +96,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc='Analyser energy')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='The output corrections workspace group')
 
 #------------------------------------------------------------------------------
@@ -165,8 +165,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         for angle_idx in range(number_angles):
             kill, ass, assc, acsc, acc = cylabs.cylabs(self._step_size, beam, ncan, radii,
-                density, sigs, siga, self._angles[angle_idx], self._elastic, self._waves, angle_idx, wrk, 0)
-
+                                                       density, sigs, siga, self._angles[angle_idx],
+                                                       self._elastic, self._waves, angle_idx, wrk, 0)
             if kill == 0:
                 logger.information('Angle %d: %f successful' % (angle_idx+1, self._angles[angle_idx]))
 
@@ -179,7 +179,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 raise ValueError('Angle ' + str(angle_idx) + ' : ' + str(self._angles[angle_idx]) + ' *** failed : Error code ' + str(kill))
 
         sample_logs = {'sample_shape': 'cylinder', 'sample_filename': self._sample_ws_name,
-                        'sample_inner_radius': self._sample_inner_radius, 'sample_outer_radius': self._sample_outer_radius}
+                       'sample_inner_radius': self._sample_inner_radius, 'sample_outer_radius': self._sample_outer_radius}
         dataX = self._waves * number_angles
 
         # Create the output workspaces

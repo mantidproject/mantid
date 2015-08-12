@@ -32,7 +32,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              "Workspace with the reference Vanadium diffraction data.")
 
         self.declareProperty(ITableWorkspaceProperty("OutIntegrationWorkspace", "", Direction.Output,
-                                                    PropertyMode.Optional),
+                                                     PropertyMode.Optional),
                              'Output integration workspace produced when given an input Vanadium workspace')
 
         self.declareProperty(MatrixWorkspaceProperty("OutCurvesWorkspace", "", Direction.Output,
@@ -40,7 +40,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              'Output curves workspace produced when given an input Vanadium workspace')
 
         self.declareProperty(ITableWorkspaceProperty("IntegrationWorkspace", "", Direction.Input,
-                                                    PropertyMode.Optional),
+                                                     PropertyMode.Optional),
                              "Workspace with the integrated values for every spectra of the reference "
                              "Vanadium diffraction data. One row per spectrum.")
 
