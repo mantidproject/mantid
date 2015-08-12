@@ -172,7 +172,8 @@ MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
  *
  * @param wksp
  */
-void LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
+API::MatrixWorkspace_sptr
+LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
   EventWorkspace_sptr eventWS =
       boost::dynamic_pointer_cast<EventWorkspace>(wksp);
 
@@ -182,12 +183,16 @@ void LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
     filterBadPulses->setProperty("OutputWorkspace", eventWS);
     filterBadPulses->setProperty("LowerCutoff", m_filterBadPulses);
     filterBadPulses->executeAsChildAlg();
+    eventWS = filterBadPulses->getProperty("OutputWorkspace");
   }
 
   auto compressEvents = createChildAlgorithm("CompressEvents");
   compressEvents->setProperty("InputWorkspace", eventWS);
   compressEvents->setProperty("OutputWorkspace", eventWS);
   compressEvents->executeAsChildAlg();
+  eventWS = compressEvents->getProperty("OutputWorkspace");
+
+  return eventWS;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -202,19 +207,22 @@ void LoadEventAndCompress::exec() {
   // first run is free
   EventWorkspace_sptr resultWS =
       boost::dynamic_pointer_cast<EventWorkspace>(loadChunk(0));
-  processChunk(resultWS);
+  resultWS =
+      boost::dynamic_pointer_cast<EventWorkspace>(processChunk(resultWS));
 
   // load the other chunks
   const size_t numRows = m_chunkingTable->rowCount();
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
-    processChunk(temp);
+    temp = processChunk(temp);
     auto alg = createChildAlgorithm("Plus");
     alg->setProperty("LHSWorkspace", resultWS);
     alg->setProperty("RHSWorkspace", temp);
     alg->setProperty("OutputWorkspace", resultWS);
     alg->setProperty("ClearRHSWorkspace", true);
     alg->executeAsChildAlg();
+    temp = alg->getProperty("OutputWorkspace");
+    resultWS = boost::dynamic_pointer_cast<EventWorkspace>(temp);
   }
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
