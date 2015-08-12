@@ -61,6 +61,8 @@ void LoadMcStas::init() {
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
                                                    Direction::Output),
                   "An output workspace.");
+  // added to allow control of errorbars
+  declareProperty("ErrorBarsSetTo1",false);                
 }
 
 //----------------------------------------------------------------------------------------------
@@ -159,7 +161,7 @@ void LoadMcStas::readEventData(
     WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
-
+  bool error_bar_1 = getProperty("ErrorBarsSetTo1")
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
   // entry are data collected for that instrument
@@ -345,8 +347,18 @@ void LoadMcStas::readEventData(
         // eventWS->getEventList(workspaceIndex) +=
         // TofEvent(detector_time,pulse_time);
         // eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
-        eventWS->getEventList(workspaceIndex) += WeightedEvent(
-            detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
+        // The following line puts the events into the weighted event instance
+        //Originally this was coded so the error squared is 1 it should be 
+        //data[numberOfDataColumn * in]*data[numberOfDataColumn * in]
+        //introduced flag to allow old usage 
+        if (error_bar_1){
+          eventWS->getEventList(workspaceIndex) += WeightedEvent(
+              detector_time, pulse_time, data[numberOfDataColumn * in], 1.0);
+        } else{    
+          eventWS->getEventList(workspaceIndex) += WeightedEvent(
+            detector_time, pulse_time, data[numberOfDataColumn * in], data[numberOfDataColumn * in]*data[numberOfDataColumn * in]);
+        }
+        
       }
     } // end reading over number of blocks of an event dataset
 
