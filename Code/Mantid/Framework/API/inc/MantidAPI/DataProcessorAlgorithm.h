@@ -67,6 +67,7 @@ protected:
   getProcessProperties(const std::string &propertyManager=std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
+  Workspace_sptr assemble(Workspace_sptr partialWS);
   Workspace_sptr assemble(const std::string &partialWSName,
                           const std::string &outputWSName);
   void saveNexus(const std::string &outputWSName,
@@ -91,9 +92,14 @@ protected:
   /// Add a matrix workspace to another matrix workspace
   MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs,
                             const MatrixWorkspace_sptr rhs);
+
   /// Add a single value to a matrix workspace
   MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs,
                             const double &rhsValue);
+
+  /// Add a matrix workspace to another matrix workspace
+  MatrixWorkspace_sptr plus2(MatrixWorkspace_sptr lhs,
+                            MatrixWorkspace_sptr rhs);
 
   /// Subract a matrix workspace by another matrix workspace
   MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs,
