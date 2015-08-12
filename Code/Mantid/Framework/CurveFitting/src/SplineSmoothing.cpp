@@ -73,7 +73,8 @@ void SplineSmoothing::init() {
   auto numOfBreaks = boost::make_shared<BoundedValidator<int>>();
   numOfBreaks->setLower(0);
   declareProperty("MaxNumberOfBreaks", M_START_SMOOTH_POINTS, numOfBreaks,
-                  "To set the positions of the break-points");
+                  "To set the positions of the break-points, default 10 "
+                  "equally spaced real values in interval 0.0 - 1.0");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -113,6 +114,7 @@ void SplineSmoothing::exec() {
 /** Smooth a single spectrum of the input workspace
  *
  * @param index :: index of the spectrum to smooth
+ * @param maxBreaks :: the number to set the positions of the break-points
  */
 void SplineSmoothing::smoothSpectrum(int index, int maxBreaks) {
   m_cspline = boost::make_shared<BSpline>();
@@ -307,6 +309,7 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
  *
  * @param inputWorkspace :: The input workspace containing noisy data
  * @param row :: The row of spectra to use
+ * @param maxBreaks :: the number to set the positions of the break-points
  */
 void SplineSmoothing::selectSmoothingPoints(
     MatrixWorkspace_const_sptr inputWorkspace, size_t row, int maxBreaks) {
@@ -318,31 +321,24 @@ void SplineSmoothing::selectSmoothingPoints(
   // if retrienved value is default zero
   if (maxBreaks == 0) {
     setProperty("MaxNumberOfBreaks", xs.size());
-    maxBreaks = static_cast<int>(getProperty("MaxNumberOfBreaks"));
+    maxBreaks = getProperty("MaxNumberOfBreaks");
   }
   // number of points to start with
   int numSmoothPts(maxBreaks);
 
   // evenly space initial points over data set
   int delta = xSize / numSmoothPts;
-  
-  g_log.information() << "delta is: " << delta << std::endl;
-  
-  for (int i = 0; i < xSize; i+=delta) {
+
+  for (int i = 0; i < xSize; i += delta) {
     smoothPts.insert(i);
   }
   smoothPts.insert(xSize - 1);
-  
-  g_log.information() << "smoothPtrs has: " << smoothPts.size() << " elements"
-                      << std::endl;
 
   bool resmooth(true);
   while (resmooth) {
     // if we're using all points then we can't do anything more.
-    if (smoothPts.size() > maxBreaks + 2)
+    if (smoothPts.size() > (unsigned)(maxBreaks + 2))
       break;
-
-    g_log.information() << "iteration inside resmooth " << std::endl;
 
     addSmoothingPoints(smoothPts, xs.data(), ys.data());
     resmooth = false;
