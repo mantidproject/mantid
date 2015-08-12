@@ -30,7 +30,7 @@ breaking points, a detailed smoothing function can also be produced.
 Users are also able to successfully apply the algorithm to a workspace
 with multiple spectrums, which would generate an output of workspace
 with multiple spectrums of :ref:`SplineSmoothing <algm-SplineSmoothing-v1>`
-algorithm. `BSpline <http://www.mantidproject.org/BSpline>`_
+algorithm applied to it. `BSpline <http://www.mantidproject.org/BSpline>`_
 can be used to help you understand break-points in further detail. 
 
 
