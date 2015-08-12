@@ -69,13 +69,23 @@ void ProcessIndirectFitParameters::init() {
 void ProcessIndirectFitParameters::exec() {
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
   std::string xColumn = getProperty("X Column");
-  std::string parameterNames = getProperty("Parameter Names");
+  std::string parameterNamesProp = getProperty("Parameter Names");
+  auto parameterNames = listToVector(parameterNamesProp);
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
-
-
 }
 
-
+std::vector<std::string>
+ProcessIndirectFitParameters::listToVector(std::string &commaList) {
+  auto listVector = std::vector<std::string>();
+  auto pos = commaList.find(",");
+  while (pos != std::string::npos) {
+	  std::string nextItem = commaList.substr(0, pos);
+	  listVector.push_back(nextItem);
+	  commaList = commaList.substr(pos, commaList.size());
+	  pos = commaList.find(",");
+  }
+  return listVector;
+}
 
 } // namespace Algorithms
 } // namespace Mantid

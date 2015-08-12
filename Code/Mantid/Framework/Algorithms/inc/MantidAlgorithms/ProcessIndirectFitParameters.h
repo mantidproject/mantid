@@ -47,6 +47,7 @@ public:
 private:
   void init();
   void exec();
+  std::vector<std::string> listToVector(std::string &);
 };
 
 } // namespace Algorithms
