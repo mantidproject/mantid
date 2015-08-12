@@ -99,7 +99,7 @@ void ScriptOutputDisplay::setZoom(int value)
 { 
   // 8 is the default font size
   QFont f = this->currentFont();
-  zoom(8 - f.pointSize());
+  zoom(8 + value - f.pointSize());
 }
 
 /**
