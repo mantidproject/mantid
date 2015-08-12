@@ -69,6 +69,10 @@ class DNSdata(object):
             unparsed = fhandler.read()
             blocks = unparsed.split(splitsymbol)
 
+            # check whether the file is complete
+            if len(blocks) < 9:
+                raise RuntimeError("The file %s is not complete!" % filename)
+
             # parse each block
             # parse block 0 (header)
             res = parse_header(blocks[0])
@@ -79,7 +83,7 @@ class DNSdata(object):
                 self.sample_name = res['sample']
                 self.userid = res['userid']
             except:
-                raise ValueError("The file %s does not contain valid DNS data format." % filename)
+                raise RuntimeError("The file %s does not contain valid DNS data format." % filename)
             # parse block 1 (general information)
             b1splitted = [s.strip() for s in blocks[1].split('#')]
             b1rest = [el for el in b1splitted]

@@ -7,7 +7,7 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewPeaksSourceSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewPeaksSourceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewPeaksSourceSMPlugin LINK_PRIVATE 
+target_link_libraries( MantidParaViewPeaksSourceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}

@@ -9,7 +9,7 @@ set_property( TARGET MantidParaViewMDHWSourceSMPlugin PROPERTY FOLDER "MantidVat
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
-target_link_libraries( MantidParaViewMDHWSourceSMPlugin LINK_PRIVATE 
+target_link_libraries( MantidParaViewMDHWSourceSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}

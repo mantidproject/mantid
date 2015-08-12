@@ -1,6 +1,7 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
+#include "MantidQtAPI/PythonThreading.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -16,6 +17,7 @@ class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
 class vtkSMDoubleVectorProperty;
+class vtkEventQtSlotConnect;
 
 class QString;
 
@@ -123,7 +125,7 @@ public:
   virtual void setColorForBackground(bool useCurrentColorSettings);
   /// Sets the splatterplot button to the desired visibility.
   virtual void setSplatterplot(bool visibility);
-  /// Initializes the settings of the color scale 
+  /// Initializes the settings of the color scale
   virtual void initializeColorScale();
   /// Sets the standard veiw button to the desired visibility.
   virtual void setStandard(bool visibility);
@@ -222,7 +224,7 @@ signals:
   void unbin();
   /**
    * Signal to tell other elements that the log scale was altered programatically
-   * @param state flag wheter or not to enable the 
+   * @param state flag wheter or not to enable the
    */
   void setLogScale(bool state);
 
@@ -231,6 +233,12 @@ protected:
    * Set the color scale for auto color scaling.
    */
   void setAutoColorScale();
+
+private slots:
+  /// Called when the rendering begins
+  void lockPyGIL();
+  /// Called when the rendering finishes
+  void releasePyGIL();
 
 private:
   Q_DISABLE_COPY(ViewBase)
@@ -250,6 +258,9 @@ private:
   const pqColorMapModel* m_currentColorMapModel;
 
   QString m_internallyRebinnedWorkspaceIdentifier;
+
+  vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
+  PyGILStateService m_gilStateStore; ///< Python GIL state storage
 };
 
 }

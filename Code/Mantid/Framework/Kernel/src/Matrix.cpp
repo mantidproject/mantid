@@ -965,6 +965,13 @@ T Matrix<T>::Invert()
   if (nx != ny && nx < 1)
     return 0;
 
+  if(nx==1)
+  {
+      T det=V[0][0];
+      if(V[0][0]!=static_cast<T>(0.))
+          V[0][0]=static_cast<T>(1.)/V[0][0];
+      return det;
+  }
   int *indx = new int[nx]; // Set in lubcmp
 
   double *col = new double[nx];

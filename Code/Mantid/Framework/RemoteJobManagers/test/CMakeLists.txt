@@ -2,7 +2,7 @@ if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
   cxxtest_add_test ( RemoteJobManagersTest ${TEST_FILES} )
-  target_link_libraries ( RemoteJobManagersTest LINK_PRIVATE 
+  target_link_libraries ( RemoteJobManagersTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             Kernel
             RemoteJobManagers

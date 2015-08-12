@@ -8,11 +8,11 @@ import os
 
 def do_cleanup():
     Files = ["BioSANS_test_data_reduction.log",
-    "BioSANS_test_data_Iq.xml",
-    "BioSANS_test_data_Iq.txt",
-    "BioSANS_test_data_Iqxy.dat"]
-    for file in Files:
-        absfile = FileFinder.getFullPath(file)
+             "BioSANS_test_data_Iq.xml",
+             "BioSANS_test_data_Iq.txt",
+             "BioSANS_test_data_Iqxy.dat"]
+    for filename in Files:
+        absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
@@ -27,8 +27,8 @@ class HFIREffAPIv2(stresstesting.MantidStressTest):
         """
             System test for sensitivity correction
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -55,8 +55,8 @@ class HFIRSensitivityDirectBeamCenter(stresstesting.MantidStressTest):
         """
             System test for sensitivity correction
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
@@ -85,8 +85,8 @@ class HFIRSensitivityScatteringBeamCenter(stresstesting.MantidStressTest):
         """
             System test for sensitivity correction
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='HFIR'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='HFIR'
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")

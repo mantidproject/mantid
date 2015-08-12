@@ -331,8 +331,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PolynomialFit.h
                    src/PythonScript.h
                    src/PythonScripting.h
-                   src/PythonSystemHeader.h
-                   src/PythonThreading.h
                    src/QwtBarCurve.h
                    src/qwt_compat.h
                    src/QwtErrorPlotCurve.h
@@ -440,6 +438,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
+				   src/Mantid/InstrumentWidget/InstrumentWindowTypes.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
                    src/Mantid/InstrumentWidget/InstrumentWindowTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
@@ -877,7 +876,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 )
 
 # Library dependencies
-target_link_libraries ( MantidPlot LINK_PRIVATE 
+target_link_libraries ( MantidPlot LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             ${CORE_MANTIDLIBS}
             MantidQtAPI
             MantidWidgets

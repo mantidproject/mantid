@@ -82,8 +82,8 @@ void LoadISISNexus2::init() {
   declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-                  "The particular entry number to read (default: Load all "
-                  "workspaces and creates a workspace group)");
+                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into one worskspace");
 
   std::vector<std::string> monitorOptions;
   monitorOptions.push_back("Include");
@@ -174,9 +174,12 @@ void LoadISISNexus2::exec() {
           entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
       index.load();
       int64_t ind = *index();
-      m_monitors[ind] = it->nxname;
-
-      ++nmons;
+      // Spectrum index of 0 means no spectrum associated with that monitor,
+      // so only count those with index > 0
+      if (ind > 0){
+        m_monitors[ind] = it->nxname;
+        ++nmons;
+      }
     }
   }
 
@@ -272,7 +275,7 @@ void LoadISISNexus2::exec() {
   createPeriodLogs(firstentry, local_workspace);
 
   WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
-  if (m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
+  if (m_loadBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
 
     wksp_group->setTitle(local_workspace->getTitle());
 
@@ -280,7 +283,7 @@ void LoadISISNexus2::exec() {
     const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
     const std::string prop_name = "OutputWorkspace_";
 
-    for (int p = 1; p <= m_detBlockInfo.numberOfPeriods; ++p) {
+    for (int p = 1; p <= m_loadBlockInfo.numberOfPeriods; ++p) {
       std::ostringstream os;
       os << p;
       m_progress->report("Loading period " + os.str());
@@ -1193,6 +1196,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   if (ndets == 0) {
     separateMonitors = false; // only monitors in the main workspace. No
                               // detectors. Will be loaded in the main workspace
+    // Possible function exit point
     return separateMonitors;
   }
 
