@@ -39,6 +39,11 @@ public:
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(m_view.get()));
   }
 
+  // TODO: There should be a few basic tests on the presenter here, including
+  // methods like: parseCalibrateFilename, buildCalibrateSuggestedFilename, etc.
+  // Several of these are indirectly tested through some of the GUI-mock-based
+  // tests below but should be tested as isolated methods here at the beginning.
+
   void test_start() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
@@ -64,7 +69,8 @@ public:
         Return(calibSettings));
 
     const std::string mockFname = "foo.par";
-    EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(Return(mockFname));
+    EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(
+        Return(mockFname));
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
         .Times(1);
 
