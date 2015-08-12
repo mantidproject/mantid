@@ -24,7 +24,21 @@ namespace CustomInterfaces {
 // Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
-const double EnggDiffractionViewQtGUI::s_defaultRebinWidth = -0.0005;
+const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
+
+const std::string EnggDiffractionViewQtGUI::g_iparmExtStr =
+    "GSAS instrument parameters / IPARM file: PRM, PAR, IPAR, IPARAM "
+    "(*.prm *.par *.ipar *.iparam);;"
+    "Other extensions/all files (*.*)";
+
+const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
+    "Comma separated values text file with calibration table (CSV)"
+    "(*.csv);;"
+    "Nexus file with calibration table (NXS, NEXUS)"
+    "(*.nxs *.nexus);;"
+    "Supported formats: CSV, NXS "
+    "(*.csv *.nxs *.nexus);;"
+    "Other extensions/all files (*.*)";
 
 /**
  * Default constructor.
@@ -72,6 +86,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   m_uiTabCalib.lineEdit_vanadium_num->setText(
       QString::fromStdString(vanadiumRun));
   m_uiTabCalib.lineEdit_ceria_num->setText(QString::fromStdString(ceriaRun));
+  m_uiTabCalib.lineEdit_current_calib_filename->setText(QString(""));
 
   m_uiTabCalib.lineEdit_new_vanadium_num->setText(
       QString::fromStdString(vanadiumRun));
@@ -149,7 +164,7 @@ void EnggDiffractionViewQtGUI::readSettings() {
           .toString()
           .toStdString();
   m_calibSettings.m_forceRecalcOverwrite =
-      qs.value("rebin-calib", s_defaultRebinWidth).toFloat();
+      qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
 
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
@@ -214,12 +229,9 @@ std::string EnggDiffractionViewQtGUI::askNewCalibrationFilename(
   QDir path(prevPath);
   QString suggestion = path.filePath(QString::fromStdString(suggestedFname));
 
-  const QString calibExt = QString("Supported formats: IPARM file for GSAS "
-                                   "(*.prm *.par *.iparm);;"
-                                   "Other extensions/all files (*.*)");
   QString choice = QFileDialog::getOpenFileName(
       this, tr("Please select the name of the calibration file"), suggestion,
-      calibExt);
+      QString::fromStdString(g_iparmExtStr));
 
   return choice.toStdString();
 }
@@ -244,28 +256,41 @@ std::string EnggDiffractionViewQtGUI::newCeriaNo() const {
   return m_uiTabCalib.lineEdit_new_ceria_num->text().toStdString();
 }
 
-void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
-  const QString calExt =
-      QString("Supported formats: CSV, NXS "
-              "(*.csv *.nxs *.nexus);;"
-              "Comma separated values text file with calibration table "
-              "(*.csv);;"
-              "Nexus file with calibration table "
-              "(*.nxs *.nexus);;"
-              "Other extensions/all files (*.*)");
+std::string EnggDiffractionViewQtGUI::currentCalibFile() const {
+  return m_uiTabCalib.lineEdit_current_calib_filename->text().toStdString();
+}
 
+void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
+                                              const std::string &ceriaNo,
+                                              const std::string &fname) {
+
+  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+      QString::fromStdString(vanadiumNo));
+  m_uiTabCalib.lineEdit_new_ceria_num->setText(QString::fromStdString(ceriaNo));
+  m_uiTabCalib.lineEdit_current_calib_filename->setText(
+      QString::fromStdString(fname));
+}
+
+std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
     QString prevPath =
         MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
   }
 
-  QString filename = QFileDialog::getOpenFileName(
-      this, tr("Open calibration file"), prevPath, calExt);
+  QString filename =
+      QFileDialog::getOpenFileName(this, tr("Open calibration file"), prevPath,
+                                   QString::fromStdString(g_iparmExtStr));
 
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
-      filename);
+  if (!filename.isEmpty()) {
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
+        filename);
+  }
 
+  return filename.toStdString();
+}
+
+void EnggDiffractionViewQtGUI::loadCalibrationClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::LoadExistingCalib);
 }
 
@@ -314,15 +339,6 @@ void EnggDiffractionViewQtGUI::browseInputDirRaw() {
 }
 
 void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
-  const QString calExt =
-      QString("Comma separated values text file with calibration table "
-              "(*.csv);;"
-              "Nexus file with calibration table "
-              "(*.nxs *.nexus);;"
-              "Supported formats: CSV, NXS "
-              "(*.csv *.nxs *.nexus);;"
-              "Other extensions/all files (*.*)");
-
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
     QString prevPath =
@@ -331,7 +347,7 @@ void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
 
   QString filename = (QFileDialog::getOpenFileName(
       this, tr("Open pixel calibration (full calibration) file"), prevPath,
-      calExt));
+      QString::fromStdString(g_pixelCalibExt)));
 
   m_calibSettings.m_pixelCalibFilename = filename.toStdString();
   m_uiTabSettings.lineEdit_pixel_calib_filename->setText(
@@ -339,13 +355,11 @@ void EnggDiffractionViewQtGUI::browsePixelCalibFilename() {
 }
 
 void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
-  const QString iparStr = QString("GSAS instrument parameters file "
-                                  "(*.prm *.par *.tiff *.ipar *.iparam);;"
-                                  "Other extensions/all files (*.*)");
 
   QString prevPath = QString::fromStdString(m_calibSettings.m_templateGSAS_PRM);
   QString path(QFileDialog::getOpenFileName(
-      this, tr("Open GSAS IPAR template file"), prevPath, iparStr));
+      this, tr("Open GSAS IPAR template file"), prevPath,
+      QString::fromStdString(g_iparmExtStr)));
 
   if (path.isEmpty()) {
     return;

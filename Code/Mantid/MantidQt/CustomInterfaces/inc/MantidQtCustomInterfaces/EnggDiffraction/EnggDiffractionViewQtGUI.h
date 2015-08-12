@@ -69,7 +69,9 @@ public:
 
   std::string askNewCalibrationFilename(const std::string &suggestedFname);
 
- std::vector<std::string> logMsgs() const { return m_logMsgs; }
+  std::string askExistingCalibFilename();
+
+  std::vector<std::string> logMsgs() const { return m_logMsgs; }
 
   std::string getRBNumber() const;
 
@@ -81,11 +83,16 @@ public:
 
   std::string currentCeriaNo() const;
 
+  std::string currentCalibFile() const;
+
   std::string newVanadiumNo() const;
 
   std::string newCeriaNo() const;
 
   std::string outCalibFilename() const { return m_outCalibFilename; }
+
+  void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
+                      const std::string &fname);
 
 private slots:
   /// for buttons, do calibrate and similar
@@ -136,18 +143,24 @@ private:
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
-  // instrument selected (ENGIN-X, etc.)
+  /// instrument selected (ENGIN-X, etc.)
   std::string m_currentInst;
-  // current calibration produced in the 'Calibration' tab
+  /// current calibration produced in the 'Calibration' tab
   std::string m_currentCalibFilename;
-  // calibration settings - from/to the 'settings' tab
+  /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
   std::string m_outCalibFilename;
 
   /// for the 'Rebin' parameter of some Engg* algorithms
-  static const double s_defaultRebinWidth;
+  static const double g_defaultRebinWidth;
 
-  // presenter as in the model-view-presenter
+  /// supported file extensions string for IPARM files (for the open
+  /// file dialogs)
+  static const std::string g_iparmExtStr;
+  /// supported file extensions string for the pixel (full) claibration
+  static const std::string g_pixelCalibExt;
+
+  /// presenter as in the model-view-presenter
   boost::scoped_ptr<IEnggDiffractionPresenter> m_presenter;
 };
 

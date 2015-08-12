@@ -79,6 +79,13 @@ void EnggDiffractionPresenter::processStart() {
 
 void EnggDiffractionPresenter::processLoadExistingCalib() {
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+
+  std::string fname = m_view->askExistingCalibFilename();
+
+  std::string instName, vanNo, ceriaNo;
+  parseCalibrateFilename(fname, instName, vanNo, ceriaNo);
+
+  m_view->newCalibLoaded(vanNo, ceriaNo, fname);
 }
 
 void EnggDiffractionPresenter::processCalcCalib() {
@@ -102,7 +109,14 @@ void EnggDiffractionPresenter::processCalcCalib() {
   std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
 
   std::string outFilename = m_view->askNewCalibrationFilename(sugg);
-  doCalib(cs, vanNo, ceriaNo, outFilename);
+  try {
+    doCalib(cs, vanNo, ceriaNo, outFilename);
+    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "The calibration calculations failed. See log messages for details. "
+        << std::endl;
+  }
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
@@ -123,11 +137,19 @@ void EnggDiffractionPresenter::processShutDown() {
   cleanup();
 }
 
+/**
+ * Calculate a calibration, responding the the "new calibration"
+ * action/button.
+ *
+ * @param cs user settings
+ * @param vanNo Vanadium run number
+ * @param ceriaNo Ceria run number
+ * @param outFilename output filename chosen by the user
+ */
 void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                        const std::string &vanNo,
                                        const std::string &ceriaNo,
                                        const std::string &outFilename) {
-
   MatrixWorkspace_sptr vanIntegWS;
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
@@ -142,10 +164,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   tzero.reserve(numBanks);
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Algorithm::fromString("EnggCalibrate");
-    alg->initialize();
-    alg->setProperty("InputWorkspace", ceriaWS);
-
     try {
+      alg->initialize();
+      alg->setProperty("InputWorkspace", ceriaWS);
       alg->execute();
     } catch (std::runtime_error &re) {
       m_view->userError("Error in calibration",
@@ -153,6 +174,9 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                             boost::lexical_cast<std::string>(i) +
                             ". Error description: " + re.what() +
                             " Please check also the log messages for details.");
+      g_log.information() << "Could not write calibration file because of the "
+                             "errors (see log). " << std::endl;
+      throw re;
     }
     difc[i] = alg->getProperty("Difc");
     tzero[i] = alg->getProperty("Zero");
@@ -262,6 +286,8 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
 }
 
 /**
+ * Load precalculated results from Vanadium corrections previously
+ * calculated.
  *
  * @param dir directory where the vanadium run should be looked for
  * (normally the input calibration directory chosen in the settings of
@@ -274,7 +300,7 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
  * @param vanCurvesWS output (matrix) workspace loaded from the
  * precalculated Vanadium correction file, with the per-bank curves
  */
-void EnggDiffractionPresenter::loadVanadiumWorkspaces(
+void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
     const std::string &vanNo, const std::string &dir,
     MatrixWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
   std::string integFullPath = "";
@@ -344,8 +370,21 @@ void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
 }
 
 /**
+ * Produce the two workspaces that are required to apply Vanadium
+ * corrections. Try to load them if precalculated results are
+ * available from files, otherwise load the source Vanadium run
+ * workspace and do the calculations.
  *
- * @param vanNo
+ * @param vanNo Vanadium run number
+ *
+ * @param inputDirCalib The 'calibration files' input directory given
+ * in settings
+ *
+ * @param vanIntegWS workspace where to create/load the Vanadium
+ * spectra integration
+ *
+ * @param vanCurvesWS workspace where to create/load the Vanadium
+ * aggregated per-bank curve
  */
 void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
     const std::string &vanNo, const std::string &inputDirCalib,
@@ -384,7 +423,8 @@ void EnggDiffractionPresenter::loadOrCalcanadiumWorkspaces(
         << "Found precalculated Vanadium correction features for Vanadium run "
         << vanNo << ". Re-using them." << std::endl;
     try {
-      loadVanadiumWorkspaces(vanNo, inputDirCalib, vanIntegWS, vanCurvesWS);
+      loadVanadiumPrecalcWorkspaces(vanNo, inputDirCalib, vanIntegWS,
+                                    vanCurvesWS);
     } catch (std::runtime_error &re) {
       m_view->userError(
           "Error while loading precalculated Vanadium corrections",

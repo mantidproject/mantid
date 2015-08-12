@@ -42,6 +42,8 @@ public:
   IEnggDiffractionView(){};
   virtual ~IEnggDiffractionView(){};
 
+  /// @name Direct (and usually modal) user interaction
+  //@{
   /**
    * Display a warning to the user (for example as a pop-up window).
    *
@@ -74,6 +76,14 @@ public:
    */
   virtual std::string
   askNewCalibrationFilename(const std::string &suggestedFname) = 0;
+
+  /**
+   * Gets an (existing file) filename from the user, to load a calibration.
+   *
+   * @return filename given by the user (empty if cancelled / not interested)
+   */
+  virtual std::string askExistingCalibFilename() = 0;
+  //@}
 
   /**
    * Gives one or more messages that this View wants to send to the
@@ -118,6 +128,14 @@ public:
   virtual std::string currentCeriaNo() const = 0;
 
   /**
+   * The filename of the current calibration (corresponding to the
+   * current Vanadium, Ceria)
+   *
+   * @return filename (normally full path)
+   */
+  virtual std::string currentCalibFile() const = 0;
+
+  /**
    * The Vanadium run number to use for a new calibration
    *
    * @return Vanadium run number, as a string
@@ -137,6 +155,18 @@ public:
    * @return file name
    */
   virtual std::string outCalibFilename() const = 0;
+
+  /**
+   * A new calibration is calculated or loaded => update display and
+   * widgets. This becomes the new 'current' calibration.
+   *
+   * @param vanadiumNo new Vanadium run number
+   * @param ceraNo new Ceria run number
+   * @param fname new calibration file name
+   */
+  virtual void newCalibLoaded(const std::string &vanadiumNo,
+                              const std::string &ceriaNo,
+                              const std::string &fname) = 0;
 
   /**
    * Save settings (normally when closing the interface). This

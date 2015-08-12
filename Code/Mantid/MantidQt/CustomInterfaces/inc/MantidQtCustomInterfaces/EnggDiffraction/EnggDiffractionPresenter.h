@@ -72,9 +72,11 @@ private:
   void parseCalibrateFilename(const std::string &path, std::string &instName,
                               std::string &vanNo, std::string &ceriaNo);
 
-  void loadVanadiumWorkspaces(const std::string &vanNo, const std::string &dir,
-                              Mantid::API::MatrixWorkspace_sptr &vanIntegWS,
-                              Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+  void
+  loadVanadiumPrecalcWorkspaces(const std::string &vanNo,
+                                const std::string &dir,
+                                Mantid::API::MatrixWorkspace_sptr &vanIntegWS,
+                                Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
 
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::MatrixWorkspace_sptr &vanIntegWS,
