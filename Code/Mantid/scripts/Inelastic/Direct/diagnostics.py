@@ -397,7 +397,7 @@ def print_test_summary(test_results,test_name=None):
     Input:
     test_results - A list or tuple containing either the number of failed spectra or None
                    indicating that the test was not run
-    IMPORTANT: The output of this function is used as 
+    IMPORTANT: The output of this function is used as
                input for GUI, so the keys names, = sign and : are control
                symbols of MantidWidgets->DiagResults method.
     """

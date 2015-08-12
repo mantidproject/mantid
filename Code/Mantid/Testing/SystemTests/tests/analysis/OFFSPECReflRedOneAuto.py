@@ -15,22 +15,20 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         offspec85 = Load("OFFSPEC00027585.raw") #transmission run
 
         #Process using ReflectometryReductionOneAuto
-        ivq_75, __, __ = ReflectometryReductionOneAuto(
-                offspec75,
-                ThetaIn=0.35,
-                FirstTransmissionRun=offspec85)
+        ivq_75, __, __ = ReflectometryReductionOneAuto(offspec75,
+                                                       ThetaIn=0.35,
+                                                       FirstTransmissionRun=offspec85)
 
-        ivq_76, __, __ = ReflectometryReductionOneAuto(
-                offspec76,
-                ThetaIn=1.00,
-                FirstTransmissionRun=offspec85)
+        ivq_76, __, __ = ReflectometryReductionOneAuto(offspec76,
+                                                       ThetaIn=1.00,
+                                                       FirstTransmissionRun=offspec85)
 
-        ivq_78, __, __ = ReflectometryReductionOneAuto(
-                offspec78,
-                ThetaIn=1.70,
-                FirstTransmissionRun=offspec85)
+        ivq_78, __, __ = ReflectometryReductionOneAuto(offspec78,
+                                                       ThetaIn=1.70,
+                                                       FirstTransmissionRun=offspec85)
 
         ivq_75_76, __ = Stitch1D(ivq_75, ivq_76, Params="1e-3")
+        #pylint: disable=unused-variable
         ivq_75_76_78, __ = Stitch1D(ivq_75_76, ivq_78, Params="0,1e-3,0.08")
         return True
 

@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/DgsReduction.cpp
 	src/DgsRemap.cpp
 	src/EQSANSDarkCurrentSubtraction.cpp
+	src/EQSANSDarkCurrentSubtraction2.cpp
 	src/EQSANSInstrument.cpp
 	src/EQSANSLoad.cpp
 	src/EQSANSMonitorTOF.cpp
@@ -49,6 +50,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/DgsReduction.h
 	inc/MantidWorkflowAlgorithms/DgsRemap.h
 	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
+	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction2.h
 	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
 	inc/MantidWorkflowAlgorithms/EQSANSLoad.h
 	inc/MantidWorkflowAlgorithms/EQSANSMonitorTOF.h

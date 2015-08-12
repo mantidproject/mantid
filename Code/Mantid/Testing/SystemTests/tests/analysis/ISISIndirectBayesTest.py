@@ -1,4 +1,4 @@
-#pylint: disable=no-init,attribute-defined-outside-init
+#pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 import stresstesting
 import os
 from abc import ABCMeta, abstractmethod

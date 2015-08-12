@@ -55,8 +55,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
 
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             validator=ws_validator,
-                             direction=Direction.Input),
+                                                     validator=ws_validator,
+                                                     direction=Direction.Input),
                              doc="Name for the input Sample workspace.")
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -73,9 +73,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample outer radius')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
-                             optional=PropertyMode.Optional,
-                             validator=ws_validator,
-                             direction=Direction.Input),
+                                                     optional=PropertyMode.Optional,
+                                                     validator=ws_validator,
+                                                     direction=Direction.Input),
                              doc="Name for the input Can workspace.")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -110,7 +110,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              doc='Analyser energy')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='The output corrections workspace group')
 #------------------------------------------------------------------------------
 
@@ -241,8 +241,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         if (self._radii[1] - self._radii[0]) < 1e-4:
             raise ValueError('Sample outer radius not > inner radius')
         else:
-            logger.information('Sample : inner radius = %f ; outer radius = %f' % (
-                               self._radii[0], self._radii[1]))
+            logger.information('Sample : inner radius = %f ; outer radius = %f' % (self._radii[0], self._radii[1]))
             self._ms = int((self._radii[1] - self._radii[0] + 0.0001)/self._step_size)
             if self._ms < 20:
                 raise ValueError('Number of steps ( %i ) should be >= 20' % (self._ms))
@@ -255,8 +254,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             if (self._radii[2] - self._radii[1]) < 1e-4:
                 raise ValueError('Can outer radius not > sample outer radius')
             else:
-                logger.information('Can : inner radius = %f ; outer radius = %f' % (
-                                   self._radii[1], self._radii[2]))
+                logger.information('Can : inner radius = %f ; outer radius = %f' % (self._radii[1], self._radii[2]))
 
         beam_width = self.getProperty('BeamWidth').value
         beam_height = self.getProperty('BeamHeight').value
@@ -316,8 +314,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             detector = mtd[self._sample_ws_name].getDetector(index)
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi
             self._angles.append(two_theta)
-        logger.information('Detector angles : %i from %f to %f ' % (
-                           len(self._angles), self._angles[0], self._angles[-1]))
+        logger.information('Detector angles : %i from %f to %f ' % (len(self._angles), self._angles[0], self._angles[-1]))
 
 #------------------------------------------------------------------------------
 
@@ -344,8 +341,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             self._elastic = math.sqrt(81.787/self._efixed) # elastic wavelength
 
         logger.information('Elastic lambda : %f' % (self._elastic))
-        logger.information('Lambda : %i values from %f to %f' % (
-                           len(self._waves), self._waves[0], self._waves[-1]))
+        logger.information('Lambda : %i values from %f to %f' % (len(self._waves), self._waves[0], self._waves[-1]))
 
 #------------------------------------------------------------------------------
 
@@ -436,9 +432,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 #  No. STEPS ARE CHOSEN SO THAT STEP WIDTH IS THE SAME FOR ALL ANNULI
 #
             AAAA, BBBA, Area_A = self._sum_rom(0, 0, A, self._radii[0], self._radii[1], self._ms,
-                                         theta, amu_scat, amu_tot_i, amu_tot_s)
+                                               theta, amu_scat, amu_tot_i, amu_tot_s)
             AAAB, BBBB, Area_B = self._sum_rom(0, 0, -A, self._radii[0], self._radii[1], self._ms,
-                                         theta, amu_scat, amu_tot_i, amu_tot_s)
+                                               theta, amu_scat, amu_tot_i, amu_tot_s)
             Area_s += Area_A + Area_B
             Ass += AAAA + AAAB
             Ass = Ass/Area_s

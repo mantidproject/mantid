@@ -20,7 +20,7 @@ class WishMasking(stresstesting.MantidStressTest):
             try:
                 index = int(line_contents[0].strip())
                 select = int(line_contents[3].strip())
-                group = int(line_contents[4].strip())
+                dummy_group = int(line_contents[4].strip())
                 if index == requested_index:
                     return select
             except ValueError:
@@ -30,22 +30,23 @@ class WishMasking(stresstesting.MantidStressTest):
 	#  1) Uses the masks to create a cal file
 	#  2) Read the cal file
 	#  3) Use the known masking boundaries to determine whether the cal file has been created propertly accoring to the function inputs.
+	#pylint: disable=too-many-arguments
     def do_test_cal_file(self, masked_workspace, should_invert, expected_masking_identifier, expected_not_masking_identifier, masking_edge):
 
         cal_filename = 'wish_masking_system_test_temp.cal'
         cal_file_full_path = os.path.join(config['defaultsave.directory'],cal_filename)
         MaskWorkspaceToCalFile(InputWorkspace=masked_workspace, OutputFile=cal_file_full_path, Invert=should_invert)
-        file = open(cal_file_full_path, 'r')
+        cfile = open(cal_file_full_path, 'r')
         try:
-            mask_boundary_inside = self.get_masking_for_index(file, masking_edge)
-            mask_boundary_outside = self.get_masking_for_index(file, masking_edge+1)
+            mask_boundary_inside = self.get_masking_for_index(cfile, masking_edge)
+            mask_boundary_outside = self.get_masking_for_index(cfile, masking_edge+1)
             self.assertTrue(mask_boundary_inside == expected_masking_identifier)
             self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
         except LookupError:
             print "Could not find the requested index"
             self.assertTrue(False)
         finally:
-            file.close()
+            cfile.close()
             os.remove(cal_file_full_path)
 
     def requiredMemoryMB(self):
@@ -124,7 +125,7 @@ class WishMasking(stresstesting.MantidStressTest):
             MaskWorkspaceToCalFile(InputWorkspace=ws, OutputFile=update_cal_file_name, Invert=True)
 
             MergeCalFiles(UpdateFile=update_cal_file_path, MasterFile=master_cal_file_path,
-                                      OutputFile=merged_cal_file_name, MergeSelections=True)
+                          OutputFile=merged_cal_file_name, MergeSelections=True)
 
             update_cal_file = open(update_cal_file_path, 'r')
             merged_cal_file = open(merged_cal_file_path, 'r')

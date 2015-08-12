@@ -21,22 +21,21 @@ class MuonLoadTest(stresstesting.MantidStressTest):
         mtd.addOrReplace("MuonLoad_DeadTimes", deadTimes)
 
         MuonLoad(Filename = "MUSR00015192",
-               DetectorGroupingTable = "MuonLoad_Grouping",
-               ApplyDeadTimeCorrection = True,
-               CustomDeadTimeTable = "MuonLoad_DeadTimes",
-               FirstPeriod = 1,
-               SecondPeriod = 0,
-               PeriodOperation = "-",
-               TimeZero = 0.6,
-               Xmin = 0.11,
-               Xmax = 10.0,
-               RebinParams = "0.032",
-               OutputType = "PairAsymmetry",
-               PairFirstIndex = 0,
-               PairSecondIndex = 1,
-               Alpha = 0.8,
-               OutputWorkspace = "MuonLoad_MUSR00015192"
-              )
+                 DetectorGroupingTable = "MuonLoad_Grouping",
+                 ApplyDeadTimeCorrection = True,
+                 CustomDeadTimeTable = "MuonLoad_DeadTimes",
+                 FirstPeriod = 1,
+                 SecondPeriod = 0,
+                 PeriodOperation = "-",
+                 TimeZero = 0.6,
+                 Xmin = 0.11,
+                 Xmax = 10.0,
+                 RebinParams = "0.032",
+                 OutputType = "PairAsymmetry",
+                 PairFirstIndex = 0,
+                 PairSecondIndex = 1,
+                 Alpha = 0.8,
+                 OutputWorkspace = "MuonLoad_MUSR00015192")
 
     def validate(self):
         return "MuonLoad_MUSR00015192", "MuonLoad_MUSR00015192.nxs"
