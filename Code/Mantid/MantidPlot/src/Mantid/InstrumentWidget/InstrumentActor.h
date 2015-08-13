@@ -8,6 +8,7 @@
 #include "SampleActor.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IObjComponent.h"
 
 #include <boost/weak_ptr.hpp>
