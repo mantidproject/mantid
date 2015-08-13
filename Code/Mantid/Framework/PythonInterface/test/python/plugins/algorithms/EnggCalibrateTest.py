@@ -117,13 +117,15 @@ class EnggCalibrateTest(unittest.TestCase):
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < difc_err_epsilon,
                         "Difc (%f) is too far from its expected value (%f)" %(difc, expected_difc))
 
-        expected_zero = -724.337353801
+        expected_zero = 416.082164
         # especially this zero parameter is extremely platform dependent/sensitive
-        # ubuntu: -724.337354; osx: -396.628396; win7: -995.879786
+        # Examples:
+        # ubuntu: -724.337354; win7: -995.879786, osx: -396.628396
+        # ubuntu: 416.082164, win7: 351.580794, osx: (didn't even try as difc was already nearly 10% different)
 
-        # this is obviously a ridiculous threshold to do just a very rough test that results/funcionality
+        # this is obviously a ridiculous threshold to do just a very rough test that results/functionality
         # do not change too much
-        zero_err_epsilon = 0.5
+        zero_err_epsilon = 0.2
 
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < zero_err_epsilon,
                         "Zero (%f) is too far from its expected value (%f)" %(zero, expected_zero))
