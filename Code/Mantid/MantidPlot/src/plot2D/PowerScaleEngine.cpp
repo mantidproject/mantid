@@ -28,7 +28,6 @@
  ***************************************************************************/
 
 #include "PowerScaleEngine.h"
-#include "ScaleEngine.h"
 
 /*!
   Return a dummy transformation
@@ -37,6 +36,8 @@ QwtScaleTransformation *PowerScaleEngine::transformation() const
 {
     return new QwtScaleTransformation(QwtScaleTransformation::Other);
 }
+
+PowerScaleEngine::~PowerScaleEngine() {}
 
 /*!
     Align and divide an interval
@@ -244,6 +245,8 @@ QwtScaleTransformation *PowerScaleTransformation::copy() const
 {
 	return new PowerScaleTransformation(d_engine);
 }
+
+PowerScaleTransformation::~PowerScaleTransformation() {}
 
 /*
  * Transform a value between 2 linear intervals
