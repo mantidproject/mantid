@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/ProcessIndirectFitParameters.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
@@ -109,6 +110,7 @@ void ProcessIndirectFitParameters::exec() {
     // this handles the case where a parameter occurs only once in the whole
     // workspace
 
+
     // Join all the parameters for each peak into a single workspace per peak
     auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
     auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
@@ -120,8 +122,8 @@ void ProcessIndirectFitParameters::exec() {
       const size_t paramMax = workspaceNames.at(j).size();
       for (size_t k = 1; k < paramMax; k++) {
         auto paramWs = workspaceNames.at(j).at(k);
-        conjoin->setProperty("", tempPeakWs);
-        conjoin->setProperty("", paramWs);
+        conjoin->setProperty("InputWorkspace1", tempPeakWs);
+        conjoin->setProperty("InputWorkspace2", paramWs);
         conjoin->executeAsChildAlg();
         tempPeakWs = conjoin->getProperty("InputWorkspace1");
       }
@@ -144,6 +146,14 @@ void ProcessIndirectFitParameters::exec() {
     auto groupWorkspace = renamer->getProperty("OutputWorkspace");
 
     // Replace axis on workspaces with text axis
+    auto axis = TextAxis(outputWs->getNumberHistograms());
+    for (size_t j = 0; j < workspaceNames.size(); j++) {
+      auto peakWs = workspaceNames.at(j);
+      for (size_t k = 0; k < peakWs.size(); k++) {
+        // axis.setLabel(i, name)
+      }
+    }
+    outputWs->replaceAxis(1, axis);
   }
 }
 
