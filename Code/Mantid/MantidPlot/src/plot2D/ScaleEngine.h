@@ -44,6 +44,7 @@ public:
 	virtual double xForm(double x, double, double, double p1, double p2) const;
 	virtual double invXForm(double x, double s1, double s2, double p1, double p2) const;
 	QwtScaleTransformation* copy() const;
+  virtual ~ScaleTransformation();
 
 protected:
 	QwtScaleTransformation* newScaleTransformation() const;
@@ -56,6 +57,9 @@ class ScaleEngine: public QwtScaleEngine
 public:
 	ScaleEngine(ScaleTransformation::Type type = ScaleTransformation::Linear,
 				double left_break = -DBL_MAX, double right_break = DBL_MAX);
+
+  virtual ~ScaleEngine();
+
 	QwtScaleTransformation* transformation() const;
 	virtual QwtScaleDiv divideScale(double x1, double x2, int maxMajSteps,
 		int maxMinSteps, double stepSize = 0.0) const;

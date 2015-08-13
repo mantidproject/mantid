@@ -35,6 +35,8 @@ QwtScaleTransformation* ScaleEngine::transformation() const
 	return new ScaleTransformation(this);
 }
 
+ScaleTransformation::~ScaleTransformation() {}
+
 double ScaleTransformation::invXForm(double p, double p1, double p2, double s1, double s2) const
 {
 	if (!d_engine->hasBreak()){
@@ -216,6 +218,8 @@ d_break_width(4),
 d_break_decoration(true),
 d_nth_power(2.0)
 {}
+
+ScaleEngine::~ScaleEngine() {}
 
 bool ScaleEngine::hasBreak() const
 {
