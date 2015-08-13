@@ -1108,15 +1108,14 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                                          coord2_step = COORD2STEP,
                                          tolerance = tolerance)
 
-    # Produce the initial position 
+    # Produce the initial position
     COORD1NEW, COORD2NEW = centre_positioner.produce_initial_position()
 
     centre = CentreFinder(original, find_direction)
     # Produce a logger for this the Beam Centre Finder
     beam_center_logger = BeamCenterLogger(centre_reduction,
                                           coord1_scale_factor,
-                                          coord2_scale_factor,
-                                          position_type = find_direction)
+                                          coord2_scale_factor)
 
     beam_center_logger.report_init(COORD1NEW, COORD2NEW)
 
@@ -1399,6 +1398,7 @@ def is_current_workspace_an_angle_workspace():
     @returns true if it is an angle workspace else false
     '''
     is_angle = False
+    # pylint: disable=bare-except
     try:
         is_angle = is_workspace_which_requires_angle(reducer = ReductionSingleton())
     except:

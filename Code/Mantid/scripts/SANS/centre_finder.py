@@ -1,5 +1,4 @@
 #pylint: disable=invalid-name
-import isis_reducer
 from isis_reduction_steps import StripEndNans
 from isis_instrument import LARMOR
 from mantid.simpleapi import *
@@ -41,6 +40,7 @@ def get_bench_rotation(reducer):
     @returns the bench rotation in degrees
     '''
     bench_rotation = 0.0
+    # pylint: disable=bare-except
     try:
         ws = mtd[str(reducer.get_sample().get_wksp_name())]
         bench_rotation = reducer.instrument.getDetValues(ws)[0]
@@ -730,9 +730,9 @@ class BeamCenterLogger(object):
     '''
     Logger during the beam centre operation. The logging will
     depend partially on the type of the first coordinate, ie [m, m] or [degree, m].
-    It will also perform a correction for a 
+    It will also perform a correction for potential offsets like bench rotations.
     '''
-    def __init__(self, reducer, coord1_scale_factor, coord2_scale_factor, position_type):
+    def __init__(self, reducer, coord1_scale_factor, coord2_scale_factor):
         super(BeamCenterLogger, self).__init__()
         self.logger = Logger("CentreFinder")
         self.using_angle = False
@@ -791,7 +791,7 @@ class BeamCenterLogger(object):
         '''
         # We need to substract the offset from the coordinate, since we do not want to display the offset
         # which is on the data
-        val1 = (coord1 - self.offset_coord1)* self.coord1_scale_factor 
+        val1 = (coord1 - self.offset_coord1)* self.coord1_scale_factor
         val2 = (coord2 - self.offset_coord2)* self.coord2_scale_factor
         coord1str = str(val1).ljust(10)[0:9]
         coord2str = str(val2).ljust(10)[0:9]
@@ -814,8 +814,8 @@ class BeamCenterLogger(object):
         @param coord2: the second coordinate
         '''
         # We shouldn't need an offset correction at this point as a possible.
-        # Also we need to multiply both entries with the same (1000) scaling, 
-        # Because the first coordinate should have been corrected before 
+        # Also we need to multiply both entries with the same (1000) scaling,
+        # Because the first coordinate should have been corrected before
         # being passed into this method. For reporting purposes we revert this
         # correction. Also we don't need to remove the offset, since it the input
         # already has it removed.

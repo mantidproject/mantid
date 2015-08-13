@@ -19,15 +19,12 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
 
         # Act
         x_new, y_new = position_updater.increment_position(x, y, x_step, y_step)
-        x_out, y_out = position_updater.produce_final_position(x_new, x, y_new, y)
 
         # Assert
         x_expected = 1.1
         y_expected = 2.2
         self.assertEqual(x_expected, x_new, "The x value should have been incremented.")
         self.assertEqual(y_expected, y_new, "The y value should have been incremented.")
-        self.assertEqual(x_expected, x_out, "The x output should not be the initial value.")
-        self.assertEqual(y_expected, y_out, "The y output should not be the initial value.")
 
     def test_that_find_LEFTRIGHT_produces_correct_increment(self):
         # Arrange
@@ -40,15 +37,12 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
 
         # Act
         x_new, y_new = position_updater.increment_position(x, y, x_step, y_step)
-        x_out, y_out = position_updater.produce_final_position(x_new, x, y_new, y)
 
         # Assert
         x_expected = 1.1
         y_expected = 2.0
         self.assertEqual(x_expected, x_new, "The x value should have been incremented.")
         self.assertEqual(y_expected, y_new, "The y value should have been incremented.")
-        self.assertEqual(x_expected, x_out, "The x output should not be the initial value.")
-        self.assertEqual(y_expected, y_out, "The y output should not be the initial value.")
 
     def test_that_find_UPPDOWN_produces_correct_increment(self):
         # Arrange
@@ -61,15 +55,12 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
 
         # Act
         x_new, y_new = position_updater.increment_position(x, y, x_step, y_step)
-        x_out, y_out = position_updater.produce_final_position(x_new, x, y_new, y)
 
         # Assert
         x_expected = 1.0
         y_expected = 2.2
         self.assertEqual(x_expected, x_new, "The x value should have been incremented.")
         self.assertEqual(y_expected, y_new, "The y value should have been incremented.")
-        self.assertEqual(x_expected, x_out, "The x output should not be the initial value.")
-        self.assertEqual(y_expected, y_out, "The y output should not be the initial value.")
 
 class TestPositionProvider(unittest.TestCase):
     workspace_name = 'dummy_ws'
@@ -122,8 +113,9 @@ class TestPositionProvider(unittest.TestCase):
         reducer = self._provide_reducer(is_larmor)
         # Act
         factory = cf.PositionProviderFactory(increment_coord1 = increment_coord1,
-                                              increment_coord2 = increment_coord2,
-                                              tolerance = tolerance)
+                                             increment_coord2 = increment_coord2,
+                                             tolerance = tolerance,
+                                             position_type = cf.FindDirectionEnum.ALL)
         provider = factory.create_position_provider(reducer = reducer)
         # Asssert
         self.assertTrue(isinstance(provider, cf.PositionProviderXY), "Should create a XY increment provider")
@@ -141,7 +133,8 @@ class TestPositionProvider(unittest.TestCase):
         # Act
         factory = cf.PositionProviderFactory(increment_coord1 = increment_coord1,
                                               increment_coord2 = increment_coord2,
-                                              tolerance = tolerance)
+                                              tolerance = tolerance,
+                                              position_type = cf.FindDirectionEnum.ALL)
         provider = factory.create_position_provider(reducer = reducer)
 
         # Asssert
@@ -160,7 +153,8 @@ class TestPositionProvider(unittest.TestCase):
         # Act
         factory = cf.PositionProviderFactory(increment_coord1 = increment_coord1,
                                               increment_coord2 = increment_coord2,
-                                              tolerance = tolerance)
+                                              tolerance = tolerance,
+                                              position_type = cf.FindDirectionEnum.ALL)
         provider = factory.create_position_provider(reducer = reducer)
 
         # Asssert
