@@ -14,8 +14,6 @@
 #   define loMargin() lowerMargin()
 #   define hiMargin() upperMargin()
 #else
-#   define lowerBound()   lBound()
-#   define upperBound()   hBound()
 #   define lowerMargin()  loMargin()
 #   define upperMargin()  hiMargin()
 #endif /* QWT_VERSION >= 0x050200 */
