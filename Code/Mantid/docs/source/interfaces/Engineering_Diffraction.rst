@@ -43,12 +43,13 @@ Parameters
 
 These parameters are required to generate new calibrations:
 
-Vanadium#
+Vanadium #
   Number of the vanadium run used to correct calibration and experiment
   runs.
 
-CeO2#
-  Number of the Ceria (short) run used to calibrate experiment runs.
+Calibration sample #
+  Number of the calibration sample run (for example Ceria run) used to
+  calibrate experiment runs.
 
 Settings
 --------

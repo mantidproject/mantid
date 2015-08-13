@@ -84,7 +84,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_ceria_num">
         <property name="text">
-         <string>CeO2 #:</string>
+         <string>Calibration sample #:</string>
         </property>
        </widget>
       </item>
@@ -185,7 +185,7 @@
         <item row="1" column="0">
          <widget class="QLabel" name="label_new_ceria_num">
           <property name="text">
-           <string>CeO2 #:</string>
+           <string>Calibration sample #:</string>
           </property>
          </widget>
         </item>
