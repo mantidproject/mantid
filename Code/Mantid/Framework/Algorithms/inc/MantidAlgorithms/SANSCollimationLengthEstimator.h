@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_SANSCOLLISIONLENGTHESTIMATOR_H
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Property.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
   /**Helper class which provides the Collimation Length for SANS instruments
 

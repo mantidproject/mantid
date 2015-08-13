@@ -163,9 +163,6 @@ class Reducer(object):
         f.close()
         return self.log_text
 
-
-
-
 class ReductionSingleton(object):
     """ Singleton reduction class """
 

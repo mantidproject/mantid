@@ -1374,6 +1374,8 @@ def get_q_resolution_moderator():
     @returns the moderator file path or nothing
     '''
     val = ReductionSingleton().to_Q.get_q_resolution_moderator()
+    if val == None:
+        val = ''
     print str(val)
     return val
 
@@ -1382,7 +1384,11 @@ def set_q_resolution_moderator(file_name):
     Sets the moderator file path
     @param file_name: the full file path
     '''
-    ReductionSingleton().to_Q.set_q_resolution_moderator(file_name)
+    try:
+        ReductionSingleton().to_Q.set_q_resolution_moderator(file_name)
+    except RuntimeError, details:
+        sanslog.error("The specified moderator file could not be found. Please specify a file"
+                      "which exists in the search directories. See details: %s" %str(details))
 
 #-- Use q resoltion
 def get_q_resultution_use():
@@ -1596,6 +1602,17 @@ def get_q_resolution_float(func, msg):
     else:
         sanslog.warning('Warning: Could not convert %s to float.' % msg)
     return element
+
+def are_settings_consistent():
+    '''
+    Runs the consistency check over all reductionssteps and reports cosistency
+    issues to the user. The user needs to sort out these issues.
+    '''
+    try:
+        ReductionSingleton().perform_consistency_check()
+    except RuntimeError, details:
+        sanslog.error("There was an inconsistency issue with your settings. See details: %s", str(details))
+        raise RuntimeError("Please fix the following inconsistencies: %s" % str(details))
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

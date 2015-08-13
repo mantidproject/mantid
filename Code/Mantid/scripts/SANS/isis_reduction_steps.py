@@ -29,6 +29,8 @@ import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
 
+DEBUG = True
+
 # A global name for the Q Resolution workspace which lives longer than a reducer core
 QRESOLUTION_WORKSPACE_NAME = "Q_Resolution_ISIS_SANS"
 QRESOLUTION_MODERATOR_WORKSPACE_NAME = "Q_Resolution_MODERATOR_ISIS_SANS"
@@ -1935,6 +1937,20 @@ class ConvertToQISIS(ReductionStep):
         #                                                     but should be addressed in an optimization step
         qResolution = self._get_q_resolution_workspace(det_bank_workspace = workspace)
 
+        # Debug output
+        if DEBUG:
+            sanslog.warning("###############################################")
+            sanslog.warning("File : %s" % str(self._q_resolution_moderator_file_name))
+            sanslog.warning("A1 : %s" % str(self._q_resolution_a1))
+            sanslog.warning("A2 : %s" % str(self._q_resolution_a2))
+            sanslog.warning("H1 : %s" % str(self._q_resolution_h1))
+            sanslog.warning("H2 : %s" % str(self._q_resolution_h1))
+            sanslog.warning("W1 : %s" % str(self._q_resolution_w1))
+            sanslog.warning("W2 : %s" % str(self._q_resolution_w2))
+            sanslog.warning("LCol: %s" % str(self._q_resolution_collimation_length))
+            sanslog.warning("DR : %s" % str(self._q_resolution_delta_r))
+            sanslog.warning("Exists: %s" % str(qResolution != None))
+
         try:
             if self._Q_alg == 'Q1D':
                 Q1D(DetBankWorkspace=workspace,
@@ -1986,6 +2002,15 @@ class ConvertToQISIS(ReductionStep):
         # Make sure that all parameters that are needed are available
         self._set_up_q_resolution_parameters()
 
+        # Run a consistency check
+        try:
+            self.run_consistency_check()
+        except RuntimeError, details:
+            sanslog.warning("ConverToQISIS: There was something wrong with the Q Resolution"
+                            " settings. Running the reduction without the Q Resolution"
+                            " Setting. See details %s" % str(details))
+            return None
+
         # Check if Q Resolution exists in mtd
         exists = mtd.doesExist(QRESOLUTION_WORKSPACE_NAME)
 
@@ -2004,11 +2029,15 @@ class ConvertToQISIS(ReductionStep):
         '''
         sigma_moderator = self._get_sigma_moderator_workspace()
 
+        # We need the radius, not the diameter in the TOFSANSResolutionByPixel algorithm
+        sample_radius = 0.5*self.get_q_resolution_a2()
+        source_radius = 0.5*self.get_q_resolution_a1()
+
         TOFSANSResolutionByPixel(InputWorkspace = det_bank_workspace,
                                  OutputWorkspace = QRESOLUTION_WORKSPACE_NAME,
                                  DeltaR = self.get_q_resolution_delta_r(),
-                                 SampleApertureRadius = self.get_q_resolution_a2(),
-                                 SourceApertureRadius = self.get_q_resolution_a1(),
+                                 SampleApertureRadius = sample_radius,
+                                 SourceApertureRadius = source_radius,
                                  SigmaModerator = sigma_moderator,
                                  AccountForGravity=self._use_gravity,
                                  ExtraLength=self._grav_extra_length)
@@ -2056,7 +2085,7 @@ class ConvertToQISIS(ReductionStep):
         try:
             q_res_file_path, dummy_suggested_name = getFileAndName(file_name)
         except:
-            raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
+            raise RuntimeError("Invalid input for mask file. (%s)" % str(file_name))
         q_res_file_path = q_res_file_path.replace("\\", "/")
         self._q_resolution_moderator_file_name = q_res_file_path
 
@@ -2128,22 +2157,23 @@ class ConvertToQISIS(ReductionStep):
     def _check_q_settings_complete(self):
         '''
         Check that the q resolution settings are complete.
-        We need a moderator file path. The other settings have default values
-        implemented
+        We need a moderator file path.
         '''
         try:
             dummy_file_path, dummy_suggested_name = getFileAndName(self._q_resolution_moderator_file_name)
         except:
-            raise RuntimeError("Invalid input for mask file. (%s)" % mask_file)
+            raise RuntimeError("The specified moderator file is not valid. Please make sure that that it exists in your search directory.")
 
     def _set_up_q_resolution_parameters(self):
         '''
         Prepare the parameters which need preparing
         '''
+        successFlag = True
         # If we have values for H1 and W1 then set A1 to the correct value
         if self._q_resolution_h1 and self._q_resolution_w1 and self._q_resolution_h2 and self._q_resolution_w2:
             self._q_resolution_a1 = self._set_up_diameter(self._q_resolution_h1, self._q_resolution_w1)
             self._q_resolution_a2 = self._set_up_diameter(self._q_resolution_h2, self._q_resolution_w2)
+
 
     def _set_up_diameter(self, h, w):
          '''
@@ -2393,7 +2423,7 @@ class UserFile(ReductionStep):
         reducer.instrument.copy_correction_files()
 
         # Run a consistency check
-        self._consistency_check(reducer)
+        reducer.perform_consistency_check()
 
         self.executed = True
         return self.executed
@@ -3012,7 +3042,10 @@ class UserFile(ReductionStep):
 
         # Check if it is the moderator file name, if so add it and return
         if arguments[0].startswith('MODERATOR'):
-            reducer.to_Q.set_q_resolution_moderator(file_name = arguments[1])
+            try:
+                reducer.to_Q.set_q_resolution_moderator(file_name = arguments[1])
+            except:
+                sanslog.error("The specified moderator file could not be found. Please specify a file which exists in the search directories.")
             return
 
         # All arguments need to be convertible to a float
@@ -3108,15 +3141,6 @@ class UserFile(ReductionStep):
 
         reducer.settings["MaskFiles"] = value
 
-    def _consistency_check(self, reducer):
-        '''
-        Runs a consistency check over all specified reducer modules, provided they have a
-        check implemented
-        @param reducer: a reducer object
-        '''
-        to_check =  reducer.get_reduction_steps()
-        for element in to_check:
-            element.run_consistency_check()
 
 class GetOutputName(ReductionStep):
     def __init__(self):

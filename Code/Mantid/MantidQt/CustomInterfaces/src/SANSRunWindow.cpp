@@ -2422,6 +2422,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   if ( runMode == SingleMode )
   {
     py_code += readSampleObjectGUIChanges();
+
+    // Provide a final check here to ensure that the settings are consistent. If they are not consistent, the function
+    // throws and the user has to fix these inconsistencies
+    py_code += "\ni.are_settings_consistent()";
+
     py_code += reduceSingleRun();
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
     py_code += "\nprint '"+PYTHON_SEP+"'+reduced+'"+PYTHON_SEP+"'";
@@ -2458,6 +2463,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     }
     py_code.prepend("import SANSBatchMode as batch\n");
     const int fileFormat = m_uiForm.file_opt->currentIndex();
+
     // create a instance of fit_settings, so it will not complain if the reduction fails
     // when restoring the scale and fit.
     QString fit = QString("\nfit_settings={'scale':%1,'shift':%2}").arg(m_uiForm.frontDetRescale->text()).arg(m_uiForm.frontDetShift->text());
@@ -4409,43 +4415,74 @@ void SANSRunWindow::setQResolutionApertureType(QResoluationAperture apertureType
 void SANSRunWindow::writeQResolutionSettingsToPythonScript(QString& pythonCode) {
   // Clear the current settings
   pythonCode += "i.reset_q_resolution_settings()\n";
-
+  const QString lineEnding1 = ")\n";
+  const QString lineEnding2 = "')\n";
   // Set usage of QResolution
   auto usageGUI = m_uiForm.q_resolution_group_box->isChecked();
   QString useage = usageGUI ? m_constants.getPythonTrueKeyword() : m_constants.getPythonFalseKeyword();
   pythonCode += "i.set_q_resolution_use(use=" + useage+ ")\n";
 
   // Set collimation length
+  
   auto collimationLength = m_uiForm.q_resolution_collimation_length_input->text().simplified();
-  pythonCode += "i.set_q_resolution_collimation_length(collimation_length="+ collimationLength +")\n";
-
+  writeQResolutionSettingsToPythonScriptSingleEntry(collimationLength,
+                                                    "i.set_q_resolution_collimation_length(collimation_length=",
+                                                    lineEnding1, pythonCode);
   // Set the moderator file
   auto moderatorFile = m_uiForm.q_resolution_moderator_input->text().simplified();
-  pythonCode += "i.set_q_resolution_moderator(file_name='"+ moderatorFile +"')\n";
-  
+  writeQResolutionSettingsToPythonScriptSingleEntry(moderatorFile,
+                                                    "i.set_q_resolution_moderator(file_name='",
+                                                    lineEnding2, pythonCode);
   // Set the delta r value
   auto deltaR = m_uiForm.q_resolution_delta_r_input->text().simplified();
-  pythonCode += "i.set_q_resolution_delta_r(delta_r="+ deltaR +")\n";
-
+  writeQResolutionSettingsToPythonScriptSingleEntry(deltaR,
+                                                    "i.set_q_resolution_delta_r(delta_r=",
+                                                    lineEnding1, pythonCode);
   // Set the aperture properties depending on the aperture type
   auto a1H1 = m_uiForm.q_resolution_a1_h1_input->text().simplified();
   auto a2H2 = m_uiForm.q_resolution_a2_h2_input->text().simplified();
   if (m_uiForm.q_resolution_combo_box->currentIndex() == QResoluationAperture::CIRCULAR) {
-    pythonCode += "i.set_q_resolution_a1(a1="+ a1H1 +")\n";
-    pythonCode += "i.set_q_resolution_a2(a2="+ a2H2 +")\n";
+      writeQResolutionSettingsToPythonScriptSingleEntry(a1H1,
+                                                       "i.set_q_resolution_a1(a1=",
+                                                       lineEnding1, pythonCode);
+      writeQResolutionSettingsToPythonScriptSingleEntry(a2H2,
+                                                       "i.set_q_resolution_a2(a2=",
+                                                        lineEnding1, pythonCode);
   } else if (m_uiForm.q_resolution_combo_box->currentIndex() == QResoluationAperture::RECTANGULAR){
-    pythonCode += "i.set_q_resolution_h1(h1="+ a1H1 +")\n";
-    pythonCode += "i.set_q_resolution_h2(h2="+ a2H2 +")\n";
+      writeQResolutionSettingsToPythonScriptSingleEntry(a1H1,
+                                                       "i.set_q_resolution_h1(h1=",
+                                                       lineEnding1, pythonCode);
+      writeQResolutionSettingsToPythonScriptSingleEntry(a2H2,
+                                                       "i.set_q_resolution_h2(h2=",
+                                                       lineEnding1, pythonCode);
     // Set the W1 and W2 parameters
     auto w1 = m_uiForm.q_resolution_w1_input->text().simplified();
-    pythonCode += "i.set_q_resolution_w1(w1="+ w1 +")\n";
+    writeQResolutionSettingsToPythonScriptSingleEntry(w1,
+                                                      "i.set_q_resolution_w1(w1=",
+                                                      lineEnding1, pythonCode);
     auto w2 = m_uiForm.q_resolution_w2_input->text().simplified();
-    pythonCode += "i.set_q_resolution_w2(w2="+ w2 +")\n";
+    writeQResolutionSettingsToPythonScriptSingleEntry(w2,
+                                                      "i.set_q_resolution_w2(w2=",
+                                                      lineEnding1, pythonCode);
   } else {
     g_log.error("SANSRunWindow: Tried to select a QResolution aperture which does not seem to exist");
   }
 }
 
+
+
+/**
+ * Write a single line of python code for Q Resolution
+ * @param value: The value to set
+ * @param code_entry: tye python method to run
+ * @param lineEnding: the line ending
+ * @param py_code: the code segment to which we want to append
+ */
+void SANSRunWindow::writeQResolutionSettingsToPythonScriptSingleEntry(QString value, QString code_entry, const QString lineEnding, QString& py_code) const {
+  if (!value.isEmpty()) {
+    py_code += code_entry + value + lineEnding;
+  }
+}
 
 /**
  * Handle a chagne of the QResolution aperture selection

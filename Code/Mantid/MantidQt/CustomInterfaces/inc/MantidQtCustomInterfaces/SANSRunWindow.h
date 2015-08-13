@@ -421,6 +421,8 @@ private:
   QString retrieveQResolutionGeometry(QString command);
   /// Write the QResolution GUI changes to a python script
   void writeQResolutionSettingsToPythonScript(QString& pythonCode);
+  /// Write single line for Q Resolution
+  void writeQResolutionSettingsToPythonScriptSingleEntry(QString value, QString code_entry, const QString lineEnding, QString& py_code) const;
   /// Sets the cirucular aperture, ie labels and populates the values with what is available from the user file
   void setupQResolutionCircularAperture();
   /// Sets the rectuanular aperture
