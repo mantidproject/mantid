@@ -18,8 +18,8 @@ class EQSANSProcessedEff(stresstesting.MantidStressTest):
         """
             System test for sensitivity correction
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()

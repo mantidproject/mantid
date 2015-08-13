@@ -12,7 +12,7 @@ Description
 This algorithm sums, bin-by-bin, multiple spectra into a single spectra.
 The errors are summed in quadrature and the algorithm checks that the
 bin boundaries in X are the same. The new summed spectra are created at
-the start of the output workspace and have spectra index numbers that
+the start of the output workspace and have spectra numbers that
 start at zero and increase in the order the groups are specified. All
 detectors from the grouped spectra will be moved to belong to the new
 spectrum.

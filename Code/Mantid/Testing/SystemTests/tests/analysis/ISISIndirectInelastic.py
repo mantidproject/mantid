@@ -1,4 +1,5 @@
-#pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines,too-many-instance-attributes,non-parent-init-called,abstract-method
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-lines
+#pylint: disable=too-many-instance-attributes,non-parent-init-called,abstract-method,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
 # abstract-mehod checking seems to ignore the fact some classes are declared abstract using abc
 
@@ -106,8 +107,7 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
             raise RuntimeError("The result workspace(s) should be in a list")
         if num_ref_files != num_results:
             raise RuntimeError("The number of result workspaces (%d) does not match"
-                               " the number of reference files (%d)." % (
-                               num_ref_files, num_results))
+                               " the number of reference files (%d)." % (num_ref_files, num_results))
         if num_ref_files < 1 or num_results < 1:
             raise RuntimeError("There needs to be a least one result and "
                                "reference.")
@@ -579,7 +579,7 @@ class IRISResolution(ISISIndirectInelasticResolution):
         self.analyser = 'graphite'
         self.reflection = '002'
         self.detector_range = [3, 53]
-        self.background = [-0.54, 0.65]
+        self.background = [-0.54, 0.54]
         self.rebin_params = '-0.2,0.002,0.2'
         self.files = ['IRS53664.raw']
 
@@ -1143,8 +1143,8 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)' % (
-                    self.resolution)
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)'\
+                    % (self.resolution)
         self.ftype = '1L'
         self.startx = -0.2
         self.endx = 0.2

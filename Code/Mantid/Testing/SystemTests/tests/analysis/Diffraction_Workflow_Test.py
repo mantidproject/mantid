@@ -14,9 +14,9 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
     def cleanup(self):
         Files = ["TOPAZ_3132.hkl",
-        "TOPAZ_3132FFT.hkl"]
-        for file in Files:
-            absfile = FileFinder.getFullPath(file)
+                 "TOPAZ_3132FFT.hkl"]
+        for filename in Files:
+            absfile = FileFinder.getFullPath(filename)
             if os.path.exists(absfile):
                 os.remove(absfile)
         return True
@@ -33,7 +33,6 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
             resource.setrlimit(resource.RLIMIT_CORE, (-1, -1))
 
         # determine where to save
-        import os
         savedir = os.path.abspath(os.path.curdir)
 
 
@@ -48,21 +47,21 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
         # Convert to Q space
         ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_MD2',LorentzCorrection='0',
-               OutputDimensions='Q (lab frame)', SplitInto='2',SplitThreshold='150') #,Version=1
+                                        OutputDimensions='Q (lab frame)', SplitInto='2',SplitThreshold='150') #,Version=1
         # Find peaks (Reduced number of peaks so file comparison with reference does not fail with small differences)
         FindPeaksMD(InputWorkspace=ws+'_MD2',MaxPeaks='20',OutputWorkspace=ws+'_peaksLattice')
         # 3d integration to centroid peaks
         CentroidPeaksMD(InputWorkspace=ws+'_MD2',CoordinatesToUse='Q (lab frame)',
-                PeakRadius='0.12',PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
+                        PeakRadius='0.12',PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
         # Find the UB matrix using the peaks and known lattice parameters
         FindUBUsingLatticeParameters(PeaksWorkspace=ws+'_peaksLattice',a='10.3522',b='6.0768',c='4.7276',
-                       alpha='90',beta='90',gamma='90', NumInitial='20', Tolerance='0.12')
+                                     alpha='90',beta='90',gamma='90', NumInitial='20', Tolerance='0.12')
         # And index to HKL
         IndexPeaks(PeaksWorkspace=ws+'_peaksLattice', Tolerance='0.12')
         # Integrate peaks in Q space using spheres
         IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
-                BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
-                PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
+                         BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
+                         PeaksWorkspace=ws+'_peaksLattice',OutputWorkspace=ws+'_peaksLattice')
         # Save for SHELX
         SaveHKL(InputWorkspace=ws+'_peaksLattice', Filename=savedir+'/'+ws+'.hkl')
 
@@ -70,30 +69,30 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         FindPeaksMD(InputWorkspace=ws+'_MD2',MaxPeaks='100',OutputWorkspace=ws+'_peaksFFT')
         # 3d integration to centroid peaks
         CentroidPeaksMD(InputWorkspace=ws+'_MD2',       CoordinatesToUse='Q (lab frame)',
-                PeakRadius='0.12',PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
+                        PeakRadius='0.12',PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
         # Find the UB matrix using FFT
         FindUBUsingFFT(PeaksWorkspace=ws+'_peaksFFT',MinD=3.,MaxD=14.)
 
         ## TODO conventional cell
 
         # And index to HKL
-        alg = IndexPeaks(PeaksWorkspace=ws+'_peaksFFT', Tolerance='0.12')
+        dummy_alg = IndexPeaks(PeaksWorkspace=ws+'_peaksFFT', Tolerance='0.12')
 
         # Integrate peaks in Q space using spheres
         IntegratePeaksMD(InputWorkspace=ws+'_MD2',PeakRadius='0.12',
-                BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
-                PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
+                         BackgroundOuterRadius='0.18',BackgroundInnerRadius='0.15',
+                         PeaksWorkspace=ws+'_peaksFFT',OutputWorkspace=ws+'_peaksFFT')
         # Save for SHELX
         SaveHKL(InputWorkspace=ws+'_peaksFFT', Filename=savedir+'/'+ws+'FFT.hkl')
 
 
         # Copy the UB matrix back to the original workspace
         CopySample(InputWorkspace=ws+'_peaksFFT',OutputWorkspace=ws,
-                       CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
+                   CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0',  CopyLattice=1)
         # Convert to reciprocal space, in the sample frame
 
         ConvertToDiffractionMDWorkspace(InputWorkspace=ws,OutputWorkspace=ws+'_HKL',
-                       OutputDimensions='HKL',LorentzCorrection='0', SplitInto='2',SplitThreshold='150')
+                                        OutputDimensions='HKL',LorentzCorrection='0', SplitInto='2',SplitThreshold='150')
         # Bin to a regular grid
         BinMD(InputWorkspace=ws+'_HKL',AlignedDim0="[H,0,0], -20, 20, 800",AlignedDim1="[0,K,0], -5, 5, 50",
               AlignedDim2="[0,0,L], -10, 10,  800",OutputWorkspace=ws+'_binned')
@@ -117,9 +116,9 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
 
         # Bin to a line (H=0 to 6, L=3, K=3)
         BinMD(InputWorkspace='TOPAZ_3132_HKL',AxisAligned='0',
-            BasisVector0='X,units,1,0,0',BasisVector1='Y,units,6.12323e-17,1,0',BasisVector2='2,units,-0,0,1',
-            Translation='-0,3,6',OutputExtents='0,6, -0.1,0.1, -0.1,0.1',OutputBins='60,1,1',
-            OutputWorkspace='TOPAZ_3132_HKL_line')
+              BasisVector0='X,units,1,0,0',BasisVector1='Y,units,6.12323e-17,1,0',BasisVector2='2,units,-0,0,1',
+              Translation='-0,3,6',OutputExtents='0,6, -0.1,0.1, -0.1,0.1',OutputBins='60,1,1',
+              OutputWorkspace='TOPAZ_3132_HKL_line')
 
         # Now check the integrated bin and the peaks
         w = mtd["TOPAZ_3132_HKL_line"]
@@ -162,8 +161,8 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         for c in xrange(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
-                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (
-                                originalUB, newUB) )
+                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s"\
+                                % (originalUB, newUB) )
 
         # load output hkl file and the golden one
         LoadHKL(Filename="TOPAZ_3132.hkl", OutputWorkspace="TOPAZ_3132")

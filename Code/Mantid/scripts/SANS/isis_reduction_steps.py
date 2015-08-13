@@ -1131,7 +1131,7 @@ class LoadSample(LoadRun):
 
     def execute(self, reducer, isSample):
         self._assignHelper(reducer)
-        
+
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
@@ -1251,7 +1251,7 @@ class TransmissionCalc(ReductionStep):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        
+
         # CalculateTransmission can be given either a monitor detetor ID or a set of detector
         # ID's corresponding to a ROI (region of interest).  The monitor or ROI will specify
         # the *transmission* (not the incident beam).  A monitor is the standard functionality,
@@ -1376,7 +1376,7 @@ class TransmissionCalc(ReductionStep):
         # We perform a FlatBackground correction. We do this in two parts.
         # First we find the workspace indices which correspond to monitors
         # and perform the correction on these indicies.
-        # Second we perform the correction on all indices which are not 
+        # Second we perform the correction on all indices which are not
         # monitors
         for ws_index in range(tmp.getNumberHistograms()):
             if tmp.getDetector(ws_index).isMonitor():
