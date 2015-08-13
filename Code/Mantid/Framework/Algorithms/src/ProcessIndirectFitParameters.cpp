@@ -80,7 +80,7 @@ void ProcessIndirectFitParameters::exec() {
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
-  auto workspaceNames = std::vector<std::vector<MatrixWorkspace_sptr>>();
+  auto workspaceNames = std::vector<std::vector<std::string>>();
   const size_t totalNames = parameterNames.size();
   for (size_t i = 0; i < totalNames; i++) {
     auto const allColumnNames = inputWs->getColumnNames();
@@ -88,7 +88,7 @@ void ProcessIndirectFitParameters::exec() {
     auto errColumns =
         searchForFitParams((parameterNames.at(i) + "_Err"), allColumnNames);
 
-    auto paramWorkspaces = std::vector<MatrixWorkspace_sptr>();
+    auto paramWorkspaces = std::vector<std::string>();
     size_t min = columns.size();
     if (errColumns.size() < min) {
       min = errColumns.size();
@@ -102,8 +102,7 @@ void ProcessIndirectFitParameters::exec() {
       convertToMatrix->setProperty("ColumnE", errColumns.at(j));
       convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
       convertToMatrix->executeAsChildAlg();
-      paramWorkspaces.push_back(
-          convertToMatrix->getProperty("OutputWorkspace"));
+      paramWorkspaces.push_back(columns.at(j));
     }
     workspaceNames.push_back(paramWorkspaces);
   }
@@ -113,7 +112,7 @@ void ProcessIndirectFitParameters::exec() {
   // workspace
 
   // Join all the parameters for each peak into a single workspace per peak
-  auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
+  auto tempWorkspaces = std::vector<std::string>();
   auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
   conjoin->setProperty("CheckOverlapping", false);
 
@@ -152,7 +151,7 @@ void ProcessIndirectFitParameters::exec() {
   for (size_t j = 0; j < workspaceNames.size(); j++) {
     auto peakWs = workspaceNames.at(j);
     for (size_t k = 0; k < peakWs.size(); k++) {
-      axisPtr->setLabel(k, peakWs.at(k)->getName());
+      axisPtr->setLabel(k, peakWs.at(k));
     }
   }
   outputWs->replaceAxis(1, axisPtr);
