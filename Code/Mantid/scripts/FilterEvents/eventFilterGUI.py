@@ -925,8 +925,9 @@ class MainWindow(QtGui.QMainWindow):
         # Load
         try:
             ws = api.Load(Filename=filename, OutputWorkspace=wsname)
-        except:
+        except RuntimeError as e:
             ws = None
+            return str(e)
 
         return ws
 
@@ -966,7 +967,7 @@ class MainWindow(QtGui.QMainWindow):
                 sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=sumwsname)
             else:
                 sumws = AnalysisDataService.retrieve(sumwsname)
-        except Exception as e:
+        except RuntimeError as e:
             return str(e)
 
         vecx = sumws.readX(0)
@@ -1085,8 +1086,8 @@ class MainWindow(QtGui.QMainWindow):
 
         try:
             self.splitWksp(splitws, infows)
-        except Exception as mtderror:
-            self._setErrorMsg("Splitting Failed!\n %s" % (str(mtderror)))
+        except RuntimeError as e:
+            self._setErrorMsg("Splitting Failed!\n %s" % (str(e)))
 
         return
 
@@ -1202,9 +1203,8 @@ class MainWindow(QtGui.QMainWindow):
     def helpClicked(self):
         from pymantidplot.proxies import showCustomInterfaceHelp
         showCustomInterfaceHelp("FilterEventUI")
-    
 
-    def _resetGUI(self, resetfilerun=False, resetwslist=False):
+    def _resetGUI(self, resetfilerun=False):
         """ Reset GUI including all text edits and etc.
         """
         if resetfilerun is True:
