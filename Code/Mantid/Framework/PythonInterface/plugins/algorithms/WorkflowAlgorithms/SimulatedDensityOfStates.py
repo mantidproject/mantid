@@ -294,32 +294,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # We want to perform bond analysis
         elif self._spec_type == 'BondAnalysis':
+            logger.notice('Performing bond analysis')
+            prog_reporter.report('Performing bond analysis')
+
             bonds = self._read_data_from_file(castep_filename).get('bonds', None)
             if bonds is None or len(bonds) == 0:
                 raise RuntimeError('No bonds found in CASTEP file')
 
-            unit_cell = file_data.get('unit_cell')
-            self._convert_to_cartesian_coordinates(unit_cell, ions)
-
-            #TODO
-            output_ws = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
-
-            print "UNIT CELL"
-            print unit_cell
-
-            print "IONS"
-            for i in ions:
-                print i
-
-            # print "BONDS"
-            # for b in bonds:
-            #     print b
-
-            # print "VECTORS"
-            # print eigenvectors
-            # print eigenvectors.shape
-            # for v in eigenvectors:
-            #     print v
+            self._bond_analysis(unit_cell, ions, bonds, eigenvectors)
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
@@ -432,6 +414,112 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             atom_a = self._find_ion(ions, *bond['atom_a'])
             atom_b = self._find_ion(ions, *bond['atom_b'])
             bond['vector'] = atom_a['cartesian_coord'] - atom_b['cartesian_coord']
+
+#----------------------------------------------------------------------------------------
+
+    def _bond_analysis(self, unit_cell, ions, bonds, eigenvectors):
+        """
+        Perform bond analysis to determine the mode of each bond with
+        significant relative motions between the bonded atoms.
+
+        @param unit_cell Unit cell vectors
+        @param ions List of all ions
+        @param bonds List of all bonds
+        @param eigenvectors List of all eigenvectors
+        """
+        prog_reporter = Progress(self, 0.0, 1.0, len(eigenvectors) * self._num_branches * self._num_ions)
+
+        self._convert_to_cartesian_coordinates(unit_cell, ions)
+        self._calculate_bond_vectors(bonds, ions)
+
+        output_workspaces = []
+        for i, wavevectors in enumerate(eigenvectors):
+            ws_name = '{0}_{1}'.format(self._out_ws_name, i)
+            output_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws_name)
+            output_ws.addColumn('int', 'Mode')
+            output_ws.addColumn('str', 'SpeciesA')
+            output_ws.addColumn('int', 'BondNumberA')
+            output_ws.addColumn('str', 'SpeciesB')
+            output_ws.addColumn('int', 'BondNumberB')
+            output_ws.addColumn('str', 'SpeciesC')
+            output_ws.addColumn('int', 'BondNumberC')
+            output_ws.addColumn('str', 'BondMode')
+            output_workspaces.append(output_ws)
+
+            for mode in range(self._num_branches):
+                for ion_b in ions:
+                    prog_reporter.report('Bond analysis (ion {0}, mode {1})'.format(ion_b['index'], mode))
+
+                    ion_wavevector = lambda ion: wavevectors[mode * self._num_ions + ion['index']]
+
+                    # Get ions A and B and wavevectors for all ions
+                    ab_bond = self._choose_close_bonded_atom(ion_b, bonds)
+                    ion_a = self._find_ion(ions, *ab_bond[0][ab_bond[1]])
+                    ion_a_vector = ion_wavevector(ion_a)
+
+                    ion_b_vector = ion_wavevector(ion_b)
+
+                    bc_bond = self._choose_close_bonded_atom(ion_b, bonds, is_not=[ion_a])
+                    ion_c = self._find_ion(ions, *bc_bond[0][bc_bond[1]])
+                    ion_c_vector = ion_wavevector(ion_c)
+
+                    ab_bond_q = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_b['cartesian_coord']))
+                    bc_bond_q = Quat(V3D(*ion_b['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
+                    ac_vect = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
+
+                    ab_motion_ion_a = V3D(*ion_a_vector)
+                    ab_motion_ion_b = V3D(*ion_b_vector)
+                    ab_bond_q.rotate(ab_motion_ion_a)
+                    ab_bond_q.rotate(ab_motion_ion_b)
+
+                    def sig_diff(a1, a2, b1, b2):
+                        res_a, res_b = [False, False, False], [False, False, False]
+                        std_dev_a = np.std(a1) * 2
+                        std_dev_b = np.std(b1) * 2
+
+                        res_a[0] = abs(a2.X() - a1[0]) > std_dev_a
+                        res_b[0] = abs(b2.X() - b1[0]) > std_dev_b
+                        res_a[1] = abs(a2.Y() - a1[1]) > std_dev_a
+                        res_b[1] = abs(b2.Y() - b1[1]) > std_dev_b
+                        res_a[2] = abs(a2.Z() - a1[2]) > std_dev_a
+                        res_b[2] = abs(b2.Z() - b1[2]) > std_dev_b
+
+                        return res_a == res_b and True in res_a
+
+                    bc_motion_ion_b = V3D(*ion_b_vector)
+                    bc_motion_ion_c = V3D(*ion_c_vector)
+                    bc_bond_q.rotate(bc_motion_ion_b)
+                    bc_bond_q.rotate(bc_motion_ion_c)
+
+                    ac_motion_ion_a = V3D(*ion_a_vector)
+                    ac_motion_ion_c = V3D(*ion_c_vector)
+                    ac_vect.rotate(ac_motion_ion_a)
+                    ac_vect.rotate(ac_motion_ion_c)
+
+                    row_details = {
+                            'Mode': mode,
+                            'SpeciesA': ion_a['species'],
+                            'SpeciesB': ion_b['species'],
+                            'SpeciesC': ion_c['species'],
+                            'BondNumberA': ion_a['bond_number'],
+                            'BondNumberB': ion_b['bond_number'],
+                            'BondNumberC': ion_c['bond_number']
+                        }
+
+                    if sig_diff(ion_a_vector, ab_motion_ion_a, ion_b_vector, ab_motion_ion_b):
+                        row_details['BondMode'] = 'AB Stretch'
+                        output_ws.addRow(row_details)
+
+                    elif sig_diff(ion_b_vector, bc_motion_ion_b, ion_c_vector, bc_motion_ion_c):
+                        row_details['BondMode'] = 'BC Stretch'
+                        output_ws.addRow(row_details)
+
+                    elif sig_diff(ion_a_vector, ac_motion_ion_a, ion_c_vector, ac_motion_ion_c):
+                        row_details['BondMode'] = 'Bending'
+                        output_ws.addRow(row_details)
+
+        GroupWorkspaces(InputWorkspaces=output_workspaces,
+                        OutputWorkspace=self._out_ws_name)
 
 #----------------------------------------------------------------------------------------
 
