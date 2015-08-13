@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="ENGIN-X" valid-from   ="1900-01-31 23:59:59"
                            valid-to     ="2100-01-31 23:59:59"
-		           last-modified="2010-10-18 17:49:49">
+		           last-modified="2015-08-13 15:00:00">
 <!-- Instrument description for ENGIN-X, Joe Kelleher 2010 -->
 <defaults>
   <length unit="meter" />
