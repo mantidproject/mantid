@@ -104,9 +104,8 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
     def _same_polarisation(self):
         """
-        Checks whether all workspaces have the same wavelength.
-        Raises error if not,
-        sets self.wavelength otherwise
+        Checks whether all workspaces have the same polarisation.
+        Raises error if not.
         """
         pols = []
         for wsname in self.input_workspaces.values():
