@@ -32,6 +32,10 @@ workspaces. If Random is selected the results will differ between runs
 of the algorithm and will not be comparable. If comparing the output is
 important set Random to false or uncheck the box.
 
+.. note::
+  For the Quasielastic and Quasielastic Tunnelling presets the XMin and XMax
+  values should be set to a range symmetrical around x=0.
+
 Instrument
 ~~~~~~~~~~
 
@@ -124,7 +128,6 @@ Output:
    Multiple Peaks has a level backgound of 0.3 counts and two gaussian peaks, the largest of which is 8.3 counts.
    Exp Decay starts high and drops rapidly to 0.03 counts at 8,000 us (with the default binning).
 
-
 **Example - Using the your own function:**
 
 .. testcode:: ExHistUserFunc
@@ -138,7 +141,6 @@ Output:
    print "With a peak reaching "+ str(ws.readY(0)[5]) + " counts at 1,000 us,"
    print "and another reaching "+ str(ws.readY(0)[50]) + " counts at 10,000 us."
 
-
 Output:
 
 .. testoutput:: ExHistUserFunc
@@ -146,6 +148,26 @@ Output:
    My function defined a background of 0.5 counts.
    With a peak reaching 80.5 counts at 1,000 us,
    and another reaching 50.5 counts at 10,000 us.
+
+**Example - Quasielastic:**
+
+.. testcode:: ExQuasielastic
+
+   ws=CreateSampleWorkspace(Function="Quasielastic",
+                            XUnit="DeltaE",
+                            XMin=-0.5,
+                            XMax=0.5,
+                            BinWidth=0.01)
+
+   print "Number of spectra: " +  str(ws.getNumberHistograms())
+   print "Number of bins: " +  str(ws.blocksize())
+
+Output:
+
+.. testoutput:: ExQuasielastic
+
+   Number of spectra: 200
+   Number of bins: 100
 
 **Example - Setting every Option:**
 
@@ -167,6 +189,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-
