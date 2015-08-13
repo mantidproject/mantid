@@ -48,9 +48,10 @@ const std::string ProcessIndirectFitParameters::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ProcessIndirectFitParameters::init() {
-  declareProperty(
-      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-      "The table workspace to convert to a MatrixWorkspace.");
+
+  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+                      "InputWorkspace", "", Direction::Input),
+                  "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
       "X Column", "", boost::make_shared<MandatoryValidator<std::string>>(),

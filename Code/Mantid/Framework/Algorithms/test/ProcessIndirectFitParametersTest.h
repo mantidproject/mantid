@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/ProcessIndirectFitParameters.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using Mantid::Algorithms::ProcessIndirectFitParameters;
 using namespace Mantid::API;
@@ -51,33 +52,40 @@ public:
                      std::invalid_argument);
   }
 
-  void test_property_input() {
-    auto tableWs = WorkspaceFactory::Instance().createTable();
+ void test_property_input() {
+	auto tableWs = WorkspaceFactory::Instance().createTable();
+	tableWs->addColumn("double", "Amplitude");
+	tableWs->addColumn("double", "Amplitude_Err");
+	tableWs->addColumn("double", "testColumn");
     std::string xColumn = "axis-1";
     std::string parameterValues = "Amplitude";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
+	TS_ASSERT_THROWS_NOTHING(alg.initialize());
+	TS_ASSERT( alg.isInitialized() );
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
     alg.setProperty("OutputWorkspace", outputName);
 
-    TS_ASSERT_EQUALS(alg.getProperty("InputWorkspace", tableWs);
-	TS_ASSERT_EQUALS(alg.getProperty("X Column", xColumn);
-	TS_ASSERT_EQUALS(alg.getProperty("Parameter Names",parameterValues);
-	TS_ASSERT_EQUALS(alg.getProperty("OutputWorkspace", outputName);
+	ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
+
+    TS_ASSERT_EQUALS(tableProp, tableWs);
+	TS_ASSERT_EQUALS(std::string(alg.getProperty("X Column")), xColumn);
+	TS_ASSERT_EQUALS(std::string(alg.getProperty("Parameter Names")),parameterValues);
+	TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")), outputName);
 
   }
 
   void test_output(){
     auto tableWs = WorkspaceFactory::Instance().createTable();
-	tableWs
     std::string xColumn = "axis-1";
     std::string parameterValues = "Amplitude";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
+	TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
@@ -85,13 +93,12 @@ public:
 
 	alg.execute();
 
-	auto outMatrixWs = alg.getProperty("InputWorkspace");
-	/*Check output*/
-	TSM_ASSERT_EQUALS(outMatrixWs.getName(), outputName);
+	MatrixWorkspace_sptr outMatrixWs = alg.getProperty("InputWorkspace");
+
+	TS_ASSERT_EQUALS(outMatrixWs->getName(), outputName);
 
 
   }
-
 
 };
 
