@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ProcessIndirectFitParameters.h"
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid {
@@ -77,19 +78,43 @@ void ProcessIndirectFitParameters::exec() {
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
+  auto workspaceNames = std::vector<std::string>();
+  const size_t totalNames = parameterNames.size();
+  for (size_t i = 0; i < totalNames; i++) {
+    auto const allColumnNames = inputWs->getColumnNames();
+    auto columns = searchForFitParams(parameterNames.at(i), allColumnNames);
+    auto errColumns =
+        searchForFitParams((parameterNames.at(i) + "_Err"), allColumnNames);
 
+    auto paramWorkspaces = std::vector<MatrixWorkspace_sptr>();
+    size_t min = columns.size();
+    if (errColumns.size() < min) {
+      min = errColumns.size();
+    }
+    auto convertToMatrix =
+        createChildAlgorithm("ConvertTableToMatrixWorkspace", -1, -1, true);
+    convertToMatrix->setProperty("InputWorkspace", inputWs);
+    convertToMatrix->setProperty("ColumnX", xColumn);
+    for (size_t j = 0; j < min; j++) {
+      convertToMatrix->setProperty("ColumnY", columns.at(j));
+      convertToMatrix->setProperty("ColumnE", errColumns.at(j));
+      convertToMatrix->setProperty("OutputWorkspace", outputWs->getName());
+      convertToMatrix->executeAsChildAlg();
+      paramWorkspaces.push_back(
+          convertToMatrix->getProperty("OutputWorkspace"));
+      workspaceNames.push_back(paramWorkspaces.at(j)->getName());
+    }
 
-  // Transpose list of workspaces, ignoring unequal length of lists
-  // this handles the case where a parameter occurs only once in the whole
-  // workspace
+    // Transpose list of workspaces, ignoring unequal length of lists
+    // this handles the case where a parameter occurs only once in the whole
+    // workspace
 
+    // Join all the parameters for each peak into a single workspace per peak
 
-  // Join all the parameters for each peak into a single workspace per peak
-
-
-  // Join all peaks into a single workspace
-
-
+    // Join all peaks into a single workspace
+	
+	// Replace axis on workspaces with text axis
+  }
 }
 
 std::vector<std::string>
@@ -103,6 +128,17 @@ ProcessIndirectFitParameters::listToVector(std::string &commaList) {
     pos = commaList.find(",");
   }
   return listVector;
+}
+
+std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
+    const std::string &suffix, const std::vector<std::string> &columns) {
+  auto fitParams = std::vector<std::string>();
+  const size_t totalColumns = columns.size();
+  for (size_t i = 0; i < totalColumns; i++) {
+    if (columns.at(i).rfind(suffix) != std::string::npos) {
+      fitParams.push_back(columns.at(i));
+    }
+  }
 }
 
 } // namespace Algorithms

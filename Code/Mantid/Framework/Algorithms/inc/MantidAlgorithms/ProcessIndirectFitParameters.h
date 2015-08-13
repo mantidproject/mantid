@@ -48,8 +48,9 @@ private:
   void init();
   void exec();
   std::vector<std::string> listToVector(std::string &);
+  std::vector<std::string> searchForFitParams(const std::string &,
+                                              const std::vector<std::string> &);
 };
-
 } // namespace Algorithms
 } // namespace Mantid
 
