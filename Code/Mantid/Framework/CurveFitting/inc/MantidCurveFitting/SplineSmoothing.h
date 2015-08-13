@@ -61,7 +61,7 @@ private:
   void exec();
 
   /// smooth a single spectrum of the workspace
-  void smoothSpectrum(int index);
+  void smoothSpectrum(int index, int maxBreaks);
 
   /// calculate derivatives for a single spectrum
   void calculateSpectrumDerivatives(int index, int order);
@@ -81,7 +81,7 @@ private:
 
   /// choose points to define a spline and smooth the data
   void selectSmoothingPoints(API::MatrixWorkspace_const_sptr inputWorkspace,
-                             size_t row);
+                             size_t row, int maxBreaks);
 
   /// calculate the spline based on the smoothing points chosen
   void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
