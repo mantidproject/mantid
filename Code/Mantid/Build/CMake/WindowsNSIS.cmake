@@ -124,10 +124,10 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/Installers/WinInstaller/qt.conf DEST
 # imageformats
 set ( QT_PLUGINS_IMAGEFORMAT qgif4.dll qico4.dll qjpeg4.dll qmng4.dll qsvg4.dll qtga4.dll qtiff4.dll )
 foreach( DLL ${QT_PLUGINS_IMAGEFORMAT} )
-  install ( FILES ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats/${DLL} DESTINATION plugins/qtplugins/imageformats/${DLL} )
+  install ( FILES ${CMAKE_LIBRARY_PATH}/qt_plugins/imageformats/${DLL} DESTINATION plugins/qt/imageformats )
 endforeach()
 # sqlite
-install ( FILES ${CMAKE_LIBRARY_PATH}/qt_plugins/sqldrivers/qsqlite4.dll DESTINATION plugins/qtplugins/sqldrivers/qsqlite4.dll )
+install ( FILES ${CMAKE_LIBRARY_PATH}/qt_plugins/sqldrivers/qsqlite4.dll DESTINATION plugins/qt/sqldrivers )
 
 ###########################################################################
 # Include files/libraries required for User compilation
