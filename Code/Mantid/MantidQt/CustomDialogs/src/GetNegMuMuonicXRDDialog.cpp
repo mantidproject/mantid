@@ -18,20 +18,20 @@ DECLARE_DIALOG(GetNegMuMuonicXRDDialog)
 GetNegMuMuonicXRDDialog::GetNegMuMuonicXRDDialog(QWidget *parent)
     : API::AlgorithmDialog(parent) {}
 
-///Initialise the layout
+/// Initialise the layout
 void GetNegMuMuonicXRDDialog::initLayout() {
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   this->setMaximumHeight(400);
   this->setMaximumWidth(675);
-  //assign periodicTable member to a new periodicTable
+  // assign periodicTable member to a new periodicTable
   periodicTable = new PeriodicTableWidget();
 
-  //assign yPosition member to a new QLineEdit
+  // assign yPosition member to a new QLineEdit
   yPosition = new QLineEdit();
 
-  //Disable all buttons on the periodicTable
-  //as we only have a select few that need to be
-  //enabled.
+  // Disable all buttons on the periodicTable
+  // as we only have a select few that need to be
+  // enabled.
   periodicTable->disableAllElementButtons();
 
   /*Elements Enabled Correspond to those for which we
@@ -40,13 +40,13 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   */
   enableElementsForGetNegMuMuonicXRD();
 
-  //main layout for the dialog (everything will be added to this)
+  // main layout for the dialog (everything will be added to this)
   auto *main_layout = new QVBoxLayout(this);
 
   // run button for executing the algorithm
   auto *runButton = new QPushButton("Run");
 
-  //label for the QLineEdit for yPosition property
+  // label for the QLineEdit for yPosition property
   auto *yPositionLabel = new QLabel("Y Position");
 
   /*validator allows only numeric input for yPosition
@@ -55,17 +55,17 @@ void GetNegMuMuonicXRDDialog::initLayout() {
    */
   auto yPositionNumericValidator = new QDoubleValidator();
 
-  //YPosition LineEdit Attributes
+  // YPosition LineEdit Attributes
   yPosition->setMaximumWidth(250);
   yPosition->setPlaceholderText("-0.01");
   yPosition->setValidator(yPositionNumericValidator);
 
-  //Run Button Attributes and signal/slot assignment
+  // Run Button Attributes and signal/slot assignment
   runButton->setMaximumWidth(100);
   connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(validInput()), this, SLOT(accept()));
 
-  //Adding Widgets to Layout
+  // Adding Widgets to Layout
   main_layout->addWidget(periodicTable);
   main_layout->addWidget(yPositionLabel);
   main_layout->addWidget(yPosition);
@@ -99,7 +99,7 @@ void GetNegMuMuonicXRDDialog::enableElementsForGetNegMuMuonicXRD() {
 */
 
 bool GetNegMuMuonicXRDDialog::validateDialogInput(QString input) {
-  //empty check on input
+  // empty check on input
   return (input != "");
 }
 
@@ -108,30 +108,29 @@ bool GetNegMuMuonicXRDDialog::validateDialogInput(QString input) {
  * and then emit the signal for valid input. Preparing for accept() to be run.
 */
 void GetNegMuMuonicXRDDialog::runClicked() {
-  //if y-position text is empty, a pop-up appears to the user.
-  if (!validateDialogInput(yPosition->text())) {
-    QMessageBox::information(this, "GetNegMuMuonicXRDDialog",
-                             "No Y Axis Position was specified, please enter a "
-                             "value or run with default value of -0.001");
-  }
-  //getting a list of strings of elements selected from periodicTableWidget
+  // getting a list of strings of elements selected from periodicTableWidget
   QString elementsSelectedStr = periodicTable->getAllCheckedElementsStr();
-  //if no elements are selected from the PeriodicTableWidget, a pop-up appears to the user.
+  // if no elements are selected from the PeriodicTableWidget, a pop-up appears
+  // to the user.
   if (!validateDialogInput(elementsSelectedStr)) {
     QMessageBox::information(
         this, "GetNegMuMuonicXRDDialog",
         "No elements were selected, Please select an element from the table");
   }
   // If elements have been selected and y-position text is non-empty then
-  // store the inputs as the corresponding propertyValues and emit validInput signal.
-  if (validateDialogInput(elementsSelectedStr) &&
-      validateDialogInput(yPosition->text())) {
+  // store the inputs as the corresponding propertyValues and emit validInput
+  // signal.
+  if (validateDialogInput(elementsSelectedStr)) {
     storePropertyValue("Elements", elementsSelectedStr);
-    storePropertyValue("YAxisPosition", yPosition->text());
+    if (validateDialogInput(yPosition->text())) {
+      storePropertyValue("YAxisPosition", yPosition->text());
+    } else {
+      // used as default value for yPosition property if the user does not input
+      // one.
+      storePropertyValue("YAxisPosition", yPosition->placeholderText());
+    }
     emit validInput();
   }
-  //used as default value for yPosition property if the user does not input one.
-  yPosition->setText("-0.001");
 }
 }
 }
