@@ -99,62 +99,62 @@ void ProcessIndirectFitParameters::exec() {
     for (size_t j = 0; j < min; j++) {
       convertToMatrix->setProperty("ColumnY", columns.at(j));
       convertToMatrix->setProperty("ColumnE", errColumns.at(j));
-      convertToMatrix->setProperty("OutputWorkspace", outputWs->getName());
+      convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
       convertToMatrix->executeAsChildAlg();
       paramWorkspaces.push_back(
           convertToMatrix->getProperty("OutputWorkspace"));
-      workspaceNames.push_back(paramWorkspaces);
     }
-
-    // Transpose list of workspaces, ignoring unequal length of lists
-    // this handles the case where a parameter occurs only once in the whole
-    // workspace
-
-
-    // Join all the parameters for each peak into a single workspace per peak
-    auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
-    auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
-    conjoin->setProperty("CheckOverlapping", false);
-
-    const size_t wsMax = workspaceNames.size();
-    for (size_t j = 0; j < wsMax; j++) {
-      auto tempPeakWs = workspaceNames.at(0);
-      const size_t paramMax = workspaceNames.at(j).size();
-      for (size_t k = 1; k < paramMax; k++) {
-        auto paramWs = workspaceNames.at(j).at(k);
-        conjoin->setProperty("InputWorkspace1", tempPeakWs);
-        conjoin->setProperty("InputWorkspace2", paramWs);
-        conjoin->executeAsChildAlg();
-        tempPeakWs = conjoin->getProperty("InputWorkspace1");
-      }
-      tempWorkspaces.push_back(tempPeakWs);
-    }
-
-    // Join all peaks into a single workspace
-    auto tempWorkspace = tempWorkspaces.at(0);
-    for (auto it = tempWorkspaces.begin(); it != tempWorkspaces.end(); ++it) {
-      conjoin->setProperty("InputWorkspace1", tempWorkspace);
-      conjoin->setProperty("InputWorkspace2", *it);
-      conjoin->executeAsChildAlg();
-      tempWorkspace = conjoin->getProperty("InputWorkspace1");
-    }
-
-    auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
-    renamer->setProperty("InputWorkspace", tempWorkspace);
-    renamer->setProperty("OutputWorkspace", outputWs);
-    renamer->executeAsChildAlg();
-    auto groupWorkspace = renamer->getProperty("OutputWorkspace");
-
-    // Replace axis on workspaces with text axis
-    auto axis = TextAxis(outputWs->getNumberHistograms());
-    for (size_t j = 0; j < workspaceNames.size(); j++) {
-      auto peakWs = workspaceNames.at(j);
-      for (size_t k = 0; k < peakWs.size(); k++) {
-        // axis.setLabel(i, name)
-      }
-    }
-    outputWs->replaceAxis(1, axis);
+    workspaceNames.push_back(paramWorkspaces);
   }
+
+  // Transpose list of workspaces, ignoring unequal length of lists
+  // this handles the case where a parameter occurs only once in the whole
+  // workspace
+
+  // Join all the parameters for each peak into a single workspace per peak
+  auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
+  auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
+  conjoin->setProperty("CheckOverlapping", false);
+
+  const size_t wsMax = workspaceNames.size();
+  for (size_t j = 0; j < wsMax; j++) {
+    auto tempPeakWs = workspaceNames.at(j).at(0);
+    const size_t paramMax = workspaceNames.at(j).size();
+    for (size_t k = 1; k < paramMax; k++) {
+      auto paramWs = workspaceNames.at(j).at(k);
+      conjoin->setProperty("InputWorkspace1", tempPeakWs);
+      conjoin->setProperty("InputWorkspace2", paramWs);
+      conjoin->executeAsChildAlg();
+      tempPeakWs = conjoin->getProperty("InputWorkspace1");
+    }
+    tempWorkspaces.push_back(tempPeakWs);
+  }
+
+  // Join all peaks into a single workspace
+  auto tempWorkspace = tempWorkspaces.at(0);
+  for (auto it = tempWorkspaces.begin(); it != tempWorkspaces.end(); ++it) {
+    conjoin->setProperty("InputWorkspace1", tempWorkspace);
+    conjoin->setProperty("InputWorkspace2", *it);
+    conjoin->executeAsChildAlg();
+    tempWorkspace = conjoin->getProperty("InputWorkspace1");
+  }
+
+  auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
+  renamer->setProperty("InputWorkspace", tempWorkspace);
+  renamer->setProperty("OutputWorkspace", outputWs);
+  renamer->executeAsChildAlg();
+  auto groupWorkspace = renamer->getProperty("OutputWorkspace");
+
+  // Replace axis on workspaces with text axis
+  auto axis = TextAxis(outputWs->getNumberHistograms());
+  TextAxis *axisPtr = &(axis);
+  for (size_t j = 0; j < workspaceNames.size(); j++) {
+    auto peakWs = workspaceNames.at(j);
+    for (size_t k = 0; k < peakWs.size(); k++) {
+      axisPtr->setLabel(k, peakWs.at(k)->getName());
+    }
+  }
+  outputWs->replaceAxis(1, axisPtr);
 }
 
 std::vector<std::string>
