@@ -28,6 +28,7 @@
  ***************************************************************************/
 #include "ScaleEngine.h"
 #include "PowerScaleEngine.h"
+#include "qwt_compat.h"
 #include <limits.h>
 
 QwtScaleTransformation* ScaleEngine::transformation() const
