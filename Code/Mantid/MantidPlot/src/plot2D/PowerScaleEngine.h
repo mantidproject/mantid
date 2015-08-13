@@ -4,7 +4,7 @@
     --------------------------------------------------------------------
     Copyright            : (C) 2009 by Ion Vasilief
     Email (use @ for *)  : ion_vasilief*yahoo.fr
-    Description          : Return a transformation for reciprocal (1/t) scales
+    Description          : Return a transformation for power (X^n) scales
 
  ***************************************************************************/
 
@@ -46,7 +46,7 @@ private:
 };
 
 /*!
-  \brief A scale engine for reciprocal (1/t) scales
+  \brief A scale engine for power (X^n) scales
 */
 
 class PowerScaleEngine: public QwtScaleEngine

@@ -28,6 +28,7 @@
  ***************************************************************************/
 
 #include "PowerScaleEngine.h"
+#include "ScaleEngine.h"
 
 /*!
   Return a dummy transformation
