@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
         )
     
     cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} )
-    target_link_libraries( MantidQtAPITest LINK_PRIVATE 
+    target_link_libraries( MantidQtAPITest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             API
             DataObjects

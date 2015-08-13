@@ -2,7 +2,7 @@
 import stresstesting
 
 from mantid.api import mtd, IMDEventWorkspace
-from mantid.simpleapi import LoadILLAscii
+import mantid.simpleapi
 
 import unittest
 
@@ -31,7 +31,7 @@ class ILLD2BLoadTest(unittest.TestCase):
         """
         ILL Loader
         """
-        LoadILLAscii(Filename=dataFile,OutputWorkspace=self.ws_name)
+        mantid.simpleapi.LoadILLAscii(Filename=dataFile,OutputWorkspace=self.ws_name)
         self._do_ads_check(self.ws_name)
 
     def _do_ads_check(self, name):
@@ -41,6 +41,8 @@ class ILLD2BLoadTest(unittest.TestCase):
 #====================================================================================
 
 class ILLD2BTest(stresstesting.MantidStressTest):
+
+    _success=False
 
     def requiredMemoryMB(self):
         """Set a limit of 2.5Gb to avoid 32-bit environment"""

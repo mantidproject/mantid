@@ -10,7 +10,7 @@ set_property( TARGET MantidParaViewSQWEventReaderSMPlugin PROPERTY FOLDER "Manti
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
-target_link_libraries( MantidParaViewSQWEventReaderSMPlugin LINK_PRIVATE 
+target_link_libraries( MantidParaViewSQWEventReaderSMPlugin LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 ${MANTID_SUBPROJECT_LIBS} 
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}

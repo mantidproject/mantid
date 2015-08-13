@@ -1,10 +1,11 @@
 #pylint: disable=no-init
 from LoadAndCheckBase import *
 
-'''
-Test File loading and basic data integrity checks of SURF data in Mantid.
-'''
 class SurfLoadingTest(LoadAndCheckBase):
+    '''
+    Test File loading and basic data integrity checks of SURF data in Mantid.
+    '''
+
     def get_raw_workspace_filename(self):
         return "SRF92132.raw"
 
