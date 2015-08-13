@@ -14,7 +14,7 @@ extracted from the ``.tar`` archive.
 
 Functions can be provided with ot without the comma between multiple dependant
 variables, for example a function names ``f(q,t_H)`` in nMOLDYN can be loaded
-using either ``f(q,t_H)`` or ``f(qt)_H`` as a function name in this algorithm.
+using either ``f(q,t)_H`` or ``f(qt)_H`` as a function name in this algorithm.
 
 Assumptions on data format
 --------------------------
