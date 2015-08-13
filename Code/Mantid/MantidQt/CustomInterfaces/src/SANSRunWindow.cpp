@@ -24,6 +24,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/Run.h"
 
+#include <QChar>
 #include <QLineEdit>
 #include <QHash>
 #include <QTextStream>
@@ -945,6 +946,8 @@ bool SANSRunWindow::loadUserFile()
 
   // Update the beam centre coordinates
   updateBeamCenterCoordinates();
+  // Set the beam finder specific settings
+  setBeamFinderDetails();
 
   //Gravity switch
   QString param = runReduceScriptFunction(
@@ -2120,6 +2123,8 @@ bool SANSRunWindow::handleLoadButtonClick()
 
   // Update the beam center position
   updateBeamCenterCoordinates();
+  // Set the beam finder specific settings
+  setBeamFinderDetails();
 
   return true;
 }
@@ -4286,12 +4291,16 @@ void SANSRunWindow::setBeamFinderDetails() {
   auto instrumentName = m_uiForm.inst_opt->currentText();
 
   // Set the labels according to the instrument
-
-
-
-  // Set the values according to the instrument
-
-  // Select the correct 
+  auto requiresAngle = runReduceScriptFunction("print i.is_current_workspace_an_angle_workspace()").simplified();
+  QString labelPosition;
+  if (requiresAngle == m_constants.getPythonTrueKeyword()) {
+    labelPosition = "Current ( "+QString(QChar(0x03B2)) + " , y ) [";
+    labelPosition.append(QChar(0xb0));
+    labelPosition += ",mm]";
+  } else {
+    labelPosition = "Current ( x , y ) [mm,mm]";
+  }
+  m_uiForm.beam_centre_finder_groupbox->setTitle(labelPosition);
 }
 
 } //namespace CustomInterfaces

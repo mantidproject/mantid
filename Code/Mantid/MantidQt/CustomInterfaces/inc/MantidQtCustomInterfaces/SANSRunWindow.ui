@@ -93,7 +93,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -3200,7 +3200,7 @@ p, li { white-space: pre-wrap; }
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_12" stretch="0,1,2">
            <item>
-            <widget class="QGroupBox" name="groupBox_12">
+            <widget class="QGroupBox" name="beam_centre_finder_groupbox">
              <property name="title">
               <string>Current ( x , y ) [mm]</string>
              </property>
@@ -3306,7 +3306,6 @@ p, li { white-space: pre-wrap; }
              <zorder>front_beam_x</zorder>
              <zorder>front_radio</zorder>
              <zorder>rear_beam_x</zorder>
-             <zorder>horizontalLayoutWidget</zorder>
              <zorder>label_16</zorder>
             </widget>
            </item>

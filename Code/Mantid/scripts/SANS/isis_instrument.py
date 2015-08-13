@@ -1547,6 +1547,9 @@ class LARMOR(ISISInstrument):
             MoveInstrumentComponent(workspace, ComponentName=component_name, X=xshift, Y=0.0, Z=0.0)
         else:
             # The x shift is in degree
+            # IMPORTANT NOTE: It seems that the definition of positive and negative angles is different
+            # between Mantid and the beam scientists. This explains the different signs for x_beam and
+            # bench_rotation.
             xshift = bench_rotation -x_beam*x_scale_factor
             sanslog.notice("Setup rotate " + str(xshift*x_scale_factor) + " " + str(0.0) + " " + str(0.0))
             RotateInstrumentComponent(workspace, ComponentName=component_name, X=0, Y=1, Z=0, Angle=xshift)

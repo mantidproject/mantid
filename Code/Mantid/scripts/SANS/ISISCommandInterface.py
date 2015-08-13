@@ -1112,11 +1112,12 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     COORD1NEW, COORD2NEW = centre_positioner.produce_initial_position()
 
     centre = CentreFinder(original, find_direction)
-
     # Produce a logger for this the Beam Centre Finder
     beam_center_logger = BeamCenterLogger(centre_reduction,
                                           coord1_scale_factor,
-                                          coord2_scale_factor)
+                                          coord2_scale_factor,
+                                          position_type = find_direction)
+
     beam_center_logger.report_init(COORD1NEW, COORD2NEW)
 
     # this function moves the detector to the beam center positions defined above and
@@ -1124,7 +1125,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     resCoord1_old, resCoord2_old = centre.SeekCentre(centre_reduction, [COORD1NEW, COORD2NEW])
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
-
     beam_center_logger.report_status(0, original[0], original[1], resCoord1_old, resCoord2_old)
 
     # take first trial step
@@ -1391,6 +1391,20 @@ def SetTransmissionMask(trans_mask_files):
         ReductionSingleton().transmission_calculator.mask_files = trans_mask_files
     else:
         sanslog.warning('Warning: The mask file list does not seem to be valid.')
+
+def is_current_workspace_an_angle_workspace():
+    '''
+    Queries if the current workspace, stored in the reducer is a workspace
+    which uses [angle, pos] to denote its location
+    @returns true if it is an angle workspace else false
+    '''
+    is_angle = False
+    try:
+        is_angle = is_workspace_which_requires_angle(reducer = ReductionSingleton())
+    except:
+        is_angle = False
+    return is_angle
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

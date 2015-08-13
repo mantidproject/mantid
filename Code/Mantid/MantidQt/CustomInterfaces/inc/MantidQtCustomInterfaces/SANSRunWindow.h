@@ -288,7 +288,6 @@ private slots:
   void onLeftRightCheckboxChanged();
   /// React to change in Up/Down checkbox
   void onUpDownCheckboxChanged();
-  
 
 private:
   /// used to specify the range of validation to do
