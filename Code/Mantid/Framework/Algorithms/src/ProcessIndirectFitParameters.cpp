@@ -139,6 +139,7 @@ std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
       fitParams.push_back(columns.at(i));
     }
   }
+  return fitParams;
 }
 
 } // namespace Algorithms
