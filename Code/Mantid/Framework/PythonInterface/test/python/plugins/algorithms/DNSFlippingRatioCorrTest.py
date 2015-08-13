@@ -43,25 +43,21 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         return outws
 
     def setUp(self):
-        dataY = np.array([3054., 5774., 4350., 2782., 1861., 1727., 1501., 1292., 1440., 1481.,
-                          1476., 1538., 1579., 1705., 1609., 1759., 1872., 1733., 2369., 2512.,
-                          4000., 2767., 3223., 3645.])
-        self.__sf_bkgrws = self._create_fake_workspace('__sf_bkgrws', dataY/1500.0, flipper='ON')
+        dataY = np.array([2997., 2470., 2110., 1818., 840., 1095., 944., 720., 698., 699., 745., 690.,
+                          977., 913., 906., 1007., 1067., 1119., 1467., 1542., 2316., 1536., 1593., 1646.])
+        self.__sf_bkgrws = self._create_fake_workspace('__sf_bkgrws', dataY/620.0, flipper='ON')
         self.workspaces.append('__sf_bkgrws')
-        dataY = np.array([8206., 10521., 6835., 5555., 4203., 4547., 4049., 3348., 3407., 3565.,
-                          3001., 2903., 2711., 2891., 2346., 2727., 2736., 2593., 3374., 4128.,
-                          4900., 3218., 3901., 7121.])
-        self.__nsf_bkgrws = self._create_fake_workspace('__nsf_bkgrws', dataY/1500.0, flipper='OFF')
+        dataY = np.array([14198., 7839., 4386., 3290., 1334., 1708., 1354., 1026., 958., 953., 888., 847.,
+                          1042., 1049., 1012., 1116., 1294., 1290., 1834., 1841., 2740., 1750., 1965., 1860.])
+        self.__nsf_bkgrws = self._create_fake_workspace('__nsf_bkgrws', dataY/619.0, flipper='OFF')
         self.workspaces.append('__nsf_bkgrws')
-        dataY = np.array([16741., 159041., 165912., 167196., 157053., 160667., 158403., 163190.,
-                          169999., 187151., 171538., 172532., 146847., 178688., 124909., 161835.,
-                          158691., 148143., 159613., 174784., 167548., 147775., 172739., 119592.])
-        self.__nsf_nicrws = self._create_fake_workspace('__nsf_nicrws', dataY/600.0, flipper='OFF')
+        dataY = np.array([5737., 5761., 5857., 5571., 4722., 5102., 4841., 4768., 5309., 5883., 5181., 4455.,
+                          4341., 4984., 3365., 4885., 4439., 4103., 4794., 14760., 10516., 4445., 5460., 3942.])
+        self.__nsf_nicrws = self._create_fake_workspace('__nsf_nicrws', dataY/58.0, flipper='OFF')
         self.workspaces.append('__nsf_nicrws')
-        dataY = np.array([11069., 47736., 42658., 42974., 33120., 35430., 33967., 34085., 36585.,
-                         41440., 41903., 38295., 27700., 38924., 24908., 31017., 32980., 29603.,
-                         32653., 35552., 34977., 44234., 39729., 45156.])
-        self.__sf_nicrws = self._create_fake_workspace('__sf_nicrws', dataY/3000.0, flipper='ON')
+        dataY = np.array([2343., 2270., 2125., 2254., 1534., 1863., 1844., 1759., 1836., 2030., 1848., 1650.,
+                          1555., 1677., 1302., 1750., 1822., 1663., 2005., 4025., 3187., 1935., 2331., 2125.])
+        self.__sf_nicrws = self._create_fake_workspace('__sf_nicrws', dataY/295.0, flipper='ON')
         self.workspaces.append('__sf_nicrws')
 
     def tearDown(self):
@@ -110,7 +106,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
                                  NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
                                  NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
                                  NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
-                                 NSFOutputWorkspace=outputWorkspaceName+'NSF')
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
 
         self.assertTrue(alg_test.isExecuted())
         # check whether the data are correct
@@ -121,15 +117,15 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         self.assertEqual(24, ws_nsf.getNumberHistograms())
         self.assertEqual(2,  ws_sf.getNumDims())
         self.assertEqual(2,  ws_nsf.getNumDims())
-        # data array spin flip must be zero
+        # data array: spin-flip must be zero
         for i in range(24):
             self.assertAlmostEqual(0.0, ws_sf.readY(i))
-        # data array non spin-flip must be nsf - sf^2/nsf
-        nsf = np.array(dataws_nsf.extractY()[0])
-        sf = np.array(dataws_sf.extractY()[0])
+        # data array: non spin-flip must be nsf - sf^2/nsf
+        nsf = np.array(dataws_nsf.extractY())
+        sf = np.array(dataws_sf.extractY())
         refdata = nsf - sf*sf/nsf
         for i in range(24):
-            self.assertAlmostEqual(refdata, ws_nsf.readY(i))
+            self.assertAlmostEqual(refdata[i], ws_nsf.readY(i))
 
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF')
         run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF')
@@ -137,6 +133,149 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         run_algorithm("DeleteWorkspace", Workspace=dataws_nsf)
         return
 
+    def test_DNSTwoTheta(self):
+        outputWorkspaceName = "DNSFlippingRatioCorrTest_Test5"
+        # rotate detector bank to different angles
+        dataws_sf = self.__sf_nicrws - self.__sf_bkgrws
+        dataws_nsf = self.__nsf_nicrws - self.__nsf_bkgrws
+        api.RotateInstrumentComponent(dataws_sf, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
+        api.RotateInstrumentComponent(dataws_nsf, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
+        api.RotateInstrumentComponent(self.__sf_nicrws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)
+        api.RotateInstrumentComponent(self.__nsf_nicrws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)
+        api.RotateInstrumentComponent(self.__sf_bkgrws, "bank0", X=0, Y=1, Z=0, Angle=-8.54)
+        api.RotateInstrumentComponent(self.__nsf_bkgrws, "bank0", X=0, Y=1, Z=0, Angle=-8.54)
+        # apply correction
+        alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
+
+        self.assertTrue(alg_test.isExecuted())
+        ws_sf = AnalysisDataService.retrieve(outputWorkspaceName + 'SF')
+        ws_nsf = AnalysisDataService.retrieve(outputWorkspaceName + 'NSF')
+        # dimensions
+        self.assertEqual(24, ws_sf.getNumberHistograms())
+        self.assertEqual(24, ws_nsf.getNumberHistograms())
+        self.assertEqual(2,  ws_sf.getNumDims())
+        self.assertEqual(2,  ws_nsf.getNumDims())
+        # 2theta angles must not change after correction has been applied
+        tthetas = np.array([7.53 + i*5 for i in range(24)])
+        for i in range(24):
+            det = ws_sf.getDetector(i)
+            self.assertAlmostEqual(tthetas[i], np.degrees(ws_sf.detectorSignedTwoTheta(det)))
+            det = ws_nsf.getDetector(i)
+            self.assertAlmostEqual(tthetas[i], np.degrees(ws_nsf.detectorSignedTwoTheta(det)))
+
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF')
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF')
+        run_algorithm("DeleteWorkspace", Workspace=dataws_sf)
+        run_algorithm("DeleteWorkspace", Workspace=dataws_nsf)
+
+        return
+
+    def test_DNSFRVanaCorrection(self):
+        outputWorkspaceName = "DNSFlippingRatioCorrTest_Test6"
+        # create fake vanadium data workspaces
+        dataY = np.array([1811., 2407., 3558., 3658., 3352., 2321., 2240., 2617., 3245., 3340., 3338., 3310.,
+                          2744., 3212., 1998., 2754., 2791., 2509., 3045., 3429., 3231., 2668., 3373., 2227.])
+        __sf_vanaws = self._create_fake_workspace('__sf_vanaws', dataY/58.0, flipper='ON')
+        self.workspaces.append('__sf_vanaws')
+        dataY = np.array([2050., 1910., 2295., 2236., 1965., 1393., 1402., 1589., 1902., 1972., 2091., 1957.,
+                          1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
+        __nsf_vanaws = self._create_fake_workspace('__nsf_vanaws', dataY/58.0, flipper='OFF')
+        self.workspaces.append('__nsf_vanaws')
+        # cosider normalization=1.0 as set in self._create_fake_workspace
+        dataws_sf = __sf_vanaws - self.__sf_bkgrws
+        dataws_nsf = __nsf_vanaws - self.__nsf_bkgrws
+        alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
+
+        self.assertTrue(alg_test.isExecuted())
+        # check whether the data are correct
+        ws_sf = AnalysisDataService.retrieve(outputWorkspaceName + 'SF')
+        ws_nsf = AnalysisDataService.retrieve(outputWorkspaceName + 'NSF')
+        # dimensions
+        self.assertEqual(24, ws_sf.getNumberHistograms())
+        self.assertEqual(24, ws_nsf.getNumberHistograms())
+        self.assertEqual(2,  ws_sf.getNumDims())
+        self.assertEqual(2,  ws_nsf.getNumDims())
+        # data array: for vanadium ratio sf/nsf must be around 2
+        ws = ws_sf/ws_nsf
+        for i in range(24):
+            self.assertAlmostEqual(2.0, np.around(ws.readY(i)))
+
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF')
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF')
+        run_algorithm("DeleteWorkspace", Workspace=dataws_sf)
+        run_algorithm("DeleteWorkspace", Workspace=dataws_nsf)
+        run_algorithm("DeleteWorkspace", Workspace=ws)
+        return
+
+    def test_DNSDoubleSpinFlip(self):
+        outputWorkspaceName = "DNSFlippingRatioCorrTest_Test7"
+        f = 0.2
+        # create fake vanadium data workspaces
+        dataY = np.array([1811., 2407., 3558., 3658., 3352., 2321., 2240., 2617., 3245., 3340., 3338., 3310.,
+                          2744., 3212., 1998., 2754., 2791., 2509., 3045., 3429., 3231., 2668., 3373., 2227.])
+        __sf_vanaws = self._create_fake_workspace('__sf_vanaws', dataY/58.0, flipper='ON')
+        self.workspaces.append('__sf_vanaws')
+        dataY = np.array([2050., 1910., 2295., 2236., 1965., 1393., 1402., 1589., 1902., 1972., 2091., 1957.,
+                          1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
+        __nsf_vanaws = self._create_fake_workspace('__nsf_vanaws', dataY/58.0, flipper='OFF')
+        self.workspaces.append('__nsf_vanaws')
+        # cosider normalization=1.0 as set in self._create_fake_workspace
+        dataws_sf = __sf_vanaws - self.__sf_bkgrws
+        dataws_nsf = __nsf_vanaws - self.__nsf_bkgrws
+        alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF',
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF', DoubleSpinFlipScatteringProbability=0.0)
+
+        self.assertTrue(alg_test.isExecuted())
+        alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
+                                 NSFDataWorkspace=dataws_nsf, SFNiCrWorkspace=self.__sf_nicrws.getName(),
+                                 NSFNiCrWorkspace=self.__nsf_nicrws.getName(), SFBkgrWorkspace=self.__sf_bkgrws.getName(),
+                                 NSFBkgrWorkspace=self.__nsf_bkgrws.getName(), SFOutputWorkspace=outputWorkspaceName+'SF1',
+                                 NSFOutputWorkspace=outputWorkspaceName+'NSF1', DoubleSpinFlipScatteringProbability=f)
+
+        self.assertTrue(alg_test.isExecuted())
+
+        # check whether the data are correct
+        ws_sf = AnalysisDataService.retrieve(outputWorkspaceName + 'SF')
+        ws_sf1 = AnalysisDataService.retrieve(outputWorkspaceName + 'SF1')
+        ws_nsf = AnalysisDataService.retrieve(outputWorkspaceName + 'NSF')
+        ws_nsf1 = AnalysisDataService.retrieve(outputWorkspaceName + 'NSF1')
+        # dimensions
+        self.assertEqual(24, ws_sf.getNumberHistograms())
+        self.assertEqual(24, ws_sf1.getNumberHistograms())
+        self.assertEqual(24, ws_nsf.getNumberHistograms())
+        self.assertEqual(24, ws_nsf1.getNumberHistograms())
+        self.assertEqual(2,  ws_sf.getNumDims())
+        self.assertEqual(2,  ws_sf1.getNumDims())
+        self.assertEqual(2,  ws_nsf.getNumDims())
+        self.assertEqual(2,  ws_nsf1.getNumDims())
+        # data array: sf must not change
+        for i in range(24):
+            self.assertAlmostEqual(ws_sf.readY(i), ws_sf1.readY(i))
+        # data array: nsf1 = nsf - sf*f
+        nsf = np.array(ws_nsf.extractY())
+        sf = np.array(ws_sf.extractY())
+        refdata = nsf - sf*f
+        for i in range(24):
+            self.assertAlmostEqual(refdata[i], ws_nsf1.readY(i))
+
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF')
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'SF1')
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF')
+        run_algorithm("DeleteWorkspace", Workspace=outputWorkspaceName + 'NSF1')
+        run_algorithm("DeleteWorkspace", Workspace=dataws_sf)
+        run_algorithm("DeleteWorkspace", Workspace=dataws_nsf)
+        return
 
 if __name__ == '__main__':
     unittest.main()

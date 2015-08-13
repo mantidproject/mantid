@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, FloatBoundedValidator
@@ -240,7 +240,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
 
         # 3. calculate correction coefficients
         _coef_ws_ = api.Divide(LHSWorkspace=_nsf_nicr_bg_, RHSWorkspace=_sf_nicr_bg_, WarnOnZeroDivide=True)
-        wslist.append(_coef_ws_)
+        wslist.append(_coef_ws_.getName())
         # 4. apply correction raw data (not normalized!)
         sf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['SF_Data'])
         nsf_data_ws = api.AnalysisDataService.retrieve(self.input_workspaces['NSF_Data'])
