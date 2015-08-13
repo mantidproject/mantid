@@ -229,6 +229,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
+        self.ui.checkBox_fastLog.setChecked(False)
         self.ui.checkBox_filterByPulse.setChecked(False)
         self.ui.checkBox_from1.setChecked(False)
         self.ui.checkBox_groupWS.setChecked(True)
@@ -1021,12 +1022,14 @@ class MainWindow(QtGui.QMainWindow):
         splitinfowsname = str(self._dataWS) + "_info"
 
         title = str(self.ui.lineEdit_title.text())
+        fastLog = self.ui.checkBox_fastLog.isChecked()
 
         splitws, infows = api.GenerateEventsFilter(\
                 InputWorkspace      = self._dataWS,\
                 UnitOfTime          = "Seconds",\
                 TitleOfSplitters    = title,\
                 OutputWorkspace     = splitwsname,\
+                FastLog             = fastLog,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         self.splitWksp(splitws, infows)
@@ -1047,25 +1050,31 @@ class MainWindow(QtGui.QMainWindow):
         if self.ui.lineEdit_3.text() != "":
             rel_starttime = float(self.ui.lineEdit_3.text())
             kwargs["StartTime"] = str(rel_starttime)
+
         if self.ui.lineEdit_4.text() != "":
             rel_stoptime = float(self.ui.lineEdit_4.text())
             kwargs["StopTime"] = str(rel_stoptime)
+
         if self.ui.lineEdit_5.text() != "":
             minlogvalue = float(self.ui.lineEdit_5.text())
             kwargs["MinimumLogValue"] = minlogvalue
+
         if self.ui.lineEdit_6.text() != "":
             maxlogvalue = float(self.ui.lineEdit_6.text())
             kwargs["MaximumLogValue"] = maxlogvalue
+
         if self.ui.lineEdit_7.text() != "":
             logvalueintv = float(self.ui.lineEdit_7.text())
             kwargs["LogValueInterval"] = logvalueintv
         logvalchangedir = str(self.ui.comboBox_4.currentText())
         kwargs["FilterLogValueByChangingDirection"] = logvalchangedir
+
         if self.ui.lineEdit_9.text() != "":
             logvalueintv = float(self.ui.lineEdit_9.text())
             kwargs["TimeTolerance"] = logvalueintv
         logboundtype = str(self.ui.comboBox_5.currentText())
         kwargs["LogBoundary"] = logboundtype
+
         if self.ui.lineEdit_8.text() != "":
             logvaluetol = float(self.ui.lineEdit_8.text())
             kwargs["LogValueTolerance"] = logvaluetol
@@ -1073,6 +1082,7 @@ class MainWindow(QtGui.QMainWindow):
 
         splitwsname = str(self._dataWS) + "_splitters"
         splitinfowsname = str(self._dataWS) + "_info"
+        fastLog = self.ui.checkBox_fastLog.isChecked()
 
         title = str(self.ui.lineEdit_title.text())
 
@@ -1082,6 +1092,7 @@ class MainWindow(QtGui.QMainWindow):
                 TitleOfSplitters    = title,\
                 OutputWorkspace     = splitwsname,\
                 LogName             = samplelog,\
+                FastLog             = fastLog,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         try:
