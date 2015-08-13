@@ -50,6 +50,49 @@ public:
     TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace", ""),
                      std::invalid_argument);
   }
+
+  void test_property_input() {
+    auto tableWs = WorkspaceFactory::Instance().createTable();
+    std::string xColumn = "axis-1";
+    std::string parameterValues = "Amplitude";
+    std::string outputName = "outMatrix";
+
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    alg.setProperty("InputWorkspace", tableWs);
+    alg.setPropertyValue("X Column", xColumn);
+    alg.setPropertyValue("Parameter Names", parameterValues);
+    alg.setProperty("OutputWorkspace", outputName);
+
+    TS_ASSERT_EQUALS(alg.getProperty("InputWorkspace", tableWs);
+	TS_ASSERT_EQUALS(alg.getProperty("X Column", xColumn);
+	TS_ASSERT_EQUALS(alg.getProperty("Parameter Names",parameterValues);
+	TS_ASSERT_EQUALS(alg.getProperty("OutputWorkspace", outputName);
+
+  }
+
+  void test_output(){
+    auto tableWs = WorkspaceFactory::Instance().createTable();
+	tableWs
+    std::string xColumn = "axis-1";
+    std::string parameterValues = "Amplitude";
+    std::string outputName = "outMatrix";
+
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    alg.setProperty("InputWorkspace", tableWs);
+    alg.setPropertyValue("X Column", xColumn);
+    alg.setPropertyValue("Parameter Names", parameterValues);
+    alg.setProperty("OutputWorkspace", outputName);
+
+	alg.execute();
+
+	auto outMatrixWs = alg.getProperty("InputWorkspace");
+	/*Check output*/
+	TSM_ASSERT_EQUALS(outMatrixWs.getName(), outputName);
+
+
+  }
+
+
 };
 
 #endif /* MANTID_ALGORITHMS_PROCESSINDIRECTFITPARAMETERSTEST_H_ */

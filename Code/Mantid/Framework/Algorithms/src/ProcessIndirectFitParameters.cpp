@@ -167,6 +167,7 @@ ProcessIndirectFitParameters::listToVector(std::string &commaList) {
     commaList = commaList.substr(pos, commaList.size());
     pos = commaList.find(",");
   }
+  listVector.push_back(commaList);
   return listVector;
 }
 
