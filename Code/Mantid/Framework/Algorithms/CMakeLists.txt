@@ -156,6 +156,7 @@ set ( SRC_FILES
 	src/ModeratorTzero.cpp
 	src/ModeratorTzeroLinear.cpp
 	src/MonteCarloAbsorption.cpp
+	src/MultipleScattering/LindleyMayersElasticCorrection.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
@@ -427,6 +428,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
+	inc/MantidAlgorithms/MultipleScattering/LindleyMayersElasticCorrection.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
@@ -642,6 +644,7 @@ set ( TEST_FILES
 	DiffractionFocussingTest.h
 	DivideTest.h
 	EditInstrumentGeometryTest.h
+	LindleyMayersElasticCorrectionTest.h
 	ElasticWindowTest.h
 	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
@@ -778,8 +781,8 @@ set ( TEST_FILES
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
-	TOFSANSResolutionByPixelTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h
+	TOFSANSResolutionByPixelTest.h
 	TimeAtSampleStrategyDirectTest.h
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h
