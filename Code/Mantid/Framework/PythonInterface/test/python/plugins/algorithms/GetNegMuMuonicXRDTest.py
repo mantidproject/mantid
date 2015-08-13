@@ -17,14 +17,14 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         y_pos_ws = [y_position]*len(au_peak_values)
         au_muon_xr_ws = CreateWorkspace(au_peak_values, y_pos_ws[:])
         #Check that au_muon_xr_ws is not null
-        self.assertIsNotNone(au_muon_xr_ws)
+        self.assertFalse(au_muon_xr_ws==None)
         au_muon_group = GroupWorkspaces(au_muon_xr_ws)
         #Check that au_muon_group is not null
-        self.assertIsNotNone(au_muon_group)
+        self.assertFalse(au_muon_group==None)
         #Get the algorithm to produce the same workspace
         neg_mu_xr_ws = GetNegMuMuonicXRD("Au", -0.001)
         #Check that neg_mu_xr_ws is not null
-        self.assertIsNotNone(neg_mu_xr_ws)
+        self.assertFalse(neg_mu_xr_ws==None)
         #Test number of workspaces in group
         self.assertEqual(au_muon_group.getNumberOfEntries(),
                         neg_mu_xr_ws.getNumberOfEntries())
