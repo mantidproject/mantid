@@ -59,7 +59,7 @@ void ProcessIndirectFitParameters::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "List of the parameter names to add to the workspace.",
                   Direction::Input);
-  /*May change to a string*/
+
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
       "The name to call the output workspace.");
@@ -78,7 +78,7 @@ void ProcessIndirectFitParameters::exec() {
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
-  auto workspaceNames = std::vector<MatrixWorkspace_sptr>();
+  auto workspaceNames = std::vector<std::vector<MatrixWorkspace_sptr>>();
   const size_t totalNames = parameterNames.size();
   for (size_t i = 0; i < totalNames; i++) {
     auto const allColumnNames = inputWs->getColumnNames();
@@ -102,38 +102,48 @@ void ProcessIndirectFitParameters::exec() {
       convertToMatrix->executeAsChildAlg();
       paramWorkspaces.push_back(
           convertToMatrix->getProperty("OutputWorkspace"));
-      workspaceNames.push_back(paramWorkspaces.at(j));
+      workspaceNames.push_back(paramWorkspaces);
     }
 
     // Transpose list of workspaces, ignoring unequal length of lists
     // this handles the case where a parameter occurs only once in the whole
     // workspace
-	
-    // Join all the parameters for each peak into a single workspace per peak
-	auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
 
-	for(auto it = workspaceNames.begin(); it != workspaceNames.end(); ++it){
-		auto tempPeakWs = workspaceNames.at(0);
-	}
+    // Join all the parameters for each peak into a single workspace per peak
+    auto tempWorkspaces = std::vector<MatrixWorkspace_sptr>();
+    auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
+    conjoin->setProperty("CheckOverlapping", false);
+
+    const size_t wsMax = workspaceNames.size();
+    for (size_t j = 0; j < wsMax; j++) {
+      auto tempPeakWs = workspaceNames.at(0);
+      const size_t paramMax = workspaceNames.at(j).size();
+      for (size_t k = 1; k < paramMax; k++) {
+        auto paramWs = workspaceNames.at(j).at(k);
+        conjoin->setProperty("", tempPeakWs);
+        conjoin->setProperty("", paramWs);
+        conjoin->executeAsChildAlg();
+        tempPeakWs = conjoin->getProperty("InputWorkspace1");
+      }
+      tempWorkspaces.push_back(tempPeakWs);
+    }
 
     // Join all peaks into a single workspace
-	auto tempWorkspace = tempWorkspaces.at(0);
-	auto conjoin = createChildAlgorithm("ConjoinWorkspaces",-1 , -1, true); 
-	conjoin->setProperty("CheckOverlapping", false);
-	for(auto it = tempWorkspaces.begin(); it != tempWorkspaces.end(); ++it){
-		conjoin->setProperty("InputWorkspace1", tempWorkspace);
-		conjoin->setProperty("InputWorkspace2", *it);
-		conjoin->executeAsChildAlg();
-		tempWorkspace = conjoin->getProperty("InputWorkspace1");
-	}
+    auto tempWorkspace = tempWorkspaces.at(0);
+    for (auto it = tempWorkspaces.begin(); it != tempWorkspaces.end(); ++it) {
+      conjoin->setProperty("InputWorkspace1", tempWorkspace);
+      conjoin->setProperty("InputWorkspace2", *it);
+      conjoin->executeAsChildAlg();
+      tempWorkspace = conjoin->getProperty("InputWorkspace1");
+    }
 
-	auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
-	renamer->setProperty("InputWorkspace", tempWorkspace);
-	renamer->setProperty("OutputWorkspace", outputWs);
-	renamer->executeAsChildAlg();
-	auto groupWorkspace = renamer->getProperty("OutputWorkspace");
+    auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
+    renamer->setProperty("InputWorkspace", tempWorkspace);
+    renamer->setProperty("OutputWorkspace", outputWs);
+    renamer->executeAsChildAlg();
+    auto groupWorkspace = renamer->getProperty("OutputWorkspace");
 
-	// Replace axis on workspaces with text axis
+    // Replace axis on workspaces with text axis
   }
 }
 
