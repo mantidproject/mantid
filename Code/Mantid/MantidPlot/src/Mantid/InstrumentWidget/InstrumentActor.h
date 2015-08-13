@@ -73,6 +73,10 @@ public:
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
   boost::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
+  ///set the mask workspace
+  void setMaskMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr wsMask) const;
+  ///inverts the internal mask workspace
+  void invertMaskWorkspace() const;
   /// Get the mask displayed but not yet applied as a IMaskWorkspace
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
   /// Apply the mask in the attached mask workspace to the data.
@@ -90,6 +94,9 @@ public:
   QString getCurrentColorMap()const{return m_currentColorMapFilename;}
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool);
+  /// extracts a mask workspace from the visualised workspace
+  Mantid::API::MatrixWorkspace_sptr extractCurrentMask() const;
+
   /// Get colormap scale autoscaling status.
   bool autoscaling()const{return m_autoscaling;}
 
