@@ -63,6 +63,7 @@ void LoadEventAndCompress::init() {
     copyProperty(algLoadEventNexus, "Filename");
     copyProperty(algLoadEventNexus, "OutputWorkspace");
     copyProperty(algDetermineChunking, "MaxChunkSize");
+    declareProperty("CompressTOFTolerance", .01);
 
     copyProperty(algLoadEventNexus, "FilterByTofMin");
     copyProperty(algLoadEventNexus, "FilterByTofMax");
@@ -189,6 +190,7 @@ LoadEventAndCompress::processChunk(API::MatrixWorkspace_sptr wksp) {
   auto compressEvents = createChildAlgorithm("CompressEvents");
   compressEvents->setProperty("InputWorkspace", eventWS);
   compressEvents->setProperty("OutputWorkspace", eventWS);
+  compressEvents->setProperty<double>("Tolerance", getProperty("CompressTOFTolerance"));
   compressEvents->executeAsChildAlg();
   eventWS = compressEvents->getProperty("OutputWorkspace");
 
