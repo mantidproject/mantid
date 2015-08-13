@@ -23,7 +23,7 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 # Add a definition that's used to guard MPI-specific parts of the main code
 add_definitions ( -DMPI_BUILD )
     
-#add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/Testing/SystemTests/scripts )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/Testing/SystemTests/scripts )
     
 # Add the ability to build a 'mantid-mpi' rpm
 set ( CPACK_PACKAGE_NAME mantid-mpi )

@@ -478,20 +478,6 @@ DataProcessorAlgorithm::plus(const MatrixWorkspace_sptr lhs,
 }
 
 /**
- * Add a matrix workspace to another matrix workspace
- * @param lhs :: the workspace on the left hand side of the addition symbol
- * @param rhs :: the workspace on the right hand side of the addition symbol
- * @return matrix workspace resulting from the operation
- */
-MatrixWorkspace_sptr
-DataProcessorAlgorithm::plus2(MatrixWorkspace_sptr lhs,
-                             MatrixWorkspace_sptr rhs) {
-  return this->executeBinaryAlgorithm<
-      MatrixWorkspace_sptr, MatrixWorkspace_sptr, MatrixWorkspace_sptr>(
-      "Plus", lhs, rhs);
-}
-
-/**
  * Add a single value to another matrix workspace
  * @param lhs :: the workspace on the left hand side of the addition symbol
  * @param rhsValue :: the value on the right hand side of the addition symbol

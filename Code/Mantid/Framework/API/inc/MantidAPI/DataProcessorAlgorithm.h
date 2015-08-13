@@ -92,14 +92,9 @@ protected:
   /// Add a matrix workspace to another matrix workspace
   MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs,
                             const MatrixWorkspace_sptr rhs);
-
   /// Add a single value to a matrix workspace
   MatrixWorkspace_sptr plus(const MatrixWorkspace_sptr lhs,
                             const double &rhsValue);
-
-  /// Add a matrix workspace to another matrix workspace
-  MatrixWorkspace_sptr plus2(MatrixWorkspace_sptr lhs,
-                            MatrixWorkspace_sptr rhs);
 
   /// Subract a matrix workspace by another matrix workspace
   MatrixWorkspace_sptr minus(const MatrixWorkspace_sptr lhs,

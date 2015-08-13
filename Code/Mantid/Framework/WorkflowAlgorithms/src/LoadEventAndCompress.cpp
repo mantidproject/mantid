@@ -213,7 +213,7 @@ void LoadEventAndCompress::exec() {
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
     temp = processChunk(temp);
-    resultWS = plus2(resultWS,temp);
+    resultWS = plus(resultWS,temp);
   }
   Workspace_sptr total = assemble(resultWS);
 
