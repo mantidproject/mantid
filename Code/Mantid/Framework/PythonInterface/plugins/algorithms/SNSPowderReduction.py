@@ -354,6 +354,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     name = "%s_%d" % (self._instrument, vanRun)
                     vanRun = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace=name,
                                                       MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
+                                                      CompressTOFTolerance=self.COMPRESS_TOL_TOF,
                                                       **vanFilterWall)
                     self.log().warning("vanRun = %s" % str(vanRun))
                     try:
@@ -371,19 +372,21 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         name = "%s_%d" % (self._instrument, vbackRuns[samRunIndex])
                         vbackRun = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace="vbackRun",
                                                             MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
+                                                            CompressTOFTolerance=self.COMPRESS_TOL_TOF,
                                                             **vanFilterWall)
-                        try:
-                            if self._normalisebycurrent is True:
-                                vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun,
-                                                                  OutputWorkspace=vbackRun)
-                                vbackRun.getRun()['gsas_monitor'] = 1
-                        except Exception, e:
-                            self.log().warning(str(e))
+                        if vbackRun.id() == EVENT_WORKSPACE_ID and vbackRun.getNumberEvents() <= 0:
+                            pass
+                        else:
+                            try:
+                                if self._normalisebycurrent is True:
+                                    vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun,
+                                                                      OutputWorkspace=vbackRun)
+                                    vbackRun.getRun()['gsas_monitor'] = 1
+                                vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
+                            except Exception, e:
+                                self.log().warning(str(e))
 
-                        vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
                         api.DeleteWorkspace(Workspace=vbackRun)
-                    else:
-                        vbackRun = None
 
                     # compress events
                     if vanRun.id() == EVENT_WORKSPACE_ID:
