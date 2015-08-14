@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-few-public-methods
 import stresstesting
 from mantid.simpleapi import *
 import SANSUtility as su

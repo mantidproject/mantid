@@ -24,7 +24,7 @@ class LOQCentreNoGrav(stresstesting.MantidStressTest):
         WavRangeReduction(3, 9, DefaultTrans)
 
     def validate(self):
-
+        self.disableChecking.append('Instrument')
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 class LOQCentreNoGravDefineCentre(stresstesting.MantidStressTest):

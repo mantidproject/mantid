@@ -74,8 +74,10 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
                                          OutputWorkspace='__LoadNMoldyn4Ascii_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
-        self._validate_sqf_ws(function_wsg[1])
-        self._validate_fqt_ws(function_wsg[0])
+        self.assertTrue(function_wsg.contains('sqf_total'))
+        self.assertTrue(function_wsg.contains('fqt_total'))
+        self._validate_sqf_ws(mtd['sqf_total'])
+        self._validate_fqt_ws(mtd['fqt_total'])
 
 
     def test_load_multiple_functions_list_full_name(self):
@@ -88,8 +90,10 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
                                          OutputWorkspace='__LoadNMoldyn4Ascii_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
-        self._validate_sqf_ws(function_wsg[1])
-        self._validate_fqt_ws(function_wsg[0])
+        self.assertTrue(function_wsg.contains('sqf_total'))
+        self.assertTrue(function_wsg.contains('fqt_total'))
+        self._validate_sqf_ws(mtd['sqf_total'])
+        self._validate_fqt_ws(mtd['fqt_total'])
 
 
     def test_load_multiple_functions_string_short_name(self):
@@ -102,8 +106,10 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
                                          OutputWorkspace='__LoadNMoldyn4Ascii_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
-        self._validate_sqf_ws(function_wsg[1])
-        self._validate_fqt_ws(function_wsg[0])
+        self.assertTrue(function_wsg.contains('sqf_total'))
+        self.assertTrue(function_wsg.contains('fqt_total'))
+        self._validate_sqf_ws(mtd['sqf_total'])
+        self._validate_fqt_ws(mtd['fqt_total'])
 
 
     def test_load_multiple_functions_some_skipped(self):
@@ -116,8 +122,10 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
                                          OutputWorkspace='__LoadNMoldyn4Ascii_test')
         self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
         self.assertEqual(len(function_wsg), 2)
-        self._validate_sqf_ws(function_wsg[1])
-        self._validate_fqt_ws(function_wsg[0])
+        self.assertTrue(function_wsg.contains('sqf_total'))
+        self.assertTrue(function_wsg.contains('fqt_total'))
+        self._validate_sqf_ws(mtd['sqf_total'])
+        self._validate_fqt_ws(mtd['fqt_total'])
 
 
     def test_load_all_functions_skipped(self):

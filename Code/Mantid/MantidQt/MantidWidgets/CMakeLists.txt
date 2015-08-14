@@ -163,7 +163,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
-target_link_libraries ( MantidWidgets LINK_PRIVATE 
+target_link_libraries ( MantidWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             QtPropertyBrowser
             ${CORE_MANTIDLIBS}

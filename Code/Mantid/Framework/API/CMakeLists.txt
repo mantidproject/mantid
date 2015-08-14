@@ -424,7 +424,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
+target_link_libraries ( API LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

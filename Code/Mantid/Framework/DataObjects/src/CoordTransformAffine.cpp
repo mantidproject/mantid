@@ -206,6 +206,55 @@ void CoordTransformAffine::buildOrthogonal(
   copyRawMatrix();
 }
 
+void CoordTransformAffine::buildNonOrthogonal(
+    const Mantid::Kernel::VMD &origin,
+    const std::vector<Mantid::Kernel::VMD> &axes,
+    const Mantid::Kernel::VMD &scaling) {
+  if (origin.size() != inD)
+    throw std::runtime_error("CoordTransformAffine::buildNonOrthogonal(): the "
+                             "origin must be in the dimensions of the input "
+                             "workspace (length inD).");
+  if (axes.size() != outD)
+    throw std::runtime_error("CoordTransformAffine::buildNonOrthogonal(): you "
+                             "must give as many basis vectors as there are "
+                             "dimensions in the output workspace.");
+  if (scaling.size() != outD)
+    throw std::runtime_error("CoordTransformAffine::buildNonOrthogonal(): the "
+                             "size of the scaling vector must be the same as "
+                             "the number of dimensions in the output "
+                             "workspace.");
+
+  // Start with identity
+  m_affineMatrix.identityMatrix();
+  //A matrix is columns of basis vectors
+  Mantid::Kernel::Matrix<coord_t> A(inD,outD);
+  for(size_t i = 0; i < outD; i++){
+      for(size_t j = 0; j < inD; j++){
+          A[j][i]=axes[i][j];
+      }
+  }
+  Mantid::Kernel::Matrix<coord_t> AT=A;
+  AT.Transpose();
+  Mantid::Kernel::Matrix<coord_t> ATA=AT*A;
+  ATA.Invert();
+  Mantid::Kernel::Matrix<coord_t> Ainv=ATA*AT;
+  Mantid::Kernel::Matrix<coord_t> offset(inD,1);
+  for(size_t j = 0; j < inD; j++){
+      offset[j][0]=origin[j];
+  }
+  Mantid::Kernel::Matrix<coord_t> outoffset=Ainv*offset;
+
+  for(size_t i = 0; i < outD; i++){
+      for(size_t j = 0; j < inD; j++){
+          m_affineMatrix[i][j]=Ainv[i][j]*scaling[i];
+      }
+      m_affineMatrix[i][inD]=-outoffset[i][0]*scaling[i];
+  }
+  // Copy into the raw matrix (for speed)
+  copyRawMatrix();
+}
+
+
 //----------------------------------------------------------------------------------------------
 /** Apply the coordinate transformation
  *

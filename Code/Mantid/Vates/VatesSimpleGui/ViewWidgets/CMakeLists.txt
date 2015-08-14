@@ -134,7 +134,7 @@ set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimple
 
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 
-target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE 
+target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
 pqApplicationComponents
 pqComponents
 vtkPVServerManagerRendering
@@ -168,7 +168,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
   
-  target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE 
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
   VatesSimpleGuiViewWidgets 
   DataHandling 
   Kernel 

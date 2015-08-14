@@ -230,7 +230,7 @@ set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Crystal LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Crystal LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

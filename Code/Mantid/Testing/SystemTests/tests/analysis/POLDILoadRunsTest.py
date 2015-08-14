@@ -135,8 +135,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
     def checkRemoveBadDetectors(self):
         # Determine bad detectors automatically
         PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
-                                            BadDetectorThreshold=2.5,
-                                            OutputWorkspace='twoWorkspacesMerged')
+                      BadDetectorThreshold=2.5,
+                      OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
@@ -146,8 +146,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
 
         # Lower threshold, more excluded detectors
         PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
-                                            BadDetectorThreshold=2.0,
-                                            OutputWorkspace='twoWorkspacesMerged')
+                      BadDetectorThreshold=2.0,
+                      OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
@@ -157,7 +157,7 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
 
         # Only use those from the IDF
         PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=False,
-                                            OutputWorkspace='twoWorkspacesMerged')
+                      OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(

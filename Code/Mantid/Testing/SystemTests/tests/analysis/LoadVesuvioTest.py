@@ -248,21 +248,21 @@ class VesuvioTests(unittest.TestCase):
 
     def test_load_with_spectra_that_are_just_monitors_raises_error(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
-          OutputWorkspace=self.ws_name, SpectrumList="1")
+                          OutputWorkspace=self.ws_name, SpectrumList="1")
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, SpectrumList="1-2")
 
     def test_load_with_invalid_difference_option_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
-          OutputWorkspace=self.ws_name, Mode="Unknown",SpectrumList="3-134")
+                          OutputWorkspace=self.ws_name, Mode="Unknown",SpectrumList="3-134")
 
     def test_load_with_difference_option_not_applicable_to_current_spectra_raises_error(self):
         self.assertRaises(ValueError, ms.LoadVesuvio, Filename="14188",
-          OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
+                          OutputWorkspace=self.ws_name, Mode="",SpectrumList="3-134")
 
     def test_raising_error_removes_temporary_raw_workspaces(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188,14199", # Second run is invalid
-          OutputWorkspace=self.ws_name, Mode="SingleDifference",SpectrumList="3-134")
+                          OutputWorkspace=self.ws_name, Mode="SingleDifference",SpectrumList="3-134")
 
         self._do_test_temp_raw_workspaces_not_left_around()
 
