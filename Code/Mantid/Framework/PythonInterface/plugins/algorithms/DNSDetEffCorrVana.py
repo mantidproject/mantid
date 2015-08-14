@@ -119,7 +119,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
     def _cleanup(self, wslist):
         """
         deletes workspaces from list
-            @param wslist List of names workspaces to delete.
+            @param wslist List of names of workspaces to delete.
         """
         for wsname in wslist:
             api.DeleteWorkspace(wsname)
