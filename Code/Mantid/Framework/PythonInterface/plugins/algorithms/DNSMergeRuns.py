@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-locals
+# pylint: disable=too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
@@ -15,10 +15,16 @@ class DNSMergeRuns(PythonAlgorithm):
                              'slit_i_right_blade_position', 'slit_i_lower_blade_position',
                              'slit_i_upper_blade_position', 'polarisation', 'flipper']
     sample_logs = properties_to_compare + ['wavelength', 'huber', 'T1', 'T2', 'Tsp', 'Ei']
-    workspace_names = []
-    wavelength = 0
-    xaxis = '2theta'
-    outws_name = None
+
+    def __init__(self):
+        """
+        Init
+        """
+        PythonAlgorithm.__init__(self)
+        self.workspace_names = []
+        self.wavelength = 0
+        self.xaxis = '2theta'
+        self.outws_name = None
 
     def category(self):
         """
@@ -59,15 +65,15 @@ class DNSMergeRuns(PythonAlgorithm):
         nhists = []
         nbins = []
         for wsname in self.workspace_names:
-            ws = api.AnalysisDataService.retrieve(wsname)
-            ndims.append(ws.getNumDims())
-            nhists.append(ws.getNumberHistograms())
-            nbins.append(ws.blocksize())
+            wks = api.AnalysisDataService.retrieve(wsname)
+            ndims.append(wks.getNumDims())
+            nhists.append(wks.getNumberHistograms())
+            nbins.append(wks.blocksize())
 
-        nd = ndims[0]
-        nh = nhists[0]
-        nb = nbins[0]
-        if ndims.count(nd) == len(ndims) and nhists.count(nh) == len(nhists) and nbins.count(nb) == len(nbins):
+        ndi = ndims[0]
+        nhi = nhists[0]
+        nbi = nbins[0]
+        if ndims.count(ndi) == len(ndims) and nhists.count(nhi) == len(nhists) and nbins.count(nbi) == len(nbins):
             return True
         else:
             message = "Cannot merge workspaces with different dimensions."
@@ -112,8 +118,8 @@ class DNSMergeRuns(PythonAlgorithm):
         ws1 = api.AnalysisDataService.retrieve(self.workspace_names[0])
         run1 = ws1.getRun()
         for wsname in self.workspace_names[1:]:
-            ws = api.AnalysisDataService.retrieve(wsname)
-            run = ws.getRun()
+            wks = api.AnalysisDataService.retrieve(wsname)
+            run = wks.getRun()
             self._check_properties(run1, run)
         return True
 
@@ -164,17 +170,17 @@ class DNSMergeRuns(PythonAlgorithm):
         """
         wls = []
         for wsname in self.workspace_names:
-            ws = api.AnalysisDataService.retrieve(wsname)
-            run = ws.getRun()
+            wks = api.AnalysisDataService.retrieve(wsname)
+            run = wks.getRun()
             if run.hasProperty('wavelength'):
                 wls.append(round(run.getProperty('wavelength').value, 3))
             else:
-                message = " Workspace " + ws.getName() + " does not have property wavelength! Cannot merge."
+                message = " Workspace " + wks.getName() + " does not have property wavelength! Cannot merge."
                 self.log().error(message)
                 return False
-        wl = wls[0]
-        if wls.count(wl) == len(wls):
-            self.wavelength = wl
+        wlength = wls[0]
+        if wls.count(wlength) == len(wls):
+            self.wavelength = wlength
             self.log().information("The wavelength is " + str(self.wavelength) + " Angstrom.")
             return True
         else:
@@ -192,16 +198,16 @@ class DNSMergeRuns(PythonAlgorithm):
         beamDirection = V3D(0, 0, 1)
         # merge workspaces, existance has been checked by _can_merge function
         for ws_name in self.workspace_names:
-            ws = api.AnalysisDataService.retrieve(ws_name)
+            wks = api.AnalysisDataService.retrieve(ws_name)
             wsnorm = api.AnalysisDataService.retrieve(ws_name + '_NORM')
-            samplePos = ws.getInstrument().getSample().getPos()
-            n_hists = ws.getNumberHistograms()
-            two_theta = np.array([ws.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
+            samplePos = wks.getInstrument().getSample().getPos()
+            n_hists = wks.getNumberHistograms()
+            two_theta = np.array([wks.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
             # round to approximate hardware accuracy 0.05 degree ~ 1 mrad
             two_theta = np.round(two_theta, 4)
-            dataY = np.rot90(ws.extractY())[0]
+            dataY = np.rot90(wks.extractY())[0]
             dataYnorm = np.rot90(wsnorm.extractY())[0]
-            dataE = np.rot90(ws.extractE())[0]
+            dataE = np.rot90(wks.extractE())[0]
             dataEnorm = np.rot90(wsnorm.extractE())[0]
             for i in range(n_hists):
                 arr.append([two_theta[i], dataY[i], dataE[i]])
@@ -212,22 +218,22 @@ class DNSMergeRuns(PythonAlgorithm):
         data_sorted = data[np.argsort(data[:, 0])]
         norm_sorted = norm[np.argsort(norm[:, 0])]
         # unique values
-        uX = np.unique(data_sorted[:, 0])
-        if len(data_sorted[:, 0]) - len(uX) > 0:
+        unX = np.unique(data_sorted[:, 0])
+        if len(data_sorted[:, 0]) - len(unX) > 0:
             arr = []
             arr_norm = []
             self.log().information("There are dublicated 2Theta angles in the dataset. Sum up the intensities.")
             # we must sum up the values
-            for i in range(len(uX)):
-                idx = np.where(np.fabs(data_sorted[:, 0] - uX[i]) < 1e-4)
+            for i in range(len(unX)):
+                idx = np.where(np.fabs(data_sorted[:, 0] - unX[i]) < 1e-4)
                 new_y = sum(data_sorted[idx][:, 1])
                 new_y_norm = sum(norm_sorted[idx][:, 1])
                 err = data_sorted[idx][:, 2]
                 err_norm = norm_sorted[idx][:, 2]
                 new_e = np.sqrt(np.dot(err, err))
                 new_e_norm = np.sqrt(np.dot(err_norm, err_norm))
-                arr.append([uX[i], new_y, new_e])
-                arr_norm.append([uX[i], new_y_norm, new_e_norm])
+                arr.append([unX[i], new_y, new_e])
+                arr_norm.append([unX[i], new_y_norm, new_e_norm])
             data = np.array(arr)
             norm = np.array(arr_norm)
 
@@ -272,11 +278,18 @@ class DNSMergeRuns(PythonAlgorithm):
         outws = api.AnalysisDataService.retrieve(self.outws_name)
         api.CopyLogs(self.workspace_names[0], outws)
         api.RemoveLogs(outws, self.sample_logs)
+        yunit = 'Counts'
+        ylabel = 'Intensity'
 
         if normalize:
             normws = api.AnalysisDataService.retrieve(self.outws_name + '_NORM')
             api.Divide(LHSWorkspace=outws, RHSWorkspace=normws, OutputWorkspace=self.outws_name)
             api.DeleteWorkspace(normws)
+            yunit = ""
+            ylabel = "Normalized Intensity"
+
+        outws.setYUnit(yunit)
+        outws.setYUnitLabel(ylabel)
 
         self.setProperty("OutputWorkspace", outws)
         return
