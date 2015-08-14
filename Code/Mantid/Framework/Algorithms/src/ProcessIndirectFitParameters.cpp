@@ -143,7 +143,7 @@ void ProcessIndirectFitParameters::exec() {
   renamer->setProperty("InputWorkspace", tempWorkspace);
   renamer->setProperty("OutputWorkspace", outputWs);
   renamer->executeAsChildAlg();
-  auto groupWorkspace = renamer->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr groupWorkspace = renamer->getProperty("OutputWorkspace");
 
   // Replace axis on workspaces with text axis
   auto axis = TextAxis(outputWs->getNumberHistograms());
@@ -155,6 +155,8 @@ void ProcessIndirectFitParameters::exec() {
     }
   }
   outputWs->replaceAxis(1, axisPtr);
+
+
 }
 
 std::vector<std::string>

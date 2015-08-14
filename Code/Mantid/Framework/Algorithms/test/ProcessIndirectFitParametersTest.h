@@ -10,6 +10,16 @@ using Mantid::Algorithms::ProcessIndirectFitParameters;
 using namespace Mantid::API;
 
 class ProcessIndirectFitParametersTest : public CxxTest::TestSuite {
+
+private:
+  ITableWorkspace_sptr createTable() {
+    auto tableWs = WorkspaceFactory::Instance().createTable();
+    tableWs->addColumn("double", "Amplitude");
+    tableWs->addColumn("double", "Amplitude_Err");
+    tableWs->addColumn("double", "testColumn");
+    return tableWs;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -52,54 +62,50 @@ public:
                      std::invalid_argument);
   }
 
- void test_property_input() {
-	auto tableWs = WorkspaceFactory::Instance().createTable();
-	tableWs->addColumn("double", "Amplitude");
-	tableWs->addColumn("double", "Amplitude_Err");
-	tableWs->addColumn("double", "testColumn");
+  void test_property_input() {
+    auto tableWs = createTable();
     std::string xColumn = "axis-1";
     std::string parameterValues = "Amplitude";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
-	TS_ASSERT_THROWS_NOTHING(alg.initialize());
-	TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
     alg.setProperty("OutputWorkspace", outputName);
 
-	ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
+    ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
 
     TS_ASSERT_EQUALS(tableProp, tableWs);
-	TS_ASSERT_EQUALS(std::string(alg.getProperty("X Column")), xColumn);
-	TS_ASSERT_EQUALS(std::string(alg.getProperty("Parameter Names")),parameterValues);
-	TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")), outputName);
-
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("X Column")), xColumn);
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("Parameter Names")),
+                     parameterValues);
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")),
+                     outputName);
   }
 
-  void test_output(){
-    auto tableWs = WorkspaceFactory::Instance().createTable();
+  void test_output() {
+    auto tableWs = createTable();
     std::string xColumn = "axis-1";
     std::string parameterValues = "Amplitude";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
-	TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
     alg.setProperty("OutputWorkspace", outputName);
 
-	alg.execute();
+    alg.execute();
 
-	MatrixWorkspace_sptr outMatrixWs = alg.getProperty("InputWorkspace");
-
-	TS_ASSERT_EQUALS(outMatrixWs->getName(), outputName);
-
-
+    MatrixWorkspace_sptr outws;
+    TS_ASSERT_THROWS_NOTHING(
+        outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputName));
   }
-
 };
 
 #endif /* MANTID_ALGORITHMS_PROCESSINDIRECTFITPARAMETERSTEST_H_ */
