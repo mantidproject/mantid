@@ -107,10 +107,6 @@ void ProcessIndirectFitParameters::exec() {
     workspaceNames.push_back(paramWorkspaces);
   }
 
-  // Transpose list of workspaces, ignoring unequal length of lists
-  // this handles the case where a parameter occurs only once in the whole
-  // workspace
-
   // Join all the parameters for each peak into a single workspace per peak
   auto tempWorkspaces = std::vector<std::string>();
   auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
@@ -178,8 +174,12 @@ std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
   auto fitParams = std::vector<std::string>();
   const size_t totalColumns = columns.size();
   for (size_t i = 0; i < totalColumns; i++) {
-    if (columns.at(i).rfind(suffix) != std::string::npos) {
-      fitParams.push_back(columns.at(i));
+    auto pos = columns.at(i).rfind(suffix);
+    if (pos != std::string::npos) {
+      auto endCheck = pos + suffix.size();
+      if (endCheck == columns.at(i).size()) {
+        fitParams.push_back(columns.at(i));
+      }
     }
   }
   return fitParams;

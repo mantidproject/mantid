@@ -5,6 +5,7 @@
 
 #include "MantidAlgorithms/ProcessIndirectFitParameters.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 
 using Mantid::Algorithms::ProcessIndirectFitParameters;
 using namespace Mantid::API;
@@ -14,9 +15,30 @@ class ProcessIndirectFitParametersTest : public CxxTest::TestSuite {
 private:
   ITableWorkspace_sptr createTable() {
     auto tableWs = WorkspaceFactory::Instance().createTable();
-    tableWs->addColumn("double", "Amplitude");
-    tableWs->addColumn("double", "Amplitude_Err");
-    tableWs->addColumn("double", "testColumn");
+    tableWs->addColumn("double", "axis-1");
+    tableWs->addColumn("double", "f0.A0");
+    tableWs->addColumn("double", "f0.A0_Err");
+    tableWs->addColumn("double", "f1.f1.f0.Height");
+    tableWs->addColumn("double", "f1.f1.f0.Height_Err");
+    tableWs->addColumn("double", "f1.f1.f0.Amplitude");
+    tableWs->addColumn("double", "f1.f1.f0.Amplitude_Err");
+    tableWs->addColumn("double", "f1.f1.f0.PeakCentre");
+    tableWs->addColumn("double", "f1.f1.f0.PeakCentre_Err");
+
+    size_t n = 5;
+    for (size_t i = 0; i < n; ++i) {
+      TableRow row = tableWs->appendRow();
+      double ax1 = int(i) * 1.0;
+      double a0 = 0.0;
+      double a0e = 0.0;
+      double h = int(i) * 1.02;
+      double he = sqrt(h);
+      double am = int(i) * 2.43;
+      double ame = sqrt(am);
+      double pc = -0.0567;
+      double pce = sqrt(pc);
+      row << ax1 << a0 << a0e << h << he << am << ame << pc << pce;
+    }
     return tableWs;
   }
 
