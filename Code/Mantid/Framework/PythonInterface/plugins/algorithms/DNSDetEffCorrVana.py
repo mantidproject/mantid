@@ -25,7 +25,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         """
         Returns category
         """
-        return 'PythonAlgorithms;MLZ\\DNS;CorrectionFunctions;EfficiencyCorrections'
+        return 'PythonAlgorithms\\MLZ\\DNS;CorrectionFunctions\\EfficiencyCorrections'
 
     def name(self):
         """
@@ -171,7 +171,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         """
         checks whether properties match in the given runs, produces warnings
             @param lhs_run Left-hand-side run
-            @param phs_run Right-hand-side run
+            @param rhs_run Right-hand-side run
         """
         lhs_title = ""
         rhs_title = ""
