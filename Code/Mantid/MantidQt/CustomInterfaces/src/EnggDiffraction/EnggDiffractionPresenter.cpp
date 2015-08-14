@@ -319,14 +319,14 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   }
 
   const std::string explMsg =
-      "Expected a file name like INSTR_vanNo_ceriaNo_....par, "
+      "Expected a file name like 'INSTR_vanNo_ceriaNo_....par', "
       "where INSTR is the instrument name and vanNo and ceriaNo are the "
       "numbers of the Vanadium and calibration sample (Ceria, CeO2) runs.";
   std::vector<std::string> parts;
   boost::split(parts, filename, boost::is_any_of("_"));
   if (parts.size() < 4) {
     throw std::invalid_argument(
-        "Failed to find at least the 4 required parts of the file name. " +
+        "Failed to find at least the 4 required parts of the file name.\n\n" +
         explMsg);
   }
 
@@ -334,7 +334,7 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
   if (g_enginxStr != parts[0]) {
     throw std::invalid_argument("The first component of the file name is not "
                                 "the expected instrument name: " +
-                                g_enginxStr + ". " + explMsg);
+                                g_enginxStr + ".\n\n" + explMsg);
   }
   const std::string castMsg =
       "It is not possible to interpret as an integer number ";
@@ -342,13 +342,13 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
     boost::lexical_cast<int>(parts[1]);
   } catch (std::runtime_error &) {
     throw std::invalid_argument(
-        castMsg + "the Vanadium number part of the file name. " + explMsg);
+        castMsg + "the Vanadium number part of the file name.\n\n" + explMsg);
   }
   try {
     boost::lexical_cast<int>(parts[2]);
   } catch (std::runtime_error &) {
     throw std::invalid_argument(
-        castMsg + "the Ceria number part of the file name. " + explMsg);
+        castMsg + "the Ceria number part of the file name.\n\n" + explMsg);
   }
 
   instName = parts[0];
