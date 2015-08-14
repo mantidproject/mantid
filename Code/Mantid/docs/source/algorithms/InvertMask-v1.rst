@@ -27,7 +27,7 @@ Usage
 .. testcode:: ExInvertPG3
 
   # Load data
-  maskws = LoadMask(Filename="POWGEN_Definition_2014-03-10.xml", InputFile="Mask-PG3-19884.xml")
+  maskws = LoadMask(Instrument="POWGEN", InputFile="Mask-PG3-19884.xml")
 
   # Check source mask workspace
   nummasked = 0
@@ -53,8 +53,8 @@ Output:
 
 .. testoutput:: ExInvertPG3
 
-  Number of histogram:  32340
+  Number of histogram:  33418
   Source Mask workspace # Detectors masked =  82
-  Source Mask workspace # Detectors masked =  32258
+  Source Mask workspace # Detectors masked =  33336
 
 .. categories::
