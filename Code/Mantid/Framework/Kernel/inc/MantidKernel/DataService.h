@@ -363,7 +363,10 @@ public:
     if (it != datamap.end()) {
       return it->second;
     } else {
-      throw Kernel::Exception::NotFoundError("Data Object", name);
+      throw Kernel::Exception::NotFoundError(
+          "Unable to find Data Object type with name '" + name +
+              "': data service ",
+          name);
     }
   }
 

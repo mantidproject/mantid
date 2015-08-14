@@ -207,30 +207,22 @@ void LoadEventAndCompress::exec() {
   m_chunkingTable = determineChunk(m_filename);
 
   // first run is free
-  EventWorkspace_sptr resultWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(loadChunk(0));
-  resultWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(processChunk(resultWS));
+  MatrixWorkspace_sptr resultWS = loadChunk(0);
+  resultWS = processChunk(resultWS);
 
   // load the other chunks
   const size_t numRows = m_chunkingTable->rowCount();
   for (size_t i = 1; i < numRows; ++i) {
     MatrixWorkspace_sptr temp = loadChunk(i);
     temp = processChunk(temp);
-    auto alg = createChildAlgorithm("Plus");
-    alg->setProperty("LHSWorkspace", resultWS);
-    alg->setProperty("RHSWorkspace", temp);
-    alg->setProperty("OutputWorkspace", resultWS);
-    alg->setProperty("ClearRHSWorkspace", true);
-    alg->executeAsChildAlg();
-    temp = alg->getProperty("OutputWorkspace");
-    resultWS = boost::dynamic_pointer_cast<EventWorkspace>(temp);
+    resultWS = plus(resultWS,temp);
   }
+  Workspace_sptr total = assemble(resultWS);
 
   // Don't bother compressing combined workspace. DetermineChunking is designed
   // to prefer loading full banks so no further savings should be available.
 
-  setProperty("OutputWorkspace", resultWS);
+  setProperty("OutputWorkspace", total);
 }
 
 } // namespace WorkflowAlgorithms
