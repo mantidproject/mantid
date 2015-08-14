@@ -181,7 +181,7 @@
 
   <type name="lineardetector">
     <component type="lineardetector-pixel" >
-    <locations z="0.0" z-end="0.2868" n-elements="239" name="linear-det"/>
+    <locations z="0" z-end="0.2868" n-elements="239" name="linear-det"/>
       <!--<location z="0" />
       <location z="0.0012" />
       <location z="0.0024" />
