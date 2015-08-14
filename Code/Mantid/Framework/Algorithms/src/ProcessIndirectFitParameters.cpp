@@ -62,9 +62,9 @@ void ProcessIndirectFitParameters::init() {
                   "List of the parameter names to add to the workspace.",
                   Direction::Input);
 
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "The name to call the output workspace.");
+  declareProperty("OutputWorkspace Name", "",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "The name to call the output workspace.", Direction::Input);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ void ProcessIndirectFitParameters::exec() {
   std::string xColumn = getProperty("X Column");
   std::string parameterNamesProp = getProperty("Parameter Names");
   auto parameterNames = listToVector(parameterNamesProp);
-  MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+  std::string outputWsName = getProperty("OutputWorkspace Name");
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
@@ -109,7 +109,7 @@ void ProcessIndirectFitParameters::exec() {
 
   // Join all the parameters for each peak into a single workspace per peak
   auto tempWorkspaces = std::vector<std::string>();
-  auto conjoin = createChildAlgorithm("ConjoinWorkspace", -1, -1, true);
+  auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
   conjoin->setProperty("CheckOverlapping", false);
 
   const size_t wsMax = workspaceNames.size();
@@ -137,9 +137,9 @@ void ProcessIndirectFitParameters::exec() {
 
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setProperty("InputWorkspace", tempWorkspace);
-  renamer->setProperty("OutputWorkspace", outputWs);
+  renamer->setProperty("OutputWorkspace", outputWsName);
   renamer->executeAsChildAlg();
-  MatrixWorkspace_sptr groupWorkspace = renamer->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWs = renamer->getProperty("OutputWorkspace");
 
   // Replace axis on workspaces with text axis
   auto axis = TextAxis(outputWs->getNumberHistograms());
@@ -162,7 +162,7 @@ ProcessIndirectFitParameters::listToVector(std::string &commaList) {
   while (pos != std::string::npos) {
     std::string nextItem = commaList.substr(0, pos);
     listVector.push_back(nextItem);
-    commaList = commaList.substr(pos, commaList.size());
+    commaList = commaList.substr(pos + 1, commaList.size());
     pos = commaList.find(",");
   }
   listVector.push_back(commaList);

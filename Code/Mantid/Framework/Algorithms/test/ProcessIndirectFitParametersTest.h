@@ -80,7 +80,7 @@ public:
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace Name", ""),
                      std::invalid_argument);
   }
 
@@ -96,7 +96,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
-    alg.setProperty("OutputWorkspace", outputName);
+    alg.setProperty("OutputWorkspace Name", outputName);
 
     ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
 
@@ -104,14 +104,14 @@ public:
     TS_ASSERT_EQUALS(std::string(alg.getProperty("X Column")), xColumn);
     TS_ASSERT_EQUALS(std::string(alg.getProperty("Parameter Names")),
                      parameterValues);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")),
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace Name")),
                      outputName);
   }
 
   void test_output() {
     auto tableWs = createTable();
     std::string xColumn = "axis-1";
-    std::string parameterValues = "Amplitude";
+    std::string parameterValues = "Height,Amplitude";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
@@ -119,7 +119,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
-    alg.setProperty("OutputWorkspace", outputName);
+    alg.setProperty("OutputWorkspace Name", outputName);
 
     alg.execute();
 
