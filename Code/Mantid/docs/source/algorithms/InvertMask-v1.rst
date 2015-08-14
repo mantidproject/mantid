@@ -27,7 +27,7 @@ Usage
 .. testcode:: ExInvertPG3
 
   # Load data
-  maskws = LoadMask(Instrument="POWGEN", InputFile="Mask-PG3-19884.xml")
+  maskws = LoadMask(Filename="POWGEN_Definition_2014-03-10.xml", InputFile="Mask-PG3-19884.xml")
 
   # Check source mask workspace
   nummasked = 0
