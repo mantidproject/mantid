@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction
@@ -25,7 +25,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS\\CorrectionFunctions\\EfficiencyCorrections'
+        return 'PythonAlgorithms;MLZ\\DNS;CorrectionFunctions;EfficiencyCorrections'
 
     def name(self):
         """
@@ -58,15 +58,15 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         and the same number of histograms
         and the same number of bins
         """
-        nd = self.dataws.getNumDims()
-        nh = self.dataws.getNumberHistograms()
-        nb = self.dataws.blocksize()
+        ndim = self.dataws.getNumDims()
+        nhist = self.dataws.getNumberHistograms()
+        nbin = self.dataws.blocksize()
 
-        if self.vanaws.getNumDims() != nd or self.vanaws.getNumberHistograms() != nh or self.vanaws.blocksize() != nb:
+        if self.vanaws.getNumDims() != ndim or self.vanaws.getNumberHistograms() != nhist or self.vanaws.blocksize() != nbin:
             self.log().error("The dimensions of Vanadium workspace are not valid.")
             return False
 
-        if self.bkgws.getNumDims() != nd or self.bkgws.getNumberHistograms() != nh or self.bkgws.blocksize() != nb:
+        if self.bkgws.getNumDims() != ndim or self.bkgws.getNumberHistograms() != nhist or self.bkgws.blocksize() != nbin:
             self.log().error("The dimensions of Background workspace are not valid.")
             return False
 
@@ -87,15 +87,17 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
         return True
 
-    def _vana_mean(self, ws):
+    def _vana_mean(self, vanaws):
         """
         checks whether the workspace with mean counts for Vanadium exists
-        creates one if not
+        creates one if not.
+            @param vanaws A MatrixWorkspace with Vanadium counts. Will be used to create VanadiumMean workspace if needed.
+            @returns  A MatrixWorkspace with Vanadium mean counts.
         """
         if api.mtd.doesExist(self.vana_mean_name):
-            nd = self.dataws.getNumDims()
+            ndims = self.dataws.getNumDims()
             vmean = api.mtd[self.vana_mean_name]
-            if vmean.getNumDims() != nd:
+            if vmean.getNumDims() != ndims:
                 message = "Specified VanadiumMean Workspace has wrong dimensions! Must be 2."
                 self.log().error(message)
                 return None
@@ -109,17 +111,18 @@ class DNSDetEffCorrVana(PythonAlgorithm):
                 return None
 
         else:
-            nh = self.vanaws.getNumberHistograms()
-            vmean = api.SumSpectra(ws, IncludeMonitors=False) / nh
+            nhists = self.vanaws.getNumberHistograms()
+            vmean = api.SumSpectra(vanaws, IncludeMonitors=False) / nhists
 
         return vmean
 
     def _cleanup(self, wslist):
         """
         deletes workspaces from list
+            @param wslist List of names workspaces to delete.
         """
-        for w in wslist:
-            api.DeleteWorkspace(w)
+        for wsname in wslist:
+            api.DeleteWorkspace(wsname)
         return
 
     def _vana_correct(self):
@@ -166,7 +169,9 @@ class DNSDetEffCorrVana(PythonAlgorithm):
 
     def _check_properties(self, lhs_run, rhs_run):
         """
-        checks whether properties match
+        checks whether properties match in the given runs, produces warnings
+            @param lhs_run Left-hand-side run
+            @param phs_run Right-hand-side run
         """
         lhs_title = ""
         rhs_title = ""
@@ -194,14 +199,15 @@ class DNSDetEffCorrVana(PythonAlgorithm):
                             self.log().warning(message)
                 else:
                     message = "Property " + property_name + " does not match! " + \
-                        lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                        rhs_title + ": " + str(rhs_property.value)
+                        lhs_title + ": " + str(lhs_property.value) + " has type " + \
+                        str(lhs_property.type) + ", but " + rhs_title + ": " + \
+                        str(rhs_property.value) + " has type " + str(rhs_property.type)
                     self.log().warning(message)
             else:
                 message = "Property " + property_name + " is not present in " +\
                     lhs_title + " or " + rhs_title + " - skipping comparison."
                 self.log().warning(message)
-        return True
+        return
 
     def PyExec(self):
         # Input
