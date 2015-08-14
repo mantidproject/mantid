@@ -97,6 +97,9 @@ private:
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
 
+  /// whether to allow users to give the output calibration filename
+  const static bool g_askUserCalibFilename;
+
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;
 

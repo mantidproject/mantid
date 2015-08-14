@@ -23,6 +23,8 @@ Mantid::Kernel::Logger g_log("EngineeringDiffractionGUI");
 }
 
 const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
+// discouraged at the moment
+const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
     : m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
@@ -115,20 +117,25 @@ void EnggDiffractionPresenter::processCalcCalib() {
     return;
   }
 
-  std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+  const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+  std::string outFilename;
+  if (!g_askUserCalibFilename) {
+    outFilename = sugg;
+  } else {
+    outFilename = m_view->askNewCalibrationFilename(sugg);
+    if (outFilename.empty()) {
+      return;
+    }
+    std::string instName = "";
 
-  std::string outFilename = m_view->askNewCalibrationFilename(sugg);
-  if (outFilename.empty()) {
-    return;
-  }
-  std::string instName = "";
-  // make sure it follows the rules
-  try {
-    parseCalibrateFilename(outFilename, instName, vanNo, ceriaNo);
-  } catch (std::invalid_argument &ia) {
-    m_view->userWarning("Invalid output calibration filename: " + outFilename,
-                        ia.what());
-    return;
+    // make sure it follows the rules
+    try {
+      parseCalibrateFilename(outFilename, instName, vanNo, ceriaNo);
+    } catch (std::invalid_argument &ia) {
+      m_view->userWarning("Invalid output calibration filename: " + outFilename,
+                          ia.what());
+      return;
+    }
   }
 
   try {

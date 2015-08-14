@@ -149,8 +149,8 @@ public:
     EXPECT_CALL(mockView,
                 askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
                                           ceriaNo + "_both_banks.prm"))
-        .Times(1)
-        .WillOnce(Return(filename));
+      .Times(0);
+    //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // No warnings, 1 error: some exception(s) are thrown (because there are
     // missing settings and/or files) but these must be caught
