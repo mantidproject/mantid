@@ -1,10 +1,12 @@
 #include "MantidQtCustomDialogs/GetNegMuMuonicXRDDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtCustomDialogs/MantidGLWidget.h"
+#include <QCheckBox>
 #include <QMessageBox>
 #include <QLineEdit>
 #include <QValidator>
 #include <QFormLayout>
+
 
 namespace MantidQt {
 namespace CustomDialogs {
@@ -65,11 +67,25 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   connect(runButton, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(this, SIGNAL(validInput()), this, SLOT(accept()));
 
+  //Show Legend button attributes and signal/slot asssignment
+  showLegendCheck = new QCheckBox("Show Legend");
+  connect(showLegendCheck, SIGNAL(checked()), this, SLOT(showLegend()));
+
   // Adding Widgets to Layout
   main_layout->addWidget(periodicTable);
+  main_layout->addWidget(showLegendCheck);
   main_layout->addWidget(yPositionLabel);
   main_layout->addWidget(yPosition);
   main_layout->addWidget(runButton);
+}
+
+/**
+ *
+ */
+void GetNegMuMuonicXRDDialog::showLegend(){
+    bool checked = showLegendCheck->isChecked();
+    std::cout << checked;
+    periodicTable->showGroupLegend(checked);
 }
 
 /**

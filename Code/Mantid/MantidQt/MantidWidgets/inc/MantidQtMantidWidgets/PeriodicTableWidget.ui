@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>604</width>
-    <height>283</height>
+    <width>730</width>
+    <height>345</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -78,8 +78,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>472</width>
-        <height>240</height>
+        <width>598</width>
+        <height>325</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -5501,6 +5501,12 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>106</width>
+       <height>221</height>
+      </size>
+     </property>
      <property name="features">
       <set>QDockWidget::NoDockWidgetFeatures</set>
      </property>
@@ -5512,8 +5518,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -5950,8 +5956,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_7">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -6388,8 +6394,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_12">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -6826,8 +6832,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_4">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -7264,8 +7270,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_9">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -7702,8 +7708,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_10">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -8140,8 +8146,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_5">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -8578,8 +8584,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_8">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -9016,8 +9022,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_2">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -9454,8 +9460,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_3">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -9784,8 +9790,8 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        <item>
         <widget class="QLabel" name="label_6">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>100</horstretch>
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>117</horstretch>
            <verstretch>100</verstretch>
           </sizepolicy>
          </property>
@@ -10221,19 +10227,6 @@ QPushButton:checked{ background-color:qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QCheckBox" name="showLegend">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>Legend</string>
-     </property>
     </widget>
    </item>
   </layout>

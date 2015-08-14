@@ -12,12 +12,11 @@ PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
   ColourElements();
   ///Hide the legend by default
   ui.Groups->setVisible(false);
-  connect(ui.showLegend, SIGNAL(clicked()), this, SLOT(showGroupLegend()));
 }
 
 // slot for showing group legend dependant on state of radioButton
-void PeriodicTableWidget::showGroupLegend() {
-  if (ui.showLegend->isChecked()) {
+void PeriodicTableWidget::showGroupLegend(bool checkState) {
+  if (checkState) {
     ui.Groups->setVisible(true);
   } else {
     ui.Groups->setVisible(false);

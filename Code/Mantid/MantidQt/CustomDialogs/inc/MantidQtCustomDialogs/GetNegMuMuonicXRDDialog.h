@@ -45,6 +45,9 @@ class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   PeriodicTableWidget *periodicTable;
   /// QLineEdit used for input of y-position property
   QLineEdit *yPosition;
+
+  //Check box for showing or hiding the Legend for PeriodicTableWidget
+  QCheckBox *showLegendCheck;
   /// Validate that the input is not empty before running algorithm
   bool validateDialogInput(QString input);
   /** Enables a the buttons corresponding to the elements
@@ -55,6 +58,7 @@ class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   private slots:
   /// When the "Run" button is clicked, the algorithm is executed with inputs
   void runClicked();
+  void showLegend();
 
   protected:
   // create the initial layout

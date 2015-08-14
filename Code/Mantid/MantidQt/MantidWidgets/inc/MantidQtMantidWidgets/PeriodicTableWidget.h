@@ -72,10 +72,9 @@ public:
   ///@return the result of the comparison between a string and the text of a button.
   bool compareButtonNameToStr(QPushButton * buttonToCompare,QString stringToCompare);
 
-
-private slots:
   ///Displays or hides the Legend for the colour coding of periodic groups
-  void showGroupLegend();
+  void showGroupLegend(bool checkState);
+
 private:
   ///The Form containing the PeriodicTableWidget
   Ui::PeriodicTable ui;
