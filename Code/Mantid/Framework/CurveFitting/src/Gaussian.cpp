@@ -3,7 +3,15 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+
+#include "MantidCurveFitting/SimpleChebfun.h"
 #include <cmath>
+#include <numeric>
+
+#include <boost/lexical_cast.hpp>
+#include "C:/Users/hqs74821/Work/Mantid_stuff/Testing/class/MyTestDef.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -65,6 +73,47 @@ double Gaussian::activeParameter(size_t i) const {
     return 1. / pow(getParameter(i), 2);
   else
     return getParameter(i);
+}
+
+void Gaussian::setInitialValues(const API::FunctionDomain &domain, API::FunctionValues &values) {
+  if (!isExplicitlySet(2)) {
+
+    auto &domain1d = dynamic_cast<const API::FunctionDomain1D&>(domain);
+    size_t n = domain1d.size();
+
+    std::vector<double> x(n);
+    std::vector<double> y(n);
+    for(size_t i = 0; i < n; ++i) {
+      x[i] = domain1d[i];
+      y[i] = values.getFitData(i);
+    }
+
+    SimpleChebfun fun(x, y);
+    auto der1 = fun.derivative();
+    auto der2 = der1.derivative();
+
+    auto &xp = der2.xPoints();
+    const double centre = getParameter("PeakCentre");
+    auto icentre = std::lower_bound(xp.begin(), xp.end(), centre);
+    if (icentre != xp.end()) {
+      auto ic = static_cast<size_t>(std::distance(xp.begin(), icentre));
+      const double d2max = der2(centre);
+      auto PD2 = der2.yPoints();
+      double left = 0.0;
+      for(auto i = ic; i > 0; --i) {
+        if (d2max * PD2[i] < 0.0) break;
+        left = centre - xp[i];
+      }
+      double right = 0.0;
+      for(auto i = ic; i < n; ++i) {
+        if (d2max * PD2[i] < 0.0) break;
+        right = xp[i] - centre;
+      }
+
+      double sigma = fabs(right + left) / 2;
+      setParameter(2, sigma);
+    }
+  }
 }
 
 } // namespace CurveFitting

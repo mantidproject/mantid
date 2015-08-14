@@ -369,6 +369,10 @@ public:
                         FunctionValues &values) const = 0;
   /// Derivatives of function with respect to active parameters.
   virtual void functionDeriv(const FunctionDomain &domain, Jacobian &jacobian);
+  /// Set initial values for parameters with default values. 
+  virtual void setInitialValues(const FunctionDomain &domain, FunctionValues &values);
+  /// Test if initial values need yo be set before fitting
+  virtual bool needSettingInitialValues() const;
 
   /* @name Callbacks to perform work at various points other than in the
    * function */

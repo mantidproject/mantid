@@ -608,12 +608,6 @@ std::vector<double> ChebfunBase::fit(ChebfunFunctionType f) const {
  * @return Function values at the base x-points.
  */
 std::vector<double> ChebfunBase::fit(const API::IFunction &f) const {
-  //const API::IFunction1D *fun1d = dynamic_cast<const API::IFunction1D *>(&f);
-  //if (!fun1d) {
-  //  throw std::runtime_error("Function is not 1D.");
-  //}
-  //std::vector<double> res(size());
-  //fun1d->function1D(res.data(), m_x.data(), size());
   API::FunctionDomain1DView x(m_x.data(), m_x.size());
   API::FunctionValues y(x);
   f.function(x,y);
@@ -656,10 +650,6 @@ std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
                                         std::vector<double> &pEven) const {
   assert(size() == pEven.size() * 2 - 1);
   assert(size() % 2 == 1);
-  //const API::IFunction1D *fun1d = dynamic_cast<const API::IFunction1D *>(&f);
-  //if (!fun1d) {
-  //  throw std::runtime_error("Function is not 1D.");
-  //}
   std::vector<double> pOdd(size() - pEven.size());
   std::vector<double> xOdd;
   xOdd.reserve(pOdd.size());
@@ -751,6 +741,155 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
   gsl_vector_complex_free(eval);
 
   return r;
+}
+
+/**
+ * Smooth some data.
+ * @param xvalues :: X-values of the data to smooth.
+ * @param yvalues :: Y-values of the data to smooth. xvalues.size() == yvalues.size()
+ * @return :: Vector of y-points in this base.
+ */
+std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, const std::vector<double> &yvalues) const
+{
+    if ( xvalues.size() != yvalues.size() ) throw std::invalid_argument("Cannot smooth: input vectors have different sizes.");
+    const size_t n = size();
+    std::vector<double> y(n);
+
+    // interpolate yvalues at the x-points of this base
+    auto ix = xvalues.begin();
+    auto xbegin = ix;
+    auto xend = xvalues.end();
+    for(size_t i = 0; i < n; ++i)
+    {
+        if ( ix == xvalues.end() )
+        {
+            break;
+        }
+        double x = m_x[i];
+        auto ix0 = std::find_if(ix, xend, [&x](double xx){return x <= xx;});
+        if ( ix0 == xend ) continue;
+        auto j = std::distance( xbegin, ix0 );
+        if ( j > 0 )
+        {
+            y[i] = yvalues[j-1] + (x - xvalues[j-1])/(xvalues[j] - xvalues[j-1]) * (yvalues[j] - yvalues[j-1]);
+            ix = ix0;
+        }
+        else
+        {
+            y[i] = yvalues[0];
+        }
+    }
+
+    const double guessSignalToNoiseRatio = 1e15;
+    auto a = calcA( y );
+
+    std::vector<double> powerSpec(n);
+    assert( powerSpec.size() == n );
+    // convert the a-coeffs to power spectrum wich is the base of the Wiener filter
+    std::transform( a.begin(), a.end(), powerSpec.begin(), [](double x){return fabs(x);} );
+
+    // estimate power spectrum's noise as the average of its high frequency half
+    double noise = std::accumulate( powerSpec.begin() + n/2, powerSpec.end(), 0.0 );
+    noise /= static_cast<double>(n/2);
+
+    // index of the maximum element in powerSpec
+    const size_t imax = static_cast<size_t>(std::distance( powerSpec.begin(), std::max_element(powerSpec.begin(), powerSpec.end()) ));
+
+    if ( noise == 0.0 )
+    {
+      noise = powerSpec[imax] / guessSignalToNoiseRatio;
+    }
+
+    //std::cerr << "Maximum signal " << powerSpec[imax] << std::endl;
+    //std::cerr << "Noise          " << noise << std::endl;
+
+    // storage for the Wiener filter, initialized with 0.0's
+    std::vector<double> wf(n);
+
+    // The filter consists of two parts:
+    //   1) low frequency region, from 0 until the power spectrum falls to the noise level, filter is calculated
+    //      from the power spectrum
+    //   2) high frequency noisy region, filter is a smooth function of frequency decreasing to 0
+
+    // the following code is an adaptation of a fortran routine with modifications
+    // noise starting index
+    size_t i0 = 0;
+    for(size_t i = 0; i < n/3; ++i)
+    {
+        double av = (powerSpec[3*i] + powerSpec[3*i+1] + powerSpec[3*i+2])/3;
+        if ( av < noise )
+        {
+            i0 = 3 * i;
+            break;
+        }
+    }
+    // intermediate variables
+    double xx = 0.0;
+    double xy = 0.0;
+    double ym = 0.0;
+    // low frequency filter values: the higher the power spectrum the closer the filter to 1.0
+    //std::cerr << "i0=" << i0 << std::endl;
+    for(size_t i = 0; i < i0; ++i)
+    {
+      double cd1 = powerSpec[i] / noise;
+      double cd2 = log(cd1);
+      wf[i] = cd1 / (1.0 + cd1);
+      double j = static_cast<double>(i+1);
+      xx += j * j;
+      xy += j * cd2;
+      ym += cd2;
+    }
+
+    // i0 should always be > 0 but in case something goes wrong make a check
+    if ( i0 > 0 )
+    {
+//      std::cerr << "Noise start index " << i0 << std::endl;
+
+      // high frequency filter values: smooth decreasing function
+      double ri0f = static_cast<double>(i0 + 1);
+      double xm = (1.0 + ri0f)/2;
+      ym /= ri0f;
+      double a1 = (xy - ri0f*xm*ym)/(xx-ri0f*xm*xm);
+      double b1 = ym - a1*xm;
+
+      //      std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << std::endl;
+
+      // calculate coeffs of a quadratic c2*i^2 + c1*i + c0
+      // which will replace the linear a1*i + b1 in building the
+      // second part of the filter
+      double c0,c1,c2;
+      {
+          double x0 = double(i0+1);
+          double x1 = double(n+1);
+          double sigma = g_tolerance / noise / 10;
+          double s = sigma / (1.0 - sigma);
+          double m2 = log(s);
+          double m0 = a1*x0 + b1;
+          double m1 = a1*x1 + b1;
+          c2 = ( m2 - m0 - a1 *(x1-x0) ) / ((x1*x1-x0*x0) - 2 *x0*(x1-x0));
+          c1 = a1 - 2 * c2 * x0;
+          c0 = m0 - c2*x0*x0 - c1 * x0;
+      }
+
+      for(size_t i = i0; i < n; ++i)
+      {
+        //double s = exp(a1*static_cast<double>(i+1)+b1);
+          double s = double(i+1);
+          s = c0 + s*( c1 + s * c2 );
+          s = exp(s);
+        wf[i] = s / (1.0 + s);
+      }
+
+    }
+    else
+    {
+      std::cerr << "Power spectrum has an unexpected shape: no smoothing" << std::endl;
+    }
+
+    std::transform( a.begin(), a.end(), wf.begin(), a.begin(), std::multiplies<double>() );
+    y = calcP(a);
+
+    return y;
 }
 
 } // CurveFitting

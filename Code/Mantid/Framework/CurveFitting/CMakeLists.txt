@@ -92,6 +92,7 @@ set ( SRC_FILES
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SeqDomainSpectrumCreator.cpp
+	src/SimpleChebfun.cpp
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
@@ -215,6 +216,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
+	inc/MantidCurveFitting/SimpleChebfun.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
@@ -327,6 +329,7 @@ set ( TEST_FILES
 	ReflectivityMulfTest.h
 	ResolutionTest.h
 	SeqDomainSpectrumCreatorTest.h
+	SimpleChebfunTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
 	SplineBackgroundTest.h
