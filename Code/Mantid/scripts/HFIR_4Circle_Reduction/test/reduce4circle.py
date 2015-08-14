@@ -96,7 +96,7 @@ def addPeak1(step):
         wkflow.download_spice_xml_file(scanno, ptno)
 
 
-    status, retobj = wkflow.findPeak(scanno, ptno)
+    status, retobj = wkflow.find_peak(scanno, ptno)
     if status is True:
         peakinfo = retobj
 
@@ -112,7 +112,7 @@ def addPeak2(step):
     """
     scanno = 82
     ptno = 11
-    status, retobj = wkflow.findPeak(scanno, ptno)
+    status, retobj = wkflow.find_peak(scanno, ptno)
     if status is True:
         peakinfo = retobj
 

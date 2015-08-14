@@ -237,10 +237,12 @@ class MainWindow(QtGui.QMainWindow):
         Browse and set up working directory
         :return:
         """
-        work_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Working Directory'), self._homeDir)
+        work_dir = str(QtGui.QFileDialog.getExistingDirectory(self, 'Get Working Directory', self._homeDir))
         status, error_message = self._myControl.set_working_directory(work_dir)
         if status is False:
             self.pop_one_button_dialog(error_message)
+        else:
+            self.ui.lineEdit_workDir.setText(work_dir)
 
         return
     
@@ -303,11 +305,14 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
 
         # Find peak
-        status, error_message = self._myProject.findPeak(exp_no, scan_no, pt_no)
+        status, ret_obj = self._myProject.find_peak(exp_no, scan_no, pt_no)
         if status is False:
-            self.pop_one_button_dialog(error_message)
+            self.pop_one_button_dialog(ret_obj)
 
-        # Set up correct values
+        # Set up correct values to table tableWidget_peaksCalUB
+        # TODO - Need to think of how to set up the table workspace!  Can mimic the peak workspace!
+        peak_info = ret_obj
+        qx, qy, qz = peak_info.get_q()
 
         return
 
@@ -527,16 +532,26 @@ class MainWindow(QtGui.QMainWindow):
     def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
         """ Plot raw workspace from XML file for a measurement/pt.
         """
-        # Load Data including SPICE scan file (necessary???) and Pt's xml file
-        status, error_message = self._myControl.load_spice_scan_file(exp_no, scan_no)
-        if status is False and self._allowDownload is False:
-            self.pop_one_button_dialog(error_message)
-            return
-        elif status is False and self._allowDownload is True:
-            status, error_message = self._myControl.download_spice_file(exp_no, scan_no)
-            if status is False:
+        # Check and load SPICE table file
+        does_exist = self._myControl.does_spice_loaded(exp_no, scan_no)
+        if does_exist is False:
+            # Download data
+            status, error_message = self._myControl.download_spice_file(exp_no, scan_no, over_write=False)
+            if status is True:
+                status, error_message = self._myControl.load_spice_scan_file(exp_no, scan_no)
+                if status is False and self._allowDownload is False:
+                    self.pop_one_button_dialog(error_message)
+                    return
+            else:
                 self.pop_one_button_dialog(error_message)
                 return
+        # END-IF(does_exist)
+
+        # TODO - Clean up rest of the codes to mimic how to deal with SPICE file
+
+        # Load Data for Pt's xml file
+        does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)
+
 
         status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
         if status is False:
@@ -548,6 +563,7 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 self.pop_one_button_dialog(error_message)
 
+        #--------------> Good from here!
         # Convert a list of vector to 2D numpy array for imshow()
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)

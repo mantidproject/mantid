@@ -133,13 +133,14 @@ class CWSCDReductionControl(object):
 
         return
 
-    def download_spice_file(self, exp_number, scan_number):
+    def download_spice_file(self, exp_number, scan_number, over_write):
         """
         Download a scan/pt data from internet
         :param exp_number: experiment number
         :param scan_number:
         :return:
         """
+        # TODO - Implement parameter over_write
         # Generate the URL for SPICE data file
         file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
                                                                     exp_number, scan_number)
@@ -255,19 +256,32 @@ class CWSCDReductionControl(object):
 
         return True, ""
 
-    def findPeak(self, scanno, ptno):
-        """
-        Find peak in sample Q space
+    def find_peak(self, expno, scanno, ptno):
+        """ Find peak in sample Q space
         :param scanno:
         :param ptno:
         :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
+        """
+        # Load data to MD
+        status, error_message = self.load_data_to_md(expno, scanno, ptno, over_write=False)
+        # TODO - Implement load_data_to_md() by referring to 'load_peaks_matrixws.py'
+        if status is False:
+            return status, error_message
+
+        # TODO - The commented out part shall go to method 'load_data_to_md()''
         """
         # Check existence
         runnumber = self._expDataDict[self._expNumber][scanno][ptno].getRunNumber()
         if runnumber is None:
             return False, "Unable to locate scan %s/pt %s" % (str(scanno), str(ptno))
+        """
+        # Rebin in momentum space and set goniometer
+        Rebin(InputWorkspace='s%04d_%04d'%(scanno, pt), OutputWorkspace='s%04d_%04d'%(scanno, pt), Params='6,0.01,6.5')
+        # Set Goniometer
+        SetGoniometer(Workspace='s%04d_%04d'%(scanno, pt), Axis0='_omega,0,1,0,-1', Axis1='_chi,0,0,1,-1', Axis2='_phi,0,1,0,-1')
 
-        # 
+
+        # TODO - From this step, refer to script 'load_peaks_md.py'
         mdwksp = self._getMDWorkspace(runnumber)
         
         peakws = api.FindPeaksMD(InputWorkspace=mdwksp)
@@ -281,7 +295,9 @@ class CWSCDReductionControl(object):
 
         # Ony case: number of peaks is equal to 1 
         self._storePeakWorkspace(peakws) 
-        peakinfo = PeakInfo(peakws, 0) 
+        peakinfo = PeakInfo(peakws, 0)
+
+        # Result shall be popped to table tableWidget_peaksCalUB in GUI
 
         return True, peakinfo
 
@@ -377,6 +393,9 @@ class CWSCDReductionControl(object):
         if spice_file_name is None:
             spice_file_name = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat' % (exp_no, scan_no))
         out_ws_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
+
+        # Check wehther the
+        self._
 
         # Load SPICE file
         try:

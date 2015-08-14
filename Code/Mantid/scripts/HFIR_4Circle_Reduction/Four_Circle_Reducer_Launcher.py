@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import sys
 from PyQt4 import QtGui
 
