@@ -17,6 +17,7 @@ class VulcanExamineProfile(stresstesting.MantidStressTest):
     irf_file = 'arg_powder.irf'
     dat_file = 'arg_si.dat'
     bkgd_file = 'arg_si_bkgd_polynomial.nxs'
+    tolerance=1.0e-6
 
     def requiredFiles(self):
         files = [self.irf_file, self.dat_file, self.bkgd_file]
@@ -60,6 +61,7 @@ class VulcanSeqRefineProfileFromScratch(stresstesting.MantidStressTest):
     """
     irf_file = 'VULCAN_SNS_1.irf'
     dat_file = 'VULCAN_22946_NOM.dat'
+    tolerance=1.0e-6
 
     def requiredFiles(self):
         files = [self.irf_file, self.dat_file]
@@ -184,6 +186,7 @@ class VulcanSeqRefineProfileLoadPlus(stresstesting.MantidStressTest):
     """ System test for sequential refinement
     """
     seqfile = "VULCAN_Calibrate_Seq.nxs"
+    tolerance=1.0e-6
 
     def requiredFiles(self):
         files = [self.seqfile]

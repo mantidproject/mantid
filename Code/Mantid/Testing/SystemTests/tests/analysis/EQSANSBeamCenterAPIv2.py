@@ -19,8 +19,8 @@ class EQSANSBeamCenter(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_4061_event.nxs")
         NoSolidAngle()
@@ -55,8 +55,8 @@ class EQSANSBeamCenterEvent(EQSANSBeamCenter):
         return True
 
     def runTest(self):
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS(True)
         AppendDataFile("EQSANS_4061_event.nxs")
         NoSolidAngle()

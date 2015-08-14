@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DNSMergeRunsTest.py
+  DNSDetEffCorrVanaTest.py
   DSFinterpTest.py
   EnggCalibrateFullTest.py
   EnggCalibrateTest.py
@@ -42,6 +43,8 @@ set ( TEST_PY_FILES
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
   LoadMultipleGSSTest.py
+  LoadNMoldyn3AsciiTest.py
+  LoadNMoldyn4AsciiTest.py
   MaskAngleTest.py
   MaskBTPTest.py
   MaskWorkspaceToCalFileTest.py

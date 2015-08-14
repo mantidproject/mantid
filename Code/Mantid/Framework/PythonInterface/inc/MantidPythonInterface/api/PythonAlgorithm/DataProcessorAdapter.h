@@ -62,11 +62,11 @@ public:
 
   void setAccumAlgProxy(const std::string &alg) { this->setAccumAlg(alg); }
 
-  API::ITableWorkspace_sptr determineChunkProxy() {
-    return this->determineChunk();
+  API::ITableWorkspace_sptr determineChunkProxy(const std::string &filename) {
+    return this->determineChunk(filename);
   }
 
-  void loadChunkProxy() { this->loadChunk(); }
+  void loadChunkProxy(const size_t rowIndex) { this->loadChunk(rowIndex); }
 
   API::Workspace_sptr loadProxy(const std::string &inputData,
                                 const bool loadQuiet = false) {

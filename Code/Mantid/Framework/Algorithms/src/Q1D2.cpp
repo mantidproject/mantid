@@ -86,6 +86,11 @@ void Q1D2::init() {
   declareProperty(
       "ExtraLength", 0.0, mustBePositive,
       "Additional length for gravity correction.");
+
+  declareProperty(
+      new WorkspaceProperty<>("QResolution", "", Direction::Input,
+                              PropertyMode::Optional, dataVal),
+      "Workspace to calculate the Q resolution.\n");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -95,12 +100,14 @@ void Q1D2::exec() {
   MatrixWorkspace_const_sptr waveAdj = getProperty("WavelengthAdj");
   MatrixWorkspace_const_sptr pixelAdj = getProperty("PixelAdj");
   MatrixWorkspace_const_sptr wavePixelAdj = getProperty("WavePixelAdj");
+  MatrixWorkspace_const_sptr qResolution = getProperty("QResolution");
+
   const bool doGravity = getProperty("AccountForGravity");
   m_doSolidAngle = getProperty("SolidAngleWeighting");
 
   // throws if we don't have common binning or another incompatibility
   Qhelper helper;
-  helper.examineInput(m_dataWS, waveAdj, pixelAdj);
+  helper.examineInput(m_dataWS, waveAdj, pixelAdj, qResolution);
   // FIXME: how to examine the wavePixelAdj?
   g_log.debug() << "All input workspaces were found to be valid\n";
   // normalization as a function of wavelength (i.e. centers of x-value bins)
@@ -122,9 +129,14 @@ void Q1D2::exec() {
   MantidVec normSum(YOut.size(), 0.0);
   // the error on the normalisation
   MantidVec normError2(YOut.size(), 0.0);
+  // the averaged Q resolution
+  MantidVec &qResolutionOut = outputWS->dataDx(0);
 
   const int numSpec = static_cast<int>(m_dataWS->getNumberHistograms());
   Progress progress(this, 0.05, 1.0, numSpec + 1);
+
+  // Flag to decide if Q Resolution is to be used
+  auto useQResolution = qResolution ? true : false; 
 
   PARALLEL_FOR3(m_dataWS, outputWS, pixelAdj)
   for (int i = 0; i < numSpec; ++i) {
@@ -160,6 +172,7 @@ void Q1D2::exec() {
       continue;
     }
 
+
     const size_t numWavbins = m_dataWS->readY(i).size() - wavStart;
     // make just one call to new to reduce CPU overhead on each thread, access
     // to these
@@ -184,6 +197,12 @@ void Q1D2::exec() {
     MantidVec::const_iterator YIn = m_dataWS->readY(i).begin() + wavStart;
     MantidVec::const_iterator EIn = m_dataWS->readE(i).begin() + wavStart;
 
+    // Pointers to the QResolution data. Note that the xdata was initially the same, hence
+    // the same indexing applies to the y values of m_dataWS and qResolution
+    // If we want to use it set it to the correct value, else to YIN, although that does not matter, as
+    // we won't use it
+    MantidVec::const_iterator QResIn = useQResolution ? (qResolution->readY(i).begin() + wavStart) : YIn;
+
     // when finding the output Q bin remember that the input Q bins (from the
     // convert to wavelength) start high and reduce
     MantidVec::const_iterator loc = QOut.end();
@@ -205,13 +224,20 @@ void Q1D2::exec() {
           // at the end
           EOutTo2[bin] += (*EIn) * (*EIn);
           normError2[bin] += *normETo2s;
+          if (useQResolution) {
+            qResolutionOut[bin] += (*YIn) * (*QResIn);
+          }
         }
+      }
+
+      // Increment the QResolution iterator
+      if (useQResolution) {
+        ++QResIn;
       }
     }
 
     PARALLEL_CRITICAL(q1d_spectra_map) {
       progress.report("Computing I(Q)");
-
       // Add up the detector IDs in the output spectrum at workspace index 0
       const ISpectrum *inSpec = m_dataWS->getSpectrum(i);
       ISpectrum *outSpec = outputWS->getSpectrum(0);
@@ -222,12 +248,30 @@ void Q1D2::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  if (useQResolution) {
+    // The number of Q (x)_ values is N, while the number of DeltaQ values is N-1,
+    // Richard Heenan suggested to duplicate the last entry of DeltaQ
+    Mantid::MantidVec::const_iterator countsIterator = YOut.begin();
+    Mantid::MantidVec::iterator qResolutionIterator = qResolutionOut.begin();
+    for (;countsIterator!= YOut.end(); ++countsIterator, ++qResolutionIterator) {
+      // Divide by the counts of the Qbin, if the counts are 0, the the qresolution will also be 0
+      if ((*countsIterator) > 0.0) {
+        *qResolutionIterator = (*qResolutionIterator)/(*countsIterator);
+      }
+    }
+    // Now duplicate write the second to last element into the last element of the deltaQ vector
+    if (qResolutionOut.size() > 1) {
+      qResolutionOut.rbegin()[0] = qResolutionOut.rbegin()[1];
+    }
+  }
+
   bool doOutputParts = getProperty("OutputParts");
   if (doOutputParts) {
     MatrixWorkspace_sptr ws_sumOfCounts =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
     ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
+    ws_sumOfCounts->dataDx(0) = outputWS->dataDx(0);
     for (size_t i = 0; i < outputWS->dataE(0).size(); i++) {
       ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
     }
@@ -235,6 +279,7 @@ void Q1D2::exec() {
     MatrixWorkspace_sptr ws_sumOfNormFactors =
         WorkspaceFactory::Instance().create(outputWS);
     ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
+    ws_sumOfNormFactors->dataDx(0) = outputWS->dataDx(0);
     for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++) {
       ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
       ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);

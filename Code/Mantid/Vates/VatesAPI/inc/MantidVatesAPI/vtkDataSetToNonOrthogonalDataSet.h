@@ -12,7 +12,6 @@
 #include <array>
 
 class vtkDataSet;
-class vtkUnstructuredGrid;
 
 namespace Mantid
 {
@@ -73,7 +72,7 @@ namespace VATES
     /// Reduce the dimensionality of matrix by 1
     void stripMatrix(Kernel::DblMatrix &mat);
     /// Add the skew basis to metadata
-    void updateMetaData(vtkUnstructuredGrid *ugrid);
+    void updateMetaData(vtkDataSet *ugrid);
     vtkDataSet *m_dataSet; ///< Pointer to VTK dataset to modify
     std::string m_wsName; ///< The name of the workspace to fetch
     std::size_t m_numDims; ///< Number of dimensions in workspace

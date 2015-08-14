@@ -59,6 +59,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
     def validate(self):
         self.tolerance_is_reller = True
         self.tolerance = 1.0e-2
+        self.disableChecking.append('Instrument')
         return "iteration_2", "SANS2DNewSettingsCarriedAcross.nxs"
 
 class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):

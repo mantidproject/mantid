@@ -1,6 +1,7 @@
 #ifndef MANTID_VATES_NORMALIZATION_H_
 #define MANTID_VATES_NORMALIZATION_H_
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid {
@@ -45,7 +46,7 @@ NormFuncIMDNodePtr makeMDEventNormalizationFunction(
 /**
 Determine which normalization function will be called on an IMDIterator of an IMDWorkspace
 */
-Mantid::API::IMDIterator * createIteratorWithNormalization(
+DLLExport Mantid::API::IMDIterator * createIteratorWithNormalization(
     const VisualNormalization normalizationOption,
     Mantid::API::IMDWorkspace const * const ws);
 
