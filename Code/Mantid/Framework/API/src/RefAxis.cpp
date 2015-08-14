@@ -103,6 +103,20 @@ bool RefAxis::equalWithinTolerance(const Axis &axis2,
   return this->operator==(axis2);
 }
 
+size_t RefAxis::indexOfValue(const double value) const {
+  UNUSED_ARG(value)
+  throw std::runtime_error("Calling indexOfValue() on RefAxis is forbidden.");
+}
+
+std::vector<double> RefAxis::createBinBoundaries() const {
+  throw std::runtime_error(
+      "Calling createBinBoundaries() on RefAxis is forbidden.");
+}
+
+const std::vector<double> &RefAxis::getValues() const {
+  throw std::runtime_error("Calling getValues() on RefAxis is forbidded.");
+}
+
 double RefAxis::getMin() const {
   throw std::runtime_error("RefAxis cannot determine minimum value. Use readX "
                            "on the workspace instead");

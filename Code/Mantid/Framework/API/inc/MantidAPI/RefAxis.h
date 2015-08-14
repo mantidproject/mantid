@@ -58,17 +58,9 @@ public:
                                     const double tolerance) const;
   // We must override these to prevent access to NumericAxis::m_values and
   // m_edges, which are unused by RefAxis and thus do not hold sensible values.
-  virtual size_t indexOfValue(const double value) const {
-    UNUSED_ARG(value)
-    throw std::runtime_error("Calling indexOfValue() on RefAxis is forbidden.");
-  }
-  virtual std::vector<double> createBinBoundaries() const {
-    throw std::runtime_error(
-        "Calling createBinBoundaries() on RefAxis is forbidden.");
-  }
-  virtual const std::vector<double> &getValues() const {
-    throw std::runtime_error("Calling getValues() on RefAxis is forbidded.");
-  }
+  virtual size_t indexOfValue(const double value) const;
+  virtual std::vector<double> createBinBoundaries() const;
+  virtual const std::vector<double> &getValues() const;
   virtual double getMin() const;
   virtual double getMax() const;
 
