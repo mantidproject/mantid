@@ -204,7 +204,9 @@ std::vector<std::vector<std::string>> ProcessIndirectFitParameters::reorderWorks
 	for(int i = 0; i < maximumLength; i++){
 		std::vector<std::string> temp;
 		for(int j = 0; j < original.size(); j++){
+			if(original.at(j).size() > i){
 			temp.push_back(original.at(j).at(i));
+			}
 		}
 		reorderedVector.push_back(temp);
 	}
