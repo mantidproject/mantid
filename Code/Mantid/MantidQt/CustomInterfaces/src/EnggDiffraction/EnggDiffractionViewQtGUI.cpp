@@ -148,12 +148,22 @@ void EnggDiffractionViewQtGUI::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
+  m_uiTabCalib.lineEdit_RBNumber->setText(
+      qs.value("user-params-RBNumber", "").toString());
+  m_uiTabCalib.lineEdit_current_vanadium_num->setText(
+      qs.value("user-params-current-vanadium-num", "").toString());
+  m_uiTabCalib.lineEdit_current_ceria_num->setText(
+      qs.value("user-params-current-ceria-num", "").toString());
+  m_uiTabCalib.lineEdit_new_vanadium_num->setText(
+      qs.value("user-params-new-vanadium-num", "").toString());
+  m_uiTabCalib.lineEdit_new_ceria_num->setText(
+      qs.value("user-params-new-ceria-num", "").toString());
+  QString calibFname = qs.value("current-calib-filename", "").toString();
+  m_uiTabCalib.lineEdit_current_calib_filename->setText(calibFname);
+  m_currentCalibFilename = calibFname.toStdString();
+
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-
-  m_currentCalibFilename =
-      qs.value("current-calib-filename", "").toString().toStdString();
-
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   m_calibSettings.m_inputDirCalib =
       qs.value("input-dir-calib-files", lastPath).toString().toStdString();
@@ -180,7 +190,15 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
-  qs.setValue("current-calib-filename", "");
+  qs.setValue("user-params-RBNumber", m_uiTabCalib.lineEdit_RBNumber->text());
+  qs.setValue("user-params-current-vanadium-num",
+              m_uiTabCalib.lineEdit_current_vanadium_num->text());
+  qs.setValue("user-params-current-ceria-num", m_uiTabCalib.lineEdit_current_ceria_num->text());
+  qs.setValue("user-params-new-vanadium-num",
+              m_uiTabCalib.lineEdit_new_vanadium_num->text());
+  qs.setValue("user-params-new-ceria-num", m_uiTabCalib.lineEdit_new_ceria_num->text());
+  qs.setValue("current-calib-filename",
+              m_uiTabCalib.lineEdit_current_calib_filename->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -242,7 +260,7 @@ std::string EnggDiffractionViewQtGUI::askNewCalibrationFilename(
 }
 
 std::string EnggDiffractionViewQtGUI::getRBNumber() const {
-  return "not available";
+  return m_uiTabCalib.lineEdit_RBNumber->text().toStdString();
 }
 
 std::string EnggDiffractionViewQtGUI::currentVanadiumNo() const {
