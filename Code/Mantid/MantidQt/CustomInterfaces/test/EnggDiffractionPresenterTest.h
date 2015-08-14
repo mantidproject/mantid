@@ -59,7 +59,7 @@ public:
     pres.notify(IEnggDiffractionPresenter::LogMsg);
   }
 
-  void test_loadExistingCalib() {
+  void test_loadExistingCalibWithWrongName() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
@@ -69,6 +69,30 @@ public:
         Return(calibSettings));
 
     const std::string mockFname = "foo.par";
+    EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(
+        Return(mockFname));
+
+    // should not get to the point where the calibration is calculated
+    EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
+        .Times(0);
+
+    // Should show a warning but no errors
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::LoadExistingCalib);
+  }
+
+  void test_loadExistingCalibWithAcceptableName() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
+        Return(calibSettings));
+
+    const std::string mockFname = "ENGINX_111111_222222_foo_bar.par";
     EXPECT_CALL(mockView, askExistingCalibFilename()).Times(1).WillOnce(
         Return(mockFname));
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, mockFname))
@@ -120,9 +144,10 @@ public:
     const std::string instr = "FAKE_INSTR";
     EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
 
-    const std::string filename = "fake_calib_filename.par";
+    const std::string filename =
+        "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
     EXPECT_CALL(mockView,
-                askNewCalibrationFilename("UNKNOWN_INST_" + vanNo + "_" +
+                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
                                           ceriaNo + "_both_banks.prm"))
         .Times(1)
         .WillOnce(Return(filename));

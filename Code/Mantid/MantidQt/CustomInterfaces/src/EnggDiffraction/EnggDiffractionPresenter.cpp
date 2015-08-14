@@ -87,7 +87,12 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
   }
 
   std::string instName, vanNo, ceriaNo;
-  parseCalibrateFilename(fname, instName, vanNo, ceriaNo);
+  try {
+    parseCalibrateFilename(fname, instName, vanNo, ceriaNo);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Invalid calibration filename : " + fname, ia.what());
+    return;
+  }
 
   m_view->newCalibLoaded(vanNo, ceriaNo, fname);
 }
@@ -114,6 +119,15 @@ void EnggDiffractionPresenter::processCalcCalib() {
 
   std::string outFilename = m_view->askNewCalibrationFilename(sugg);
   if (outFilename.empty()) {
+    return;
+  }
+  std::string instName = "";
+  // make sure it follows the rules
+  try {
+    parseCalibrateFilename(outFilename, instName, vanNo, ceriaNo);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Invalid output calibration filename: " + outFilename,
+                        ia.what());
     return;
   }
 
@@ -280,8 +294,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
  * @param vanNo number of the Vanadium run used for this calibration file
  * @param ceriaNo number of the Ceria run
  *
- * @return Suggested name for a new calibration file, following
- * ENGIN-X practices
+ * @throws invalid_argument with an informative message if tha name does
+ * not look correct (does not follow the conventions).
  */
 void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
                                                       std::string &instName,
@@ -297,10 +311,37 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
     return;
   }
 
+  const std::string explMsg =
+      "Expected a file name like INSTR_vanNo_ceriaNo_....par, "
+      "where INSTR is the instrument name and vanNo and ceriaNo are the "
+      "numbers of the Vanadium and calibration sample (Ceria, CeO2) runs.";
   std::vector<std::string> parts;
   boost::split(parts, filename, boost::is_any_of("_"));
   if (parts.size() < 4) {
-    return;
+    throw std::invalid_argument(
+        "Failed to find at least the 4 required parts of the file name. " +
+        explMsg);
+  }
+
+  // check the rules on the file name
+  if (g_enginxStr != parts[0]) {
+    throw std::invalid_argument("The first component of the file name is not "
+                                "the expected instrument name: " +
+                                g_enginxStr + ". " + explMsg);
+  }
+  const std::string castMsg =
+      "It is not possible to interpret as an integer number ";
+  try {
+    boost::lexical_cast<int>(parts[1]);
+  } catch (std::runtime_error &) {
+    throw std::invalid_argument(
+        castMsg + "the Vanadium number part of the file name. " + explMsg);
+  }
+  try {
+    boost::lexical_cast<int>(parts[2]);
+  } catch (std::runtime_error &) {
+    throw std::invalid_argument(
+        castMsg + "the Ceria number part of the file name. " + explMsg);
   }
 
   instName = parts[0];
@@ -323,7 +364,7 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
   // default and only one supported
   std::string instStr = g_enginxStr;
   if ("ENGIN-X" != m_view->currentInstrument()) {
-    instStr = "UNKNOWN_INST";
+    instStr = "UNKNOWNINST";
   }
 
   // default extension for calibration files
@@ -486,7 +527,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                         "properties passed to the algorithms were invalid. "
                         "This is possibly because some of the settings are not "
                         "consistent. Please check the log messages for "
-                        "details. Details: " + std::string(ia.what()));
+                        "details. Details: " +
+                            std::string(ia.what()));
       throw;
     } catch (std::runtime_error &re) {
       m_view->userError("Failed to calculate Vanadium corrections",
@@ -494,7 +536,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                         "algorithms used to perform Vanadium corrections. "
                         "There was no obvious error in the input properties "
                         "but the algorithm failed. Please check the log "
-                        "messages for details." + std::string(re.what()));
+                        "messages for details." +
+                            std::string(re.what()));
       throw;
     }
   } else {

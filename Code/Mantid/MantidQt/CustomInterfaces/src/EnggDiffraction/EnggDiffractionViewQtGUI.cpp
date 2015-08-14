@@ -80,12 +80,6 @@ void EnggDiffractionViewQtGUI::initLayout() {
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabCalib() {
-  // empty defaults for current calibration
-  m_uiTabCalib.lineEdit_RBNumber->setText("");
-  m_uiTabCalib.lineEdit_current_vanadium_num->setText("");
-  m_uiTabCalib.lineEdit_current_ceria_num->setText("");
-  m_uiTabCalib.lineEdit_current_calib_filename->setText("");
-
   // Last available runs. This (as well as the empty defaults just
   // above) should probably be made persistent - and encapsulated into a
   // CalibrationParameters or similar class/structure
@@ -150,17 +144,19 @@ void EnggDiffractionViewQtGUI::readSettings() {
 
   m_uiTabCalib.lineEdit_RBNumber->setText(
       qs.value("user-params-RBNumber", "").toString());
+
   m_uiTabCalib.lineEdit_current_vanadium_num->setText(
       qs.value("user-params-current-vanadium-num", "").toString());
   m_uiTabCalib.lineEdit_current_ceria_num->setText(
       qs.value("user-params-current-ceria-num", "").toString());
+  QString calibFname = qs.value("current-calib-filename", "").toString();
+  m_uiTabCalib.lineEdit_current_calib_filename->setText(calibFname);
+  m_currentCalibFilename = calibFname.toStdString();
+
   m_uiTabCalib.lineEdit_new_vanadium_num->setText(
       qs.value("user-params-new-vanadium-num", "").toString());
   m_uiTabCalib.lineEdit_new_ceria_num->setText(
       qs.value("user-params-new-ceria-num", "").toString());
-  QString calibFname = qs.value("current-calib-filename", "").toString();
-  m_uiTabCalib.lineEdit_current_calib_filename->setText(calibFname);
-  m_currentCalibFilename = calibFname.toStdString();
 
   QString lastPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
@@ -191,14 +187,16 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
   qs.setValue("user-params-RBNumber", m_uiTabCalib.lineEdit_RBNumber->text());
+
   qs.setValue("user-params-current-vanadium-num",
               m_uiTabCalib.lineEdit_current_vanadium_num->text());
   qs.setValue("user-params-current-ceria-num", m_uiTabCalib.lineEdit_current_ceria_num->text());
+  qs.setValue("current-calib-filename",
+              m_uiTabCalib.lineEdit_current_calib_filename->text());
+
   qs.setValue("user-params-new-vanadium-num",
               m_uiTabCalib.lineEdit_new_vanadium_num->text());
   qs.setValue("user-params-new-ceria-num", m_uiTabCalib.lineEdit_new_ceria_num->text());
-  qs.setValue("current-calib-filename",
-              m_uiTabCalib.lineEdit_current_calib_filename->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
