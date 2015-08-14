@@ -107,6 +107,12 @@ void ProcessIndirectFitParameters::exec() {
     workspaceNames.push_back(paramWorkspaces);
   }
 
+  // Transpose list of workspaces, ignoring unequal length of lists
+  // this handles the case where a parameter occurs only once in the whole
+  // workspace
+  workspaceNames = reorderWorkspaceParams(workspaceNames); 
+
+
   // Join all the parameters for each peak into a single workspace per peak
   auto tempWorkspaces = std::vector<std::string>();
   auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
@@ -183,6 +189,28 @@ std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
     }
   }
   return fitParams;
+}
+
+std::vector<std::vector<std::string>> ProcessIndirectFitParameters::reorderWorkspaceParams(const std::vector<std::vector<std::string>> &original){
+	size_t maximumLength = original.at(0).size();
+	for(int i = 1; i < original.size(); i++){
+		if(original.at(i).size() > maximumLength){
+			maximumLength = original.at(i).size();
+		}
+	}
+
+	auto reorderedVector = std::vector<std::vector<std::string>>();
+
+	for(int i = 0; i < maximumLength; i++){
+		std::vector<std::string> temp;
+		for(int j = 0; j < original.size(); j++){
+			temp.push_back(original.at(j).at(i));
+		}
+		reorderedVector.push_back(temp);
+	}
+
+	return reorderedVector;
+
 }
 
 } // namespace Algorithms
