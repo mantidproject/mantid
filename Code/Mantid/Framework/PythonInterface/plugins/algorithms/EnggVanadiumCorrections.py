@@ -13,7 +13,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
 
     def category(self):
-        return "Diffraction\\Engineering;CorrectionFunctions;BackgroundCorrections;PythonAlgorithms"
+        return ("Diffraction\\Engineering;PythonAlgorithms;CorrectionFunctions;BackgroundCorrections;"
+                "EfficiencyCorrections;NormalisationCorrections")
 
     def name(self):
         return "EnggVanadiumCorrections"
