@@ -272,13 +272,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     const double thetaUpper = theta + thetaHalfWidth;
 
     const MantidVec &X = inputWS->readX(0);
-    const MantidVec &Y = inputWS->readY(i);
     
-
     for (size_t j = 0; j < nBins; ++j) {
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];
-      const double signal = Y[j];
 
       // fractional rebin
       m_calculator->setThetaFinal(thetaLower);
