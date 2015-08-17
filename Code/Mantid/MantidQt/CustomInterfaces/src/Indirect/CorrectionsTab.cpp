@@ -14,19 +14,14 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-namespace IDA
-{
   /**
    * Constructor.
    *
-   * @param parent :: the parent widget (an IndirectDataAnalysis object).
+   * @param parent :: the parent widget
    */
   CorrectionsTab::CorrectionsTab(QWidget * parent) : IndirectTab(parent),
-    m_dblEdFac(NULL), m_blnEdFac(NULL),
-    m_parent(NULL)
+    m_dblEdFac(NULL), m_blnEdFac(NULL)
   {
-    m_parent = dynamic_cast<IndirectDataAnalysis*>(parent);
-
     // Create Editor Factories
     m_dblEdFac = new DoubleEditorFactory(this);
     m_blnEdFac = new QtCheckBoxFactory(this);
@@ -119,6 +114,5 @@ namespace IDA
     return outputName;
   }
 
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

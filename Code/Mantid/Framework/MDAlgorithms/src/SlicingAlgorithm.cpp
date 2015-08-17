@@ -394,15 +394,19 @@ void SlicingAlgorithm::createGeneralTransform() {
   DataObjects::CoordTransformAffine *ct =
       new DataObjects::CoordTransformAffine(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
-  ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
-                      VMD(this->m_binningScaling));
+  //ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
+  //                    VMD(this->m_binningScaling));
+  ct->buildNonOrthogonal(m_inputMinPoint, this->m_bases,
+                          VMD(this->m_binningScaling)/VMD(m_transformScaling));
   this->m_transform = ct;
 
   // Transformation original->binned
   DataObjects::CoordTransformAffine *ctFrom =
       new DataObjects::CoordTransformAffine(inD, m_outD);
-  ctFrom->buildOrthogonal(m_translation, this->m_bases,
-                          VMD(m_transformScaling));
+  //ctFrom->buildOrthogonal(m_translation, this->m_bases,
+  //                        VMD(m_transformScaling));
+  ctFrom->buildNonOrthogonal(m_translation, this->m_bases,
+                             VMD(m_transformScaling)/VMD(m_transformScaling));
   m_transformFromOriginal = ctFrom;
 
   // Validate

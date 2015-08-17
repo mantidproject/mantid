@@ -8,6 +8,8 @@ import os
 import stresstesting
 
 class HYSPECReductionTest(stresstesting.MantidStressTest):
+    groupingFile = ''
+    tolerance=1e-8
 
     def requiredMemoryMB(self):
         return 5000

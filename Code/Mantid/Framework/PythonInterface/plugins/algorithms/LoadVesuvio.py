@@ -5,9 +5,10 @@ from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as ms
 
+from LoadEmptyVesuvio import LoadEmptyVesuvio
+
 import copy
 import numpy as np
-import os
 
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
@@ -27,14 +28,11 @@ ITHICK = 2
 BACKWARD = 0
 FORWARD = 1
 
-# Instrument parameter headers. Key in the dictionary is the number of columns in the file
-IP_HEADERS = {5:"spectrum,theta,t0,-,R", 6:"spectrum,-,theta,t0,-,R"}
-
 # Child Algorithm logging
 _LOGGING_ = False
 
 #pylint: disable=too-many-instance-attributes
-class LoadVesuvio(PythonAlgorithm):
+class LoadVesuvio(LoadEmptyVesuvio):
 
     _ws_index = None
     _spectrum_no = None
@@ -88,8 +86,12 @@ class LoadVesuvio(PythonAlgorithm):
     mon_thick = None
     foil_out = None
 
+#----------------------------------------------------------------------------------------
+
     def summary(self):
         return "Loads raw data produced by the Vesuvio instrument at ISIS."
+
+#----------------------------------------------------------------------------------------
 
     def PyInit(self):
         self.declareProperty(RUN_PROP, "", StringMandatoryValidator(),
@@ -105,8 +107,8 @@ class LoadVesuvio(PythonAlgorithm):
         self.declareProperty(MODE_PROP, "DoubleDifference", StringListValidator(MODES),
                              doc="The difference option. Valid values: %s" % str(MODES))
 
-        self.declareProperty(FileProperty(INST_PAR_PROP,"",action=FileAction.OptionalLoad,
-                                          extensions=["dat"]),
+        self.declareProperty(FileProperty(INST_PAR_PROP, "", action=FileAction.OptionalLoad,
+                                          extensions=["dat", "par"]),
                              doc="An optional IP file. If provided the values are used to correct "
                                  "the default instrument values and attach the t0 values to each "
                                  "detector")
@@ -155,7 +157,7 @@ class LoadVesuvio(PythonAlgorithm):
 
             ip_file = self.getPropertyValue(INST_PAR_PROP)
             if len(ip_file) > 0:
-                self._load_ip_file(ip_file)
+                self.foil_out = self._load_ip_file(self.foil_out, ip_file)
 
             if self._sumspectra:
                 self._sum_all_spectra()
@@ -219,7 +221,7 @@ class LoadVesuvio(PythonAlgorithm):
 
         ip_file = self.getPropertyValue(INST_PAR_PROP)
         if len(ip_file) > 0:
-            self._load_ip_file(ip_file)
+            self.foil_out = self._load_ip_file(self.foil_out, ip_file)
 
         if self._sumspectra:
             self._sum_all_spectra()
@@ -235,11 +237,8 @@ class LoadVesuvio(PythonAlgorithm):
             parameters as attributes
         """
         isis = config.getFacility("ISIS")
-        inst_name = "VESUVIO"
-        inst_dir = config.getInstrumentDirectory()
-        inst_file = os.path.join(inst_dir, inst_name + "_Definition.xml")
-        __empty_vesuvio_ws = ms.LoadEmptyInstrument(Filename=inst_file, EnableLogging=_LOGGING_)
-        empty_vesuvio = __empty_vesuvio_ws.getInstrument()
+        empty_vesuvio_ws = self._load_empty_evs()
+        empty_vesuvio = empty_vesuvio_ws.getInstrument()
 
         def to_int_list(str_param):
             """Return the list of numbers described by the string range"""
@@ -247,7 +246,7 @@ class LoadVesuvio(PythonAlgorithm):
             return range(int(elements[0]),int(elements[1]) + 1) # range goes x_l,x_h-1
 
         # Attach parameters as attributes
-        self._inst_prefix = isis.instrument(inst_name).shortName()
+        self._inst_prefix = isis.instrument("VESUVIO").shortName()
         parnames = empty_vesuvio.getParameterNames(False)
         for name in parnames:
             # Irritating parameter access doesn't let you query the type
@@ -283,8 +282,6 @@ class LoadVesuvio(PythonAlgorithm):
         self._forw_period_sum1 = to_range_tuple(self.forward_period_sum1)
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
-
-        ms.DeleteWorkspace(__empty_vesuvio_ws,EnableLogging=_LOGGING_)
 
 #----------------------------------------------------------------------------------------
 
@@ -718,31 +715,6 @@ class LoadVesuvio(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    def _load_ip_file(self, ip_file):
-        """
-            If provided, load the instrument parameter file into the result
-            workspace
-            @param ip_file A string containing the full path to an IP file
-        """
-        if ip_file == "":
-            raise ValueError("Empty filename string for IP file")
-
-        ip_header = self._get_header_format(ip_file)
-
-        # More verbose until the child algorithm stuff is sorted
-        update_inst = self.createChildAlgorithm("UpdateInstrumentFromFile")
-        update_inst.setLogging(_LOGGING_)
-        update_inst.setProperty("Workspace", self.foil_out)
-        update_inst.setProperty("Filename", ip_file)
-        update_inst.setProperty("MoveMonitors", False)
-        update_inst.setProperty("IgnorePhi", True)
-        update_inst.setProperty("AsciiHeader", ip_header)
-        update_inst.execute()
-
-        self.foil_out = update_inst.getProperty("Workspace").value
-
-#----------------------------------------------------------------------------------------
-
     def _sum_all_spectra(self):
         """
             Sum requested sets of spectra together
@@ -771,26 +743,6 @@ class LoadVesuvio(PythonAlgorithm):
             foil_start += nsummed
         #endfor
         self.foil_out = ws_out
-
-#----------------------------------------------------------------------------------------
-
-    def _get_header_format(self, ip_filename):
-        """
-            Returns the header format to be used for the given
-            IP file. Currently supports 5/6 column files.
-            Raises ValueError if anything other than a 5/6 column
-            file is found.
-            @filename ip_filename :: Full path to the IP file.
-            @returns The header format string for use with UpdateInstrumentFromFile
-        """
-        ipfile = open(ip_filename, "r")
-        first_line = ipfile.readline()
-        columns = first_line.split() # splits on whitespace characters
-        try:
-            return IP_HEADERS[len(columns)]
-        except KeyError:
-            raise ValueError("Unknown format for IP file. Currently support 5/6 column "
-                             "variants. ncols=%d" % (len(columns)))
 
 #----------------------------------------------------------------------------------------
 

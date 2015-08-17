@@ -6,7 +6,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure
 
-class Qt4MplCanvas(FigureCanvas):
+class MplFigureCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
     It can be used to replace GraphicsView of QtGui
     """

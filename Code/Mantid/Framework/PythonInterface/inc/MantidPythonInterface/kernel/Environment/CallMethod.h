@@ -22,7 +22,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 #include "MantidPythonInterface/kernel/Environment/WrapperHelpers.h"
 
 #include <boost/python/class.hpp>

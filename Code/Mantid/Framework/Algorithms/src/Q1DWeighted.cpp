@@ -269,7 +269,7 @@ void Q1DWeighted::exec() {
               // only over a forward-going cone
               if (isCone)
                 center_angle *= 2.0;
-              center_angle += wedgeOffset;
+              center_angle += M_PI / 180.0 * wedgeOffset;
               V3D sub_pix = V3D(pos.X(), pos.Y(), 0.0);
               double angle = fabs(sub_pix.angle(
                   V3D(cos(center_angle), sin(center_angle), 0.0)));

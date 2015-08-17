@@ -244,5 +244,24 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         self.checkFloat(tofs[1], 65000)
 
 
+    def test_time_shifts_for_added_event_files(self):
+        # Check for correct input
+        shifts = '12, 13, 14'
+        num_files = 4
+        output = i.check_time_shifts_for_added_event_files(number_of_files = num_files, time_shifts=shifts)
+        self.assertTrue(not output)
+
+        # Check warning is produced for mismatch in number of shifts and files, ideally #shifts = N-1 and #files=N
+        shifts2 = '12, 13'
+        num_files2 = 4
+        output2 = i.check_time_shifts_for_added_event_files(number_of_files = num_files2, time_shifts=shifts2)
+        self.assertTrue(output2.startswith('Error: Expected N-1 time shifts '))
+
+        # Check error is produced for lexically incorrect shifts, ie shifts which cannot be converted to float
+        shifts3 = '12, 13, a'
+        num_files3 = 4
+        output3 = i.check_time_shifts_for_added_event_files(number_of_files = num_files3, time_shifts=shifts3)
+        self.assertTrue(output3.startswith('Error: Elements of the time'))
+
 if __name__ == '__main__':
     unittest.main()

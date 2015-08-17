@@ -4,8 +4,10 @@ import unittest
 import mantid
 from mantid.simpleapi import *
 from mantid.api import mtd, WorkspaceGroup
+from mantid.kernel import DateAndTime, time_duration, FloatTimeSeriesProperty,BoolTimeSeriesProperty,StringTimeSeriesProperty,StringPropertyWithValue
 import SANSUtility as su
 import re
+import random
 
 TEST_STRING_DATA = 'SANS2D0003434-add' + su.ADDED_EVENT_DATA_TAG
 TEST_STRING_MON = 'SANS2D0003434-add_monitors' + su.ADDED_EVENT_DATA_TAG
@@ -24,6 +26,40 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
     
+def addSampleLogEntry(log_name, ws, start_time, extra_time_shift):
+    number_of_times = 10
+    for i in range(0, number_of_times):
+
+        val = random.randrange(0, 10, 1)
+        date = DateAndTime(start_time)
+        date +=  int(i*1e9)
+        date += int(extra_time_shift*1e9)
+        AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
+
+def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
+     # Create the event workspace
+    ws = CreateSampleWorkspace(WorkspaceType= 'Event', NumEvents = number_events, OutputWorkspace = name)
+
+    # Add the proton_charge log entries
+    if proton_charge:
+        if proton_charge_empty:
+            addSampleLogEntry('proton_charge', ws, start_time, extra_time_shift)
+        else:
+            addSampleLogEntry('proton_charge', ws, start_time, extra_time_shift)
+
+    # Add some other time series log entry
+    addSampleLogEntry('time_series_2', ws, start_time, extra_time_shift)
+    return ws
+
+def provide_event_ws_custom(name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
+    return provide_event_ws_with_entries(name=name, start_time=start_time,number_events = 100, extra_time_shift = extra_time_shift, proton_charge=proton_charge, proton_charge_empty=proton_charge_empty)
+
+def provide_event_ws(name, start_time, extra_time_shift):
+    return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = True)
+
+def provide_event_ws_wo_proton_charge(name, start_time, extra_time_shift):
+    return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = False)
+
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 
 class SANSUtilityTest(unittest.TestCase):
@@ -168,7 +204,6 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
         if os.path.exists(file_names[0]):
             os.remove(file_names[0])
 
-
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
 
     def do_test_load_check(self, event_name, monitor_name):
@@ -234,7 +269,6 @@ class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
         monitor_name3 = TEST_STRING_MON3
         self.do_test_load_check(event_name = event_name3, monitor_name = monitor_name3)
 
-
 class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
     _appendix = '_monitors'
 
@@ -263,6 +297,283 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
 
 
 
+
+
+class AddOperationTest(unittest.TestCase):
+    def compare_added_workspaces(self,ws1, ws2, out_ws, start_time1, start_time2, extra_time_shift, isOverlay):
+        self._compare_added_logs(ws1, ws2, out_ws, start_time1, start_time2, extra_time_shift, isOverlay)
+        # Could compare events here, but trusting add algorithm for now
+
+    def _compare_added_logs(self, ws1, ws2, out_ws,time1, time2, extra_time_shift, isOverlay):
+        run1 = ws1.getRun()
+        run2 = ws2.getRun()
+        out_run = out_ws.getRun()
+        props_out = out_run.getProperties()
+
+        # Check that all times of workspace1 and workspace2 can be found in the outputworkspace
+        for prop in props_out:
+            if isinstance(prop, FloatTimeSeriesProperty) or isinstance(prop, BoolTimeSeriesProperty) or isinstance(prop, StringTimeSeriesProperty):
+                prop1 = run1.getProperty(prop.name)
+                prop2 = run2.getProperty(prop.name)
+                self._compare_time_series(prop, prop1, prop2, time1, time2, extra_time_shift, isOverlay)
+            elif isinstance(prop, StringPropertyWithValue):
+                pass
+
+    def _compare_time_series(self, prop_out, prop_in1, prop_in2, time1, time2, extra_time_shift, isOverlay):
+        times_out = prop_out.times
+        times1 = prop_in1.times
+        times2 = prop_in2.times
+
+        # Total time differnce is TIME1 - (TIME2 + extraShift)
+        shift = 0.0
+        if isOverlay:
+            shift = time_duration.total_nanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift
+
+        # Check ws1 against output
+        # We shift the second workspace onto the first workspace
+        shift_ws1 = 0
+        self._assert_times(times1, times_out, shift_ws1)
+        # Check ws2 against output
+        self._assert_times(times2, times_out, shift)
+        # Check overlapping times
+        self._compare_overlapping_times(prop_in1, prop_out, times1, times2, times_out, shift)
+
+    def _assert_times(self, times_in, times_out, shift):
+        for time in times_in:
+            # Add the shift in nanaoseconds to the DateAndTime object ( the plus operator is defined
+            # for nanoseconds)
+            converted_time = time + int(shift*1e9)
+            self.assertTrue(converted_time in times_out)
+
+    def _compare_overlapping_times(self, prop_in1, prop_out, times1, times2, times_out, shift):
+        overlap_times= []
+        for time in times1:
+            if time in times2:
+                overlap_times.append(time)
+        # Now go through all those overlap times and check that the value of the 
+        # first workspace is recorded in the output
+        for overlap_time in overlap_times:
+            times1_list = list(times1)
+            timesout_list = list(times_out)
+            index_in1 = times1_list.index(overlap_time)
+            index_out = timesout_list.index(overlap_time)
+            value_in1 = prop_in1.nthValue(index_in1)
+            value_out = prop_out.nthValue(index_out)
+            self.assertTrue(value_in1 == value_out)
+
+    def test_two_files_are_added_correctly_for_overlay_on(self):
+        isOverlay = True
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+        # Create event ws1
+        start_time_1 = "2010-01-01T00:00:00"
+        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        # Create event ws2
+        start_time_2 = "2012-01-01T00:10:00"
+        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        # Create adder
+        adder = su.AddOperation(isOverlay, '')
+        # Act
+        adder.add(ws1, ws2,out_ws_name, 0)
+        out_ws = mtd[out_ws_name]
+        # Assert
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+
+    def test_two_files_are_added_correctly_for_overlay_on_and_inverted_times(self):
+        isOverlay = True
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+        # Create event ws1
+        start_time_1 = "2012-01-01T00:10:00"
+        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        # Create event ws2
+        start_time_2 = "2010-01-01T00:00:00"
+        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        # Create adder
+        adder = su.AddOperation(isOverlay, '')
+        # Act
+        adder.add(ws1, ws2,out_ws_name, 0)
+        out_ws = mtd[out_ws_name]
+        # Assert
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+
+    def test_two_files_are_added_correctly_for_overlay_off(self):
+        isOverlay = False
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+        # Create event ws1
+        start_time_1 = "2010-01-01T00:00:00"
+        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        # Create event ws2
+        start_time_2 = "2012-01-01T01:00:00"
+        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        # Create adder
+        adder = su.AddOperation(False, '')
+        # Act
+        adder.add(ws1, ws2,out_ws_name, 0)
+        out_ws = mtd[out_ws_name]
+        # Assert
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+
+    def test_two_files_are_added_correctly_with_time_shift(self):
+        isOverlay = True
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+        time_shift = 100
+        # Create event ws1
+        start_time_1 = "2010-01-01T00:00:00"
+        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        # Create event ws2
+        start_time_2 = "2012-01-01T01:10:00"
+        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = time_shift )
+        # Create adder
+        adder = su.AddOperation(True, str(time_shift))
+        # Act
+        adder.add(ws1, ws2,out_ws_name, 0)
+        out_ws = mtd[out_ws_name]
+        # Assert
+        self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = time_shift, isOverlay = isOverlay)
+
+
+    def test_multiple_files_are_overlayed_correctly(self):
+        isOverlay = True
+        names =['ws1', 'ws2', 'ws3']
+        out_ws_name = 'out_ws'
+        out_ws_name2 = 'out_ws2'
+        # Create event ws1
+        start_time_1 = "2010-01-01T00:00:00"
+        ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
+        # Create event ws2
+        start_time_2 = "2012-01-01T00:00:00"
+        ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+        # Create event ws3
+        start_time_3 = "2013-01-01T00:00:00"
+        ws3 = provide_event_ws(names[2],start_time_3, extra_time_shift = 0.0)
+        # Create adder
+        adder = su.AddOperation(True, '')
+        # Act
+        adder.add(ws1, ws2,out_ws_name, 0)
+        adder.add(out_ws_name, ws3, out_ws_name2, 0)
+        out_ws2 = mtd[out_ws_name2]
+        out_ws = mtd[out_ws_name]
+        # Assert
+        self.compare_added_workspaces(out_ws, ws2, out_ws2, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
+
+class TestCombineWorkspacesFactory(unittest.TestCase):
+    def test_that_factory_returns_overlay_class(self):
+        factory = su.CombineWorkspacesFactory()
+        alg = factory.create_add_algorithm(True)
+        self.assertTrue(isinstance(alg, su.OverlayWorkspaces))
+
+    def test_that_factory_returns_overlay_class(self):
+        factory = su.CombineWorkspacesFactory()
+        alg = factory.create_add_algorithm(False)
+        self.assertTrue(isinstance(alg, su.PlusWorkspaces))
+
+class TestOverlayWorkspaces(unittest.TestCase):
+    def test_time_from_proton_charge_log_is_recovered(self):
+        # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+
+        start_time_1 = "2010-01-01T00:00:00"
+        event_ws_1 = provide_event_ws(names[0],start_time_1, extra_time_shift = 0.0)
+
+        start_time_2 = "2012-01-01T00:00:00"
+        event_ws_2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+
+        # Act
+        overlayWorkspaces = su.OverlayWorkspaces()
+        time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
+
+        # Assert
+        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        self.assertEqual(time_difference, expected_time_difference)
+
+        # Clean up 
+        self._clean_up(names)
+        self._clean_up(out_ws_name)
+
+    def test_that_time_difference_adds_correct_optional_shift(self):
+         # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+
+        start_time_1 = "2010-01-01T00:00:00"
+        event_ws_1 = provide_event_ws(names[0],start_time_1, extra_time_shift = 0.0)
+
+        # Extra shift in seconds
+        optional_time_shift = 1000
+        start_time_2 = "2012-01-01T00:00:00"
+        event_ws_2 = provide_event_ws(names[1],start_time_2, extra_time_shift = optional_time_shift)
+
+        # Act
+        overlayWorkspaces = su.OverlayWorkspaces()
+        time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
+
+        # Assert
+        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        expected_time_difference -= optional_time_shift # Need to subtract as we add the time shift to the subtrahend
+        self.assertEqual(time_difference, expected_time_difference)
+
+        # Clean up 
+        self._clean_up(names)
+        self._clean_up(out_ws_name)
+
+    def test_error_is_raised_if_proton_charge_is_missing(self):
+        # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+
+        start_time_1 = "2010-01-01T00:00:00"
+        event_ws_1 = provide_event_ws_custom(name = names[0], start_time = start_time_1, extra_time_shift = 0.0, proton_charge = False)
+
+        # Extra shift in seconds
+        start_time_2 = "2012-01-01T00:00:00"
+        event_ws_2 = provide_event_ws_custom(name = names[1], start_time = start_time_2, extra_time_shift = 0.0,proton_charge = False)
+
+        # Act and Assert
+        overlayWorkspaces = su.OverlayWorkspaces()
+        args=[event_ws_1, event_ws_2]
+        kwargs = {}
+        self.assertRaises(RuntimeError, overlayWorkspaces._extract_time_difference_in_seconds, *args, **kwargs)
+
+        # Clean up 
+        self._clean_up(names)
+        self._clean_up(out_ws_name)
+
+    def test_correct_time_difference_is_extracted(self):
+        pass
+    def test_workspaces_are_normalized_by_proton_charge(self):
+        pass
+
+    def _clean_up(self,names):
+        for name in names:
+            if name in mtd.getObjectNames():
+                DeleteWorkspace(name)
+
+class TestTimeShifter(unittest.TestCase):
+    def test_zero_shift_when_out_of_range(self):
+        # Arrange
+        time_shifts = ['12', '333.6', '-232']
+        time_shifter = su.TimeShifter(time_shifts)
+
+        # Act and Assert
+        self.assertEqual(time_shifter.get_Nth_time_shift(0), 12.0)
+        self.assertEqual(time_shifter.get_Nth_time_shift(1), 333.6)
+        self.assertEqual(time_shifter.get_Nth_time_shift(2), -232.0)
+        self.assertEqual(time_shifter.get_Nth_time_shift(3), 0.0)
+
+    def test_zero_shift_when_bad_cast(self):
+        # Arrange
+        time_shifts = ['12', '33a.6', '-232']
+        time_shifter = su.TimeShifter(time_shifts)
+
+        # Act and Assert
+        self.assertEqual(time_shifter.get_Nth_time_shift(0), 12.0)
+        self.assertEqual(time_shifter.get_Nth_time_shift(1), 0.0)
+        self.assertEqual(time_shifter.get_Nth_time_shift(2), -232.0)
+        self.assertEqual(time_shifter.get_Nth_time_shift(3), 0.0)
 
 class TestZeroErrorFreeWorkspace(unittest.TestCase):
     def _setup_workspace(self, name, type):
@@ -397,6 +708,149 @@ class TestZeroErrorFreeWorkspace(unittest.TestCase):
 
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
+
+
+class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):
+    monitor_appendix="_monitors"
+    def test_monitors_are_renamed_correctly(self):
+        #Arrange
+        ws_1 = CreateSampleWorkspace()
+        ws_2 = CreateSampleWorkspace()
+        ws_3 = CreateSampleWorkspace()
+
+        ws_mon_1 = CreateSampleWorkspace()
+        ws_mon_2 = CreateSampleWorkspace()
+        ws_mon_3 = CreateSampleWorkspace()
+
+        ws_group = GroupWorkspaces(InputWorkspaces=[ws_1, ws_2, ws_3])
+        ws_mon_group = GroupWorkspaces(InputWorkspaces=[ws_mon_1, ws_mon_2, ws_mon_3])
+
+        # Act
+        su.rename_monitors_for_multiperiod_event_data(ws_mon_group, ws_group, self.monitor_appendix)
+
+        # Assert
+        self.assertTrue(ws_mon_1.name() == ws_1.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertTrue(ws_mon_2.name() == ws_2.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+        self.assertTrue(ws_mon_3.name() == ws_3.name() + self.monitor_appendix, "Monitors should be renamed to xxxx_monitors")
+
+        # Clean up
+        for element in mtd.getObjectNames():
+            if element in mtd:
+                DeleteWorkspace(element)
+
+    def test_expection_is_raised_when_workspaec_and_monitor_mismatch(self):
+        #Arrange
+        ws_1 = CreateSampleWorkspace()
+        ws_2 = CreateSampleWorkspace()
+        ws_3 = CreateSampleWorkspace()
+
+        ws_mon_1 = CreateSampleWorkspace()
+        ws_mon_2 = CreateSampleWorkspace()
+
+        ws_group = GroupWorkspaces(InputWorkspaces=[ws_1, ws_2, ws_3])
+        ws_mon_group = GroupWorkspaces(InputWorkspaces=[ws_mon_1, ws_mon_2])
+
+        # Act + Assert
+        args = {'monitor_worksapce': ws_mon_group, 'workspace':ws_group, 'appendix':self.monitor_appendix}
+        self.assertRaises(RuntimeError, su.rename_monitors_for_multiperiod_event_data, *args)
+
+        # Clean up
+        for element in mtd.getObjectNames():
+            if element in mtd:
+                DeleteWorkspace(element)
+
+class TestConvertibleToInteger(unittest.TestCase):
+    def test_converts_true_to_integer_when_integer(self):
+        # Arrange
+        input = 3
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_converts_true_to_integer_when_convertible_string(self):
+        # Arrange
+        input = '34'
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test__converts_false_to_integer_when_non_convertible_string(self):
+        # Arrange
+        input = '34_gt'
+        # Act
+        result = su.is_convertible_to_int(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestConvertibleToFloat(unittest.TestCase):
+    def test_converts_true_to_float_when_float(self):
+        # Arrange
+        input = 3.8
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_convertible_true_to_float_when_convertible_string(self):
+        # Arrange
+        input = "4.78"
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_converts_false_to_float_when_convertible_string(self):
+        # Arrange
+        input = "4.78_tg"
+        # Act
+        result = su.is_convertible_to_float(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestValidXmlFileList(unittest.TestCase):
+    def test_finds_valid_xml_file_list(self):
+        # Arrange
+        input = ["test1.xml", "test2.xml", "test3.xml"]
+        # Act
+        result =su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertTrue(result)
+
+    def test_finds_invalid_xml_file_list(self):
+        # Arrange
+        input = ["test1.xml", "test2.ccl", "test3.xml"]
+        # Act
+        result =su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertFalse(result)
+
+    def test_finds_empty_list(self):
+        # Arrange
+        input = []
+        # Act
+        result = su.is_valid_xml_file_list(input)
+        # Assert
+        self.assertFalse(result)
+
+class TestConvertToAndFromPythonStringList(unittest.TestCase):
+    def test_converts_from_string_to_list(self):
+        # Arrange
+        input = "test1.xml, test2.xml, test3.xml"
+        # Act
+        result = su.convert_to_string_list(input)
+        # Assert
+        expected = "['test1.xml','test2.xml','test3.xml']"
+        self.assertEqual(expected, result)
+    def test_converts_from_list_to_string(self):
+        # Arrange
+        input = ["test1.xml", "test2.xml", "test3.xml"]
+        # Act
+        result = su.convert_from_string_list(input)
+        # Assert
+        expected = "test1.xml,test2.xml,test3.xml"
+        self.assertEqual(expected, result)
 
 if __name__ == "__main__":
     unittest.main()

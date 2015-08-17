@@ -38,22 +38,6 @@ namespace CustomInterfaces
   {
     m_view->setWaitingCursor();
 
-    // Check time limits
-    if (auto timeRange = m_view->timeRange()) {
-
-      double tmin = (*timeRange).first;
-      double tmax = (*timeRange).second;
-      if ( tmin >= tmax ){
-        m_view->restoreCursor();
-        m_view->displayError("Invalid time interval");
-        return;
-      }
-    } else {
-      m_view->restoreCursor();
-      m_view->displayError("No time interval");
-      return;
-    }
-
     try
     {
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
@@ -69,8 +53,13 @@ namespace CustomInterfaces
       // If time limiting requested, set min/max times
       if (auto timeRange = m_view->timeRange())
       {
-        alg->setProperty("TimeMin", timeRange->first);
-        alg->setProperty("TimeMax", timeRange->second);
+        double timeMin = (*timeRange).first;
+        double timeMax = (*timeRange).second;
+        if (timeMin>=timeMax) {
+          throw std::invalid_argument("Invalid time limits");
+        }
+        alg->setProperty("TimeMin", timeMin);
+        alg->setProperty("TimeMax", timeMax);
       }
 
       // If corrections from custom file requested, set file property

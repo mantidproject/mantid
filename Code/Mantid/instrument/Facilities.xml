@@ -60,6 +60,11 @@
     <livedata address="NDXHRPD:6789" />
   </instrument>
 
+  <instrument name="IMAT">
+    <technique>Neutron Imaging</technique>
+    <livedata address="NDXIMAT:6789" />
+  </instrument>
+
   <instrument name="INES" shortname="INS" beamline="N8">
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXINES:6789" />
@@ -389,7 +394,7 @@
 
    <instrument name="USANS" shortname="USANS" beamline="1A">
       <technique>Small Angle Scattering</technique>
-      <livedata address="usans-daq1.sns.gov:31415" />
+      <livedata address="bl1a-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="VULCAN" beamline="7">
@@ -399,7 +404,7 @@
    <instrument name="CORELLI" beamline="9">
 	<technique>Neutron Diffraction</technique>
 	<technique>Diffuse Scattering</technique>
-	<livedata address="corelli-daq1.sns.gov:31415" />
+	<livedata address="bl9-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="POWGEN" shortname="PG3" beamline="11A">
@@ -429,14 +434,14 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-    <livedata address="vision-daq1.sns.gov:31415" />
+    <livedata address="bl16b-daq1.sns.gov:31415" />
   </instrument>
 
    <instrument name="SEQUOIA" shortname="SEQ" beamline="17">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-    <livedata address="sequoia-sms.sns.gov:31415" />
+    <livedata address="bl17-daq1.sns.gov:31415" />
    </instrument>
 
    <instrument name="ARCS" beamline="18">
@@ -631,7 +636,7 @@
   <instrument name="TOFTOF">
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
-    <technique>Time-of-flight Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
   </instrument>
 </facility>
 

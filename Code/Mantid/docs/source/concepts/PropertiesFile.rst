@@ -126,6 +126,7 @@ to alter and those properties are detailed below.
 +-------------------------------------------+---------------------------------------------------+-----------------------+
 |logging.channels.fileChannel.path          | The Path to the log file.                         |../logs/mantid.log     |
 +-------------------------------------------+---------------------------------------------------+-----------------------+
+
 The logging priority levels for the file logging and console logging can also be adjusted in python using the commands:
 
 .. testcode:: LoggingConfigExample
@@ -135,8 +136,6 @@ The logging priority levels for the file logging and console logging can also be
   #Set the file to only log at critical level (2=critical)
   ConfigService.setConsoleLogLevel(2)
   
-.. testoutput:: AddSampleLogExample 
-
 
 
 MantidPlot Properties

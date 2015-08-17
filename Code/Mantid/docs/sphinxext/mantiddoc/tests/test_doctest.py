@@ -149,7 +149,7 @@ ALL_FAIL_EX = \
 """Document: algorithms/AllFailed
 ------------------------------
 **********************************************************************
-File "algorithms/AllFailed.rst", line 127, in Ex2
+File "algorithms/AllFailed.rst", line 127, in Ex2[31]
 Failed example:
     print "Multi-line failed"
     print "test"
@@ -169,13 +169,13 @@ Got:
 **********************************************************************
 2 items had failures:
    1 of   1 in Ex1
-   1 of   1 in Ex2
+   1 of   1 in Ex2[31]
 2 tests in 2 items.
 0 passed and 2 failed.
 ***Test Failed*** 2 failures.
 2 items passed all tests:
    1 tests in Ex1 (cleanup code)
-   1 tests in Ex2 (cleanup code)
+   1 tests in Ex2[31] (cleanup code)
 2 tests in 2 items.
 2 passed and 0 failed.
 Test passed.
@@ -275,9 +275,9 @@ class DocTestOutputParserTest(unittest.TestCase):
         self.assertEquals(2, suite.ntests)
 
         cases = suite.testcases
-        expected_names = ["Ex2", "Ex1"]
+        expected_names = ["Ex2[31]", "Ex1"]
         expected_errors = [
-"""File "algorithms/AllFailed.rst", line 127, in Ex2
+"""File "algorithms/AllFailed.rst", line 127, in Ex2[31]
 Failed example:
     print "Multi-line failed"
     print "test"

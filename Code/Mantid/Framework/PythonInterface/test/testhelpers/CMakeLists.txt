@@ -32,7 +32,7 @@ set_python_properties( PythonWorkspaceCreationHelper WorkspaceCreationHelper )
 set_target_output_directory ( PythonWorkspaceCreationHelper ${OUTPUT_DIR} .pyd )
 # Override folder
 set_property ( TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python" )
-target_link_libraries ( PythonWorkspaceCreationHelper LINK_PRIVATE 
+target_link_libraries ( PythonWorkspaceCreationHelper LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             PythonAPIModule
             DataObjects
             DataHandling

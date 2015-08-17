@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "IndirectDataAnalysis.h"
 #include "IndirectTab.h"
 
 class QwtPlotCurve;
@@ -43,8 +42,6 @@ namespace MantidQt
 namespace MantidQt
 {
 namespace CustomInterfaces
-{
-namespace IDA
 {
   class DLLExport CorrectionsTab : public IndirectTab
   {
@@ -89,12 +86,7 @@ namespace IDA
 
     /// Overidden by child class.
     virtual void loadSettings(const QSettings & settings) = 0;
-
-    /// A pointer to the parent (friend) IndirectDataAnalysis object.
-    IndirectDataAnalysis * m_parent;
-
   };
-} // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 

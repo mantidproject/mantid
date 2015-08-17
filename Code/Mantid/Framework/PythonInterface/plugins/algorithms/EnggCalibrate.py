@@ -12,7 +12,7 @@ class EnggCalibrate(PythonAlgorithm):
         return "EnggCalibrate"
 
     def summary(self):
-        return "Calibrates a detector bank by performing a single peak fitting."
+        return "Calibrates a detector bank (or group of detectors) by performing a single peak fitting."
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
@@ -27,6 +27,27 @@ class EnggCalibrate(PythonAlgorithm):
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
 
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
+                                                     PropertyMode.Optional),
+                             'Workspace with the Vanadium (correction and calibration) run. '
+                             'Alternatively, when the Vanadium run has been already processed, '
+                             'the properties can be used')
+
+        self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             '(integration result) and one row per spectrum. This can be used in '
+                             'combination with OutVanadiumCurveFits from a previous execution and '
+                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+
+        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc = 'A workspace2D with the fitting workspaces corresponding to '
+                             'the instrument banks. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                             'workspace is generated.')
+
         import EnggUtils
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
                              direction=Direction.Input,
@@ -37,7 +58,7 @@ class EnggCalibrate(PythonAlgorithm):
         self.declareProperty(self.INDICES_PROP_NAME, '', direction=Direction.Input,
                              doc = 'Sets the spectrum numbers for the detectors '
                              'that should be considered in the calibration (all others will be '
-                             'ignored). This options cannot be used together with Bank, as they overlap. '
+                             'ignored). This option cannot be used together with Bank, as they overlap. '
                              'You can give multiple ranges, for example: "0-99", or "0-9, 50-59, 100-109".')
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
@@ -50,10 +71,10 @@ class EnggCalibrate(PythonAlgorithm):
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
-        self.declareProperty("Difc", 0.0, direction = Direction.Output,\
+        self.declareProperty("Difc", 0.0, direction = Direction.Output,
                              doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
 
-        self.declareProperty("Zero", 0.0, direction = Direction.Output,\
+        self.declareProperty("Zero", 0.0, direction = Direction.Output,
                              doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
 
     def PyExec(self):
@@ -61,12 +82,13 @@ class EnggCalibrate(PythonAlgorithm):
         import EnggUtils
 
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
+                                     self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
         # Get peaks in dSpacing from file
         expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                         self.getProperty('ExpectedPeaks').value)
+                                                       self.getProperty('ExpectedPeaks').value)
 
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
@@ -98,11 +120,13 @@ class EnggCalibrate(PythonAlgorithm):
 
         return difc, zero
 
-    def _focusRun(self, ws, bank, indices):
+    def _focusRun(self, ws, vanWS, bank, indices):
         """
-        Focuses the input workspace by running EnggFocus which will produce a single spectrum workspace.
+        Focuses the input workspace by running EnggFocus as a child algorithm, which will produce a
+        single spectrum workspace.
 
         @param ws :: workspace to focus
+        @param vanWS :: workspace with Vanadium run for corrections
         @param bank :: the focussing will be applied on the detectors of this bank
         @param indices :: list of indices to consider, as an alternative to bank (bank and indices are
         mutually exclusive)
@@ -111,12 +135,24 @@ class EnggCalibrate(PythonAlgorithm):
         """
         alg = self.createChildAlgorithm('EnggFocus')
         alg.setProperty('InputWorkspace', ws)
+
         alg.setProperty('Bank', bank)
         alg.setProperty(self.INDICES_PROP_NAME, indices)
 
         detPos = self.getProperty('DetectorPositions').value
         if detPos:
             alg.setProperty('DetectorPositions', detPos)
+
+        if vanWS:
+            alg.setProperty('VanadiumWorkspace', vanWS)
+
+        integWS = self.getProperty('VanIntegrationWorkspace').value
+        if integWS:
+            alg.setProperty('VanIntegrationWorkspace', integWS)
+
+        curvesWS = self.getProperty('VanCurvesWorkspace').value
+        if curvesWS:
+            alg.setProperty('VanCurvesWorkspace', curvesWS)
 
         alg.execute()
 

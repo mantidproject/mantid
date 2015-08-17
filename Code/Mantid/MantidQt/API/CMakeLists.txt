@@ -25,6 +25,7 @@ set ( SRC_FILES
   src/PlotAxis.cpp
   src/PropertyWidget.cpp
   src/PropertyWidgetFactory.cpp
+  src/PythonThreading.cpp
   src/PythonRunner.cpp
   src/QtSignalChannel.cpp
   src/QwtRasterDataMD.cpp
@@ -42,10 +43,10 @@ set ( SRC_FILES
 )
 
 set ( MOC_FILES
-  inc/MantidQtAPI/AlgorithmDialog.h 
-  inc/MantidQtAPI/AlgorithmRunner.h 
+  inc/MantidQtAPI/AlgorithmDialog.h
+  inc/MantidQtAPI/AlgorithmRunner.h
   inc/MantidQtAPI/AlgorithmPropertiesWidget.h
-  inc/MantidQtAPI/BatchAlgorithmRunner.h 
+  inc/MantidQtAPI/BatchAlgorithmRunner.h
   inc/MantidQtAPI/BoolPropertyWidget.h
   inc/MantidQtAPI/FilePropertyWidget.h
   inc/MantidQtAPI/GenericDialog.h
@@ -87,6 +88,8 @@ set ( INC_FILES
   inc/MantidQtAPI/MdConstants.h
   inc/MantidQtAPI/MdPlottingCmapsProvider.h
   inc/MantidQtAPI/MdSettings.h
+  inc/MantidQtAPI/PythonThreading.h
+  inc/MantidQtAPI/PythonSystemHeader.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
   inc/MantidQtAPI/QwtRasterDataMD.h
   inc/MantidQtAPI/QwtWorkspaceBinData.h
@@ -96,9 +99,9 @@ set ( INC_FILES
   inc/MantidQtAPI/SignalRange.h
 )
 
-set ( UI_FILES 
+set ( UI_FILES
   inc/MantidQtAPI/ManageUserDirectories.ui
-  inc/MantidQtAPI/ScriptRepositoryView.ui 
+  inc/MantidQtAPI/ScriptRepositoryView.ui
 )
 
 set( TEST_FILES
@@ -113,15 +116,11 @@ set( TEST_FILES
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
-
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
-
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
-# For Windows:
-# add_definitions ( -DIN_MANTIDQT_API )
-# add_definitions ( -DQWT_DLL )
-# add_definitions ( -DQWT_MAKEDLL )
+# Python includes
+include_directories ( ${PYTHON_INCLUDE_PATH} )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtAPI/PrecompiledHeader.h ALL_SRC )
@@ -131,9 +130,12 @@ set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_A
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
-endif () 
+endif ()
 
-target_link_libraries ( MantidQtAPI LINK_PRIVATE ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} ${POCO_LIBRARIES} ${Boost_LIBRARIES} )
+target_link_libraries ( MantidQtAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
+  ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
+)
 
 ###########################################################################
 # Windows: Generate a qt.conf file so that the dev build finds the qt
@@ -147,7 +149,7 @@ if ( WIN32 )
   configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
   add_custom_command ( TARGET MantidQtAPI POST_BUILD
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                               ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} 
+                               ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF}
                                ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
 endif()
 

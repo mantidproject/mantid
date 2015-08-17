@@ -2,7 +2,7 @@
 // Includes
 //-------------------------------------------
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Environment/GlobalInterpreterLock.h"
 
 #include <frameobject.h> //Python
 

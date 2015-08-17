@@ -37,17 +37,13 @@ void PredictFractionalPeaks::init() {
       new WorkspaceProperty<IPeaksWorkspace>("FracPeaks", "",
                                              Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-
   declareProperty(
-      new Kernel::ArrayProperty<double>(string("HOffset"), string("-.5,0, .5")),
+      new Kernel::ArrayProperty<double>(string("HOffset"), "-0.5,0.0,0.5"),
       "Offset in the h direction");
-
+  declareProperty(new Kernel::ArrayProperty<double>(string("KOffset"), "0"),
+                  "Offset in the h direction");
   declareProperty(
-      new Kernel::ArrayProperty<double>(string("KOffset"), string("0")),
-      "Offset in the h direction");
-
-  declareProperty(
-      new Kernel::ArrayProperty<double>(string("LOffset"), string("-.5,.5")),
+      new Kernel::ArrayProperty<double>(string("LOffset"), "-0.5,0.5"),
       "Offset in the h direction");
 
   declareProperty("IncludeAllPeaksInRange", false,

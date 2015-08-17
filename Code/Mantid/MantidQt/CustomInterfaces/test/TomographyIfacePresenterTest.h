@@ -80,8 +80,7 @@ public:
     pres.notify(ITomographyIfacePresenter::SetupResourcesAndTools);
 
     // needs one tool at a very minimum
-    EXPECT_CALL(mockView, currentReconTool()).Times(1).WillOnce(
-        Return(g_ccpi));
+    EXPECT_CALL(mockView, currentReconTool()).Times(1).WillOnce(Return(g_ccpi));
     // and basic tools settings
     EXPECT_CALL(mockView, reconToolsSettings()).Times(0);
 
@@ -156,10 +155,13 @@ public:
         mockView,
         showImage(testing::Matcher<const Mantid::API::MatrixWorkspace_sptr &>(
             testing::_))).Times(1);
+    EXPECT_CALL(mockView,
+                showImage(testing::Matcher<const std::string &>(testing::_)))
+        .Times(0);
+
     // No errors, no warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-    // EXPECT_CALL(pres, notify(testing::_)).Times(1);
 
     pres.notify(ITomographyIfacePresenter::ViewImg);
   }

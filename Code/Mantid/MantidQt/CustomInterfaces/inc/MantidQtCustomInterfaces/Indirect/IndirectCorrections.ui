@@ -26,19 +26,19 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="tabCalcCorr">
+      <widget class="QWidget" name="tabCalculatePaalmanPings">
        <attribute name="title">
-        <string>Calculate Corrections</string>
+        <string>Calculate Paalman Pings</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabApplyCorr">
+      <widget class="QWidget" name="tabApplyPaalmanPings">
        <attribute name="title">
-        <string>Apply Corrections</string>
+        <string>Apply Paalman Pings</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabAbsorptionCorrections">
        <attribute name="title">
-        <string>Absorption Corrections</string>
+        <string>Absorption</string>
        </attribute>
       </widget>
      </widget>

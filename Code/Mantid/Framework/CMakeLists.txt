@@ -55,6 +55,8 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   if ( MPI_BUILD )
   include ( MPISetup )
         set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+        find_package ( OpenGL REQUIRED )
+        find_package ( GSL REQUIRED )
   endif ( MPI_BUILD )
 endif ()
 
@@ -154,7 +156,8 @@ install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
           DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE GROUP_WRITE
                                 WORLD_READ WORLD_EXECUTE WORLD_WRITE
-          PATTERN "*UNIT_TESTING*" EXCLUDE
+          PATTERN "*UNIT_TESTING*" EXCLUDE 
+          PATTERN ".gitignore" EXCLUDE
 )
 
 # Ships .py files but only ship compiled pyd files for supported platforms.

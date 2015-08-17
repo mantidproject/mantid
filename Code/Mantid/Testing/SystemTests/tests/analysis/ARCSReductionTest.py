@@ -10,6 +10,10 @@ from numpy import *
 
 class ARCSReductionTest(stresstesting.MantidStressTest):
 
+    vanFile1=''
+    vanFile0=''
+    nxspeFile=''
+
     def requiredFiles(self):
         return ["ARCS_23961_event.nxs","WBARCS.nxs"]
 

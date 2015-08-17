@@ -151,5 +151,18 @@ namespace Mantid
     {
       return m_specialCoords;
     }
+      
+    std::vector<int> MDHWInMemoryLoadingPresenter::getExtents()
+    {
+      using namespace Mantid::API;
+      Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
+      IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
+      std::vector<int> extents(6, 0);
+      extents[1] = static_cast<int>(histoWs->getXDimension()->getNBins());
+      extents[3] = static_cast<int>(histoWs->getYDimension()->getNBins());
+      extents[5] = static_cast<int>(histoWs->getZDimension()->getNBins());
+      return extents;
+    }
+      
   }
 }

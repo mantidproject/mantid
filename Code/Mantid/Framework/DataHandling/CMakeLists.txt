@@ -8,12 +8,12 @@ set ( SRC_FILES
 	src/CreateModeratorModel.cpp
 	src/CreateSampleShape.cpp
 	src/CreateSimulationWorkspace.cpp
-	src/DecoratorWorkspace.cpp
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
 	src/DownloadFile.cpp
 	src/DownloadInstrument.cpp
+	src/EventWorkspaceCollection.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -59,6 +59,7 @@ set ( SRC_FILES
 	src/LoadLLB.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
+        src/LoadMLZ.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMcStas.cpp
@@ -166,12 +167,12 @@ set ( INC_FILES
 	inc/MantidDataHandling/CreateModeratorModel.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/CreateSimulationWorkspace.h
-	inc/MantidDataHandling/DecoratorWorkspace.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
 	inc/MantidDataHandling/DownloadFile.h
 	inc/MantidDataHandling/DownloadInstrument.h
+	inc/MantidDataHandling/EventWorkspaceCollection.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -217,6 +218,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
+        inc/MantidDataHandling/LoadMLZ.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMcStas.h
@@ -323,12 +325,12 @@ set ( TEST_FILES
 	CreateModeratorModelTest.h
 	CreateSampleShapeTest.h
 	CreateSimulationWorkspaceTest.h
-	DecoratorWorkspaceTest.h
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
 	DownloadFileTest.h
 	DownloadInstrumentTest.h
+	EventWorkspaceCollectionTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -367,6 +369,7 @@ set ( TEST_FILES
 	LoadIsawDetCalTest.h
 	LoadLLBTest.h
 	LoadLogTest.h
+        LoadMLZTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h
@@ -484,7 +487,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
 
-target_link_libraries ( DataHandling LINK_PRIVATE ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

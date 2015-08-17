@@ -29,8 +29,10 @@
 #ifndef PYTHON_SCRIPT_H
 #define PYTHON_SCRIPT_H
 
-#include "PythonSystemHeader.h"
-#include "PythonThreading.h"
+// Python headers have to go first!
+#include "MantidQtAPI/PythonSystemHeader.h"
+#include "MantidQtAPI/PythonThreading.h"
+
 #include "Script.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
 
@@ -43,7 +45,7 @@ class PythonScripting;
 struct _sipWrapperType;
 
 /**
- * This class holds, compiles and executes the Python code. 
+ * This class holds, compiles and executes the Python code.
  */
 class PythonScript : public Script, MantidQt::API::WorkspaceObserver
 {
@@ -82,9 +84,9 @@ public:
   /// Special handle for syntax errors as they have no traceback
   QString constructSyntaxErrorStr(PyObject *syntaxError);
   /// Convert a traceback to a string
-  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback, 
+  void tracebackToMsg(QTextStream &msgStream, PyTracebackObject* traceback,
                       bool root=true);
-  
+
   /// Set the name of the passed object so that Python can refer to it
   bool setQObject(QObject *val, const char *name);
   /// Set the name of the integer so that Python can refer to it
@@ -161,6 +163,10 @@ private:
   QVariant evaluateImpl();
   /// Execute the current code and return a boolean indicating success/failure
   bool executeImpl();
+  /// Request that this script be aborted
+  void abortImpl();
+  /// Get the value of the Python thread ID when a script is executed
+  long getThreadID();
 
   /// Performs the call to Python from a string
   bool executeString();
@@ -170,6 +176,7 @@ private:
   bool checkResult(PyObject *result);
   /// Compile to bytecode
   PyObject * compileToByteCode(bool for_eval=true);
+
 
   // ---------------------------- Variable reference ---------------------------------------------
   /// Listen to add notifications from the ADS
@@ -190,7 +197,10 @@ private:
 
   PythonScripting * m_pythonEnv;
   PyObject *localDict, *stdoutSave, *stderrSave;
-  PyObject *m_CodeFileObject;
+  PyObject *m_codeFileObject;
+  long m_threadID; ///< Python thread id
+  /// A reference to the IAlgorithm._algorithmInThread static method
+  PyObject * m_algorithmInThread;
   bool isFunction;
   QString fileName;
   bool m_isInitialized;
