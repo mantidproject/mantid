@@ -574,6 +574,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
 
+    def checkInfoMatch(self, left, right):
+        if (left["frequency"].value is not None) and (right["frequency"].value is not None) \
+           and (abs(left["frequency"].value - right["frequency"].value)/left["frequency"].value > .05):
+            raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
+                               % (left["frequency"].value, right["frequency"].value))
+        if (left["wavelength"].value is not None) and (right["wavelength"].value is not None) \
+                   and abs(left["wavelength"].value - right["wavelength"].value)/left["wavelength"].value > .05:
+            raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
+                               % (left["wavelength"].value, right["wavelength"].value))
+
     #pylint: disable=too-many-arguments
     def _focusAndSum(self, runnumbers, extension, filterWall, calib, preserveEvents=True):
         """Load, sum, and focus data in chunks"""
@@ -592,14 +602,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 sumRun = temp
                 info = tempinfo
             else:
-                if (tempinfo["frequency"].value is not None) and (info["frequency"].value is not None) \
-                   and (abs(tempinfo["frequency"].value - info["frequency"].value)/info["frequency"].value > .05):
-                    raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
-                                       % (tempinfo["frequency"].value, info["frequency"].value))
-                if (tempinfo["wavelength"].value is not None) and (info["wavelength"].value is not None) \
-                   and abs(tempinfo["wavelength"].value - info["wavelength"].value)/info["wavelength"].value > .05:
-                    raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
-                                       % (tempinfo["wavelength"].value, info["wavelength"].value))
+                self.checkInfoMatch(info, tempinfo)
+
                 sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
                 if sumRun.id() == EVENT_WORKSPACE_ID:
                     sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
