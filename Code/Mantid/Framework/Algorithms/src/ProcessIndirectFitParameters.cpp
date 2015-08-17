@@ -121,7 +121,7 @@ void ProcessIndirectFitParameters::exec() {
   conjoin->setProperty("CheckOverlapping", false);
   const size_t wsMax = workspaceNames.size();
   for (size_t j = 0; j < wsMax; j++) {
-    auto tempPeakWs = workspaceNames.at(j).at(0);
+    std::string tempPeakWs = workspaceNames.at(j).at(0);
     const size_t paramMax = workspaceNames.at(j).size();
     for (size_t k = 1; k < paramMax; k++) {
       auto paramWs = workspaceNames.at(j).at(k);
@@ -134,7 +134,7 @@ void ProcessIndirectFitParameters::exec() {
   }
 
   // Join all peaks into a single workspace
-  auto tempWorkspace = tempWorkspaces.at(0);
+  std::string tempWorkspace = tempWorkspaces.at(0);
   for (auto it = tempWorkspaces.begin() + 1; it != tempWorkspaces.end(); ++it) {
     conjoin->setProperty("InputWorkspace1", tempWorkspace);
     conjoin->setProperty("InputWorkspace2", *it);
@@ -152,7 +152,7 @@ void ProcessIndirectFitParameters::exec() {
   
   // Replace axis on workspaces with text axis
   auto axis = new TextAxis(outputWs->getNumberHistograms());
-  int offset = 0;
+  size_t offset = 0;
   for (size_t j = 0; j < workspaceNames.size(); j++) {
     auto peakWs = workspaceNames.at(j);
     for (size_t k = 0; k < peakWs.size(); k++) {
@@ -220,16 +220,16 @@ std::vector<std::vector<std::string>>
 ProcessIndirectFitParameters::reorder2DVector(
     const std::vector<std::vector<std::string>> &original) {
   size_t maximumLength = original.at(0).size();
-  for (int i = 1; i < original.size(); i++) {
+  for (size_t i = 1; i < original.size(); i++) {
     if (original.at(i).size() > maximumLength) {
       maximumLength = original.at(i).size();
     }
   }
 
   auto reorderedVector = std::vector<std::vector<std::string>>();
-  for (int i = 0; i < maximumLength; i++) {
+  for (size_t i = 0; i < maximumLength; i++) {
     std::vector<std::string> temp;
-    for (int j = 0; j < original.size(); j++) {
+    for (size_t j = 0; j < original.size(); j++) {
       if (original.at(j).size() > i) {
         temp.push_back(original.at(j).at(i));
       }
