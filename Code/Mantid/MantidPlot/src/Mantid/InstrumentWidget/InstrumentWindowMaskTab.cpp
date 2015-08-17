@@ -777,9 +777,9 @@ void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   // Make sure we have stored the Mask in the helper MaskWorkspace
-  storeMask();
+  storeMask(invertMask);
   setSelectActivity();
-  createMaskWorkspace(invertMask, false);
+  createMaskWorkspace(false, false);
 
 #if 0
   // TESTCASE
@@ -803,14 +803,16 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   // Make sure we have stored the Mask in the helper MaskWorkspace
-  storeMask();
-
+  storeMask(invertMask);
   setSelectActivity();
-  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask,true);
+  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(false,true);
   if (outputWS)
   {
     clearShapes();
+    
+    QApplication::restoreOverrideCursor();
     QString fileName = m_instrWindow->getSaveFileName("Select location and name for the mask file", "XML files (*.xml);;All (*.* *)");
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (!fileName.isEmpty())
     {
@@ -837,7 +839,7 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     // Make sure we have stored the Mask in the helper MaskWorkspace
-    storeMask();
+    storeMask(invertMask);
 
     setSelectActivity();
     Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(false,true);
@@ -850,7 +852,7 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
         Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("MaskWorkspaceToCalFile",-1);
         alg->setPropertyValue("InputWorkspace",outputWS->name());
         alg->setPropertyValue("OutputFile",fileName.toStdString());
-        alg->setProperty("Invert",invertMask);
+        alg->setProperty("Invert",false);
         alg->execute();
       }
       Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
