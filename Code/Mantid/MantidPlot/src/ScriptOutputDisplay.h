@@ -67,7 +67,7 @@ private:
   /// Create the action pointers
   void initActions();
   /// Reset the default font
-  void resetFont();
+  void resetFont(bool setFontSize = false);
 
 private:
   /// Copy action

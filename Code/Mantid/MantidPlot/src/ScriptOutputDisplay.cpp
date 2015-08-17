@@ -287,12 +287,14 @@ void ScriptOutputDisplay::initActions()
 
 /**
  * Rest the font to default
+ * @param setFontSize - Whether to set the font size
  */
-void ScriptOutputDisplay::resetFont()
+void ScriptOutputDisplay::resetFont(bool setFontSize)
 {
   QFont f("Andale Mono");
   f.setFixedPitch(true);
-  f.setPointSize(8);
+  if (setFontSize)
+    f.setPointSize(8);
   setCurrentFont(f);
   setMinimumWidth(5);
   setMinimumHeight(5);
