@@ -8,13 +8,12 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
                     3206.8,2474.22,2341.21,2304.44,1436.05,1391.58,1104.9,
                     899.14,869.98,405.654,400.143]
     as_muonic_xr = [1866.9,1855.8,436.6,427.5]
-    y_pos = -0.001
-    
+
     #TESTING FOR ONE WORKSPACE IN GROUP WORKSPACE
     def test_muonic_xrd_single_ws_produced(self):
         #Setting up the work space manually
         au_peak_values = self.au_muonic_xr
-        y_position = self.y_pos
+        y_position = -0.001 #same as default used by GetNegMuMuonic
         y_pos_ws = [y_position]*len(au_peak_values)
         au_muon_xr_ws = CreateWorkspace(au_peak_values[:], y_pos_ws[:])
         #Check that au_muon_xr_ws is not null
@@ -23,7 +22,7 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         #Check that au_muon_group is not null
         self.assertFalse(au_muon_group==None)
         #Get the algorithm to produce the same workspace
-        neg_mu_xr_group = GetNegMuMuonicXRD("Au", -0.001)
+        neg_mu_xr_group = GetNegMuMuonicXRD("Au") #testing default y-Axis position value
         #Check that neg_mu_xr_ws is not null
         self.assertFalse(neg_mu_xr_group==None)
         #Test number of workspaces in group
@@ -31,7 +30,7 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
                         neg_mu_xr_group.getNumberOfEntries())
         self.assertTrue(au_muon_group.size() == 1)
         self.assertTrue(neg_mu_xr_group.size() == 1)
-        
+
         #now testing the one workspace in the workspace group
         neg_mu_xr_ws = neg_mu_xr_group[0]
         au_muon_ws = au_muon_group[0]
@@ -39,7 +38,7 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         self.assertEqual(neg_mu_xr_ws.getNumberHistograms(), au_muon_ws.getNumberHistograms())
         #check number of bins is equal
         self.assertEqual(au_muon_ws.blocksize(), neg_mu_xr_ws.blocksize())
-        
+
         #check length of XValues is the same
         self.assertEqual(len(au_muon_ws.readX(0)), len(neg_mu_xr_ws.readX(0)))
         #check all the XValues are the same
@@ -48,20 +47,60 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         self.assertEqual(len(au_muon_ws.readY(0)), len(neg_mu_xr_ws.readY(0)))
         #check all the YValues are the same
         self.assertItemsEqual(au_muon_ws.readY(0),neg_mu_xr_ws.readY(0))
-        
+
     #TESTING FOR MORE THAN ONE WORKSPACE IN GROUP WORKSPACE
     def test_muonic_xrd_group_workspace(self):
-        y_position = self.y_pos
+        y_position = 0.2
+        #Setting up au_muonic workspace
         au_peak_values = self.au_muonic_xr
+        #check to see if workspace has been set to non-None value
+        self.assertFalse(au_peak_values == None)
+
         au_y_pos_ws = [y_position]*len(au_peak_values)
+
+        #setting up as_muonic workspace
         as_peak_values = self.as_muonic_xr
+        #check to see if workspace has been set to non-None value
+        self.assertFalse(as_peak_values == None)
+
         as_y_pos_ws = [y_position]*len(as_peak_values)
 
         au_muon_xr_ws = CreateWorkspace(au_peak_values,au_y_pos_ws[:])
+        #check to see if workspace creation was successful
+        self.assertFalse(au_muon_xr_ws == None)
         as_muon_xr_ws = CreateWorkspace(as_peak_values, as_y_pos_ws[:])
+        #check to see if workspace creation was successful
+        self.assertFalse(as_muon_xr_ws == None)
 
         ws_list = [au_muon_xr_ws,as_muon_xr_ws]
         grouped_muon_ws = GroupWorkspaces(ws_list)
+        #check to see whether grouping workspaces was successful
+        self.assertFalse(grouped_muon_ws == None)
+
+        #Run algorithm that creates muonic_xr group workspace
+        group_muonic_xr_ws = GetNegMuMuonicXRD("Au,As", 0.2)
+        #check that this has assigned value correctly
+        self.assertFalse(group_muonic_xr_ws == None)
+
+        #Compare histograms for each of the workspaces in GroupWorkspaces created
+        self.assertEqual(grouped_muon_ws[0].getNumberHistograms(), group_muonic_xr_ws[0].getNumberHistograms())
+        self.assertEqual(grouped_muon_ws[1].getNumberHistograms(), group_muonic_xr_ws[1].getNumberHistograms())
+
+        #Compare length of X values read from each workspace in grouped workspace
+        self.assertEqual(len(grouped_muon_ws[0].readX(0)), len(group_muonic_xr_ws[0].readX(0)))
+        self.assertEqual(len(grouped_muon_ws[1].readX(0)), len(group_muonic_xr_ws[1].readX(0)))
+
+        #Compare X values read from each workspace in grouped workspace
+        self.assertItemsEqual(grouped_muon_ws[0].readX(0), group_muonic_xr_ws[0].readX(0))
+        self.assertItemsEqual(grouped_muon_ws[1].readX(0), group_muonic_xr_ws[1].readX(0))
+
+        #Compare length of Y values read from each workspace in grouped workspace
+        self.assertEqual(len(grouped_muon_ws[0].readY(0)), len(group_muonic_xr_ws[0].readY(0)))
+        self.assertEqual(len(grouped_muon_ws[1].readY(0)), len(group_muonic_xr_ws[1].readY(0)))
+
+        #Compare Y values read from each workspace in grouped workspace
+        self.assertItemsEqual(grouped_muon_ws[0].readY(0), group_muonic_xr_ws[0].readY(0))
+        self.assertItemsEqual(grouped_muon_ws[1].readY(0), group_muonic_xr_ws[1].readY(0))
 
 if __name__ == '__main__':
     unittest.main()
