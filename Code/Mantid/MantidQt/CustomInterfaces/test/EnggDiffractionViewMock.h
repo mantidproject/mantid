@@ -71,6 +71,9 @@ public:
                void(const std::string &, const std::vector<double> &,
                     const std::vector<double> &));
 
+  // virtual void enableCalibrateActions(bool enable);
+  MOCK_METHOD1(enableCalibrateActions, void(bool));
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 };

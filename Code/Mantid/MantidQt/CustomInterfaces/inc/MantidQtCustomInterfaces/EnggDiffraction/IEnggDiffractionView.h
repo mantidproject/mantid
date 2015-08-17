@@ -181,6 +181,15 @@ public:
                                  const std::vector<double> &tzero) = 0;
 
   /**
+   * Enable/disable calibrate actions. The idea is that actions /
+   * buttons like 'calibrate' or 'load calibration' can be disabled
+   * while a calibration is being calculated.
+   *
+   * @param enable true to enable actions (default initial state)
+   */
+  virtual void enableCalibrateActions(bool enable) = 0;
+
+  /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and
    * geometry, preferences etc. of the user interface.

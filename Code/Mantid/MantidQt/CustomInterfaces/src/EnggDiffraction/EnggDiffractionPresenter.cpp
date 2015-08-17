@@ -100,6 +100,11 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 }
 
 void EnggDiffractionPresenter::processCalcCalib() {
+  m_view->enableCalibrateActions(false);
+
+  g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
+                    "take a few seconds... " << std::endl;
+
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
 
   std::string vanNo = m_view->newVanadiumNo();
@@ -164,6 +169,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
+
+  m_view->enableCalibrateActions(true);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {

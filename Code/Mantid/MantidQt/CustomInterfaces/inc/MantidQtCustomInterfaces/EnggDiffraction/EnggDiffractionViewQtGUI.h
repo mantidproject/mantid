@@ -98,6 +98,8 @@ public:
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero);
 
+  virtual void enableCalibrateActions(bool enable);
+
 private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();

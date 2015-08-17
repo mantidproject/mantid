@@ -96,6 +96,8 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
 
   connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
           SLOT(calibrateClicked()));
+
+  enableCalibrateActions(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -298,6 +300,11 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
         QString::fromStdString(fname));
   }
+}
+
+void EnggDiffractionViewQtGUI::enableCalibrateActions(bool enable) {
+  m_uiTabCalib.pushButton_load_calib->setEnabled(enable);
+  m_uiTabCalib.pushButton_new_calib->setEnabled(enable);
 }
 
 void
