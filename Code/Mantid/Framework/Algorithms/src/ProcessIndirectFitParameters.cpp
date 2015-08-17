@@ -96,9 +96,10 @@ void ProcessIndirectFitParameters::exec() {
     auto convertToMatrix =
         createChildAlgorithm("ConvertTableToMatrixWorkspace", -1, -1, true);
     convertToMatrix->setAlwaysStoreInADS(true);
-    convertToMatrix->setProperty("InputWorkspace", inputWs);
-    convertToMatrix->setProperty("ColumnX", xColumn);
+
     for (size_t j = 0; j < min; j++) {
+      convertToMatrix->setProperty("InputWorkspace", inputWs);
+      convertToMatrix->setProperty("ColumnX", xColumn);
       convertToMatrix->setProperty("ColumnY", columns.at(j));
       convertToMatrix->setProperty("ColumnE", errColumns.at(j));
       convertToMatrix->setProperty("OutputWorkspace", columns.at(j));
@@ -118,7 +119,6 @@ void ProcessIndirectFitParameters::exec() {
   auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
   conjoin->setAlwaysStoreInADS(true);
   conjoin->setProperty("CheckOverlapping", false);
-
   const size_t wsMax = workspaceNames.size();
   for (size_t j = 0; j < wsMax; j++) {
     auto tempPeakWs = workspaceNames.at(j).at(0);
@@ -152,11 +152,14 @@ void ProcessIndirectFitParameters::exec() {
   
   // Replace axis on workspaces with text axis
   auto axis = new TextAxis(outputWs->getNumberHistograms());
+  int offset = 0;
   for (size_t j = 0; j < workspaceNames.size(); j++) {
     auto peakWs = workspaceNames.at(j);
     for (size_t k = 0; k < peakWs.size(); k++) {
-      axis->setLabel(k, peakWs.at(k));
+      std::string kString = peakWs.at(k);
+      axis->setLabel((k + offset), peakWs.at(k));
     }
+	offset += peakWs.size();
   }
   outputWs->replaceAxis(1, axis);
 }
