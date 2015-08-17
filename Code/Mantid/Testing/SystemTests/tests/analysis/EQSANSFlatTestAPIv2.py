@@ -25,8 +25,8 @@ class EQSANSFlatTest(stresstesting.MantidStressTest):
             It is used to verify that the complete reduction chain works
             and reproduces reference results.
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS(True)
         SolidAngle()
         DarkCurrent(FILE_LOCATION+"EQSANS_5704_event.nxs")

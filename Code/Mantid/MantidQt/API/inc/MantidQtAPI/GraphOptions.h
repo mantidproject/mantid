@@ -12,7 +12,7 @@ namespace GraphOptions
 /**
  * Scale type enumeration
  */
-  EXPORT_OPT_MANTIDQT_API enum ScaleType { Linear = 0, Log10 };
+  EXPORT_OPT_MANTIDQT_API enum ScaleType { Linear = 0, Log10, Power };
 
   /**
    * Axis choice

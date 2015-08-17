@@ -61,7 +61,7 @@ Usage
 
         SetInstrumentParameter(Workspace=ws_name,
                                ParameterName='Efixed',
-                               DetectorList=range(1,114),
+                               DetectorList=range(1,113),
                                ParameterType='Number',
                                Value='1.555')
 

@@ -1,7 +1,6 @@
 #pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
-from mantid.api import Workspace
 
 
 #----------------------------------------------------------------------
@@ -9,7 +8,7 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
     """
     """
 
-
+    tolerance = 1e-5
 
     def runTest(self):
 
@@ -55,13 +54,12 @@ class ConvertToMDworkflow(stresstesting.MantidStressTest):
     def validate(self):
         """Returns the name of the workspace & file to compare"""
         self.tolerance = 1e-5
-      #elf.disableChecking.append('SpectraMap')
-      #elf.disableChecking.append('Instrument')
+        #self.disableChecking.append('SpectraMap')
+        #self.disableChecking.append('Instrument')
         result = 'WS_4D'
         reference = "ConvertToMDSample.nxs"
 
         valNames = [result,reference]
-        from mantid.simpleapi import Load,CompareMDWorkspaces,FrameworkManager,SaveNexus
 
         Load(Filename=reference,OutputWorkspace=valNames[1])
 
