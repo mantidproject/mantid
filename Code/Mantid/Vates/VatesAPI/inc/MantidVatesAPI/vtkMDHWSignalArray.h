@@ -487,7 +487,9 @@ void vtkMDHWSignalArray<Scalar>::InsertValue(vtkIdType, Scalar) {
 }
 
 //------------------------------------------------------------------------------
-template <class Scalar> vtkMDHWSignalArray<Scalar>::vtkMDHWSignalArray() {}
+template <class Scalar>
+vtkMDHWSignalArray<Scalar>::vtkMDHWSignalArray()
+    : m_offset(0) {}
 
 //------------------------------------------------------------------------------
 template <class Scalar> vtkMDHWSignalArray<Scalar>::~vtkMDHWSignalArray() {}

@@ -237,7 +237,9 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
     return 0;
   }
-  m_presenter->executeLoadMetadata();
+  if (m_presenter) {
+    m_presenter->executeLoadMetadata();
+  }
   setTimeRange(outputVector);
   std::vector<int> extents = dynamic_cast<MDHWInMemoryLoadingPresenter*>(m_presenter)->getExtents();
   outputVector->GetInformationObject(0)
