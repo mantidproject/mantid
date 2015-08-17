@@ -42,7 +42,7 @@
     Document: bar/FooDoc
     --------------------
     **********************************************************************
-    File "bar/FooDoc.rst", line 127, in Ex2
+    File "bar/FooDoc.rst", line 127, in Ex2[31]
     Failed example:
         print "Multi-line failed"
         print "test"
@@ -62,13 +62,13 @@
     **********************************************************************
     2 items had failures:
        1 of   1 in Ex1
-       1 of   1 in Ex2
+       1 of   1 in Ex2[31]
     2 tests in 2 items.
     0 passed and 2 failed.
     ***Test Failed*** 2 failures.
     2 items passed all tests:
        1 tests in Ex1 (cleanup code)
-       1 tests in Ex2 (cleanup code)
+       1 tests in Ex2[31] (cleanup code)
     2 tests in 2 items.
     2 passed and 0 failed.
     Test passed.
@@ -152,7 +152,7 @@ NUMBER_PASSED_RE = re.compile(r"^(\d+) items passed all tests:$")
 
 TEST_PASSED_END_RE = re.compile(r"Test passed.")
 TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
-FAILURE_LOC_RE = re.compile(r"^File \"(.+)\",\s+line\s+(\d+),\s+in\s+(\w+)(\s\((setup|cleanup) code\))?$")
+FAILURE_LOC_RE = re.compile(r"^File \"(.+)\",\s+line\s+(\d+),\s+in\s+(\S+)(\s\((setup|cleanup) code\))?$")
 MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
 
 #-------------------------------------------------------------------------------

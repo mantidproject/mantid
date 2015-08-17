@@ -14,21 +14,20 @@ def do_cleanup():
     return True
 
 class EQSANSSolid(stresstesting.MantidStressTest):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
+    def cleanup(self):
+        do_cleanup()
+        return True
 
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS(False)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()
@@ -57,20 +56,20 @@ class EQSANSSolid(stresstesting.MantidStressTest):
         return "EQSANS_1466_event_Iq", 'EQSANSSolid.nxs'
 
 class EQSANSSolidEvent(EQSANSSolid):
-
-    def cleanup(self):
-        do_cleanup()
-        return True
     """
         Analysis Tests for EQSANS
         Testing that the I(Q) output of is correct
     """
+    def cleanup(self):
+        do_cleanup()
+        return True
+
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         EQSANS(True)
         AppendDataFile("EQSANS_1466_event.nxs")
         SolidAngle()

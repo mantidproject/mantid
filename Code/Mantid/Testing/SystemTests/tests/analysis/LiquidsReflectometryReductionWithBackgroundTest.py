@@ -162,6 +162,7 @@ class NoBackgroundTest(stresstesting.MantidStressTest):
 
 
 class TOFMismatchTest(stresstesting.MantidStressTest):
+    correct_exception_caught = False
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -192,8 +193,8 @@ class TOFMismatchTest(stresstesting.MantidStressTest):
                                           SlitsWidthFlag=True,
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
-        except RuntimeError as e:
-            if str(e).startswith("Requested TOF range does not match data"):
+        except RuntimeError as err:
+            if str(err).startswith("Requested TOF range does not match data"):
                 self.correct_exception_caught = True
 
     def validate(self):
@@ -201,6 +202,7 @@ class TOFMismatchTest(stresstesting.MantidStressTest):
 
 
 class BadDataTOFRangeTest(stresstesting.MantidStressTest):
+    correct_exception_caught = False
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -231,8 +233,8 @@ class BadDataTOFRangeTest(stresstesting.MantidStressTest):
                                           SlitsWidthFlag=True,
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
-        except RuntimeError as e:
-            if str(e).startswith("Requested TOF range does not match data"):
+        except RuntimeError as err:
+            if str(err).startswith("Requested TOF range does not match data"):
                 self.correct_exception_caught = True
 
     def validate(self):
@@ -240,6 +242,7 @@ class BadDataTOFRangeTest(stresstesting.MantidStressTest):
 
 
 class BadPeakSelectionTest(stresstesting.MantidStressTest):
+    correct_exception_caught = False
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
@@ -269,8 +272,8 @@ class BadPeakSelectionTest(stresstesting.MantidStressTest):
                                           SlitsWidthFlag=True,
                                           CropFirstAndLastPoints=False,
                                           OutputWorkspace='reflectivity_119816')
-        except RuntimeError as e:
-            if str(e).startswith("The reflectivity is all zeros"):
+        except RuntimeError as err:
+            if str(err).startswith("The reflectivity is all zeros"):
                 self.correct_exception_caught = True
 
     def validate(self):

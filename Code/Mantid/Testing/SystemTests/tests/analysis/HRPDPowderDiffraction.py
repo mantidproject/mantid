@@ -65,8 +65,8 @@ class HRPDPowderDiffraction(stresstesting.MantidStressTest):
         ConvertUnits(InputWorkspace="Vanadium",OutputWorkspace="Vanadium",Target="Wavelength")
         #Correct for cylinderAbsorption
         CylinderAbsorption(InputWorkspace="Vanadium",OutputWorkspace="Transmission",CylinderSampleHeight="2",
-                            CylinderSampleRadius="0.4",AttenuationXSection="5.1",ScatteringXSection="5.08",
-                            SampleNumberDensity="0.072",NumberOfSlices="10",NumberOfAnnuli="10",NumberOfWavelengthPoints="100")
+                           CylinderSampleRadius="0.4",AttenuationXSection="5.1",ScatteringXSection="5.08",
+                           SampleNumberDensity="0.072",NumberOfSlices="10",NumberOfAnnuli="10",NumberOfWavelengthPoints="100")
         Divide(LHSWorkspace="Vanadium",RHSWorkspace="Transmission",OutputWorkspace="Vanadium")
         #convert to dspacing and focuss
         ConvertUnits(InputWorkspace="Vanadium",OutputWorkspace="Vanadium",Target="dSpacing")

@@ -24,6 +24,7 @@ protected:
   ~vtkScaleWorkspace();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int FillInputPortInformation (int port, vtkInformation *info);
 
 private:
   vtkScaleWorkspace(const vtkScaleWorkspace&);
