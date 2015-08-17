@@ -190,13 +190,15 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
 
   qs.setValue("user-params-current-vanadium-num",
               m_uiTabCalib.lineEdit_current_vanadium_num->text());
-  qs.setValue("user-params-current-ceria-num", m_uiTabCalib.lineEdit_current_ceria_num->text());
+  qs.setValue("user-params-current-ceria-num",
+              m_uiTabCalib.lineEdit_current_ceria_num->text());
   qs.setValue("current-calib-filename",
               m_uiTabCalib.lineEdit_current_calib_filename->text());
 
   qs.setValue("user-params-new-vanadium-num",
               m_uiTabCalib.lineEdit_new_vanadium_num->text());
-  qs.setValue("user-params-new-ceria-num", m_uiTabCalib.lineEdit_new_ceria_num->text());
+  qs.setValue("user-params-new-ceria-num",
+              m_uiTabCalib.lineEdit_new_ceria_num->text());
 
   // TODO: this should become << >> operators on EnggDiffCalibSettings
   qs.setValue("input-dir-calib-files",
@@ -296,6 +298,39 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
         QString::fromStdString(fname));
   }
+}
+
+void
+EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
+                                            const std::vector<double> &difc,
+                                            const std::vector<double> &tzero) {
+  // TODO: this is horrible and should not last much here.
+  // Avoid running Python code
+  // Update this as soon as we have a more stable way of generating IPARM files
+  // Writes a file doing this:
+  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
+  // vanadium_run=236516, template_file=None):
+
+  std::string pyCode = "import EnggUtils\n";
+  pyCode += "GSAS_iparm_fname= '" + outFilename + "'\n";
+  pyCode += "Difcs = []\n";
+  pyCode += "Zeros = []\n";
+  pyCode += "open('/home/fedemp/test/ENGINX_GUI/foo.txt', 'a')\n";
+  for (size_t i = 0; i < difc.size(); i++) {
+    pyCode +=
+        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
+    pyCode +=
+        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
+  }
+  pyCode += "EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, Difcs, "
+            "Zeros) \n";
+
+  std::string status =
+      runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+
+  // g_log.information()
+  //     << "Saved output calibration file through Python. Status: " << status
+  //     << std::endl;
 }
 
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {

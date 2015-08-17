@@ -94,6 +94,10 @@ public:
   void newCalibLoaded(const std::string &vanadiumNo, const std::string &ceriaNo,
                       const std::string &fname);
 
+  void writeOutCalibFile(const std::string &outFilename,
+                         const std::vector<double> &difc,
+                         const std::vector<double> &tzero);
+
 private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();

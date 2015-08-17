@@ -138,6 +138,18 @@ void EnggDiffractionPresenter::processCalcCalib() {
     }
   }
 
+  g_log.notice() << "Generating new calibration file: " << outFilename
+                 << std::endl;
+
+  Mantid::Kernel::ConfigServiceImpl &conf =
+      Mantid::Kernel::ConfigService::Instance();
+  const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
+  // in principle, the run files will be found from 'DirRaw', and the
+  // pre-calculated Vanadium corrections from 'DirCalib'
+  if (Poco::File(cs.m_inputDirCalib).exists())
+    conf.appendDataSearchDir(cs.m_inputDirCalib);
+  if (Poco::File(cs.m_inputDirRaw).exists())
+    conf.appendDataSearchDir(cs.m_inputDirCalib);
   try {
     doCalib(cs, vanNo, ceriaNo, outFilename);
     m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
@@ -150,6 +162,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
         << "The calibration calculations failed. Some input properties "
            "were not valid. See log messages for details. " << std::endl;
   }
+  // restore normal data search paths
+  conf.setDataSearchDirs(tmpDirs);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
@@ -203,6 +217,29 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     throw;
   }
 
+  const std::string instStr = m_view->currentInstrument();
+  try {
+    auto load = Algorithm::fromString("Load");
+    load->initialize();
+    load->setPropertyValue("Filename", instStr + ceriaNo);
+    std::string ceriaWSName = "engggui_calibration_sample_ws";
+    load->setPropertyValue("OutputWorkspace", ceriaWSName);
+    load->execute();
+
+    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    ceriaWS = ADS.retrieveWS<MatrixWorkspace>(ceriaWSName);
+  } catch (std::runtime_error &re) {
+    m_view->userError("Error while loading calibration sample data",
+                      "Could not run Load succesfully for the calibration "
+                      "sample (run number: " +
+                          ceriaNo + "). Error description: " + re.what() +
+                          " Please check also the log messages for details.");
+    g_log.warning()
+        << "Could not generate calibration file because there errors while "
+           "loading calibration sample data (see log). " << std::endl;
+    throw;
+  }
+
   // Bank 1 and 2 - ENGIN-X
   const size_t numBanks = 2;
   std::vector<double> difc, tzero;
@@ -211,28 +248,22 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   for (size_t i = 0; i < difc.size(); i++) {
     auto alg = Algorithm::fromString("EnggCalibrate");
     try {
-      auto load = Algorithm::fromString("Load");
-      load->initialize();
-      load->setPropertyValue(
-          "Filename",
-          ceriaNo); // TODO more specific build Ceria filename
-      std::string ceriaWSName = "engggui_calibration_ceria_ws";
-      load->setPropertyValue("OutputWorkspace", ceriaWSName);
-      load->execute();
-      AnalysisDataServiceImpl &ADS =
-          Mantid::API::AnalysisDataService::Instance();
-      MatrixWorkspace_sptr ceriaWS =
-          ADS.retrieveWS<MatrixWorkspace>(ceriaWSName);
-
       alg->initialize();
       alg->setProperty("InputWorkspace", ceriaWS);
       alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
       alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
       alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(i + 1));
       // TODO: figure out what should be done about the list of expected peaks
-      // to
-      // EnggCalibrate
-      alg->setPropertyValue("ExpectedPeaks", "0.9566, 2.7057");
+      // to EnggCalibrate => it should be a default, as in EnggFitPeaks, that
+      // should be fixed in a nother ticket/issue
+      alg->setPropertyValue(
+          "ExpectedPeaks",
+          "3.1243, 2.7057, 1.9132, 1.6316, 1.5621, "
+          "1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, "
+          "0.8556, 0.8252, 0.8158, 0.7811");
+      alg->setPropertyValue("OutputParametersTableName",
+                            "engggui_calibration_bank_" +
+                                boost::lexical_cast<std::string>(i + 1));
       alg->execute();
     } catch (std::runtime_error &re) {
       m_view->userError("Error in calibration",
@@ -240,49 +271,27 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                             boost::lexical_cast<std::string>(i) +
                             ". Error description: " + re.what() +
                             " Please check also the log messages for details.");
-      g_log.information() << "Could not write calibration file because of the "
-                             "errors (see log). " << std::endl;
+      g_log.warning() << "Could not generate calibration file because of the "
+                         "errors (see log). " << std::endl;
       throw;
     }
     difc[i] = alg->getProperty("Difc");
     tzero[i] = alg->getProperty("Zero");
+
+    g_log.notice() << "Bank " << i + 1 << " calibrated, "
+                   << "difc: " << difc[i] << ", zero: " << tzero[i]
+                   << std::endl;
   }
 
-  // From EnggFitPeaks:
-  //         defaultPeaks = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529,
-  //         1.2415,
-  //                      1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019,
-  //                      0.8556,
-  //                      0.8252, 0.8158, 0.7811]
-
-  // TODO: this is horrible and should not last much here.
-  // Avoid running Python code
-  // Update this as soon as we have a more stable way of generating IPARM files
-  // Writes a file doing this:
-  // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
-  // vanadium_run=236516, template_file=None):
-
-  std::string pyCode = "import EnggUtils\n";
-  pyCode += "GSAS_iparm_fname= '" + outFilename + "'\n";
-  pyCode += "Difcs = []\n";
-  pyCode += "Zeros = []\n";
-  for (size_t i = 0; i < difc.size(); i++) {
-    pyCode +=
-        "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
-    pyCode +=
-        "Zeros.append(" + boost::lexical_cast<std::string>(tzero[i]) + ")\n";
-  }
-  pyCode += "EnggUtils.write_ENGINX_GSAS_iparam_file(GSAS_iparm_fname, Difcs, "
-            "Zeros) \n";
-
-  MantidQt::API::PythonRunner pyRunner;
-  std::string status = pyRunner.runPythonCode(QString::fromStdString(pyCode),
-                                              true).toStdString();
-  g_log.information()
-      << "Saved output calibration file through Python. Status: " << status
-      << std::endl;
-  g_log.information() << "Calibration file written as " << outFilename
-                      << std::endl;
+  // Double horror: 1st use a python script
+  // 2nd: because runPythonCode does this by emitting a signal that goes to
+  // MantidPlot,
+  // it has to be done in the view (which is a UserSubWindow).
+  Poco::Path outFullPath(cs.m_inputDirCalib);
+  outFullPath.append(outFilename);
+  m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
+  g_log.notice() << "Calibration file written as " << outFullPath.toString()
+                 << std::endl;
 }
 
 /**
@@ -370,14 +379,16 @@ std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
     const std::string &vanNo, const std::string &ceriaNo) const {
   // default and only one supported
   std::string instStr = g_enginxStr;
+  std::string nameAppendix = "_both_banks";
   if ("ENGIN-X" != m_view->currentInstrument()) {
     instStr = "UNKNOWNINST";
+    nameAppendix = "_calibration";
   }
 
   // default extension for calibration files
   const std::string calibExt = ".prm";
   std::string sugg =
-      instStr + "_" + vanNo + "_" + ceriaNo + "_both_banks" + calibExt;
+      instStr + "_" + vanNo + "_" + ceriaNo + nameAppendix + calibExt;
 
   return sugg;
 }
@@ -555,7 +566,17 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     try {
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS);
-    } catch (std::runtime_error &) {
+    } catch (std::invalid_argument &ia) {
+      m_view->userError(
+          "Error while loading precalculated Vanadium corrections",
+          "The files with precalculated Vanadium corection features (spectra "
+          "integration and per-bank curves) were found (with names '" +
+              preIntegFilename + "' and '" + preCurvesFilename +
+              "', respectively, but there was a problem with the inputs to the "
+              "load algorithms to load them: " +
+              std::string(ia.what()));
+      throw;
+    } catch (std::runtime_error &re) {
       m_view->userError(
           "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
@@ -563,7 +584,9 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
               preIntegFilename + "' and '" + preCurvesFilename +
               "', respectively, but there was a problem while loading them. "
               "Please check the log messages for details. You might want to "
-              "delete those files or force recalculations (in settings).");
+              "delete those files or force recalculations (in settings). Error "
+              "details: " +
+              std::string(re.what()));
       throw;
     }
   }

@@ -64,6 +64,13 @@ public:
   MOCK_METHOD3(newCalibLoaded, void(const std::string &, const std::string &,
                                     const std::string &));
 
+  // virtual void writeOutCalibFile(const std::string &outFilename,
+  //                                const std::vector<double> &difc,
+  //                                const std::vector<double> &tzero)
+  MOCK_METHOD3(writeOutCalibFile,
+               void(const std::string &, const std::vector<double> &,
+                    const std::vector<double> &));
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 };

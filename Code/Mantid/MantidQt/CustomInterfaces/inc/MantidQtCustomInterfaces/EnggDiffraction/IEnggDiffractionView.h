@@ -169,6 +169,18 @@ public:
                               const std::string &fname) = 0;
 
   /**
+   * Write a GSAS file. Temporarily here until we have a more final
+   * way of generating these files.
+   *
+   * @param outFilename output file name
+   * @param dif difc values (one per bank)
+   * @param tzeor tzero values (one per bank)
+   */
+  virtual void writeOutCalibFile(const std::string &outFilename,
+                                 const std::vector<double> &difc,
+                                 const std::vector<double> &tzero) = 0;
+
+  /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and
    * geometry, preferences etc. of the user interface.
