@@ -10,7 +10,7 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
     as_muonic_xr = [1866.9,1855.8,436.6,427.5]
 
     #TESTING FOR ONE WORKSPACE IN GROUP WORKSPACE
-    def test_muonic_xrd_single_ws_produced(self):
+    def test_muonic_xrd_single_ws_in_group(self):
         #Setting up the work space manually
         au_peak_values = self.au_muonic_xr
         y_position = -0.001 #same as default used by GetNegMuMuonic
@@ -42,14 +42,25 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         #check length of XValues is the same
         self.assertEqual(len(au_muon_ws.readX(0)), len(neg_mu_xr_ws.readX(0)))
         #check all the XValues are the same
-        self.assertItemsEqual(au_muon_ws.readX(0),neg_mu_xr_ws.readX(0))
+        
+        #For RHEL6 (running an older version of python) this assert is not yet implemented: 
+        #self.assertItemsEqual(au_muon_ws.readX(0),neg_mu_xr_ws.readX(0))
+        #INSTEAD we will use a simple for loop
+        for x_value in range(len(au_muon_ws.readX(0))):
+            self.assertEqual(au_muon_ws.readX(0)[x_value], neg_mu_xr_ws.readX(0)[x_value])
+        
         #check length of YValues is the same
         self.assertEqual(len(au_muon_ws.readY(0)), len(neg_mu_xr_ws.readY(0)))
         #check all the YValues are the same
-        self.assertItemsEqual(au_muon_ws.readY(0),neg_mu_xr_ws.readY(0))
+        
+        #For RHEL6 (running an older version of python) this assert is not yet implemented: 
+        #self.assertItemsEqual(au_muon_ws.readY(0),neg_mu_xr_ws.readY(0))
+        #INSTEAD we will use a simple for loop
+        for y_value in range(len(au_muon_ws.readY(0))):
+            self.assertEqual(au_muon_ws.readY(0)[y_value], neg_mu_xr_ws.readY(0)[y_value])
 
     #TESTING FOR MORE THAN ONE WORKSPACE IN GROUP WORKSPACE
-    def test_muonic_xrd_group_workspace(self):
+    def test_muonic_xrd_more_than_one_ws_in_group(self):
         y_position = 0.2
         #Setting up au_muonic workspace
         au_peak_values = self.au_muonic_xr
@@ -91,16 +102,29 @@ class GetNegMuMuonicXRDTest(unittest.TestCase):
         self.assertEqual(len(grouped_muon_ws[1].readX(0)), len(group_muonic_xr_ws[1].readX(0)))
 
         #Compare X values read from each workspace in grouped workspace
-        self.assertItemsEqual(grouped_muon_ws[0].readX(0), group_muonic_xr_ws[0].readX(0))
-        self.assertItemsEqual(grouped_muon_ws[1].readX(0), group_muonic_xr_ws[1].readX(0))
-
+        
+        #For RHEL6 (running an older version of python) this assert is not yet implemented: 
+        #self.assertItemsEqual(grouped_muon_ws[0].readX(0), group_muonic_xr_ws[0].readX(0))
+        #self.assertItemsEqual(grouped_muon_ws[1].readX(0), group_muonic_xr_ws[1].readX(0))
+        #INSTEAD we will use a simple for loop
+        for x_value in range(len(grouped_muon_ws[0].readX(0))):
+            self.assertEqual(grouped_muon_ws[0].readX(0)[x_value], group_muonic_xr_ws[0].readX(0)[x_value])
+        for x_value in range(len(grouped_muon_ws[1].readX(0))):
+            self.assertEqual(grouped_muon_ws[1].readX(0)[x_value], group_muonic_xr_ws[1].readX(0)[x_value])
         #Compare length of Y values read from each workspace in grouped workspace
         self.assertEqual(len(grouped_muon_ws[0].readY(0)), len(group_muonic_xr_ws[0].readY(0)))
         self.assertEqual(len(grouped_muon_ws[1].readY(0)), len(group_muonic_xr_ws[1].readY(0)))
 
         #Compare Y values read from each workspace in grouped workspace
-        self.assertItemsEqual(grouped_muon_ws[0].readY(0), group_muonic_xr_ws[0].readY(0))
-        self.assertItemsEqual(grouped_muon_ws[1].readY(0), group_muonic_xr_ws[1].readY(0))
+        
+        #For RHEL6 (running an older version of python) this assert is not yet implemented: 
+        #self.assertItemsEqual(grouped_muon_ws[0].readY(0), group_muonic_xr_ws[0].readY(0))
+        #self.assertItemsEqual(grouped_muon_ws[1].readY(0), group_muonic_xr_ws[1].readY(0))
+        #INSTEAD we will use a simple for loop
+        for y_value in range(len(grouped_muon_ws[0].readY(0))):
+            self.assertEqual(grouped_muon_ws[0].readY(0)[y_value], group_muonic_xr_ws[0].readY(0)[y_value])
+        for y_value in range(len(grouped_muon_ws[1].readY(0))):
+            self.assertEqual(grouped_muon_ws[1].readY(0)[y_value], group_muonic_xr_ws[1].readY(0)[y_value])
 
 if __name__ == '__main__':
     unittest.main()
