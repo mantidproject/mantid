@@ -69,8 +69,7 @@ void GetNegMuMuonicXRDDialog::initLayout() {
 
   //Show Legend button attributes and signal/slot asssignment
   showLegendCheck = new QCheckBox("Show Legend");
-  connect(showLegendCheck, SIGNAL(checked()), this, SLOT(showLegend()));
-
+  connect(showLegendCheck, SIGNAL(clicked()), this, SLOT(showLegend()));
   // Adding Widgets to Layout
   main_layout->addWidget(periodicTable);
   main_layout->addWidget(showLegendCheck);
@@ -84,7 +83,6 @@ void GetNegMuMuonicXRDDialog::initLayout() {
  */
 void GetNegMuMuonicXRDDialog::showLegend(){
     bool checked = showLegendCheck->isChecked();
-    std::cout << checked;
     periodicTable->showGroupLegend(checked);
 }
 

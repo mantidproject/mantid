@@ -73,7 +73,7 @@ public:
   bool compareButtonNameToStr(QPushButton * buttonToCompare,QString stringToCompare);
 
   ///Displays or hides the Legend for the colour coding of periodic groups
-  void showGroupLegend(bool checkState);
+  void showGroupLegend(bool checked);
 
 private:
   ///The Form containing the PeriodicTableWidget

@@ -15,10 +15,11 @@ PeriodicTableWidget::PeriodicTableWidget(QWidget *parent) : QWidget(parent) {
 }
 
 // slot for showing group legend dependant on state of radioButton
-void PeriodicTableWidget::showGroupLegend(bool checkState) {
-  if (checkState) {
+void PeriodicTableWidget::showGroupLegend(bool checked) {
+    if (checked) {
     ui.Groups->setVisible(true);
-  } else {
+    }
+    else{
     ui.Groups->setVisible(false);
   }
 }
