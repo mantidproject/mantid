@@ -54,6 +54,7 @@ private:
     tableWs->addColumn("double", "f1.f1.f2.Height");
     tableWs->addColumn("double", "f1.f1.f2.Height_Err");
 
+
     size_t n = 5;
     for (size_t i = 0; i < n; ++i) {
       TableRow row = tableWs->appendRow();
@@ -156,6 +157,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputName));
+    size_t const histNum = outws->getNumberHistograms();
+    TS_ASSERT_EQUALS(histNum, 2);
+    TS_ASSERT_EQUALS(outws->getAxis(1)->label(0), "f1.f1.f0.Height");
+    TS_ASSERT_EQUALS(outws->getAxis(1)->label(1), "f1.f1.f0.Amplitude");
+
+	// 5 = The initial number of rows in the table workspace
+	TS_ASSERT_EQUALS(outws->blocksize(), 5); 
+
+    AnalysisDataService::Instance().remove(outputName);
   }
 
   void test_output_of_irregular_shaped_table_workspace() {
@@ -177,6 +187,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputName));
+    size_t const histNum = outws->getNumberHistograms();
+    TS_ASSERT_EQUALS(histNum, 4);
+    TS_ASSERT_EQUALS(outws->getAxis(1)->label(0), "f1.f1.f0.Height");
+    TS_ASSERT_EQUALS(outws->getAxis(1)->label(1), "f1.f1.f0.Amplitude");
+    TS_ASSERT_EQUALS(outws->getAxis(1)->label(2), "f1.f1.f1.Height");
+    TS_ASSERT_EQUALS(outws->getAxis(1)->label(3), "f1.f1.f2.Height");
+
+	// 5 = The initial number of rows in the table workspace
+	TS_ASSERT_EQUALS(outws->blocksize(), 5); 
+
+    AnalysisDataService::Instance().remove(outputName);
   }
 };
 
