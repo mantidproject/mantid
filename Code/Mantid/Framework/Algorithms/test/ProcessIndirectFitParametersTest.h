@@ -42,6 +42,35 @@ private:
     return tableWs;
   }
 
+  ITableWorkspace_sptr createIrregularTable() {
+    auto tableWs = WorkspaceFactory::Instance().createTable();
+    tableWs->addColumn("double", "axis-1");
+    tableWs->addColumn("double", "f1.f1.f0.Height");
+    tableWs->addColumn("double", "f1.f1.f0.Height_Err");
+    tableWs->addColumn("double", "f1.f1.f0.Amplitude");
+    tableWs->addColumn("double", "f1.f1.f0.Amplitude_Err");
+    tableWs->addColumn("double", "f1.f1.f1.Height");
+    tableWs->addColumn("double", "f1.f1.f1.Height_Err");
+    tableWs->addColumn("double", "f1.f1.f2.Height");
+    tableWs->addColumn("double", "f1.f1.f2.Height_Err");
+
+    size_t n = 5;
+    for (size_t i = 0; i < n; ++i) {
+      TableRow row = tableWs->appendRow();
+      double ax1 = int(i) * 1.0;
+      double h = int(i) * 1.02;
+      double he = sqrt(h);
+      double am = int(i) * 2.43;
+      double ame = sqrt(am);
+      double h1 = -0.0567;
+      double he1 = sqrt(h);
+      double h2 = int(i) * -0.25;
+      double he2 = sqrt(h2);
+      row << ax1 << h << he << am << ame << h1 << he1 << h2 << he2;
+    }
+    return tableWs;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -108,7 +137,7 @@ public:
                      outputName);
   }
 
-  void test_output() {
+  void test_output_of_regular_shaped_table_workspace() {
     auto tableWs = createTable();
     std::string xColumn = "axis-1";
     std::string parameterValues = "Height,Amplitude";
@@ -124,6 +153,27 @@ public:
     alg.execute();
 
     MatrixWorkspace_sptr outws;
+    TS_ASSERT_THROWS_NOTHING(
+        outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            outputName));
+  }
+
+  void test_output_of_irregular_shaped_table_workspace() {
+	auto tableWs = createIrregularTable();
+	std::string xColumn = "axis-1";
+	std::string parameterValues = "Height,Amplitude";
+    std::string outputName = "outMatrix";
+
+	Mantid::Algorithms::ProcessIndirectFitParameters alg;
+	TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", tableWs);
+    alg.setPropertyValue("X Column", xColumn);
+    alg.setPropertyValue("Parameter Names", parameterValues);
+    alg.setProperty("OutputWorkspace Name", outputName);
+
+	alg.execute();
+
+	MatrixWorkspace_sptr outws;
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputName));
