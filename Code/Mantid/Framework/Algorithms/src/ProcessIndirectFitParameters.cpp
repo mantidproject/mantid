@@ -128,7 +128,7 @@ void ProcessIndirectFitParameters::exec() {
       conjoin->setProperty("InputWorkspace1", tempPeakWs);
       conjoin->setProperty("InputWorkspace2", paramWs);
       conjoin->executeAsChildAlg();
-      tempPeakWs = conjoin->getProperty("InputWorkspace1");
+      tempPeakWs = std::string(conjoin->getProperty("InputWorkspace1"));
     }
     tempWorkspaces.push_back(tempPeakWs);
   }
@@ -139,7 +139,7 @@ void ProcessIndirectFitParameters::exec() {
     conjoin->setProperty("InputWorkspace1", tempWorkspace);
     conjoin->setProperty("InputWorkspace2", *it);
     conjoin->executeAsChildAlg();
-    tempWorkspace = conjoin->getProperty("InputWorkspace1");
+    tempWorkspace = std::string(conjoin->getProperty("InputWorkspace1"));
   }
 
   //Rename the workspace to the specified outputName
@@ -156,7 +156,6 @@ void ProcessIndirectFitParameters::exec() {
   for (size_t j = 0; j < workspaceNames.size(); j++) {
     auto peakWs = workspaceNames.at(j);
     for (size_t k = 0; k < peakWs.size(); k++) {
-      std::string kString = peakWs.at(k);
       axis->setLabel((k + offset), peakWs.at(k));
     }
 	offset += peakWs.size();
