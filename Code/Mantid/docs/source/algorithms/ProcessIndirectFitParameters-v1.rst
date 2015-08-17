@@ -10,36 +10,47 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+An Algorithm designed to allow for the TableWorkspace output of the 
+PlotPeakByLogValue algorithm to be transformed into a Matrix workspace 
+based on the desired parameters.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - ProcessIndirectFitParameters**
 
 .. testcode:: ProcessIndirectFitParametersExample
 
    # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = ProcessIndirectFitParameters()
+   tws = WorkspaceFactory.createTable()
+   tws.addColumn("double", "A")
+   tws.addColumn("double", "B")
+   tws.addcolumn("double", "C")
+   tws.addColumn("double", "D")
+   tws.addRow([1,2,3,4])
+   tws.addRow([5,6,7,8])
+   tws.addRow([9,0,1,2])
+   tws.addRow([0,0,0,1])
+   
+   # Add to Mantid Workspace list
+   mtd.addOrReplace("TableWs",tws)
+   
+   # "D" is not included in the algorithm params list 
+   wsOut = ProcessIndirectFitParameters(tws, "A", "B,C", "outputWorkspace")
 
    # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
+   print "%s is a %s and the Y values are:" % (wsOut, wsOut.id())
+   print wsOut.readY(0)
+   
 Output:
 
 .. testoutput:: ProcessIndirectFitParametersExample
-
-  The output workspace has ?? spectra
-
+    :options: +NORMALIZE_WHITESPACE
+	
+    outputWorkspace is a Workspace2D and the Y values are:
+	[ 2.  6.  0.]
+	
 .. categories::
 
 .. sourcelink::
