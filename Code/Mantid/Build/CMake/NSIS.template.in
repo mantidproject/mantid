@@ -83,19 +83,17 @@ FunctionEnd
   Pop "${OUT}"
 !macroend
  
-!define StrContains '!insertmacro "_StrContainsConstructor"'  
+!define StrContains '!insertmacro "_StrContainsConstructor"'
   
-!macro HandleRunningMantid process message
-	nsExec::ExecToStack  "tasklist /NH /FI $\"STATUS eq RUNNING$\" /FI $\"IMAGENAME eq ${process}$\""
-    Pop $0
-	Pop $1 ;ouput of ExecToStack
-	${StrContains} $0 ${process} "$1"
-      StrCmp $0 ${process} found 
-      Goto notrunning
-    found:
-      MessageBox MB_OK '${message}' 
-	  Abort 
-    notrunning:
+!macro HandleRunningMantid processname processpath message
+  nsExec::ExecToStack  "wmic process where $\"name='${processname}'$\" get ExecutablePath"
+  Pop $0
+  Pop $1 ;output of ExecToStack
+  ${StrContains} $0 ${processpath} "$1"
+  StrCmp $0 "" notfound
+    MessageBox MB_OK '${message}'
+    Abort
+  notfound:
 !macroend
   
 ;end Mantid functions and macros  
@@ -562,6 +560,19 @@ Function ConditionalAddToRegisty
   ConditionalAddToRegisty_EmptyString:
 FunctionEnd
 
+; Add a switch to the uninstaller that skipts the confirmation dialog
+!include FileFunc.nsh
+
+Function un.skipifsilentprogress
+ClearErrors
+${GetParameters} $0
+${GetOptions} "$0" "/UIS" $1
+${IfNot} ${Errors}
+    SetAutoClose true ;Make sure user does not have to click close
+    Abort
+${EndIf}
+FunctionEnd
+
 ;--------------------------------
 
 !ifdef CPACK_USES_DOWNLOAD
@@ -610,9 +621,10 @@ FunctionEnd
 
   !insertmacro MUI_PAGE_LICENSE "@CPACK_RESOURCE_FILE_LICENSE@"
   Page custom InstallOptionsPage
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE in.abortIfRunning
   !insertmacro MUI_PAGE_DIRECTORY
-  
-  ;Start Menu Folder Page Configuration
+
+ ;Start Menu Folder Page Configuration
   !define MUI_STARTMENUPAGE_REGISTRY_ROOT "SHCTX" 
   !define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\@CPACK_PACKAGE_VENDOR@\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" 
   !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
@@ -620,9 +632,11 @@ FunctionEnd
 
   @CPACK_NSIS_PAGE_COMPONENTS@
 
+  !define MUI_PAGE_CUSTOMFUNCTION_SHOW in.uninstallifexists
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE un.skipifsilentprogress
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
 
@@ -630,57 +644,6 @@ FunctionEnd
 ;Languages
 
   !insertmacro MUI_LANGUAGE "English" ;first language is the default language
-  !insertmacro MUI_LANGUAGE "Albanian"
-  !insertmacro MUI_LANGUAGE "Arabic"
-  !insertmacro MUI_LANGUAGE "Basque"
-  !insertmacro MUI_LANGUAGE "Belarusian"
-  !insertmacro MUI_LANGUAGE "Bosnian"
-  !insertmacro MUI_LANGUAGE "Breton"
-  !insertmacro MUI_LANGUAGE "Bulgarian"
-  !insertmacro MUI_LANGUAGE "Croatian"
-  !insertmacro MUI_LANGUAGE "Czech"
-  !insertmacro MUI_LANGUAGE "Danish"
-  !insertmacro MUI_LANGUAGE "Dutch"
-  !insertmacro MUI_LANGUAGE "Estonian"
-  !insertmacro MUI_LANGUAGE "Farsi"
-  !insertmacro MUI_LANGUAGE "Finnish"
-  !insertmacro MUI_LANGUAGE "French"
-  !insertmacro MUI_LANGUAGE "German"
-  !insertmacro MUI_LANGUAGE "Greek"
-  !insertmacro MUI_LANGUAGE "Hebrew"
-  !insertmacro MUI_LANGUAGE "Hungarian"
-  !insertmacro MUI_LANGUAGE "Icelandic"
-  !insertmacro MUI_LANGUAGE "Indonesian"
-  !insertmacro MUI_LANGUAGE "Irish"
-  !insertmacro MUI_LANGUAGE "Italian"
-  !insertmacro MUI_LANGUAGE "Japanese"
-  !insertmacro MUI_LANGUAGE "Korean"
-  !insertmacro MUI_LANGUAGE "Kurdish"
-  !insertmacro MUI_LANGUAGE "Latvian"
-  !insertmacro MUI_LANGUAGE "Lithuanian"
-  !insertmacro MUI_LANGUAGE "Luxembourgish"
-  !insertmacro MUI_LANGUAGE "Macedonian"
-  !insertmacro MUI_LANGUAGE "Malay"
-  !insertmacro MUI_LANGUAGE "Mongolian"
-  !insertmacro MUI_LANGUAGE "Norwegian"
-  !insertmacro MUI_LANGUAGE "Polish"
-  !insertmacro MUI_LANGUAGE "Portuguese"
-  !insertmacro MUI_LANGUAGE "PortugueseBR"
-  !insertmacro MUI_LANGUAGE "Romanian"
-  !insertmacro MUI_LANGUAGE "Russian"
-  !insertmacro MUI_LANGUAGE "Serbian"
-  !insertmacro MUI_LANGUAGE "SerbianLatin"
-  !insertmacro MUI_LANGUAGE "SimpChinese"
-  !insertmacro MUI_LANGUAGE "Slovak"
-  !insertmacro MUI_LANGUAGE "Slovenian"
-  !insertmacro MUI_LANGUAGE "Spanish"
-  !insertmacro MUI_LANGUAGE "Swedish"
-  !insertmacro MUI_LANGUAGE "Thai"
-  !insertmacro MUI_LANGUAGE "TradChinese"
-  !insertmacro MUI_LANGUAGE "Turkish"
-  !insertmacro MUI_LANGUAGE "Ukrainian"
-  !insertmacro MUI_LANGUAGE "Welsh"
-
 
 ;--------------------------------
 ;Reserve Files
@@ -861,6 +824,19 @@ Function .onSelChange
   !insertmacro SectionList MaybeSelectionChanged
 FunctionEnd
 
+;---------------------------------------------
+; Check if mantid is running
+Function in.abortIfRunning
+  !insertmacro HandleRunningMantid "MantidPlot.exe" "$INSTDIR" "$INSTDIR\bin\MantidPlot.exe appears to be running. Please shut down MantidPlot and try again."
+FunctionEnd
+
+;---------------------------------------------
+; On clicking install, check if we need to uninstall first
+Function in.uninstallifexists
+    IfFileExists $INSTDIR\uninstall.exe 0 +2 ;If there is an uninstall.exe run it
+    ExecWait '"$INSTDIR\uninstall.exe" /UIS _?=$INSTDIR'
+FunctionEnd
+
 ;--------------------------------
 ;Uninstaller Section
 
@@ -961,18 +937,7 @@ SectionEnd
 ; "Program Files" for AllUsers, "My Documents" for JustMe...
 
 Function .onInit
- 
-!insertmacro HandleRunningMantid "MantidPlot.exe" "MantidPlot appears to be running. Shut down MantidPlot and try again."
 
-  IfSilent +7
-    IfFileExists $INSTDIR\uninstall.exe +4 0 ;If there is an uninstall.exe, then the machine is already using the new installers, which is fine, so continue
-	  IfFileExists $INSTDIR\*.* 0 +3 ; The user appears not to have the uninstaller.exe and already has a MantidInstall directory, indicates old installer is present
-        MessageBox MB_YESNO "This looks like your first install with the new installer. Have you removed the previous Mantid install?$\r$\n$\r$\nIf you have not yet removed Mantid, click No, which aborts the install, and then remove it using Windows program manager." IDYES NoAbort
-        Abort "Cancelled. Remove old Mantid install then retry."
-      NoAbort:
-    MessageBox MB_OK "Mantid installer will try to run any existing uninstallers first. Please click OK and be patient, the installer will start soon"
-  ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
-  
   ; Reads components status for registry
   !insertmacro SectionList "InitSection"
 

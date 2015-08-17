@@ -63,7 +63,7 @@ public:
                             const std::size_t &verticalIndex = 0) const;
   /// Set the value at a specific index
   virtual void setValue(const std::size_t &index, const double &value);
-  size_t indexOfValue(const double value) const;
+  virtual size_t indexOfValue(const double value) const;
   virtual bool operator==(const Axis &) const;
   virtual bool equalWithinTolerance(const Axis &axis2,
                                     const double tolerance) const;
@@ -71,7 +71,7 @@ public:
   /// Create bin boundaries from the point values
   virtual std::vector<double> createBinBoundaries() const;
   /// Return a const reference to the values
-  const std::vector<double> &getValues() const;
+  virtual const std::vector<double> &getValues() const;
   /// returns min value defined on axis
   double getMin() const { return m_values.front(); }
   /// returns max value defined on axis

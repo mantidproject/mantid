@@ -67,6 +67,7 @@ protected:
   getProcessProperties(const std::string &propertyManager=std::string()) const;
   /// MPI option. If false, we will use one job event if MPI is available
   bool m_useMPI;
+  Workspace_sptr assemble(Workspace_sptr partialWS);
   Workspace_sptr assemble(const std::string &partialWSName,
                           const std::string &outputWSName);
   void saveNexus(const std::string &outputWSName,

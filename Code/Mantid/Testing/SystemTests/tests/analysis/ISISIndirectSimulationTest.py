@@ -6,7 +6,7 @@ import mantid.simpleapi as ms
 class MolDynCdlTest(stresstesting.MantidStressTest):
 
     def runTest(self):
-        ms.MolDyn(Filename='DISF_NaF.cdl',
+        ms.MolDyn(Data='DISF_NaF.cdl',
                   Functions=['Fqt-total', 'Sqw-total'],
                   Plot='None',
                   Save=False,
@@ -56,7 +56,7 @@ class MolDynCdlTest(stresstesting.MantidStressTest):
 class MolDynDatTest(stresstesting.MantidStressTest):
 
     def runTest(self):
-        ms.MolDyn(Filename='WSH_test.dat',
+        ms.MolDyn(Data='WSH_test.dat',
                   Plot='None',
                   Save=False,
                   OutputWorkspace='WSH_test_iqt')

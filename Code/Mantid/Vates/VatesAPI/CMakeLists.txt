@@ -49,6 +49,7 @@ src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkMD0DFactory.cpp
+src/vtkNullStructuredGrid.cpp
 src/vtkNullUnstructuredGrid.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDHexFactory.cpp
@@ -119,6 +120,7 @@ inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
 inc/MantidVatesAPI/vtkMD0DFactory.h
+inc/MantidVatesAPI/vtkNullStructuredGrid.h
 inc/MantidVatesAPI/vtkNullUnstructuredGrid.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
@@ -128,6 +130,7 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
+inc/MantidVatesAPI/vtkMDHWSignalArray.h
 )
 
 set( TEST_FILES
@@ -178,6 +181,8 @@ test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToPeaksFilteredDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
+test/vtkNullStructuredGridTest.h
+test/vtkMDHWSignalArrayTest.h
 test/vtkEllipsoidTransformerTest.h
 test/NullPeaksPresenterVsiTest.h
 test/ConcretePeaksPresenterVsiTest.h
