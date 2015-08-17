@@ -91,7 +91,7 @@ void AppendSpectra::exec() {
     // Both are event workspaces. Use the special method
     MatrixWorkspace_sptr output = this->execEvent();
     if (number > 1)
-      g_log.warning("Number property is ignored for event workspaces");
+      g_log.warning("Repeat property is ignored for event workspaces");
     if (mergeLogs)
       combineLogs(ws1->run(), ws2->run(), output->mutableRun());
     // Set the output workspace
