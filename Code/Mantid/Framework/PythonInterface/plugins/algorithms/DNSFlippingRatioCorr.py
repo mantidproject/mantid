@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-locals
+# pylint: disable=too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, FloatBoundedValidator
@@ -15,16 +15,22 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
     properties_to_compare = ['deterota', 'wavelength', 'slit_i_left_blade_position',
                              'slit_i_right_blade_position', 'slit_i_lower_blade_position',
                              'slit_i_upper_blade_position']
-    input_workspaces = {}
-    sf_outws_name = None
-    nsf_outws_name = None
-    dfr = 0.05
+
+    def __init__(self):
+        """
+        Init
+        """
+        PythonAlgorithm.__init__(self)
+        self.input_workspaces = {}
+        self.sf_outws_name = None
+        self.nsf_outws_name = None
+        self.dfr = 0.05
 
     def category(self):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS\\CorrectionFunctions'
+        return 'PythonAlgorithms\\MLZ\\DNS;CorrectionFunctions'
 
     def name(self):
         """
@@ -68,20 +74,20 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         nhists = []
         nbins = []
         for wsname in self.input_workspaces.values():
-            ws = api.AnalysisDataService.retrieve(wsname)
-            ndims.append(ws.getNumDims())
-            nhists.append(ws.getNumberHistograms())
-            nbins.append(ws.blocksize())
+            wks = api.AnalysisDataService.retrieve(wsname)
+            ndims.append(wks.getNumDims())
+            nhists.append(wks.getNumberHistograms())
+            nbins.append(wks.blocksize())
 
-        nd = ndims[0]
-        nh = nhists[0]
-        nb = nbins[0]
-        if ndims.count(nd) == len(ndims) and nhists.count(nh) == len(nhists) and nbins.count(nb) == len(nbins):
+        ndi = ndims[0]
+        nhi = nhists[0]
+        nbi = nbins[0]
+        if ndims.count(ndi) == len(ndims) and nhists.count(nhi) == len(nhists) and nbins.count(nbi) == len(nbins):
             return True
         else:
             message = "Input workspaces have different dimensions. Cannot correct flipping ratio."
             self.log().error(message)
-            return False
+            raise RuntimeError(message)
 
     def _ws_exist(self):
         """
@@ -93,12 +99,12 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
             if not api.AnalysisDataService.doesExist(wsname):
                 message = "Workspace " + wsname + " does not exist! Cannot correct flipping ratio."
                 self.log().error(message)
-                return False
+                raise RuntimeError(message)
             if not api.AnalysisDataService.doesExist(wsname + '_NORM'):
                 if wsname not in dataws_names:
                     message = "Workspace " + wsname + "_NORM does not exist! Cannot correct flipping ratio."
                     self.log().error(message)
-                    return False
+                    raise RuntimeError(message)
 
         return True
 
@@ -109,30 +115,30 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         pols = []
         for wsname in self.input_workspaces.values():
-            ws = api.AnalysisDataService.retrieve(wsname)
-            run = ws.getRun()
+            wks = api.AnalysisDataService.retrieve(wsname)
+            run = wks.getRun()
             if run.hasProperty('polarisation'):
                 pols.append(run.getProperty('polarisation').value)
             else:
                 message = \
-                    " Workspace " + ws.getName() + " does not have property polarisation! Cannot correct flipping ratio."
+                    " Workspace " + wks.getName() + " does not have property polarisation! Cannot correct flipping ratio."
                 self.log().error(message)
-                return False
-        p = pols[0]
-        if pols.count(p) == len(pols):
-            self.log().information("The polarisation is " + p)
+                raise RuntimeError(message)
+        polarisation = pols[0]
+        if pols.count(polarisation) == len(pols):
+            self.log().information("The polarisation is " + polarisation)
             return True
         else:
             message = "Cannot apply correction to workspaces with different polarisation!"
             self.log().error(message)
-            return False
+            raise RuntimeError(message)
 
     def _cleanup(self, wslist):
         """
         deletes workspaces from list
         """
-        for w in wslist:
-            api.DeleteWorkspace(w)
+        for wsname in wslist:
+            api.DeleteWorkspace(wsname)
         return
 
     def _flipper_valid(self):
@@ -142,25 +148,25 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         """
         # sort workspaces for sf and nsf
         nsf = []
-        for s in self.input_workspaces.keys():
-            if 'NSF' in s:
-                nsf.append(s)
         for key in self.input_workspaces.keys():
-            ws = api.AnalysisDataService.retrieve(self.input_workspaces[key])
-            run = ws.getRun()
+            if 'NSF' in key:
+                nsf.append(key)
+        for key in self.input_workspaces.keys():
+            wks = api.AnalysisDataService.retrieve(self.input_workspaces[key])
+            run = wks.getRun()
             if not run.hasProperty('flipper'):
-                message = "Workspace " + ws.getName() + " does not have flipper sample log!"
+                message = "Workspace " + wks.getName() + " does not have flipper sample log!"
                 self.log().error(message)
-                return False
+                raise RuntimeError(message)
             flipper = run.getProperty('flipper').value
             if key in nsf:
                 needed = 'OFF'
             else:
                 needed = 'ON'
             if flipper != needed:
-                message = "Workspace " + ws.getName() + " must have flipper " + needed + ", but it is " + flipper
+                message = "Workspace " + wks.getName() + " must have flipper " + needed + ", but it is " + flipper
                 self.log().error(message)
-                return False
+                raise RuntimeError(message)
 
         return True
 
@@ -172,25 +178,25 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         if not self.input_workspaces:
             message = "No workspace names has been specified! Nothing for FR correction."
             self.log().error(message)
-            return False
+            raise RuntimeError(message)
         # workspaces and normalization workspaces must exist
-        if not self._ws_exist():
-            return False
+        self._ws_exist()
+
         # they must have the same dimensions
-        if not self._dimensions_valid():
-            return False
+        self._dimensions_valid()
+
         # and the same polarisation
-        if not self._same_polarisation():
-            return False
+        self._same_polarisation()
+
         # check validity of flipper status
-        if not self._flipper_valid():
-            return False
+        self._flipper_valid()
+
         # algorithm must warn if some properties_to_compare are different
         ws1 = api.AnalysisDataService.retrieve(self.input_workspaces.values()[0])
         run1 = ws1.getRun()
         for wsname in self.input_workspaces.values()[1:]:
-            ws = api.AnalysisDataService.retrieve(wsname)
-            run = ws.getRun()
+            wks = api.AnalysisDataService.retrieve(wsname)
+            run = wks.getRun()
             self._check_properties(run1, run)
         return True
 
@@ -317,8 +323,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         self.dfr = float(self.getPropertyValue("DoubleSpinFlipScatteringProbability"))
 
         # check if possible to apply correction
-        if not self._can_correct():
-            raise RuntimeError("Error: impossible to apply flipping ratio correction to given workspaces!")
+        self._can_correct()
 
         # apply flipping ratio correction, retrieve the result
         self._fr_correction()

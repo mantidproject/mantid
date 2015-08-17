@@ -99,7 +99,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
 
     def test_DNSFRSelfCorrection(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test4"
-        # cosider normalization=1.0 as set in self._create_fake_workspace
+        # consider normalization=1.0 as set in self._create_fake_workspace
         dataws_sf = self.__sf_nicrws - self.__sf_bkgrws
         dataws_nsf = self.__nsf_nicrws - self.__nsf_bkgrws
         alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
@@ -185,7 +185,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
                           1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
         __nsf_vanaws = self._create_fake_workspace('__nsf_vanaws', dataY/58.0, flipper='OFF')
         self.workspaces.append('__nsf_vanaws')
-        # cosider normalization=1.0 as set in self._create_fake_workspace
+        # consider normalization=1.0 as set in self._create_fake_workspace
         dataws_sf = __sf_vanaws - self.__sf_bkgrws
         dataws_nsf = __nsf_vanaws - self.__nsf_bkgrws
         alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
@@ -227,7 +227,7 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
                           1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
         __nsf_vanaws = self._create_fake_workspace('__nsf_vanaws', dataY/58.0, flipper='OFF')
         self.workspaces.append('__nsf_vanaws')
-        # cosider normalization=1.0 as set in self._create_fake_workspace
+        # consider normalization=1.0 as set in self._create_fake_workspace
         dataws_sf = __sf_vanaws - self.__sf_bkgrws
         dataws_nsf = __nsf_vanaws - self.__nsf_bkgrws
         alg_test = run_algorithm("DNSFlippingRatioCorr", SFDataWorkspace=dataws_sf,
