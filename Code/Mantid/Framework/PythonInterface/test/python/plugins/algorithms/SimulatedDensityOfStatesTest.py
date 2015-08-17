@@ -2,7 +2,7 @@
 
 import unittest
 from mantid import logger
-from mantid.api import ITableWorkspace
+from mantid.api import (ITableWorkspace, WorkspaceGroup)
 from mantid.simpleapi import (SimulatedDensityOfStates, CheckWorkspacesMatch,
                               Scale, CreateEmptyTableWorkspace)
 
@@ -224,6 +224,12 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
         ws = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                       CASTEPFile=self._castep_file,
                                       SpectrumType='BondAnalysis')
+
+        self.assertTrue(isinstance(ws, WorkspaceGroup))
+        self.assertEqual(len(ws), 2)
+
+        self.assertTrue(isinstance(ws[0], ITableWorkspace))
+        self.assertTrue(isinstance(ws[1], ITableWorkspace))
 
 
 if __name__=="__main__":
