@@ -159,21 +159,21 @@ public:
   }
 
   void test_output_of_irregular_shaped_table_workspace() {
-	auto tableWs = createIrregularTable();
-	std::string xColumn = "axis-1";
-	std::string parameterValues = "Height,Amplitude";
+    auto tableWs = createIrregularTable();
+    std::string xColumn = "axis-1";
+    std::string parameterValues = "Height,Amplitude";
     std::string outputName = "outMatrix";
 
-	Mantid::Algorithms::ProcessIndirectFitParameters alg;
-	TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("X Column", xColumn);
     alg.setPropertyValue("Parameter Names", parameterValues);
     alg.setProperty("OutputWorkspace Name", outputName);
 
-	alg.execute();
+    alg.execute();
 
-	MatrixWorkspace_sptr outws;
+    MatrixWorkspace_sptr outws;
     TS_ASSERT_THROWS_NOTHING(
         outws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             outputName));

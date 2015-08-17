@@ -95,6 +95,7 @@ void ProcessIndirectFitParameters::exec() {
     }
     auto convertToMatrix =
         createChildAlgorithm("ConvertTableToMatrixWorkspace", -1, -1, true);
+    convertToMatrix->setAlwaysStoreInADS(true);
     convertToMatrix->setProperty("InputWorkspace", inputWs);
     convertToMatrix->setProperty("ColumnX", xColumn);
     for (size_t j = 0; j < min; j++) {
@@ -115,6 +116,7 @@ void ProcessIndirectFitParameters::exec() {
   // Join all the parameters for each peak into a single workspace per peak
   auto tempWorkspaces = std::vector<std::string>();
   auto conjoin = createChildAlgorithm("ConjoinWorkspaces", -1, -1, true);
+  conjoin->setAlwaysStoreInADS(true);
   conjoin->setProperty("CheckOverlapping", false);
 
   const size_t wsMax = workspaceNames.size();
@@ -133,29 +135,30 @@ void ProcessIndirectFitParameters::exec() {
 
   // Join all peaks into a single workspace
   auto tempWorkspace = tempWorkspaces.at(0);
-  for (auto it = tempWorkspaces.begin(); it != tempWorkspaces.end(); ++it) {
+  for (auto it = tempWorkspaces.begin() + 1; it != tempWorkspaces.end(); ++it) {
     conjoin->setProperty("InputWorkspace1", tempWorkspace);
     conjoin->setProperty("InputWorkspace2", *it);
     conjoin->executeAsChildAlg();
     tempWorkspace = conjoin->getProperty("InputWorkspace1");
   }
 
+  //Rename the workspace to the specified outputName
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setProperty("InputWorkspace", tempWorkspace);
   renamer->setProperty("OutputWorkspace", outputWsName);
   renamer->executeAsChildAlg();
-  MatrixWorkspace_sptr outputWs = renamer->getProperty("OutputWorkspace");
-
+  Workspace_sptr renameWs = renamer->getProperty("OutputWorkspace");
+  auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
+  
   // Replace axis on workspaces with text axis
-  auto axis = TextAxis(outputWs->getNumberHistograms());
-  TextAxis *axisPtr = &(axis);
+  auto axis = new TextAxis(outputWs->getNumberHistograms());
   for (size_t j = 0; j < workspaceNames.size(); j++) {
     auto peakWs = workspaceNames.at(j);
     for (size_t k = 0; k < peakWs.size(); k++) {
-      axisPtr->setLabel(k, peakWs.at(k));
+      axis->setLabel(k, peakWs.at(k));
     }
   }
-  outputWs->replaceAxis(1, axisPtr);
+  outputWs->replaceAxis(1, axis);
 }
 
 /**
