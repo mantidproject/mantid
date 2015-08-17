@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Filter Events Interface</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QPushButton" name="helpBtn">
