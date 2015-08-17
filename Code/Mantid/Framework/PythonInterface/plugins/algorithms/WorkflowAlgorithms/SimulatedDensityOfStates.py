@@ -460,6 +460,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     ion_b_vector = ion_wavevector(ion_b)
 
                     bc_bond = self._choose_close_bonded_atom(ion_b, bonds, is_not=[ion_a])
+                    if bc_bond == (None, None):
+                        bc_bond = ab_bond
                     ion_c = self._find_ion(ions, *bc_bond[0][bc_bond[1]])
                     ion_c_vector = ion_wavevector(ion_c)
 
@@ -1108,7 +1110,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Atom bond regex. Looks for lines in the following format:
         #   H 006 --    O 012               0.46        1.04206
-        bond_regex_str = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        bond_regex_str = r"\s+([A-z]+)\s+([0-9]+)\s+--\s+([A-z]+)\s+([0-9]+)\s+(%(s)s)\s+(%(s)s)" % {'s': self._float_regex}
         bond_regex = re.compile(bond_regex_str)
 
         block_count = 0
