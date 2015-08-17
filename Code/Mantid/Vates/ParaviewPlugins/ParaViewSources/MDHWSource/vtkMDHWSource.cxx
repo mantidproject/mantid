@@ -227,26 +227,28 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
                                                    new ADSWorkspaceProvider<Mantid::API::IMDHistoWorkspace>,
                                                    m_wsName);
   }
-  if (m_presenter == NULL)
+  if (m_presenter) {
+    if (!m_presenter->canReadFile()) {
+      vtkErrorMacro(<< "Cannot fetch the specified workspace from Mantid ADS.");
+      return 0;
+    } else {
+      m_presenter->executeLoadMetadata();
+      setTimeRange(outputVector);
+      std::vector<int> extents =
+          dynamic_cast<MDHWInMemoryLoadingPresenter *>(m_presenter)
+              ->getExtents();
+      outputVector->GetInformationObject(0)
+          ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
+                static_cast<int>(extents.size()));
+      return 1;
+    }
+  } else //(m_presenter == NULL)
   {
-    // updater information has been called prematurely. We will reexecute once all attributes are setup.
+    // updater information has been called prematurely. We will reexecute once
+    // all attributes are setup.
     return 1;
   }
-  if(!m_presenter->canReadFile())
-  {
-    vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
-    return 0;
-  }
-  if (m_presenter) {
-    m_presenter->executeLoadMetadata();
-  }
-  setTimeRange(outputVector);
-  std::vector<int> extents = dynamic_cast<MDHWInMemoryLoadingPresenter*>(m_presenter)->getExtents();
-  outputVector->GetInformationObject(0)
-      ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
-            static_cast<int>(extents.size()));
 
-  return 1;
 }
 
 void vtkMDHWSource::PrintSelf(ostream& os, vtkIndent indent)
