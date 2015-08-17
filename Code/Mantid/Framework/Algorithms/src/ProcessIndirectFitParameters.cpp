@@ -110,8 +110,7 @@ void ProcessIndirectFitParameters::exec() {
   // Transpose list of workspaces, ignoring unequal length of lists
   // this handles the case where a parameter occurs only once in the whole
   // workspace
-  workspaceNames = reorderWorkspaceParams(workspaceNames); 
-
+  workspaceNames = reorder2DVector(workspaceNames);
 
   // Join all the parameters for each peak into a single workspace per peak
   auto tempWorkspaces = std::vector<std::string>();
@@ -157,10 +156,13 @@ void ProcessIndirectFitParameters::exec() {
     }
   }
   outputWs->replaceAxis(1, axisPtr);
-
-
 }
 
+/**
+ * Transforms a comma separated list into a vector of strings
+ * @param commaList - The comma separated list to be separated
+ * @return - The vector of string composed of the elements of the comma list
+ */
 std::vector<std::string>
 ProcessIndirectFitParameters::listToVector(std::string &commaList) {
   auto listVector = std::vector<std::string>();
@@ -175,6 +177,15 @@ ProcessIndirectFitParameters::listToVector(std::string &commaList) {
   return listVector;
 }
 
+/**
+ * Searchs for a particular word within all of the fit params in the columns of
+ * a table workspace (note: This method only matches strings that are at the end
+ * of a column name this is to ensure that "Amplitude" will match
+ * "f0.f0.f1.Amplitude" but not f0.f0.f1.Amplitude_Err")
+ * @param suffix - The string to search for
+ * @param columns - A string vector of all the column names in a table workspace
+ * @return - The full column names in which the string is present
+ */
 std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
     const std::string &suffix, const std::vector<std::string> &columns) {
   auto fitParams = std::vector<std::string>();
@@ -191,28 +202,36 @@ std::vector<std::string> ProcessIndirectFitParameters::searchForFitParams(
   return fitParams;
 }
 
-std::vector<std::vector<std::string>> ProcessIndirectFitParameters::reorderWorkspaceParams(const std::vector<std::vector<std::string>> &original){
-	size_t maximumLength = original.at(0).size();
-	for(int i = 1; i < original.size(); i++){
-		if(original.at(i).size() > maximumLength){
-			maximumLength = original.at(i).size();
-		}
-	}
+/**
+ * Changes the ordering of a 2D vector of strings such that
+ * [[1a,2a,3a], [1b,2b,3b], [1c,2c,3c]]
+ * becomes
+ * [[1a,1b,1c], [2a,2b,2c], [3a,3b,3c]]
+ * @param original - The original vector to be transformed
+ * @return - The vector after it has been transformed
+ */
+std::vector<std::vector<std::string>>
+ProcessIndirectFitParameters::reorder2DVector(
+    const std::vector<std::vector<std::string>> &original) {
+  size_t maximumLength = original.at(0).size();
+  for (int i = 1; i < original.size(); i++) {
+    if (original.at(i).size() > maximumLength) {
+      maximumLength = original.at(i).size();
+    }
+  }
 
-	auto reorderedVector = std::vector<std::vector<std::string>>();
+  auto reorderedVector = std::vector<std::vector<std::string>>();
+  for (int i = 0; i < maximumLength; i++) {
+    std::vector<std::string> temp;
+    for (int j = 0; j < original.size(); j++) {
+      if (original.at(j).size() > i) {
+        temp.push_back(original.at(j).at(i));
+      }
+    }
+    reorderedVector.push_back(temp);
+  }
 
-	for(int i = 0; i < maximumLength; i++){
-		std::vector<std::string> temp;
-		for(int j = 0; j < original.size(); j++){
-			if(original.at(j).size() > i){
-			temp.push_back(original.at(j).at(i));
-			}
-		}
-		reorderedVector.push_back(temp);
-	}
-
-	return reorderedVector;
-
+  return reorderedVector;
 }
 
 } // namespace Algorithms

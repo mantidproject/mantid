@@ -51,7 +51,7 @@ private:
   std::vector<std::string> searchForFitParams(const std::string &,
                                               const std::vector<std::string> &);
   std::vector<std::vector<std::string>>
-  reorderWorkspaceParams(const std::vector<std::vector<std::string>> &);
+  reorder2DVector(const std::vector<std::vector<std::string>> &);
 };
 } // namespace Algorithms
 } // namespace Mantid
