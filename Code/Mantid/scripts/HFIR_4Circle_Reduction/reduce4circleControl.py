@@ -28,11 +28,12 @@ except ImportError:
     import mantid
 import mantid.simpleapi as api
 
-         
+
 DebugMode = True
 
 DET_X_SIZE = 256
 DET_Y_SIZE = 256
+
 
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
@@ -43,22 +44,27 @@ class PeakInfo(object):
         # Flag for data storage mode
         self._cacheDataOnly = False
         # Data server's URL
-        self._myServerURL = '' 
+        self._myServerURL = ''
         # Local data cache directory
         self._localCacheDir = ''
         # Experiment number to process
-        self._myExpNumber = -1
-        # Flag to delete cache dir 
+        self._currentExpNumber = 0
+        # Flag to delete cache dir
         self._rmdirFlag = False
 
         return
 
+    def get_peaks(self):
+        """
+        Get peaks from
+        :return:
+        """
+        return None
 
-    def setPeak(self, peakws, rowindex):
+
+    def set_peak(self, peakws, rowindex):
         """ Set peak information from a peak workspace
         """
-
-
         raise NotImplementedError("ASAP")
 
 
@@ -84,7 +90,7 @@ class CWSCDReductionControl(object):
 
         self._myServerURL = ''
 
-        # Container for loaded workspaces 
+        # Container for loaded workspaces
         self._spiceTableDict = {}
         # Container for loaded raw pt workspace
         self._rawDataDict = {}
@@ -102,14 +108,14 @@ class CWSCDReductionControl(object):
         """
         # Get HKL
         try:
-            h = float(int(matrixws.run().getProperty('_h').value))
-            k = float(int(matrixws.run().getProperty('_k').value))
-            l = float(int(matrixws.run().getProperty('_l').value))
+            m_h = float(int(matrixws.run().getProperty('_h').value))
+            m_k = float(int(matrixws.run().getProperty('_k').value))
+            m_l = float(int(matrixws.run().getProperty('_l').value))
         except ValueError:
             return (False, "Unable to locate _h, _k or _l in input matrix workspace.")
 
-        thepeak = peakws.getPeak(ipeak)
-        thepeak.setHKL(h, k, l)
+        new_peak = peakws.getPeak(ipeak)
+        new_peak.setHKL(m_h, m_k, m_l)
 
         return
 
@@ -150,7 +156,7 @@ class CWSCDReductionControl(object):
         # Download
         try:
             api.DownloadFile(Address=file_url, Filename=file_name)
-        except Exception as e:
+        except RuntimeError as e:
             return False, str(e)
 
         # Check file exist?
@@ -174,7 +180,7 @@ class CWSCDReductionControl(object):
         try:
             api.DownloadFile(Address=xml_file_url,
                              Filename=local_xml_file_name)
-        except Exception as e:
+        except RuntimeError as e:
             return False, 'Unable to download Detector XML file %s dur to %s.' % (xml_file_name, str(e))
 
         # Check file exist?
@@ -193,7 +199,9 @@ class CWSCDReductionControl(object):
 
         for scan_no in scan_list:
             # Download single spice file for a run
-            status, ret_obj = self.download_spice_file(scan_no)
+            status, ret_obj = self.download_spice_file(exp_number=self._expNumber,
+                                                       scan_number=scan_no,
+                                                       over_write=False)
 
             # Reject if SPICE file cannot download
             if status is False:
@@ -218,21 +226,6 @@ class CWSCDReductionControl(object):
 
         return True, error_message
 
-    def downloadAllDataSet(self):
-        """
-        Download all data set
-        :return:
-        """
-        # FIXME 
-        for scanno in xrange(1, sys.maxint):
-            status, retobj = self.download_spice_file(scanno)
-            if status is False:
-                break
-
-
-
-        return
-
     def existDataFile(self, scanno, ptno):
         """
         Check whether data file for a scan or pt number exists
@@ -240,12 +233,12 @@ class CWSCDReductionControl(object):
         :param ptno:
         :return:
         """
-        # Check spice file 
-        spicefilename = '%s_exp%04d_scan%04d.dat'%(self._instrumentName, self._expNumber, 
-                scanno)
-        spicefilename = os.path.join(self._dataDir, spicefilename)
-        if os.path.exists(spicefilename) is False:
-            return (False, "Spice data file %s cannot be found."%(spicefilename))
+        # Check spice file
+        spice_file_name = '%s_exp%04d_scan%04d.dat'%(self._instrumentName,
+                                                   self._expNumber, scanno)
+        spice_file_name = os.path.join(self._dataDir, spice_file_name)
+        if os.path.exists(spice_file_name) is False:
+            return False, 'Spice data file %s cannot be found.'% spice_file_name
 
         # Check xml file
         xmlfilename = '%s_exp%d_scan%04d_%04d.xml'%(self._instrumentName, self._expNumber,
@@ -280,10 +273,9 @@ class CWSCDReductionControl(object):
         # Set Goniometer
         SetGoniometer(Workspace='s%04d_%04d'%(scanno, pt), Axis0='_omega,0,1,0,-1', Axis1='_chi,0,0,1,-1', Axis2='_phi,0,1,0,-1')
 
-
         # TODO - From this step, refer to script 'load_peaks_md.py'
         mdwksp = self._getMDWorkspace(runnumber)
-        
+
         peakws = api.FindPeaksMD(InputWorkspace=mdwksp)
 
         # Get number of peaks
@@ -293,8 +285,8 @@ class CWSCDReductionControl(object):
         elif numpeaks >= 2:
             raise NotImplementedError("It is not implemented for finding more than 1 peak.")
 
-        # Ony case: number of peaks is equal to 1 
-        self._storePeakWorkspace(peakws) 
+        # Ony case: number of peaks is equal to 1
+        self._storePeakWorkspace(peakws)
         peakinfo = PeakInfo(peakws, 0)
 
         # Result shall be popped to table tableWidget_peaksCalUB in GUI
@@ -319,7 +311,8 @@ class CWSCDReductionControl(object):
                     if table_ws is None:
                         raise NotImplementedError('Logic error! Cannot happen!')
                 else:
-                    return False, 'Unable to load Spice file for Exp %d Scan %d.' % (exp_no, scan_no)
+                    return False, 'Unable to load Spice file for Exp %d Scan %d due to %s.' % (
+                        exp_no, scan_no, error_message)
 
         col_name_list = table_ws.getColumnNames()
         i_pt = col_name_list.index('Pt.')
@@ -364,12 +357,12 @@ class CWSCDReductionControl(object):
         if isinstance(peakws, PeakWorkspace) is False:
             return False, "Input workspace %s is not a PeakWorkspace" % (str(peakws))
 
-        # Get UB matrix 
+        # Get UB matrix
         if DebugMode is True:
             ubmatrix = peakws.sample().getOrientedLattice().getUB()
             print "[DB] UB matrix is %s\n" % (str(ubmatrix))
 
-        # Copy sample/ub matrix to target 
+        # Copy sample/ub matrix to target
         api.CopySample(InputWorkspace=srcpeakws,
                        OutputWorkspace=str(targetpeakws),
                        CopyName=0, CopyMaterial=0, CopyEnvironment=0,
@@ -383,19 +376,19 @@ class CWSCDReductionControl(object):
 
     def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
         """
-
+        Load a SPICE scan file to table workspace and run information matrix workspace.
         :param scan_no:
         :param spice_file_name:
         :return: status (boolean), error message (string)
         """
+        # Check whether the workspace has been loaded
+        out_ws_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
+        if self._rawDataDict.has_key((exp_no, scan_no)) is True:
+            return True, out_ws_name
 
         # Form standard name for a SPICE file if name is not given
         if spice_file_name is None:
             spice_file_name = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat' % (exp_no, scan_no))
-        out_ws_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
-
-        # Check wehther the
-        self._
 
         # Load SPICE file
         try:
@@ -408,7 +401,7 @@ class CWSCDReductionControl(object):
         # Store
         self._add_spice_workspace(exp_no, scan_no, spice_table_ws)
 
-        return True, ''
+        return True, out_ws_name
 
     def load_spice_xml_file(self, exp_no, scan_no, pt_no):
         """
@@ -445,15 +438,13 @@ class CWSCDReductionControl(object):
         :param pt_no:
         :return:
         """
-        """
-        """
         # Rebin in momentum space: UB matrix only
         try:
             ret_obj = api.Rebin(InputWorkspace='s%04d_%04d'%(scan_no, pt_no),
                                 OutputWorkspace='s%04d_%04d'%(scan_no, pt_no),
                                 Params='6,0.01,6.5')
-        except RuntimeError as e:
-            return False, str(e)
+        except RuntimeError as err:
+            return False, str(err)
 
         # Set Goniometer
         try:
@@ -461,8 +452,8 @@ class CWSCDReductionControl(object):
                               Axis0='_omega,0,1,0,-1',
                               Axis1='_chi,0,0,1,-1',
                               Axis2='_phi,0,1,0,-1')
-        except RuntimeError as e:
-            return False, str(e)
+        except RuntimeError as err:
+            return False, str(err)
 
         processed_ws = ret_obj
 
@@ -476,17 +467,15 @@ class CWSCDReductionControl(object):
         :param pt_no:
         :return:
         """
-        """
-        """
         # Check existence of SPICE workspace
         if self._spiceTableDict.has_key(scan_no) is False:
             status, ret_obj = self.load_spice_scan_file(exp_no, scan_no)
             if status is False:
                 return False, ret_obj
 
-        # Check existence of matrix workspace 
+        # Check existence of matrix workspace
         if self._expDataDict[self._expNumber].has_key((scan_no, pt_no)) is False:
-            self.load_spice_xml_file(scan_no, pt_no)
+            self.load_spice_xml_file(exp_no, scan_no, pt_no)
 
         return True, ''
 
@@ -494,8 +483,6 @@ class CWSCDReductionControl(object):
         """
 
         :return:
-        """
-        """
         """
         inputws = ''
         for pt in [11]:
@@ -513,25 +500,23 @@ class CWSCDReductionControl(object):
         :param server_url:
         :return:
         """
-        """ Set data server's URL
-        """
         # Server URL must end with '/'
         self._myServerURL = str(server_url)
         if self._myServerURL.endswith('/') is False:
-            self._myServerURL + '/'
+            self._myServerURL += '/'
 
         # Test URL valid or not
         is_url_good = False
         error_message = None
         try:
-            r = urllib2.urlopen(self._myServerURL)
-        except urllib2.HTTPError, e:
-            error_message = str(e.code)
-        except urllib2.URLError, e: 
-            error_message = str(e.args)
+            result = urllib2.urlopen(self._myServerURL)
+        except urllib2.HTTPError, err:
+            error_message = str(err.code)
+        except urllib2.URLError, err:
+            error_message = str(err.args)
         else:
             is_url_good = True
-            r.close()
+            result.close()
 
         if error_message is None:
             error_message = ''
@@ -542,11 +527,9 @@ class CWSCDReductionControl(object):
 
     def setWebAccessMode(self, mode):
         """
-
+        Set data access mode form server
         :param mode:
         :return:
-        """
-        """ Set data access mode form server
         """
         if isinstance(mode, str) is False:
             raise RuntimeError('Input mode is not string')
@@ -617,18 +600,14 @@ class CWSCDReductionControl(object):
 
         return True, ''
 
-    def set_exp_number(self, expno):
+    def set_exp_number(self, exp_number):
         """
         Set experiment number
-        :param expno:
+        :param exp_number:
         :return:
         """
-
-        # TODO : need some verification on input expno
-        try:
-            self._expNumber = int(expno)
-        except TypeError:
-            return False
+        assert(isinstance(exp_number, int))
+        self._expNumber = exp_number
 
         return True
 
