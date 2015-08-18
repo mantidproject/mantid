@@ -119,6 +119,9 @@ public:
   virtual void lockData() const;
   virtual void unlockData() const;
 
+  //-------------------------------------------------------
+  virtual bool useDx() const;
+
 protected:
   /// The spectrum number of this spectrum
   specid_t m_specNo;
@@ -131,6 +134,9 @@ protected:
 
   /// Copy-on-write pointer to the Dx (X error) vector.
   MantidVecPtr refDx;
+
+  /// Flag to indicate if Dx (X error) is being used or not
+  mutable bool m_useDx;
 };
 
 } // namespace API
