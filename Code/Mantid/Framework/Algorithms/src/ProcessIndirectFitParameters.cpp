@@ -54,15 +54,15 @@ void ProcessIndirectFitParameters::init() {
                   "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
-      "X Column", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "ColumnX", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "The column in the table to use for the x values.", Direction::Input);
 
-  declareProperty("Parameter Names", "",
+  declareProperty("ParameterNames", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "List of the parameter names to add to the workspace.",
                   Direction::Input);
 
-  declareProperty("OutputWorkspace Name", "",
+  declareProperty("OutputWorkspaceName", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "The name to call the output workspace.", Direction::Input);
 }
@@ -73,10 +73,10 @@ void ProcessIndirectFitParameters::init() {
 void ProcessIndirectFitParameters::exec() {
   // Get Properties
   ITableWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  std::string xColumn = getProperty("X Column");
-  std::string parameterNamesProp = getProperty("Parameter Names");
+  std::string xColumn = getProperty("ColumnX");
+  std::string parameterNamesProp = getProperty("ParameterNames");
   auto parameterNames = listToVector(parameterNamesProp);
-  std::string outputWsName = getProperty("OutputWorkspace Name");
+  std::string outputWsName = getProperty("OutputWorkspaceName");
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace

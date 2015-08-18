@@ -94,7 +94,7 @@ public:
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("X Column", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("ColumnX", ""),
                      std::invalid_argument);
   }
 
@@ -102,7 +102,7 @@ public:
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Parameter Names", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("ParameterNames", ""),
                      std::invalid_argument);
   }
 
@@ -110,7 +110,7 @@ public:
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspace Name", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("OutputWorkspaceName", ""),
                      std::invalid_argument);
   }
 
@@ -124,17 +124,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace", tableWs);
-    alg.setPropertyValue("X Column", xColumn);
-    alg.setPropertyValue("Parameter Names", parameterValues);
-    alg.setProperty("OutputWorkspace Name", outputName);
+    alg.setPropertyValue("ColumnX", xColumn);
+    alg.setPropertyValue("ParameterNames", parameterValues);
+    alg.setProperty("OutputWorkspaceName", outputName);
 
     ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
 
     TS_ASSERT_EQUALS(tableProp, tableWs);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("X Column")), xColumn);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("Parameter Names")),
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("ColumnX")), xColumn);
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("ParameterNames")),
                      parameterValues);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace Name")),
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspaceName")),
                      outputName);
   }
 
@@ -147,9 +147,9 @@ public:
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", tableWs);
-    alg.setPropertyValue("X Column", xColumn);
-    alg.setPropertyValue("Parameter Names", parameterValues);
-    alg.setProperty("OutputWorkspace Name", outputName);
+    alg.setPropertyValue("ColumnX", xColumn);
+    alg.setPropertyValue("ParameterNames", parameterValues);
+    alg.setProperty("OutputWorkspaceName", outputName);
 
     alg.execute();
 
@@ -177,9 +177,9 @@ public:
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", tableWs);
-    alg.setPropertyValue("X Column", xColumn);
-    alg.setPropertyValue("Parameter Names", parameterValues);
-    alg.setProperty("OutputWorkspace Name", outputName);
+    alg.setPropertyValue("ColumnX", xColumn);
+    alg.setPropertyValue("ParameterNames", parameterValues);
+    alg.setProperty("OutputWorkspaceName", outputName);
 
     alg.execute();
 
