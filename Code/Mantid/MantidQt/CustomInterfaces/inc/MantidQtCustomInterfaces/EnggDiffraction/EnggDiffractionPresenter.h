@@ -10,6 +10,10 @@
 
 #include <boost/scoped_ptr.hpp>
 
+#include <QObject>
+
+class QThread;
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -41,7 +45,10 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 // needs to be dll-exported for the tests
-class DLLExport EnggDiffractionPresenter : public IEnggDiffractionPresenter {
+class DLLExport EnggDiffractionPresenter : public QObject,
+                                           public IEnggDiffractionPresenter {
+  // Q_OBJECT for 'connect' with thread/worker
+  Q_OBJECT
 
 public:
   /// Default constructor - normally used from the concrete view
@@ -49,6 +56,10 @@ public:
   virtual ~EnggDiffractionPresenter();
 
   virtual void notify(IEnggDiffractionPresenter::Notification notif);
+
+  // this is the hard work that a worker / thread will run
+  void doNewCalibration(const std::string &outFilename,
+                        const std::string &vanNo, const std::string &ceriaNo);
 
 protected:
   void initialize();
@@ -63,9 +74,16 @@ protected:
   void processInstChange();
   void processShutDown();
 
+protected slots:
+  void calibrationFinished();
+
 private:
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
+
+  virtual void startAsynCalibWorker(const std::string &outFilename,
+                                    const std::string &vanNo,
+                                    const std::string &ceriaNo);
 
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
                const std::string &ceriaNo, const std::string &outFilename);
@@ -99,6 +117,11 @@ private:
 
   /// whether to allow users to give the output calibration filename
   const static bool g_askUserCalibFilename;
+
+  QThread *m_workerThread;
+
+  /// true if the last calibration completed successfully
+  bool m_calibFinishedOK;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;

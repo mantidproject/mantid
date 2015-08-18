@@ -5,12 +5,15 @@
 #include "MantidQtAPI/PythonRunner.h"
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h"
+#include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
 
 #include <boost/lexical_cast.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
+
+#include <QThread>
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -27,7 +30,8 @@ const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
-    : m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
+    : m_workerThread(NULL), m_calibFinishedOK(false),
+      m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
     throw std::runtime_error(
         "Severe inconsistency found. Presenter created "
@@ -44,6 +48,17 @@ EnggDiffractionPresenter::~EnggDiffractionPresenter() { cleanup(); }
  */
 void EnggDiffractionPresenter::cleanup() {
   // m_model->cleanup();
+
+  // this may still be running
+  if (m_workerThread) {
+    if (m_workerThread->isRunning()) {
+      g_log.notice() << "A calibration process is currently running, shutting "
+                        "it down immediately..." << std::endl;
+      m_workerThread->wait(10);
+    }
+    delete m_workerThread;
+    m_workerThread = NULL;
+  }
 }
 
 void EnggDiffractionPresenter::notify(
@@ -100,27 +115,39 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 }
 
 void EnggDiffractionPresenter::processCalcCalib() {
-  m_view->enableCalibrateActions(false);
-
-  g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... " << std::endl;
-
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-
   std::string vanNo = m_view->newVanadiumNo();
   if (vanNo.empty()) {
     m_view->userWarning(
         "Error in the inputs",
-        "The Vanadium number cannot be empty and must be an integer number");
+        "The Vanadium number cannot be empty and must be an integer number.");
     return;
   }
   std::string ceriaNo = m_view->newCeriaNo();
   if (ceriaNo.empty()) {
     m_view->userWarning(
         "Error in the inputs",
-        "The Ceria number cannot be empty and must be an integer number");
+        "The Ceria number cannot be empty and must be an integer number.");
     return;
   }
+
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  const std::string pixelCalib = cs.m_pixelCalibFilename;
+  if (pixelCalib.empty()) {
+    m_view->userWarning(
+        "Error in the inputs",
+        "You need to set a pixel (full) calibration in settings.");
+    return;
+  }
+  const std::string templGSAS = cs.m_templateGSAS_PRM;
+  if (templGSAS.empty()) {
+    m_view->userWarning(
+        "Error in the inputs",
+        "You need to set a template calibration file for GSAS in settings.");
+    return;
+  }
+
+  g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
+                    "take a few seconds... " << std::endl;
 
   const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
   std::string outFilename;
@@ -143,21 +170,84 @@ void EnggDiffractionPresenter::processCalcCalib() {
     }
   }
 
+  m_view->enableCalibrateActions(false);
+  // alternatively, this would be GUI-blocking:
+  // doNewCalibration(outFilename, vanNo, ceriaNo);
+  // calibrationFinished()
+  startAsynCalibWorker(outFilename, vanNo, ceriaNo);
+}
+
+/**
+ * Start the calibration work without blocking the GUI
+ *
+ * @param outFilename name for the output GSAS calibration file
+ * @param vanNo vanadium run number
+ * @param ceriaNo ceria run number
+ */
+void
+EnggDiffractionPresenter::startAsynCalibWorker(const std::string &outFilename,
+                                               const std::string &vanNo,
+                                               const std::string &ceriaNo) {
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  EnggDiffWorker *worker =
+      new EnggDiffWorker(this, outFilename, vanNo, ceriaNo);
+  worker->moveToThread(m_workerThread);
+
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(calibrate()));
+  connect(worker, SIGNAL(finished()), this, SLOT(calibrationFinished()));
+  // early delete of thread and worker
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()), Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+  m_workerThread->start();
+}
+
+void EnggDiffractionPresenter::calibrationFinished() {
+  if (!m_view)
+    return;
+
+  m_view->enableCalibrateActions(true);
+  if (!m_calibFinishedOK) {
+    g_log.warning() << "The cablibration did not finished correctly."
+                    << std::endl;
+  } else {
+    const std::string vanNo = m_view->newVanadiumNo();
+    const std::string ceriaNo = m_view->newCeriaNo();
+    const std::string outFilename =
+        buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+    g_log.notice()
+        << "Cablibration finished and ready as 'current calibration'."
+        << std::endl;
+  }
+  if (m_workerThread) {
+    delete m_workerThread;
+    m_workerThread = NULL;
+  }
+}
+
+void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
+                                                const std::string &vanNo,
+                                                const std::string &ceriaNo) {
   g_log.notice() << "Generating new calibration file: " << outFilename
                  << std::endl;
 
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
   Mantid::Kernel::ConfigServiceImpl &conf =
       Mantid::Kernel::ConfigService::Instance();
   const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
   // in principle, the run files will be found from 'DirRaw', and the
   // pre-calculated Vanadium corrections from 'DirCalib'
-  if (Poco::File(cs.m_inputDirCalib).exists())
+  if (!cs.m_inputDirCalib.empty() && Poco::File(cs.m_inputDirCalib).exists()) {
     conf.appendDataSearchDir(cs.m_inputDirCalib);
-  if (Poco::File(cs.m_inputDirRaw).exists())
-    conf.appendDataSearchDir(cs.m_inputDirCalib);
+  }
+  if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists())
+    conf.appendDataSearchDir(cs.m_inputDirRaw);
+
   try {
     doCalib(cs, vanNo, ceriaNo, outFilename);
-    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+    m_calibFinishedOK = true;
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
@@ -169,8 +259,6 @@ void EnggDiffractionPresenter::processCalcCalib() {
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
-
-  m_view->enableCalibrateActions(true);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
@@ -208,21 +296,8 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   MatrixWorkspace_sptr vanCurvesWS;
   MatrixWorkspace_sptr ceriaWS;
 
-  try {
-    loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
-                                 vanCurvesWS, cs.m_forceRecalcOverwrite);
-  } catch (std::runtime_error &re) {
-    g_log.error() << "Unable to load or calculate Vanadium corrections. Giving "
-                     "up. There was a problem while executing algorithms: " +
-                         std::string(re.what());
-    throw;
-  } catch (std::invalid_argument &ia) {
-    g_log.error() << "Unable to load or calculate Vanadium corrections. Giving "
-                     "up. There was a problem with the inputs to the "
-                     "correction algorithms: " +
-                         std::string(ia.what());
-    throw;
-  }
+  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+                               vanCurvesWS, cs.m_forceRecalcOverwrite);
 
   const std::string instStr = m_view->currentInstrument();
   try {
@@ -236,14 +311,12 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
     ceriaWS = ADS.retrieveWS<MatrixWorkspace>(ceriaWSName);
   } catch (std::runtime_error &re) {
-    m_view->userError("Error while loading calibration sample data",
-                      "Could not run Load succesfully for the calibration "
-                      "sample (run number: " +
-                          ceriaNo + "). Error description: " + re.what() +
-                          " Please check also the log messages for details.");
-    g_log.warning()
-        << "Could not generate calibration file because there errors while "
-           "loading calibration sample data (see log). " << std::endl;
+    g_log.error()
+        << "Error while loading calibration sample data. "
+           "Could not run the algorithm Load succesfully for the calibration "
+           "sample (run number: " +
+               ceriaNo + "). Error description: " + re.what() +
+               " Please check also the previous log messages for details.";
     throw;
   }
 
@@ -273,13 +346,10 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
                                 boost::lexical_cast<std::string>(i + 1));
       alg->execute();
     } catch (std::runtime_error &re) {
-      m_view->userError("Error in calibration",
-                        "Could not run EnggCalibrate succesfully for bank " +
-                            boost::lexical_cast<std::string>(i) +
-                            ". Error description: " + re.what() +
-                            " Please check also the log messages for details.");
-      g_log.warning() << "Could not generate calibration file because of the "
-                         "errors (see log). " << std::endl;
+      g_log.error() << "Error in calibration. ",
+          "Could not run the algorithm EnggCalibrate succesfully for bank " +
+              boost::lexical_cast<std::string>(i) + ". Error description: " +
+              re.what() + " Please check also the log messages for details.";
       throw;
     }
     difc[i] = alg->getProperty("Difc");
@@ -546,23 +616,23 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
     try {
       calcVanadiumWorkspaces(vanNo, vanIntegWS, vanCurvesWS);
     } catch (std::invalid_argument &ia) {
-      m_view->userError("Failed to calculate Vanadium corrections",
-                        "There was an error in the execution of the algorithms "
-                        "required to calculate Vanadium corrections. Some "
-                        "properties passed to the algorithms were invalid. "
-                        "This is possibly because some of the settings are not "
-                        "consistent. Please check the log messages for "
-                        "details. Details: " +
-                            std::string(ia.what()));
+      g_log.error() << "Failed to calculate Vanadium corrections. "
+                       "There was an error in the execution of the algorithms "
+                       "required to calculate Vanadium corrections. Some "
+                       "properties passed to the algorithms were invalid. "
+                       "This is possibly because some of the settings are not "
+                       "consistent. Please check the log messages for "
+                       "details. Details: " +
+                           std::string(ia.what()) << std::endl;
       throw;
     } catch (std::runtime_error &re) {
-      m_view->userError("Failed to calculate Vanadium corrections",
-                        "There was an error while executing one of the "
-                        "algorithms used to perform Vanadium corrections. "
-                        "There was no obvious error in the input properties "
-                        "but the algorithm failed. Please check the log "
-                        "messages for details." +
-                            std::string(re.what()));
+      g_log.error() << "Failed to calculate Vanadium corrections. "
+                       "There was an error while executing one of the "
+                       "algorithms used to perform Vanadium corrections. "
+                       "There was no obvious error in the input properties "
+                       "but the algorithm failed. Please check the log "
+                       "messages for details." +
+                           std::string(re.what()) << std::endl;
       throw;
     }
   } else {
@@ -574,18 +644,16 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
       loadVanadiumPrecalcWorkspaces(preIntegFilename, preCurvesFilename,
                                     vanIntegWS, vanCurvesWS);
     } catch (std::invalid_argument &ia) {
-      m_view->userError(
-          "Error while loading precalculated Vanadium corrections",
+      g_log.error() << "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
           "integration and per-bank curves) were found (with names '" +
               preIntegFilename + "' and '" + preCurvesFilename +
               "', respectively, but there was a problem with the inputs to the "
               "load algorithms to load them: " +
-              std::string(ia.what()));
+              std::string(ia.what());
       throw;
     } catch (std::runtime_error &re) {
-      m_view->userError(
-          "Error while loading precalculated Vanadium corrections",
+      g_log.error() << "Error while loading precalculated Vanadium corrections",
           "The files with precalculated Vanadium corection features (spectra "
           "integration and per-bank curves) were found (with names '" +
               preIntegFilename + "' and '" + preCurvesFilename +
@@ -593,7 +661,7 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
               "Please check the log messages for details. You might want to "
               "delete those files or force recalculations (in settings). Error "
               "details: " +
-              std::string(re.what()));
+              std::string(re.what());
       throw;
     }
   }

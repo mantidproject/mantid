@@ -108,6 +108,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
   inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
   inc/MantidQtCustomInterfaces/Homer.h
   inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
@@ -221,6 +222,8 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
                 inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h

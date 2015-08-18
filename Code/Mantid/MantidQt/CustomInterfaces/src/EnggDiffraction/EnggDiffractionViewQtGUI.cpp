@@ -303,8 +303,11 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
 }
 
 void EnggDiffractionViewQtGUI::enableCalibrateActions(bool enable) {
-  m_uiTabCalib.pushButton_load_calib->setEnabled(enable);
-  m_uiTabCalib.pushButton_new_calib->setEnabled(enable);
+  m_uiTabCalib.lineEdit_RBNumber->setEnabled(enable);
+  m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
+  m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
+
+  m_ui.pushButton_close->setEnabled(enable);
 }
 
 void
@@ -456,7 +459,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
   int answer = QMessageBox::AcceptRole;
 
   QMessageBox msgBox;
-  if (false /* TODO: get this from user settings */) {
+  if (false /* TODO: get this from user settings if eventually used */) {
     msgBox.setWindowTitle("Close the engineering diffraction interface");
     // with something like this, we'd have layout issues:
     // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
@@ -476,7 +479,7 @@ void EnggDiffractionViewQtGUI::closeEvent(QCloseEvent *event) {
     answer = msgBox.exec();
   }
 
-  if (answer == QMessageBox::AcceptRole) {
+  if (answer == QMessageBox::AcceptRole && m_ui.pushButton_close->isEnabled()) {
     m_presenter->notify(IEnggDiffractionPresenter::ShutDown);
     event->accept();
   } else {

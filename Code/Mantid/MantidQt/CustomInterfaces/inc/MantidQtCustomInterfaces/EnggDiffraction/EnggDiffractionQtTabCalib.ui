@@ -42,7 +42,7 @@
     </layout>
    </item>
    <item row="1" column="0">
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="groupBox_current_calib">
      <property name="title">
       <string>Current calibration:</string>
      </property>
@@ -160,7 +160,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QGroupBox" name="groupBox">
+      <widget class="QGroupBox" name="groupBox_make_new_calib">
        <property name="title">
         <string>Make new calibration</string>
        </property>

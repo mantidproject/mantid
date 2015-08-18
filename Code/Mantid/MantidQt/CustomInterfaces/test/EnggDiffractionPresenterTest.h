@@ -11,6 +11,25 @@ using namespace MantidQt::CustomInterfaces;
 using testing::TypedEq;
 using testing::Return;
 
+// Use this mocked presenter for tests that will start the calibration thread.
+// Otherwise you'll run into trouble with issues like "QEventLoop: Cannot be
+// used without QApplication", as there is not Qt application here and the
+// normal Qt thread used by the presenter uses signals/slots.
+class EnggDiffPresenterNoThread : public EnggDiffractionPresenter {
+public:
+  EnggDiffPresenterNoThread(IEnggDiffractionView *view)
+      : EnggDiffractionPresenter(view) {}
+
+private:
+  // not async at all
+  void startAsynCalibWorker(const std::string &outFilename,
+                            const std::string &vanNo,
+                            const std::string &ceriaNo) {
+    doNewCalibration(outFilename, vanNo, ceriaNo);
+    calibrationFinished();
+  }
+};
+
 class EnggDiffractionPresenterTest : public CxxTest::TestSuite {
 
 public:
@@ -109,10 +128,10 @@ public:
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    // will need basic calibration settings from the user
+    // would need basic calibration settings from the user, but it should not
+    // get to that point because of early detected errors:
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
-        Return(calibSettings));
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
 
     // No errors, 1 warning (no Vanadium, no Ceria run numbers given)
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
@@ -125,44 +144,90 @@ public:
     pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
 
-  void test_calcCalibWithRunNumbersButError() {
+  void test_calcCalibWithSettingsMissing() {
     testing::NiceMock<MockEnggDiffractionView> mockView;
     MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
 
-    // will need basic calibration settings from the user
+    const std::string instr = "FAKEINSTR";
+    const std::string vanNo = "9999999999"; // use a number that won't be found!
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+
+    // will need basic calibration settings from the user - but I forget to set
+    // them
     EnggDiffCalibSettings calibSettings;
+
     EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
         Return(calibSettings));
 
-    const std::string vanNo = "9999999999"; // use a number that won't be found!
     EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
 
-    const std::string ceriaNo =
-        "9999999999"; // use a number that won't be found!
     EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
 
-    const std::string instr = "FAKE_INSTR";
-    EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
-
-    const std::string filename =
-        "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
-    EXPECT_CALL(mockView,
-                askNewCalibrationFilename("UNKNOWNINST_" + vanNo + "_" +
-                                          ceriaNo + "_both_banks.prm"))
-      .Times(0);
-    //  .WillOnce(Return(filename)); // if enabled ask user output filename
-
-    // No warnings, 1 error: some exception(s) are thrown (because there are
-    // missing settings and/or files) but these must be caught
-    // and an error shown to the user
-    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(1);
+    // 1 warning because some required settings are missing/empty
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
 
     // does not update the current calibration as it must have failed
     EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, testing::_))
         .Times(0);
 
     TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
+  }
+
+  void test_calcCalibWithRunNumbersButError() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+
+    // this test would start a Qt thread that needs signals/slots
+    // Don't do: MantidQt::CustomInterfaces::EnggDiffractionPresenter
+    // pres(&mockView);
+    EnggDiffPresenterNoThread pres(&mockView);
+
+    const std::string instr = "FAKEINSTR";
+    const std::string vanNo = "9999999999"; // use a number that won't be found!
+    const std::string ceriaNo =
+        "9999999999"; // use a number that won't be found!
+
+    // will need basic calibration settings from the user
+    EnggDiffCalibSettings calibSettings;
+    calibSettings.m_pixelCalibFilename =
+        instr + "_" + vanNo + "_" + ceriaNo + ".prm";
+    calibSettings.m_templateGSAS_PRM = "fake.prm";
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(2).WillRepeatedly(
+        Return(calibSettings));
+
+    EXPECT_CALL(mockView, newVanadiumNo()).Times(1).WillOnce(Return(vanNo));
+
+    EXPECT_CALL(mockView, newCeriaNo()).Times(1).WillOnce(Return(ceriaNo));
+
+    EXPECT_CALL(mockView, currentInstrument()).Times(1).WillOnce(Return(instr));
+
+    const std::string filename =
+        "UNKNOWNINST_" + vanNo + "_" + ceriaNo + "_" + "foo.prm";
+    EXPECT_CALL(mockView, askNewCalibrationFilename(
+                              "UNKNOWNINST_" + vanNo + "_" + ceriaNo +
+                              "_both_banks.prm")).Times(0);
+    //  .WillOnce(Return(filename)); // if enabled ask user output filename
+
+    // should disable actions at the beginning of the calculations
+    EXPECT_CALL(mockView, enableCalibrateActions(false)).Times(1);
+
+    // and should enable them again at the (unsuccessful) end - this happens
+    // when a separate thread finished (here the thread is mocked)
+    EXPECT_CALL(mockView, enableCalibrateActions(true)).Times(1);
+
+    // No warnings/error pop-ups: some exception(s) are thrown (because there
+    // are missing settings and/or files) but these must be caught
+    // and error messages logged
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+
+    // does not update the current calibration as it must have failed
+    EXPECT_CALL(mockView, newCalibLoaded(testing::_, testing::_, testing::_))
+        .Times(0);
+
+    // TS_ASSERT_THROWS_NOTHING(pres.notify(IEnggDiffractionPresenter::CalcCalib));
+    pres.notify(IEnggDiffractionPresenter::CalcCalib);
   }
 
   // TODO: disabled for now, as this one would need to load files
@@ -172,7 +237,7 @@ public:
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
-    EXPECT_CALL(mockView, currentCalibSettings()).Times(1).WillOnce(
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(2).WillOnce(
         Return(calibSettings));
 
     // No errors/warnings
