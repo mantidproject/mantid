@@ -3,6 +3,7 @@
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/SimpleChebfun.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -261,6 +262,8 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     values->setFitData(j, y);
     values->setFitWeight(j, weight);
   }
+  m_domain = domain;
+  m_values = values;
 }
 
 /**
@@ -432,6 +435,13 @@ void FitMW::initFunction(API::IFunction_sptr function) {
   function->setWorkspace(m_matrixWorkspace);
   function->setMatrixWorkspace(m_matrixWorkspace, m_workspaceIndex, m_startX,
                                m_endX);
+  if (needSettingInitialValues(*function)) {
+    auto domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(m_domain.lock());
+    auto values = m_values.lock();
+    if (domain && values) {
+      setInitialValues(*function, *domain, *values);
+    }
+  }
 }
 
 //--------------------------------------------------------------------------------------------------------------
@@ -615,6 +625,91 @@ void FitMW::addFunctionValuesToWS(
       eValues[i] = std::sqrt(err);
     }
   }
+}
+
+namespace {
+
+/// Estimate a peak width from a secon derivative of the data.
+/// @param centre :: Approximate peak centre.
+/// @param der2 :: An approximation to the second derivative.
+double getPeakWidth(double centre, const SimpleChebfun &der2) {
+  auto &xp = der2.xPoints();
+  auto icentre = std::lower_bound(xp.begin(), xp.end(), centre);
+  if (icentre != xp.end()) {
+    auto ic = static_cast<size_t>(std::distance(xp.begin(), icentre));
+    const double d2max = der2(centre);
+    auto PD2 = der2.yPoints();
+    double left = 0.0;
+    for (auto i = ic; i > 0; --i) {
+      if (d2max * PD2[i] < 0.0)
+        break;
+      left = centre - xp[i];
+    }
+    double right = 0.0;
+    for (auto i = ic; i < xp.size(); ++i) {
+      if (d2max * PD2[i] < 0.0)
+        break;
+      right = xp[i] - centre;
+    }
+
+    return fabs(right + left) / 2;
+  }
+  return 0.0;
+}
+
+/// Set initial values to a function if it needs to.
+void setValues(API::IFunction &function, const SimpleChebfun &fun,
+                      const SimpleChebfun &der1, const SimpleChebfun &der2) {
+  if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
+    for (size_t i = 0; i < cf->nFunctions(); ++i) {
+      setValues(*cf->getFunction(i), fun, der1, der2);
+    }
+  } else if (function.name() == "Gaussian" && !function.isExplicitlySet(2)) {
+    double width = getPeakWidth(function.getParameter("PeakCentre"), der2);
+    function.setParameter("Sigma", width);
+  } else if (function.name() == "Lorentzian" && !function.isExplicitlySet(2)) {
+    double width = getPeakWidth(function.getParameter("PeakCentre"), der2);
+    function.setParameter("FWHM", width);
+  }
+}
+
+} // namespace
+
+/// Test if initial values need to be set before fitting
+bool FitMW::needSettingInitialValues(const API::IFunction& function) {
+  if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
+    for (size_t i = 0; i < cf->nFunctions(); ++i) {
+      if (needSettingInitialValues(*cf->getFunction(i)))
+        return true;
+    }
+  } else if (function.name() == "Gaussian" && !function.isExplicitlySet(2))
+    return true;
+   else if (function.name() == "Lorentzian" && !function.isExplicitlySet(2))
+    return true;
+  return false;
+}
+
+/**
+ * Set initial values for parameters with default values.
+ * @param domain :: Initialized domain.
+ * @param values :: Function values with the fit data set up.
+ */
+void FitMW::setInitialValues(API::IFunction& function, const API::FunctionDomain1D &domain, API::FunctionValues &values) {
+
+  size_t n = domain.size();
+
+  std::vector<double> x(n);
+  std::vector<double> y(n);
+  for (size_t i = 0; i < n; ++i) {
+    x[i] = domain[i];
+    y[i] = values.getFitData(i);
+  }
+
+  SimpleChebfun fun(x, y);
+  auto der1 = fun.derivative();
+  auto der2 = der1.derivative();
+
+  setValues(function, fun, der1, der2);
 }
 
 } // namespace Algorithm

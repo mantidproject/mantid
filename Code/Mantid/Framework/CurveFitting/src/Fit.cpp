@@ -142,8 +142,6 @@ void Fit::execConcrete() {
   // do something with the function which may depend on workspace
   m_domainCreator->initFunction(m_function);
 
-  m_function->setInitialValues(*domain, *values);
-
   // get the minimizer
   std::string minimizerName = getPropertyValue("Minimizer");
   API::IFuncMinimizer_sptr minimizer =

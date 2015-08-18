@@ -745,20 +745,5 @@ CompositeFunction::getContainingFunction(const ParameterReference &ref) const {
   return IFunction_sptr();
 }
 
-/// Set initial values for default parameters for functions that allow that.
-void CompositeFunction::setInitialValues(const FunctionDomain &domain, FunctionValues &values) {
-  auto nFuns = nFunctions();
-  if (nFuns == 0) return;
-
-  for (size_t iFun = 0; iFun < nFunctions(); iFun++) {
-    IFunction_sptr fun = getFunction(iFun);
-    fun->setInitialValues(domain, values);
-  }
-}
-
-bool CompositeFunction::needSettingInitialValues() const {
-  return false;
-}
-
 } // namespace API
 } // namespace Mantid

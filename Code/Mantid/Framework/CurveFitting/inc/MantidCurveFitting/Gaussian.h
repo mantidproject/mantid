@@ -70,8 +70,6 @@ public:
   virtual void setActiveParameter(size_t i, double value);
   virtual double activeParameter(size_t i) const;
 
-  void setInitialValues(const API::FunctionDomain &domain, API::FunctionValues &values);
-
 protected:
   virtual void functionLocal(double *out, const double *xValues,
                              const size_t nData) const;

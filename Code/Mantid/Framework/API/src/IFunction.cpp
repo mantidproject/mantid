@@ -1101,22 +1101,6 @@ void IFunction::setCovarianceMatrix(
   m_covar = covar;
 }
 
-/**
- * Set initial values for parameters with default values. Called by Fit
- * after domain has been created.
- * @param domain :: Initialized domain.
- * @param values :: Function values with the fit data set up.
- */
-void IFunction::setInitialValues(const FunctionDomain &domain, FunctionValues &values) {
-  UNUSED_ARG(domain);
-  UNUSED_ARG(values);
-}
-
-/// Test if initial values need yo be set before fitting
-bool IFunction::needSettingInitialValues() const {
-  return false;
-}
-
 } // namespace API
 } // namespace Mantid
 
