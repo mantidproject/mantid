@@ -301,7 +301,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             if bonds is None or len(bonds) == 0:
                 raise RuntimeError('No bonds found in CASTEP file')
 
-            self._bond_analysis(unit_cell, ions, bonds, eigenvectors)
+            self._bond_analysis(unit_cell, ions, bonds, eigenvectors[0])
 
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
@@ -427,7 +427,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param bonds List of all bonds
         @param eigenvectors List of eigenvectors
         """
-        prog_reporter = Progress(self, 0.0, 1.0, len(eigenvectors) * self._num_branches * self._num_ions)
+        prog_reporter = Progress(self, 0.0, 1.0, self._num_branches * self._num_ions)
 
         self._convert_to_cartesian_coordinates(unit_cell, ions)
         self._calculate_bond_vectors(bonds, ions)
@@ -441,13 +441,12 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         output_ws.addColumn('str', 'SpeciesC')
         output_ws.addColumn('int', 'SpeciesNumberC')
         output_ws.addColumn('str', 'BondMode')
-        output_workspaces.append(output_ws)
 
         for mode in range(self._num_branches):
             for ion_b in ions:
                 prog_reporter.report('Bond analysis (ion {0}, mode {1})'.format(ion_b['index'], mode))
 
-                ion_wavevector = lambda ion: wavevectors[mode * self._num_ions + ion['index']]
+                ion_wavevector = lambda ion: eigenvectors[mode * self._num_ions + ion['index']]
 
                 # Get ions A and B and wavevectors for all ions
                 ab_bond = self._choose_close_bonded_atom(ion_b, bonds)
@@ -457,8 +456,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 ion_b_vector = ion_wavevector(ion_b)
 
                 bc_bond = self._choose_close_bonded_atom(ion_b, bonds, is_not=[ion_a])
-                if bc_bond == (None, None):
-                    bc_bond = ab_bond
                 ion_c = self._find_ion(ions, *bc_bond[0][bc_bond[1]])
                 ion_c_vector = ion_wavevector(ion_c)
 
@@ -471,20 +468,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 ab_bond_q.rotate(ab_motion_ion_a)
                 ab_bond_q.rotate(ab_motion_ion_b)
 
-                def sig_diff(a1, a2, b1, b2):
-                    res_a, res_b = [False, False, False], [False, False, False]
-                    std_dev_a = np.std(a1) * 2
-                    std_dev_b = np.std(b1) * 2
-
-                    res_a[0] = abs(a2.X() - a1[0]) > std_dev_a
-                    res_b[0] = abs(b2.X() - b1[0]) > std_dev_b
-                    res_a[1] = abs(a2.Y() - a1[1]) > std_dev_a
-                    res_b[1] = abs(b2.Y() - b1[1]) > std_dev_b
-                    res_a[2] = abs(a2.Z() - a1[2]) > std_dev_a
-                    res_b[2] = abs(b2.Z() - b1[2]) > std_dev_b
-
-                    return res_a == res_b and True in res_a
-
                 bc_motion_ion_b = V3D(*ion_b_vector)
                 bc_motion_ion_c = V3D(*ion_c_vector)
                 bc_bond_q.rotate(bc_motion_ion_b)
@@ -494,6 +477,18 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 ac_motion_ion_c = V3D(*ion_c_vector)
                 ac_vect.rotate(ac_motion_ion_a)
                 ac_vect.rotate(ac_motion_ion_c)
+
+                ab = ab_motion_ion_a - ab_motion_ion_b
+                bc = bc_motion_ion_b - bc_motion_ion_c
+                ac = ac_motion_ion_a - ac_motion_ion_c
+
+                x = np.array([ab.X(), bc.X(), ac.X()])
+                y = np.array([ab.Y(), bc.Y(), ac.Y()])
+                z = np.array([ab.Z(), bc.Z(), ac.Z()])
+                b = np.array([1.0, 1.0, 1.0])
+
+                fitted = np.abs(np.linalg.solve(np.array([x, y, z]), b))
+                fitted /= np.linalg.norm(fitted)
 
                 row_details = {
                         'Mode': mode,
@@ -505,17 +500,11 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                         'SpeciesNumberC': ion_c['number']
                     }
 
-                if sig_diff(ion_a_vector, ab_motion_ion_a, ion_b_vector, ab_motion_ion_b):
-                    row_details['BondMode'] = 'AB Stretch'
-                    output_ws.addRow(row_details)
-
-                elif sig_diff(ion_b_vector, bc_motion_ion_b, ion_c_vector, bc_motion_ion_c):
-                    row_details['BondMode'] = 'BC Stretch'
-                    output_ws.addRow(row_details)
-
-                elif sig_diff(ion_a_vector, ac_motion_ion_a, ion_c_vector, ac_motion_ion_c):
-                    row_details['BondMode'] = 'Bending'
-                    output_ws.addRow(row_details)
+                dimension = ['AB Stretch', 'BC Stretch', 'Bend']
+                for idx, dim in enumerate(dimension):
+                    if fitted[idx] > 0.85:
+                        row_details['BondMode'] = dim
+                        output_ws.addRow(row_details)
 
 #----------------------------------------------------------------------------------------
 
