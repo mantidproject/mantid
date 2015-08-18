@@ -1,4 +1,3 @@
-# pylint: disable=no-init
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction
@@ -15,11 +14,17 @@ class DNSDetEffCorrVana(PythonAlgorithm):
     properties_to_compare = ['deterota', 'wavelength', 'slit_i_left_blade_position',
                              'slit_i_right_blade_position', 'slit_i_lower_blade_position',
                              'slit_i_upper_blade_position', 'polarisation', 'flipper']
-    dataws = None
-    outws_name = None
-    vanaws = None
-    bkgws = None
-    vana_mean_name = None
+
+    def __init__(self):
+        """
+        Init
+        """
+        PythonAlgorithm.__init__(self)
+        self.dataws = None
+        self.outws_name = None
+        self.vanaws = None
+        self.bkgws = None
+        self.vana_mean_name = None
 
     def category(self):
         """

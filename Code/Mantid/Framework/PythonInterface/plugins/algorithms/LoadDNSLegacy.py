@@ -1,4 +1,3 @@
-#pylint: disable=no-init
 import mantid.simpleapi as api
 import numpy as np
 import os
@@ -20,11 +19,18 @@ class LoadDNSLegacy(PythonAlgorithm):
     Load the DNS Legacy data file to the matrix workspace
     Monitor/duration data are loaded to the separate workspace
     """
+
+    def __init__(self):
+        """
+        Init
+        """
+        PythonAlgorithm.__init__(self)
+
     def category(self):
         """
         Returns category
         """
-        return 'PythonAlgorithms\\MLZ\\DNS\\DataHandling'
+        return 'PythonAlgorithms\\MLZ\\DNS;DataHandling'
 
     def name(self):
         """
@@ -84,7 +90,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         # create workspace
         api.CreateWorkspace(OutputWorkspace=outws_name, DataX=dataX, DataY=dataY,
                             DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        outws = api.mtd[outws_name]
+        outws = api.AnalysisDataService.retrieve(outws_name)
         api.LoadInstrument(outws, InstrumentName='DNS')
 
         run = outws.mutableRun()
@@ -113,9 +119,9 @@ class LoadDNSLegacy(PythonAlgorithm):
                          LogType='Number', LogUnit='Degrees')
         api.AddSampleLog(outws, LogName='omega', LogText=str(metadata.huber - metadata.deterota),
                          LogType='Number', LogUnit='Degrees')
-        api.AddSampleLog(outws, LogName='T1', LogText=str(metadata.t1),
+        api.AddSampleLog(outws, LogName='T1', LogText=str(metadata.temp1),
                          LogType='Number', LogUnit='K')
-        api.AddSampleLog(outws, LogName='T2', LogText=str(metadata.t2),
+        api.AddSampleLog(outws, LogName='T2', LogText=str(metadata.temp2),
                          LogType='Number', LogUnit='K')
         api.AddSampleLog(outws, LogName='Tsp', LogText=str(metadata.tsp),
                          LogType='Number', LogUnit='K')
@@ -156,19 +162,32 @@ class LoadDNSLegacy(PythonAlgorithm):
         api.AddSampleLog(outws, 'slit_i_right_blade_position',
                          LogText=str(metadata.slit_i_right_blade_position),
                          LogType='Number', LogUnit='mm')
+        # add information whether the data are normalized (yes/no):
+        api.AddSampleLog(outws, LogName='normalized',
+                         LogText='no', LogType='String')
 
         # create workspace with normalization data (monitor or duration)
         if norm == 'duration':
             dataY.fill(metadata.duration)
             dataE.fill(0.001)
+            yunit = 'Seconds'
+            ylabel = 'Duration'
         else:
             dataY.fill(metadata.monitor_counts)
             dataE = np.sqrt(dataY)
+            yunit = 'Counts'
+            ylabel = 'Monitor Counts'
         api.CreateWorkspace(OutputWorkspace=monws_name, DataX=dataX, DataY=dataY,
                             DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        monws = api.mtd[monws_name]
+        monws = api.AnalysisDataService.retrieve(monws_name)
         api.LoadInstrument(monws, InstrumentName='DNS')
         api.CopyLogs(InputWorkspace=outws_name, OutputWorkspace=monws_name, MergeStrategy='MergeReplaceExisting')
+        api.AddSampleLog(monws, 'normalization',
+                         LogText=norm, LogType='String')
+        monws.setYUnit(yunit)
+        monws.setYUnitLabel(ylabel)
+        outws.setYUnit("Counts")
+        outws.setYUnitLabel("Intensity")
 
         self.setProperty("OutputWorkspace", outws)
         self.log().debug('LoadDNSLegacy: data are loaded to the workspace ' + outws_name)
