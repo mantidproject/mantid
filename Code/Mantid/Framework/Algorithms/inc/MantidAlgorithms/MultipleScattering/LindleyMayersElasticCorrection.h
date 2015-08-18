@@ -65,8 +65,8 @@ public:
   /// Return the correction factors
   void apply(const std::vector<double> &tof, std::vector<double> &signal,
              std::vector<double> &errors);
-  /// Calculate the absoprtion factor for a single mu*r value
-  std::pair<double, double> calculateAbsorption(const double muR);
+  /// Calculate the self-attentation factor for a single mu*r value
+  double calculateSelfAttenuation(const double muR);
   /// Calculate the multiple scattering factor for a single mu*r value & absorption value
   std::pair<double, double> calculateMS(const size_t irp, const double muR, const double abs);
 

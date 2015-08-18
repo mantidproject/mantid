@@ -95,23 +95,23 @@ void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
   // by initial values above
   const double deltaR = muRmax() - muRmin();
   for (size_t i = 0; i < N_MUR_PTS; ++i) {
-    const double mur =
+    const double muR =
         muRmin() + to<double>(i) * deltaR / to<double>(N_MUR_PTS - 1);
+    xmur[i + 1] = muR;
 
-    auto absFactor = calculateAbsorption(mur);
-    xmur[i + 1] = mur;
-    yabs[i + 1] = absFactor.first;
-    wabs[i + 1] = absFactor.second;
+    auto attenuation = calculateSelfAttenuation(muR);
+    const double absFactor = attenuation / (M_PI * muR * muR);
+    yabs[i + 1] = 1. / absFactor;
+    wabs[i + 1] = absFactor;
   }
 }
 
 /**
- * Calculate the absorption factor and weight for the given mur value
+ * Calculate the self-attenutation factor for the given mur value
  * @param muR Single mu*r slice value
- * @return A pair of (factor,weight)
+ * @return The self-attenuation factor for this sample
  */
-std::pair<double, double>
-LindleyMayersElasticCorrection::calculateAbsorption(const double muR) {
+double LindleyMayersElasticCorrection::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -142,9 +142,7 @@ LindleyMayersElasticCorrection::calculateAbsorption(const double muR) {
 
     yr[i] = r0 * integrate(yth, dyth);
   }
-
-  const double absFactor = integrate(yr, dyr) / M_PI / muRSq;
-  return std::make_pair(1.0 / absFactor, absFactor);
+  return integrate(yr, dyr);
 }
 
 /**
@@ -196,12 +194,14 @@ LindleyMayersElasticCorrection::calculateMS(const size_t irp, const double muR,
         continue;
       sum += exp(-(mul1 + mul2 + mul12)) / pow(mul12, 2);
     }
-    const double beta = pow(M_PI * muR * muR * muH, 2) * sum / to<double>(N_SECOND);
+    const double beta =
+        pow(M_PI * muR * muR * muH, 2) * sum / to<double>(N_SECOND);
     const double delta = 0.25 * beta / (M_PI * abs * muH);
     deltas[j] = delta;
   }
-  auto stats = getStatistics(deltas, StatOptions::Mean | StatOptions::CorrectedStdDev);
-  return std::make_pair(stats.mean, stats.mean/stats.standard_deviation);
+  auto stats =
+      getStatistics(deltas, StatOptions::Mean | StatOptions::CorrectedStdDev);
+  return std::make_pair(stats.mean, stats.mean / stats.standard_deviation);
 }
 
 //-----------------------------------------------------------------------------

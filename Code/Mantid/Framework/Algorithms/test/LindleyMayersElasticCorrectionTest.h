@@ -21,13 +21,12 @@ public:
     delete suite;
   }
 
-  void test_absorption_correction_for_fixed_mur() {
+  void test_attentuaton_correction_for_fixed_mur() {
     LindleyMayersElasticCorrection mscat(createTestParameters());
-    auto absFactor = mscat.calculateAbsorption(0.01);
+    auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
-    TS_ASSERT_DELTA(1.01711285, absFactor.first, delta);
-    TS_ASSERT_DELTA(0.98317507, absFactor.second, delta);
+    TS_ASSERT_DELTA(0.00030887, absFactor, delta);
   }
 
   void test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor() {
