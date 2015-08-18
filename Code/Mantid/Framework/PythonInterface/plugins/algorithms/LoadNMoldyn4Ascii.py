@@ -295,6 +295,12 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
             data *= sc.value('Planck constant in eV s') # Hz to eV
             data *= sc.milli # eV to meV
 
+        # Time (ps) to TOF (s)
+        elif name.lower() == 'time' and unit.lower() == 'ps':
+            logger.information('Axis {0} will be converted to time in microsecond'.format(name))
+            unit = 'TOF'
+            data *= sc.micro # ps to us
+
         # No conversion
         else:
             unit = 'Empty'

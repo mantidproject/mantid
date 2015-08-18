@@ -29,7 +29,8 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
         self.assertEqual(workspace.getNumberHistograms(), 21)
         self.assertEqual(workspace.blocksize(), 100)
-        self.assertEqual(str(workspace.getAxis(0).getUnit().symbol()), 'ps')
+        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'TOF')
+        self.assertEqual(str(workspace.getAxis(1).getUnit().unitID()), 'MomentumTransfer')
 
 
     def _validate_sqf_ws(self, workspace):
@@ -41,7 +42,8 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
         self.assertEqual(workspace.getNumberHistograms(), 21)
         self.assertEqual(workspace.blocksize(), 199)
-        self.assertEqual(str(workspace.getAxis(0).getUnit().symbol()), 'THz')
+        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'Energy')
+        self.assertEqual(str(workspace.getAxis(1).getUnit().unitID()), 'MomentumTransfer')
 
 
     def test_load_single_fqt_function(self):
