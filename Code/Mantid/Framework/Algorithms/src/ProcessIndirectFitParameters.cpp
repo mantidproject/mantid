@@ -49,7 +49,7 @@ const std::string ProcessIndirectFitParameters::summary() const {
  */
 void ProcessIndirectFitParameters::init() {
 
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>(
+  declareProperty(new WorkspaceProperty<ITableWorkspace>(
                       "InputWorkspace", "", Direction::Input),
                   "The table workspace to convert to a MatrixWorkspace.");
 
@@ -62,9 +62,9 @@ void ProcessIndirectFitParameters::init() {
                   "List of the parameter names to add to the workspace.",
                   Direction::Input);
 
-  declareProperty("OutputWorkspaceName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
-                  "The name to call the output workspace.", Direction::Input);
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
+                                                         Direction::Output),
+                  "The name to give the output workspace");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ void ProcessIndirectFitParameters::exec() {
   std::string xColumn = getProperty("ColumnX");
   std::string parameterNamesProp = getProperty("ParameterNames");
   auto parameterNames = listToVector(parameterNamesProp);
-  std::string outputWsName = getProperty("OutputWorkspaceName");
+  MatrixWorkspace_sptr outputWsName = getProperty("OutputWorkspace");
 
   // Search for any parameters in the table with the given parameter names,
   // ignoring their function index and output them to a workspace
@@ -161,6 +161,8 @@ void ProcessIndirectFitParameters::exec() {
     offset += peakWs.size();
   }
   outputWs->replaceAxis(1, axis);
+
+  setProperty("OutputWorkspace", outputWs);
 }
 
 /**
