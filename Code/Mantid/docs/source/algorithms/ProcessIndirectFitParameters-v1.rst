@@ -26,7 +26,7 @@ Usage
    tws = WorkspaceFactory.createTable()
    tws.addColumn("double", "A")
    tws.addColumn("double", "B")
-   tws.addcolumn("double", "C")
+   tws.addColumn("double", "C")
    tws.addColumn("double", "D")
    tws.addRow([1,2,3,4])
    tws.addRow([5,6,7,8])
