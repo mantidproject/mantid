@@ -3,10 +3,12 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/TableRow.h" 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/CalculateReflectometry.h"
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -224,7 +226,15 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
 }
 
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
-    MatrixWorkspace_const_sptr inputWS) const {
+    MatrixWorkspace_const_sptr inputWS, boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >& vertexes) const {
+  // Create a table for the output if we want to debug vertex positioning
+  if(vertexes){
+    (*vertexes)->addColumn("double","Qx");
+    (*vertexes)->addColumn("double","Qy");
+    (*vertexes)->addColumn("int","OriginIndex");
+    (*vertexes)->addColumn("int", "OriginBin");
+    (*vertexes)->addColumn("double", "CellSignal");
+  }
 
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
@@ -303,6 +313,19 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
         specNumberMapping.push_back(
             outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
         detIDMapping.push_back(detector->getID());
+      }
+      
+      //Debugging
+      if(vertexes){
+        TableRow row = (*vertexes)->appendRow();
+        row << ll.X() << ll.Y() << int(i) << int(j) << signal;
+        row = (*vertexes)->appendRow();
+        row << ul.X() << ul.Y() << int(i) << int(j) << signal;
+        row = (*vertexes)->appendRow();
+        row << ur.X() << ur.Y() << int(i) << int(j) << signal;
+        row = (*vertexes)->appendRow();
+        row << lr.X() << lr.Y() << int(i) << int(j) << signal;
+        
       }
     }
   }
