@@ -209,8 +209,6 @@ EnggDiffractionPresenter::outputCalibFilename(const std::string &vanNo,
   } else {
     outFilename = m_view->askNewCalibrationFilename(sugg);
     if (!outFilename.empty()) {
-      std::string instName = "";
-
       // make sure it follows the rules
       try {
         std::string inst, van, ceria;

@@ -341,6 +341,9 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
   // g_log.information()
   //     << "Saved output calibration file through Python. Status: " << status
   //     << std::endl;
+  m_logMsgs.push_back(
+      "Run Python code to save output file, with status string: " + status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
 }
 
 std::string EnggDiffractionViewQtGUI::askExistingCalibFilename() {
