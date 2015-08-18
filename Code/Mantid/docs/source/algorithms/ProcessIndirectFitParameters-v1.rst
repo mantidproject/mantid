@@ -26,7 +26,7 @@ Usage
    tws = WorkspaceFactory.createTable()
    tws.addColumn("double", "A")
    tws.addColumn("double", "B")
-   tws.addColumn("double", "C")
+   tws.addColumn("double", "B_Err")
    tws.addColumn("double", "D")
    tws.addRow([1,2,3,4])
    tws.addRow([5,6,7,8])
@@ -35,9 +35,12 @@ Usage
    
    # Add to Mantid Workspace list
    mtd.addOrReplace("TableWs",tws)
-   
-   # "D" is not included in the algorithm params list 
-   wsOut = ProcessIndirectFitParameters(tws, "A", "B,C", "outputWorkspace")
+   wsName = "outputWorkspace"
+
+   # "D" is not included in the algorithm params list
+   ProcessIndirectFitParameters(tws, 'A', "B", wsName)
+
+   wsOut = mtd[wsName]
 
    # Print the result
    print "%s is a %s and the Y values are:" % (wsOut, wsOut.id())
@@ -49,7 +52,7 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 	
     outputWorkspace is a Workspace2D and the Y values are:
-	[ 2.  6.  0.]
+	[ 2.  6.  0.  0.]
 	
 .. categories::
 
