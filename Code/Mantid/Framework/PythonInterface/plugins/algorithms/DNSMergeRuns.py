@@ -1,8 +1,14 @@
 # pylint: disable=too-many-locals
+import sys
+import os
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
 import numpy as np
+
+sys.path.insert(0, os.path.dirname(__file__))
+import mlzutils
+sys.path.pop(0)
 
 
 class DNSMergeRuns(PythonAlgorithm):
@@ -55,56 +61,6 @@ class DNSMergeRuns(PythonAlgorithm):
                              "otherwise the separate normalization workspace will be created.")
         return
 
-    def _dimensions_valid(self):
-        """
-        Checks validity of the workspace dimensions:
-        all given workspaces must have the same number of dimensions
-        and the same number of histograms
-        and the same number of bins
-        """
-        ndims = []
-        nhists = []
-        nbins = []
-        for wsname in self.workspace_names:
-            wks = api.AnalysisDataService.retrieve(wsname)
-            ndims.append(wks.getNumDims())
-            nhists.append(wks.getNumberHistograms())
-            nbins.append(wks.blocksize())
-
-        ndi = ndims[0]
-        nhi = nhists[0]
-        nbi = nbins[0]
-        if ndims.count(ndi) == len(ndims) and nhists.count(nhi) == len(nhists) and nbins.count(nbi) == len(nbins):
-            return True
-        else:
-            message = "Cannot merge workspaces with different dimensions."
-            self.log().error(message)
-            raise RuntimeError(message)
-
-    def _ws_exist(self):
-        """
-        Checks whether the workspace and its normalization workspaces exist
-        """
-        for wsname in self.workspace_names:
-            if not api.AnalysisDataService.doesExist(wsname):
-                message = "Workspace " + wsname + " does not exist! Cannot merge."
-                self.log().error(message)
-                raise RuntimeError(message)
-
-        return True
-
-    def _normws_exist(self):
-        """
-        Checks whether the workspace and its normalization workspaces exist
-        """
-        for wsname in self.workspace_names:
-            if not api.AnalysisDataService.doesExist(wsname + '_NORM'):
-                message = "Workspace " + wsname + "_NORM does not exist! Cannot merge."
-                self.log().error(message)
-                raise RuntimeError(message)
-
-        return True
-
     def _can_merge(self):
         """
         checks whether it is possible to merge the given list of workspaces
@@ -116,17 +72,18 @@ class DNSMergeRuns(PythonAlgorithm):
             raise RuntimeError(message)
 
         # workspaces must exist
-        self._ws_exist()
+        mlzutils.ws_exist(self.workspace_names, self.log())
 
         # all workspaces must be either normalized or not normalized
         self._are_normalized()
 
         # if data are not normalized, normalization workspaces must exist
         if not self.is_normalized:
-            self._normws_exist()
+            wslist = [wsname + '_NORM' for wsname in self.workspace_names]
+            mlzutils.ws_exist(wslist, self.log())
 
         # they must have the same dimensions
-        self._dimensions_valid()
+        mlzutils.same_dimensions(self.workspace_names)
 
         # and the same wavelength
         self._same_wavelength()
@@ -137,47 +94,8 @@ class DNSMergeRuns(PythonAlgorithm):
         for wsname in self.workspace_names[1:]:
             wks = api.AnalysisDataService.retrieve(wsname)
             run = wks.getRun()
-            self._check_properties(run1, run)
+            mlzutils.compare_properties(run1, run, self.properties_to_compare, self.log())
         return True
-
-    def _check_properties(self, lhs_run, rhs_run):
-        """
-        checks whether properties match
-        """
-        lhs_title = ""
-        rhs_title = ""
-        if lhs_run.hasProperty('run_title'):
-            lhs_title = lhs_run.getProperty('run_title').value
-        if rhs_run.hasProperty('run_title'):
-            rhs_title = rhs_run.getProperty('run_title').value
-
-        for property_name in self.properties_to_compare:
-            if lhs_run.hasProperty(property_name) and rhs_run.hasProperty(property_name):
-                lhs_property = lhs_run.getProperty(property_name)
-                rhs_property = rhs_run.getProperty(property_name)
-                if lhs_property.type == rhs_property.type:
-                    if lhs_property.type == 'string':
-                        if lhs_property.value != rhs_property.value:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + lhs_property.value + ", but " + \
-                                rhs_title + ": " + rhs_property.value
-                            self.log().warning(message)
-                    if lhs_property.type == 'number':
-                        if abs(lhs_property.value - rhs_property.value) > 5e-3:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                                rhs_title + ": " + str(rhs_property.value)
-                            self.log().warning(message)
-                else:
-                    message = "Property " + property_name + " does not match! " + \
-                        lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                        rhs_title + ": " + str(rhs_property.value)
-                    self.log().warning(message)
-            else:
-                message = "Property " + property_name + " is not present in " +\
-                    lhs_title + " or " + rhs_title + " - skipping comparison."
-                self.log().warning(message)
-        return
 
     def _same_wavelength(self):
         """
@@ -316,8 +234,9 @@ class DNSMergeRuns(PythonAlgorithm):
 
     def _merge_normalized(self):
         """
-        merges given workspaces into one,
-        corresponding normalization workspaces are also merged
+        merges given workspaces into one
+        it partially duplicates _merge_workspaces, but to my opinion
+        putting 'if self.is_normalized' will slow down the _merge_workspaces function
         """
         arr = []
         beamDirection = V3D(0, 0, 1)
