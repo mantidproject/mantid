@@ -57,7 +57,7 @@ public:
 
   virtual void notify(IEnggDiffractionPresenter::Notification notif);
 
-  // this is the hard work that a worker / thread will run
+  // this is the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,
                         const std::string &vanNo, const std::string &ceriaNo);
 
@@ -78,9 +78,16 @@ protected slots:
   void calibrationFinished();
 
 private:
-  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
-                                              const std::string &ceriaNo) const;
+  void inputChecksBeforeCalibrate(const std::string &newVanNo,
+                                  const std::string &newCeriaNo);
 
+  std::string outputCalibFilename(const std::string &vanNo,
+                                  const std::string &ceriaNo);
+
+  void parseCalibrateFilename(const std::string &path, std::string &instName,
+                              std::string &vanNo, std::string &ceriaNo);
+
+  // this may need to be mocked up in tests
   virtual void startAsynCalibWorker(const std::string &outFilename,
                                     const std::string &vanNo,
                                     const std::string &ceriaNo);
@@ -88,9 +95,19 @@ private:
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
                const std::string &ceriaNo, const std::string &outFilename);
 
-  void parseCalibrateFilename(const std::string &path, std::string &instName,
-                              std::string &vanNo, std::string &ceriaNo);
+  std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
+                                              const std::string &ceriaNo) const;
 
+  void loadOrCalcVanadiumWorkspaces(
+      const std::string &vanNo, const std::string &inputDirCalib,
+      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
+      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, bool forceRecalc);
+
+  void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
+                                        const std::string &inputDirCalib,
+                                        std::string &preIntegFilename,
+                                        std::string &preCurvesFilename,
+                                        bool &found);
   void
   loadVanadiumPrecalcWorkspaces(const std::string &preIntegFilename,
                                 const std::string &preCurvesFilename,
@@ -100,17 +117,6 @@ private:
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
-
-  void findPrecalcVanadiumCorrFilenames(const std::string &vanNo,
-                                        const std::string &inputDirCalib,
-                                        std::string &preIntegFilename,
-                                        std::string &preCurvesFilename,
-                                        bool &found);
-
-  void loadOrCalcVanadiumWorkspaces(
-      const std::string &vanNo, const std::string &inputDirCalib,
-      Mantid::API::ITableWorkspace_sptr &vanIntegWS,
-      Mantid::API::MatrixWorkspace_sptr &vanCurvesWS, bool forceRecalc);
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;

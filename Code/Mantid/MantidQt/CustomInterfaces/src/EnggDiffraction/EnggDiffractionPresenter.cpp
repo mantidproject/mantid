@@ -116,65 +116,185 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 
 void EnggDiffractionPresenter::processCalcCalib() {
   std::string vanNo = m_view->newVanadiumNo();
-  if (vanNo.empty()) {
-    m_view->userWarning(
-        "Error in the inputs",
-        "The Vanadium number cannot be empty and must be an integer number.");
-    return;
-  }
   std::string ceriaNo = m_view->newCeriaNo();
-  if (ceriaNo.empty()) {
-    m_view->userWarning(
-        "Error in the inputs",
-        "The Ceria number cannot be empty and must be an integer number.");
-    return;
-  }
-
-  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
-  const std::string pixelCalib = cs.m_pixelCalibFilename;
-  if (pixelCalib.empty()) {
-    m_view->userWarning(
-        "Error in the inputs",
-        "You need to set a pixel (full) calibration in settings.");
-    return;
-  }
-  const std::string templGSAS = cs.m_templateGSAS_PRM;
-  if (templGSAS.empty()) {
-    m_view->userWarning(
-        "Error in the inputs",
-        "You need to set a template calibration file for GSAS in settings.");
+  try {
+    inputChecksBeforeCalibrate(vanNo, ceriaNo);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required for calibrate",
+                        ia.what());
     return;
   }
 
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
                     "take a few seconds... " << std::endl;
 
-  const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
-  std::string outFilename;
-  if (!g_askUserCalibFilename) {
-    outFilename = sugg;
-  } else {
-    outFilename = m_view->askNewCalibrationFilename(sugg);
-    if (outFilename.empty()) {
-      return;
-    }
-    std::string instName = "";
-
-    // make sure it follows the rules
-    try {
-      parseCalibrateFilename(outFilename, instName, vanNo, ceriaNo);
-    } catch (std::invalid_argument &ia) {
-      m_view->userWarning("Invalid output calibration filename: " + outFilename,
-                          ia.what());
-      return;
-    }
-  }
+  const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
   m_view->enableCalibrateActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo);
   // calibrationFinished()
   startAsynCalibWorker(outFilename, vanNo, ceriaNo);
+}
+
+void EnggDiffractionPresenter::processLogMsg() {
+  std::vector<std::string> msgs = m_view->logMsgs();
+  for (size_t i = 0; i < msgs.size(); i++) {
+    g_log.information() << msgs[i] << std::endl;
+  }
+}
+
+void EnggDiffractionPresenter::processInstChange() {
+  const std::string err = "Changing instrument is not supported!";
+  g_log.error() << err << std::endl;
+  m_view->userError("Fatal error", err);
+}
+
+void EnggDiffractionPresenter::processShutDown() {
+  m_view->saveSettings();
+  cleanup();
+}
+
+/**
+ * Does several checks on the current inputs and settings. This should
+ * be done before starting any calibration work. The message return
+ * should in principle be shown to the user as a visible message
+ * (pop-up, error log, etc.)
+ *
+ * @param newVanNo number of the Vanadium run for the new calibration
+ * @param newCeriaNo number of the Ceria run for the new calibration
+ *
+ * @throws std::invalid_argument with an informative message.
+ */
+void EnggDiffractionPresenter::inputChecksBeforeCalibrate(
+    const std::string &newVanNo, const std::string &newCeriaNo) {
+  if (newVanNo.empty()) {
+    throw std::invalid_argument(
+        "The Vanadium number cannot be empty and must be an integer number.");
+  }
+  if (newCeriaNo.empty()) {
+    throw std::invalid_argument(
+        "The Ceria number cannot be empty and must be an integer number.");
+  }
+
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  const std::string pixelCalib = cs.m_pixelCalibFilename;
+  if (pixelCalib.empty()) {
+    throw std::invalid_argument(
+        "You need to set a pixel (full) calibration in settings.");
+  }
+  const std::string templGSAS = cs.m_templateGSAS_PRM;
+  if (templGSAS.empty()) {
+    throw std::invalid_argument(
+        "You need to set a template calibration file for GSAS in settings.");
+  }
+}
+
+/**
+ * What should be the name of the output GSAS calibration file, given
+ * the Vanadium and Ceria runs
+ *
+ * @param vanNo number of the Vanadium run, which is normally part of the name
+ * @param ceriaNo number of the Ceria run, which is normally part of the name
+ *
+ * @return filename (without the full path)
+ */
+std::string
+EnggDiffractionPresenter::outputCalibFilename(const std::string &vanNo,
+                                              const std::string &ceriaNo) {
+  std::string outFilename = "";
+  const std::string sugg = buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+  if (!g_askUserCalibFilename) {
+    outFilename = sugg;
+  } else {
+    outFilename = m_view->askNewCalibrationFilename(sugg);
+    if (!outFilename.empty()) {
+      std::string instName = "";
+
+      // make sure it follows the rules
+      try {
+        std::string inst, van, ceria;
+        parseCalibrateFilename(outFilename, inst, van, ceria);
+      } catch (std::invalid_argument &ia) {
+        m_view->userWarning(
+            "Invalid output calibration filename: " + outFilename, ia.what());
+        outFilename = "";
+      }
+    }
+  }
+
+  return outFilename;
+}
+
+/**
+ * Parses the name of a calibration file and guesses the instrument,
+ * vanadium and ceria run numbers, assuming that the name has been
+ * build with buildCalibrateSuggestedFilename().
+ *
+ * @todo this is currently based on the filename. This method should
+ * do a basic sanity check that the file is actually a calibration
+ * file (IPARM file for GSAS), and get the numbers from the file not
+ * from the name of the file. Leaving this as a TODO for now, as the
+ * file template and contents are still subject to change.
+ *
+ * @param path full path to a calibration file
+ * @param instName instrument used in the file
+ * @param vanNo number of the Vanadium run used for this calibration file
+ * @param ceriaNo number of the Ceria run
+ *
+ * @throws invalid_argument with an informative message if tha name does
+ * not look correct (does not follow the conventions).
+ */
+void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
+                                                      std::string &instName,
+                                                      std::string &vanNo,
+                                                      std::string &ceriaNo) {
+  instName = "";
+  vanNo = "";
+  ceriaNo = "";
+
+  Poco::Path fullPath(path);
+  const std::string filename = fullPath.getFileName();
+  if (filename.empty()) {
+    return;
+  }
+
+  const std::string explMsg =
+      "Expected a file name like 'INSTR_vanNo_ceriaNo_....par', "
+      "where INSTR is the instrument name and vanNo and ceriaNo are the "
+      "numbers of the Vanadium and calibration sample (Ceria, CeO2) runs.";
+  std::vector<std::string> parts;
+  boost::split(parts, filename, boost::is_any_of("_"));
+  if (parts.size() < 4) {
+    throw std::invalid_argument(
+        "Failed to find at least the 4 required parts of the file name.\n\n" +
+        explMsg);
+  }
+
+  // check the rules on the file name
+  if (g_enginxStr != parts[0]) {
+    throw std::invalid_argument("The first component of the file name is not "
+                                "the expected instrument name: " +
+                                g_enginxStr + ".\n\n" + explMsg);
+  }
+  const std::string castMsg =
+      "It is not possible to interpret as an integer number ";
+  try {
+    boost::lexical_cast<int>(parts[1]);
+  } catch (std::runtime_error &) {
+    throw std::invalid_argument(
+        castMsg + "the Vanadium number part of the file name.\n\n" + explMsg);
+  }
+  try {
+    boost::lexical_cast<int>(parts[2]);
+  } catch (std::runtime_error &) {
+    throw std::invalid_argument(
+        castMsg + "the Ceria number part of the file name.\n\n" + explMsg);
+  }
+
+  instName = parts[0];
+  vanNo = parts[1];
+  ceriaNo = parts[2];
 }
 
 /**
@@ -203,30 +323,15 @@ EnggDiffractionPresenter::startAsynCalibWorker(const std::string &outFilename,
   m_workerThread->start();
 }
 
-void EnggDiffractionPresenter::calibrationFinished() {
-  if (!m_view)
-    return;
-
-  m_view->enableCalibrateActions(true);
-  if (!m_calibFinishedOK) {
-    g_log.warning() << "The cablibration did not finished correctly."
-                    << std::endl;
-  } else {
-    const std::string vanNo = m_view->newVanadiumNo();
-    const std::string ceriaNo = m_view->newCeriaNo();
-    const std::string outFilename =
-        buildCalibrateSuggestedFilename(vanNo, ceriaNo);
-    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
-    g_log.notice()
-        << "Cablibration finished and ready as 'current calibration'."
-        << std::endl;
-  }
-  if (m_workerThread) {
-    delete m_workerThread;
-    m_workerThread = NULL;
-  }
-}
-
+/**
+ * Calculate a new calibration. This is what threads/workers should
+ * use to run the calculations in response to the user clicking
+ * 'calibrate' or similar.
+ *
+ * @param outFilename name for the output GSAS calibration file
+ * @param vanNo vanadium run number
+ * @param ceriaNo ceria run number
+ */
 void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
                                                 const std::string &vanNo,
                                                 const std::string &ceriaNo) {
@@ -261,22 +366,60 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   conf.setDataSearchDirs(tmpDirs);
 }
 
-void EnggDiffractionPresenter::processLogMsg() {
-  std::vector<std::string> msgs = m_view->logMsgs();
-  for (size_t i = 0; i < msgs.size(); i++) {
-    g_log.information() << msgs[i] << std::endl;
+/**
+ * Method to call when the calibration work has finished, either from
+ * a separate thread or not (as in this presenter's' test).
+ */
+void EnggDiffractionPresenter::calibrationFinished() {
+  if (!m_view)
+    return;
+
+  m_view->enableCalibrateActions(true);
+  if (!m_calibFinishedOK) {
+    g_log.warning() << "The cablibration did not finished correctly."
+                    << std::endl;
+  } else {
+    const std::string vanNo = m_view->newVanadiumNo();
+    const std::string ceriaNo = m_view->newCeriaNo();
+    const std::string outFilename =
+        buildCalibrateSuggestedFilename(vanNo, ceriaNo);
+    m_view->newCalibLoaded(vanNo, ceriaNo, outFilename);
+    g_log.notice()
+        << "Cablibration finished and ready as 'current calibration'."
+        << std::endl;
+  }
+  if (m_workerThread) {
+    delete m_workerThread;
+    m_workerThread = NULL;
   }
 }
 
-void EnggDiffractionPresenter::processInstChange() {
-  const std::string err = "Changing instrument is not supported!";
-  g_log.error() << err << std::endl;
-  m_view->userError("Fatal error", err);
-}
+/**
+ * Build a suggested name for a new calibration, by appending instrument name,
+ * relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
+ *
+ * @param vanNo number of the Vanadium run
+ * @param ceriaNo number of the Ceria run
+ *
+ * @return Suggested name for a new calibration file, following
+ * ENGIN-X practices
+ */
+std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
+    const std::string &vanNo, const std::string &ceriaNo) const {
+  // default and only one supported
+  std::string instStr = g_enginxStr;
+  std::string nameAppendix = "_both_banks";
+  if ("ENGIN-X" != m_view->currentInstrument()) {
+    instStr = "UNKNOWNINST";
+    nameAppendix = "_calibration";
+  }
 
-void EnggDiffractionPresenter::processShutDown() {
-  m_view->saveSettings();
-  cleanup();
+  // default extension for calibration files
+  const std::string calibExt = ".prm";
+  std::string sugg =
+      instStr + "_" + vanNo + "_" + ceriaNo + nameAppendix + calibExt;
+
+  return sugg;
 }
 
 /**
@@ -355,7 +498,7 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
     difc[i] = alg->getProperty("Difc");
     tzero[i] = alg->getProperty("Zero");
 
-    g_log.notice() << "Bank " << i + 1 << " calibrated, "
+    g_log.notice() << " * Bank " << i + 1 << " calibrated, "
                    << "difc: " << difc[i] << ", zero: " << tzero[i]
                    << std::endl;
   }
@@ -369,214 +512,6 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
                  << std::endl;
-}
-
-/**
- * Parses the name of a calibration file and guesses the instrument,
- * vanadium and ceria run numbers, assuming that the name has been
- * build with buildCalibrateSuggestedFilename().
- *
- * @todo this is currently based on the filename. This method should
- * do a basic sanity check that the file is actually a calibration
- * file (IPARM file for GSAS), and get the numbers from the file not
- * from the name of the file. Leaving this as a TODO for now, as the
- * file template and contents are still subject to change.
- *
- * @param path full path to a calibration file
- * @param instName instrument used in the file
- * @param vanNo number of the Vanadium run used for this calibration file
- * @param ceriaNo number of the Ceria run
- *
- * @throws invalid_argument with an informative message if tha name does
- * not look correct (does not follow the conventions).
- */
-void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
-                                                      std::string &instName,
-                                                      std::string &vanNo,
-                                                      std::string &ceriaNo) {
-  instName = "";
-  vanNo = "";
-  ceriaNo = "";
-
-  Poco::Path fullPath(path);
-  const std::string filename = fullPath.getFileName();
-  if (filename.empty()) {
-    return;
-  }
-
-  const std::string explMsg =
-      "Expected a file name like 'INSTR_vanNo_ceriaNo_....par', "
-      "where INSTR is the instrument name and vanNo and ceriaNo are the "
-      "numbers of the Vanadium and calibration sample (Ceria, CeO2) runs.";
-  std::vector<std::string> parts;
-  boost::split(parts, filename, boost::is_any_of("_"));
-  if (parts.size() < 4) {
-    throw std::invalid_argument(
-        "Failed to find at least the 4 required parts of the file name.\n\n" +
-        explMsg);
-  }
-
-  // check the rules on the file name
-  if (g_enginxStr != parts[0]) {
-    throw std::invalid_argument("The first component of the file name is not "
-                                "the expected instrument name: " +
-                                g_enginxStr + ".\n\n" + explMsg);
-  }
-  const std::string castMsg =
-      "It is not possible to interpret as an integer number ";
-  try {
-    boost::lexical_cast<int>(parts[1]);
-  } catch (std::runtime_error &) {
-    throw std::invalid_argument(
-        castMsg + "the Vanadium number part of the file name.\n\n" + explMsg);
-  }
-  try {
-    boost::lexical_cast<int>(parts[2]);
-  } catch (std::runtime_error &) {
-    throw std::invalid_argument(
-        castMsg + "the Ceria number part of the file name.\n\n" + explMsg);
-  }
-
-  instName = parts[0];
-  vanNo = parts[1];
-  ceriaNo = parts[2];
-}
-
-/**
- * Build a suggested name for a new calibration, by appending instrument name,
- * relevant run numbers, etc., like: ENGINX_241391_236516_both_banks.par
- *
- * @param vanNo number of the Vanadium run
- * @param ceriaNo number of the Ceria run
- *
- * @return Suggested name for a new calibration file, following
- * ENGIN-X practices
- */
-std::string EnggDiffractionPresenter::buildCalibrateSuggestedFilename(
-    const std::string &vanNo, const std::string &ceriaNo) const {
-  // default and only one supported
-  std::string instStr = g_enginxStr;
-  std::string nameAppendix = "_both_banks";
-  if ("ENGIN-X" != m_view->currentInstrument()) {
-    instStr = "UNKNOWNINST";
-    nameAppendix = "_calibration";
-  }
-
-  // default extension for calibration files
-  const std::string calibExt = ".prm";
-  std::string sugg =
-      instStr + "_" + vanNo + "_" + ceriaNo + nameAppendix + calibExt;
-
-  return sugg;
-}
-
-/**
- * Load precalculated results from Vanadium corrections previously
- * calculated.
- *
- * @param preIntegFilename filename (can be full path) where the
- * vanadium spectra integration table should be loaded from
- *
- * @param preCurvesFilename filename (can be full path) where the
- * vanadium per-bank curves should be loaded from
- *
- * @param vanIntegWS output (matrix) workspace loaded from the
- * precalculated Vanadium correction file, with the integration
- * resutls
- *
- * @param vanCurvesWS output (matrix) workspace loaded from the
- * precalculated Vanadium correction file, with the per-bank curves
- */
-void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
-    const std::string &preIntegFilename, const std::string &preCurvesFilename,
-    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-
-  auto alg = Algorithm::fromString("LoadNexus");
-  alg->initialize();
-  alg->setPropertyValue("Filename", preIntegFilename);
-  std::string integWSName = "engggui_vanadium_integration_ws";
-  alg->setPropertyValue("OutputWorkspace", integWSName);
-  alg->execute();
-  // alg->getProperty("OutputWorkspace");
-  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integWSName);
-
-  auto algCurves = Algorithm::fromString("LoadNexus");
-  algCurves->initialize();
-  algCurves->setPropertyValue("Filename", preCurvesFilename);
-  std::string curvesWSName = "engggui_vanadium_curves_ws";
-  algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
-  algCurves->execute();
-  // algCurves->getProperty("OutputWorkspace");
-  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
-}
-
-void EnggDiffractionPresenter::calcVanadiumWorkspaces(
-    const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
-    MatrixWorkspace_sptr &vanCurvesWS) {
-
-  auto load = Algorithm::fromString("Load");
-  load->initialize();
-  load->setPropertyValue("Filename",
-                         vanNo); // TODO more specific build Vanadium filename
-  std::string vanWSName = "engggui_vanadium_ws";
-  load->setPropertyValue("OutputWorkspace", vanWSName);
-  load->execute();
-  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-  MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
-  // TODO: maybe use setChild() and then load->getProperty("OutputWorkspace");
-
-  auto alg = Algorithm::fromString("EnggVanadiumCorrections");
-  alg->initialize();
-  alg->setProperty("VanadiumWorkspace", vanWS);
-  std::string integName = "engggui_van_integration_ws";
-  alg->setPropertyValue("IntegrationWorkspace", integName);
-  std::string curvesName = "engggui_van_curves_ws";
-  alg->setPropertyValue("CurvesWorkspace", curvesName);
-  alg->execute();
-
-  ADS.remove(vanWSName);
-
-  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
-  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
-}
-
-/**
- * builds the expected names of the precalculated Vanadium correction
- * files and tells if both files are found, similar to:
- * ENGINX_precalculated_vanadium_run000236516_integration.nxs
- * ENGINX_precalculated_vanadium_run00236516_bank_curves.nxs
- *
- * @param vanNo
- * @param inputDirCalib
- * @param preIntegFilename if not found on disk, the string is set as empty
- * @param preCurvesFilename if not found on disk, the string is set as empty
- * @param found true if both files are found and (re-)usable
- */
-void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
-    const std::string &vanNo, const std::string &inputDirCalib,
-    std::string &preIntegFilename, std::string &preCurvesFilename,
-    bool &found) {
-  found = false;
-
-  const std::string runNo = std::string(2, '0').append(vanNo);
-  preIntegFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
-
-  preCurvesFilename =
-      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
-
-  Poco::Path pathInteg(inputDirCalib);
-  pathInteg.append(preIntegFilename);
-
-  Poco::Path pathCurves(inputDirCalib);
-  pathCurves.append(preCurvesFilename);
-
-  if (Poco::File(pathInteg).exists() && Poco::File(pathCurves).exists()) {
-    preIntegFilename = pathInteg.toString();
-    preCurvesFilename = pathCurves.toString();
-    found = true;
-  }
 }
 
 /**
@@ -665,6 +600,127 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
       throw;
     }
   }
+}
+
+/**
+ * builds the expected names of the precalculated Vanadium correction
+ * files and tells if both files are found, similar to:
+ * ENGINX_precalculated_vanadium_run000236516_integration.nxs
+ * ENGINX_precalculated_vanadium_run00236516_bank_curves.nxs
+ *
+ * @param vanNo Vanadium run number
+ * @param inputDirCalib calibration directory in settings
+ * @param preIntegFilename if not found on disk, the string is set as empty
+ * @param preCurvesFilename if not found on disk, the string is set as empty
+ * @param found true if both files are found and (re-)usable
+ */
+void EnggDiffractionPresenter::findPrecalcVanadiumCorrFilenames(
+    const std::string &vanNo, const std::string &inputDirCalib,
+    std::string &preIntegFilename, std::string &preCurvesFilename,
+    bool &found) {
+  found = false;
+
+  const std::string runNo = std::string(2, '0').append(vanNo);
+  preIntegFilename =
+      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_integration.nxs";
+
+  preCurvesFilename =
+      g_enginxStr + "_precalculated_vanadium_run" + runNo + "_bank_curves.nxs";
+
+  Poco::Path pathInteg(inputDirCalib);
+  pathInteg.append(preIntegFilename);
+
+  Poco::Path pathCurves(inputDirCalib);
+  pathCurves.append(preCurvesFilename);
+
+  if (Poco::File(pathInteg).exists() && Poco::File(pathCurves).exists()) {
+    preIntegFilename = pathInteg.toString();
+    preCurvesFilename = pathCurves.toString();
+    found = true;
+  }
+}
+
+/**
+ * Load precalculated results from Vanadium corrections previously
+ * calculated.
+ *
+ * @param preIntegFilename filename (can be full path) where the
+ * vanadium spectra integration table should be loaded from
+ *
+ * @param preCurvesFilename filename (can be full path) where the
+ * vanadium per-bank curves should be loaded from
+ *
+ * @param vanIntegWS output (matrix) workspace loaded from the
+ * precalculated Vanadium correction file, with the integration
+ * resutls
+ *
+ * @param vanCurvesWS output (matrix) workspace loaded from the
+ * precalculated Vanadium correction file, with the per-bank curves
+ */
+void EnggDiffractionPresenter::loadVanadiumPrecalcWorkspaces(
+    const std::string &preIntegFilename, const std::string &preCurvesFilename,
+    ITableWorkspace_sptr &vanIntegWS, MatrixWorkspace_sptr &vanCurvesWS) {
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+
+  auto alg = Algorithm::fromString("LoadNexus");
+  alg->initialize();
+  alg->setPropertyValue("Filename", preIntegFilename);
+  std::string integWSName = "engggui_vanadium_integration_ws";
+  alg->setPropertyValue("OutputWorkspace", integWSName);
+  alg->execute();
+  // alg->getProperty("OutputWorkspace");
+  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integWSName);
+
+  auto algCurves = Algorithm::fromString("LoadNexus");
+  algCurves->initialize();
+  algCurves->setPropertyValue("Filename", preCurvesFilename);
+  std::string curvesWSName = "engggui_vanadium_curves_ws";
+  algCurves->setPropertyValue("OutputWorkspace", curvesWSName);
+  algCurves->execute();
+  // algCurves->getProperty("OutputWorkspace");
+  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesWSName);
+}
+
+/**
+ * Calculate vanadium corrections (in principle only for when
+ * pre-calculated results are not available). This is expensive.
+ *
+ * @param vanNo Vanadium run number
+ *
+ * @param vanIntegWS where to keep the Vanadium run spectra
+ * integration values
+ *
+ * @param vanCurvesWS workspace where to keep the per-bank vanadium
+ * curves
+ */
+void EnggDiffractionPresenter::calcVanadiumWorkspaces(
+    const std::string &vanNo, ITableWorkspace_sptr &vanIntegWS,
+    MatrixWorkspace_sptr &vanCurvesWS) {
+
+  auto load = Algorithm::fromString("Load");
+  load->initialize();
+  load->setPropertyValue("Filename",
+                         vanNo); // TODO more specific build Vanadium filename
+  std::string vanWSName = "engggui_vanadium_ws";
+  load->setPropertyValue("OutputWorkspace", vanWSName);
+  load->execute();
+  AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  MatrixWorkspace_sptr vanWS = ADS.retrieveWS<MatrixWorkspace>(vanWSName);
+  // TODO: maybe use setChild() and then load->getProperty("OutputWorkspace");
+
+  auto alg = Algorithm::fromString("EnggVanadiumCorrections");
+  alg->initialize();
+  alg->setProperty("VanadiumWorkspace", vanWS);
+  std::string integName = "engggui_van_integration_ws";
+  alg->setPropertyValue("IntegrationWorkspace", integName);
+  std::string curvesName = "engggui_van_curves_ws";
+  alg->setPropertyValue("CurvesWorkspace", curvesName);
+  alg->execute();
+
+  ADS.remove(vanWSName);
+
+  vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
+  vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
 }
 
 } // namespace CustomInterfaces
