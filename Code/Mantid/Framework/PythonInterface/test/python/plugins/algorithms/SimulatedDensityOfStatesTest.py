@@ -225,11 +225,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                                       CASTEPFile=self._castep_file,
                                       SpectrumType='BondAnalysis')
 
-        self.assertTrue(isinstance(ws, WorkspaceGroup))
-        self.assertEqual(len(ws), 2)
-
-        self.assertTrue(isinstance(ws[0], ITableWorkspace))
-        self.assertTrue(isinstance(ws[1], ITableWorkspace))
+        self.assertTrue(isinstance(ws, ITableWorkspace))
 
 
 if __name__=="__main__":

@@ -184,7 +184,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             for ion in ions:
                 ion_table.addRow([ion['species'],
                                   ion['index'],
-                                  ion['bond_number'],
+                                  ion['number'],
                                   ion['fract_coord'][0],
                                   ion['fract_coord'][1],
                                   ion['fract_coord'][2],
@@ -200,9 +200,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             bond_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             bond_table.addColumn('str', 'SpeciesA')
-            bond_table.addColumn('int', 'BondNumberA')
+            bond_table.addColumn('int', 'SpeciesNumberA')
             bond_table.addColumn('str', 'SpeciesB')
-            bond_table.addColumn('int', 'BondNumberB')
+            bond_table.addColumn('int', 'SpeciesNumberB')
             bond_table.addColumn('float', 'Length')
             bond_table.addColumn('float', 'Population')
 
@@ -340,8 +340,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         if is_not is None:
             is_not = []
         is_not.append(atom)
-        is_not = [(i['species'], i['bond_number']) for i in is_not if i is not None]
-        a = (atom['species'], atom['bond_number'])
+        is_not = [(i['species'], i['number']) for i in is_not if i is not None]
+        a = (atom['species'], atom['number'])
 
         best = (None, None)
 
@@ -377,19 +377,19 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    def _find_ion(self, ions, species, bond_number=None):
+    def _find_ion(self, ions, species, number=None):
         """
         Finds a specific ion or set of ions in the list of ions.
 
         @param ions List of ions
         @param species Atomic species
-        @param bond_number (optional) Search for a specific ion in a bond
+        @param number (optional) Search for a specific ion in a bond
         @return List of multiple ions or single ion, None if no ions found
         """
-        if bond_number is None:
+        if number is None:
             valid = lambda i: i['species'] == species
         else:
-            valid = lambda i: i['species'] == species and i['bond_number'] == bond_number
+            valid = lambda i: i['species'] == species and i['number'] == number
 
         results = [i for i in ions if valid(i)]
 
@@ -425,103 +425,97 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param unit_cell Unit cell vectors
         @param ions List of all ions
         @param bonds List of all bonds
-        @param eigenvectors List of all eigenvectors
+        @param eigenvectors List of eigenvectors
         """
         prog_reporter = Progress(self, 0.0, 1.0, len(eigenvectors) * self._num_branches * self._num_ions)
 
         self._convert_to_cartesian_coordinates(unit_cell, ions)
         self._calculate_bond_vectors(bonds, ions)
 
-        output_workspaces = []
-        for i, wavevectors in enumerate(eigenvectors):
-            ws_name = '{0}_{1}'.format(self._out_ws_name, i)
-            output_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws_name)
-            output_ws.addColumn('int', 'Mode')
-            output_ws.addColumn('str', 'SpeciesA')
-            output_ws.addColumn('int', 'BondNumberA')
-            output_ws.addColumn('str', 'SpeciesB')
-            output_ws.addColumn('int', 'BondNumberB')
-            output_ws.addColumn('str', 'SpeciesC')
-            output_ws.addColumn('int', 'BondNumberC')
-            output_ws.addColumn('str', 'BondMode')
-            output_workspaces.append(output_ws)
+        output_ws = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+        output_ws.addColumn('int', 'Mode')
+        output_ws.addColumn('str', 'SpeciesA')
+        output_ws.addColumn('int', 'SpeciesNumberA')
+        output_ws.addColumn('str', 'SpeciesB')
+        output_ws.addColumn('int', 'SpeciesNumberB')
+        output_ws.addColumn('str', 'SpeciesC')
+        output_ws.addColumn('int', 'SpeciesNumberC')
+        output_ws.addColumn('str', 'BondMode')
+        output_workspaces.append(output_ws)
 
-            for mode in range(self._num_branches):
-                for ion_b in ions:
-                    prog_reporter.report('Bond analysis (ion {0}, mode {1})'.format(ion_b['index'], mode))
+        for mode in range(self._num_branches):
+            for ion_b in ions:
+                prog_reporter.report('Bond analysis (ion {0}, mode {1})'.format(ion_b['index'], mode))
 
-                    ion_wavevector = lambda ion: wavevectors[mode * self._num_ions + ion['index']]
+                ion_wavevector = lambda ion: wavevectors[mode * self._num_ions + ion['index']]
 
-                    # Get ions A and B and wavevectors for all ions
-                    ab_bond = self._choose_close_bonded_atom(ion_b, bonds)
-                    ion_a = self._find_ion(ions, *ab_bond[0][ab_bond[1]])
-                    ion_a_vector = ion_wavevector(ion_a)
+                # Get ions A and B and wavevectors for all ions
+                ab_bond = self._choose_close_bonded_atom(ion_b, bonds)
+                ion_a = self._find_ion(ions, *ab_bond[0][ab_bond[1]])
+                ion_a_vector = ion_wavevector(ion_a)
 
-                    ion_b_vector = ion_wavevector(ion_b)
+                ion_b_vector = ion_wavevector(ion_b)
 
-                    bc_bond = self._choose_close_bonded_atom(ion_b, bonds, is_not=[ion_a])
-                    if bc_bond == (None, None):
-                        bc_bond = ab_bond
-                    ion_c = self._find_ion(ions, *bc_bond[0][bc_bond[1]])
-                    ion_c_vector = ion_wavevector(ion_c)
+                bc_bond = self._choose_close_bonded_atom(ion_b, bonds, is_not=[ion_a])
+                if bc_bond == (None, None):
+                    bc_bond = ab_bond
+                ion_c = self._find_ion(ions, *bc_bond[0][bc_bond[1]])
+                ion_c_vector = ion_wavevector(ion_c)
 
-                    ab_bond_q = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_b['cartesian_coord']))
-                    bc_bond_q = Quat(V3D(*ion_b['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
-                    ac_vect = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
+                ab_bond_q = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_b['cartesian_coord']))
+                bc_bond_q = Quat(V3D(*ion_b['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
+                ac_vect = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_c['cartesian_coord']))
 
-                    ab_motion_ion_a = V3D(*ion_a_vector)
-                    ab_motion_ion_b = V3D(*ion_b_vector)
-                    ab_bond_q.rotate(ab_motion_ion_a)
-                    ab_bond_q.rotate(ab_motion_ion_b)
+                ab_motion_ion_a = V3D(*ion_a_vector)
+                ab_motion_ion_b = V3D(*ion_b_vector)
+                ab_bond_q.rotate(ab_motion_ion_a)
+                ab_bond_q.rotate(ab_motion_ion_b)
 
-                    def sig_diff(a1, a2, b1, b2):
-                        res_a, res_b = [False, False, False], [False, False, False]
-                        std_dev_a = np.std(a1) * 2
-                        std_dev_b = np.std(b1) * 2
+                def sig_diff(a1, a2, b1, b2):
+                    res_a, res_b = [False, False, False], [False, False, False]
+                    std_dev_a = np.std(a1) * 2
+                    std_dev_b = np.std(b1) * 2
 
-                        res_a[0] = abs(a2.X() - a1[0]) > std_dev_a
-                        res_b[0] = abs(b2.X() - b1[0]) > std_dev_b
-                        res_a[1] = abs(a2.Y() - a1[1]) > std_dev_a
-                        res_b[1] = abs(b2.Y() - b1[1]) > std_dev_b
-                        res_a[2] = abs(a2.Z() - a1[2]) > std_dev_a
-                        res_b[2] = abs(b2.Z() - b1[2]) > std_dev_b
+                    res_a[0] = abs(a2.X() - a1[0]) > std_dev_a
+                    res_b[0] = abs(b2.X() - b1[0]) > std_dev_b
+                    res_a[1] = abs(a2.Y() - a1[1]) > std_dev_a
+                    res_b[1] = abs(b2.Y() - b1[1]) > std_dev_b
+                    res_a[2] = abs(a2.Z() - a1[2]) > std_dev_a
+                    res_b[2] = abs(b2.Z() - b1[2]) > std_dev_b
 
-                        return res_a == res_b and True in res_a
+                    return res_a == res_b and True in res_a
 
-                    bc_motion_ion_b = V3D(*ion_b_vector)
-                    bc_motion_ion_c = V3D(*ion_c_vector)
-                    bc_bond_q.rotate(bc_motion_ion_b)
-                    bc_bond_q.rotate(bc_motion_ion_c)
+                bc_motion_ion_b = V3D(*ion_b_vector)
+                bc_motion_ion_c = V3D(*ion_c_vector)
+                bc_bond_q.rotate(bc_motion_ion_b)
+                bc_bond_q.rotate(bc_motion_ion_c)
 
-                    ac_motion_ion_a = V3D(*ion_a_vector)
-                    ac_motion_ion_c = V3D(*ion_c_vector)
-                    ac_vect.rotate(ac_motion_ion_a)
-                    ac_vect.rotate(ac_motion_ion_c)
+                ac_motion_ion_a = V3D(*ion_a_vector)
+                ac_motion_ion_c = V3D(*ion_c_vector)
+                ac_vect.rotate(ac_motion_ion_a)
+                ac_vect.rotate(ac_motion_ion_c)
 
-                    row_details = {
-                            'Mode': mode,
-                            'SpeciesA': ion_a['species'],
-                            'SpeciesB': ion_b['species'],
-                            'SpeciesC': ion_c['species'],
-                            'BondNumberA': ion_a['bond_number'],
-                            'BondNumberB': ion_b['bond_number'],
-                            'BondNumberC': ion_c['bond_number']
-                        }
+                row_details = {
+                        'Mode': mode,
+                        'SpeciesA': ion_a['species'],
+                        'SpeciesB': ion_b['species'],
+                        'SpeciesC': ion_c['species'],
+                        'SpeciesNumberA': ion_a['number'],
+                        'SpeciesNumberB': ion_b['number'],
+                        'SpeciesNumberC': ion_c['number']
+                    }
 
-                    if sig_diff(ion_a_vector, ab_motion_ion_a, ion_b_vector, ab_motion_ion_b):
-                        row_details['BondMode'] = 'AB Stretch'
-                        output_ws.addRow(row_details)
+                if sig_diff(ion_a_vector, ab_motion_ion_a, ion_b_vector, ab_motion_ion_b):
+                    row_details['BondMode'] = 'AB Stretch'
+                    output_ws.addRow(row_details)
 
-                    elif sig_diff(ion_b_vector, bc_motion_ion_b, ion_c_vector, bc_motion_ion_c):
-                        row_details['BondMode'] = 'BC Stretch'
-                        output_ws.addRow(row_details)
+                elif sig_diff(ion_b_vector, bc_motion_ion_b, ion_c_vector, bc_motion_ion_c):
+                    row_details['BondMode'] = 'BC Stretch'
+                    output_ws.addRow(row_details)
 
-                    elif sig_diff(ion_a_vector, ac_motion_ion_a, ion_c_vector, ac_motion_ion_c):
-                        row_details['BondMode'] = 'Bending'
-                        output_ws.addRow(row_details)
-
-        GroupWorkspaces(InputWorkspaces=output_workspaces,
-                        OutputWorkspace=self._out_ws_name)
+                elif sig_diff(ion_a_vector, ac_motion_ion_a, ion_c_vector, ac_motion_ion_c):
+                    row_details['BondMode'] = 'Bending'
+                    output_ws.addRow(row_details)
 
 #----------------------------------------------------------------------------------------
 
@@ -855,7 +849,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
                     # -1 to convert to zero based indexing
                     ion['index'] = int(line_data[0]) - 1
-                    ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
+                    ion['number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
                     file_data['ions'].append(ion)
 
                 logger.debug('All ions: ' + str(file_data['ions']))
