@@ -120,7 +120,7 @@ public:
   virtual void unlockData() const;
 
   //-------------------------------------------------------
-  virtual bool useDx() const;
+  virtual bool hasDx() const;
 
 protected:
   /// The spectrum number of this spectrum
@@ -136,7 +136,7 @@ protected:
   MantidVecPtr refDx;
 
   /// Flag to indicate if Dx (X error) is being used or not
-  mutable bool m_useDx;
+  mutable bool m_hasDx;
 };
 
 } // namespace API

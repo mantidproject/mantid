@@ -7,20 +7,20 @@ namespace API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISpectrum::ISpectrum() : m_specNo(0), detectorIDs(), refX(), refDx(),m_useDx(false) {}
+ISpectrum::ISpectrum() : m_specNo(0), detectorIDs(), refX(), refDx(),m_hasDx(false) {}
 
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
  */
 ISpectrum::ISpectrum(const specid_t specNo)
-    : m_specNo(specNo), detectorIDs(), refX(), refDx(), m_useDx(false) {}
+    : m_specNo(specNo), detectorIDs(), refX(), refDx(), m_hasDx(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy constructor
  */
 ISpectrum::ISpectrum(const ISpectrum &other)
     : m_specNo(other.m_specNo), detectorIDs(other.detectorIDs),
-    refX(other.refX), refDx(other.refDx), m_useDx(other.m_useDx) {}
+    refX(other.refX), refDx(other.refDx), m_hasDx(other.m_hasDx) {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy spectrum number and detector IDs, but not X vector, from another
@@ -56,7 +56,7 @@ void ISpectrum::setX(const MantidVec &X) { refX.access() = X; }
 /// @param Dx :: vector of X error data
 void ISpectrum::setDx(const MantidVec &Dx) {
   refDx.access() = Dx;
-  m_useDx = true;
+  m_hasDx = true;
 }
 
 /// Sets the x data.
@@ -65,10 +65,7 @@ void ISpectrum::setX(const MantidVecPtr &X) { refX = X; }
 
 /// Sets the x error data.
 /// @param Dx :: vector of X error data
-void ISpectrum::setDx(const MantidVecPtr &Dx) {
-  refDx = Dx;
-  m_useDx = true;
-}
+void ISpectrum::setDx(const MantidVecPtr &Dx) { refDx = Dx; }
 
 /// Sets the x data
 /// @param X :: vector of X data
@@ -78,7 +75,7 @@ void ISpectrum::setX(const MantidVecPtr::ptr_type &X) { refX = X; }
 /// @param Dx :: vector of X error data
 void ISpectrum::setDx(const MantidVecPtr::ptr_type &Dx) {
   refDx = Dx;
-  m_useDx = true;
+  m_hasDx = true;
 }
 
 // =============================================================================================
@@ -92,7 +89,7 @@ MantidVec &ISpectrum::dataX() { return refX.access(); }
  *  Dx vectors and a significant and unnecessary bloating of memory usage.
  */
 MantidVec &ISpectrum::dataDx() {
-  m_useDx = true;
+  m_hasDx = true;
   return refDx.access();
 }
 
@@ -119,7 +116,7 @@ MantidVecPtr ISpectrum::ptrX() const { return refX; }
 
 /// Returns a pointer to the x data
 MantidVecPtr ISpectrum::ptrDx() const {
-  m_useDx = true;
+  m_hasDx = true;
   return refDx;
 }
 
@@ -233,8 +230,8 @@ void ISpectrum::unlockData() const {}
  * Gets the value of the use flag.
  * @returns true if DX has been set, else false
  */
-bool ISpectrum::useDx() const {
-  return m_useDx;
+bool ISpectrum::hasDx() const {
+  return m_hasDx;
 }
 
 } // namespace Mantid
