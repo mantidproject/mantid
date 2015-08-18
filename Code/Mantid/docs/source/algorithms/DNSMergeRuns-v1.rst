@@ -46,7 +46,8 @@ The input workspaces (**WorkspaceNames**) have to have the following in order to
 -  The same number of dimensions
 -  The same number of spectra
 -  The same number of bins
--  Have the corresponding normalization workspace
+-  Must have sample log **normalized** set to "yes" for normalized data or "no" for not normalized data. Important: this value must be the same for all given workspaces. The mixture of normalized and not normalized workspaces is not accepted: algorithm will terminate with an error message.
+-  If sample log **normalized** is set to "no", all workspaces must have the corresponding normalization workspace.
 -  Have the same wavelength in the sample logs
 
 For the physically meaningful merge result, it is also important that these workspaces have the same slits size, polarisation, and flipper status. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.

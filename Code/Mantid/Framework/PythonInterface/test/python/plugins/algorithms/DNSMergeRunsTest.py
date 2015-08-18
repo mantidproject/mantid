@@ -25,9 +25,9 @@ class DNSMergeRunsTest(unittest.TestCase):
                             DataE=dataE, NSpec=ndet, UnitX="Wavelength")
         outws = api.mtd[wsname]
         api.LoadInstrument(outws, InstrumentName='DNS')
-        p_names = 'wavelength,slit_i_left_blade_position,slit_i_right_blade_position,\
+        p_names = 'wavelength,slit_i_left_blade_position,slit_i_right_blade_position,normalized,\
             slit_i_lower_blade_position,slit_i_upper_blade_position,polarisation,flipper'
-        p_values = '4.2,10,10,5,20,x,ON'
+        p_values = '4.2,10,10,no,5,20,x,ON'
         api.AddSampleLogMultiple(Workspace=outws, LogNames=p_names, LogValues=p_values, ParseType=True)
         # rotate instrument component ans set deterota
         api.RotateInstrumentComponent(outws, "bank0", X=0, Y=1, Z=0, Angle=angle)
