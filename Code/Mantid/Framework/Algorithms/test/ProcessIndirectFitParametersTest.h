@@ -54,7 +54,6 @@ private:
     tableWs->addColumn("double", "f1.f1.f2.Height");
     tableWs->addColumn("double", "f1.f1.f2.Height_Err");
 
-
     size_t n = 5;
     for (size_t i = 0; i < n; ++i) {
       TableRow row = tableWs->appendRow();
@@ -162,19 +161,19 @@ public:
     TS_ASSERT_EQUALS(outWs->getAxis(1)->label(0), "f1.f1.f0.Height");
     TS_ASSERT_EQUALS(outWs->getAxis(1)->label(1), "f1.f1.f0.Amplitude");
 
-	// 5 = The initial number of rows in the table workspace
-	TS_ASSERT_EQUALS(outWs->blocksize(), 5); 
+    // 5 = The initial number of rows in the table workspace
+    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
 
-	// Test output values
-	auto heightY = outWs->readY(0);
-	auto heightTest = std::vector<double>();
-	tableWs->getColumn("f1.f1.f0.Height")->numeric_fill(heightTest);
-	TS_ASSERT_EQUALS(heightY, heightTest);
+    // Test output values
+    auto heightY = outWs->readY(0);
+    auto heightTest = std::vector<double>();
+    tableWs->getColumn("f1.f1.f0.Height")->numeric_fill(heightTest);
+    TS_ASSERT_EQUALS(heightY, heightTest);
 
-	auto ampY = outWs->readY(1);
-	auto ampTest = std::vector<double>();
-	tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
-	TS_ASSERT_EQUALS(ampY, ampTest);
+    auto ampY = outWs->readY(1);
+    auto ampTest = std::vector<double>();
+    tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
+    TS_ASSERT_EQUALS(ampY, ampTest);
 
     AnalysisDataService::Instance().remove(outputName);
   }
@@ -205,32 +204,31 @@ public:
     TS_ASSERT_EQUALS(outWs->getAxis(1)->label(2), "f1.f1.f1.Height");
     TS_ASSERT_EQUALS(outWs->getAxis(1)->label(3), "f1.f1.f2.Height");
 
-	// 5 = The initial number of rows in the table workspace
-	TS_ASSERT_EQUALS(outWs->blocksize(), 5); 
+    // 5 = The initial number of rows in the table workspace
+    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
 
-	// Test output values
-	auto heightY = outWs->readY(0);
-	auto heightTest = std::vector<double>();
-	tableWs->getColumn("f1.f1.f0.Height")->numeric_fill(heightTest);
-	TS_ASSERT_EQUALS(heightY, heightTest);
+    // Test output values
+    auto heightY = outWs->readY(0);
+    auto heightTest = std::vector<double>();
+    tableWs->getColumn("f1.f1.f0.Height")->numeric_fill(heightTest);
+    TS_ASSERT_EQUALS(heightY, heightTest);
 
-	auto ampY = outWs->readY(1);
-	auto ampTest = std::vector<double>();
-	tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
-	TS_ASSERT_EQUALS(ampY, ampTest);
+    auto ampY = outWs->readY(1);
+    auto ampTest = std::vector<double>();
+    tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
+    TS_ASSERT_EQUALS(ampY, ampTest);
 
-	auto height1Y = outWs->readY(2);
-	auto height1Test = std::vector<double>();
-	tableWs->getColumn("f1.f1.f1.Height")->numeric_fill(height1Test);
-	TS_ASSERT_EQUALS(height1Y, height1Test);
+    auto height1Y = outWs->readY(2);
+    auto height1Test = std::vector<double>();
+    tableWs->getColumn("f1.f1.f1.Height")->numeric_fill(height1Test);
+    TS_ASSERT_EQUALS(height1Y, height1Test);
 
-	auto height2Y = outWs->readY(3);
-	auto height2Test = std::vector<double>();
-	tableWs->getColumn("f1.f1.f2.Height")->numeric_fill(height2Test);
-	TS_ASSERT_EQUALS(height2Y, height2Test);
+    auto height2Y = outWs->readY(3);
+    auto height2Test = std::vector<double>();
+    tableWs->getColumn("f1.f1.f2.Height")->numeric_fill(height2Test);
+    TS_ASSERT_EQUALS(height2Y, height2Test);
 
-	AnalysisDataService::Instance().remove(outputName);
-
+    AnalysisDataService::Instance().remove(outputName);
   }
 };
 

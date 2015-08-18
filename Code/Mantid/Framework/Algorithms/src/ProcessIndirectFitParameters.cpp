@@ -142,14 +142,14 @@ void ProcessIndirectFitParameters::exec() {
     tempWorkspace = std::string(conjoin->getProperty("InputWorkspace1"));
   }
 
-  //Rename the workspace to the specified outputName
+  // Rename the workspace to the specified outputName
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setProperty("InputWorkspace", tempWorkspace);
   renamer->setProperty("OutputWorkspace", outputWsName);
   renamer->executeAsChildAlg();
   Workspace_sptr renameWs = renamer->getProperty("OutputWorkspace");
   auto outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(renameWs);
-  
+
   // Replace axis on workspaces with text axis
   auto axis = new TextAxis(outputWs->getNumberHistograms());
   size_t offset = 0;
@@ -158,7 +158,7 @@ void ProcessIndirectFitParameters::exec() {
     for (size_t k = 0; k < peakWs.size(); k++) {
       axis->setLabel((k + offset), peakWs.at(k));
     }
-	offset += peakWs.size();
+    offset += peakWs.size();
   }
   outputWs->replaceAxis(1, axis);
 }
@@ -178,7 +178,9 @@ ProcessIndirectFitParameters::listToVector(std::string &commaList) {
     commaList = commaList.substr(pos + 1, commaList.size());
     pos = commaList.find(",");
   }
-  listVector.push_back(commaList);
+  if (commaList.compare("") != 0) {
+    listVector.push_back(commaList);
+  }
   return listVector;
 }
 
