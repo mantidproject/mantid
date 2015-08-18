@@ -98,12 +98,12 @@ public:
   void test_use_dx_flag_being_set_when_accessing_dx_with_non_const() {
     // non-const dataDx()
     SpectrumTester s;
-    Mantid::MantidVec& dx= s.dataDx();
+    s.dataDx();
     TS_ASSERT(s.hasDx());
 
     // non-const ptrDx()
     SpectrumTester s2;
-    Mantid::MantidVecPtr ptrDx = s2.ptrDx();
+    s2.ptrDx();
     TS_ASSERT(s2.hasDx());
 
     // setDX vesion 1
@@ -122,7 +122,7 @@ public:
   void test_use_dx_flag_not_being_set_when_accessing_dx_with_const() {
     // const dataDx()
     const SpectrumTester s;
-    const Mantid::MantidVec& element = s.dataDx();
+    s.dataDx();
     TS_ASSERT(!s.hasDx());
 
     // setDX vesion 2, not this version is used in Workspace2D to have an initial DX array.
@@ -136,7 +136,7 @@ public:
   void test_use_dx_flag_is_copied_during_copy_construction() {
     // Copy spectrum which had the flag set
     SpectrumTester s;
-    Mantid::MantidVec& dx= s.dataDx();
+    s.dataDx();
     TS_ASSERT(s.hasDx());
 
     SpectrumTester s2(s);
