@@ -121,6 +121,7 @@ public:
 
   //-------------------------------------------------------
   virtual bool hasDx() const;
+  virtual void resetHasDx();
 
 protected:
   /// The spectrum number of this spectrum

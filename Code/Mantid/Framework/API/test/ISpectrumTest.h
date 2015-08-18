@@ -112,11 +112,17 @@ public:
     s3.setDx(Dx);
     TS_ASSERT(s3.hasDx());
 
-    // setDX vesion 3
+    // setDX vesion 2
     SpectrumTester s4;
     Mantid::MantidVecPtr::ptr_type Dx_vec_ptr_type;
     s4.setDx(Dx_vec_ptr_type);
     TS_ASSERT(s4.hasDx());
+
+    // setDX version 3
+    SpectrumTester s5;
+    Mantid::MantidVecPtr Dx_vec_ptr;
+    s5.setDx(Dx_vec_ptr);
+    TS_ASSERT(s5.hasDx());
   }
 
   void test_use_dx_flag_not_being_set_when_accessing_dx_with_const() {
@@ -124,14 +130,8 @@ public:
     const SpectrumTester s;
     s.dataDx();
     TS_ASSERT(!s.hasDx());
-
-    // setDX vesion 2, not this version is used in Workspace2D to have an initial DX array.
-    // This we don't consider to be a properly set DX array.
-    SpectrumTester s2;
-    Mantid::MantidVecPtr Dx_vec_ptr;
-    s2.setDx(Dx_vec_ptr);
-    TS_ASSERT(!s2.hasDx());
   }
+
 
   void test_use_dx_flag_is_copied_during_copy_construction() {
     // Copy spectrum which had the flag set

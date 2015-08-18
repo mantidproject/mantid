@@ -65,7 +65,10 @@ void ISpectrum::setX(const MantidVecPtr &X) { refX = X; }
 
 /// Sets the x error data.
 /// @param Dx :: vector of X error data
-void ISpectrum::setDx(const MantidVecPtr &Dx) { refDx = Dx; }
+void ISpectrum::setDx(const MantidVecPtr &Dx) {
+  refDx = Dx;
+  m_hasDx = true;
+}
 
 /// Sets the x data
 /// @param X :: vector of X data
@@ -232,6 +235,13 @@ void ISpectrum::unlockData() const {}
  */
 bool ISpectrum::hasDx() const {
   return m_hasDx;
+}
+
+/**
+ * Resets the hasDx flag
+ */
+void ISpectrum::resetHasDx() {
+  m_hasDx = false;
 }
 
 } // namespace Mantid
