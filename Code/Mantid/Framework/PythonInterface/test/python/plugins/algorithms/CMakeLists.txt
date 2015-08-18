@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
   CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DNSMergeRunsTest.py
+  DNSFlippingRatioCorrTest.py
   DNSDetEffCorrVanaTest.py
   DSFinterpTest.py
   EnggCalibrateFullTest.py

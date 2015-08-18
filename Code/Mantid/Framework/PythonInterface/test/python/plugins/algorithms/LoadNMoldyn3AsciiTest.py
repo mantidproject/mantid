@@ -4,7 +4,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class MolDynTest(unittest.TestCase):
+class LoadNMoldyn3AsciiTest(unittest.TestCase):
 
     _cdl_filename = 'NaF_DISF.cdl'
     _dat_filename = 'WSH_test.dat'

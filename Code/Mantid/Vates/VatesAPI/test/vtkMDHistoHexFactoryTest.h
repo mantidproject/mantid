@@ -54,18 +54,18 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
     for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {
-      TS_ASSERT_EQUALS(insideProduct->IsCellVisible(i), true)
+      TS_ASSERT(insideProduct->IsCellVisible(i) != 0);
     }
 
     // This has changed. Cells are still present but not visible.
     TS_ASSERT_EQUALS((10 * 10 * 10), belowProduct->GetNumberOfCells());
     for (auto i = 0; i < belowProduct->GetNumberOfCells(); ++i) {
-      TS_ASSERT_EQUALS(belowProduct->IsCellVisible(i), false)
+      TS_ASSERT(belowProduct->IsCellVisible(i) == 0);
     }
 
     TS_ASSERT_EQUALS((10 * 10 * 10), aboveProduct->GetNumberOfCells());
     for (auto i = 0; i < aboveProduct->GetNumberOfCells(); ++i) {
-      TS_ASSERT_EQUALS(aboveProduct->IsCellVisible(i), false)
+      TS_ASSERT(aboveProduct->IsCellVisible(i) == 0);
     }
   }
 
