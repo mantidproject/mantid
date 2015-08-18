@@ -3,7 +3,7 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
-#include "MantidAPI/TableRow.h" 
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/CalculateReflectometry.h"
 #include "MantidDataObjects/FractionalRebinning.h"
@@ -24,6 +24,10 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace {void writeRow(Mantid::API::TableRow &row, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
+    row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
+}
+}
 namespace Mantid {
 namespace DataObjects {
 
@@ -225,15 +229,26 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   return ws;
 }
 
+boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
+createTable(boost::optional<
+            boost::shared_ptr<Mantid::DataObjects::TableWorkspace>> &vertexes) {
+  (*vertexes)->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
+  (*vertexes)->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
+  (*vertexes)->addColumn("int", "OriginIndex");
+  (*vertexes)->addColumn("int", "OriginBin");
+  (*vertexes)->addColumn("double", "CellSignal");
+  (*vertexes)->addColumn("double", "CellError");
+
+  return vertexes;
+}
+
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
-    MatrixWorkspace_const_sptr inputWS, boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >& vertexes) const {
+    MatrixWorkspace_const_sptr inputWS,
+    boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
+        &vertexes) const {
   // Create a table for the output if we want to debug vertex positioning
-  if(vertexes){
-    (*vertexes)->addColumn("double","Qx");
-    (*vertexes)->addColumn("double","Qy");
-    (*vertexes)->addColumn("int","OriginIndex");
-    (*vertexes)->addColumn("int", "OriginBin");
-    (*vertexes)->addColumn("double", "CellSignal");
+  if (vertexes) {
+    vertexes = createTable(vertexes);
   }
 
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
@@ -281,24 +296,26 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
-    const MantidVec &X = inputWS->readX(0);
-    
+    const MantidVec &X = inputWS->readX(i);
+    const MantidVec &Y = inputWS->readY(i);
+    const MantidVec &E = inputWS->readE(i);
     for (size_t j = 0; j < nBins; ++j) {
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];
+      const double signal = Y[j];
+      const double error = E[j];
 
       // fractional rebin
       m_calculator->setThetaFinal(thetaLower);
-      const V2D ur(m_calculator->calculateDim0(lamLower), //highest qx 
-                   m_calculator->calculateDim1(lamLower)); 
+      const V2D ur(m_calculator->calculateDim0(lamLower), // highest qx
+                   m_calculator->calculateDim1(lamLower));
       const V2D lr(m_calculator->calculateDim0(lamUpper),
-                   m_calculator->calculateDim1(lamUpper)); //lowest qz 
+                   m_calculator->calculateDim1(lamUpper)); // lowest qz
       m_calculator->setThetaFinal(thetaUpper);
       const V2D ul(m_calculator->calculateDim0(lamLower),
-                   m_calculator->calculateDim1(lamLower)); //highest qz 
-      const V2D ll(m_calculator->calculateDim0(lamUpper),  //lowest qx  
-                   m_calculator->calculateDim1(lamUpper)); 
-               
+                   m_calculator->calculateDim1(lamLower)); // highest qz
+      const V2D ll(m_calculator->calculateDim0(lamUpper), // lowest qx
+                   m_calculator->calculateDim1(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
@@ -314,18 +331,17 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
             outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
         detIDMapping.push_back(detector->getID());
       }
-      
-      //Debugging
-      if(vertexes){
+
+      // Debugging
+      if (vertexes) {
         TableRow row = (*vertexes)->appendRow();
-        row << ll.X() << ll.Y() << int(i) << int(j) << signal;
+        writeRow(row, ll, i, j, signal, error);
         row = (*vertexes)->appendRow();
-        row << ul.X() << ul.Y() << int(i) << int(j) << signal;
+        writeRow(row, ul, i, j, signal, error);
         row = (*vertexes)->appendRow();
-        row << ur.X() << ur.Y() << int(i) << int(j) << signal;
+        writeRow(row, ur, i, j, signal, error);
         row = (*vertexes)->appendRow();
-        row << lr.X() << lr.Y() << int(i) << int(j) << signal;
-        
+        writeRow(row, lr, i, j, signal, error);
       }
     }
   }
@@ -342,7 +358,6 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   return outWS;
 }
-
 
 /**
  * A map detector ID and Q ranges
@@ -406,10 +421,9 @@ void ReflectometryTransform::initAngularCaches(
     rot.rotate(maxPoint);
     double halfBoxHeight = maxPoint.scalar_prod(upDirVec);
 
-    m_thetaWidths[i] = 2.0 * std::fabs(std::atan(halfBoxHeight / l2)) * 180.0 / M_PI;
- 
-
-}
+    m_thetaWidths[i] =
+        2.0 * std::fabs(std::atan(halfBoxHeight / l2)) * 180.0 / M_PI;
+  }
 }
 }
 }
