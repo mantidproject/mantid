@@ -30,6 +30,8 @@ public:
   void setZoom(int value);
   /// zooms the text size
   void zoom(int range=1);
+  /// returns the current zoom level
+  int zoomLevel();
 public slots:
   //zooms in, not called ZoomIn to avoid clashing with the base ZoomIn that does not work
   void zoomUp();  
@@ -67,7 +69,7 @@ private:
   /// Create the action pointers
   void initActions();
   /// Reset the default font
-  void resetFont(bool setFontSize = false);
+  void resetFont();
 
 private:
   /// Copy action
@@ -76,6 +78,10 @@ private:
   QAction *m_clear;
   /// Save action
   QAction *m_save;
+  ///original default font size
+  int m_origFontSize;
+  ///current zoom level
+  int m_zoomLevel;
 };
 
 #endif /* SCRIPTOUTPUTDISPLAY_H_ */

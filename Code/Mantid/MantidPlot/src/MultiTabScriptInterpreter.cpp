@@ -103,6 +103,7 @@ void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
   setTabTitle(scriptRunner, filename); // Make sure the tooltip is set
   scriptRunner->setFocus();
   scriptRunner->editor()->zoomIn(globalZoomLevel());
+  scriptRunner->messages()->setZoom(globalZoomLevel());
   connect(scriptRunner, SIGNAL(textZoomedIn()), this,
           SLOT(zoomInAllButCurrent()));
   connect(scriptRunner, SIGNAL(textZoomedIn()), this,
@@ -304,10 +305,18 @@ void MultiTabScriptInterpreter::clearScriptVariables() {
 }
 
 /// Tracks the global zoom level
-void MultiTabScriptInterpreter::trackZoomIn() { ++m_globalZoomLevel; }
+void MultiTabScriptInterpreter::trackZoomIn()
+{
+  if (m_globalZoomLevel < 20)
+    ++m_globalZoomLevel;
+}
 
 /// Tracks the global zoom level
-void MultiTabScriptInterpreter::trackZoomOut() { --m_globalZoomLevel; }
+void MultiTabScriptInterpreter::trackZoomOut()
+{
+  if (m_globalZoomLevel > -10)
+    --m_globalZoomLevel;
+}
 
 /// Increase font size on all tabs
 void MultiTabScriptInterpreter::zoomIn() {
