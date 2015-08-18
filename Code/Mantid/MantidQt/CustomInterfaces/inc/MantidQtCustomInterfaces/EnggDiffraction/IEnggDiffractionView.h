@@ -173,8 +173,8 @@ public:
    * way of generating these files.
    *
    * @param outFilename output file name
-   * @param dif difc values (one per bank)
-   * @param tzeor tzero values (one per bank)
+   * @param difc difc values (one per bank)
+   * @param tzero tzero values (one per bank)
    */
   virtual void writeOutCalibFile(const std::string &outFilename,
                                  const std::vector<double> &difc,
