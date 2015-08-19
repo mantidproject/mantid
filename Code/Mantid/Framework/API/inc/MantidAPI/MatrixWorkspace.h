@@ -290,6 +290,14 @@ public:
     getSpectrum(index)->setData(Y, E);
   }
 
+  /**
+   * Probes if DX (X Error) values were set on a particular spectrum
+   * @param index: the spectrum index
+   */
+  virtual bool hasDx(const std::size_t index) const {
+    return getSpectrum(index)->hasDx();
+  }
+
   /// Generate the histogram or rebin the existing histogram.
   virtual void generateHistogram(const std::size_t index, const MantidVec &X,
                                  MantidVec &Y, MantidVec &E,

@@ -14048,7 +14048,7 @@ void ApplicationWindow::showmantidplotHelp()
 
 void ApplicationWindow::showBugTracker()
 {
-  QDesktopServices::openUrl(QUrl("mailto:mantid-help@mantidproject.org"));
+  QDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
 }
 
 /*
