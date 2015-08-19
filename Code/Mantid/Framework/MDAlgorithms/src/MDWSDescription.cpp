@@ -8,6 +8,7 @@
 #include "MantidKernel/Strings.h"
 
 #include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -424,10 +425,37 @@ void MDWSDescription::setCoordinateSystem(
   m_coordinateSystem = system;
 }
 
+/**
+ * create the frame
+ * @return MDFrame
+ */
+Geometry::MDFrame_uptr MDWSDescription::getFrame() const{
+    auto factory = Geometry::makeMDFrameFactoryChain();
+    return factory->create(Geometry::MDFrameArgument(m_frameKey, m_frameUnitKey));
+}
+
+/**
+ * Sets the frame.
+ * @param frameKey
+ * @param frameUnitKey
+ */
+void MDWSDescription::setFrame(const std::string frameKey, const std::string frameUnitKey){
+    m_frameKey = frameKey;
+    m_frameUnitKey = frameUnitKey;
+}
+
 /// @return the special coordinate system if any.
 Mantid::Kernel::SpecialCoordinateSystem
 MDWSDescription::getCoordinateSystem() const {
   return m_coordinateSystem;
+}
+
+/**
+ * Is the algorithm running in Q3D mode?
+ * @return True only if in Q3D mode
+ */
+bool MDWSDescription::isQ3DMode() const{
+    return this->AlgID.compare("Q3D") == 0;
 }
 
 } // end namespace MDAlgorithms

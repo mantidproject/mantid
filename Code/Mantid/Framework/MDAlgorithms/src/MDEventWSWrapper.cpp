@@ -8,40 +8,25 @@ namespace MDAlgorithms {
   template parameter:
   * nd -- number of dimensions
 
- *@param  targ_dim_names -- size-nd vector of string containing names of nd
- dimensions of the wrapped workspace
- *@param  targ_dim_ID    -- size-nd vector of strings containing id of the
- wrapped workspace dimensions
- *@param  targ_dim_units -- size-nd vector of strings containing units of the
- wrapped workspace dimensions
- *
- *@param  dimMin         -- size-nd vector of min values of dimensions of the
- target workspace
- *@param  dimMax         -- size-nd vector of max values of dimensions of the
- target workspace
- *@param  numBins        -- size-nd vector of number of bins, each dimension is
- split on single level          */
+ *@param  description : MDWorkspaceDescription memento.
+*/
 template <size_t nd>
-void MDEventWSWrapper::createEmptyEventWS(const Strings &targ_dim_names,
-                                          const Strings &targ_dim_ID,
-                                          const Strings &targ_dim_units,
-                                          const std::vector<double> &dimMin,
-                                          const std::vector<double> &dimMax,
-                                          const std::vector<size_t> &numBins) {
+void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription& description) {
 
   boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>> ws =
       boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
           new DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>());
 
-  size_t nBins(10);
+  auto numBins = description.getNBins();
+  size_t nBins(10); // HACK. this means we have 10 bins artificially. This can't be right.
   // Give all the dimensions
   for (size_t d = 0; d < nd; d++) {
     if (!numBins.empty())
       nBins = numBins[d];
 
     Geometry::MDHistoDimension *dim = new Geometry::MDHistoDimension(
-        targ_dim_names[d], targ_dim_ID[d], targ_dim_units[d],
-        coord_t(dimMin[d]), coord_t(dimMax[d]), nBins);
+        description.getDimNames()[d], description.getDimIDs()[d], description.getDimUnits()[d],
+        description.getDimMin()[d], description.getDimMax()[d], nBins);
     ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
   }
   ws->initialize();
@@ -57,11 +42,7 @@ void MDEventWSWrapper::createEmptyEventWS(const Strings &targ_dim_names,
 }
 /// terminator for attempting initiate 0 dimensions workspace, will throw.
 template <>
-void MDEventWSWrapper::createEmptyEventWS<0>(const Strings &, const Strings &,
-                                             const Strings &,
-                                             const std::vector<double> &,
-                                             const std::vector<double> &,
-                                             const std::vector<size_t> &) {
+void MDEventWSWrapper::createEmptyEventWS<0>(const MDWSDescription&) {
   throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be "
                               "initiated with 0 dimensions"));
 }
@@ -207,9 +188,7 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 
   m_NDimensions = (int)WSD.nDimensions();
   // call the particular function, which creates the workspace with n_dimensions
-  (this->*(wsCreator[m_NDimensions]))(WSD.getDimNames(), WSD.getDimIDs(),
-                                      WSD.getDimUnits(), WSD.getDimMin(),
-                                      WSD.getDimMax(), WSD.getNBins());
+  (this->*(wsCreator[m_NDimensions]))(WSD);
 
   // set up the matrix, which convert momentums from Q in orthogonal crystal
   // coordinate system and units of Angstrom^-1 to hkl or orthogonal hkl or
