@@ -340,11 +340,9 @@ public:
 
   void test_with_dx_data_event() {
     Parameters params("event-dx");
-
     auto ws = runAlgorithm(params);
-    if (!ws) return;
 
-    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    if (!ws) return;
     params.testDx(*ws);
   }
 
@@ -417,7 +415,7 @@ private:
       return createInputWithDetectors("event");
     else if (workspaceType == "histo-dx")
       return createInputWorkspaceHistWithDx();
-    else if (workspaceType == "event-dx");
+    else if (workspaceType == "event-dx")
       return createInputWorkspaceEventWithDx();
     throw std::runtime_error("Undefined workspace type");
   }
@@ -478,10 +476,13 @@ private:
     auto ws = createInputWorkspaceEvent();
     // Add the delta x values
     for (size_t j = 0; j < nSpec; ++j) {
+      Mantid::MantidVecPtr dXvals;
+      Mantid::MantidVec &dX = dXvals.access();
+      dX.resize(nBins + 1, 0.0);
       for (size_t k = 0; k <= nBins; ++k) {
-        // Add a constant error to all spectra
-        ws->dataDx(j)[k] = sqrt(double(k));
+        dX[k] = sqrt(double(k)) + 1;
       }
+      ws->setDx(j, dXvals);
     }
     return ws;
   }
@@ -664,20 +665,24 @@ private:
     // ---- test Dx -------
     void testDx(const MatrixWorkspace& ws) const {
       if (wsType == "histo-dx") {
-        TS_ASSERT_EQUALS(ws.blocksize(), 1);
+        TS_ASSERT(ws.hasDx(0));
         TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0);
         TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0);
         TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0));
-
+        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0));
         // Check that the length of x and dx is the same
         auto x = ws.readX(0);
         auto dX = ws.readDx(0);
         TS_ASSERT_EQUALS(x.size(), dX.size());
-      } else if (wsType == "event-dx") {
-        TS_ASSERT_EQUALS(ws.blocksize(), 1);
-        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0);
-        TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0));
+
+      } else if (wsType == "event-dx"){
+        TS_ASSERT(ws.hasDx(0));
+        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0) + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0) + 1.0);
+      } else {
+        TSM_ASSERT("Should never reach here", false);
       }
     }
   };

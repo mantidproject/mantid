@@ -154,8 +154,8 @@ void ExtractSpectra::execHistogram() {
   // Loop over the required workspace indices, copying in the desired bins
   for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
     auto i = m_workspaceIndexList[j];
-    //auto hasDx = m_inputWorkspace->hasDx(i);
-    bool hasDx = false;
+
+    bool hasDx = m_inputWorkspace->hasDx(i);
 
     // Preserve/restore sharing if X vectors are the same
     if (m_commonBoundaries) {
@@ -334,9 +334,7 @@ void ExtractSpectra::execEvent() {
     // Copy spectrum number & detector IDs
     outEL.copyInfoFrom(el);
 
-    // Check if a dx value is required
-    // auto hasDx = eventW->hasDx(i);
-    bool hasDx = true;
+    bool hasDx = eventW->hasDx(i);
 
     if (!m_commonBoundaries)
       // If the X axis is NOT common, then keep the initial X axis, just clear
