@@ -117,6 +117,7 @@ public:
     auto tableWs = createTable();
     std::string xColumn = "axis-1";
     std::string parameterValues = "Amplitude";
+    std::string inAxis = "Degrees";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
@@ -125,7 +126,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("ColumnX", xColumn);
     alg.setPropertyValue("ParameterNames", parameterValues);
-    alg.setPropertyValue("XAxisUnit", "SpectraNumber");
+    alg.setPropertyValue("XAxisUnit", inAxis);
     alg.setProperty("OutputWorkspace", outputName);
 
     ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
@@ -134,8 +135,7 @@ public:
     TS_ASSERT_EQUALS(std::string(alg.getProperty("ColumnX")), xColumn);
     TS_ASSERT_EQUALS(std::string(alg.getProperty("ParameterNames")),
                      parameterValues);
-    TS_ASSERT_EQUALS(std::string(alg.getProperty("XAxisUnit")),
-                     "SpectraNumber");
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("XAxisUnit")), inAxis);
     TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")),
                      outputName);
   }
@@ -144,6 +144,7 @@ public:
     auto tableWs = createTable();
     std::string xColumn = "axis-1";
     std::string parameterValues = "Height,Amplitude";
+    std::string inAxis = "Degrees";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
@@ -151,7 +152,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("ColumnX", xColumn);
     alg.setPropertyValue("ParameterNames", parameterValues);
-	alg.setPropertyValue("XAxisUnit", "SpectraNumber");
+    alg.setPropertyValue("XAxisUnit", inAxis);
     alg.setProperty("OutputWorkspace", outputName);
 
     alg.execute();
@@ -179,6 +180,10 @@ public:
     tableWs->getColumn("f1.f1.f0.Amplitude")->numeric_fill(ampTest);
     TS_ASSERT_EQUALS(ampY, ampTest);
 
+    // Test axis units
+    std::string outAxis = outWs->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(inAxis, outAxis);
+
     AnalysisDataService::Instance().remove(outputName);
   }
 
@@ -186,6 +191,7 @@ public:
     auto tableWs = createIrregularTable();
     std::string xColumn = "axis-1";
     std::string parameterValues = "Height,Amplitude";
+    std::string inAxis = "Degrees";
     std::string outputName = "outMatrix";
 
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
@@ -193,7 +199,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("ColumnX", xColumn);
     alg.setPropertyValue("ParameterNames", parameterValues);
-	alg.setPropertyValue("XAxisUnit", "SpectraNumber");
+    alg.setPropertyValue("XAxisUnit", inAxis);
     alg.setProperty("OutputWorkspace", outputName);
 
     alg.execute();
@@ -232,6 +238,10 @@ public:
     auto height2Test = std::vector<double>();
     tableWs->getColumn("f1.f1.f2.Height")->numeric_fill(height2Test);
     TS_ASSERT_EQUALS(height2Y, height2Test);
+
+    // Test axis units
+    std::string outAxis = outWs->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(inAxis, outAxis);
 
     AnalysisDataService::Instance().remove(outputName);
   }
