@@ -42,6 +42,7 @@ public:
       "<Dimension ID=\"id\">") +
       "<Name>name</Name>" +
       "<Units>Furlongs</Units>" +
+      "<Frame>Unknown frame</Frame>" +
       "<UpperBounds>20.0000</UpperBounds>" +
       "<LowerBounds>-10.0000</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +
@@ -62,6 +63,7 @@ public:
       "<Dimension ID=\"id\">") +
       "<Name>name</Name>" +
       "<Units>Furlongs</Units>" +
+      "<Frame>Unknown frame</Frame>" +
       "<UpperBounds>20.0000</UpperBounds>" +
       "<LowerBounds>-10.0000</LowerBounds>" +
       "<NumberOfBins>15</NumberOfBins>" +
@@ -84,11 +86,25 @@ public:
 
   void test_construct_with_frame_type(){
    QLab frame;
-   MDHistoDimension dimension("QLabX", "QLabX", frame, 0, 10, 1);
+   MDHistoDimension dimension("QLabX", "QLabX", frame, 0, 10, 2);
    const auto & mdFrame = dimension.getMDFrame();
 
    TS_ASSERT_EQUALS(frame.name(), mdFrame.name());
    TS_ASSERT_EQUALS(frame.getUnitLabel(), mdFrame.getUnitLabel());
+
+   std::string actualXML = dimension.toXMLString();
+
+   std::string expectedXML =std::string(
+     "<Dimension ID=\"QLabX\">") +
+     "<Name>QLabX</Name>" +
+     "<Units>Angstrom^-1</Units>" +
+     "<Frame>QLab</Frame>" +
+     "<UpperBounds>10.0000</UpperBounds>" +
+     "<LowerBounds>0.0000</LowerBounds>" +
+     "<NumberOfBins>2</NumberOfBins>" +
+     "</Dimension>";
+
+   TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
 

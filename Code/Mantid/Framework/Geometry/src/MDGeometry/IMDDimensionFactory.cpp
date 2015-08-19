@@ -60,6 +60,13 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
     units = unitsElement->innerText();
   }
 
+  Poco::XML::Element *frameElement = dimensionXML.getChildElement("Frame");
+  std::string frame = "Unknown frame";
+  if(NULL != frameElement){
+     // Set the frame if it exists
+    frame = frameElement->innerText();
+  }
+
   Poco::XML::Element *upperBoundsElement =
       dimensionXML.getChildElement("UpperBounds");
   if (NULL == upperBoundsElement) {
@@ -112,8 +119,6 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
     upperBounds = upperLimit;
     lowerBounds = lowerLimit;
   }
-
-  const std::string frame = ""; //TODO!!!
 
   // Select the unit.
   MDFrame_const_uptr mdframe = makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));

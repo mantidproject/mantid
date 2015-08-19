@@ -15,7 +15,7 @@ QLab::QLab() : m_unit(new Mantid::Kernel::InverseAngstromsUnit) {}
 QLab::~QLab() {}
 
 
-const std::string QLab::QLabName = "Qlab";
+const std::string QLab::QLabName = "QLab";
 
 Kernel::UnitLabel QLab::getUnitLabel() const
 {

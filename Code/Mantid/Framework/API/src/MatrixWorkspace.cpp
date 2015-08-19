@@ -8,6 +8,8 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MDUnit.h"
 
@@ -1278,7 +1280,7 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL), m_unit(new Kernel::LabelUnit(m_axis.unit()->label())) {}
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL), m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   virtual std::string getName() const {
@@ -1291,7 +1293,7 @@ public:
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const {
-    return m_unit->getUnitLabel();
+    return m_frame->getUnitLabel();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
@@ -1341,7 +1343,10 @@ public:
   }
 
   const Kernel::MDUnit &getMDUnits() const{
-      return *m_unit;
+      return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame& getMDFrame() const{
+      return *m_frame;
   }
 
   virtual ~MWDimension() {}
@@ -1350,7 +1355,7 @@ private:
   const Axis &m_axis;
   const std::string m_dimensionId;
   const bool m_haveEdges;
-  const Kernel::MDUnit_const_uptr m_unit;
+  const Geometry::MDFrame_const_uptr m_frame;
 
 };
 
@@ -1361,7 +1366,7 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId), m_unit(new Kernel::LabelUnit(m_ws->getAxis(0)->unit()->label())) {
+      : m_ws(ws), m_dimensionId(dimensionId), m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(), m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1379,7 +1384,7 @@ public:
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const {
-    return m_unit->getUnitLabel();
+    return m_frame->getUnitLabel();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
@@ -1415,7 +1420,10 @@ public:
     throw std::runtime_error("Not implemented");
   }
   const Kernel::MDUnit &getMDUnits() const{
-      return *m_unit;
+      return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame& getMDFrame() const{
+      return *m_frame;
   }
 
 private:
@@ -1426,7 +1434,7 @@ private:
   /// Dimension ID string
   const std::string m_dimensionId;
   /// Unit
-  const Kernel::MDUnit_const_uptr m_unit;
+  const Geometry::MDFrame_const_uptr m_frame;
 };
 
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
