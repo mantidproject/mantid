@@ -38,7 +38,7 @@ public:
     virtual const Mantid::Kernel::MDUnit& getMDUnit() const = 0;
     virtual bool canConvertTo(const Mantid::Kernel::MDUnit& otherUnit) const = 0;
     virtual std::string name() const = 0;
-
+    virtual ~MDFrame(){}
 };
 
 } // namespace Geometry

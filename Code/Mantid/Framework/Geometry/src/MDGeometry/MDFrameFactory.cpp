@@ -5,17 +5,6 @@
 namespace Mantid {
 namespace Geometry {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-MDFrameFactory::MDFrameFactory() {}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-MDFrameFactory::~MDFrameFactory() {}
-
-
 GeneralFrame *
 GeneralFrameFactory::createRaw(const std::string &argument) const{
     return new GeneralFrame(argument, argument); // HACK

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/ChainableFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -33,16 +33,8 @@ namespace Geometry {
 */
 class DLLExport MDFrameFactory
     : public Kernel::ChainableFactory<MDFrameFactory, MDFrame> {
-private:
-  virtual MDFrame *createRaw(const std::string &argument) const;
-
 public:
-  /// Indicate an ability to intepret the string
-  virtual bool canInterpret(const std::string &unitString) const;
-
-  MDFrameFactory();
-
-  virtual ~MDFrameFactory();
+  virtual ~MDFrameFactory(){}
 };
 
 //-----------------------------------------------------------------------
@@ -50,7 +42,7 @@ public:
 //-----------------------------------------------------------------------
 class DLLExport GeneralFrameFactory : public MDFrameFactory {
 private:
-  GeneralFrame *createRaw(const std::string &unitString) const;
+  GeneralFrame *createRaw(const std::string &argument) const;
 public:
   bool canInterpret(const std::string &) const;
 };

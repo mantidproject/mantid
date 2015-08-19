@@ -5,8 +5,10 @@
 
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class MDFrameFactoryTest : public CxxTest::TestSuite {
 public:
@@ -22,7 +24,7 @@ public:
     TS_ASSERT(factory.canInterpret("anything"));
 
     std::unique_ptr<MDFrame> product = factory.create("anything");
-    GeneralFrame x =
+    TSM_ASSERT("Should be creating a GeneralFrame", dynamic_cast<GeneralFrame*>(product.get()));
   }
 
 
