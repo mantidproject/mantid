@@ -45,6 +45,10 @@ public:
 
   void changeScaleType(GraphOptions::ScaleType type);
 
+  void setNthPower(double nth_power){m_nth_power = nth_power;};
+
+  double getNthPower() const {return m_nth_power;};
+
   bool loadMap(const QString & filename);
   
   static QString loadMapDialog(QString previousFile, QWidget * parent);
@@ -122,6 +126,8 @@ private:
 
   /// Cached NAN value
   double m_nan;
+
+  double m_nth_power;
 
   ///the name of the color map
   QString m_name;

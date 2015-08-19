@@ -1442,6 +1442,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
               start = sp->getMinPositiveValue();
             }
             sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
+            sp->mutableColorMap().setNthPower(sc_engine->nthPower());
             rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
             sp->setColorMap(sp->getColorMap());
             // we could check if(sp->isIntensityChanged()) but this doesn't work when one value is changing from zero to say 10^-10, which is a big problem for log plots
@@ -4371,6 +4372,7 @@ void Graph::copy(Graph* g)
         rightAxis->setColorBarEnabled(false);
       sp->plot()->enableAxis(QwtPlot::yRight, true);
       sp->mutableColorMap().changeScaleType(sp->getColorMap().getScaleType());
+      sp->mutableColorMap().setNthPower(sp->getColorMap().getNthPower());
 
       rightAxis->setColorMap(sp->data().range(),sp->mutableColorMap());
       sp->plot()->setAxisScale(QwtPlot::yRight,
