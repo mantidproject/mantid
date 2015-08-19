@@ -64,11 +64,11 @@ class ReflectometryISIS(stresstesting.MantidStressTest):
             self.assertTrue(thisTheta < nextTheta)
 
         # MD transformations
-        ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='QxQy',
+        QxQy, QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
                                 OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12')
-        ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='KiKf',
+        KiKf, KiKF_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
                                 OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05')
-        ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='PiPf',
+        PiPf, PiPf_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
                                 OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15')
 
         # Bin the outputs to histograms because observations are not important.
