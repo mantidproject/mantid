@@ -26,5 +26,7 @@ void export_ISpectrum() {
       .def("clearDetectorIDs", &ISpectrum::clearDetectorIDs,
            "Clear the set of detector IDs")
       .def("setSpectrumNo", &ISpectrum::setSpectrumNo,
-           "Set the spectrum number for this spectrum");
+           "Set the spectrum number for this spectrum")
+      .def("hasDx", &ISpectrum::hasDx,
+           "Returns True if the spectrum uses the DX (X Error) array, else False.");
 }

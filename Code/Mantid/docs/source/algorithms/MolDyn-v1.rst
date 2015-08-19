@@ -33,7 +33,7 @@ Usage
 
 .. testcode:: ExLoadCDLFile
 
-    out_ws_group = MolDyn(Filename='NaF_DISF.cdl',
+    out_ws_group = MolDyn(Data='NaF_DISF.cdl',
                           Functions=['Fqt-total', 'Sqw-total'])
 
     for ws_name in out_ws_group.getNames():

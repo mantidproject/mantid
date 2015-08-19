@@ -67,6 +67,7 @@ private slots:
   void radiosSwitched();
   void setModified();
   void recalcStepMin();
+  void checkscaletype();
 
 private:
   bool m_modified, m_initialised;
@@ -74,13 +75,13 @@ private:
   ApplicationWindow* m_app;
   Graph* m_graph;
 
-  DoubleSpinBox *m_dspnEnd, *m_dspnStart, *m_dspnStep, *m_dspnBreakStart, *m_dspnBreakEnd, *m_dspnStepBeforeBreak, *m_dspnStepAfterBreak;
+  DoubleSpinBox *m_dspnEnd, *m_dspnStart, *m_dspnStep, *m_dspnBreakStart, *m_dspnBreakEnd, *m_dspnStepBeforeBreak, *m_dspnStepAfterBreak, *m_dspnN;
   QCheckBox *m_chkInvert, *m_chkLog10AfterBreak, *m_chkBreakDecoration;
   QRadioButton *m_radStep, *m_radMajor;
   QSpinBox *m_spnMajorValue, *m_spnBreakPosition, *m_spnBreakWidth;
   QGroupBox *m_grpAxesBreaks;
   QComboBox *m_cmbMinorTicksBeforeBreak, *m_cmbMinorTicksAfterBreak, *m_cmbScaleType, *m_cmbMinorValue, *m_cmbUnit;
-  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox, *m_lblStart, *m_lblEnd;
+  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox, *m_lblStart, *m_lblEnd, *m_lblN, *m_lblWarn;
   QDateTimeEdit *m_dteStartDateTime, *m_dteEndDateTime;
   QTimeEdit *m_timStartTime, *m_timEndTime;
 
