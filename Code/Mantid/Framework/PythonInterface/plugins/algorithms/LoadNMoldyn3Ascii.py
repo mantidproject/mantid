@@ -4,18 +4,12 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+import ast
+import re
 import os
 import numpy as np
-import math
 
-
-def _split_line(a):
-    elements = a.split()  # split line on character
-    extracted = []
-    for n in elements:
-        extracted.append(float(n))
-    return extracted  # values as list
-
+#==============================================================================
 
 def _find_starts(data, c, l1):
     for l in range(l1, len(data)):
@@ -25,6 +19,7 @@ def _find_starts(data, c, l1):
             break
     return line
 
+#==============================================================================
 
 def _find_tab_starts(data, c, l1):
     for l in range(l1, len(data)):
@@ -34,6 +29,7 @@ def _find_tab_starts(data, c, l1):
             break
     return line
 
+#==============================================================================
 
 def _find_ends(data, c, l1):
     for l in range(l1, len(data)):
@@ -43,15 +39,7 @@ def _find_ends(data, c, l1):
             break
     return line
 
-
-def _find_char(data, c, l1):
-    for l in range(l1, len(data)):
-        char = data[l]
-        if char.find(c):
-            line = l
-            break
-    return line
-
+#==============================================================================
 
 def _make_list(a, l1, l2):
     data = ''
@@ -60,21 +48,52 @@ def _make_list(a, l1, l2):
         alist = data.split(',')
     return alist
 
+#==============================================================================
+
+def _cdl_find_dimensions(data):
+    """
+    Gets the number of Q, time and frequency values in given raw data.
+
+    @param data Raw data to search
+    """
+
+    num_q_values = _find_tab_starts(data, 'NQVALUES', 0)
+    num_time_values = _find_tab_starts(data, 'NTIMES', 0)
+    num_freq_values = _find_tab_starts(data, 'NFREQUENCIES', 0)
+
+    q_el = data[num_q_values].split()
+    num_q = int(q_el[2])
+    t_el = data[num_time_values].split()
+    num_t = int(t_el[2])
+    f_el = data[num_freq_values].split()
+    num_f = int(f_el[2])
+
+    logger.debug(data[2][1:-1])
+    logger.debug(data[3][1:-1])
+    logger.debug(data[6][1:-1])
+
+    return num_q, num_t, num_f
+
+#==============================================================================
 
 class LoadNMoldyn3Ascii(PythonAlgorithm):
 
     _file_name = None
+    _file_type = None
     _functions = None
     _out_ws = None
 
+#-------------------------------------------------------------------------------
 
     def category(self):
         return 'PythonAlgorithms;Inelastic;Simulation'
 
+#-------------------------------------------------------------------------------
 
     def summary(self):
         return 'Imports functions from CDL and ASCII files output by nMOLDYN 3.'
 
+#-------------------------------------------------------------------------------
 
     def PyInit(self):
         self.declareProperty(FileProperty('Filename', '',
@@ -89,6 +108,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc='Output workspace name')
 
+#-------------------------------------------------------------------------------
 
     def validateInputs(self):
         issues = dict()
@@ -105,124 +125,72 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
         return issues
 
+#-------------------------------------------------------------------------------
 
     def PyExec(self):
         # Do setup
         self._setup()
 
-        # Load data file
-        data, name, ext = self._load_file()
-
         # Run nMOLDYN import
-        if ext == 'cdl':
-            self._cdl_import(data, name)
-        elif ext == 'dat':
-            self._ascii_import(data, name)
+        if self._file_type == 'cdl':
+            self._cdl_import()
+        elif self._file_type == 'dat':
+            self._ascii_import()
         else:
-            raise RuntimeError('Unrecognised file format: %s' % ext)
+            raise RuntimeError('Unrecognised file extension: %s' % self._file_type)
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', self._out_ws)
 
+#-------------------------------------------------------------------------------
 
     def _setup(self):
         """
         Gets algorithm properties.
         """
         self._file_name = self.getPropertyValue('Filename')
+        self._file_type = os.path.splitext(self._file_name)[1][1:]
+
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
         raw_functions = self.getProperty('Functions').value
         self._functions = [x.strip() for x in raw_functions]
 
+#-------------------------------------------------------------------------------
 
-    def _load_file(self):
-        """
-        Attempts to load the sample file.
-
-        @returns A tuple with the ASCII data, sample file name and file extension
-        """
-
-        # Get some data about the file
-        path = self._file_name
-        base = os.path.basename(path)
-        name = os.path.splitext(base)[0]
-        ext = os.path.splitext(path)[1]
-
-        # Remove dot from extension
-        if len(ext) > 1:
-            ext = ext[1:]
-
-        logger.debug('Base filename for %s is %s' % (self._file_name, name))
-        logger.debug('File type of %s is %s' % (self._file_name, ext))
-
-        if not os.path.isfile(path):
-            path = FileFinder.getFullPath(path)
-
-        logger.information('Got file path for %s: %s' % (self._file_name, path))
-
-        # Open file and get data
-        handle = open(path, 'r')
-        data = []
-        for line in handle:
-            line = line.rstrip()
-            data.append(line)
-        handle.close()
-
-        return data, name, ext
-
-
-    def _find_dimensions(self, data):
-        """
-        Gets the number of Q, time and frequency values in given raw data.
-
-        @param data Raw data to search
-        """
-
-        num_q_values = _find_tab_starts(data, 'NQVALUES', 0)
-        num_time_values = _find_tab_starts(data, 'NTIMES', 0)
-        num_freq_values = _find_tab_starts(data, 'NFREQUENCIES', 0)
-
-        q_el = data[num_q_values].split()
-        num_q = int(q_el[2])
-        t_el = data[num_time_values].split()
-        num_t = int(t_el[2])
-        f_el = data[num_freq_values].split()
-        num_f = int(f_el[2])
-
-        logger.debug(data[2][1:-1])
-        logger.debug(data[3][1:-1])
-        logger.debug(data[6][1:-1])
-
-        return num_q, num_t, num_f
-
-
-    def _cdl_import(self, data, name):
+    def _cdl_import(self):
         """
         Import data from CDL file.
-
-        @param data Raw data
-        @param name Name of data file
         """
+        logger.notice('Loading CDL file')
 
-        logger.notice('Loading CDL file: %s' % name)
+        # Get file base name
+        base_filename = os.path.basename(self._file_name)
+        base_name = os.path.splitext(base_filename)[0]
+
+        # Open file and get data
+        data = []
+        with open(self._file_name, 'r') as handle:
+            for line in handle:
+                line = line.rstrip()
+                data.append(line)
 
         len_data = len(data)
 
         # raw head
-        nQ, nT, nF = self._find_dimensions(data)
+        num_spec, nT, nF = _cdl_find_dimensions(data)
         ldata = _find_starts(data, 'data:', 0)
         lq1 = _find_starts(data, ' q =', ldata)  # start Q values
         lq2 = _find_starts(data, ' q =', lq1 - 1)
         Qlist = _make_list(data, lq1, lq2)
-        if nQ != len(Qlist):
+        if num_spec != len(Qlist):
             raise RUntimeError('Error reading Q values')
         Qf = Qlist[0].split()
         Q = [float(Qf[2]) / 10.0]
-        for m in range(1, nQ - 1):
+        for m in range(1, num_spec - 1):
             Q.append(float(Qlist[m]) / 10.0)
 
-        Q.append(float(Qlist[nQ - 1][:-1]) / 10.0)
+        Q.append(float(Qlist[num_spec - 1][:-1]) / 10.0)
         logger.information('Q values = ' + str(Q))
 
         lt1 = _find_starts(data, ' time =', lq2)  # start T values
@@ -263,17 +231,17 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
             if func[:3] == 'Fqt':
                 nP = nT
                 xEn = np.array(T)
-                eZero = np.zeros(nT)
-                xUnit = 'TOF'
+                zero_error = np.zeros(nT)
+                x_unit = 'TOF'
             elif func[:3] == 'Sqw':
                 nP = nF
                 xEn = np.array(F)
-                eZero = np.zeros(nF)
-                xUnit = 'Energy'
+                zero_error = np.zeros(nF)
+                x_unit = 'Energy'
             else:
                 raise RuntimeError('Failed to parse function string ' + func)
 
-            for n in range(0, nQ):
+            for n in range(0, num_spec):
                 for m in range(lstart, len_data):
                     char = data[m]
                     if char.startswith('  // ' + func):
@@ -287,12 +255,12 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
                 raise RuntimeError('Failed to parse function string ' + func)
 
             Qaxis = ''
-            for n in range(0, nQ):
+            for n in range(0, num_spec):
                 logger.information(str(start))
                 logger.information('Reading : ' + data[start[n]])
 
                 Slist = _make_list(data, start[n] + 1, start[n + 1] - 1)
-                if n == nQ - 1:
+                if n == num_spec - 1:
                     Slist[nP - 1] = Slist[nP - 1][:-1]
                 S = []
                 for m in range(0, nP):
@@ -303,111 +271,114 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
                     logger.information('S values = ' + str(S[:2]) + ' to ' + str(S[-2:]))
                 if n == 0:
                     Qaxis += str(Q[n])
-                    xDat = xEn
-                    yDat = np.array(S)
-                    eDat = eZero
+                    data_x = xEn
+                    data_y = np.array(S)
+                    data_e = zero_error
                 else:
                     Qaxis += ',' + str(Q[n])
-                    xDat = np.append(xDat, xEn)
-                    yDat = np.append(yDat, np.array(S))
-                    eDat = np.append(eDat, eZero)
-            outWS = name + '_' + func
+                    data_x = np.append(data_x, xEn)
+                    data_y = np.append(data_y, np.array(S))
+                    data_e = np.append(data_e, zero_error)
 
-            CreateWorkspace(OutputWorkspace=outWS,
-                            DataX=xDat,
-                            DataY=yDat,
-                            DataE=eDat,
-                            Nspec=nQ,
-                            UnitX=xUnit,
+            function_ws_name = base_name + '_' + func
+            CreateWorkspace(OutputWorkspace=function_ws_name,
+                            DataX=data_x,
+                            DataY=data_y,
+                            DataE=data_e,
+                            Nspec=num_spec,
+                            UnitX=x_unit,
                             VerticalAxisUnit='MomentumTransfer',
                             VerticalAxisValues=Qaxis)
 
-            output_ws_list.append(outWS)
+            output_ws_list.append(function_ws_name)
 
         GroupWorkspaces(InputWorkspaces=output_ws_list,
                         OutputWorkspace=self._out_ws)
 
+#-------------------------------------------------------------------------------
 
-    def _ascii_import(self, data, name):
+    def _ascii_import(self):
         """
         Import ASCII data.
-
-        @param data Raw ASCII data
-        @param name Name of data file
         """
+        logger.notice('Loading ASCII data')
 
-        from IndirectCommon import getEfixed
-        from IndirectNeutron import ChangeAngles, InstrParas
+        # Regex
+        x_axis_regex = re.compile(r"NO") #TODO
+        v_axis_regex = re.compile(r"NO") #TODO
 
-        logger.notice('Loading ASCII data: %s' % name)
+        # Read file
+        data = []
+        x_axis = (None, None)
+        v_axis = (None, None)
+        with open(self._file_name, 'r') as handle:
+            for line in handle:
+                line = line.strip()
 
-        val = _split_line(data[3])
-        Q = []
-        for n in range(1, len(val)):
-            Q.append(val[n])
+                if line == "":
+                    continue
 
-        nQ = len(Q)
-        x = []
-        y = []
-        for n in range(4, len(data)):
-            val = _split_line(data[n])
-            x.append(val[0])
-            yval = val[1:]
-            y.append(yval)
+                x_axis_match = x_axis_regex.match(line)
+                v_axis_match = v_axis_regex.match(line)
 
-        nX = len(x)
-        logger.information('nQ = ' + str(nQ))
-        logger.information('nT = ' + str(nX))
+                # Line (X) header
+                if x_axis_match:
+                    x_axis = (x_axis_match.groups(1), x_axis_match.groups(2))
 
-        xT = np.array(x)
-        eZero = np.zeros(nX)
-        #Qaxis = ''
-        for m in range(0, nQ):
-            logger.information('Q[' + str(m + 1) + '] : ' + str(Q[m]))
+                # Column (V) header
+                elif v_axis_match:
+                    v_axis = (v_axis_match.groups(1), v_axis_match.groups(2))
 
-            S = []
-            for n in range(0, nX):
-                S.append(y[n][m])
+                # Data line (if not comment)
+                elif line.strip()[0] != '#':
+                    line_values = np.array([ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
+                    data.append(line_values)
 
-            if m == 0:
-                #Qaxis += str(Q[m])
-                xDat = xT
-                yDat = np.array(S)
-                eDat = eZero
-            else:
-                #Qaxis += ',' + str(Q[m])
-                xDat = np.append(xDat, xT)
-                yDat = np.append(yDat, np.array(S))
-                eDat = np.append(eDat, eZero)
+        # Get axis and Y values
+        data = np.array(data)
+        v_axis_values = data[1:,0]
+        x_axis_values = data[0,1:]
+        y_values = np.ravel(data[1:,1:])
 
-        CreateWorkspace(OutputWorkspace=self._out_ws,
-                        DataX=xDat,
-                        DataY=yDat,
-                        DataE=eDat,
-                        Nspec=nQ,
-                        UnitX='TOF')
+        # Create the workspace
+        create_workspace = AlgorithmManager.Instance().create('CreateWorkspace')
+        create_workspace.initialize()
+        create_workspace.setLogging(False)
+        create_workspace.setProperty('OutputWorkspace', self._out_ws)
+        create_workspace.setProperty('DataX', x_axis_values)
+        create_workspace.setProperty('DataY', y_values)
+        create_workspace.setProperty('NSpec', v_axis_values.size)
+        # create_workspace.setProperty('UnitX', )
+        # create_workspace.setProperty('YUnitLabel', )
+        create_workspace.setProperty('VerticalAxisValues', v_axis_values)
+        create_workspace.setProperty('VerticalAxisUnit', 'Empty')
+        # create_workspace.setProperty('WorkspaceTitle', )
+        create_workspace.execute()
 
-        Qmax = Q[nQ - 1]
-        instr = 'MolDyn'
-        ana = 'simul'
-        if Qmax <= 2.0:
-            refl = '2'
-        else:
-            refl = '4'
 
-        InstrParas(self._out_ws, instr, ana, refl)
-        efixed = getEfixed(self._out_ws)
-        logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
-        pi4 = 4.0 * math.pi
-        wave = 1.8 * math.sqrt(25.2429 / efixed)
-        theta = []
-        for n in range(0, nQ):
-            qw = wave * Q[n] / pi4
-            ang = 2.0 * math.degrees(math.asin(qw))
-            theta.append(ang)
+        #TODO
+        # from IndirectCommon import getEfixed
+        # from IndirectNeutron import ChangeAngles, InstrParas
+        # Qmax = Q[nQ - 1]
+        # instr = 'MolDyn'
+        # ana = 'simul'
+        # if Qmax <= 2.0:
+        #     refl = '2'
+        # else:
+        #     refl = '4'
+        # InstrParas(self._out_ws, instr, ana, refl)
+        # efixed = getEfixed(self._out_ws)
+        # logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
+        # pi4 = 4.0 * math.pi
+        # wave = 1.8 * math.sqrt(25.2429 / efixed)
+        # theta = []
+        # for n in range(0, nQ):
+        #     qw = wave * Q[n] / pi4
+        #     ang = 2.0 * math.degrees(math.asin(qw))
+        #     theta.append(ang)
+        # ChangeAngles(self._out_ws, instr, theta)
 
-        ChangeAngles(self._out_ws, instr, theta)
-
+#==============================================================================
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadNMoldyn3Ascii)
