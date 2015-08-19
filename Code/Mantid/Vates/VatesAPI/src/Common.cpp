@@ -9,6 +9,7 @@
 #include "vtkPVChangeOfBasisHelper.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/regex.hpp>
 
 // using namespace Mantid::Geometry;
 namespace Mantid {
@@ -18,7 +19,10 @@ std::string makeAxisTitle(Dimension_const_sptr dim) {
   title += " (";
   title += dim->getUnits();
   title += ")";
-  return title;
+  // update inverse angstrom symbol so it is rendered in mathtex.
+  // Consider removing after ConvertToMD provides unit labels with latex symbols.
+  boost::regex re("A\\^-1");
+  return boost::regex_replace(title, re, "$\\\\AA^{-1}$");
 }
 
 void setAxisLabel(std::string metadataLabel, std::string labelString,
