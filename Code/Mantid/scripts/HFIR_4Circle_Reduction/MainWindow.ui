@@ -43,7 +43,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>0</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -992,6 +992,13 @@
              <layout class="QVBoxLayout" name="verticalLayout">
               <item>
                <layout class="QGridLayout" name="gridLayout_10">
+                <item row="0" column="5">
+                 <widget class="QPushButton" name="pushButton_useDefaultDir">
+                  <property name="text">
+                   <string>Use Default</string>
+                  </property>
+                 </widget>
+                </item>
                 <item row="0" column="0">
                  <widget class="QLabel" name="label_instrument">
                   <property name="text">
@@ -1002,7 +1009,7 @@
                 <item row="2" column="2">
                  <widget class="QLineEdit" name="lineEdit_workDir"/>
                 </item>
-                <item row="2" column="6">
+                <item row="2" column="5">
                  <widget class="QPushButton" name="pushButton_browseWorkDir">
                   <property name="text">
                    <string>Browse</string>
@@ -1023,7 +1030,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="6">
+                <item row="1" column="5">
                  <widget class="QPushButton" name="pushButton_browseLocalCache">
                   <property name="text">
                    <string>Browse</string>
@@ -1093,7 +1100,7 @@
      <x>0</x>
      <y>0</y>
      <width>1266</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
