@@ -2,7 +2,10 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,6 +52,9 @@ const std::string ProcessIndirectFitParameters::summary() const {
  */
 void ProcessIndirectFitParameters::init() {
 
+  std::vector<std::string> unitOptions = UnitFactory::Instance().getKeys();
+  unitOptions.push_back("");
+
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
                       "InputWorkspace", "", Direction::Input),
                   "The table workspace to convert to a MatrixWorkspace.");
@@ -61,6 +67,10 @@ void ProcessIndirectFitParameters::init() {
                   boost::make_shared<MandatoryValidator<std::string>>(),
                   "List of the parameter names to add to the workspace.",
                   Direction::Input);
+
+    declareProperty("XAxisUnit", "",
+                  boost::make_shared<StringListValidator>(unitOptions),
+                  "The unit to assign to the X Axis");
 
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
@@ -76,6 +86,7 @@ void ProcessIndirectFitParameters::exec() {
   std::string xColumn = getProperty("ColumnX");
   std::string parameterNamesProp = getProperty("ParameterNames");
   auto parameterNames = listToVector(parameterNamesProp);
+  std::string xUnit = getProperty("XAxisUnit");
   MatrixWorkspace_sptr outputWsName = getProperty("OutputWorkspace");
 
   // Search for any parameters in the table with the given parameter names,
@@ -162,6 +173,11 @@ void ProcessIndirectFitParameters::exec() {
   }
   outputWs->replaceAxis(1, axis);
 
+  // Set units for the xAxis
+  if(xUnit.compare("") != 0){
+	outputWs->getAxis(0)->setUnit(xUnit);
+  }
+  
   setProperty("OutputWorkspace", outputWs);
 }
 

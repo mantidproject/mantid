@@ -105,13 +105,6 @@ public:
                      std::invalid_argument);
   }
 
-  void test_empty_units_is_not_allowed() {
-    Mantid::Algorithms::ProcessIndirectFitParameters alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS(alg.setPropertyValue("XAxisUnit", ""),
-                     std::invalid_argument);
-  }
-
   void test_empty_output_is_not_allowed() {
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
