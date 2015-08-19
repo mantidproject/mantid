@@ -38,7 +38,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest LINK_PRIVATE 
+  target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             Algorithms
             API
             DataHandling

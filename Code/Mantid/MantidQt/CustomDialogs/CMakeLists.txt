@@ -9,6 +9,7 @@ set ( SRC_FILES src/CatalogPublishDialog.cpp
                 src/LoadRawDialog.cpp
                 src/LOQScriptInputDialog.cpp
                 src/MantidGLWidget.cpp
+                src/GetNegMuMuonicXRDDialog.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
                 src/SmoothNeighboursDialog.cpp
@@ -29,6 +30,7 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CatalogPublishDialog.h
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
+                inc/MantidQtCustomDialogs/GetNegMuMuonicXRDDialog.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
                 inc/MantidQtCustomDialogs/SmoothNeighboursDialog.h
@@ -76,7 +78,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( CustomDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
 endif () 
 
-target_link_libraries ( CustomDialogs LINK_PRIVATE 
+target_link_libraries ( CustomDialogs LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidWidgets
             ${CORE_MANTIDLIBS}

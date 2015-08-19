@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-many-locals
+# pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 import stresstesting
 from mantid.simpleapi import *
 

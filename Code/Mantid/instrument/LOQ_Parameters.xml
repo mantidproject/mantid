@@ -55,6 +55,11 @@
   <value val="3"/>
 </parameter>
 
+<parameter name="collimation-length-correction">
+  <!-- This is a correction length in meter for the L1 value to obtain the default collimation length-->
+  <value val="6.480"/>
+</parameter>
+
 </component-link>
 
 </parameter-file>

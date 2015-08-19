@@ -122,8 +122,10 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         detector_index_ranges = (multi_detector_start, nHist-1)
 
 
-    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, 
-    detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max,
+                                               detector_workspace_indexes=detector_index_ranges,
+                                               monitor_workspace_index=i0_monitor_index, correct_monitor=True,
+                                               bg_min=background_min, bg_max=background_max )
 
     inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF

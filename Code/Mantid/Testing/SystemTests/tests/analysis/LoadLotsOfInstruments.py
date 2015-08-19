@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-few-public-methods
 from mantid.simpleapi import *
 from mantid.api import FrameworkManager
 import os
@@ -57,6 +57,7 @@ class LoadLotsOfInstruments(stresstesting.MantidStressTest):
                 if not self.__loadAndTest__(filename):
                     print "FAILED TO LOAD '%s'" % filename
                     failed.append(filename)
+            #pylint: disable=broad-except
             except Exception, e:
                 print "FAILED TO LOAD '%s' WITH ERROR:" % filename
                 print e

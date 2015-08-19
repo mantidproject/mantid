@@ -152,8 +152,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_proxyInfo(),
-      m_isProxySet(false) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = 0;
@@ -198,7 +197,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
-  m_ConfigPaths.insert(std::make_pair("instrumentDefinition.vtpDirectory", true));
+  m_ConfigPaths.insert(
+      std::make_pair("instrumentDefinition.vtpDirectory", true));
   m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
@@ -311,8 +311,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     } else {
       m_PropertyString = temp;
     }
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
               << e.what() << std::endl;
@@ -393,8 +392,7 @@ void ConfigServiceImpl::configureLogging() {
           m_logFilePath = "";
         } else
           fclose(fp);
-      }
-      catch (std::exception &) {
+      } catch (std::exception &) {
         std::cerr
             << "Error writing to log file path given in properties file: \""
             << m_logFilePath << "\". Will use a default path instead."
@@ -443,8 +441,7 @@ void ConfigServiceImpl::configureLogging() {
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
-  }
-  catch (std::exception &e) {
+  } catch (std::exception &e) {
     std::cerr << "Trouble configuring the logging framework " << e.what()
               << std::endl;
   }
@@ -520,8 +517,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
   bool is_relative(false);
   try {
     is_relative = Poco::Path(dir).isRelative();
-  }
-  catch (Poco::PathSyntaxException &) {
+  } catch (Poco::PathSyntaxException &) {
     g_log.warning() << "Malformed path detected in the \"" << key
                     << "\" variable, skipping \"" << dir << "\"\n";
     return "";
@@ -547,8 +543,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string &dir,
                     << "\" in the \"" << key << "\" variable does not exist.\n";
       converted = "";
     }
-  }
-  catch (Poco::FileException &) {
+  } catch (Poco::FileException &) {
     g_log.debug() << "Required properties path \"" << converted
                   << "\" in the \"" << key << "\" variable does not exist.\n";
     converted = "";
@@ -713,8 +708,7 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off" << std::endl;
 
     filestr.close();
-  }
-  catch (std::runtime_error &ex) {
+  } catch (std::runtime_error &ex) {
     g_log.warning() << "Unable to write out user.properties file to "
                     << getUserPropertiesDir() << m_user_properties_file_name
                     << " error: " << ex.what() << std::endl;
@@ -767,8 +761,7 @@ void ConfigServiceImpl::reset() {
   try {
     Poco::File userFile(getUserFilename());
     userFile.remove();
-  }
-  catch (Poco::Exception &) {
+  } catch (Poco::Exception &) {
   }
   createUserPropertiesFile();
 
@@ -949,8 +942,7 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
   std::string retVal;
   try {
     retVal = m_pConf->getString(keyName);
-  }
-  catch (Poco::NotFoundException &) {
+  } catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << keyName << " in the properties file"
                   << std::endl;
     retVal = "";
@@ -979,11 +971,12 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
  *
  * @return Vector containing all config options
  */
-void ConfigServiceImpl::getKeysRecursive(const std::string &root,
-    std::vector<std::string> &allKeys) const {
+void
+ConfigServiceImpl::getKeysRecursive(const std::string &root,
+                                    std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);
 
-  if(rootKeys.empty())
+  if (rootKeys.empty())
     allKeys.push_back(root);
 
   for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
@@ -998,14 +991,14 @@ void ConfigServiceImpl::getKeysRecursive(const std::string &root,
   }
 }
 
-  /**
- * Recursively gets a list of all config options.
- *
- * This function is needed as Boost Python does not like calling function with
- * default arguments.
- *
- * @return Vector containing all config options
- */
+/**
+* Recursively gets a list of all config options.
+*
+* This function is needed as Boost Python does not like calling function with
+* default arguments.
+*
+* @return Vector containing all config options
+*/
 std::vector<std::string> ConfigServiceImpl::keys() const {
   std::vector<std::string> allKeys;
   getKeysRecursive("", allKeys);
@@ -1055,8 +1048,7 @@ bool ConfigServiceImpl::isExecutable(const std::string &target) const {
         return false;
     } else
       return false;
-  }
-  catch (Poco::Exception &) {
+  } catch (Poco::Exception &) {
     return false;
   }
 }
@@ -1079,8 +1071,7 @@ void ConfigServiceImpl::launchProcess(
   try {
     std::string expTarget = Poco::Path::expand(programFilePath);
     Poco::Process::launch(expTarget, programArguments);
-  }
-  catch (Poco::SystemException &e) {
+  } catch (Poco::SystemException &e) {
     throw std::runtime_error(e.what());
   }
 }
@@ -1600,8 +1591,7 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   try {
     dirPath = Poco::Path(path);
     dirPath.makeDirectory();
-  }
-  catch (Poco::PathSyntaxException &) {
+  } catch (Poco::PathSyntaxException &) {
     return;
   }
   if (!isInDataSearchList(dirPath.toString())) {
@@ -1647,9 +1637,8 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const {
 const std::string ConfigServiceImpl::getVTPFileDirectory() {
   // Determine the search directory for XML instrument definition files (IDFs)
   std::string directoryName = getString("instrumentDefinition.vtpDirectory");
-  
-  if (directoryName.empty())
-  {
+
+  if (directoryName.empty()) {
     Poco::Path path(getAppDataDir());
     path.makeDirectory();
     path.pushDirectory("instrument");
@@ -1703,12 +1692,10 @@ bool ConfigServiceImpl::addDirectoryifExists(
       g_log.information("Unable to locate directory at: " + directoryName);
       return false;
     }
-  }
-  catch (Poco::PathNotFoundException &) {
+  } catch (Poco::PathNotFoundException &) {
     g_log.information("Unable to locate directory at: " + directoryName);
     return false;
-  }
-  catch (Poco::FileNotFoundException &) {
+  } catch (Poco::FileNotFoundException &) {
     g_log.information("Unable to locate directory at: " + directoryName);
     return false;
   }
@@ -1790,8 +1777,7 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
       g_log.debug() << "Looking for " << instrumentName << " at "
                     << defaultFacility << "." << std::endl;
       return getFacility(defaultFacility).instrument(instrumentName);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility
       // Move along, there's nothing to see here...
     }
@@ -1804,14 +1790,17 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
       g_log.debug() << "Looking for " << instrumentName << " at "
                     << (**it).name() << "." << std::endl;
       return (**it).instrument(instrumentName);
-    }
-    catch (Exception::NotFoundError &) {
+    } catch (Exception::NotFoundError &) {
       // Well the instName doesn't exist for this facility...
       // Move along, there's nothing to see here...
     }
   }
+
+  const std::string errMsg =
+      "Failed to find an instrument with this name in any facility: '" +
+      instrumentName + "' -";
   g_log.debug("Instrument " + instrumentName + " not found");
-  throw Exception::NotFoundError("Instrument", instrumentName);
+  throw Exception::NotFoundError(errMsg, instrumentName);
 }
 
 /** Gets a vector of the facility Information objects
@@ -1901,13 +1890,14 @@ ConfigServiceImpl::addObserver(const Poco::AbstractObserver &observer) const {
 /**  Remove an observer
  @param observer :: Reference to the observer to remove
  */
-void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver &observer)
-    const {
+void ConfigServiceImpl::removeObserver(
+    const Poco::AbstractObserver &observer) const {
   m_notificationCenter.removeObserver(observer);
 }
 
 /*
-Checks to see whether the pvplugins.directory variable is set. If it is set, assume
+Checks to see whether the pvplugins.directory variable is set. If it is set,
+assume
 we have built Mantid with ParaView
 @return True if paraview is available or not disabled.
 */
@@ -1953,55 +1943,49 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
 /** Sets the log level priority for the File log channel
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
-void ConfigServiceImpl::setFileLogLevel(int logLevel)
-{
-  setFilterChannelLogLevel("fileFilterChannel",logLevel);
+void ConfigServiceImpl::setFileLogLevel(int logLevel) {
+  setFilterChannelLogLevel("fileFilterChannel", logLevel);
 }
 /** Sets the log level priority for the Console log channel
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
 */
-void ConfigServiceImpl::setConsoleLogLevel(int logLevel)
-{
-  setFilterChannelLogLevel("consoleFilterChannel",logLevel);
+void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
+  setFilterChannelLogLevel("consoleFilterChannel", logLevel);
 }
-
 
 /** Sets the Log level for a filter channel
 * @param filterChannelName the channel name of the filter channel to change
 * @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
-* @throws std::invalid_argument if the channel name is incorrect or it is not a filterChannel
+* @throws std::invalid_argument if the channel name is incorrect or it is not a
+* filterChannel
 */
-void ConfigServiceImpl::setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel)
-{
-  Poco::Channel* channel = NULL;
-  try
-  {
-    channel = Poco::LoggingRegistry::defaultRegistry().channelForName(filterChannelName);
-  }
-  catch(Poco::NotFoundException&)
-  {
-    throw std::invalid_argument(filterChannelName + " not found in the Logging Registry");
+void ConfigServiceImpl::setFilterChannelLogLevel(
+    const std::string &filterChannelName, int logLevel) {
+  Poco::Channel *channel = NULL;
+  try {
+    channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
+        filterChannelName);
+  } catch (Poco::NotFoundException &) {
+    throw std::invalid_argument(filterChannelName +
+                                " not found in the Logging Registry");
   }
 
-  auto *filterChannel = dynamic_cast<Poco::FilterChannel*>(channel);
-  if (filterChannel)
-  {
-    filterChannel->setPriority(logLevel);      
-    //set root level if required
+  auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
+  if (filterChannel) {
+    filterChannel->setPriority(logLevel);
+    // set root level if required
     int rootLevel = Poco::Logger::root().getLevel();
-    if (rootLevel < logLevel)
-    {
-        Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    if (rootLevel < logLevel) {
+      Mantid::Kernel::Logger::setLevelForAll(logLevel);
     }
-    g_log.log(filterChannelName + " log channel set to " + Logger::PriorityNames[logLevel] + " priority",static_cast<Logger::Priority>(logLevel));
-  }
-  else
-  {
-    throw std::invalid_argument(filterChannelName + " was not a filter channel");
+    g_log.log(filterChannelName + " log channel set to " +
+                  Logger::PriorityNames[logLevel] + " priority",
+              static_cast<Logger::Priority>(logLevel));
+  } else {
+    throw std::invalid_argument(filterChannelName +
+                                " was not a filter channel");
   }
 }
-
-
 
 /// \cond TEMPLATE
 template DLLExport int ConfigServiceImpl::getValue(const std::string &,

@@ -70,6 +70,32 @@ class PDRManager(object):
 
         return
 
+    def getAverageMonitorCounts(self):
+        """ Return the average monitor counts
+        """
+        # Check
+        if self._rawSpiceTableWS is None:
+            raise NotImplementedError('Raw SPICE TableWorkspace is None for scan %d, exp %d' % (
+                self.exp, self.scan
+            ))
+
+        # Get the column index for monitor counts
+        colnames = self._rawSpiceTableWS.getColumnNames()
+        try:
+            imonitor = colnames.index("monitor")
+        except ValueError:
+            raise RuntimeError("monitor is not a column name in SPICE table workspace.")
+
+        # Sum and average
+        numpts = self._rawSpiceTableWS.rowCount()
+        totalcounts = 0
+        for irow in xrange(numpts):
+            moncounts = self._rawSpiceTableWS.cell(irow, imonitor)
+            totalcounts += moncounts
+
+        return float(totalcounts)/float(numpts)
+
+
     def getProcessedVanadiumWS(self):
         """
         """
@@ -110,7 +136,7 @@ class PDRManager(object):
         return self._applySmoothVan
 
     def setup(self, datamdws, monitormdws, reducedws=None, unit=None, binsize=None):
-        """ Set up
+        """ Set up MDEventWorkspaces and reduction parameters
         """
         self.datamdws = datamdws
         self.monitormdws = monitormdws
@@ -125,15 +151,15 @@ class PDRManager(object):
 
         return
 
-    def setRawWorkspaces(self, spicetablews, logmatrixws):
+    def set_raw_workspaces(self, spice_table_ws, log_matrix_ws):
         """ Set 2 raw SPICE workspaces
         """
         # Validate
-        if  spicetablews.id() != 'TableWorkspace' or logmatrixws.id() != 'Workspace2D':
+        if  spice_table_ws.id() != 'TableWorkspace' or log_matrix_ws.id() != 'Workspace2D':
             raise NotImplementedError("Input workspaces for setRawWorkspaces() are not of correct types.")
 
-        self._rawSpiceTableWS =  spicetablews
-        self._rawLogInfoWS = logmatrixws
+        self._rawSpiceTableWS = spice_table_ws
+        self._rawLogInfoWS = log_matrix_ws
 
         return
 
@@ -223,9 +249,14 @@ class HFIRPDRedControl(object):
 
         return
 
-
-    def getIndividualDetCounts(self, exp, scan, detid, xlabel):
+    def getIndividualDetCounts(self, exp, scan, detid, xlabel, normalized=True):
         """ Get individual detector counts
+        :param exp:
+        :param scan:
+        :param detid:
+        :param xlabel:
+        :param normalized:
+        :return:
         """
         # Check and get data
         exp = int(exp)
@@ -252,20 +283,22 @@ class HFIRPDRedControl(object):
                     api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Detector',
-                                                    DetectorID = detid)
+                                                    DetectorID = detid,
+                                                    NormalizeByMonitorCounts=normalized)
         else:
+            print "Plot detector %d's counts vs. sample log %s."%(detid, xlabel)
             tempoutws = \
                     api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Detector',
                                                     DetectorID = detid,
-                                                    XLabel=xlabel)
+                                                    XLabel=xlabel,
+                                                    NormalizeByMonitorCounts=normalized)
 
         vecx = tempoutws.readX(0)[:]
         vecy = tempoutws.readY(0)[:]
 
-        return (vecx, vecy)
-
+        return vecx, vecy
 
     def getRawDetectorCounts(self, exp, scan, ptnolist=None):
         """ Return raw detector counts as a list of 3-tuples
@@ -355,6 +388,7 @@ class HFIRPDRedControl(object):
         # ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         # get data
+        print "[DB] Plot sample log: XLabel = %s" % (xlabel)
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Sample Log',
@@ -541,11 +575,14 @@ class HFIRPDRedControl(object):
 
         tablews = AnalysisDataService.retrieve(tablewsname)
         infows  = AnalysisDataService.retrieve(infowsname)
+        if tablews is None or infows is None:
+            raise NotImplementedError('Unable to retrieve either spice table workspace %s or log workspace %s' % (
+                tablewsname, infowsname))
 
         # Create a reduction manager and add workspaces to it
         wsmanager = PDRManager(expno, scanno)
-        wsmanager.setRawWorkspaces(tablews, infows)
-        self._myWorkspaceDict[ (int(expno), int(scanno) )] = wsmanager
+        wsmanager.set_raw_workspaces(tablews, infows)
+        self._myWorkspaceDict[(int(expno), int(scanno))] = wsmanager
 
         return
 
@@ -646,7 +683,7 @@ class HFIRPDRedControl(object):
 
 
     def parseSpiceData(self, expno, scanno, detefftablews=None):
-        """ Load SPICE data to MDWorkspaces
+        """ Load SPICE data to MDWorkspaces from raw table workspace
         """
         # Get reduction manager
         try:
@@ -681,24 +718,99 @@ class HFIRPDRedControl(object):
 
         return True
 
+    def reset_to_normalized(self, exp, scan_list, min_x, max_x, bin_size):
+        """ Reset the scaled up data to normalized data
+        :param exp:
+        :param scan_list:
+        :param min_x:
+        :param max_x:
+        :param bin_size:
+        :return:
+        """
+        try:
+            exp = int(exp)
+        except ValueError as e:
+            return False, str(e)
 
-    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=None,scalefactor=None):
-        """ Reduce SPICE powder diffraction data.
+        for scan in scan_list:
+            try:
+                scan = int(scan)
+                wsmanager = self._myWorkspaceDict[(exp, scan)]
+            except ValueError:
+                # type error, return with false
+                return False, 'Scan number %s is not integer.'%(str(scan))
+            except KeyError:
+                # data has not been reduced yet. Reduce dat
+                self.reduceSpicePDData(exp, scan, unit='2theta',
+                                       xmin=min_x, xmax=max_x, binsize=bin_size)
+                wsmanager = self._myWorkspaceDict[(exp, scan)]
+            # END_TRY_EXCEPT
+
+            # Reduce data if it is not reduced
+            if wsmanager.reducedws is None:
+                self.reduceSpicePDData(exp, scan, unit='2theta', xmin=min_x, xmax=max_x, binsize=bin_size)
+
+            monitorcounts = wsmanager.getAverageMonitorCounts()
+            print '[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts)
+            # FUTURE: implement method ws_manager.reset_to_normalized() instead
+            wsmanager.reducedws = wsmanager.reducedws / monitorcounts
+        # END_FOR(scan)
+
+        return True, ''
+
+    def scale_to_raw_monitor_counts(self, exp, scan_list, min_x, max_x, bin_size):
+        """ Scale up the reduced powder spectrum to its average monitor counts
+        :param exp:
+        :param scan_list:
+        :param min_x:
+        :param max_x:
+        :param bin_size:
+        :return:
+        """
+        try:
+            exp = int(exp)
+        except ValueError as e:
+            return False, str(e)
+
+        for scan in scan_list:
+            try:
+                scan = int(scan)
+                wsmanager = self._myWorkspaceDict[(exp, scan)]
+            except ValueError:
+                # type error, return with false
+                return False, 'Scan number %s is not integer.'%(str(scan))
+            except KeyError:
+                # data has not been reduced yet. Reduce dat
+                self.reduceSpicePDData(exp, scan, unit='2theta',
+                                       xmin=min_x, xmax=max_x, binsize=bin_size)
+                wsmanager = self._myWorkspaceDict[(exp, scan)]
+            # END_TRY_EXCEPT
+
+            # Reduce data if it is not reduced
+            if wsmanager.reducedws is None:
+                self.reduceSpicePDData(exp, scan, unit='2theta', xmin=min_x, xmax=max_x, binsize=bin_size)
+
+            monitorcounts = wsmanager.getAverageMonitorCounts()
+            print '[DB] Exp %d Scan %d: average monitor counts = %.5f' % (exp, scan, monitorcounts)
+            wsmanager.reducedws = wsmanager.reducedws * monitorcounts
+        # END_FOR(scan)
+
+        return True, ''
+
+    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None,
+                          excludeddetlist=None,scalefactor=None):
+        """ Reduce SPICE powder diffraction data from MDEventWorkspaces
         Return - Boolean as reduction is successful or not
         """
-        # Default
-        if excludeddetlist is None:
-            excludeddetlist = None
-
         # Get reduction manager
         try:
-            wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
+            ws_manager = self._myWorkspaceDict[(int(exp), int(scan))]
         except KeyError:
             raise NotImplementedError("SPICE data for Exp %d Scan %d has not been loaded." % (
                 int(exp), int(scan)))
 
-        datamdws = wsmanager.datamdws
-        monitormdws = wsmanager.monitormdws
+        datamdws = ws_manager.datamdws
+        monitormdws = ws_manager.monitormdws
 
         # binning from MD to single spectrum ws
         # set up binning parameters
@@ -712,10 +824,17 @@ class HFIRPDRedControl(object):
             scalefactor = 1.
         else:
             scalefactor = float(scalefactor)
+            print "[DB] Scale factor is %f." % (scalefactor)
+
+        # Excluded detectors
+        if excludeddetlist is None:
+            excludeddetlist = []
+        else:
+            print "[DB] Excluded detectors: %s"%(excludeddetlist), "Convert to numpy array", \
+                numpy.array(excludeddetlist)
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
-        print "[DB]", numpy.array(excludeddetlist)
         api.ConvertCWPDMDToSpectra(InputWorkspace=datamdws,
                 InputMonitorWorkspace=monitormdws,
                 OutputWorkspace=outwsname,
@@ -733,11 +852,14 @@ class HFIRPDRedControl(object):
             raise NotImplementedError("Failed to bin the MDEventWorkspaces to MatrixWorkspace.")
 
         # Manager:
-        wsmanager = PDRManager(exp, scan)
-        wsmanager.setup(datamdws, monitormdws, outws, unit, binsize)
-        wsmanager.setWavelength(wavelength)
+        if self._myWorkspaceDict.has_key((exp, scan)) is False:
+            raise NotImplementedError('Exp %d Scan %d has not been initialized.  ' % (exp, scan))
+        # wsmanager = PDRManager(exp, scan)
+        ws_manager = self._myWorkspaceDict[(exp, scan)]
+        ws_manager.setup(datamdws, monitormdws, outws, unit, binsize)
+        ws_manager.setWavelength(wavelength)
 
-        self._myWorkspaceDict[(exp, scan)] = wsmanager
+        # self._myWorkspaceDict[(exp, scan)] = wsmanager
 
         return True
 

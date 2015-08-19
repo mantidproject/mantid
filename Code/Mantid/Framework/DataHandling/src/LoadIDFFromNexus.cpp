@@ -54,6 +54,12 @@ void LoadIDFFromNexus::init() {
                   "and 'mantid_workspace_1' for a processed nexus file. "
                   "Only a one level path is curently supported",
                   Direction::Input);
+  declareProperty("ParameterCorrectionFilePath", std::string(""),
+                  "Full path name of Parameter Correction file. "
+                  "This should only be used in a situation,"
+                  "where the default full file path is inconvenient.",
+                  Direction::Input);
+
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -80,8 +86,11 @@ void LoadIDFFromNexus::exec() {
   localWorkspace->loadInstrumentInfoNexus(filename, &nxfile );
 
   // Look for parameter correction file
-  std::string parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
-  g_log.notice() << "Parameter correction file: " << parameterCorrectionFile << "\n";
+  std::string parameterCorrectionFile = getPropertyValue("ParameterCorrectionFilePath");
+  if( parameterCorrectionFile == "") {
+     parameterCorrectionFile = getParameterCorrectionFile( localWorkspace->getInstrument()->getName() );
+  }
+  g_log.debug() << "Parameter correction file: " << parameterCorrectionFile << "\n";
 
   // Read parameter correction file, if found
   std::string correctionParameterFile = "";
@@ -90,11 +99,38 @@ void LoadIDFFromNexus::exec() {
     // Read parameter correction file 
     // to find out which parameter file to use 
     // and whether it is appended to default parameters.
-    readParameterCorrectionFile( parameterCorrectionFile, "2015-07-23 12:00:00", correctionParameterFile, append );
+    g_log.notice() << "Using parameter correction file: " << parameterCorrectionFile << ".\n";
+    readParameterCorrectionFile( parameterCorrectionFile, localWorkspace->getAvailableWorkspaceStartDate(), correctionParameterFile, append );
   }
-  g_log.notice() << "Result of readParameterCorrectionFile: " << correctionParameterFile << " " << append << "\n";
 
-  LoadParameters(  &nxfile, localWorkspace );
+
+  // Load default parameters if either there is no correction parameter file or it is to be appended.
+  if( correctionParameterFile == "" || append ) {
+    LoadParameters(  &nxfile, localWorkspace );
+  } else {  // Else clear the parameters
+    g_log.notice() << "Parameters to be replaced are cleared.\n";
+    localWorkspace->getInstrument()->getParameterMap()->clear();
+  }
+
+  // Load parameters from correction parameter file, if it exists
+  if( correctionParameterFile != "") {
+      Poco::Path corrFilePath(parameterCorrectionFile);
+      g_log.debug() << "Correction file path: " << corrFilePath.toString() << "\n";
+      Poco::Path corrDirPath = corrFilePath.parent();
+      g_log.debug() << "Correction directory path: " << corrDirPath.toString() << "\n";
+      Poco::Path corrParamFile( corrDirPath, correctionParameterFile );
+      if(append) {
+         g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to append parameters.\n";
+      } else {
+         g_log.notice() << "Using correction parameter file: " << corrParamFile.toString() << " to replace parameters.\n";
+      }
+      bool ok = loadParameterFile( corrParamFile.toString(), localWorkspace );
+      if(!ok) {
+        g_log.error() << "Unable to load parameter file " << corrParamFile.toString() << " specified in " << corrFilePath.toString() << ".\n";
+      }
+  } else {
+     g_log.notice() << "No correction parameter file applies to the date for correection file.\n";
+  }
 
   return;
 }
@@ -137,11 +173,17 @@ void LoadIDFFromNexus::exec() {
   *  @throw FileError Thrown if unable to parse XML file
   */
 void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correction_file, const std::string& date, 
-                                                   std::string& parameter_file, bool& append ) { 
+                                                   std::string& parameter_file, bool& append ) {
 
    // Set output arguments to default
   parameter_file = "";
   append = false;
+
+  // Check the date.
+  if( date == ""){
+    g_log.notice() << "No date is supplied for parameter correction file " << correction_file << ". Correction file is ignored.\n";
+    return;
+  }
 
    // Get contents of correction file                                                    
   const std::string xmlText = Kernel::Strings::loadFile(correction_file);
@@ -166,6 +208,7 @@ void LoadIDFFromNexus::readParameterCorrectionFile( const std::string& correctio
   }
 
   // Convert date to Mantid object
+  g_log.notice() << "Date for correction file " << date << "\n";
   DateAndTime externalDate( date );
 
   // Examine the XML structure obtained by parsing
@@ -219,30 +262,40 @@ void LoadIDFFromNexus::LoadParameters( ::NeXus::File *nxfile, const MatrixWorksp
       const std::string paramFile =
           directoryName + instrumentName + "_Parameters.xml";
 
-      try {
-        // load and also populate instrument parameters from this 'fallback'
-        // parameter file
-        Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
-        loadParamAlg->setProperty("Filename", paramFile);
-        loadParamAlg->setProperty("Workspace", localWorkspace);
-        loadParamAlg->execute();
-        g_log.notice() << "Instrument parameter file: " << paramFile
-                       << " has been loaded" << std::endl;
-        break; // stop at the first one
-      } catch (std::runtime_error &) {
-        g_log.debug() << "Instrument parameter file: " << paramFile
-                      << " not found or un-parsable. ";
-      }
+      // Attempt to load specified file, if successful, use file and stop search.
+      if(loadParameterFile( paramFile, localWorkspace )) break; 
+
     }
   } else { // We do have parameters from the Nexus file
     g_log.notice()
-        << "Found Instrument parameter map entry in Nexus file, which is loaded"
+        << "Found Instrument parameter map entry in Nexus file, which is loaded.\n"
         << std::endl;
     // process parameterString into parameters in workspace
     localWorkspace->readParameterMap(parameterString);
   }
 
 }
+
+// Private function to load parameter file specified by a full path name into given workspace, returning success.
+bool LoadIDFFromNexus::loadParameterFile (const std::string& fullPathName, const MatrixWorkspace_sptr localWorkspace ) {
+ 
+      try {
+        // load and also populate instrument parameters from this 'fallback'
+        // parameter file
+        Algorithm_sptr loadParamAlg = createChildAlgorithm("LoadParameterFile");
+        loadParamAlg->setProperty("Filename", fullPathName);
+        loadParamAlg->setProperty("Workspace", localWorkspace);
+        loadParamAlg->execute();
+        g_log.notice() << "Instrument parameter file: " << fullPathName
+                       << " has been loaded.\n" << std::endl;
+        return true; // Success 
+      } catch (std::runtime_error &) {
+        g_log.debug() << "Instrument parameter file: " << fullPathName
+                      << " not found or un-parsable.\n";
+        return false; // Failure
+      }
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid
