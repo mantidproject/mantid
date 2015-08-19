@@ -418,11 +418,20 @@ void ConvolutionFitSequential::exec() {
 
   auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
   logAdder->setProperty("Workspace", resultWs);
+  std::string logNamesList, logValuesList = "";
   size_t total = sampleLog.size();
   for (auto it = sampleLog.begin(); it != sampleLog.end(); ++it) {
-    logAdder->setProperty(it->first, it->second);
-    logAdder->executeAsChildAlg();
+    logNamesList += it->first;
+    logValuesList += it->second;
+    if (it != --sampleLog.end()) {
+      logNamesList += ",";
+      logValuesList += ",";
+    }
   }
+
+  logAdder->setProperty("LogNames", logNamesList);
+  logAdder->setProperty("LogValues", logValuesList);
+  logAdder->executeAsChildAlg();
 
   logCopier->setProperty("InputWorkspace", resultWs);
   logCopier->setProperty("OutputWorkspace", (outputWs->getName() +
