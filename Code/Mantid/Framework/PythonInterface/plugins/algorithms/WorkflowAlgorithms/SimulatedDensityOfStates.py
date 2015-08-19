@@ -1,9 +1,11 @@
-#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines,too-many-arguments
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+from operator import itemgetter
 import numpy as np
+import copy
 import re
 import os.path
 import math
@@ -326,40 +328,56 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    def _choose_close_bonded_atom(self, atom, bonds, is_not=None):
+    def _get_all_bonded_atoms(self, atom, bonds, ions, unit_cell, cells=None):
         """
-        Choose an atom that is bonded to the atom specified that is closest to
-        it within the length specified.
+        Gets the atoms bonded to a given atom and their bond length in a given
+        cell.
 
-        @param atom Atom chosen atom must be bonded to
+        @param atom Details of atom
         @param bonds List of all bonds
-        @param is_non List of atoms that cannot be considered
-        @return A tuple containing the bond description and they key used to
-                access the bonded atom
+        @param ions List of all ions
+        @param unit_cell Unit cell vectors
+        @param cells Cells to look in as list of offsets to fractional
+                     coordinates
+        @return List of bonded atoms
         """
-        if is_not is None:
-            is_not = []
-        is_not.append(atom)
-        is_not = [(i['species'], i['number']) for i in is_not if i is not None]
-        a = (atom['species'], atom['number'])
+        if cells is None:
+            # The "central" cell only
+            cells = [[0, 0, 0]]
 
-        best = (None, None)
+        bonded_to = self._get_bonded_atoms((atom['species'], atom['number']), bonds)
 
-        for bond in [b for b in bonds if b['atom_a'] == a]:
-            if bond['atom_b'] in is_not:
-                continue
+        bonded = []
+        for cell in cells:
+            # Prepare the ions in the cell
+            cell_ions = copy.deepcopy(ions)
+            for ion in cell_ions:
+                ion['fract_coord'] += np.array(cell)
+            self._convert_to_cartesian_coordinates(unit_cell, cell_ions)
 
-            if best[0] is None or bond['length'] < best[0]['length']:
-                best = (bond, 'atom_b')
+            # Add the ions
+            for ion in bonded_to:
+                ion_details = self._find_ion(cell_ions, *ion)
+                ion_details['length'] = np.linalg.norm(atom['cartesian_coord'] - ion_details['cartesian_coord'])
+                bonded.append(ion_details)
 
-        for bond in [b for b in bonds if b['atom_b'] == a]:
-            if bond['atom_a'] in is_not:
-                continue
+        return bonded
 
-            if best[0] is None or bond['length'] < best[0]['length']:
-                best = (bond, 'atom_a')
+#----------------------------------------------------------------------------------------
 
-        return best
+    def _get_bonded_atoms(self, atom, bonds):
+        """
+        Gets a list of all atoms, tuple(species, number), which are bonded to a
+        given atom.
+
+        @param atom Atom to be bonded with, tuple(species, number)
+        @param bonds List of all bonds
+        @return List of bonded atoms
+        """
+        bonded_to = []
+        bonded_to.extend([b['atom_a'] for b in bonds if b['atom_b'] == atom])
+        bonded_to.extend([b['atom_b'] for b in bonds if b['atom_a'] == atom])
+        return bonded_to
 
 #----------------------------------------------------------------------------------------
 
@@ -448,15 +466,17 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
                 ion_wavevector = lambda ion: eigenvectors[mode * self._num_ions + ion['index']]
 
+                cells = [[0, 0, 0], [-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1], [0, 0, 1]]
+                bonded = self._get_all_bonded_atoms(ion_b, bonds, ions, unit_cell, cells)
+                bonded = sorted(bonded, key=itemgetter('length'))
+
                 # Get ions A and B and wavevectors for all ions
-                ab_bond = self._choose_close_bonded_atom(ion_b, bonds)
-                ion_a = self._find_ion(ions, *ab_bond[0][ab_bond[1]])
+                ion_a = bonded[0]
                 ion_a_vector = ion_wavevector(ion_a)
 
                 ion_b_vector = ion_wavevector(ion_b)
 
-                bc_bond = self._choose_close_bonded_atom(ion_b, bonds, is_not=[ion_a])
-                ion_c = self._find_ion(ions, *bc_bond[0][bc_bond[1]])
+                ion_c = bonded[1]
                 ion_c_vector = ion_wavevector(ion_c)
 
                 ab_bond_q = Quat(V3D(*ion_a['cartesian_coord']), V3D(*ion_b['cartesian_coord']))
@@ -478,16 +498,23 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 ac_vect.rotate(ac_motion_ion_a)
                 ac_vect.rotate(ac_motion_ion_c)
 
-                ab = ab_motion_ion_a - ab_motion_ion_b
-                bc = bc_motion_ion_b - bc_motion_ion_c
-                ac = ac_motion_ion_a - ac_motion_ion_c
+                ab = ab_motion_ion_a + ab_motion_ion_b
+                bc = bc_motion_ion_b + bc_motion_ion_c
+                ac = ac_motion_ion_a + ac_motion_ion_c
 
                 x = np.array([ab.X(), bc.X(), ac.X()])
                 y = np.array([ab.Y(), bc.Y(), ac.Y()])
                 z = np.array([ab.Z(), bc.Z(), ac.Z()])
+
+                a = np.array([x, y, z])
                 b = np.array([1.0, 1.0, 1.0])
 
-                fitted = np.abs(np.linalg.solve(np.array([x, y, z]), b))
+                try:
+                    fitted = np.abs(np.linalg.solve(a, b))
+                except np.linalg.LinAlgError as lae:
+                    logger.warning(str(lae))
+                    continue
+
                 fitted /= np.linalg.norm(fitted)
 
                 row_details = {
@@ -502,7 +529,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
                 dimension = ['AB Stretch', 'BC Stretch', 'Bend']
                 for idx, dim in enumerate(dimension):
-                    if fitted[idx] > 0.85:
+                    if fitted[idx] > 0.7:
                         row_details['BondMode'] = dim
                         output_ws.addRow(row_details)
 
