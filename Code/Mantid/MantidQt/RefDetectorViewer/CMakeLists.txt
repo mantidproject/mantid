@@ -63,7 +63,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE 
+target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtSpectrumViewer
             ${CORE_MANTIDLIBS}
             ${Boost_LIBRARIES}
@@ -77,7 +77,7 @@ target_link_libraries ( MantidQtRefDetectorViewer LINK_PRIVATE
 ###########################################################################
 
 add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL src/RefDetectorViewDemo.cpp )
-target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE 
+target_link_libraries ( RefDetectorViewDemo LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtRefDetectorViewer
             MantidQtSpectrumViewer
             ${Boost_LIBRARIES}

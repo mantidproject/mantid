@@ -18,6 +18,7 @@ namespace API {
 /// version.
 struct Algorithm_descriptor {
   std::string name;     ///< name
+  std::string alias;    ///< alias
   std::string category; ///< category
   int version;          ///< version
 };

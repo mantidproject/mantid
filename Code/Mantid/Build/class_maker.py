@@ -179,7 +179,8 @@ namespace %s {
 %s::~%s() {}
 %s
 } // namespace %s
-} // namespace Mantid""" % (
+} // namespace Mantid
+""" % (
         subproject, args.subfolder, classname, subproject, algorithm_top,
         classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)

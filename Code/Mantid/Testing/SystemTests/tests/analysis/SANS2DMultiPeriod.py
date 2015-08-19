@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,too-few-public-methods
 import stresstesting
 
 from mantid.simpleapi import *
@@ -8,6 +8,8 @@ from SANSBatchMode import *
 
 # test batch mode with sans2d and selecting a period in batch mode
 class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
+
+    reduced=''
 
     def runTest(self):
 

@@ -32,7 +32,7 @@ Usage
 	log = ws.getRun().getLogData("my_log")
 	print "my_log has %i entries" % log.size()
 	for i in range(log.size()):
-		print "\t%s\t%f" %(log.times[i], log.value[i])
+		print "\t%s\t%s" %(log.times[i], log.value[i])
 	
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:00:00", Value="New Initial", DeleteExisting=True)
 	AddNote(ws, Name="my_log", Time="2014-01-01T00:30:00", Value="New Final")
@@ -40,7 +40,7 @@ Usage
 	log = ws.getRun().getLogData("my_log")
 	print "my_log now has %i entries" %log.size()
 	for i in range(log.size()):
-		print "\t%s\t%i" % (log.times[i], log.value[i])
+		print "\t%s\t%s" % (log.times[i], log.value[i])
 		
 Output:
 
@@ -48,12 +48,12 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 	
 	my_log has 3 entries
-            2010-01-01T00:00:00     Initial
-            2010-01-01T00:30:00     Second
-            2010-01-01T00:50:00     Final
+            2014-01-01T00:00:00     Initial
+            2014-01-01T00:30:30     Second
+            2014-01-01T00:50:00     Final
     my_log now has 2 entries
-            2010-01-01T00:00:00     New Initial
-            2010-01-01T00:50:00     New Final  
+            2014-01-01T00:00:00     New Initial
+            2014-01-01T00:30:00     New Final  
 
 .. categories::
 

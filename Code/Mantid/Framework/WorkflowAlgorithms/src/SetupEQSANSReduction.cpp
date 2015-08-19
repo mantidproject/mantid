@@ -48,7 +48,7 @@ void SetupEQSANSReduction::init() {
 
   declareProperty("SkipTOFCorrection", false,
                   "If true, the EQSANS TOF correction will be skipped");
-  declareProperty("PreserveEvents", true,
+  declareProperty("PreserveEvents", false,
                   "If true, the output workspace will be an event workspace");
 
   declareProperty(

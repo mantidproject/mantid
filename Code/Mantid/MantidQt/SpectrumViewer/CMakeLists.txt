@@ -82,7 +82,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtSpectrumViewer PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 # ... and links to other required libs
-target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE 
+target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidWidgets
             ${CORE_MANTIDLIBS}

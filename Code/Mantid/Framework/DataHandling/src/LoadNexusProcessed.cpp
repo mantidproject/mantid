@@ -243,9 +243,8 @@ void LoadNexusProcessed::init() {
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-                  "The particular entry number to read. Default load all "
-                  "workspaces and creates a workspacegroup (default: read all "
-                  "entries).");
+                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into one worskspace");
   declareProperty("LoadHistory", true,
                   "If true, the workspace history will be loaded");
   declareProperty(
@@ -1024,10 +1023,19 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   // Get information from all but data group
   std::string parameterStr;
   // Hop to the right point /mantid_workspace_1
-  m_cppFile->openPath(entry.path()); // This is
+  try {
+    m_cppFile->openPath(entry.path()); // This is
+  } catch (std::runtime_error &re) {
+    throw std::runtime_error("Error while opening a path in a Peaks entry in a "
+                             "Nexus processed file. "
+                             "This path is wrong: " +
+                             entry.path() +
+                             ". Lower level error description: " + re.what());
+  }
   try {
     // This loads logs, sample, and instrument.
-    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile, parameterStr);
+    peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_cppFile,
+                                    parameterStr);
   } catch (std::exception &e) {
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
@@ -1036,7 +1044,15 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   // Coordinates - Older versions did not have the separate field but used a log
   // value
   uint32_t loadCoord(0);
-  m_cppFile->openGroup("peaks_workspace", "NXentry");
+  const std::string peaksWSName = "peaks_workspace";
+  try {
+    m_cppFile->openGroup(peaksWSName, "NXentry");
+  } catch (std::runtime_error &re) {
+    throw std::runtime_error(
+        "Error while opening a peaks workspace in a Nexus processed file. "
+        "Cannot open gropu " +
+        peaksWSName + ". Lower level error description: " + re.what());
+  }
   try {
     m_cppFile->readData("coordinate_system", loadCoord);
     peakWS->setCoordinateSystem(

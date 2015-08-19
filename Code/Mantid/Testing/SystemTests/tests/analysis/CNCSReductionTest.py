@@ -8,6 +8,10 @@ import os
 import stresstesting
 
 class CNCSReductionTest(stresstesting.MantidStressTest):
+    parFile=''
+    groupingFile=''
+    nxspeFile=''
+    vanFile=''
 
     def requiredFiles(self):
         return ["CNCS_51936_event.nxs","CNCS_23936_event.nxs","CNCS_23937_event.nxs"]

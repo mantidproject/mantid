@@ -2,7 +2,7 @@
 import stresstesting
 
 from mantid.api import mtd
-from mantid.simpleapi import SetupILLD33Reduction, SANSReduction,Rebin,SANSAzimuthalAverage1D
+import mantid.simpleapi as ms
 
 import unittest
 
@@ -17,7 +17,7 @@ class ILLD33SANSTest(unittest.TestCase):
 
     def test_all(self):
 
-        SetupILLD33Reduction(
+        ms.SetupILLD33Reduction(
             # Beam center shouldn't work
             #BeamCenterMethod="None",
             MaskedDetectorList=[14709,14710,14711,14712,14713,14714,14715,14716,14717,14718,14719,
@@ -67,12 +67,12 @@ class ILLD33SANSTest(unittest.TestCase):
             ComputeResolution=True,
             ReductionProperties=self.prefix + "props")
 
-        output=SANSReduction(Filename='ILL/001425.nxs', ReductionProperties=self.prefix + "props",
-                             OutputWorkspace=self.prefix + "out")
-        Rebin(InputWorkspace=self.prefix + 'out',OutputWorkspace=self.prefix + 'out_rebin',
-              Params='4,0.1,15')
-        SANSAzimuthalAverage1D(InputWorkspace=self.prefix + 'out_rebin',Binning='0.001,0.0002,0.03',
-                               OutputWorkspace=self.prefix + 'final')
+        ms.SANSReduction(Filename='ILL/001425.nxs', ReductionProperties=self.prefix + "props",
+                         OutputWorkspace=self.prefix + "out")
+        ms.Rebin(InputWorkspace=self.prefix + 'out',OutputWorkspace=self.prefix + 'out_rebin',
+                 Params='4,0.1,15')
+        ms.SANSAzimuthalAverage1D(InputWorkspace=self.prefix + 'out_rebin',Binning='0.001,0.0002,0.03',
+                                  OutputWorkspace=self.prefix + 'final')
 
         # Check some data
         wsOut = mtd[self.prefix + 'out']
@@ -92,6 +92,7 @@ class ILLD33SANSTest(unittest.TestCase):
 #====================================================================================
 
 class ILLD33Test(stresstesting.MantidStressTest):
+    _success = False
 
     def requiredMemoryMB(self):
         """Set a limit of 2.5Gb to avoid 32-bit environment"""

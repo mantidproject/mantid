@@ -5,7 +5,7 @@ if ( CXXTEST_FOUND )
   include_directories ( ../ )
   
   cxxtest_add_test ( ScriptRepositoryTest ${TEST_FILES} ${GMOCK_TEST_FILES})   
-  target_link_libraries( ScriptRepositoryTest LINK_PRIVATE 
+  target_link_libraries( ScriptRepositoryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             API
             Kernel
             ScriptRepository

@@ -56,6 +56,8 @@ event splitters that are supported by this algorithm.
    :ref:`MatrixWorkspace <MatrixWorkspace>` is way faster than a
    `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ in Mantid.
 
+.. _functionalities-GenerateEventFilter-ref:
+
 Functionalities
 ###############
 
@@ -87,6 +89,8 @@ this algorithm:
    equal or within the tolerance of the log value as v\_0 + n x delta\_v
    +/- tolerance\_v.
 
+.. _filterbytime-GenerateEventFilter-ref:
+
 Generate event filters by time
 ##############################
 
@@ -113,6 +117,7 @@ Unit of time
 There are three types of units that are supported for time. 
 They are second, nanosecond and percentage of duration from *StartTime* to *StopTime*. 
 
+.. _filterbylogv-GenerateEventFilter-ref:
 
 Generate event filters by sample log value
 ##########################################

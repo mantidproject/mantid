@@ -88,7 +88,7 @@ FitwindowTableWorkspace contains the fit window for each individual peak in the 
 to find.
 It contains :math:`1+2\times N` columns, where N is the number of peaks positions specified in 'DReference'.
 
-- Column 0: spectrum number (workspace index) :math:`iws`.  If :math:`iws < 0`, then it is a 'universal' spectrum;
+- Column 0: spectrum number :math:`spNum`.  If :math:`spNum < 0`, then it is a 'universal' spectrum;
 - Column :math:`2i+1`: left boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
 - Column :math:`2i+2`: right boundary of peak :math:`i` defined in 'DReference' of spectrum :math:`iws`;
 
@@ -123,13 +123,13 @@ much fewer events received, i.e., poorer signal.
 :math:`\chi^2` of the offset fitting function
 #############################################
 
-The goodness of fit, :math:`\chi^2_{iws}`, of the offset fitting
+The goodness of fit, :math:`\chi^2_{spNum}`, of the offset fitting
 function
 
 .. math:: \sum_{p} |X_{0, p} - (1+offset)X_{0, p}|\cdot H^2_{p}
 
 is an important measure of fitting quality on each spectrum (indexed as
-iws).
+spNum).
 
 Deviation of highest peaks
 ##########################
@@ -161,7 +161,7 @@ has not been implemented yet.
 On the other hand, since GetDetOffsetsMultiPeaks always operates on an
 EventWorkspace with thousands or several ten thousands of spectra, it is
 very hard to tell the quality of fitting by looking at
-:math:`\chi^2_{iws}` of all spectra. Hence, Here are two other
+:math:`\chi^2_{spNum}` of all spectra. Hence, Here are two other
 parameters are defined for comparison of results.
 
     :math:`g_1 = \frac{\sum_{s}D_{s}^2}{N_{nm}}`

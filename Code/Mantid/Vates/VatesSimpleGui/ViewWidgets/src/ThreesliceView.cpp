@@ -4,6 +4,7 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Path.h>
 
+
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -42,7 +43,8 @@ namespace
 }
 
 
-ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
+ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
+  ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui()
 {
   this->m_ui.setupUi(this);
   this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,

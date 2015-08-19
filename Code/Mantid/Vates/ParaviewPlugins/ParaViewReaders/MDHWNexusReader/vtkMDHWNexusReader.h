@@ -2,19 +2,19 @@
 #define _vtkMDHWNexusReader_h
 
 
-#include "vtkUnstructuredGridAlgorithm.h"
+#include "vtkStructuredGridAlgorithm.h"
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidKernel/MultiThreaded.h"
 
 class vtkImplicitFunction;
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkMDHWNexusReader : public vtkUnstructuredGridAlgorithm
+class VTK_EXPORT vtkMDHWNexusReader : public vtkStructuredGridAlgorithm
 {
 public:
 
   static vtkMDHWNexusReader *New();
-  vtkTypeMacro(vtkMDHWNexusReader, vtkUnstructuredGridAlgorithm)
+  vtkTypeMacro(vtkMDHWNexusReader, vtkStructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName)
   vtkGetStringMacro(FileName)

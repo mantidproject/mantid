@@ -1367,6 +1367,12 @@ class InstrumentWindowTab: QFrame
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindowTab.h"
 %End
+public:
+	// This is a duplicate from the same enum in InstrumentWindow, just so you
+	// can do like InstrumentWindowRenderTab.FULL3D
+	enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
+                     SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
+                     RENDERMODE_SIZE };
 private:
   InstrumentWindowTab(const InstrumentWindowTab &);
 };
@@ -1390,6 +1396,7 @@ class InstrumentWindow: MdiSubWindow
 %End
 
 public:
+  // Note this enum is also defined in InstrumentWindowTab
   enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };

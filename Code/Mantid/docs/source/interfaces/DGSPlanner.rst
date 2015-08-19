@@ -26,6 +26,8 @@ of HYSPEC, a value for the **S2** angle is required. The monochromator to sample
 chosen to be msd=1798.5. 
 The **Incident Energy** is in mili-electron-Volts. The **Fast** option will use only 25% of the detectors
 to calculate the coverage.
+One can use a previously saved Mantid workspace containing a mask, the **Mask file** option,
+to eliminate from the coverage calculations detectors that are masked in the experiment.
 
 The **Goniometer** settings follow the Mantid convention (see :ref:`SetGoniometer <algm-SetGoniometer>`.
 The default values follow the goniometer description in `Horace <http://horace.isis.rl.ac.uk/Generating_SQW_files>`_.
