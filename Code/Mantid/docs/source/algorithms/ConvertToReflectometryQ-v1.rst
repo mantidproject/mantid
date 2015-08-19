@@ -23,6 +23,17 @@ workspace does not contain this value, or if you wish to override this
 value you can do so by providing your own *IncidentTheta* property and
 enabling *OverrideIncidentTheta*.
 
+The algorithm also has the option to create a table of 'DumpVertexes' that resemble
+the transformation before NormalisedPolygon has been used to rebin.
+The table of DumpedVertexes will have uniform bin widths. whereas the table created after
+rebinning with NormalisedPolygon may contain non-uniform bin widths; resulting a Ragged workspace.
+
+To create this table there are certain properties that must be present in the algorithm:
+
+- The transform method must be NormalisedPolygon
+- The option to Output as MD workspace must not be selected
+- The option to DumpVertexes must be selected
+
 Transformations
 ###############
 
@@ -121,6 +132,58 @@ Output:
     Qx Qz
     Ki Kf
     Pz_i + Pz_f Pz_i - Pz_f
+    
+Patch Plot with Dumped Vertexes
+###############################
+
+ConvertToReflectometryQ has the functionality to produce a table of vertexes before they are
+fitted to a normalised polygon. The plotting of these vertexes results in a patch plot that can be
+achieved by running the algorithm below.
+
+Usage
+-----
+**Example - Patch Plot using the Dumped vertexes from ConvertToReflectometryQ**
+
+.. code-block:: python
+
+    import numpy as np
+    import matplotlib
+    from matplotlib.patches import Polygon
+    from matplotlib.collections import PatchCollection
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LogNorm
+
+    def patch_plot(vertex_table):
+        fig, ax = plt.subplots()
+
+        patches = list()
+        colors = list()
+        polygon_vertexes = list()   
+
+        for vertex in vertex_table:
+            polygon_vertexes.append((vertex['Qx'], vertex['Qy'] ))
+            if len(polygon_vertexes) == 4:
+                poly = Polygon(polygon_vertexes, True,edgecolor='none',linewidth=0)
+                patches.append(poly)
+                colors.append(vertex['CellSignal'])
+                polygon_vertexes = list()
+         
+        p = PatchCollection(patches, cmap=matplotlib.cm.jet,norm=LogNorm(vmin=1e-3, vmax=1e5),linewidths=(0,))
+        p.set_array(np.array(colors))
+        ax.add_collection(p)
+        plt.colorbar(p)
+        axes = plt.gca()
+        axes.set_xlim([-0.0004,0.0004])
+        axes.set_ylim([0,0.2])
+
+        plt.show()
+    
+    threadsafe_call(patch_plot, mtd['vertex_dump'])
+
+Output:
+
+.. figure:: /images/ConvertToReflectometryQ_PatchPlot.png
+   :alt: patch plot of dumped vertexes
 
 .. categories::
 
