@@ -284,8 +284,8 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         if name.lower() == 'q' and unit.lower() == 'inv_nm':
             logger.information('Axis {0} will be converted to Q in Angstrom**-1'.format(name))
             unit = 'MomentumTransfer'
-            data /= sc.nano # nm to m
-            data *= sc.angstrom # m to Angstrom
+            data *= sc.nano # nm to m
+            data /= sc.angstrom # m to Angstrom
 
         # Frequency (THz) to Energy (meV)
         elif name.lower() == 'frequency' and unit.lower() == 'thz':
@@ -293,7 +293,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
             unit = 'Energy'
             data *= sc.tera # THz to Hz
             data *= sc.value('Planck constant in eV s') # Hz to eV
-            data *= sc.milli # eV to meV
+            data /= sc.milli # eV to meV
 
         # Time (ps) to TOF (s)
         elif name.lower() == 'time' and unit.lower() == 'ps':
