@@ -75,5 +75,10 @@ std::string HKL::name() const
     return HKLName;
 }
 
+HKL *HKL::clone() const
+{
+    return new HKL(m_unit->clone());
+}
+
 } // namespace Geometry
 } // namespace Mantid

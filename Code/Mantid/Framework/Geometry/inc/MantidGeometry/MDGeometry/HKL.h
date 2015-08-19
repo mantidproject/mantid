@@ -47,6 +47,7 @@ public:
   const Kernel::MDUnit& getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   std::string name() const;
+  HKL* clone() const;
 
 private:
 

@@ -37,5 +37,10 @@ std::string QSample::name() const
     return QSampleName;
 }
 
+QSample *QSample::clone() const
+{
+    return new QSample;
+}
+
 } // namespace Geometry
 } // namespace Mantid

@@ -30,5 +30,10 @@ bool GeneralFrame::canConvertTo(const Kernel::MDUnit &otherUnit) const {
 
 std::string GeneralFrame::name() const { return m_frameName; }
 
+GeneralFrame *GeneralFrame::clone() const
+{
+    return new GeneralFrame(m_frameName, std::unique_ptr<Kernel::MDUnit>(m_unit->clone()));
+}
+
 } // namespace Geometry
 } // namespace Mantid

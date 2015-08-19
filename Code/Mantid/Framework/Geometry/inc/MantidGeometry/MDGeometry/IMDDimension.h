@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
@@ -58,6 +59,9 @@ public:
 
   /// @return the name of the dimension as can be displayed along the axis
   virtual std::string getName() const = 0;
+
+  /// @return the MDFrame
+  virtual const Geometry::MDFrame& getMDFrame() const = 0;
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const = 0;

@@ -42,6 +42,7 @@ public:
   const Kernel::MDUnit &getMDUnit() const;
   bool canConvertTo(const Kernel::MDUnit &otherUnit) const;
   std::string name() const;
+  virtual GeneralFrame* clone() const;
 private:
   /// Label unit
   const std::unique_ptr<Mantid::Kernel::MDUnit> m_unit;

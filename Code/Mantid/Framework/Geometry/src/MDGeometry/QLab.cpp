@@ -42,5 +42,10 @@ std::string QLab::name() const
     return QLab::QLabName;
 }
 
+QLab *QLab::clone() const
+{
+    return new QLab;
+}
+
 } // namespace Geometry
 } // namespace Mantid

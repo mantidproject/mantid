@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -81,11 +82,13 @@ public:
 
   }
 
-  void test_construct_with_unit_type(){
-   Kernel::InverseAngstromsUnit unit;
-   MDHistoDimension dimension("QLabX", "QLabX", unit, 0, 10, 1);
-   const auto & units = dimension.getMDUnits();
-   TS_ASSERT_EQUALS(unit.getUnitLabel(), units.getUnitLabel());
+  void test_construct_with_frame_type(){
+   QLab frame;
+   MDHistoDimension dimension("QLabX", "QLabX", frame, 0, 10, 1);
+   const auto & mdFrame = dimension.getMDFrame();
+
+   TS_ASSERT_EQUALS(frame.name(), mdFrame.name());
+   TS_ASSERT_EQUALS(frame.getUnitLabel(), mdFrame.getUnitLabel());
   }
 
 

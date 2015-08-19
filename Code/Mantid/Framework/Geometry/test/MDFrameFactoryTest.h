@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidKernel/MDUnit.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -21,7 +22,7 @@ public:
   static MDFrameFactoryTest *createSuite() { return new MDFrameFactoryTest(); }
   static void destroySuite(MDFrameFactoryTest *suite) { delete suite; }
 
-  void test_GeneralFrameFactory() {
+  void test_GeneralFrameFactory_all_general() {
     GeneralFrameFactory factory;
     const MDFrameArgument argument("any_frame", "any_unit");
     TS_ASSERT(factory.canInterpret(argument));
@@ -29,6 +30,23 @@ public:
     std::unique_ptr<MDFrame> product = factory.create(argument);
     TSM_ASSERT("Should be creating a GeneralFrame",
                dynamic_cast<GeneralFrame *>(product.get()));
+
+    const auto& heldMDUnit = product->getMDUnit();
+    TSM_ASSERT("Expect that we have a label unit", dynamic_cast<const Mantid::Kernel::LabelUnit*>(&heldMDUnit));
+  }
+
+  void test_GeneralFrameFactory_known_units() {
+
+    GeneralFrameFactory factory;
+
+    const MDFrameArgument argument("any_frame", Units::Symbol::InverseAngstrom);
+
+    std::unique_ptr<MDFrame> product = factory.create(argument);
+    TSM_ASSERT("Should be creating a GeneralFrame",
+               dynamic_cast<GeneralFrame *>(product.get()));
+
+    const auto& heldMDUnit = product->getMDUnit();
+    TSM_ASSERT("Expect that we have a label unit", dynamic_cast<const Mantid::Kernel::InverseAngstromsUnit*>(&heldMDUnit));
   }
 
   void test_QLabFrameFactory() {
@@ -65,7 +83,6 @@ public:
   }
 
   void test_HKLFrameFactory_interpretation() {
-    using namespace Mantid::Kernel;
     HKLFrameFactory factory;
 
     TSM_ASSERT(
@@ -87,7 +104,6 @@ public:
   }
 
   void test_HKLFrameFactory_create_inverse_angstroms() {
-    using namespace Mantid::Kernel;
     HKLFrameFactory factory;
 
     std::unique_ptr<MDFrame> product = factory.create(
@@ -102,7 +118,6 @@ public:
   }
 
   void test_HKLFrameFactory_create_rlu() {
-    using namespace Mantid::Kernel;
     HKLFrameFactory factory;
 
     std::unique_ptr<MDFrame> product = factory.create(

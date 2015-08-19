@@ -42,6 +42,7 @@ public:
   const Mantid::Kernel::MDUnit& getMDUnit() const;
   bool canConvertTo(const Mantid::Kernel::MDUnit& otherUnit) const;
   virtual std::string name() const;
+  QLab *clone() const;
 
   // Type name
   static const std::string QLabName;
@@ -50,7 +51,6 @@ private:
 
   /// Fixed to be inverse angstroms
   const std::unique_ptr<const Mantid::Kernel::MDUnit> m_unit;
-
 
 };
 
