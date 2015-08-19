@@ -371,11 +371,21 @@ void ConvolutionFitSequential::exec() {
     }
   }
 
+  // Construct comma separated list for ProcessIndirectFirParameters
+  std::string paramNamesList = "";
+  const size_t maxNames = paramNames.size();
+  for (size_t i = 0; i < maxNames; i++) {
+    paramNamesList += paramNames.at(i);
+    if (i != (maxNames - 1)) {
+      paramNamesList += ",";
+    }
+  }
+
   // Run ProcessIndirectFitParameters
   auto pifp = createChildAlgorithm("ProcessIndirectFitParameters", -1, -1, true);
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("ParameterNames", paramNames);
+  pifp->setProperty("ParameterNames", paramNamesList);
   pifp->setProperty("OutputWorkspace", resultWsName);
   pifp->executeAsChildAlg();
 
