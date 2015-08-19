@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/MaskedProperty.cpp
 	src/Material.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
+	src/Math/Distributions/ChebyshevPolynomial.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
@@ -182,6 +183,7 @@ set ( INC_FILES
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
+	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
@@ -267,6 +269,7 @@ set ( TEST_FILES
 	CPUTimerTest.h
 	CacheTest.h
 	CatalogInfoTest.h
+	ChebyshevPolynomialTest.h
 	ChecksumHelperTest.h
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
