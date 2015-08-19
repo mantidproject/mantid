@@ -11,38 +11,48 @@ namespace MDAlgorithms {
  *@param  description : MDWorkspaceDescription memento.
 */
 template <size_t nd>
-void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription& description) {
+void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
 
-  boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>> ws =
-      boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
+  boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>
+      ws = boost::shared_ptr<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>>(
           new DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd>());
 
   auto numBins = description.getNBins();
-  size_t nBins(10); // HACK. this means we have 10 bins artificially. This can't be right.
+  size_t nBins(10); // HACK. this means we have 10 bins artificially. This can't
+                    // be right.
   // Give all the dimensions
   for (size_t d = 0; d < nd; d++) {
     if (!numBins.empty())
       nBins = numBins[d];
 
-    Geometry::MDHistoDimension *dim = new Geometry::MDHistoDimension(
-        description.getDimNames()[d], description.getDimIDs()[d], description.getDimUnits()[d],
-        description.getDimMin()[d], description.getDimMax()[d], nBins);
+    Geometry::MDHistoDimension *dim = NULL;
+    if (d < 3 && description.isQ3DMode()) {
+      // We should have frame and scale information that we can use correctly
+      // for our Q dimensions.
+      auto mdFrame = description.getFrame();
+
+      dim = new Geometry::MDHistoDimension(
+          description.getDimNames()[d], description.getDimIDs()[d],
+          *mdFrame, description.getDimMin()[d],
+          description.getDimMax()[d], nBins);
+
+    } else {
+      dim = new Geometry::MDHistoDimension(
+          description.getDimNames()[d], description.getDimIDs()[d],
+          description.getDimUnits()[d], description.getDimMin()[d],
+          description.getDimMax()[d], nBins);
+    }
+
     ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
   }
   ws->initialize();
 
-  // Build up the box controller
-  // bc = ws->getBoxController();
-  // Build up the box controller, using the properties in
-  // BoxControllerSettingsAlgorithm
-  //     this->setBoxController(bc);
-  // We always want the box to be split (it will reject bad ones)
-  // ws->splitBox();
   m_Workspace = ws;
 }
 /// terminator for attempting initiate 0 dimensions workspace, will throw.
 template <>
-void MDEventWSWrapper::createEmptyEventWS<0>(const MDWSDescription&) {
+void MDEventWSWrapper::createEmptyEventWS<0>(const MDWSDescription &) {
   throw(std::invalid_argument("MDEventWSWrapper:createEmptyEventWS can not be "
                               "initiated with 0 dimensions"));
 }
@@ -71,7 +81,8 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
                                    size_t dataSize) const {
 
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
           m_Workspace.get());
   if (pWs) {
     for (size_t i = 0; i < dataSize; i++) {
@@ -80,8 +91,8 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
           *(detId + i), (Coord + i * nd)));
     }
   } else {
-    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *const pLWs =
-        dynamic_cast<
+    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *const
+        pLWs = dynamic_cast<
             DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *>(
             m_Workspace.get());
 
@@ -107,31 +118,14 @@ void MDEventWSWrapper::addMDDataND<0>(float *, uint16_t *, uint32_t *,
 }
 
 /***/
-// void MDEventWSWrapper::splitBoxList(Kernel::ThreadScheduler * ts)
 template <size_t nd> void MDEventWSWrapper::splitBoxList() {
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
           m_Workspace.get());
   if (!pWs)
     throw(std::bad_cast());
 
-  // std::vector<API::splitBoxList> &BoxList =
-  // pWs->getBoxController()->getBoxesToSplit();
-  // API::splitBoxList RootBox;
-  //  for(size_t i=0;i<BoxList.size();i++)
-  //  {
-  // bool
-  // rootFolderReplaced=DataObjects::MDBox<DataObjects::MDEvent<nd>,nd>::splitAllIfNeeded(BoxList[i],NULL);
-  // if(rootFolderReplaced)
-  // {
-  //   RootBox = BoxList[i];
-  // }
-
-  //  }
-  //   if(RootBox.boxPointer)pWs->setBox(reinterpret_cast<DataObjects::MDBoxBase<DataObjects::MDEvent<nd>,nd>
-  //   *>(RootBox.boxPointer));
-
-  //    BoxList.clear();
   m_needSplitting = false;
 }
 
@@ -144,7 +138,8 @@ template <> void MDEventWSWrapper::splitBoxList<0>() {
 template <size_t nd> void MDEventWSWrapper::calcCentroidND(void) {
 
   DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      dynamic_cast<
+          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
           this->m_Workspace.get());
   if (!pWs)
     throw(std::bad_cast());
