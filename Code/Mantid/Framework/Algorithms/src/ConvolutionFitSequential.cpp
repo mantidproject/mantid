@@ -257,8 +257,6 @@ void ConvolutionFitSequential::exec() {
 
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
-  auto resultWs = WorkspaceFactory::Instance().create(
-      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
 
 
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
@@ -373,7 +371,15 @@ void ConvolutionFitSequential::exec() {
     }
   }
 
-  // Run convertParametersToWorkspace
+  // Run ProcessIndirectFitParameters
+  auto pifp = createChildAlgorithm("ProcessIndirectFitParameters", -1, -1, true);
+  pifp->setProperty("InputWorkspace", outputWs);
+  pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("ParameterNames", paramNames);
+  pifp->setProperty("OutputWorkspace", resultWsName);
+  pifp->executeAsChildAlg();
+
+  MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
 
   // Set x units to be momentum transfer
   axis = resultWs->getAxis(0);
