@@ -1,4 +1,3 @@
-# pylint: disable=too-many-locals
 import sys
 import os
 import mantid.simpleapi as api
@@ -74,7 +73,7 @@ class DNSMergeRuns(PythonAlgorithm):
         # workspaces must exist
         mlzutils.ws_exist(self.workspace_names, self.log())
 
-        # all workspaces must be either normalized or not normalized
+        # all workspaces must be either normalized or not normalized, but not mixed
         self._are_normalized()
 
         # if data are not normalized, normalization workspaces must exist
@@ -159,90 +158,20 @@ class DNSMergeRuns(PythonAlgorithm):
 
         return True
 
-    def _merge_workspaces(self):
-        """
-        merges given workspaces into one,
-        corresponding normalization workspaces are also merged
-        """
-        arr = []
-        arr_norm = []
-        beamDirection = V3D(0, 0, 1)
-        # merge workspaces, existance has been checked by _can_merge function
-        for ws_name in self.workspace_names:
-            wks = api.AnalysisDataService.retrieve(ws_name)
-            wsnorm = api.AnalysisDataService.retrieve(ws_name + '_NORM')
-            samplePos = wks.getInstrument().getSample().getPos()
-            n_hists = wks.getNumberHistograms()
-            two_theta = np.array([wks.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
-            # round to approximate hardware accuracy 0.05 degree ~ 1 mrad
-            two_theta = np.round(two_theta, 4)
-            dataY = np.rot90(wks.extractY())[0]
-            dataYnorm = np.rot90(wsnorm.extractY())[0]
-            dataE = np.rot90(wks.extractE())[0]
-            dataEnorm = np.rot90(wsnorm.extractE())[0]
-            for i in range(n_hists):
-                arr.append([two_theta[i], dataY[i], dataE[i]])
-                arr_norm.append([two_theta[i], dataYnorm[i], dataEnorm[i]])
-        data = np.array(arr)
-        norm = np.array(arr_norm)
-        # sum up intensities for dublicated angles
-        data_sorted = data[np.argsort(data[:, 0])]
-        norm_sorted = norm[np.argsort(norm[:, 0])]
-        # unique values
-        unX = np.unique(data_sorted[:, 0])
-        if len(data_sorted[:, 0]) - len(unX) > 0:
-            arr = []
-            arr_norm = []
-            self.log().information("There are dublicated 2Theta angles in the dataset. Sum up the intensities.")
-            # we must sum up the values
-            for i in range(len(unX)):
-                idx = np.where(np.fabs(data_sorted[:, 0] - unX[i]) < 1e-4)
-                new_y = sum(data_sorted[idx][:, 1])
-                new_y_norm = sum(norm_sorted[idx][:, 1])
-                err = data_sorted[idx][:, 2]
-                err_norm = norm_sorted[idx][:, 2]
-                new_e = np.sqrt(np.dot(err, err))
-                new_e_norm = np.sqrt(np.dot(err_norm, err_norm))
-                arr.append([unX[i], new_y, new_e])
-                arr_norm.append([unX[i], new_y_norm, new_e_norm])
-            data = np.array(arr)
-            norm = np.array(arr_norm)
-
-        # define x axis
-        if self.xaxis == "2theta":
-            data[:, 0] = np.round(np.degrees(data[:, 0]), 2)
-            unitx = "Degrees"
-        elif self.xaxis == "|Q|":
-            data[:, 0] = np.fabs(4.0*np.pi*np.sin(0.5*data[:, 0])/self.wavelength)
-            unitx = "MomentumTransfer"
-        elif self.xaxis == "d-Spacing":
-            data[:, 0] = np.fabs(0.5*self.wavelength/np.sin(0.5*data[:, 0]))
-            unitx = "dSpacing"
-        else:
-            message = "The value for X axis " + self.xaxis + " is invalid! Cannot merge."
-            self.log().error(message)
-            raise RuntimeError(message)
-
-        data_sorted = data[np.argsort(data[:, 0])]
-        api.CreateWorkspace(dataX=data_sorted[:, 0], dataY=data_sorted[:, 1], dataE=data_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=self.outws_name)
-        norm[:, 0] = data[:, 0]
-        norm_sorted = norm[np.argsort(norm[:, 0])]
-        api.CreateWorkspace(dataX=norm_sorted[:, 0], dataY=norm_sorted[:, 1], dataE=norm_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=self.outws_name + '_NORM')
-        return
-
-    def _merge_normalized(self):
+    def _merge_workspaces(self, norm=False):
         """
         merges given workspaces into one
-        it partially duplicates _merge_workspaces, but to my opinion
-        putting 'if self.is_normalized' will slow down the _merge_workspaces function
+            @param norm If True, normalization workspaces will be merged
         """
         arr = []
         beamDirection = V3D(0, 0, 1)
+        if norm:
+            suffix = '_NORM'
+        else:
+            suffix = ''
         # merge workspaces, existance has been checked by _can_merge function
         for ws_name in self.workspace_names:
-            wks = api.AnalysisDataService.retrieve(ws_name)
+            wks = api.AnalysisDataService.retrieve(ws_name + suffix)
             samplePos = wks.getInstrument().getSample().getPos()
             n_hists = wks.getNumberHistograms()
             two_theta = np.array([wks.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
@@ -286,7 +215,13 @@ class DNSMergeRuns(PythonAlgorithm):
 
         data_sorted = data[np.argsort(data[:, 0])]
         api.CreateWorkspace(dataX=data_sorted[:, 0], dataY=data_sorted[:, 1], dataE=data_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=self.outws_name)
+                            UnitX=unitx, OutputWorkspace=self.outws_name + suffix)
+        outws = api.AnalysisDataService.retrieve(self.outws_name + suffix)
+        # assume that all input workspaces have the same YUnits and YUnitLabel
+        wks = api.AnalysisDataService.retrieve(self.workspace_names[0] + suffix)
+        outws.setYUnit(wks.YUnit())
+        outws.setYUnitLabel(wks.YUnitLabel())
+
         return
 
     def PyExec(self):
@@ -300,19 +235,18 @@ class DNSMergeRuns(PythonAlgorithm):
         # check whether given workspaces can be merged
         self._can_merge()
 
-        if self.is_normalized:
-            if normalize:
-                message = "Invalid setting for Normalize property. The given workspaces are already normalized."
-                self.log().error(message)
-                raise RuntimeError(message)
-            self._merge_normalized()
-        else:
-            self._merge_workspaces()
+        if self.is_normalized and normalize:
+            message = "Invalid setting for Normalize property. The given workspaces are already normalized."
+            self.log().error(message)
+            raise RuntimeError(message)
+
+        self._merge_workspaces()
+        if not self.is_normalized:
+            self._merge_workspaces(norm=True)
+
         outws = api.AnalysisDataService.retrieve(self.outws_name)
         api.CopyLogs(self.workspace_names[0], outws)
         api.RemoveLogs(outws, self.sample_logs)
-        yunit = 'Counts'
-        ylabel = 'Intensity'
 
         if normalize:
             normws = api.AnalysisDataService.retrieve(self.outws_name + '_NORM')
@@ -330,9 +264,8 @@ class DNSMergeRuns(PythonAlgorithm):
             ylabel = "Normalized Intensity"
             api.Divide(LHSWorkspace=outws, RHSWorkspace=normws, OutputWorkspace=self.outws_name)
             api.DeleteWorkspace(normws)
-
-        outws.setYUnit(yunit)
-        outws.setYUnitLabel(ylabel)
+            outws.setYUnit(yunit)
+            outws.setYUnitLabel(ylabel)
 
         self.setProperty("OutputWorkspace", outws)
         return

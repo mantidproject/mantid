@@ -181,6 +181,7 @@ class LoadDNSLegacy(PythonAlgorithm):
                             DataE=dataE, NSpec=ndet, UnitX="Wavelength")
         monws = api.AnalysisDataService.retrieve(monws_name)
         api.LoadInstrument(monws, InstrumentName='DNS')
+        api.RotateInstrumentComponent(monws, "bank0", X=0, Y=1, Z=0, Angle=metadata.deterota)
         api.CopyLogs(InputWorkspace=outws_name, OutputWorkspace=monws_name, MergeStrategy='MergeReplaceExisting')
         api.AddSampleLog(monws, 'normalization',
                          LogText=norm, LogType='String')
