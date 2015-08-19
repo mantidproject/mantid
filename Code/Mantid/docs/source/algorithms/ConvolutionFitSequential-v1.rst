@@ -10,15 +10,13 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+An algorithm designed mainly as a sequential call to PlotPeakByLogValue 
+but used within the ConvFit tab within the Indirect Analysis interface 
+to fit Convolution Functions.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - ConvolutionFitSequential**
 
