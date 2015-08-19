@@ -83,7 +83,8 @@ void CreateSampleWorkspace::init() {
   m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
       "Exp Decay", "name=ExpDecay, Height=100, Lifetime=1000;"));
   m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
-      "Powder Diffraction", "name= LinearBackground,A0=0.0850208,A1=-4.89583e-06;"
+      "Powder Diffraction",
+      "name= LinearBackground,A0=0.0850208,A1=-4.89583e-06;"
       "name=Gaussian,Height=0.584528,PeakCentre=$PC1$,Sigma=14.3772;"
       "name=Gaussian,Height=1.33361,PeakCentre=$PC2$,Sigma=15.2516;"
       "name=Gaussian,Height=1.74691,PeakCentre=$PC3$,Sigma=15.8395;"
@@ -93,6 +94,18 @@ void CreateSampleWorkspace::init() {
       "name=Gaussian,Height=2.8998,PeakCentre=$PC7$,Sigma=21.1127;"
       "name=Gaussian,Height=2.05237,PeakCentre=$PC8$,Sigma=21.9932;"
       "name=Gaussian,Height=8.40976,PeakCentre=$PC9$,Sigma=25.2751;"));
+  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+      "Quasielastic", "name=Lorentzian,FWHM=0.3,PeakCentre=$PC5$,Amplitude=0.8;"
+                      "name=Lorentzian,FWHM=0.1,PeakCentre=$PC5$,Amplitude=1;"
+                      "name=LinearBackground,A0=0.1"));
+  m_preDefinedFunctionmap.insert(std::pair<std::string, std::string>(
+      "Quasielastic Tunnelling",
+      "name=LinearBackground,A0=0.1;"
+      "name=Lorentzian,FWHM=0.1,PeakCentre=$PC5$,Amplitude=1;"
+      "name=Lorentzian,FWHM=0.05,PeakCentre=$PC7$,Amplitude=0.04;"
+      "name=Lorentzian,FWHM=0.05,PeakCentre=$PC3$,Amplitude=0.04;"
+      "name=Lorentzian,FWHM=0.05,PeakCentre=$PC8$,Amplitude=0.02;"
+      "name=Lorentzian,FWHM=0.05,PeakCentre=$PC2$,Amplitude=0.02"));
   m_preDefinedFunctionmap.insert(
       std::pair<std::string, std::string>("User Defined", ""));
   std::vector<std::string> functionOptions;
@@ -112,7 +125,8 @@ void CreateSampleWorkspace::init() {
                   "The Number of banks in the instrument (default:2)");
   declareProperty("BankPixelWidth", 10,
                   boost::make_shared<BoundedValidator<int>>(0, 10000),
-                  "The number of pixels in horizontally and vertically in a bank (default:10)");
+                  "The number of pixels in horizontally and vertically in a "
+                  "bank (default:10)");
   declareProperty("NumEvents", 1000,
                   boost::make_shared<BoundedValidator<int>>(0, 100000),
                   "The number of events per detector, this is only used for "
@@ -192,8 +206,8 @@ void CreateSampleWorkspace::exec() {
 
   // Create an instrument with one or more rectangular banks.
   Instrument_sptr inst = createTestInstrumentRectangular(
-      numBanks, bankPixelWidth, pixelSpacing, 
-      bankDistanceFromSample,sourceSampleDistance);
+      numBanks, bankPixelWidth, pixelSpacing, bankDistanceFromSample,
+      sourceSampleDistance);
 
   int num_bins = static_cast<int>((xMax - xMin) / binWidth);
   MatrixWorkspace_sptr ws;
@@ -421,8 +435,7 @@ void CreateSampleWorkspace::replaceAll(std::string &str,
  */
 Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
     int num_banks, int pixels, double pixelSpacing,
-    const double bankDistanceFromSample,
-    const double sourceSampleDistance) {
+    const double bankDistanceFromSample, const double sourceSampleDistance) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
