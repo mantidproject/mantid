@@ -97,11 +97,18 @@ public:
                      std::invalid_argument);
   }
 
-  void test_that_empty_param_names_is_not_allowed() {
+  void test_empty_param_names_is_not_allowed() {
     Mantid::Algorithms::ProcessIndirectFitParameters alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
     TS_ASSERT_THROWS(alg.setPropertyValue("ParameterNames", ""),
+                     std::invalid_argument);
+  }
+
+  void test_empty_units_is_not_allowed() {
+    Mantid::Algorithms::ProcessIndirectFitParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT_THROWS(alg.setPropertyValue("XAxisUnit", ""),
                      std::invalid_argument);
   }
 
@@ -125,6 +132,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("ColumnX", xColumn);
     alg.setPropertyValue("ParameterNames", parameterValues);
+    alg.setPropertyValue("XAxisUnit", "SpectraNumber");
     alg.setProperty("OutputWorkspace", outputName);
 
     ITableWorkspace_sptr tableProp = alg.getProperty("InputWorkspace");
@@ -133,6 +141,8 @@ public:
     TS_ASSERT_EQUALS(std::string(alg.getProperty("ColumnX")), xColumn);
     TS_ASSERT_EQUALS(std::string(alg.getProperty("ParameterNames")),
                      parameterValues);
+    TS_ASSERT_EQUALS(std::string(alg.getProperty("XAxisUnit")),
+                     "SpectraNumber");
     TS_ASSERT_EQUALS(std::string(alg.getProperty("OutputWorkspace")),
                      outputName);
   }
@@ -148,6 +158,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("ColumnX", xColumn);
     alg.setPropertyValue("ParameterNames", parameterValues);
+	alg.setPropertyValue("XAxisUnit", "SpectraNumber");
     alg.setProperty("OutputWorkspace", outputName);
 
     alg.execute();
@@ -189,6 +200,7 @@ public:
     alg.setProperty("InputWorkspace", tableWs);
     alg.setPropertyValue("ColumnX", xColumn);
     alg.setPropertyValue("ParameterNames", parameterValues);
+	alg.setPropertyValue("XAxisUnit", "SpectraNumber");
     alg.setProperty("OutputWorkspace", outputName);
 
     alg.execute();
