@@ -43,7 +43,7 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 /**
  * Constructor with filename and type
  * @param filename :: color map file to load
- * @param type :: The scale type, currently Linear or Log10 
+ * @param type :: The scale type
  */
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
   QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0),
@@ -265,6 +265,7 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   }
   else
   {
+    // Assume log10 type
     // Have to deal with the possibility that a user has entered 0 as a minimum
     double minValue = interval.minValue();
     if( minValue < LOG_ZERO_CUTOFF )
