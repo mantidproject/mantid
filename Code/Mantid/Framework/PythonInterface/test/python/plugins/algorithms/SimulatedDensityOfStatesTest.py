@@ -209,22 +209,6 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
                           PHONONFile=self._phonon_file,
                           SpectrumType='IonTable')
 
-    def test_bond_analysis_file_error(self):
-        """
-        Bond analysis requires both a CASTEP and PHONON file.
-        """
-        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
-                          PHONONFile=self._phonon_file,
-                          SpectrumType='BondAnalysis')
-        self.assertRaises(RuntimeError, SimulatedDensityOfStates,
-                          CASTEPFile=self._castep_file,
-                          SpectrumType='BondAnalysis')
-
-    def test_bond_analysis_happy_case(self):
-        ws = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
-                                      CASTEPFile=self._castep_file,
-                                      SpectrumType='BondAnalysis')
-
 
 if __name__=="__main__":
     unittest.main()

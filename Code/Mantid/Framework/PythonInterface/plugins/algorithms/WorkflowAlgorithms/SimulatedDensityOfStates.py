@@ -61,7 +61,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
         self.declareProperty(name='SpectrumType',defaultValue='DOS',\
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable', 'BondAnalysis']),
+            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
         self.declareProperty(name='Scale', defaultValue=1.0,
@@ -171,7 +171,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             ion_table.addColumn('str', 'Species')
             ion_table.addColumn('int', 'FileIndex')
-            ion_table.addColumn('int', 'BondNumber')
+            ion_table.addColumn('int', 'Number')
             ion_table.addColumn('float', 'FractionalX')
             ion_table.addColumn('float', 'FractionalY')
             ion_table.addColumn('float', 'FractionalZ')
@@ -200,9 +200,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             bond_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
             bond_table.addColumn('str', 'SpeciesA')
-            bond_table.addColumn('int', 'BondNumberA')
+            bond_table.addColumn('int', 'NumberA')
             bond_table.addColumn('str', 'SpeciesB')
-            bond_table.addColumn('int', 'BondNumberB')
+            bond_table.addColumn('int', 'NumberB')
             bond_table.addColumn('float', 'Length')
             bond_table.addColumn('float', 'Population')
 
@@ -292,35 +292,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             mtd[self._out_ws_name].setYUnit('A^4')
             mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
-        # We want to perform bond analysis
-        elif self._spec_type == 'BondAnalysis':
-            bonds = self._read_data_from_file(castep_filename).get('bonds', None)
-            if bonds is None or len(bonds) == 0:
-                raise RuntimeError('No bonds found in CASTEP file')
-
-            unit_cell = file_data.get('unit_cell')
-            self._convert_to_cartesian_coordinates(unit_cell, ions)
-
-            #TODO
-            output_ws = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
-
-            print "UNIT CELL"
-            print unit_cell
-
-            print "IONS"
-            for i in ions:
-                print i
-
-            # print "BONDS"
-            # for b in bonds:
-            #     print b
-
-            # print "VECTORS"
-            # print eigenvectors
-            # print eigenvectors.shape
-            # for v in eigenvectors:
-            #     print v
-
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
 #----------------------------------------------------------------------------------------
@@ -344,43 +315,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
-    def _choose_close_bonded_atom(self, atom, bonds, is_not=None):
-        """
-        Choose an atom that is bonded to the atom specified that is closest to
-        it within the length specified.
-
-        @param atom Atom chosen atom must be bonded to
-        @param bonds List of all bonds
-        @param is_non List of atoms that cannot be considered
-        @return A tuple containing the bond description and they key used to
-                access the bonded atom
-        """
-        if is_not is None:
-            is_not = []
-        is_not.append(atom)
-        is_not = [(i['species'], i['bond_number']) for i in is_not if i is not None]
-        a = (atom['species'], atom['bond_number'])
-
-        best = (None, None)
-
-        for bond in [b for b in bonds if b['atom_a'] == a]:
-            if bond['atom_b'] in is_not:
-                continue
-
-            if best[0] is None or bond['length'] < best[0]['length']:
-                best = (bond, 'atom_b')
-
-        for bond in [b for b in bonds if b['atom_b'] == a]:
-            if bond['atom_a'] in is_not:
-                continue
-
-            if best[0] is None or bond['length'] < best[0]['length']:
-                best = (bond, 'atom_a')
-
-        return best
-
-#----------------------------------------------------------------------------------------
-
     def _convert_to_cartesian_coordinates(self, unit_cell, ions):
         """
         Converts fractional coordinates to Cartesian coordinates given the unit
@@ -392,46 +326,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         for ion in ions:
             cell_pos = ion['fract_coord'] * unit_cell
             ion['cartesian_coord'] = np.apply_along_axis(np.sum, 0, cell_pos)
-
-#----------------------------------------------------------------------------------------
-
-    def _find_ion(self, ions, species, bond_number=None):
-        """
-        Finds a specific ion or set of ions in the list of ions.
-
-        @param ions List of ions
-        @param species Atomic species
-        @param bond_number (optional) Search for a specific ion in a bond
-        @return List of multiple ions or single ion, None if no ions found
-        """
-        if bond_number is None:
-            valid = lambda i: i['species'] == species
-        else:
-            valid = lambda i: i['species'] == species and i['bond_number'] == bond_number
-
-        results = [i for i in ions if valid(i)]
-
-        if len(results) == 0:
-            return None
-        elif len(results) == 1:
-            return results[0]
-        else:
-            return results
-
-#----------------------------------------------------------------------------------------
-
-    def _calculate_bond_vectors(self, bonds, ions):
-        """
-        Calculate the vectors for a list of bonds, using the Cartesian postions
-        of each atom in the bond.
-
-        @param bonds List of bonds
-        @param ions List of ions in bonds
-        """
-        for bond in bonds:
-            atom_a = self._find_ion(ions, *bond['atom_a'])
-            atom_b = self._find_ion(ions, *bond['atom_b'])
-            bond['vector'] = atom_a['cartesian_coord'] - atom_b['cartesian_coord']
 
 #----------------------------------------------------------------------------------------
 

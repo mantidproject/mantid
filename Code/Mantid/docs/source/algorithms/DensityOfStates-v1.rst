@@ -10,7 +10,7 @@ Description
 -----------
 
 Calculates phonon densities of states, Raman and IR spectrum from the
-output of CASTEP code obtained in the form of .phonon and .castep files.
+output of CASTEP code obtained in the form of *.phonon* and *.castep* files.
 
 The PeakWidth property may be passed a function containg the variable "energy"
 (e.g. *0.1*energy*) to set the FWHM of the peak as a function of the energy
@@ -19,7 +19,11 @@ data by allowing the peak width to change according to the resolution of the
 instrument.
 
 If the IonTable spectrum type is used then the output workspace will be
-a table workspace containing each ion that is present in a .phonon file.
+a table workspace containing each ion that is present in a *.phonon* file.
+
+If the BondTable spectrum type is used then the output workspace will be
+a table workspace containing details of the bonds defined in the *.castep*
+file.
 
 Usage
 -----
@@ -79,16 +83,13 @@ Output:
 .. testcode:: ExSimulatedDensityOfStatesIonTable
 
     ion_ws = SimulatedDensityOfStates(File='squaricn.phonon', SpectrumType='IonTable')
-    for i in range (0, ion_ws.rowCount()):
-        print ion_ws.row(i)['Ion']
+    print ','.join(ion_ws.column('Species'))
 
 Output:
 
 .. testoutput:: ExSimulatedDensityOfStatesIonTable
 
-    H
-    C
-    O
+    H, H, H, H, C, C, C, C, C, C, C, C, O, O, O, O, O, O, O, O
 
 .. categories::
 
