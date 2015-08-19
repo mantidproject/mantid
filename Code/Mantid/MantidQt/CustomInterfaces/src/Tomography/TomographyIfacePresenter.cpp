@@ -310,7 +310,6 @@ void TomographyIfacePresenter::processLogMsg() {
   std::vector<std::string> msgs = m_view->logMsgs();
   for (size_t i = 0; i < msgs.size(); i++) {
     m_model->logMsg(msgs[i]);
-    break;
   }
 }
 

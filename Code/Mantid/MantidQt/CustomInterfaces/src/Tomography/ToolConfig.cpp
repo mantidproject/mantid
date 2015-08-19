@@ -2,11 +2,14 @@
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigCustom.h"
 #include "MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h"
 
-
 #include <boost/lexical_cast.hpp>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+ToolConfigTomoPy::ToolConfigTomoPy()
+    : TomoRecToolConfig(""), m_pathOut(""), m_pathDark(""), m_pathOpen(""),
+      m_pathSample(""), m_centerRot(.0), m_angleMin(.0), m_angleMax(180.0) {}
 
 ToolConfigTomoPy::ToolConfigTomoPy(const std::string &runnable,
                                    const std::string &pathOut,
@@ -27,6 +30,10 @@ std::string ToolConfigTomoPy::makeCmdLineOptions() const {
          " --center_of_rotation " +
          boost::lexical_cast<std::string>(m_centerRot);
 }
+
+ToolConfigAstraToolbox::ToolConfigAstraToolbox()
+    : TomoRecToolConfig(""), m_centerRot(.0), m_angleMin(.0), m_angleMax(180.0),
+      m_pathOut(""), m_pathDark(""), m_pathOpen(""), m_pathSample("") {}
 
 ToolConfigAstraToolbox::ToolConfigAstraToolbox(
     const std::string &runnable, double centerRot, double angleMin,
