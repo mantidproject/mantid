@@ -31,6 +31,10 @@ size_t N_SECOND = 10000;
 /// 2pi
 double TWOPI = 2.0 * M_PI;
 
+//-----------------------------------------------------------------------------
+// Utility functions
+//-----------------------------------------------------------------------------
+
 /**
  * Integrate by simpsons rule
  * @param y Collection of y values at points separated by dy
@@ -52,6 +56,7 @@ double integrate(const std::vector<double> &y, const double dx) {
   }
   return dx * (y.front() + 4.0 * sumOdd + 2.0 * sumEven + y.back()) / 3.0;
 }
+
 }
 
 namespace Mantid {
@@ -86,24 +91,31 @@ void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
   UNUSED_ARG(signal);
   UNUSED_ARG(errors);
   // Temporary storage
-  std::vector<double> xmur(N_MUR_PTS + 1, 0.0), yabs(N_MUR_PTS + 1, 1.0),
-      wabs(N_MUR_PTS + 1, 1.0), // absorption signals + weights
-      yms(N_MUR_PTS + 1, 0.0),
-      wms(N_MUR_PTS + 1, 100.0); // multiple scattering signals + weights
+  std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
+      yabs(N_MUR_PTS + 1, 1.0), // absorption signals
+      wabs(N_MUR_PTS + 1, 1.0), // absorption weights
+      yms(N_MUR_PTS + 1, 0.0), // multiple scattering signals 
+      wms(N_MUR_PTS + 1, 100.0); // multiple scattering  weights
 
   // Main loop over mur. Limit is nrpts but vectors are nrpts+1. First value set
   // by initial values above
   const double deltaR = muRmax() - muRmin();
-  for (size_t i = 0; i < N_MUR_PTS; ++i) {
+  for (size_t i = 1; i < N_MUR_PTS + 1; ++i) {
     const double muR =
-        muRmin() + to<double>(i) * deltaR / to<double>(N_MUR_PTS - 1);
-    xmur[i + 1] = muR;
+        muRmin() + to<double>(i-1) * deltaR / to<double>(N_MUR_PTS - 1);
+    xmur[i] = muR;
 
     auto attenuation = calculateSelfAttenuation(muR);
     const double absFactor = attenuation / (M_PI * muR * muR);
-    yabs[i + 1] = 1. / absFactor;
-    wabs[i + 1] = absFactor;
+    // track these
+    yabs[i] = 1. / absFactor;
+    wabs[i] = absFactor;
+    // ratio of second/first scatter
+    auto mscat = calculateMS(i, muR, attenuation);
+    yms[i] = mscat.first;
+    wms[i] = mscat.second;
   }
+  // Fit polynomials to absorption values
 }
 
 /**
