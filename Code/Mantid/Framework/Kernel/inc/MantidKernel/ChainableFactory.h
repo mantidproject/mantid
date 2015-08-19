@@ -31,7 +31,7 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename Factory, typename Product>
+template <typename Factory, typename Product, typename Argument>
 class DLLExport ChainableFactory : public Chainable<Factory> {
 public:
   /// Destructor
@@ -39,15 +39,15 @@ public:
 
   /**
    * Factory method wrapper. Wraps results in smart pointer.
-   * @param unitString : unit string to intepret
+   * @param argument : creational arguments
    * @return Product
    */
-  std::unique_ptr<Product> create(const std::string &arguments) const {
-    if (this->canInterpret(arguments)) {
-      return std::unique_ptr<Product>(this->createRaw(arguments));
+  std::unique_ptr<Product> create(const Argument &argument) const {
+    if (this->canInterpret(argument)) {
+      return std::unique_ptr<Product>(this->createRaw(argument));
     } else {
       if (this->hasSuccessor()) {
-        return (*Chainable<Factory>::m_successor)->create(arguments);
+        return (*Chainable<Factory>::m_successor)->create(argument);
       } else {
         throw std::invalid_argument("No successor MDUnitFactory");
       }
@@ -56,10 +56,10 @@ public:
 
 private:
   /// Create the product
-  virtual Product *createRaw(const std::string &argument) const = 0;
+  virtual Product *createRaw(const Argument &argument) const = 0;
 
   /// Indicate an ability to intepret the string
-  virtual bool canInterpret(const std::string &unitString) const = 0;
+  virtual bool canInterpret(const Argument &unitString) const = 0;
 };
 
 } // namespace Kernel

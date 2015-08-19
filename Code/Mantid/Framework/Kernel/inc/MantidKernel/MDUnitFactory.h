@@ -33,7 +33,7 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit> {
+class DLLExport MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
 
 public:
 
@@ -73,7 +73,7 @@ typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;
 typedef std::unique_ptr<const MDUnitFactory> MDUnitFactory_const_uptr;
 
 /// Convience method. Pre-constructed builder chain.
-MDUnitFactory_uptr DLLExport makeFactoryChain();
+MDUnitFactory_uptr DLLExport makeMDUnitFactoryChain();
 
 
 } // namespace Kernel
