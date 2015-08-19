@@ -110,7 +110,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         arr = np.array(_vana_bg_.extractY()).flatten()
         neg_values = np.where(arr < 0)[0]
         if len(neg_values):
-            self._cleanup(wslist)
+            mlzutils.cleanup(wslist)
             message = "Background " + self.bkgws.getName() + " is higher than Vanadium " + \
                 self.vanaws.getName() + " signal!"
             self.log().error(message)
@@ -119,7 +119,7 @@ class DNSDetEffCorrVana(PythonAlgorithm):
         # 3. calculate correction coefficients
         _vana_mean_ws_ = self._vana_mean(_vana_bg_)
         if not _vana_mean_ws_:
-            self._cleanup(wslist)
+            mlzutils.cleanup(wslist)
             return None
         if not self.vana_mean_name:
             wslist.append(_vana_mean_ws_.getName())

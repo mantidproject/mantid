@@ -198,7 +198,7 @@ class DNSFlippingRatioCorr(PythonAlgorithm):
         sf_neg_values = np.where(sf_arr < 0)[0]
         nsf_neg_values = np.where(nsf_arr < 0)[0]
         if len(sf_neg_values) or len(nsf_neg_values):
-            self._cleanup(wslist)
+            mlzutils.cleanup(wslist)
             message = "Background is higher than NiCr signal!"
             self.log().error(message)
             raise RuntimeError(message)
