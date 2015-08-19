@@ -10,7 +10,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/StartFrameworkManager.cpp
   )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES}  )
-  target_link_libraries( CurveFittingTest LINK_PRIVATE 
+  target_link_libraries( CurveFittingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             CurveFitting
             API
             DataHandling

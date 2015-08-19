@@ -15,8 +15,8 @@ class EQSANSNormalisationNoFlux(stresstesting.MantidStressTest):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         ws = "__eqsans_normalisation_test"
 
         EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws,
@@ -43,8 +43,8 @@ class EQSANSNormalisationDefault(stresstesting.MantidStressTest):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         ws = "__eqsans_normalisation_test"
 
         EQSANSLoad(Filename="EQSANS_1466_event.nxs", OutputWorkspace=ws,
@@ -79,8 +79,8 @@ class EQSANSNormalisationInputFlux(stresstesting.MantidStressTest):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         ws = "__eqsans_normalisation_test"
         spectrum_file = "eqsans_beam_flux.txt"
 
@@ -103,13 +103,14 @@ class EQSANSNormalisationBeamFlux(stresstesting.MantidStressTest):
     """
         Analysis Tests for EQSANS
     """
-
+    data_ws=""
+    prop_mng=""
     def runTest(self):
         """
             Check that EQSANSTofStructure returns the correct workspace
         """
-        config = ConfigService.Instance()
-        config["facilityName"]='SNS'
+        configI = ConfigService.Instance()
+        configI["facilityName"]='SNS'
         self.prop_mng = "eqsans_normalise_options"
         self.data_ws = "eqsans_normalise_data_ws"
 

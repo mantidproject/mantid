@@ -66,6 +66,14 @@ If the :literal:`CorrectionAlgorithm` property is set to
 algorithm is used, with C0 and C1 taken from the :literal:`C0` and :literal:`C1`
 properties.
 
+Detector Position Correction
+############################
+
+Detector Position Correction is used for when the position of the detector
+is not aligned with the reflected beamline. The correction algorithm used is
+:ref:`algm-SpecularReflectionPositionCorrect-v1` which is a purely vertical
+position correction.
+
 Workflow
 ########
 
@@ -80,9 +88,9 @@ Usage
 
    run = Load(Filename='INTER00013460.nxs')
    # Basic reduction with no transmission run
-   IvsQ, IvsLam, thetaOut = ReflectometryReductionOne(InputWorkspace=run, ThetaIn=0.7, I0MonitorIndex=2, ProcessingInstructions='3:4', 
-   WavelengthMin=1.0, WavelengthMax=17.0, 
-   MonitorBackgroundWavelengthMin=15.0, MonitorBackgroundWavelengthMax=17.0, 
+   IvsQ, IvsLam, thetaOut = ReflectometryReductionOne(InputWorkspace=run, ThetaIn=0.7, I0MonitorIndex=2, ProcessingInstructions='3:4',
+   WavelengthMin=1.0, WavelengthMax=17.0,
+   MonitorBackgroundWavelengthMin=15.0, MonitorBackgroundWavelengthMax=17.0,
    MonitorIntegrationWavelengthMin=4.0, MonitorIntegrationWavelengthMax=10.0 )
 
    print "The first four IvsLam Y values are: [ %.4e, %.4e, %.4e, %.4e ]" % (IvsLam.readY(0)[0], IvsLam.readY(0)[1], IvsLam.readY(0)[2], IvsLam.readY(0)[3])

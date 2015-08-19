@@ -155,7 +155,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE 
+target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidQtAPI
             MantidWidgets
             DataObjects
@@ -184,7 +184,7 @@ if ( CXXTEST_FOUND )
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-  target_link_libraries( SliceViewerTest LINK_PRIVATE
+  target_link_libraries( SliceViewerTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtSliceViewer
             DataObjects
             Crystal

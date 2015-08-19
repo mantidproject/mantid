@@ -7,7 +7,7 @@ import mantid
 
 class VesuvioResolution(PythonAlgorithm):
 
-    _spectrum_index = None
+    _workspace_index = None
     _mass = None
 
     def category(self):
@@ -22,8 +22,8 @@ class VesuvioResolution(PythonAlgorithm):
                                                direction=Direction.Input),
                              doc='Sample workspace')
 
-        self.declareProperty(name='SpectrumIndex', defaultValue=0,
-                             doc='Spectra index to use for resolution')
+        self.declareProperty(name='WorkspaceIndex', defaultValue=0,
+                             doc='Workspace index to use for resolution')
 
         self.declareProperty(name='Mass', defaultValue=100.0,
                              doc='The mass defining the recoil peak in AMU')
@@ -49,10 +49,10 @@ class VesuvioResolution(PythonAlgorithm):
         issues = dict()
 
         sample_ws = self.getProperty('Workspace').value
-        spectrum_index = self.getProperty('SpectrumIndex').value
+        workspace_index = self.getProperty('WorkspaceIndex').value
 
-        if spectrum_index > sample_ws.getNumberHistograms() - 1:
-            issues['SpectrumIndex'] = 'Spectrum index is out of range'
+        if workspace_index > sample_ws.getNumberHistograms() - 1:
+            issues['WorkspaceIndex'] = 'Workspace index is out of range'
 
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
         out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
@@ -72,7 +72,7 @@ class VesuvioResolution(PythonAlgorithm):
         sample_ws = self.getProperty('Workspace').value
         out_ws_tof = self.getPropertyValue('OutputWorkspaceTOF')
         out_ws_ysp = self.getPropertyValue('OutputWorkspaceYSpace')
-        self._spectrum_index = self.getProperty('SpectrumIndex').value
+        self._workspace_index = self.getProperty('WorkspaceIndex').value
         self._mass = self.getProperty('Mass').value
 
         output_tof = (out_ws_tof != '')
@@ -116,7 +116,7 @@ class VesuvioResolution(PythonAlgorithm):
         fit.setChild(True)
         mantid.simpleapi.set_properties(fit, function, InputWorkspace=workspace, MaxIterations=0,
                                         CreateOutput=True, Output=fit_naming_stem,
-                                        WorkspaceIndex=self._spectrum_index,
+                                        WorkspaceIndex=self._workspace_index,
                                         OutputCompositeMembers=True)
         fit.execute()
         fit_ws = fit.getProperty('OutputWorkspace').value

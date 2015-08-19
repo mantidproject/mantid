@@ -70,7 +70,7 @@ class LoadDNSLegacy(PythonAlgorithm):
         try:
             metadata.read_legacy(filename)
         except RuntimeError as err:
-            message = "Error of loading of file " + filename + ": " + err
+            message = "Error of loading of file " + filename + ": " + str(err)
             self.log().error(message)
             raise RuntimeError(message)
 

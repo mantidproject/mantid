@@ -13,6 +13,8 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <algorithm>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -24,6 +26,8 @@ static double flat_cell061Es [] = {8.140295E-03, 8.260089E-03, 8.198814E-03, 8.3
 /// defined below this creates some input data
 void createInputWorkspaces(int start, int end, Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels);
 void createInputWorkSpacesForMasking ( Mantid::API::MatrixWorkspace_sptr & input, Mantid::API::MatrixWorkspace_sptr & wave, Mantid::API::MatrixWorkspace_sptr & pixels);
+void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr & qResolution, Mantid::API::MatrixWorkspace_sptr & alteredInput, Mantid::API::MatrixWorkspace_sptr & input,  double value1, double value2);
+
 
 class Q1D2Test : public CxxTest::TestSuite
 {
@@ -341,7 +345,7 @@ public:
 
     Mantid::API::AnalysisDataService::Instance().remove(m_noGrav);
   }
-    
+
   void testInvalidInput()
   {
     Mantid::Algorithms::Q1D2 Q1D;
@@ -362,8 +366,94 @@ public:
       Q1D.execute();
 
     TS_ASSERT( ! Q1D.isExecuted() )
+
+    // Restore the old binning
+    xData[15] -= 0.001;
   }
-  
+
+  void testRunsWithQResolution() {
+    // Arrange
+    Mantid::API::MatrixWorkspace_sptr qResolution, alteredInput;
+    const double value1 = 1;
+    const double value2 = 2;
+    createQResolutionWorkspace(qResolution, alteredInput, m_inputWS, value1, value2);
+
+    // Act
+    Mantid::Algorithms::Q1D2 Q1D;
+    TS_ASSERT_THROWS_NOTHING( Q1D.initialize() );
+    TS_ASSERT( Q1D.isInitialized() )
+
+    const std::string outputWS("Q1D2Test_result");
+    Q1D.setProperty("DetBankWorkspace", alteredInput); 
+    Q1D.setProperty("WavelengthAdj", m_wavNorm);
+    Q1D.setProperty("PixelAdj", m_pixel);
+    Q1D.setPropertyValue("OutputWorkspace", outputWS);
+    Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+    Q1D.setProperty("QResolution", qResolution);
+    Q1D.setProperty("OutputParts", true);
+
+    // Assert
+    TS_ASSERT_THROWS_NOTHING(Q1D.execute());
+
+    TS_ASSERT( Q1D.isExecuted() )
+
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                              (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+
+    Mantid::API::MatrixWorkspace_sptr sumOfCounts;
+    TS_ASSERT_THROWS_NOTHING( sumOfCounts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                              (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS+"_sumOfCounts")) )
+
+    // That output will be SUM_i(Yin_i*QRES_in_i)/(SUM_i(Y_in_i)) for each q value
+    // In our test workspace we set QRes_in_1 to 1, this means that all DX values should be SUM_i(Y_in_i)/(SUM_i(Y_in_i))
+    // which is either 1 or 0. It can be 0 if no data falls into this bin. We make sure that there is at least one bin
+    // with a count of 1
+    auto& dataDX = result->dataDx(0);
+    unsigned int counter = 0;
+    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
+      if (*it==1.0) {
+        counter++;
+      }
+      // Make sure that the value is either 1 or 0
+      TSM_ASSERT("The DX value should be either 1 or 0", (*it==1.0) || (*it==0.0));
+    }
+    TSM_ASSERT("There should be at least one bin which is not 0", counter > 0);
+
+    // Clean Up
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_sumOfCounts");
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_sumOfNormFactors");
+  }
+
+    void testThatDxIsNotPopulatedWhenQResolutionIsNotChoosen() {
+    // Arrange
+    Mantid::Algorithms::Q1D2 Q1D;
+    TS_ASSERT_THROWS_NOTHING( Q1D.initialize() );
+    TS_ASSERT( Q1D.isInitialized() )
+
+    const std::string outputWS("Q1D2Test_result");
+    Q1D.setProperty("DetBankWorkspace", m_inputWS); 
+    Q1D.setProperty("WavelengthAdj", m_wavNorm);
+    Q1D.setProperty("PixelAdj", m_pixel);
+    Q1D.setPropertyValue("OutputWorkspace", outputWS);
+    Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
+    TS_ASSERT_THROWS_NOTHING(Q1D.execute());
+
+    TS_ASSERT( Q1D.isExecuted() )
+
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                              (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+
+    // Make sure that the Q resolution is not calculated
+    auto& dataDX = result->dataDx(0);
+    for (auto it = dataDX.begin(); it != dataDX.end(); ++it) {
+      TSM_ASSERT("All Dx values should be 0, as we didn't use the QResolution ooption", (*it==0.0));
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+
   ///stop the constructor from being run every time algorithms test suite is initialised
   static Q1D2Test *createSuite() { return new Q1D2Test(); }
   static void destroySuite(Q1D2Test *suite) { delete suite; }
@@ -483,4 +573,25 @@ void createInputWorkSpacesForMasking ( Mantid::API::MatrixWorkspace_sptr & input
 {
    createInputWorkspaces ( 9001, 9030, input, wave, pixels );
 }
+
+void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr & qResolution, Mantid::API::MatrixWorkspace_sptr & alteredInput, Mantid::API::MatrixWorkspace_sptr & input, double value1, double value2) {
+  //The q resolution workspace is almost the same to the input workspace, except for the y value, we set all Y values to 1
+  qResolution = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
+  alteredInput = Mantid::API::MatrixWorkspace_sptr(input->clone().release());
+
+  // Populate Y with Value1
+  for (size_t i = 0; i < qResolution->getNumberHistograms(); ++i) {
+    auto& data = qResolution->dataY(i);
+    std::fill(data.begin(), data.end(), value1);
+  }
+
+  // Populate Y with Value2
+  for (size_t i = 0; i < alteredInput->getNumberHistograms(); ++i) {
+    auto& data = alteredInput->dataY(i);
+    std::fill(data.begin(), data.end(), value2);
+  }
+
+
+}
+
 #endif /*Q1D2Test_H_*/

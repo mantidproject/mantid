@@ -32,7 +32,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-#include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
 #include <vtkHexahedron.h>

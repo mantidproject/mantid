@@ -30,15 +30,15 @@ class PlusMDTest(stresstesting.MantidStressTest):
     def runTest(self):
         # Some platforms can't clean up the open file handle on cncs.nxs from the last test, so run cleanup here as well
         barefilename = "cncs.nxs"
-        config = ConfigService.Instance()
-        self._saved_filename = os.path.join(config["defaultsave.directory"], barefilename)
+        configI = ConfigService.Instance()
+        self._saved_filename = os.path.join(configI["defaultsave.directory"], barefilename)
         self.cleanup()
 
         # Load then convert to Q in the lab frame
         LoadEventNexus(Filename=r'CNCS_7860_event.nxs',OutputWorkspace='cncs_nxs')
 
         ConvertToDiffractionMDWorkspace(InputWorkspace='cncs_nxs', OutputWorkspace='cncs_original', SplitInto=2)
-        alg = SaveMD(InputWorkspace='cncs_original', Filename=barefilename)
+        SaveMD(InputWorkspace='cncs_original', Filename=barefilename)
 
         self.assertDelta( mtd['cncs_original'].getNPoints(), 112266, 1)
         BinMD(InputWorkspace='cncs_original',AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',
@@ -143,16 +143,16 @@ class MergeMDTest(stresstesting.MantidStressTest):
         return filenames_string
 
     def runTest(self):
-        config = ConfigService.Instance()
+        configI = ConfigService.Instance()
 
         LoadEventNexus(Filename='CNCS_7860_event.nxs',
-        OutputWorkspace='CNCS_7860_event_NXS',CompressTolerance=0.1)
+                       OutputWorkspace='CNCS_7860_event_NXS',CompressTolerance=0.1)
 
         for omega in xrange(0, 5):
             print "Starting omega %03d degrees" % omega
             CreateMDWorkspace(Dimensions='3',Extents='-5,5,-5,5,-5,5',Names='Q_sample_x,Q_sample_y,Q__sample_z',
                               Units='A,A,A',SplitInto='3',SplitThreshold='200',MaxRecursionDepth='3',
-            MinRecursionDepth='3', OutputWorkspace='CNCS_7860_event_MD')
+                              MinRecursionDepth='3', OutputWorkspace='CNCS_7860_event_MD')
 
             # Convert events to MD events
             AddSampleLog("CNCS_7860_event_NXS", "omega", "%s.0" % omega, "Number Series")
@@ -165,12 +165,12 @@ class MergeMDTest(stresstesting.MantidStressTest):
                                             OutputDimensions='Q (sample frame)',LorentzCorrection='1', Append=True)
 
             barefilename = "CNCS_7860_event_rotated_%03d.nxs" % omega
-            filename = os.path.join(config["defaultsave.directory"], barefilename)
-            alg = SaveMD("CNCS_7860_event_MD", Filename=filename)
+            filename = os.path.join(configI["defaultsave.directory"], barefilename)
+            SaveMD("CNCS_7860_event_MD", Filename=filename)
             self._saved_filenames.append(filename)
         # End for loop
-        filename = os.path.join(config["defaultsave.directory"], r'merged.nxs')
-        alg = MergeMDFiles(Filenames=self.make_files_to_merge_string(), OutputFilename=filename, OutputWorkspace='merged')
+        filename = os.path.join(configI["defaultsave.directory"], r'merged.nxs')
+        MergeMDFiles(Filenames=self.make_files_to_merge_string(), OutputFilename=filename, OutputWorkspace='merged')
         self._saved_filenames.append(filename)
 
         # 5 times the number of events in the output workspace.

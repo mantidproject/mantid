@@ -100,7 +100,7 @@ class MantidConfigDirectInelastic(object):
         to have:
         Map/masks folder with layout defined on (e.g. svn checkout)
         https://svn.isis.rl.ac.uk/InstrumentFiles/trunk
-        2) User scripts folder with layout defined on 
+        2) User scripts folder with layout defined on
         (e.g. git checkout or Mantid script repository set-up):
         git@github.com:mantidproject/scriptrepository.git
         see https://github.com/mantidproject/scriptrepository for details
@@ -110,7 +110,7 @@ class MantidConfigDirectInelastic(object):
           and other folders
           All these assumptions are summarized within __init__
 
-       The class have to change/to be amended if the configuration 
+       The class have to change/to be amended if the configuration
        changes or has additional features.
     """
     def __init__(self,mantid='/opt/Mantid/',home='/home/',\
@@ -181,9 +181,9 @@ class MantidConfigDirectInelastic(object):
 
         # Methods, which build & verify various parts of Mantid configuration
         self._dynamic_options = [self._set_default_inst,
-                        self._set_script_repo, # this would be necessary to have on an Instrument scientist account, disabled on generic setup
-                        self._def_python_search_path,
-                        self._set_datasearch_directory,self._set_rb_directory]
+                                 self._set_script_repo, # necessary to have on an Instrument scientist account, disabled on generic setup
+                                 self._def_python_search_path,
+                                 self._set_datasearch_directory,self._set_rb_directory]
         self._user = None
         self._cycle_data_folder=set()
         # this is the list, containing configuration strings
@@ -202,7 +202,7 @@ class MantidConfigDirectInelastic(object):
             return True
         # missing file should always be replaced
         if not os.path.isfile(config_file_name):
-           return True
+            return True
         modification_date = date.fromtimestamp(os.path.getmtime(config_file_name))
         start_date = self._user.get_start_date()
         if modification_date<start_date:
@@ -218,7 +218,7 @@ class MantidConfigDirectInelastic(object):
             return True
         # non-existing file should always be replaced
         if not os.path.isfile(target_script_name):
-           return True
+            return True
         #Always replace sample file if it has not been touched
         start_date = self._user.get_start_date()
         # this time is set up to the file, copied from the repository
@@ -299,7 +299,7 @@ class MantidConfigDirectInelastic(object):
         self._cycle_data_folder=set()
         for date_key,folder_id in theUser.cycle_IDlist.items():
             self._cycle_data_folder.add(self.get_data_folder_name(theUser.instrument[date_key],folder_id))
-        # Initialize configuration settings 
+        # Initialize configuration settings
         self._dynamic_configuration = copy.deepcopy(self._dynamic_options_base)
         self._init_config()
     #
@@ -363,7 +363,7 @@ class MantidConfigDirectInelastic(object):
             raise RuntimeError("Can not define RB folder without user being defined")
     #
     def _set_datasearch_directory(self):
-        """Note, map/mask instrument folder is lower case as if loaded from SVN. 
+        """Note, map/mask instrument folder is lower case as if loaded from SVN.
            Autoreduction may have it upper case"""
         if not self._user:
             raise RuntimeError("Can not define Data search path without user being defined")
@@ -375,7 +375,7 @@ class MantidConfigDirectInelastic(object):
         all_data_folders=list(self._cycle_data_folder)
         data_dir = os.path.abspath('{0}'.format(all_data_folders[0]))
         for folder in all_data_folders[1:]:
-             data_dir +=';'+os.path.abspath('{0}'.format(folder))
+            data_dir +=';'+os.path.abspath('{0}'.format(folder))
 
         all_rb_folders = self._user.rb_dir
         for folder in all_rb_folders.values():
@@ -391,7 +391,7 @@ class MantidConfigDirectInelastic(object):
         config_path = os.path.join(user_path,'.mantid')
         if not os.path.exists(config_path):
             err = os.makedirs(config_path)
-            if err: 
+            if err:
                 raise RuntimeError('can not find or create Mantid configuration path {0}'.format(config_path))
 
         config_file = os.path.join(config_path,'Mantid.user.properties')

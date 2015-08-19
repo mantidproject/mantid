@@ -46,9 +46,9 @@ Create iterators with correct normalization normalization to an IMDIterator.
 @param ws : workspace to fetch defaults from if needed
 @return new IMDIterator
 */
-Mantid::API::IMDIterator * createIteratorWithNormalization(
-    const VisualNormalization normalizationOption,
-    Mantid::API::IMDWorkspace const * const ws) {
+DLLExport Mantid::API::IMDIterator *
+createIteratorWithNormalization(const VisualNormalization normalizationOption,
+                                Mantid::API::IMDWorkspace const *const ws) {
 
   using namespace Mantid::API;
 

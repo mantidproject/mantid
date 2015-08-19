@@ -44,7 +44,7 @@ set_target_properties ( DesignerPlugins PROPERTIES OUTPUT_NAME ${LIB_NAME} )
 set_target_properties( DesignerPlugins PROPERTIES EXCLUDE_FROM_ALL TRUE )
 
 # Set the library dependencies
-target_link_libraries ( DesignerPlugins LINK_PRIVATE 
+target_link_libraries ( DesignerPlugins LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
             MantidWidgets
             MantidQtSliceViewer
             MantidQtAPI
