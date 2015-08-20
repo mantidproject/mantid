@@ -3,38 +3,39 @@ import os.path
 import CRY_ini
 import CRY_load
 
-nbankdic = { \
+num_bank_dic = { \
     'hrp': 3, \
     'gem': 5, \
     'pol': 6 \
     }
 
-grpOffDic = { \
+grp_of_Dic = { \
     'hrp': 'hrpd_new_072_01_corr.cal'
     }
 
 
 def rawpath(runno, inst='hrp', Verbose=False):
-    f = open('//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt', 'r')
-    line = os.path.abspath(f.readline())
+    file = open('//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt', 'r')
+    line = os.path.abspath(file.readline())
     if Verbose:
         print '//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt'
         print line
     return line
 
 
-class instrument:
+class Instrument:
     def __init__(self, instr):
         self.name = instr
         self.sname = instr[0:3]
-        self.nbank = nbankdic[self.sname]
-        self.PC = 'Y:'
-        self.grpOfffile = CRY_ini.EnvAnalysisdir + '/GrpOff/' + grpOffDic[self.sname]
+        self.nbank = num_bank_dic[self.sname]
+        self.pc_comp = 'Y:'
+        self.grpOfffile = CRY_ini.env_analysis_dir + '/GrpOff/' + grp_of_Dic[self.sname]
 
 
-class Focus(instrument):
+class focus(Instrument):
     def __init__(self, instr='hrpd'):
-        self.Instr = instrument(instr)
+        Instrument.__init__(self, instr)
+        self.Instr = Instrument(instr)
         self.isave = False
         self.wkspaces = {}
 
@@ -44,17 +45,17 @@ class Focus(instrument):
     def savemode_off(self):
         self.isave = False
 
-    def Load(self, runno, norm=True, path=False, focus=True):
+    def load(self, runno, norm=True, path=False, focus=True):
         if path:
             wkspname = runno.split('|')[0]
             FileLoc = runno.split('|')[1]
         elif self.isave:
-            f = open('//isis/inst$/NDX' + self.Instr.name + '/Instrument/logs/lastrun.txt', 'r')
-            lstrun = str(int(f.readlines()[0].split()[1]) + 1)
+            file = open('//isis/inst$/NDX' + self.Instr.name + '/Instrument/logs/lastrun.txt', 'r')
+            lstrun = str(int(file.readlines()[0].split()[1]) + 1)
             if runno < 10:
-                FileLoc = self.Instr.PC + '/' + self.Instr.sname + lstrun + '.s' + '0' + str(runno)
+                FileLoc = self.Instr.pc_comp + '/' + self.Instr.sname + lstrun + '.s' + '0' + str(runno)
             else:
-                FileLoc = self.Instr.PC + '/' + self.Instr.sname + lstrun + '.s' + str(runno)
+                FileLoc = self.Instr.pc_comp + '/' + self.Instr.sname + lstrun + '.s' + str(runno)
             print FileLoc
             wkspname = str(lstrun) + '_' + str(runno)
             tempwkspc = LoadRaw(Filename=FileLoc, OutputWorkspace=wkspname)
@@ -63,7 +64,7 @@ class Focus(instrument):
             FileLoc = rawpath(runno, inst=self.Instr.sname) + '\\' + self.Instr.sname + str(runno) + '.raw'
             if not os.path.exists(FileLoc):
                 print 'File not found expected in directory ' + FileLoc + '\n'
-                print 'use a.Load("wksp|filepath", path=True) instead'
+                print 'use a.load("wksp|filepath", path=True) instead'
                 return
             wkspname = str(runno)
         print FileLoc
@@ -76,16 +77,16 @@ class Focus(instrument):
             DiffractionFocussing(InputWorkspace=wkspname, OutputWorkspace=wkspname,
                                  GroupingFileName=self.Instr.grpOfffile)
             blist = range(1, self.Instr.nbank + 1)
-            CRY_load.SplitBank(wkspname, blist, Del=True)
+            CRY_load.split_bank(wkspname, blist, Del=True)
 
 
 if __name__ == '__main__':
     from SET_env_scripts2_migrated import *
 
-    a = Focus()
-    # a.savemode_on()
-    # a.Load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
+    a_focus = focus()
+    # a_focus.savemode_on()
+    # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
     print rawpath(35493, inst='gem', Verbose=False)
-    # a.Load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
-    a.Load(35493)
+    # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
+    a_focus.load(35493)
 

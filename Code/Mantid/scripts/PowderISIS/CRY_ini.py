@@ -4,15 +4,15 @@ import re
 import os.path
 from os.path import abspath, join, dirname
 
-EnvAnalysisdir = ''
-print '--------------------- '
-print 'Using the B:\\MantidPowderFocus\\\scripts2\\CRY_ini.py scripts... '
-print '--------------------- '
+env_analysis_dir = ''
+#print '--------------------- '
+#print 'Using the B:\\MantidPowderFocus\\\scripts2\\CRY_ini.py scripts... '
+#print '--------------------- '
 
 
-class files:
+class Files:
     def __init__(self, instr, RawDir="", Analysisdir="", UnitTest=False, debugMode=False):
-        global EnvAnalysisdir
+        global env_analysis_dir
         self.debugMode = False
         if debugMode:
             self.debugMode = True
@@ -82,14 +82,14 @@ class files:
             self.Analysisdir = join(self.InsDir, 'UnitTest')
             self.RawDir = join(self.InsDir, 'UnitTest', 'RAW')
         else:
-            if RawDir <> "":
+            if RawDir != "":
                 self.RawDir = RawDir
             else:
                 self.RawDir = ''
-            if Analysisdir <> "":
+            if Analysisdir != "":
                 self.Analysisdir = abspath(Analysisdir)
             else:
-                self.Analysisdir = abspath(EnvAnalysisdir)
+                self.Analysisdir = abspath(env_analysis_dir)
         self.OffDir = join(self.Analysisdir, "GrpOff")
         self.GrpDir = join(self.Analysisdir, "GrpOff")
 
@@ -108,12 +108,12 @@ class files:
         if not os.path.exists(self.user):
             os.makedirs(self.user)
 
-        if prefFile <> "":
+        if prefFile != "":
             self.LstPreffil = prefFile
         else:
             self.LstPreffil = "mtd.pref"
 
-        if prefDir <> "":
+        if prefDir != "":
             self.LstPrefDir = prefDir
         else:
             self.LstPrefDir = self.user
@@ -219,7 +219,7 @@ class files:
         self.dataRangeSet = False
         if self.saveXYEtof or self.saveXYEd:
             bankList = self.read_prefline("BankList")
-            self.bankList = CRY_utils.getListInt(bankList)
+            self.bankList = CRY_utils.get_list_int(bankList)
         print "Done"
         if Verbose:
             self.tell()
@@ -234,11 +234,12 @@ class files:
             if not fexist:
                 VanOK = i
         if self.ExistV == "yes" or self.ExistV == "sam":
-            if VanOK <> 0:
+            if VanOK != 0:
                 msg = msg + "At least the corrected vanadium file " + self.CorrVanFile + "-" + str(
                     i) + ".nxs is  missing \n"
                 if self.ExistV == "sam":
-                    msg = msg + "Vanadium runs will be created in due time according to the grouping deduced from 1st sample dead detector list\n"
+                    msg = msg + "Vanadium runs will be created in due time according to the grouping deduced from 1st \
+                    sample dead detector list\n"
                     msg = msg + "Using as parameters: \n"
                     self.VGrpfocus = "sam"
                 if self.ExistV == "yes":
@@ -250,7 +251,8 @@ class files:
                 print 'got Here!!!'
         else:
             if self.ExistV == "over":
-                msg = msg + "A corrected Van file will be created with base name " + self.CorrVanFile + " overriding any previous one created before\n"
+                msg = msg + "A corrected Van file will be created with base name " + self.CorrVanFile + " overriding \
+                any previous one created before\n"
             else:
                 msg = msg + "At least the corrected Van file " + self.CorrVanFile + "-" + str(
                     i) + ".nxs given in the pref file already exists,\n"
@@ -277,16 +279,16 @@ class files:
                 msg = msg + "I will not strip any peak...! \n"
             else:
                 fvan = open(self.InsDir + "/" + self.VanPeakFile, 'r')
-                b = -1
+                b_int = -1
                 for line in fvan:
-                    p = re.compile("bank")
-                    m = p.search(line)
-                    if m <> None:
+                    p_lst = re.compile("bank")
+                    m_lst = p_lst.search(line)
+                    if m_lst != None:
                         self.VanPeakList.append([])
-                        b = b + 1
+                        b_int = b_int + 1
                         continue
                     numbers = line.rstrip().split()
-                    self.VanPeakList[b].append([float(numbers[0]), float(numbers[1])])
+                    self.VanPeakList[b_int].append([float(numbers[0]), float(numbers[1])])
                 print "Vana Peaks will be removed by interpolation in ranges given in"
                 print self.InsDir + "/" + self.VanPeakFile + '\n'
                 fvan.close()
@@ -296,18 +298,18 @@ class files:
         print msg
 
     def setCommonRawDir(self, RawDir=""):
-        if RawDir <> "":
+        if RawDir != "":
             self.RawDir = RawDir
         self.VanDir = self.RawDir
         self.VEmptyDir = self.RawDir
         self.SEmptyDir = self.RawDir
 
     def updateCalib(self):
-        self.VanFile = CRY_utils.ListOfList2List(CRY_utils.getSampleList(self.basefile, self.VrunnoList, self.VanDir))
+        self.VanFile = CRY_utils.ListOfList2List(CRY_utils.get_sample_list(self.basefile, self.VrunnoList, self.VanDir))
         self.VEmptyFile = CRY_utils.ListOfList2List(
-            CRY_utils.getSampleList(self.basefile, self.VErunnoList, self.VEmptyDir))
+            CRY_utils.get_sample_list(self.basefile, self.VErunnoList, self.VEmptyDir))
         self.SEmptyFile = CRY_utils.ListOfList2List(
-            CRY_utils.getSampleList(self.basefile, self.SErunnoList, self.SEmptyDir))
+            CRY_utils.get_sample_list(self.basefile, self.SErunnoList, self.SEmptyDir))
         self.Path2OffFile = self.OffDir + "/" + self.OffFile
         self.Path2GrpFile = self.GrpDir + "/" + self.GrpFile
         self.CorrVanFile = self.CorrVanDir + "/" + self.CorrVanFile
@@ -332,14 +334,14 @@ class files:
         found = False
         for line in fin:
             pattern2match = label + '[ ]*(.*)'
-            p = re.compile(pattern2match)
-            m = p.match(line)
-            if m <> None:
+            p_lst = re.compile(pattern2match)
+            m_lst = p_lst.match(line)
+            if m_lst != None:
                 found = True
                 break
         fin.close()
         if found:
-            return m.group(1).rstrip()
+            return m_lst.group(1).rstrip()
         else:
             if optional:
                 return ""
@@ -354,10 +356,10 @@ class files:
         fileline = []
         for line in fin:
             pattern2match = '(' + label + '[ ]+)'
-            p = re.compile(pattern2match)
-            m = p.match(line)
-            if m <> None:
-                line = m.group() + value + "\n"
+            p_lst = re.compile(pattern2match)
+            m_lst = p_lst.match(line)
+            if m_lst != None:
+                line = m_lst.group() + value + "\n"
             fileline.append(line)
         fin.close()
         fin = open(self.LstPreffil, "w")
@@ -365,27 +367,27 @@ class files:
             fin.write(line)
         fin.close()
 
-    def read_multprefline(self, label, n):
+    def read_multprefline(self, label, n_int):
         fin = open(self.LstPreffil, "r")
-        found = False
+        # found = False
         output = []
         i = 0
         for line in fin:
             pattern2match = label + '[ ]+(.+)'
-            p = re.compile(pattern2match)
-            m = p.match(line)
-            if m <> None:
-                found = True
+            p_lst = re.compile(pattern2match)
+            m_lst = p_lst.match(line)
+            if m_lst is not None:
+                # found = True
                 i += 1
-                output.append(m.group(1).rstrip())
-            if i == n:
+                output.append(m_lst.group(1).rstrip())
+            if i == n_int:
                 break
         fin.close()
         return output
 
     def read_dir(self, fin, col):
         for line in fin:
-            if line[0] <> "#":
+            if line[0] != "#":
                 break
         alist = line.rstrip().split()
         return alist[col - 1]
@@ -446,9 +448,8 @@ class files:
 
 
 if __name__ == '__main__':
-    # Opt : expt=files("hrpd",RawDir="",Analysisdir="")
-    expt = files("hrpd")
+    # Opt : expt_files=Files("hrpd",RawDir="",Analysisdir="")
+    expt_files = Files("hrpd")
     # default
-    expt.initialize('Cycle08_2', 'Si')
-# Opt : expt.initialize('Cycle09_2','tests',prefFile='mtd.pref', prefDir="")
-
+    expt_files.initialize('Cycle08_2', 'Si')
+# Opt : expt_files.initialize('Cycle09_2','tests',prefFile='mtd.pref', prefDir="")

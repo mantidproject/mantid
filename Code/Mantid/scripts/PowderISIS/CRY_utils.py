@@ -3,19 +3,19 @@ from types import *
 import re
 
 
-def getSampleList(basefile, listText, directory=""):
+def get_sample_list(basefile, listText, direct=""):
     raw = True
     thedir = ""
-    # if directory<>"":
-    #	thedir=directory+"/"
+    # if direct<>"":
+    #	thedir=direct+"/"
     samfillist = []
-    p = re.compile("s([0-9]+)[ ]+(.+)")
-    m = p.match(listText)
-    if m <> None:
+    p_list = re.compile("s([0-9]+)[ ]+(.+)")
+    m_list = p_list.match(listText)
+    if m_list != None:
         raw = False
-        runno = m.group(1)
-        listText = m.group(2).rstrip()
-    thelist = getList(listText)
+        runno = m_list.group(1)
+        listText = m_list.group(2).rstrip()
+    thelist = git_list(listText)
     for samlist in thelist:
         samfil = []
         for sam in samlist:
@@ -35,7 +35,7 @@ def getSampleList(basefile, listText, directory=""):
     return samfillist
 
 
-def getList(AString):
+def git_list(AString):
     # returns [[n]]
     # 			if Astring='n'
     #         [[n1, n2..ni]]
@@ -46,10 +46,10 @@ def getList(AString):
     numorrange_list = AString.rstrip().split(" ")
     for numorrange in numorrange_list:
         s = re.compile("\+")
-        m = s.search(numorrange)
-        p = re.compile('[0-9]+')
-        limits = p.findall(numorrange)
-        if m <> None:
+        m_list = s.search(numorrange)
+        p_list = re.compile('[0-9]+')
+        limits = p_list.findall(numorrange)
+        if m_list <> None:
             # '+' found, other cases skipped
             AList.append(limits)
             continue
@@ -68,11 +68,11 @@ def getList(AString):
             startnum = int(limits[0])
             endnum = int(limits[1]) + 1
             sampleLen = int(limits[2])
-        addlist = [];
+        addlist = []
         rnum = startnum
-        m = range(startnum, endnum)
-        m = m[::sampleLen]
-        for i in m:
+        m_list = range(startnum, endnum)
+        m_list = m_list[::sampleLen]
+        for i in m_list:
             for j in range(0, sampleLen):
                 rnum = i + j
                 if rnum < endnum:
@@ -80,11 +80,11 @@ def getList(AString):
                 else:
                     break
             AList.append(addlist)
-            addlist = [];
+            addlist = []
     return AList
 
 
-def getListInt(AString):
+def get_list_int(AString):
     # returns [n]
     # 			if Astring='n'
     #         [n1, n2..ni]
@@ -92,17 +92,17 @@ def getListInt(AString):
     AList = []
     numorrange_list = AString.rstrip().split(" ")
     for numorrange in numorrange_list:
-        p = re.compile('[0-9]+')
-        limits = p.findall(numorrange)
+        p_list = re.compile('[0-9]+')
+        limits = p_list.findall(numorrange)
         if len(limits) == 1:
             startnum = int(limits[0])
             endnum = int(limits[0]) + 1
         if len(limits) == 2:
             startnum = int(limits[0])
             endnum = int(limits[1]) + 1
-        rnum = startnum
-        m = range(startnum, endnum)
-        for i in m:
+        # rnum = startnum
+        m_list = range(startnum, endnum)
+        for i in m_list:
             AList.append(i)
     return AList
 
@@ -115,8 +115,9 @@ def ListOfList2List(lol):
 
 
 # Correct for absorption an InputWkspc(in D)
-# Put its transmission in outputWkspc 
-def CorrectAbs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSampleRadius, \
+# Put its transmission in outputWkspc
+
+def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSampleRadius, \
                TheAttenuationXSection, TheScatteringXSection, TheSampleNumberDensity, \
                TheNumberOfSlices, TheNumberOfAnnuli, TheNumberOfWavelengthPoints, TheExpMethod):
     # The input workspace needs to be in units of wavelength for the CylinderAbsorption algorithm
@@ -136,10 +137,9 @@ def CorrectAbs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSamp
 
 
 if __name__ == '__main__':
-    #	AList=getList("1-3 15-150-10 42-44")
-    AList = getList("44429+44453")
+    #	AList=git_list("1-3 15-150-10 42-44")
+    AList = git_list("44429+44453")
     print AList
-    print getSampleList(expt.basefile, "1000 1245-1268 1308-1400-10", directory=expt.RawDir)
-    print getSampleList(expt.basefile, "s41256 1-5 10 15-30-3", directory=expt.RawDir)
-# print getListInt("1-3 15-150  42-44")
-
+    print get_sample_list(expt_files.basefile, "1000 1245-1268 1308-1400-10", direct=expt_files.RawDir)
+    print get_sample_list(expt_files.basefile, "s41256 1-5 10 15-30-3", direct=expt_files.RawDir)
+# print get_list_int("1-3 15-150  42-44")
