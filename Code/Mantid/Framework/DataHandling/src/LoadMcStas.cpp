@@ -161,7 +161,7 @@ void LoadMcStas::readEventData(
     WorkspaceGroup_sptr &outputGroup, ::NeXus::File &nxFile) {
   std::string filename = getPropertyValue("Filename");
   auto entries = nxFile.getEntries();
-  bool error_bar_1 = getProperty("ErrorBarsSetTo1")
+  bool error_bar_1 = getProperty("ErrorBarsSetTo1");
   // will assume that each top level entry contain one mcstas
   // generated IDF and any event data entries within this top level
   // entry are data collected for that instrument
