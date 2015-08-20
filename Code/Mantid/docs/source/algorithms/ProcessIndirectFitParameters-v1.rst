@@ -38,7 +38,7 @@ Usage
    wsName = "outputWorkspace"
 
    # "D" is not included in the algorithm params list
-   ProcessIndirectFitParameters(tws, 'A', "B", wsName)
+   ProcessIndirectFitParameters(tws, 'A', "B", "" ,wsName)
 
    wsOut = mtd[wsName]
 
