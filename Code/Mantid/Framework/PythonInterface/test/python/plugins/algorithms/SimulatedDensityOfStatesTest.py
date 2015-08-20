@@ -40,38 +40,53 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
 
     def test_phonon_load(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file)
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
+        v_axis_values = wks.getAxis(1).extractValues()
+        self.assertEquals(v_axis_values[0], 'Gaussian')
+        self.assertEquals(v_axis_values[1], 'Stick')
 
     def test_castep_load(self):
-        wks = SimulatedDensityOfStates(CASTEPFile='squaricn.castep')
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        wks = SimulatedDensityOfStates(CASTEPFile=self._castep_file)
+        self.assertEquals(wks.getNumberHistograms(), 2)
+        v_axis_values = wks.getAxis(1).extractValues()
+        self.assertEquals(v_axis_values[0], 'Gaussian')
+        self.assertEquals(v_axis_values[1], 'Stick')
 
     def test_raman_active(self):
         spec_type = 'Raman_Active'
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        SpectrumType=spec_type)
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
+        v_axis_values = wks.getAxis(1).extractValues()
+        self.assertEquals(v_axis_values[0], 'Gaussian')
+        self.assertEquals(v_axis_values[1], 'Stick')
 
     def test_ir_active(self):
         spec_type = 'IR_Active'
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        SpectrumType=spec_type)
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
+        v_axis_values = wks.getAxis(1).extractValues()
+        self.assertEquals(v_axis_values[0], 'Gaussian')
+        self.assertEquals(v_axis_values[1], 'Stick')
 
     def test_lorentzian_function(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        Function='Lorentzian')
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
+        v_axis_values = wks.getAxis(1).extractValues()
+        self.assertEquals(v_axis_values[0], 'Lorentzian')
+        self.assertEquals(v_axis_values[1], 'Stick')
 
     def test_peak_width(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        PeakWidth='0.3')
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
 
     def test_peak_width_function(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        PeakWidth='0.1*energy')
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
 
     def test_peak_width_function_error(self):
         """
@@ -84,7 +99,7 @@ class SimulatedDensityOfStatesTest(unittest.TestCase):
     def test_temperature(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,
                                        Temperature=50)
-        self.assertEquals(wks.getNumberHistograms(), 1)
+        self.assertEquals(wks.getNumberHistograms(), 2)
 
     def test_scale(self):
         wks = SimulatedDensityOfStates(PHONONFile=self._phonon_file,

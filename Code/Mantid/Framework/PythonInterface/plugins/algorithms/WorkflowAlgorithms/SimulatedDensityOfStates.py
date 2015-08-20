@@ -54,40 +54,44 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                              doc='Filename of the PHONON file.')
 
         self.declareProperty(name='Function',defaultValue='Gaussian',
-            validator=StringListValidator(['Gaussian', 'Lorentzian']),
-            doc="Type of function to fit to peaks.")
+                             validator=StringListValidator(['Gaussian', 'Lorentzian']),
+                             doc="Type of function to fit to peaks.")
 
         self.declareProperty(name='PeakWidth', defaultValue='10.0',
-            doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
+                             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
-        self.declareProperty(name='SpectrumType',defaultValue='DOS',\
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
-            doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+        self.declareProperty(name='SpectrumType', defaultValue='DOS',
+                             validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
+                             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+
+        self.declareProperty(name='StickHeight', defaultValue=0.01,
+                             doc='Intensity of peaks in stick diagram.')
 
         self.declareProperty(name='Scale', defaultValue=1.0,
-            doc='Scale the intesity by the given factor. Default is no scaling.')
+                             doc='Scale the intesity by the given factor. Default is no scaling.')
 
         self.declareProperty(name='BinWidth', defaultValue=1.0,
-            doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
+                             doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
         self.declareProperty(name='Temperature', defaultValue=300.0,
-            doc='Temperature to use (in raman spectrum modelling). Default is 300')
+                             doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
         self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
-            doc='Ignore frequencies below the this threshold. Default is 3.0')
+                             doc='Ignore frequencies below the this threshold. Default is 3.0')
 
         self.declareProperty(StringArrayProperty('Ions', Direction.Input),
-            doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
+                             doc="List of Ions to use to calculate partial density of states."\
+                                 "If left blank, total density of states will be calculated")
 
         self.declareProperty(name='SumContributions', defaultValue=False,
-            doc="Sum the partial density of states into a single workspace.")
+                             doc="Sum the partial density of states into a single workspace.")
 
         self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
-            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
-            doc="Sum the partial density of states by the scattering cross section.")
+                             validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+                             doc="Sum the partial density of states by the scattering cross section.")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
-            doc="Name to give the output workspace.")
+                             doc="Name to give the output workspace.")
 
         # Regex pattern for a floating point number
         self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
@@ -131,6 +135,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         if spec_type != 'DOS' and scale_by_cross_section:
             issues['ScaleByCrossSection'] = 'Cannot scale contributions by cross sections when using %s' % spec_type
+
+        if phonon_filename == '' and scale_by_cross_section:
+            issues['ScaleByCrossSection'] = 'Must supply a PHONON file when scaling by cross sections'
 
         if not calc_partial and sum_contributions:
             issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
@@ -377,6 +384,25 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
+    def _draw_sticks(self, peaks, dos_shape):
+        """
+        Draw a stick diagram for peaks.
+
+        @param hist - array of counts for each bin
+        @param peaks - the indicies of each non-zero point in the data
+        @param dos_shape - shape of the DOS array with broadened peaks
+        @return the y data
+        """
+        dos = np.zeros(dos_shape)
+        stick_intensity = self.getProperty('StickHeight').value
+
+        for index in peaks:
+            dos[index] = stick_intensity
+
+        return dos
+
+#----------------------------------------------------------------------------------------
+
     def _compute_partial_ion_workflow(self, partial_ions, frequencies, eigenvectors, weights):
         """
         Computes the partial DoS workspaces for a given set of ions (optionally scaling them by
@@ -406,7 +432,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
-            SetSampleMaterial(InputWorkspace=self._out_ws_name, ChemicalFormula=ion_name)
+            SetSampleMaterial(InputWorkspace=self._out_ws_name,
+                              ChemicalFormula=ion_name)
 
             # Multiply intensity by scatttering cross section
             if self._scale_by_cross_section == 'Incoherent':
@@ -417,35 +444,39 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().totalScatterXSection()
 
             if self._scale_by_cross_section != 'None':
-                Scale(InputWorkspace=self._out_ws_name, OutputWorkspace=self._out_ws_name,
-                      Operation='Multiply', Factor=scattering_x_section)
+                Scale(InputWorkspace=self._out_ws_name,
+                      OutputWorkspace=self._out_ws_name,
+                      Operation='Multiply',
+                      Factor=scattering_x_section)
 
             partial_workspaces.append(partial_ws_name)
-            RenameWorkspace(self._out_ws_name, OutputWorkspace=partial_ws_name)
+            RenameWorkspace(self._out_ws_name,
+                            OutputWorkspace=partial_ws_name)
 
         total_workspace = self._out_ws_name + "_Total"
 
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
-            sum_workspace = '__dos_sum'
+            data_x = mtd[partial_workspaces[0]].dataX(0)
+            dos_specs = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
+            stick_specs = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
 
-            # Collect spectra into a single workspace
-            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0],
-                          InputWorkspace2=partial_workspaces[1])
-            for ws_idx in xrange(2, len(partial_workspaces)):
-                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace,
-                              InputWorkspace2=partial_workspaces[ws_idx])
+            for partial_ws in partial_workspaces:
+                dos_specs += mtd[partial_ws].dataY(0)
+                stick_specs += mtd[partial_ws].dataY(1)
 
-            # Sum all spectra
-            SumSpectra(InputWorkspace=sum_workspace, OutputWorkspace=total_workspace)
-            mtd[total_workspace].getSpectrum(0).setSpectrumNo(1)
+            stick_specs[stick_specs > 0.0] = self.getProperty('StickHeight').value
 
-            # Remove workspace used to sum spectra
-            DeleteWorkspace(sum_workspace)
+            self._create_dos_workspace(data_x, dos_specs, stick_specs, total_workspace)
+
+            # Set correct units on total workspace
+            mtd[total_workspace].setYUnit('(D/A)^2/amu')
+            mtd[total_workspace].setYUnitLabel('Intensity')
 
         # Otherwise just repackage the WS we have as the total
         else:
-            CloneWorkspace(InputWorkspace=partial_workspaces[0], OutputWorkspace=total_workspace)
+            CloneWorkspace(InputWorkspace=partial_workspaces[0],
+                           OutputWorkspace=total_workspace)
 
         logger.debug('Partial workspaces: ' + str(partial_workspaces))
         logger.debug('Summed workspace: ' + str(total_workspace))
@@ -534,14 +565,25 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # Find and fit peaks
         peaks = hist.nonzero()[0]
         dos = self._draw_peaks(xmin, hist, peaks)
+        dos_sticks = self._draw_sticks(peaks, dos.shape)
 
         data_x = np.arange(xmin, xmin + dos.size)
-        CreateWorkspace(DataX=data_x, DataY=dos, OutputWorkspace=self._out_ws_name)
-        unitx = mtd[self._out_ws_name].getAxis(0).setUnit("Label")
-        unitx.setLabel("Energy Shift", 'cm^-1')
+        self._create_dos_workspace(data_x, dos, dos_sticks, self._out_ws_name)
 
         if self._scale != 1:
             Scale(InputWorkspace=self._out_ws_name, OutputWorkspace=self._out_ws_name, Factor=self._scale)
+
+#----------------------------------------------------------------------------------------
+
+    def _create_dos_workspace(self, data_x, dos, dos_sticks, out_name):
+        CreateWorkspace(DataX=data_x,
+                        DataY=np.ravel(np.array([dos, dos_sticks])),
+                        NSpec=2,
+                        VerticalAxisUnit='Text',
+                        VerticalAxisValues=[self._peak_func, 'Stick'],
+                        OutputWorkspace=out_name)
+        unitx = mtd[out_name].getAxis(0).setUnit("Label")
+        unitx.setLabel("Energy Shift", 'cm^-1')
 
 #----------------------------------------------------------------------------------------
 
