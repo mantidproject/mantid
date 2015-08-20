@@ -40,6 +40,8 @@ const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
     "(*.csv *.nxs *.nexus);;"
     "Other extensions/all files (*.*)";
 
+const std::string EnggDiffractionViewQtGUI::m_settingsGroup = "CustomInterfaces/EnggDiffractionView";
+
 /**
  * Default constructor.
  *
