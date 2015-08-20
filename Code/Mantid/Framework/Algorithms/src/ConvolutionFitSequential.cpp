@@ -285,7 +285,8 @@ void ConvolutionFitSequential::exec() {
   logCopier->executeAsChildAlg();
 
   resultWs = logCopier->getProperty("OutputWorkspace");
-
+  
+  //Create Sample Log
   auto sampleLogStrings = std::map<std::string, std::string>();
   sampleLogStrings["sam_workspace"] = inputWs->getName();
   sampleLogStrings["convolve_members"] =
@@ -304,6 +305,7 @@ void ConvolutionFitSequential::exec() {
         boost::lexical_cast<std::string>(temperature);
   }
 
+  // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
   for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
     logAdder->setProperty("Workspace", resultWs);
@@ -312,7 +314,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
   }
-
+  // Add Numeric Logs
   for (auto it = sampleLogNumeric.begin(); it != sampleLogNumeric.end(); it++) {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", it->first);
@@ -321,6 +323,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->executeAsChildAlg();
   }
 
+  // Copy Logs to GroupWorkspace 
   logCopier = createChildAlgorithm("CopyLogs", -1, -1, false);
   logCopier->setProperty("InputWorkspace", resultWs);
   logCopier->setProperty("OutputWorkspace",
@@ -328,7 +331,6 @@ void ConvolutionFitSequential::exec() {
   logCopier->executeAsChildAlg();
 
   // Rename TableWorkspace
-
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setAlwaysStoreInADS(true);
   renamer->setProperty("InputWorkspace", outputWs);
