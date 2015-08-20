@@ -1,3 +1,4 @@
+#pylint: disable=W0633,too-many-branches
 __author__ = 'wzz'
 
 import os
@@ -12,22 +13,22 @@ def check_url(url, read_lines=False):
     lines = None
     try:
         # Access URL
-        r = urllib2.urlopen(url, timeout=2)
+        url_stream = urllib2.urlopen(url, timeout=2)
 
         # Read lines
         if read_lines is True:
-            lines = r.readlines()
-    except urllib2.URLError as e:
-        r = e
+            lines = url_stream.readlines()
+    except urllib2.URLError as url_error:
+        url_stream = url_error
 
     # Return result
-    if r.code in (200, 401):
+    if url_stream.code in (200, 401):
         url_good = True
     else:
         url_good = False
 
     # Close connect
-    r.close()
+    url_stream.close()
 
     # Return
     if read_lines is True:
@@ -36,7 +37,6 @@ def check_url(url, read_lines=False):
     return url_good
 
 
-# FIXME - Make it work! return_list
 def get_scans_list(server_url, exp_no, return_list=False):
     """ Get list of scans under one experiment
     :param server_url:
@@ -64,6 +64,8 @@ def get_scans_list(server_url, exp_no, return_list=False):
                 scan_list.append(scan)
     # END_FOR
     scan_list = sorted(scan_list)
+    if return_list is True:
+        return scan_list
 
     message = 'Experiment %d: Scan from %d to %d' % (exp_no, scan_list[0], scan_list[-1])
 

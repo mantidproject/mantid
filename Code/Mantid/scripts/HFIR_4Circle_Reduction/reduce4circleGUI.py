@@ -1,7 +1,7 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904
 ################################################################################
 #
-# MainWindow application for reducing HFIR 4-circle 
+# MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
 import sys
@@ -9,11 +9,10 @@ import os
 import csv
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+import PyQt4.QtCore
+import PyQt4.QtGui
 
 import reduce4circleControl as r4c
-
 
 try:
     import mantid
@@ -104,7 +103,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.doAcceptCalUB)
 
         self.connect(self.ui.pushButton_resetCalUB, QtCore.SIGNAL('clicked()'),
-                self.doResetCalUB) 
+                self.doResetCalUB)
 
         # Event handling for tab 'refine ub matrix'
         self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
@@ -118,7 +117,7 @@ class MainWindow(QtGui.QMainWindow):
         self._expID = None
         self._currPt = None
         self._xmlwsbasename = None
-        
+
         # Some configuration
         self._homeSrcDir = os.getcwd()
         self._homeDir = os.getcwd()

@@ -1,13 +1,14 @@
 #!/usr/bin/python
+#pylint: disable=invalid-module-name,relative-import,invalid-constant-name
 import sys
 from PyQt4 import QtGui
 
-import reduce4circleGUI 
+import reduce4circleGUI
 
 if __name__=="__main__":
-    app = QtGui.QApplication(sys.argv)
-    myapp = reduce4circleGUI.MainWindow()
-    myapp.show()
+    q_app = QtGui.QApplication(sys.argv)
+    my_app = reduce4circleGUI.MainWindow()
+    my_app.show()
 
-    exit_code=app.exec_()
+    exit_code=q_app.exec_()
     sys.exit(exit_code)
