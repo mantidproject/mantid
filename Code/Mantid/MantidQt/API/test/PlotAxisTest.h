@@ -88,7 +88,7 @@ public:
     ws->replaceAxis(1, new Mantid::API::NumericAxis(1));
     ws->getAxis(1)->setUnit("TOF");
 
-    QString expected = QString::fromWCharArray(L"Time-of-flight (microsecond)");
+    QString expected = QString::fromWCharArray(L"Time-of-flight (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 0).title());
     TS_ASSERT_EQUALS(expected, PlotAxis(*ws, 1).title());
   }
@@ -129,7 +129,7 @@ public:
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1,1);
     ws->setYUnit("Counts");
 
-    QString expected = QString::fromWCharArray(L"Counts");
+    QString expected = QString::fromWCharArray(L"Counts (\u03bcs\u207b\u00b9)");
     TS_ASSERT_EQUALS("Counts", PlotAxis(true, *ws).title());
   }
 
@@ -140,7 +140,7 @@ public:
     using Mantid::Kernel::UnitLabel;
 
       MDHistoDimension dim("tof", "dimx", UnitLabel("us",L"\u03bcs","\\mu s"), 0.0f, 1.0f, 10);
-    QString expected = QString::fromWCharArray(L"tof (us)");
+    QString expected = QString::fromWCharArray(L"tof (\u03bcs)");
     TS_ASSERT_EQUALS(expected, PlotAxis(dim).title());
   }
 
