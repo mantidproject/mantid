@@ -4,6 +4,7 @@
 #include "MantidKernel/Chainable.h"
 #include "MantidKernel/System.h"
 #include <memory>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
