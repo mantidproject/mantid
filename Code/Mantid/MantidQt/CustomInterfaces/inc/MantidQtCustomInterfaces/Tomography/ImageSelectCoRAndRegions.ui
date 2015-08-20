@@ -228,9 +228,9 @@
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="pushButton_cor">
                <property name="text">
-                <string>Reset</string>
+                <string>Select</string>
                </property>
               </widget>
              </item>
@@ -248,9 +248,9 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_cor">
+              <widget class="QPushButton" name="pushButton_2">
                <property name="text">
-                <string>Select</string>
+                <string>Reset</string>
                </property>
               </widget>
              </item>
@@ -356,9 +356,9 @@
            <item row="2" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="pushButton_roi">
                <property name="text">
-                <string>Reset</string>
+                <string>Select</string>
                </property>
               </widget>
              </item>
@@ -376,9 +376,9 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_roi">
+              <widget class="QPushButton" name="pushButton">
                <property name="text">
-                <string>Select</string>
+                <string>Reset</string>
                </property>
               </widget>
              </item>
