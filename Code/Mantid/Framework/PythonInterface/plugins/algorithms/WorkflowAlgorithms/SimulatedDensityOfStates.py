@@ -581,7 +581,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                         NSpec=2,
                         VerticalAxisUnit='Text',
                         VerticalAxisValues=[self._peak_func, 'Stick'],
-                        OutputWorkspace=out_name)
+                        OutputWorkspace=out_name,
+                        EnableLogging=False)
         unitx = mtd[out_name].getAxis(0).setUnit("Label")
         unitx.setLabel("Energy Shift", 'cm^-1')
 
