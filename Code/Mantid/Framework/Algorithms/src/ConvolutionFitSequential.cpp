@@ -71,6 +71,16 @@ void ConvolutionFitSequential::init() {
                   "The function that describes the parameters of the fit.",
                   Direction::Input);
 
+  std::vector<std::string> backType;
+  backType.push_back("Fixed Flat");
+  backType.push_back("Fit Flat");
+  backType.push_back("Fit Linear");
+
+  declareProperty("BackgroundType", "Fixed Flat",
+                  boost::make_shared<StringListValidator>(backType),
+                  "The Type of background used in the fitting",
+                  Direction::Input);
+
   declareProperty(
       "Start X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The start of the range for the fit function.", Direction::Input);
@@ -129,6 +139,8 @@ void ConvolutionFitSequential::exec() {
   // Initialise variables with properties
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
+  const std::string backType =
+      convertToShortHand(getProperty("backgroundType"));
   const double startX = getProperty("Start X");
   const double endX = getProperty("End X");
   const double temperature = getProperty("Temperature");
@@ -147,8 +159,7 @@ void ConvolutionFitSequential::exec() {
   // Inspect function to obtain fit Type and background
   std::vector<std::string> functionValues = findValuesFromFunction(function);
   const std::string LorentzNum = functionValues[0];
-  const std::string backgroundName = functionValues[1];
-  const std::string funcName = functionValues[2];
+  const std::string funcName = functionValues[1];
   bool usingLorentzians = false;
   if (boost::lexical_cast<int>(LorentzNum) > 0) {
     usingLorentzians = true;
@@ -167,7 +178,7 @@ void ConvolutionFitSequential::exec() {
   m_log.information("Input files: " + inputWs->getName());
   m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
                     LorentzNum);
-  m_log.information("Background type: " + backgroundName);
+  m_log.information("Background type: " + backType);
 
   // Output workspace name
   std::string outputWsName = inputWs->getName();
@@ -182,7 +193,7 @@ void ConvolutionFitSequential::exec() {
   if (LorentzNum.compare("0") != 0) {
     outputWsName += LorentzNum + "L";
   }
-  outputWsName += backgroundName + "_s";
+  outputWsName += backType + "_s";
   outputWsName += boost::lexical_cast<std::string>(specMin);
   outputWsName += "_to_";
   outputWsName += boost::lexical_cast<std::string>(specMax);
@@ -298,7 +309,7 @@ void ConvolutionFitSequential::exec() {
   sampleLogStrings["convolve_members"] =
       boost::lexical_cast<std::string>(convolve);
   sampleLogStrings["fit_program"] = "ConvFit";
-  sampleLogStrings["background"] = backgroundName;
+  sampleLogStrings["background"] = backType;
   sampleLogStrings["delta_function"] = usingDelta;
   sampleLogStrings["temperature_correction"] =
       boost::lexical_cast<std::string>(usingTemp);
@@ -370,8 +381,6 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
   std::string fitType = "";
   auto pos = subFunction.rfind("name=");
   if (pos != std::string::npos) {
-    fitType = subFunction.substr(0, pos);
-    pos = fitType.rfind("name=");
     fitType = subFunction.substr(pos, subFunction.size());
     pos = fitType.find_first_of(",");
     fitType = fitType.substr(5, pos - 5);
@@ -385,8 +394,8 @@ bool ConvolutionFitSequential::checkForTwoLorentz(
 /**
  * Finds specific values embedded in the function supplied to the algorithm
  * @param function The full function string
- * @return all values of interest from the function (0 - fitType, 1 -
- * background, 2 - functionName)
+ * @return all values of interest from the function (0 - fitType,  1 -
+ * functionName)
  */
 std::vector<std::string>
 ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
@@ -401,7 +410,7 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     functionName = fitType;
     if (fitType.compare("Lorentzian") == 0) {
       std::string newSub = function.substr(0, startPos);
-      bool isTwoL = checkForTwoLorentz(function.substr(0, startPos));
+      bool isTwoL = checkForTwoLorentz(newSub);
       if (isTwoL == true) {
         fitType = "2";
       } else {
@@ -413,14 +422,6 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
     result.push_back(fitType);
   }
 
-  std::string background = "";
-  auto pos = function.find("name=");
-  if (pos != std::string::npos) {
-    background = function.substr(pos, function.size());
-    pos = background.find_first_of(",");
-    background = background.substr(5, pos - 5);
-    result.push_back(background);
-  }
   result.push_back(functionName);
   return result;
 }
@@ -518,7 +519,8 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
  * Calculates the EISF if the fit includes a Delta function
  * @param tableWs - The TableWorkspace to append the EISF calculation to
  */
-void ConvolutionFitSequential::calculateEISF(API::ITableWorkspace_sptr &tableWs) {
+void ConvolutionFitSequential::calculateEISF(
+    API::ITableWorkspace_sptr &tableWs) {
   // Get height data from parameter table
   auto columns = tableWs->getColumnNames();
   std::string height = searchForFitParams("Height", columns).at(0);
@@ -617,6 +619,25 @@ void ConvolutionFitSequential::calculateEISF(API::ITableWorkspace_sptr &tableWs)
       errCol->cell<double>(j) = eisfErr.at(j);
     }
   }
+}
+
+/**
+ * Converts the user input into short hand for use in the workspace naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
+std::string
+ConvolutionFitSequential::convertToShortHand(const std::string &original) {
+  std::string result = "";
+  if (original.compare("Fit Linear") == 0) {
+    result = "FitL";
+  } else if (original.compare("Fixed Flat") == 0) {
+    result = "FixF";
+  } else {
+    result = "FitF";
+  }
+
+  return result;
 }
 
 } // namespace Algorithms
