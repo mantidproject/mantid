@@ -2,12 +2,15 @@
 #define COLORMAPWIDGET_H_
 
 #include <QFrame>
+#include <src/lib/include/DoubleSpinBox.h>
 
 class MantidColorMap;
 
 class QwtScaleWidget;
 class QLineEdit;
 class QComboBox;
+class QLabel;
+class DoubleSpinBox;
 
 
 /**
@@ -44,7 +47,10 @@ private:
   QwtScaleWidget *m_scaleWidget;
   QLineEdit *m_minValueBox, *m_maxValueBox;
   QComboBox *m_scaleOptions;
+  QLabel *m_lblN;
+  DoubleSpinBox *m_dspnN;
   double m_minPositiveValue;
+  double m_nth_power;
   bool m_dragging;
   int m_y;
   DragType m_dtype;
