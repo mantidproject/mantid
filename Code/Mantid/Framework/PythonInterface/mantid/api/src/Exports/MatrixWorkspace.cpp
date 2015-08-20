@@ -229,7 +229,8 @@ void export_MatrixWorkspace() {
            args("self", "workspaceIndex"), "Creates a read-only numpy wrapper "
                                            "around the original Dx data at the "
                                            "given index")
-
+      .def("hasDx", &MatrixWorkspace::hasDx,args("self", "workspaceIndex"),
+           "Returns True if the spectrum uses the DX (X Error) array, else False.")
       //--------------------------------------- Write spectrum data
       //------------------------
       .def("dataX", (data_modifier)&MatrixWorkspace::dataX,
