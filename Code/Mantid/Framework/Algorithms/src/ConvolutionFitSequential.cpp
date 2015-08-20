@@ -443,6 +443,7 @@ void ConvolutionFitSequential::exec() {
     renamer->executeAsChildAlg();
   }
 }
+
 /**
  * Check function to establish if it is for one lorentzian or Two
  * @param subfunction The unchecked substring of the function
@@ -508,6 +509,13 @@ ConvolutionFitSequential::findValuesFromFunction(const std::string &function) {
   return result;
 }
 
+/**
+ * Searchs for a given fit parameter within the a vector of columnNames
+ * @param suffix - The string to search for within the columnName
+ * @param columns - A vector of column names to be searched through
+ * @return A vector of all the column names that contained the given suffix
+ * string
+ */
 std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
     const std::string &suffix, const std::vector<std::string> &columns) {
   auto fitParams = std::vector<std::string>();
@@ -535,22 +543,42 @@ ConvolutionFitSequential::columnToVector(const API::Column_sptr &column) {
   return result;
 }
 
+/**
+ * Inline function to Square a number
+ */
 static inline double computeSquare(double x) { return x * x; }
 
+/**
+ * Squares all the values inside a vector of type double
+ * @param target - The vector to be squared
+ * @return The vector after being squared
+ */
 std::vector<double>
 ConvolutionFitSequential::squareVector(std::vector<double> target) {
   std::transform(target.begin(), target.end(), target.begin(), computeSquare);
   return target;
 }
 
+/**
+ * Creates a vector of type double using the values of another vector
+ * @param original - The original vector to be cloned
+ * @return A clone of the original vector
+ */
 std::vector<double>
 ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
   auto result = std::vector<double>(original.begin(), original.end());
   return result;
 }
 
-MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
-    MatrixWorkspace_sptr &inputWs, const std::string &tempFitWsName) {
+/**
+ * Converts the input workspaces to get the Elastic Q axis
+ * @param inputWs - The MatrixWorkspace to be converted
+ * @param wsName - The desired name of the output workspace
+ * @return Shared pointer to the converted workspace
+ */
+MatrixWorkspace_sptr
+ConvolutionFitSequential::convertInputToElasticQ(MatrixWorkspace_sptr &inputWs,
+                                                 const std::string &wsName) {
   auto tempFitWs = WorkspaceFactory::Instance().create(
       "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
@@ -558,7 +586,7 @@ MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
-    convSpec->setProperty("OutputWorkSpace", tempFitWsName);
+    convSpec->setProperty("OutputWorkSpace", wsName);
     convSpec->setProperty("Target", "ElasticQ");
     convSpec->setProperty("EMode", "Indirect");
     convSpec->executeAsChildAlg();
@@ -570,7 +598,7 @@ MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
     }
     auto cloneWs = createChildAlgorithm("CloneWorkspace");
     cloneWs->setProperty("InputWorkspace", inputWs);
-    cloneWs->setProperty("OutputWorkspace", tempFitWsName);
+    cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
     tempFitWs = cloneWs->getProperty("OutputWorkspace");
     std::string tempName = tempFitWs->getName();
