@@ -336,13 +336,14 @@ void ExtractSpectra::execEvent() {
 
     bool hasDx = eventW->hasDx(i);
 
-    if (!m_commonBoundaries)
+    if (!m_commonBoundaries) {
       // If the X axis is NOT common, then keep the initial X axis, just clear
       // the events
       outEL.setX(el.dataX());
       if (hasDx) {
         outEL.setDx(el.dataDx());
       }
+    }
     else {
       // Common bin boundaries get all set to the same value
       outEL.setX(XValues_new);
