@@ -86,6 +86,8 @@ public:
   void loadColorMap(const QString& ,bool reset_colors = true);
   /// Change the colormap scale type.
   void changeScaleType(int);
+  /// Change the colormap power scale exponent.
+  void changeNthPower(double);
   /// Get the file name of the current color map.
   QString getCurrentColorMap()const{return m_currentColorMapFilename;}
   /// Toggle colormap scale autoscaling.

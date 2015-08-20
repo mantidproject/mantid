@@ -62,6 +62,7 @@ ColorMapWidget::ColorMapWidget(int type,QWidget* parent,const double& minPositiv
   m_lblN->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
   m_dspnN = new DoubleSpinBox();
   m_dspnN->setValue(m_nth_power);
+  connect(m_dspnN, SIGNAL(valueChanged(double)), this, SLOT(nPowerChanged(double)));
 
   QGridLayout* options_layout = new QGridLayout;
   options_layout->addWidget(m_scaleOptions, 1, 0, 1, 2);
@@ -86,6 +87,11 @@ void ColorMapWidget::scaleOptionsChanged(int i)
   else m_dspnN->setEnabled(false);
 
   emit scaleTypeChanged(m_scaleOptions->itemData(i).toUInt());
+}
+
+void ColorMapWidget::nPowerChanged(double nth_power)
+{
+  emit nthPowerChanged(nth_power);
 }
 
 /**
@@ -221,6 +227,11 @@ int ColorMapWidget::getScaleType()const
 void ColorMapWidget::setScaleType(int type)
 {
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
+}
+
+void ColorMapWidget::setNthPower(double nth_power)
+{
+  m_dspnN->setValue(nth_power);
 }
 
 /**
