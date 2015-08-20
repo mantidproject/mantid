@@ -44,16 +44,16 @@ void TOFSANSResolutionByPixel::init() {
                   "Name of the newly created workspace which contains the Q resolution.");
   auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
-  declareProperty("DeltaR", 0.0, positiveDouble, "Pixel size (mm).");
+  declareProperty("DeltaR", 0.0, positiveDouble, "Virtual ring width on the detector (mm).");
   declareProperty("SampleApertureRadius", 0.0, positiveDouble,
-                  "Sample aperture radius (mm).");
+                  "Sample aperture radius, R2 (mm).");
   declareProperty("SourceApertureRadius", 0.0, positiveDouble,
-                  "Source aperture radius (mm).");
+                  "Source aperture radius, R1 (mm).");
   declareProperty(new WorkspaceProperty<>(
                       "SigmaModerator", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
-                  "Sigma moderator spread in units of microsec as a function "
-                  "of wavelength.");
+                  "Moderator time spread (microseconds) as a"
+                  "function of wavelength (Angstroms).");
   declareProperty("CollimationLength", 0.0, positiveDouble, "Collimation length (m)");
   declareProperty("AccountForGravity", false,
                   "Whether to correct for the effects of gravity");
