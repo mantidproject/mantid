@@ -571,50 +571,62 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     """
     if rAnds.fitScale==False and rAnds.fitShift==False:
         return rAnds.scale, rAnds.shift
+    # We need to make suret that the fitting only occurs in the y direction
+    constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
+
     #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
+                Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
+                Ties='f0.Scaling='+str(rAnds.scale)+ constant_x_shift_and_scale,
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
+                Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+                Ties='f0.Scaling=' + str(rAnds.scale) + constant_x_shift_and_scale,
                 Output="__fitRescaleAndShift")
     elif rAnds.fitShift==False:
         if rAnds.qRangeUserSelected:
-            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
-            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
-            logger.warning('function input ' + str(function_input))
-
             Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
+                Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+                Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
+                Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
+                Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
                 Output="__fitRescaleAndShift")
     else:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",
+                Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+                Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
-            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",Output="__fitRescaleAndShift")
+            Fit(InputWorkspace=rearData,
+                Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
+                Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
+                Output="__fitRescaleAndShift")
 
     param = mtd['__fitRescaleAndShift_Parameters']
 
-    row1 = param.row(0).items()
-    row2 = param.row(1).items()
-    row3 = param.row(2).items()
-    scale = row1[1][1]
-    chiSquared = row3[1][1]
+    # The outparameters are:
+    # 1. Scaling in y direction
+    # 2. Shift in x direction
+    # 3. Scaling in x direction
+    # 4. Shift in y direction
+    # 5. Chi^2 value
+    row0 = param.row(0).items()
+    row1 = param.row(1).items()
+    row2 = param.row(2).items()
+    row3 = param.row(3).items()
+    row4 = param.row(4).items()
+
+    scale = row0[1][1]
+    # In order to determine the shift, we need to remove the scale factor
+    shift = row3[1][1]/scale
+    chiSquared = row4[1][1]
 
     fitSuccess = True
     if not chiSquared > 0:
@@ -626,8 +638,6 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
 
     if fitSuccess == False:
         return rAnds.scale, rAnds.shift
-
-    shift = row2[1][1] / scale
 
     delete_workspaces('__fitRescaleAndShift_Parameters')
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix')
