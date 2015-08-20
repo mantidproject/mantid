@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -52,6 +53,8 @@ private:
   std::vector<double> columnToVector(const API::Column_sptr &);
   std::vector<double> squareVector(std::vector<double>);
   std::vector<double> cloneVector(const std::vector<double> &);
+  API::MatrixWorkspace_sptr convertInputToElasticQ(API::MatrixWorkspace_sptr &,
+                                              const std::string &);
 };
 
 } // namespace Algorithms

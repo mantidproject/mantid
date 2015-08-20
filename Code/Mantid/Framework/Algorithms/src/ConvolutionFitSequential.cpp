@@ -183,33 +183,7 @@ void ConvolutionFitSequential::exec() {
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
-  auto tempFitWs = WorkspaceFactory::Instance().create(
-      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
-  auto axis = inputWs->getAxis(1);
-  if (axis->isSpectra()) {
-    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
-    convSpec->setAlwaysStoreInADS(true);
-    convSpec->setProperty("InputWorkSpace", inputWs);
-    convSpec->setProperty("OutputWorkSpace", tempFitWsName);
-    convSpec->setProperty("Target", "ElasticQ");
-    convSpec->setProperty("EMode", "Indirect");
-    convSpec->executeAsChildAlg();
-    tempFitWs = convSpec->getProperty("OutputWorkspace");
-  } else if (axis->isNumeric()) {
-    // Check that units are Momentum Transfer
-    if (axis->unit()->unitID() != "MomentumTransfer") {
-      throw std::runtime_error("Input must have axis values of Q");
-    }
-    auto cloneWs = createChildAlgorithm("CloneWorkspace");
-    cloneWs->setProperty("InputWorkspace", inputWs);
-    cloneWs->setProperty("OutputWorkspace", tempFitWsName);
-    cloneWs->executeAsChildAlg();
-    tempFitWs = cloneWs->getProperty("OutputWorkspace");
-    std::string tempName = tempFitWs->getName();
-  } else {
-    throw std::runtime_error(
-        "Input workspace must have either spectra or numeric axis.");
-  }
+  auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
   // Fit all spectra in workspace
   std::string plotPeakInput = "";
@@ -393,7 +367,7 @@ void ConvolutionFitSequential::exec() {
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultWsName);
 
   // Set x units to be momentum transfer
-  axis = resultWs->getAxis(0);
+  auto axis = resultWs->getAxis(0);
   axis->setUnit("MomentumTransfer");
 
   // Handle sample logs
@@ -456,8 +430,8 @@ void ConvolutionFitSequential::exec() {
 
   // Rename Workspaces in group
   WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outputWsName + "_Workspaces");
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
+                                                                 "_Workspaces");
   auto groupWsNames = groupWs->getNames();
   renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   for (int i = specMin; i < specMax + 1; i++) {
@@ -466,7 +440,7 @@ void ConvolutionFitSequential::exec() {
     outName += boost::lexical_cast<std::string>(i);
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
-	renamer->executeAsChildAlg();
+    renamer->executeAsChildAlg();
   }
 }
 /**
@@ -573,6 +547,39 @@ std::vector<double>
 ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
   auto result = std::vector<double>(original.begin(), original.end());
   return result;
+}
+
+MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
+    MatrixWorkspace_sptr &inputWs, const std::string &tempFitWsName) {
+  auto tempFitWs = WorkspaceFactory::Instance().create(
+      "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
+  auto axis = inputWs->getAxis(1);
+  if (axis->isSpectra()) {
+    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
+    convSpec->setAlwaysStoreInADS(true);
+    convSpec->setProperty("InputWorkSpace", inputWs);
+    convSpec->setProperty("OutputWorkSpace", tempFitWsName);
+    convSpec->setProperty("Target", "ElasticQ");
+    convSpec->setProperty("EMode", "Indirect");
+    convSpec->executeAsChildAlg();
+    tempFitWs = convSpec->getProperty("OutputWorkspace");
+  } else if (axis->isNumeric()) {
+    // Check that units are Momentum Transfer
+    if (axis->unit()->unitID() != "MomentumTransfer") {
+      throw std::runtime_error("Input must have axis values of Q");
+    }
+    auto cloneWs = createChildAlgorithm("CloneWorkspace");
+    cloneWs->setProperty("InputWorkspace", inputWs);
+    cloneWs->setProperty("OutputWorkspace", tempFitWsName);
+    cloneWs->executeAsChildAlg();
+    tempFitWs = cloneWs->getProperty("OutputWorkspace");
+    std::string tempName = tempFitWs->getName();
+  } else {
+    throw std::runtime_error(
+        "Input workspace must have either spectra or numeric axis.");
+  }
+
+  return tempFitWs;
 }
 
 } // namespace Algorithms
