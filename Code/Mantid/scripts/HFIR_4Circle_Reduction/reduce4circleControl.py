@@ -90,6 +90,9 @@ class CWSCDReductionControl(object):
 
         self._myServerURL = ''
 
+        # Some set up
+        self._expNumber = None
+
         # Container for loaded workspaces
         self._spiceTableDict = {}
         # Container for loaded raw pt workspace
@@ -139,7 +142,7 @@ class CWSCDReductionControl(object):
 
         return
 
-    def does_raw_exist(self, exp_no, scan_no, pt_no):
+    def does_raw_loaded(self, exp_no, scan_no, pt_no):
         """
         Check whether the raw Workspace2D for a Pt. exists
         :param exp_no:
@@ -213,6 +216,10 @@ class CWSCDReductionControl(object):
         :param scan_list:
         :return:
         """
+        # Check
+        if self._expNumber is None:
+            raise RuntimeError('Experiment number is not set up for controller.')
+
         error_message = ''
 
         for scan_no in scan_list:
@@ -228,10 +235,13 @@ class CWSCDReductionControl(object):
 
             # Load SPICE file to Mantid
             spice_file_name = ret_obj
-            status, spice_table = self.load_spice_scan_file(self._expDataDict, scan_no, spice_file_name)
+            status, ret_obj = self.load_spice_scan_file(self._expNumber, scan_no, spice_file_name)
             if status is False:
-                error_message = spice_table
+                error_message = ret_obj
                 return False, error_message
+            else:
+                spice_table = self._spiceTableDict[(self._expNumber, scan_no)]
+                assert spice_table
             pt_no_list = self._getPtListFromTable(spice_table)
 
             # Download all single-measurement file
@@ -318,8 +328,9 @@ class CWSCDReductionControl(object):
         :param load_spice_scan:
         :return:
         """
+        print '[DB] Get Pt. for Exp %d Scan %d' % (exp_no, scan_no)
         table_ws = self._get_spice_workspace(exp_no, scan_no)
-        if table_ws is False:
+        if table_ws is None:
             if load_spice_scan is False:
                 return False, 'Spice file for Exp %d Scan %d is not loaded.' % (exp_no, scan_no)
             else:
@@ -621,8 +632,7 @@ class CWSCDReductionControl(object):
         return True, ''
 
     def set_exp_number(self, exp_number):
-        """
-        Set experiment number
+        """ Add experiment number
         :param exp_number:
         :return:
         """
@@ -632,7 +642,12 @@ class CWSCDReductionControl(object):
         return True
 
     def _add_raw_workspace(self, exp_no, scan_no, pt_no, raw_ws):
-        """
+        """ Add raw Pt.'s workspace
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :param raw_ws:
+        :return: None
         """
         self._rawDataDict[(exp_no, scan_no, pt_no)] = raw_ws
 
@@ -647,15 +662,16 @@ class CWSCDReductionControl(object):
         """
         assert(isinstance(exp_no, int))
         assert(isinstance(scan_no, int))
-        if self._spiceTableDict.has_key(exp_no) is False:
-            self._spiceTableDict[exp_no] = {}
-
+        assert(isinstance(spice_table_ws, mantid.dataobjects._dataobjects.TableWorkspace))
         self._spiceTableDict[(exp_no, scan_no)] = spice_table_ws
 
         return
 
     def _get_spice_workspace(self, exp_no, scan_no):
-        """
+        """ Get SPICE's scan table workspace
+        :param exp_no:
+        :param scan_no:
+        :return: Table workspace or None
         """
         try:
             ws = self._spiceTableDict[exp_no][scan_no]

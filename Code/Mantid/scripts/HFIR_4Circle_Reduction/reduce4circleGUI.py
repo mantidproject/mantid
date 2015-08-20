@@ -11,6 +11,7 @@ import csv
 from PyQt4 import QtCore, QtGui
 
 import reduce4circleControl as r4c
+import guiutility as gutil
 
 try:
     import mantid
@@ -260,10 +261,14 @@ class MainWindow(QtGui.QMainWindow):
             valid, scan_list = fcutil.parse_int_array(scan_list_str)
             if valid is False:
                 error_message = scan_list
-                self.pop_one_button_dialog(scan_list)
+                self.pop_one_button_dialog(error_message)
         else:
             # Get all scans
-            exp_no = self._parse_integers_editor(self.ui.lineEdit_exp)
+            status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp])
+            if status is False:
+                self.pop_one_button_dialog(ret_obj)
+                return
+            exp_no = ret_obj
             assert(isinstance(exp_no, int))
             server_url = str(self.ui.lineEdit_url.text())
             scan_list = fcutil.get_scans_list(server_url, exp_no, return_list=True)
@@ -296,8 +301,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Find peak in a given scan/pt and record it
         """
         # Get experiment, scan and pt
-        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp, self.ui.lineEdit_scanNumber,
-                                                       self.ui.lineEdit_ptNumber])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_scanNumber,
+                                                        self.ui.lineEdit_ptNumber])
         if status is True:
             exp_no, scan_no, pt_no = ret_obj
         else:
@@ -338,9 +344,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot the Pt.
         """
         # Get measurement pt and the file number
-        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
-                                                       self.ui.lineEdit_run,
-                                                       self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo])
         if status is True:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
@@ -358,9 +364,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot the Pt.
         """
         # Get measurement pt and the file number
-        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
-                                                       self.ui.lineEdit_run,
-                                                       self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo])
         if status is True:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
@@ -386,9 +392,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot the Pt.
         """
         # Get measurement pt and the file number
-        status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
-                                                       self.ui.lineEdit_run,
-                                                       self.ui.lineEdit_rawDataPtNo])
+        status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                        self.ui.lineEdit_run,
+                                                        self.ui.lineEdit_rawDataPtNo])
         if status is True:
             exp_no = ret_obj[0]
             scan_no = ret_obj[1]
@@ -448,10 +454,10 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Set up dictionary
-        save_dict = {}
+        save_dict = dict()
+
         save_dict['lineEdit_exp'] = str(self.ui.lineEdit_exp.text())
         save_dict['lineEdit_localSpiceDir'] = str(self.ui.lineEdit_localSpiceDir.text())
-
         save_dict['comboBox_mode'] = self.ui.comboBox_mode.currentIndex()
 
         # Save to csv file
@@ -498,7 +504,7 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # Get parameters
-        status, inp_list = self._parse_integers_editor([self.ui.lineEdit_exp, self.ui.lineEdit_run])
+        status, inp_list = gutil.parse_integers_editors([self.ui.lineEdit_exp, self.ui.lineEdit_run])
         if status is False:
             self.pop_one_button_dialog(inp_list)
             return
@@ -550,16 +556,16 @@ class MainWindow(QtGui.QMainWindow):
         # Load Data for Pt's xml file
         does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)
 
-
-        status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
-        if status is False:
-            if self._allowDownload is True:
-                status, error_message = self._myControl.download_spice_xml_file(exp_no, scan_no)
-                if status is False:
+        if does_exist is False:
+            status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
+            if status is False:
+                if self._allowDownload is True:
+                    status, error_message = self._myControl.download_spice_xml_file(exp_no, scan_no)
+                    if status is False:
+                        self.pop_one_button_dialog(error_message)
+                        return
+                else:
                     self.pop_one_button_dialog(error_message)
-                    return
-            else:
-                self.pop_one_button_dialog(error_message)
 
         #--------------> Good from here!
         # Convert a list of vector to 2D numpy array for imshow()
@@ -570,32 +576,3 @@ class MainWindow(QtGui.QMainWindow):
                                          hold_prev_image=False)
 
         return
-
-    def _parse_integers_editor(self, line_edit_list):
-        """
-        :param line_edit_list:
-        :return: (True, list of integers); (False, error message)
-        """
-        error_message = ''
-        integer_list = []
-
-        for line_edit in line_edit_list:
-            try:
-                str_value = str(line_edit.text()).strip()
-                int_value = int(str_value)
-            except ValueError as e:
-                error_message += 'Unable to parse to integer. %s\n' % (str(e))
-            else:
-                if str_value != '%d' % int_value:
-                    error_message += 'Value %s is not a proper integer.\n' % str_value
-                else:
-                    integer_list.append(int_value)
-                    print 'Value %s to %d' % (str_value, int_value)
-            # END-TRY
-        # END-FOR
-
-        if len(error_message) > 0:
-            self.pop_one_button_dialog(error_message)
-            return False, error_message
-
-        return True, integer_list
