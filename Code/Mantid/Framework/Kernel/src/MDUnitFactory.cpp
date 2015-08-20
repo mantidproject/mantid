@@ -38,7 +38,9 @@ MDUnitFactory_uptr makeMDUnitFactoryChain() {
   typedef MDUnitFactory_uptr FactoryType;
   auto first = FactoryType(new InverseAngstromsUnitFactory);
   first->setSuccessor(FactoryType(new ReciprocalLatticeUnitFactory))
-      .setSuccessor(FactoryType(new LabelUnitFactory));
+   // Add more factories here! 
+   // Make sure that LabelUnitFactory is the last in the chain to give a fall through
+    .setSuccessor(FactoryType(new LabelUnitFactory));
   return first;
 }
 

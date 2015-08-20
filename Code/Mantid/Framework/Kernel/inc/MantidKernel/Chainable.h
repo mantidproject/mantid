@@ -2,7 +2,6 @@
 #define MANTID_KERNEL_CHAINABLE_H_
 
 #include "MantidKernel/System.h"
-#include <boost/optional.hpp>
 #include <memory>
 
 namespace Mantid {
@@ -44,15 +43,19 @@ namespace Kernel {
 template <typename ChainableType> class DLLExport Chainable {
 protected:
   /// Successor factory
-  boost::optional<std::unique_ptr<ChainableType>> m_successor;
-
+  ///boost::optional<std::unique_ptr<ChainableType>> m_successor;
+  std::unique_ptr<ChainableType> m_successor;
 public:
   /// Set the successor
-  Chainable &setSuccessor(std::unique_ptr<ChainableType> successor) {
-    m_successor = std::unique_ptr<ChainableType>(successor.release());
-    return *(*m_successor);
+  Chainable &setSuccessor(std::unique_ptr<ChainableType>& successor) {
+    m_successor = std::move(successor);
+    return *m_successor;
   }
-  bool hasSuccessor() const { return m_successor.is_initialized(); }
+  Chainable &setSuccessor(std::unique_ptr<ChainableType>&& successor) {
+    m_successor = std::move(successor);
+    return *m_successor;
+  }
+  bool hasSuccessor() const { return m_successor.get() != NULL; }
   virtual ~Chainable() = 0;
 };
 

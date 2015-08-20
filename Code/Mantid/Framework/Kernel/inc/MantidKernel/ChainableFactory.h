@@ -47,7 +47,7 @@ public:
       return std::unique_ptr<Product>(this->createRaw(argument));
     } else {
       if (this->hasSuccessor()) {
-        return (*Chainable<Factory>::m_successor)->create(argument);
+        return Chainable<Factory>::m_successor->create(argument);
       } else {
         throw std::invalid_argument("No successor MDUnitFactory");
       }

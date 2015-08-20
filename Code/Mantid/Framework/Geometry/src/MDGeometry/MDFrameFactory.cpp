@@ -66,6 +66,7 @@ MDFrameFactory_uptr makeMDFrameFactoryChain() {
   auto first = FactoryType(new QLabFrameFactory);
   first->setSuccessor(FactoryType(new QSampleFrameFactory))
       .setSuccessor(FactoryType(new HKLFrameFactory))
+      // Make sure that GeneralFrameFactory is the last in the chain to give a fall-through option 
       .setSuccessor(FactoryType(new GeneralFrameFactory));
   return first;
 }
