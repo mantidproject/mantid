@@ -363,7 +363,7 @@ void ConvolutionFitSequential::exec() {
   renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i));
-    std::string outName = outputWs->getName() + "_";
+    std::string outName = outputWsName + "_";
     outName += boost::lexical_cast<std::string>(i);
     outName += "_Workspace";
     renamer->setProperty("OutputWorkspace", outName);
