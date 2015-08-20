@@ -618,8 +618,6 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     # 4. Shift in y direction
     # 5. Chi^2 value
     row0 = param.row(0).items()
-    row1 = param.row(1).items()
-    row2 = param.row(2).items()
     row3 = param.row(3).items()
     row4 = param.row(4).items()
 
