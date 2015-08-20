@@ -73,6 +73,9 @@ class EnggFocus(PythonAlgorithm):
     	# Leave the data for the bank we are interested in only
         wks = EnggUtils.cropData(self, wks, indices)
 
+        prog = Progress(self, start=0, end=1, nreports=3)
+
+        prog.report('Preparing input workspace')
         # Leave data for the same bank in the vanadium workspace too
         vanWS = self.getProperty('VanadiumWorkspace').value
         vanIntegWS = self.getProperty('VanIntegrationWorkspace').value
@@ -87,9 +90,11 @@ class EnggFocus(PythonAlgorithm):
     	# Convert to dSpacing
         wks = EnggUtils.convertToDSpacing(self, wks)
 
+        prog.report('Summing spectra')
     	# Sum the values
         wks = EnggUtils.sumSpectra(self, wks)
 
+        prog.report('Preparing output workspace')
     	# Convert back to time of flight
         wks = EnggUtils.convertToToF(self, wks)
 

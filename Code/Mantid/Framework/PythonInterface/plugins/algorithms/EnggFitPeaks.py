@@ -139,7 +139,10 @@ class EnggFitPeaks(PythonAlgorithm):
         foundPeaks = peaks[0]
         fittedPeaks = self._createFittedPeaksTable(peaksTableName)
 
+        prog = Progress(self, start=0, end=1, nreports=foundPeaks.rowCount())
+
         for i in range(foundPeaks.rowCount()):
+            prog.report('Fitting peak number ' + str(i+1))
 
             row = foundPeaks.row(i)
             # Peak parameters estimated by FindPeaks
