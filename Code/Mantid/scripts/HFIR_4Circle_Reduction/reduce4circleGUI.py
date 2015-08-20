@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904
+#pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921
 ################################################################################
 #
 # MainWindow application for reducing HFIR 4-circle
@@ -9,8 +9,6 @@ import os
 import csv
 
 from PyQt4 import QtCore, QtGui
-import PyQt4.QtCore
-import PyQt4.QtGui
 
 import reduce4circleControl as r4c
 
@@ -244,7 +242,7 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_workDir.setText(work_dir)
 
         return
-    
+
     def doCalUBMatrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
         """
@@ -265,7 +263,9 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog(scan_list)
         else:
             # Get all scans
-            # FIXME - Implement all scan case
+            exp_no = self._parse_integers_editor(self.ui.lineEdit_exp)
+            assert(isinstance(exp_no, int))
+            server_url = str(self.ui.lineEdit_url.text())
             scan_list = fcutil.get_scans_list(server_url, exp_no, return_list=True)
         self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
 
@@ -291,7 +291,7 @@ class MainWindow(QtGui.QMainWindow):
         self._myControl.download_data_set(scan_list)
 
         return
-    
+
     def do_find_peak(self):
         """ Find peak in a given scan/pt and record it
         """
@@ -335,7 +335,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_plot_pt_raw(self):
-        """ Plot the Pt. 
+        """ Plot the Pt.
         """
         # Get measurement pt and the file number
         status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
@@ -353,9 +353,9 @@ class MainWindow(QtGui.QMainWindow):
         self._plot_raw_xml_2d(exp_no, scan_no, pt_no)
 
         return
-        
+
     def do_plot_prev_pt_raw(self):
-        """ Plot the Pt. 
+        """ Plot the Pt.
         """
         # Get measurement pt and the file number
         status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
@@ -383,7 +383,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def do_plot_next_pt_raw(self):
-        """ Plot the Pt. 
+        """ Plot the Pt.
         """
         # Get measurement pt and the file number
         status, ret_obj = self._parse_integers_editor([self.ui.lineEdit_exp,
@@ -467,11 +467,10 @@ class MainWindow(QtGui.QMainWindow):
 
     def load_session(self, filename=None):
         """
-        To read it back:
+        To load a session, i.e., read it back:
         :param filename:
         :return:
         """
-        # TODO - Doc!
         if filename is None:
             filename = 'session_backup.csv'
 

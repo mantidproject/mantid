@@ -139,6 +139,24 @@ class CWSCDReductionControl(object):
 
         return
 
+    def does_raw_exist(self, exp_no, scan_no, pt_no):
+        """
+        Check whether the raw Workspace2D for a Pt. exists
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :return:
+        """
+        return (exp_no, scan_no, pt_no) in self._rawDataDict
+
+    def does_spice_loaded(self, exp_no, scan_no):
+        """ Check whether a SPICE file has been loaded
+        :param exp_no:
+        :param scan_no:
+        :return:
+        """
+        return (exp_no, scan_no) in self._spiceTableDict
+
     def download_spice_file(self, exp_number, scan_number, over_write):
         """
         Download a scan/pt data from internet
@@ -210,7 +228,7 @@ class CWSCDReductionControl(object):
 
             # Load SPICE file to Mantid
             spice_file_name = ret_obj
-            status, spice_table = self.load_spice_scan_file(scan_no, spice_file_name)
+            status, spice_table = self.load_spice_scan_file(self._expDataDict, scan_no, spice_file_name)
             if status is False:
                 error_message = spice_table
                 return False, error_message
@@ -374,7 +392,7 @@ class CWSCDReductionControl(object):
 
         return True, ""
 
-    def load_spice_scan_file(self, exp_no, scan_no, spice_file_name=None):
+    def load_spice_scan_file(self, exp_no, scan_no=None, spice_file_name=None):
         """
         Load a SPICE scan file to table workspace and run information matrix workspace.
         :param scan_no:
@@ -382,8 +400,10 @@ class CWSCDReductionControl(object):
         :return: status (boolean), error message (string)
         """
         # Check whether the workspace has been loaded
+        assert(isinstance(exp_no, int))
+        assert(isinstance(scan_no, int))
         out_ws_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
-        if self._rawDataDict.has_key((exp_no, scan_no)) is True:
+        if (exp_no, scan_no) in self._spiceTableDict:
             return True, out_ws_name
 
         # Form standard name for a SPICE file if name is not given
@@ -614,13 +634,7 @@ class CWSCDReductionControl(object):
     def _add_raw_workspace(self, exp_no, scan_no, pt_no, raw_ws):
         """
         """
-        if self._rawDataDict.has_key(exp_no) is False:
-            self._rawDataDict[exp_no] = {}
-
-        if self._rawDataDict[exp_no].has_key(scan_no) is False:
-            self._rawDataDict[exp_no][scan_no] = {}
-
-        self._rawDataDict[exp_no][scan_no][pt_no] = raw_ws
+        self._rawDataDict[(exp_no, scan_no, pt_no)] = raw_ws
 
         return
 
@@ -631,10 +645,12 @@ class CWSCDReductionControl(object):
     def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
         """
         """
+        assert(isinstance(exp_no, int))
+        assert(isinstance(scan_no, int))
         if self._spiceTableDict.has_key(exp_no) is False:
             self._spiceTableDict[exp_no] = {}
 
-        self._spiceTableDict[exp_no][scan_no] = spice_table_ws
+        self._spiceTableDict[(exp_no, scan_no)] = spice_table_ws
 
         return
 
@@ -652,7 +668,7 @@ class CWSCDReductionControl(object):
         """
         """
         try:
-            ws = self._rawDataDict[exp_no][scan_no][pt_no]
+            ws = self._rawDataDict[(exp_no, scan_no, pt_no)]
         except KeyError:
             return None
 
