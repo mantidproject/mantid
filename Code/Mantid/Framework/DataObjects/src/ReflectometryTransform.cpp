@@ -24,9 +24,27 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace {void writeRow(Mantid::API::TableRow &row, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
-    row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
-}
+namespace {
+    /** 
+    *  Writes one row to an existing table
+    */
+    void writeRow(boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>> &vertexes, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
+        TableRow row = (*vertexes)->appendRow();
+        row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
+    }
+    /**
+    *  Adds the column headings to a table
+    *  @param vertexes : Table to which the columns are written to.
+    */
+    void addColumnHeadings(boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>> &vertexes) {
+
+        (*vertexes)->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
+        (*vertexes)->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
+        (*vertexes)->addColumn("int", "OriginIndex");
+        (*vertexes)->addColumn("int", "OriginBin");
+        (*vertexes)->addColumn("double", "CellSignal");
+        (*vertexes)->addColumn("double", "CellError");
+    }
 }
 namespace Mantid {
 namespace DataObjects {
@@ -229,28 +247,10 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   return ws;
 }
 
-boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
-createTable(boost::optional<
-            boost::shared_ptr<Mantid::DataObjects::TableWorkspace>> &vertexes) {
-  (*vertexes)->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
-  (*vertexes)->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
-  (*vertexes)->addColumn("int", "OriginIndex");
-  (*vertexes)->addColumn("int", "OriginBin");
-  (*vertexes)->addColumn("double", "CellSignal");
-  (*vertexes)->addColumn("double", "CellError");
-
-  return vertexes;
-}
-
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
     boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
         &vertexes) const {
-  // Create a table for the output if we want to debug vertex positioning
-  if (vertexes) {
-    vertexes = createTable(vertexes);
-  }
-
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
@@ -282,7 +282,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   // Holds the spectrum-detector mapping
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
-
+  // Create a table for the output if we want to debug vertex positioning
+  addColumnHeadings(vertexes);
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {
@@ -331,17 +332,12 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
             outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
         detIDMapping.push_back(detector->getID());
       }
-
       // Debugging
       if (vertexes) {
-        TableRow row = (*vertexes)->appendRow();
-        writeRow(row, ll, i, j, signal, error);
-        row = (*vertexes)->appendRow();
-        writeRow(row, ul, i, j, signal, error);
-        row = (*vertexes)->appendRow();
-        writeRow(row, ur, i, j, signal, error);
-        row = (*vertexes)->appendRow();
-        writeRow(row, lr, i, j, signal, error);
+        writeRow(vertexes, ll, i, j, signal, error);
+        writeRow(vertexes, ul, i, j, signal, error);
+        writeRow(vertexes, ur, i, j, signal, error);
+        writeRow(vertexes, lr, i, j, signal, error);
       }
     }
   }
