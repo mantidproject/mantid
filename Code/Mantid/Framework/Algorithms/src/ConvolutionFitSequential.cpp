@@ -146,11 +146,11 @@ void ConvolutionFitSequential::exec() {
 
   // Inspect function to obtain fit Type and background
   std::vector<std::string> functionValues = findValuesFromFunction(function);
-  const std::string fTypeName = functionValues[0];
+  const std::string LorentzNum = functionValues[0];
   const std::string backgroundName = functionValues[1];
   const std::string funcName = functionValues[2];
   bool usingLorentzians = false;
-  if (boost::lexical_cast<int>(fTypeName) > 0) {
+  if (boost::lexical_cast<int>(LorentzNum) > 0) {
     usingLorentzians = true;
   }
 
@@ -166,7 +166,7 @@ void ConvolutionFitSequential::exec() {
   // Add logger information
   m_log.information("Input files: " + inputWs->getName());
   m_log.information("Fit type: Delta=" + usingDelta + "; Lorentzians=" +
-                    fTypeName);
+                    LorentzNum);
   m_log.information("Background type: " + backgroundName);
 
   // Output workspace name
@@ -175,15 +175,17 @@ void ConvolutionFitSequential::exec() {
   if (pos != std::string::npos) {
     outputWsName = outputWsName.substr(0, pos + 1);
   }
-  if (fTypeName.compare("0") != 0) {
-    outputWsName += "conv_" + fTypeName + "L" + backgroundName + "_s";
-  } else {
-    outputWsName += "conv_" + backgroundName + "_s";
+  outputWsName += "conv_";
+  if (delta) {
+    outputWsName += "Delta";
   }
+  if (LorentzNum.compare("0") != 0) {
+    outputWsName += LorentzNum + "L";
+  }
+  outputWsName += backgroundName + "_s";
   outputWsName += boost::lexical_cast<std::string>(specMin);
   outputWsName += "_to_";
   outputWsName += boost::lexical_cast<std::string>(specMax);
-  auto outputWs = WorkspaceFactory::Instance().createTable();
 
   // Convert input workspace to get Q axis
   const std::string tempFitWsName = "__convfit_fit_ws";
@@ -221,7 +223,7 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
   plotPeaks->executeAsChildAlg();
 
-  outputWs =
+  ITableWorkspace_sptr outputWs =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWsName);
 
   // Delete workspaces
@@ -275,7 +277,7 @@ void ConvolutionFitSequential::exec() {
   pifp->setProperty("OutputWorkspace", resultWsName);
   pifp->executeAsChildAlg();
 
-  MatrixWorkspace_sptr resultWs =
+  API::MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultWsName);
 
   // Set x units to be momentum transfer
@@ -479,9 +481,8 @@ ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
  * @param wsName - The desired name of the output workspace
  * @return Shared pointer to the converted workspace
  */
-API::MatrixWorkspace_sptr
-ConvolutionFitSequential::convertInputToElasticQ(MatrixWorkspace_sptr &inputWs,
-                                                 const std::string &wsName) {
+API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
+    API::MatrixWorkspace_sptr &inputWs, const std::string &wsName) {
   auto tempFitWs = WorkspaceFactory::Instance().create(
       "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
@@ -517,7 +518,7 @@ ConvolutionFitSequential::convertInputToElasticQ(MatrixWorkspace_sptr &inputWs,
  * Calculates the EISF if the fit includes a Delta function
  * @param tableWs - The TableWorkspace to append the EISF calculation to
  */
-void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs) {
+void ConvolutionFitSequential::calculateEISF(API::ITableWorkspace_sptr &tableWs) {
   // Get height data from parameter table
   auto columns = tableWs->getColumnNames();
   std::string height = searchForFitParams("Height", columns).at(0);
