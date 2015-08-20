@@ -1,4 +1,5 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include <stdexcept>
 
 namespace {
 
