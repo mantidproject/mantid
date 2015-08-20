@@ -76,6 +76,7 @@ set ( SRC_FILES
 	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
+	src/ParameterEstimator.cpp
 	src/PawleyFit.cpp
 	src/PawleyFunction.cpp
 	src/PeakParameterFunction.cpp
@@ -200,6 +201,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/ParameterEstimator.h
 	inc/MantidCurveFitting/PawleyFit.h
 	inc/MantidCurveFitting/PawleyFunction.h
 	inc/MantidCurveFitting/PeakParameterFunction.h
@@ -314,6 +316,7 @@ set ( TEST_FILES
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
+	ParameterEstimatorTest.h
 	PawleyFitTest.h
 	PawleyFunctionTest.h
 	PeakParameterFunctionTest.h

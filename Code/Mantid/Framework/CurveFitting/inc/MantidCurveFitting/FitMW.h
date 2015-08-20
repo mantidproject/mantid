@@ -128,9 +128,7 @@ private:
       const boost::shared_ptr<API::FunctionDomain> &domain,
       boost::shared_ptr<API::FunctionValues> resultValues) const;
   /// Set initial values for parameters with default values. 
-  void setInitialValues(API::IFunction& function, const API::FunctionDomain1D &domain, API::FunctionValues &values);
-  /// Test if initial values need to be set before fitting
-  static bool FitMW::needSettingInitialValues(const API::IFunction& function);
+  void setInitialValues(API::IFunction& function);
 
   /// Store workspace property name
   std::string m_workspacePropertyName;
@@ -158,7 +156,7 @@ private:
   /// Option to normalise the data
   mutable bool m_normalise;
   /// Store the created domain and values
-  mutable boost::weak_ptr<API::FunctionDomain> m_domain;
+  mutable boost::weak_ptr<API::FunctionDomain1D> m_domain;
   mutable boost::weak_ptr<API::FunctionValues> m_values;
   size_t m_startIndex;
 };

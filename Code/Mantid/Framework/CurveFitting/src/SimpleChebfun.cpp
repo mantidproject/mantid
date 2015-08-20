@@ -19,6 +19,13 @@ SimpleChebfun::SimpleChebfun(size_t n, ChebfunFunctionType fun, double start,
   m_P = m_base->fit(fun);
 }
 
+SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction& fun, double start,
+                             double end)
+    : m_badFit(false) {
+  m_base = boost::make_shared<ChebfunBase>(n, start, end);
+  m_P = m_base->fit(fun);
+}
+
 /// Constructs a SimpleChebfun that approximates a function to a given accuracy
 /// in an interval of x-values.
 /// The approximation may fail (too large interval, function discontinuous, etc).
@@ -33,6 +40,18 @@ SimpleChebfun::SimpleChebfun(ChebfunFunctionType fun, double start, double end,
                              double accuracy, size_t badSize)
     : m_badFit(false) {
   m_base = ChebfunBase::bestFitAnyTolerance<ChebfunFunctionType>(
+      start, end, fun, m_P, m_A, accuracy);
+  if (!m_base) {
+    m_base = boost::make_shared<ChebfunBase>(badSize - 1, start, end, accuracy);
+    m_P = m_base->fit(fun);
+    m_badFit = true;
+  }
+}
+
+SimpleChebfun::SimpleChebfun(const API::IFunction& fun, double start, double end,
+                             double accuracy, size_t badSize)
+    : m_badFit(false) {
+  m_base = ChebfunBase::bestFitAnyTolerance<const API::IFunction&>(
       start, end, fun, m_P, m_A, accuracy);
   if (!m_base) {
     m_base = boost::make_shared<ChebfunBase>(badSize - 1, start, end, accuracy);
@@ -57,6 +76,15 @@ SimpleChebfun::SimpleChebfun(ChebfunBase_sptr base): m_badFit(false) {
   m_base = base;
   m_P.resize(base->size());
 }
+
+/// Get a reference to the Chebyshev expansion coefficients
+const std::vector<double> &SimpleChebfun::coeffs() const {
+  if (m_A.empty()) {
+    m_A = m_base->calcA(m_P);
+  }
+  return m_A;
+}
+
 
 /// Evaluate the function.
 /// @param x :: Point where the function is evaluated.
@@ -87,6 +115,37 @@ SimpleChebfun SimpleChebfun::derivative() const {
    return cheb;
 }
 
+/// Create an integral of this function.
+SimpleChebfun SimpleChebfun::integral() const {
+  if (m_A.empty()) {
+    m_A = m_base->calcA(m_P);
+  }
+  std::vector<double> A;
+  auto base = m_base->integral(m_A, A);
+  SimpleChebfun cheb(base);
+  cheb.m_P = base->calcP(A);
+  cheb.m_A = A;
+  return cheb;
+}
+
+/// Get rough estimates of the roots.
+/// @param level :: An optional right-hand-side of equation (*this)(x) == level.
+std::vector<double> SimpleChebfun::roughRoots(double level) const {
+  std::vector<double> rs;
+  if (m_P.empty()) return rs;
+  auto &x = m_base->xPoints();
+  auto y1 = m_P.front() - level;
+  for(size_t i = 1; i < m_P.size(); ++i) {
+    auto y = m_P[i] - level;
+    if (y == 0.0) {
+      rs.push_back(x[i]);
+    } else if (y1 * y < 0.0) {
+      rs.push_back((x[i] + x[i-1]) / 2);
+    }
+    y1 = y;
+  }
+  return rs;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

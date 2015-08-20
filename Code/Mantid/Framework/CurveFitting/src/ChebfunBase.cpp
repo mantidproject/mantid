@@ -843,7 +843,7 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
     // i0 should always be > 0 but in case something goes wrong make a check
     if ( i0 > 0 )
     {
-//      std::cerr << "Noise start index " << i0 << std::endl;
+      //std::cerr << "Noise start index " << i0 << std::endl;
 
       // high frequency filter values: smooth decreasing function
       double ri0f = static_cast<double>(i0 + 1);
@@ -852,32 +852,55 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
       double a1 = (xy - ri0f*xm*ym)/(xx-ri0f*xm*xm);
       double b1 = ym - a1*xm;
 
-      //      std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << std::endl;
+      //std::cerr << "(a1,b1) = (" << a1 << ',' << b1 << ')' << std::endl;
 
-      // calculate coeffs of a quadratic c2*i^2 + c1*i + c0
+      // calculate coeffs of a cubic c3*i^3 + c2*i^2 + c1*i + c0
       // which will replace the linear a1*i + b1 in building the
       // second part of the filter
-      double c0,c1,c2;
+      double c0,c1,c2,c3;
       {
           double x0 = double(i0+1);
           double x1 = double(n+1);
           double sigma = g_tolerance / noise / 10;
           double s = sigma / (1.0 - sigma);
-          double m2 = log(s);
+          double m1 = log(s);
           double m0 = a1*x0 + b1;
-          double m1 = a1*x1 + b1;
-          c2 = ( m2 - m0 - a1 *(x1-x0) ) / ((x1*x1-x0*x0) - 2 *x0*(x1-x0));
-          c1 = a1 - 2 * c2 * x0;
-          c0 = m0 - c2*x0*x0 - c1 * x0;
+          if (a1 < 0.0) {
+            c3 = 0.0;
+            c2 = ( m1 - m0 - a1 *(x1-x0) ) / ((x1*x1-x0*x0) - 2 *x0*(x1-x0));
+            c1 = a1 - 2 * c2 * x0;
+            c0 = m0 - c2*x0*x0 - c1 * x0;
+          } else {
+            c3 = 0.0;
+            c2 = 0.0;
+            c1 = (m1 - m0) / (x1 - x0);
+            c0 = m0 - c1 * x0;
+            double tmp = exp(c1*double(i0+2) + c0);
+            tmp = tmp / (1.0 + tmp);
+            if (tmp > 0.1) {
+              m0 = 0.0;
+              double d0 = log(0.1/0.9);
+              c3 = (d0*(x0 - x1) - 2 *(m0 - m1)) / (pow(x0,3) - pow(x1,3) - 3 * x0 * x1 *(x0 - x1));
+              c2 = (3*c3*(x0*x0 - x1*x1) - d0) / (2*(x1 - x0));
+              c1 = -x1*(3*c3*x1 + 2*c2);
+              c0 = x1*x1*(2*c3*x1 + c2) + m1;
+            }
+          }
       }
+
+      //std::cerr << "(c2,c1,c0) = (" << c2 << ',' << c1 << ',' << c0 << ')' << std::endl;
 
       for(size_t i = i0; i < n; ++i)
       {
         //double s = exp(a1*static_cast<double>(i+1)+b1);
-          double s = double(i+1);
-          s = c0 + s*( c1 + s * c2 );
+        double s = double(i+1);
+        s = c0 + s * (c1 + s * (c2 + s * c3));
+        if (s > 100.0) {
+          wf[i] = 1.0;
+        } else {
           s = exp(s);
-        wf[i] = s / (1.0 + s);
+          wf[i] = s / (1.0 + s);
+        }
       }
 
     }

@@ -38,7 +38,11 @@ public:
   /// Constructor.
   SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end);
   /// Constructor.
+  SimpleChebfun(size_t n, const API::IFunction& fun, double start, double end);
+  /// Constructor.
   SimpleChebfun(ChebfunFunctionType fun, double start, double end, double accuracy = 0.0, size_t badSize = 10);
+  /// Constructor.
+  SimpleChebfun(const API::IFunction& fun, double start, double end, double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
   SimpleChebfun(const std::vector<double>& x, const std::vector<double>& y);
   /// Number of points in the approximation.
@@ -57,6 +61,8 @@ public:
   const std::vector<double> &xPoints() const { return m_base->xPoints(); }
   /// Get a reference to the y-points
   const std::vector<double> &yPoints() const { return m_P; }
+  /// Get a reference to the Chebyshev expansion coefficients
+  const std::vector<double> &coeffs() const;
   /// Evaluate the function.
   double operator()(double x) const;
   /// Evaluate the function.
@@ -65,6 +71,11 @@ public:
   std::vector<double> linspace(size_t n) const;
   /// Create a derivative of this function.
   SimpleChebfun derivative() const;
+  /// Create an integral of this function.
+  SimpleChebfun integral() const;
+  /// Get rough estimates of the roots
+  std::vector<double> roughRoots(double level = 0.0) const;
+  void setA(const std::vector<double>& a) {m_A = a; m_P = m_base->calcP(m_A);}
 private:
   /// Constructor
   SimpleChebfun(ChebfunBase_sptr base);
