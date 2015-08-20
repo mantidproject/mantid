@@ -260,7 +260,6 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   int pointsToRead = readEnd - readStart + 1;
   // Now stream sits at the first line of data
-  fileline = "";
   std::vector<double> columnOne, ydata, errdata, xError;
   columnOne.reserve(readEnd);
   ydata.reserve(readEnd);
@@ -533,8 +532,7 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries,
 
 /**
  * Checks if there is an x error present in the data set
- * @param stream:: the stream object
- * @param line: the 
+ * @param stream:: the stream object 
  */
 bool LoadRKH::hasXerror(std::ifstream &stream) {
   auto containsXerror = false;
