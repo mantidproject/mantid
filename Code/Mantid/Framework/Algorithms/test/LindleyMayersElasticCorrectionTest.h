@@ -29,7 +29,8 @@ public:
     TS_ASSERT_DELTA(0.00030887, absFactor, delta);
   }
 
-  void test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor() {
+  void
+  test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor() {
     LindleyMayersElasticCorrection mscat(createTestParameters());
     const size_t irp(0);
     const double muR(0.01), abs(0.0003);
@@ -39,13 +40,12 @@ public:
     TS_ASSERT_DELTA(0.00461391, absFactor.first, delta);
     TS_ASSERT_DELTA(67.25351289, absFactor.second, delta);
   }
-  
-  void xtest_default_corrects_both_absorption_and_multiple_scattering() {
+
+  void test_default_corrects_both_absorption_and_multiple_scattering() {
     LindleyMayersElasticCorrection mscat(createTestParameters());
-    // Histogram data
     const size_t nypts(100);
-    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(error.begin(), error.end(), error.begin(), sqrt);
+    std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
+    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
     double xcur(100.0);
     std::generate(tof.begin(), tof.end(), [&xcur] { return xcur++; });
 
@@ -53,22 +53,30 @@ public:
     mscat.apply(tof, signal, error);
 
     // Check some values
-    const double delta(1e-08);
+    const double delta(1e-06);
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
-    TS_ASSERT_DELTA(110.0, tof.back(), delta);
+    TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DIFFERS(2.0, signal.front());
-    TS_ASSERT_DIFFERS(2.0, signal.back());
+    TS_ASSERT_DELTA(-10.406096, signal.front(), delta);
+    TS_ASSERT_DELTA(-10.366438, signal.back(), delta);
 
-    TS_ASSERT_DIFFERS(sqrt(2.0), error.front());
-    TS_ASSERT_DIFFERS(sqrt(2.0), error.back());
+    TS_ASSERT_DELTA(-7.358221, error.front(), delta);
+    TS_ASSERT_DELTA(-7.330179, error.back(), delta);
   }
 
 private:
   ScatteringCorrectionParameters createTestParameters() {
     // A bit like a POLARIS spectrum
-    ScatteringCorrectionParameters pars = {14.0, 2.2, 0.10821, 0.0, 0.072, 5.08,
-                                           5.1,  0.0025, 0.04};
+    ScatteringCorrectionParameters pars;
+    pars.l1 = 14.0;
+    pars.l2 = 2.2;
+    pars.twoTheta = 0.10821;
+    pars.phi = 0.0;
+    pars.rho = 0.07261;
+    pars.sigmaSc = 5.1;
+    pars.sigmaAbs = 5.08;
+    pars.cylRadius = 0.0025;
+    pars.cylHeight = 0.04;
     return pars;
   }
 };

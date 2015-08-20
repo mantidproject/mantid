@@ -4,11 +4,15 @@
 #include "MantidAlgorithms/MultipleScattering/LindleyMayersElasticCorrection.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidKernel/Math/ChebyshevPolyFit.h"
+#include "MantidKernel/Math/Distributions/ChebyshevSeries.h"
 #include <cassert>
 #include <cmath>
 
-using Mantid::Kernel::MersenneTwister;
+using Mantid::Kernel::ChebyshevPolyFit;
+using Mantid::Kernel::ChebyshevSeries;
 using Mantid::Kernel::getStatistics;
+using Mantid::Kernel::MersenneTwister;
 using Mantid::Kernel::StatOptions;
 using std::pow;
 
@@ -28,6 +32,8 @@ size_t N_RAD = 29;
 size_t N_THETA = 29;
 /// Number of second order event points
 size_t N_SECOND = 10000;
+/// Order of polynomial used to fit generated points
+size_t N_POLY_ORDER = 4;
 /// 2pi
 double TWOPI = 2.0 * M_PI;
 
@@ -56,7 +62,6 @@ double integrate(const std::vector<double> &y, const double dx) {
   }
   return dx * (y.front() + 4.0 * sumOdd + 2.0 * sumEven + y.back()) / 3.0;
 }
-
 }
 
 namespace Mantid {
@@ -87,22 +92,30 @@ LindleyMayersElasticCorrection::~LindleyMayersElasticCorrection() {}
 void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
                                            std::vector<double> &signal,
                                            std::vector<double> &errors) {
-  UNUSED_ARG(tof);
-  UNUSED_ARG(signal);
-  UNUSED_ARG(errors);
+  const size_t ntof(tof.size());
+  assert(ntof == signal.size());
+  assert(ntof == errors.size());
+
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
-      yabs(N_MUR_PTS + 1, 1.0), // absorption signals
-      wabs(N_MUR_PTS + 1, 1.0), // absorption weights
-      yms(N_MUR_PTS + 1, 0.0), // multiple scattering signals 
+      yabs(N_MUR_PTS + 1, 1.0),  // absorption signals
+      wabs(N_MUR_PTS + 1, 1.0),  // absorption weights
+      yms(N_MUR_PTS + 1, 0.0),   // multiple scattering signals
       wms(N_MUR_PTS + 1, 100.0); // multiple scattering  weights
+
+  // Constants
+  const double vol = M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2);
+  //  Oct 2003 discussion with Jerry Mayers:
+  //  1E-22 factor in formula for RNS was introduced by Jerry to keep
+  //   multiple scattering correction close to 1
+  const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
 
   // Main loop over mur. Limit is nrpts but vectors are nrpts+1. First value set
   // by initial values above
   const double deltaR = muRmax() - muRmin();
   for (size_t i = 1; i < N_MUR_PTS + 1; ++i) {
     const double muR =
-        muRmin() + to<double>(i-1) * deltaR / to<double>(N_MUR_PTS - 1);
+        muRmin() + to<double>(i - 1) * deltaR / to<double>(N_MUR_PTS - 1);
     xmur[i] = muR;
 
     auto attenuation = calculateSelfAttenuation(muR);
@@ -115,7 +128,38 @@ void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
     yms[i] = mscat.first;
     wms[i] = mscat.second;
   }
-  // Fit polynomials to absorption values
+
+  // Fit polynomials to absorption values to interpolate to input data range
+  ChebyshevPolyFit polyfit(N_POLY_ORDER);
+  auto absCfs = polyfit(xmur, yabs, wabs);
+  auto msCfs = polyfit(xmur, yms, wms);
+
+  // corrections to input
+  const double muMin(xmur.front()), muMax(xmur.back()),
+      flightPath(m_pars.l1 + m_pars.l2), cylRadCM(m_pars.cylRadius * 1e2);
+  ChebyshevSeries chebyPoly(N_POLY_ORDER);
+
+  for (size_t i = 0; i < ntof; ++i) {
+    const double tsec = tof[i] * 1e-6;
+    const double veli = flightPath / tsec;
+    const double sigabs = m_pars.sigmaAbs * 2200.0 / veli;
+    const double sigt = sigabs + m_pars.sigmaSc;
+    // Dimensionless number - rho in (1/Angtroms^3), sigt in barns
+    // (1/Angstrom = 1e8/cm) * (barn = 1e-24cm) --> factors cancel out
+    const double rmu = m_pars.rho * sigt * cylRadCM;
+    // Varies between [-1,+1]
+    const double xcap = ((rmu - muMin) - (muMax - rmu)) / (muMax - muMin);
+    const double attenfact = chebyPoly(absCfs, xcap);
+    // multiple scatter
+    const double msVal = chebyPoly(msCfs, xcap);
+    const double beta = m_pars.sigmaSc * msVal / sigt;
+    const double msfact = (1.0 - beta) / rns;
+
+    // apply correction
+    const double yin(signal[i]), ein(errors[i]);
+    signal[i] *= msfact * attenfact;
+    errors[i] = signal[i] * ein / yin;
+  }
 }
 
 /**
@@ -123,7 +167,8 @@ void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
  * @param muR Single mu*r slice value
  * @return The self-attenuation factor for this sample
  */
-double LindleyMayersElasticCorrection::calculateSelfAttenuation(const double muR) {
+double
+LindleyMayersElasticCorrection::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -172,7 +217,7 @@ LindleyMayersElasticCorrection::calculateMS(const size_t irp, const double muR,
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
   double muH = muR * (m_pars.cylHeight / m_pars.cylRadius);
-  seedRNG(irp + 1);
+  seedRNG(irp);
 
   // Take an average over a number of sets of second scatters
   const size_t nsets(10);
