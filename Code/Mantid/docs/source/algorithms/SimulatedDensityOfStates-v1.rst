@@ -35,8 +35,8 @@ Usage
 .. testcode:: ExSimulatedDensityOfStatesSimple
 
     # Loading the same data from a castep and phonon file
-    phonon_ws = SimulatedDensityOfStates(File='squaricn.phonon')
-    castep_ws = SimulatedDensityOfStates(File='squaricn.castep')
+    phonon_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
+    castep_ws = SimulatedDensityOfStates(CASTEPFile='squaricn.castep')
 
     print CheckWorkspacesMatch(phonon_ws, castep_ws)
 
@@ -50,7 +50,8 @@ Output:
 
 .. testcode:: ExSimulatedDensityOfStatesPartial
 
-    squaricn = SimulatedDensityOfStates(File='squaricn.phonon', Ions=['H', 'C', 'O'])
+    squaricn = SimulatedDensityOfStates(PHONONFile='squaricn.phonon',
+                                        Ions=['H', 'C', 'O'])
 
     for name in squaricn.getNames():
       print name
@@ -67,8 +68,10 @@ Output:
 
 .. testcode:: ExSimulatedDensityOfStatesPartialSummed
 
-    sum_ws = SimulatedDensityOfStates(File='squaricn.phonon', Ions=['H', 'C', 'O'], SumContributions=True)
-    total_ws = SimulatedDensityOfStates(File='squaricn.phonon')
+    sum_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon',
+                                      Ions=['H', 'C', 'O'],
+                                      SumContributions=True)
+    total_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon')
 
     print CheckWorkspacesMatch(total_ws, sum_ws, Tolerance=1e-12)
 
@@ -82,7 +85,8 @@ Output:
 
 .. testcode:: ExSimulatedDensityOfStatesIonTable
 
-    ion_ws = SimulatedDensityOfStates(File='squaricn.phonon', SpectrumType='IonTable')
+    ion_ws = SimulatedDensityOfStates(PHONONFile='squaricn.phonon',
+                                      SpectrumType='IonTable')
     print ','.join(ion_ws.column('Species'))
 
 Output:
