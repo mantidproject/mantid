@@ -439,15 +439,12 @@ void ConvolutionFitSequential::exec() {
   }
 
   
-  WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-          outputWs->getName() + "_Workspaces");
-  auto logCopier2 = createChildAlgorithm("CopyLogs", -1, -1, false);
-  logCopier2->setProperty("InputWorkspace", resultWs);
-  logCopier2->setProperty("OutputWorkspace", (outputWs->getName() + "_Workspaces"));
-  logCopier2->executeAsChildAlg();
+  logCopier = createChildAlgorithm("CopyLogs", -1, -1, false);
+  logCopier->setProperty("InputWorkspace", resultWs);
+  logCopier->setProperty("OutputWorkspace", (outputWs->getName() + "_Workspaces"));
+  logCopier->executeAsChildAlg();
 
-  // Rename workspaces
+  // Rename TableWorkspace
   
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setAlwaysStoreInADS(true);
@@ -455,6 +452,8 @@ void ConvolutionFitSequential::exec() {
   renamer->setProperty("OutputWorkspace", (outputWs->getName() +
                                            "_Parameters"));
   renamer->executeAsChildAlg();
+
+  // Rename Workspaces in group
 
 }
 /**
