@@ -32,9 +32,14 @@ void ImageCoRViewQtGUI::initLayout() {
   m_ui.setupUi(this);
 
   QList<int> sizes;
-  sizes.push_back(700);
+  sizes.push_back(1000);
   sizes.push_back(100);
-  m_ui.splitter_img_horiz->setSizes(sizes);
+  m_ui.splitter_main_horiz->setSizes(sizes);
+
+  sizes.clear();
+  sizes.push_back(10);
+  sizes.push_back(1000);
+  m_ui.splitter_img_vertical->setSizes(sizes);
   m_ui.horizontalScrollBar_img_stack->setEnabled(false);
 
   setupConnections();
