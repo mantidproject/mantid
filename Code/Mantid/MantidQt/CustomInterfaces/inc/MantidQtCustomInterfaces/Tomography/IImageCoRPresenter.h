@@ -53,7 +53,8 @@ public:
     SelectNormalization,  ///< Start selection of the normalization region
     FinishedCoR,          ///< A CoR has been picked
     FinishedROI,          ///< The ROI is selected
-    FinishedNormalization ///< The normalization regions is selected
+    FinishedNormalization,///< The normalization regions is selected
+    ShutDown              ///< The widget is being closed/destroyed
   };
 
   /**

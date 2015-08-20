@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORVIEW_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IIMAGECORVIEW_H_
 
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 
 namespace MantidQt {
@@ -62,9 +63,66 @@ public:
   virtual ImageStackPreParams userSelection() const = 0;
 
   /**
+   * Path to a stack of images that the user has requested to
+   * display. The path would be expected to point to a recognized
+   * directory structure (sample/dark/white) or image file (as a
+   * particular case).
    *
+   * @return directory of file path as a string
    */
-  virtual void showImgOrStack() = 0;
+  virtual std::string stackPath() const = 0;
+
+  /**
+   * Display a special case of stack of images: individual image, from
+   * a path to a recognized directory structure (sample/dark/white) or
+   * image format. Here recognized format means something that is
+   * supported natively by the widgets library, in practice
+   * Qt. Normally you can expect that .tiff and .png images are
+   * supported.
+   *
+   * @param path path to the stack (directory) or individual image file.
+   */
+  virtual void showStack(const std::string &path) = 0;
+
+  /**
+   * Display a stack of images (or individual image as a particular
+   * case), from a workspace group containing matrix workspaces. It
+   * assumes that the workspace contains an image in the form in which
+   * LoadFITS loads FITS images (or spectrum per row, all of them with
+   * the same number of data points (columns)).
+   *
+   * @param ws Workspace group where every workspace is a FITS or
+   * similar image that has been loaded with LoadFITS or similar
+   * algorithm.
+   */
+  virtual void showStack(const Mantid::API::WorkspaceGroup_sptr &ws) = 0;
+
+  /**
+   * Display a warning to the user (for example as a pop-up window).
+   *
+   * @param warn warning title, should be short and would normally be
+   * shown as the title of the window or a big banner.
+   *
+   * @param description longer, free form description of the issue.
+   */
+  virtual void userWarning(const std::string &warn,
+                           const std::string &description) = 0;
+
+  /**
+   * Display an error message (for example as a pop-up window).
+   *
+   * @param err Error title, should be short and would normally be
+   * shown as the title of the window or a big banner.
+   *
+   * @param description longer, free form description of the issue.
+   */
+  virtual void userError(const std::string &err,
+                         const std::string &description) = 0;
+
+  /**
+   * Save settings (normally when closing this widget).
+   */
+  virtual void saveSettings() const = 0;
 };
 
 } // namespace CustomInterfaces

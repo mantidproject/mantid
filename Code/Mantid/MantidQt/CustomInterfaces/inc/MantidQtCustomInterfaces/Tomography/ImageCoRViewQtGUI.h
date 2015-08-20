@@ -57,7 +57,17 @@ public:
 
   ImageStackPreParams userSelection() const;
 
-  void showImgOrStack();
+  virtual std::string stackPath() const { return m_stackPath; };
+
+  void showStack(const std::string &path);
+
+  void showStack(const Mantid::API::WorkspaceGroup_sptr &ws);
+
+  void userWarning(const std::string &warn, const std::string &description);
+
+  void userError(const std::string &err, const std::string &description);
+
+  void saveSettings() const;
 
 protected:
   void initLayout();
@@ -69,10 +79,21 @@ private slots:
 private:
   void setupConnections();
 
+  void readSettings();
+
+  // widget closing
+  virtual void closeEvent(QCloseEvent *ev);
+
   Ui::ImageSelectCoRAndRegions m_ui;
 
+  /// persistent settings
+  static const std::string m_settingsGroup;
+
+  /// parameters currently set by the user
   ImageStackPreParams m_params;
-  std::string m_imgPath;
+
+  /// path to the image stack being visualized
+  std::string m_stackPath;
 
   // presenter as in the model-view-presenter
   boost::scoped_ptr<IImageCoRPresenter> m_presenter;

@@ -9,12 +9,18 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 
+#include <QCloseEvent>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPainter>
+#include <QSettings>
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// this would be more like a CustomWidget if it's eventually moved there
+const std::string ImageCoRViewQtGUI::m_settingsGroup =
+    "CustomInterfaces/ImageCoRView";
 
 ImageCoRViewQtGUI::ImageCoRViewQtGUI(QWidget *parent)
     : QWidget(parent), IImageCoRView(), m_presenter(NULL) {
@@ -57,56 +63,6 @@ ImageStackPreParams ImageCoRViewQtGUI::userSelection() const {
   return m_params;
 }
 
-void ImageCoRViewQtGUI::showImgOrStack() {}
-
-void ImageCoRViewQtGUI::showImg() {}
-
-WorkspaceGroup_sptr loadFITSImage(const std::string &path) {
-  // get fits file into workspace and retrieve it from the ADS
-  auto alg = Algorithm::fromString("LoadFITS");
-  alg->initialize();
-  alg->setPropertyValue("Filename", path);
-  std::string wsName = "__fits_ws_tomography_gui";
-  alg->setProperty("OutputWorkspace", wsName);
-  // this is way faster when loading into a MatrixWorkspace
-  alg->setProperty("LoadAsRectImg", true);
-  try {
-    alg->execute();
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Failed to load image. Could not load this file as a "
-        "FITS image: " +
-        std::string(e.what()));
-    return WorkspaceGroup_sptr();
-  }
-  if (!alg->isExecuted()) {
-    throw std::runtime_error(
-        "Failed to load image correctly. Note that even though "
-        "the image file has been loaded it seems to contain errors.");
-  }
-  WorkspaceGroup_sptr wsg;
-  MatrixWorkspace_sptr ws;
-  try {
-    wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-        wsg->getNames()[0]);
-  } catch (std::exception &e) {
-    throw std::runtime_error(
-        "Could not load image contents. An unrecoverable error "
-        "happened when trying to load the image contents. Cannot "
-        "display it. Error details: " +
-        std::string(e.what()));
-  }
-
-  // draw image from workspace
-  if (wsg && ws &&
-      Mantid::API::AnalysisDataService::Instance().doesExist(ws->name())) {
-    return wsg;
-  } else {
-    return WorkspaceGroup_sptr();
-  }
-}
-
 void ImageCoRViewQtGUI::browseImgClicked() {
   m_presenter->notify(IImageCoRPresenter::BrowseImgOrStack);
   // get path
@@ -121,21 +77,21 @@ void ImageCoRViewQtGUI::browseImgClicked() {
                             "Other extensions/all files (*.*)");
   QString prevPath =
       MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  QString path(QFileDialog::getOpenFileName(this, tr("Open image file"),
-                                            prevPath, fitsStr));
+  QString path(QFileDialog::getExistingDirectory(
+      this, tr("Open stack of images"), prevPath, QFileDialog::ShowDirsOnly));
   if (!path.isEmpty()) {
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(
-        QFileInfo(path).absoluteDir().path());
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(path);
   } else {
     return;
   }
 
-  m_imgPath = path.toStdString();
+  m_stackPath = path.toStdString();
   m_presenter->notify(IImageCoRPresenter::NewImgOrStack);
+}
 
-  WorkspaceGroup_sptr wsg = loadFITSImage(m_imgPath);
-  if (!wsg)
-    return;
+void ImageCoRViewQtGUI::showStack(const std::string & /*path*/) {}
+
+void ImageCoRViewQtGUI::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
   MatrixWorkspace_sptr ws =
       boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
   if (!ws)
@@ -240,6 +196,40 @@ void ImageCoRViewQtGUI::browseImgClicked() {
   m_ui.label_img->show();
 
   m_ui.label_img_name->setText(QString::fromStdString(name));
+}
+
+void ImageCoRViewQtGUI::readSettings() {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+  qs.endGroup();
+}
+
+void ImageCoRViewQtGUI::userWarning(const std::string &err,
+                                    const std::string &description) {
+  QMessageBox::warning(this, QString::fromStdString(err),
+                       QString::fromStdString(description), QMessageBox::Ok,
+                       QMessageBox::Ok);
+}
+
+void ImageCoRViewQtGUI::userError(const std::string &err,
+                                  const std::string &description) {
+  QMessageBox::critical(this, QString::fromStdString(err),
+                        QString::fromStdString(description), QMessageBox::Ok,
+                        QMessageBox::Ok);
+}
+
+void ImageCoRViewQtGUI::saveSettings() const {
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  qs.setValue("interface-win-geometry", saveGeometry());
+  qs.endGroup();
+}
+
+void ImageCoRViewQtGUI::closeEvent(QCloseEvent *event) {
+  m_presenter->notify(IImageCoRPresenter::ShutDown);
+  event->accept();
 }
 
 } // namespace CustomInterfaces

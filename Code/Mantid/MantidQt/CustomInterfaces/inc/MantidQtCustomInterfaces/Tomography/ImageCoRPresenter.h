@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORPRESENTER_H_
 
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
@@ -54,15 +55,19 @@ protected:
 
   void processInit();
   void processBrowseImg();
-  void processNewImg();
+  void processNewStack();
   void processSelectCoR();
   void processSelectROI();
   void processSelectNormalization();
   void processFinishedCoR();
   void processFinishedROI();
   void processFinishedNormalization();
+  void processShutDown();
 
 private:
+  Mantid::API::WorkspaceGroup_sptr loadFITSStack(const std::string &path);
+  Mantid::API::WorkspaceGroup_sptr loadFITSImage(const std::string &path);
+
   /// Associated view for this presenter (MVP pattern)
   IImageCoRView *const m_view;
 
