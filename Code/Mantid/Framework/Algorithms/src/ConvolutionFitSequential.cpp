@@ -247,104 +247,8 @@ void ConvolutionFitSequential::exec() {
 
   // Run calcEISF if Delta
   if (delta) {
-    // Get height data from parameter table
-    auto columns = outputWs->getColumnNames();
-    std::string height = searchForFitParams("Height", columns).at(0);
-    std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
-    auto heightY = std::vector<double>();
-	outputWs->getColumn(height)->numeric_fill(heightY);
-	auto heightE = std::vector<double>();
-	outputWs->getColumn(heightErr)->numeric_fill(heightE);
-
-    // Get amplitude column names
-    auto ampNames = searchForFitParams("Amplitude", columns);
-    auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
-
-    // For each lorentzian, calculate EISF
-    size_t maxSize = ampNames.size();
-    if (ampErrorNames.size() > maxSize) {
-      maxSize = ampErrorNames.size();
-    }
-    for (size_t i = 0; i < maxSize; i++) {
-      // Get amplitude from column in table workspace
-      std::string ampName = ampNames.at(i);
-      auto ampY = std::vector<double>();
-	  outputWs->getColumn(ampName)->numeric_fill(ampY);
-      std::string ampErrorName = ampErrorNames.at(i);
-      auto ampErr = std::vector<double>();
-	  outputWs->getColumn(ampErrorName)->numeric_fill(ampErr);
-
-      // Calculate EISF and EISF error
-      // total = heightY + ampY
-      auto total = cloneVector(heightY);
-      std::transform(total.begin(), total.end(), ampY.begin(), total.begin(),
-                     std::plus<double>());
-      // eisfY = heightY / total
-      auto eisfY = cloneVector(heightY);
-      std::transform(eisfY.begin(), eisfY.end(), total.begin(), eisfY.begin(),
-                     std::divides<double>());
-      // heightE squared
-      auto heightESq = cloneVector(heightE);
-      heightE = squareVector(heightESq);
-      // ampErr squared
-      auto ampErrSq = cloneVector(ampErr);
-      ampErrSq = squareVector(ampErrSq);
-      // totalErr = heightE squared + ampErr squared
-      auto totalErr = cloneVector(heightESq);
-      std::transform(totalErr.begin(), totalErr.end(), ampErrSq.begin(),
-                     totalErr.begin(), std::plus<double>());
-      // heightY squared
-      auto heightYSq = cloneVector(heightY);
-      heightYSq = squareVector(heightYSq);
-      // total Squared
-      auto totalSq = cloneVector(total);
-      totalSq = squareVector(totalSq);
-      // errOverTotalSq = totalErr / total squared
-      auto errOverTotalSq = cloneVector(totalErr);
-      std::transform(errOverTotalSq.begin(), errOverTotalSq.end(),
-                     totalSq.begin(), errOverTotalSq.begin(),
-                     std::divides<double>());
-      // heightESqOverYSq = heightESq / heightYSq
-      auto heightESqOverYSq = cloneVector(heightESq);
-      std::transform(heightESqOverYSq.begin(), heightESqOverYSq.end(),
-                     heightYSq.begin(), heightESqOverYSq.begin(),
-                     std::divides<double>());
-      // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
-      auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
-      std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
-                     sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
-      // eisfYSumRoot = eisfY * sqrtESqOverYSq
-      auto eisfYSumRoot = cloneVector(eisfY);
-      std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),
-                     sqrtESqOverYSq.begin(), eisfYSumRoot.begin(),
-                     std::multiplies<double>());
-      // eisfErr = eisfYSumRoot + errOverTotalSq
-      auto eisfErr = cloneVector(eisfYSumRoot);
-      std::transform(eisfErr.begin(), eisfErr.end(), errOverTotalSq.begin(),
-                     eisfErr.begin(), std::plus<double>());
-
-      // Append the calculated values to the table workspace
-      std::string columnName =
-          ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
-      columnName += "EISF";
-      std::string errorColumnName = ampErrorName.substr(
-          0, (ampName.size() - std::string("Amplitude_Err").size()));
-      errorColumnName += "EISF_Err";
-
-      outputWs->addColumn("double", columnName);
-      outputWs->addColumn("double", errorColumnName);
-      size_t maxEisf = eisfY.size();
-      if (eisfErr.size() > maxEisf) {
-        maxEisf = eisfErr.size();
-      }
-
-      Column_sptr col = outputWs->getColumn(columnName);
-      Column_sptr errCol = outputWs->getColumn(errorColumnName);
-      for (size_t j = 0; j < maxEisf; j++) {
-        col->cell<double>(j) = eisfY.at(j);
-        errCol->cell<double>(j) = eisfErr.at(j);
-      }
-    }
+	      auto columns = outputWs->getColumnNames();
+		  calculateEISF(outputWs);
   }
 
   // Construct comma separated list for ProcessIndirectFirParameters
@@ -602,6 +506,112 @@ ConvolutionFitSequential::convertInputToElasticQ(MatrixWorkspace_sptr &inputWs,
 
   return tempFitWs;
 }
+
+
+/**
+ * Calculates the EISF if the fit includes a Delta function 
+ * @param tableWs - The TableWorkspace to append the EISF calculation to
+ */
+void ConvolutionFitSequential::calculateEISF(ITableWorkspace_sptr &tableWs){
+	    // Get height data from parameter table
+    auto columns = tableWs->getColumnNames();
+    std::string height = searchForFitParams("Height", columns).at(0);
+    std::string heightErr = searchForFitParams("Height_Err", columns).at(0);
+    auto heightY = std::vector<double>();
+	tableWs->getColumn(height)->numeric_fill(heightY);
+	auto heightE = std::vector<double>();
+	tableWs->getColumn(heightErr)->numeric_fill(heightE);
+
+    // Get amplitude column names
+    auto ampNames = searchForFitParams("Amplitude", columns);
+    auto ampErrorNames = searchForFitParams("Amplitude_Err", columns);
+
+    // For each lorentzian, calculate EISF
+    size_t maxSize = ampNames.size();
+    if (ampErrorNames.size() > maxSize) {
+      maxSize = ampErrorNames.size();
+    }
+    for (size_t i = 0; i < maxSize; i++) {
+      // Get amplitude from column in table workspace
+      std::string ampName = ampNames.at(i);
+      auto ampY = std::vector<double>();
+	  tableWs->getColumn(ampName)->numeric_fill(ampY);
+      std::string ampErrorName = ampErrorNames.at(i);
+      auto ampErr = std::vector<double>();
+	  tableWs->getColumn(ampErrorName)->numeric_fill(ampErr);
+
+      // Calculate EISF and EISF error
+      // total = heightY + ampY
+      auto total = cloneVector(heightY);
+      std::transform(total.begin(), total.end(), ampY.begin(), total.begin(),
+                     std::plus<double>());
+      // eisfY = heightY / total
+      auto eisfY = cloneVector(heightY);
+      std::transform(eisfY.begin(), eisfY.end(), total.begin(), eisfY.begin(),
+                     std::divides<double>());
+      // heightE squared
+      auto heightESq = cloneVector(heightE);
+      heightE = squareVector(heightESq);
+      // ampErr squared
+      auto ampErrSq = cloneVector(ampErr);
+      ampErrSq = squareVector(ampErrSq);
+      // totalErr = heightE squared + ampErr squared
+      auto totalErr = cloneVector(heightESq);
+      std::transform(totalErr.begin(), totalErr.end(), ampErrSq.begin(),
+                     totalErr.begin(), std::plus<double>());
+      // heightY squared
+      auto heightYSq = cloneVector(heightY);
+      heightYSq = squareVector(heightYSq);
+      // total Squared
+      auto totalSq = cloneVector(total);
+      totalSq = squareVector(totalSq);
+      // errOverTotalSq = totalErr / total squared
+      auto errOverTotalSq = cloneVector(totalErr);
+      std::transform(errOverTotalSq.begin(), errOverTotalSq.end(),
+                     totalSq.begin(), errOverTotalSq.begin(),
+                     std::divides<double>());
+      // heightESqOverYSq = heightESq / heightYSq
+      auto heightESqOverYSq = cloneVector(heightESq);
+      std::transform(heightESqOverYSq.begin(), heightESqOverYSq.end(),
+                     heightYSq.begin(), heightESqOverYSq.begin(),
+                     std::divides<double>());
+      // sqrtESqOverYSq = squareRoot( heightESqOverYSq )
+      auto sqrtESqOverYSq = cloneVector(heightESqOverYSq);
+      std::transform(sqrtESqOverYSq.begin(), sqrtESqOverYSq.end(),
+                     sqrtESqOverYSq.begin(), (double (*)(double))sqrt);
+      // eisfYSumRoot = eisfY * sqrtESqOverYSq
+      auto eisfYSumRoot = cloneVector(eisfY);
+      std::transform(eisfYSumRoot.begin(), eisfYSumRoot.end(),
+                     sqrtESqOverYSq.begin(), eisfYSumRoot.begin(),
+                     std::multiplies<double>());
+      // eisfErr = eisfYSumRoot + errOverTotalSq
+      auto eisfErr = cloneVector(eisfYSumRoot);
+      std::transform(eisfErr.begin(), eisfErr.end(), errOverTotalSq.begin(),
+                     eisfErr.begin(), std::plus<double>());
+
+      // Append the calculated values to the table workspace
+      std::string columnName =
+          ampName.substr(0, (ampName.size() - std::string("Amplitude").size()));
+      columnName += "EISF";
+      std::string errorColumnName = ampErrorName.substr(
+          0, (ampName.size() - std::string("Amplitude_Err").size()));
+      errorColumnName += "EISF_Err";
+
+      tableWs->addColumn("double", columnName);
+      tableWs->addColumn("double", errorColumnName);
+      size_t maxEisf = eisfY.size();
+      if (eisfErr.size() > maxEisf) {
+        maxEisf = eisfErr.size();
+      }
+
+      Column_sptr col = tableWs->getColumn(columnName);
+      Column_sptr errCol = tableWs->getColumn(errorColumnName);
+      for (size_t j = 0; j < maxEisf; j++) {
+        col->cell<double>(j) = eisfY.at(j);
+        errCol->cell<double>(j) = eisfErr.at(j);
+      }
+    }
+  }
 
 } // namespace Algorithms
 } // namespace Mantid
