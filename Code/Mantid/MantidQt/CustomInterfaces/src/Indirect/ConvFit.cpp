@@ -300,7 +300,7 @@ void ConvFit::run() {
   cfs->setProperty("End X", enX.toStdString());
   double temp = 0.0;
   if(temperature.toStdString().compare("") != 0){
-	  temp = boost::lexical_cast<double>(temperature.toStdString());
+	  temp = temperature.toDouble();
   }
   cfs->setProperty("Temperature", temp);
   cfs->setProperty("Spec Min", specMin.toStdString());

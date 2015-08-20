@@ -210,7 +210,7 @@ void ConvolutionFitSequential::exec() {
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
   }
-  
+
   // Fit all spectra in workspace
   std::string plotPeakInput = "";
   for (int i = 0; i < specMax + 1; i++) {
@@ -225,7 +225,7 @@ void ConvolutionFitSequential::exec() {
       funcName.find("Stretched") != std::string::npos) {
     passIndex = true;
   }
-  
+
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
   plotPeaks->setAlwaysStoreInADS(true);
@@ -243,8 +243,9 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
   plotPeaks->executeAsChildAlg();
 
-  outputWs = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWsName);
-  
+  outputWs =
+      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWsName);
+
   // Delete workspaces
   std::string deleteWorkspaces[] = {
       (outputWsName + "_NormalisedCovarianceMatrices"),
@@ -269,7 +270,7 @@ void ConvolutionFitSequential::exec() {
     paramNames.erase(paramNames.begin() + 1);
     paramNames.push_back("EISF");
   }
-  
+
   // Run calcEISF if Delta
   if (delta) {
     // Get height data from parameter table
@@ -426,7 +427,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", it->first);
     logAdder->setProperty("LogText", it->second);
-	logAdder->setProperty("LogType", "String");
+    logAdder->setProperty("LogType", "String");
     logAdder->executeAsChildAlg();
   }
 
@@ -438,23 +439,35 @@ void ConvolutionFitSequential::exec() {
     logAdder->executeAsChildAlg();
   }
 
-  
   logCopier = createChildAlgorithm("CopyLogs", -1, -1, false);
   logCopier->setProperty("InputWorkspace", resultWs);
-  logCopier->setProperty("OutputWorkspace", (outputWs->getName() + "_Workspaces"));
+  logCopier->setProperty("OutputWorkspace",
+                         (outputWs->getName() + "_Workspaces"));
   logCopier->executeAsChildAlg();
 
   // Rename TableWorkspace
-  
+
   auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
   renamer->setAlwaysStoreInADS(true);
   renamer->setProperty("InputWorkspace", outputWs);
-  renamer->setProperty("OutputWorkspace", (outputWs->getName() +
-                                           "_Parameters"));
+  renamer->setProperty("OutputWorkspace",
+                       (outputWs->getName() + "_Parameters"));
   renamer->executeAsChildAlg();
 
   // Rename Workspaces in group
-
+  WorkspaceGroup_sptr groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+          outputWsName + "_Workspaces");
+  auto groupWsNames = groupWs->getNames();
+  renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
+  for (int i = specMin; i < specMax + 1; i++) {
+    renamer->setProperty("InputWorkspace", groupWsNames.at(i));
+    std::string outName = outputWs->getName() + "_";
+    outName += boost::lexical_cast<std::string>(i);
+    outName += "_Workspace";
+    renamer->setProperty("OutputWorkspace", outName);
+	renamer->executeAsChildAlg();
+  }
 }
 /**
  * Check function to establish if it is for one lorentzian or Two
