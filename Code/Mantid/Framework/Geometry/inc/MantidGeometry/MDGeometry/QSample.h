@@ -35,7 +35,7 @@ namespace Geometry {
 */
 class DLLExport QSample : public MDFrame {
 public:
-  static const DLLExport std::string QSampleName;
+  static const std::string QSampleName;
   QSample();
   virtual ~QSample();
   Kernel::UnitLabel getUnitLabel() const;
