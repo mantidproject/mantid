@@ -341,7 +341,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Copy Logs to GroupWorkspace
-  logCopier = createChildAlgorithm("CopyLogs", -1, -1, false);
+  logCopier = createChildAlgorithm("CopyLogs", -1, -1, true);
   logCopier->setProperty("InputWorkspace", resultWs);
   logCopier->setProperty("OutputWorkspace",
                          (outputWs->getName() + "_Workspaces"));
@@ -501,7 +501,7 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
     if (axis->unit()->unitID() != "MomentumTransfer") {
       throw std::runtime_error("Input must have axis values of Q");
     }
-    auto cloneWs = createChildAlgorithm("CloneWorkspace");
+    auto cloneWs = createChildAlgorithm("CloneWorkspace", -1, -1, true);
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();

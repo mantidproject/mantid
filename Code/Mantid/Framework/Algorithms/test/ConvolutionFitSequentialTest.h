@@ -118,7 +118,6 @@ public:
   void test_exec() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
   }
 
   //------------------------ Private Functions---------------------------
