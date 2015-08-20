@@ -45,7 +45,7 @@ public:
   QLab *clone() const;
 
   // Type name
-  static const std::string QLabName;
+  static const DLLExport std::string QLabName;
 
 private:
 

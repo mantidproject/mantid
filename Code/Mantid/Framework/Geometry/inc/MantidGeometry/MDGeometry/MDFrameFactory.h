@@ -92,11 +92,8 @@ class DLLExport HKLFrameFactory : public MDFrameFactory {
     bool canInterpret(const MDFrameArgument& argument) const;
 };
 
-
-
-
 /// Make a complete factory chain
-MDFrameFactory_uptr makeMDFrameFactoryChain();
+MDFrameFactory_uptr DLLExport makeMDFrameFactoryChain();
 
 } // namespace Geometry
 } // namespace Mantid

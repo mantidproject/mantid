@@ -40,7 +40,7 @@ public:
   HKL(std::unique_ptr<Kernel::MDUnit>& unit);
   HKL(Kernel::MDUnit* unit);
   virtual ~HKL();
-  static const std::string HKLName;
+  static const DLLExport std::string HKLName;
 
   // MDFrame interface
   Kernel::UnitLabel getUnitLabel() const;
