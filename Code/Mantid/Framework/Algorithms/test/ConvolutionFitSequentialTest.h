@@ -115,8 +115,13 @@ public:
   }
 
   //------------------------- Execution cases ---------------------------
-  void test_exec() {}
+  void test_exec() {
+    Mantid::Algorithms::ConvolutionFitSequential alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
+  }
+
+  //------------------------ Private Functions---------------------------
 };
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */
