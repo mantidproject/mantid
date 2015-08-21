@@ -85,7 +85,7 @@ void AppendSpectra::exec() {
   }
 
   const bool mergeLogs = getProperty("MergeLogs");
-  const int number = getProperty("Repeat");
+  const int number = getProperty("Number");
 
   if (event_ws1 && event_ws2) {
     // Both are event workspaces. Use the special method
