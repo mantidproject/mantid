@@ -633,15 +633,11 @@ void ConvolutionFitSequential::calculateEISF(
  */
 std::string
 ConvolutionFitSequential::convertBackToShort(const std::string &original) {
-  std::string result = "";
-  if (original.compare("Fit Linear") == 0) {
-    result = "FitL";
-  } else if (original.compare("Fixed Flat") == 0) {
-    result = "FixF";
-  } else {
-    result = "FitF";
+  std::string result = original.substr(0,3);
+  auto pos = original.find(" ");
+  if(pos != std::string::npos){
+	result += original.at(pos + 1);
   }
-
   return result;
 }
 
@@ -654,16 +650,18 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
 	std::string result = "";
-	if(original.compare("ElasticDiffSphere") == 0){
-		result = "EDS";
-	}else if(original.compare("ElasticDiffRotDiscreteCircle") == 0){
-		result = "EDC";
-	}else if(original.compare("InelasticDiffSphere") == 0){
-		result = "IDS";
-	}else if(original.compare("InelasticDiffRotDiscreteCircle") == 0){
-		result = "IDC";
-	}else if(original.compare("StretchExpFT") == 0){
-		result = "SFT";
+	if(original.at(0) == 'E'){
+		result += "E";
+	}else if(original.at(0) == 'I'){
+		result +="I";
+	}else{
+		return "SFT";
+	}
+	auto pos = original.find("Circle");
+	if(pos != std::string::npos){
+		result += "DC";
+	}else{
+		result += "DS";
 	}
 	return result;
 }
