@@ -3,6 +3,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <memory>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Kernel {
@@ -22,7 +23,8 @@ InverseAngstromsUnitFactory::createRaw(const std::string &) const {
 
 bool
 InverseAngstromsUnitFactory::canInterpret(const std::string &unitString) const {
-  return unitString == Units::Symbol::InverseAngstrom.ascii();
+  boost::regex pattern(".*(Angstrom\\^-1)|(A\\^-1)$");
+  return boost::regex_match(unitString, pattern);
 }
 
 ReciprocalLatticeUnit *

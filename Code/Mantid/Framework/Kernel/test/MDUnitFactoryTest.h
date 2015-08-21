@@ -105,7 +105,11 @@ public:
 
   void test_InverseAngstroms_factory(){
       InverseAngstromsUnitFactory factory;
+
       auto product = factory.create(Units::Symbol::InverseAngstrom);
+      TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
+
+      product = factory.create("A^-1");
       TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
   }
 
