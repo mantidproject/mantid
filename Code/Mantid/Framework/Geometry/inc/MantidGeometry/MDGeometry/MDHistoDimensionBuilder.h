@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_H_
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/UnitLabel.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -23,7 +24,7 @@ public:
   ~MDHistoDimensionBuilder();
   void setName(std::string name);
   void setId(std::string id);
-  void setUnits(std::string units);
+  void setUnits(const Kernel::UnitLabel& units);
   void setMin(double min);
   void setMax(double max);
   void setNumBins(size_t nbins);
@@ -40,7 +41,7 @@ private:
   /// Cached id
   std::string m_id;
   /// Cached units
-  std::string m_units;
+  Kernel::UnitLabel m_units;
   /// Cached min
   double m_min;
   /// Cached max
