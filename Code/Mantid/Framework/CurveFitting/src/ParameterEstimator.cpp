@@ -9,47 +9,59 @@
 
 namespace Mantid {
 namespace CurveFitting {
+namespace ParameterEstimator {
 
 /// The logger.
 Kernel::Logger g_log("ParameterEstimator");
 
-//----------------------------------------------------------------------------------------------
-/// Constructor
-/// @param function :: A function to estimate parameters for.
-/// @param domain :: A domain with fitting data arguments.
-/// @param values :: A FunctionValues object with the fitting data.
-ParameterEstimator::ParameterEstimator(API::IFunction &function,
-                                       const API::FunctionDomain1D &domain,
-                                       const API::FunctionValues &values)
-    : m_function(function), m_domain(domain), m_values(values) {}
+enum Function {None, Gaussian, Lorentzian, BackToBackExponential};
+typedef std::map<std::string,std::pair<size_t,Function>> FunctionMapType;
 
 //----------------------------------------------------------------------------------------------
-/// Do the job.
-void ParameterEstimator::estimate() {
-  if (!needSettingInitialValues(m_function))
-    return;
-  std::vector<double> x;
-  std::vector<double> y;
-  extractValues(x, y);
-  if (x.empty())
-    return;
-  SimpleChebfun fun(x, y);
-  auto der1 = fun.derivative();
-  auto der2 = der1.derivative();
-  setValues(m_function, fun, der1, der2);
+/// Return a function code for a function if it needs setting values or None otherwise.
+Function whichFunction(const API::IFunction &function) {
+  static FunctionMapType functionMap;
+  if (functionMap.empty()) {
+    functionMap["Gaussian"] = std::make_pair(2, Gaussian);
+    functionMap["Lorentzian"] = std::make_pair(2,Lorentzian);
+    functionMap["BackToBackExponential"] = std::make_pair(4,BackToBackExponential);
+  }
+  auto index = functionMap.find(function.name());
+  if (index != functionMap.end()) {
+    if (!function.isExplicitlySet(index->second.first)) return index->second.second;
+  }
+  return None;
 }
 
 //----------------------------------------------------------------------------------------------
-/// Extract values from m_domain and m_values objects to vectors.
+/// Test if initial values need to be set before fitting.
+/// @param function :: A fitting function to test.
+bool needSettingInitialValues(const API::IFunction &function) {
+  if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
+    for (size_t i = 0; i < cf->nFunctions(); ++i) {
+      if (needSettingInitialValues(*cf->getFunction(i)))
+        return true;
+    }
+  } else {
+    return whichFunction(function) != None;
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------------------------------
+/// Extract values from domain and values objects to vectors.
+/// @param domain :: A domain with fitting data arguments.
+/// @param values :: A FunctionValues object with the fitting data.
 /// @param x :: A vector to store the domain values
 /// @param y :: A vector to store the fitting data values.
-void ParameterEstimator::extractValues(std::vector<double> &x,
-                                       std::vector<double> &y) const {
+void extractValues(const API::FunctionDomain1D &domain,
+                   const API::FunctionValues &values, std::vector<double> &x,
+                   std::vector<double> &y) {
 
-  size_t n = m_domain.size();
-  double start = m_domain[0];
-  double end = m_domain[n - 1];
-  auto dBegin = m_domain.getPointerAt(0);
+  size_t n = domain.size();
+  double start = domain[0];
+  double end = domain[n - 1];
+  auto dBegin = domain.getPointerAt(0);
   auto startIter = std::lower_bound(dBegin, dBegin + n, start);
   auto istart = static_cast<size_t>(std::distance(dBegin, startIter));
   if (istart == n) {
@@ -69,12 +81,11 @@ void ParameterEstimator::extractValues(std::vector<double> &x,
   y.resize(n);
   for (size_t i = istart; i < iend; ++i) {
     auto j = i - istart;
-    x[j] = m_domain[i];
-    y[j] = m_values.getFitData(i);
+    x[j] = domain[i];
+    y[j] = values.getFitData(i);
   }
 }
 
-namespace {
 // Functions to extract features from a curve
 
 //----------------------------------------------------------------------------------------------
@@ -207,7 +218,96 @@ double getPeakCentre(double centre, const SimpleChebfun &der1) {
   return centre;
 }
 
-} // namespace
+//----------------------------------------------------------------------------------------------
+/// Set initial values to a BackToBackExponential.
+/// @param function :: A fitting BackToBackExponential function.
+/// @param fun :: A smooth approximation of the fitting data.
+/// @param der1 :: The first derivative of the fitting data.
+/// @param der2 :: The second derivative of the fitting data.
+void setBackToBackExponential(API::IFunction &function,
+                                   const SimpleChebfun &fun,
+                                   const SimpleChebfun &der1,
+                                   const SimpleChebfun &der2) {
+  // Find the actual peak centre and gaussian component of the width
+  auto centre = getPeakCentre(function.getParameter("X0"), der1);
+  double sigma = getPeakWidth(centre, der2);
+  function.setParameter("S", sigma);
+
+  g_log.debug() << "Estimating parameters of BackToBackExponential" << std::endl;
+  g_log.debug() << "centre= " << centre << std::endl;
+  g_log.debug() << "sigma = " << sigma << std::endl;
+
+  // Estimate the background level
+  auto xlr = getPeakLeftRightExtent(centre, der2);
+  g_log.debug() << "extent: " << xlr.first - centre << ' ' << xlr.second - centre
+            << std::endl;
+  double yl = fun(xlr.first);
+  double yr = fun(xlr.second);
+  double background =
+      yl + (yr - yl) / (xlr.second - xlr.first) * (centre - xlr.first);
+  double height = fun(centre) - background;
+  g_log.debug() << "height= " << height << std::endl;
+  g_log.debug() << "background= " << background << std::endl;
+
+  // Find left and right "HWHM".
+  auto hwhm = getPeakHWHM(centre, height, background, fun);
+  g_log.debug() << "HWHM: " << hwhm.first << ' ' << hwhm.second << std::endl;
+
+  // Find the extent of the default fitting function (with new S set)
+  // to be able to make an approximation with a SimpleChebfun.
+  function.setParameter("I", 1.0);
+  double x0 = function.getParameter("X0");
+  double leftX = 1.0 / function.getParameter("A");
+  if (leftX < 3 * sigma) {
+    leftX = 3 * sigma;
+  }
+  leftX = x0 - leftX;
+  double rightX = 1.0 / function.getParameter("B");
+  if (rightX < 3 * sigma) {
+    rightX = 3 * sigma;
+  }
+  rightX = x0 + rightX;
+
+  // Find corrections to the default A and B parameters.
+  // A and B are responsible for differences in the widths.
+  {
+    SimpleChebfun b2b(fun.order(), function, leftX, rightX);
+    auto b2b_d1 = b2b.derivative();
+    auto centre1 = getPeakCentre(x0, b2b_d1);
+
+    double height1 = b2b(centre1);
+    auto hwhm1 = getPeakHWHM(centre1, height1, 0, b2b);
+    g_log.debug() << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second
+              << std::endl;
+
+    double aCorr = (hwhm1.first + sigma) / (hwhm.first + sigma);
+    double bCorr = (hwhm1.second - sigma) / (hwhm.second - sigma);
+    g_log.debug() << "corrections: " << aCorr << ' ' << bCorr << std::endl;
+    double a = function.getParameter("A") * aCorr;
+    double b = function.getParameter("B") * bCorr;
+    function.setParameter("A", a);
+    function.setParameter("B", b);
+  }
+
+  // After all shape parameters are set (S, A and B) shift X0
+  // and scale I.
+  {
+    SimpleChebfun b2b(fun.order(), function, leftX, rightX);
+    auto b2b_d1 = b2b.derivative();
+    double centre1 = getPeakCentre(x0, b2b_d1);
+    double height1 = b2b(centre1);
+    x0 += centre - centre1;
+    function.setParameter("X0", x0);
+    function.setParameter("I", height / height1);
+  }
+
+  g_log.debug() << "Parameters:" << std::endl;
+  g_log.debug() << "I  " << function.getParameter("I") << std::endl;
+  g_log.debug() << "X0 " << function.getParameter("X0") << std::endl;
+  g_log.debug() << "A  " << function.getParameter("A") << std::endl;
+  g_log.debug() << "B  " << function.getParameter("B") << std::endl;
+  g_log.debug() << "S  " << function.getParameter("S") << std::endl;
+}
 
 //----------------------------------------------------------------------------------------------
 /// Set initial values to a function if it needs to.
@@ -215,136 +315,58 @@ double getPeakCentre(double centre, const SimpleChebfun &der1) {
 /// @param fun :: A smooth approximation of the fitting data.
 /// @param der1 :: The first derivative of the fitting data.
 /// @param der2 :: The second derivative of the fitting data.
-void ParameterEstimator::setValues(API::IFunction &function,
+void setValues(API::IFunction &function,
                                    const SimpleChebfun &fun,
                                    const SimpleChebfun &der1,
-                                   const SimpleChebfun &der2) const {
+                                   const SimpleChebfun &der2) {
   if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       setValues(*cf->getFunction(i), fun, der1, der2);
     }
-  } else if (function.name() == "Gaussian" && !function.isExplicitlySet(2)) {
+    return;
+  } 
+
+  switch (whichFunction(function)) {
+  case Gaussian: {
     double width = getPeakWidth(function.getParameter("PeakCentre"), der2);
     function.setParameter("Sigma", width);
-  } else if (function.name() == "Lorentzian" && !function.isExplicitlySet(2)) {
+    break;
+  }
+  case Lorentzian: {
     double width = getPeakWidth(function.getParameter("PeakCentre"), der2);
     function.setParameter("FWHM", width);
-  } else if (function.name() == "BackToBackExponential" &&
-             !function.isExplicitlySet(4)) {
-    auto centre = getPeakCentre(function.getParameter("X0"), der1);
-    std::cerr << "C=" << centre << std::endl;
-    double sigma = getPeakWidth(centre, der2);
-    std::cerr << "sigma=" << sigma << std::endl;
-    function.setParameter("S", sigma);
-
-    auto lr = getPeakLeftRightWidth(centre, der2);
-    std::cerr << "lr: " << lr.first - centre << ' ' << lr.second - centre
-              << std::endl;
-    auto xlr = getPeakLeftRightExtent(centre, der2);
-    std::cerr << "xlr: " << xlr.first - centre << ' ' << xlr.second - centre
-              << std::endl;
-    double yl = fun(xlr.first);
-    double yr = fun(xlr.second);
-    double background =
-        yl + (yr - yl) / (xlr.second - xlr.first) * (centre - xlr.first);
-    double height = fun(centre) - background;
-
-    std::cerr << "height: " << height << ' ' << background << std::endl;
-    auto hwhm = getPeakHWHM(centre, height, background, fun);
-    std::cerr << "HWHM: " << hwhm.first << ' ' << hwhm.second << std::endl;
-
-    function.setParameter("I", 1.0);
-    double x0 = function.getParameter("X0");
-    double leftX = 1.0 / function.getParameter("A");
-    if (leftX < 3 * sigma)
-      leftX = 3 * sigma;
-    leftX = x0 - leftX;
-    double rightX = 1.0 / function.getParameter("B");
-    if (rightX < 3 * sigma)
-      rightX = 3 * sigma;
-    if (rightX > 10.0)
-      rightX = 10.0;
-    rightX = x0 + rightX;
-    SimpleChebfun b2b(fun.order(), function, leftX, rightX);
-    auto b2b_d1 = b2b.derivative();
-    auto b2b_d2 = b2b_d1.derivative();
-    auto centre1 = getPeakCentre(x0, b2b_d1);
-    double dx = centre - centre1;
-    std::cerr << "dx=" << dx << std::endl;
-    x0 += dx;
-    function.setParameter("X0", x0);
-
-    {
-      leftX += dx;
-      rightX += dx;
-      SimpleChebfun b2b(fun.order(), function, leftX, rightX);
-      auto b2b_d1 = b2b.derivative();
-      auto b2b_d2 = b2b_d1.derivative();
-      auto centre1 = getPeakCentre(x0, b2b_d1);
-      auto lr = getPeakLeftRightWidth(centre1, b2b_d2);
-      std::cerr << "new lr: " << centre1 << ' ' << lr.first - centre1 << ' '
-                << lr.second - centre1 << std::endl;
-      auto xlr = getPeakLeftRightExtent(centre1, b2b_d2);
-      std::cerr << "new xlr: " << centre1 << ' ' << xlr.first - centre1 << ' '
-                << xlr.second - centre1 << std::endl;
-      double height1 = b2b(centre1);
-      auto hwhm1 = getPeakHWHM(centre1, height1, 0, b2b);
-      std::cerr << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second
-                << std::endl;
-      double aCorr = (hwhm1.first + sigma) / (hwhm.first + sigma);
-      double bCorr = (hwhm1.second - sigma) / (hwhm.second - sigma);
-      std::cerr << "corrections: " << aCorr << ' ' << bCorr << std::endl;
-      double a = function.getParameter("A") * aCorr;
-      double b = function.getParameter("B") * bCorr;
-      function.setParameter("A", a);
-      function.setParameter("B", b);
-      SimpleChebfun b2b1(fun.order(), function, leftX, rightX);
-      auto b2b1_d1 = b2b1.derivative();
-      centre1 = getPeakCentre(x0, b2b1_d1);
-      height1 = b2b1(centre1);
-      x0 += centre - centre1;
-      function.setParameter("X0", x0);
-      function.setParameter("I", height / height1);
-      std::cerr << "Parameters:" << std::endl;
-      std::cerr << "I  " << function.getParameter("I") << std::endl;
-      std::cerr << "X0 " << function.getParameter("X0") << std::endl;
-      std::cerr << "A  " << function.getParameter("A") << std::endl;
-      std::cerr << "B  " << function.getParameter("B") << std::endl;
-      std::cerr << "S  " << function.getParameter("S") << std::endl;
-
-      SimpleChebfun bbb(function, centre, rightX);
-      auto &x = bbb.xPoints();
-      std::cerr << "Size " << x.size() << ' ' << bbb.isGood() << std::endl;
-      for (size_t i = 1; i < x.size(); ++i) {
-        double s = x[i - 1];
-        double e = x[i];
-        SimpleChebfun cheb(bbb, s, e);
-        std::cerr << "interval " << s << ' ' << e << std::endl;
-        std::cerr << cheb.size() << ' ' << cheb.isGood() << std::endl;
-      }
-    }
+    break;
+  }
+  case BackToBackExponential: {
+    setBackToBackExponential(function, fun, der1, der2);
+    break;
+  }
+  default:
+    break;
   }
 }
 
 //----------------------------------------------------------------------------------------------
-/// Test if initial values need to be set before fitting.
-/// @param function :: A fitting function to test.
-bool ParameterEstimator::needSettingInitialValues(
-    const API::IFunction &function) {
-  if (auto cf = dynamic_cast<const API::CompositeFunction *>(&function)) {
-    for (size_t i = 0; i < cf->nFunctions(); ++i) {
-      if (needSettingInitialValues(*cf->getFunction(i)))
-        return true;
-    }
-  } else if (function.name() == "Gaussian" && !function.isExplicitlySet(2))
-    return true;
-  else if (function.name() == "Lorentzian" && !function.isExplicitlySet(2))
-    return true;
-  else if (function.name() == "BackToBackExponential" &&
-           !function.isExplicitlySet(4))
-    return true;
-  return false;
+/// ParameterEstimator estimates parameter values of some fitting functions
+///  from fitting data.
+/// @param function :: A function to estimate parameters for.
+/// @param domain :: A domain with fitting data arguments.
+/// @param values :: A FunctionValues object with the fitting data.
+void estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
+              const API::FunctionValues &values) {
+  if (!needSettingInitialValues(function))
+    return;
+  std::vector<double> x;
+  std::vector<double> y;
+  extractValues(domain, values, x, y);
+  if (x.empty())
+    return;
+  SimpleChebfun fun(x, y);
+  auto der1 = fun.derivative();
+  auto der2 = der1.derivative();
+  setValues(function, fun, der1, der2);
 }
 
+} // namespace ParameterEstimator
 } // namespace CurveFitting
 } // namespace Mantid

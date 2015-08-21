@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/ParameterEstimator.h"
 
-using Mantid::CurveFitting::ParameterEstimator;
+using namespace Mantid::CurveFitting::ParameterEstimator;
 using namespace Mantid::API;
 
 class ParameterEstimatorTest : public CxxTest::TestSuite {

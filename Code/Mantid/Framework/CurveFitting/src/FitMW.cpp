@@ -629,8 +629,7 @@ void FitMW::setInitialValues(API::IFunction& function) {
   auto domain = m_domain.lock();
   auto values = m_values.lock();
   if (domain && values) {
-    ParameterEstimator estimator(function, *domain, *values);
-    estimator.estimate();
+    ParameterEstimator::estimate(function, *domain, *values);
   }
 }
 
