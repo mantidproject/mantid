@@ -7,9 +7,49 @@ from mantid.api import *
 
 class MolDynTest(unittest.TestCase):
 
+    def test_load_version3_cdl(self):
+        """
+        Load a function from a nMOLDYN 3 .cdl file
+        """
+
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
+                              Functions=['Sqw-total'],
+                              OutputWorkspace='__LoadNMoldyn3Ascii_test')
+
+        self.assertTrue(isinstance(moldyn_group, WorkspaceGroup))
+
+
+    def test_load_version3_dat(self):
+        """
+        Load a function from an nMOLDYN 3 .dat file
+        """
+
+        moldyn_ws = MolDyn(Data='WSH_test.dat',
+                           OutputWorkspace='__LoadNMoldyn3Ascii_test')
+
+        self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
+
+
+    def test_load_version4(self):
+        """
+        Load a function from an nMOLDYN 4 export.
+        """
+        # This test requires the directory to be provided, this is in the
+        # UnitTest directory so do get this from the serch directories
+        data_dirs = config['datasearch.directories'].split(';')
+        unit_test_data_dir = [p for p in data_dirs if 'UnitTest' in p][0]
+        data_directory = os.path.join(unit_test_data_dir, 'nmoldyn4_data')
+
+        function_ws = MolDyn(Data=data_directory,
+                             Functions=['fqt_total'],
+                             OutputWorkspace='__LoadNMoldyn4Ascii_test')
+
+        self.assertTrue(isinstance(function_ws, MatrixWorkspace))
+
+
     def test_loadSqwWithEMax(self):
         # Load an Sqw function from a nMOLDYN file
-        moldyn_group = MolDyn(Filename='NaF_DISF.cdl',
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
                               Functions=['Sqw-total'],
                               MaxEnergy="1.0")
 
@@ -27,7 +67,7 @@ class MolDynTest(unittest.TestCase):
 
     def test_loadSqwWithSymm(self):
         # Load an Sqw function from a nMOLDYN file
-        moldyn_group = MolDyn(Filename='NaF_DISF.cdl',
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
                               Functions=['Sqw-total'],
                               SymmetriseEnergy=True)
 
@@ -54,7 +94,7 @@ class MolDynTest(unittest.TestCase):
                                            BinWidth=0.1)
 
         # Load an Sqw function from a nMOLDYN file
-        moldyn_group = MolDyn(Filename='NaF_DISF.cdl',
+        moldyn_group = MolDyn(Data='NaF_DISF.cdl',
                               Functions=['Sqw-total'],
                               MaxEnergy="1.0",
                               SymmetriseEnergy=True,
@@ -80,7 +120,7 @@ class MolDynTest(unittest.TestCase):
 
         # Load an Sqw function from a nMOLDYN file
         self.assertRaises(RuntimeError, MolDyn,
-                          Filename='NaF_DISF.cdl',
+                          Data='NaF_DISF.cdl',
                           Functions=['Sqw-total'],
                           Resolution=sample_res,
                           OutputWorkspace='moldyn_group')

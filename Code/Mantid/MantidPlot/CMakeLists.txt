@@ -135,6 +135,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/origin/OPJFile.cpp
                    src/plot2D/ImageSymbol.cpp
                    src/plot2D/ScaleEngine.cpp
+                   src/plot2D/PowerScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/lib/src/CollapsiveGroupBox.cpp
                    src/lib/src/ColorBox.cpp
@@ -377,6 +378,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/origin/OPJFile.h
                    src/plot2D/ImageSymbol.h
                    src/plot2D/ScaleEngine.h
+                   src/plot2D/PowerScaleEngine.h
                    src/lib/include/CollapsiveGroupBox.h
                    src/lib/include/ColorBox.h
                    src/lib/include/ColorButton.h

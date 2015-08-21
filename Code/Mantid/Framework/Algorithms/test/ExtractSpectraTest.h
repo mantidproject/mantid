@@ -187,6 +187,18 @@ public:
     params.testDetectorList(*ws);
   }
 
+  void test_with_dx_data() {
+    // Arrange
+    Parameters params("histo-dx");
+
+    // Act
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    // Assert
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testDx(*ws);
+  }
 
 
   // ---- test event ----
@@ -290,7 +302,7 @@ public:
   }
 
 
-    void test_index_and_detector_list_event()
+  void test_index_and_detector_list_event()
   {
     Parameters params("event-detector");
     params.setDetectorList().setIndexRange();
@@ -326,6 +338,13 @@ public:
     params.testDetectorList(*ws);
   }
 
+  void test_with_dx_data_event() {
+    Parameters params("event-dx");
+    auto ws = runAlgorithm(params);
+
+    if (!ws) return;
+    params.testDx(*ws);
+  }
 
   // ---- test histo-ragged ----
 
@@ -373,6 +392,7 @@ public:
     auto ws = runAlgorithm(params, false);
   }
 
+
 private:
 
   // -----------------------  helper methods ------------------------
@@ -393,6 +413,10 @@ private:
       return createInputWithDetectors("histo");
     else if (workspaceType == "event-detector")
       return createInputWithDetectors("event");
+    else if (workspaceType == "histo-dx")
+      return createInputWorkspaceHistWithDx();
+    else if (workspaceType == "event-dx")
+      return createInputWorkspaceEventWithDx();
     throw std::runtime_error("Undefined workspace type");
   }
 
@@ -408,6 +432,18 @@ private:
       space->dataE(j).assign(nBins, sqrt(double(j)));
     }
     return space;
+  }
+
+  MatrixWorkspace_sptr createInputWorkspaceHistWithDx() const {
+    auto ws = createInputWorkspaceHisto();
+    // Add the delta x values
+    for (size_t j = 0; j < nSpec; ++j) {
+      for (size_t k = 0; k <= nBins; ++k) {
+        // Add a constant error to all spectra
+        ws->dataDx(j)[k] = sqrt(double(k));
+      }
+    }
+    return ws;
   }
 
   MatrixWorkspace_sptr createInputWorkspaceHistoRagged() const
@@ -436,6 +472,21 @@ private:
     return ws;
   }
 
+  MatrixWorkspace_sptr createInputWorkspaceEventWithDx() const {
+    auto ws = createInputWorkspaceEvent();
+    // Add the delta x values
+    for (size_t j = 0; j < nSpec; ++j) {
+      Mantid::MantidVecPtr dXvals;
+      Mantid::MantidVec &dX = dXvals.access();
+      dX.resize(nBins + 1, 0.0);
+      for (size_t k = 0; k <= nBins; ++k) {
+        dX[k] = sqrt(double(k)) + 1;
+      }
+      ws->setDx(j, dXvals);
+    }
+    return ws;
+  }
+
   MatrixWorkspace_sptr createInputWithDetectors(std::string workspaceType) const
   {
     MatrixWorkspace_sptr ws;
@@ -455,8 +506,6 @@ private:
     }
     return ws;
   }
-
-
 
   struct Parameters
   {
@@ -611,6 +660,30 @@ private:
     {
       StartWorkspaceIndex = 1000;
       EndWorkspaceIndex = 1002;
+    }
+
+    // ---- test Dx -------
+    void testDx(const MatrixWorkspace& ws) const {
+      if (wsType == "histo-dx") {
+        TS_ASSERT(ws.hasDx(0));
+        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0));
+        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0));
+        // Check that the length of x and dx is the same
+        auto x = ws.readX(0);
+        auto dX = ws.readDx(0);
+        TS_ASSERT_EQUALS(x.size(), dX.size());
+
+      } else if (wsType == "event-dx"){
+        TS_ASSERT(ws.hasDx(0));
+        TS_ASSERT_EQUALS(ws.readDx(0)[0], 0.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[1], 1.0 + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[2], sqrt(2.0) + 1.0);
+        TS_ASSERT_EQUALS(ws.readDx(0)[3], sqrt(3.0) + 1.0);
+      } else {
+        TSM_ASSERT("Should never reach here", false);
+      }
     }
   };
 

@@ -149,17 +149,28 @@ void ExtractSpectra::execHistogram() {
     const MantidVec &oldX = m_inputWorkspace->readX(m_workspaceIndexList.front());
     newX.access().assign(oldX.begin() + m_minX, oldX.begin() + m_maxX);
   }
+
   Progress prog(this, 0.0, 1.0, (m_workspaceIndexList.size()));
   // Loop over the required workspace indices, copying in the desired bins
   for (int j = 0; j < static_cast<int>(m_workspaceIndexList.size()); ++j) {
     auto i = m_workspaceIndexList[j];
+
+    bool hasDx = m_inputWorkspace->hasDx(i);
+
     // Preserve/restore sharing if X vectors are the same
     if (m_commonBoundaries) {
       outputWorkspace->setX(j, newX);
+      if (hasDx) {
+        const MantidVec &oldDx = m_inputWorkspace->readDx(i);
+        outputWorkspace->dataDx(j).assign(oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
+      }
     } else {
       // Safe to just copy whole vector 'cos can't be cropping in X if not
       // common
       outputWorkspace->setX(j, m_inputWorkspace->refX(i));
+      if (hasDx) {
+        outputWorkspace->setDx(j, m_inputWorkspace->refDx(i));
+      }
     }
 
     const MantidVec &oldY = m_inputWorkspace->readY(i);
@@ -323,13 +334,26 @@ void ExtractSpectra::execEvent() {
     // Copy spectrum number & detector IDs
     outEL.copyInfoFrom(el);
 
-    if (!m_commonBoundaries)
+    bool hasDx = eventW->hasDx(i);
+
+    if (!m_commonBoundaries) {
       // If the X axis is NOT common, then keep the initial X axis, just clear
       // the events
       outEL.setX(el.dataX());
-    else
+      if (hasDx) {
+        outEL.setDx(el.dataDx());
+      }
+    }
+    else {
       // Common bin boundaries get all set to the same value
       outEL.setX(XValues_new);
+      if (hasDx) {
+        const MantidVec &oldDx = m_inputWorkspace->readDx(i);
+        cow_ptr<MantidVec> DxValues_new;
+        DxValues_new.access().assign(oldDx.begin() + m_minX, oldDx.begin() + m_maxX);
+        outEL.setDx(DxValues_new);
+      }
+    }
 
     // Propagate bin masking if there is any
     if (m_inputWorkspace->hasMaskedBins(i)) {

@@ -247,6 +247,11 @@ public:
     return getSpectrum(index)->ptrX();
   }
 
+  /// Returns a pointer to the dX  (X Error) data
+  virtual Kernel::cow_ptr<MantidVec> refDx(const std::size_t index) const {
+    return getSpectrum(index)->ptrDx();
+  }
+
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVec &X) {
     getSpectrum(index)->setX(X);
@@ -262,6 +267,24 @@ public:
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type &X) {
     getSpectrum(index)->setX(X);
+    invalidateCommonBinsFlag();
+  }
+
+  /// Set the specified Dx (X Error) array to point to the given existing array
+  virtual void setDx(const std::size_t index, const MantidVec &Dx) {
+    getSpectrum(index)->setDx(Dx);
+    invalidateCommonBinsFlag();
+  }
+
+  /// Set the specified Dx (X Error) array to point to the given existing array
+  virtual void setDx(const std::size_t index, const MantidVecPtr &Dx) {
+    getSpectrum(index)->setDx(Dx);
+    invalidateCommonBinsFlag();
+  }
+
+  /// Set the specified Dx (X Error) array to point to the given existing array
+  virtual void setDx(const std::size_t index, const MantidVecPtr::ptr_type &Dx) {
+    getSpectrum(index)->setX(Dx);
     invalidateCommonBinsFlag();
   }
 
@@ -288,6 +311,14 @@ public:
   virtual void setData(const std::size_t index, const MantidVecPtr::ptr_type &Y,
                        const MantidVecPtr::ptr_type &E) {
     getSpectrum(index)->setData(Y, E);
+  }
+
+  /**
+   * Probes if DX (X Error) values were set on a particular spectrum
+   * @param index: the spectrum index
+   */
+  virtual bool hasDx(const std::size_t index) const {
+    return getSpectrum(index)->hasDx();
   }
 
   /// Generate the histogram or rebin the existing histogram.
