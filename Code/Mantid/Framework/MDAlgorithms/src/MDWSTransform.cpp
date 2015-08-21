@@ -321,7 +321,6 @@ void MDWSTransform::setQ3DDimensionsNames(
   if (FrameID == CnvrtToMD::AutoSelect)
     FrameID = findTargetFrame(TargWSDescription);
 
-  std::string frameKey;
   switch (FrameID) {
   case (CnvrtToMD::LabFrame): {
     dimNames[0] = "Q_lab_x";
