@@ -363,8 +363,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Convert to integer slide value
         ileftvalue = int( (newtime0-xlim[0])/(xlim[1] - xlim[0])*100 )
-        info_msg = "iLeftSlide = %s" % str(ileftvalue)
-        Logger("Filter_Events").information(info_msg)
+        debug_msg = "iLeftSlide = %s" % str(ileftvalue)
+        Logger("Filter_Events").debug(debug_msg)
 
         # Skip if same as origina
         if ileftvalue == self._leftSlideValue:
@@ -529,8 +529,8 @@ class MainWindow(QtGui.QMainWindow):
     def set_minLogValue(self):
         """ Set the starting time and left slide bar
         """
-        error_msg = "Minimum Log Value = %s" %(str(self.ui.lineEdit_5.text()))
-        Logger("Filter_Events").error(error_msg)
+        debug_msg = "Minimum Log Value = %s" %(str(self.ui.lineEdit_5.text()))
+        Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
 
