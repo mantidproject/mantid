@@ -180,11 +180,14 @@ int vtkMDHWNexusReader::RequestInformation(
   
   m_presenter->executeLoadMetadata();
   setTimeRange(outputVector);
-  std::vector<int> extents = dynamic_cast<MDHWNexusLoadingPresenter*>(m_presenter)->getExtents();
-  outputVector->GetInformationObject(0)
-      ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
-            static_cast<int>(extents.size()));
-
+  MDHWNexusLoadingPresenter *castPresenter =
+      dynamic_cast<MDHWNexusLoadingPresenter *>(m_presenter);
+  if (castPresenter) {
+    std::vector<int> extents = castPresenter->getExtents();
+    outputVector->GetInformationObject(0)
+        ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
+              static_cast<int>(extents.size()));
+  }
   return 1;
 }
 
