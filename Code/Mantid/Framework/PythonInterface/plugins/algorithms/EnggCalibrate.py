@@ -81,18 +81,22 @@ class EnggCalibrate(PythonAlgorithm):
 
         import EnggUtils
 
+        # Get peaks in dSpacing from file
+        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                       self.getProperty('ExpectedPeaks').value)
+
+        prog = Progress(self, start=0, end=1, nreports=2)
+
+        prog.report('Focusing the input workspace')
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
                                      self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
-        # Get peaks in dSpacing from file
-        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                       self.getProperty('ExpectedPeaks').value)
-
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
+        prog.report('Fitting parameters for the focused run')
         difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
 
         self._produceOutputs(difc, zero)
