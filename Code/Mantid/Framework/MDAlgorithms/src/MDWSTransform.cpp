@@ -321,6 +321,7 @@ void MDWSTransform::setQ3DDimensionsNames(
   if (FrameID == CnvrtToMD::AutoSelect)
     FrameID = findTargetFrame(TargWSDescription);
 
+  std::string frameKey;
   switch (FrameID) {
   case (CnvrtToMD::LabFrame): {
     dimNames[0] = "Q_lab_x";
@@ -343,13 +344,9 @@ void MDWSTransform::setQ3DDimensionsNames(
     dimNames[1] = "K";
     dimNames[2] = "L";
 
-
     Kernel::MDUnit_uptr mdUnit(new Kernel::InverseAngstromsUnit);
-    if (ScaleID == HKLScale){
-        mdUnit.reset(new Kernel::ReciprocalLatticeUnit);
-    }
     TargWSDescription.setCoordinateSystem(Mantid::Kernel::HKL);
-    TargWSDescription.setFrame(Geometry::HKL::HKLName, mdUnit->getUnitLabel());
+    TargWSDescription.setFrame(Geometry::HKL::HKLName);
     break;
   }
   default:

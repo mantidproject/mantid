@@ -31,7 +31,7 @@ void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
     if (d < 3 && description.isQ3DMode()) {
       // We should have frame and scale information that we can use correctly
       // for our Q dimensions.
-      auto mdFrame = description.getFrame();
+      auto mdFrame = description.getFrame(d);
 
       dim = new Geometry::MDHistoDimension(
           description.getDimNames()[d], description.getDimIDs()[d], *mdFrame,

@@ -427,11 +427,12 @@ void MDWSDescription::setCoordinateSystem(
 
 /**
  * create the frame
+ * @param d : dimension index to get the frame for.
  * @return MDFrame
  */
-Geometry::MDFrame_uptr MDWSDescription::getFrame() const{
+Geometry::MDFrame_uptr MDWSDescription::getFrame(size_t d) const{
     auto factory = Geometry::makeMDFrameFactoryChain();
-    return factory->create(Geometry::MDFrameArgument(m_frameKey, m_frameUnitKey));
+    return factory->create(Geometry::MDFrameArgument(m_frameKey, m_DimUnits[d]));
 }
 
 /**
@@ -439,9 +440,8 @@ Geometry::MDFrame_uptr MDWSDescription::getFrame() const{
  * @param frameKey
  * @param frameUnitKey
  */
-void MDWSDescription::setFrame(const std::string frameKey, const std::string frameUnitKey){
+void MDWSDescription::setFrame(const std::string frameKey){
     m_frameKey = frameKey;
-    m_frameUnitKey = frameUnitKey;
 }
 
 /// @return the special coordinate system if any.

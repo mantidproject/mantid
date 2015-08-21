@@ -158,9 +158,9 @@ public: // for the time being
   /// @return the special coordinate system if any.
   Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
   /// Set the md frame
-  void setFrame(const std::string frameKey, const std::string frameUnitKey="");
+  void setFrame(const std::string frameKey);
   /// Retrieve the md frame
-  Geometry::MDFrame_uptr getFrame() const;
+  Geometry::MDFrame_uptr getFrame(size_t d) const;
 
 
   /// sets number of bins each dimension is split
@@ -205,8 +205,6 @@ private:
   Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
   /// Frame key. For frame to use.
   std::string m_frameKey;
-  /// Unit key. For frame unit to use.
-  std::string m_frameUnitKey;
 };
 }
 }
