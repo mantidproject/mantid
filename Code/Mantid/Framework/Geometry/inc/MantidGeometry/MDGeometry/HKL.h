@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/DllConfig.h"
 #include <memory>
 
 namespace Mantid {
@@ -33,14 +34,14 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport HKL : public MDFrame {
+class MANTID_GEOMETRY_DLL HKL : public MDFrame {
 public:
   HKL(const HKL& other);
   HKL& operator=(const HKL& other);
   HKL(std::unique_ptr<Kernel::MDUnit>& unit);
   HKL(Kernel::MDUnit* unit);
   virtual ~HKL();
-  static const std::string HKLName;
+  static const MANTID_GEOMETRY_DLL std::string HKLName;
 
   // MDFrame interface
   Kernel::UnitLabel getUnitLabel() const;

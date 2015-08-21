@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/DllConfig.h"
 #include <memory>
 
 namespace Mantid {
@@ -33,7 +34,7 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport QLab : public MDFrame{
+class MANTID_GEOMETRY_DLL QLab : public MDFrame{
 public:
 
   QLab();
@@ -45,7 +46,7 @@ public:
   QLab *clone() const;
 
   // Type name
-  static const std::string QLabName;
+  static const MANTID_GEOMETRY_DLL std::string QLabName;
 
 private:
 
