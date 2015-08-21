@@ -66,24 +66,27 @@ void TomographyIfaceViewQtGUI::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
   // add tab contents and set up their ui's
-  QWidget *tab1w = new QWidget(m_ui.tabMain);
-  m_uiTabRun.setupUi(tab1w);
-  m_ui.tabMain->addTab(tab1w, QString("Run"));
-  QWidget *tab2w = new QWidget(m_ui.tabMain);
-  m_uiTabSetup.setupUi(tab2w);
-  m_ui.tabMain->addTab(tab2w, QString("Setup"));
+  QWidget *tabRunW = new QWidget(m_ui.tabMain);
+  m_uiTabRun.setupUi(tabRunW);
+  m_ui.tabMain->addTab(tabRunW, QString("Run"));
+  QWidget *tabSetupW = new QWidget(m_ui.tabMain);
+  m_uiTabSetup.setupUi(tabSetupW);
+  m_ui.tabMain->addTab(tabSetupW, QString("Setup"));
 
-  ImageCoRViewQtGUI *tab3w = new ImageCoRViewQtGUI(m_ui.tabMain);
-  m_ui.tabMain->addTab(tab3w, QString("Center && regions"));
+  ImageCoRViewQtGUI *tabCoRW = new ImageCoRViewQtGUI(m_ui.tabMain);
+  m_ui.tabMain->addTab(tabCoRW, QString("Center && ROI"));
 
-  QWidget *tab4w = new QWidget();
-  m_ui.tabMain->addTab(tab4w, QString("Filters"));
+  QWidget *tabFiltersW = new QWidget();
+  m_ui.tabMain->addTab(tabFiltersW, QString("Filters"));
 
-  QWidget *tab5w = new QWidget();
-  m_ui.tabMain->addTab(tab5w, QString("Visualize"));
+  QWidget *tabVizW = new QWidget();
+  m_ui.tabMain->addTab(tabVizW, QString("Visualize"));
 
-  QWidget *tab6w = new QWidget();
-  m_ui.tabMain->addTab(tab6w, QString("Convert"));
+  QWidget *tabConvertW = new QWidget();
+  m_ui.tabMain->addTab(tabConvertW, QString("Convert"));
+
+  QWidget *tabEBandsW = new QWidget();
+  m_ui.tabMain->addTab(tabEBandsW, QString("Energy bands"));
 
   readSettings();
 
