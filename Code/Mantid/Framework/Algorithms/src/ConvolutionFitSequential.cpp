@@ -5,6 +5,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/MandatoryValidator.h"
@@ -13,6 +14,10 @@
 #include "MantidKernel/StringContainsValidator.h"
 
 #include <cmath>
+
+namespace {
+Mantid::Kernel::Logger g_log("ConvolutionFitSequential");
+}
 
 namespace Mantid {
 namespace Algorithms {
@@ -204,13 +209,13 @@ void ConvolutionFitSequential::exec() {
 
   // passWSIndex
   bool passIndex = false;
-  if (funcName.find("Diffusion") != std::string::npos ||
+  if (funcName.find("Diff") != std::string::npos ||
       funcName.find("Stretched") != std::string::npos) {
     passIndex = true;
   }
 
   // Run PlotPeaksByLogValue
-  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", -1, -1, true);
+  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.0, 0.70, true);
   plotPeaks->setAlwaysStoreInADS(true);
   plotPeaks->setProperty("Input", plotPeakInput);
   plotPeaks->setProperty("OutputWorkspace", outputWsName);
@@ -225,15 +230,13 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("Minimizer", minimizer);
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
   plotPeaks->executeAsChildAlg();
-
   ITableWorkspace_sptr outputWs =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWsName);
-
   // Delete workspaces
   std::string deleteWorkspaces[] = {
       (outputWsName + "_NormalisedCovarianceMatrices"),
       (outputWsName + "_Parameters"), tempFitWsName};
-  auto deleter = createChildAlgorithm("DeleteWorkspace", -1, -1, true);
+  auto deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
   for (int i = 0; i < 3; i++) {
     deleter->setProperty("WorkSpace", deleteWorkspaces[i]);
     deleter->executeAsChildAlg();
@@ -253,7 +256,7 @@ void ConvolutionFitSequential::exec() {
   }
   if (funcName.compare("Lorentzian") == 0) {
     // remove peak centre
-    int pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
+    auto pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
               paramNames.begin();
     if (pos != std::string::npos) {
       paramNames.erase(paramNames.begin() + pos);
@@ -279,7 +282,7 @@ void ConvolutionFitSequential::exec() {
 
   // Run ProcessIndirectFitParameters
   auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", -1, -1, true);
+      createChildAlgorithm("ProcessIndirectFitParameters", 0.73, 0.80, true);
   pifp->setAlwaysStoreInADS(true);
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
@@ -295,7 +298,7 @@ void ConvolutionFitSequential::exec() {
   axis->setUnit("MomentumTransfer");
 
   // Handle sample logs
-  auto logCopier = createChildAlgorithm("CopyLogs", -1, -1, true);
+  auto logCopier = createChildAlgorithm("CopyLogs", 0.80, 0.85, true);
   logCopier->setProperty("InputWorkspace", inputWs);
   logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
@@ -322,7 +325,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Add String Logs
-  auto logAdder = createChildAlgorithm("AddSampleLog", -1, -1, true);
+  auto logAdder = createChildAlgorithm("AddSampleLog", 0.85, 0.90, true);
   for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", it->first);
@@ -338,16 +341,15 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("LogType", "Number");
     logAdder->executeAsChildAlg();
   }
-
   // Copy Logs to GroupWorkspace
-  logCopier = createChildAlgorithm("CopyLogs", -1, -1, true);
+  logCopier = createChildAlgorithm("CopyLogs", 0.90, 0.93, true);
   logCopier->setProperty("InputWorkspace", resultWs);
   logCopier->setProperty("OutputWorkspace",
                          (outputWs->getName() + "_Workspaces"));
   logCopier->executeAsChildAlg();
 
   // Rename TableWorkspace
-  auto renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
+  auto renamer = createChildAlgorithm("RenameWorkspace", 0.93, 0.94, true);
   renamer->setAlwaysStoreInADS(true);
   renamer->setProperty("InputWorkspace", outputWs);
   renamer->setProperty("OutputWorkspace",
@@ -359,7 +361,7 @@ void ConvolutionFitSequential::exec() {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
                                                                  "_Workspaces");
   auto groupWsNames = groupWs->getNames();
-  renamer = createChildAlgorithm("RenameWorkspace", -1, -1, true);
+  renamer = createChildAlgorithm("RenameWorkspace", 0.94, 1., true);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i));
     std::string outName = outputWsName + "_";
@@ -368,6 +370,7 @@ void ConvolutionFitSequential::exec() {
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
   }
+
 }
 
 /**
