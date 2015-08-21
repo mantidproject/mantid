@@ -4,12 +4,12 @@ namespace Mantid {
 namespace Geometry {
 
 GeneralFrame::GeneralFrame(const std::string &frameName,
-                           const std::string &unit)
-    : m_unit(new Mantid::Kernel::LabelUnit(unit)), m_frameName(frameName) {}
-
-GeneralFrame::GeneralFrame(const std::string &frameName,
                            std::unique_ptr<Kernel::MDUnit> unit)
     : m_unit(unit.release()), m_frameName(frameName) {}
+
+GeneralFrame::GeneralFrame(const std::string& frameName, const Kernel::UnitLabel& unit):
+    m_unit(new Mantid::Kernel::LabelUnit(unit)), m_frameName(frameName) {}
+
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

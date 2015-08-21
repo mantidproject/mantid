@@ -1293,7 +1293,7 @@ public:
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const {
-    return m_frame->getUnitLabel();
+    return m_axis.unit()->label();
   }
 
   /// short name which identify the dimension among other dimension. A dimension
@@ -1384,7 +1384,7 @@ public:
 
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const {
-    return m_frame->getUnitLabel();
+    return m_ws->getAxis(0)->unit()->label();
   }
 
   /// short name which identify the dimension among other dimension. A dimension

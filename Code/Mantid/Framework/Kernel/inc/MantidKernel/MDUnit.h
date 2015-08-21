@@ -71,9 +71,9 @@ public:
 
 class DLLExport LabelUnit : public MDUnit {
 private:
-  std::string m_unitLabel;
+  UnitLabel m_unitLabel;
 public:
-  LabelUnit(const std::string& unitLabel);
+  LabelUnit(const UnitLabel& unitLabel);
   UnitLabel getUnitLabel() const;
   bool canConvertTo(const MDUnit &other) const;
   bool isQUnit() const;

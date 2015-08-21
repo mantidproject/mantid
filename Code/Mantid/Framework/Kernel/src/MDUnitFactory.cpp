@@ -1,5 +1,6 @@
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <memory>
 
@@ -7,7 +8,7 @@ namespace Mantid {
 namespace Kernel {
 
 LabelUnit *LabelUnitFactory::createRaw(const std::string &unitString) const {
-  return new LabelUnit(unitString);
+  return new LabelUnit(UnitLabel(unitString));
 }
 
 bool LabelUnitFactory::canInterpret(const std::string &) const {

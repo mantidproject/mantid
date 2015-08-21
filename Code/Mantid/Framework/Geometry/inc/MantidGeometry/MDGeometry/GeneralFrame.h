@@ -35,7 +35,7 @@ namespace Geometry {
 */
 class DLLExport GeneralFrame : public MDFrame {
 public:
-  GeneralFrame(const std::string& frameName, const std::string& unit);
+  GeneralFrame(const std::string& frameName, const Kernel::UnitLabel& unit);
   GeneralFrame(const std::string& frameName, std::unique_ptr<Mantid::Kernel::MDUnit> unit);
   virtual ~GeneralFrame();
   Kernel::UnitLabel getUnitLabel() const;

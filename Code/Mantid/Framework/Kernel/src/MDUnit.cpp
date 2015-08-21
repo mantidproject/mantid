@@ -71,9 +71,9 @@ InverseAngstromsUnit* InverseAngstromsUnit::clone() const {return new InverseAng
 //  LabelUnit
 //----------------------------------------------------------------------------------------------
 
-LabelUnit::LabelUnit(const std::string &unitLabel) : m_unitLabel(unitLabel) {}
+LabelUnit::LabelUnit(const UnitLabel& unitLabel): m_unitLabel(unitLabel) {}
 
-UnitLabel LabelUnit::getUnitLabel() const { return UnitLabel(m_unitLabel); }
+UnitLabel LabelUnit::getUnitLabel() const { return m_unitLabel; }
 
 bool LabelUnit::canConvertTo(const MDUnit &other) const {
   return this->getUnitLabel() == other.getUnitLabel();
