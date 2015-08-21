@@ -36,7 +36,7 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL QSample : public MDFrame {
 public:
-  static const MANTID_GEOMETRY_DLL std::string QSampleName;
+  static const std::string QSampleName;
   QSample();
   virtual ~QSample();
   Kernel::UnitLabel getUnitLabel() const;

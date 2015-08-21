@@ -41,7 +41,7 @@ public:
   HKL(std::unique_ptr<Kernel::MDUnit>& unit);
   HKL(Kernel::MDUnit* unit);
   virtual ~HKL();
-  static const MANTID_GEOMETRY_DLL std::string HKLName;
+  static const std::string HKLName;
 
   // MDFrame interface
   Kernel::UnitLabel getUnitLabel() const;

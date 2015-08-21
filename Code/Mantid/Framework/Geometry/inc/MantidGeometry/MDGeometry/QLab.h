@@ -46,7 +46,7 @@ public:
   QLab *clone() const;
 
   // Type name
-  static const MANTID_GEOMETRY_DLL std::string QLabName;
+  static const std::string QLabName;
 
 private:
 
