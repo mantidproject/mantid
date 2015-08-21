@@ -103,6 +103,18 @@ void setEFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
   setSpectrumFromPyObject(self, &MatrixWorkspace::dataE, wsIndex, values);
 }
 
+
+/**
+ * Set the Dx values from an python array-style object
+ * @param self :: A reference to the calling object
+ * @param wsIndex :: The workspace index for the spectrum to set
+ * @param values :: A numpy array. The length must match the size of the
+ */
+void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
+                      numeric::array values) {
+  setSpectrumFromPyObject(self, &MatrixWorkspace::dataDx, wsIndex, values);
+}
+
 /**
  * Adds a deprecation warning to the getNumberBins call to warn about using
  * blocksize instead
@@ -229,7 +241,8 @@ void export_MatrixWorkspace() {
            args("self", "workspaceIndex"), "Creates a read-only numpy wrapper "
                                            "around the original Dx data at the "
                                            "given index")
-
+      .def("hasDx", &MatrixWorkspace::hasDx,args("self", "workspaceIndex"),
+           "Returns True if the spectrum uses the DX (X Error) array, else False.")
       //--------------------------------------- Write spectrum data
       //------------------------
       .def("dataX", (data_modifier)&MatrixWorkspace::dataX,
@@ -256,6 +269,9 @@ void export_MatrixWorkspace() {
            "simple copy into the array.")
       .def("setE", &setEFromPyObject, args("self", "workspaceIndex", "e"),
            "Set E values from a python list or numpy array. It performs a "
+           "simple copy into the array.")
+      .def("setDx", &setDxFromPyObject, args("self", "workspaceIndex", "dX"),
+           "Set Dx values from a python list or numpy array. It performs a "
            "simple copy into the array.")
 
       // --------------------------------------- Extract data

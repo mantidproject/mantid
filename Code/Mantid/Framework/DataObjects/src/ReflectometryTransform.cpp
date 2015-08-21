@@ -272,22 +272,23 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     const double thetaUpper = theta + thetaHalfWidth;
 
     const MantidVec &X = inputWS->readX(0);
-
+    
     for (size_t j = 0; j < nBins; ++j) {
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];
 
       // fractional rebin
       m_calculator->setThetaFinal(thetaLower);
-      const V2D ll(m_calculator->calculateDim0(lamLower),
-                   m_calculator->calculateDim1(lamLower));
+      const V2D ur(m_calculator->calculateDim0(lamLower), //highest qx 
+                   m_calculator->calculateDim1(lamLower)); 
       const V2D lr(m_calculator->calculateDim0(lamUpper),
-                   m_calculator->calculateDim1(lamUpper));
+                   m_calculator->calculateDim1(lamUpper)); //lowest qz 
       m_calculator->setThetaFinal(thetaUpper);
       const V2D ul(m_calculator->calculateDim0(lamLower),
-                   m_calculator->calculateDim1(lamLower));
-      const V2D ur(m_calculator->calculateDim0(lamUpper),
-                   m_calculator->calculateDim1(lamUpper));
+                   m_calculator->calculateDim1(lamLower)); //highest qz 
+      const V2D ll(m_calculator->calculateDim0(lamUpper),  //lowest qx  
+                   m_calculator->calculateDim1(lamUpper)); 
+               
 
       Quadrilateral inputQ(ll, lr, ur, ul);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
@@ -319,6 +320,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   return outWS;
 }
 
+
 /**
  * A map detector ID and Q ranges
  * This method looks unnecessary as it could be calculated on the fly but
@@ -335,7 +337,7 @@ void ReflectometryTransform::initAngularCaches(
 
   auto inst = workspace->getInstrument();
   const auto samplePos = inst->getSample()->getPos();
-  const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
+  const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
 
   for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
   {
@@ -356,9 +358,8 @@ void ReflectometryTransform::initAngularCaches(
       continue;
     }
     // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorTwoTheta(det) * 180.0 / M_PI;
+    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
     m_theta[i] = theta;
-
     /**
      * Determine width from shape geometry. A group is assumed to contain
      * detectors with the same shape & r, theta value, i.e. a ring mapped-group
@@ -370,7 +371,7 @@ void ReflectometryTransform::initAngularCaches(
       auto dets = group->getDetectors();
       det = dets[0];
     }
-    const auto pos = det->getPos();
+    const auto pos = det->getPos() - samplePos;
     double l2(0.0), t(0.0), p(0.0);
     pos.getSpherical(l2, t, p);
     // Get the shape
@@ -380,10 +381,12 @@ void ReflectometryTransform::initAngularCaches(
     BoundingBox bbox = shape->getBoundingBox();
     auto maxPoint(bbox.maxPoint());
     rot.rotate(maxPoint);
-    double boxWidth = maxPoint[upDir];
+    double halfBoxHeight = maxPoint.scalar_prod(upDirVec);
 
-    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2)) * 180.0 / M_PI;
-  }
+    m_thetaWidths[i] = 2.0 * std::fabs(std::atan(halfBoxHeight / l2)) * 180.0 / M_PI;
+ 
+
+}
 }
 }
 }

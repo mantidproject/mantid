@@ -1189,14 +1189,14 @@ void InstrumentWindow::createTabs(QSettings &settings) {
 
   // Mask controls
   InstrumentWindowMaskTab *maskTab = new InstrumentWindowMaskTab(this);
-  mControlsTab->addTab(maskTab, QString("Mask/Group"));
+  mControlsTab->addTab(maskTab, QString("Draw"));
   connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
   maskTab->loadSettings(settings);
 
   // Instrument tree controls
   InstrumentWindowTreeTab *treeTab = new InstrumentWindowTreeTab(this);
-  mControlsTab->addTab(treeTab, QString("Instrument Tree"));
+  mControlsTab->addTab(treeTab, QString("Instrument"));
   treeTab->loadSettings(settings);
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,

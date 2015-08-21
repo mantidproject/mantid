@@ -175,8 +175,9 @@ void MDHWNexusLoadingPresenter::loadWorkspace( ProgressAction& loadingProgressUp
     alg->addObserver(observer);
     alg->execute();
     alg->removeObserver(observer);
-    Workspace_sptr result = AnalysisDataService::Instance().retrieve("MD_HISTO_WS_ID");
-    m_histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(result);
+    m_histoWs =
+        AnalysisDataService::Instance()
+            .retrieveWS<Mantid::API::IMDHistoWorkspace>("MD_HISTO_WS_ID");
 }
 
 }

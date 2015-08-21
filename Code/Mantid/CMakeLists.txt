@@ -78,21 +78,7 @@ ENDIF()
 # Set paths to Third_Party for Mac builds
 ###########################################################################
 IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-  if ( NOT THIRD_PARTY )
-    set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
-  endif ()
-
-  # Print out where we think we are looking for 3rd party stuff
-  message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
-
-  # Check that the 3rd party directory exists.
-  if (NOT IS_DIRECTORY "${THIRD_PARTY}")
-    message ( WARNING "Specified THIRD_PARTY directory doesn't exist!" )
-  endif()
-
   include ( DarwinSetup )
-
 ENDIF()
 
 # We probably don't want this to run on every build.

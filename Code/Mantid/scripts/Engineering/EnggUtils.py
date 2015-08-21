@@ -149,10 +149,17 @@ def getDetIDsForBank(bank):
 
     alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
     alg.setProperty('InputFile', groupingFilePath)
-    alg.setProperty('OutputWorkspace', '__EnginXGrouping')
+    grpName = '__EnginXGrouping'
+    alg.setProperty('OutputWorkspace', grpName)
     alg.execute()
 
-    grouping = mtd['__EnginXGrouping']
+    # LoadDetectorsGroupingFile produces a 'Grouping' workspace.
+    # PropertyWithValue<GroupingWorkspace> not working (GitHub issue 13437)
+    # => cannot run as child and get outputworkspace property properly
+    if not AnalysisDataService.doesExist(grpName):
+        raise RuntimeError('LoadDetectorsGroupingFile did not run correctly. Could not '
+                           'find its output workspace: ' + grpName)
+    grouping = mtd[grpName]
 
     detIDs = set()
 
