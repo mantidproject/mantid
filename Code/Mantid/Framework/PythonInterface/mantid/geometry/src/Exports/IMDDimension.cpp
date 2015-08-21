@@ -1,6 +1,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/shared_ptr.hpp>
 
 #include <boost/python/class.hpp>
@@ -10,6 +11,10 @@
 
 using namespace Mantid::Geometry;
 using namespace boost::python;
+
+// clang-format off
+GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 
 namespace {
 /**
