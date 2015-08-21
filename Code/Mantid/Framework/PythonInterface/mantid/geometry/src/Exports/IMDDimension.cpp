@@ -1,12 +1,20 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/UnitLabel.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include <boost/shared_ptr.hpp>
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_internal_reference.hpp>
+#include <boost/python/copy_const_reference.hpp>
 
-using Mantid::Geometry::IMDDimension;
-using Mantid::Geometry::IMDDimension_sptr;
+using namespace Mantid::Geometry;
 using namespace boost::python;
+
+// clang-format off
+GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 
 namespace {
 /**
@@ -16,6 +24,16 @@ namespace {
 std::string getUnitsAsStr(IMDDimension &self) {
   return self.getUnits().ascii();
 }
+
+/**
+ * @brief getMDFrame
+ * @param self : A reference to the calling object
+ * @return cloned MDFrame wrapped as a shared pointer.
+ */
+boost::shared_ptr<MDFrame> getMDFrame(const IMDDimension& self){
+    return boost::shared_ptr<MDFrame>(self.getMDFrame().clone());
+}
+
 }
 
 void export_IMDDimension() {
@@ -39,5 +57,7 @@ void export_IMDDimension() {
            "dimension."
            "A dimension can be usually find by its ID and various  ")
       .def("getUnits", &getUnitsAsStr,
-           "Return the units associated with this dimension.");
+           "Return the units associated with this dimension.")
+      .def("getMDFrame", &getMDFrame,
+           "Return the multidimensional frame for this dimension.");
 }
