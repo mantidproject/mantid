@@ -45,7 +45,7 @@ void AppendSpectra::init() {
       "ValidateInputs", true,
       "Perform a set of checks that the two input workspaces are compatible.");
 
-  declareProperty("Repeat", 1,
+  declareProperty("Number", 1,
                   boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
                   "Append the spectra from InputWorkspace2 multiple times (for "
                   "MatrixWorkspaces only)");
@@ -91,7 +91,7 @@ void AppendSpectra::exec() {
     // Both are event workspaces. Use the special method
     MatrixWorkspace_sptr output = this->execEvent();
     if (number > 1)
-      g_log.warning("Repeat property is ignored for event workspaces");
+      g_log.warning("Number property is ignored for event workspaces");
     if (mergeLogs)
       combineLogs(ws1->run(), ws2->run(), output->mutableRun());
     // Set the output workspace
