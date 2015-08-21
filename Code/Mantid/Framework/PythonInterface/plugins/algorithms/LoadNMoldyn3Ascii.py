@@ -131,16 +131,27 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         # Do setup
         self._setup()
 
+        loaded_ws = None
+
         # Run nMOLDYN import
         if self._file_type == 'cdl':
-            self._cdl_import()
+            loaded_ws = self._cdl_import()
         elif self._file_type == 'dat':
-            self._ascii_import()
+            loaders = [self._ascii_3d_import, self._ascii_2d_import]
+            for loader in loaders:
+                try:
+                    logger.information('Attempting to load with loader {0}'.format(loader))
+                    loaded_ws = loader()
+                    break
+                except (ValueError, SyntaxError) as err:
+                    logger.information('Loader {0} failed to load data: {1}'.format(loader, err))
         else:
             raise RuntimeError('Unrecognised file extension: %s' % self._file_type)
 
+        print loaded_ws
+
         # Set the output workspace
-        self.setProperty('OutputWorkspace', self._out_ws)
+        self.setProperty('OutputWorkspace', loaded_ws)
 
 #-------------------------------------------------------------------------------
 
@@ -292,14 +303,16 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
             output_ws_list.append(function_ws_name)
 
-        GroupWorkspaces(InputWorkspaces=output_ws_list,
-                        OutputWorkspace=self._out_ws)
+        out_ws = GroupWorkspaces(InputWorkspaces=output_ws_list,
+                                 OutputWorkspace=self._out_ws)
+
+        return out_ws
 
 #-------------------------------------------------------------------------------
 
-    def _ascii_import(self):
+    def _ascii_3d_import(self):
         """
-        Import ASCII data.
+        Import 3D ASCII data (e.g. I(Q, t), S(Q, w)).
         """
         logger.notice('Loading ASCII data')
 
@@ -309,12 +322,13 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
         # Read file
         data = []
-        x_axis = (None, None)
-        v_axis = (None, None)
+        x_axis = None
+        v_axis = None
         with open(self._file_name, 'r') as handle:
             for line in handle:
                 line = line.strip()
 
+                # Ignore empty lines
                 if line == "":
                     continue
 
@@ -334,6 +348,11 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
                     line_values = np.array([ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
                     data.append(line_values)
 
+        if x_axis is None or v_axis is None:
+            raise ValueError('Data is not in expected format for 3D data')
+        logger.debug('X axis: {0}'.format(x_axis))
+        logger.debug('V axis: {0}'.format(v_axis))
+
         # Get axis and Y values
         data = np.array(data)
         v_axis_values = data[1:,0]
@@ -343,40 +362,84 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         # Create the workspace
         create_workspace = AlgorithmManager.Instance().create('CreateWorkspace')
         create_workspace.initialize()
+        create_workspace.setChild(True)
         create_workspace.setLogging(False)
         create_workspace.setProperty('OutputWorkspace', self._out_ws)
         create_workspace.setProperty('DataX', x_axis_values)
         create_workspace.setProperty('DataY', y_values)
         create_workspace.setProperty('NSpec', v_axis_values.size)
-        # create_workspace.setProperty('UnitX', )
-        # create_workspace.setProperty('YUnitLabel', )
+        create_workspace.setProperty('UnitX', x_axis[1])
         create_workspace.setProperty('VerticalAxisValues', v_axis_values)
         create_workspace.setProperty('VerticalAxisUnit', 'Empty')
         # create_workspace.setProperty('WorkspaceTitle', )
         create_workspace.execute()
 
+        return create_workspace.getProperty('OutputWorkspace').value
 
-        #TODO
-        # from IndirectCommon import getEfixed
-        # from IndirectNeutron import ChangeAngles, InstrParas
-        # Qmax = Q[nQ - 1]
-        # instr = 'MolDyn'
-        # ana = 'simul'
-        # if Qmax <= 2.0:
-        #     refl = '2'
-        # else:
-        #     refl = '4'
-        # InstrParas(self._out_ws, instr, ana, refl)
-        # efixed = getEfixed(self._out_ws)
-        # logger.information('Qmax = ' + str(Qmax) + ' ; efixed = ' + str(efixed))
-        # pi4 = 4.0 * math.pi
-        # wave = 1.8 * math.sqrt(25.2429 / efixed)
-        # theta = []
-        # for n in range(0, nQ):
-        #     qw = wave * Q[n] / pi4
-        #     ang = 2.0 * math.degrees(math.asin(qw))
-        #     theta.append(ang)
-        # ChangeAngles(self._out_ws, instr, theta)
+#-------------------------------------------------------------------------------
+
+    def _ascii_2d_import(self):
+        """
+        Import 2D ASCII data (e.g. DoS).
+        """
+        logger.notice('Loading ASCII data')
+
+        # Regex
+        x_axis_regex = re.compile(r"\s*columns-1\s*=\s*([A-z0-9\-\s]+)\s*\(([A-z0-9-*]+)\)")
+        y_axis_regex = re.compile(r"\s*columns-2\s*=\s*([A-z\-\s]+)")
+
+        # Read file
+        data = []
+        x_axis = None
+        y_axis = None
+        with open(self._file_name, 'r') as handle:
+            for line in handle:
+                line = line.strip()
+
+                # Ignore empty lines
+                if line == "":
+                    continue
+
+                x_axis_match = x_axis_regex.match(line)
+                y_axis_match = y_axis_regex.match(line)
+
+                # Line (X) header
+                if x_axis_match:
+                    x_axis = (x_axis_match.group(1).strip(), x_axis_match.group(2))
+
+                # Data (Y) header
+                elif y_axis_match:
+                    y_axis = y_axis_match.group(1)
+
+                # Data line (if not comment)
+                elif line.strip()[0] != '#':
+                    line_values = np.array([ast.literal_eval(t.strip()) if 'nan' not in t.lower() else np.nan for t in line.split()])
+                    data.append(line_values)
+
+        if x_axis is None or y_axis is None:
+            raise ValueError('Data is not in expected format for 2D data')
+        logger.debug('X axis: {0}'.format(x_axis))
+        logger.debug('Y axis: {0}'.format(y_axis))
+
+        # Get axis and Y values
+        data = np.array(data)
+        x_axis_values = data[:,0]
+        y_values = data[:,1]
+
+        # Create the workspace
+        create_workspace = AlgorithmManager.Instance().create('CreateWorkspace')
+        create_workspace.initialize()
+        create_workspace.setChild(True)
+        create_workspace.setLogging(False)
+        create_workspace.setProperty('OutputWorkspace', self._out_ws)
+        create_workspace.setProperty('DataX', x_axis_values)
+        create_workspace.setProperty('DataY', y_values)
+        create_workspace.setProperty('NSpec', 1)
+        create_workspace.setProperty('UnitX', x_axis[1])
+        create_workspace.setProperty('WorkspaceTitle', y_axis)
+        create_workspace.execute()
+
+        return create_workspace.getProperty('OutputWorkspace').value
 
 #==============================================================================
 
