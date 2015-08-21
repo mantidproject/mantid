@@ -75,7 +75,6 @@ public:
   SimpleChebfun integral() const;
   /// Get rough estimates of the roots
   std::vector<double> roughRoots(double level = 0.0) const;
-  void setA(const std::vector<double>& a) {m_A = a; m_P = m_base->calcP(m_A);}
 private:
   /// Constructor
   SimpleChebfun(ChebfunBase_sptr base);
