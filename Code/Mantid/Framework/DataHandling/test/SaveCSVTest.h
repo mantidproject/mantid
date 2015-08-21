@@ -225,7 +225,7 @@ private:
       dataStream.str(line);
       dataStream >> indexMarker >> d1 >> separator >> d2 >> separator >> d3 >> separator;
       TS_ASSERT_EQUALS(indexMarker, spec);
-      TS_ASSERT_EQUALS(separator,";" );
+      TS_ASSERT_EQUALS(separator,"," );
       TS_ASSERT_DELTA(d1, sqrt(double(spec)), 1e-5);
       TS_ASSERT_DELTA(d2, sqrt(double(spec)), 1e-5);
       TS_ASSERT_DELTA(d3, sqrt(double(spec)), 1e-5);
