@@ -437,8 +437,7 @@ Geometry::MDFrame_uptr MDWSDescription::getFrame(size_t d) const{
 
 /**
  * Sets the frame.
- * @param frameKey
- * @param frameUnitKey
+ * @param frameKey : Frame key desired.
  */
 void MDWSDescription::setFrame(const std::string frameKey){
     m_frameKey = frameKey;
