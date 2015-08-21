@@ -352,39 +352,24 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 else:
                     # load the vanadium
                     name = "%s_%d" % (self._instrument, vanRun)
-                    vanRun = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace=name,
-                                                      MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
-                                                      CompressTOFTolerance=self.COMPRESS_TOL_TOF,
-                                                      **vanFilterWall)
-                    self.log().warning("vanRun = %s" % str(vanRun))
-                    try:
-                        if self._normalisebycurrent is True:
-                            vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun,
-                                                            OutputWorkspace=vanRun)
-                            vanRun.getRun()['gsas_monitor'] = 1
-                    except Exception, e:
-                        self.log().warning(str(e))
-
+                    if self.getProperty("Sum").value:
+                        vanRun = self._loadAndSum(vanRuns, name, **vanFilterWall)
+                    else:
+                        vanRun = self._loadAndSum([vanRun], name, **vanFilterWall)
 
                     # load the vanadium background (if appropriate)
                     vbackRuns = self._info["empty"].value
                     if not noRunSpecified(vbackRuns):
                         name = "%s_%d" % (self._instrument, vbackRuns[samRunIndex])
-                        vbackRun = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace="vbackRun",
-                                                            MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
-                                                            CompressTOFTolerance=self.COMPRESS_TOL_TOF,
-                                                            **vanFilterWall)
+                        if self.getProperty("Sum").value:
+                            vbackRun = self._loadAndSum(vbackRuns, name, **vanFilterWall)
+                        else:
+                            vbackRun = self._loadAndSum([vbackRuns[samRunIndex]], name, **vanFilterWall)
+
                         if vbackRun.id() == EVENT_WORKSPACE_ID and vbackRun.getNumberEvents() <= 0:
                             pass
                         else:
-                            try:
-                                if self._normalisebycurrent is True:
-                                    vbackRun = api.NormaliseByCurrent(InputWorkspace=vbackRun,
-                                                                      OutputWorkspace=vbackRun)
-                                    vbackRun.getRun()['gsas_monitor'] = 1
-                                vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
-                            except Exception, e:
-                                self.log().warning(str(e))
+                            vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
 
                         api.DeleteWorkspace(Workspace=vbackRun)
 
@@ -583,6 +568,45 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                    and abs(left["wavelength"].value - right["wavelength"].value)/left["wavelength"].value > .05:
             raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                % (left["wavelength"].value, right["wavelength"].value))
+
+    def _loadAndSum(self, runnumbers, outName, **filterWall):
+        names=["%s_%d" % (self._instrument, runNum) for runNum in runnumbers]
+
+        sumRun = None
+        info = None
+        SUFFIX = self.getProperty("Extension").value
+
+        for name in names:
+            self.log().information("[Sum] processing %s" % name)
+            temp = api.LoadEventAndCompress(Filename=name+SUFFIX, OutputWorkspace=name,
+                                            MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
+                                            CompressTOFTolerance=self.COMPRESS_TOL_TOF,
+                                            **filterWall)
+            try:
+                if self._normalisebycurrent is True:
+                    temp = api.NormaliseByCurrent(InputWorkspace=temp,
+                                                  OutputWorkspace=temp)
+                    temp.getRun()['gsas_monitor'] = 1
+            except Exception, e:
+                self.log().warning(str(e))
+            tempinfo = self._getinfo(temp)
+            if sumRun is None:
+                sumRun = temp
+                info = tempinfo
+            else:
+                self.checkInfoMatch(info, tempinfo)
+
+                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
+                if sumRun.id() == EVENT_WORKSPACE_ID:
+                    sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
+                                                Tolerance=self.COMPRESS_TOL_TOF) # 10ns
+                api.DeleteWorkspace(str(temp))
+
+        if str(sumRun) == outName:
+            return sumRun
+        else:
+            return api.RenameWorkspace(InputWorkspace=sumRun, OutputWorkspace=outName)
+
 
     #pylint: disable=too-many-arguments
     def _focusAndSum(self, runnumbers, extension, filterWall, calib, preserveEvents=True):
