@@ -178,7 +178,7 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
 }
 /**
  * Performs centre-point rebinning and produces an MDWorkspace
- * @param inputWS : The workspace you wish to perform centre-point rebinning on.
+ * @param inputWs : The workspace you wish to perform centre-point rebinning on.
  * @param boxController : controls how the MDWorkspace will be split
  * @returns An MDWorkspace based on centre-point rebinning of the inputWS
  */
@@ -282,7 +282,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
 }
 /**
  * Execution path for NormalisedPolygon Rebinning
- * @param inputWS : Workspace to be rebinned
+ * @param inputWs : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
  */
