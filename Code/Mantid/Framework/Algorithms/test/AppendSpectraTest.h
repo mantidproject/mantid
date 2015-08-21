@@ -110,7 +110,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace1","top") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace2","bottom") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","top") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Repeat",2) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Number",2) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
 
