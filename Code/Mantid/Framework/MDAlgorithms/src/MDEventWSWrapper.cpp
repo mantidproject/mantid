@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/MDEventWSWrapper.h"
+#include "MantidGeometry/MDGeometry/MDTypes.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -33,15 +34,16 @@ void MDEventWSWrapper::createEmptyEventWS(const MDWSDescription &description) {
       auto mdFrame = description.getFrame();
 
       dim = new Geometry::MDHistoDimension(
-          description.getDimNames()[d], description.getDimIDs()[d],
-          *mdFrame, description.getDimMin()[d],
-          description.getDimMax()[d], nBins);
+          description.getDimNames()[d], description.getDimIDs()[d], *mdFrame,
+          Mantid::coord_t(description.getDimMin()[d]),
+          Mantid::coord_t(description.getDimMax()[d]), nBins);
 
     } else {
       dim = new Geometry::MDHistoDimension(
           description.getDimNames()[d], description.getDimIDs()[d],
-          description.getDimUnits()[d], description.getDimMin()[d],
-          description.getDimMax()[d], nBins);
+          description.getDimUnits()[d],
+          Mantid::coord_t(description.getDimMin()[d]),
+          Mantid::coord_t(description.getDimMax()[d]), nBins);
     }
 
     ws->addDimension(Geometry::MDHistoDimension_sptr(dim));
