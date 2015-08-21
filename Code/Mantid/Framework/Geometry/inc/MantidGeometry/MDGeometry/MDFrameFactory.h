@@ -7,13 +7,14 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/DllConfig.h"
 #include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
 /// Input argument type for MDFrameFactory chainable factory
-class MDFrameArgument{
+class MANTID_GEOMETRY_DLL MDFrameArgument{
 public:
     const std::string unitString;
     const std::string frameString;
@@ -47,7 +48,7 @@ public:
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDFrameFactory
+class MANTID_GEOMETRY_DLL MDFrameFactory
     : public Kernel::ChainableFactory<MDFrameFactory, MDFrame, MDFrameArgument> {
 public:
   virtual ~MDFrameFactory(){}
@@ -61,7 +62,7 @@ typedef std::unique_ptr<MDFrameFactory> MDFrameFactory_uptr;
 //-----------------------------------------------------------------------
 
 /// GeneralFrameFactory derived MDFrameFactory type
-class DLLExport GeneralFrameFactory : public MDFrameFactory {
+class MANTID_GEOMETRY_DLL GeneralFrameFactory : public MDFrameFactory {
 private:
   GeneralFrame* createRaw(const MDFrameArgument &argument) const;
 public:
@@ -69,7 +70,7 @@ public:
 };
 
 /// QLabFrameFactory derived MDFrameFactory type
-class DLLExport QLabFrameFactory : public MDFrameFactory {
+class MANTID_GEOMETRY_DLL QLabFrameFactory : public MDFrameFactory {
   private:
     QLab*   createRaw(const MDFrameArgument& argument) const;
   public:
@@ -77,7 +78,7 @@ class DLLExport QLabFrameFactory : public MDFrameFactory {
 };
 
 /// QSampleFrameFactory derived MDFrameFactory type
-class DLLExport QSampleFrameFactory : public MDFrameFactory {
+class MANTID_GEOMETRY_DLL QSampleFrameFactory : public MDFrameFactory {
   private:
     QSample*   createRaw(const MDFrameArgument& argument) const;
   public:
@@ -85,7 +86,7 @@ class DLLExport QSampleFrameFactory : public MDFrameFactory {
 };
 
 /// HKLFrame derived MDFrameFactory type
-class DLLExport HKLFrameFactory : public MDFrameFactory {
+class MANTID_GEOMETRY_DLL HKLFrameFactory : public MDFrameFactory {
   private:
     HKL*   createRaw(const MDFrameArgument& argument) const;
   public:
@@ -96,7 +97,7 @@ class DLLExport HKLFrameFactory : public MDFrameFactory {
 
 
 /// Make a complete factory chain
-MDFrameFactory_uptr makeMDFrameFactoryChain();
+MDFrameFactory_uptr MANTID_GEOMETRY_DLL makeMDFrameFactoryChain();
 
 } // namespace Geometry
 } // namespace Mantid

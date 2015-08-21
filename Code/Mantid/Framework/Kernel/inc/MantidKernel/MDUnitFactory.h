@@ -4,6 +4,7 @@
 #include "MantidKernel/ChainableFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/MDUnit.h"
+#include "MantidKernel/DllConfig.h"
 #include <memory>
 
 namespace Mantid {
@@ -33,7 +34,7 @@ namespace Kernel {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
+class MANTID_KERNEL_DLL MDUnitFactory : public ChainableFactory<MDUnitFactory, MDUnit, std::string> {
 
 public:
 
@@ -53,17 +54,17 @@ private:
 // Derived MDUnitFactory declarations
 //-----------------------------------------------------------------------
 
-class DLLExport LabelUnitFactory : public MDUnitFactory {
+class MANTID_KERNEL_DLL LabelUnitFactory : public MDUnitFactory {
     LabelUnit *createRaw(const std::string &unitString) const;
     bool canInterpret(const std::string &unitString) const;
 };
 
-class DLLExport InverseAngstromsUnitFactory : public MDUnitFactory {
+class MANTID_KERNEL_DLL InverseAngstromsUnitFactory : public MDUnitFactory {
     InverseAngstromsUnit *createRaw(const std::string &unitString) const;
     bool canInterpret(const std::string &unitString) const;
 };
 
-class DLLExport ReciprocalLatticeUnitFactory : public MDUnitFactory {
+class MANTID_KERNEL_DLL ReciprocalLatticeUnitFactory : public MDUnitFactory {
     ReciprocalLatticeUnit *createRaw(const std::string &unitString) const;
     bool canInterpret(const std::string &unitString) const;
 };
@@ -73,7 +74,7 @@ typedef std::unique_ptr<MDUnitFactory> MDUnitFactory_uptr;
 typedef std::unique_ptr<const MDUnitFactory> MDUnitFactory_const_uptr;
 
 /// Convience method. Pre-constructed builder chain.
-MDUnitFactory_uptr DLLExport makeMDUnitFactoryChain();
+MDUnitFactory_uptr MANTID_KERNEL_DLL makeMDUnitFactoryChain();
 
 
 } // namespace Kernel
