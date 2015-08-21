@@ -55,7 +55,8 @@ private:
   API::MatrixWorkspace_sptr convertInputToElasticQ(API::MatrixWorkspace_sptr &,
                                                    const std::string &);
   void calculateEISF(API::ITableWorkspace_sptr &);
-  std::string convertToShortHand(const std::string &);
+  std::string convertBackToShort(const std::string &);
+  std::string convertFuncToShort(const std::string &);
 };
 
 } // namespace Algorithms

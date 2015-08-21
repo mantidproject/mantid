@@ -137,7 +137,7 @@ void ConvolutionFitSequential::exec() {
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   const std::string function = getProperty("Function");
   const std::string backType =
-      convertToShortHand(getProperty("backgroundType"));
+      convertBackToShort(getProperty("backgroundType"));
   const double startX = getProperty("Start X");
   const double endX = getProperty("End X");
   const double temperature = getProperty("Temperature");
@@ -189,6 +189,8 @@ void ConvolutionFitSequential::exec() {
   }
   if (LorentzNum.compare("0") != 0) {
     outputWsName += LorentzNum + "L";
+  }else{
+	outputWsName += convertFuncToShort(funcName);
   }
   outputWsName += backType + "_s";
   outputWsName += boost::lexical_cast<std::string>(specMin);
@@ -624,12 +626,13 @@ void ConvolutionFitSequential::calculateEISF(
 }
 
 /**
- * Converts the user input into short hand for use in the workspace naming
+ * Converts the user input for background into short hand for use in the
+ * workspace naming
  * @param original - The original user input to the function
  * @return The short hand of the users input
  */
 std::string
-ConvolutionFitSequential::convertToShortHand(const std::string &original) {
+ConvolutionFitSequential::convertBackToShort(const std::string &original) {
   std::string result = "";
   if (original.compare("Fit Linear") == 0) {
     result = "FitL";
@@ -640,6 +643,29 @@ ConvolutionFitSequential::convertToShortHand(const std::string &original) {
   }
 
   return result;
+}
+
+/**
+ * Converts the user input for function into short hand for use in the workspace
+ * naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
+std::string
+ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
+	std::string result = "";
+	if(original.compare("ElasticDiffSphere") == 0){
+		result = "EDS";
+	}else if(original.compare("ElasticDiffRotDiscreteCircle") == 0){
+		result = "EDC";
+	}else if(original.compare("InelasticDiffSphere") == 0){
+		result = "IDS";
+	}else if(original.compare("InelasticDiffRotDiscreteCircle") == 0){
+		result = "IDC";
+	}else if(original.compare("StretchExpFT") == 0){
+		result = "SFT";
+	}
+	return result;
 }
 
 } // namespace Algorithms
