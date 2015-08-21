@@ -89,6 +89,7 @@ set ( SRC_FILES
   src/Tomography/ImageCoRViewQtGUI.cpp
   src/Tomography/ImageStackPreParams.cpp
   src/Tomography/SavuConfigDialog.cpp
+  src/Tomography/StackOfImagesDirs.cpp
   src/Tomography/TomographyIfaceModel.cpp
   src/Tomography/TomographyIfacePresenter.cpp
   src/Tomography/TomographyIfaceViewQtGUI.cpp
@@ -203,6 +204,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfacePresenter.h
   inc/MantidQtCustomInterfaces/Tomography/ITomographyIfaceView.h
+  inc/MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfacePresenter.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceViewQtGUI.h
   inc/MantidQtCustomInterfaces/Tomography/TomographyIfaceModel.h

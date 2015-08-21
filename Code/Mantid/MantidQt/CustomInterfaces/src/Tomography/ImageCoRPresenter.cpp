@@ -5,8 +5,7 @@
 #include "MantidQtCustomInterfaces/Tomography/ImageStackPreParams.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRView.h"
-
-#include <Poco/Path.h>
+#include "MantidQtCustomInterfaces/Tomography/StackOfImagesDirs.h"
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -79,41 +78,44 @@ void ImageCoRPresenter::processBrowseImg() {}
 void ImageCoRPresenter::processNewStack() {
   const std::string pstr = m_view->stackPath();
 
-  Poco::Path path(pstr);
+  StackOfImagesDirs soid(pstr);
 
-  const std::string imgPath = "";
-
-  if (imgPath.empty()) {
-    m_view->userWarning("Error trying to find image stack", "imgPath empty");
+  const std::string soiPath = soid.sampleImagesDir();
+  if (soiPath.empty()) {
+    m_view->userWarning("Error trying to find image stack",
+                        "Could not find the sample images directory. The stack "
+                        "of images is expected as: \n\n" + soid.description());
     return;
   }
 
-  // TODO: check the directory contains the expected structure,
-  // Then go and load the files
-  bool isStackDir = true;
-  if (isStackDir) {
-    Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgPath);
-    if (!wsg)
-      return;
-
-    // TODO: check number of workspaces in wsg
-    size_t imgCount = 0;
-    if (0 == imgCount)
-      return;
-
-    m_view->showStack(wsg);
-
-    // clean-up container group workspace
-    if (wsg)
-      Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
-
-  } else {
-    m_view->userWarning(
-        "Failed to load stack of images - directory structure issue",
-        "Could not load a stack of images because the selected "
-        "directory does not have to the supported structure (sample/dark/white "
-        "subdirectories).");
+  std::vector<std::string> imgs = soid.sampleFiles();
+  if (0 >= imgs.size()) {
+    m_view->userWarning("Error trying to find image/projection files in the stack directories",
+                        "Could not find any image file in the samples subdirectory: " + soiPath);
+    return;
   }
+
+  const std::string imgPath = imgs.front();
+
+  Mantid::API::WorkspaceGroup_sptr wsg = loadFITSStack(imgPath);
+  if (!wsg)
+    return;
+
+  size_t imgCount = wsg->size();
+  if (0 == imgCount) {
+    m_view->userWarning(
+        "Failed to load any FITS images - directory structure issue",
+        "Even though a directory apprently holding a stack of images was found, "
+        "it was not possible to load any image file correctly from: " +
+                        soiPath);
+    return;
+  }
+
+  m_view->showStack(wsg);
+
+  // clean-up container group workspace
+  if (wsg)
+    Mantid::API::AnalysisDataService::Instance().remove(wsg->getName());
 }
 
 void ImageCoRPresenter::processSelectCoR() {}
