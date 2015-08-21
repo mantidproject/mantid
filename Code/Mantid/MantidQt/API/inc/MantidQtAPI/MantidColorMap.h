@@ -127,13 +127,14 @@ private:
   /// Cached NAN value
   double m_nan;
 
-  double m_nth_power;
-
   ///the name of the color map
   QString m_name;
 
   ///the path to the map file
   QString m_path;
+
+  double m_nth_power;
+
 };
 
 

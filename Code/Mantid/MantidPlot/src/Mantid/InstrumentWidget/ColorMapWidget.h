@@ -53,10 +53,10 @@ private:
   QLabel *m_lblN;
   DoubleSpinBox *m_dspnN;
   double m_minPositiveValue;
-  double m_nth_power;
   bool m_dragging;
   int m_y;
   DragType m_dtype;
+  double m_nth_power;
 };
 
 
