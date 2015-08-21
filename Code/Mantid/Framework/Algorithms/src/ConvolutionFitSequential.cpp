@@ -112,20 +112,12 @@ void ConvolutionFitSequential::init() {
                   "If true, the fit is treated as a convolution workspace.",
                   Direction::Input);
 
-  std::vector<std::string> minimizers;
-  minimizers.push_back("Levenberg-Marquardt");
-  minimizers.push_back("Simplex");
-  minimizers.push_back("FABADA");
-  minimizers.push_back("Conjugate gradient (Fletcher-Reeves imp.)");
-  minimizers.push_back("Conjugate gradient (Polak-Ribiere imp.)");
-  minimizers.push_back("BFGS");
-  declareProperty("Minimizer", std::string("Levenberg-Marquardt"),
-                  boost::make_shared<StringListValidator>(minimizers),
-                  "Minimizer to use for fitting. Minimizers available are: "
-                  "'Levenberg-Marquardt', 'Simplex', 'FABADA', 'Conjugate "
-                  "gradient (Fletcher-Reeves imp.)', 'Conjugate gradient "
-                  "(Polak-Ribiere imp.)' and 'BFGS'",
-                  Direction::Input);
+  declareProperty("Minimizer", "Levenberg-Marquardt",
+                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  "Minimizer to use for fitting. Minimizers available are "
+                  "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
+                  "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
+                  "gradient (Polak-Ribiere imp.)' and 'BFGS'");
 
   declareProperty("Max Iterations", 500, boundedV,
                   "The maximum number of iterations permitted",
@@ -253,6 +245,9 @@ void ConvolutionFitSequential::exec() {
   // Define params for use in convertParametersToWorkSpace (Refactor to generic)
   auto paramNames = std::vector<std::string>();
   auto func = FunctionFactory::Instance().createFunction(funcName);
+  if (delta) {
+    paramNames.push_back("Height");
+  }
   for (size_t i = 0; i < func->nParams(); i++) {
     paramNames.push_back(func->parameterName(i));
   }

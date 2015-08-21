@@ -300,14 +300,15 @@ void ConvFit::run() {
   cfs->setProperty("Start X", stX.toStdString());
   cfs->setProperty("End X", enX.toStdString());
   double temp = 0.0;
-  if(temperature.toStdString().compare("") != 0){
-	  temp = temperature.toDouble();
+  if (temperature.toStdString().compare("") != 0) {
+    temp = temperature.toDouble();
   }
   cfs->setProperty("Temperature", temp);
   cfs->setProperty("Spec Min", specMin.toStdString());
   cfs->setProperty("Spec Max", specMax.toStdString());
   cfs->setProperty("Convolve", true);
-  cfs->setProperty("Minimizer", "Levenberg-Marquardt");
+  cfs->setProperty("Minimizer",
+                   minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("Max Iterations", maxIterations);
   cfs->execute();
 
