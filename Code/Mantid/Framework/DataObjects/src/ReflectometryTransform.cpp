@@ -286,7 +286,6 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
  */
-
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
