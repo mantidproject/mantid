@@ -1,15 +1,17 @@
+#pylint: disable = too-few-public-methods,old-style-class,redefined-outer-name
+
 from mantid.simpleapi import *
 import os.path
 import CRY_ini
 import CRY_load
 
-num_bank_dic = { \
+numbankdic = { \
     'hrp': 3, \
     'gem': 5, \
     'pol': 6 \
     }
 
-grp_of_Dic = { \
+grpofdic = { \
     'hrp': 'hrpd_new_072_01_corr.cal'
     }
 
@@ -27,12 +29,12 @@ class Instrument:
     def __init__(self, instr):
         self.name = instr
         self.sname = instr[0:3]
-        self.nbank = num_bank_dic[self.sname]
+        self.nbank = numbankdic[self.sname]
         self.pc_comp = 'Y:'
-        self.grpOfffile = CRY_ini.env_analysis_dir + '/GrpOff/' + grp_of_Dic[self.sname]
+        self.grpOfffile = CRY_ini.env_analysis_dir + '/GrpOff/' + grpofdic[self.sname]
 
 
-class focus(Instrument):
+class Focus(Instrument):
     def __init__(self, instr='hrpd'):
         Instrument.__init__(self, instr)
         self.Instr = Instrument(instr)
@@ -50,8 +52,8 @@ class focus(Instrument):
             wkspname = runno.split('|')[0]
             FileLoc = runno.split('|')[1]
         elif self.isave:
-            file = open('//isis/inst$/NDX' + self.Instr.name + '/Instrument/logs/lastrun.txt', 'r')
-            lstrun = str(int(file.readlines()[0].split()[1]) + 1)
+            ofile = open('//isis/inst$/NDX' + self.Instr.name + '/Instrument/logs/lastrun.txt', 'r')
+            lstrun = str(int(ofile.readlines()[0].split()[1]) + 1)
             if runno < 10:
                 FileLoc = self.Instr.pc_comp + '/' + self.Instr.sname + lstrun + '.s' + '0' + str(runno)
             else:
@@ -83,10 +85,10 @@ class focus(Instrument):
 if __name__ == '__main__':
     from SET_env_scripts2_migrated import *
 
-    a_focus = focus()
+    afocus = Focus()
     # a_focus.savemode_on()
     # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
     print rawpath(35493, inst='gem', Verbose=False)
     # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
-    a_focus.load(35493)
+    afocus.load(35493)
 

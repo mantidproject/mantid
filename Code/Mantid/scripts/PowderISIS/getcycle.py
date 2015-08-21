@@ -3,8 +3,8 @@ import os.path
 
 
 def rawpath(runno, inst='hrp', Verbose=False):
-    f = open('//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt', 'r')
-    line = os.path.abspath(f.readline()) + '\\' + inst + str(runno) + '.raw'
+    file = open('//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt', 'r')
+    line = os.path.abspath(file.readline()) + '\\' + inst + str(runno) + '.raw'
     if Verbose:
         print '//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt'
         print line

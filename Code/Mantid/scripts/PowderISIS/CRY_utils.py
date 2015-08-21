@@ -1,3 +1,5 @@
+#pylint: disable=redefined-outer-name
+
 from mantid.simpleapi import *
 from types import *
 import re
@@ -45,11 +47,11 @@ def git_list(AString):
     AList = []
     numorrange_list = AString.rstrip().split(" ")
     for numorrange in numorrange_list:
-        s = re.compile("\+")
-        m_list = s.search(numorrange)
+        slist = re.compile("\+")
+        m_list = slist.search(numorrange)
         p_list = re.compile('[0-9]+')
         limits = p_list.findall(numorrange)
-        if m_list <> None:
+        if m_list is not None:
             # '+' found, other cases skipped
             AList.append(limits)
             continue
@@ -107,7 +109,7 @@ def get_list_int(AString):
     return AList
 
 
-def ListOfList2List(lol):
+def list_of_list2_list(lol):
     alist = []
     for item in lol:
         alist.append(item[0])
@@ -118,8 +120,8 @@ def ListOfList2List(lol):
 # Put its transmission in outputWkspc
 
 def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSampleRadius, \
-               TheAttenuationXSection, TheScatteringXSection, TheSampleNumberDensity, \
-               TheNumberOfSlices, TheNumberOfAnnuli, TheNumberOfWavelengthPoints, TheExpMethod):
+                TheAttenuationXSection, TheScatteringXSection, TheSampleNumberDensity, \
+                TheNumberOfSlices, TheNumberOfAnnuli, TheNumberOfWavelengthPoints, TheExpMethod):
     # The input workspace needs to be in units of wavelength for the CylinderAbsorption algorithm
     ConvertUnits(InputWorkspace=InputWkspc, OutputWorkspace=InputWkspc, Target="Wavelength")
     CylinderAbsorption(InputWorkspace=InputWkspc, OutputWorkspace=outputWkspc,
@@ -138,8 +140,8 @@ def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSam
 
 if __name__ == '__main__':
     #	AList=git_list("1-3 15-150-10 42-44")
-    AList = git_list("44429+44453")
-    print AList
-    print get_sample_list(expt_files.basefile, "1000 1245-1268 1308-1400-10", direct=expt_files.RawDir)
-    print get_sample_list(expt_files.basefile, "s41256 1-5 10 15-30-3", direct=expt_files.RawDir)
+    list = git_list("44429+44453")
+    print list
+    print get_sample_list(experimentf.basefile, "1000 1245-1268 1308-1400-10", direct=experimentf.RawDir)
+    print get_sample_list(experimentf.basefile, "s41256 1-5 10 15-30-3", direct=experimentf.RawDir)
 # print get_list_int("1-3 15-150  42-44")

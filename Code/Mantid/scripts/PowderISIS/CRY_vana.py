@@ -4,65 +4,65 @@ import CRY_sample
 import CRY_load
 
 
-def create_vana(expt_files, NoAbs=False):
+def create_vana(experimentf, NoAbs=False):
     # ==== Vana loading
-    (dum, uampstotal) = CRY_sample.get_data_sum(expt_files.VanFile, "Vanadium", expt_files)
+    (dum, uampstotal) = CRY_sample.get_data_sum(experimentf.VanFile, "Vanadium", experimentf)
     # Subtract the empty instrument ===
-    (dum, uampstotal) = CRY_sample.get_data_sum(expt_files.VEmptyFile, "Empty", expt_files)
+    (dum, uampstotal) = CRY_sample.get_data_sum(experimentf.VEmptyFile, "Empty", experimentf)
     if uampstotal > 1e-6:
         print " => Substract the Empty to the Vana"
         Minus(LHSWorkspace="Vanadium", RHSWorkspace="Empty", OutputWorkspace="Vanadium_align")
         mtd.remove("Empty")
-    CRY_load.align_fnc("Vanadium_align", expt_files)
+    CRY_load.align_fnc("Vanadium_align", experimentf)
     Divide(LHSWorkspace="Vanadium_align", RHSWorkspace="Corr", OutputWorkspace="Vanadium_corr")
     if not NoAbs:
         print " => Van Absortption correction"
         CRY_utils.correct_abs(InputWkspc="Vanadium_corr", outputWkspc="Transmission", \
-                             TheCylinderSampleHeight=expt_files.VHeight, \
-                             TheCylinderSampleRadius=expt_files.VRadius, \
-                             TheAttenuationXSection=expt_files.VAttenuationXSection, \
-                             TheScatteringXSection=expt_files.VScatteringXSection, \
-                             TheSampleNumberDensity=expt_files.VanaNumberDensity, \
-                             TheNumberOfSlices=expt_files.VNumberOfSlices, \
-                             TheNumberOfAnnuli=expt_files.VNumberOfAnnuli, \
-                             TheNumberOfWavelengthPoints=expt_files.VNumberOfWavelengthPoints, \
-                             TheExpMethod=expt_files.VExpMethod)
+                             TheCylinderSampleHeight=experimentf.VHeight, \
+                             TheCylinderSampleRadius=experimentf.VRadius, \
+                             TheAttenuationXSection=experimentf.VAttenuationXSection, \
+                             TheScatteringXSection=experimentf.VScatteringXSection, \
+                             TheSampleNumberDensity=experimentf.VanaNumberDensity, \
+                             TheNumberOfSlices=experimentf.VNumberOfSlices, \
+                             TheNumberOfAnnuli=experimentf.VNumberOfAnnuli, \
+                             TheNumberOfWavelengthPoints=experimentf.VNumberOfWavelengthPoints, \
+                             TheExpMethod=experimentf.VExpMethod)
     # --- Alternative way
     # ConvertUnits(InputWorkspace="Vanadium", OutputWorkspace="Vanadium", Target="Wavelength")
     # CylinderAbsorption(InputWorkspace="Vanadium", OutputWorkspace="Vanadium",
-    #	CylinderSampleHeight=      expt_files.VHeight,
-    #	CylinderSampleRadius=      expt_files.VRadius,
-    #	AttenuationXSection=       expt_files.VAttenuationXSection,
-    #	ScatteringXSection=        expt_files.VScatteringXSection,
-    #	SampleNumberDensity=       expt_files.VanaNumberDensity,
-    #	NumberOfSlices =           expt_files.VNumberOfSlices,
-    #	NumberOfAnnuli=            expt_files.VNumberOfAnnuli,
-    #	NumberOfWavelengthPoints = expt_files.VNumberOfWavelengthPoints,
-    #	ExpMethod=                 expt_files.VExpMethod               )
+    #	CylinderSampleHeight=      experimentf.VHeight,
+    #	CylinderSampleRadius=      experimentf.VRadius,
+    #	AttenuationXSection=       experimentf.VAttenuationXSection,
+    #	ScatteringXSection=        experimentf.VScatteringXSection,
+    #	SampleNumberDensity=       experimentf.VanaNumberDensity,
+    #	NumberOfSlices =           experimentf.VNumberOfSlices,
+    #	NumberOfAnnuli=            experimentf.VNumberOfAnnuli,
+    #	NumberOfWavelengthPoints = experimentf.VNumberOfWavelengthPoints,
+    #	ExpMethod=                 experimentf.VExpMethod               )
     # ConvertUnits(InputWorkspace="Vanadium", OutputWorkspace="Vanadium", Target="dSpacing")
-    # (dum,uampstotal)=CRY_sample.get_data_sum(expt_files.VanFile,"Vanadium2",expt_files)
+    # (dum,uampstotal)=CRY_sample.get_data_sum(experimentf.VanFile,"Vanadium2",experimentf)
     # Divide("Vanadium2", "Vanadium", "Vanadium")
     ##ConvertUnits(InputWorkspace=InputWkspc, OutputWorkspace=InputWkspc, Target="dSpacing")
     # mtd.remove("Vanadium2")
     ##
-    print " => Focus type : " + expt_files.VGrpfocus
-    if expt_files.VGrpfocus == "sam":
-        GrpFile = expt_files.Path2DatGrpFile
+    print " => Focus type : " + experimentf.VGrpfocus
+    if experimentf.VGrpfocus == "sam":
+        GrpFile = experimentf.Path2DatGrpFile
     else:
-        GrpFile = expt_files.Path2VanGrpFile
+        GrpFile = experimentf.Path2VanGrpFile
     print " => Van Focused with the Cal file :" + GrpFile
     DiffractionFocussing(InputWorkspace="Vanadium_corr", OutputWorkspace="Vanadium_foc", GroupingFileName=GrpFile,
                          PreserveEvents=False)
     print " => VANADIUM FOCUSED"
     ReplaceSpecialValues(InputWorkspace="Vanadium_foc", OutputWorkspace="Vanadium", NaNValue="0", InfinityValue="0",
                          BigNumberThreshold="99999999.99999999")
-    SaveNexusProcessed(Filename=expt_files.CorrVanFile + "_unstripped.nxs", InputWorkspace="Vanadium")
-    SaveFocusedXYE(Filename=expt_files.CorrVanFile + "_unstripped.dat", InputWorkspace="Vanadium", SplitFiles=True)
-    strip_the_vana(expt_files)
-    if expt_files.ExistV == 'no' and expt_files.VGrpfocus == 'van':
-        expt_files.write_prefline("ExistingV", "yes")
-        expt_files.ExistV = "yes"
-    if not expt_files.debugMode:
+    SaveNexusProcessed(Filename=experimentf.CorrVanFile + "_unstripped.nxs", InputWorkspace="Vanadium")
+    SaveFocusedXYE(Filename=experimentf.CorrVanFile + "_unstripped.dat", InputWorkspace="Vanadium", SplitFiles=True)
+    strip_the_vana(experimentf)
+    if experimentf.ExistV == 'no' and experimentf.VGrpfocus == 'van':
+        experimentf.write_prefline("ExistingV", "yes")
+        experimentf.ExistV = "yes"
+    if not experimentf.debugMode:
         mtd.remove("Vanadium_foc")
         mtd.remove("Transmission")
         mtd.remove("Vanadium_corr")
@@ -70,77 +70,77 @@ def create_vana(expt_files, NoAbs=False):
     return False
 
 
-def strip_the_vana(expt_files, LoadUnstrip=""):
+def strip_the_vana(experimentf, LoadUnstrip=""):
     if not LoadUnstrip:
         LoadNexusProcessed(Filename=LoadUnstrip, OutputWorkspace="Vanadium", EntryNumber=1)
-    print expt_files.bankList
-    CRY_load.split_bank("Vanadium", bankList=expt_files.bankList, Del=True)
-    if expt_files.VanPeakRemove == "interpol":
+    print experimentf.bankList
+    CRY_load.split_bank("Vanadium", bankList=experimentf.bankList, Del=True)
+    if experimentf.VanPeakRemove == "interpol":
         print " => Van Bragg-peak stripping"
-        print "Smmoth Vana data with " + expt_files.VanSmooth + " points"
-        remove_bins(expt_files)
-    elif expt_files.VanPeakRemove == "strip":
+        print "Smmoth Vana data with " + experimentf.VanSmooth + " points"
+        remove_bins(experimentf)
+    elif experimentf.VanPeakRemove == "strip":
         print " => Van Bragg-peak stripping"
-        van_strip(expt_files)
-    elif expt_files.VanPeakRemove == "spline":
-        van_spline(expt_files)
-    elif expt_files.VanPeakRemove == "splineonly":
-        van_spline_only(expt_files)
+        van_strip(experimentf)
+    elif experimentf.VanPeakRemove == "spline":
+        van_spline(experimentf)
+    elif experimentf.VanPeakRemove == "splineonly":
+        van_spline_only(experimentf)
     else:
         return
-    save_vana(expt_files)
+    save_vana(experimentf)
 
 
-def save_vana(expt_files):
-    for i in expt_files.bankList:
+def save_vana(experimentf):
+    for i in experimentf.bankList:
         spec = i - 1
-        vanfil = expt_files.CorrVanFile + "-" + str(spec) + ".nxs"
+        vanfil = experimentf.CorrVanFile + "-" + str(spec) + ".nxs"
         SaveNexusProcessed(Filename=vanfil, InputWorkspace="Vanadium-" + str(i))
 
 
-def remove_bins(expt_files):
-    for i in expt_files.bankList:
+def remove_bins(experimentf):
+    for i in experimentf.bankList:
         spec = i - 1
         SmoothData(InputWorkspace="Vanadium-" + str(i), OutputWorkspace="Vanadium-" + str(i),
-                   NPoints=int(expt_files.VanSmooth))
+                   NPoints=int(experimentf.VanSmooth))
         print "Strip Vanapeak in bank=" + str(i)
-        for peak in expt_files.VanPeakList[spec]:
+        for peak in experimentf.VanPeakList[spec]:
             RemoveBins(InputWorkspace="Vanadium-" + str(i), OutputWorkspace="Vanadium-" + str(i), XMin=peak[0],
                        XMax=peak[1], RangeUnit="AsInput", Interpolation="Linear", WorkspaceIndex=0)
-        SaveFocusedXYE(Filename=expt_files.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
+        SaveFocusedXYE(Filename=experimentf.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
                        SplitFiles=False)
 
 
-def van_strip(expt_files):
-    for i in expt_files.bankList:
+def van_strip(experimentf):
+    for i in experimentf.bankList:
         spec = i - 1
-        if expt_files.VanPeakWdt[spec] != 0:
+        if experimentf.VanPeakWdt[spec] != 0:
             print "Strip Vanapeaks with params : bank=" + str(i) + " FWHM=" + str(
-                expt_files.VanPeakWdt[spec]) + " Tol=" + str(expt_files.VanPeakTol[spec])
+                experimentf.VanPeakWdt[spec]) + " Tol=" + str(experimentf.VanPeakTol[spec])
             StripPeaks(InputWorkspace="Vanadium-" + str(i), OutputWorkspace="Vanadium-" + str(i),
-                       FWHM=expt_files.VanPeakWdt[spec], Tolerance=expt_files.VanPeakTol[spec], WorkspaceIndex=0)
-            SaveFocusedXYE(Filename=expt_files.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
+                       FWHM=experimentf.VanPeakWdt[spec], Tolerance=experimentf.VanPeakTol[spec], WorkspaceIndex=0)
+            SaveFocusedXYE(Filename=experimentf.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
                            SplitFiles=False)
 
 
-def van_spline(expt_files):
-    for i in expt_files.bankList:
+def van_spline(experimentf):
+    for i in experimentf.bankList:
         spec = i - 1
         print "Strip Vanapeak in bank=" + str(i)
-        for peak in expt_files.VanPeakList[spec]:
+        for peak in experimentf.VanPeakList[spec]:
             MaskBins(InputWorkspace="Vanadium-" + str(i), OutputWorkspace="Vanadium-" + str(i), XMin=peak[0],
                      XMax=peak[1])
         SplineBackground(InputWorkspace="Vanadium-" + str(i), OutputWorkspace="Vanadium-" + str(i), WorkspaceIndex=0,
-                         NCoeff=int(expt_files.VanSplineCoef))
-        SaveFocusedXYE(Filename=expt_files.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
+                         NCoeff=int(experimentf.VanSplineCoef))
+        SaveFocusedXYE(Filename=experimentf.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
                        SplitFiles=False)
 
 
-def van_spline_only(expt_files):
-    for i in expt_files.bankList:
+def van_spline_only(experimentf):
+    for i in experimentf.bankList:
         spec = i - 1
         SplineBackground(InputWorkspace="Vanadium-" + str(i), OutputWorkspace="Vanadium-" + str(i), WorkspaceIndex=0,
-                         NCoeff=int(expt_files.VanSplineCoef))
-        SaveFocusedXYE(Filename=expt_files.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
+                         NCoeff=int(experimentf.VanSplineCoef))
+        SaveFocusedXYE(Filename=experimentf.CorrVanFile + "-" + str(spec) + "_.dat", InputWorkspace="Vanadium-" + str(i),
                        SplitFiles=False)
 

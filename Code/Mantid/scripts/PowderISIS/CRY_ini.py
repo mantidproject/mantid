@@ -1,3 +1,5 @@
+#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches
+
 from mantid.simpleapi import *
 import CRY_utils
 import re
@@ -305,10 +307,10 @@ class Files:
         self.SEmptyDir = self.RawDir
 
     def updateCalib(self):
-        self.VanFile = CRY_utils.ListOfList2List(CRY_utils.get_sample_list(self.basefile, self.VrunnoList, self.VanDir))
-        self.VEmptyFile = CRY_utils.ListOfList2List(
+        self.VanFile = CRY_utils.list_of_list2_list(CRY_utils.get_sample_list(self.basefile, self.VrunnoList, self.VanDir))
+        self.VEmptyFile = CRY_utils.list_of_list2_list(
             CRY_utils.get_sample_list(self.basefile, self.VErunnoList, self.VEmptyDir))
-        self.SEmptyFile = CRY_utils.ListOfList2List(
+        self.SEmptyFile = CRY_utils.list_of_list2_list(
             CRY_utils.get_sample_list(self.basefile, self.SErunnoList, self.SEmptyDir))
         self.Path2OffFile = self.OffDir + "/" + self.OffFile
         self.Path2GrpFile = self.GrpDir + "/" + self.GrpFile
@@ -448,8 +450,8 @@ class Files:
 
 
 if __name__ == '__main__':
-    # Opt : expt_files=Files("hrpd",RawDir="",Analysisdir="")
-    expt_files = Files("hrpd")
+    # Opt : experimentf=Files("hrpd",RawDir="",Analysisdir="")
+    experimentf = Files("hrpd")
     # default
-    expt_files.initialize('Cycle08_2', 'Si')
-# Opt : expt_files.initialize('Cycle09_2','tests',prefFile='mtd.pref', prefDir="")
+    experimentf.initialize('Cycle08_2', 'Si')
+# Opt : experimentf.initialize('Cycle09_2','tests',prefFile='mtd.pref', prefDir="")

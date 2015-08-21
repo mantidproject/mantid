@@ -7,7 +7,7 @@ old_version = False
 
 # First a function definition for the Loading algorithms which
 # loads the data and immediately aligns the detectors
-def load(outputArea, pathtofile, expt_files, add=False):
+def load(outputArea, pathtofile, experimentf, add=False):
     total = outputArea
     if add:
         outputArea = outputArea + "add"
@@ -22,7 +22,7 @@ def load(outputArea, pathtofile, expt_files, add=False):
         LoadRaw(Filename=pathtofile, OutputWorkspace=outputArea)
     else:
         LoadRaw(Filename=pathtofile, OutputWorkspace=outputArea, LoadLogFiles=False)
-    if expt_files.instr == "hrpd":
+    if experimentf.instr == "hrpd":
         removeallpromptpulses(outputArea)
     uamps = mtd[outputArea].getRun().getProtonCharge()
     if add:
@@ -33,8 +33,8 @@ def load(outputArea, pathtofile, expt_files, add=False):
     return uamps, uampstot
 
 
-def align_fnc(outputArea, expt_files):
-    AlignDetectors(InputWorkspace=outputArea, OutputWorkspace=outputArea, CalibrationFile=expt_files.Path2OffFile)
+def align_fnc(outputArea, experimentf):
+    AlignDetectors(InputWorkspace=outputArea, OutputWorkspace=outputArea, CalibrationFile=experimentf.Path2OffFile)
 
 
 def split_bank(InputArea, bankList, Del=True):
@@ -50,24 +50,24 @@ def bin_bank(InputArea, bankList, Drange):
         Rebin(InputWorkspace=InputArea + "-" + str(i), OutputWorkspace=InputArea + "-" + str(i), Params=Drange[i - 1])
 
 
-def sets_drange(wkspc, expt_files):
+def sets_drange(wkspc, experimentf):
     datamatrix = mtd[wkspc]
-    for i in range(0, expt_files.Nbank):
+    for i in range(0, experimentf.Nbank):
         x_data = datamatrix.readX(i)
         last = len(x_data) - 1
-        CropRange = expt_files.CropRange[i].rstrip().split()
+        CropRange = experimentf.CropRange[i].rstrip().split()
         xbegin = str(x_data[0] * (1 + float(CropRange[0])))
         xend = str(x_data[last] * float(CropRange[1]))
         datbin = math.exp(math.log(x_data[last] / x_data[0]) / last) - 1
-        if datbin > float(expt_files.Bining[i]):
-            print 'WARNING: Rebining in *pref file ' + expt_files.Bining[
+        if datbin > float(experimentf.Bining[i]):
+            print 'WARNING: Rebining in *pref file ' + experimentf.Bining[
                 i] + ' is lower than diffraction focusing rebining step'
             print 'WARNING: Rebining Kept to be ' + str(datbin) + ' for bank ' + str(i + 1)
-            expt_files.Bining[i] = str(datbin)
-        Drange = xbegin + ",-" + expt_files.Bining[i] + "," + xend
-        expt_files.Drange.append(Drange)
-    expt_files.dataRangeSet = True
-    return setsDrange
+            experimentf.Bining[i] = str(datbin)
+        Drange = xbegin + ",-" + experimentf.Bining[i] + "," + xend
+        experimentf.Drange.append(Drange)
+    experimentf.dataRangeSet = True
+    return sets_drange
 
 
 def scale_wspc(InputArea, scale):
