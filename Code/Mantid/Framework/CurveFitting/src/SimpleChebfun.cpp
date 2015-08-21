@@ -147,5 +147,16 @@ std::vector<double> SimpleChebfun::roughRoots(double level) const {
   return rs;
 }
 
+/// Add a C++ function to the function
+/// @param fun :: A function to add.
+SimpleChebfun& SimpleChebfun::operator+=(ChebfunFunctionType fun) {
+  auto &x = xPoints();
+  for(size_t i = 0; i < x.size(); ++i) {
+    m_P[i] += fun(x[i]);
+  }
+  m_A.clear();
+  return *this;
+}
+
 } // namespace CurveFitting
 } // namespace Mantid

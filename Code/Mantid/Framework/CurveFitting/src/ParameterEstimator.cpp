@@ -158,9 +158,8 @@ std::pair<double, double> getPeakLeftRightExtent(double centre,
 /// @param fun :: A function which is expected to be a peak on a background.
 /// @return :: The left and right displacements from peak centre.
 std::pair<double, double> getPeakHWHM(double centre, double height,
-                                      double background,
                                       const SimpleChebfun &fun) {
-  auto roots = fun.roughRoots(background + height / 2);
+  auto roots = fun.roughRoots(height / 2);
   double left = fun.startX();
   double right = fun.endX();
   if (roots.empty()) {
@@ -218,6 +217,18 @@ double getPeakCentre(double centre, const SimpleChebfun &der1) {
   return centre;
 }
 
+/// A linear function.
+class LinearFunction {
+public:
+  LinearFunction(double a0, double a1) :m_a0(a0), m_a1(a1) {}
+  double operator()(double x) const {
+    return m_a0 + m_a1 * x;
+  }
+private:
+  double m_a0;
+  double m_a1;
+};
+
 //----------------------------------------------------------------------------------------------
 /// Set initial values to a BackToBackExponential.
 /// @param function :: A fitting BackToBackExponential function.
@@ -243,14 +254,19 @@ void setBackToBackExponential(API::IFunction &function,
             << std::endl;
   double yl = fun(xlr.first);
   double yr = fun(xlr.second);
-  double background =
-      yl + (yr - yl) / (xlr.second - xlr.first) * (centre - xlr.first);
+  double slope = (yr - yl) / (xlr.second - xlr.first);
+  double background = yl + slope * (centre - xlr.first);
   double height = fun(centre) - background;
   g_log.debug() << "height= " << height << std::endl;
   g_log.debug() << "background= " << background << std::endl;
+  g_log.debug() << "slope= " << slope << std::endl;
 
+  // Remove the background as it affects A and B parameters.
+  LinearFunction bg(-yl + slope * xlr.first, -slope);
+  SimpleChebfun fun1(fun);
+  fun1 += bg;
   // Find left and right "HWHM".
-  auto hwhm = getPeakHWHM(centre, height, background, fun);
+  auto hwhm = getPeakHWHM(centre, height, fun1);
   g_log.debug() << "HWHM: " << hwhm.first << ' ' << hwhm.second << std::endl;
 
   // Find the extent of the default fitting function (with new S set)
@@ -276,7 +292,7 @@ void setBackToBackExponential(API::IFunction &function,
     auto centre1 = getPeakCentre(x0, b2b_d1);
 
     double height1 = b2b(centre1);
-    auto hwhm1 = getPeakHWHM(centre1, height1, 0, b2b);
+    auto hwhm1 = getPeakHWHM(centre1, height1, b2b);
     g_log.debug() << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second
               << std::endl;
 
