@@ -1,13 +1,9 @@
-import sys
-import os
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(__file__))
 import mlzutils
-sys.path.pop(0)
 
 
 class DNSMergeRuns(PythonAlgorithm):

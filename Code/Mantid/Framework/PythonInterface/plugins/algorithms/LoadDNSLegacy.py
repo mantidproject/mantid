@@ -6,9 +6,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory, WorkspaceProperty, \
     FileProperty, FileAction
 from mantid.kernel import Direction, StringListValidator, DateAndTime
 
-sys.path.insert(0, os.path.dirname(__file__))
 from dnsdata import DNSdata
-sys.path.pop(0)
 
 POLARISATIONS = ['0', 'x', 'y', 'z', '-x', '-y', '-z']
 NORMALIZATIONS = ['duration', 'monitor']
