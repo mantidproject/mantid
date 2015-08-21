@@ -27,6 +27,12 @@ using namespace Mantid::Kernel;
 namespace {
     /** 
     *  Writes one row to an existing table
+    *  @param vertexes : The table that the rows will be written to
+    *  @param vertex : The vertex from which the data is retrieved for writing i.e lower left, lower right etc.
+    *  @param nHisto : The number of the histogram
+    *  @param nBins : The number of the bin
+    *  @param signal : The Y value of the bin
+    *  @param error : The E value of the bin
     */
     void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
         TableRow row = vertexes->appendRow();
@@ -49,6 +55,20 @@ namespace {
 namespace Mantid {
 namespace DataObjects {
 
+/**
+ * Constructor
+ * @param d0Label : label for the first dimension axis
+ * @param d0ID : unique identifier for the first dimension
+ * @param d0Min : minimum value for the first dimension
+ * @param d0Max : maximum value for the first dimension
+ * @param d0NumBins : number of bins in first dimension
+ * @param d1Label : label for the second dimension axis
+ * @param d1ID : unique identifier for the second dimension
+ * @param d1Min : minimum value for the second dimension
+ * @param d1Max : maximum value for the second dimension
+ * @param d1NumBins : number of bins in the second dimension
+ * @param calc : Pointer to CalculateReflectometry object.
+ */
 ReflectometryTransform::ReflectometryTransform(
     const std::string &d0Label, const std::string &d0ID, double d0Min,
     double d0Max, const std::string &d1Label, const std::string &d1ID,
@@ -62,8 +82,17 @@ ReflectometryTransform::ReflectometryTransform(
         "The supplied minimum values must be less than the maximum values.");
 }
 
+/**
+ * Destructor
+ */
 ReflectometryTransform::~ReflectometryTransform() {}
 
+/**
+ * Creates an MD workspace
+ * @param a : pointer to the first dimension of the MDWorkspace
+  *@param b : pointer to the second dimension of the MDWorkspace
+ * @param boxController : controls how the MDWorkspace will be split
+ */
 boost::shared_ptr<MDEventWorkspace2Lean>
 ReflectometryTransform::createMDWorkspace(
     Mantid::Geometry::IMDDimension_sptr a,
@@ -147,7 +176,12 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
     verticalAxis->setValue(i, qzIncrement);
   }
 }
-
+/**
+ * Performs centre-point rebinning and produces an MDWorkspace
+ * @param inputWS : The workspace you wish to perform centre-point rebinning on.
+ * @param boxController : controls how the MDWorkspace will be split
+ * @returns An MDWorkspace based on centre-point rebinning of the inputWS
+ */
 Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController) const {
@@ -246,6 +280,12 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   }
   return ws;
 }
+/**
+ * Execution path for NormalisedPolygon Rebinning
+ * @param inputWS : Workspace to be rebinned
+ * @param vertexes : TableWorkspace for debugging purposes
+ * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
+ */
 
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
