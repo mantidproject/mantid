@@ -1155,9 +1155,12 @@ double MantidMatrixModel::data(int row, int col) const
   {
     val = m_workspace->readY(row + m_startRow)[col];
   }
-  else
+  else if (m_type == E)
   {
     val = m_workspace->readE(row + m_startRow)[col];
+  } else
+  {
+    val = m_workspace->readDx(row + m_startRow)[col];
   }
   return val;
 }

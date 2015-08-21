@@ -340,7 +340,7 @@ class MantidMatrixModel:public QAbstractTableModel
 {
   Q_OBJECT
 public:
-  typedef enum {Y,X,E} Type;
+  typedef enum {Y,X,E,DX} Type;
   MantidMatrixModel(QObject *parent,
     const Mantid::API::MatrixWorkspace* ws,
     int rows,
@@ -362,11 +362,18 @@ public:
   }
 
   /// Implementation of QAbstractTableModel::columnCount() -- number of columns. If type is X it is
-  /// the numner of bin boundaries. If type is Y or E it is the number of data values.
+  /// the number of bin boundaries. If the type is DX it is the number of bin boundaries as well.
+  ///If type is Y or E it is the number of data values.
   int columnCount(const QModelIndex &parent = QModelIndex()) const
   {
     (void)parent; //To avoid compiler warning
-    return m_type == X? m_cols + m_colNumCorr : m_cols;
+    int columnCount = 0;
+    if (m_type == X || m_type == DX) {
+      columnCount = m_cols + m_colNumCorr;
+    } else {
+      columnCount = m_cols
+    }
+    return columnCount;
   }
 
   double data(int row, int col) const;
@@ -394,7 +401,7 @@ private:
   int m_rows,m_cols; ///< numbers of rows and columns
   int m_colNumCorr;  ///< == 1 for histograms and == 0 for point data
   QLocale m_locale;
-  Type m_type;///< The type: X for bin boundaries, Y for the spectrum data, E for errors
+  Type m_type;///< The type: X for bin boundaries, Y for the spectrum data, E for errors, DX for x errors
   char m_format;   //  Format of numbers returned by data(): 'f' - fixed, 'e' - scientific.
   int m_prec;       //  Number precision
   QColor m_mon_color; // Monitor Specific background color
