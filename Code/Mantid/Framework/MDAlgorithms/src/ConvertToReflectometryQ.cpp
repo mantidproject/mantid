@@ -373,9 +373,9 @@ void ConvertToReflectometryQ::exec() {
       outputWS = outputWS2D;
     } else if (transMethod == normPolyTransform()) {
       const bool dumpVertexes = this->getProperty("DumpVertexes");
-      auto vertexesTable = dumpVertexes ? boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >(vertexes) : boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >();
+      auto vertexesTable = vertexes;
       
-      auto outputWSRB = transform->executeNormPoly(inputWs, vertexesTable);
+      auto outputWSRB = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes);
       outputWSRB->copyExperimentInfoFrom(inputWs.get());
       outputWS = outputWSRB;
     } else {

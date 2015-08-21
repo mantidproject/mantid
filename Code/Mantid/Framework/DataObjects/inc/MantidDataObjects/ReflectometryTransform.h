@@ -7,7 +7,6 @@
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 
 #include "MantidDataObjects/MDEventFactory.h"
-#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -85,7 +84,7 @@ public:
 
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr
-  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs, boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace> >& vertexes) const;
+  executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs, boost::shared_ptr<Mantid::DataObjects::TableWorkspace> & vertexes, bool dumpVertexes) const;
 
   virtual ~ReflectometryTransform();
   ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
