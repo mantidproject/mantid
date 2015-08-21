@@ -2,23 +2,23 @@
 
 from mantid.simpleapi import *
 import os.path
-import CRY_ini
-import CRY_load
+import cry_ini
+import cry_load
 
-numbankdic = { \
+NUM_BANK_DIC = { \
     'hrp': 3, \
     'gem': 5, \
     'pol': 6 \
     }
 
-grpofdic = { \
+GRP_OF_DIC = { \
     'hrp': 'hrpd_new_072_01_corr.cal'
     }
 
 
 def rawpath(runno, inst='hrp', Verbose=False):
-    file = open('//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt', 'r')
-    line = os.path.abspath(file.readline())
+    ofile = open('//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt', 'r')
+    line = os.path.abspath(ofile.readline())
     if Verbose:
         print '//filepath.isis.rl.ac.uk/' + inst + str(runno) + '.raw/windir.txt'
         print line
@@ -29,12 +29,12 @@ class Instrument:
     def __init__(self, instr):
         self.name = instr
         self.sname = instr[0:3]
-        self.nbank = numbankdic[self.sname]
+        self.nbank = NUM_BANK_DIC[self.sname]
         self.pc_comp = 'Y:'
-        self.grpOfffile = CRY_ini.env_analysis_dir + '/GrpOff/' + grpofdic[self.sname]
+        self.grpOfffile = CRY_ini.ANALYSIS_DIR + '/GrpOff/' + GRP_OF_DIC[self.sname]
 
 
-class Focus(Instrument):
+class focus_(Instrument):
     def __init__(self, instr='hrpd'):
         Instrument.__init__(self, instr)
         self.Instr = Instrument(instr)
@@ -79,16 +79,16 @@ class Focus(Instrument):
             DiffractionFocussing(InputWorkspace=wkspname, OutputWorkspace=wkspname,
                                  GroupingFileName=self.Instr.grpOfffile)
             blist = range(1, self.Instr.nbank + 1)
-            CRY_load.split_bank(wkspname, blist, Del=True)
+            cry_load.split_bank(wkspname, blist, Del=True)
 
 
 if __name__ == '__main__':
     from SET_env_scripts2_migrated import *
 
-    afocus = Focus()
+    A_FOCUS = focus_()
     # a_focus.savemode_on()
     # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
     print rawpath(35493, inst='gem', Verbose=False)
     # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
-    afocus.load(35493)
+    A_FOCUS.load(35493)
 
