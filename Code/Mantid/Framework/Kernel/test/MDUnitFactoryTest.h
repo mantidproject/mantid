@@ -111,6 +111,9 @@ public:
 
       product = factory.create("A^-1");
       TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
+
+      product = factory.create("in 4.436 A^-1");
+      TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
   }
 
   void test_make_standard_chain(){

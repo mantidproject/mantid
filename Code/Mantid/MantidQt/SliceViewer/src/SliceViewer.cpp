@@ -43,6 +43,7 @@
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <qwt_plot_panner.h>
+#include <qwt_plot_rescaler.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -81,7 +82,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL){
+      m_peaksSliderWidget(NULL) {
 
   ui.setupUi(this);
 
@@ -170,6 +171,27 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<PeakTransformQLabFactory>());
   this->setAcceptDrops(true);
+
+  // --------- Rescaler --------------------
+  m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+}
+
+void SliceViewer::updateAspectRatios() {
+
+  /* Lock aspect ratios, if that feature has been enabled, and if the plot x and
+   * y units
+   * are suitable.
+  */
+  const bool lockAspectRatios = m_lockAspectRatiosAction->isChecked() &&
+                                m_X->getMDUnits().isQUnit() &&
+                                m_Y->getMDUnits().isQUnit();
+
+  m_rescaler->setEnabled(lockAspectRatios);
+  m_rescaler->setReferenceAxis(QwtPlot::xBottom);
+  m_rescaler->setAspectRatio(QwtPlot::yLeft, 1.0);
+  m_rescaler->setAspectRatio(QwtPlot::yRight, 0.0);
+  m_rescaler->setAspectRatio(QwtPlot::xTop, 0.0);
+  m_rescaler->setExpandingDirection(QwtPlotRescaler::ExpandBoth);
 }
 
 //------------------------------------------------------------------------------
@@ -177,6 +199,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 SliceViewer::~SliceViewer() {
   saveSettings();
   delete m_data;
+  delete m_rescaler;
   // Don't delete Qt objects, I think these are auto-deleted
 }
 
@@ -212,6 +235,9 @@ void SliceViewer::loadSettings() {
       static_cast<Mantid::API::MDNormalization>(norm);
   this->setNormalization(normaliz);
 
+  const bool lockAspectRatioEnabled = settings.value("LockAspectRatios", 1).toInt();
+  this->m_lockAspectRatiosAction->setChecked(lockAspectRatioEnabled);
+
   settings.endGroup();
 }
 
@@ -226,7 +252,10 @@ void SliceViewer::saveSettings() {
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
   settings.setValue("Normalization",
-                      static_cast<int>(this->getNormalization()));
+                    static_cast<int>(this->getNormalization()));
+
+  settings.setValue("LockAspectRatios",
+                    m_lockAspectRatiosAction->isChecked() ? 1 : 0);
   settings.endGroup();
 }
 //------------------------------------------------------------------------------
@@ -236,11 +265,12 @@ void SliceViewer::saveSettings() {
 * @param mode the mode of the icon
 * @param state on or off state of the icon
 */
-void SliceViewer::setIconFromString(QAbstractButton* btn, const std::string& iconName,
-    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state = QIcon::State::Off)
-{
+void SliceViewer::setIconFromString(QAbstractButton *btn,
+                                    const std::string &iconName,
+                                    QIcon::Mode mode = QIcon::Mode::Normal,
+                                    QIcon::State state = QIcon::State::Off) {
   QIcon icon;
-  icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
+  icon.addFile(QString::fromStdString(iconName), QSize(), mode, state);
   btn->setIcon(icon);
 }
 /** set an icon given the control and a string.
@@ -249,15 +279,16 @@ void SliceViewer::setIconFromString(QAbstractButton* btn, const std::string& ico
 * @param mode the mode of the icon
 * @param state on or off state of the icon
 */
-void SliceViewer::setIconFromString(QAction* action,const std::string& iconName,
-    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state= QIcon::State::Off)
-{
+void SliceViewer::setIconFromString(QAction *action,
+                                    const std::string &iconName,
+                                    QIcon::Mode mode = QIcon::Mode::Normal,
+                                    QIcon::State state = QIcon::State::Off) {
   QIcon icon;
-  icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
+  icon.addFile(QString::fromStdString(iconName), QSize(), mode, state);
   action->setIcon(icon);
 }
 
-  //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Create the menus */
 void SliceViewer::initMenus() {
   // ---------------------- Build the menu bar -------------------------
@@ -301,7 +332,7 @@ void SliceViewer::initMenus() {
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
-  setIconFromString(action,g_iconViewFull);
+  setIconFromString(action, g_iconViewFull);
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
@@ -363,14 +394,16 @@ void SliceViewer::initMenus() {
   QActionGroup *group = new QActionGroup(this);
 
   const QString normalization = " Normalization";
-  action = new QAction(QPixmap(), SliceViewer::NoNormalizationKey + normalization, this);
+  action = new QAction(QPixmap(),
+                       SliceViewer::NoNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNone()));
   m_actionNormalizeNone = action;
 
-  action = new QAction(QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
+  action = new QAction(
+      QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -378,7 +411,8 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationVolume()));
   m_actionNormalizeVolume = action;
 
-  action = new QAction(QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
+  action = new QAction(
+      QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -386,11 +420,24 @@ void SliceViewer::initMenus() {
           SLOT(changeNormalizationNumEvents()));
   m_actionNormalizeNumEvents = action;
 
+  // Mirror the menu options directly in the Ui.
   ui.comboNormalization->addItem(SliceViewer::NoNormalizationKey);
   ui.comboNormalization->addItem(SliceViewer::VolumeNormalizationKey);
   ui.comboNormalization->addItem(SliceViewer::NumEventsNormalizationKey);
 
-  connect(this->ui.comboNormalization, SIGNAL(currentIndexChanged(const QString&)), SLOT(onNormalizationChanged(const QString&)));
+  connect(this->ui.comboNormalization,
+          SIGNAL(currentIndexChanged(const QString &)),
+          SLOT(onNormalizationChanged(const QString &)));
+
+  m_menuView->addSeparator();
+
+  action = new QAction(QPixmap(), "Lock &Aspect Ratios", this);
+  action->setCheckable(true);
+  action->setChecked(true);
+  m_lockAspectRatiosAction = action;
+  connect(action, SIGNAL(toggled(bool)), this,
+          SLOT(setAspectRatioChoice(bool)));
+  m_menuView->addAction(action);
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
@@ -399,19 +446,15 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
   m_menuColorOptions->addAction(action);
 
-  action = new QAction(QPixmap(), "&Current View range", this);
+  action = new QAction(QPixmap(), "&Current View Range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
-  {
-    setIconFromString(action,g_iconZoomPlus);
-  }
+  { setIconFromString(action, g_iconZoomPlus); }
   m_menuColorOptions->addAction(action);
 
-  action = new QAction(QPixmap(), "&Full range", this);
+  action = new QAction(QPixmap(), "&Full Range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
-  {
-    setIconFromString(action,g_iconZoomMinus);
-  }
+  { setIconFromString(action, g_iconZoomMinus); }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "Transparent &Zeros", this);
@@ -782,6 +825,19 @@ void SliceViewer::setColorScaleAutoSlice() {
 }
 
 //------------------------------------------------------------------------------
+/** Automatically lock aspect ratios, or switch that behaviour off.
+ * @param lockRatios : True to lock the aspect ratios
+ */
+void SliceViewer::setAspectRatioChoice(bool lockRatios) {
+  m_lockAspectRatiosAction->blockSignals(true);
+  m_lockAspectRatiosAction->setChecked(lockRatios);
+  m_lockAspectRatiosAction->blockSignals(false);
+
+  // Redraw the view.
+  this->updateDisplay(true/*force axis reset*/);
+}
+
+//------------------------------------------------------------------------------
 /// Slot called when the ColorBarWidget changes the range of colors
 void SliceViewer::colorRangeChanged() {
   m_spect->setColorMap(m_colorBar->getColorMap());
@@ -820,13 +876,13 @@ void SliceViewer::changeNormalizationNumEvents() {
  * @brief Slot to handle change in normalization kicked-off from the combo box.
  * @param normalizationKey : Text key for type of normalization switched to.
  */
-void SliceViewer::onNormalizationChanged(const QString& normalizationKey) {
+void SliceViewer::onNormalizationChanged(const QString &normalizationKey) {
   if (normalizationKey == SliceViewer::NoNormalizationKey) {
-      changeNormalizationNone();
+    changeNormalizationNone();
   } else if (normalizationKey == SliceViewer::VolumeNormalizationKey) {
-      changeNormalizationVolume();
+    changeNormalizationVolume();
   } else {
-      changeNormalizationNumEvents();
+    changeNormalizationNumEvents();
   }
 }
 
@@ -854,12 +910,12 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
 
   // Sync the normalization combobox.
   this->ui.comboNormalization->blockSignals(true);
-  if(norm == Mantid::API::NoNormalization) {
-      this->ui.comboNormalization->setCurrentIndex(0);
+  if (norm == Mantid::API::NoNormalization) {
+    this->ui.comboNormalization->setCurrentIndex(0);
   } else if (norm == Mantid::API::VolumeNormalization) {
-      this->ui.comboNormalization->setCurrentItem(1);
+    this->ui.comboNormalization->setCurrentItem(1);
   } else {
-      this->ui.comboNormalization->setCurrentIndex(2);
+    this->ui.comboNormalization->setCurrentIndex(2);
   }
   this->ui.comboNormalization->blockSignals(false);
 
@@ -937,7 +993,8 @@ void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
 
   if (checked) {
-    setIconFromString(ui.btnDoLine,g_iconCutOn,QIcon::Mode::Normal,QIcon::State::Off);
+    setIconFromString(ui.btnDoLine, g_iconCutOn, QIcon::Mode::Normal,
+                      QIcon::State::Off);
     QString text;
     if (m_lineOverlay->getCreationMode())
       text = "Click and drag to draw an cut line.\n"
@@ -949,7 +1006,8 @@ void SliceViewer::LineMode_toggled(bool checked) {
   if (!checked) {
     // clear the old line
     clearLine();
-    setIconFromString(ui.btnDoLine,g_iconCut,QIcon::Mode::Normal,QIcon::State::On);
+    setIconFromString(ui.btnDoLine, g_iconCut, QIcon::Mode::Normal,
+                      QIcon::State::On);
   }
   emit showLineViewer(checked);
 }
@@ -982,16 +1040,18 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
       m_lineOverlay->setSnapEnabled(true);
       m_lineOverlay->setSnapX(dlg->getSnapX());
       m_lineOverlay->setSnapY(dlg->getSnapY());
-      setIconFromString(ui.btnSnapToGrid,g_iconGridOn, QIcon::Normal, QIcon::On);
+      setIconFromString(ui.btnSnapToGrid, g_iconGridOn, QIcon::Normal,
+                        QIcon::On);
     } else {
       // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
       m_lineOverlay->setSnapEnabled(false);
-      setIconFromString(ui.btnSnapToGrid,g_iconGrid, QIcon::Normal, QIcon::Off);
+      setIconFromString(ui.btnSnapToGrid, g_iconGrid, QIcon::Normal,
+                        QIcon::Off);
     }
   } else {
     m_lineOverlay->setSnapEnabled(false);
-    setIconFromString(ui.btnSnapToGrid,g_iconGrid, QIcon::Normal, QIcon::Off);
+    setIconFromString(ui.btnSnapToGrid, g_iconGrid, QIcon::Normal, QIcon::Off);
   }
 }
 
@@ -1007,7 +1067,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   m_rebinMode = checked;
 
   if (!m_rebinMode) {
-    setIconFromString(ui.btnRebinMode,g_iconRebin, QIcon::Normal, QIcon::Off);
+    setIconFromString(ui.btnRebinMode, g_iconRebin, QIcon::Normal, QIcon::Off);
     // uncheck auto-rebin
     ui.btnAutoRebin->setChecked(false);
     // Remove the overlay WS
@@ -1015,7 +1075,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     this->updateDisplay();
   } else {
-    setIconFromString(ui.btnRebinMode,g_iconRebinOn, QIcon::Normal, QIcon::On);
+    setIconFromString(ui.btnRebinMode, g_iconRebinOn, QIcon::Normal, QIcon::On);
     // Start the rebin
     this->rebinParamsChanged();
   }
@@ -1428,6 +1488,9 @@ void SliceViewer::updateDisplay(bool resetAxes) {
 
     // Update the pointer to the slider widget.
     updatePeakOverlaySliderWidget();
+
+    // Lock or unlock aspect ratios
+    updateAspectRatios();
   }
 
   // Set the color range
@@ -1986,9 +2049,11 @@ void SliceViewer::rebinParamsChanged() {
   alg->setProperty("InputWorkspace", m_ws);
   alg->setProperty("AxisAligned", false);
 
-  // If we are rebinning from an existing MDHistoWorkspace, and that workspace has been created with basis vectors normalized, then we reapply that setting here.
-  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)){
-      alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
+  // If we are rebinning from an existing MDHistoWorkspace, and that workspace
+  // has been created with basis vectors normalized, then we reapply that
+  // setting here.
+  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+    alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 
   std::vector<double> OutputExtents;
@@ -2142,7 +2207,8 @@ void SliceViewer::disablePeakOverlays() {
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
 
-  setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
+  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
+                    QIcon::Off);
   ui.btnPeakOverlay->setChecked(false);
 }
 
@@ -2196,13 +2262,13 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiSphereFactory>(
             peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
-                    m_spect->yAxis(), numberOfChildPresenters));
+            m_spect->yAxis(), numberOfChildPresenters));
     // Candiate for plotting as a markers of peak positions
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiCrossFactory>(
             m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), m_spect->xAxis(),
-                    m_spect->yAxis(), numberOfChildPresenters));
+            m_plot->canvas(), m_spect->xAxis(), m_spect->yAxis(),
+            numberOfChildPresenters));
     try {
       m_peaksPresenter->addPeaksPresenter(
           boost::make_shared<ConcretePeaksPresenter>(
@@ -2218,8 +2284,9 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
-  
-  setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
+
+  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
+                    QIcon::Off);
   ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
@@ -2246,10 +2313,12 @@ void SliceViewer::peakOverlay_clicked() {
     disablePeakOverlays();
   }
   if (m_peaksPresenter->size() > 0) {
-    setIconFromString(ui.btnPeakOverlay,g_iconPeakListOn, QIcon::Normal, QIcon::On);
+    setIconFromString(ui.btnPeakOverlay, g_iconPeakListOn, QIcon::Normal,
+                      QIcon::On);
     ui.btnPeakOverlay->setChecked(true);
   } else {
-    setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
+    setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
+                      QIcon::Off);
     ui.btnPeakOverlay->setChecked(false);
   }
 }
@@ -2401,7 +2470,6 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     }
   }
 }
-
 
 } // namespace
 }

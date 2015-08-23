@@ -27,6 +27,7 @@
 
 class QDragEnterEvent;
 class QDropEvent;
+class QwtPlotRescaler;
 
 namespace Mantid
 {
@@ -193,6 +194,8 @@ public slots:
   void dynamicRebinComplete(bool error);
   // Peaks overlay
   void peakOverlay_clicked();
+  // Aspect ratios
+  void setAspectRatioChoice(bool lockRatios);
 
 protected:
 
@@ -228,6 +231,9 @@ private:
 
   // helper for saveImage
   QString ensurePngExtension(const QString& fname) const;
+
+  // Rescaler methods
+  void updateAspectRatios();
 
 private:
   
@@ -312,6 +318,7 @@ private:
   QAction *m_actionNormalizeVolume;
   QAction *m_actionNormalizeNumEvents;
   QAction *m_actionRefreshRebin;
+  QAction *m_lockAspectRatiosAction;
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
@@ -351,6 +358,9 @@ private:
 
   /// Object for choosing a PeakTransformFactory based on the workspace type.
   Mantid::Geometry::PeakTransformSelector m_peakTransformSelector;
+
+  /// Plot rescaler. For fixed aspect ratios.
+  QwtPlotRescaler* m_rescaler;
 
   static const QString NoNormalizationKey;
   static const QString VolumeNormalizationKey;
