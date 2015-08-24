@@ -96,7 +96,6 @@ SliceViewer::SliceViewer(QWidget *parent)
   // Set up the ColorBarWidget
   m_colorBar = ui.colorBarWidget;
   m_colorBar->setViewRange(0, 10);
-  m_colorBar->setLog(true);
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double, double, bool)),
                    this, SLOT(colorRangeChanged()));
 
@@ -185,7 +184,14 @@ SliceViewer::~SliceViewer() {
 void SliceViewer::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
-  bool scaleType = (bool)settings.value("LogColorScale", 0).toInt();
+
+  // Maintain backwards compatibility with use of LogColorScale
+  int scaleType = settings.value("ColorScale", -1).toInt();
+  if (scaleType == -1) {
+    scaleType = settings.value("LogColorScale", 0).toInt();
+  }
+
+  double nth_power = settings.value("PowerScaleExponent", 2.0).toDouble();
 
   // Load Colormap. If the file is invalid the default stored colour map is
   // used.
@@ -200,7 +206,8 @@ void SliceViewer::loadSettings() {
   // Set values from settings
   if (!m_currentColorMapFile.isEmpty())
     loadColorMap(m_currentColorMapFile);
-  m_colorBar->setLog(scaleType);
+  m_colorBar->setScale(scaleType);
+  m_colorBar->setExponent(nth_power);
   // Last saved image file
   m_lastSavedFile = settings.value("LastSavedImagePath", "").toString();
 
@@ -221,7 +228,8 @@ void SliceViewer::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
   settings.setValue("ColormapFile", m_currentColorMapFile);
-  settings.setValue("LogColorScale", (int)m_colorBar->getLog());
+  settings.setValue("ColorScale", m_colorBar->getScale());
+  settings.setValue("PowerScaleExponent", m_colorBar->getExponent());
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
@@ -1655,7 +1663,8 @@ void SliceViewer::setColorScale(double min, double max, bool log) {
     throw std::invalid_argument(
         "For logarithmic color scales, both minimum and maximum must be > 0.");
   m_colorBar->setViewRange(min, max);
-  m_colorBar->setLog(log);
+  // TODO set scale type
+  //m_colorBar->setLog(log);
   this->colorRangeChanged();
 }
 
