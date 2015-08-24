@@ -575,7 +575,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
 
     # Determine the StartQ and EndQ values
-    su.get_start_q_and_end_q_values(rear_data = rearData, rescale_shift = rAnds)
+    q_min, q_max = su.get_start_q_and_end_q_values(rear_data = rearData, front_data = frontData, rescale_shift = rAnds)
 
     #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
@@ -583,34 +583,19 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
                 Ties='f0.Scaling='+str(rAnds.scale)+ constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
-        else:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
-                Ties='f0.Scaling=' + str(rAnds.scale) + constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift")
+                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     elif rAnds.fitShift==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
                 Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
-        else:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
-                Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift")
+                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     else:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
                 Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
-                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
-        else:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
-                Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
-                Output="__fitRescaleAndShift")
+                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
 
     param = mtd['__fitRescaleAndShift_Parameters']
 
