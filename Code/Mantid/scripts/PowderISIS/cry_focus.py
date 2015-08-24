@@ -40,7 +40,7 @@ def focus_all(EXPR_FILE, samplelistTexte, scale=0, NoVabs=False, NoSAC=False, Ef
         print '--------------------------'
         print '         Start focus here        '
         print '--------------------------'
-        print " ---> " + Focus(EXPR_FILE, sample2Add, scale, Norm, isfirst, NoAbs=NoVabs)
+        print " ---> " + focus_one(EXPR_FILE, sample2Add, scale, Norm, isfirst, NoAbs=NoVabs)
         isfirst = False
     #
     # changed by WAK 8/3/2011:delete workspaces
@@ -101,7 +101,7 @@ def load_sac_eff(EXPR_FILE, NoSAC=False, Eff=True):
                     mtd.remove("Eff")
 
 
-def Focus(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
+def focus_one(EXPR_FILE, sampleAdd, scale, Norm, isfirst=False, NoAbs=False):
     (outname, uampstotal) = cry_sample.get_data_sum(sampleAdd, "sample", EXPR_FILE)
     if uampstotal < 1e-6:
         return "No usable data, Raw files probably not found: cannot create " + outname + "\n"
