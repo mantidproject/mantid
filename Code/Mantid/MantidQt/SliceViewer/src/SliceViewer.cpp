@@ -1656,15 +1656,14 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
  * @throw std::invalid_argument if max < min or if the values are
  *        inconsistent with a log color scale
  */
-void SliceViewer::setColorScale(double min, double max, bool log) {
+void SliceViewer::setColorScale(double min, double max, int type) {
   if (max <= min)
     throw std::invalid_argument("Color scale maximum must be > minimum.");
-  if (log && ((min <= 0) || (max <= 0)))
+  if (type == 1 && ((min <= 0) || (max <= 0)))
     throw std::invalid_argument(
         "For logarithmic color scales, both minimum and maximum must be > 0.");
   m_colorBar->setViewRange(min, max);
-  // TODO set scale type
-  //m_colorBar->setLog(log);
+  m_colorBar->setScale(type);
   this->colorRangeChanged();
 }
 
@@ -1695,7 +1694,17 @@ void SliceViewer::setColorMapBackground(int r, int g, int b) {
  *        inconsistent with a log color scale
  */
 void SliceViewer::setColorScaleMin(double min) {
-  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleLog());
+  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleType());
+}
+
+//------------------------------------------------------------------------------
+/** Get the colormap scale type
+ *
+ * @return int corresponding to the selected scale type
+ */
+int SliceViewer::getColorScaleType()
+{
+  return m_colorBar->getScale();
 }
 
 //------------------------------------------------------------------------------
@@ -1706,7 +1715,7 @@ void SliceViewer::setColorScaleMin(double min) {
  *        inconsistent with a log color scale
  */
 void SliceViewer::setColorScaleMax(double max) {
-  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleLog());
+  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleType());
 }
 
 //------------------------------------------------------------------------------
@@ -1717,7 +1726,7 @@ void SliceViewer::setColorScaleMax(double max) {
  *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log) {
-  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), log);
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), (int)log);
 }
 
 //------------------------------------------------------------------------------
