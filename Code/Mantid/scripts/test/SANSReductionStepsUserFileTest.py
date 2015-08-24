@@ -68,10 +68,10 @@ class MockConvertTOQISISQResolution(object):
     def set_q_resolution_collimation_length(self, collimation_length):
         self.collim = collimation_length
 
-    def set_q_resolution_g1(self, h1):
+    def set_q_resolution_h1(self, h1):
         self.h1 = h1
 
-    def set_q_resolution_g2(self, h2):
+    def set_q_resolution_h2(self, h2):
         self.h2 = h2
 
     def set_q_resolution_w1(self, w1):
