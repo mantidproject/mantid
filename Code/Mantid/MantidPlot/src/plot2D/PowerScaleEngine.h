@@ -27,8 +27,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef RECIPROCAL_SCALE_ENGINE_H
-#define RECIPROCAL_SCALE_ENGINE_H
+#ifndef POWER_SCALE_ENGINE_H
+#define POWER_SCALE_ENGINE_H
 
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
