@@ -1,12 +1,12 @@
-#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches
+#pylint: disable=attribute-defined-outside-init,undefined-loop-variable,too-many-arguments,too-many-branches,too-many-instance-attributes,old-style-class,global-variable-not-assigned
 
 from mantid.simpleapi import *
-import CRY_utils
+import cry_utils
 import re
 import os.path
 from os.path import abspath, join, dirname
 
-env_analysis_dir = ''
+ANALYSIS_DIR = ''
 #print '--------------------- '
 #print 'Using the B:\\MantidPowderFocus\\\scripts2\\CRY_ini.py scripts... '
 #print '--------------------- '
@@ -14,7 +14,7 @@ env_analysis_dir = ''
 
 class Files:
     def __init__(self, instr, RawDir="", Analysisdir="", UnitTest=False, debugMode=False):
-        global env_analysis_dir
+        global ANALYSIS_DIR
         self.debugMode = False
         if debugMode:
             self.debugMode = True
@@ -91,7 +91,7 @@ class Files:
             if Analysisdir != "":
                 self.Analysisdir = abspath(Analysisdir)
             else:
-                self.Analysisdir = abspath(env_analysis_dir)
+                self.Analysisdir = abspath(ANALYSIS_DIR)
         self.OffDir = join(self.Analysisdir, "GrpOff")
         self.GrpDir = join(self.Analysisdir, "GrpOff")
 
@@ -221,7 +221,7 @@ class Files:
         self.dataRangeSet = False
         if self.saveXYEtof or self.saveXYEd:
             bankList = self.read_prefline("BankList")
-            self.bankList = CRY_utils.get_list_int(bankList)
+            self.bankList = cry_utils.get_list_int(bankList)
         print "Done"
         if Verbose:
             self.tell()
@@ -307,11 +307,11 @@ class Files:
         self.SEmptyDir = self.RawDir
 
     def updateCalib(self):
-        self.VanFile = CRY_utils.list_of_list2_list(CRY_utils.get_sample_list(self.basefile, self.VrunnoList, self.VanDir))
-        self.VEmptyFile = CRY_utils.list_of_list2_list(
-            CRY_utils.get_sample_list(self.basefile, self.VErunnoList, self.VEmptyDir))
-        self.SEmptyFile = CRY_utils.list_of_list2_list(
-            CRY_utils.get_sample_list(self.basefile, self.SErunnoList, self.SEmptyDir))
+        self.VanFile = cry_utils.list_of_list2_list(cry_utils.get_sample_list(self.basefile, self.VrunnoList, self.VanDir))
+        self.VEmptyFile = cry_utils.list_of_list2_list(
+            cry_utils.get_sample_list(self.basefile, self.VErunnoList, self.VEmptyDir))
+        self.SEmptyFile = cry_utils.list_of_list2_list(
+            cry_utils.get_sample_list(self.basefile, self.SErunnoList, self.SEmptyDir))
         self.Path2OffFile = self.OffDir + "/" + self.OffFile
         self.Path2GrpFile = self.GrpDir + "/" + self.GrpFile
         self.CorrVanFile = self.CorrVanDir + "/" + self.CorrVanFile
@@ -450,8 +450,8 @@ class Files:
 
 
 if __name__ == '__main__':
-    # Opt : experimentf=Files("hrpd",RawDir="",Analysisdir="")
-    experimentf = Files("hrpd")
+    # Opt : EXPR_FILE=Files("hrpd",RawDir="",Analysisdir="")
+    EXPR_FILE = Files("hrpd")
     # default
-    experimentf.initialize('Cycle08_2', 'Si')
-# Opt : experimentf.initialize('Cycle09_2','tests',prefFile='mtd.pref', prefDir="")
+    EXPR_FILE.initialize('Cycle08_2', 'Si')
+# Opt : EXPR_FILE.initialize('Cycle09_2','tests',prefFile='mtd.pref', prefDir="")

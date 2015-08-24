@@ -2,12 +2,12 @@ from mantid.simpleapi import *
 from types import *
 import math
 
-old_version = False
+OLD_VERSION = False
 
 
 # First a function definition for the Loading algorithms which
 # loads the data and immediately aligns the detectors
-def load(outputArea, pathtofile, experimentf, add=False):
+def load(outputArea, pathtofile, EXPR_FILE, add=False):
     total = outputArea
     if add:
         outputArea = outputArea + "add"
@@ -18,11 +18,11 @@ def load(outputArea, pathtofile, experimentf, add=False):
     #		raise
     #	else:
     #		fin.close()
-    if old_version:
+    if OLD_VERSION:
         LoadRaw(Filename=pathtofile, OutputWorkspace=outputArea)
     else:
         LoadRaw(Filename=pathtofile, OutputWorkspace=outputArea, LoadLogFiles=False)
-    if experimentf.instr == "hrpd":
+    if EXPR_FILE.instr == "hrpd":
         removeallpromptpulses(outputArea)
     uamps = mtd[outputArea].getRun().getProtonCharge()
     if add:
@@ -33,8 +33,8 @@ def load(outputArea, pathtofile, experimentf, add=False):
     return uamps, uampstot
 
 
-def align_fnc(outputArea, experimentf):
-    AlignDetectors(InputWorkspace=outputArea, OutputWorkspace=outputArea, CalibrationFile=experimentf.Path2OffFile)
+def align_fnc(outputArea, EXPR_FILE):
+    AlignDetectors(InputWorkspace=outputArea, OutputWorkspace=outputArea, CalibrationFile=EXPR_FILE.Path2OffFile)
 
 
 def split_bank(InputArea, bankList, Del=True):
@@ -50,23 +50,23 @@ def bin_bank(InputArea, bankList, Drange):
         Rebin(InputWorkspace=InputArea + "-" + str(i), OutputWorkspace=InputArea + "-" + str(i), Params=Drange[i - 1])
 
 
-def sets_drange(wkspc, experimentf):
+def sets_drange(wkspc, EXPR_FILE):
     datamatrix = mtd[wkspc]
-    for i in range(0, experimentf.Nbank):
+    for i in range(0, EXPR_FILE.Nbank):
         x_data = datamatrix.readX(i)
         last = len(x_data) - 1
-        CropRange = experimentf.CropRange[i].rstrip().split()
+        CropRange = EXPR_FILE.CropRange[i].rstrip().split()
         xbegin = str(x_data[0] * (1 + float(CropRange[0])))
         xend = str(x_data[last] * float(CropRange[1]))
         datbin = math.exp(math.log(x_data[last] / x_data[0]) / last) - 1
-        if datbin > float(experimentf.Bining[i]):
-            print 'WARNING: Rebining in *pref file ' + experimentf.Bining[
+        if datbin > float(EXPR_FILE.Bining[i]):
+            print 'WARNING: Rebining in *pref file ' + EXPR_FILE.Bining[
                 i] + ' is lower than diffraction focusing rebining step'
             print 'WARNING: Rebining Kept to be ' + str(datbin) + ' for bank ' + str(i + 1)
-            experimentf.Bining[i] = str(datbin)
-        Drange = xbegin + ",-" + experimentf.Bining[i] + "," + xend
-        experimentf.Drange.append(Drange)
-    experimentf.dataRangeSet = True
+            EXPR_FILE.Bining[i] = str(datbin)
+        Drange = xbegin + ",-" + EXPR_FILE.Bining[i] + "," + xend
+        EXPR_FILE.Drange.append(Drange)
+    EXPR_FILE.dataRangeSet = True
     return sets_drange
 
 

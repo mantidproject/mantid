@@ -1,3 +1,5 @@
+#pylint: disable=unused-variable
+
 from mantid.simpleapi import *
 from getcycle import *
 import time

@@ -3,11 +3,10 @@
 import re
 
 from mantid.simpleapi import *
-import CRY_load
-import CRY_ini
+import cry_load
 
 
-def get_data_sum(sampleAdd, samLab, experimentf):
+def get_data_sum(sampleAdd, samLab, EXPR_FILE):
     # Adds a list of data files given as a list of filenames
     # into the workspace samLab. Zero uamps runs are skipped
     # Function returns (BasenameRunno,uampstot) the first non-Zero run
@@ -17,9 +16,9 @@ def get_data_sum(sampleAdd, samLab, experimentf):
         if SampleFn == "none":
             return ('', 0)
         if firstnonzeronotfound:  # load first run
-            uamps, uampstot = CRY_load.load(samLab, SampleFn, experimentf, add=False)
+            uamps, uampstot = cry_load.load(samLab, SampleFn, EXPR_FILE, add=False)
         else:  # Or add a new run
-            uamps, uampstot = CRY_load.load(samLab, SampleFn, experimentf, add=True)
+            uamps, uampstot = cry_load.load(samLab, SampleFn, EXPR_FILE, add=True)
         if uamps > 1e-6:
             uampstotal = uampstotal + uamps
             print "'w' uamps = " + str(uampstot) + 'Data uamps =' + str(uamps) + 'Manually computed sum=' + str(
@@ -27,14 +26,14 @@ def get_data_sum(sampleAdd, samLab, experimentf):
             if firstnonzeronotfound:
                 # Gets BasenameRunno from SampleFn using RegEx
                 # try to find it as path\BasenameRunno.raw
-                pseaerch = ".*(" + experimentf.basefile + "[0-9]+)\.raw"
+                pseaerch = ".*(" + EXPR_FILE.basefile + "[0-9]+)\.raw"
                 p_wrd = re.compile(pseaerch)
                 m_wrd = p_wrd.match(SampleFn)
                 if m_wrd is not None:
                     sampleout = m_wrd.group(1)
                 else:
                     # else... try to it find as path\BasenameRunno.s*
-                    pseaerch = ".*(" + experimentf.basefile + "[0-9]+)\.s([0-9]+)"
+                    pseaerch = ".*(" + EXPR_FILE.basefile + "[0-9]+)\.s([0-9]+)"
                     p_wrd = re.compile(pseaerch)
                     m_wrd = p_wrd.match(SampleFn)
                     sampleout = m_wrd.group(1) + "_" + m_wrd.group(2)
@@ -52,9 +51,9 @@ def get_data_sum(sampleAdd, samLab, experimentf):
 
 
 if __name__ == '__main__':
-    experimentf = CRY_ini.File("hrpd")
-    experimentf.initialize('Cycle09_2', 'tests', prefFile="mtd_tst.pref")
-    experimentf.tell()
+    EXPR_FILE = CRY_ini.File("hrpd")
+    EXPR_FILE.initialize('Cycle09_2', 'tests', prefFile="mtd_tst.pref")
+    EXPR_FILE.tell()
 # CorrectVana(VanFile,EmptyFile,AcalibFile,1)
 # normalizeall(SampleDatFile,AcalibFile)
 # rearrangeallbanks(OutputFile,"")
