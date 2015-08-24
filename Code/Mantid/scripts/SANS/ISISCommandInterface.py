@@ -575,7 +575,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
 
     # Determine the StartQ and EndQ values
-    q_min, q_max = su.get_start_q_and_end_q_values(rear_data = rearData, front_data = frontData, rescale_shift = rAnds)
+    q_min, q_max = su.get_start_q_and_end_q_values(rear_data_name = rearData, front_data_name = frontData, rescale_shift = rAnds)
 
     #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
