@@ -40,7 +40,8 @@ const std::string EnggDiffractionViewQtGUI::g_pixelCalibExt =
     "(*.csv *.nxs *.nexus);;"
     "Other extensions/all files (*.*)";
 
-const std::string EnggDiffractionViewQtGUI::m_settingsGroup = "CustomInterfaces/EnggDiffractionView";
+const std::string EnggDiffractionViewQtGUI::m_settingsGroup =
+    "CustomInterfaces/EnggDiffractionView";
 
 /**
  * Default constructor.
@@ -60,6 +61,11 @@ void EnggDiffractionViewQtGUI::initLayout() {
   QWidget *wCalib = new QWidget(m_ui.tabMain);
   m_uiTabCalib.setupUi(wCalib);
   m_ui.tabMain->addTab(wCalib, QString("Calibration"));
+
+  QWidget *wFocus = new QWidget(m_ui.tabMain);
+  m_uiTabFocus.setupUi(wFocus);
+  m_ui.tabMain->addTab(wFocus, QString("Focus"));
+
   QWidget *wSettings = new QWidget(m_ui.tabMain);
   m_uiTabSettings.setupUi(wSettings);
   m_ui.tabMain->addTab(wSettings, QString("Settings"));
@@ -128,6 +134,17 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
 
   connect(m_uiTabSettings.pushButton_browse_template_gsas_prm,
           SIGNAL(released()), this, SLOT(browseTemplateGSAS_PRM()));
+
+  connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()), this,
+          SLOT(browseDirFocusing()));
+}
+
+void EnggDiffractionViewQtGUI::doSetupTabFocus() {
+   m_uiTabSettings.lineEdit_dir_focusing->setText(
+      QString::fromStdString(m_focusDir));
+
+   connect(m_uiTabFocus.pushButton_browse_dir_focusing, SIGNAL(released()), this,
+           SLOT(focusClicked()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
@@ -182,6 +199,9 @@ void EnggDiffractionViewQtGUI::readSettings() {
   m_calibSettings.m_forceRecalcOverwrite =
       qs.value("rebin-calib", g_defaultRebinWidth).toFloat();
 
+  // 'focusing' block
+  m_focusDir = qs.value("focus-dir").toString().toStdString();
+
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 }
@@ -216,6 +236,9 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("template-gsas-prm",
               QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
   qs.setValue("rebin-calib", m_calibSettings.m_rebinCalibrate);
+
+  // 'focusing' block
+  qs.setValue("focus-dir", m_focusDir);
 
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
@@ -375,6 +398,10 @@ void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }
 
+void EnggDiffractionViewQtGUI::calibrateClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::Focus);
+}
+
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
   QString prevPath = QString::fromStdString(m_calibSettings.m_inputDirCalib);
   if (prevPath.isEmpty()) {
@@ -449,6 +476,26 @@ void EnggDiffractionViewQtGUI::browseTemplateGSAS_PRM() {
   m_calibSettings.m_templateGSAS_PRM = path.toStdString();
   m_uiTabSettings.lineEdit_template_gsas_prm->setText(
       QString::fromStdString(m_calibSettings.m_templateGSAS_PRM));
+}
+
+void EnggDiffractionViewQtGUI::browseDirFocusing() {
+  QString prevPath = QString::fromStdString(m_focusDir);
+  if (prevPath.isEmpty()) {
+    prevPath =
+        MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  }
+  QString dir = QFileDialog::getExistingDirectory(
+      this, tr("Open Directory"), prevPath,
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+  if (dir.isEmpty()) {
+    return;
+  }
+
+  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+  m_focusDir = dir.toStdString();
+  m_uiTabSettings.lineEdit_dir_focusing->setText(
+      QString::fromStdString(m_focusDir));
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

@@ -8,6 +8,7 @@
 
 #include "ui_EnggDiffractionQtGUI.h"
 #include "ui_EnggDiffractionQtTabCalib.h"
+#include "ui_EnggDiffractionQtTabFocus.h"
 #include "ui_EnggDiffractionQtTabSettings.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -104,12 +105,14 @@ private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();
   void calibrateClicked();
+  void focusClicked();
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
   void browseInputDirRaw();
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
+  void browseDirFocusing();
 
   // slots of the calibration tab/section of the interface
 
@@ -124,6 +127,7 @@ private:
   void doSetupGeneralWidgets();
   void doSetupTabCalib();
   void doSetupTabSettings();
+  void doSetupTabFocus();
 
   std::string guessGSASTemplatePath() const;
 
@@ -156,6 +160,9 @@ private:
   /// calibration settings - from/to the 'settings' tab
   EnggDiffCalibSettings m_calibSettings;
   std::string m_outCalibFilename;
+
+  /// This is in principle the only settings for 'focus'
+  std::string m_focusDir;
 
   /// for the 'Rebin' parameter of some Engg* algorithms
   static const double g_defaultRebinWidth;

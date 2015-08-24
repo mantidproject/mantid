@@ -269,7 +269,7 @@
          <widget class="QLineEdit" name="lineEdit_dir_focusing"/>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_browse_focusing">
+         <widget class="QPushButton" name="pushButton_browse_dir_focusing">
           <property name="text">
            <string>Browse</string>
           </property>

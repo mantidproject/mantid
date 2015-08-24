@@ -108,7 +108,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="pushButton_focus">
           <property name="text">
            <string>Focus</string>
           </property>
