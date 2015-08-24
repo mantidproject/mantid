@@ -24,6 +24,11 @@ with actual instrument data.
 When loading from a ``.dat`` file from nMOLDYN 3 function selection and
 convolution with an instrument resolution are unavailable.
 
+Workflow
+========
+
+.. diagram:: MolDyn-v1_wkflw.dot
+
 Usage
 -----
 
