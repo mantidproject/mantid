@@ -44,22 +44,21 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Start X", ""),
-                     std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""), std::invalid_argument);
   }
 
   void test_empty_endX_is_not_allowed() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("End X", ""), std::invalid_argument);
+    TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""), std::invalid_argument);
   }
 
   void test_empty_specMin_is_not_allowed() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Min", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("SpecMin", ""),
                      std::invalid_argument);
   }
 
@@ -67,7 +66,7 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Max", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("SpecMax", ""),
                      std::invalid_argument);
   }
 
@@ -75,7 +74,7 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-    TS_ASSERT_THROWS(alg.setPropertyValue("Max Iterations", ""),
+    TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", ""),
                      std::invalid_argument);
   }
 
@@ -90,16 +89,16 @@ public:
   void test_spectra_min_or_max_number_can_not_be_negative() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Min", "-1"),
+    TS_ASSERT_THROWS(alg.setPropertyValue("SpecMin", "-1"),
                      std::invalid_argument);
-    TS_ASSERT_THROWS(alg.setPropertyValue("Spec Max", "-1"),
+    TS_ASSERT_THROWS(alg.setPropertyValue("SpecMax", "-1"),
                      std::invalid_argument);
   }
 
   void test_max_iterations_can_not_be_a_negative_number() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS(alg.setPropertyValue("Max Iterations", "-1"),
+    TS_ASSERT_THROWS(alg.setPropertyValue("MaxIterations", "-1"),
                      std::invalid_argument);
   }
 
@@ -121,22 +120,67 @@ public:
 
   //------------------------- Execution cases ---------------------------
   void test_exec() {
+    auto resWs = Create2DWorkspace(5, 1);
+    auto redWs = Create2DWorkspace(5, 5);
+
+    AnalysisDataService::Instance().add("ResolutionWs_", resWs);
+    AnalysisDataService::Instance().add("ReductionWs_", redWs);
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    auto resWs = Create2DWorkspace(5, 1);
+    alg.setProperty("InputWorkspace", redWs);
+    alg.setProperty("Function", "name=LinearBackground,A0=0,A1=0,ties=(A0=0."
+                                "000000,A1=0.0);(composite=Convolution,"
+                                "FixResolution=true,NumDeriv=true;name="
+                                "Resolution,Workspace=__ConvFit_Resolution,"
+                                "WorkspaceIndex=0;((composite=ProductFunction,"
+                                "NumDeriv=false;name=Lorentzian,Amplitude=1,"
+                                "PeakCentre=0,FWHM=0.0175");
+    alg.setProperty("BackgroundType", "Fixed Flat");
+    alg.setProperty("StartX", 0.0);
+    alg.setProperty("EndX", 3.0);
+    alg.setProperty("Temperature", 0.0);
+    alg.setProperty("SpecMin", 0);
+    alg.setProperty("SpecMax", 5);
+    alg.setProperty("Convolve", true);
+    alg.setProperty("Minimizer", "Levenberg-Marquardt");
+    alg.setProperty("MaxIterations", 500);
+    alg.execute();
+
+    // Retrieve parameter table
+    /*ITableWorkspace_sptr paramTable;
+    TS_ASSERT_THROWS_NOTHING(
+        paramTable =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                "ReductionWs_conv_1LFixF_s0_to_5_Parameters"));
+
+    // Retrieve results table
+    MatrixWorkspace_sptr resultWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "ReductionWs_conv_1LFixF_s0_to_5_Result");
+    TS_ASSERT_THROWS_NOTHING(
+        resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+            "ReductionWs_conv_1LFixF_s0_to_5_Result"));
+
+    // Retrieve group table
+    WorkspaceGroup_sptr groupWs;
+    TS_ASSERT_THROWS_NOTHING(
+        groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));*/
   }
 
   //------------------------ Private Functions---------------------------
 
-  Workspace2D_sptr Create2DWorkspace(int xlen, int ylen) {
+  MatrixWorkspace_sptr Create2DWorkspace(int xlen, int ylen) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
+        ylen, xlen, false, false, true, "testInst");
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen, 0.0));
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
     boost::shared_ptr<Mantid::MantidVec> e1(
         new Mantid::MantidVec(xlen - 1, sqrt(3.0)));
 
-    Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(ylen, xlen, xlen - 1);
+    MatrixWorkspace_sptr testWs(ws);
+    testWs->initialize(ylen, xlen, xlen - 1);
     double j = 1.0;
 
     for (int i = 0; i < xlen; i++) {
@@ -145,11 +189,11 @@ public:
     }
 
     for (int i = 0; i < ylen; i++) {
-      retVal->setX(i, x1);
-      retVal->setData(i, y1, e1);
+      testWs->setX(i, x1);
+      testWs->setData(i, y1, e1);
     }
-
-    return retVal;
+    testWs->getAxis(0)->setUnit("DeltaE");
+    return testWs;
   }
 };
 
