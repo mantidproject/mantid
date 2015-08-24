@@ -27,6 +27,7 @@
 #include <math.h>
 #include <string>
 #include <iostream>
+#include <map>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "../ContourLinesEditor.h"
@@ -42,6 +43,9 @@ class MultiLayer;
 class QTabWidget;
 class UpdateDAEThread;
 class ProjectData;
+
+class MantidMatrixTabExtension;
+typedef std::map<MantidMatrixModel::Type, MantidMatrixTabExtension> MantidMatrixTabExtensionCollection;
 
 /**
 * Find the minimum and maximum Y values in a matrix workspace.
@@ -406,6 +410,20 @@ private:
   int m_prec;       //  Number precision
   QColor m_mon_color; // Monitor Specific background color
   mutable QHash<int, bool> m_monCache; //monitor flag cache
+};
+
+
+/**
+ * Holds the information for a new tab.
+ */
+struct MantidMatrixTabExtension {
+  MantidMatrixTabExtension(QString label, QTableView * tableView, MantidMatrixModel *model) : label(label),
+                                                                                              tableView(tableView),
+                                                                                              model(model) {}
+  QString label;
+  QTableView *tableView;
+  QPointer<MantidMatrixModel> model;
+  MantidMatrixModel::Type type;
 };
 
 #endif

@@ -64,6 +64,31 @@ namespace
   Logger g_log("MantidMatrix");
 }
 
+
+namespace {
+
+/**
+ * Converts an interger value to the corrsponding enum
+ */
+MantidMatrixModel::Type intToModelType(int i) {
+  switch(i) {
+    case 0:
+      return MantidMatrixModel::Y;
+    case 1:
+      return MantidMatrixModel::X;
+    case 2:
+      return MantidMatrixModel::E;
+    case 3:
+      return MantidMatrixModel::DX;
+    default:
+      g_log.error("Trying to convert to an unknown MantidMatrixModel type. Defaulting to Y type.");
+      return MantidMatrixModel::Y;
+  }
+}
+}
+
+
+
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
   WorkspaceObserver(),

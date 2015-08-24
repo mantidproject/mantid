@@ -401,6 +401,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/FitParameterTie.h
                    src/Mantid/FlowLayout.h
                    src/Mantid/IFunctionWrapper.h
+				   src/Mantid/IMantidMatrixExtension.h
                    src/Mantid/ImportWorkspaceDlg.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
