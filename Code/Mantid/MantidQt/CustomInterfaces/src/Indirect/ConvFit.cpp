@@ -292,11 +292,11 @@ void ConvFit::run() {
   // Set the result workspace for Python script export
   m_pythonExportWsName = pyOutput.toStdString();*/
 
-  auto cfs =
-      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
-  cfs->setProperty("BackgroundType", m_uiForm.cbBackground->currentText().toStdString());
+  cfs->setProperty("BackgroundType",
+                   m_uiForm.cbBackground->currentText().toStdString());
   cfs->setProperty("Start X", stX.toStdString());
   cfs->setProperty("End X", enX.toStdString());
   double temp = 0.0;
