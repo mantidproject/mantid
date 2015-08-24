@@ -574,6 +574,9 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     # We need to make suret that the fitting only occurs in the y direction
     constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
 
+    # Determine the StartQ and EndQ values
+    su.get_start_q_and_end_q_values(rear_data = rearData, rescale_shift = rAnds)
+
     #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
