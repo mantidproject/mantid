@@ -66,7 +66,7 @@ Description          : General plot options dialog
 
 #include <qwt_plot.h>
 #include <qwt_scale_widget.h>
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 /* XPM */
 static const char* bottom_scl_xpm[] = { "36 38 75 1", " 	c None", ".	c #FFFFFF",

@@ -8,7 +8,7 @@
 //#include <qwt_plot.h>
 #include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include "DoubleSpinBox.h"
 
 #include <QWidget>

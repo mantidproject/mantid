@@ -34,7 +34,7 @@
 #include "Spectrogram.h"
 #include "PlotCurve.h"
 #include "LegendWidget.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 #include <qwt_plot.h>
 #include <qwt_painter.h>

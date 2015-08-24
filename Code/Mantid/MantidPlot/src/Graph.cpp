@@ -56,7 +56,7 @@
 #include "RangeSelectorTool.h"
 #include "PlotCurve.h"
 #include "ApplicationWindow.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"

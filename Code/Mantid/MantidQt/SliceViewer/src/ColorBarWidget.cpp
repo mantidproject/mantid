@@ -2,7 +2,7 @@
 #include "MantidQtSliceViewer/ColorBarWidget.h"
 #include "MantidQtSliceViewer/QScienceSpinBox.h"
 #include "qwt_scale_div.h"
-#include "../../../MantidPlot/src/plot2D/PowerScaleEngine.h"
+#include "MantidQtAPI/PowerScaleEngine.h"
 #include <iosfwd>
 #include <iostream>
 #include <qwt_scale_map.h>

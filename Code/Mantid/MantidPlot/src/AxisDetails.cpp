@@ -10,7 +10,7 @@
 #include "MantidQtAPI/qwt_compat.h"
 #include "MyParser.h"
 #include "Plot.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 #include <QWidget>
 #include <QSpinBox>
