@@ -30,7 +30,7 @@ const std::string EnggDiffractionPresenter::g_enginxStr = "ENGINX";
 const bool EnggDiffractionPresenter::g_askUserCalibFilename = false;
 
 EnggDiffractionPresenter::EnggDiffractionPresenter(IEnggDiffractionView *view)
-    : m_workerThread(NULL), m_calibFinishedOK(false),
+    : m_workerThread(NULL), m_calibFinishedOK(false), m_focusFinishedOK(false),
       m_view(view) /*, m_model(new EnggDiffractionModel()), */ {
   if (!m_view) {
     throw std::runtime_error(
@@ -76,6 +76,10 @@ void EnggDiffractionPresenter::notify(
 
   case IEnggDiffractionPresenter::CalcCalib:
     processCalcCalib();
+    break;
+
+  case IEnggDiffractionPresenter::FocusRun:
+    processFocusRun();
     break;
 
   case IEnggDiffractionPresenter::LogMsg:
@@ -130,11 +134,35 @@ void EnggDiffractionPresenter::processCalcCalib() {
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
-  m_view->enableCalibrateActions(false);
+  m_view->enableCalibrateAndFocusActions(false);
   // alternatively, this would be GUI-blocking:
   // doNewCalibration(outFilename, vanNo, ceriaNo);
   // calibrationFinished()
-  startAsynCalibWorker(outFilename, vanNo, ceriaNo);
+  startAsyncCalibWorker(outFilename, vanNo, ceriaNo);
+}
+
+void EnggDiffractionPresenter::processFocusRun() {
+  std::string runNo = m_view->focusingRunNo();
+  int bank = m_view->focusingBank();
+  try {
+    inputChecksBeforeFocus(runNo, bank);
+  } catch (std::invalid_argument &ia) {
+    m_view->userWarning("Error in the inputs required to focus a run",
+                        ia.what());
+    return;
+  }
+
+  g_log.notice() << "EnggDiffraction GUI: starting new focusing. This may take "
+                    "some seconds... " << std::endl;
+
+  const std::string focusDir = m_view->focusingDir();
+  const std::string outFilename = outputFocusFilename(runNo, bank);
+
+  m_view->enableCalibrateAndFocusActions(false);
+  // GUI-blocking alternative:
+  // doFocusRun(outFielname, runNo, bank)
+  // focusingFinished()
+  startAsyncFocusWorker(focusDir, outFilename, runNo, bank);
 }
 
 void EnggDiffractionPresenter::processLogMsg() {
@@ -296,16 +324,18 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
 }
 
 /**
- * Start the calibration work without blocking the GUI
+ * Start the calibration work without blocking the GUI. This uses
+ * connect for Qt signals/slots so that it runs well with the Qt event
+ * loop. Because of that this class needs to be a Q_OBJECT.
  *
  * @param outFilename name for the output GSAS calibration file
  * @param vanNo vanadium run number
  * @param ceriaNo ceria run number
  */
 void
-EnggDiffractionPresenter::startAsynCalibWorker(const std::string &outFilename,
-                                               const std::string &vanNo,
-                                               const std::string &ceriaNo) {
+EnggDiffractionPresenter::startAsyncCalibWorker(const std::string &outFilename,
+                                                const std::string &vanNo,
+                                                const std::string &ceriaNo) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
@@ -372,7 +402,7 @@ void EnggDiffractionPresenter::calibrationFinished() {
   if (!m_view)
     return;
 
-  m_view->enableCalibrateActions(true);
+  m_view->enableCalibrateAndFocusActions(true);
   if (!m_calibFinishedOK) {
     g_log.warning() << "The cablibration did not finished correctly."
                     << std::endl;
@@ -509,6 +539,212 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
   outFullPath.append(outFilename);
   m_view->writeOutCalibFile(outFullPath.toString(), difc, tzero);
   g_log.notice() << "Calibration file written as " << outFullPath.toString()
+                 << std::endl;
+}
+
+/**
+ * @TODO
+ *
+ */
+void EnggDiffractionPresenter::inputChecksBeforeFocus(const std::string &runNo,
+                                                      int bank) {}
+
+/**
+ * @TODO
+ *
+ */
+std::string
+EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
+                                              int bank) {
+  const std::string instStr = m_view->currentInstrument();
+
+  return instStr + runNo + "_focused";
+}
+
+/**
+ * Start the focusing algorithm(s) without blocking the GUI. This is
+ * based on Qt connect / signals-slots so that it goes in sync with
+ * the Qt event loop. For that reason this class needs to be a
+ * Q_OBJECT.
+ *
+ * @param dir directory (full path) for the focused output files
+ * @param outFilename full name for the output focused run
+ * @param runNo input run number
+ * @param bank instrument bank to focus
+ */
+void EnggDiffractionPresenter::startAsyncFocusWorker(
+    const std::string &dir, const std::string &outFilename,
+    const std::string &runNo, int bank) {
+  delete m_workerThread;
+  m_workerThread = new QThread(this);
+  EnggDiffWorker *worker =
+      new EnggDiffWorker(this, dir, outFilename, runNo, bank);
+  worker->moveToThread(m_workerThread);
+
+  connect(m_workerThread, SIGNAL(started()), worker, SLOT(focus()));
+  connect(worker, SIGNAL(finished()), this, SLOT(focusingFinished()));
+  // early delete of thread and worker
+  connect(m_workerThread, SIGNAL(finished()), m_workerThread,
+          SLOT(deleteLater()), Qt::DirectConnection);
+  connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+  m_workerThread->start();
+}
+
+/**
+ * Produce a new focused output file. This is what threads/workers
+ * should use to run the calculations required to process a 'focus'
+ * push or similar from the user.
+ *
+ * @param dir directory (full path) for the output focused files
+ * @param outFilename name for the output focused file
+ * @param runNo input run number
+ * @param bank bank number for the focusing
+ */
+void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
+                                          const std::string &outFilename,
+                                          const std::string &runNo, int bank) {
+  g_log.notice() << "Generating new focused file (bank " +
+                        boost::lexical_cast<std::string>(bank) + ") for run " +
+                        runNo + " into: " << outFilename << std::endl;
+
+  Poco::Path fpath(dir);
+  const std::string fullFilename = fpath.append(fpath).toString();
+
+  // TODO: this is almost 100% common with doNewCalibrate() - refactor
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  Mantid::Kernel::ConfigServiceImpl &conf =
+      Mantid::Kernel::ConfigService::Instance();
+  const std::vector<std::string> tmpDirs = conf.getDataSearchDirs();
+  // in principle, the run files will be found from 'DirRaw', and the
+  // pre-calculated Vanadium corrections from 'DirCalib'
+  if (!cs.m_inputDirCalib.empty() && Poco::File(cs.m_inputDirCalib).exists()) {
+    conf.appendDataSearchDir(cs.m_inputDirCalib);
+  }
+  if (!cs.m_inputDirRaw.empty() && Poco::File(cs.m_inputDirRaw).exists()) {
+    conf.appendDataSearchDir(cs.m_inputDirRaw);
+  }
+
+  try {
+    doFocusing(cs, fullFilename, runNo, bank);
+    m_focusFinishedOK = true;
+  } catch (std::runtime_error &) {
+    g_log.error() << "The focusing calculations failed. One of the algorithms"
+                     "did not execute correctly. See log messages for details."
+                  << std::endl;
+  } catch (std::invalid_argument &) {
+    g_log.error()
+        << "The focusing failed. Some input properties were not valid. "
+           "See log messages for details. " << std::endl;
+  }
+
+  // restore initial data search paths
+  conf.setDataSearchDirs(tmpDirs);
+}
+
+/**
+ * Method (Qt slot) to call when the focusing work has finished,
+ * possibly from a separate thread but sometimes not (as in this
+ * presenter class' test).
+ */
+void EnggDiffractionPresenter::focusingFinished() {
+  if (!m_view)
+    return;
+
+  m_view->enableCalibrateAndFocusActions(true);
+  if (!m_focusFinishedOK) {
+    g_log.warning() << "The cablibration did not finished correctly."
+                    << std::endl;
+  } else {
+    g_log.notice() << "Focusing finished - focused run ready." << std::endl;
+  }
+  if (m_workerThread) {
+    delete m_workerThread;
+    m_workerThread = NULL;
+  }
+}
+
+/**
+ * Focuses a run, produces a focused workspace, and saves it into a
+ * file.
+ *
+ * @param cs user settings for calibration (this does not calibrate but
+ * uses calibration input files such as vanadium runs
+ *
+ * @param fullFilename full paht for the output (focused) filename
+ * @param runNo input run to focus
+ * @param bank instrument bank to focus
+ */
+void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
+                                          const std::string &fullFilename,
+                                          const std::string &runNo, int bank) {
+  ITableWorkspace_sptr vanIntegWS;
+  MatrixWorkspace_sptr vanCurvesWS;
+  MatrixWorkspace_sptr inWS;
+
+  const std::string vanNo = m_view->currentVanadiumNo();
+  loadOrCalcVanadiumWorkspaces(vanNo, cs.m_inputDirCalib, vanIntegWS,
+                               vanCurvesWS, cs.m_forceRecalcOverwrite);
+
+  const std::string inWSName = "engggui_focusing_input_ws";
+  const std::string instStr = m_view->currentInstrument();
+  try {
+    auto load = Algorithm::fromString("Load");
+    load->initialize();
+    load->setPropertyValue("Filename", instStr + runNo);
+    load->setPropertyValue("OutputWorkspace", inWSName);
+    load->execute();
+
+    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    inWS = ADS.retrieveWS<MatrixWorkspace>(inWSName);
+  } catch (std::runtime_error &re) {
+    g_log.error()
+        << "Error while loading sample data for focusing. "
+           "Could not run the algorithm Load succesfully for the focusing "
+           "sample (run number: " +
+               runNo + "). Error description: " + re.what() +
+               " Please check also the previous log messages for details.";
+    throw;
+  }
+
+  const std::string outWSName = "enggui_focusing_output_ws";
+  try {
+    auto alg = Algorithm::fromString("EnggFocus");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWSName);
+    alg->setProperty("OutputWorkspace", outWSName);
+    alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
+    alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
+    alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
+    alg->setPropertyValue("OutputParametersTableName",
+                          "engggui_calibration_bank_" +
+                              boost::lexical_cast<std::string>(bank));
+    // TODO: use detector positions (from calibrate full) when available
+    // alg->setProperty(DetectorPositions, TableWorkspace)
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in calibration. ",
+        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+            boost::lexical_cast<std::string>(bank) + ". Error description: " +
+            re.what() + " Please check also the log messages for details.";
+    throw;
+  }
+
+  g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
+
+  try {
+    auto alg = Algorithm::fromString("SaveNexus");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", outWSName);
+    alg->setPropertyValue("Filename", fullFilename);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in calibration. ",
+        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+            boost::lexical_cast<std::string>(bank) + ". Error description: " +
+            re.what() + " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
 }
 
