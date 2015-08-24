@@ -29,7 +29,7 @@ def create_vana(EXPR_FILE, NoAbs=False):
                              TheNumberOfAnnuli=EXPR_FILE.VNumberOfAnnuli, \
                              TheNumberOfWavelengthPoints=EXPR_FILE.VNumberOfWavelengthPoints, \
                              TheExpMethod=EXPR_FILE.VExpMethod)
-    # --- Alternative way
+    # --- Alternative way.
     # ConvertUnits(InputWorkspace="Vanadium", OutputWorkspace="Vanadium", Target="Wavelength")
     # CylinderAbsorption(InputWorkspace="Vanadium", OutputWorkspace="Vanadium",
     #	CylinderSampleHeight=      EXPR_FILE.VHeight,

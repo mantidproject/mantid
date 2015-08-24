@@ -92,6 +92,7 @@ def load_sac_eff(EXPR_FILE, NoSAC=False, Eff=True):
                 #				if EXPR_FILE.instr=="polaris":
                 #					CreateSingleValuedWorkspace("Sc", str(10000000))
                 #				else:
+                #
                 CreateSingleValuedWorkspace(OutputWorkspace="Sc", DataValue=str(100000))
                 Divide(LHSWorkspace="Corr", RHSWorkspace="Sc", OutputWorkspace="Corr")
                 mtd.remove("Sc")
@@ -224,7 +225,7 @@ def rearrange_4nex(OutputFile, EXPR_FILE):
 # end change
 
 
-# if __name__ == '__main__':
+# if __name__ == '__main__': :
 #    rearrange_4xye("ResultTOFtmp", 0, "11200,-0.0003,104000", "tst1.dat", units="TOF")
 #    rearrange_4xye("ResultTOFtmp", 1, "11200,-0.0008,104000", "tst2.dat", units="TOF")
 #    rearrange_4xye("ResultTOFtmp", 2, "11200,-0.0012,104000", "tst3.dat", units="TOF")

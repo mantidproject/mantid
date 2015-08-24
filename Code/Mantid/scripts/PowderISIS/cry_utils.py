@@ -115,7 +115,7 @@ def list_of_list2_list(lol):
     return alist
 
 
-# Correct for absorption an InputWkspc(in D)
+# Correct for absorption an InputWkspc(in D).
 # Put its transmission in outputWkspc
 
 def correct_abs(InputWkspc, outputWkspc, TheCylinderSampleHeight, TheCylinderSampleRadius, \

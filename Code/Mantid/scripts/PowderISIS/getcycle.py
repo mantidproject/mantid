@@ -10,7 +10,7 @@ def rawpath(runno, inst='hrp', Verbose=False):
         print line
     return line
 
-
+# __main__
 if __name__ == '__main__':
     rawpath(sys.argv[1], Verbose=True)
 

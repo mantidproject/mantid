@@ -85,7 +85,7 @@ if __name__ == '__main__':
     from SET_env_scripts2_migrated import *
 
     A_FOCUS = Focus()
-    # a_focus.savemode_on()
+    # a_focus.savemode_on() .
     # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)
     print rawpath(35493, inst='gem', Verbose=False)
     # a_focus.load('TEST|//isis/inst$/ndxhrpd/instrument/data/cycle_11_5/hrp51683.raw', path=True)

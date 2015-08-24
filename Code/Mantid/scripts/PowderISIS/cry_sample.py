@@ -7,7 +7,7 @@ import cry_load
 
 
 def get_data_sum(sampleAdd, samLab, EXPR_FILE):
-    # Adds a list of data files given as a list of filenames
+    # Adds a list of data files given as a list of filenames.
     # into the workspace samLab. Zero uamps runs are skipped
     # Function returns (BasenameRunno,uampstot) the first non-Zero run
     uampstotal = 0.0

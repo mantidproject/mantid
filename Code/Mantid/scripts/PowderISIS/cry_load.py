@@ -6,7 +6,7 @@ OLD_VERSION = False
 
 
 # First a function definition for the Loading algorithms which
-# loads the data and immediately aligns the detectors
+# loads the data and immediately aligns the detectors.
 def load(outputArea, pathtofile, EXPR_FILE, add=False):
     total = outputArea
     if add:
