@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_LINDLEYMAYERSELASTICCORRECTION_H_
-#define MANTID_ALGORITHMS_LINDLEYMAYERSELASTICCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_MAYERSMSCORRECTION_H_
+#define MANTID_ALGORITHMS_MAYERSMSCORRECTION_H_
 /**
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,7 +29,7 @@
 
 namespace Mantid {
 namespace Kernel {
-  class PseudoRandomNumberGenerator;
+class PseudoRandomNumberGenerator;
 }
 namespace Algorithms {
 
@@ -55,20 +55,23 @@ struct ScatteringCorrectionParameters {
   https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574 for an array of
   tof, signal & error values
 */
-class MANTID_ALGORITHMS_DLL LindleyMayersElasticCorrection {
+class MANTID_ALGORITHMS_DLL MayersMSCorrection {
 public:
   /// Constructor
-  LindleyMayersElasticCorrection(ScatteringCorrectionParameters params);
-  /// Destructor - declared in cpp file to use forward declaration with unique_ptr
-  ~LindleyMayersElasticCorrection();
+  MayersMSCorrection(ScatteringCorrectionParameters params);
+  /// Destructor - declared in cpp file to use forward declaration with
+  /// unique_ptr
+  ~MayersMSCorrection();
 
   /// Return the correction factors
   void apply(const std::vector<double> &tof, std::vector<double> &signal,
              std::vector<double> &errors);
   /// Calculate the self-attentation factor for a single mu*r value
   double calculateSelfAttenuation(const double muR);
-  /// Calculate the multiple scattering factor for a single mu*r value & absorption value
-  std::pair<double, double> calculateMS(const size_t irp, const double muR, const double abs);
+  /// Calculate the multiple scattering factor for a single mu*r value &
+  /// absorption value
+  std::pair<double, double> calculateMS(const size_t irp, const double muR,
+                                        const double abs);
 
 private:
   inline double muRmin() const { return m_muRrange.first; }

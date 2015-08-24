@@ -1,28 +1,28 @@
-#ifndef MANTID_ALGORITHMS_LINDLEYMAYERSELASTICCORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_LINDLEYMAYERSELASTICCORRECTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_MAYERSMSCORRECTIONTEST_H_
+#define MANTID_ALGORITHMS_MAYERSMSCORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MultipleScattering/LindleyMayersElasticCorrection.h"
+#include "MantidAlgorithms/MultipleScattering/MayersMSCorrection.h"
 #include <algorithm>
 #include <cmath>
 
-using Mantid::Algorithms::LindleyMayersElasticCorrection;
+using Mantid::Algorithms::MayersMSCorrection;
 using Mantid::Algorithms::ScatteringCorrectionParameters;
 
-class LindleyMayersElasticCorrectionTest : public CxxTest::TestSuite {
+class MayersMSCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LindleyMayersElasticCorrectionTest *createSuite() {
-    return new LindleyMayersElasticCorrectionTest();
+  static MayersMSCorrectionTest *createSuite() {
+    return new MayersMSCorrectionTest();
   }
-  static void destroySuite(LindleyMayersElasticCorrectionTest *suite) {
+  static void destroySuite(MayersMSCorrectionTest *suite) {
     delete suite;
   }
 
   void test_attentuaton_correction_for_fixed_mur() {
-    LindleyMayersElasticCorrection mscat(createTestParameters());
+    MayersMSCorrection mscat(createTestParameters());
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
@@ -31,7 +31,7 @@ public:
 
   void
   test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor() {
-    LindleyMayersElasticCorrection mscat(createTestParameters());
+    MayersMSCorrection mscat(createTestParameters());
     const size_t irp(0);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
@@ -42,7 +42,7 @@ public:
   }
 
   void test_default_corrects_both_absorption_and_multiple_scattering() {
-    LindleyMayersElasticCorrection mscat(createTestParameters());
+    MayersMSCorrection mscat(createTestParameters());
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(), sqrt);

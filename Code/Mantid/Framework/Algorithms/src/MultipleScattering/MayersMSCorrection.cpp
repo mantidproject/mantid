@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAlgorithms/MultipleScattering/LindleyMayersElasticCorrection.h"
+#include "MantidAlgorithms/MultipleScattering/MayersMSCorrection.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
@@ -74,14 +74,14 @@ namespace Algorithms {
  * Constructor
  * @param params Defines the required parameters for the correction
  */
-LindleyMayersElasticCorrection::LindleyMayersElasticCorrection(
+MayersMSCorrection::MayersMSCorrection(
     ScatteringCorrectionParameters params)
     : m_pars(params), m_muRrange(0.01, 4.0), m_rng(new MersenneTwister(1)) {}
 
 /**
  * Destructor
  */
-LindleyMayersElasticCorrection::~LindleyMayersElasticCorrection() {}
+MayersMSCorrection::~MayersMSCorrection() {}
 
 /**
  * Correct the given data for absorption and multiple scattering effects
@@ -89,7 +89,7 @@ LindleyMayersElasticCorrection::~LindleyMayersElasticCorrection() {}
  * @param signal Signal values to correct [In/Out]
  * @param errors Error values to correct [In/Out]
  */
-void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
+void MayersMSCorrection::apply(const std::vector<double> &tof,
                                            std::vector<double> &signal,
                                            std::vector<double> &errors) {
   const size_t ntof(tof.size());
@@ -168,7 +168,7 @@ void LindleyMayersElasticCorrection::apply(const std::vector<double> &tof,
  * @return The self-attenuation factor for this sample
  */
 double
-LindleyMayersElasticCorrection::calculateSelfAttenuation(const double muR) {
+MayersMSCorrection::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -211,7 +211,7 @@ LindleyMayersElasticCorrection::calculateSelfAttenuation(const double muR) {
  * @return A pair of (factor,weight)
  */
 std::pair<double, double>
-LindleyMayersElasticCorrection::calculateMS(const size_t irp, const double muR,
+MayersMSCorrection::calculateMS(const size_t irp, const double muR,
                                             const double abs) {
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
@@ -269,7 +269,7 @@ LindleyMayersElasticCorrection::calculateMS(const size_t irp, const double muR,
  * (Re-)seed the random number generator
  * @param seed Seed value for the random number generator
  */
-void LindleyMayersElasticCorrection::seedRNG(const size_t seed) {
+void MayersMSCorrection::seedRNG(const size_t seed) {
   m_rng->setSeed(seed);
 }
 
