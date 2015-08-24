@@ -173,7 +173,7 @@ void testAxisLabels()
   presenter.executeLoadMetadata();
   vtkDataSet* product = presenter.execute(&factory, mockLoadingProgressAction, mockDrawingProgressAction);
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
-  /*TSM_ASSERT_EQUALS("X Label should match exactly",
+  TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
                     "[H,0,0] (in 1.992 $\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Y Label should match exactly",
@@ -181,7 +181,7 @@ void testAxisLabels()
                     "[0,K,0] (in 1.992 $\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForZ"),
-                    "[0,0,L] (in 1.087 $\\AA^{-1}$)");*/
+                    "[0,0,L] (in 1.087 $\\AA^{-1}$)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
