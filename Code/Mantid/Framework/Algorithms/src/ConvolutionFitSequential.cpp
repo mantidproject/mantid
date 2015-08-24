@@ -189,8 +189,8 @@ void ConvolutionFitSequential::exec() {
   }
   if (LorentzNum.compare("0") != 0) {
     outputWsName += LorentzNum + "L";
-  }else{
-	outputWsName += convertFuncToShort(funcName);
+  } else {
+    outputWsName += convertFuncToShort(funcName);
   }
   outputWsName += backType + "_s";
   outputWsName += boost::lexical_cast<std::string>(specMin);
@@ -259,7 +259,7 @@ void ConvolutionFitSequential::exec() {
   if (funcName.compare("Lorentzian") == 0) {
     // remove peak centre
     auto pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-              paramNames.begin();
+               paramNames.begin();
     if (pos != std::string::npos) {
       paramNames.erase(paramNames.begin() + pos);
     }
@@ -372,7 +372,6 @@ void ConvolutionFitSequential::exec() {
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
   }
-
 }
 
 /**
@@ -633,10 +632,10 @@ void ConvolutionFitSequential::calculateEISF(
  */
 std::string
 ConvolutionFitSequential::convertBackToShort(const std::string &original) {
-  std::string result = original.substr(0,3);
+  std::string result = original.substr(0, 3);
   auto pos = original.find(" ");
-  if(pos != std::string::npos){
-	result += original.at(pos + 1);
+  if (pos != std::string::npos) {
+    result += original.at(pos + 1);
   }
   return result;
 }
@@ -649,21 +648,21 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
  */
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
-	std::string result = "";
-	if(original.at(0) == 'E'){
-		result += "E";
-	}else if(original.at(0) == 'I'){
-		result +="I";
-	}else{
-		return "SFT";
-	}
-	auto pos = original.find("Circle");
-	if(pos != std::string::npos){
-		result += "DC";
-	}else{
-		result += "DS";
-	}
-	return result;
+  std::string result = "";
+  if (original.at(0) == 'E') {
+    result += "E";
+  } else if (original.at(0) == 'I') {
+    result += "I";
+  } else {
+    return "SFT";
+  }
+  auto pos = original.find("Circle");
+  if (pos != std::string::npos) {
+    result += "DC";
+  } else {
+    result += "DS";
+  }
+  return result;
 }
 
 } // namespace Algorithms
