@@ -87,11 +87,11 @@ void ConvolutionFitSequential::init() {
                   Direction::Input);
 
   declareProperty(
-      "Start X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
+      "StartX", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The start of the range for the fit function.", Direction::Input);
 
   declareProperty(
-      "End X", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
+      "EndX", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The end of the range for the fit function.", Direction::Input);
 
   declareProperty("Temperature", EMPTY_DBL(),
@@ -103,12 +103,12 @@ void ConvolutionFitSequential::init() {
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
-  declareProperty("Spec Min", 0, boundedV, "The first spectrum to be used in "
+  declareProperty("SpecMin", 0, boundedV, "The first spectrum to be used in "
                                            "the fit. Spectra values can not be "
                                            "negative",
                   Direction::Input);
 
-  declareProperty("Spec Max", 0, boundedV, "The final spectrum to be used in "
+  declareProperty("SpecMax", 0, boundedV, "The final spectrum to be used in "
                                            "the fit. Spectra values can not be "
                                            "negative",
                   Direction::Input);
@@ -124,7 +124,7 @@ void ConvolutionFitSequential::init() {
                   "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
                   "gradient (Polak-Ribiere imp.)' and 'BFGS'");
 
-  declareProperty("Max Iterations", 500, boundedV,
+  declareProperty("MaxIterations", 500, boundedV,
                   "The maximum number of iterations permitted",
                   Direction::Input);
 }
@@ -138,13 +138,13 @@ void ConvolutionFitSequential::exec() {
   const std::string function = getProperty("Function");
   const std::string backType =
       convertBackToShort(getProperty("backgroundType"));
-  const double startX = getProperty("Start X");
-  const double endX = getProperty("End X");
+  const double startX = getProperty("StartX");
+  const double endX = getProperty("EndX");
   const double temperature = getProperty("Temperature");
-  const int specMin = getProperty("Spec Min");
-  const int specMax = getProperty("Spec max");
+  const int specMin = getProperty("SpecMin");
+  const int specMax = getProperty("Specmax");
   const bool convolve = getProperty("Convolve");
-  const int maxIter = getProperty("Max Iterations");
+  const int maxIter = getProperty("MaxIterations");
   const std::string minimizer = getProperty("Minimizer");
 
   // Handle empty/non-empty temp property

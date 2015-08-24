@@ -297,19 +297,19 @@ void ConvFit::run() {
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
                    m_uiForm.cbBackground->currentText().toStdString());
-  cfs->setProperty("Start X", stX.toStdString());
-  cfs->setProperty("End X", enX.toStdString());
+  cfs->setProperty("StartX", stX.toStdString());
+  cfs->setProperty("EndX", enX.toStdString());
   double temp = 0.0;
   if (temperature.toStdString().compare("") != 0) {
     temp = temperature.toDouble();
   }
   cfs->setProperty("Temperature", temp);
-  cfs->setProperty("Spec Min", specMin.toStdString());
-  cfs->setProperty("Spec Max", specMax.toStdString());
+  cfs->setProperty("SpecMin", specMin.toStdString());
+  cfs->setProperty("SpecMax", specMax.toStdString());
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
-  cfs->setProperty("Max Iterations", maxIterations);
+  cfs->setProperty("MaxIterations", maxIterations);
   cfs->execute();
 
   updatePlot();
