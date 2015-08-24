@@ -105,7 +105,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
           SLOT(calibrateClicked()));
 
-  enableCalibrateActions(true);
+  enableCalibrateAndFocusActions(true);
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabSettings() {
@@ -122,6 +122,9 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   m_uiTabSettings.checkBox_force_recalculate_overwrite->setChecked(
       m_calibSettings.m_forceRecalcOverwrite);
 
+  m_uiTabSettings.lineEdit_dir_focusing->setText(
+      QString::fromStdString(m_focusDir));
+
   // push button signals/slots
   connect(m_uiTabSettings.pushButton_browse_input_dir_calib, SIGNAL(released()),
           this, SLOT(browseInputDirCalib()));
@@ -135,16 +138,13 @@ void EnggDiffractionViewQtGUI::doSetupTabSettings() {
   connect(m_uiTabSettings.pushButton_browse_template_gsas_prm,
           SIGNAL(released()), this, SLOT(browseTemplateGSAS_PRM()));
 
-  connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()), this,
-          SLOT(browseDirFocusing()));
+  connect(m_uiTabSettings.pushButton_browse_dir_focusing, SIGNAL(released()),
+          this, SLOT(browseDirFocusing()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupTabFocus() {
-   m_uiTabSettings.lineEdit_dir_focusing->setText(
-      QString::fromStdString(m_focusDir));
-
-   connect(m_uiTabFocus.pushButton_browse_dir_focusing, SIGNAL(released()), this,
-           SLOT(focusClicked()));
+  connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
+          SLOT(focusClicked()));
 }
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
@@ -238,7 +238,7 @@ void EnggDiffractionViewQtGUI::saveSettings() const {
   qs.setValue("rebin-calib", m_calibSettings.m_rebinCalibrate);
 
   // 'focusing' block
-  qs.setValue("focus-dir", m_focusDir);
+  qs.setValue("focus-dir", QString::fromStdString(m_focusDir));
 
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
@@ -327,12 +327,17 @@ void EnggDiffractionViewQtGUI::newCalibLoaded(const std::string &vanadiumNo,
   }
 }
 
-void EnggDiffractionViewQtGUI::enableCalibrateActions(bool enable) {
+void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
+  // calibrate
   m_uiTabCalib.lineEdit_RBNumber->setEnabled(enable);
   m_uiTabCalib.groupBox_make_new_calib->setEnabled(enable);
   m_uiTabCalib.groupBox_current_calib->setEnabled(enable);
 
   m_ui.pushButton_close->setEnabled(enable);
+
+  // focus
+  m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
+  m_uiTabFocus.pushButton_focus->setEnabled(enable);
 }
 
 void
@@ -398,8 +403,8 @@ void EnggDiffractionViewQtGUI::calibrateClicked() {
   m_presenter->notify(IEnggDiffractionPresenter::CalcCalib);
 }
 
-void EnggDiffractionViewQtGUI::calibrateClicked() {
-  m_presenter->notify(IEnggDiffractionPresenter::Focus);
+void EnggDiffractionViewQtGUI::focusClicked() {
+  m_presenter->notify(IEnggDiffractionPresenter::FocusRun);
 }
 
 void EnggDiffractionViewQtGUI::browseInputDirCalib() {
@@ -496,6 +501,19 @@ void EnggDiffractionViewQtGUI::browseDirFocusing() {
   m_focusDir = dir.toStdString();
   m_uiTabSettings.lineEdit_dir_focusing->setText(
       QString::fromStdString(m_focusDir));
+}
+
+std::string EnggDiffractionViewQtGUI::focusingRunNo() const {
+  return m_uiTabFocus.lineEdit_run_num->text().toStdString();
+}
+
+std::string EnggDiffractionViewQtGUI::focusingDir() const {
+  return m_uiTabSettings.lineEdit_dir_focusing->text().toStdString();
+}
+
+int EnggDiffractionViewQtGUI::focusingBank() const {
+  int idx = m_uiTabFocus.comboBox_bank_num->currentIndex();
+  return m_uiTabFocus.comboBox_bank_num->itemData(idx).toInt();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

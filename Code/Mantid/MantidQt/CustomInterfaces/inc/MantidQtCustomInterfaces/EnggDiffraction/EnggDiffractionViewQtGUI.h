@@ -99,7 +99,13 @@ public:
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero);
 
-  virtual void enableCalibrateActions(bool enable);
+  virtual void enableCalibrateAndFocusActions(bool enable);
+
+  virtual std::string focusingDir() const;
+
+  virtual std::string focusingRunNo() const;
+
+  virtual int focusingBank() const;
 
 private slots:
   /// for buttons, do calibrate and similar
@@ -151,6 +157,7 @@ private:
   // 'tabs'
   // but they could be separate dialogs, widgets, etc.
   Ui::EnggDiffractionQtTabCalib m_uiTabCalib;
+  Ui::EnggDiffractionQtTabFocus m_uiTabFocus;
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// instrument selected (ENGIN-X, etc.)
