@@ -243,7 +243,7 @@ void test_that_invalid_collimation_method_throws_an_error() {
                     std::invalid_argument);
 }
 
-void test_that_missing_guide_cutoff_throws_an_error() {
+void test_that_missing_guide_cutoff_produces_a_default_value() {
   // Arrange
   double collimationLengthCorrection = 20;
   double collimationLengthIncrement = 12;
@@ -262,12 +262,12 @@ void test_that_missing_guide_cutoff_throws_an_error() {
                                             samplePosition );
   auto collimationLengthEstimator = SANSCollimationLengthEstimator();
   // Act + Assert
-  TSM_ASSERT_THROWS("Should throw an exception since we are missing the guide cutoffs.",
+  TSM_ASSERT_EQUALS("Should produce a fallback value of 25-20=5 since the guide cutoffs are missing",
                     collimationLengthEstimator.provideCollimationLength(testWorkspace),
-                    std::invalid_argument);
+                    5.0);
 }
 
-void test_that_missing_number_of_guides_throws_an_error() {
+void test_that_missing_number_of_guides_produces_a_default_value() {
   // Arrange
   double collimationLengthCorrection = 20;
   double collimationLengthIncrement = 12;
@@ -286,12 +286,12 @@ void test_that_missing_number_of_guides_throws_an_error() {
                                             samplePosition );
   auto collimationLengthEstimator = SANSCollimationLengthEstimator();
   // Act + Assert
-  TSM_ASSERT_THROWS("Should throw an exception since we are missing  the number of guides spec.",
+  TSM_ASSERT_EQUALS("Should produce a fallback value of 25-20=5 since the number of guides spec is missing",
                     collimationLengthEstimator.provideCollimationLength(testWorkspace),
-                    std::invalid_argument);
+                    5.0);
 }
 
-void test_that_missing_collimation_length_increment_throws_an_error() {
+void test_that_missing_collimation_length_increment_produces_a_default_value() {
     // Arrange
   double collimationLengthCorrection = 20;
   double collimationLengthIncrement = -1;
@@ -310,14 +310,14 @@ void test_that_missing_collimation_length_increment_throws_an_error() {
                                             samplePosition );
   auto collimationLengthEstimator = SANSCollimationLengthEstimator();
   // Act + Assert
-  TSM_ASSERT_THROWS("Should throw an exception since we are missing the collimation length increment.",
+  TSM_ASSERT_EQUALS("Should produce a fallback value of 25-20=5 since the collimation length increment is missing.",
                     collimationLengthEstimator.provideCollimationLength(testWorkspace),
-                    std::invalid_argument);
+                    5.0);
 }
 
 
 void test_that_mismatch_of_log_guides_with_specified_number_of_guides_throws() {
-    // Arrange
+  // Arrange
   double collimationLengthCorrection = 20;
   double collimationLengthIncrement = 2;
   std::string collimationMethod = "guide";
@@ -335,13 +335,13 @@ void test_that_mismatch_of_log_guides_with_specified_number_of_guides_throws() {
                                             samplePosition);
   auto collimationLengthEstimator = SANSCollimationLengthEstimator();
   // Act + Assert
-  TSM_ASSERT_THROWS("Should throw an exception since there is mismatch between the specified number of guides and the guides in the logs",
+  TSM_ASSERT_EQUALS("Should produce a fallback value of 25-20=5 since there is a mismatch between the number of guides in the log and in the spec",
                     collimationLengthEstimator.provideCollimationLength(testWorkspace),
-                    std::invalid_argument);
+                    5.0);
 }
 
 void test_that_5_log_guides_are_all_picked_up_and_contribute() {
-    // Arrange
+  // Arrange
   double collimationLengthCorrection = 20;
   double collimationLengthIncrement = 2;
   std::string collimationMethod = "guide";
@@ -358,13 +358,13 @@ void test_that_5_log_guides_are_all_picked_up_and_contribute() {
   guideLogDetails.push_back(guideCutoff + 10);
 
   auto testWorkspace = createTestWorkspace(10, 0, 10, 0.1, collimationMethod,
-                                            collimationLengthCorrection,
-                                            collimationLengthIncrement,
-                                            guideCutoff,
-                                            numberOfGuides,
-                                            sourcePosition,
-                                            samplePosition,
-                                            guideLogDetails);
+                                           collimationLengthCorrection,
+                                           collimationLengthIncrement,
+                                           guideCutoff,
+                                           numberOfGuides,
+                                           sourcePosition,
+                                           samplePosition,
+                                           guideLogDetails);
   auto collimationLengthEstimator = SANSCollimationLengthEstimator();
   // Act
   auto length = collimationLengthEstimator.provideCollimationLength(testWorkspace);
