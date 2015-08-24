@@ -1,5 +1,6 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 
 #include <boost/make_shared.hpp>
 #include <Poco/AutoPtr.h>
@@ -59,6 +60,13 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
     units = unitsElement->innerText();
   }
 
+  Poco::XML::Element *frameElement = dimensionXML.getChildElement("Frame");
+  std::string frame = "Unknown frame";
+  if(NULL != frameElement){
+     // Set the frame if it exists
+    frame = frameElement->innerText();
+  }
+
   Poco::XML::Element *upperBoundsElement =
       dimensionXML.getChildElement("UpperBounds");
   if (NULL == upperBoundsElement) {
@@ -112,8 +120,12 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
     lowerBounds = lowerLimit;
   }
 
+  // Select the unit.
+  MDFrame_const_uptr mdframe = makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
+
+
   return boost::make_shared<MDHistoDimension>(
-      name, id, units, static_cast<coord_t>(lowerBounds),
+      name, id, *mdframe, static_cast<coord_t>(lowerBounds),
       static_cast<coord_t>(upperBounds), nBins);
 }
 

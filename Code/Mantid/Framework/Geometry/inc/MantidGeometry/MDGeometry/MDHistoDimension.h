@@ -4,7 +4,10 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/UnitLabel.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
+#include "MantidKernel/MDUnit.h"
+#include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/VMD.h"
 
 namespace Mantid {
@@ -31,7 +34,27 @@ public:
   MDHistoDimension(std::string name, std::string ID,
                    const Kernel::UnitLabel &units, coord_t min, coord_t max,
                    size_t numBins)
-      : m_name(name), m_dimensionId(ID), m_units(units), m_min(min), m_max(max),
+      : m_name(name), m_dimensionId(ID), m_frame(new GeneralFrame("Unknown frame", units)), m_min(min), m_max(max),
+        m_numBins(numBins),
+        m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
+    if (max < min) {
+      throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
+                                  "dimension with min > max");
+    }
+  }
+
+  /** Constructor for simple MDHistoDimension
+  * @param name :: full name of the axis
+  * @param ID :: identifier string
+  * @param frame :: MDFrame
+  * @param min :: minimum extent
+  * @param max :: maximum extent
+  * @param numBins :: number of bins (evenly spaced)
+  */
+  MDHistoDimension(std::string name, std::string ID,
+                   const MDFrame &frame, coord_t min, coord_t max,
+                   size_t numBins)
+      : m_name(name), m_dimensionId(ID), m_frame(frame.clone()), m_min(min), m_max(max),
         m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
@@ -45,7 +68,7 @@ public:
    */
   MDHistoDimension(const IMDDimension *other)
       : m_name(other->getName()), m_dimensionId(other->getDimensionId()),
-        m_units(other->getUnits()), m_min(other->getMinimum()),
+        m_frame(other->getMDFrame().clone()), m_min(other->getMinimum()),
         m_max(other->getMaximum()), m_numBins(other->getNBins()),
         m_binWidth(other->getBinWidth()) {}
 
@@ -55,8 +78,14 @@ public:
   /// Return the name of the dimension as can be displayed along the axis
   virtual std::string getName() const { return m_name; }
 
+  /// Return the md frame
+  const MDFrame &getMDFrame() const {return *m_frame;}
+
   /// Return the units of the dimension as a string
-  virtual const Kernel::UnitLabel getUnits() const { return m_units; }
+  virtual const Kernel::UnitLabel getUnits() const { return m_frame->getUnitLabel(); }
+
+  /// Returns the unit
+  virtual const Kernel::MDUnit& getMDUnits() const {return m_frame->getMDUnit();}
 
   /** Short name which identify the dimension among other dimension.
    * A dimension can be usually found by its ID and various
@@ -108,8 +137,8 @@ private:
   /// ID string
   std::string m_dimensionId;
 
-  /// Dimension units
-  Kernel::UnitLabel m_units;
+  /// Multidimensional frame
+  Geometry::MDFrame_uptr m_frame;
 
   /// Extent of dimension
   coord_t m_min;
@@ -122,6 +151,7 @@ private:
 
   /// Calculated bin size
   coord_t m_binWidth;
+
 };
 
 /// Shared pointer to a MDHistoDimension
