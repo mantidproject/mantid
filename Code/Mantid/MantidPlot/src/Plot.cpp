@@ -26,7 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
 #include "Graph.h"
 #include "Grid.h"

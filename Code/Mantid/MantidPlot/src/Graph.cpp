@@ -27,7 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include <QVarLengthArray>
 
 #include "pixmaps.h"

@@ -26,7 +26,7 @@ Description          : General plot options dialog
 *   Boston, MA  02110-1301  USA                                           *
 *                                                                         *
 ***************************************************************************/
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "AxesDialog.h"
 #include "ApplicationWindow.h"
 #include "TextDialog.h"
