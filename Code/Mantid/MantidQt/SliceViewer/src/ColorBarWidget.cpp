@@ -34,6 +34,7 @@ ColorBarWidget::ColorBarWidget(QWidget *parent)
   ui.cmbScaleType->addItem(tr("logarithmic"));
   ui.cmbScaleType->addItem(tr("power"));
   m_colorMap.changeScaleType( GraphOptions::Linear );
+  ui.dspnN->setMinimum(-100.0);
   ui.dspnN->setEnabled(false);
 
   // Create and add the color bar
