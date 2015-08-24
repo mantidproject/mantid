@@ -1057,9 +1057,12 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @param rlow: mask around the (estimated) centre to this radius (in millimetres)
         @param rupp: don't include further out than this distance (mm) from the centre point
         @param MaxInter: don't calculate more than this number of iterations (default = 10)
-        @param xstart: initial guess for the horizontal distance of the beam centre from the detector centre in meters (default the values in the mask file)
-        @param ystart: initial guess for the distance of the beam centre from the detector centre vertically in metres (default the values in the mask file)
-    @param tolerance: define the precision of the search. If the step is smaller than the tolerance, it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
+        @param xstart: initial guess for the horizontal distance of the beam
+                       centre from the detector centre in meters (default the values in the mask file)
+        @param ystart: initial guess for the distance of the beam centre from the detector centre
+                       vertically in metres (default the values in the mask file)
+    @param tolerance: define the precision of the search. If the step is smaller than the tolerance,
+                      it will be considered stop searching the centre (default=1.251e-4 or 1.251um)
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step

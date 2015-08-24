@@ -98,7 +98,8 @@ class DetectorBank(object):
                 @param width: the detector's width, spectra numbers along the width should increase in intervals of one
                 @param height: the detector's height, spectra numbers along the down the height should increase in intervals of width
                 @param isRect: true for rectangular or square detectors, i.e. number of pixels = width * height
-                @param n_pixels: optional for rectangular shapes because if it is not given it is calculated from the height and width in that case
+                @param n_pixels: optional for rectangular shapes because if it is not given it
+                                 is calculated from the height and width in that case
             """
             self._width = width
             self._height = height
@@ -108,7 +109,8 @@ class DetectorBank(object):
                 if self._isRect:
                     self._n_pixels = self._width*self._height
                 else:
-                    raise AttributeError('Number of pixels in the detector unknown, you must state the number of pixels for non-rectangular detectors')
+                    raise AttributeError('Number of pixels in the detector unknown, you must state the'
+                                          'number of pixels for non-rectangular detectors')
 
 
         def width(self):
@@ -766,7 +768,7 @@ class ISISInstrument(BaseInstrument):
         '''
         We load the instrument specific Instrument Parameter File (IPF) and check if
         there are any settings which the calibration workspace does not have. The calibration workspace
-        has its own parameter map stored in the nexus file. This means that if we add new 
+        has its own parameter map stored in the nexus file. This means that if we add new
         entries to the IPF, then they are not being picked up. We do not want to change the existing
         values, just add new entries.
         @param ws_name: the name of the main workspace with the data
@@ -799,17 +801,17 @@ class ISISInstrument(BaseInstrument):
         '''
         ws_instrument = workspace.getInstrument()
         component_name = ws_instrument.getName()
-        type = ws_instrument.getParameterType(param_name)
+        ipf_type = ws_instrument.getParameterType(param_name)
         # For now we only expect string, int and double
         type_ids = ["string", "int", "double"]
         value = None
         type_to_save = "Number"
-        if type == type_ids[0]:
+        if ipf_type == type_ids[0]:
             value = ws_instrument.getStringParameter(param_name)
             type_to_save = "String"
-        elif type == type_ids[1]:
+        elif ipf_type == type_ids[1]:
             value = ws_instrument.getIntParameter(param_name)
-        elif type == type_ids[2]:
+        elif ipf_type == type_ids[2]:
             value = ws_instrument.getNumberParameter(param_name)
         else:
             raise RuntimeError("ISISInstrument: An Instrument Parameter File value of unknown type"
