@@ -91,6 +91,9 @@ private:
 
   // Remove lines from an input stream
   void skipLines(std::istream &strm, int nlines);
+
+  /// Check if we the data set stores an X-Error values
+  bool hasXerror(std::ifstream &stream);
 };
 }
 }

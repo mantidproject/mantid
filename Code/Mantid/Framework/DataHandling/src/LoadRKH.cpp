@@ -26,6 +26,45 @@ using namespace Mantid::Kernel;
 
 DECLARE_FILELOADER_ALGORITHM(LoadRKH)
 
+namespace {
+void readLinesForRKH1D(std::istream& stream, int readStart, int readEnd, std::vector<double>& columnOne,
+                       std::vector<double>& ydata, std::vector<double>& errdata, Progress& prog) {
+  std::string fileline = "";
+  for (int index = 1; index <= readEnd; ++index) {
+    getline(stream, fileline);
+    if (index < readStart)
+      continue;
+    double x(0.), y(0.), yerr(0.);
+    std::istringstream datastr(fileline);
+    datastr >> x >> y >> yerr;
+    columnOne.push_back(x);
+    ydata.push_back(y);
+    errdata.push_back(yerr);
+    prog.report();
+  }
+}
+
+void readLinesWithXErrorForRKH1D(std::istream& stream, int readStart, int readEnd, std::vector<double>& columnOne,
+                                 std::vector<double>& ydata, std::vector<double>& errdata, std::vector<double>& xError,
+                                 Progress& prog) {
+  std::string fileline = "";
+  for (int index = 1; index <= readEnd; ++index) {
+    getline(stream, fileline);
+    if (index < readStart)
+      continue;
+    double x(0.), y(0.), yerr(0.), xerr(0.);
+    std::istringstream datastr(fileline);
+    datastr >> x >> y >> yerr>>xerr;
+    columnOne.push_back(x);
+    ydata.push_back(y);
+    errdata.push_back(yerr);
+    xError.push_back(xerr);
+    prog.report();
+  }
+}
+}
+
+
 /**
  * Return the confidence with with this algorithm can load the file
  * @param descriptor A descriptor for the file
@@ -221,30 +260,32 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
 
   int pointsToRead = readEnd - readStart + 1;
   // Now stream sits at the first line of data
-  fileline = "";
-  std::vector<double> columnOne, ydata, errdata;
+  std::vector<double> columnOne, ydata, errdata, xError;
   columnOne.reserve(readEnd);
   ydata.reserve(readEnd);
   errdata.reserve(readEnd);
 
+  auto hasXError = hasXerror(m_fileIn);
+
   Progress prog(this, 0.0, 1.0, readEnd);
-  for (int index = 1; index <= readEnd; ++index) {
-    getline(m_fileIn, fileline);
-    if (index < readStart)
-      continue;
-    double x(0.), y(0.), yerr(0.);
-    std::istringstream datastr(fileline);
-    datastr >> x >> y >> yerr;
-    columnOne.push_back(x);
-    ydata.push_back(y);
-    errdata.push_back(yerr);
-    prog.report();
+
+  if (hasXError) {
+    xError.reserve(readEnd);
+    readLinesWithXErrorForRKH1D(m_fileIn, readStart, readEnd,
+                                columnOne, ydata, errdata, xError,  prog);
+  } else {
+    readLinesForRKH1D(m_fileIn, readStart, readEnd,
+                      columnOne, ydata, errdata, prog);
   }
   m_fileIn.close();
 
   assert(pointsToRead == static_cast<int>(columnOne.size()));
   assert(pointsToRead == static_cast<int>(ydata.size()));
   assert(pointsToRead == static_cast<int>(errdata.size()));
+
+  if (hasXError) {
+    assert(pointsToRead == static_cast<int>(xError.size()));
+  }
 
   if (colIsUnit) {
     MatrixWorkspace_sptr localworkspace = WorkspaceFactory::Instance().create(
@@ -254,7 +295,9 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
     localworkspace->dataX(0) = columnOne;
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
-
+    if (hasXError) {
+      localworkspace->dataDx(0) = xError;
+    }
     return localworkspace;
   } else {
     MatrixWorkspace_sptr localworkspace =
@@ -265,6 +308,12 @@ const API::MatrixWorkspace_sptr LoadRKH::read1D() {
           ->setSpectrumNo(static_cast<int>(columnOne[index]));
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
+    }
+
+    if (hasXError) {
+      for (int index = 0; index < pointsToRead; ++index) {
+        localworkspace->dataDx(index)[0] = xError[index];
+      }
     }
     return localworkspace;
   }
@@ -480,5 +529,27 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries,
                         MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }
+
+/**
+ * Checks if there is an x error present in the data set
+ * @param stream:: the stream object 
+ */
+bool LoadRKH::hasXerror(std::ifstream &stream) {
+  auto containsXerror = false;
+  auto currentPutLocation = stream.tellg();
+  std::string line;
+  getline(stream, line);
+
+  std::string x,y, yerr, xerr;
+  std::istringstream datastr(line);
+  datastr >> x >> y >> yerr >> xerr;
+  if (!xerr.empty()) {
+    containsXerror = true;
+  }
+  // Reset the original location of the stream
+  stream.seekg(currentPutLocation, stream.beg);
+  return containsXerror;
+}
+
 }
 }

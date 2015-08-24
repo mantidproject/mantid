@@ -139,7 +139,10 @@ class EnggFitPeaks(PythonAlgorithm):
         foundPeaks = peaks[0]
         fittedPeaks = self._createFittedPeaksTable(peaksTableName)
 
+        prog = Progress(self, start=0, end=1, nreports=foundPeaks.rowCount())
+
         for i in range(foundPeaks.rowCount()):
+            prog.report('Fitting peak number ' + str(i+1))
 
             row = foundPeaks.row(i)
             # Peak parameters estimated by FindPeaks
@@ -171,18 +174,15 @@ class EnggFitPeaks(PythonAlgorithm):
             COEF_LEFT = 2
             COEF_RIGHT = 3
 
-            # Try to predict a fit window for the peak
-            xMin = centre - (width * COEF_LEFT)
-            xMax = centre + (width * COEF_RIGHT)
-
             # Fit using predicted window and a proper function with approximated initital values
             fitAlg = self.createChildAlgorithm('Fit')
             fitAlg.setProperty('Function', 'name=LinearBackground;' + str(peak))
             fitAlg.setProperty('InputWorkspace', inWS)
             fitAlg.setProperty('WorkspaceIndex', wsIndex)
-            fitAlg.setProperty('StartX', xMin)
-            fitAlg.setProperty('EndX', xMax)
             fitAlg.setProperty('CreateOutput', True)
+            # Try to predict a fit window for the peak (using magic numbers)
+            fitAlg.setProperty('StartX', centre - (width * COEF_LEFT))
+            fitAlg.setProperty('EndX', centre + (width * COEF_RIGHT))
             fitAlg.execute()
             paramTable = fitAlg.getProperty('OutputParameters').value
 

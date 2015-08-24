@@ -42,6 +42,8 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MDUnit.cpp
+	src/MDUnitFactory.cpp
 	src/MagneticFormFactorTable.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
@@ -129,6 +131,8 @@ set ( INC_FILES
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
+	inc/MantidKernel/Chainable.h
+	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
@@ -174,6 +178,8 @@ set ( INC_FILES
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
+	inc/MantidKernel/MDUnit.h
+	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -302,6 +308,8 @@ set ( TEST_FILES
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
+	MDUnitFactoryTest.h
+	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h

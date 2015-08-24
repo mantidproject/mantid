@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -41,6 +42,7 @@ public:
       "<Dimension ID=\"id\">") +
       "<Name>name</Name>" +
       "<Units>Furlongs</Units>" +
+      "<Frame>Unknown frame</Frame>" +
       "<UpperBounds>20.0000</UpperBounds>" +
       "<LowerBounds>-10.0000</LowerBounds>" +
       "<NumberOfBins>1</NumberOfBins>" +
@@ -61,6 +63,7 @@ public:
       "<Dimension ID=\"id\">") +
       "<Name>name</Name>" +
       "<Units>Furlongs</Units>" +
+      "<Frame>Unknown frame</Frame>" +
       "<UpperBounds>20.0000</UpperBounds>" +
       "<LowerBounds>-10.0000</LowerBounds>" +
       "<NumberOfBins>15</NumberOfBins>" +
@@ -69,6 +72,39 @@ public:
     MDHistoDimension dimension("name", "id", "Furlongs", -10, 20.0, 15);
     std::string actualXML = dimension.toXMLString();
     TS_ASSERT_EQUALS(expectedXML, actualXML);
+  }
+
+  void test_getMDUnits_gives_label_unit(){
+
+   Kernel::UnitLabel unitLabel("Meters");
+   MDHistoDimension dimension("Distance", "Dist", unitLabel, 0, 10, 1);
+   const Mantid::Kernel::MDUnit & unit = dimension.getMDUnits();
+   TS_ASSERT_EQUALS(unit.getUnitLabel(), unitLabel);
+   TS_ASSERT(dynamic_cast<const Mantid::Kernel::LabelUnit*>(&unit));
+
+  }
+
+  void test_construct_with_frame_type(){
+   QLab frame;
+   MDHistoDimension dimension("QLabX", "QLabX", frame, 0, 10, 2);
+   const auto & mdFrame = dimension.getMDFrame();
+
+   TS_ASSERT_EQUALS(frame.name(), mdFrame.name());
+   TS_ASSERT_EQUALS(frame.getUnitLabel(), mdFrame.getUnitLabel());
+
+   std::string actualXML = dimension.toXMLString();
+
+   std::string expectedXML =std::string(
+     "<Dimension ID=\"QLabX\">") +
+     "<Name>QLabX</Name>" +
+     "<Units>Angstrom^-1</Units>" +
+     "<Frame>QLab</Frame>" +
+     "<UpperBounds>10.0000</UpperBounds>" +
+     "<LowerBounds>0.0000</LowerBounds>" +
+     "<NumberOfBins>2</NumberOfBins>" +
+     "</Dimension>";
+
+   TS_ASSERT_EQUALS(expectedXML, actualXML);
   }
 
 

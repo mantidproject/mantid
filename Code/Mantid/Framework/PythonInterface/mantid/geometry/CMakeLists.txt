@@ -20,6 +20,7 @@ set ( EXPORT_FILES
   src/Exports/RectangularDetector.cpp
   src/Exports/Instrument.cpp
   src/Exports/UnitCell.cpp
+  src/Exports/MDFrame.cpp
   src/Exports/OrientedLattice.cpp
   src/Exports/ReferenceFrame.cpp
   src/Exports/Goniometer.cpp
