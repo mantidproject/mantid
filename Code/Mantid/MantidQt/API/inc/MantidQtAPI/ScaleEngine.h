@@ -29,13 +29,14 @@
 #ifndef SCALE_ENGINE_H
 #define SCALE_ENGINE_H
 
+#include "MantidQtAPI/DllOption.h"
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
 #include <float.h>
 
 class ScaleEngine;
 
-class ScaleTransformation: public QwtScaleTransformation
+class EXPORT_OPT_MANTIDQT_API ScaleTransformation: public QwtScaleTransformation
 {
 public:
 	enum Type{Linear, Log10, Power};
@@ -52,7 +53,7 @@ protected:
 	const ScaleEngine* d_engine;
 };
 
-class ScaleEngine: public QwtScaleEngine
+class EXPORT_OPT_MANTIDQT_API ScaleEngine: public QwtScaleEngine
 {
 public:
 	ScaleEngine(ScaleTransformation::Type type = ScaleTransformation::Linear,
