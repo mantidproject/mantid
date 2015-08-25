@@ -271,7 +271,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # first round of processing the sample
             if not self.getProperty("Sum").value and samRun > 0:
                 self._info = None
-                returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws,\
+                returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, splitwksp=self._splitws,\
+                                             normalisebycurrent=self._normalisebycurrent,
                                              preserveEvents=preserveEvents)
 
                 if isinstance(returned, list):
@@ -330,7 +331,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                preserveEvents=preserveEvents)
                     else:
                         canRun = self._focusChunks(canRuns[samRunIndex], SUFFIX, canFilterWall, calib,\
-                               preserveEvents=preserveEvents)
+                                                   normalisebycurrent=self._normalisebycurrent,
+                                                   preserveEvents=preserveEvents)
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                     smoothParams = self.getProperty("BackgroundSmoothParams").value
                     if smoothParams != None and len(smoothParams)>0:
@@ -582,13 +584,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                             MaxChunkSize=self._chunks, FilterBadPulses=self._filterBadPulses,
                                             CompressTOFTolerance=self.COMPRESS_TOL_TOF,
                                             **filterWall)
-            try:
-                if self._normalisebycurrent is True:
-                    temp = api.NormaliseByCurrent(InputWorkspace=temp,
-                                                  OutputWorkspace=temp)
-                    temp.getRun()['gsas_monitor'] = 1
-            except Exception, e:
-                self.log().warning(str(e))
             tempinfo = self._getinfo(temp)
             if sumRun is None:
                 sumRun = temp
@@ -602,10 +597,18 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                 api.DeleteWorkspace(str(temp))
 
-        if str(sumRun) == outName:
-            return sumRun
-        else:
-            return api.RenameWorkspace(InputWorkspace=sumRun, OutputWorkspace=outName)
+        if str(sumRun) != outName:
+            sumRun = api.RenameWorkspace(InputWorkspace=sumRun, OutputWorkspace=outName)
+
+        try:
+            if self._normalisebycurrent is True:
+                sumRun = api.NormaliseByCurrent(InputWorkspace=temp,
+                                              OutputWorkspace=temp)
+                temp.getRun()['gsas_monitor'] = 1
+        except Exception, e:
+            self.log().warning(str(e))
+
+        return sumRun
 
 
     #pylint: disable=too-many-arguments
@@ -619,6 +622,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
 
             temp = self._focusChunks(temp, extension, filterWall, calib,\
+                                     normalisebycurrent=False,
                                      preserveEvents=preserveEvents)
             tempinfo = self._getinfo(temp)
 
@@ -635,15 +639,22 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 api.DeleteWorkspace(str(temp))
             # ENDIF
         # ENDFOR (processing each)
+        if self._normalisebycurrent is True:
+            sumRun = api.NormaliseByCurrent(InputWorkspace=sumRun,
+                                            OutputWorkspace=sumRun)
+            sumRun.getRun()['gsas_monitor'] = 1
+
         return sumRun
 
 
     #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
-    def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
+    def _focusChunks(self, runnumber, extension, filterWall, calib,
+                     normalisebycurrent, splitwksp=None, preserveEvents=True):
         """ Load, (optional) split and focus data in chunks
 
         Arguments:
          - runnumber : integer for run number
+         - normalisebycurrent: Set to False if summing runs for correct math
          - splitwksp:  SplittersWorkspace (if None then no split)
          - filterWall: Enabled if splitwksp is defined
 
@@ -825,7 +836,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     OutputWorkspace=wksplist[itemp], Tolerance=self.COMPRESS_TOL_TOF) # 100ns
 
             try:
-                if self._normalisebycurrent is True:
+                if normalisebycurrent is True:
                     wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp],
                                                              OutputWorkspace=wksplist[itemp])
                     wksplist[itemp].getRun()['gsas_monitor'] = 1
