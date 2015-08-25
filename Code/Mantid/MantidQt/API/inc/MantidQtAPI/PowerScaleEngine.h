@@ -51,7 +51,7 @@ private:
   \brief A scale engine for power (X^n) scales
 */
 
-class PowerScaleEngine: public QwtScaleEngine
+class EXPORT_OPT_MANTIDQT_API PowerScaleEngine: public QwtScaleEngine
 {
 public:
     virtual void autoScale(int maxSteps,
