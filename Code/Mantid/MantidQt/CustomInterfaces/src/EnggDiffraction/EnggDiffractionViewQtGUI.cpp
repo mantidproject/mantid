@@ -327,7 +327,6 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
   pyCode += "GSAS_iparm_fname= '" + outFilename + "'\n";
   pyCode += "Difcs = []\n";
   pyCode += "Zeros = []\n";
-  pyCode += "open('/home/fedemp/test/ENGINX_GUI/foo.txt', 'a')\n";
   for (size_t i = 0; i < difc.size(); i++) {
     pyCode +=
         "Difcs.append(" + boost::lexical_cast<std::string>(difc[i]) + ")\n";
