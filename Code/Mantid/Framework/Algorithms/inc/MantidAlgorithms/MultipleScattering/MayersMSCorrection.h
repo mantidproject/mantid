@@ -34,22 +34,6 @@ class PseudoRandomNumberGenerator;
 namespace Algorithms {
 
 /**
- * Stores parameters for a single calculation for a given angle
- * and sample details
- */
-struct ScatteringCorrectionParameters {
-  double l1;        ///< Nominal distance from source to sample (m)
-  double l2;        ///< Nominal distance from sample to detector (m)
-  double twoTheta;  ///< Scattering angle of the detector (radians)
-  double phi;       ///< Azimuth angle of the detector (radians)
-  double rho;       ///< Number density of scatters (angstroms^-3)
-  double sigmaSc;   ///< Total scattering cross-section (barns)
-  double sigmaAbs;  ///< Absorption cross-section at 2200m/s (barns)
-  double cylRadius; ///< Radius of cylinder (m)
-  double cylHeight; ///< Height of cylinder (m)
-};
-
-/**
 
   Applies the procedure found in section 4 of
   https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574 for an array of
@@ -57,15 +41,33 @@ struct ScatteringCorrectionParameters {
 */
 class MANTID_ALGORITHMS_DLL MayersMSCorrection {
 public:
+  /**
+   * Stores parameters for a single calculation for a given angle
+   * and sample details
+   */
+  struct Parameters {
+    double l1;        ///< Nominal distance from source to sample (m)
+    double l2;        ///< Nominal distance from sample to detector (m)
+    double twoTheta;  ///< Scattering angle of the detector (radians)
+    double phi;       ///< Azimuth angle of the detector (radians)
+    double rho;       ///< Number density of scatters (angstroms^-3)
+    double sigmaSc;   ///< Total scattering cross-section (barns)
+    double sigmaAbs;  ///< Absorption cross-section at 2200m/s (barns)
+    double cylRadius; ///< Radius of cylinder (m)
+    double cylHeight; ///< Height of cylinder (m)
+  };
+
   /// Constructor
-  MayersMSCorrection(ScatteringCorrectionParameters params);
+  MayersMSCorrection(MayersMSCorrection::Parameters params,
+                     const std::vector<double> &tof,
+                     const std::vector<double> &sigIn,
+                     const std::vector<double> &errIn);
   /// Destructor - declared in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersMSCorrection();
 
   /// Return the correction factors
-  void apply(const std::vector<double> &tof, std::vector<double> &signal,
-             std::vector<double> &errors);
+  void apply(std::vector<double> &sigOut, std::vector<double> &errOut);
   /// Calculate the self-attentation factor for a single mu*r value
   double calculateSelfAttenuation(const double muR);
   /// Calculate the multiple scattering factor for a single mu*r value &
@@ -78,8 +80,14 @@ private:
   inline double muRmax() const { return m_muRrange.second; }
   void seedRNG(const size_t seed);
 
-  /// A copy of the scattering parameters
-  const ScatteringCorrectionParameters m_pars;
+  /// A copy of the correction parameters
+  const Parameters m_pars;
+  /// A reference to the tof vluaes
+  const std::vector<double> &m_tof;
+  /// A reference to the input signal values
+  const std::vector<double> &m_sigin;
+  /// A reference to the input error values
+  const std::vector<double> &m_errin;
   /// Limits for the range of mu*r values to cover
   const std::pair<double, double> m_muRrange;
   /// Random number generator

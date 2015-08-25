@@ -74,9 +74,16 @@ namespace Algorithms {
  * Constructor
  * @param params Defines the required parameters for the correction
  */
-MayersMSCorrection::MayersMSCorrection(
-    ScatteringCorrectionParameters params)
-    : m_pars(params), m_muRrange(0.01, 4.0), m_rng(new MersenneTwister(1)) {}
+MayersMSCorrection::MayersMSCorrection(MayersMSCorrection::Parameters params,
+                                       const std::vector<double> &tof,
+                                       const std::vector<double> &sigIn,
+                                       const std::vector<double> &errIn)
+    : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
+      m_muRrange(0.01, 4.0), m_rng(new MersenneTwister(1)) {
+  // Sanity check
+  assert(sigIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
+  assert(errIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
+}
 
 /**
  * Destructor
@@ -84,18 +91,24 @@ MayersMSCorrection::MayersMSCorrection(
 MayersMSCorrection::~MayersMSCorrection() {}
 
 /**
- * Correct the given data for absorption and multiple scattering effects
- * @param tof Time-of-flight values in microseconds
- * @param signal Signal values to correct [In/Out]
- * @param errors Error values to correct [In/Out]
+ * Correct the data for absorption and multiple scattering effects. Allows
+ * both histogram or point data. For histogram the TOF is taken to be
+ * the mid point of a bin
+ * @param sigOut Signal values to correct [In/Out]
+ * @param errOut Error values to correct [In/Out]
  */
-void MayersMSCorrection::apply(const std::vector<double> &tof,
-                                           std::vector<double> &signal,
-                                           std::vector<double> &errors) {
-  const size_t ntof(tof.size());
-  assert(ntof == signal.size());
-  assert(ntof == errors.size());
+void MayersMSCorrection::apply(std::vector<double> &sigOut,
+                               std::vector<double> &errOut) {
+  // Local aliases to input values (avoid typing m_)
+  const auto & tof = m_tof;
+  const auto & sigIn = m_sigin;
+  const auto & errIn = m_errin;
 
+  const size_t nsig(sigIn.size());
+  // Sanity check
+  assert(sigOut.size() == sigIn.size());
+  assert(errOut.size() == errIn.size());
+  
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
       yabs(N_MUR_PTS + 1, 1.0),  // absorption signals
@@ -139,8 +152,10 @@ void MayersMSCorrection::apply(const std::vector<double> &tof,
       flightPath(m_pars.l1 + m_pars.l2), cylRadCM(m_pars.cylRadius * 1e2);
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
-  for (size_t i = 0; i < ntof; ++i) {
-    const double tsec = tof[i] * 1e-6;
+  const bool histogram = (tof.size() == nsig + 1);
+  for (size_t i = 0; i < nsig; ++i) {
+    const double tusec = histogram ? 0.5*(tof[i] + tof[i+1]) : tof[i];
+    const double tsec = tusec * 1e-6;
     const double veli = flightPath / tsec;
     const double sigabs = m_pars.sigmaAbs * 2200.0 / veli;
     const double sigt = sigabs + m_pars.sigmaSc;
@@ -156,9 +171,9 @@ void MayersMSCorrection::apply(const std::vector<double> &tof,
     const double msfact = (1.0 - beta) / rns;
 
     // apply correction
-    const double yin(signal[i]), ein(errors[i]);
-    signal[i] *= msfact * attenfact;
-    errors[i] = signal[i] * ein / yin;
+    const double yin(sigIn[i]), ein(errIn[i]);
+    sigOut[i] *= msfact * attenfact;
+    errOut[i] = sigOut[i] * ein / yin;
   }
 }
 
@@ -167,8 +182,7 @@ void MayersMSCorrection::apply(const std::vector<double> &tof,
  * @param muR Single mu*r slice value
  * @return The self-attenuation factor for this sample
  */
-double
-MayersMSCorrection::calculateSelfAttenuation(const double muR) {
+double MayersMSCorrection::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -210,9 +224,9 @@ MayersMSCorrection::calculateSelfAttenuation(const double muR) {
  * @param abs Absorption and self-attenuation factor (\f$A_s\f$ in Mayers paper)
  * @return A pair of (factor,weight)
  */
-std::pair<double, double>
-MayersMSCorrection::calculateMS(const size_t irp, const double muR,
-                                            const double abs) {
+std::pair<double, double> MayersMSCorrection::calculateMS(const size_t irp,
+                                                          const double muR,
+                                                          const double abs) {
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
@@ -269,9 +283,7 @@ MayersMSCorrection::calculateMS(const size_t irp, const double muR,
  * (Re-)seed the random number generator
  * @param seed Seed value for the random number generator
  */
-void MayersMSCorrection::seedRNG(const size_t seed) {
-  m_rng->setSeed(seed);
-}
+void MayersMSCorrection::seedRNG(const size_t seed) { m_rng->setSeed(seed); }
 
 } // namespace Algorithms
 } // namespace Mantid
