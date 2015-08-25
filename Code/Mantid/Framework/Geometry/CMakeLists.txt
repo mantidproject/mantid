@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
 	src/Crystal/BraggScatterer.cpp
 	src/Crystal/BraggScattererFactory.cpp
@@ -57,9 +58,12 @@ set ( SRC_FILES
 	src/Instrument/ReferenceFrame.cpp
 	src/Instrument/XMLInstrumentParameter.cpp
 	src/MDGeometry/CompositeImplicitFunction.cpp
+	src/MDGeometry/GeneralFrame.cpp
+	src/MDGeometry/HKL.cpp
 	src/MDGeometry/IMDDimension.cpp
 	src/MDGeometry/IMDDimensionFactory.cpp
 	src/MDGeometry/MDBoxImplicitFunction.cpp
+	src/MDGeometry/MDFrameFactory.cpp
 	src/MDGeometry/MDGeometryXMLBuilder.cpp
 	src/MDGeometry/MDGeometryXMLParser.cpp
 	src/MDGeometry/MDHistoDimension.cpp
@@ -68,6 +72,8 @@ set ( SRC_FILES
 	src/MDGeometry/MDPlane.cpp
 	src/MDGeometry/MDPlaneImplicitFunction.cpp
 	src/MDGeometry/NullImplicitFunction.cpp
+	src/MDGeometry/QLab.cpp
+	src/MDGeometry/QSample.cpp
 	src/Math/Acomp.cpp
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
@@ -190,10 +196,14 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/ReferenceFrame.h
 	inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
 	inc/MantidGeometry/MDGeometry/CompositeImplicitFunction.h
+	inc/MantidGeometry/MDGeometry/GeneralFrame.h
+	inc/MantidGeometry/MDGeometry/HKL.h
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
 	inc/MantidGeometry/MDGeometry/MDDimensionExtents.h
+	inc/MantidGeometry/MDGeometry/MDFrame.h
+	inc/MantidGeometry/MDGeometry/MDFrameFactory.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
@@ -205,6 +215,8 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDTypes.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
 	inc/MantidGeometry/MDGeometry/NullImplicitFunction.h
+	inc/MantidGeometry/MDGeometry/QLab.h
+	inc/MantidGeometry/MDGeometry/QSample.h
 	inc/MantidGeometry/Math/Acomp.h
 	inc/MantidGeometry/Math/Algebra.h
 	inc/MantidGeometry/Math/BnId.h
@@ -256,17 +268,19 @@ set ( TEST_FILES
 	CompositeImplicitFunctionTest.h
 	ConeTest.h
 	ConventionalCellTest.h
-	ConvexPolygonTest.h
 	ConvexPolygonIteratorTest.h
+	ConvexPolygonTest.h
 	CrystalStructureTest.h
 	CyclicGroupTest.h
 	CylinderTest.h
 	DetectorGroupTest.h
 	DetectorTest.h
 	FitParameterTest.h
+	GeneralFrameTest.h
 	GeneralTest.h
 	GoniometerTest.h
 	GroupTest.h
+	HKLTest.h
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
@@ -278,6 +292,7 @@ set ( TEST_FILES
 	LineIntersectVisitTest.h
 	LineTest.h
 	MDBoxImplicitFunctionTest.h
+	MDFrameFactoryTest.h
 	MDGeometryXMLParserTest.h
 	MDHistoDimensionBuilderTest.h
 	MDHistoDimensionTest.h
@@ -312,6 +327,8 @@ set ( TEST_FILES
 	PolygonEdgeTest.h
 	PolygonIntersectionTest.h
 	ProductOfCyclicGroupsTest.h
+	QLabTest.h
+	QSampleTest.h
 	QuadrilateralTest.h
 	RectangularDetectorPixelTest.h
 	RectangularDetectorTest.h
