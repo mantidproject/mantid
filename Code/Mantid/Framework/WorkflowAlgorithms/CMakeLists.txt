@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AlignAndFocusPowder.cpp
 	src/ComputeSensitivity.cpp
+	src/ConvolutionFitSequential.cpp
 	src/DgsAbsoluteUnitsReduction.cpp
 	src/DgsConvertToEnergyTransfer.cpp
 	src/DgsDiagnose.cpp
@@ -42,6 +43,7 @@ set ( SRC_UNITY_IGNORE_FILES
 set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
 	inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
+	inc/MantidWorkflowAlgorithms/ConvolutionFitSequential.h
 	inc/MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h
 	inc/MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h
 	inc/MantidWorkflowAlgorithms/DgsDiagnose.h
@@ -78,6 +80,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+    ConvolutionFitSequentialTest.h
 	LoadEventAndCompressTest.h
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
