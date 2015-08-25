@@ -867,11 +867,16 @@ class Mask_ISIS(ReductionStep):
             Purpose of this method is to populate self._lim_phi_xml
         '''
         # convert all angles to be between 0 and 360
-        while phimax > 360 : phimax -= 360
-        while phimax < 0 : phimax += 360
-        while phimin > 360 : phimin -= 360
-        while phimin < 0 : phimin += 360
-        while phimax<phimin : phimax += 360
+        while phimax > 360 :
+            phimax -= 360
+        while phimax < 0 :
+            phimax += 360
+        while phimin > 360 :
+            phimin -= 360
+        while phimin < 0 :
+            phimin += 360
+        while phimax<phimin :
+            phimax += 360
 
         #Convert to radians
         phimin = math.pi*phimin/180.0
@@ -1199,14 +1204,18 @@ class NormalizeToMonitor(ReductionStep):
             RenameWorkspace(mon, OutputWorkspace=self.output_wksp)
 
         if reducer.instrument.name() == 'LOQ':
-            RemoveBins(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp,XMin= reducer.transmission_calculator.loq_removePromptPeakMin,XMax=
-                       reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
+            RemoveBins(InputWorkspace=self.output_wksp,
+                       OutputWorkspace= self.output_wksp,
+                       XMin= reducer.transmission_calculator.loq_removePromptPeakMin,
+                       XMax= reducer.transmission_calculator.loq_removePromptPeakMax, Interpolation="Linear")
 
         # Remove flat background
         TOF_start, TOF_end = reducer.inst.get_TOFs(normalization_spectrum)
 
         if TOF_start and TOF_end:
-            CalculateFlatBackground(InputWorkspace=self.output_wksp,OutputWorkspace= self.output_wksp, StartX=TOF_start, EndX=TOF_end, Mode='Mean')
+            CalculateFlatBackground(InputWorkspace=self.output_wksp,
+                                    OutputWorkspace= self.output_wksp,
+                                    StartX=TOF_start, EndX=TOF_end, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         if reducer.instrument.is_interpolating_norm():
@@ -1221,7 +1230,8 @@ class TransmissionCalc(ReductionStep):
         as a function of wavelength. The results are stored as a workspace
     """
 
-    # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified in the GUI to the way it can be send to CalculateTransmission
+    # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified in
+    # the GUI to the way it can be send to CalculateTransmission
     TRANS_FIT_OPTIONS = {
         'YLOG' : 'Log',
         'STRAIGHT' : 'Linear',
@@ -1312,13 +1322,16 @@ class TransmissionCalc(ReductionStep):
             fit_method = 'POLYNOMIAL'
             self.fit_settings[select+ORDER] = int(order_str)
         if fit_method not in self.TRANS_FIT_OPTIONS.keys():
-            _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
+            _issueWarning(("ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, "
+                           "using default method (%s)" % self.DEFAULT_FIT))
             fit_method = self.DEFAULT_FIT
 
         # get variables for this selector
         sel_settings = dict()
         for prop in self.fit_props:
-            sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]
+            sel_settings[prop] = (self.fit_settings[select+prop]
+                                  if self.fit_settings.has_key(select+prop)
+                                  else self.fit_settings['both::'+prop])
 
         # copy fit_method
         sel_settings[FITMETHOD] = fit_method
@@ -1514,7 +1527,9 @@ class TransmissionCalc(ReductionStep):
         # get variables for this selector
         sel_settings = dict()
         for prop in self.fit_props:
-            sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]
+            sel_settings[prop] = (self.fit_settings[select+prop]
+                                  if self.fit_settings.has_key(select+prop)
+                                  else self.fit_settings['both::'+prop])
 
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
@@ -1908,7 +1923,8 @@ class ConvertToQISIS(ReductionStep):
         if (not self._grav_extra_length_set) or override:
             self._grav_extra_length = extra_length
         else:
-            msg = "User file can't override previous extra length setting for gravity correction; extra length remains " + str(self._grav_extra_length)
+            msg = ("User file can't override previous extra length setting " +
+                   "for gravity correction; extra length remains " + str(self._grav_extra_length))
             print msg
             sanslog.warning(msg)
 
@@ -2079,7 +2095,8 @@ class ConvertToQISIS(ReductionStep):
         @det_bank_workspace: the main workspace
         '''
         # Here we need to check if the binning has changed, ie if the
-        # existing 
+        # existing
+        dummy_ws = det_bank_workspace
         raise RuntimeError("The QResolution optimization has not been implemented yet")
 
     def set_q_resolution_moderator(self, file_name):
@@ -2173,7 +2190,6 @@ class ConvertToQISIS(ReductionStep):
         '''
         Prepare the parameters which need preparing
         '''
-        successFlag = True
         # If we have values for H1 and W1 then set A1 to the correct value
         if self._q_resolution_h1 and self._q_resolution_w1 and self._q_resolution_h2 and self._q_resolution_w2:
             self._q_resolution_a1 = self._set_up_diameter(self._q_resolution_h1, self._q_resolution_w1)
@@ -2181,14 +2197,14 @@ class ConvertToQISIS(ReductionStep):
 
 
     def _set_up_diameter(self, h, w):
-         '''
-         Prepare the diameter parameter. If there are corresponding H and W values, then
-         use them instead. Richard provided the formula: A = 2*sqrt((H^2 + W^2)/6)
-         @param h: the height
-         @param w: the width
-         @returns the new diameter
-         '''
-         return 2*math.sqrt((h*h + w*w)/6)
+        '''
+        Prepare the diameter parameter. If there are corresponding H and W values, then
+        use them instead. Richard provided the formula: A = 2*sqrt((H^2 + W^2)/6)
+        @param h: the height
+        @param w: the width
+        @returns the new diameter
+        '''
+        return 2*math.sqrt((h*h + w*w)/6)
 
     def reset_q_settings(self):
         '''
