@@ -97,6 +97,7 @@ public:
   void setColorScaleMax(double max);
   void setColorScaleLog(bool log);
   int getColorScaleType();
+  void setColorScale(double min, double max, bool log);
   void setColorScale(double min, double max, int type);
   void setColorMapBackground(int r, int g, int b);
   double getColorScaleMin() const;

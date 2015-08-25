@@ -71,7 +71,7 @@ public:
   QwtDoubleInterval getViewRange() const;
   MantidColorMap & getColorMap();
 
-  int getLog();
+  bool getLog();
 
   int getScale();
   void setScale(int);

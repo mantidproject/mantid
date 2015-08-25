@@ -1649,10 +1649,32 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
 
 //------------------------------------------------------------------------------
 /** Set the color scale limits and log mode via a method call.
+ *  Here for backwards compatibility, setColorScale(double min, double max, int type)
+ *  should be used instead.
  *
  * @param min :: minimum value corresponding to the lowest color on the map
  * @param max :: maximum value corresponding to the highest color on the map
  * @param log :: true for a log color scale, false for linear
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScale(double min, double max, bool log) {
+  if (max <= min)
+    throw std::invalid_argument("Color scale maximum must be > minimum.");
+  if (log && ((min <= 0) || (max <= 0)))
+    throw std::invalid_argument(
+        "For logarithmic color scales, both minimum and maximum must be > 0.");
+  m_colorBar->setViewRange(min, max);
+  m_colorBar->setScale(log ? 1 : 0);
+  this->colorRangeChanged();
+}
+
+//------------------------------------------------------------------------------
+/** Set the color scale limits and type via a method call.
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param type :: 0 for linear, 1 for log, 2 for power
  * @throw std::invalid_argument if max < min or if the values are
  *        inconsistent with a log color scale
  */

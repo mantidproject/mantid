@@ -111,13 +111,13 @@ void ColorBarWidget::setScale(int type)
   changedScaleType(type);
 }
 
-int ColorBarWidget::getLog()
+bool ColorBarWidget::getLog()
 {
   if (getScale() == 1)
   {
-    return 1;
+    return true;
   }
-  else return 0;
+  else return false;
 }
 
 // Set exponent value for power scale
@@ -264,7 +264,7 @@ void ColorBarWidget::changedScaleType(int type)
   ui.dspnN->setEnabled(type == 2);
 
   // Record if log scale option is selected
-  type == 1 ? m_log = true : m_log = false;
+  m_log = (type == 1);
 
   m_colorMap.changeScaleType( GraphOptions::ScaleType(type) );
   ui.valMin->setLogSteps( m_log );
