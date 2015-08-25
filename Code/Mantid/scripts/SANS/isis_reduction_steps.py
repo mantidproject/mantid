@@ -2044,6 +2044,8 @@ class ConvertToQISIS(ReductionStep):
 
         if not mtd.doesExist(QRESOLUTION_WORKSPACE_NAME):
             raise RuntimeError("ConvertTpQIsis: Could not create the q resolution workspace")
+
+        DeleteWorkspace(sigma_moderator)
         return mtd[QRESOLUTION_WORKSPACE_NAME]
 
     def _get_sigma_moderator_workspace(self):
@@ -2054,6 +2056,9 @@ class ConvertToQISIS(ReductionStep):
         moderator_ws = Load(Filename = self.get_q_resolution_moderator())
         moderator_historgram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
         moderator_wavelength_ws = ConvertUnits(InputWorkspace=moderator_historgram_ws,Target="Wavelength")
+
+        DeleteWorkspace(moderator_ws)
+        DelteWorkspace(moderator_histogram_ws)
         return moderator_wavelength_ws
 
     def _get_existing_q_resolution(self, det_bank_workspace):
