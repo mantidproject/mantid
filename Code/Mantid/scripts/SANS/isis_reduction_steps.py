@@ -29,7 +29,7 @@ import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
 
-DEBUG = True
+DEBUG = False
 
 # A global name for the Q Resolution workspace which lives longer than a reducer core
 QRESOLUTION_WORKSPACE_NAME = "Q_Resolution_ISIS_SANS"
@@ -2054,11 +2054,11 @@ class ConvertToQISIS(ReductionStep):
         @returns the sigma moderator workspace
         '''
         moderator_ws = Load(Filename = self.get_q_resolution_moderator())
-        moderator_historgram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
-        moderator_wavelength_ws = ConvertUnits(InputWorkspace=moderator_historgram_ws,Target="Wavelength")
+        moderator_histogram_ws = ConvertToHistogram(InputWorkspace = moderator_ws)
+        moderator_wavelength_ws = ConvertUnits(InputWorkspace=moderator_histogram_ws,Target="Wavelength")
 
         DeleteWorkspace(moderator_ws)
-        DelteWorkspace(moderator_histogram_ws)
+        DeleteWorkspace(moderator_histogram_ws)
         return moderator_wavelength_ws
 
     def _get_existing_q_resolution(self, det_bank_workspace):
