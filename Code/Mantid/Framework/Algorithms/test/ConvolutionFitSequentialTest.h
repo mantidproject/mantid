@@ -10,6 +10,8 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 
+#include "MantidKernel/TimeSeriesProperty.h" 
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ConvolutionFitSequential;
@@ -127,7 +129,7 @@ public:
   void test_exec() {
     auto resWs = create2DWorkspace(5, 1);
     auto redWs = create2DWorkspace(6, 5);
-	createConvitResWorkspace(5, 6);
+    createConvitResWorkspace(5, 6);
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
     Mantid::Algorithms::ConvolutionFitSequential alg;
@@ -151,28 +153,29 @@ public:
     alg.setProperty("MaxIterations", 500);
     alg.execute();
 
-    // Retrieve parameter table
-    /*ITableWorkspace_sptr paramTable;
+    // Retrieve and analyse parameter table - Param table does not require
+    // further testing as this is tested in the ProcessIndirectFitParameters
+    // Algorithm
+    ITableWorkspace_sptr paramTable;
     TS_ASSERT_THROWS_NOTHING(
         paramTable =
             AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
                 "ReductionWs_conv_1LFixF_s0_to_5_Parameters"));
 
-    // Retrieve results table
-    MatrixWorkspace_sptr resultWs =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "ReductionWs_conv_1LFixF_s0_to_5_Result");
+    // Retrieve and analyse results table
+    MatrixWorkspace_sptr resultWs;
     TS_ASSERT_THROWS_NOTHING(
         resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "ReductionWs_conv_1LFixF_s0_to_5_Result"));
 
-    // Retrieve group table
+    // Retrieve and analyse group table
     WorkspaceGroup_sptr groupWs;
     TS_ASSERT_THROWS_NOTHING(
         groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));
 
-        */
+    auto ent = groupWs->getNumberOfEntries();
+    TS_ASSERT_EQUALS(ent, redWs->getNumberHistograms());
   }
 
   //------------------------ Private Functions---------------------------
@@ -199,12 +202,17 @@ public:
       testWs->setX(i, x1);
       testWs->setData(i, y1, e1);
     }
+
     testWs->getAxis(0)->setUnit("DeltaE");
 
     for (int i = 0; i < xlen; i++) {
       testWs->setEFixed((i + 1), 0.50);
     }
 
+    auto run = testWs->mutableRun();
+    auto timeSeries =
+        new Mantid::Kernel::TimeSeriesProperty<std::string>("Test");
+    run.addProperty(timeSeries);
     return testWs;
   }
 
@@ -219,7 +227,7 @@ public:
         new Mantid::MantidVec(totalBins, sqrt(3.0)));
 
     MatrixWorkspace_sptr testWs(convFitRes);
-    testWs->initialize(totalHist + 1, totalBins + 1 , totalBins);
+    testWs->initialize(totalHist + 1, totalBins + 1, totalBins);
     double j = 1.0;
 
     for (int i = 0; i < totalBins; i++) {
@@ -227,9 +235,13 @@ public:
       j += 1.5;
     }
 
-	AnalysisDataService::Instance().add("__ConvFit_Resolution", convFitRes);
-  }
+    for (int i = 0; i < totalBins; i++) {
+      testWs->setX(i, x1);
+      testWs->setData(i, y1, e1);
+    }
 
+    AnalysisDataService::Instance().add("__ConvFit_Resolution", convFitRes);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */
