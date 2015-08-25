@@ -608,7 +608,7 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                         runNo + " into: " << outFilename << std::endl;
 
   Poco::Path fpath(dir);
-  const std::string fullFilename = fpath.append(fpath).toString();
+  const std::string fullFilename = fpath.append(outFilename).toString();
 
   // TODO: this is almost 100% common with doNewCalibrate() - refactor
   EnggDiffCalibSettings cs = m_view->currentCalibSettings();
@@ -631,10 +631,10 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
     g_log.error() << "The focusing calculations failed. One of the algorithms"
                      "did not execute correctly. See log messages for details."
                   << std::endl;
-  } catch (std::invalid_argument &) {
+  } catch (std::invalid_argument &ia) {
     g_log.error()
         << "The focusing failed. Some input properties were not valid. "
-           "See log messages for details. " << std::endl;
+           "See log messages for details. Error: " << ia.what() << std::endl;
   }
 
   // restore initial data search paths
@@ -706,7 +706,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     throw;
   }
 
-  const std::string outWSName = "enggui_focusing_output_ws";
+  const std::string outWSName = "engggui_focusing_output_ws";
   try {
     auto alg = Algorithm::fromString("EnggFocus");
     alg->initialize();
@@ -715,9 +715,6 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
     alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
     alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
-    alg->setPropertyValue("OutputParametersTableName",
-                          "engggui_calibration_bank_" +
-                              boost::lexical_cast<std::string>(bank));
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
@@ -730,8 +727,9 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   }
 
   g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
-
   try {
+    g_log.debug() << "Going to save focused output into nexus file: "
+                  << fullFilename << std::endl;
     auto alg = Algorithm::fromString("SaveNexus");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", outWSName);

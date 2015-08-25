@@ -75,6 +75,7 @@ void EnggDiffractionViewQtGUI::initLayout() {
   // basic UI setup, connect signals, etc.
   doSetupGeneralWidgets();
   doSetupTabCalib();
+  doSetupTabFocus();
   doSetupTabSettings();
 
   // presenter that knows how to handle a IEnggDiffractionView should take care
@@ -513,7 +514,7 @@ std::string EnggDiffractionViewQtGUI::focusingDir() const {
 
 int EnggDiffractionViewQtGUI::focusingBank() const {
   int idx = m_uiTabFocus.comboBox_bank_num->currentIndex();
-  return m_uiTabFocus.comboBox_bank_num->itemData(idx).toInt();
+  return m_uiTabFocus.comboBox_bank_num->itemData(idx).toInt() + 1;
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
