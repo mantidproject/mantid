@@ -1,0 +1,68 @@
+digraph MolDyn {
+  label="MolDyn Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    Version             [label="nMoldyn version"]
+    IfSave              [label="Save?"]
+    IsWorkspaceInEnergy [label="Is workspace in energy?"]
+    IfSymmetrise        [label="SymmetriseEnergy?"]
+    IfCrop              [label="Have MaxEnergy?"]
+    IfConvolve          [label="Have Resolution workspace?"]
+  }
+
+  subgraph processes {
+    $process_style
+    ProcessEnergyWorkspaces [label="Process energy workspaces"]
+  }
+
+  subgraph params {
+    $param_style
+    Data
+    Functions
+    Resolution
+    MaxEnergy
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    LoadNMoldyn3Ascii
+    LoadNMoldyn4Ascii
+    SaveNexus
+    Symmetrise
+    CropWorkspace
+    ConvolveWorkspaces
+  }
+
+  ProcessEnergyWorkspaces_Start [label="Process energy workspaces"]
+  ProcessEnergyWorkspaces_End   [label="End"]
+
+  Data                    -> Version
+  Functions               -> LoadNMoldyn3Ascii
+  Version                 -> LoadNMoldyn3Ascii        [label="3"]
+  Functions               -> LoadNMoldyn4Ascii
+  Version                 -> LoadNMoldyn4Ascii        [label="4"]
+  LoadNMoldyn3Ascii       -> ProcessEnergyWorkspaces
+  LoadNMoldyn4Ascii       -> ProcessEnergyWorkspaces
+  ProcessEnergyWorkspaces -> OutputWorkspace
+  ProcessEnergyWorkspaces -> IfSave
+  IfSave                  -> SaveNexus                [label="Yes"]
+
+  ProcessEnergyWorkspaces_Start -> IsWorkspaceInEnergy
+  IsWorkspaceInEnergy           -> IfSymmetrise                 [label="Yes"]
+  MaxEnergy                     -> Symmetrise
+  IfSymmetrise                  -> Symmetrise                   [label="Yes"]
+  Symmetrise                    -> IfConvolve
+  IfSymmetrise                  -> IfCrop                       [label="No"]
+  MaxEnergy                     -> CropWorkspace
+  IfCrop                        -> CropWorkspace                [label="Yes"]
+  CropWorkspace                 -> IfConvolve
+  IfCrop                        -> IfConvolve                   [label="No"]
+  IfConvolve                    -> ConvolveWorkspaces           [label="Yes"]
+  Resolution                    -> ConvolveWorkspaces
+  ConvolveWorkspaces            -> ProcessEnergyWorkspaces_End
+  IfConvolve                    -> ProcessEnergyWorkspaces_End  [label="No"]
+  IsWorkspaceInEnergy           -> ProcessEnergyWorkspaces_End  [label="No"]
+}

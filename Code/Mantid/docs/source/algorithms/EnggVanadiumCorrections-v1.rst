@@ -85,11 +85,11 @@ Usage
    # # To generate the pre-calculated features (integration and curves), for a new
    # Vanadium run, and apply the corrections on a workspace:
    #             
-   # data_ws = Load('ENGINX00213855.nxs')
+   # sample_ws = Load('ENGINX00213855.nxs')
    # van_ws = Load('ENGINX00236516.nxs')
-   # EnggVanadiumCorrections(Workspace = data_ws, VanadiumWorkspace = van_ws
-   #                         IntegrationWorkspace = 'integ_ws',
-   #                         CurvesWorkspace = 'curves_ws')
+   # EnggVanadiumCorrections(Workspace = sample_ws, VanadiumWorkspace = van_ws
+   #                         OutIntegrationWorkspace = 'integ_ws',
+   #                         OutCurvesWorkspace = 'curves_ws')
    #
    # # Now you can save the two pre-calculated features / workspaces:
    # SaveNexus(InputWorkspace='integ_ws',

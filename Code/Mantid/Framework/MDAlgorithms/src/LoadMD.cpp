@@ -5,9 +5,13 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/MDUnitFactory.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/LoadMD.h"
@@ -297,6 +301,7 @@ void LoadMD::loadDimensions() {
 /** Load all the dimensions into this->m_dims
 * The dimensions are stored as an nxData array */
 void LoadMD::loadDimensions2() {
+  using namespace Geometry;
   m_dims.clear();
 
   std::string axes;
@@ -313,14 +318,22 @@ void LoadMD::loadDimensions2() {
   for (size_t d = splitAxes.size(); d > 0; d--) {
     std::string long_name;
     std::string units;
+    std::string frame;
     std::vector<double> axis;
     m_file->openData(splitAxes[d - 1]);
     m_file->getAttr("long_name", long_name);
     m_file->getAttr("units", units);
+    try {
+        m_file->getAttr("frame", frame);
+    } catch (std::exception&)
+    {
+        frame = "Unknown frame";
+    }
+    Geometry::MDFrame_const_uptr mdFrame = Geometry::makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
     m_dims.push_back(boost::make_shared<MDHistoDimension>(
-        long_name, splitAxes[d - 1], units, static_cast<coord_t>(axis.front()),
+        long_name, splitAxes[d - 1], *mdFrame, static_cast<coord_t>(axis.front()),
         static_cast<coord_t>(axis.back()), axis.size() - 1));
   }
   m_file->closeGroup();

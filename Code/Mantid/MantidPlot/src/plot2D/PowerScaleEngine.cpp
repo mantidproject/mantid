@@ -276,6 +276,6 @@ double PowerScaleTransformation::xForm(
 double PowerScaleTransformation::invXForm(double p, double p1, double p2,
     double s1, double s2) const
 {
-	return pow((p - p1) / (p2 - p1) * (pow(s2, nth_power) - pow(s1, nth_power)), 1.0/nth_power) * s1;
+	return pow((p - p1) / (p2 - p1) * (pow(s2, nth_power) - pow(s1, nth_power)), 1.0/nth_power) + s1;
 }
 
