@@ -656,7 +656,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   // Detectors column
   file->writeData("column_1", detectorID);
   file->openData("column_1");
-  file->putAttr("name", "Dectector ID");
+  file->putAttr("name", "Detector ID");
   file->putAttr("interpret_as", specifyInteger);
   file->putAttr("units", "Not known");
   file->closeData();
