@@ -323,8 +323,12 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
   // write_ENGINX_GSAS_iparam_file(output_file, difc, zero, ceria_run=241391,
   // vanadium_run=236516, template_file=None):
 
+  // this replace is to prevent issues with network drives on windows:
+  const std::string  safeOutFname= boost::replace_all_copy(outFilename, "\\","/");
   std::string pyCode = "import EnggUtils\n";
-  pyCode += "GSAS_iparm_fname= '" + outFilename + "'\n";
+  pyCode += "import os\n";
+  // normalize apparently not needed after the replace, but to be double-safe:
+  pyCode += "GSAS_iparm_fname= os.path.normpath('" + safeOutFname + "')\n";
   pyCode += "Difcs = []\n";
   pyCode += "Zeros = []\n";
   for (size_t i = 0; i < difc.size(); i++) {
