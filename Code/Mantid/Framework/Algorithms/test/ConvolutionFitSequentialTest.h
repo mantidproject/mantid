@@ -126,8 +126,8 @@ public:
   //------------------------- Execution cases ---------------------------
   void test_exec() {
     auto resWs = create2DWorkspace(5, 1);
-    auto redWs = create2DWorkspace(5, 5);
-	createConvitResWorkspace(5, 5);
+    auto redWs = create2DWorkspace(6, 5);
+	createConvitResWorkspace(5, 6);
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
     Mantid::Algorithms::ConvolutionFitSequential alg;
@@ -201,11 +201,9 @@ public:
     }
     testWs->getAxis(0)->setUnit("DeltaE");
 
-    testWs->setEFixed(1, 0.50);
-    testWs->setEFixed(2, 0.50);
-    testWs->setEFixed(3, 0.50);
-    testWs->setEFixed(4, 0.50);
-    testWs->setEFixed(5, 0.50);
+    for (int i = 0; i < xlen; i++) {
+      testWs->setEFixed((i + 1), 0.50);
+    }
 
     return testWs;
   }
