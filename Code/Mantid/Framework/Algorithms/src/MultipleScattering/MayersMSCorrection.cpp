@@ -172,7 +172,7 @@ void MayersMSCorrection::apply(std::vector<double> &sigOut,
 
     // apply correction
     const double yin(sigIn[i]), ein(errIn[i]);
-    sigOut[i] *= msfact * attenfact;
+    sigOut[i] = yin*msfact * attenfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
 }

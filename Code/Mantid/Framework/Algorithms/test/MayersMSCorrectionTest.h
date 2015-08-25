@@ -27,11 +27,13 @@ public:
     TS_ASSERT_DELTA(0.00030887, absFactor, delta);
   }
 
-  void
-  test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor() {
+  // clang-format off
+  void test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor()
+  // clang-format on
+  {
     std::vector<double> dummy(1, 0.0);
     MayersMSCorrection mscat(createTestParameters(), dummy, dummy, dummy);
-    const size_t irp(0);
+    const size_t irp(1);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
 
@@ -63,7 +65,10 @@ public:
     TS_ASSERT_DELTA(-7.330179, error.back(), delta);
   }
 
-  void test_corrects_both_absorption_and_multiple_scattering_for_histogram_data() {
+  // clang-format off
+  void test_corrects_both_absorption_and_multiple_scattering_for_histogram_data()
+  // clang-format on
+  {
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
