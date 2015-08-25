@@ -39,6 +39,12 @@ std::string MDHistoDimension::toXMLString() const {
   unitsElement->appendChild(unitsText);
   pDimensionElement->appendChild(unitsElement);
 
+  // Set the frame.
+  AutoPtr<Element> frameElement = pDoc->createElement("Frame");
+  AutoPtr<Text> frameText = pDoc->createTextNode(this->getMDFrame().name());
+  frameElement->appendChild(frameText);
+  pDimensionElement->appendChild(frameElement);
+
   // Set the upper bounds
   AutoPtr<Element> upperBoundsElement = pDoc->createElement("UpperBounds");
   AutoPtr<Text> upperBoundsText = pDoc->createTextNode(

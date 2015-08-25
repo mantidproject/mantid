@@ -2,6 +2,10 @@
 
 #include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/MDTransfAxisNames.h"
+#include "MantidGeometry/MDGeometry/HKL.h"
+#include "MantidGeometry/MDGeometry/QLab.h"
+#include "MantidGeometry/MDGeometry/QSample.h"
+#include "MantidKernel/MDUnit.h"
 
 #include <cfloat>
 
@@ -48,7 +52,7 @@ MDWSTransform::getTransfMatrix(MDWSDescription &TargWSDescription,
   std::vector<double> transf =
       getTransfMatrix(TargWSDescription, FrameID, ScaleID);
 
-  if (TargWSDescription.AlgID.compare("Q3D") == 0) {
+  if (TargWSDescription.isQ3DMode()) {
     this->setQ3DDimensionsNames(TargWSDescription, FrameID, ScaleID);
   }
 
@@ -323,6 +327,7 @@ void MDWSTransform::setQ3DDimensionsNames(
     dimNames[1] = "Q_lab_y";
     dimNames[2] = "Q_lab_z";
     TargWSDescription.setCoordinateSystem(Mantid::Kernel::QLab);
+    TargWSDescription.setFrame(Geometry::QLab::QLabName);
     break;
   }
   case (CnvrtToMD::SampleFrame): {
@@ -330,13 +335,17 @@ void MDWSTransform::setQ3DDimensionsNames(
     dimNames[1] = "Q_sample_y";
     dimNames[2] = "Q_sample_z";
     TargWSDescription.setCoordinateSystem(Mantid::Kernel::QSample);
+    TargWSDescription.setFrame(Geometry::QSample::QSampleName);
     break;
   }
   case (CnvrtToMD::HKLFrame): {
     dimNames[0] = "H";
     dimNames[1] = "K";
     dimNames[2] = "L";
+
+    Kernel::MDUnit_uptr mdUnit(new Kernel::InverseAngstromsUnit);
     TargWSDescription.setCoordinateSystem(Mantid::Kernel::HKL);
+    TargWSDescription.setFrame(Geometry::HKL::HKLName);
     break;
   }
   default:

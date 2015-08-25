@@ -164,18 +164,35 @@ void SaveRKH::write1D() {
       specid = static_cast<specid_t>(i + 1);
     }
 
+    auto hasDx = m_workspace->hasDx(i);
+    //hasDx = false;
+    // We only want to access the dx values if they exist. In case they don't exist
+    // set the dXData const reference to the X value. The value will not be used later on.
+    const auto &dXdata = hasDx ? m_workspace->readDx(i) : m_workspace->readX(i);
+
     for (size_t j = 0; j < nbins; ++j) {
       // Calculate/retrieve the value to go in the first column
       double xval(0.0);
+      double dXval(0.0);
       if (horizontal)
         xval = histogram ? 0.5 * (xdata[j] + xdata[j + 1]) : xdata[j];
       else {
         xval = static_cast<double>(specid);
       }
 
+      if (hasDx) {
+        dXval = histogram ? 0.5 * (dXdata[j] + dXdata[j + 1]) : dXdata[j];
+      }
+
       m_outRKH << std::fixed << std::setw(12) << std::setprecision(5) << xval
                << std::scientific << std::setw(16) << std::setprecision(6)
-               << ydata[j] << std::setw(16) << edata[j] << "\n";
+               << ydata[j] << std::setw(16) << edata[j];
+
+      if (hasDx) {
+        m_outRKH << std::setw(16) << dXval;
+      }
+
+      m_outRKH << "\n";
 
       prg.report();
     }
