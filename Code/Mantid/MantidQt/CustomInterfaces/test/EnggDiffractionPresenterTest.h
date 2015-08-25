@@ -210,11 +210,11 @@ public:
     //  .WillOnce(Return(filename)); // if enabled ask user output filename
 
     // should disable actions at the beginning of the calculations
-    EXPECT_CALL(mockView, enableCalibrateActions(false)).Times(1);
+    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(false)).Times(1);
 
     // and should enable them again at the (unsuccessful) end - this happens
     // when a separate thread finished (here the thread is mocked)
-    EXPECT_CALL(mockView, enableCalibrateActions(true)).Times(1);
+    EXPECT_CALL(mockView, enableCalibrateAndFocusActions(true)).Times(1);
 
     // No warnings/error pop-ups: some exception(s) are thrown (because there
     // are missing settings and/or files) but these must be caught

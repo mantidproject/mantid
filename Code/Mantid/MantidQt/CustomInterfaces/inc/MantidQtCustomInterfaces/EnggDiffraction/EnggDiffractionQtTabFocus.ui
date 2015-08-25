@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>EnggDiffractionQtTabFocus</class>
- <widget class="QWidget" name="Form">
+ <widget class="QWidget" name="EnggDiffractionQtTabFocus">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>504</height>
+    <width>614</width>
+    <height>533</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,7 @@
            <string/>
           </property>
           <property name="readOnly">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -127,7 +127,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>359</height>
+       <height>388</height>
       </size>
      </property>
     </spacer>
