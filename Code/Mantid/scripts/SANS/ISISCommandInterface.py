@@ -579,23 +579,20 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
 
     #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
-        if rAnds.qRangeUserSelected:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
-                Ties='f0.Scaling='+str(rAnds.scale)+ constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
+        Fit(InputWorkspace=rearData,
+            Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
+            Ties='f0.Scaling='+str(rAnds.scale)+ constant_x_shift_and_scale,
+            Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     elif rAnds.fitShift==False:
-        if rAnds.qRangeUserSelected:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
-                Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
-                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
+        Fit(InputWorkspace=rearData,
+            Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+            Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
+            Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     else:
-        if rAnds.qRangeUserSelected:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
-                Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
-                Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
+        Fit(InputWorkspace=rearData,
+            Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+            Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
+            Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
 
     param = mtd['__fitRescaleAndShift_Parameters']
 
