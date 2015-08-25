@@ -176,6 +176,14 @@ public:
 
     auto ent = groupWs->getNumberOfEntries();
     TS_ASSERT_EQUALS(ent, redWs->getNumberHistograms());
+
+    // Check Log was copied correctly
+	auto groupMember = groupWs->getItem("ReductionWs_conv_1LFixF_s0_to_5_0_Workspace");
+    auto matrixMember = boost::shared_dynamic_cast<MatrixWorkspace>(groupMember);
+    auto memberRun = matrixMember->mutableRun();
+    //auto memberLog = memberRun.getLogData("Test");
+    auto originalLog = redWs->mutableRun().getLogData("Test");
+    //TS_ASSERT_EQUALS(memberLog, originalLog);
   }
 
   //------------------------ Private Functions---------------------------
