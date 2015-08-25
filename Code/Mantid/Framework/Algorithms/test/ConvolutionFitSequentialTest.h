@@ -3,6 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+
 #include "MantidAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -23,6 +25,8 @@ public:
   static void destroySuite(ConvolutionFitSequentialTest *suite) {
     delete suite;
   }
+
+  ConvolutionFitSequentialTest() { FrameworkManager::Instance(); }
 
   void test_fit_function_is_valid_for_convolution_fitting() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
