@@ -95,6 +95,46 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  void testExecNumber()
+  {
+    setupWS();
+
+    AppendSpectra alg;
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    // Get the two input workspaces for later
+    MatrixWorkspace_sptr in1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top");
+    MatrixWorkspace_sptr in2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("bottom");
+
+    // Now it should succeed
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace1","top") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace2","bottom") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","top") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Number",2) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("top") );
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 40 );
+    // Check a few values
+    TS_ASSERT_EQUALS( output->readX(0)[0], in1->readX(0)[0] );
+    TS_ASSERT_EQUALS( output->readX(15)[444], in2->readX(5)[444] );
+    TS_ASSERT_EQUALS( output->readX(30)[444], in2->readX(5)[444] );
+    TS_ASSERT_EQUALS( output->readY(3)[99], in1->readY(3)[99] );
+    TS_ASSERT_EQUALS( output->readE(7)[700], in1->readE(7)[700] );
+    TS_ASSERT_EQUALS( output->readY(19)[55], in2->readY(9)[55] );
+    TS_ASSERT_EQUALS( output->readE(10)[321], in2->readE(0)[321] );
+    TS_ASSERT_EQUALS( output->readY(34)[55], in2->readY(9)[55] );
+    TS_ASSERT_EQUALS( output->readE(25)[321], in2->readE(0)[321] );
+    // There will be a spectra number clash here so all spectra numbers should
+    // be reset
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(5), 5 );
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(12), 12 );
+    TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(27), 27 );
+  }
+
+  //----------------------------------------------------------------------------------------------
   void testExecMismatchedWorkspaces()
   {
     MatrixWorkspace_sptr ews = WorkspaceCreationHelper::CreateEventWorkspace(10, 10);
