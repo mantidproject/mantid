@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidAlgorithms/ConvolutionFitSequential.h"
 
@@ -124,9 +125,9 @@ public:
 
   //------------------------- Execution cases ---------------------------
   void test_exec() {
-    auto resWs = Create2DWorkspace(5, 1);
-    auto redWs = Create2DWorkspace(5, 5);
-
+    auto resWs = create2DWorkspace(5, 1);
+    auto redWs = create2DWorkspace(5, 5);
+	createConvitResWorkspace(5, 5);
     AnalysisDataService::Instance().add("ResolutionWs_", resWs);
     AnalysisDataService::Instance().add("ReductionWs_", redWs);
     Mantid::Algorithms::ConvolutionFitSequential alg;
@@ -176,7 +177,7 @@ public:
 
   //------------------------ Private Functions---------------------------
 
-  MatrixWorkspace_sptr Create2DWorkspace(int xlen, int ylen) {
+  MatrixWorkspace_sptr create2DWorkspace(int xlen, int ylen) {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         xlen, ylen, false, false, true, "testInst");
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen, 0.0));
@@ -208,6 +209,29 @@ public:
 
     return testWs;
   }
+
+  void createConvitResWorkspace(int totalHist, int totalBins) {
+    auto convFitRes = WorkspaceFactory::Instance().create(
+        "Workspace2D", totalHist + 1, totalBins + 1, totalBins);
+    boost::shared_ptr<Mantid::MantidVec> x1(
+        new Mantid::MantidVec(totalBins + 1, 0.0));
+    boost::shared_ptr<Mantid::MantidVec> y1(
+        new Mantid::MantidVec(totalBins, 3.0));
+    boost::shared_ptr<Mantid::MantidVec> e1(
+        new Mantid::MantidVec(totalBins, sqrt(3.0)));
+
+    MatrixWorkspace_sptr testWs(convFitRes);
+    testWs->initialize(totalHist + 1, totalBins + 1 , totalBins);
+    double j = 1.0;
+
+    for (int i = 0; i < totalBins; i++) {
+      (*x1)[i] = j * 0.5;
+      j += 1.5;
+    }
+
+	AnalysisDataService::Instance().add("__ConvFit_Resolution", convFitRes);
+  }
+
 };
 
 #endif /* MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIALTEST_H_ */
