@@ -5,6 +5,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidAPI/NotebookWriter.h"
 
 #include <fstream>
 
@@ -123,6 +124,10 @@ void GeneratePythonScript::exec() {
     file.flush();
     file.close();
   }
+
+  NotebookWriter *nb = new NotebookWriter;
+  nb->writeNotebook();
+
 }
 
 } // namespace Algorithms

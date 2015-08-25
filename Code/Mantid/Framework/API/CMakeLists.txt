@@ -123,7 +123,7 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
-)
+        src/NotebookWriter.cpp)
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/IDataFileChecker.cpp
@@ -297,7 +297,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceValidators.h
-)
+        inc/MantidAPI/NotebookWriter.h)
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
