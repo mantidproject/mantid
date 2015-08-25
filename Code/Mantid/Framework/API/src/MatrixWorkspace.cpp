@@ -8,7 +8,10 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/MDUnit.h"
 
 #include <numeric>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -1277,7 +1280,7 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL) {}
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL), m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   virtual std::string getName() const {
@@ -1339,12 +1342,21 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
+  const Kernel::MDUnit &getMDUnits() const{
+      return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame& getMDFrame() const{
+      return *m_frame;
+  }
+
   virtual ~MWDimension() {}
 
 private:
   const Axis &m_axis;
   const std::string m_dimensionId;
   const bool m_haveEdges;
+  const Geometry::MDFrame_const_uptr m_frame;
+
 };
 
 //===============================================================================
@@ -1354,7 +1366,7 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId) {
+      : m_ws(ws), m_dimensionId(dimensionId), m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(), m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1407,6 +1419,12 @@ public:
   virtual std::string toXMLString() const {
     throw std::runtime_error("Not implemented");
   }
+  const Kernel::MDUnit &getMDUnits() const{
+      return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame& getMDFrame() const{
+      return *m_frame;
+  }
 
 private:
   /// Workspace we refer to
@@ -1415,6 +1433,8 @@ private:
   MantidVec m_X;
   /// Dimension ID string
   const std::string m_dimensionId;
+  /// Unit
+  const Geometry::MDFrame_const_uptr m_frame;
 };
 
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>

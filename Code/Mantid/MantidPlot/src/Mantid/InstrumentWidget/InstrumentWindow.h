@@ -90,6 +90,7 @@ public:
   void setColorMapRange(double minValue, double maxValue);
   void selectComponent(const QString & name);
   void setScaleType(GraphOptions::ScaleType type);
+  void setExponent(double nth_power);
   void setViewType(const QString& type);
   InstrumentActor* getInstrumentActor() const {return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
@@ -120,6 +121,7 @@ signals:
   void colorMapMaxValueChanged(double);
   void colorMapRangeChanged(double,double);
   void scaleTypeChanged(int);
+  void nthPowerChanged(double);
   void integrationRangeChanged(double,double);
   void glOptionChanged(bool);
   void requestSelectComponent(const QString&);
@@ -143,6 +145,7 @@ public slots:
 
   void changeColormap(const QString & filename = ""); // Deprecated
   void changeScaleType(int);// Deprecated
+  void changeNthPower(double);
   void changeColorMapMinValue(double minValue); // Deprecated
   void changeColorMapMaxValue(double maxValue); // Deprecated
   void changeColorMapRange(double minValue, double maxValue); // Deprecated

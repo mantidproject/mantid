@@ -581,6 +581,14 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
 }
 
 /**
+ * Set the exponent for the Power scale type
+ * @param nth_power :: The exponent choice
+ */
+void InstrumentWindow::setExponent(double nth_power) {
+  emit nthPowerChanged(nth_power);
+}
+
+/**
  * This method opens a color dialog to pick the background color,
  * and then sets it.
  */
@@ -791,6 +799,12 @@ void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
 void InstrumentWindow::changeScaleType(int type) {
   m_instrumentActor->changeScaleType(type);
+  setupColorMap();
+  updateInstrumentView();
+}
+
+void InstrumentWindow::changeNthPower(double nth_power) {
+  m_instrumentActor->changeNthPower(nth_power);
   setupColorMap();
   updateInstrumentView();
 }
