@@ -104,13 +104,13 @@ void ConvolutionFitSequential::init() {
   boundedV->setLower(0);
 
   declareProperty("SpecMin", 0, boundedV, "The first spectrum to be used in "
-                                           "the fit. Spectra values can not be "
-                                           "negative",
+                                          "the fit. Spectra values can not be "
+                                          "negative",
                   Direction::Input);
 
   declareProperty("SpecMax", 0, boundedV, "The final spectrum to be used in "
-                                           "the fit. Spectra values can not be "
-                                           "negative",
+                                          "the fit. Spectra values can not be "
+                                          "negative",
                   Direction::Input);
 
   declareProperty("Convolve", true,

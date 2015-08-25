@@ -128,13 +128,13 @@ public:
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     alg.setProperty("InputWorkspace", redWs);
-    alg.setProperty("Function", "name=LinearBackground,A0=0,A1=0,ties=(A0=0."
-                                "000000,A1=0.0);(composite=Convolution,"
-                                "FixResolution=true,NumDeriv=true;name="
-                                "Resolution,Workspace=__ConvFit_Resolution,"
-                                "WorkspaceIndex=0;((composite=ProductFunction,"
-                                "NumDeriv=false;name=Lorentzian,Amplitude=1,"
-                                "PeakCentre=0,FWHM=0.0175");
+    alg.setProperty("Function",
+                    "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
+                    "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                    "name=Resolution,Workspace=__ConvFit_Resolution,"
+                    "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+                    "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+                    "0175)))");
     alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
@@ -165,14 +165,16 @@ public:
     WorkspaceGroup_sptr groupWs;
     TS_ASSERT_THROWS_NOTHING(
         groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
-            "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));*/
+            "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));
+
+        */
   }
 
   //------------------------ Private Functions---------------------------
 
   MatrixWorkspace_sptr Create2DWorkspace(int xlen, int ylen) {
     auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-        ylen, xlen, false, false, true, "testInst");
+        xlen, ylen, false, false, true, "testInst");
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen, 0.0));
     boost::shared_ptr<Mantid::MantidVec> y1(
         new Mantid::MantidVec(xlen - 1, 3.0));
@@ -193,6 +195,13 @@ public:
       testWs->setData(i, y1, e1);
     }
     testWs->getAxis(0)->setUnit("DeltaE");
+
+    testWs->setEFixed(1, 0.50);
+    testWs->setEFixed(2, 0.50);
+    testWs->setEFixed(3, 0.50);
+    testWs->setEFixed(4, 0.50);
+    testWs->setEFixed(5, 0.50);
+
     return testWs;
   }
 };
