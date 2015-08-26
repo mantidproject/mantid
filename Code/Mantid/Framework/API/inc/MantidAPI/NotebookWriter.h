@@ -5,9 +5,6 @@
 
     This class assists with writing ipython notebooks.
 
-    @author Matthew D Jones, Tessella, ISIS, RAL
-    @date 25/08/2015
-
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
     National Laboratory & European Spallation Source
 
@@ -37,20 +34,22 @@ class NotebookWriter {
 
 public:
 
-  NotebookWriter(){};
+  NotebookWriter();
   virtual ~NotebookWriter(){};
 
   template<typename JsonString>
-  Json::Value markdownCell(JsonString string_array);
+  void markdownCell(JsonString string_array);
   template<typename JsonString>
-  Json::Value codeCell(JsonString string_code);
-  Json::Value buildNotebook();
+  void codeCell(JsonString string_code);
   void writeNotebook();
 
 private:
 
-  Json::Value headerComment();
-  Json::Value headerCode();
+  void headerComment();
+  void headerCode();
+  Json::Value buildNotebook();
+
+  Json::Value m_cell_buffer;
 
 };
 
