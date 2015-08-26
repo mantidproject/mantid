@@ -15,6 +15,7 @@
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/RebinDisabledState.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
@@ -116,7 +117,18 @@ public:
   void setRebinNumBins(int xBins, int yBins);
   void setRebinMode(bool mode, bool locked);
   void refreshRebin();
-
+  // Methods related to SliceViewerState
+  SliceViewerState_sptr currentState; //initialised to RebinDisabledState
+  void setRebinBtnState();
+  void setOverlayPipeline( Mantid::API::IMDWorkspace_sptr current_overlayWS);
+  bool m_WS_is_EventWorkspace();
+  //returning the current state of slice viewer.
+  SliceViewerState_sptr getCurrentState(){return this->currentState;}
+  void setCurrentState(SliceViewerState_sptr state){
+      this->currentState = state;
+  }
+  // data members related to SliceViewerState
+  Mantid::API::IMDWorkspace_sptr m_overlay_rebinWS;
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
   ProxyCompositePeaksPresenter* setPeaksWorkspaces(const QStringList& list); // For python binding
@@ -225,7 +237,6 @@ private:
   // Autorebin methods.
   bool isAutoRebinSet() const;
   void autoRebinIfRequired();
-
   // helper for saveImage
   QString ensurePngExtension(const QString& fname) const;
 
