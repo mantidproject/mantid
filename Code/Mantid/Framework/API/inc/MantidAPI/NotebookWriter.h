@@ -40,14 +40,17 @@ public:
   NotebookWriter(){};
   virtual ~NotebookWriter(){};
 
-  Json::Value markdownCell(std::string string_text);
-  Json::Value codeCell(std::string string_code);
+  template<typename JsonString>
+  Json::Value markdownCell(JsonString string_array);
+  template<typename JsonString>
+  Json::Value codeCell(JsonString string_code);
   Json::Value buildNotebook();
   void writeNotebook();
 
 private:
 
-  Json::Value headerCell();
+  Json::Value headerComment();
+  Json::Value headerCode();
 
 };
 
