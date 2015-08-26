@@ -160,7 +160,7 @@ void EnggDiffractionPresenter::processFocusRun() {
 
   m_view->enableCalibrateAndFocusActions(false);
   // GUI-blocking alternative:
-  // doFocusRun(outFielname, runNo, bank)
+  // doFocusRun(focusDir, outFilename, runNo, bank)
   // focusingFinished()
   startAsyncFocusWorker(focusDir, outFilename, runNo, bank);
 }
@@ -543,22 +543,50 @@ void EnggDiffractionPresenter::doCalib(const EnggDiffCalibSettings &cs,
 }
 
 /**
- * @TODO
+ * Performs several checks on the current focusing inputs and
+ * settings. This should be done before starting any focus work. The
+ * message return should be shown to the user as a visible message
+ * (pop-up, error log, etc.)
  *
+ * @param runNo run number to focus
+ * @param bank bank to focus
+ *
+ * @throws std::invalid_argument with an informative message.
  */
 void EnggDiffractionPresenter::inputChecksBeforeFocus(const std::string &runNo,
-                                                      int bank) {}
+                                                      int bank) {
+  if (runNo.empty()) {
+    throw std::invalid_argument(
+        "The sample run number cannot be empty and must be an integer number.");
+  }
+  if (bank < 1) {
+    throw std::invalid_argument("The bank number must be a positive integer.");
+  }
+
+  EnggDiffCalibSettings cs = m_view->currentCalibSettings();
+  const std::string pixelCalib = cs.m_pixelCalibFilename;
+  if (pixelCalib.empty()) {
+    throw std::invalid_argument(
+        "You need to set a pixel (full) calibration in settings.");
+  }
+}
 
 /**
- * @TODO
+ * Builds the name of the output focused file, given the sample run
+ * number and the bank to focus.
  *
+ * @param vanNo number of the Vanadium run, which is normally part of the name
+ * @param ceriaNo number of the Ceria run, which is normally part of the name
+ *
+ * @return filename (without the full path)
  */
 std::string
 EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
                                               int bank) {
   const std::string instStr = m_view->currentInstrument();
 
-  return instStr + runNo + "_focused";
+  return instStr + runNo + "_focused_bank_" +
+         boost::lexical_cast<std::string>(bank);
 }
 
 /**
@@ -569,7 +597,7 @@ EnggDiffractionPresenter::outputFocusFilename(const std::string &runNo,
  *
  * @param dir directory (full path) for the focused output files
  * @param outFilename full name for the output focused run
- * @param runNo input run number
+o * @param runNo input run number
  * @param bank instrument bank to focus
  */
 void EnggDiffractionPresenter::startAsyncFocusWorker(
