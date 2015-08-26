@@ -207,7 +207,7 @@ class EnginXCalibrateFullThenCalibrateTest(stresstesting.MantidStressTest):
         self.assertTrue(rel_err_less_delta(self.posTable.cell(100, 3), 1.49010562897, exdelta))
         #self.assertDelta(self.posTable.cell(100, 3), 1.49010562897, delta)
         self.assertTrue(rel_err_less_delta(self.posTable.cell(400, 4), 1.65264105797, exdelta))
-        self.assertTrue(rel_err_less_delta(self.posTable.cell(200, 5), 0.296705961227, exdelta))
+        self.assertTrue(rel_err_less_delta(self.posTable.cell(200, 5), -0.296705961227, exdelta))
         self.assertTrue(rel_err_less_delta(self.posTable.cell(610, 7), 18585.1738281, exdelta))
         self.assertTrue(rel_err_less_delta(self.posTable.cell(1199, 8), -1.56501817703, exdelta_special))
 

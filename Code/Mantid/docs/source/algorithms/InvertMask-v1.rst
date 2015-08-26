@@ -53,9 +53,9 @@ Output:
 
 .. testoutput:: ExInvertPG3
 
-  Number of histogram:  32340
+  Number of histogram:  33418
   Source Mask workspace # Detectors masked =  82
-  Source Mask workspace # Detectors masked =  32258
+  Source Mask workspace # Detectors masked =  33336
 
 .. categories::
 

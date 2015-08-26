@@ -6,6 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -101,6 +102,7 @@ public: // for the time being
   void setWS(API::MatrixWorkspace_sptr otherMatrixWS);
   std::string getWSName() const { return m_InWS->name(); }
   bool isPowder() const;
+  bool isQ3DMode() const;
   bool hasLattice() const { return m_InWS->sample().hasOrientedLattice(); }
 
   boost::shared_ptr<Geometry::OrientedLattice> getLattice() const {
@@ -155,6 +157,12 @@ public: // for the time being
   void setCoordinateSystem(const Mantid::Kernel::SpecialCoordinateSystem system);
   /// @return the special coordinate system if any.
   Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
+  /// Set the md frame
+  void setFrame(const std::string frameKey);
+  /// Retrieve the md frame
+  Geometry::MDFrame_uptr getFrame(size_t d) const;
+
+
   /// sets number of bins each dimension is split
   void setNumBins(const std::vector<int> &nBins);
 
@@ -195,6 +203,8 @@ protected: // until MDWSDesctiptionDepricatedExist
 private:
   /// Coordinate system.
   Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
+  /// Frame key. For frame to use.
+  std::string m_frameKey;
 };
 }
 }

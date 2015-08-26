@@ -36,13 +36,13 @@ class VesuvioResolutionTest(unittest.TestCase):
                           Workspace=self._sample_ws, Mass=1.0079)
 
 
-    def test_spec_index_validation(self):
+    def test_ws_index_validation(self):
         """
-        Tests that validation fails if spectra index is out of range.
+        Tests that validation fails if ws index is out of range.
         """
 
         self.assertRaises(RuntimeError, VesuvioResolution,
-                          Workspace=self._sample_ws, Mass=1.0079, SpectrumIndex=50)
+                          Workspace=self._sample_ws, Mass=1.0079, WorkspaceIndex=50)
 
 
 if __name__ == '__main__':

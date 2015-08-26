@@ -17,6 +17,9 @@ class DOSPhononTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -33,6 +36,9 @@ class DOSPhononCrossSectionScaleTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -48,6 +54,9 @@ class DOSCastepTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -66,6 +75,9 @@ class DOSRamanActiveTest(stresstesting.MantidStressTest):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -83,6 +95,9 @@ class DOSIRActiveTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -101,6 +116,9 @@ class DOSPartialTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -118,7 +136,6 @@ class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
         spec_type = 'DOS'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSTest.nxs'
-        self.tolerance = 1e-10
 
         SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
@@ -127,6 +144,10 @@ class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.tolerance = 1e-10
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -146,6 +167,9 @@ class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -163,7 +187,6 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStr
         spec_type = 'DOS'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSCrossSectionScaleTest.nxs'
-        self.tolerance = 1e-10
 
         SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
@@ -173,4 +196,8 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStr
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.tolerance = 1e-10
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result

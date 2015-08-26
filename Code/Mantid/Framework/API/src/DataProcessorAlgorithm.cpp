@@ -198,6 +198,32 @@ MatrixWorkspace_sptr DataProcessorAlgorithm::loadChunk(const size_t rowIndex) {
 
 /**
  * Assemble the partial workspaces from all MPI processes
+ * @param partialWS :: workspace to assemble
+ * thread only)
+ */
+Workspace_sptr
+DataProcessorAlgorithm::assemble(Workspace_sptr partialWS) {
+  Workspace_sptr outputWS =partialWS;
+#ifdef MPI_BUILD
+  IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
+  gatherAlg->setLogging(true);
+  gatherAlg->setAlwaysStoreInADS(true);
+  gatherAlg->setProperty("InputWorkspace", partialWS);
+  gatherAlg->setProperty("PreserveEvents", true);
+  gatherAlg->setPropertyValue("OutputWorkspace", "_total");
+  gatherAlg->execute();
+
+  if (isMainThread())
+  {
+    outputWS = AnalysisDataService::Instance().retrieve("_total");
+  }
+#endif
+
+  return outputWS;
+}
+
+/**
+ * Assemble the partial workspaces from all MPI processes
  * @param partialWSName :: Name of the workspace to assemble
  * @param outputWSName :: Name of the assembled workspace (available in main
  * thread only)
