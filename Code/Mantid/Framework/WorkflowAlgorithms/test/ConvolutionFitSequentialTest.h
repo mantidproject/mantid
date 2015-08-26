@@ -10,7 +10,7 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "MantidKernel/TimeSeriesProperty.h" 
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -188,6 +188,16 @@ public:
     TS_ASSERT_EQUALS(memberRun.getLogData().at(1)->value(),
                      originalRun.getLogData().at(1)->value());
 
+    // Check new Log data is present
+    auto memberLogs = memberRun.getLogData();
+
+    TS_ASSERT_EQUALS(memberLogs.at(2)->value(), "FixF");
+    TS_ASSERT_EQUALS(memberLogs.at(3)->value(), "1");
+    TS_ASSERT_EQUALS(memberLogs.at(4)->value(), "false");
+    TS_ASSERT_EQUALS(memberLogs.at(5)->value(), "ConvFit");
+    TS_ASSERT_EQUALS(memberLogs.at(6)->value(), "ReductionWs_");
+    TS_ASSERT_EQUALS(memberLogs.at(7)->value(), "0");
+    TS_ASSERT_EQUALS(memberLogs.at(8)->value(), "1");
   }
 
   //------------------------ Private Functions---------------------------
