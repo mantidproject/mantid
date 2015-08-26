@@ -174,14 +174,17 @@ public:
         groupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
             "ReductionWs_conv_1LFixF_s0_to_5_Workspaces"));
 
-    auto ent = groupWs->getNumberOfEntries();
-    TS_ASSERT_EQUALS(ent, redWs->getNumberHistograms());
-
-    // Check oringal Log was copied correctly
+    // Check number of expected Histograms and Histogram deminsions
+    int entities = groupWs->getNumberOfEntries();
+    TS_ASSERT_EQUALS(entities, redWs->getNumberHistograms());
     auto groupMember =
         groupWs->getItem("ReductionWs_conv_1LFixF_s0_to_5_0_Workspace");
     auto matrixMember =
         boost::shared_dynamic_cast<MatrixWorkspace>(groupMember);
+
+    TS_ASSERT(matrixMember->blocksize(), resWs->blocksize());
+
+    // Check oringal Log was copied correctly
     auto &memberRun = matrixMember->mutableRun();
     auto &originalRun = redWs->mutableRun();
 
