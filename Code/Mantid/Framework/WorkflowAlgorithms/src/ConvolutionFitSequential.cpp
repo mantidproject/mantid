@@ -127,6 +127,8 @@ void ConvolutionFitSequential::init() {
   declareProperty("MaxIterations", 500, boundedV,
                   "The maximum number of iterations permitted",
                   Direction::Input);
+
+  declareProperty("OutputWorkspace", "", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -372,6 +374,8 @@ void ConvolutionFitSequential::exec() {
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
   }
+  
+  setProperty("OutputWorkspace", (outputWsName + "_Result"));
 }
 
 /**
