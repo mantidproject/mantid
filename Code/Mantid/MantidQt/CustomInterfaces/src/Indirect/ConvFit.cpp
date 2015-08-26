@@ -275,23 +275,6 @@ void ConvFit::run() {
   } else {
     pyInput += "temp=None\n";
   }
-
-  /*pyInput += "bg = '" + bgType + "'\n"
-                                 "ftype = '" +
-             fitType +
-             "'\n"
-             "rws = confitSeq(input, func, startx, endx, ftype, bg, temp, "
-             "specMin, specMax, convolve, max_iterations=max_iterations, "
-             "minimizer=minimizer, Plot=plot, Save=save)\n"
-             "AddSampleLog(Workspace=rws, LogName='res_workspace', LogText='" +
-             m_uiForm.dsResInput->getCurrentDataName() + "')\n"
-                                                         "print rws\n";
-
-  QString pyOutput = runPythonCode(pyInput);
-
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = pyOutput.toStdString();*/
-
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
