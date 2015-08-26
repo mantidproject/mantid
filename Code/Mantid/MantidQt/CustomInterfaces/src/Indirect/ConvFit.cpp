@@ -237,44 +237,7 @@ void ConvFit::run() {
   QString specMax = m_uiForm.spSpectraMax->text();
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
-
-  QString pyInput = "from IndirectDataAnalysis import confitSeq\n"
-                    "input = '" +
-                    m_cfInputWSName + "'\n"
-                                      "func = r'" +
-                    QString::fromStdString(function) + "'\n"
-                                                       "startx = " +
-                    stX + "\n"
-                          "endx = " +
-                    enX + "\n"
-                          "plot = '" +
-                    m_uiForm.cbPlotType->currentText() + "'\n"
-                                                         "ties = " +
-                    ties + "\n"
-                           "specMin = " +
-                    specMin + "\n"
-                              "specMax = " +
-                    specMax + "\n"
-                              "max_iterations = " +
-                    QString::number(maxIterations) + "\n"
-                                                     "minimizer = '" +
-                    minimizerString("$outputname_$wsindex") + "'\n"
-                                                              "save = " +
-                    (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
-
-  if (m_blnManager->value(m_properties["Convolve"]))
-    pyInput += "convolve = True\n";
-  else
-    pyInput += "convolve = False\n";
-
   QString temperature = m_uiForm.leTempCorrection->text();
-  bool useTempCorrection =
-      (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
-  if (useTempCorrection) {
-    pyInput += "temp=" + temperature + "\n";
-  } else {
-    pyInput += "temp=None\n";
-  }
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
@@ -294,7 +257,6 @@ void ConvFit::run() {
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
   cfs->execute();
-
   updatePlot();
 }
 
