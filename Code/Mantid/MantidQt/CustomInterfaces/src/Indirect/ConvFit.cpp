@@ -238,6 +238,10 @@ void ConvFit::run() {
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
   QString temperature = m_uiForm.leTempCorrection->text();
+  QString plot = m_uiForm.cbPlotType->currentText();
+  const bool save = m_uiForm.ckSave->isChecked();
+
+  // Run ConvolutionFitSequential Algorithm
   auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
@@ -257,6 +261,19 @@ void ConvFit::run() {
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
   cfs->execute();
+
+  if (save) {
+    QString saveDir = QString::fromStdString(
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory"));
+    // Check validity of save path
+    QString resultWsName =
+        QString::fromStdString(cfs->getProperty("OutputWorkspace"));
+	QString fullPath = saveDir.append(resultWsName).append(".nxs");
+    addSaveWorkspaceToQueue(resultWsName, fullPath);
+	
+  }
+  m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
 }
 
