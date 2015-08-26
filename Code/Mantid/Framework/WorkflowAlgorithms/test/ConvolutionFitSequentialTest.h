@@ -177,13 +177,17 @@ public:
     auto ent = groupWs->getNumberOfEntries();
     TS_ASSERT_EQUALS(ent, redWs->getNumberHistograms());
 
-    // Check Log was copied correctly
-	auto groupMember = groupWs->getItem("ReductionWs_conv_1LFixF_s0_to_5_0_Workspace");
-    auto matrixMember = boost::shared_dynamic_cast<MatrixWorkspace>(groupMember);
-    auto memberRun = matrixMember->mutableRun();
-    //auto memberLog = memberRun.getLogData("Test");
-    auto originalLog = redWs->mutableRun().getLogData("Test");
-    //TS_ASSERT_EQUALS(memberLog, originalLog);
+    // Check oringal Log was copied correctly
+    auto groupMember =
+        groupWs->getItem("ReductionWs_conv_1LFixF_s0_to_5_0_Workspace");
+    auto matrixMember =
+        boost::shared_dynamic_cast<MatrixWorkspace>(groupMember);
+    auto &memberRun = matrixMember->mutableRun();
+    auto &originalRun = redWs->mutableRun();
+
+    TS_ASSERT_EQUALS(memberRun.getLogData().at(1)->value(),
+                     originalRun.getLogData().at(1)->value());
+
   }
 
   //------------------------ Private Functions---------------------------
@@ -217,10 +221,12 @@ public:
       testWs->setEFixed((i + 1), 0.50);
     }
 
-    auto run = testWs->mutableRun();
+    auto &run = testWs->mutableRun();
     auto timeSeries =
-        new Mantid::Kernel::TimeSeriesProperty<std::string>("Test");
+        new Mantid::Kernel::TimeSeriesProperty<std::string>("TestTimeSeries");
+    timeSeries->addValue("2010-09-14T04:20:12", "0.02");
     run.addProperty(timeSeries);
+    auto test = run.getLogData("TestTimeSeries")->value();
     return testWs;
   }
 
