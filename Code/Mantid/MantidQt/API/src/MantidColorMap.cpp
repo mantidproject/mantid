@@ -32,7 +32,7 @@ namespace
  * Default
  */
 MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_type(GraphOptions::Log10),
-				     m_colors(0), m_num_colors(0), m_name(), m_path()
+				     m_colors(0), m_num_colors(0), m_name(), m_path(), m_nth_power(2.0)
 {
   m_nan = std::numeric_limits<double>::quiet_NaN();
   this->setNanColor(255,255,255);
@@ -43,10 +43,11 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 /**
  * Constructor with filename and type
  * @param filename :: color map file to load
- * @param type :: The scale type, currently Linear or Log10 
+ * @param type :: The scale type
  */
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
-  QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0), m_name(), m_path()
+  QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0),
+  m_name(), m_path(), m_nth_power(2.0)
 {
   m_nan = std::numeric_limits<double>::quiet_NaN();
   this->setNanColor(255,255,255);
@@ -257,8 +258,14 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   {
     ratio = (value - interval.minValue()) / width;
   }
+  else if (m_scale_type == GraphOptions::Power)
+  {
+    ratio = (pow(value, m_nth_power) - pow(interval.minValue(), m_nth_power)) /
+            (pow(interval.maxValue(), m_nth_power) - pow(interval.minValue(), m_nth_power));
+  }
   else
   {
+    // Assume log10 type
     // Have to deal with the possibility that a user has entered 0 as a minimum
     double minValue = interval.minValue();
     if( minValue < LOG_ZERO_CUTOFF )

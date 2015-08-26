@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name,anomalous-backslash-in-string
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -18,7 +18,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _bin_width = None
     _spec_type = None
     _peak_func = None
-    _ws_name = None
+    _out_ws_name = None
     _peak_width = None
     _scale = None
     _zero_threshold = None
@@ -26,64 +26,75 @@ class SimulatedDensityOfStates(PythonAlgorithm):
     _sum_contributions = None
     _scale_by_cross_section = None
     _calc_partial = None
-    _ion_dict = None
-    _partial_ion_numbers = None
     _num_ions = None
     _num_branches = None
 
+#----------------------------------------------------------------------------------------
 
     def category(self):
         return "Simulation"
 
+#----------------------------------------------------------------------------------------
 
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
 
+#----------------------------------------------------------------------------------------
 
     def PyInit(self):
         # Declare properties
-        self.declareProperty(FileProperty('File', '', action=FileAction.Load,
-            extensions = ["phonon", "castep"]),
-            doc='Filename of the file.')
+        self.declareProperty(FileProperty('CASTEPFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions = ["castep"]),
+                             doc='Filename of the CASTEP file.')
+
+        self.declareProperty(FileProperty('PHONONFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions = ["phonon"]),
+                             doc='Filename of the PHONON file.')
 
         self.declareProperty(name='Function',defaultValue='Gaussian',
-            validator=StringListValidator(['Gaussian', 'Lorentzian']),
-            doc="Type of function to fit to peaks.")
+                             validator=StringListValidator(['Gaussian', 'Lorentzian']),
+                             doc="Type of function to fit to peaks.")
 
         self.declareProperty(name='PeakWidth', defaultValue='10.0',
-            doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
+                             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
-        self.declareProperty(name='SpectrumType',defaultValue='DOS',
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),
-            doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+        self.declareProperty(name='SpectrumType', defaultValue='DOS',
+                             validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active', 'BondTable']),
+                             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
+
+        self.declareProperty(name='StickHeight', defaultValue=0.01,
+                             doc='Intensity of peaks in stick diagram.')
 
         self.declareProperty(name='Scale', defaultValue=1.0,
-            doc='Scale the intesity by the given factor. Default is no scaling.')
+                             doc='Scale the intesity by the given factor. Default is no scaling.')
 
         self.declareProperty(name='BinWidth', defaultValue=1.0,
-            doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
+                             doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
         self.declareProperty(name='Temperature', defaultValue=300.0,
-            doc='Temperature to use (in raman spectrum modelling). Default is 300')
+                             doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
         self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
-            doc='Ignore frequencies below the this threshold. Default is 3.0')
+                             doc='Ignore frequencies below the this threshold. Default is 3.0')
 
         self.declareProperty(StringArrayProperty('Ions', Direction.Input),
-            doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
+                             doc="List of Ions to use to calculate partial density of states."\
+                                 "If left blank, total density of states will be calculated")
 
         self.declareProperty(name='SumContributions', defaultValue=False,
-            doc="Sum the partial density of states into a single workspace.")
+                             doc="Sum the partial density of states into a single workspace.")
 
         self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
-            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
-            doc="Sum the partial density of states by the scattering cross section.")
+                             validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+                             doc="Sum the partial density of states by the scattering cross section.")
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
-            doc="Name to give the output workspace.")
+                             doc="Name to give the output workspace.")
 
         # Regex pattern for a floating point number
-        self._float_regex = '\-?(?:\d+\.?\d*|\d*\.?\d+)'
+        self._float_regex = r'\-?(?:\d+\.?\d*|\d*\.?\d+)'
 
 #----------------------------------------------------------------------------------------
 
@@ -95,8 +106,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         """
         issues = dict()
 
-        file_name = self.getPropertyValue('File')
-        file_type = file_name[file_name.rfind('.') + 1:]
+        castep_filename = self.getPropertyValue('CASTEPFile')
+        phonon_filename = self.getPropertyValue('PHONONFile')
+
+        if castep_filename == '' and phonon_filename == '':
+            msg = 'Must have at least one input file'
+            issues['CASTEPFile'] = msg
+            issues['PHONONFile'] = msg
+
         spec_type = self.getPropertyValue('SpectrumType')
         sum_contributions = self.getProperty('SumContributions').value
         scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection') != 'None'
@@ -104,8 +121,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         ions = self.getProperty('Ions').value
         calc_partial = len(ions) > 0
 
-        if spec_type == 'IonTable' and file_type != 'phonon':
-            issues['SpectrumType'] = 'Cannot output an ion table from a %s file' % file_type
+        if spec_type == 'IonTable' and phonon_filename == '':
+            issues['SpectrumType'] = 'Require a .phonon file for ion table output'
+
+        if spec_type == 'BondAnalysis' and phonon_filename == '' and castep_filename == '':
+            issues['SpectrumType'] = 'Require both a .phonon and .castep file for bond analysis'
+
+        if spec_type == 'BondTable' and castep_filename == '':
+            issues['SpectrumType'] = 'Require a .castep file for bond table output'
 
         if spec_type != 'DOS' and calc_partial:
             issues['Ions'] = 'Cannot calculate partial density of states when using %s' % spec_type
@@ -113,44 +136,100 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         if spec_type != 'DOS' and scale_by_cross_section:
             issues['ScaleByCrossSection'] = 'Cannot scale contributions by cross sections when using %s' % spec_type
 
+        if phonon_filename == '' and scale_by_cross_section:
+            issues['ScaleByCrossSection'] = 'Must supply a PHONON file when scaling by cross sections'
+
         if not calc_partial and sum_contributions:
             issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
 
         return issues
 
 #----------------------------------------------------------------------------------------
+
     #pylint: disable=too-many-branches
     def PyExec(self):
         # Run the algorithm
         self._get_properties()
 
-        file_name = self.getPropertyValue('File')
-        file_data = self._read_data_from_file(file_name)
-        frequencies, ir_intensities, raman_intensities, weights = file_data[:4]
+        castep_filename = self.getPropertyValue('CASTEPFile')
+        phonon_filename = self.getPropertyValue('PHONONFile')
+
+        if phonon_filename != '' and self._spec_type != 'BondTable':
+            file_data = self._read_data_from_file(phonon_filename)
+        elif castep_filename != '':
+            file_data = self._read_data_from_file(castep_filename)
+        else:
+            raise RuntimeError('No valid data file')
+
+        frequencies = file_data['frequencies']
+        ir_intensities = file_data['ir_intensities']
+        raman_intensities = file_data['raman_intensities']
+        weights = file_data['weights']
+        eigenvectors = file_data.get('eigenvectors', None)
+        ions = file_data.get('ions', None)
+        unit_cell = file_data.get('unit_cell', None)
+
+        logger.debug('Unit cell: {0}'.format(unit_cell))
 
         prog_reporter = Progress(self, 0.0, 1.0, 1)
 
         # We want to output a table workspace with ion information
         if self._spec_type == 'IonTable':
-            ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._ws_name)
-            ion_table.addColumn('str', 'Ion')
-            ion_table.addColumn('int', 'Count')
+            ion_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+            ion_table.addColumn('str', 'Species')
+            ion_table.addColumn('int', 'FileIndex')
+            ion_table.addColumn('int', 'Number')
+            ion_table.addColumn('float', 'FractionalX')
+            ion_table.addColumn('float', 'FractionalY')
+            ion_table.addColumn('float', 'FractionalZ')
+            ion_table.addColumn('float', 'CartesianX')
+            ion_table.addColumn('float', 'CartesianY')
+            ion_table.addColumn('float', 'CartesianZ')
 
-            for ion, data in self._ion_dict.items():
-                ion_table.addRow([ion, len(data)])
+            self._convert_to_cartesian_coordinates(unit_cell, ions)
+
+            for ion in ions:
+                ion_table.addRow([ion['species'],
+                                  ion['index'],
+                                  ion['bond_number'],
+                                  ion['fract_coord'][0],
+                                  ion['fract_coord'][1],
+                                  ion['fract_coord'][2],
+                                  ion['cartesian_coord'][0],
+                                  ion['cartesian_coord'][1],
+                                  ion['cartesian_coord'][2]])
+
+        # We want to output a table workspace with bond information
+        if self._spec_type == 'BondTable':
+            bonds = file_data.get('bonds', None)
+            if bonds is None or len(bonds) == 0:
+                raise RuntimeError('No bonds found in CASTEP file')
+
+            bond_table = CreateEmptyTableWorkspace(OutputWorkspace=self._out_ws_name)
+            bond_table.addColumn('str', 'SpeciesA')
+            bond_table.addColumn('int', 'NumberA')
+            bond_table.addColumn('str', 'SpeciesB')
+            bond_table.addColumn('int', 'NumberB')
+            bond_table.addColumn('float', 'Length')
+            bond_table.addColumn('float', 'Population')
+
+            for bond in bonds:
+                bond_table.addRow([bond['atom_a'][0],
+                                   bond['atom_a'][1],
+                                   bond['atom_b'][0],
+                                   bond['atom_b'][1],
+                                   bond['length'],
+                                   bond['population']])
 
         # We want to calculate a partial DoS
         elif self._calc_partial and self._spec_type == 'DOS':
             logger.notice('Calculating partial density of states')
             prog_reporter.report('Calculating partial density of states')
 
-            eigenvectors = file_data[4]
-
-            # Filter the dict of all ions to only those the user cares about
+            # Build a dictionary of ions that the user cares about
             partial_ions = dict()
-            for k, v in self._ion_dict.items():
-                if k in self._ions:
-                    partial_ions[k] = v
+            for ion in self._ions:
+                partial_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
 
             partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
@@ -160,29 +239,32 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                     DeleteWorkspace(partial_ws)
 
                 # Rename the summed workspace, this will be the output
-                RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._ws_name)
+                RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
             else:
                 DeleteWorkspace(sum_workspace)
 
                 group = ','.join(partial_workspaces)
-                GroupWorkspaces(group, OutputWorkspace=self._ws_name)
+                GroupWorkspaces(group, OutputWorkspace=self._out_ws_name)
 
         # We want to calculate a total DoS with scaled intensities
         elif self._spec_type == 'DOS' and self._scale_by_cross_section != 'None':
             logger.notice('Calculating summed density of states with scaled intensities')
             prog_reporter.report('Calculating density of states')
 
-            eigenvectors = file_data[4]
+            # Build a dict of all ions
+            all_ions = dict()
+            for ion in set([i['species'] for i in ions]):
+                all_ions[ion] = [i['index'] for i in ions if i['species'] == ion]
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(self._ion_dict, frequencies, eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(all_ions, frequencies, eigenvectors, weights)
 
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
                 DeleteWorkspace(partial_ws)
 
             # Rename the summed workspace, this will be the output
-            RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._ws_name)
+            RenameWorkspace(InputWorkspace=sum_workspace, OutputWorkspace=self._out_ws_name)
 
         # We want to calculate a total DoS without scaled intensities
         elif self._spec_type == 'DOS':
@@ -190,8 +272,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             prog_reporter.report('Calculating density of states')
 
             self._compute_DOS(frequencies, np.ones_like(frequencies), weights)
-            mtd[self._ws_name].setYUnit('(D/A)^2/amu')
-            mtd[self._ws_name].setYUnitLabel('Intensity')
+            mtd[self._out_ws_name].setYUnit('(D/A)^2/amu')
+            mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
         # We want to calculate a DoS with IR active
         elif self._spec_type == 'IR_Active':
@@ -202,8 +284,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             prog_reporter.report('Calculating IR intensities')
 
             self._compute_DOS(frequencies, ir_intensities, weights)
-            mtd[self._ws_name].setYUnit('(D/A)^2/amu')
-            mtd[self._ws_name].setYUnitLabel('Intensity')
+            mtd[self._out_ws_name].setYUnit('(D/A)^2/amu')
+            mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
         # We want to create a DoS with Raman active
         elif self._spec_type == 'Raman_Active':
@@ -214,10 +296,10 @@ class SimulatedDensityOfStates(PythonAlgorithm):
             prog_reporter.report('Calculating Raman intensities')
 
             self._compute_raman(frequencies, raman_intensities, weights)
-            mtd[self._ws_name].setYUnit('A^4')
-            mtd[self._ws_name].setYUnitLabel('Intensity')
+            mtd[self._out_ws_name].setYUnit('A^4')
+            mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
-        self.setProperty('OutputWorkspace', self._ws_name)
+        self.setProperty('OutputWorkspace', self._out_ws_name)
 
 #----------------------------------------------------------------------------------------
 
@@ -229,7 +311,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._bin_width = self.getProperty('BinWidth').value
         self._spec_type = self.getPropertyValue('SpectrumType')
         self._peak_func = self.getPropertyValue('Function')
-        self._ws_name = self.getPropertyValue('OutputWorkspace')
+        self._out_ws_name = self.getPropertyValue('OutputWorkspace')
         self._peak_width = self.getProperty('PeakWidth').value
         self._scale = self.getProperty('Scale').value
         self._zero_threshold = self.getProperty('ZeroThreshold').value
@@ -237,6 +319,20 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         self._sum_contributions = self.getProperty('SumContributions').value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
         self._calc_partial = (len(self._ions) > 0)
+
+#----------------------------------------------------------------------------------------
+
+    def _convert_to_cartesian_coordinates(self, unit_cell, ions):
+        """
+        Converts fractional coordinates to Cartesian coordinates given the unit
+        cell vectors and adds to existing list of ions.
+
+        @param unit_cell Unit cell vectors
+        @param ions Ion list to be updated
+        """
+        for ion in ions:
+            cell_pos = ion['fract_coord'] * unit_cell
+            ion['cartesian_coord'] = np.apply_along_axis(np.sum, 0, cell_pos)
 
 #----------------------------------------------------------------------------------------
 
@@ -256,7 +352,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 peak_widths = np.fromiter([eval(self._peak_width.replace(PEAK_WIDTH_ENERGY_FLAG, str(energies[p])))\
                                            for p in peaks], dtype=float)
             except SyntaxError:
-                raise ValueError('Invalid peak width function (must be either a float number or function containing "energy")')
+                raise ValueError('Invalid peak width function (must be either a decimal or function containing "energy")')
             peak_widths = np.abs(peak_widths)
             logger.debug('Peak widths: %s' % (str(peak_widths)))
         else:
@@ -288,6 +384,25 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
+    def _draw_sticks(self, peaks, dos_shape):
+        """
+        Draw a stick diagram for peaks.
+
+        @param hist - array of counts for each bin
+        @param peaks - the indicies of each non-zero point in the data
+        @param dos_shape - shape of the DOS array with broadened peaks
+        @return the y data
+        """
+        dos = np.zeros(dos_shape)
+        stick_intensity = self.getProperty('StickHeight').value
+
+        for index in peaks:
+            dos[index] = stick_intensity
+
+        return dos
+
+#----------------------------------------------------------------------------------------
+
     def _compute_partial_ion_workflow(self, partial_ions, frequencies, eigenvectors, weights):
         """
         Computes the partial DoS workspaces for a given set of ions (optionally scaling them by
@@ -301,7 +416,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param weights Weights for each frequency block
         @returns Tuple of list of partial workspace names and summed contribution workspace name
         """
-
         logger.debug('Computing partial DoS for: ' + str(partial_ions))
 
         partial_workspaces = []
@@ -309,55 +423,60 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Output each contribution to it's own workspace
         for ion_name, ions in partial_ions.items():
-            partial_ws_name = self._ws_name + '_' + ion_name
+            partial_ws_name = self._out_ws_name + '_' + ion_name
 
             self._compute_partial(ions, frequencies, eigenvectors, weights)
 
             # Set correct units on partial workspace
-            mtd[self._ws_name].setYUnit('(D/A)^2/amu')
-            mtd[self._ws_name].setYUnitLabel('Intensity')
+            mtd[self._out_ws_name].setYUnit('(D/A)^2/amu')
+            mtd[self._out_ws_name].setYUnitLabel('Intensity')
 
             # Add the sample material to the workspace
-            SetSampleMaterial(InputWorkspace=self._ws_name, ChemicalFormula=ion_name)
+            SetSampleMaterial(InputWorkspace=self._out_ws_name,
+                              ChemicalFormula=ion_name)
 
             # Multiply intensity by scatttering cross section
             if self._scale_by_cross_section == 'Incoherent':
-                scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().incohScatterXSection()
+                scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().incohScatterXSection()
             elif self._scale_by_cross_section == 'Coherent':
-                scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().cohScatterXSection()
+                scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().cohScatterXSection()
             elif self._scale_by_cross_section == 'Total':
-                scattering_x_section = mtd[self._ws_name].mutableSample().getMaterial().totalScatterXSection()
+                scattering_x_section = mtd[self._out_ws_name].mutableSample().getMaterial().totalScatterXSection()
 
             if self._scale_by_cross_section != 'None':
-                Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name,
-                      Operation='Multiply', Factor=scattering_x_section)
+                Scale(InputWorkspace=self._out_ws_name,
+                      OutputWorkspace=self._out_ws_name,
+                      Operation='Multiply',
+                      Factor=scattering_x_section)
 
             partial_workspaces.append(partial_ws_name)
-            RenameWorkspace(self._ws_name, OutputWorkspace=partial_ws_name)
+            RenameWorkspace(self._out_ws_name,
+                            OutputWorkspace=partial_ws_name)
 
-        total_workspace = self._ws_name + "_Total"
+        total_workspace = self._out_ws_name + "_Total"
 
         # If there is more than one partial workspace need to sum first spectrum of all
         if len(partial_workspaces) > 1:
-            sum_workspace = '__dos_sum'
+            data_x = mtd[partial_workspaces[0]].dataX(0)
+            dos_specs = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
+            stick_specs = np.zeros_like(mtd[partial_workspaces[0]].dataY(0))
 
-            # Collect spectra into a single workspace
-            AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=partial_workspaces[0],
-                          InputWorkspace2=partial_workspaces[1])
-            for ws_idx in xrange(2, len(partial_workspaces)):
-                AppendSpectra(OutputWorkspace=sum_workspace, InputWorkspace1=sum_workspace,
-                              InputWorkspace2=partial_workspaces[ws_idx])
+            for partial_ws in partial_workspaces:
+                dos_specs += mtd[partial_ws].dataY(0)
+                stick_specs += mtd[partial_ws].dataY(1)
 
-            # Sum all spectra
-            SumSpectra(InputWorkspace=sum_workspace, OutputWorkspace=total_workspace)
-            mtd[total_workspace].getSpectrum(0).setSpectrumNo(1)
+            stick_specs[stick_specs > 0.0] = self.getProperty('StickHeight').value
 
-            # Remove workspace used to sum spectra
-            DeleteWorkspace(sum_workspace)
+            self._create_dos_workspace(data_x, dos_specs, stick_specs, total_workspace)
+
+            # Set correct units on total workspace
+            mtd[total_workspace].setYUnit('(D/A)^2/amu')
+            mtd[total_workspace].setYUnitLabel('Intensity')
 
         # Otherwise just repackage the WS we have as the total
         else:
-            CloneWorkspace(InputWorkspace=partial_workspaces[0], OutputWorkspace=total_workspace)
+            CloneWorkspace(InputWorkspace=partial_workspaces[0],
+                           OutputWorkspace=total_workspace)
 
         logger.debug('Partial workspaces: ' + str(partial_workspaces))
         logger.debug('Summed workspace: ' + str(total_workspace))
@@ -446,14 +565,26 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # Find and fit peaks
         peaks = hist.nonzero()[0]
         dos = self._draw_peaks(xmin, hist, peaks)
+        dos_sticks = self._draw_sticks(peaks, dos.shape)
 
         data_x = np.arange(xmin, xmin + dos.size)
-        CreateWorkspace(DataX=data_x, DataY=dos, OutputWorkspace=self._ws_name)
-        unitx = mtd[self._ws_name].getAxis(0).setUnit("Label")
-        unitx.setLabel("Energy Shift", 'cm^-1')
+        self._create_dos_workspace(data_x, dos, dos_sticks, self._out_ws_name)
 
         if self._scale != 1:
-            Scale(InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name, Factor=self._scale)
+            Scale(InputWorkspace=self._out_ws_name, OutputWorkspace=self._out_ws_name, Factor=self._scale)
+
+#----------------------------------------------------------------------------------------
+
+    def _create_dos_workspace(self, data_x, dos, dos_sticks, out_name):
+        CreateWorkspace(DataX=data_x,
+                        DataY=np.ravel(np.array([dos, dos_sticks])),
+                        NSpec=2,
+                        VerticalAxisUnit='Text',
+                        VerticalAxisValues=[self._peak_func, 'Stick'],
+                        OutputWorkspace=out_name,
+                        EnableLogging=False)
+        unitx = mtd[out_name].getAxis(0).setUnit("Label")
+        unitx.setLabel("Energy Shift", 'cm^-1')
 
 #----------------------------------------------------------------------------------------
 
@@ -512,9 +643,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             file_data = self._parse_castep_file(file_name)
 
-        frequencies = file_data[0]
-
-        if frequencies.size == 0:
+        if file_data['frequencies'].size == 0:
             raise ValueError("Failed to load any frequencies from file.")
 
         return file_data
@@ -531,19 +660,22 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         """
         # Found header block at start of frequencies
         q1, q2, q3, weight = [float(x) for x in header_match.groups()]
-        if block_count > 1 and sum([q1, q2, q3]) == 0:
+        q_vector = [q1, q2, q3]
+        if block_count > 1 and sum(q_vector) == 0:
             weight = 0.0
-        return weight
+        return weight, q_vector
 
 #----------------------------------------------------------------------------------------
-    #pylint: disable=too-many-branches
+
     def _parse_phonon_file_header(self, f_handle):
         """
         Read information from the header of a <>.phonon file
 
         @param f_handle - handle to the file.
-        @return tuple of the number of ions and branches in the file
+        @return List of ions in file as list of tuple of (ion, mode number)
         """
+        file_data = {'ions': []}
+
         while True:
             line = f_handle.readline()
 
@@ -554,9 +686,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 self._num_ions = int(line.strip().split()[-1])
             elif 'Number of branches' in line:
                 self._num_branches = int(line.strip().split()[-1])
+            elif 'Unit cell vectors' in line:
+                file_data['unit_cell'] = self._parse_phonon_unit_cell_vectors(f_handle)
             elif 'Fractional Co-ordinates' in line:
-                self._ion_dict = dict()
-
                 if self._num_ions is None:
                     raise IOError("Failed to parse file. Invalid file header.")
 
@@ -564,33 +696,21 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 for _ in xrange(self._num_ions):
                     line = f_handle.readline()
                     line_data = line.strip().split()
-                    ion = line_data[4]
 
-                    mode = int(line_data[0]) - 1  # -1 to convert to zero based indexing
+                    species = line_data[4]
+                    ion = {'species': species}
+                    ion['fract_coord'] = np.array([float(line_data[1]), float(line_data[2]), float(line_data[3])])
+                    # -1 to convert to zero based indexing
+                    ion['index'] = int(line_data[0]) - 1
+                    ion['bond_number'] = len([i for i in file_data['ions'] if i['species'] == species]) + 1
+                    file_data['ions'].append(ion)
 
-                    # Add the ion and the mode to the dict
-                    if ion not in self._ion_dict:
-                        self._ion_dict[ion] = list()
-                    self._ion_dict[ion].append(mode)
-
-                logger.debug('All ions: ' + str(self._ion_dict))
-
-                self._partial_ion_numbers = []
-                for ion, ion_nums in self._ion_dict.items():
-                    if len(ion_nums) == 0:
-                        logger.warning("Could not find any ions of type %s" % ion)
-                    self._partial_ion_numbers += ion_nums
-
-                self._partial_ion_numbers = sorted(self._partial_ion_numbers)
-                self._partial_ion_numbers = np.asarray(self._partial_ion_numbers)
-
-                if self._partial_ion_numbers.size == 0:
-                    raise ValueError("Could not find any of the specified ions")
+                logger.debug('All ions: ' + str(file_data['ions']))
 
             if 'END header' in line:
                 if self._num_ions is None or self._num_branches is None:
                     raise IOError("Failed to parse file. Invalid file header.")
-                return
+                return file_data
 
 #----------------------------------------------------------------------------------------
 
@@ -610,6 +730,25 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         prog_reporter.report("Reading frequencies.")
 
 #----------------------------------------------------------------------------------------
+
+    def _parse_phonon_unit_cell_vectors(self, f_handle):
+        """
+        Parses the unit cell vectors in a .phonon file.
+
+        @param f_handle Handle to the file
+        @return Numpy array of unit vectors
+        """
+        data = []
+        for _ in range(3):
+            line = f_handle.readline()
+            line_data = line.strip().split()
+            line_data = [float(x) for x in line_data]
+            data.append(line_data)
+
+        return np.array(data)
+
+#----------------------------------------------------------------------------------------
+
     def _parse_phonon_eigenvectors(self, f_handle):
         vectors = []
         prog_reporter = Progress(self, 0.0, 1.0, self._num_branches * self._num_ions)
@@ -636,19 +775,23 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         @param file_name - file path of the file to read
         @return the frequencies, infra red and raman intensities and weights of frequency blocks
         """
+        file_data = {}
+
         # Header regex. Looks for lines in the following format:
         #     q-pt=    1    0.000000  0.000000  0.000000      1.0000000000    0.000000  0.000000  1.000000
         header_regex_str = r"^ +q-pt=\s+\d+ +(%(s)s) +(%(s)s) +(%(s)s) (?: *(%(s)s)){0,4}" % {'s': self._float_regex}
         header_regex = re.compile(header_regex_str)
-
         eigenvectors_regex = re.compile(r"\s*Mode\s+Ion\s+X\s+Y\s+Z\s*")
         block_count = 0
 
-        frequencies, ir_intensities, raman_intensities, weights = [], [], [], []
-        eigenvectors = []
+        record_eigenvectors = self._calc_partial \
+                           or (self._spec_type == 'DOS' and self._scale_by_cross_section != 'None') \
+                           or self._spec_type == 'BondAnalysis'
+
+        frequencies, ir_intensities, raman_intensities, weights, q_vectors, eigenvectors = [], [], [], [], [], []
         data_lists = (frequencies, ir_intensities, raman_intensities)
         with open(file_name, 'rU') as f_handle:
-            self._parse_phonon_file_header(f_handle)
+            file_data.update(self._parse_phonon_file_header(f_handle))
 
             while True:
                 line = f_handle.readline()
@@ -661,8 +804,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 if header_match:
                     block_count += 1
 
-                    weight = self._parse_block_header(header_match, block_count)
+                    weight, q_vector = self._parse_block_header(header_match, block_count)
                     weights.append(weight)
+                    q_vectors.append(q_vector)
 
                     # Parse block of frequencies
                     for line_data in self._parse_phonon_freq_block(f_handle):
@@ -671,7 +815,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
                 vector_match = eigenvectors_regex.match(line)
                 if vector_match:
-                    if self._calc_partial or (self._spec_type == 'DOS' and self._scale_by_cross_section != 'None'):
+                    if record_eigenvectors:
                         # Parse eigenvectors for partial dos
                         vectors = self._parse_phonon_eigenvectors(f_handle)
                         eigenvectors.append(vectors)
@@ -688,7 +832,16 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         raman_intensities = np.asarray(raman_intensities)
         warray = np.repeat(weights, self._num_branches)
 
-        return frequencies, ir_intensities, raman_intensities, warray, eigenvectors
+        file_data.update({
+                'frequencies': frequencies,
+                'ir_intensities': ir_intensities,
+                'raman_intensities': raman_intensities,
+                'weights': warray,
+                'q_vectors':q_vectors,
+                'eigenvectors': eigenvectors
+                })
+
+        return file_data
 
 #----------------------------------------------------------------------------------------
 
@@ -767,6 +920,24 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
 #----------------------------------------------------------------------------------------
 
+    def _parse_castep_bond(self, bond_match):
+        """
+        Parses a regex match to obtain bond information.
+
+        @param bond_match Regex match to bond data line
+        @return A dictionary defining the bond
+        """
+        bond = dict()
+
+        bond['atom_a'] = (bond_match.group(1), int(bond_match.group(2)))
+        bond['atom_b'] = (bond_match.group(3), int(bond_match.group(4)))
+        bond['population'] = float(bond_match.group(5))
+        bond['length'] = float(bond_match.group(6))
+
+        return bond
+
+#----------------------------------------------------------------------------------------
+
     def _parse_castep_file(self, file_name):
         """
         Read frequencies from a <>.castep file
@@ -781,11 +952,16 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         # Data regex. Looks for lines in the following format:
         #     +     1      -0.051481   a          0.0000000  N            0.0000000  N     +
-        data_regex_str = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+"% {'s': self._float_regex}
+        data_regex_str = r" +\+ +\d+ +(%(s)s)(?: +\w)? *(%(s)s)? *([YN])? *(%(s)s)? *([YN])? *\+" % {'s': self._float_regex}
         data_regex = re.compile(data_regex_str)
 
+        # Atom bond regex. Looks for lines in the following format:
+        #   H 006 --    O 012               0.46        1.04206
+        bond_regex_str = r" +([A-z])+ +([0-9]+) +-- +([A-z]+) +([0-9]+) +(%(s)s) +(%(s)s)" % {'s': self._float_regex}
+        bond_regex = re.compile(bond_regex_str)
+
         block_count = 0
-        frequencies, ir_intensities, raman_intensities, weights = [], [], [], []
+        frequencies, ir_intensities, raman_intensities, weights, q_vectors, bonds = [], [], [], [], [], []
         data_lists = (frequencies, ir_intensities, raman_intensities)
         with open(file_name, 'rU') as f_handle:
             self._parse_castep_file_header(f_handle)
@@ -800,8 +976,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 header_match = header_regex.match(line)
                 if header_match:
                     block_count += 1
-                    weight = self._parse_block_header(header_match, block_count)
+                    weight, q_vector = self._parse_block_header(header_match, block_count)
                     weights.append(weight)
+                    q_vectors.append(q_vector)
 
                     # Move file pointer forward to start of intensity data
                     self._find_castep_freq_block(f_handle, data_regex)
@@ -811,13 +988,30 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                         for data_list, item in zip(data_lists, line_data):
                             data_list.append(item)
 
+                # Check if we've found a bond
+                bond_match = bond_regex.match(line)
+                if bond_match:
+                    bonds.append(self._parse_castep_bond(bond_match))
+
         frequencies = np.asarray(frequencies)
         ir_intensities = np.asarray(ir_intensities)
         raman_intensities = np.asarray(raman_intensities)
         warray = np.repeat(weights, self._num_branches)
 
-        return frequencies, ir_intensities, raman_intensities, warray
+        file_data = {
+                'frequencies': frequencies,
+                'ir_intensities': ir_intensities,
+                'raman_intensities': raman_intensities,
+                'weights': warray,
+                'q_vectors':q_vectors
+                }
 
+        if len(bonds) > 0:
+            file_data['bonds'] = bonds
+
+        return file_data
+
+#----------------------------------------------------------------------------------------
 
 try:
     import scipy.constants
