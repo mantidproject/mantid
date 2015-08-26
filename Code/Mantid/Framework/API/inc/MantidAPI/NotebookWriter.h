@@ -30,7 +30,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-#include <json/writer.h>
+#include <json/json.h>
 #include <string>
 
 class NotebookWriter {
