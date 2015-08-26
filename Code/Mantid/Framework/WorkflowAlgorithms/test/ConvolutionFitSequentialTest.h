@@ -6,7 +6,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidAlgorithms/ConvolutionFitSequential.h"
+#include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 

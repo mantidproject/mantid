@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/ConvolutionFitSequential.h"
+#include "MantidWorkflowAlgorithms/ConvolutionFitSequential.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
