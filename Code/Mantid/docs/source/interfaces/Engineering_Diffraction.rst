@@ -117,8 +117,9 @@ Most of the functionality provided by this interface is based on the
 engineering diffraction Mantid algorithms (which are named with the
 prefix *Engg*). This includes :ref:`EnggCalibrate
 <algm-EnggCalibrate>`, :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`, :ref:`EnggFocus <algm-EnggFocus>` and
-several other algorithms, explained in detail in the Mantid algorithm
-description.
+<algm-EnggCalibrateFull>`, :ref:`EnggVanadiumCorrections
+<algm-EnggVanadiumCorrections>`, :ref:`EnggFocus <algm-EnggFocus>`,
+and several other algorithms, explained in detail in the Mantid
+algorithms documentation.
 
 .. categories:: Interfaces Diffraction
