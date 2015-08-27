@@ -370,7 +370,7 @@ void ConvFit::newDataLoaded(const QString wsName) {
 void ConvFit::extendResolutionWorkspace() {
   if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
     const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-
+		std::string t = resWsName.toStdString();
     API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
     appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
 
@@ -379,11 +379,13 @@ void ConvFit::extendResolutionWorkspace() {
       IAlgorithm_sptr appendAlg =
           AlgorithmManager::Instance().create("AppendSpectra");
       appendAlg->initialize();
+	  	std::string t = resWsName.toStdString();
       appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
       appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
 
       if (i == 0) {
         appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+			std::string t = resWsName.toStdString();
         m_batchAlgoRunner->addAlgorithm(appendAlg);
       } else {
         m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
