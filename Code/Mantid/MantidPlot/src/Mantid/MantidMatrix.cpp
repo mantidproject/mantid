@@ -1294,7 +1294,7 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   auto extension = m_extensionRequest.createMantidMatrixTabExtension(type);
 
   // We need to hook up the extension
-  extension.model = new MantidMatrixModel(this,m_workspace.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
+  extension.model = new MantidMatrixModel(this,m_workspace.get(),m_rows,m_cols,m_startRow,type);
   extension.tableView= new QTableView();
 
    // Add it to the extension collection, so we can set it up in place
