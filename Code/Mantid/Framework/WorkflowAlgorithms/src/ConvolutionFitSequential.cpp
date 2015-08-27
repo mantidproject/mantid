@@ -380,7 +380,7 @@ void ConvolutionFitSequential::exec() {
 
 /**
  * Check function to establish if it is for one lorentzian or Two
- * @param subfunction The unchecked substring of the function
+ * @param subFunction The unchecked substring of the function
  * @return true if the function is two lorentzian false if one lorentzian
  */
 bool ConvolutionFitSequential::checkForTwoLorentz(
