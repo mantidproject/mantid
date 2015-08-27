@@ -14,10 +14,9 @@ MantidMatrixExtensionRequest::~MantidMatrixExtensionRequest() {}
 
 /**
  * Create a MantidMatrix Tab Extension
- * @param provide the type
+ * @param type: provide the type
  * @returns a MantidMatrixTabeExtension
  */
-
 MantidMatrixTabExtension
 MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
     MantidMatrixModel::Type type) {
@@ -40,7 +39,7 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
  * Set the number format for the selection type in the extensions
  * @param type: the model type
  * @param extensions: the extensions
- * @param f: the format
+ * @param format: the format
  * @param precision: the precision
  */
 void MantidMatrixExtensionRequest::setNumberFormat(
@@ -82,6 +81,7 @@ void MantidMatrixExtensionRequest::setNumberFormatForAll(MantidMatrixTabExtensio
 /**
  * Record the numeric format
  * @param type: the type which requires recording
+ * @param extensions: the extensions
  * @param format: the format
   *@param precision: the precision
  */
@@ -131,7 +131,6 @@ int MantidMatrixExtensionRequest::getPrecision(MantidMatrixModel::Type type, Man
 
 /**
  * Set the column width
- * @param type: the type
  * @param extensions: the extensions
  * @param width: the width
  * @param numberOfColumns: the number of columns
@@ -148,7 +147,7 @@ void MantidMatrixExtensionRequest::setColumnWidthForAll(MantidMatrixTabExtension
  * @param type: the type
  * @param extensions: the extensions
  * @param width: the width
- * @param defaultVale: a default table view
+ * @param defaultValue: a default table view
  * @returns a table view object
  */
 QTableView* MantidMatrixExtensionRequest::getTableView(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, int width, QTableView* defaultValue) {
@@ -182,6 +181,7 @@ void MantidMatrixExtensionRequest::setColumnWidthPreference(MantidMatrixModel::T
  * Get the column width
  * @param type: the type
  * @param extensions: the extensions
+ * @param defaultValue: a default column width
  * @returns the precision
  */
 int MantidMatrixExtensionRequest::getColumnWidth(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, int defaultValue) {
@@ -214,6 +214,7 @@ bool MantidMatrixExtensionRequest::tableViewMatchesObject(MantidMatrixTabExtensi
  * Get the requested active table view
  * @param type: the type
  * @param extensions: the extensions
+ * @param defaultValue: a default table view pointer
  * @returns the active table view
  */
 QTableView* MantidMatrixExtensionRequest::getActiveView(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, QTableView* defaultValue) {
@@ -229,6 +230,7 @@ QTableView* MantidMatrixExtensionRequest::getActiveView(MantidMatrixModel::Type 
  * Get the requested active model
  * @param type: the type
  * @param extensions: the extensions
+ * @param defaultValue: a default active model
  * @returns the active model
  */
 MantidMatrixModel* MantidMatrixExtensionRequest::getActiveModel(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, MantidMatrixModel* defaultValue) {
@@ -253,6 +255,7 @@ void MantidMatrixExtensionRequest::reset() {
  * @param type: the type
  * @param extensions: the extensions
  * @param defaultValue: the default value
+ * @returns the column width from the preferences
  */
 int MantidMatrixExtensionRequest::getColumnWidthPreference(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, int defaultValue) {
   if (extensions.count(type) > 0) {

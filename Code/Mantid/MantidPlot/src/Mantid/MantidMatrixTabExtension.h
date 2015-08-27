@@ -10,12 +10,14 @@
  * Holds the information for a new tab.
  */
 struct MantidMatrixTabExtension {
-  MantidMatrixTabExtension(QString label, QTableView * tableView, MantidMatrixModel *model) : label(label),
+  MantidMatrixTabExtension(QString label, QTableView * tableView, MantidMatrixModel *model, MantidMatrixModel::Type type) : label(label),
                                                                                               tableView(tableView),
-                                                                                              model(model) {}
+                                                                                              model(model),
+                                                                                              type(type) {}
   MantidMatrixTabExtension(): label(""),
                               tableView(NULL),
-                              model(NULL) {}
+                              model(NULL),
+                              type(MantidMatrixModel::Type::DX){}
   QString label;
   QTableView *tableView;
   QPointer<MantidMatrixModel> model;

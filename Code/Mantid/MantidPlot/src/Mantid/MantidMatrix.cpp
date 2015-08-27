@@ -1272,7 +1272,7 @@ std::string MantidMatrix::saveToProject(ApplicationWindow* app)
 
 /**
  * Creates a MantidMatrixTabExtension of a specified type
- * @parma type: the type of the tab extension
+ * @param type: the type of the tab extension
  */
 void MantidMatrix::addMantidMatrixTabExtension(MantidMatrixModel::Type type) {
   // We only want to have unique tab extensions
@@ -1312,7 +1312,7 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
 
   // Set the column width
   auto columnWidth = m_extensionRequest.getColumnWidthPreference(type, m_extensions, MantidPreferences::MantidMatrixColumnWidthY());
-  setColumnsWidth(modelTypeToInt(type),MantidPreferences::MantidMatrixColumnWidthY());
+  setColumnsWidth(modelTypeToInt(type), columnWidth);
 
   // Set the number format
   auto format = m_extensionRequest.getFormat(type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
