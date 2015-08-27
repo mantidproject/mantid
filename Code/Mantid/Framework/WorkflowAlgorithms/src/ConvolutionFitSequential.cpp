@@ -513,7 +513,6 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
     tempFitWs = cloneWs->getProperty("OutputWorkspace");
-    std::string tempName = tempFitWs->getName();
   } else {
     throw std::runtime_error(
         "Input workspace must have either spectra or numeric axis.");
