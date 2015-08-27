@@ -127,7 +127,7 @@ public:
 
   //------------------------- Execution cases ---------------------------
   void test_exec() {
-	const int totalBins = 6;
+    const int totalBins = 6;
     auto resWs = create2DWorkspace(5, 1);
     auto redWs = create2DWorkspace(totalBins, 5);
     createConvitResWorkspace(5, totalBins);
@@ -168,8 +168,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         resultWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "ReductionWs_conv_1LFixF_s0_to_5_Result"));
-	TS_ASSERT_EQUALS(resultWs->blocksize(), totalBins);
-
+    TS_ASSERT_EQUALS(resultWs->blocksize(), totalBins);
 
     // Retrieve and analyse group table
     WorkspaceGroup_sptr groupWs;
@@ -183,7 +182,7 @@ public:
     auto groupMember =
         groupWs->getItem("ReductionWs_conv_1LFixF_s0_to_5_0_Workspace");
     auto matrixMember =
-        boost::shared_dynamic_cast<MatrixWorkspace>(groupMember);
+        boost::dynamic_pointer_cast<MatrixWorkspace>(groupMember);
 
     TS_ASSERT_EQUALS(matrixMember->blocksize(), resWs->blocksize());
 
