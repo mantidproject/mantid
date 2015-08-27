@@ -1019,12 +1019,8 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
   m_modelE = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::E);
   connectTableView(m_table_viewE,m_modelE);
 
-  // Clear the extensions and the extensionRequest object
-  m_extensions.clear();
-  m_extensionRequest.reset();
-  if (ws->hasDx(0)) {
-    addMantidMatrixTabExtension(MantidMatrixModel::DX);
-  }
+  // Update the extensions
+  updateExtensions(ws);
 
   // Restore selection
   activeView()->setCurrentIndex(curIndex);
@@ -1038,7 +1034,6 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
   invalidateBoundingRect();
 
   repaintAll();
-
 }
 
 void MantidMatrix::closeDependants()
@@ -1297,9 +1292,9 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   extension.model = new MantidMatrixModel(this,m_workspace.get(),m_rows,m_cols,m_startRow,type);
   extension.tableView= new QTableView();
 
-   // Add it to the extension collection, so we can set it up in place
-   m_extensions.insert(std::make_pair(type, extension));
-   auto mapped_extension = m_extensions[type];
+  // Add it to the extension collection, so we can set it up in place
+  m_extensions.insert(std::make_pair(type, extension));
+  auto mapped_extension = m_extensions[type];
 
   // Add a new tab
   m_tabs->insertTab(modelTypeToInt(type),mapped_extension.tableView, mapped_extension.label);
@@ -1318,5 +1313,19 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   auto format = m_extensionRequest.getFormat(type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
   auto precision = m_extensionRequest.getPrecision(type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionY());
   setNumberFormat(modelTypeToInt(type), format, precision);
+}
+
+
+/**
+ * Update the existing extensions
+ * @param ws: the new workspace
+ */
+void MantidMatrix::updateExtensions(Mantid::API::MatrixWorkspace_sptr ws) {
+  // Remove the tabs
+  for (auto it = m_extensions.begin(); it != m_extensions.end(); ++it) {
+    auto& extension = it->second;
+    extension.model = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,it->first);
+    connectTableView(extension.tableView,extension.model);
+  }
 }
 

@@ -298,7 +298,9 @@ private:
   void addMantidMatrixTabExtension(MantidMatrixModel::Type type);
   /// Hook up a MantidMatrixExtension
   void setupNewExtension(MantidMatrixModel::Type type);
-  
+  /// Update the existing extensions
+  void updateExtensions(Mantid::API::MatrixWorkspace_sptr ws);
+
   /// ExtensioRequest handleer
   MantidMatrixExtensionRequest m_extensionRequest;
 

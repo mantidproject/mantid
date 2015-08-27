@@ -242,13 +242,6 @@ MantidMatrixModel* MantidMatrixExtensionRequest::getActiveModel(MantidMatrixMode
   }
 }
 
-/**
- * Reset the MantidMatrixExtensionRequest
- */
-void MantidMatrixExtensionRequest::reset() {
-  m_extensionHandler = boost::make_shared<MantidMatrixNullExtensionHandler>();
-}
-
 
 /**
  * Get the column width preference

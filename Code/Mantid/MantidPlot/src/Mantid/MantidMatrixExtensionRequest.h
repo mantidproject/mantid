@@ -11,7 +11,6 @@ class MantidMatrixExtensionRequest {
 public:
   MantidMatrixExtensionRequest();
   ~MantidMatrixExtensionRequest();
-  void reset();
   MantidMatrixTabExtension createMantidMatrixTabExtension(MantidMatrixModel::Type type);
   void setNumberFormat(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, const QChar& format,int precision);
   void setNumberFormatForAll(MantidMatrixTabExtensionMap& extensions, const QChar& format,int precision);
