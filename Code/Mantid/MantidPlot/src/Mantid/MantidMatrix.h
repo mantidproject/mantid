@@ -34,6 +34,7 @@
 
 #include "MantidMatrixExtensionRequest.h"
 #include "MantidMatrixModel.h"
+#include "MantidMatrixTabExtension.h"
 
 
 class QLabel;
@@ -47,10 +48,6 @@ class QTabWidget;
 class UpdateDAEThread;
 class ProjectData;
 
-//class MantidMatrixTabExtension;
-
-
-//typedef std::map<MantidMatrixModel::Type, MantidMatrixTabExtension> MantidMatrixTabExtensionCollection;
 
 
 /**
@@ -111,6 +108,7 @@ public:
   double dataX(int row, int col) const;
   double dataY(int row, int col) const;
   double dataE(int row, int col) const;
+  double dataDx(int row, int col) const;
   int indexX(int row,double s)const;
   int indexY(double s)const;
 
@@ -280,7 +278,7 @@ protected:
   int m_column_width;
 
   // MantidMatrixExtensionCollection
-  //MantidMatrixTabExtensionCollection m_extensions;
+  MantidMatrixTabExtensionMap m_extensions;
 
 private:
   //name of the underlying workspace
@@ -297,12 +295,12 @@ private:
   QString m_colormapName;
 
   /// Add a MantidMatrixExtension
-  //void addMantidMatrixTabExtension(MantidMatrixModel::Type type);
+  void addMantidMatrixTabExtension(MantidMatrixModel::Type type);
   /// Hook up a MantidMatrixExtension
-  //void setupNewExtension(MantidMatrixModel::Type type);
+  void setupNewExtension(MantidMatrixModel::Type type);
   
   /// ExtensioRequest handleer
- // MantidMatrixExtensionRequest m_extensionRequest;
+  MantidMatrixExtensionRequest m_extensionRequest;
 
   friend class MantidMatrixFunction;
 };
@@ -351,21 +349,5 @@ private:
   ContourLinesEditor* m_ContourLinesEditor;
 };
 
-
-/**
- * Holds the information for a new tab.
- */
-struct MantidMatrixTabExtension {
-  MantidMatrixTabExtension(QString label, QTableView * tableView, MantidMatrixModel *model) : label(label),
-                                                                                              tableView(tableView),
-                                                                                              model(model) {}
-  MantidMatrixTabExtension(): label(""),
-                              tableView(NULL),
-                              model(NULL) {}
-  QString label;
-  QTableView *tableView;
-  QPointer<MantidMatrixModel> model;
-  MantidMatrixModel::Type type;
-};
 
 #endif

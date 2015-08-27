@@ -178,6 +178,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidDock.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
+		   src/Mantid/MantidMatrixDxExtensionHandler.cpp
 		   src/Mantid/MantidMatrixExtensionRequest.cpp
                    src/Mantid/MantidMatrixFunction.cpp
 		   src/Mantid/MantidMatrixModel.cpp
@@ -404,6 +405,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/FlowLayout.h
                    src/Mantid/IFunctionWrapper.h
                    src/Mantid/ImportWorkspaceDlg.h
+		   src/Mantid/IMantidMatrixExtensionHandler.h
                    src/Mantid/InputHistory.h
                    src/Mantid/LoadDAEDlg.h
                    src/Mantid/ManageCustomMenus.h
@@ -413,8 +415,11 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidCurve.h
                    src/Mantid/MantidDock.h
                    src/Mantid/MantidMatrixCurve.h
+		   src/Mantid/MantidMatrixDxExtensionHandler.h
 		   src/Mantid/MantidMatrixExtensionRequest.h
 		   src/Mantid/MantidMatrixModel.h
+		   src/Mantid/MantidMatrixNullExtensionHandler.h
+		   src/Mantid/MantidMatrixTabExtension.h
                    src/Mantid/MantidMDCurve.h
                    src/Mantid/MantidMDCurveDialog.h
                    src/Mantid/MantidMatrixDialog.h

@@ -67,9 +67,10 @@ namespace
 
 
 namespace {
-#if 0
 /**
  * Converts an interger value to the corrsponding enum
+ * @param i: the integer to check
+ * @returns the corresponding model type
  */
 MantidMatrixModel::Type intToModelType(int i) {
   switch(i) {
@@ -86,7 +87,27 @@ MantidMatrixModel::Type intToModelType(int i) {
       return MantidMatrixModel::Y;
   }
 }
-#endif
+
+/**
+ * Converts an model enum into a corresponding integer
+ * @parm type: the model type to check
+ * @returns the corresponding integer value
+ */
+int modelTypeToInt(MantidMatrixModel::Type type) {
+  switch(type) {
+    case MantidMatrixModel::Y:
+      return 0;
+    case MantidMatrixModel::X:
+      return 1;
+    case MantidMatrixModel::E:
+      return 2;
+    case MantidMatrixModel::DX:
+      return 3;
+    default:
+      g_log.error("Trying to convert to an unknown MantidMatrixModel to an integer. Defaulting to 0.");
+      return 0;
+  }
+}
 }
 
 
@@ -152,12 +173,11 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
 
   setGeometry(50, 50, QMIN(5, numCols())*m_table_viewY->horizontalHeader()->sectionSize(0) + 55,
     (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
-#if 0
+
   // Add an extension for the DX component if required
   if (ws->hasDx(0)) {
     addMantidMatrixTabExtension(MantidMatrixModel::DX);
   }
-#endif
 
   observeAfterReplace();
   observePreDelete();
@@ -174,7 +194,10 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
 bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
 {
   // if it's context menu on any of the views
-  if (e->type() == QEvent::ContextMenu && (object == m_table_viewY || object == m_table_viewX || object == m_table_viewE)){
+  if (e->type() == QEvent::ContextMenu && (object == m_table_viewY ||
+                                           object == m_table_viewX ||
+                                           object == m_table_viewE ||
+                                           m_extensionRequest.tableViewMatchesObject(m_extensions, object))){
     e->accept();
     emit showContextMenu();
     return true;
@@ -294,7 +317,6 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
     m_table_viewY->horizontalHeader()->setDefaultSectionSize(width);
     m_table_viewX->horizontalHeader()->setDefaultSectionSize(width);
     m_table_viewE->horizontalHeader()->setDefaultSectionSize(width);
-
     int cols = numCols();
     for(int i=0; i<cols; i++)
     {
@@ -302,6 +324,7 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
       m_table_viewX->setColumnWidth(i, width);
       m_table_viewE->setColumnWidth(i, width);
     }
+    m_extensionRequest.setColumnWidthForAll(m_extensions, width, cols);
     MantidPreferences::MantidMatrixColumnWidth(width);
   }
   else
@@ -311,11 +334,14 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
     int cols = numCols();
     for(int i=0; i<cols; i++)
       table_view->setColumnWidth(i, width);
-    switch (m_tabs->currentIndex())
+    auto currentIndex = m_tabs->currentIndex();
+    switch (currentIndex)
     {
     case 0: MantidPreferences::MantidMatrixColumnWidthY(width);break;
     case 1: MantidPreferences::MantidMatrixColumnWidthX(width);break;
     case 2: MantidPreferences::MantidMatrixColumnWidthE(width);break;
+    default:
+      m_extensionRequest.setColumnWidthPreference(intToModelType(currentIndex), m_extensions, width);
     }
   }
 
@@ -328,15 +354,15 @@ void MantidMatrix::setColumnsWidth(int width, bool all)
 */
 void MantidMatrix::setColumnsWidth(int i,int width)
 {
-
   QTableView* table_view;
   switch(i)
   {
   case 0: table_view =  m_table_viewY; MantidPreferences::MantidMatrixColumnWidthY(width); break;
   case 1: table_view =  m_table_viewX; MantidPreferences::MantidMatrixColumnWidthX(width); break;
   case 2: table_view =  m_table_viewE; MantidPreferences::MantidMatrixColumnWidthE(width); break;
-  default: table_view = activeView();
-  };
+  default: 
+    table_view = m_extensionRequest.getTableView(intToModelType(i), m_extensions, width, activeView());
+  }
 
   table_view->horizontalHeader()->setDefaultSectionSize(width);
   int cols = numCols();
@@ -357,32 +383,39 @@ int MantidMatrix::columnsWidth(int i)
   case 0: return m_table_viewY->columnWidth(0);
   case 1: return m_table_viewX->columnWidth(0);
   case 2: return m_table_viewE->columnWidth(0);
+  default:
+    return m_extensionRequest.getColumnWidth(intToModelType(i), m_extensions, activeView()->columnWidth(0));
   };
-  return activeView()->columnWidth(0);
 }
 
 /**  Return the pointer to the active table view.
 */
 QTableView *MantidMatrix::activeView()
 {
-  switch (m_tabs->currentIndex())
+  auto currentIndex = m_tabs->currentIndex();
+  switch (currentIndex)
   {
   case 0: return m_table_viewY;
   case 1: return m_table_viewX;
   case 2: return m_table_viewE;
+  default:
+    return m_extensionRequest.getActiveView(intToModelType(currentIndex), m_extensions, m_table_viewY);
   }
-  return m_table_viewY;
 }
 
 /**  Returns the pointer to the active model.
 */
 MantidMatrixModel *MantidMatrix::activeModel()
 {
-  switch (m_tabs->currentIndex())
+  auto currentIndex = m_tabs->currentIndex();
+  switch (currentIndex)
   {
   case 0: return m_modelY;
   case 1: return m_modelX;
   case 2: return m_modelE;
+  default:
+    return m_extensionRequest.getActiveModel(intToModelType(currentIndex), m_extensions, m_modelY);
+  
   }
   return m_modelY;
 }
@@ -535,6 +568,15 @@ double MantidMatrix::dataE(int row, int col) const
   return res;
 
 }
+
+double MantidMatrix::dataDx(int row, int col) const
+{
+  if (!m_workspace || row >= numRows() || col >= numCols()) return 0.;
+  double res = m_workspace->readDx(row + m_startRow)[col];
+  return res;
+}
+
+
 
 QString MantidMatrix::workspaceName() const
 {
@@ -977,6 +1019,13 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
   m_modelE = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::E);
   connectTableView(m_table_viewE,m_modelE);
 
+  // Clear the extensions and the extensionRequest object
+  m_extensions.clear();
+  m_extensionRequest.reset();
+  if (ws->hasDx(0)) {
+    addMantidMatrixTabExtension(MantidMatrixModel::DX);
+  }
+
   // Restore selection
   activeView()->setCurrentIndex(curIndex);
   if (indexList.size())
@@ -1017,12 +1066,14 @@ void MantidMatrix::setNumberFormat(const QChar& f,int prec, bool all)
     modelY()->setFormat(f,prec);
     modelX()->setFormat(f,prec);
     modelE()->setFormat(f,prec);
+    m_extensionRequest.setNumberFormatForAll(m_extensions, f, prec);
     MantidPreferences::MantidMatrixNumberFormat(f);
     MantidPreferences::MantidMatrixNumberPrecision(prec);
   }
   else
   {
     activeModel()->setFormat(f,prec);
+    auto current_index = m_tabs->currentIndex();
     switch (m_tabs->currentIndex())
     {
     case 0: MantidPreferences::MantidMatrixNumberFormatY(f);
@@ -1033,6 +1084,9 @@ void MantidMatrix::setNumberFormat(const QChar& f,int prec, bool all)
       break;
     case 2: MantidPreferences::MantidMatrixNumberFormatE(f);
       MantidPreferences::MantidMatrixNumberPrecisionE(prec);
+      break;
+    default:
+      m_extensionRequest.recordFormat(intToModelType(current_index), m_extensions, f, prec);
       break;
     }
   }
@@ -1054,6 +1108,9 @@ void MantidMatrix::setNumberFormat(int i,const QChar& f,int prec, bool all)
   case 2: m_modelE->setFormat(f,prec);
     MantidPreferences::MantidMatrixNumberFormatE(f);
     MantidPreferences::MantidMatrixNumberPrecisionE(prec);
+    break;
+  default:
+    m_extensionRequest.setNumberFormat(intToModelType(i), m_extensions, f, prec);
     break;
   }
 }
@@ -1212,7 +1269,7 @@ std::string MantidMatrix::saveToProject(ApplicationWindow* app)
   return tsv.outputLines();
 }
 
-#if 0
+
 /**
  * Creates a MantidMatrixTabExtension of a specified type
  * @parma type: the type of the tab extension
@@ -1240,18 +1297,26 @@ void MantidMatrix::setupNewExtension(MantidMatrixModel::Type type) {
   extension.model = new MantidMatrixModel(this,m_workspace.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
   extension.tableView= new QTableView();
 
-  // Add it to the extension collection
-  m_extensions.insert(std::make_pair(type, extension));
-
-  // Connect Table View
-
-  // Set the Column Width
-
-  // Set the number format
+   // Add it to the extension collection, so we can set it up in place
+   m_extensions.insert(std::make_pair(type, extension));
+   auto mapped_extension = m_extensions[type];
 
   // Add a new tab
+  m_tabs->insertTab(modelTypeToInt(type),mapped_extension.tableView, mapped_extension.label);
 
   // Install the eventfilter
+  mapped_extension.tableView->installEventFilter(this);
+
+  // Connect Table View
+  connectTableView(mapped_extension.tableView, mapped_extension.model);
+
+  // Set the column width
+  auto columnWidth = m_extensionRequest.getColumnWidthPreference(type, m_extensions, MantidPreferences::MantidMatrixColumnWidthY());
+  setColumnsWidth(modelTypeToInt(type),MantidPreferences::MantidMatrixColumnWidthY());
+
+  // Set the number format
+  auto format = m_extensionRequest.getFormat(type, m_extensions, MantidPreferences::MantidMatrixNumberFormatY());
+  auto precision = m_extensionRequest.getPrecision(type, m_extensions, MantidPreferences::MantidMatrixNumberPrecisionY());
+  setNumberFormat(modelTypeToInt(type), format, precision);
 }
 
-#endif
