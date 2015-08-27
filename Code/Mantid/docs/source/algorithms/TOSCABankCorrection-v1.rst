@@ -46,6 +46,11 @@ recalculated by averaging the intensities of the two corrected spectra, this
 compensates for the broader peaks seen on the original sum spectra due to the
 misalignment of the peaks.
 
+.. note::
+  This algorithm is only intended to provide an approximation of what the
+  measured spectra would look like if the sample was in the expected sample
+  position.
+
 Usage
 -----
 
