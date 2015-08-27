@@ -27,7 +27,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-#include <json/json.h>
+#include <json/writer.h>
 #include <string>
 
 class NotebookWriter {
