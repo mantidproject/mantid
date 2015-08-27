@@ -125,7 +125,7 @@ void GeneratePythonScript::exec() {
     file.close();
   }
 
-  NotebookWriter *nb = new NotebookWriter;
+  std::unique_ptr<NotebookWriter> nb(new NotebookWriter());
   nb->writeNotebook();
 
 }

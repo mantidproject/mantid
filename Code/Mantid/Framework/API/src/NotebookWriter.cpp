@@ -80,9 +80,12 @@ void NotebookWriter::headerCode() {
   Json::Value check_version(Json::arrayValue);
 
   check_version.append(Json::Value("import warnings"));
-  check_version.append(Json::Value("# Check if the version of Mantid being used matches the version which created the notebook."));
+  check_version.append(Json::Value("import mantid.kernel"));
+  check_version.append(Json::Value("# Check if the version of Mantid being used matches"
+                                       " the version which created the notebook."));
   check_version.append(Json::Value(std::string("if \"") + Mantid::Kernel::MantidVersion::version() +
-                                   "\" != kernel.version(): warnings.warn(\"Versions do not match. Notebook may not run as intended.\")"));
+                                   "\" != mantid.kernel.version_str(): warnings.warn(\"Version of Mantid"
+                                       " being used does not match version which created the notebook.\")"));
 
   codeCell(check_version);
 
