@@ -56,6 +56,8 @@ public:
   static const UnitLabel Nanometre;
   /// Inverse centimeters
   static const UnitLabel InverseCM;
+  /// Reciprocal lattice units
+  static const UnitLabel RLU;
 };
 
 } // namespace Units

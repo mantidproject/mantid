@@ -400,6 +400,7 @@ Spectrogram* Spectrogram::copy()
   new_s->setLevelsNumber(levels());
 
   new_s->mutableColorMap().changeScaleType(getColorMap().getScaleType());
+  new_s->mutableColorMap().setNthPower(getColorMap().getNthPower());
   return new_s;
 }
 
