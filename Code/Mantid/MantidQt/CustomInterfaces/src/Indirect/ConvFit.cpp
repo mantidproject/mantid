@@ -277,7 +277,7 @@ void ConvFit::run() {
     addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
-  if (!plot.compare("None") == 0) {
+  if (!(plot.compare("None") == 0)) {
     if (plot.compare("All") == 0) {
       int specEnd = (int)resultWs->getNumberHistograms();
       for (int i = 0; i < specEnd; i++) {

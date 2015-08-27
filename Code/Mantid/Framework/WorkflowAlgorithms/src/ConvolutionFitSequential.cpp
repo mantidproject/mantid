@@ -207,7 +207,7 @@ void ConvolutionFitSequential::exec() {
   std::string plotPeakInput = "";
   for (int i = 0; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
-    nextWs += std::to_string(i);
+	nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
   }
 
