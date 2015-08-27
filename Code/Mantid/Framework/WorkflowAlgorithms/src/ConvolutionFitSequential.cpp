@@ -260,11 +260,9 @@ void ConvolutionFitSequential::exec() {
   }
   if (funcName.compare("Lorentzian") == 0) {
     // remove peak centre
-    auto pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-               paramNames.begin();
-    if (pos != std::string::npos) {
-      paramNames.erase(paramNames.begin() + pos);
-    }
+    size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
+                 paramNames.begin();
+    paramNames.erase(paramNames.begin() + pos);
     paramNames.push_back("EISF");
   }
 
