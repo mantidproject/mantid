@@ -6,6 +6,7 @@ from mantid.api import *
 
 import ast
 import re
+import math
 import os
 import numpy as np
 
@@ -148,7 +149,8 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         else:
             raise RuntimeError('Unrecognised file extension: %s' % self._file_type)
 
-        print loaded_ws
+        if loaded_ws is None:
+            raise RuntimeError('Failed to load any data, check file format')
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', loaded_ws)
@@ -312,36 +314,23 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
 
     def _ascii_3d_import(self):
         """
-        Import 3D ASCII data (e.g. I(Q, t), S(Q, w)).
+        Import 3D ASCII data (e.g. I(Q, t)).
         """
         logger.notice('Loading ASCII data')
-
-        # Regex
-        x_axis_regex = re.compile(r"NO") #TODO
-        v_axis_regex = re.compile(r"NO") #TODO
+        from IndirectCommon import getEfixed
+        from IndirectNeutron import ChangeAngles, InstrParas
 
         # Read file
         data = []
-        x_axis = None
-        v_axis = None
+        x_axis = ('time', 'ns')
+        v_axis = ('q', 'ang^-1')
         with open(self._file_name, 'r') as handle:
             for line in handle:
                 line = line.strip()
 
                 # Ignore empty lines
-                if line == "":
+                if line == '':
                     continue
-
-                x_axis_match = x_axis_regex.match(line)
-                v_axis_match = v_axis_regex.match(line)
-
-                # Line (X) header
-                if x_axis_match:
-                    x_axis = (x_axis_match.groups(1), x_axis_match.groups(2))
-
-                # Column (V) header
-                elif v_axis_match:
-                    v_axis = (v_axis_match.groups(1), v_axis_match.groups(2))
 
                 # Data line (if not comment)
                 elif line.strip()[0] != '#':
@@ -354,27 +343,35 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         logger.debug('V axis: {0}'.format(v_axis))
 
         # Get axis and Y values
-        data = np.array(data)
-        v_axis_values = data[1:,0]
+        data = np.swapaxes(np.array(data), 0, 1)
         x_axis_values = data[0,1:]
+        v_axis_values = data[1:,0]
         y_values = np.ravel(data[1:,1:])
 
         # Create the workspace
-        create_workspace = AlgorithmManager.Instance().create('CreateWorkspace')
-        create_workspace.initialize()
-        create_workspace.setChild(True)
-        create_workspace.setLogging(False)
-        create_workspace.setProperty('OutputWorkspace', self._out_ws)
-        create_workspace.setProperty('DataX', x_axis_values)
-        create_workspace.setProperty('DataY', y_values)
-        create_workspace.setProperty('NSpec', v_axis_values.size)
-        create_workspace.setProperty('UnitX', x_axis[1])
-        create_workspace.setProperty('VerticalAxisValues', v_axis_values)
-        create_workspace.setProperty('VerticalAxisUnit', 'Empty')
-        # create_workspace.setProperty('WorkspaceTitle', )
-        create_workspace.execute()
 
-        return create_workspace.getProperty('OutputWorkspace').value
+        wks = CreateWorkspace(OutputWorkspace=self._out_ws,
+                              DataX=x_axis_values,
+                              DataY=y_values,
+                              NSpec=v_axis_values.size,
+                              UnitX=x_axis[1],
+                              EnableLogging=False)
+
+        # Load the MolDyn instrument
+        q_max = v_axis_values[-1]
+        instrument = 'MolDyn'
+        reflection = '2' if q_max <= 2.0 else '4'
+        InstrParas(wks.name(), instrument, 'simul', reflection)
+
+        # Process angles
+        efixed = getEfixed(wks.name())
+        logger.information('Qmax={0}, Efixed={1}'.format(q_max, efixed))
+        wave = 1.8 * math.sqrt(25.2429 / efixed)
+        qw = wave * v_axis_values / (4.0 * math.pi)
+        theta = 2.0 * np.degrees(np.arcsin(qw))
+        ChangeAngles(wks.name(), instrument, theta)
+
+        return wks
 
 #-------------------------------------------------------------------------------
 
@@ -385,7 +382,7 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         logger.notice('Loading ASCII data')
 
         # Regex
-        x_axis_regex = re.compile(r"\s*columns-1\s*=\s*([A-z0-9\-\s]+)\s*\(([A-z0-9-*]+)\)")
+        x_axis_regex = re.compile(r"\s*columns-1\s*=\s*([A-z0-9\-\s]+)\s*\(([A-z0-9-\s*]+)\)")
         y_axis_regex = re.compile(r"\s*columns-2\s*=\s*([A-z\-\s]+)")
 
         # Read file
@@ -427,19 +424,16 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         y_values = data[:,1]
 
         # Create the workspace
-        create_workspace = AlgorithmManager.Instance().create('CreateWorkspace')
-        create_workspace.initialize()
-        create_workspace.setChild(True)
-        create_workspace.setLogging(False)
-        create_workspace.setProperty('OutputWorkspace', self._out_ws)
-        create_workspace.setProperty('DataX', x_axis_values)
-        create_workspace.setProperty('DataY', y_values)
-        create_workspace.setProperty('NSpec', 1)
-        create_workspace.setProperty('UnitX', x_axis[1])
-        create_workspace.setProperty('WorkspaceTitle', y_axis)
-        create_workspace.execute()
+        wks = CreateWorkspace(OutputWorkspace=self._out_ws,
+                              DataX=x_axis_values,
+                              DataY=y_values,
+                              NSpec=1,
+                              UnitX=x_axis[1],
+                              WorkspaceTitle=y_axis,
+                              YUnitLabel=y_axis,
+                              EnableLogging=False)
 
-        return create_workspace.getProperty('OutputWorkspace').value
+        return wks
 
 #==============================================================================
 
