@@ -1,7 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as ms
 import numpy as np
 
 class Replicate(PythonAlgorithm):
@@ -19,9 +18,12 @@ class Replicate(PythonAlgorithm):
         return "This algorithm is used to replicate a cut of n dimensions to n+1 dimensions."
 
     def PyInit(self):
-        self.declareProperty(IMDHistoWorkspaceProperty("InputWorkspace", "", Direction.Input), "Workspace to replicate to n+1 dimensions. Contains data to be replicated.")
-        self.declareProperty(IMDHistoWorkspaceProperty("ShapeWorkspace", "", Direction.Input), "Template to define shape of output. OutputWorkspace will have the same characteristics but hold different data.")
-        self.declareProperty(IMDHistoWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output replicated workspace")
+        self.declareProperty(IMDHistoWorkspaceProperty("InputWorkspace", "", Direction.Input),
+                             "Workspace to replicate to n+1 dimensions. Contains data to be replicated.")
+        self.declareProperty(IMDHistoWorkspaceProperty("ShapeWorkspace", "", Direction.Input),
+                             "Template to define shape of output. OutputWorkspace will have the same characteristics but hold different data.")
+        self.declareProperty(IMDHistoWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+                             "Output replicated workspace")
 
     def _tile_flattened(self, source, n_replications):
         source = source.flatten()
