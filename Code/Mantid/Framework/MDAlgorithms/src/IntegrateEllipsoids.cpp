@@ -67,6 +67,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progre
     EventList &events = wksp->getEventList(i);
 
     events.switchTo(WEIGHTED_NOTIME);
+    events.compressEvents(1e-5, &events);
 
     // check to see if the event list is empty
     if (events.empty()) {
@@ -308,24 +309,6 @@ void IntegrateEllipsoids::exec() {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
-  Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
-      getProperty("OutputWorkspace");
-  if (peak_ws != in_peak_ws) {
-    peak_ws.reset(in_peak_ws->clone().release());
-  }
-  // This only fails in the unit tests which say that MaskBTP is not registered
-  try {
-    runMaskDetectors(peak_ws, "Tube", "edges");
-    runMaskDetectors(peak_ws, "Pixel", "edges");
-  } catch (...) {
-    g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
-                "edge for IntegrateIfOnEdge option");
-  }
-
-  // Get the instrument and its detectors
-  Geometry::Instrument_const_sptr inst = peak_ws->getInstrument();
-  calculateE1(inst);  //fill E1Vec for use in detectorQ
-
   double radius = getProperty("RegionRadius");
   int numSigmas = getProperty("NumSigmas");
   double cutoffIsigI = getProperty("CutoffIsigI");
@@ -335,6 +318,27 @@ void IntegrateEllipsoids::exec() {
   double back_outer_radius = getProperty("BackgroundOuterSize");
   bool hkl_integ = getProperty("IntegrateInHKL");
   bool integrateEdge = getProperty("IntegrateIfOnEdge");
+   if (!integrateEdge)
+   {
+     // This only fails in the unit tests which say that MaskBTP is not registered
+     try {
+       runMaskDetectors(in_peak_ws, "Tube", "edges");
+       runMaskDetectors(in_peak_ws, "Pixel", "edges");
+     } catch (...) {
+       g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
+                   "edge for IntegrateIfOnEdge option");
+     }
+    // Get the instrument and its detectors
+    Geometry::Instrument_const_sptr inst = in_peak_ws->getInstrument();
+    calculateE1(inst);  //fill E1Vec for use in detectorQ
+   }
+
+   Mantid::DataObjects::PeaksWorkspace_sptr peak_ws =
+       getProperty("OutputWorkspace");
+   if (peak_ws != in_peak_ws) {
+     peak_ws.reset(in_peak_ws->clone().release());
+   }
+
   // get UBinv and the list of
   // peak Q's for the integrator
   std::vector<Peak> &peaks = peak_ws->getPeaks();
@@ -418,12 +422,12 @@ void IntegrateEllipsoids::exec() {
       peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
-          integrator.ellipseIntegrateEvents(
+          integrator.ellipseIntegrateEvents(E1Vec,
               peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
       // Do not integrate if sphere is off edge of detector
 
-      if (!detectorQ(peak_q, axes_radii)) {
+      /*if (!detectorQ(peak_q, axes_radii)) {
         g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
                            "of detector for peak " << i << std::endl;
         if (!integrateEdge) {
@@ -431,7 +435,7 @@ void IntegrateEllipsoids::exec() {
           peaks[i].setSigmaIntensity(0.0);
           continue;
         }
-      }
+      }*/
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
@@ -504,12 +508,12 @@ void IntegrateEllipsoids::exec() {
         if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
           peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
-          integrator.ellipseIntegrateEvents(
+          integrator.ellipseIntegrateEvents(E1Vec,
               peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
           // Do not integrate if sphere is off edge of detector
 
-          if (!detectorQ(peak_q, axes_radii)) {
+          /*if (!detectorQ(peak_q, axes_radii)) {
             g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
                                "of detector for peak " << i << std::endl;
             if (!integrateEdge) {
@@ -517,7 +521,7 @@ void IntegrateEllipsoids::exec() {
               peaks[i].setSigmaIntensity(0.0);
               continue;
             }
-          }
+          }*/
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
           if (axes_radii.size() == 3) {
