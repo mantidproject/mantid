@@ -278,7 +278,6 @@ void ConvFit::run() {
   }
 
   if (!plot.compare("None") == 0) {
-    auto axis = resultWs->getAxis(1);
     if (plot.compare("All") == 0) {
       int specEnd = (int)resultWs->getNumberHistograms();
       for (int i = 0; i < specEnd; i++) {
