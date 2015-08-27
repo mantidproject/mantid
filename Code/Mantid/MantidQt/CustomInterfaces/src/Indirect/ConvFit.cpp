@@ -286,6 +286,10 @@ void ConvFit::run() {
                                   i, i);
       }
     } else {
+      // -1 to account for None in dropDown
+      int specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
+      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                specNumber, specNumber);
     }
   }
   m_batchAlgoRunner->executeBatchAsync();
