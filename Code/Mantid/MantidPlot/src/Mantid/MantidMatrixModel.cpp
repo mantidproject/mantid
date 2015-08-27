@@ -131,7 +131,7 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
     if (refAxis && axisIndex == 0)
     {
       //still need to protect from ragged workspaces
-      if (m_type==X)
+      if (m_type==X || m_type==DX)
       {
         if (role == Qt::ToolTipRole) 
         {
