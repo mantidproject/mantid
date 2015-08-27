@@ -151,7 +151,7 @@ public:
     nexusHelper.reopenFile();
 
     // Verify that this test_entry has a peaks_workspace entry
-    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace","NXentry") )
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace","NXentry") );
 
     // Check detector IDs
     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_1") );
