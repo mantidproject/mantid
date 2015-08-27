@@ -575,8 +575,10 @@ void EnggDiffractionPresenter::inputChecksBeforeFocus(const std::string &runNo,
  * Builds the name of the output focused file, given the sample run
  * number and the bank to focus.
  *
- * @param vanNo number of the Vanadium run, which is normally part of the name
- * @param ceriaNo number of the Ceria run, which is normally part of the name
+ * @param runNo number of the run for which we want a focused output
+ * file name
+ *
+ * @param bank bank number which is normally used as a suffix
  *
  * @return filename (without the full path)
  */
