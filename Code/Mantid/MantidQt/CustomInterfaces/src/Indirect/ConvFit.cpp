@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -238,7 +239,7 @@ void ConvFit::run() {
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
   QString temperature = m_uiForm.leTempCorrection->text();
-  QString plot = m_uiForm.cbPlotType->currentText();
+  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
   const bool save = m_uiForm.ckSave->isChecked();
 
   // Run ConvolutionFitSequential Algorithm
@@ -271,13 +272,21 @@ void ConvFit::run() {
         Mantid::Kernel::ConfigService::Instance().getString(
             "defaultsave.directory"));
     // Check validity of save path
-	QString QresultWsName = QString::fromStdString(resultWs->getName());
+    QString QresultWsName = QString::fromStdString(resultWs->getName());
     QString fullPath = saveDir.append(QresultWsName).append(".nxs");
     addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
   if (!plot.compare("None") == 0) {
-
+    auto axis = resultWs->getAxis(1);
+    if (plot.compare("All") == 0) {
+      int specEnd = (int)resultWs->getNumberHistograms();
+      for (int i = 0; i < specEnd; i++) {
+        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                  i, i);
+      }
+    } else {
+    }
   }
   m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
