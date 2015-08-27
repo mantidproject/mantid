@@ -4,7 +4,7 @@
 #include "MantidMatrixModel.h"
 #include "MantidMatrixTabExtension.h"
 #include "IMantidMatrixExtensionHandler.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 
 class MantidMatrixExtensionRequest {
@@ -27,8 +27,7 @@ public:
   int getColumnWidthPreference(MantidMatrixModel::Type type, MantidMatrixTabExtensionMap& extensions, int defaultValue);
 
 private:
-  boost::shared_ptr<IMantidMatrixExtensionHandler> m_extensionHandler;
-  void setHandler(boost::shared_ptr<IMantidMatrixExtensionHandler> handler);
+  std::unique_ptr<IMantidMatrixExtensionHandler> m_extensionHandler;
 };
 
 #endif

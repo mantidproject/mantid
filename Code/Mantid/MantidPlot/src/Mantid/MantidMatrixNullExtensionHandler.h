@@ -14,12 +14,6 @@ public:
   MantidMatrixNullExtensionHandler() {}
   virtual ~MantidMatrixNullExtensionHandler() {}
 
-  virtual void
-  setSuccessor(boost::shared_ptr<IMantidMatrixExtensionHandler> ) {
-    throw std::runtime_error("You have seemed to attached an invalid extension to the "
-                "Mantid Matrix.");
-  }
-
   virtual void setNumberFormat(MantidMatrixTabExtension& ,
                                const QChar &, int ) {
     throw std::runtime_error("You have seemed to attached an invalid extension to the "

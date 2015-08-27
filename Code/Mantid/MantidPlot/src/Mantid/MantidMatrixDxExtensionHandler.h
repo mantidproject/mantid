@@ -9,7 +9,6 @@ class MantidMatrixDxExtensionHandler : public IMantidMatrixExtensionHandler {
 public:
   MantidMatrixDxExtensionHandler();
   virtual ~MantidMatrixDxExtensionHandler();
-  virtual void setSuccessor(boost::shared_ptr<IMantidMatrixExtensionHandler> successor);
   virtual void setNumberFormat(MantidMatrixTabExtension& extension, const QChar& format,int precision);
   virtual void recordFormat(MantidMatrixTabExtension& extension, const QChar &format, int precision);
   virtual QChar getFormat(MantidMatrixTabExtension& extension);
@@ -20,7 +19,6 @@ public:
   virtual void setColumnWidthPreference(MantidMatrixTabExtension& extension, int width);
   virtual int getColumnWidthPreference(MantidMatrixTabExtension& extension);
 private:
-  boost::shared_ptr<IMantidMatrixExtensionHandler> m_successor;
   MantidMatrixModel::Type m_type;
 };
 #endif

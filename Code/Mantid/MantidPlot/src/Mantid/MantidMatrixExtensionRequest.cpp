@@ -7,8 +7,7 @@
 
 
 MantidMatrixExtensionRequest::MantidMatrixExtensionRequest()
-    : m_extensionHandler(
-          boost::make_shared<MantidMatrixNullExtensionHandler>()) {}
+    : m_extensionHandler(new MantidMatrixNullExtensionHandler()) {}
 
 MantidMatrixExtensionRequest::~MantidMatrixExtensionRequest() {}
 
@@ -23,12 +22,15 @@ MantidMatrixExtensionRequest::createMantidMatrixTabExtension(
   MantidMatrixTabExtension extension;
 
   switch (type) {
-  case MantidMatrixModel::DX:
-    extension.label = "X Errors";
-    extension.type = type;
-    // Extend the chain of responsibility
-    setHandler(boost::make_shared<MantidMatrixDxExtensionHandler>());
-    return extension;
+  case MantidMatrixModel::DX: {
+      extension.label = "X Errors";
+      extension.type = type;
+      // Extend the chain of responsibility
+      std::unique_ptr<MantidMatrixDxExtensionHandler> dxHandler(new MantidMatrixDxExtensionHandler());
+      dxHandler->setSuccessor(m_extensionHandler);
+      m_extensionHandler = std::move(dxHandler);
+      return extension;
+    }
   default:
     throw std::runtime_error(
         "The requested extension type has not been implemented yet");
@@ -54,16 +56,6 @@ void MantidMatrixExtensionRequest::setNumberFormat(
   }
 }
 
-/**
- * Sets a new handler in the chain of responsibility
- * @param handler: the new handler
- */
-void MantidMatrixExtensionRequest::setHandler(
-    boost::shared_ptr<IMantidMatrixExtensionHandler> handler) {
-  handler->setSuccessor(m_extensionHandler);
-  m_extensionHandler = handler;
-  boost::shared_ptr<IMantidMatrixExtensionHandler> hh = boost::make_shared<MantidMatrixDxExtensionHandler>();
-}
 
 /**
  * Set number format for all extensions

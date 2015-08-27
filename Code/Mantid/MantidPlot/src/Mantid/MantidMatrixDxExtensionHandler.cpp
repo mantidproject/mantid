@@ -7,13 +7,6 @@ MantidMatrixDxExtensionHandler::MantidMatrixDxExtensionHandler() : m_type(Mantid
 
 MantidMatrixDxExtensionHandler::~MantidMatrixDxExtensionHandler() {}
 
-/**
- * Sets the successor of the chain
- * @param successor: successor element
- */
-void MantidMatrixDxExtensionHandler::setSuccessor(boost::shared_ptr<IMantidMatrixExtensionHandler> successor) {
-  m_successor = successor;
-}
 
 /**
  * Sets the number format for DX values

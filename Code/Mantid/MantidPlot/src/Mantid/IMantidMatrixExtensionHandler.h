@@ -2,13 +2,12 @@
 #define MANTIDPLOT_IMANTIDMATRIXEXTENSIONHANDLER_H
 
 #include "MantidMatrixTabExtension.h"
+#include "MantidKernel/Chainable.h"
 #include "boost/shared_ptr.hpp"
 
-class IMantidMatrixExtensionHandler {
+class IMantidMatrixExtensionHandler : public Mantid::Kernel::Chainable<IMantidMatrixExtensionHandler> {
 public:
   virtual ~IMantidMatrixExtensionHandler() {}
-  virtual void
-  setSuccessor(boost::shared_ptr<IMantidMatrixExtensionHandler> successor) = 0;
   virtual void setNumberFormat(MantidMatrixTabExtension& extension,
                                const QChar &format, int precision) = 0;
   virtual void recordFormat(MantidMatrixTabExtension& extension, const QChar &format, int precision) = 0;
