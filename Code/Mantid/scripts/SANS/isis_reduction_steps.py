@@ -2248,8 +2248,9 @@ class UserFile(ReductionStep):
                 self._readDetectorCorrections(upper_line[8:], reducer)
             elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
                 self._readFrontRescaleShiftSetup(det_specif, reducer)
-            elif any(it == det_specif.strip() for it in ['FRONT','REAR','BOTH','MERGE','MERGED']):
+            elif any(it == det_specif.strip() for it in ['FRONT','REAR','BOTH','MERGE','MERGED', 'MAIN', 'HAB']):
                 # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
+                # we also accomodate DET/MAIN and DET/HAB here which are specificially for LOQ
                 det_specif = det_specif.strip()
                 if det_specif == 'MERGE':
                     det_specif = 'MERGED'
