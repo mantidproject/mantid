@@ -375,7 +375,7 @@ void ConvolutionFitSequential::exec() {
     renamer->executeAsChildAlg();
   }
   
-  setProperty("OutputWorkspace", (outputWsName + "_Result"));
+  setProperty("OutputWorkspace", resultWs->name());
 }
 
 /**

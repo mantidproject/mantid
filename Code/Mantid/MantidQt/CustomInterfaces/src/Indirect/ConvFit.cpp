@@ -262,16 +262,22 @@ void ConvFit::run() {
   cfs->setProperty("MaxIterations", maxIterations);
   cfs->execute();
 
+  MatrixWorkspace_sptr resultWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          cfs->getProperty("OutputWorkspace"));
+
   if (save) {
     QString saveDir = QString::fromStdString(
         Mantid::Kernel::ConfigService::Instance().getString(
             "defaultsave.directory"));
     // Check validity of save path
-    QString resultWsName =
-        QString::fromStdString(cfs->getProperty("OutputWorkspace"));
-	QString fullPath = saveDir.append(resultWsName).append(".nxs");
-    addSaveWorkspaceToQueue(resultWsName, fullPath);
-	
+	QString QresultWsName = QString::fromStdString(resultWs->getName());
+    QString fullPath = saveDir.append(QresultWsName).append(".nxs");
+    addSaveWorkspaceToQueue(QresultWsName, fullPath);
+  }
+
+  if (!plot.compare("None") == 0) {
+
   }
   m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
