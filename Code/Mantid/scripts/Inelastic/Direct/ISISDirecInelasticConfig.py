@@ -10,7 +10,7 @@ from xml.dom import minidom
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS','LET','MERLIN','MARI','HET']
 # the list of the parameters, which can be replaced if found in user files
-USER_PROPERTIES=['$instrument$', '$cycle$', '$start_date$', '$rb_folder']
+USER_PROPERTIES=['instrument', 'cycleID', 'start_date', 'rb_folder']
 
 class UserProperties(object):
     """Helper class to define & retrieve user properties
@@ -19,33 +19,37 @@ class UserProperties(object):
     def __init__(self,user_id=None):
         """ None is done for com"""
         self._user_id = str(user_id)
-        self.instrument={}
-        self.rb_dir = {}
-        self.cycle_IDlist={}
-        self.start_dates = {}
+        self._instrument={}
+        self._rb_dirs = {}
+        self._cycle_IDs={}
+        self._start_dates = {}
         self._recent_dateID=None
 
 #
     def set_user_properties(self,instrument,start_date,cycle,rb_folder):
-        """Define the information, user office provides about user. The info has the form:
+        """Define the information, user office provides about user. 
+
+           The info has the form:
            instrument -- string with full instrument name
-           date       -- experiment start date in the form YYYYMMDD
-           cycle      -- the cycle id in the form CYCLEYYYYN where N is the cycle number within the year
-           rb_folder  -- the working folder available for all users and IS participating in the experiment.
+           date       -- string with experiment start date in the form YYYYMMDD
+           cycle      -- string with the cycle id in the form CYCLEYYYYN 
+                         where N is the cycle number within the year
+           rb_folder  -- string containing the full path to working folder available 
+                        for all users and IS participating in the experiment.
         """
         self.check_input(instrument,start_date,cycle,rb_folder)
         #when user starts
         recent_date = date(int(start_date[0:4]),int(start_date[4:6]),int(start_date[6:8]))
         recent_date_id = str(recent_date)
-        self.start_dates[recent_date_id]=recent_date
+        self._start_dates[recent_date_id]=recent_date
 
         # a data which define the cycle ID e.g 2014_3 or something
-        self.cycle_IDlist[recent_date_id] = (str(cycle[5:9]),str(cycle[9:10]))
-        self.instrument[recent_date_id]   = str(instrument).upper()
-        self.rb_dir[recent_date_id]       = rb_folder
+        self._cycle_IDs[recent_date_id] = (str(cycle[5:9]),str(cycle[9:10]))
+        self._instrument[recent_date_id]   = str(instrument).upper()
+        self._rb_dirs[recent_date_id]       = rb_folder
         if self._recent_dateID:
-            max_date = self.start_dates[self._recent_dateID]
-            for date_key,a_date in self.start_dates.iteritems():
+            max_date = self._start_dates[self._recent_dateID]
+            for date_key,a_date in self._start_dates.iteritems():
                 if a_date>max_date:
                     self._recent_dateID = date_key
                     max_date = a_date
@@ -53,43 +57,59 @@ class UserProperties(object):
             self._recent_dateID = recent_date_id
 
     def replace_variables(self,data_string):
-
+        str_parts = data_string.split('$')
+        for prop in USER_PROPERTIES:
+            try:
+                ind = str_parts.index(prop)
+            except :
+                ind = None
+            if not ind is None:
+               str_parts[ind] = str(getattr(self,prop))
+        data_string = "".join(str_parts)
         return data_string        
 #
     @property
     def start_date(self):
         """Last start date"""
         if self._recent_dateID:
-            return  self.start_dates[self._recent_dateID]
+            return  self._start_dates[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
-#
+ #
     @property
-    def last_instrument(self):
+    def instrument(self):
         """return instrument used in last actual experiment"""
         if self._recent_dateID:
-            return  self.instrument[self._recent_dateID]
+            return  self._instrument[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
 #
     @property
-    def last_rbdir(self):
+    def rb_dir(self):
         """return rb folder used in last actual instrument"""
         if self._recent_dateID:
-            return  self.rb_dir[self._recent_dateID]
+            return  self._rb_dirs[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
 #
     @property
-    def last_cycleID(self):
+    def cycleID(self):
+        """return last cycleID the user is participating"""
+        if self._recent_dateID:
+            year,num =self._cycle_IDs[self._recent_dateID]
+            return  "{0}_{1}".format(year,num)
+        else:
+            raise RuntimeError("User's experiment date is not defined. User undefined")
+    @property
+    def cycle(self):
         """return last cycle the user is participating"""
         if self._recent_dateID:
-            return  self.cycle_IDlist[self._recent_dateID]
+            return  self._cycle_IDs[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
 #
     @property
-    def user_id(self):
+    def userID(self):
         return self._user_id
 
     def check_input(self,instrument,start_date,cycle,rb_folder):
@@ -255,19 +275,19 @@ class MantidConfigDirectInelastic(object):
     def _define_fullpath_to_copy(self,short_source_file=None,short_target_file=None):
         """Append full path to source and target files """
 
-        InstrName = self._user.last_instrument
+        InstrName = self._user.instrument
         rb_folder = self._user.rb_dir
         if short_source_file is None:
             short_source_file = self._sample_reduction_file(InstrName)
         if short_target_file is None:
-            CycleID = self._user.last_cycleID
+            CycleID = self._user.cycleID
             short_target_file = self._target_reduction_file(InstrName,CycleID)
 
 
         source_path = os.path.join(self._script_repo,'direct_inelastic',InstrName.upper())
-        full_source = os.path.join(source_path,source_file)
+        full_source = os.path.join(source_path,short_source_file)
 
-        full_target = os.path.join(rb_folder,target_file)
+        full_target = os.path.join(rb_folder,short_target_file)
         return full_source,full_target
 
 #
@@ -383,7 +403,7 @@ class MantidConfigDirectInelastic(object):
     def init_user(self,fedid,theUser):
         """Define settings, specific to a user"""
         #
-        for instr in theUser.instrument.values():
+        for instr in theUser._instrument.values():
             if not self.is_inelastic(instr):
                 raise RuntimeError('Instrument {0} is not among acceptable instruments'.format(instrument))
         self._user=theUser
@@ -392,14 +412,14 @@ class MantidConfigDirectInelastic(object):
         user_folder = os.path.join(self._home_path,self._fedid)
         if not os.path.exists(user_folder):
             raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(fedid))
-        for rb_folder in theUser.rb_dir.values():
+        for rb_folder in theUser._rb_dirs.values():
             if not os.path.exists(str(rb_folder)):
                 raise RuntimeError("Experiment folder with {0} does not exist. Create such folder first".format(rb_folder))
         #
         # how to check cycle folders, they may not be available
         self._cycle_data_folder=set()
-        for date_key,folder_id in theUser.cycle_IDlist.items():
-            self._cycle_data_folder.add(self.get_data_folder_name(theUser.instrument[date_key],folder_id))
+        for date_key,folder_id in theUser._cycle_IDs.items():
+            self._cycle_data_folder.add(self.get_data_folder_name(theUser._instrument[date_key],folder_id))
         # Initialize configuration settings
         self._dynamic_configuration = copy.deepcopy(self._dynamic_options_base)
         self._init_config()
@@ -427,7 +447,7 @@ class MantidConfigDirectInelastic(object):
     def _set_default_inst(self):
         """Set up last instrument, deployed by user"""
         if self._user:
-            InstrName = self._user.last_instrument
+            InstrName = self._user.instrument
             self._dynamic_configuration.append('default.instrument={0}'.format(InstrName))
         else:
             self._dynamic_configuration.append('default.instrument={0}'.format('MARI'))
@@ -449,7 +469,7 @@ class MantidConfigDirectInelastic(object):
 
         # define and append user scripts search path
         user_path_part = copy.deepcopy(self._python_user_scripts)
-        for instr in self._user.instrument.values():
+        for instr in self._user._instrument.values():
             user_path_part.add(os.path.join('direct_inelastic',instr.upper()))
         for part in user_path_part:
             path +=';'+os.path.join(self._script_repo,part)+'/'
@@ -459,7 +479,8 @@ class MantidConfigDirectInelastic(object):
     def _set_rb_directory(self):
         """Set up default save directory, the one where data are saved by default"""
         if self._user:
-            rb_folder = self._user.last_rbdir
+            rb_folder = self._user.rb_dir
+
             self._dynamic_configuration.append('defaultsave.directory={0}'.format(rb_folder))
         else:
             raise RuntimeError("Can not define RB folder without user being defined")
@@ -470,7 +491,7 @@ class MantidConfigDirectInelastic(object):
         if not self._user:
             raise RuntimeError("Can not define Data search path without user being defined")
 
-        instr_name = self._user.last_instrument
+        instr_name = self._user.instrument
         map_mask_dir  = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder),\
                                                      '{0}'.format(str.lower(instr_name))))
         # set up all data folders
@@ -479,7 +500,7 @@ class MantidConfigDirectInelastic(object):
         for folder in all_data_folders[1:]:
             data_dir +=';'+os.path.abspath('{0}'.format(folder))
 
-        all_rb_folders = self._user.rb_dir
+        all_rb_folders = self._user._rb_dirs
         for folder in all_rb_folders.values():
             data_dir+=';'+os.path.abspath('{0}'.format(folder))
 
@@ -504,9 +525,9 @@ class MantidConfigDirectInelastic(object):
         if platform.system() != 'Windows':
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_path))
 
-        InstrName = self._user.last_instrument
-        cycleID   = self._user.last_cycleID
-        rb_folder = self._user.last_rbdir
+        InstrName = self._user.instrument
+        cycleID   = self._user.cycleID
+        rb_folder = self._user.rb_dir
         self.copy_reduction_sample(InstrName,cycleID,rb_folder)
         #
         self.make_map_mask_links(user_path)

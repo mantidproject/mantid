@@ -53,7 +53,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
     def makeFakeSourceReductionFile(self,mcf,contents=None):
 
-        instr_name = mcf._user.get_last_instrument()
+        instr_name = mcf._user.instrument
 
         file_path = os.path.join(self.UserScriptRepoDir,'direct_inelastic',instr_name.upper())
         if not os.path.exists(file_path):
@@ -82,15 +82,22 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             shutil.rmtree(self.userRootDir,ignore_errors=True)
 
     def test_UserProperties(self):
-        user = UserProperties()
+        user = UserProperties(self.userID)
 
         user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
 
         id = user._recent_dateID
-        self.assertEqual(user.instrument[id],'MERLIN')
-        self.assertEqual(user.cycle_IDlist[id],('2015','1'))
-        self.assertEqual(user.start_dates[id],datetime.date(2015,05,03))
-        self.assertEqual(user.rb_dir[id],self.rbdir)
+        self.assertEqual(user._instrument[id],'MERLIN')
+        self.assertEqual(user._cycle_IDs[id],('2015','1'))
+        self.assertEqual(user._start_dates[id],datetime.date(2015,05,03))
+        self.assertEqual(user._rb_dirs[id],self.rbdir)
+        self.assertEqual(user.userID,self.userID)
+
+        self.assertEqual(user.instrument,'MERLIN')
+        self.assertEqual(user.cycleID,'2015_1')
+        self.assertEqual(user.start_date,datetime.date(2015,05,03))
+        self.assertEqual(user.rb_dir,self.rbdir)
+
 
         self.assertRaises(RuntimeError,user.set_user_properties,'SANS2D',self.start_date,self.cycle,self.rbdir)
         self.assertRaises(RuntimeError,user.set_user_properties,'HET','201400000',self.cycle,self.rbdir)
@@ -106,9 +113,11 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         if os.path.exists(rbdir):
             shutil.rmtree(rbdir)
 
-        self.assertEqual(len(user.instrument),2)
+        self.assertEqual(len(user.instrument),6)
+        self.assertEqual(len(user._instrument),2)
+
         self.assertEqual(user._recent_dateID,id)
-        self.assertEqual(user.start_dates['2000-01-12'],datetime.date(2000,01,12))
+        self.assertEqual(user._start_dates['2000-01-12'],datetime.date(2000,01,12))
 
         targetDir = self.get_save_dir()
         rbdir = os.path.join(self.userRootDir,'RB1999666')
@@ -118,10 +127,11 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         if os.path.exists(rbdir):
             shutil.rmtree(rbdir)
 
-        self.assertEqual(len(user.instrument),3)
+        self.assertEqual(len(user._instrument),3)
         id = user._recent_dateID
         self.assertEqual(id,'2016-12-01')
-        self.assertEqual(user.instrument[id],'MERLIN')
+        self.assertEqual(user._instrument[id],'MERLIN')
+        self.assertEqual(user.instrument,'MERLIN')
 
     def test_build_config(self):
         # script verifies the presence of a folder, not its contents.
@@ -155,15 +165,15 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(self.userRootDir,'.mantid')))
         self.assertTrue(os.path.exists(config_file))
 
-        cur_cycleID = mcf._user.get_last_cycleID()
-        instr = mcf._user.get_last_instrument()
+        cur_cycleID = mcf._user.cycleID
+        instr = mcf._user.instrument
         targ_file = mcf._target_reduction_file(instr,cur_cycleID)
 
-        reduction_file = os.path.join(mcf._user.get_last_rbdir(),targ_file)
+        reduction_file = os.path.join(mcf._user.rb_dir,targ_file)
         self.assertTrue(os.path.isfile(reduction_file))
 
         self.assertFalse(mcf.config_need_replacing(config_file))
-        start_date = user.get_start_date()
+        start_date = user.start_date
         date_in_apast=datetime.date(start_date.year,start_date.month,start_date.day-1)
         time_in_a_past = time.mktime(date_in_apast.timetuple())
         os.utime(config_file,(time_in_a_past,time_in_a_past))
@@ -215,7 +225,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertTrue(os.path.exists(config_file))
 
         self.assertFalse(mcf.config_need_replacing(config_file))
-        start_date = user.get_start_date()
+        start_date = user.start_date
         date_in_apast=datetime.date(start_date.year,start_date.month,start_date.day-1)
         time_in_a_past = time.mktime(date_in_apast.timetuple())
         os.utime(config_file,(time_in_a_past,time_in_a_past))
@@ -242,8 +252,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # Check sample reduction file
         #
         full_rb_path = rbdir2
-        cycle_id = user1.get_last_cycleID()
-        instr = user1.get_last_instrument()
+        cycle_id = user1.cycleID
+        instr = user1.instrument
         target_file = mcf._target_reduction_file(instr,cycle_id)
         full_target_file = os.path.join(full_rb_path,target_file)
         self.assertTrue(os.path.exists(full_target_file))
@@ -267,6 +277,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         if os.path.exists(user1RootDir):
             shutil.rmtree(user1RootDir,ignore_errors=True)
 
+    def test_replace_user_variables(self):
+        user = UserProperties("wkc26243")
+        user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
+
+        targ_string = user.replace_variables('$instrument$ReductionScript$cycleID$.py')
+        self.assertEqual(self.instrument+'ReductionScript2015_1.py',targ_string)
+        
 
 
 
