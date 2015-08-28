@@ -1,24 +1,30 @@
-import os
+﻿import os
 import platform
 import shutil
 import re
 import copy
 from datetime import date
 import time
+from xml.dom import minidom
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS','LET','MERLIN','MARI','HET']
+# the list of the parameters, which can be replaced if found in user files
+USER_PROPERTIES=['$instrument$', '$cycle$', '$start_date$', '$rb_folder']
 
 class UserProperties(object):
     """Helper class to define & retrieve user properties
        as retrieved from file provided by user office
     """
-    def __init__(self):
+    def __init__(self,user_id=None):
+        """ None is done for com"""
+        self._user_id = str(user_id)
         self.instrument={}
         self.rb_dir = {}
         self.cycle_IDlist={}
         self.start_dates = {}
         self._recent_dateID=None
+
 #
     def set_user_properties(self,instrument,start_date,cycle,rb_folder):
         """Define the information, user office provides about user. The info has the form:
@@ -45,34 +51,46 @@ class UserProperties(object):
                     max_date = a_date
         else:
             self._recent_dateID = recent_date_id
+
+    def replace_variables(self,data_string):
+
+        return data_string        
 #
-    def get_start_date(self):
+    @property
+    def start_date(self):
         """Last start date"""
         if self._recent_dateID:
             return  self.start_dates[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
 #
-    def get_last_instrument(self):
+    @property
+    def last_instrument(self):
         """return instrument used in last actual experiment"""
         if self._recent_dateID:
             return  self.instrument[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
 #
-    def get_last_rbdir(self):
+    @property
+    def last_rbdir(self):
         """return rb folder used in last actual instrument"""
         if self._recent_dateID:
             return  self.rb_dir[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
 #
-    def get_last_cycleID(self):
+    @property
+    def last_cycleID(self):
         """return last cycle the user is participating"""
         if self._recent_dateID:
             return  self.cycle_IDlist[self._recent_dateID]
         else:
             raise RuntimeError("User's experiment date is not defined. User undefined")
+#
+    @property
+    def user_id(self):
+        return self._user_id
 
     def check_input(self,instrument,start_date,cycle,rb_folder):
         """Verify that input is correct"""
@@ -134,14 +152,19 @@ class MantidConfigDirectInelastic(object):
         self._python_mantid_path = ['scripts/Calibration/','scripts/Examples/','scripts/Interface/','scripts/Vates/']
         # Static paths to user scripts, defined wrt script repository root
         self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
-        # File name, used as source of reduction scripts for particular instrument
-        self._sample_reduction_file = lambda InstrName : '{0}Reduction_Sample.py'.format(InstrName)
-        # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
-        self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}_{2}.py'.format(InstrName,cycleID[0],cycleID[1])
         # Relative to a particular user path to place links, important to user
         self._user_specific_link_path='Desktop'
         # Relative to a particular user name of folders with link to instrument files
         self._map_mask_link_name = 'instrument_files'
+        # the name of the file, which describes python files to copy to user. The file has to be placed in 
+        #  script_repository/instrument_name folder
+        # File name, used as source of reduction scripts for particular instrument
+        self._user_files_descr = 'USER_Files_description.xml'
+        # fall back files defined to use if USER_Files_description is for some reason not available or wrong
+        self._sample_reduction_file = lambda InstrName : '{0}Reduction_Sample.py'.format(InstrName)
+        # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
+        self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}_{2}.py'.format(InstrName,cycleID[0],cycleID[1])
+
 
         # Static contents of the Mantid Config file
         self._header = ("# This file can be used to override any properties for this installation.\n"
@@ -204,7 +227,7 @@ class MantidConfigDirectInelastic(object):
         if not os.path.isfile(config_file_name):
             return True
         modification_date = date.fromtimestamp(os.path.getmtime(config_file_name))
-        start_date = self._user.get_start_date()
+        start_date = self._user.start_date
         if modification_date<start_date:
             return True
         else:
@@ -220,7 +243,7 @@ class MantidConfigDirectInelastic(object):
         if not os.path.isfile(target_script_name):
             return True
         #Always replace sample file if it has not been touched
-        start_date = self._user.get_start_date()
+        start_date = self._user.start_date
         # this time is set up to the file, copied from the repository
         sample_file_time = time.mktime(start_date.timetuple())
         targ_file_time  = os.path.getmtime(target_script_name)
@@ -229,21 +252,35 @@ class MantidConfigDirectInelastic(object):
         else: # somebody have modified the target file. Leave it alone
             return False
 #
-    def copy_reduction_sample(self,InstrName,CycleID,rb_folder):
-        """Method copies sample reduction script from user script repository
-           to user folder.
-        """
+    def _define_fullpath_to_copy(self,short_source_file=None,short_target_file=None):
+        """Append full path to source and target files """
 
-        source_file = self._sample_reduction_file(InstrName)
+        InstrName = self._user.last_instrument
+        rb_folder = self._user.rb_dir
+        if short_source_file is None:
+            short_source_file = self._sample_reduction_file(InstrName)
+        if short_target_file is None:
+            CycleID = self._user.last_cycleID
+            short_target_file = self._target_reduction_file(InstrName,CycleID)
+
 
         source_path = os.path.join(self._script_repo,'direct_inelastic',InstrName.upper())
         full_source = os.path.join(source_path,source_file)
 
+        full_target = os.path.join(rb_folder,target_file)
+        return full_source,full_target
+
+#
+    def copy_reduction_sample(self,InstrName,CycleID,rb_folder):
+        """Method copies sample reduction script from user script repository
+           to user folder.
+        """
+        full_source,full_target = self._define_fullpath_to_copy(self._sample_reduction_file(InstrName),
+                                self._target_reduction_file(InstrName,CycleID))
+
         if not os.path.isfile(full_source):
             return
 
-        target_file = self._target_reduction_file(InstrName,CycleID)
-        full_target = os.path.join(rb_folder,target_file)
         # already have target file or modified by user
         if not self.script_need_replacing(full_source,full_target):
             return
@@ -255,9 +292,73 @@ class MantidConfigDirectInelastic(object):
         if platform.system() != 'Windows':
             os.system('chown '+self._fedid+':'+self._fedid+' '+full_target)
         # Set up the file creation and modification dates to the users start date
-        start_date = self._user.get_start_date()
+        start_date = self._user.start_date
         file_time = time.mktime(start_date.timetuple())
         os.utime(full_target,(file_time,file_time))
+
+    def _copy_and_parse_user_file(self,input_file,output_file,replacemets_list):
+        """Method processes file provided for user and replaces list of keywords, describing user
+           and experiment (See comments in User_files_description.xml) with their values
+        """
+        shutil.copyfile(input_file,output_file)
+        pass
+
+    def _get_file_attributes(self,file_node):
+        """processes xml file_node to retrieve file attributes to copy """
+
+        source_file = file_node.getAttribute("file_name")
+        if source_file is None:
+            return (None,None)
+        target_file = file_node.getAttribute("copy_as")
+
+        if target_file is None:
+            source_file = target_file
+        else:
+            if "$" in target_file:
+                target_file = self._user.replace_variables(target_file)
+        full_source,full_target  = self._define_fullpath_to_copy(source_file,target_file)
+
+        return (full_source,full_target)      
+
+    def _parse_user_files_description(self,job_description_file):
+        """ Method parses xml file used to describe files to provide to user"""
+
+        # does not work if user is not defined
+        copying_job =[]
+
+        if self._user is None:
+            return None
+        # parse job description file
+        try:
+            domObj=minidom.parse(job_description_file)
+        except Exception as error:
+            input_file,output_file = self._define_fullpath_to_copy()
+            copying_job.append(lambda : shutil.copyfile(input_file,output_file))
+            return copying_job
+
+        files_to_copy = domObj.getElementsByTagName("file_to_copy")
+        copying_jobs = []
+
+        # go through all files in the description and define file copying operations
+        for file in files_to_copy :
+            # retrieve file attributes or its default values if the attributes are missing
+            input_file,output_file =self._get_file_attributes(file)
+            if input_file is None:
+                continue
+
+            # identify all replacements, defined for this file
+            replacements_info = job.getElementsByTagName('replace_in_file')
+            if replacements_info is None:
+                copying_job.append(lambda : shutil.copyfile(input_file,output_file))
+            else:
+                replacement_list = {}
+                for replacement in replacements_info:
+                    source,dest = self._parse_replacement_info(replacement)
+                    replacement_list[source]=dest
+                copying_job = lambda : self._copy_and_parse_user_file(input_file,output_file,replacement_list)
+                copying_jobs.append(copying_job)
+
+        return copying_jobs 
 
 
     def get_data_folder_name(self,instr,cycle_ID):
@@ -326,12 +427,13 @@ class MantidConfigDirectInelastic(object):
     def _set_default_inst(self):
         """Set up last instrument, deployed by user"""
         if self._user:
-            InstrName = self._user.get_last_instrument()
+            InstrName = self._user.last_instrument
             self._dynamic_configuration.append('default.instrument={0}'.format(InstrName))
         else:
             self._dynamic_configuration.append('default.instrument={0}'.format('MARI'))
     #
     def _set_script_repo(self):
+        """ defines script repository location. By default its option is commented"""
         self._dynamic_configuration.append('#ScriptLocalRepository={0}'.format(self._script_repo))
     #
     def _def_python_search_path(self):
@@ -345,7 +447,7 @@ class MantidConfigDirectInelastic(object):
         for part in self._python_mantid_path:
             path +=';'+os.path.join(self._mantid_path,part)
 
-        # define and append user scrips search path
+        # define and append user scripts search path
         user_path_part = copy.deepcopy(self._python_user_scripts)
         for instr in self._user.instrument.values():
             user_path_part.add(os.path.join('direct_inelastic',instr.upper()))
@@ -357,7 +459,7 @@ class MantidConfigDirectInelastic(object):
     def _set_rb_directory(self):
         """Set up default save directory, the one where data are saved by default"""
         if self._user:
-            rb_folder = self._user.get_last_rbdir()
+            rb_folder = self._user.last_rbdir
             self._dynamic_configuration.append('defaultsave.directory={0}'.format(rb_folder))
         else:
             raise RuntimeError("Can not define RB folder without user being defined")
@@ -368,7 +470,7 @@ class MantidConfigDirectInelastic(object):
         if not self._user:
             raise RuntimeError("Can not define Data search path without user being defined")
 
-        instr_name = self._user.get_last_instrument()
+        instr_name = self._user.last_instrument
         map_mask_dir  = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder),\
                                                      '{0}'.format(str.lower(instr_name))))
         # set up all data folders
@@ -402,9 +504,9 @@ class MantidConfigDirectInelastic(object):
         if platform.system() != 'Windows':
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_path))
 
-        InstrName = self._user.get_last_instrument()
-        cycleID   = self._user.get_last_cycleID()
-        rb_folder = self._user.get_last_rbdir()
+        InstrName = self._user.last_instrument
+        cycleID   = self._user.last_cycleID
+        rb_folder = self._user.last_rbdir
         self.copy_reduction_sample(InstrName,cycleID,rb_folder)
         #
         self.make_map_mask_links(user_path)
