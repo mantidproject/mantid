@@ -56,17 +56,17 @@ Usage
   
   print "Result has %i Spectra" %result_ws.getNumberHistograms()
   
-  print "Amplitude 0: " + str(result_ws.readY(0)[0])
-  print "Amplitude 1: " + str(result_ws.readY(0)[1])
-  print "Amplitude 2: " + str(result_ws.readY(0)[2])
+  print "Amplitude 0: %.5f" %(result_ws.readY(0)[0])
+  print "Amplitude 1: %.5f" %(result_ws.readY(0)[1])
+  print "Amplitude 2: %.5f" %(result_ws.readY(0)[2])
   
-  print "X axis at 0: " + str(result_ws.readX(0)[0])
-  print "X axis at 1: " + str(result_ws.readX(0)[1])
-  print "X axis at 2: " + str(result_ws.readX(0)[2])
+  print "X axis at 0: %.5f" %(result_ws.readX(0)[0])
+  print "X axis at 1: %.5f" %(result_ws.readX(0)[1])
+  print "X axis at 2: %.5f" %(result_ws.readX(0)[2])
   
-  print "Amplitude Err 0: " + str(result_ws.readE(0)[0])
-  print "Amplitude Err 1: " + str(result_ws.readE(0)[1])
-  print "Amplitude Err 2: " + str(result_ws.readE(0)[2])
+  print "Amplitude Err 0: %.5f" %(result_ws.readE(0)[0])
+  print "Amplitude Err 1: %.5f" %(result_ws.readE(0)[1])
+  print "Amplitude Err 2: %.5f" %(result_ws.readE(0)[2])
 
 Output:  
   
@@ -75,17 +75,17 @@ Output:
   
   Result has 2 Spectra
   
-  Amplitude 0: 4.29258460465
-  Amplitude 1: 4.17927903719
-  Amplitude 2: 3.97924203893
+  Amplitude 0: 4.29258
+  Amplitude 1: 4.17928
+  Amplitude 2: 3.97924
 
-  X axis at 0: 0.525312757876
-  X axis at 1: 0.729166880913
-  X axis at 2: 0.923395132994
+  X axis at 0: 0.52531
+  X axis at 1: 0.72917
+  X axis at 2: 0.92340
 
-  Amplitude Err 0: 0.00465378627994
-  Amplitude Err 1: 0.00463860572049
-  Amplitude Err 2: 0.00503877232361
+  Amplitude Err 0: 0.00465
+  Amplitude Err 1: 0.00464
+  Amplitude Err 2: 0.00504
 
 .. categories::
 
