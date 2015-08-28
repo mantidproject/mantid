@@ -28,11 +28,11 @@ Usage
 .. testcode:: ConvolutionFitSequentialExample
 
   # Set up algorithm parameters
-  function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,Workspace=__ConvFit_Resolution,WorkspaceIndex=0;(name=DeltaFunction,Height=1;(composite=ProductFunction,NumDeriv=false;name=UserFunction,Formula=((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp))),Temp=1.03,ties=(Temp=1.03);name=Lorentzian,Amplitude=4.20243,PeakCentre=-0.008497,FWHM=0.053436)))"
+  function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,Workspace=__ConvFit_Resolution,WorkspaceIndex=0;((composite=ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)))"
   bgType = "Fixed Flat"
   startX = -0.547608
   endX = 0.543217
-  temp = 1.03
+  temp = 0
   specMin = 0
   specMax = 50
   convolve = True
@@ -43,16 +43,49 @@ Usage
   sample = Load('irs26176_graphite002_red.nxs')
   resolution = Load('irs26173_graphite002_res.nxs')
   
-  AppendSpectra(InputWorkspace1=sample.getName(), InputWorkspace2=sample.getName(), OutputWorkspace="__ConvFit_Resolution")
-  
+  # Build resolution workspace (normally done by the Convfit tab when files load)
+  AppendSpectra(InputWorkspace1=resolution.getName(), InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")
   for i in range(1, sample.getNumberHistograms()):
-    AppendSpectra(InputWorkspace1="__ConvFit_Resolution", InputWorkspace2=sample.getName(), OutputWorkspace="__ConvFit_Resolution")
+    AppendSpectra(InputWorkspace1="__ConvFit_Resolution", InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")  
   
-  
-  ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, Temperature=temp, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
+  # Run algorithm
+  wsName = ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, Temperature=temp, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
 
-  result_ws = mtd["irs26176_graphite002_conv_1LFixF_s0_to_50_Result"]
+  # Obtain result
+  result_ws = mtd[wsName]
   
+  print "Result has %i Spectra" %result_ws.getNumberHistograms()
+  
+  print "Amplitude 0: " + str(result_ws.readY(0)[0])
+  print "Amplitude 1: " + str(result_ws.readY(0)[1])
+  print "Amplitude 2: " + str(result_ws.readY(0)[2])
+  
+  print "X axis at 0: " + str(result_ws.readX(0)[0])
+  print "X axis at 1: " + str(result_ws.readX(0)[1])
+  print "X axis at 2: " + str(result_ws.readX(0)[2])
+  
+  print "Amplitude Err 0: " + str(result_ws.readE(0)[0])
+  print "Amplitude Err 1: " + str(result_ws.readE(0)[1])
+  print "Amplitude Err 2: " + str(result_ws.readE(0)[2])
+
+Output:  
+  
+.. testoutput:: ConvolutionFitSequentialExample
+  :options: +NORMALIZE_WHITESPACE
+  
+  Result has 2 Spectra
+  
+  Amplitude 0: 4.97477934519
+  Amplitude 1: 5.70386755316
+  Amplitude 2: 6.23362160358
+
+  X axis at 0: 0.441681333822
+  X axis at 1: 0.48367188188
+  X axis at 2: 0.525249485018
+
+  Amplitude Err 0: 0.0126995447404
+  Amplitude Err 1: 0.0136213390219
+  Amplitude Err 2: 0.0141790669546
 
 .. categories::
 

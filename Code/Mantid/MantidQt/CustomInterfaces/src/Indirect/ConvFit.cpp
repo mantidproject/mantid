@@ -232,10 +232,10 @@ void ConvFit::run() {
 
   CompositeFunction_sptr func = createFunction(useTies);
   std::string function = std::string(func->asString());
-  QString stX = m_properties["StartX"]->valueText();
-  QString enX = m_properties["EndX"]->valueText();
-  QString specMin = m_uiForm.spSpectraMin->text();
-  QString specMax = m_uiForm.spSpectraMax->text();
+  std::string stX = m_properties["StartX"]->valueText().toStdString();
+  std::string enX = m_properties["EndX"]->valueText().toStdString();
+  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
+  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
   QString temperature = m_uiForm.leTempCorrection->text();
@@ -248,15 +248,15 @@ void ConvFit::run() {
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
                    m_uiForm.cbBackground->currentText().toStdString());
-  cfs->setProperty("StartX", stX.toStdString());
-  cfs->setProperty("EndX", enX.toStdString());
+  cfs->setProperty("StartX", stX);
+  cfs->setProperty("EndX", enX);
   double temp = 0.0;
   if (temperature.toStdString().compare("") != 0) {
     temp = temperature.toDouble();
   }
   cfs->setProperty("Temperature", temp);
-  cfs->setProperty("SpecMin", specMin.toStdString());
-  cfs->setProperty("SpecMax", specMax.toStdString());
+  cfs->setProperty("SpecMin", specMin);
+  cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());

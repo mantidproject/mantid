@@ -372,7 +372,7 @@ void ConvolutionFitSequential::exec() {
     renamer->setProperty("OutputWorkspace", outName);
     renamer->executeAsChildAlg();
   }
-  
+
   setProperty("OutputWorkspace", resultWs->name());
 }
 
