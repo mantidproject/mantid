@@ -1,7 +1,6 @@
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include <sstream>
 
 
 namespace {
@@ -15,8 +14,7 @@ NotebookWriter::NotebookWriter() : m_cell_buffer(Json::arrayValue)
   headerCode();
 }
 
-template<typename JsonString>
-void NotebookWriter::codeCell(JsonString string_code) {
+void NotebookWriter::codeCell(Json::Value string_code) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
@@ -31,8 +29,22 @@ void NotebookWriter::codeCell(JsonString string_code) {
   m_cell_buffer.append(cell_data);
 }
 
-template<typename JsonString>
-void NotebookWriter::markdownCell(JsonString string_array) {
+void NotebookWriter::codeCell(std::string string_code) {
+
+  Json::Value cell_data;
+  const Json::Value empty = Json::Value(Json::ValueType::objectValue);
+
+  cell_data["cell_type"] = "code";
+  cell_data["collapsed"] = false;
+  cell_data["input"] = string_code;
+  cell_data["language"] = "python";
+  cell_data["metadata"] = empty;
+  cell_data["outputs"] = Json::Value(Json::arrayValue);
+
+  m_cell_buffer.append(cell_data);
+}
+
+void NotebookWriter::markdownCell(Json::Value string_array) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
@@ -43,6 +55,19 @@ void NotebookWriter::markdownCell(JsonString string_array) {
 
   m_cell_buffer.append(cell_data);
 }
+
+void NotebookWriter::markdownCell(std::string string_array) {
+
+  Json::Value cell_data;
+  const Json::Value empty = Json::Value(Json::ValueType::objectValue);
+
+  cell_data["cell_type"] = "markdown";
+  cell_data["metadata"] = empty;
+  cell_data["source"] = string_array;
+
+  m_cell_buffer.append(cell_data);
+}
+
 void NotebookWriter::headerComment() {
 
   Json::Value strings(Json::arrayValue);
@@ -122,20 +147,12 @@ Json::Value NotebookWriter::buildNotebook() {
   return output;
 }
 
-std::ostringstream NotebookWriter::writeNotebook() {
-
-  g_log.debug() << "Written ipython notebook file" << std::endl;
-  //std::string filename = "/home/jonmd/test_notebook.ipynb";
-  //std::ofstream out_stream;
-  std::ostringstream out_stream;
-  //out_stream.open(filename);
+std::string NotebookWriter::writeNotebook() {
 
   const Json::Value root = buildNotebook();
 
   Json::StyledWriter writer;
   std::string output_string = writer.write(root);
 
-  out_stream << output_string;
-
-  return out_stream;
+  return output_string;
 }

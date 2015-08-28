@@ -37,11 +37,11 @@ public:
   NotebookWriter();
   virtual ~NotebookWriter(){};
 
-  template<typename JsonString>
-  void markdownCell(JsonString string_array);
-  template<typename JsonString>
-  void codeCell(JsonString string_code);
-  std::ostringstream writeNotebook();
+  void markdownCell(Json::Value string_array);
+  void markdownCell(std::string string_array);
+  void codeCell(Json::Value string_code);
+  void codeCell(std::string string_code);
+  std::string writeNotebook();
 
 private:
 

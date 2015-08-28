@@ -4,7 +4,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/HistoryItem.h"
 #include "MantidAPI/NotebookBuilder.h"
-#include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Logger.h"
 
@@ -36,12 +35,11 @@ const std::string NotebookBuilder::build() {
   for (; iter != m_historyItems.end(); ++iter) {
     writeHistoryToStream(iter);
   }
-  os = m_nb_writer->writeNotebook();
-  return os.str();
+  return m_nb_writer->writeNotebook();
 }
 
 /**
- * Write out an algorithm to the script.
+ * Write out an algorithm to the notebook.
  *
  * If the entry is unrolled this will recurse and output the children of
  * that entry instead. If not, it will just output the algorithm to the stream.
@@ -52,27 +50,21 @@ const std::string NotebookBuilder::build() {
  * @param depth :: count of how far we've recursed into the history
  */
 void NotebookBuilder::writeHistoryToStream(
-        std::vector<HistoryItem>::const_iterator &iter,
-        int depth) {
+        std::vector<HistoryItem>::const_iterator &iter) {
   auto algHistory = iter->getAlgorithmHistory();
   if (iter->isUnrolled()) {
 
     m_nb_writer->markdownCell(
-        "\n" + std::string("Child algorithms of ") + algHistory->name() + "\n");
+        std::string("Child algorithms of ") + algHistory->name());
 
-    // don't create a line for the algorithm, just output its children
-    buildChildren(iter, depth + 1);
+    buildChildren(iter);
 
-    os << std::string(depth, '#');
-    os << " End of child algorithms of " << algHistory->name() << "\n";
+    m_nb_writer->markdownCell(
+        std::string("End of child algorithms of ") + algHistory->name());
 
-    if (boost::next(iter) == m_historyItems.end() ||
-        !boost::next(iter)->isUnrolled()) {
-      os << "\n";
-    }
   } else {
     // create the string for this algorithm
-    os << buildAlgorithmString(algHistory) << "\n";
+    m_nb_writer->codeCell(buildAlgorithmString(algHistory));
   }
 }
 
@@ -80,8 +72,7 @@ void NotebookBuilder::writeHistoryToStream(
  * Iterate over each of the items children and output them to the script.
  *
  * This moves the iterator forward over each of the child records and writes
- *them to
- * the stream.
+ * them to the stream.
  *
  * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history
@@ -89,13 +80,12 @@ void NotebookBuilder::writeHistoryToStream(
  * @param depth :: count of how far we've recursed into the history
  */
 void
-NotebookBuilder::buildChildren(std::vector<HistoryItem>::const_iterator &iter,
-                               int depth) {
+NotebookBuilder::buildChildren(std::vector<HistoryItem>::const_iterator &iter) {
   size_t numChildren = iter->numberOfChildren();
   ++iter; // move to first child
   for (size_t i = 0; i < numChildren && iter != m_historyItems.end();
        ++i, ++iter) {
-    writeHistoryToStream(iter, depth);
+    writeHistoryToStream(iter);
   }
   --iter;
 }

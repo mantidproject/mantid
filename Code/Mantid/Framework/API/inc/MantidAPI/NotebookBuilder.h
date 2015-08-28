@@ -9,7 +9,7 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/PropertyHistory.h"
-#include "NotebookWriter.h"
+#include "MantidAPI/NotebookWriter.h"
 
 #include <sstream>
 
@@ -49,14 +49,12 @@ public:
                   std::string versionSpecificity = "old");
     virtual ~NotebookBuilder(){};
 
-    /// build a python script from the history view
+    /// build an ipython notebook from the history view
     const std::string build();
 
 private:
-    void writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter,
-                              int depth = 1);
-    void buildChildren(std::vector<HistoryItem>::const_iterator &iter,
-                       int depth = 1);
+    void writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter);
+    void buildChildren(std::vector<HistoryItem>::const_iterator &iter);
     const std::string
         buildAlgorithmString(AlgorithmHistory_const_sptr algHistory);
     const std::string

@@ -102,7 +102,7 @@ void GenerateIPythonNotebook::exec() {
   else
     versionSpecificity = "all";
 
-  ScriptBuilder builder(view, versionSpecificity);
+  NotebookBuilder builder(view, versionSpecificity);
   std::string generatedScript = "";
   generatedScript += builder.build();
 
@@ -116,9 +116,6 @@ void GenerateIPythonNotebook::exec() {
     file.flush();
     file.close();
   }
-
-  std::unique_ptr<NotebookWriter> nb(new NotebookWriter());
-  nb->writeNotebook();
 
 }
 
