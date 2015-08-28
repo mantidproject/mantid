@@ -38,7 +38,7 @@ void GenerateIPythonNotebook::init() {
                                         API::FileProperty::OptionalSave, exts),
                   "The name of the file into which the workspace history will "
                       "be generated.");
-  declareProperty("ScriptText", std::string(""),
+  declareProperty("NotebookText", std::string(""),
                   "Saves the history of the workspace to a variable.",
                   Direction::Output);
 
@@ -103,16 +103,16 @@ void GenerateIPythonNotebook::exec() {
     versionSpecificity = "all";
 
   NotebookBuilder builder(view, versionSpecificity);
-  std::string generatedScript = "";
-  generatedScript += builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+  std::string generatedNotebook = "";
+  generatedNotebook += builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
-  setPropertyValue("ScriptText", generatedScript);
+  setPropertyValue("NotebookText", generatedNotebook);
 
   const std::string filename = getPropertyValue("Filename");
 
   if (!filename.empty()) {
     std::ofstream file(filename.c_str(), std::ofstream::trunc);
-    file << generatedScript;
+    file << generatedNotebook;
     file.flush();
     file.close();
   }
