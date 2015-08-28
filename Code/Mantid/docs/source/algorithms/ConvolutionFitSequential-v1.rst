@@ -27,6 +27,10 @@ Usage
 
 .. testcode:: ConvolutionFitSequentialExample
 
+  # Create a host workspace
+  sample = Load('irs26176_graphite002_red.nxs')
+  resolution = Load('irs26173_graphite002_red.nxs')
+
   # Set up algorithm parameters
   function = "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,Workspace=__ConvFit_Resolution,WorkspaceIndex=0;((composite=ProductFunction,NumDeriv=false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175)))"
   bgType = "Fixed Flat"
@@ -34,14 +38,10 @@ Usage
   endX = 0.543217
   temp = 0
   specMin = 0
-  specMax = 50
+  specMax = sample.getNumberHistograms() - 1
   convolve = True
   minimizer = "Levenberg-Marquardt"
   maxIt = 500
-	
-  # Create a host workspace
-  sample = Load('irs26176_graphite002_red.nxs')
-  resolution = Load('irs26173_graphite002_res.nxs')
   
   # Build resolution workspace (normally done by the Convfit tab when files load)
   AppendSpectra(InputWorkspace1=resolution.getName(), InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")
@@ -75,17 +75,17 @@ Output:
   
   Result has 2 Spectra
   
-  Amplitude 0: 4.97477934519
-  Amplitude 1: 5.70386755316
-  Amplitude 2: 6.23362160358
+  Amplitude 0: 4.29258460465
+  Amplitude 1: 4.17927903719
+  Amplitude 2: 3.97924203893
 
-  X axis at 0: 0.441681333822
-  X axis at 1: 0.48367188188
-  X axis at 2: 0.525249485018
+  X axis at 0: 0.525312757876
+  X axis at 1: 0.729166880913
+  X axis at 2: 0.923395132994
 
-  Amplitude Err 0: 0.0126995447404
-  Amplitude Err 1: 0.0136213390219
-  Amplitude Err 2: 0.0141790669546
+  Amplitude Err 0: 0.00465378627994
+  Amplitude Err 1: 0.00463860572049
+  Amplitude Err 2: 0.00503877232361
 
 .. categories::
 
