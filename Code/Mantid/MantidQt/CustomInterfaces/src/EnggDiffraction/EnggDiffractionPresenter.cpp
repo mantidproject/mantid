@@ -88,6 +88,7 @@ void EnggDiffractionPresenter::notify(
 
   case IEnggDiffractionPresenter::InstrumentChange:
     processInstChange();
+    break;
 
   case IEnggDiffractionPresenter::ShutDown:
     processShutDown();
