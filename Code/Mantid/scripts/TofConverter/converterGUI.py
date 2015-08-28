@@ -2,7 +2,7 @@
 from ui_converter import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 import math
-import convertUnits
+import TofConverter.convertUnits
 
 class MainWindow(QtGui.QMainWindow):
     needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
@@ -65,7 +65,7 @@ class MainWindow(QtGui.QMainWindow):
         # Temporary import while method is in the wrong place
         from pymantidplot.proxies import showCustomInterfaceHelp
         showCustomInterfaceHelp("TOF_Converter") #need to find a way to import this module
-        
+
     def convert(self):
         if self.ui.InputVal.text() == "":
             return
@@ -78,9 +78,9 @@ class MainWindow(QtGui.QMainWindow):
                 self.flightpath = -1.0
             if self.ui.scatteringAngleInput.text() !='':
                 self.Theta = float(self.ui.scatteringAngleInput.text()) * math.pi / 360.0
-                
-            self.output = convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption, self.Theta, self.flightpath)
-            
+
+            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption, self.Theta, self.flightpath)
+
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
         except ArithmeticError, e:

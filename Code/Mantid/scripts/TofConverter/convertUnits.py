@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,too-many-branches
 import math
 # Used by converter GUI to do unit conversions
 
@@ -107,5 +107,5 @@ def energy2output(Energy, outOption, theta, flightpath):
 
     elif outOption == 'Energy (meV)':
         OutputVal = Energy
-        
+
     return OutputVal
