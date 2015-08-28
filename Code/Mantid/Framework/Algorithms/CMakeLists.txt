@@ -676,6 +676,7 @@ set ( TEST_FILES
 	FlatPlateAbsorptionTest.h
 	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
+	GenerateIPythonNotebookTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
 	GetDetOffsetsMultiPeaksTest.h
