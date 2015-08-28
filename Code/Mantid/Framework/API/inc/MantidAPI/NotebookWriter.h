@@ -41,7 +41,7 @@ public:
   void markdownCell(JsonString string_array);
   template<typename JsonString>
   void codeCell(JsonString string_code);
-  void writeNotebook();
+  std::ostringstream writeNotebook();
 
 private:
 

@@ -1,7 +1,7 @@
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
-#include <fstream>
+#include <sstream>
 
 
 namespace {
@@ -122,12 +122,13 @@ Json::Value NotebookWriter::buildNotebook() {
   return output;
 }
 
-void NotebookWriter::writeNotebook() {
+std::ostringstream NotebookWriter::writeNotebook() {
 
   g_log.debug() << "Written ipython notebook file" << std::endl;
-  std::string filename = "/home/jonmd/test_notebook.ipynb";
-  std::ofstream out_stream;
-  out_stream.open(filename);
+  //std::string filename = "/home/jonmd/test_notebook.ipynb";
+  //std::ofstream out_stream;
+  std::ostringstream out_stream;
+  //out_stream.open(filename);
 
   const Json::Value root = buildNotebook();
 
@@ -135,6 +136,6 @@ void NotebookWriter::writeNotebook() {
   std::string output_string = writer.write(root);
 
   out_stream << output_string;
-  out_stream.close();
 
+  return out_stream;
 }

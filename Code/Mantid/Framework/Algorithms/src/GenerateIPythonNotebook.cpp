@@ -4,8 +4,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/ScriptBuilder.h"
-#include "MantidAPI/NotebookWriter.h"
+#include "MantidAPI/NotebookBuilder.h"
 
 #include <fstream>
 
@@ -17,10 +16,10 @@ namespace {
 }
 
 namespace Mantid {
-    namespace Algorithms {
+namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-        DECLARE_ALGORITHM(GenerateIPythonNotebook)
+DECLARE_ALGORITHM(GenerateIPythonNotebook)
 
 //----------------------------------------------------------------------------------------------
 
