@@ -32,7 +32,7 @@ void GenerateIPythonNotebook::init() {
       "An input workspace.");
 
   std::vector<std::string> exts;
-  exts.push_back(".py");
+  exts.push_back(".ipynb");
 
   declareProperty(new API::FileProperty("Filename", "",
                                         API::FileProperty::OptionalSave, exts),
@@ -104,7 +104,7 @@ void GenerateIPythonNotebook::exec() {
 
   NotebookBuilder builder(view, versionSpecificity);
   std::string generatedScript = "";
-  generatedScript += builder.build();
+  generatedScript += builder.build(ws->getName(), ws->getTitle(), ws->getComment());
 
   setPropertyValue("ScriptText", generatedScript);
 

@@ -50,7 +50,7 @@ public:
     virtual ~NotebookBuilder(){};
 
     /// build an ipython notebook from the history view
-    const std::string build();
+    const std::string build(std::string ws_name, std::string ws_title, std::string ws_comment);
 
 private:
     void writeHistoryToStream(std::vector<HistoryItem>::const_iterator &iter);

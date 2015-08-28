@@ -30,7 +30,17 @@ NotebookBuilder::NotebookBuilder(boost::shared_ptr<HistoryView> view,
  *
  * @return a formatted python string of the history
  */
-const std::string NotebookBuilder::build() {
+const std::string NotebookBuilder::build(std::string ws_name,
+                                         std::string ws_title,
+                                         std::string ws_comment) {
+  // record workspace details in notebook
+  std::string workspace_details;
+  workspace_details = "Workspace History: " + ws_name + "\n";
+  workspace_details += "------------------------\n";
+  workspace_details += ws_title + "\n";
+  workspace_details += ws_comment;
+  m_nb_writer->markdownCell(workspace_details);
+
   auto iter = m_historyItems.begin();
   for (; iter != m_historyItems.end(); ++iter) {
     writeHistoryToStream(iter);
