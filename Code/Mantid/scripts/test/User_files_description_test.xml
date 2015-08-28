@@ -16,10 +16,12 @@
  <!--Simple file copying -->  
   <file_to_copy file_name="Test_reduction_file1.py" copy_as="Test_reduction_file2.py"/>
 
- <!--Advanced file copying -->    
-  <file_to_copy file_name="Test_reduction_file.py" copy_as="Test_reduction_file$cycleID$.py">
-    <replace variable  ="Test_reduction_file" by_variable="Test_reduction_file$instrument$"/>
-    <replace variable  ="AAAA" by_variable="BBB"/>  
+ <!--Advanced file copying 
+    Variables have to be either strings or strings with variables, described above
+  -->    
+  <file_to_copy file_name="Test_reduction_file.py" copy_as="Test_reduction_file_$cycleID$.py">
+    <replace var  ="Test_reduction_file" by_var="$instrument$Test_reduction_file_$cycleID$"/>
+    <replace var  ="AAAA" by_var="BBB"/>  
   </file_to_copy>
 
 </user_files_description>

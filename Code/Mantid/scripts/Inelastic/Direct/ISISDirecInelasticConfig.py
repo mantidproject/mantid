@@ -183,7 +183,7 @@ class MantidConfigDirectInelastic(object):
         # fall back files defined to use if USER_Files_description is for some reason not available or wrong
         self._sample_reduction_file = lambda InstrName : '{0}Reduction_Sample.py'.format(InstrName)
         # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
-        self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}_{2}.py'.format(InstrName,cycleID[0],cycleID[1])
+        self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}.py'.format(InstrName,cycleID)
 
 
         # Static contents of the Mantid Config file
@@ -272,7 +272,7 @@ class MantidConfigDirectInelastic(object):
         else: # somebody have modified the target file. Leave it alone
             return False
 #
-    def _define_fullpath_to_copy(self,short_source_file=None,short_target_file=None):
+    def _fullpath_to_copy(self,short_source_file=None,short_target_file=None):
         """Append full path to source and target files """
 
         InstrName = self._user.instrument
@@ -289,39 +289,63 @@ class MantidConfigDirectInelastic(object):
 
         full_target = os.path.join(rb_folder,short_target_file)
         return full_source,full_target
-
 #
-    def copy_reduction_sample(self,InstrName,CycleID,rb_folder):
-        """Method copies sample reduction script from user script repository
+    def copy_reduction_sample(self, users_file_description=None):
+        """copy sample reduction scripts from user script repository
            to user folder.
         """
-        full_source,full_target = self._define_fullpath_to_copy(self._sample_reduction_file(InstrName),
-                                self._target_reduction_file(InstrName,CycleID))
+        if users_file_description is None:
+            users_file_description = self._user_files_descr
+        files_to_copy = self._parse_user_files_description(users_file_description)
+        for files in files_to_copy:
+            self._copy_user_file_job(files[0],files[1],files[2])
 
-        if not os.path.isfile(full_source):
-            return
-
-        # already have target file or modified by user
-        if not self.script_need_replacing(full_source,full_target):
-            return
-        if os.path.isfile(full_target):
-            os.remove(full_target)
-        shutil.copyfile(full_source,full_target)
-        os.chmod(full_target,0777)
-
-        if platform.system() != 'Windows':
-            os.system('chown '+self._fedid+':'+self._fedid+' '+full_target)
-        # Set up the file creation and modification dates to the users start date
-        start_date = self._user.start_date
-        file_time = time.mktime(start_date.timetuple())
-        os.utime(full_target,(file_time,file_time))
 
     def _copy_and_parse_user_file(self,input_file,output_file,replacemets_list):
         """Method processes file provided for user and replaces list of keywords, describing user
            and experiment (See comments in User_files_description.xml) with their values
         """
-        shutil.copyfile(input_file,output_file)
-        pass
+        fh_targ    = open(output_file,'w')
+        if not fh_targ :
+            return
+        var_to_replace = replacemets_list.keys()
+        with open(input_file) as fh_source:
+            for line in fh_source:
+                rez = line
+                for var in var_to_replace:
+                    if var in rez:
+                        rez = rez.replace(var, replacemets_list[var])
+                fh_targ.write(rez)
+        fh_targ.close()
+
+
+   
+
+    def _copy_user_file_job(self,input_file,output_file,replacement_list=None):
+        """Method processes file provided for user and replaces list of keywords, describing user
+           and experiment (See comments in User_files_description.xml) with their values if 
+           such replacement list is provided.
+        """
+        if not os.path.isfile(input_file):
+            return
+
+        # already have target file or modified by user
+        if not self.script_need_replacing(input_file,output_file):
+            return
+        if os.path.isfile(output_file):
+            os.remove(output_file)
+        if replacement_list is None:
+            shutil.copyfile(input_file,output_file)
+        else:
+            self._copy_and_parse_user_file(input_file,output_file,replacement_list)
+        os.chmod(output_file,0777)
+
+        #if platform.system() != 'Windows':
+        #    os.system('chown '+self._fedid+':'+self._fedid+' '+output_file)
+        # Set up the file creation and modification dates to the users start date
+        start_date = self._user.start_date
+        file_time = time.mktime(start_date.timetuple())
+        os.utime(output_file,(file_time,file_time))
 
     def _get_file_attributes(self,file_node):
         """processes xml file_node to retrieve file attributes to copy """
@@ -336,28 +360,54 @@ class MantidConfigDirectInelastic(object):
         else:
             if "$" in target_file:
                 target_file = self._user.replace_variables(target_file)
-        full_source,full_target  = self._define_fullpath_to_copy(source_file,target_file)
+        full_source,full_target  = self._fullpath_to_copy(source_file,target_file)
 
         return (full_source,full_target)      
+    def _parse_replacement_info(self,repl_info):
+        """process dom element 'replacement' and 
+           returns the  variables with its correspondent value
+           to replace variable by their value.
+
+           If value contains one or more of the supported variables as its part, this
+           variable is replaced by its value. 
+           Supported variables are defined by global list USER_PROPERTIES
+           and their values are taken from current self._user class
+        """
+        # what should be replaced in the file
+        source  = repl_info.getAttribute("var")
+        if len(source) == 0:
+            raise InvalidArgument('"replace" field of {0} file for instrument {1} has to contain attribute "var" and its value'\
+                                   .format(self._user_files_descr,self._user.instrument))
+        # what should be placed instead of the replacement
+        dest    = repl_info.getAttribute("by_var")
+        if len(dest) == 0:
+            raise InvalidArgument('"replace" field of {0} file for instrument {1} has to contain attribute "by_var" and its value'\
+                                   .format(self._user_files_descr,self._user.instrument))
+
+        # replace use-specific variables by their values
+        if '$' in dest:
+            dest = self._user.replace_variables(dest)
+        return (source,dest)
 
     def _parse_user_files_description(self,job_description_file):
         """ Method parses xml file used to describe files to provide to user"""
 
-        # does not work if user is not defined
-        copying_job =[]
+        # mainly for debugging purposes
+        filenames_to_copy=[]
 
+        # does not work if user is not defined
         if self._user is None:
             return None
-        # parse job description file
+        # parse job description file, fail down on default behavior if
+        # user files description is not there
         try:
             domObj=minidom.parse(job_description_file)
         except Exception as error:
-            input_file,output_file = self._define_fullpath_to_copy()
-            copying_job.append(lambda : shutil.copyfile(input_file,output_file))
-            return copying_job
+            input_file,output_file = self._fullpath_to_copy()
+            filenames_to_copy.append((input_file,output_file,None))
+            return filenames_to_copy
 
         files_to_copy = domObj.getElementsByTagName("file_to_copy")
-        copying_jobs = []
 
         # go through all files in the description and define file copying operations
         for file in files_to_copy :
@@ -367,20 +417,19 @@ class MantidConfigDirectInelastic(object):
                 continue
 
             # identify all replacements, defined for this file
-            replacements_info = job.getElementsByTagName('replace_in_file')
-            if replacements_info is None:
-                copying_job.append(lambda : shutil.copyfile(input_file,output_file))
+            replacements_info = file.getElementsByTagName('replace')
+            if len(replacements_info) == 0:
+                replacement_list = None
             else:
                 replacement_list = {}
                 for replacement in replacements_info:
                     source,dest = self._parse_replacement_info(replacement)
                     replacement_list[source]=dest
-                copying_job = lambda : self._copy_and_parse_user_file(input_file,output_file,replacement_list)
-                copying_jobs.append(copying_job)
+            filenames_to_copy.append((input_file,output_file,replacement_list))
 
-        return copying_jobs 
-
-
+        return filenames_to_copy
+#    
+       
     def get_data_folder_name(self,instr,cycle_ID):
         """Method to generate a data folder from instrument name and the cycle start date
            (cycle ID)
@@ -424,11 +473,10 @@ class MantidConfigDirectInelastic(object):
         self._dynamic_configuration = copy.deepcopy(self._dynamic_options_base)
         self._init_config()
     #
-
     def  _check_server_folders_present(self):
         """Routine checks all necessary server folder are present"""
         if not os.path.exists(self._mantid_path):
-            raise RuntimeError("SERVER ERROR: no correct mantid path defined at {0}".format(self._mantid_path))
+            raise RuntimeError("SERVER ERROR: no correct Mantid path defined at {0}".format(self._mantid_path))
         if not os.path.exists(self._home_path):
             raise RuntimeError("SERVER ERROR: no correct home path defined at {0}".format(self._home_path))
         if not os.path.exists(self._script_repo):
@@ -525,10 +573,7 @@ class MantidConfigDirectInelastic(object):
         if platform.system() != 'Windows':
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_path))
 
-        InstrName = self._user.instrument
-        cycleID   = self._user.cycleID
-        rb_folder = self._user.rb_dir
-        self.copy_reduction_sample(InstrName,cycleID,rb_folder)
+        self.copy_reduction_sample(self._user_files_descr)
         #
         self.make_map_mask_links(user_path)
     #

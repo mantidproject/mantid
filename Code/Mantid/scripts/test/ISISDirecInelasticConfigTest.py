@@ -22,7 +22,10 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.rbnumber  = "RB" + nrbnumber
         self.start_date= '20150503'
         self.userID = 'tuf666699'
+        self._set_up()
         return super(ISISDirectInelasticConfigTest, self).__init__(methodName)
+    def __del__(self):
+        self._tear_down()
 
     def get_save_dir(self):
         targetDir = config['defaultsave.directory']
@@ -32,8 +35,22 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             else:
                 targetDir = '/tmp'
         return targetDir 
+    def write_test_file(self,filename):
+        """Method writes test file with name provided and 
+           specified contents
+        """
+        dir_name = os.path.dirname(filename)
+        if not os.path.exists(dir_name):
+           os.makedirs(dir_name)
 
-    def setUp(self):
+        fh = open(filename,'w')
+        fh.write("****************************************\n")
+        fh.write("first test variable = AAAA # something\n")
+        fh.write("second test var  Test_reduction_file # other\n ")
+        fh.close()
+
+
+    def _set_up(self):
         # Create user's folder structure in default save directory.
         # the administrative script (not here) builds all this for real in /home
         targetDir = self.get_save_dir()
@@ -70,7 +87,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         return full_file
 
 
-    def tearDown(self):
+    def _tear_down(self):
         # Clean-up user's folder structure
         if os.path.exists(self.rbdir):
             shutil.rmtree(self.rbdir,ignore_errors=True)
@@ -132,8 +149,10 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(id,'2016-12-01')
         self.assertEqual(user._instrument[id],'MERLIN')
         self.assertEqual(user.instrument,'MERLIN')
+        
 
     def test_build_config(self):
+
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
@@ -181,6 +200,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # clear up
         if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
+
 
     def test_build_3Experiments_config(self):
         # script verifies the presence of a folder, not its contents.
@@ -276,6 +296,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             shutil.rmtree(rbdir3,ignore_errors=True)
         if os.path.exists(user1RootDir):
             shutil.rmtree(user1RootDir,ignore_errors=True)
+        #
+
 
     def test_replace_user_variables(self):
         user = UserProperties("wkc26243")
@@ -284,6 +306,61 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         targ_string = user.replace_variables('$instrument$ReductionScript$cycleID$.py')
         self.assertEqual(self.instrument+'ReductionScript2015_1.py',targ_string)
         
+    def test_parse_file_description(self):
+
+        this_file = os.path.realpath(__file__)
+        file_dir = os.path.dirname(this_file)
+        test_xml = os.path.join(file_dir,'User_files_description_test.xml')
+        self.assertTrue(os.path.exists(test_xml))
+
+        MantidDir = os.path.split(os.path.realpath(__file__))[0]
+        HomeRootDir = self.get_save_dir()
+        mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
+
+        
+        user = UserProperties(self.userID)
+        user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
+        mcf.init_user(self.userID,user)
+
+        # test old defaults, deployed if no User_files_description are defined
+        files_to_copy = mcf._parse_user_files_description(None)
+        self.assertEqual(len(files_to_copy),1)
+        source = files_to_copy[0][0]
+        dest   = files_to_copy[0][1]
+        repl   = files_to_copy[0][2]
+        self.assertEqual(os.path.basename(source),'MERLINReduction_Sample.py')
+        self.assertEqual(os.path.basename(dest) ,'MERLINReduction_2015_1.py')
+        self.assertTrue(repl is None)
+
+        
+        # test files defined by test xml file
+        files_to_copy = mcf._parse_user_files_description(test_xml)
+        self.assertEqual(len(files_to_copy),2)
+
+        # define and generate test files to copy. 
+        # We know what files are and what their contents is from User_files_description_test.xml
+        for file_descr in files_to_copy:
+            source = file_descr[0]
+            dest   = file_descr[1]
+            if os.path.exists(dest):
+                os.remove(dest)
+            self.write_test_file(source)
+
+        # Check copy_reduction_sample 
+        mcf.copy_reduction_sample(test_xml)
+        for file_pair in files_to_copy:
+            dest   = file_pair[1]
+            self.assertTrue(os.path.exists(dest))
+
+        # Clean up
+        for file_pair in files_to_copy:
+            source = file_pair[0]
+            dest   = file_pair[1]
+            if os.path.exists(dest):
+                os.remove(dest)
+            if os.path.exists(source):
+                os.remove(source)
+
 
 
 
