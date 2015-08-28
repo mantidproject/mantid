@@ -1,14 +1,11 @@
 #pylint: disable=invalid-name
 import math
-# Used by converter GUI to perform the unit conversions
 
-# Function used in converterGUI
 def doConversion(inputval, inOption, outOption, theta, flightpath):
     stage1output = input2energy(float(inputval), inOption, theta, flightpath)
     stage2output = energy2output(stage1output, outOption, theta, flightpath)
     return stage2output
-  
-# Converts all input types to energy  
+
 def input2energy(inputval, inOption, theta, flightpath):
     e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
     e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
@@ -59,7 +56,6 @@ def input2energy(inputval, inOption, theta, flightpath):
 
     return Energy
 
-# Converts intermediate energies to output type
 def energy2output(Energy, outOption, theta, flightpath):
     e2lam = 81.787 #using lambda=h/p  p: momentum, h: planck's const, lambda: wavelength
     e2nu = 4.139 # using h/(m*lambda^2) m: mass of neutron
@@ -110,4 +106,3 @@ def energy2output(Energy, outOption, theta, flightpath):
         OutputVal = Energy
 
     return OutputVal
-    
