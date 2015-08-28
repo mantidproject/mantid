@@ -84,6 +84,7 @@ void Integrate3DEvents::addEvents(std::vector<std::pair<double, V3D> > const &ev
  * half the major axis length of the ellipsoids, and the other axes of the
  * ellipsoids will be set proportionally, based on the standard deviations.
  *
+ * @param E1Vec               Vector of values for calculating edge of detectors
  * @param peak_q              The Q-vector for the peak center.
  * @param specify_size        If true the integration will be done using the
  *                            ellipsoids with major axes determined by the
@@ -203,7 +204,7 @@ double Integrate3DEvents::numInEllipsoid(std::vector<std::pair<double, V3D>> con
  *                     of the three inner axes of the ellisoid.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
-double Integrate3DEvents::numInEllipsoid(std::vector<std::pair<double, V3D>> const &events,
+double Integrate3DEvents::numInEllipsoidBkg(std::vector<std::pair<double, V3D>> const &events,
                                       std::vector<V3D> const &directions,
                                       std::vector<double> const &sizes,
                                       std::vector<double> const &sizesIn) {
@@ -427,6 +428,8 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q, bool hkl_integ)
  * axes for the events and the standard deviations in the the directions
  * of the principal axes.
  *
+ * @param E1Vec             Vector of values for calculating edge of detectors
+ * @param peak_q            The Q-vector for the peak center.
  * @param ev_list             List of events centered at (0,0,0) for a
  *                            particular peak.
  * @param directions          The three principal axes of the list of events
@@ -526,7 +529,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     }
   }
 
-  double backgrd = numInEllipsoid(ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
+  double backgrd = numInEllipsoidBkg(ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii);
 
   double peak_w_back = numInEllipsoid(ev_list, directions, axes_radii);
 
@@ -545,6 +548,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * This method is applied to all masked pixels. If there are masked pixels
  *trajectories inside an integration volume, the peak must be rejected.
  *
+ * @param E1Vec          Vector of values for calculating edge of detectors
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */

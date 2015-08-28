@@ -83,7 +83,7 @@ private:
                             std::vector<double> const &sizes);
 
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
-  static double numInEllipsoid(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
+  static double numInEllipsoidBkg(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
                             std::vector<Mantid::Kernel::V3D> const &directions,
                             std::vector<double> const &sizes,
                             std::vector<double> const &sizesIn);
