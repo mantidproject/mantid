@@ -27,14 +27,14 @@ class UserProperties(object):
 
 #
     def set_user_properties(self,instrument,start_date,cycle,rb_folder):
-        """Define the information, user office provides about user. 
+        """Define the information, user office provides about user.
 
            The info has the form:
            instrument -- string with full instrument name
            date       -- string with experiment start date in the form YYYYMMDD
-           cycle      -- string with the cycle id in the form CYCLEYYYYN 
+           cycle      -- string with the cycle id in the form CYCLEYYYYN
                          where N is the cycle number within the year
-           rb_folder  -- string containing the full path to working folder available 
+           rb_folder  -- string containing the full path to working folder available
                         for all users and IS participating in the experiment.
         """
         self.check_input(instrument,start_date,cycle,rb_folder)
@@ -61,12 +61,12 @@ class UserProperties(object):
         for prop in USER_PROPERTIES:
             try:
                 ind = str_parts.index(prop)
-            except :
+            except Exception:
                 ind = None
             if not ind is None:
-               str_parts[ind] = str(getattr(self,prop))
+                str_parts[ind] = str(getattr(self,prop))
         data_string = "".join(str_parts)
-        return data_string        
+        return data_string
 #
     @property
     def start_date(self):
@@ -151,6 +151,8 @@ class MantidConfigDirectInelastic(object):
        The class have to change/to be amended if the configuration
        changes or has additional features.
     """
+    # pylint: disable=too-many-instance-attributes
+    # It has as many as parameters describing ISIS configuration.
     def __init__(self,mantid='/opt/Mantid/',home='/home/',\
                  script_repo='/opt/UserScripts/',\
                  map_mask_folder='/usr/local/mprogs/InstrumentFiles/'):
@@ -176,13 +178,16 @@ class MantidConfigDirectInelastic(object):
         self._user_specific_link_path='Desktop'
         # Relative to a particular user name of folders with link to instrument files
         self._map_mask_link_name = 'instrument_files'
-        # the name of the file, which describes python files to copy to user. The file has to be placed in 
+        # the name of the file, which describes python files to copy to user. The file has to be placed in
         #  script_repository/instrument_name folder
         # File name, used as source of reduction scripts for particular instrument
         self._user_files_descr = 'USER_Files_description.xml'
         # fall back files defined to use if USER_Files_description is for some reason not available or wrong
+        # pylint: disable=W0108
+        # it will not work without lambda as intended
         self._sample_reduction_file = lambda InstrName : '{0}Reduction_Sample.py'.format(InstrName)
         # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
+        # it will not work without lambda as intended
         self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}.py'.format(InstrName,cycleID)
 
 
@@ -192,7 +197,8 @@ class MantidConfigDirectInelastic(object):
                         "# As this file will not be replaced with further installations of Mantid it is a safe place to put\n"
                         "# properties that suit your particular installation.\n"
                         "#\n"
-                        "# See here for a list of possible options:''# http://www.mantidproject.org/Properties_File#Mantid.User.Properties''\n"
+                        "# See here for a list of possible options:''"
+                        "# http://www.mantidproject.org/Properties_File#Mantid.User.Properties''\n"
                         "#\n"
                         "#uncomment to enable archive search - ICat and Orbiter\n"
                         "datasearch.searcharchive = On #  may be important for autoreduction to work,\n")
@@ -253,7 +259,7 @@ class MantidConfigDirectInelastic(object):
         else:
             return False
 #
-    def script_need_replacing(self,source_script_name,target_script_name):
+    def script_need_replacing(self,target_script_name):
         """Method specifies conditions when existing reduction file should be replaced
            by a sample file.
         """
@@ -317,20 +323,17 @@ class MantidConfigDirectInelastic(object):
                         rez = rez.replace(var, replacemets_list[var])
                 fh_targ.write(rez)
         fh_targ.close()
-
-
-   
-
+#
     def _copy_user_file_job(self,input_file,output_file,replacement_list=None):
-        """Method processes file provided for user and replaces list of keywords, describing user
-           and experiment (See comments in User_files_description.xml) with their values if 
-           such replacement list is provided.
+        """Method copies file provided into the requested destination
+           and replaces keys specified in replacement list dictionary with their
+           values if replacement_list is provided.
         """
         if not os.path.isfile(input_file):
             return
 
         # already have target file or modified by user
-        if not self.script_need_replacing(input_file,output_file):
+        if not self.script_need_replacing(output_file):
             return
         if os.path.isfile(output_file):
             os.remove(output_file)
@@ -362,14 +365,15 @@ class MantidConfigDirectInelastic(object):
                 target_file = self._user.replace_variables(target_file)
         full_source,full_target  = self._fullpath_to_copy(source_file,target_file)
 
-        return (full_source,full_target)      
+        return (full_source,full_target)
+#
     def _parse_replacement_info(self,repl_info):
-        """process dom element 'replacement' and 
+        """process dom element 'replacement' and
            returns the  variables with its correspondent value
            to replace variable by their value.
 
            If value contains one or more of the supported variables as its part, this
-           variable is replaced by its value. 
+           variable is replaced by its value.
            Supported variables are defined by global list USER_PROPERTIES
            and their values are taken from current self._user class
         """
@@ -402,7 +406,7 @@ class MantidConfigDirectInelastic(object):
         # user files description is not there
         try:
             domObj=minidom.parse(job_description_file)
-        except Exception as error:
+        except Exception:
             input_file,output_file = self._fullpath_to_copy()
             filenames_to_copy.append((input_file,output_file,None))
             return filenames_to_copy
@@ -410,14 +414,14 @@ class MantidConfigDirectInelastic(object):
         files_to_copy = domObj.getElementsByTagName("file_to_copy")
 
         # go through all files in the description and define file copying operations
-        for file in files_to_copy :
+        for file_node in files_to_copy :
             # retrieve file attributes or its default values if the attributes are missing
-            input_file,output_file =self._get_file_attributes(file)
+            input_file,output_file =self._get_file_attributes(file_node)
             if input_file is None:
                 continue
 
             # identify all replacements, defined for this file
-            replacements_info = file.getElementsByTagName('replace')
+            replacements_info = file_node.getElementsByTagName('replace')
             if len(replacements_info) == 0:
                 replacement_list = None
             else:
@@ -428,8 +432,7 @@ class MantidConfigDirectInelastic(object):
             filenames_to_copy.append((input_file,output_file,replacement_list))
 
         return filenames_to_copy
-#    
-       
+#
     def get_data_folder_name(self,instr,cycle_ID):
         """Method to generate a data folder from instrument name and the cycle start date
            (cycle ID)
@@ -452,21 +455,28 @@ class MantidConfigDirectInelastic(object):
     def init_user(self,fedid,theUser):
         """Define settings, specific to a user"""
         #
+        # pylint: disable=W0212
+        # bad practice but I need all instruments, not the current one
         for instr in theUser._instrument.values():
             if not self.is_inelastic(instr):
                 raise RuntimeError('Instrument {0} is not among acceptable instruments'.format(instrument))
         self._user=theUser
 
+        # pylint: disable=W0201
+        # its init method so the change is reasonable 
         self._fedid = str(fedid)
         user_folder = os.path.join(self._home_path,self._fedid)
         if not os.path.exists(user_folder):
             raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(fedid))
+        # pylint: disable=W0212
+        # bad practice but I need all rb_dires, not the current one
         for rb_folder in theUser._rb_dirs.values():
             if not os.path.exists(str(rb_folder)):
                 raise RuntimeError("Experiment folder with {0} does not exist. Create such folder first".format(rb_folder))
         #
         # how to check cycle folders, they may not be available
         self._cycle_data_folder=set()
+        # pylint: disable=W0212
         for date_key,folder_id in theUser._cycle_IDs.items():
             self._cycle_data_folder.add(self.get_data_folder_name(theUser._instrument[date_key],folder_id))
         # Initialize configuration settings
@@ -548,6 +558,7 @@ class MantidConfigDirectInelastic(object):
         for folder in all_data_folders[1:]:
             data_dir +=';'+os.path.abspath('{0}'.format(folder))
 
+        # pylint: disable=W0212
         all_rb_folders = self._user._rb_dirs
         for folder in all_rb_folders.values():
             data_dir+=';'+os.path.abspath('{0}'.format(folder))
@@ -605,6 +616,8 @@ class MantidConfigDirectInelastic(object):
         """Write existing dynamic configuration from memory to
            user defined configuration file
         """
+        # pylint: disable=C0101
+        # What is wrong with fp variable name here?
         fp = open(config_file_name,'w')
         fp.write(self._header)
         fp.write('## -----   Generated user properties ------------ \n')

@@ -278,13 +278,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         full_target_file = os.path.join(full_rb_path,target_file)
         self.assertTrue(os.path.exists(full_target_file))
         # Fresh target file should always be replaced
-        self.assertTrue(mcf.script_need_replacing(source_file,full_target_file))
+        self.assertTrue(mcf.script_need_replacing(full_target_file))
         # modify target file access time:
         access_time = os.path.getmtime(full_target_file)
         now = time.time()
         os.utime(full_target_file,(access_time ,now))
         # should not replace modified target file
-        self.assertFalse(mcf.script_need_replacing(source_file,full_target_file))
+        self.assertFalse(mcf.script_need_replacing(full_target_file))
 
         #--------------------------------------------------------------------
         # clean up
