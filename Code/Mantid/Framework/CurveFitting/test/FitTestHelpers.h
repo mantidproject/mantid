@@ -16,6 +16,8 @@ static API::MatrixWorkspace_sptr generatePeaksCurveWorkspace();
 
 static API::MatrixWorkspace_sptr generateSmoothCurveWorkspace();
 
+/// Run fit on a (single spectrum) matrix workspace, using the given type
+/// of function and minimizer option
 static Mantid::API::IAlgorithm_sptr
 runFitAlgorithm(MatrixWorkspace_sptr dataToFit, CurveBenchmarks ctype,
                 const std::string minimizer = "Levenberg-MarquardtMD") {
