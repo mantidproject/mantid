@@ -47,7 +47,8 @@ generateCurveDataForFit(CurveBenchmarks ctype) {
     return generateSmoothCurveWorkspace();
   else
     throw std::invalid_argument(
-        "Unknown curve type when trying to generate curve data: " + ctype);
+        "Unknown curve type when trying to generate curve data: " +
+        boost::lexical_cast<std::string>(ctype));
 }
 
 /// Produces a string description of a function with parameters and values, as
@@ -61,7 +62,7 @@ static std::string generateFunctionDescrForFit(CurveBenchmarks ctype) {
   else
     throw std::invalid_argument("Unknown curve type when trying to generate a "
                                 "function description string: " +
-                                ctype);
+                                boost::lexical_cast<std::string>(ctype));
 }
 
 // Equivalent python script. Create data with a peak and a bit of noise:
