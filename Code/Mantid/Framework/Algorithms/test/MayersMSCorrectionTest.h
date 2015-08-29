@@ -58,11 +58,11 @@ public:
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
     TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DELTA(-10.406096, signal.front(), delta);
-    TS_ASSERT_DELTA(-10.366438, signal.back(), delta);
+    TS_ASSERT_DELTA(0.38169889, signal.front(), delta);
+    TS_ASSERT_DELTA(0.38255995, signal.back(), delta);
 
-    TS_ASSERT_DELTA(-7.358221, error.front(), delta);
-    TS_ASSERT_DELTA(-7.330179, error.back(), delta);
+    TS_ASSERT_DELTA(0.26990187, error.front(), delta);
+    TS_ASSERT_DELTA(0.27051073, error.back(), delta);
   }
 
   // clang-format off
@@ -89,11 +89,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(-10.406096, signal.front(), delta);
-    TS_ASSERT_DELTA(-10.366438, signal.back(), delta);
+    TS_ASSERT_DELTA(0.38169889, signal.front(), delta);
+    TS_ASSERT_DELTA(0.38255995, signal.back(), delta);
 
-    TS_ASSERT_DELTA(-7.358221, error.front(), delta);
-    TS_ASSERT_DELTA(-7.330179, error.back(), delta);
+    TS_ASSERT_DELTA(0.26990187, error.front(), delta);
+    TS_ASSERT_DELTA(0.27051073, error.back(), delta);
   }
 
 private:

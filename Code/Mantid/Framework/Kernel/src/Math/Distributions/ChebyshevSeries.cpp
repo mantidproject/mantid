@@ -20,7 +20,8 @@ namespace Kernel {
  * @param n Order of the polynomial, which will require n+1 coefficients
  * to evaluate.
  */
-ChebyshevSeries::ChebyshevSeries(const size_t n) : m_bk(n + 3, 0.0) {
+ChebyshevSeries::ChebyshevSeries(const size_t degree)
+  : m_bk(degree + 3, 0.0) {
   // The algorithm requires computing upto n+2 terms so space is
   // reserved for (n+1)+2 values.
 }
@@ -28,24 +29,24 @@ ChebyshevSeries::ChebyshevSeries(const size_t n) : m_bk(n + 3, 0.0) {
 /**
  * @param x X value to evaluate the polynomial in the range [-1,1]. No checking
  * is performed.
- * @param a_n Vector of (n+1) coefficients for the polynomial. They should be
+ * @param c Vector of (n+1) coefficients for the polynomial. They should be
  * ordered from 0->n. Providing more coefficients that required is not
  * considered an error.
  * @return Value of the polynomial. The value is undefined if x or n are
  * out of range
  */
-double ChebyshevSeries::operator()(const std::vector<double> &a_n,
+double ChebyshevSeries::operator()(const std::vector<double> &c,
                                    const double x) {
-  const size_t n = m_bk.size() - 3;
-  assert(a_n.size() >= n + 1);
-  // Start at top as each value of b_k requires the next 2 values
-  m_bk.resize(n + 3);
+  const size_t degree(m_bk.size() - 3);
+  assert(c.size() >= degree + 1);
+
+  m_bk.resize(degree + 3);
   std::fill(m_bk.begin(), m_bk.end(), 0.0);
-  for (size_t i = 0; i <= n; ++i) {
-    size_t k = n - i;
-    m_bk[k] = a_n[k] + 2. * x * m_bk[k + 1] - m_bk[k + 2];
+  for (size_t i = 0; i <= degree; ++i) {
+    const size_t k = degree - i;
+    m_bk[k] = c[k] + 2. * x * m_bk[k + 1] - m_bk[k + 2];
   }
-  return 0.5 * (m_bk[0] - m_bk[2]);
+  return m_bk[0] - x*m_bk[1];
 }
 
 } // namespace Kernel

@@ -34,15 +34,14 @@ namespace Kernel {
 /**
  * Evaluate an approximation to a nth order polynomial using a Chebyshev
  * series through Crenshaw's algorithm to evaluate
- * \f$p_n(x) = a_0 + \Sigma_{i=1}^{n}a_iT_i\f$
+ * \f$p_n(x) = \Sigma_{i=1}^{n}c_iT_i\f$
  * The evaluation is implemented using the reccurrence relations
- *   http://mathworld.wolfram.com/ClenshawRecurrenceFormula.html &
- *   https://en.wikipedia.org/wiki/Clenshaw_algorithm#Special_case_for_Chebyshev_series
+ *   http://mathworld.wolfram.com/ClenshawRecurrenceFormula.html
 */
 class MANTID_KERNEL_DLL ChebyshevSeries {
 public:
-  ChebyshevSeries(const size_t n);
-  double operator()(const std::vector<double> &a_n, const double x);
+  ChebyshevSeries(const size_t degree);
+  double operator()(const std::vector<double> &c, const double x);
 
 private:
   // Storage for n+3 coefficents in the recurrence relation

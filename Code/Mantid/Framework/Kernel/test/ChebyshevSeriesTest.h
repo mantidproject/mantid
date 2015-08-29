@@ -20,14 +20,16 @@ public:
   void test_expected_values_for_x_in_range() {
     using namespace boost::assign;
     const double delta(1e-12);
-    std::vector<double> coeffs = list_of(0.5)(2.4)(-3.2);
+    std::vector<double> coeffs = list_of(0.5)(2.4)(-3.2)(-1.7)(2.1);
 
     const double x(0.75);
     // Expected values computed on paper using reccurrence relation
-    // https://en.wikipedia.org/wiki/Clenshaw_algorithm#Special_case_for_Chebyshev_series
-    TS_ASSERT_DELTA(0.5*coeffs[0], ChebyshevSeries(0)(coeffs, x), delta);
-    TS_ASSERT_DELTA(2.05, ChebyshevSeries(1)(coeffs, x), delta);
-    TS_ASSERT_DELTA(1.65, ChebyshevSeries(2)(coeffs, x), delta);
+    // http://docs.scipy.org/doc/numpy-dev/reference/generated/numpy.polynomial.chebyshev.chebval.html#numpy.polynomial.chebyshev.chebval
+    TS_ASSERT_DELTA(0.5, ChebyshevSeries(0)(coeffs, x), delta);
+    TS_ASSERT_DELTA(2.3, ChebyshevSeries(1)(coeffs, x), delta);
+    TS_ASSERT_DELTA(1.9, ChebyshevSeries(2)(coeffs, x), delta);
+    TS_ASSERT_DELTA(2.85625, ChebyshevSeries(3)(coeffs, x), delta);
+    TS_ASSERT_DELTA(0.821875, ChebyshevSeries(4)(coeffs, x), delta);
   }
 };
 
