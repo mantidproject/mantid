@@ -259,6 +259,14 @@ class MantidConfigDirectInelastic(object):
         else:
             return False
 #
+    @property
+    def user_file_description(self):
+        if self._user:
+            return os.path.join(self._script_repo,'direct_inelastic',self._user.instrument,
+                                self._user_files_descr)
+        else:
+            return  self._user_files_descr
+#
     def script_need_replacing(self,target_script_name):
         """Method specifies conditions when existing reduction file should be replaced
            by a sample file.
@@ -585,7 +593,7 @@ class MantidConfigDirectInelastic(object):
         if platform.system() != 'Windows':
             os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_path))
 
-        self.copy_reduction_sample(self._user_files_descr)
+        self.copy_reduction_sample(self.user_file_description)
         #
         self.make_map_mask_links(user_path)
     #
