@@ -463,7 +463,7 @@ class MantidConfigDirectInelastic(object):
         self._user=theUser
 
         # pylint: disable=W0201
-        # its init method so the change is reasonable 
+        # its init method so the change is reasonable
         self._fedid = str(fedid)
         user_folder = os.path.join(self._home_path,self._fedid)
         if not os.path.exists(user_folder):
@@ -527,6 +527,7 @@ class MantidConfigDirectInelastic(object):
 
         # define and append user scripts search path
         user_path_part = copy.deepcopy(self._python_user_scripts)
+        # pylint: disable=W0212
         for instr in self._user._instrument.values():
             user_path_part.add(os.path.join('direct_inelastic',instr.upper()))
         for part in user_path_part:
@@ -616,7 +617,7 @@ class MantidConfigDirectInelastic(object):
         """Write existing dynamic configuration from memory to
            user defined configuration file
         """
-        # pylint: disable=C0101
+        # pylint: disable=C0103
         # What is wrong with fp variable name here?
         fp = open(config_file_name,'w')
         fp.write(self._header)
