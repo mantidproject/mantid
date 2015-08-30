@@ -1,8 +1,11 @@
 #include "MantidMDAlgorithms/TransposeMD.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Progress.h"
 #include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -11,6 +14,7 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <memory>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -105,7 +109,6 @@ void TransposeMD::exec() {
     std::iota(axes.begin(), axes.end(), 0);
   }
 
-
   std::vector<coord_t> origin(nDimsOutput, 0.0);
   std::vector<Geometry::IMDDimension_sptr> targetGeometry;
   for (size_t i = 0; i < nDimsOutput; ++i) {
@@ -123,25 +126,41 @@ void TransposeMD::exec() {
   CoordTransformAligned coordTransform(nDimsInput, nDimsOutput, axes, origin,
                                        scaling);
 
-  IMDIterator * inIterator = inWS->createIterator();
-  do{
+  uint64_t nPoints = inWS->getNPoints();
+  Progress progress(this, 0, 1, size_t(nPoints));
+
+  progress.reportIncrement(
+      size_t(double(nPoints) * 0.1)); // Report ~10% progress
+
+  const int nThreads = Mantid::API::FrameworkManager::Instance()
+                           .getNumOMPThreads(); // NThreads to Request
+
+  auto iterators = inWS->createIterators(nThreads, NULL);
+
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int it = 0; it < int(iterators.size()); ++it) {
+
+    PARALLEL_START_INTERUPT_REGION
+    auto inIterator = std::unique_ptr<IMDIterator>(iterators[it]);
+    do {
       auto center = inIterator->getCenter();
-      const coord_t* incoords = center.getBareArray();
+      const coord_t *incoords = center.getBareArray();
       std::vector<coord_t> outcoords(nDimsOutput);
       coordTransform.apply(incoords, &outcoords[0]);
 
       size_t index = outWS->getLinearIndexAtCoord(&outcoords[0]);
       outWS->setSignalAt(index, inIterator->getSignal());
       const double error = inIterator->getError();
-      outWS->setErrorSquaredAt(index, error*error);
+      outWS->setErrorSquaredAt(index, error * error);
       outWS->setNumEventsAt(index, inIterator->getNumEvents());
       outWS->setMDMaskAt(index, inIterator->getIsMasked());
+      progress.report();
+    } while (inIterator->next());
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 
-  }while(inIterator->next());
-
-
-  this->setProperty("OutputWorkspace",
-                    outWS);
+  this->setProperty("OutputWorkspace", outWS);
 }
 
 } // namespace MDAlgorithms
