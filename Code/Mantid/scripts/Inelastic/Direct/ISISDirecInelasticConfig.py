@@ -351,8 +351,8 @@ class MantidConfigDirectInelastic(object):
             self._copy_and_parse_user_file(input_file,output_file,replacement_list)
         os.chmod(output_file,0777)
 
-        #if platform.system() != 'Windows':
-        #    os.system('chown '+self._fedid+':'+self._fedid+' '+output_file)
+        if platform.system() != 'Windows':
+            os.system("chown {0}:{0} {1}".format(self._fedid,output_file))
         # Set up the file creation and modification dates to the users start date
         start_date = self._user.start_date
         file_time = time.mktime(start_date.timetuple())
