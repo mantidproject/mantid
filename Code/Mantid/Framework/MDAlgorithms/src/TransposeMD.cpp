@@ -106,15 +106,13 @@ void TransposeMD::exec() {
   }
 
 
-  std::vector<coord_t> origin;
+  std::vector<coord_t> origin(nDimsOutput, 0.0);
   std::vector<Geometry::IMDDimension_sptr> targetGeometry;
   for (size_t i = 0; i < nDimsOutput; ++i) {
     // Clone the dimension corresponding to the axis requested.
     auto cloneDim = Geometry::IMDDimension_sptr(
         new Geometry::MDHistoDimension(inWS->getDimension(axes[i]).get()));
     targetGeometry.push_back(cloneDim);
-    // Set the same origin as we have on the input workspace
-    origin.push_back(coord_t(cloneDim->getMinimum()));
   }
 
   // Make the output workspace in the right shape.
@@ -134,8 +132,10 @@ void TransposeMD::exec() {
 
       size_t index = outWS->getLinearIndexAtCoord(&outcoords[0]);
       outWS->setSignalAt(index, inIterator->getSignal());
-      outWS->setErrorSquaredAt(index, inIterator->getError()*inIterator->getError());
-      // TODO more otherwise
+      const double error = inIterator->getError();
+      outWS->setErrorSquaredAt(index, error*error);
+      outWS->setNumEventsAt(index, inIterator->getNumEvents());
+      outWS->setMDMaskAt(index, inIterator->getIsMasked());
 
   }while(inIterator->next());
 
