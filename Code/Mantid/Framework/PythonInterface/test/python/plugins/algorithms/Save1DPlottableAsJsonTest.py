@@ -13,7 +13,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
     def test_save_one_curve(self):
         """ Test to Save one curve
         """
-        datawsname = "TestOneSurve"
+        datawsname = "TestOneCurve"
         E, I, err = self._createOneCurve(datawsname)
 
         # Execute
@@ -89,6 +89,35 @@ class SaveVulcanGSSTest(unittest.TestCase):
         np.testing.assert_array_equal(d1['y'], I2)
         np.testing.assert_array_equal(d1['e'], err2)
 
+        # Delete the output file
+        os.remove(out_path)
+        return
+
+
+    def test_save_one_curve_withdesignatedname(self):
+        """ Test to Save one curve with a name specified by client
+        """
+        datawsname = "TestOneCurve"
+        E, I, err = self._createOneCurve(datawsname)
+
+        # Execute
+        out_path = "tempout_curve_withname.json"
+        alg_test = run_algorithm(
+            "Save1DPlottableAsJson", 
+            InputWorkspace = datawsname,
+            JsonFilename = out_path,
+            PlotName = "myplot")
+        
+        self.assertTrue(alg_test.isExecuted())
+        
+        # Verify ....
+        d = json.load(open(out_path))
+        plotname = "myplot"
+        d0 = d[plotname+'0'] # plots are numbered
+        np.testing.assert_array_equal(d0['x'], E)
+        np.testing.assert_array_equal(d0['y'], I)
+        np.testing.assert_array_equal(d0['e'], err)
+        
         # Delete the output file
         os.remove(out_path)
         return
