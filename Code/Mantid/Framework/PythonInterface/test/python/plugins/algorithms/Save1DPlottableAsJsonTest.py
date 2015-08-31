@@ -6,7 +6,7 @@ from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
-import os
+import os, json
 
 class SaveVulcanGSSTest(unittest.TestCase):
 
@@ -14,7 +14,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         """ Test to Save one curve
         """
         datawsname = "TestOneSurve"
-        self._createOneCurve(datawsname)
+        E, I, err = self._createOneCurve(datawsname)
 
         # Execute
         out_path = "tempout_curve.json"
@@ -24,11 +24,16 @@ class SaveVulcanGSSTest(unittest.TestCase):
             JsonFilename = out_path)
         
         self.assertTrue(alg_test.isExecuted())
-
+        
         # Verify ....
+        d = json.load(open(out_path))
+        d0 = d[datawsname+'0'] # plots are numbered
+        np.testing.assert_array_equal(d0['x'], E)
+        np.testing.assert_array_equal(d0['y'], I)
+        np.testing.assert_array_equal(d0['e'], err)
         
         # Delete the output file
-        # os.remove(out_path)
+        os.remove(out_path)
         return
 
 
@@ -36,7 +41,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         """ Test to Save one histogram
         """
         datawsname = "TestOneHistogram"
-        self._createOneHistogram(datawsname)
+        E, I, err = self._createOneHistogram(datawsname)
 
         # Execute
         out_path = "tempout_hist.json"
@@ -48,9 +53,14 @@ class SaveVulcanGSSTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         
         # Verify ....
+        d = json.load(open(out_path))
+        d0 = d[datawsname+'0'] # plots are numbered
+        np.testing.assert_array_equal(d0['x'], E)
+        np.testing.assert_array_equal(d0['y'], I)
+        np.testing.assert_array_equal(d0['e'], err)
 
         # Delete the output file
-        # os.remove(out_path)
+        os.remove(out_path)
         return
 
 
@@ -58,7 +68,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         """ Test to Save two curves
         """
         datawsname = "TestTwoCurves"
-        self._createTwoCurves(datawsname)
+        E, I, err, I2, err2 = self._createTwoCurves(datawsname)
         
         # Execute
         out_path = "tempout_2curves.json"
@@ -70,9 +80,17 @@ class SaveVulcanGSSTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         
         # Verify ....
+        d = json.load(open(out_path))
+        d0 = d[datawsname+'0'] # plots are numbered
+        np.testing.assert_array_equal(d0['x'], E)
+        np.testing.assert_array_equal(d0['y'], I)
+        np.testing.assert_array_equal(d0['e'], err)
+        d1 = d[datawsname+'1'] #
+        np.testing.assert_array_equal(d1['y'], I2)
+        np.testing.assert_array_equal(d1['e'], err2)
 
         # Delete the output file
-        # os.remove(out_path)
+        os.remove(out_path)
         return
 
 
@@ -89,7 +107,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
-        return dataws
+        return E, I, err
 
 
     def _createOneHistogram(self, datawsname):
@@ -106,7 +124,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
-        return dataws
+        return E, I, err
 
 
     def _createTwoCurves(self, datawsname):
@@ -136,7 +154,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, ws)
-        return ws
+        return E, I, err, I2, err2
 
 
 if __name__ == '__main__': unittest.main()
