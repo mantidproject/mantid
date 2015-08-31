@@ -45,7 +45,9 @@ class Save1DPlottableAsJson(PythonAlgorithm):
 
         self.declareProperty(
             FileProperty("JsonFilename", "", FileAction.Save, ['.json']),
-            "Name of the output Json file. ")
+            "Name of the output Json file")
+        
+        self.declareProperty("PlotName", "", "Name of the output plot")
         
         return
 
@@ -55,6 +57,7 @@ class Save1DPlottableAsJson(PythonAlgorithm):
         # Properties
         inputwsname = self.getPropertyValue("InputWorkspace")
         outfilename = self.getPropertyValue("JsonFilename")
+        plotname = self.getPropertyValue("PlotName")
 
         # Check properties
         inputws = AnalysisDataService.retrieve(inputwsname)
@@ -70,17 +73,17 @@ class Save1DPlottableAsJson(PythonAlgorithm):
                 "Output file %s already exists" % outfilename)
 
         # Generate Json file
-        output = self._save(inputws, outfilename)
+        output = self._save(inputws, outfilename, plotname)
         return
 
-    def _save(self, inputws, outpath):
-        d = self._serialize(inputws)
+    def _save(self, inputws, outpath, plotname):
+        d = self._serialize(inputws, plotname)
         import json
         json.dump(d, open(outpath, 'wt'))
         return
         
-    def _serialize(self, ws):
-        wname = ws.getName()
+    def _serialize(self, ws, plotname):
+        wname = plotname or ws.getName()
         # init dictionary
         ishist = ws.isHistogramData()
         type = "histogram" if ishist else "point"
