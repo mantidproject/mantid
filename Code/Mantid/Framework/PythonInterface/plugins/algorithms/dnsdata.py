@@ -1,5 +1,4 @@
-#pylint: disable=invalid-name,too-many-instance-attributes,too-few-public-methods,anomalous-backslash-in-string
-import sys
+# pylint: disable=too-many-instance-attributes,too-few-public-methods
 import re
 import datetime
 
@@ -47,8 +46,8 @@ class DNSdata(object):
         self.b_coil_current = None
         self.c_coil_current = None
         self.z_coil_current = None
-        self.t1 = None       # T1
-        self.t2 = None       # T2
+        self.temp1 = None       # T1
+        self.temp2 = None       # T2
         self.tsp = None      # T_setpoint
         self.tof_channel_number = None
         self.tof_channel_width = None
@@ -87,10 +86,10 @@ class DNSdata(object):
             # parse block 1 (general information)
             b1splitted = [s.strip() for s in blocks[1].split('#')]
             b1rest = [el for el in b1splitted]
-            r_user = re.compile("User:\s*(?P<name>.*?$)")
-            r_sample = re.compile("Sample:\s*(?P<sample>.*?$)")
-            r_coil = re.compile("^(?P<coil>.*?)\s*xyz-coil.*")
-            r_filter = re.compile("^(?P<filter>.*?)\s*Be-filter.*")
+            r_user = re.compile(r"User:\s*(?P<name>.*?$)")
+            r_sample = re.compile(r"Sample:\s*(?P<sample>.*?$)")
+            r_coil = re.compile(r"^(?P<coil>.*?)\s*xyz-coil.*")
+            r_filter = re.compile(r"^(?P<filter>.*?)\s*Be-filter.*")
             for line in b1splitted:
                 res = r_user.match(line)
                 if res:
@@ -164,8 +163,8 @@ class DNSdata(object):
             # parse block 5 (Temperatures)
             # assume: T1=cold_head_temperature, T2=sample_temperature
             b5splitted = [s.strip() for s in blocks[5].split('#')]
-            self.t1 = float(b5splitted[2].split()[1])
-            self.t2 = float(b5splitted[3].split()[1])
+            self.temp1 = float(b5splitted[2].split()[1])
+            self.temp2 = float(b5splitted[3].split()[1])
             self.tsp = float(b5splitted[4].split()[1])
 
             # parse block 6 (TOF parameters)
@@ -201,20 +200,13 @@ class DNSdata(object):
                 pass
 
 
-def parse_header(h):
+def parse_header(header):
     """
     parses the header string and returns the parsed dictionary
     """
-    d = {}
-    regexp = re.compile("(\w+)=(\w+)")
-    result = regexp.finditer(h)
-    for r in result:
-        d[r.groups()[0]] = r.groups()[1]
-    return d
-
-
-if __name__ == '__main__':
-    fname = sys.argv[1]
-    dns_data = DNSdata()
-    dns_data.read_legacy(fname)
-    print dns_data.__dict__
+    header_dict = {}
+    regexp = re.compile(r"(\w+)=(\w+)")
+    result = regexp.finditer(header)
+    for res in result:
+        header_dict[res.groups()[0]] = res.groups()[1]
+    return header_dict

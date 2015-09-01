@@ -19,8 +19,10 @@ This algorithm merges given matrix workspaces to a :ref:`Workspace2D <Workspace2
 .. note::
     The **OutputWorkspace** will have no connection to the instrument. Part of the sample logs will be lost either. This algorithm can be executed at any step of the data reduction to view the result. However, further data reduction must be performed on the original workspaces.
 
-As a result, following output will be produced: 
+As a result, following output will be produced:
+
 -  Output workspace with corrected data. Part of sample logs will be copied from the first data workspace. The data will be normalized to monitor or run duration if the **Normalize** option is checked. 
+  
 -  If the **Normalize** option is unchecked, workspace with normalization data (monitor counts or run duration) will be created. The normalization workspace is named same as the data workspace, but has suffix "_NORM". 
 
 .. warning::
@@ -46,8 +48,9 @@ The input workspaces (**WorkspaceNames**) have to have the following in order to
 -  The same number of dimensions
 -  The same number of spectra
 -  The same number of bins
--  Have the corresponding normalization workspace
--  Have the same wavelength in the sample logs
+-  The same wavelength in the sample logs
+-  Sample log **normalized** must be set to "yes" for normalized data or "no" for not normalized data. **Important:** this value must be the same for all given workspaces. The mixture of normalized and not normalized workspaces is not accepted: algorithm will terminate with an error message.
+-  If sample log **normalized** is set to "no", all workspaces must have the corresponding normalization workspace.
 
 For the physically meaningful merge result, it is also important that these workspaces have the same slits size, polarisation, and flipper status. If some of these parameters are different, algorithm produces warning. If these properties are not specified in the workspace sample logs, no comparison is performed.
 

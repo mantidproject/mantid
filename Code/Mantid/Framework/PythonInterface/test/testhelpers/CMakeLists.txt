@@ -6,6 +6,7 @@ set ( PY_FILES
   __init__.py
   algorithm_decorator.py
   tempfile_wrapper.py
+  mlzhelpers.py
 )
 
 # Copy python files to output directory

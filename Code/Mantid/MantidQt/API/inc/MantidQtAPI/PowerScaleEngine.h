@@ -33,8 +33,9 @@
 #include <qwt_scale_engine.h>
 #include <qwt_scale_map.h>
 #include "ScaleEngine.h"
+#include "MantidQtAPI/DllOption.h"
 
-class PowerScaleTransformation: public ScaleTransformation
+class EXPORT_OPT_MANTIDQT_API PowerScaleTransformation: public ScaleTransformation
 {
 public:
 	PowerScaleTransformation(const ScaleEngine *engine):ScaleTransformation(engine), nth_power(engine->nthPower()){};
@@ -50,7 +51,7 @@ private:
   \brief A scale engine for power (X^n) scales
 */
 
-class PowerScaleEngine: public QwtScaleEngine
+class EXPORT_OPT_MANTIDQT_API PowerScaleEngine: public QwtScaleEngine
 {
 public:
     virtual void autoScale(int maxSteps,

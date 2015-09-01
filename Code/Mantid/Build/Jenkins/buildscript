@@ -212,6 +212,11 @@ $SCL_ON_RHEL6 "ctest -j$BUILD_THREADS --schedule-random --output-on-failure"
 # Run the documentation tests on Ubuntu when doing a pull request build.
 ###############################################################################
 if [[ "${ON_UBUNTU}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+  # Remove doctrees directory so it forces a full reparse. It seems that
+  # without this newly added doctests are not executed
+  if [ -d $BUILD_DIR/docs/doctrees ]; then
+    rm -rf $BUILD_DIR/docs/doctrees/*
+  fi
   $SCL_ON_RHEL6 "cmake --build . --target docs-test"
 fi
 

@@ -25,7 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "Spectrogram.h"
 #include <math.h>
 #include <QPen>
