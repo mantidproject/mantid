@@ -30,7 +30,7 @@
 #include <json/writer.h>
 #include <string>
 
-class NotebookWriter {
+class MANTID_API_DLL NotebookWriter {
 
 public:
 
