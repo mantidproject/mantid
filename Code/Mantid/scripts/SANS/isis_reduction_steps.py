@@ -2049,12 +2049,14 @@ class ConvertToQISIS(ReductionStep):
         sample_radius = 0.5*self.get_q_resolution_a2()
         source_radius = 0.5*self.get_q_resolution_a1()
 
+        # The radii and the deltaR are expected to be in mm
         TOFSANSResolutionByPixel(InputWorkspace = det_bank_workspace,
                                  OutputWorkspace = QRESOLUTION_WORKSPACE_NAME,
-                                 DeltaR = self.get_q_resolution_delta_r(),
-                                 SampleApertureRadius = sample_radius,
-                                 SourceApertureRadius = source_radius,
+                                 DeltaR = self.get_q_resolution_delta_r()*1000.,
+                                 SampleApertureRadius = sample_radius*1000.,
+                                 SourceApertureRadius = source_radius*1000.,
                                  SigmaModerator = sigma_moderator,
+                                 CollimationLength = self.get_q_resolution_collimation_length(),
                                  AccountForGravity=self._use_gravity,
                                  ExtraLength=self._grav_extra_length)
 
