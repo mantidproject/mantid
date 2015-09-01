@@ -1055,38 +1055,42 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
     '''
     min_q = None
     max_q = None
-    # Check if there is range specified in the rescale_shift object
-    if rescale_shift.qRangeUserSelected:
-        min_q = rescale_shift.qMin
-        max_q = rescale_shift.qMax
+
+    front_data = mtd[front_data_name]
+    front_dataX = front_data.readX(0)
+
+    front_size = len(front_dataX)
+    front_q_min = None
+    front_q_max = None
+    if front_size > 0:
+        front_q_min = front_dataX[0]
+        front_q_max = front_dataX[front_size - 1]
     else:
-        front_data = mtd[front_data_name]
-        front_dataX = front_data.readX(0)
+        raise RuntimeError("The FRONT detector does not seem to contain q values")
 
-        front_size = len(front_dataX)
-        front_q_min = None
-        front_q_max = None
-        if front_size > 0:
-            front_q_min = front_dataX[0]
-            front_q_max = front_dataX[front_size - 1]
-        else:
-            raise RuntimeError("The FRONT detector does not seem to contain q values")
+    rear_data = mtd[rear_data_name]
+    rear_dataX = rear_data.readX(0)
 
-        rear_data = mtd[rear_data_name]
-        rear_dataX = rear_data.readX(0)
+    rear_size = len(rear_dataX)
+    rear_q_min = None
+    rear_q_max = None
+    if rear_size > 0:
+        rear_q_min = rear_dataX[0]
+        rear_q_max = rear_dataX[rear_size - 1]
+    else:
+        raise RuntimeError("The REAR detector does not seem to contain q values")
 
-        rear_size = len(rear_dataX)
-        rear_q_max = None
-        if rear_size > 0:
-            rear_q_max = rear_dataX[rear_size - 1]
-        else:
-            raise RuntimeError("The REAR detector does not seem to contain q values")
+    if  rear_q_max < front_q_min:
+        raise RuntimeError("The min value of the FRONT detector data set is larger"
+                            "than the max value of the REAR detector data set")
 
-        if  rear_q_max < front_q_min:
-            raise RuntimeError("The min value of the FRONT detector data set is larger"
-                               "than the max value of the REAR detector data set")
-        min_q = front_q_min
-        max_q = front_q_max
+    # Get the min and max range
+    min_q = max(rear_q_min, front_q_min)
+    max_q = min(rear_q_max, front_q_max)
+
+    if rescale_shift.qRangeUserSelected:
+        min_q = max(min_q, rescale_shift.qMin)
+        max_q = min(max_q,rescale_shift.qMax)
 
     return min_q, max_q
 
@@ -1099,30 +1103,23 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
     @param q_max: the maximal q value
     '''
     # First we want to crop the workspaces
-    alg = AlgorithmManager.create("CropWorkspace")
-    alg.initialize()
-    alg.setChild(True)
-    alg.setProperty("XMin", q_min)
-    alg.setProperty("XMax", q_max)
-
-    # For the front data set
-    alg.setProperty("InputWorkspace", front_data)
-    alg.setProperty("OutputWorkspace", "front_cropped")
-    alg.execute()
-    front_data_cropped = alg.getProperty("OutputWorkspace").value
-
+    front_data_cropped = CropWorkspace(InputWorkspace=front_data, XMin = q_min, XMax = q_max)
     # For the rear data set
-    alg.setProperty("InputWorkspace", rear_data)
-    alg.setProperty("OutputWorkspace", "rear_cropped")
-    alg.execute()
-    rear_data_cropped = alg.getProperty("OutputWorkspace").value
+    rear_data_cropped = CropWorkspace(InputWorkspace=rear_data, XMin = q_min, XMax = q_max)
 
     # Now transfer the error from front data to the rear data workspace
     # This works only if we have a single QMod spectrum in the workspaces
     front_error = front_data_cropped.dataE(0)
     rear_error = rear_data_cropped.dataE(0)
+    
+    rear_error_squared = rear_error*rear_error
+    front_error_squared = front_error*front_error
 
-    corrected_error = np.sqrt(rear_error*rear_error + front_error*front_error)
+    a = len(rear_error_squared)
+    b = len(front_error_squared)
+
+    corrected_error_squared =  rear_error_squared + front_error_squared
+    corrected_error = np.sqrt(corrected_error_squared)
     rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
 
     return front_data_cropped, rear_data_cropped

@@ -629,7 +629,8 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     delete_workspaces('__fitRescaleAndShift_Parameters')
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix')
     delete_workspaces('__fitRescaleAndShift_Workspace')
-    delete_workspaces(front
+    delete_workspaces(rear_data_corrected.name())
+    delete_workspaces(front_data_corrected.name())
 
 
     return scale, shift
