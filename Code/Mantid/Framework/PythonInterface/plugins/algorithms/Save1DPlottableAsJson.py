@@ -1,14 +1,13 @@
-#pylint: disable=no-init,invalid-name
-import mantid.simpleapi as api
+#pylint: disable=no-init,unused-variable
 from mantid.api import *
 from mantid.kernel import *
 import os
 
-    
+
 # See ticket #10234
 
 class Save1DPlottableAsJson(PythonAlgorithm):
-    """ Save 1D plottable data in json format from workspace. 
+    """ Save 1D plottable data in json format from workspace.
     """
     def category(self):
         """
@@ -36,7 +35,6 @@ class Save1DPlottableAsJson(PythonAlgorithm):
         """
         # this is the requirement of using this plugin
         # is there a place to register that?
-        
         self.require()
 
         self.declareProperty(
@@ -46,9 +44,9 @@ class Save1DPlottableAsJson(PythonAlgorithm):
         self.declareProperty(
             FileProperty("JsonFilename", "", FileAction.Save, ['.json']),
             "Name of the output Json file")
-        
+
         self.declareProperty("PlotName", "", "Name of the output plot")
-        
+
         return
 
     def PyExec(self):
@@ -67,46 +65,46 @@ class Save1DPlottableAsJson(PythonAlgorithm):
         if inputws.axes() > 2:
             raise ValueError(
                 "InputWorkspace must be one-dimensional.")
-            
+
         if os.path.exists(outfilename):
             raise IOError(
                 "Output file %s already exists" % outfilename)
 
         # Generate Json file
-        output = self._save(inputws, outfilename, plotname)
+        self._save(inputws, outfilename, plotname)
         return
 
     def _save(self, inputws, outpath, plotname):
-        d = self._serialize(inputws, plotname)
+        plot = self._serialize(inputws, plotname)
         import json
-        json.dump(d, open(outpath, 'wt'))
+        json.dump(plot, open(outpath, 'w'))
         return
-        
-    def _serialize(self, ws, plotname):
-        wname = plotname or ws.getName()
+
+    def _serialize(self, workspace, plotname):
+        wname = plotname or workspace.getName()
         # init dictionary
-        ishist = ws.isHistogramData()
-        type = "histogram" if ishist else "point"
-        d = {"type": type}
+        ishist = workspace.isHistogramData()
+        plottype = "histogram" if ishist else "point"
+        serialized = {"type": plottype}
         # helper
         label = lambda axis: "%s (%s)" % (
             axis.getUnit().caption(),
             axis.getUnit().symbol() or 1,
             )
         # loop over spectra
-        for i in range(ws.getNumberHistograms()):
+        for i in range(workspace.getNumberHistograms()):
             k = "%s%s" % (wname, i)
-            v = dict(
-                x = list(ws.readX(i)),
-                y = list(ws.readY(i)),
-                e = list(ws.readE(i)),
-                xlabel = label(ws.getAxis(0)),
-                ylabel = label(ws.getAxis(1)),
-                title = "long title of %s" % k,
+            value = dict(
+                x=list(workspace.readX(i)),
+                y=list(workspace.readY(i)),
+                e=list(workspace.readE(i)),
+                xlabel=label(workspace.getAxis(0)),
+                ylabel=label(workspace.getAxis(1)),
+                title="long title of %s" % k,
                 )
-            d[k] = v
+            serialized[k] = value
             continue
-        return d
+        return serialized
 
 
 # Register algorithm with Mantid

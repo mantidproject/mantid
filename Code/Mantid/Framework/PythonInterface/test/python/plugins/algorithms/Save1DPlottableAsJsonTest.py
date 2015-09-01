@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,too-many-public-methods
 import unittest
 import numpy as np
 import mantid.simpleapi as api
@@ -19,19 +20,17 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         out_path = "tempout_curve.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson", 
+            "Save1DPlottableAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path)
-        
+        # executed?
         self.assertTrue(alg_test.isExecuted())
-        
         # Verify ....
         d = json.load(open(out_path))
         d0 = d[datawsname+'0'] # plots are numbered
         np.testing.assert_array_equal(d0['x'], E)
         np.testing.assert_array_equal(d0['y'], I)
         np.testing.assert_array_equal(d0['e'], err)
-        
         # Delete the output file
         os.remove(out_path)
         return
@@ -46,19 +45,17 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         out_path = "tempout_hist.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson", 
+            "Save1DPlottableAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path)
-        
+        # Executed?
         self.assertTrue(alg_test.isExecuted())
-        
         # Verify ....
         d = json.load(open(out_path))
         d0 = d[datawsname+'0'] # plots are numbered
         np.testing.assert_array_equal(d0['x'], E)
         np.testing.assert_array_equal(d0['y'], I)
         np.testing.assert_array_equal(d0['e'], err)
-
         # Delete the output file
         os.remove(out_path)
         return
@@ -69,16 +66,14 @@ class SaveVulcanGSSTest(unittest.TestCase):
         """
         datawsname = "TestTwoCurves"
         E, I, err, I2, err2 = self._createTwoCurves(datawsname)
-        
         # Execute
         out_path = "tempout_2curves.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson", 
+            "Save1DPlottableAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path)
-        
+        # executed?
         self.assertTrue(alg_test.isExecuted())
-        
         # Verify ....
         d = json.load(open(out_path))
         d0 = d[datawsname+'0'] # plots are numbered
@@ -88,7 +83,6 @@ class SaveVulcanGSSTest(unittest.TestCase):
         d1 = d[datawsname+'1'] #
         np.testing.assert_array_equal(d1['y'], I2)
         np.testing.assert_array_equal(d1['e'], err2)
-
         # Delete the output file
         os.remove(out_path)
         return
@@ -99,17 +93,15 @@ class SaveVulcanGSSTest(unittest.TestCase):
         """
         datawsname = "TestOneCurve"
         E, I, err = self._createOneCurve(datawsname)
-
         # Execute
         out_path = "tempout_curve_withname.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson", 
+            "Save1DPlottableAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path,
             PlotName = "myplot")
-        
+        # executed?
         self.assertTrue(alg_test.isExecuted())
-        
         # Verify ....
         d = json.load(open(out_path))
         plotname = "myplot"
@@ -117,7 +109,6 @@ class SaveVulcanGSSTest(unittest.TestCase):
         np.testing.assert_array_equal(d0['x'], E)
         np.testing.assert_array_equal(d0['y'], I)
         np.testing.assert_array_equal(d0['e'], err)
-        
         # Delete the output file
         os.remove(out_path)
         return
@@ -129,11 +120,10 @@ class SaveVulcanGSSTest(unittest.TestCase):
         E = np.arange(-50, 50, 1.0)
         I = 1000 * np.exp(-E**2/10**2)
         err = I ** .5
-        
+        # create workspace
         dataws = api.CreateWorkspace(
-            DataX = E, DataY = I, DataE = err, NSpec = 1, 
+            DataX = E, DataY = I, DataE = err, NSpec = 1,
             UnitX = "Energy(meV)")
-        
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
         return E, I, err
@@ -146,11 +136,10 @@ class SaveVulcanGSSTest(unittest.TestCase):
         Ecenters = (E[:-1] + E[1:]) / 2
         I = 1000 * np.exp(-Ecenters**2/10**2)
         err = I ** .5
-        
+        # create workspace
         dataws = api.CreateWorkspace(
-            DataX = E, DataY = I, DataE = err, NSpec = 1, 
+            DataX = E, DataY = I, DataE = err, NSpec = 1,
             UnitX = "Energy(meV)")
-        
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, dataws)
         return E, I, err
@@ -166,10 +155,9 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # curve 2
         I2 = 1000 * (1+np.sin(E/5*np.pi))
         err2 = I ** .5
-        
         # workspace
         ws = WorkspaceFactory.create(
-            "Workspace2D", NVectors=2, 
+            "Workspace2D", NVectors=2,
             XLength = E.size, YLength = I.size
             )
         # curve1
@@ -180,10 +168,10 @@ class SaveVulcanGSSTest(unittest.TestCase):
         ws.dataX(1)[:] = E
         ws.dataY(1)[:] = I2
         ws.dataE(1)[:] = err2
-        
         # Add to data service
         AnalysisDataService.addOrReplace(datawsname, ws)
         return E, I, err, I2, err2
 
 
-if __name__ == '__main__': unittest.main()
+if __name__ == '__main__':
+    unittest.main()
