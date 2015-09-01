@@ -3057,6 +3057,7 @@ class UserFile(ReductionStep):
         @param arguments: the arguments of a QResolution line
         @param reducer: a reducer object
         '''
+        arguments = arguments.upper()
         if arguments.find('=') == -1:
             return self._read_q_resolution_line_on_off(arguments, reducer)
 
