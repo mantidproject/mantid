@@ -120,6 +120,7 @@ void TransposeMD::exec() {
 
   // Make the output workspace in the right shape.
   auto outWS = MDHistoWorkspace_sptr(new MDHistoWorkspace(targetGeometry));
+  outWS->copyExperimentInfos(*inWS);
 
   // Configure the coordinate transform.
   std::vector<coord_t> scaling(nDimsOutput, 1); // No scaling
@@ -150,7 +151,7 @@ void TransposeMD::exec() {
 
       size_t index = outWS->getLinearIndexAtCoord(&outcoords[0]);
       outWS->setSignalAt(index, inIterator->getSignal());
-      const double error = inIterator->getError();
+      const signal_t error = inIterator->getError();
       outWS->setErrorSquaredAt(index, error * error);
       outWS->setNumEventsAt(index, inIterator->getNumEvents());
       outWS->setMDMaskAt(index, inIterator->getIsMasked());

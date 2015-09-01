@@ -3,11 +3,15 @@
 
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
 class vtkDataSet;
 namespace Mantid
 {
+  namespace API{
+    class IMDHistoWorkspace;
+  }
   namespace VATES
   {
     /** 
@@ -53,12 +57,18 @@ namespace Mantid
       virtual int getSpecialCoordinates();
       std::vector<int> getExtents();
     private:
+      /// Transpose a workspace to push integrated dimensions to the last
+      boost::shared_ptr<Mantid::API::IMDHistoWorkspace> transposeWs(boost::shared_ptr<Mantid::API::IMDHistoWorkspace>& histoWs);
       /// Repository for accessing workspaces. At this level, does not specify how or where from.
       boost::scoped_ptr<WorkspaceProvider> m_repository;
       /// The name of the workspace.
       const std::string m_wsName;
+      /// The type name of the workspace
       std::string m_wsTypeName;
+      /// The workspace special coordinate system
       int m_specialCoords;
+      /// Cached visual histogram workspace. Post transpose. Avoids repeating transpose.
+      boost::shared_ptr<Mantid::API::IMDHistoWorkspace> m_cachedVisualHistoWs;
     };
   }
 }
