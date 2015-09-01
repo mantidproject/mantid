@@ -165,7 +165,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertRaises(RuntimeError,MantidConfigDirectInelastic,MantidDir,HomeRootDir,'MissingUserScriptRepoDir',self.MapMaskDir)
         self.assertRaises(RuntimeError,MantidConfigDirectInelastic,MantidDir,HomeRootDir,self.UserScriptRepoDir,'MissingMapMaskDir')
 
-        user = UserProperties()
+        user = UserProperties(self.userID)
         user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
 
         # clear up the previous
@@ -173,7 +173,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
 
 
-        mcf.init_user(self.userID,user)
+        mcf.init_user(user)
         self.makeFakeSourceReductionFile(mcf)
 
         self.assertEqual(len(mcf._dynamic_configuration),6)
@@ -209,7 +209,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         HomeRootDir = self.get_save_dir()
         mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
 
-        user = UserProperties()
+        user = UserProperties(self.userID)
         user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
 
 
@@ -232,7 +232,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
 
 
-        mcf.init_user(self.userID,user)
+        mcf.init_user(user)
 
         fake_source=self.makeFakeSourceReductionFile(mcf)
         self.assertEqual(len(mcf._dynamic_configuration),6)
@@ -256,10 +256,10 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         if not os.path.exists(user1RootDir):
             os.makedirs(user1RootDir)
         #
-        user1 = UserProperties()
+        user1 = UserProperties(user1ID)
         user1.set_user_properties('MARI','20990124','CYCLE20991',rbdir2)
 
-        mcf.init_user(user1ID,user1)
+        mcf.init_user(user1)
         source_file = self.makeFakeSourceReductionFile(mcf)
 
         mcf.generate_config()
@@ -321,7 +321,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         
         user = UserProperties(self.userID)
         user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
-        mcf.init_user(self.userID,user)
+        mcf.init_user(user)
 
         # test old defaults, deployed if no User_files_description are defined
         files_to_copy = mcf._parse_user_files_description(None)

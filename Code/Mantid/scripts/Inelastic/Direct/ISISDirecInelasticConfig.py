@@ -471,7 +471,7 @@ class MantidConfigDirectInelastic(object):
         else:
             return False
     #
-    def init_user(self,fedid,theUser):
+    def init_user(self,theUser):
         """Define settings, specific to a user"""
         #
         # pylint: disable=W0212
@@ -483,10 +483,10 @@ class MantidConfigDirectInelastic(object):
 
         # pylint: disable=W0201
         # its init method so the change is reasonable
-        self._fedid = str(fedid)
+        self._fedid =  theUser.userID
         user_folder = os.path.join(self._home_path,self._fedid)
         if not os.path.exists(user_folder):
-            raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(fedid))
+            raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(self._fedid))
         # pylint: disable=W0212
         # bad practice but I need all rb_dires, not the current one
         for rb_folder in theUser._rb_dirs.values():
