@@ -178,13 +178,13 @@ public:
     auto wsHist = ws->getHistory();
 
     NotebookBuilder builder(wsHist.createView());
-    std::string scriptText = builder.build();
+    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
     {
       TS_ASSERT_EQUALS(*it, result[i])
     }
@@ -230,13 +230,13 @@ public:
 
     view->unrollAll();
     NotebookBuilder builder(view);
-    std::string scriptText = builder.build();
+    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
     {
       TS_ASSERT_EQUALS(*it, result[i])
     }
@@ -292,13 +292,13 @@ public:
     view->unroll(5);
 
     NotebookBuilder builder(view);
-    std::string scriptText = builder.build();
+    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
     {
       TS_ASSERT_EQUALS(*it, result[i])
     }
@@ -329,13 +329,13 @@ public:
     auto wsHist = ws->getHistory();
 
     NotebookBuilder builder(wsHist.createView());
-    std::string scriptText = builder.build();
+    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
     {
       TS_ASSERT_EQUALS(*it, result[i])
     }
