@@ -1,6 +1,5 @@
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
@@ -60,63 +59,6 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   return bCanReadIt;
 }
 
-/**
- * @brief MDHWInMemoryLoadingPresenter::transposeWs
- *
- * vtkDataSets are usually provided in 3D, trying to create these where one of those dimensions
- * might be integrated out leads to empty datasets. To avoid this we reorder the dimensions in our workspace
- * prior to visualisation by transposing if if needed.
- *
- * @param histoWs : An input workspace that may integrated dimensions anywhere.
- * @return A workspace that can be directly rendered from. Integrated dimensions are always last.
- */
-Mantid::API::IMDHistoWorkspace_sptr MDHWInMemoryLoadingPresenter::transposeWs(
-    Mantid::API::IMDHistoWorkspace_sptr &histoWs) {
-  using namespace Mantid::API;
-
-  if (!m_cachedVisualHistoWs) {
-    /*
-     Construct dimension indexes list for transpose. We do this by forcing
-     integrated
-     dimensions to be the last in the list. All other orderings are kept.
-     */
-    std::vector<int> integratedDims;
-    std::vector<int> nonIntegratedDims;
-    for (int i = 0; i < int(histoWs->getNumDims()); ++i) {
-      auto dim = histoWs->getDimension(i);
-      if (dim->getIsIntegrated()) {
-        integratedDims.push_back(i);
-      } else {
-        nonIntegratedDims.push_back(i);
-      }
-    }
-    std::vector<int> orderedDims;
-    orderedDims = nonIntegratedDims;
-    orderedDims.insert(orderedDims.end(), integratedDims.begin(),
-                       integratedDims.end());
-
-    /*
-     If there has been any reordering above, then the dimension indexes will
-     no longer be sorted. We use that to determine if we can avoid transposing the workspace.
-     */
-    if (!std::is_sorted(orderedDims.begin(), orderedDims.end())) {
-      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("TransposeMD");
-      alg->setChild(true);
-      alg->initialize();
-      alg->setProperty("InputWorkspace", histoWs);
-      alg->setPropertyValue("OutputWorkspace", "dummy");
-      alg->setProperty("Axes", orderedDims);
-      alg->execute();
-      IMDHistoWorkspace_sptr visualHistoWs =
-          alg->getProperty("OutputWorkspace");
-      m_cachedVisualHistoWs = visualHistoWs;
-    } else {
-      // No need to transpose anything.
-      m_cachedVisualHistoWs = histoWs;
-    }
-  }
-  return m_cachedVisualHistoWs;
-}
 
 /*
 Executes the underlying algorithm to create the MVP model.
@@ -136,11 +78,11 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
   IMDHistoWorkspace_sptr histoWs =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
 
-  auto visualHistoWs = transposeWs(histoWs);
+  MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
 
   // factory->setRecursionDepth(this->m_view->getRecursionDepth());
   vtkDataSet *visualDataSet = factory->oneStepCreate(
-      visualHistoWs, drawingProgressUpdate); // HACK: progressUpdate should be
+      m_cachedVisualHistoWs, drawingProgressUpdate); // HACK: progressUpdate should be
                                              // argument for drawing!
 
   /*extractMetaData needs to be re-run here because the first execution of this
@@ -157,8 +99,9 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
     this->m_metadataJsonManager->setMaxValue(range[1]);
   }
 
-  this->extractMetadata(visualHistoWs);
+  this->extractMetadata(m_cachedVisualHistoWs);
 
+  // Transposed workpace is temporary, outside the ADS, and does not have a name. so get it from pre-transposed.
   this->appendMetadata(visualDataSet, histoWs->getName());
   return visualDataSet;
 }
@@ -175,7 +118,7 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
   m_wsTypeName = histoWs->id();
   m_specialCoords = histoWs->getSpecialCoordinateSystem();
 
-  histoWs = transposeWs(histoWs);
+  MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
 
   // Set the minimum and maximum of the workspace data.
   QwtDoubleInterval minMaxContainer =
@@ -185,13 +128,13 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   // Set the instrument which is associated with the workspace.
   m_metadataJsonManager->setInstrument(
-      m_metaDataExtractor->extractInstrument(histoWs));
+      m_metaDataExtractor->extractInstrument(m_cachedVisualHistoWs));
 
   // Set the special coordinates
   m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);
 
   // Call base-class extraction method.
-  this->extractMetadata(histoWs);
+  this->extractMetadata(m_cachedVisualHistoWs);
 }
 
 /// Destructor
@@ -218,11 +161,11 @@ std::vector<int> MDHWInMemoryLoadingPresenter::getExtents() {
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
   IMDHistoWorkspace_sptr histoWs =
       boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
-  histoWs = transposeWs(histoWs);
+  MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
   std::vector<int> extents(6, 0);
-  extents[1] = static_cast<int>(histoWs->getXDimension()->getNBins());
-  extents[3] = static_cast<int>(histoWs->getYDimension()->getNBins());
-  extents[5] = static_cast<int>(histoWs->getZDimension()->getNBins());
+  extents[1] = static_cast<int>(m_cachedVisualHistoWs->getXDimension()->getNBins());
+  extents[3] = static_cast<int>(m_cachedVisualHistoWs->getYDimension()->getNBins());
+  extents[5] = static_cast<int>(m_cachedVisualHistoWs->getZDimension()->getNBins());
   return extents;
 }
 }
