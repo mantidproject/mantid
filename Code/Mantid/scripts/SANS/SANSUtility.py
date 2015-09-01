@@ -1111,12 +1111,9 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
     # This works only if we have a single QMod spectrum in the workspaces
     front_error = front_data_cropped.dataE(0)
     rear_error = rear_data_cropped.dataE(0)
-    
+
     rear_error_squared = rear_error*rear_error
     front_error_squared = front_error*front_error
-
-    a = len(rear_error_squared)
-    b = len(front_error_squared)
 
     corrected_error_squared =  rear_error_squared + front_error_squared
     corrected_error = np.sqrt(corrected_error_squared)

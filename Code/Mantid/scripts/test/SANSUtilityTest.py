@@ -885,14 +885,14 @@ class TestExtractionOfQRange(unittest.TestCase):
         bin_width = 1 
         provide_histo_workspace_with_one_spectrum(rear_name, rear_q_min, rear_q_max, bin_width)
         provide_histo_workspace_with_one_spectrum(front_name, front_q_min, front_q_max, bin_width)
-        rescale_shift = HelperRescaleShift(True, 1, 2)
+        rescale_shift = HelperRescaleShift(True, 15, 17)
         # Act
         result_q_min, result_q_max = su.get_start_q_and_end_q_values(rear_data_name = rear_name,
                                                                      front_data_name = front_name,
                                                                      rescale_shift = rescale_shift)
         # Assert
-        self.assertEqual(1, result_q_min)
-        self.assertEqual(2, result_q_max)
+        self.assertEqual(15, result_q_min)
+        self.assertEqual(17, result_q_max)
         # Clean up
         self._delete_workspace(front_name)
         self._delete_workspace(rear_name)
