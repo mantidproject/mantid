@@ -27,8 +27,13 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
+#include "MantidAPI/DllConfig.h"
+
 #include <json/writer.h>
 #include <string>
+
+namespace Mantid {
+namespace API {
 
 class MANTID_API_DLL NotebookWriter {
 
@@ -37,9 +42,7 @@ public:
   NotebookWriter();
   virtual ~NotebookWriter(){};
 
-  void markdownCell(Json::Value string_array);
   void markdownCell(std::string string_array);
-  void codeCell(Json::Value string_code);
   void codeCell(std::string string_code);
   std::string writeNotebook();
 
@@ -47,10 +50,16 @@ private:
 
   void headerComment();
   void headerCode();
+
   Json::Value buildNotebook();
 
-  Json::Value m_cell_buffer;
+  void markdownCell(Json::Value string_array);
+  void codeCell(Json::Value string_code);
 
+  Json::Value m_cell_buffer;
 };
+
+}
+}
 
 #endif //MANTID_NOTEBOOKWRITER_H

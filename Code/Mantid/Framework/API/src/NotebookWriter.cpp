@@ -2,6 +2,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
+namespace Mantid {
+namespace API {
 
 namespace {
     Mantid::Kernel::Logger g_log("NotebookWriter");
@@ -155,4 +157,7 @@ std::string NotebookWriter::writeNotebook() {
   std::string output_string = writer.write(root);
 
   return output_string;
+}
+
+}
 }
