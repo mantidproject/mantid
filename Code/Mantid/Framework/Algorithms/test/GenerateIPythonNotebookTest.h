@@ -94,13 +94,22 @@ public:
 
     while(std::getline(file, notebookLine))
     {
-      TS_ASSERT_EQUALS(result[lineCount], notebookLine)
+      if (lineCount < 8) {
+        TS_ASSERT_EQUALS(result[lineCount], notebookLine)
+      }
+      else if (lineCount == 94) {
+        TS_ASSERT_EQUALS("               \"input\" : \"Power(InputWorkspace='testGenerateIPythonNotebook', OutputWorkspace='testGenerateIPythonNotebook', Exponent=1.5)\",", notebookLine)
+      }
+      else if (lineCount == 70) {
+        TS_ASSERT_EQUALS("               \"input\" : \"NonExistingAlgorithm()\",", notebookLine)
+      }
+      //else if (lineCount == )
       lineCount++;
     }
 
     // Verify that if we set the content of NotebookText that it is set correctly.
     alg.setPropertyValue("NotebookText", result[5]);
-    TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"), "CropWorkspace(InputWorkspace='testGenerateIPythonNotebook', OutputWorkspace='testGenerateIPythonNotebook', XMin=2, XMax=5)");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("NotebookText"), "   \"nbformat_minor\" : 0,");
 
     file.close();
     if (Poco::File(filename).exists()) Poco::File(filename).remove();
