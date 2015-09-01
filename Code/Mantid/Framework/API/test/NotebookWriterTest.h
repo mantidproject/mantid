@@ -1,0 +1,7 @@
+#ifndef MANTID_NOTEBOOKWRITERTEST_H_
+#define MANTID_NOTEBOOKWRITERTEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+
+#endif // MANTID_NOTEBOOKWRITERTEST_H_

@@ -359,6 +359,8 @@ set ( TEST_FILES
 	MultiPeriodGroupWorkerTest.h
 	MultipleExperimentInfosTest.h
 	MultipleFilePropertyTest.h
+	NotebookBuilderTest.h
+	NotebookWriterTest.h
 	NumericAxisTest.h
 	ParamFunctionAttributeHolderTest.h
 	ParameterReferenceTest.h
