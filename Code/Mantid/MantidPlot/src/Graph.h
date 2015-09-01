@@ -53,7 +53,7 @@
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
 #include "MantidQtAPI/GraphOptions.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 

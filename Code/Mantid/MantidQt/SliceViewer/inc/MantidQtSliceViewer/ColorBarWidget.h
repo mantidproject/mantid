@@ -51,7 +51,6 @@ signals:
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER ColorBarWidget : public QWidget
 {
   Q_OBJECT
-  Q_PROPERTY(bool log READ getLog WRITE setLog )
   Q_PROPERTY(double minimum READ getMinimum WRITE setMinimum)
   Q_PROPERTY(double maximum READ getMaximum WRITE setMaximum)
 
@@ -65,20 +64,28 @@ public:
   void setViewRange(QwtDoubleInterval range);
   void setMinimum(double min);
   void setMaximum(double max);
-  void setLog(bool log);
   void setRenderMode(bool rendering);
 
   double getMinimum() const;
   double getMaximum() const;
-  bool getLog() const;
   QwtDoubleInterval getViewRange() const;
   MantidColorMap & getColorMap();
 
+  bool getLog();
+
+  int getScale();
+  void setScale(int);
+
+  void setExponent(double);
+  double getExponent();
+
+
 public slots:
-  void changedLogState(int);
   void changedMinimum();
   void changedMaximum();
   void colorBarMouseMoved(QPoint, double);
+  void changedScaleType(int);
+  void changedExponent(double);
 
 signals:
   /// Signal sent when the range or log mode of the color scale changes.

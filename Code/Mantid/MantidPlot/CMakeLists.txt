@@ -134,8 +134,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/VectorCurve.cpp
                    src/origin/OPJFile.cpp
                    src/plot2D/ImageSymbol.cpp
-                   src/plot2D/ScaleEngine.cpp
-                   src/plot2D/PowerScaleEngine.cpp
                    src/analysis/fft2D.cpp
                    src/lib/src/CollapsiveGroupBox.cpp
                    src/lib/src/ColorBox.cpp
@@ -333,7 +331,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/PythonScript.h
                    src/PythonScripting.h
                    src/QwtBarCurve.h
-                   src/qwt_compat.h
                    src/QwtErrorPlotCurve.h
                    src/QwtHistogram.h
                    src/QwtPieCurve.h
@@ -377,8 +374,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/analysis/fft2D.h
                    src/origin/OPJFile.h
                    src/plot2D/ImageSymbol.h
-                   src/plot2D/ScaleEngine.h
-                   src/plot2D/PowerScaleEngine.h
                    src/lib/include/CollapsiveGroupBox.h
                    src/lib/include/ColorBox.h
                    src/lib/include/ColorButton.h
