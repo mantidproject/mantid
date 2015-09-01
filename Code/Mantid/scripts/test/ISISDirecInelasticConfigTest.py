@@ -305,6 +305,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         targ_string = user.replace_variables('$instrument$ReductionScript$cycleID$.py')
         self.assertEqual(self.instrument+'ReductionScript2015_1.py',targ_string)
+        self.assertEqual(user.GID,'1310168')
         
     def test_parse_file_description(self):
 

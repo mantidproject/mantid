@@ -69,6 +69,17 @@ class UserProperties(object):
         return data_string
 #
     @property
+    def GID(self):
+        """Returns user's group ID which coincide with
+           number part of the rb directory
+        """
+        if self._user_id:
+            RBfolder = os.path.basename(self.rb_dir)
+            return RBfolder[2:]
+        else:
+            return None
+#
+    @property
     def start_date(self):
         """Last start date"""
         if self._recent_dateID:
