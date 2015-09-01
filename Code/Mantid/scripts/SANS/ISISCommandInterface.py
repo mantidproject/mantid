@@ -632,7 +632,6 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     delete_workspaces(rear_data_corrected.name())
     delete_workspaces(front_data_corrected.name())
 
-
     return scale, shift
 
 def _WavRangeReduction(name_suffix=None):
