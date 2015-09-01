@@ -577,20 +577,24 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     # Determine the StartQ and EndQ values
     q_min, q_max = su.get_start_q_and_end_q_values(rear_data_name = rearData, front_data_name = frontData, rescale_shift = rAnds)
 
+    # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
+    # we want to take into account the errors of both workspaces.
+    front_data_corrected, rear_data_corrected = su.get_error_corrected_front_and_rear_data_sets(frontData, rearData, q_min, q_max)
+
     #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
-        Fit(InputWorkspace=rearData,
-            Function='name=TabulatedFunction, Workspace="' + str(frontData)+'"' + ";name=FlatBackground",
+        Fit(InputWorkspace=rear_data_corrected.name(),
+            Function='name=TabulatedFunction, Workspace="' + front_data_corrected.name() +'"' + ";name=FlatBackground",
             Ties='f0.Scaling='+str(rAnds.scale)+ constant_x_shift_and_scale,
             Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     elif rAnds.fitShift==False:
-        Fit(InputWorkspace=rearData,
-            Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+        Fit(InputWorkspace=rear_data_corrected.name(),
+            Function='name=TabulatedFunction, Workspace="' + str(front_data_corrected.name()) + '"' + ";name=FlatBackground",
             Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
             Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     else:
-        Fit(InputWorkspace=rearData,
-            Function='name=TabulatedFunction, Workspace="' + str(frontData) + '"' + ";name=FlatBackground",
+        Fit(InputWorkspace=rear_data_corrected.name(),
+            Function='name=TabulatedFunction, Workspace="' + str(front_data_corrected.name()) + '"' + ";name=FlatBackground",
             Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
             Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
 
@@ -625,6 +629,8 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     delete_workspaces('__fitRescaleAndShift_Parameters')
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix')
     delete_workspaces('__fitRescaleAndShift_Workspace')
+    delete_workspaces(front
+
 
     return scale, shift
 

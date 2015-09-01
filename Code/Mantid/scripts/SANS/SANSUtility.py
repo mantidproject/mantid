@@ -12,6 +12,7 @@ import math
 import os
 import re
 import types
+import numpy as np
 
 sanslog = Logger("SANS")
 ADDED_EVENT_DATA_TAG = '_added_event_data'
@@ -1088,6 +1089,43 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
         max_q = front_q_max
 
     return min_q, max_q
+
+def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q_max):
+    '''
+    Transfers the error data from the front data to the rear data
+    @param front_data: the front data set
+    @param rear_data: the rear data set
+    @param q_min: the minimal q value
+    @param q_max: the maximal q value
+    '''
+    # First we want to crop the workspaces
+    alg = AlgorithmManager.create("CropWorkspace")
+    alg.initialize()
+    alg.setChild(True)
+    alg.setProperty("XMin", q_min)
+    alg.setProperty("XMax", q_max)
+
+    # For the front data set
+    alg.setProperty("InputWorkspace", front_data)
+    alg.setProperty("OutputWorkspace", "front_cropped")
+    alg.execute()
+    front_data_cropped = alg.getProperty("OutputWorkspace").value
+
+    # For the rear data set
+    alg.setProperty("InputWorkspace", rear_data)
+    alg.setProperty("OutputWorkspace", "rear_cropped")
+    alg.execute()
+    rear_data_cropped = alg.getProperty("OutputWorkspace").value
+
+    # Now transfer the error from front data to the rear data workspace
+    # This works only if we have a single QMod spectrum in the workspaces
+    front_error = front_data_cropped.dataE(0)
+    rear_error = rear_data_cropped.dataE(0)
+
+    corrected_error = np.sqrt(rear_error*rear_error + front_error*front_error)
+    rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
+
+    return front_data_cropped, rear_data_cropped
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

@@ -8,6 +8,7 @@ from mantid.kernel import DateAndTime, time_duration, FloatTimeSeriesProperty,Bo
 import SANSUtility as su
 import re
 import random
+import numpy as np
 
 TEST_STRING_DATA = 'SANS2D0003434-add' + su.ADDED_EVENT_DATA_TAG
 TEST_STRING_MON = 'SANS2D0003434-add_monitors' + su.ADDED_EVENT_DATA_TAG
@@ -939,6 +940,51 @@ class TestExtractionOfQRange(unittest.TestCase):
         # Clean up
         self._delete_workspace(front_name)
         self._delete_workspace(rear_name)
+
+
+class TestErrorPropagationFitAndRescale(unittest.TestCase):
+    def _createWorkspace(self, x1, y1, err1, x2, y2, err2):
+        front = CreateWorkspace(DataX = x1,
+                                DataY =y1,
+                                DataE = err1,
+                                NSpec = 1,
+                                UnitX = "MomentumTransfer")
+        rear = CreateWorkspace(DataX = x2,
+                               DataY =y2,
+                               DataE = err2,
+                               NSpec = 1,
+                               UnitX = "MomentumTransfer")
+        return front, rear
+
+    def test_that_error_is_transferred(self):
+        # Arrange
+        x1 = [1,2,3,4,5,6,7,8,9]
+        x2 = [1,2,3,4,5,6,7,8,9]
+        y1 = [2,2,2,2,2,2,2,2]
+        y2 = [2,2,2,2,2,2,2,2]
+        e1 = [1,1,1,1,1,1,1,1]
+        e2 = [2,2,2,2,2,2,2,2]
+        front, rear = self._createWorkspace(x1,y1, e1, x2, y2, e2)
+
+        x_min = 3
+        x_max = 7
+        # Act 
+        f_return, r_return = su.get_error_corrected_front_and_rear_data_sets(front, rear,x_min, x_max)
+
+        # Assert
+        self.assertEqual(5, len(f_return.dataX(0)))
+        self.assertEqual(5, len(r_return.dataX(0)))
+
+        expected_errors_in_rear = [np.sqrt(5),np.sqrt(5),np.sqrt(5),np.sqrt(5)]
+        self.assertTrue(expected_errors_in_rear[0] == r_return.dataE(0)[0])
+        self.assertTrue(expected_errors_in_rear[1] == r_return.dataE(0)[1])
+        self.assertTrue(expected_errors_in_rear[2] == r_return.dataE(0)[2])
+        self.assertTrue(expected_errors_in_rear[3] == r_return.dataE(0)[3])
+
+        # Clean up
+        DeleteWorkspace(front)
+        DeleteWorkspace(rear)
+
 
 if __name__ == "__main__":
     unittest.main()
