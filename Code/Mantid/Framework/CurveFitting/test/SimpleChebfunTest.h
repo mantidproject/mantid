@@ -136,6 +136,19 @@ public:
     do_test_values(cheb_cos, Cos, 1e-13, 1e-13);
   }
 
+  void test_roughRoots() {
+    SimpleChebfun cheb(Sin, -2*M_PI - 0.1, 2*M_PI + 0.1);
+    auto roots = cheb.roughRoots();
+    TS_ASSERT_EQUALS(roots.size(), 5);
+    if (roots.size() == 5) {
+      TS_ASSERT_DELTA(roots[0], -2*M_PI, 1e-4);
+      TS_ASSERT_DELTA(roots[1], -M_PI, 1e-2);
+      TS_ASSERT_DELTA(roots[2], 0, 1e-9);
+      TS_ASSERT_DELTA(roots[3], M_PI, 1e-2);
+      TS_ASSERT_DELTA(roots[4], 2*M_PI, 1e-4);
+    }
+  }
+
 private:
 
   void do_test_values(const SimpleChebfun& cheb, std::function<double(double)> fun, double accur1 = 1e-14, double accur2 = 1e-14) {
