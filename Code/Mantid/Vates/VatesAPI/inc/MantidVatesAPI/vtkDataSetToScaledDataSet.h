@@ -43,21 +43,16 @@ namespace VATES
                               vtkUnstructuredGrid *output);
     /// Destructor
     virtual ~vtkDataSetToScaledDataSet();
-    /// Set the scaling factors
-    void initialize(double xScale, double yScale, double zScale);
     /// Apply the scaling and add metadata
-    void execute();
+    void execute(double xScale, double yScale, double zScale);
   private:
     vtkDataSetToScaledDataSet& operator=(const vtkDataSetToScaledDataSet& other);
     /// Set metadata on the dataset to handle scaling
-    void updateMetaData();
+    void updateMetaData(double xScale, double yScale,
+                        double zScale);
 
     vtkUnstructuredGrid *m_inputData; ///< Data to scale
     vtkUnstructuredGrid *m_outputData; ///< Scaled data
-    double m_xScaling; ///< The scale factor in the X direction
-    double m_yScaling; ///< The scale factor in the Y direction
-    double m_zScaling; ///< The scale factor in the Z direction
-    bool m_isInitialised; ///< Flag to declare object initialised
   };
 
 } // namespace VATES

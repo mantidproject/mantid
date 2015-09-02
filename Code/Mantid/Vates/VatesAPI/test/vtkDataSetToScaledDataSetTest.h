@@ -80,19 +80,11 @@ public:
                      std::runtime_error);
   }
 
-  void testExecThrowIfNoInit() {
-    vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    vtkDataSetToScaledDataSet scaler(in, out);
-    TS_ASSERT_THROWS(scaler.execute(), std::runtime_error);
-  }
-
   void testExecution() {
     vtkUnstructuredGrid *in = makeDataSet();
     vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
     vtkDataSetToScaledDataSet scaler(in, out);
-    scaler.initialize(0.1, 0.5, 0.2);
-    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+    TS_ASSERT_THROWS_NOTHING(scaler.execute(0.1, 0.5, 0.2));
 
     // Check bounds are scaled
     double *bb = out->GetBounds();
@@ -148,8 +140,7 @@ public:
 
     // Act
     vtkDataSetToScaledDataSet scaler(in, out);
-    scaler.initialize(0.1, 0.5, 0.2);
-    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+    TS_ASSERT_THROWS_NOTHING(scaler.execute(0.1, 0.5, 0.2));
 
     vtkFieldData *fieldData = out->GetFieldData();
     MetadataJsonManager manager;
