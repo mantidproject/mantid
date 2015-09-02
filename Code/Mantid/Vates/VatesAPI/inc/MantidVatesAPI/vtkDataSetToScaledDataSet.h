@@ -4,13 +4,14 @@
 #include "MantidKernel/System.h"
 
 class vtkUnstructuredGrid;
+class vtkInformation;
 namespace Mantid
 {
 namespace VATES
 {
 
   /**
-   *Class that handles scaling a given vtkDataSet and setting appropriate
+   *Functor class that handles scaling a given vtkDataSet and setting appropriate
    *metadata on output vtkDataSet so that original extents will be shown.
     
     @date 22/02/2013
@@ -39,20 +40,18 @@ namespace VATES
   {
   public:
     /// Constructor
-    vtkDataSetToScaledDataSet(vtkUnstructuredGrid *input,
-                              vtkUnstructuredGrid *output);
+    vtkDataSetToScaledDataSet();
     /// Destructor
     virtual ~vtkDataSetToScaledDataSet();
     /// Apply the scaling and add metadata
-    void execute(double xScale, double yScale, double zScale);
+    vtkUnstructuredGrid* execute(double xScale, double yScale, double zScale, vtkUnstructuredGrid * inputData, vtkInformation* info);
+    /// Apply the scaling and add metadata
+    vtkUnstructuredGrid* execute(double xScale, double yScale, double zScale, vtkUnstructuredGrid * inputData, vtkUnstructuredGrid * outputData = NULL);
   private:
     vtkDataSetToScaledDataSet& operator=(const vtkDataSetToScaledDataSet& other);
     /// Set metadata on the dataset to handle scaling
     void updateMetaData(double xScale, double yScale,
-                        double zScale);
-
-    vtkUnstructuredGrid *m_inputData; ///< Data to scale
-    vtkUnstructuredGrid *m_outputData; ///< Scaled data
+                        double zScale, vtkUnstructuredGrid* inputData, vtkUnstructuredGrid * outputData);
   };
 
 } // namespace VATES

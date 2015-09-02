@@ -56,11 +56,8 @@ int vtkScaleWorkspace::RequestData(vtkInformation*, vtkInformationVector **input
   }
 
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  vtkUnstructuredGrid *outputDataSet = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-  vtkDataSetToScaledDataSet scaler(inputDataSet, outputDataSet);
-  scaler.initialize(m_xScaling, m_yScaling, m_zScaling);
-  scaler.execute();
+  vtkDataSetToScaledDataSet scaler;
+  scaler.execute(m_xScaling, m_yScaling, m_zScaling, inputDataSet, outInfo);
 
   // Need to call an update on the meta data, as it is not guaranteed that RequestInformation will be called
   // before we access the metadata.
