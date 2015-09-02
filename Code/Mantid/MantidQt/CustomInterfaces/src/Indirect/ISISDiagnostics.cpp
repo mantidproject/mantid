@@ -252,16 +252,11 @@ namespace CustomInterfaces
     double specMax = instDetails["spectra-max"].toDouble();
 
     // Set spectra range
-    m_dblManager->setMinimum(m_properties["SpecMin"], specMin);
     m_dblManager->setMaximum(m_properties["SpecMin"], specMax);
-    m_dblManager->setValue(m_properties["SpecMin"], specMin);
-
     m_dblManager->setMinimum(m_properties["SpecMax"], specMin);
-    m_dblManager->setMaximum(m_properties["SpecMax"], specMax);
-    m_dblManager->setValue(m_properties["SpecMax"], specMax);
 
-    m_dblManager->setMinimum(m_properties["PreviewSpec"], specMin);
-    m_dblManager->setMaximum(m_properties["PreviewSpec"], specMax);
+    m_dblManager->setValue(m_properties["SpecMin"], specMin);
+    m_dblManager->setValue(m_properties["SpecMax"], specMax);
     m_dblManager->setValue(m_properties["PreviewSpec"], specMin);
 
     // Set peak and background ranges
@@ -366,6 +361,16 @@ namespace CustomInterfaces
     else if(prop == m_properties["BackgroundStart"])  backgroundRangeSelector->setMinimum(val);
     else if(prop == m_properties["BackgroundEnd"])    backgroundRangeSelector->setMaximum(val);
     else if(prop == m_properties["PreviewSpec"])      handleNewFile();
+    else if(prop == m_properties["SpecMin"])
+    {
+      m_dblManager->setMinimum(m_properties["SpecMax"], val+1);
+      m_dblManager->setMinimum(m_properties["PreviewSpec"], val+1);
+    }
+    else if(prop == m_properties["SpecMax"])
+    {
+      m_dblManager->setMaximum(m_properties["SpecMin"], val-1);
+      m_dblManager->setMaximum(m_properties["PreviewSpec"], val);
+    }
 
     if(prop != m_properties["PreviewSpec"])
       updatePreviewPlot();
