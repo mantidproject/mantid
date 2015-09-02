@@ -64,19 +64,19 @@ class ReflectometryISIS(stresstesting.MantidStressTest):
             self.assertTrue(thisTheta < nextTheta)
 
         # MD transformations
-        ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='QxQy',
+        QxQy, _QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
                                 OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12')
-        ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='KiKf',
+        KiKf, _KiKF_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
                                 OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05')
-        ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',OutputWorkspace='PiPf',
+        PiPf, _PiPf_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
                                 OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15')
 
         # Bin the outputs to histograms because observations are not important.
-        BinMD(InputWorkspace='QxQy',AxisAligned='0',BasisVector0='Qx,(Ang^-1),1,0',BasisVector1='Qz,(Ang^-1),0,1',
+        BinMD(InputWorkspace=QxQy, AxisAligned='0',BasisVector0='Qx,(Ang^-1),1,0',BasisVector1='Qz,(Ang^-1),0,1',
               OutputExtents='-0.0005,0.0005,0,0.12',OutputBins='100,100',Parallel='1',OutputWorkspace='QxQy_rebinned')
-        BinMD(InputWorkspace='KiKf',AxisAligned='0',BasisVector0='Ki,(Ang^-1),1,0',BasisVector1='Kf,(Ang^-1),0,1',
+        BinMD(InputWorkspace=KiKf, AxisAligned='0',BasisVector0='Ki,(Ang^-1),1,0',BasisVector1='Kf,(Ang^-1),0,1',
               OutputExtents='0,0.05,0,0.05',OutputBins='200,200',Parallel='1',OutputWorkspace='KiKf_rebinned')
-        BinMD(InputWorkspace='PiPf',AxisAligned='0',BasisVector0='Pz_i + Pz_f,(Ang^-1),1,0',BasisVector1='Pz_i - Pz_f,(Ang^-1),0,1',
+        BinMD(InputWorkspace=PiPf, AxisAligned='0',BasisVector0='Pz_i + Pz_f,(Ang^-1),1,0',BasisVector1='Pz_i - Pz_f,(Ang^-1),0,1',
               OutputExtents='0,0.1,-0.02,0.15',OutputBins='50,50',Parallel='1',OutputWorkspace='PiPf_rebinned')
 
         # Fetch benchmarks for testing against

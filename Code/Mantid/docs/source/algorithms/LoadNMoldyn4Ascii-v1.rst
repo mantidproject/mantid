@@ -20,8 +20,27 @@ Assumptions on data format
 --------------------------
 
 The ``Directory`` property must be given the directory that is produced when you
-extract the ``.tar`` archive from nMMOLDYN without modifications which must only
+extract the ``.tar`` archive from nMOLDYN without modifications which must only
 contain the data files produces from a single export operation from nMOLDYN.
+
+Axis Unit Conversions
+---------------------
+
+When loading certain axis from nMOLDYN 4 the units may be converted to an
+equivalent unit in Mantid. The possible conversions are shown in the table
+below:
+
++-----------+---------+------------------+--------------+
+| nMOLDYN             | Mantid                          |
++-----------+---------+------------------+--------------+
+| name      | unit    | name             | unit         |
++===========+=========+==================+==============+
+| frequency | THz     | Energy           | meV          |
++-----------+---------+------------------+--------------+
+| q         | nm**-1  | MomentumTransfer | Angstrom**-1 |
++-----------+---------+------------------+--------------+
+| Time      | pSecond | TOF              | uSecond      |
++-----------+---------+------------------+--------------+
 
 Usage
 -----

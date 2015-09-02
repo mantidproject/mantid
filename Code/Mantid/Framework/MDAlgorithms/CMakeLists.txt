@@ -109,6 +109,7 @@ set ( SRC_FILES
 	src/SmoothMD.cpp
 	src/ThresholdMD.cpp
 	src/TransformMD.cpp
+	src/TransposeMD.cpp
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
@@ -227,6 +228,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SmoothMD.h
 	inc/MantidMDAlgorithms/ThresholdMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
+	inc/MantidMDAlgorithms/TransposeMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/UnitsConversionHelper.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
@@ -334,6 +336,7 @@ set ( TEST_FILES
 	TobyFitResolutionModelTest.h
 	TobyFitYVectorTest.h
 	TransformMDTest.h
+	TransposeMDTest.h
 	UnaryOperationMDTest.h
 	UnitsConversionHelperTest.h
 	WeightedMeanMDTest.h
