@@ -1,21 +1,6 @@
 #ifndef MANTID_API_NOTEBOOKBUILDER_H_
 #define MANTID_API_NOTEBOOKBUILDER_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
-#include "MantidAPI/HistoryView.h"
-#include "MantidAPI/AlgorithmHistory.h"
-#include "MantidAPI/WorkspaceHistory.h"
-#include "MantidKernel/PropertyHistory.h"
-#include "MantidAPI/NotebookWriter.h"
-
-#include <sstream>
-
-namespace Mantid {
-namespace API {
-
 /** @class NotebookBuilder
 
     This class builds an ipython notebook of an algorithm's history, using
@@ -42,6 +27,19 @@ namespace API {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
+
+#include "MantidAPI/DllConfig.h"
+#include "MantidAPI/HistoryView.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidKernel/PropertyHistory.h"
+#include "MantidAPI/NotebookWriter.h"
+
+#include <sstream>
+
+namespace Mantid {
+namespace API {
+
 
 class MANTID_API_DLL NotebookBuilder {
 public:
