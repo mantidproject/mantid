@@ -156,7 +156,7 @@ set ( SRC_FILES
 	src/ModeratorTzero.cpp
 	src/ModeratorTzeroLinear.cpp
 	src/MonteCarloAbsorption.cpp
-	src/MultipleScattering/MayersMSCorrection.cpp
+	src/MultipleScattering/MayersSampleCorrection.cpp
 	src/MultipleScatteringCorrection.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
@@ -429,7 +429,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
-	inc/MantidAlgorithms/MultipleScattering/MayersMSCorrection.h
+	inc/MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h
 	inc/MantidAlgorithms/MultipleScatteringCorrection.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h

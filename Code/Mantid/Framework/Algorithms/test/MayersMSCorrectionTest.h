@@ -3,11 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MultipleScattering/MayersMSCorrection.h"
+#include "MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h"
 #include <algorithm>
 #include <cmath>
 
-using Mantid::Algorithms::MayersMSCorrection;
+using Mantid::Algorithms::MayersSampleCorrection;
 
 class MayersMSCorrectionTest : public CxxTest::TestSuite {
 public:
@@ -20,7 +20,7 @@ public:
 
   void test_attentuaton_correction_for_fixed_mur() {
     std::vector<double> dummy(1, 0.0);
-    MayersMSCorrection mscat(createTestParameters(), dummy, dummy, dummy);
+    MayersSampleCorrection mscat(createTestParameters(), dummy, dummy, dummy);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
@@ -32,7 +32,7 @@ public:
   // clang-format on
   {
     std::vector<double> dummy(1, 0.0);
-    MayersMSCorrection mscat(createTestParameters(), dummy, dummy, dummy);
+    MayersSampleCorrection mscat(createTestParameters(), dummy, dummy, dummy);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
@@ -48,7 +48,7 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
     double xcur(100.0);
     std::generate(tof.begin(), tof.end(), [&xcur] { return xcur++; });
-    MayersMSCorrection mscat(createTestParameters(), tof, signal, error);
+    MayersSampleCorrection mscat(createTestParameters(), tof, signal, error);
 
     // Correct it
     mscat.apply(signal, error);
@@ -79,7 +79,7 @@ public:
       xcur += 1.0;
       return xold;
     });
-    MayersMSCorrection mscat(createTestParameters(), tof, signal, error);
+    MayersSampleCorrection mscat(createTestParameters(), tof, signal, error);
 
     // Correct it
     mscat.apply(signal, error);
@@ -97,9 +97,9 @@ public:
   }
 
 private:
-  MayersMSCorrection::Parameters createTestParameters() {
+  MayersSampleCorrection::Parameters createTestParameters() {
     // A bit like a POLARIS spectrum
-    MayersMSCorrection::Parameters pars;
+    MayersSampleCorrection::Parameters pars;
     pars.l1 = 14.0;
     pars.l2 = 2.2;
     pars.twoTheta = 0.10821;

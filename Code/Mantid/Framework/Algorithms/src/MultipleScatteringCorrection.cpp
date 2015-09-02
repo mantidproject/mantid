@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCorrection.h"
-#include "MantidAlgorithms/MultipleScattering/MayersMSCorrection.h"
+#include "MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -74,7 +74,7 @@ void MultipleScatteringCorrection::exec() {
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
 
   // Invariant algorithm parameters
-  MayersMSCorrection::Parameters baseParams;
+  MayersSampleCorrection::Parameters baseParams;
   auto instrument = inputWS->getInstrument();
   const auto source = instrument->getSource();
   const auto sample = instrument->getSample();
@@ -89,7 +89,7 @@ void MultipleScatteringCorrection::exec() {
   double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
   sampleShape.getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
   V3D boxWidth(maxX - minX, maxY - minY, maxZ - minZ);
-  baseParams.cylRadius = 0.5*boxWidth[frame->pointingHorizontal()];
+  baseParams.cylRadius = 0.5 * boxWidth[frame->pointingHorizontal()];
   baseParams.cylHeight = boxWidth[frame->pointingUp()];
 
   const auto &sampleMaterial = sampleShape.material();
@@ -110,14 +110,15 @@ void MultipleScatteringCorrection::exec() {
     } catch (Exception::NotFoundError &) {
       continue;
     }
-    if(det->isMonitor() || det->isMasked()) continue;
+    if (det->isMonitor() || det->isMasked())
+      continue;
 
     auto spectrumParams = baseParams;
     spectrumParams.l2 = det->getDistance(*sample);
     spectrumParams.twoTheta = det->getTwoTheta(sample->getPos(), beamLine);
     spectrumParams.phi = det->getPhi();
-    MayersMSCorrection correction(spectrumParams, inX, inputWS->readY(i),
-                                  inputWS->readE(i));
+    MayersSampleCorrection correction(spectrumParams, inX, inputWS->readY(i),
+                                      inputWS->readE(i));
     correction.apply(outputWS->dataY(i), outputWS->dataE(i));
     prog.report();
   }

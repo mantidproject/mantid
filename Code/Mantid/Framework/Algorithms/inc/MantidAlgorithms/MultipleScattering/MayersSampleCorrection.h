@@ -39,7 +39,7 @@ namespace Algorithms {
   https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574 for an array of
   tof, signal & error values
 */
-class MANTID_ALGORITHMS_DLL MayersMSCorrection {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrection {
 public:
   /**
    * Stores parameters for a single calculation for a given angle
@@ -58,13 +58,13 @@ public:
   };
 
   /// Constructor
-  MayersMSCorrection(MayersMSCorrection::Parameters params,
+  MayersSampleCorrection(MayersSampleCorrection::Parameters params,
                      const std::vector<double> &tof,
                      const std::vector<double> &sigIn,
                      const std::vector<double> &errIn);
-  /// Destructor - declared in cpp file to use forward declaration with
+  /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
-  ~MayersMSCorrection();
+  ~MayersSampleCorrection();
 
   /// Return the correction factors
   void apply(std::vector<double> &sigOut, std::vector<double> &errOut);

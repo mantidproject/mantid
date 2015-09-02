@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAlgorithms/MultipleScattering/MayersMSCorrection.h"
+#include "MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
@@ -74,7 +74,7 @@ namespace Algorithms {
  * Constructor
  * @param params Defines the required parameters for the correction
  */
-MayersMSCorrection::MayersMSCorrection(MayersMSCorrection::Parameters params,
+MayersSampleCorrection::MayersSampleCorrection(MayersSampleCorrection::Parameters params,
                                        const std::vector<double> &tof,
                                        const std::vector<double> &sigIn,
                                        const std::vector<double> &errIn)
@@ -88,7 +88,7 @@ MayersMSCorrection::MayersMSCorrection(MayersMSCorrection::Parameters params,
 /**
  * Destructor
  */
-MayersMSCorrection::~MayersMSCorrection() {}
+MayersSampleCorrection::~MayersSampleCorrection() {}
 
 /**
  * Correct the data for absorption and multiple scattering effects. Allows
@@ -97,7 +97,7 @@ MayersMSCorrection::~MayersMSCorrection() {}
  * @param sigOut Signal values to correct [In/Out]
  * @param errOut Error values to correct [In/Out]
  */
-void MayersMSCorrection::apply(std::vector<double> &sigOut,
+void MayersSampleCorrection::apply(std::vector<double> &sigOut,
                                std::vector<double> &errOut) {
   // Local aliases to input values (avoid typing m_)
   const auto & tof = m_tof;
@@ -182,7 +182,7 @@ void MayersMSCorrection::apply(std::vector<double> &sigOut,
  * @param muR Single mu*r slice value
  * @return The self-attenuation factor for this sample
  */
-double MayersMSCorrection::calculateSelfAttenuation(const double muR) {
+double MayersSampleCorrection::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -224,7 +224,7 @@ double MayersMSCorrection::calculateSelfAttenuation(const double muR) {
  * @param abs Absorption and self-attenuation factor (\f$A_s\f$ in Mayers paper)
  * @return A pair of (factor,weight)
  */
-std::pair<double, double> MayersMSCorrection::calculateMS(const size_t irp,
+std::pair<double, double> MayersSampleCorrection::calculateMS(const size_t irp,
                                                           const double muR,
                                                           const double abs) {
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
@@ -283,7 +283,7 @@ std::pair<double, double> MayersMSCorrection::calculateMS(const size_t irp,
  * (Re-)seed the random number generator
  * @param seed Seed value for the random number generator
  */
-void MayersMSCorrection::seedRNG(const size_t seed) { m_rng->setSeed(seed); }
+void MayersSampleCorrection::seedRNG(const size_t seed) { m_rng->setSeed(seed); }
 
 } // namespace Algorithms
 } // namespace Mantid
