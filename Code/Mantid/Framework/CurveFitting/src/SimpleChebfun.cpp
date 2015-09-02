@@ -140,7 +140,7 @@ std::vector<double> SimpleChebfun::roughRoots(double level) const {
     if (y == 0.0) {
       rs.push_back(x[i]);
     } else if (y1 * y < 0.0) {
-      rs.push_back((x[i] + x[i-1]) / 2);
+      rs.push_back((-x[i-1]*y + x[i]*y1)/(y1 - y));
     }
     y1 = y;
   }

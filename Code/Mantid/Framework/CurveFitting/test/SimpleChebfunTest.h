@@ -24,21 +24,21 @@ public:
   static void destroySuite( SimpleChebfunTest *suite ) { delete suite; }
 
 
-  void xtest_constructor_low_accuracy()
+  void test_constructor_low_accuracy()
   {
     SimpleChebfun cheb(5, Sin, -M_PI, M_PI);
     do_test_values(cheb, Sin, 0.02);
     TS_ASSERT(cheb.isGood());
   }
 
-  void xtest_constructor_high_accuracy()
+  void test_constructor_high_accuracy()
   {
     SimpleChebfun cheb(21, Sin, -M_PI, M_PI);
     do_test_values(cheb, Sin, 1e-15);
     TS_ASSERT(cheb.isGood());
   }
 
-  void xtest_constructor_best_fit()
+  void test_constructor_best_fit()
   {
     SimpleChebfun cheb(Sin, -M_PI, M_PI);
     do_test_values(cheb, Sin, 2e-15);
@@ -46,7 +46,7 @@ public:
     TS_ASSERT(cheb.isGood());
   }
 
-  void xtest_constructor_bad_fit()
+  void test_constructor_bad_fit()
   {
     SimpleChebfun cheb(Sin, -1000, 1000);
     do_test_values(cheb, Sin, 2e-15);
@@ -54,7 +54,7 @@ public:
     TS_ASSERT(!cheb.isGood());
   }
 
-  void xtest_constructor_smooth()
+  void test_constructor_smooth()
   {
     double xa[] = {
         -10, -9.7979797979798, -9.5959595959596, -9.39393939393939,
@@ -145,13 +145,13 @@ private:
       size_t n = static_cast<size_t>(1.3 * cheb.size());
       auto x = cheb.linspace(n);
       for(size_t i = 0; i < n; ++i) {
-        std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << std::endl;
+        //std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << std::endl;
         TS_ASSERT_DELTA(cheb(x[i]), fun(x[i]), accur1);
       }
     }
     auto &xp = cheb.xPoints();
     for(size_t i = 0; i < xp.size(); ++i) {
-      std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << std::endl;
+      //std::cerr << xp[i] << ' ' << cheb(xp[i]) - fun(xp[i]) << std::endl;
       TS_ASSERT_DELTA(cheb(xp[i]), fun(xp[i]), accur2);
     }
   }

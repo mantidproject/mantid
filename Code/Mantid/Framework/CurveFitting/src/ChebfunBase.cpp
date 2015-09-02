@@ -802,6 +802,7 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
 
     //std::cerr << "Maximum signal " << powerSpec[imax] << std::endl;
     //std::cerr << "Noise          " << noise << std::endl;
+    //std::cerr << noise / powerSpec[imax] << std::endl;
 
     // storage for the Wiener filter, initialized with 0.0's
     std::vector<double> wf(n);
@@ -843,7 +844,11 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
     // i0 should always be > 0 but in case something goes wrong make a check
     if ( i0 > 0 )
     {
-      //std::cerr << "Noise start index " << i0 << std::endl;
+      //std::cerr << "Noise start index " << i0 << ' ' << n << std::endl;
+      if (noise / powerSpec[imax] > 0.01 && i0 > n/2) {
+        //std::cerr << "There is too much noise: no smoothing." << std::endl;
+        return y;
+      }
 
       // high frequency filter values: smooth decreasing function
       double ri0f = static_cast<double>(i0 + 1);

@@ -100,44 +100,30 @@ void extractValues(const API::FunctionDomain1D &domain,
 /// @return :: A pair of zero points on either side of the centre.
 std::pair<double, double>
 getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
-  auto &xp = der2.xPoints();
-  auto icentre = std::lower_bound(xp.begin(), xp.end(), centre);
-  if (icentre != xp.end()) {
-    auto ic = static_cast<size_t>(std::distance(xp.begin(), icentre));
-    const double d2max = der2(centre);
-    auto PD2 = der2.yPoints();
-    double sign = d2max / fabs(d2max);
-    size_t rootCount = 0;
-    double left = 0.0;
-    for (auto i = ic; i > 0; --i) {
-      if (sign * PD2[i] < 0.0) {
-        ++rootCount;
-        if (rootCount == n) {
-          break;
-        } else {
-          sign *= -1;
-        }
-      }
-      left = xp[i];
-    }
-    sign = d2max / fabs(d2max);
-    rootCount = 0;
-    double right = 0.0;
-    for (auto i = ic; i < xp.size(); ++i) {
-      if (sign * PD2[i] < 0.0) {
-        ++rootCount;
-        if (rootCount == n) {
-          break;
-        } else {
-          sign *= -1;
-        }
-      }
-      right = xp[i];
-    }
+  double left = centre;
+  double right = centre;
 
-    return std::make_pair(left, right);
+  const double d2max = der2(centre);
+  auto &xp = der2.xPoints();
+  auto roots = der2.roughRoots();
+  if (!roots.empty()) {
+    auto iright = std::upper_bound(roots.begin(), roots.end(), centre);
+    if (iright == roots.end()) {
+      left = roots.back();
+      return std::make_pair(left, right);
+    }
+    if (std::distance(roots.begin(),iright) < n) {
+      left = xp.front();
+      return std::make_pair(left, right);
+    }
+    left = *(iright - n);
+    if (std::distance(iright, roots.end()) < n) {
+      right = xp.back();
+    } else {
+      right = *(iright + n - 1);
+    }
   }
-  return std::make_pair(centre, centre);
+  return std::make_pair(left, right);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -242,6 +228,7 @@ void setBackToBackExponential(API::IFunction &function,
   // Find the actual peak centre and gaussian component of the width
   auto centre = getPeakCentre(function.getParameter("X0"), der1);
   double sigma = getPeakWidth(centre, der2);
+  if (sigma == 0.0) sigma = 1e-06;
   function.setParameter("S", sigma);
 
   g_log.debug() << "Estimating parameters of BackToBackExponential" << std::endl;
@@ -296,8 +283,18 @@ void setBackToBackExponential(API::IFunction &function,
     g_log.debug() << "new HWHM: " << hwhm1.first << ' ' << hwhm1.second
               << std::endl;
 
-    double aCorr = (hwhm1.first + sigma) / (hwhm.first + sigma);
-    double bCorr = (hwhm1.second - sigma) / (hwhm.second - sigma);
+    double denom = hwhm.first + sigma;
+    double aCorr = denom > 0 ? (hwhm1.first + sigma) / denom : 100.0;
+    if (aCorr < 0) {
+      aCorr = 100.0;
+      function.fix(2);
+    }
+    denom = hwhm.second - sigma;
+    double bCorr = denom > 0 ? (hwhm1.second - sigma) / denom : 100.0;
+    if (bCorr < 0) {
+      bCorr = 100.0;
+      function.fix(3);
+    }
     g_log.debug() << "corrections: " << aCorr << ' ' << bCorr << std::endl;
     double a = function.getParameter("A") * aCorr;
     double b = function.getParameter("B") * bCorr;

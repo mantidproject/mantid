@@ -18,7 +18,7 @@ namespace ParameterEstimator {
 
 /// ParameterEstimator estimates parameter values of some fitting functions
 ///  from fitting data.
-void estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
+void DLLExport estimate(API::IFunction &function, const API::FunctionDomain1D &domain,
               const API::FunctionValues &values);
 
 } // namespace ParameterEstimator
