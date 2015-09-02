@@ -6,6 +6,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/CompositeValidator.h"
 
 namespace Mantid {
@@ -21,6 +22,7 @@ namespace Exception = Kernel::Exception;
 using Geometry::IDetector_const_sptr;
 using Kernel::CompositeValidator;
 using Kernel::Direction;
+using Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MultipleScatteringCorrection)
@@ -76,9 +78,9 @@ void MultipleScatteringCorrection::exec() {
   auto instrument = inputWS->getInstrument();
   const auto sourcePos = instrument->getSource()->getPos();
   const auto samplePos = instrument->getSample()->getPos();
+  const auto beamLine = samplePos - sourcePos;
+  const auto frame = instrument->getReferenceFrame();
   baseParams.l1 = samplePos.distance(sourcePos);
-  g_log.warning("Ignoring out of place scattering");
-  baseParams.phi = 0.0;
 
   const auto &sampleShape = inputWS->sample().getShape();
   // Current Object code computes quite an inaccurate bounding box so we do
@@ -86,15 +88,10 @@ void MultipleScatteringCorrection::exec() {
   const double big(100.); // seems to be a sweet spot...
   double minX(-big), maxX(big), minY(-big), maxY(big), minZ(-big), maxZ(big);
   sampleShape.getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
-  baseParams.cylRadius = 0.5*(maxX - minX);
-  baseParams.cylHeight = (maxY - minY);
+  V3D boxWidth(maxX - minX, maxY - minY, maxZ - minZ);
+  baseParams.cylRadius = 0.5*boxWidth[frame->pointingHorizontal()];
+  baseParams.cylHeight = boxWidth[frame->pointingUp()];
 
-// reintroduce this when the general code is improved
-//  const auto &bboxWidth = sampleShape.getBoundingBox().width();
-//  baseParams.cylRadius = 0.5*bboxWidth[0];
-//  baseParams.cylHeight = bboxWidth[1];
-
-  g_log.warning("Assuming Y is up and X is horizontal");
   const auto &sampleMaterial = sampleShape.material();
   baseParams.rho = sampleMaterial.numberDensity();
   baseParams.sigmaAbs = sampleMaterial.absorbXSection();
@@ -116,8 +113,10 @@ void MultipleScatteringCorrection::exec() {
     if(det->isMonitor() || det->isMasked()) continue;
 
     auto spectrumParams = baseParams;
-    spectrumParams.l2 = det->getPos().distance(samplePos);
-    spectrumParams.twoTheta = inputWS->detectorTwoTheta(det);
+    const auto detPos = det->getPos();
+    spectrumParams.l2 = detPos.distance(samplePos);
+    spectrumParams.twoTheta = (detPos - samplePos).angle(beamLine);
+    spectrumParams.phi = atan2(detPos.Y(), detPos.X());
     MayersMSCorrection correction(spectrumParams, inX, inputWS->readY(i),
                                   inputWS->readE(i));
     correction.apply(outputWS->dataY(i), outputWS->dataE(i));
