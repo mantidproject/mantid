@@ -76,11 +76,11 @@ void MultipleScatteringCorrection::exec() {
   // Invariant algorithm parameters
   MayersMSCorrection::Parameters baseParams;
   auto instrument = inputWS->getInstrument();
-  const auto sourcePos = instrument->getSource()->getPos();
-  const auto samplePos = instrument->getSample()->getPos();
-  const auto beamLine = samplePos - sourcePos;
+  const auto source = instrument->getSource();
+  const auto sample = instrument->getSample();
+  const auto beamLine = sample->getPos() - source->getPos();
   const auto frame = instrument->getReferenceFrame();
-  baseParams.l1 = samplePos.distance(sourcePos);
+  baseParams.l1 = sample->getDistance(*source);
 
   const auto &sampleShape = inputWS->sample().getShape();
   // Current Object code computes quite an inaccurate bounding box so we do
@@ -113,10 +113,9 @@ void MultipleScatteringCorrection::exec() {
     if(det->isMonitor() || det->isMasked()) continue;
 
     auto spectrumParams = baseParams;
-    const auto detPos = det->getPos();
-    spectrumParams.l2 = detPos.distance(samplePos);
-    spectrumParams.twoTheta = (detPos - samplePos).angle(beamLine);
-    spectrumParams.phi = atan2(detPos.Y(), detPos.X());
+    spectrumParams.l2 = det->getDistance(*sample);
+    spectrumParams.twoTheta = det->getTwoTheta(sample->getPos(), beamLine);
+    spectrumParams.phi = det->getPhi();
     MayersMSCorrection correction(spectrumParams, inX, inputWS->readY(i),
                                   inputWS->readE(i));
     correction.apply(outputWS->dataY(i), outputWS->dataE(i));
