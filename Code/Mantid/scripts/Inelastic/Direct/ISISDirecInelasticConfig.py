@@ -57,6 +57,10 @@ class UserProperties(object):
             self._recent_dateID = recent_date_id
 
     def replace_variables(self,data_string):
+		"""Replace variables defined in USER_PROPERTIES
+		   and enclosed in $ sign with their values
+		   defined for a user
+		"""
         str_parts = data_string.split('$')
         for prop in USER_PROPERTIES:
             try:
@@ -272,6 +276,9 @@ class MantidConfigDirectInelastic(object):
 #
     @property
     def user_file_description(self):
+		"""defines full file name (with path) for an xml file which describes
+		   files, which should be copied to a user
+		"""
         if self._user:
             return os.path.join(self._script_repo,'direct_inelastic',self._user.instrument,
                                 self._user_files_descr)
@@ -316,7 +323,7 @@ class MantidConfigDirectInelastic(object):
         return full_source,full_target
 #
     def copy_reduction_sample(self, users_file_description=None):
-        """copy sample reduction scripts from user script repository
+        """copy sample reduction scripts from Mantid script repository
            to user folder.
         """
         if users_file_description is None:
