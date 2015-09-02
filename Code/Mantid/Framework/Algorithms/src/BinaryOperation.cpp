@@ -508,6 +508,9 @@ void BinaryOperation::doSingleValue() {
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
+      if (m_lhs->hasDx(i)) {
+        m_out->setDx(i, m_lhs->refDx(i));
+      }
       performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -519,6 +522,9 @@ void BinaryOperation::doSingleValue() {
     for (int64_t i = 0; i < numHists; ++i) {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
+      if (m_lhs->hasDx(i)) {
+        m_out->setDx(i, m_lhs->refDx(i));
+      }
       // Get reference to output vectors here to break any sharing outside the
       // function call below
       // where the order of argument evaluation is not guaranteed (if it's L->R
