@@ -160,10 +160,8 @@ public:
 
   void test_Build_Simple()
   {
-    std::string result[] = {
-      "TopLevelAlgorithm(InputWorkspace='test_input_workspace', OutputWorkspace='test_output_workspace')",
-      ""
-    };
+    std::string result =
+      "               \"input\" : \"TopLevelAlgorithm(InputWorkspace='test_input_workspace', OutputWorkspace='test_output_workspace')\",";
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
@@ -183,11 +181,8 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
-    int i=0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    // Compare line 52 (1 indexed) with expected result
+    TS_ASSERT_EQUALS(notebookLines[70], result)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -195,24 +190,10 @@ public:
 
   void test_Build_Unrolled()
   {
-    std::string result[] = {
-      "",
-      "# Child algorithms of TopLevelAlgorithm",
-      "",
-      "## Child algorithms of NestedAlgorithm",
-      "BasicAlgorithm(PropertyA='FirstOne')",
-      "BasicAlgorithm(PropertyA='SecondOne')",
-      "## End of child algorithms of NestedAlgorithm",
-      "",
-      "## Child algorithms of NestedAlgorithm",
-      "BasicAlgorithm(PropertyA='FirstOne')",
-      "BasicAlgorithm(PropertyA='SecondOne')",
-      "## End of child algorithms of NestedAlgorithm",
-      "",
-      "# End of child algorithms of TopLevelAlgorithm",
-      "",
-      "",
-    };
+    std::string result_markdown =
+      "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code =
+      "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -230,16 +211,13 @@ public:
 
     view->unrollAll();
     NotebookBuilder builder(view);
-    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
+    std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
-    int i=0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    TS_ASSERT_EQUALS(notebookLines[70], result_markdown)
+    TS_ASSERT_EQUALS(notebookLines[80], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -292,7 +270,7 @@ public:
     view->unroll(5);
 
     NotebookBuilder builder(view);
-    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
+    std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
@@ -329,7 +307,7 @@ public:
     auto wsHist = ws->getHistory();
 
     NotebookBuilder builder(wsHist.createView());
-    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
+    std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
