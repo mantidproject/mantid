@@ -371,6 +371,8 @@ public:
 
   /// Apply masking.
   void setMDMasking(Mantid::Geometry::MDImplicitFunction *maskingRegion);
+  /// Apply masking.
+  void setMDMaskAt(const size_t& index, bool mask);
 
   /// Clear masking.
   void clearMDMasking();
