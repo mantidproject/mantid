@@ -57,8 +57,8 @@ class UserProperties(object):
             self._recent_dateID = recent_date_id
 
     def replace_variables(self,data_string):
-		"""Replace variables defined in USER_PROPERTIES
-		   and enclosed in $ sign with their values
+        """Replace variables defined in USER_PROPERTIES
+            and enclosed in $ sign with their values
 		   defined for a user
 		"""
         str_parts = data_string.split('$')
@@ -276,7 +276,7 @@ class MantidConfigDirectInelastic(object):
 #
     @property
     def user_file_description(self):
-		"""defines full file name (with path) for an xml file which describes
+        """defines full file name (with path) for an xml file which describes
 		   files, which should be copied to a user
 		"""
         if self._user:
