@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Math/ChebyshevPolyFit.h"

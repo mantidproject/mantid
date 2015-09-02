@@ -156,8 +156,6 @@ set ( SRC_FILES
 	src/ModeratorTzero.cpp
 	src/ModeratorTzeroLinear.cpp
 	src/MonteCarloAbsorption.cpp
-	src/MultipleScattering/MayersSampleCorrection.cpp
-	src/MultipleScatteringCorrection.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
 	src/MultiplyRange.cpp
@@ -215,6 +213,8 @@ set ( SRC_FILES
 	src/ResetNegatives.cpp
 	src/ResizeRectangularDetector.cpp
 	src/RingProfile.cpp
+	src/SampleCorrections/MayersSampleCorrection.cpp
+	src/SampleCorrections/SampleMaterialCorrections.cpp
 	src/SANSCollimationLengthEstimator.cpp
 	src/SANSDirectBeamScaling.cpp
 	src/SassenaFFT.cpp
@@ -429,8 +429,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
-	inc/MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h
-	inc/MantidAlgorithms/MultipleScatteringCorrection.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
 	inc/MantidAlgorithms/MultiplyRange.h
@@ -488,6 +486,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ResetNegatives.h
 	inc/MantidAlgorithms/ResizeRectangularDetector.h
 	inc/MantidAlgorithms/RingProfile.h
+	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
+	inc/MantidAlgorithms/SampleCorrections/SampleMaterialCorrections.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SassenaFFT.h
@@ -703,7 +703,7 @@ set ( TEST_FILES
 	ModeratorTzeroLinearTest.h
 	ModeratorTzeroTest.h
 	MonteCarloAbsorptionTest.h
-	MultipleScatteringCorrectionTest.h
+	SampleMaterialCorrectionsTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
 	MultiplyTest.h

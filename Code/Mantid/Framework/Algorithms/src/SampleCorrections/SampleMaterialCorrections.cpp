@@ -1,8 +1,8 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAlgorithms/MultipleScatteringCorrection.h"
-#include "MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/SampleMaterialCorrections.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -25,7 +25,7 @@ using Kernel::Direction;
 using Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(MultipleScatteringCorrection)
+DECLARE_ALGORITHM(SampleMaterialCorrections)
 
 //------------------------------------------------------------------------------
 // Public members
@@ -34,30 +34,29 @@ DECLARE_ALGORITHM(MultipleScatteringCorrection)
 /**
  * Constructor
  */
-MultipleScatteringCorrection::MultipleScatteringCorrection()
-    : API::Algorithm() {}
+SampleMaterialCorrections::SampleMaterialCorrections() : API::Algorithm() {}
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string MultipleScatteringCorrection::name() const {
-  return "MultipleScatteringCorrection";
+const std::string SampleMaterialCorrections::name() const {
+  return "SampleMaterialCorrections";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MultipleScatteringCorrection::version() const { return 1; }
+int SampleMaterialCorrections::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MultipleScatteringCorrection::category() const {
+const std::string SampleMaterialCorrections::category() const {
   return "Corrections";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string MultipleScatteringCorrection::summary() const {
-  return "Corrects the input data for the effects of multiple scattering";
+const std::string SampleMaterialCorrections::summary() const {
+  return "Corrects the input data for the effects of attenuation & multiple scattering";
 }
 
 /** Initialize the algorithm's properties.
  */
-void MultipleScatteringCorrection::init() {
+void SampleMaterialCorrections::init() {
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input,
                                           createInputWSValidator()),
@@ -69,7 +68,7 @@ void MultipleScatteringCorrection::init() {
 
 /**
  */
-void MultipleScatteringCorrection::exec() {
+void SampleMaterialCorrections::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
 
@@ -133,7 +132,7 @@ void MultipleScatteringCorrection::exec() {
  * @return The validator required for the input workspace
  */
 Kernel::IValidator_sptr
-MultipleScatteringCorrection::createInputWSValidator() const {
+SampleMaterialCorrections::createInputWSValidator() const {
   auto validator = boost::make_shared<CompositeValidator>();
 
   unsigned int requires = (InstrumentValidator::SamplePosition |

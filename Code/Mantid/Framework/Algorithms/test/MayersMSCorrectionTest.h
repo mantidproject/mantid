@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MultipleScattering/MayersSampleCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include <algorithm>
 #include <cmath>
 

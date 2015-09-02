@@ -1,26 +1,26 @@
-#ifndef MANTID_ALGORITHMS_MULTIPLESCATTERINGCORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_MULTIPLESCATTERINGCORRECTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONSTEST_H_
+#define MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONSTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/MultipleScatteringCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/SampleMaterialCorrections.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/Material.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::MultipleScatteringCorrection;
+using Mantid::Algorithms::SampleMaterialCorrections;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 
-class MultipleScatteringCorrectionTest : public CxxTest::TestSuite {
+class SampleMaterialCorrectionsTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MultipleScatteringCorrectionTest *createSuite() {
-    return new MultipleScatteringCorrectionTest();
+  static SampleMaterialCorrectionsTest *createSuite() {
+    return new SampleMaterialCorrectionsTest();
   }
-  static void destroySuite(MultipleScatteringCorrectionTest *suite) {
+  static void destroySuite(SampleMaterialCorrectionsTest *suite) {
     delete suite;
   }
 
@@ -73,7 +73,7 @@ public:
 
 private:
   IAlgorithm_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS) {
-    auto alg = boost::make_shared<MultipleScatteringCorrection>();
+    auto alg = boost::make_shared<SampleMaterialCorrections>();
     // Don't put output in ADS by default
     alg->setChild(true);
     alg->setRethrows(true);
@@ -147,4 +147,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_MULTIPLESCATTERINGCORRECTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONSTEST_H_ */

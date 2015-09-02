@@ -1,12 +1,13 @@
-#ifndef MANTID_ALGORITHMS_MULTIPLESCATTERINGCORRECTION_H_
-#define MANTID_ALGORITHMS_MULTIPLESCATTERINGCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_
+#define MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 namespace Mantid {
 namespace Algorithms {
 
 /**
-  Corrects for the effects of multiple scattering.
+  Corrects for the effects of absorption and multiple scattering using different
+  algorithms.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,10 +30,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MultipleScatteringCorrection
-    : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SampleMaterialCorrections : public API::Algorithm {
 public:
-  MultipleScatteringCorrection();
+  SampleMaterialCorrections();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -49,4 +49,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MULTIPLESCATTERINGCORRECTION_H_ */
+#endif /* MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_ */
