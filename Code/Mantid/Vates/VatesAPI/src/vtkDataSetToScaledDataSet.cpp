@@ -37,7 +37,7 @@ vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() {}
  * @param xScale : Scale factor for the x direction
  * @param yScale : Scale factor for the y direction
  * @param zScale : Scale factor for the z direction
- * @param inputDataSet : Input point data set to scale
+ * @param inputData : Input point data set to scale
  * @param info : info to obtain the output data set from.
  * @return The resulting scaled dataset
  */
