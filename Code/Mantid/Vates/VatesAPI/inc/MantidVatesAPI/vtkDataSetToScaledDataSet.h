@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 
-class vtkUnstructuredGrid;
+class vtkPointSet;
 class vtkInformation;
 namespace Mantid
 {
@@ -44,14 +44,14 @@ namespace VATES
     /// Destructor
     virtual ~vtkDataSetToScaledDataSet();
     /// Apply the scaling and add metadata
-    vtkUnstructuredGrid* execute(double xScale, double yScale, double zScale, vtkUnstructuredGrid * inputData, vtkInformation* info);
+    vtkPointSet* execute(double xScale, double yScale, double zScale, vtkPointSet * inputData, vtkInformation* info);
     /// Apply the scaling and add metadata
-    vtkUnstructuredGrid* execute(double xScale, double yScale, double zScale, vtkUnstructuredGrid * inputData, vtkUnstructuredGrid * outputData = NULL);
+    vtkPointSet* execute(double xScale, double yScale, double zScale, vtkPointSet * inputData, vtkPointSet * outputData = NULL);
   private:
     vtkDataSetToScaledDataSet& operator=(const vtkDataSetToScaledDataSet& other);
     /// Set metadata on the dataset to handle scaling
     void updateMetaData(double xScale, double yScale,
-                        double zScale, vtkUnstructuredGrid* inputData, vtkUnstructuredGrid * outputData);
+                        double zScale, vtkPointSet* inputData, vtkPointSet * outputData);
   };
 
 } // namespace VATES

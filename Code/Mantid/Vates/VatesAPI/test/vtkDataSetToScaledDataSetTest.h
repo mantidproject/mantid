@@ -22,6 +22,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkPointSet.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
@@ -80,7 +81,7 @@ public:
 
     vtkDataSetToScaledDataSet scaler;
     vtkUnstructuredGrid *in = makeDataSet();
-    vtkUnstructuredGrid* out = scaler.execute(0.1, 0.5, 0.2, in);
+    vtkPointSet* out = scaler.execute(0.1, 0.5, 0.2, in);
 
     // Check bounds are scaled
     double *bb = out->GetBounds();
@@ -135,7 +136,7 @@ public:
 
     // Act
     vtkDataSetToScaledDataSet scaler;
-    vtkUnstructuredGrid* out = scaler.execute(0.1, 0.5, 0.2, in);
+    vtkPointSet* out = scaler.execute(0.1, 0.5, 0.2, in);
 
     vtkFieldData *fieldData = out->GetFieldData();
     MetadataJsonManager manager;

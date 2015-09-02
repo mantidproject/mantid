@@ -6,7 +6,7 @@
 #include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkUnsignedCharArray.h>
-#include <vtkUnstructuredGrid.h>
+#include <vtkPointSet.h>
 #include <vtkSmartPointer.h>
 #include <vtkMatrix4x4.h>
 #include <vtkPVChangeOfBasisHelper.h>
@@ -40,12 +40,12 @@ vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() {}
  * @param info : The dataset to scale
  * @return The resulting scaled dataset
  */
-vtkUnstructuredGrid *
+vtkPointSet *
 vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
-                                   vtkUnstructuredGrid *inputData, vtkInformation* info) {
+                                   vtkPointSet *inputData, vtkInformation* info) {
 
   // Extract output dataset from information.
-  vtkUnstructuredGrid *outputData = vtkUnstructuredGrid::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
+  vtkPointSet *outputData = vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
 
   return execute(xScale, yScale, zScale, inputData, outputData);
 
@@ -67,17 +67,17 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
  * @param outputData : The output dataset. Optional. If not specified or null, new one created.
  * @return The resulting scaled dataset
  */
-vtkUnstructuredGrid *
+vtkPointSet *
 vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
-                                   vtkUnstructuredGrid *inputData, vtkUnstructuredGrid* outputData) {
+                                   vtkPointSet *inputData, vtkPointSet* outputData) {
 
   if (NULL == inputData) {
     throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with "
-                             "NULL input vtkUnstructuredGrid");
+                             "NULL input vtkPointSet");
   }
 
   if(outputData == NULL){
-       outputData = vtkUnstructuredGrid::New();
+       outputData = inputData->NewInstance();
   }
 
   vtkPoints *points = inputData->GetPoints();
@@ -117,7 +117,7 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
  * @param outputData : Output dataset
  */
 void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
-                                               double zScale, vtkUnstructuredGrid *inputData, vtkUnstructuredGrid *outputData) {
+                                               double zScale, vtkPointSet *inputData, vtkPointSet *outputData) {
   // We need to put the scaling on the diagonal elements of the ChangeOfBasis
   // (COB) Matrix.
   vtkSmartPointer<vtkMatrix4x4> cobMatrix =
