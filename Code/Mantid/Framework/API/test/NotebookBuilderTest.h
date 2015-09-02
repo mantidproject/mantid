@@ -217,7 +217,7 @@ public:
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     TS_ASSERT_EQUALS(notebookLines[70], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[80], result_code)
+    TS_ASSERT_EQUALS(notebookLines[106], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -225,25 +225,10 @@ public:
 
   void test_Partially_Unrolled()
   {
-    std::string result[] = {
-      "",
-      "# Child algorithms of TopLevelAlgorithm",
-      "",
-      "## Child algorithms of NestedAlgorithm",
-      "BasicAlgorithm(PropertyA='FirstOne')",
-      "BasicAlgorithm(PropertyA='SecondOne')",
-      "## End of child algorithms of NestedAlgorithm",
-      "",
-      "NestedAlgorithm()",
-      "# End of child algorithms of TopLevelAlgorithm",
-      "",
-      "# Child algorithms of TopLevelAlgorithm",
-      "NestedAlgorithm()",
-      "NestedAlgorithm()",
-      "# End of child algorithms of TopLevelAlgorithm",
-      "",
-      "",
-    };
+    std::string result_markdown =
+      "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code =
+      "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -275,11 +260,8 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
-    int i=0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    TS_ASSERT_EQUALS(notebookLines[70], result_markdown)
+    TS_ASSERT_EQUALS(notebookLines[80], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -289,10 +271,8 @@ public:
   void test_Build_Simple_with_backslash()
   {
     //checks that property values with \ get prefixed with r, eg. filename=r'c:\test\data.txt'
-    std::string result[] = {
-      "TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_workspace', OutputWorkspace='test_output_workspace')",
-      ""
-    };
+    std::string result =
+      "               \"input\" : \"TopLevelAlgorithm(InputWorkspace=r'test_inp\\\\ut_workspace', OutputWorkspace='test_output_workspace')\",";
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace", input);
 
@@ -312,11 +292,7 @@ public:
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
-    int i=0;
-    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    TS_ASSERT_EQUALS(notebookLines[70], result)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
