@@ -12,7 +12,7 @@ class Save1DPlottableAsJson(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Framework;Utility"
+        return "Utility"
 
     def name(self):
         """

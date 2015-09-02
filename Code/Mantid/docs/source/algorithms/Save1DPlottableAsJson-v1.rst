@@ -23,11 +23,17 @@ Usage
 
 .. testcode:: ExSave1DPlottableJson
 
-  import os
-  
-  dataws = Load(Filename="withplottables.nxs")
+  import os, numpy as np
+  # prepare input
+  E = np.arange(-50, 50, 1.0)
+  I = 1000 * np.exp(-E**2/10**2)
+  err = I ** .5
+  dataws = CreateWorkspace(
+      DataX = E, DataY = I, DataE = err, NSpec = 1,
+      UnitX = "Energy(meV)")
+  # output path
   out_json = "myplot.json"
-  
+  # run algorithm
   Save1DPlottableAsJson(InputWorkspace=dataws, JsonFilename=out_json, PlotName="myplot")
 
 
