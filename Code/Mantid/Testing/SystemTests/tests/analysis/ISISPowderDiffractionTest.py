@@ -65,3 +65,4 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
                      'hrpd/test/cycle_09_2/hrpd_new_072_01_corr.cal'}
         _cleanup_files(config['defaultsave.directory'], filenames)
+
