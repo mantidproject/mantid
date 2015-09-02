@@ -122,7 +122,7 @@ void NotebookWriter::headerCode() {
   import_matplotlib.append(Json::Value("import matplotlib.pyplot as plt\n\n"));
 
   import_matplotlib.append(Json::Value("#Some magic to tell matplotlib how to behave in IPython Notebook\n"));
-  import_matplotlib.append(Json::Value("%matplotlib inline")); //TODO nbagg available on all platforms?
+  import_matplotlib.append(Json::Value("%matplotlib inline"));
 
   codeCell(import_matplotlib);
 }
@@ -140,7 +140,7 @@ Json::Value NotebookWriter::buildNotebook() {
   worksheet_arr.append(worksheet);
 
   Json::Value meta_name;
-  meta_name["name"] = "example"; //TODO create useful name
+  meta_name["name"] = "Mantid Notebook";
   output["metadata"] = meta_name;
   output["nbformat"] = 3;
   output["nbformat_minor"] = 0;
