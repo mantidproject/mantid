@@ -55,7 +55,6 @@ class MolDyn(PythonAlgorithm):
         except ValueError, vex:
             issues['Data'] = str(vex)
 
-        symm = self.getProperty('SymmetriseEnergy').value
         res_ws = self.getPropertyValue('Resolution')
         max_energy = self.getPropertyValue('MaxEnergy')
 
