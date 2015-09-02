@@ -966,16 +966,16 @@ void SliceViewer::loadColorMap(QString filename)
 
 %End
 
-  void setColorScale(double min, double max, bool log)      throw (std::invalid_argument);
+  void setColorScale(double min, double max, int type)      throw (std::invalid_argument);
 %Docstring
-void SliceViewer::setColorScale(double min, double max, bool log)
+void SliceViewer::setColorScale(double min, double max, int type)
 -----------------------------------------------------------------
-    Set the color scale limits and log mode via a method call.
+    Set the color scale limits and type via a method call.
 
     Args:
         min :: minimum value corresponding to the lowest color on the map
         max :: maximum value corresponding to the highest color on the map
-        log :: true for a log color scale, false for linear
+        type :: 0 for linear, 1 for log, 2 for power
 
     Raises:
         std::invalid_argument if max < min or if the values are
@@ -1025,6 +1025,19 @@ void SliceViewer::setColorScaleLog(bool log)
     Raises:
         std::invalid_argument if the min/max values are inconsistent
            with a log color scale
+
+%End
+
+  int getColorScaleType();
+%Docstring
+int SliceViewer::getColorScaleType()
+--------------------------------------------
+    Get scale type as integer value
+
+    Returns:
+        0 for linear scale
+        1 for log scale
+        2 for power scale
 
 %End
 

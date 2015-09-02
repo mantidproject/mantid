@@ -6,7 +6,7 @@
 #include <qwt_scale_engine.h>
 #include <qwt_scale_draw.h>
 #include <qwt_plot_canvas.h>
-#include <qwt_compat.h>
+#include <MantidQtAPI/qwt_compat.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_scale_widget.h>
 

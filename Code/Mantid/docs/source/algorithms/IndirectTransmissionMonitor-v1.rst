@@ -27,6 +27,8 @@ Workflow
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Create mapping file for IRIS**
 
 .. testcode:: exIRISTransmission
