@@ -33,7 +33,8 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
-from ui_MainWindow import Ui_MainWindow #import line for the UI python class
+# import line for the UI python class
+from ui_MainWindow import Ui_MainWindow
 
 
 class MainWindow(QtGui.QMainWindow):
@@ -78,6 +79,8 @@ class MainWindow(QtGui.QMainWindow):
                      self.show_scan_pt_list)
 
         # Tab 'Advanced'
+        self.connect(self.ui.pushButton_useDefaultDir, QtCore.SIGNAL('clicked()'),
+                     self.do_setup_dir_default)
         self.connect(self.ui.pushButton_browseLocalCache, QtCore.SIGNAL('clicked()'),
                      self.do_browse_local_cache_dir)
         self.connect(self.ui.pushButton_browseWorkDir, QtCore.SIGNAL('clicked()'),
@@ -86,6 +89,9 @@ class MainWindow(QtGui.QMainWindow):
                      self.change_instrument_name)
 
         # Menu
+        self.connect(self.ui.actionExit, QtCore.SIGNAL('triggered()'),
+                     self.menu_quit)
+
         self.connect(self.ui.actionSave_Session, QtCore.SIGNAL('triggered()'),
                      self.save_current_session)
         self.connect(self.ui.actionLoad_Session, QtCore.SIGNAL('triggered()'),
@@ -109,7 +115,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.doAddScanPtToRefineUB)
 
         # Validator
-
+        # TODO
 
         # Declaration of class variable
         self._runID = None
@@ -300,6 +306,9 @@ class MainWindow(QtGui.QMainWindow):
     def do_find_peak(self):
         """ Find peak in a given scan/pt and record it
         """
+        # Set/re-set directory
+        self._set_data_access_info()
+
         # Get experiment, scan and pt
         status, ret_obj = gutil.parse_integers_editors([self.ui.lineEdit_exp,
                                                         self.ui.lineEdit_scanNumber,
@@ -308,9 +317,10 @@ class MainWindow(QtGui.QMainWindow):
             exp_no, scan_no, pt_no = ret_obj
         else:
             self.pop_one_button_dialog(ret_obj)
+            return
 
         # Find peak
-        status, ret_obj = self._myProject.find_peak(exp_no, scan_no, pt_no)
+        status, ret_obj = self._myControl.find_peak(exp_no, scan_no, pt_no)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
 
@@ -406,10 +416,11 @@ class MainWindow(QtGui.QMainWindow):
         # Previous one
         pt_no += 1
         # get last Pt. number
-        status, last_pt_no = self._myControl.get_pt_numbers(exp_no, scan_no)[-1]
+        status, last_pt_no = self._myControl.get_pt_numbers(exp_no, scan_no)
         if status is False:
             error_message = last_pt_no
-            self.pop_one_button_dialog('Unable to access Spice table for scan %d due to %s.' % (scan_no, error_message))
+            self.pop_one_button_dialog('Unable to access Spice table for scan %d. Reason" %s.' % (
+                scan_no, error_message))
         if pt_no > last_pt_no:
             self.pop_one_button_dialog('Pt. = %d is the last one of scan %d.' % (pt_no, scan_no))
             return
@@ -424,6 +435,28 @@ class MainWindow(QtGui.QMainWindow):
     def doResetCalUB(self):
         """ Reset/reject the UB matrix calculation
         """
+
+        return
+
+    def do_setup_dir_default(self):
+        """
+        Set up default directory for storing data and working
+        :return:
+        """
+        home_dir = os.path.expanduser('~')
+        # Data cache directory
+        data_cache_dir = os.path.join(home_dir, 'Temp/HB3ATest')
+        if os.path.exists(data_cache_dir) is False:
+            os.mkdir(data_cache_dir)
+
+        # Working directory
+        work_dir = os.path.join(data_cache_dir, 'Workspace')
+        if os.path.exists(work_dir) is False:
+            os.mkdir(work_dir)
+
+        # Set to line edit
+        self.ui.lineEdit_localSrcDir.setText(data_cache_dir)
+        self.ui.lineEdit_workDir.setText(work_dir)
 
         return
 
@@ -499,6 +532,13 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def menu_quit(self):
+        """
+
+        :return:
+        """
+        self.close()
+
     def show_scan_pt_list(self):
         """ Show the range of Pt. in a scan
         :return:
@@ -539,6 +579,8 @@ class MainWindow(QtGui.QMainWindow):
         # Check and load SPICE table file
         does_exist = self._myControl.does_spice_loaded(exp_no, scan_no)
         if does_exist is False:
+            # Reset the data and working direction
+            self._set_data_access_info()
             # Download data
             status, error_message = self._myControl.download_spice_file(exp_no, scan_no, over_write=False)
             if status is True:
@@ -557,22 +599,38 @@ class MainWindow(QtGui.QMainWindow):
         does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)
 
         if does_exist is False:
+            # Check whether needs to download
+            status, error_message = self._myControl.download_spice_xml_file(scan_no, pt_no, exp_no=exp_no)
+            if status is False:
+                self.pop_one_button_dialog(error_message)
+                return
+            # Load SPICE xml file
             status, error_message = self._myControl.load_spice_xml_file(exp_no, scan_no, pt_no)
             if status is False:
-                if self._allowDownload is True:
-                    status, error_message = self._myControl.download_spice_xml_file(exp_no, scan_no)
-                    if status is False:
-                        self.pop_one_button_dialog(error_message)
-                        return
-                else:
-                    self.pop_one_button_dialog(error_message)
+                self.pop_one_button_dialog(error_message)
+                return
 
-        #--------------> Good from here!
         # Convert a list of vector to 2D numpy array for imshow()
         # Get data and plot
         raw_det_data = self._myControl.get_raw_detector_counts(exp_no, scan_no, pt_no)
         self.ui.graphicsView.clear_canvas()
         self.ui.graphicsView.add_plot_2d(raw_det_data, x_min=0, x_max=256, y_min=0, y_max=256,
                                          hold_prev_image=False)
+
+        return
+
+    def _set_data_access_info(self):
+        """
+
+        :return:
+        """
+        cache_dir = str(self.ui.lineEdit_localSrcDir.text())
+        self._myControl.set_local_data_dir(cache_dir)
+
+        working_dir = str(self.ui.lineEdit_workDir.text())
+        self._myControl.set_working_directory(working_dir)
+
+        data_server = str(self.ui.lineEdit_url.text())
+        self._myControl.set_server_url(data_server)
 
         return

@@ -27,7 +27,7 @@ except ImportError:
     sys.path.append(mantiddir)
     import mantid
 import mantid.simpleapi as api
-
+from mantid.api import AnalysisDataService
 
 DebugMode = True
 
@@ -186,16 +186,26 @@ class CWSCDReductionControl(object):
 
         return True, file_name
 
-    def download_spice_xml_file(self, scan_no, pt_no):
+    def download_spice_xml_file(self, scan_no, pt_no, exp_no=None, overwrite=False):
         """ Download a SPICE XML file for one measurement in a scan
         :param scan_no:
         :param pt_no:
+        :param exp_no:
+        :param overwrite:
         :return: tuple (boolean, local file name/error message)
         """
-        # Generate the URL for XML file
-        xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, self._expNumber, scan_no, pt_no)
-        xml_file_url = '%sexp%d/Datafiles/%s' % (self._myServerURL, self._expNumber, xml_file_name)
+        # Experiment number
+        if exp_no is None:
+            exp_no = self._expNumber
+
+        # Form the target file name and path
+        xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, exp_no, scan_no, pt_no)
         local_xml_file_name = os.path.join(self._dataDir, xml_file_name)
+        if os.path.exists(local_xml_file_name) is True and overwrite is True:
+            return True, local_xml_file_name
+
+        # Generate the URL for XML file
+        xml_file_url = '%sexp%d/Datafiles/%s' % (self._myServerURL, exp_no, xml_file_name)
 
         # Download
         try:
@@ -277,29 +287,27 @@ class CWSCDReductionControl(object):
 
         return True, ""
 
-    def find_peak(self, expno, scanno, ptno):
+    def find_peak(self, exp_number, scan_number, pt_number):
         """ Find peak in sample Q space
-        :param scanno:
-        :param ptno:
+        :param scan_number:
+        :param pt_number:
         :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
+
+        This part will be redo as 11847_Load_HB3A_Experiment
         """
-        # Load data to MD
-        status, error_message = self.load_data_to_md(expno, scanno, ptno, over_write=False)
-        # TODO - Implement load_data_to_md() by referring to 'load_peaks_matrixws.py'
+        # Download data
+        status_sp, spice_file_name = self.download_spice_file(exp_number, scan_number, over_write=False)
+        status_det, det_file_name = self.download_spice_xml_file(scan_number, pt_number, exp_number, overwrite=False)
+        if status_sp is False or status_det is False:
+            err_msg = 'Unable to download SPICE file or detector file. Reason: %s; %s' % (
+                spice_file_name, det_file_name)
+            return False, err_msg
+
+        # Load data
+        status, error_message = self.load_raw_data_to_md(exp_number, scan_number, pt_number,
+                                                         spice_file_name, det_file_name)
         if status is False:
             return status, error_message
-
-        # TODO - The commented out part shall go to method 'load_data_to_md()''
-        """
-        # Check existence
-        runnumber = self._expDataDict[self._expNumber][scanno][ptno].getRunNumber()
-        if runnumber is None:
-            return False, "Unable to locate scan %s/pt %s" % (str(scanno), str(ptno))
-        """
-        # Rebin in momentum space and set goniometer
-        Rebin(InputWorkspace='s%04d_%04d'%(scanno, pt), OutputWorkspace='s%04d_%04d'%(scanno, pt), Params='6,0.01,6.5')
-        # Set Goniometer
-        SetGoniometer(Workspace='s%04d_%04d'%(scanno, pt), Axis0='_omega,0,1,0,-1', Axis1='_chi,0,0,1,-1', Axis2='_phi,0,1,0,-1')
 
         # TODO - From this step, refer to script 'load_peaks_md.py'
         mdwksp = self._getMDWorkspace(runnumber)
@@ -309,7 +317,7 @@ class CWSCDReductionControl(object):
         # Get number of peaks
         numpeaks = peakws.rowCount()
         if numpeaks == 0:
-            return (False, "Unable to find peak in scan %d/pt %d" % (scanno, ptno))
+            return (False, "Unable to find peak in scan %d/pt %d" % (scan_number, pt_number))
         elif numpeaks >= 2:
             raise NotImplementedError("It is not implemented for finding more than 1 peak.")
 
@@ -413,13 +421,13 @@ class CWSCDReductionControl(object):
         # Check whether the workspace has been loaded
         assert(isinstance(exp_no, int))
         assert(isinstance(scan_no, int))
-        out_ws_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
+        out_ws_name = get_spice_table_name(exp_no, scan_no)
         if (exp_no, scan_no) in self._spiceTableDict:
             return True, out_ws_name
 
         # Form standard name for a SPICE file if name is not given
         if spice_file_name is None:
-            spice_file_name = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat' % (exp_no, scan_no))
+            spice_file_name = os.path.join(self._dataDir, get_spice_file_name(exp_no, scan_no))
 
         # Load SPICE file
         try:
@@ -434,7 +442,7 @@ class CWSCDReductionControl(object):
 
         return True, out_ws_name
 
-    def load_spice_xml_file(self, exp_no, scan_no, pt_no):
+    def load_spice_xml_file(self, exp_no, scan_no, pt_no, xml_file_name=None):
         """
         Load SPICE's XML file to
         :param scan_no:
@@ -442,13 +450,21 @@ class CWSCDReductionControl(object):
         :return:
         """
         # Form XMIL file as ~/../HB3A_exp355_scan%04d_%04d.xml'%(scan_no, pt)
-        xml_file_name = os.path.join(self._dataDir, 'HB3A_exp%d_scan%04d_%04d.xml' % (exp_no, scan_no, pt_no))
+        if xml_file_name is None:
+            xml_file_name = os.path.join(self._dataDir,
+                                         'HB3A_exp%d_scan%04d_%04d.xml' % (exp_no, scan_no, pt_no))
+
+        # Get spice table
+        spice_table_ws = self._get_spice_workspace(exp_no, scan_no)
+        assert isinstance(spice_table_ws, mantid.dataobjects._dataobjects.TableWorkspace)
+        spice_table_name = spice_table_ws.name()
 
         # Load SPICE Pt. file
-        spice_table_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
+        # spice_table_name = 'Table_Exp%d_Scan%04d' % (exp_no, scan_no)
+        pt_ws_name = get_raw_data_workspace_name(exp_no, scan_no, pt_no)
         try:
             ret_obj = api.LoadSpiceXML2DDet(Filename=xml_file_name,
-                                            OutputWorkspace='s%04d_%04d'%(scan_no, pt_no),
+                                            OutputWorkspace=pt_ws_name,
                                             DetectorGeometry='256,256',
                                             SpiceTableWorkspace=spice_table_name,
                                             PtNumber=pt_no)
@@ -460,7 +476,42 @@ class CWSCDReductionControl(object):
         # Add data storage
         self._add_raw_workspace(exp_no, scan_no, pt_no, pt_ws)
 
-        return True, pt_ws
+        return True, pt_ws_name
+
+    def load_raw_data_to_md(self, exp_number, scan_number, pt_number,
+                            spice_file_name, det_file_name):
+        """ To rebin and set goniometer
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :return:
+        """
+        # FIXME - Need a method to standard this
+        # spice_table_name = 'HB3A_%03d_%04d_Raw' % (exp_number, scan_number)
+
+        # Load raw
+        if (exp_number, scan_number) not in self._spiceTableDict:
+            status, err_msg = self.load_spice_scan_file(exp_number, scan_number, spice_file_name)
+            if status is False:
+                return False, err_msg
+
+        if (exp_number, scan_number, pt_number) not in self._expDataDict:
+            status, ret_obj = self.load_spice_xml_file(exp_number, scan_number, pt_number, det_file_name)
+            if status is False:
+                err_msg = ret_obj
+                return False, err_msg
+
+        pt_ws = self._get_raw_workspace(exp_number, scan_number, pt_number)
+        pt_ws_name = pt_ws.name()
+
+        # Rebin and set goniometer
+        api.Rebin(InputWorkspace=pt_ws_name, OutputWorkspace=pt_ws_name,
+                  Params='6,0.01,6.5')
+        api.SetGoniometer(Workspace=pt_ws_name,
+                          Axis0='_omega,0,1,0,-1', Axis1='_chi,0,0,1,-1', Axis2='_phi,0,1,0,-1')
+        self._add_raw_workspace(exp_number, scan_number, pt_number, pt_ws_name)
+
+        return True, ''
 
     def process_pt_wksp(self, scan_no, pt_no):
         """
@@ -646,10 +697,22 @@ class CWSCDReductionControl(object):
         :param exp_no:
         :param scan_no:
         :param pt_no:
-        :param raw_ws:
+        :param raw_ws: workspace or name of the workspace
         :return: None
         """
-        self._rawDataDict[(exp_no, scan_no, pt_no)] = raw_ws
+        # Check
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(pt_no, int)
+
+        if isinstance(raw_ws, str):
+            # Given by name
+            matrix_ws = AnalysisDataService.retrieve(raw_ws)
+        else:
+            matrix_ws = raw_ws
+        assert isinstance(matrix_ws, mantid.dataobjects._dataobjects.Workspace2D)
+
+        self._rawDataDict[(exp_no, scan_no, pt_no)] = matrix_ws
 
         return
 
@@ -674,8 +737,9 @@ class CWSCDReductionControl(object):
         :return: Table workspace or None
         """
         try:
-            ws = self._spiceTableDict[exp_no][scan_no]
+            ws = self._spiceTableDict[(exp_no, scan_no)]
         except KeyError:
+            print '[DB] Keys to SPICE TABLE: %s' % str(self._spiceTableDict.keys())
             return None
 
         return ws
@@ -708,3 +772,38 @@ class CWSCDReductionControl(object):
             ptlist.append(ptno)
 
         return ptlist
+
+
+def get_spice_file_name(exp_number, scan_number):
+    """
+
+    :param exp_number:
+    :param scan_num:
+    :return:
+    """
+    file_name = 'HB3A_exp%04d_scan%04d.dat' % (exp_number, scan_number)
+
+    return file_name
+
+
+def get_spice_table_name(exp_number, scan_number):
+    """ Form the name of the table workspace for SPICE
+    :param exp_number:
+    :param scan_number:
+    :return:
+    """
+    table_name = 'HB3A_%03d_%04d_SpiceTable' % (exp_number, scan_number)
+
+    return table_name
+
+
+def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
+    """ Form the name of the matrix workspace to which raw pt. XML file is loaded
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'HB3A_%03d_%04d_%04d_Raw' % (exp_number, scan_number, pt_number)
+
+    return ws_name
