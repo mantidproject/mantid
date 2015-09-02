@@ -1,6 +1,5 @@
 # pylint: disable=no-init
 
-from IndirectImport import is_supported_f2py_platform
 from mantid.api import FileFinder
 from mantid import config
 import os.path
@@ -26,13 +25,7 @@ def _cleanup_files(dirname, filenames):
             print 'Did not delete generated file: ' + filename
 # ==============================================================================
 
-# Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace
 class ISISPowderDiffraction(stresstesting.MantidStressTest):
-    def skipTests(self):
-        if is_supported_f2py_platform():
-            return False
-        else:
-            return True
 
     def requiredFiles(self):
         return {"HRP39191.raw", "HRP39187.raw", "HRP43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
