@@ -1,16 +1,15 @@
 # pylint: disable=no-init
-import stresstesting
-import os
-import sys
-from mantid.api import FileFinder
-absfile=FileFinder.getFullPath("PowderISIS")
-sys.path.append(absfile)
-
-from mantid.simpleapi import *
-import cry_ini
-import cry_focus
 
 from IndirectImport import is_supported_f2py_platform
+from mantid.api import FileFinder
+from mantid import config
+import os.path
+import stresstesting
+import sys
+F_DIR = FileFinder.getFullPath("PowderISIS")
+sys.path.append(F_DIR)
+import cry_ini
+import cry_focus
 
 
 # ==============================================================================
@@ -24,8 +23,7 @@ def _cleanup_files(dirname, filenames):
         try:
             os.remove(path)
         except OSError:
-            pass
-            print("Did not delete generated file: " + filename)
+            print 'Did not delete generated file: ' + filename
 # ==============================================================================
 
 # Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace
