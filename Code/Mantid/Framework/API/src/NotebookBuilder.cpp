@@ -26,9 +26,11 @@ NotebookBuilder::NotebookBuilder(boost::shared_ptr<HistoryView> view,
   m_nb_writer(new NotebookWriter()) {}
 
 /**
- * Build a python script for each algorithm included in the history view.
- *
- * @return a formatted python string of the history
+ * Build an ipython notebook for algorithms included in the history view.
+ * @param ws_name :: workspace name
+ * @param ws_title :: workspace title
+ * @param ws_comment :: workspace comment
+ * @return a formatted ipython notebook string of the history
  */
 const std::string NotebookBuilder::build(std::string ws_name,
                                          std::string ws_title,
@@ -57,7 +59,6 @@ const std::string NotebookBuilder::build(std::string ws_name,
  * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
- * @param depth :: count of how far we've recursed into the history
  */
 void NotebookBuilder::writeHistoryToStream(
         std::vector<HistoryItem>::const_iterator &iter) {
@@ -87,7 +88,6 @@ void NotebookBuilder::writeHistoryToStream(
  * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
- * @param depth :: count of how far we've recursed into the history
  */
 void
 NotebookBuilder::buildChildren(std::vector<HistoryItem>::const_iterator &iter) {

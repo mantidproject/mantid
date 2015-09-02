@@ -16,14 +16,20 @@ NotebookWriter::NotebookWriter() : m_cell_buffer(Json::arrayValue)
   headerCode();
 }
 
-void NotebookWriter::codeCell(Json::Value string_code) {
+  /**
+ * Add a code cell to the buffer of cells to write to the notebook
+ *
+ * @param string_code :: Json array of strings containing python code
+   * for the code cell
+ */
+void NotebookWriter::codeCell(Json::Value array_code) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
 
   cell_data["cell_type"] = "code";
   cell_data["collapsed"] = false;
-  cell_data["input"] = string_code;
+  cell_data["input"] = array_code;
   cell_data["language"] = "python";
   cell_data["metadata"] = empty;
   cell_data["outputs"] = Json::Value(Json::arrayValue);
@@ -31,6 +37,11 @@ void NotebookWriter::codeCell(Json::Value string_code) {
   m_cell_buffer.append(cell_data);
 }
 
+  /**
+ * Add a code cell to the buffer of cells to write to the notebook
+ *
+ * @param string_code :: string containing the python for the code cell
+ */
 void NotebookWriter::codeCell(std::string string_code) {
 
   Json::Value cell_data;
@@ -46,6 +57,12 @@ void NotebookWriter::codeCell(std::string string_code) {
   m_cell_buffer.append(cell_data);
 }
 
+  /**
+* Add a markdown cell to the buffer of cells to write to the notebook
+*
+* @param string_array :: json array of strings containing the python
+   * code for the code cell
+*/
 void NotebookWriter::markdownCell(Json::Value string_array) {
 
   Json::Value cell_data;
@@ -58,18 +75,27 @@ void NotebookWriter::markdownCell(Json::Value string_array) {
   m_cell_buffer.append(cell_data);
 }
 
-void NotebookWriter::markdownCell(std::string string_array) {
+  /**
+* Add a markdown cell to the buffer of cells to write to the notebook
+*
+* @param string_array :: string containing the python code for the code cell
+*/
+void NotebookWriter::markdownCell(std::string string_text) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
 
   cell_data["cell_type"] = "markdown";
   cell_data["metadata"] = empty;
-  cell_data["source"] = string_array;
+  cell_data["source"] = string_text;
 
   m_cell_buffer.append(cell_data);
 }
 
+  /**
+* Add a markdown cell of information for the user to the buffer of cells to
+   * write to the notebook
+*/
 void NotebookWriter::headerComment() {
 
   Json::Value strings(Json::arrayValue);
@@ -88,6 +114,12 @@ void NotebookWriter::headerComment() {
   markdownCell(strings);
 }
 
+  /**
+* Add code cells to the buffer of cells to write to the notebook
+   * These are to import Mantid and matplotlib, and to warn the
+   * user if the version of Mantid being used does not match the
+   * version which generated the notebook.
+*/
 void NotebookWriter::headerCode() {
 
   Json::Value import_mantid(Json::arrayValue);
@@ -127,6 +159,10 @@ void NotebookWriter::headerCode() {
   codeCell(import_matplotlib);
 }
 
+  /**
+* Create a Json value containing the whole notebook
+ * @return a Json value containing the whole notebook
+*/
 Json::Value NotebookWriter::buildNotebook() {
 
   Json::Value output;
@@ -149,6 +185,11 @@ Json::Value NotebookWriter::buildNotebook() {
   return output;
 }
 
+  /**
+* Create a formatted string of Json which describes a notebook
+   * @return a formatted string of the Json which describes
+   * the whole notebook
+*/
 std::string NotebookWriter::writeNotebook() {
 
   const Json::Value root = buildNotebook();
