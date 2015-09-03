@@ -104,3 +104,4 @@ class SavePlot1DAsJson(PythonAlgorithm):
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SavePlot1DAsJson)
+
