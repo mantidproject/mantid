@@ -66,10 +66,6 @@ class SavePlot1DAsJson(PythonAlgorithm):
             raise ValueError(
                 "InputWorkspace must be one-dimensional.")
 
-        if os.path.exists(outfilename):
-            raise IOError(
-                "Output file %s already exists" % outfilename)
-
         # Generate Json file
         self._save(inputws, outfilename, plotname)
         return

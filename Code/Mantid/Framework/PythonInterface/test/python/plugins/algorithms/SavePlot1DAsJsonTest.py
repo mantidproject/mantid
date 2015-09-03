@@ -56,6 +56,11 @@ class SaveVulcanGSSTest(unittest.TestCase):
         np.testing.assert_array_equal(d0['x'], E)
         np.testing.assert_array_equal(d0['y'], I)
         np.testing.assert_array_equal(d0['e'], err)
+        # test overwrite
+        alg_test = run_algorithm(
+            "SavePlot1DAsJson",
+            InputWorkspace = datawsname,
+            JsonFilename = out_path)
         # Delete the output file
         os.remove(out_path)
         return
