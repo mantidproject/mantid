@@ -196,8 +196,8 @@ void LoadBBY::exec() {
           mask[s0 + (size_t)y] = false;
       }
       else { // if (offset < 0)
-        for (int y = HISTO_BINS_Y + offset; y != HISTO_BINS_Y; y++)
-          mask[s0 + (size_t)y] = false;
+        for (size_t y = HISTO_BINS_Y + static_cast<size_t>(offset); y != HISTO_BINS_Y; y++)
+          mask[s0 + y] = false;
       }
     }
   }
@@ -513,11 +513,12 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, s
   double pixel_height = height / static_cast<double>(yPixelCount);
   
   // adjusting for binning
-  double detectorYOffset = (pixelsCutOffL - pixelsCutOffH) * pixel_height;
+  auto diffPixelsCutOff = (pixelsCutOffL - pixelsCutOffH);
+  double detectorYOffset = static_cast<double>(diffPixelsCutOff)* pixel_height;
 
   yPixelCount = finalBinsY;
-  pixel_height *= tubeBinning;
-  height = pixel_height * finalBinsY;
+  pixel_height *= static_cast<double>(tubeBinning);
+  height = pixel_height * static_cast<double>(finalBinsY);
 
   // final number of pixels
   size_t pixelCount = xPixelCount * yPixelCount;
