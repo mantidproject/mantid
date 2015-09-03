@@ -39,22 +39,34 @@ public:
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), Mantid::VATES::VolumeNormalization, 0);
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressAction));
+    vtkStructuredGrid *insideProduct =
+        dynamic_cast<vtkStructuredGrid *>(inside.create(progressAction));
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), Mantid::VATES::VolumeNormalization, 0);
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressAction));
+    vtkStructuredGrid *belowProduct =
+        dynamic_cast<vtkStructuredGrid *>(below.create(progressAction));
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), Mantid::VATES::VolumeNormalization, 0);
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressAction));
+    vtkStructuredGrid *aboveProduct =
+        dynamic_cast<vtkStructuredGrid *>(above.create(progressAction));
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
+    for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {
+      TS_ASSERT(insideProduct->IsCellVisible(i) != 0);
+    }
 
-    // This has changed, in order to ensure that we do not pass on empty 
-    // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid
-    TS_ASSERT_EQUALS(1, belowProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(1, aboveProduct->GetNumberOfCells());
+    // This has changed. Cells are still present but not visible.
+    TS_ASSERT_EQUALS((10 * 10 * 10), belowProduct->GetNumberOfCells());
+    for (auto i = 0; i < belowProduct->GetNumberOfCells(); ++i) {
+      TS_ASSERT(belowProduct->IsCellVisible(i) == 0);
+    }
+
+    TS_ASSERT_EQUALS((10 * 10 * 10), aboveProduct->GetNumberOfCells());
+    for (auto i = 0; i < aboveProduct->GetNumberOfCells(); ++i) {
+      TS_ASSERT(aboveProduct->IsCellVisible(i) == 0);
+    }
   }
 
   void testProgressUpdating()

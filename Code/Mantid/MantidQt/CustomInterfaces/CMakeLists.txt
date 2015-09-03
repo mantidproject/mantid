@@ -3,6 +3,8 @@ set ( SRC_FILES
   src/DataComparison.cpp
   src/deltaECalc.cpp
   src/DirectConvertToEnergy.cpp
+  src/EnggDiffraction/EnggDiffractionPresenter.cpp
+  src/EnggDiffraction/EnggDiffractionViewQtGUI.cpp
   src/Homer.cpp
   src/Indirect/AbsorptionCorrections.cpp
   src/Indirect/ApplyPaalmanPings.cpp
@@ -79,6 +81,7 @@ set ( SRC_FILES
   src/ReflSearchModel.cpp
   src/SampleTransmission.cpp
   src/SANSAddFiles.cpp
+  src/SANSConstants.cpp
   src/SANSDiagnostics.cpp
   src/SANSEventSlicing.cpp
   src/SANSPlotSpecial.cpp
@@ -101,6 +104,12 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/deltaECalc.h
   inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
   inc/MantidQtCustomInterfaces/DllConfig.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffCalibSettings.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
+  inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
   inc/MantidQtCustomInterfaces/Homer.h
   inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
   inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h
@@ -186,6 +195,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
   inc/MantidQtCustomInterfaces/SampleTransmission.h
   inc/MantidQtCustomInterfaces/SANSAddFiles.h
+  inc/MantidQtCustomInterfaces/SANSConstants.h
   inc/MantidQtCustomInterfaces/SANSDiagnostics.h
   inc/MantidQtCustomInterfaces/SANSEventSlicing.h
   inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
@@ -212,6 +222,9 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DataComparison.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresenter.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionPresWorker.h
+                inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionViewQtGUI.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h
@@ -294,6 +307,9 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtGUI.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabCalib.ui
+               inc/MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionQtTabSettings.ui
                inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.ui
                inc/MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.ui
@@ -359,6 +375,7 @@ set ( TEST_FILES
   ALCDataLoadingPresenterTest.h
   ALCPeakFittingModelTest.h
   ALCPeakFittingPresenterTest.h
+  EnggDiffractionPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
   ReflLegacyTransferStrategyTest.h
@@ -406,7 +423,7 @@ endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces LINK_PRIVATE
+target_link_libraries ( CustomInterfaces LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
             MantidQtAPI
             MantidWidgets
             QtPropertyBrowser

@@ -78,6 +78,21 @@ set ( PYTHON_EXECUTABLE_DEBUG "${CMAKE_LIBRARY_PATH}/Python27/python_d.exe" CACH
 set ( PYTHONW_EXECUTABLE "${CMAKE_LIBRARY_PATH}/Python27/pythonw.exe" CACHE FILEPATH "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE ) 
 
 ###########################################################################
+# If required, find tcmalloc
+###########################################################################
+set ( USE_TCMALLOC ON CACHE BOOL "If true, link with tcmalloc" )
+# If not wanted, just carry on without it
+if ( USE_TCMALLOC )
+  set ( TCMALLOC_LIBRARIES optimized "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal.lib" debug "${CMAKE_LIBRARY_PATH}/libtcmalloc_minimal_d.lib" )
+  # Use an alternate variable name so that it is only set on Windows
+  set ( TCMALLOC_LIBRARIES_LINKTIME ${TCMALLOC_LIBRARIES})
+  set ( CMAKE_SHARED_LINKER_FLAGS /INCLUDE:"__tcmalloc" )
+else ( USE_TCMALLOC )
+  message ( STATUS "TCMalloc will not be included." )
+endif ()
+
+
+###########################################################################
 # Compiler options.
 ###########################################################################
 add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )

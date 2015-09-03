@@ -1,16 +1,16 @@
 #ifndef _vtkScaleWorkspace_h
 #define _vtkScaleWorkspace_h
-#include "vtkUnstructuredGridAlgorithm.h"
+#include "vtkPointSetAlgorithm.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include <boost/scoped_ptr.hpp>
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkScaleWorkspace : public vtkUnstructuredGridAlgorithm
+class VTK_EXPORT vtkScaleWorkspace : public vtkPointSetAlgorithm
 {
 public:
   static vtkScaleWorkspace *New();
-  vtkTypeMacro(vtkScaleWorkspace, vtkUnstructuredGridAlgorithm)
+  vtkTypeMacro(vtkScaleWorkspace, vtkPointSetAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);
@@ -24,11 +24,12 @@ protected:
   ~vtkScaleWorkspace();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int FillInputPortInformation (int port, vtkInformation *info);
 
 private:
   vtkScaleWorkspace(const vtkScaleWorkspace&);
   void operator = (const vtkScaleWorkspace&);
-  void updateMetaData(vtkUnstructuredGrid *inputDataSet);
+  void updateMetaData(vtkPointSet *inputDataSet);
   double m_xScaling;
   double m_yScaling;
   double m_zScaling;

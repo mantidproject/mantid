@@ -89,6 +89,8 @@ private:
   void init();
   /// Overwrites Algorithm method
   void exec();
+  /// Load Parameter File specified by full pathname into given workspace, return success
+  bool loadParameterFile (const std::string& fullPathName, const API::MatrixWorkspace_sptr workspace );
 };
 
 } // namespace DataHandling

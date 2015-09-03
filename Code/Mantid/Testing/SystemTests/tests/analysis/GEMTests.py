@@ -1,8 +1,9 @@
 import stresstesting
 import os
 from mantid.simpleapi import *
-
+#pylint: disable=too-many-instance-attributes
 class GEMTest(stresstesting.MantidStressTest):
+    validate=None
 
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
@@ -143,12 +144,12 @@ class GEMTest(stresstesting.MantidStressTest):
             os.remove(self.gss_file)
         if os.path.exists(self.new_cal_file):
             os.remove(self.new_cal_file)
-        for file in self.xye_tof_files:
-            if os.path.exists(file):
-                os.remove(file)
-        for file in self.xye_d_files:
-            if os.path.exists(file):
-                os.remove(file)
+        for filename in self.xye_tof_files:
+            if os.path.exists(filename):
+                os.remove(filename)
+        for filename in self.xye_d_files:
+            if os.path.exists(filename):
+                os.remove(filename)
 
     def doValidation(self):
         '''Override doValidation to vaildate two things at the same time'''
@@ -167,14 +168,16 @@ class GEMTest(stresstesting.MantidStressTest):
         self.validate = self.validateTOFXYE
         self.file_index = 0
 		# file_index is incremented after each call to validateASCII()
-        res = self.validateASCII() and self.validateASCII() and self.validateASCII() and self.validateASCII() and self.validateASCII() and self.validateASCII()
+        res = self.validateASCII() and self.validateASCII() and self.validateASCII() and \
+              self.validateASCII() and self.validateASCII() and self.validateASCII()
         if not res:
             return False
 		# reset validate() method to call validateTOFXYE()
         self.validate = self.validateDXYE
         self.file_index = 0
 		# file_index is incremented after each call to validateASCII()
-        res = self.validateASCII() and self.validateASCII() and self.validateASCII() and self.validateASCII() and self.validateASCII() and self.validateASCII()
+        res = self.validateASCII() and self.validateASCII() and self.validateASCII() and \
+              self.validateASCII() and self.validateASCII() and self.validateASCII()
         return res
 
     def validateNexus(self):
@@ -183,19 +186,16 @@ class GEMTest(stresstesting.MantidStressTest):
 
     def validateGSS(self):
         '''Validate the created gss file'''
-        from mantid.api import FileFinder
         return self.gss_file, FileFinder.getFullPath(self.ref_gss_file)
 
     def validateTOFXYE(self):
         '''Validate the created gss file'''
-        from mantid.api import FileFinder
         i = self.file_index
         self.file_index += 1
         return self.xye_tof_files[i], FileFinder.getFullPath(self.ref_xye_tof_files[i])
 
     def validateDXYE(self):
         '''Validate the created gss file'''
-        from mantid.api import FileFinder
         i = self.file_index
         self.file_index += 1
         return self.xye_d_files[i], FileFinder.getFullPath(self.ref_xye_d_files[i])

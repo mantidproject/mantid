@@ -40,6 +40,15 @@ public:
     TS_ASSERT_DELTA( map.normalize(range, 1000.), 0.75, 1e-5);
   }
 
+  void test_normalize_power()
+  {
+    MantidColorMap map;
+    QwtDoubleInterval range(10.0, 20.0);
+    map.changeScaleType( GraphOptions::Power );
+    map.setNthPower( 2.0 );
+    TS_ASSERT_DELTA( map.normalize(range, 16.), 0.52, 1e-5);
+  }
+
   /// Setting a NAN color
   void test_nan_color()
   {

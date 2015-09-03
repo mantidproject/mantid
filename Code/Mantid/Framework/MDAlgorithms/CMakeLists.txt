@@ -109,6 +109,7 @@ set ( SRC_FILES
 	src/SmoothMD.cpp
 	src/ThresholdMD.cpp
 	src/TransformMD.cpp
+	src/TransposeMD.cpp
 	src/UnaryOperationMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
@@ -227,6 +228,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SmoothMD.h
 	inc/MantidMDAlgorithms/ThresholdMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
+	inc/MantidMDAlgorithms/TransposeMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/UnitsConversionHelper.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
@@ -334,6 +336,7 @@ set ( TEST_FILES
 	TobyFitResolutionModelTest.h
 	TobyFitYVectorTest.h
 	TransformMDTest.h
+	TransposeMDTest.h
 	UnaryOperationMDTest.h
 	UnitsConversionHelperTest.h
 	WeightedMeanMDTest.h
@@ -372,7 +375,7 @@ endif ()
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-target_link_libraries ( MDAlgorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES}  )
+target_link_libraries ( MDAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES}  )
 
 # Add the unit tests directory
 add_subdirectory ( test )

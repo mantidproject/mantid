@@ -17,13 +17,14 @@ from mantid.kernel import Logger
 sanslog = Logger("SANS")
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace, FileLoaderRegistry
+from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
-                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG)
+                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
+                          can_load_as_event_workspace)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -140,7 +141,7 @@ class LoadRun(object):
         """
         if self._period != self.UNSET_PERIOD:
             workspace = self._get_workspace_name(self._period)
-            if not FileLoaderRegistry.canLoad("LoadEventNexus", self._data_file):
+            if not can_load_as_event_workspace(self._data_file):
                 extra_options['EntryNumber'] = self._period
         else:
             workspace = self._get_workspace_name()
@@ -1125,7 +1126,7 @@ class LoadSample(LoadRun):
 
     def execute(self, reducer, isSample):
         self._assignHelper(reducer)
-        
+
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
@@ -1245,7 +1246,7 @@ class TransmissionCalc(ReductionStep):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        
+
         # CalculateTransmission can be given either a monitor detetor ID or a set of detector
         # ID's corresponding to a ROI (region of interest).  The monitor or ROI will specify
         # the *transmission* (not the incident beam).  A monitor is the standard functionality,
@@ -1370,7 +1371,7 @@ class TransmissionCalc(ReductionStep):
         # We perform a FlatBackground correction. We do this in two parts.
         # First we find the workspace indices which correspond to monitors
         # and perform the correction on these indicies.
-        # Second we perform the correction on all indices which are not 
+        # Second we perform the correction on all indices which are not
         # monitors
         for ws_index in range(tmp.getNumberHistograms()):
             if tmp.getDetector(ws_index).isMonitor():
@@ -2247,8 +2248,9 @@ class UserFile(ReductionStep):
                 self._readDetectorCorrections(upper_line[8:], reducer)
             elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
                 self._readFrontRescaleShiftSetup(det_specif, reducer)
-            elif any(it == det_specif.strip() for it in ['FRONT','REAR','BOTH','MERGE','MERGED']):
+            elif any(it == det_specif.strip() for it in ['FRONT','REAR','BOTH','MERGE','MERGED', 'MAIN', 'HAB']):
                 # for /DET/FRONT, /DET/REAR, /DET/BOTH, /DET/MERGE and /DET/MERGED commands
+                # we also accomodate DET/MAIN and DET/HAB here which are specificially for LOQ
                 det_specif = det_specif.strip()
                 if det_specif == 'MERGE':
                     det_specif = 'MERGED'

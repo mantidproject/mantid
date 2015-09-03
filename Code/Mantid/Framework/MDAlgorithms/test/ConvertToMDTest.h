@@ -163,6 +163,15 @@ void testExecQ3D()
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
 
+    // Check that we are getting good frame information back for each dimension.
+    TS_ASSERT_EQUALS("HKL", outWS->getDimension(0)->getMDFrame().name());
+    TS_ASSERT_EQUALS(true, outWS->getDimension(0)->getMDUnits().isQUnit());
+    TS_ASSERT_EQUALS("HKL", outWS->getDimension(1)->getMDFrame().name());
+    TS_ASSERT_EQUALS(true, outWS->getDimension(1)->getMDUnits().isQUnit());
+    TS_ASSERT_EQUALS("HKL", outWS->getDimension(2)->getMDFrame().name());
+    TS_ASSERT_EQUALS(true, outWS->getDimension(2)->getMDUnits().isQUnit());
+    TS_ASSERT_EQUALS(false, outWS->getDimension(3)->getMDUnits().isQUnit());
+
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }
 

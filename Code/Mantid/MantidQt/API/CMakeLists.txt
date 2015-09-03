@@ -40,6 +40,8 @@ set ( SRC_FILES
   src/VatesViewerInterface.cpp
   src/WorkspaceObserver.cpp
   src/SelectionNotificationService.cpp
+  src/ScaleEngine.cpp
+  src/PowerScaleEngine.cpp
 )
 
 set ( MOC_FILES
@@ -97,6 +99,9 @@ set ( INC_FILES
   inc/MantidQtAPI/ScriptRepositoryView.h
   inc/MantidQtAPI/SelectionNotificationService.h
   inc/MantidQtAPI/SignalRange.h
+  inc/MantidQtAPI/qwt_compat.h
+  inc/MantidQtAPI/ScaleEngine.h
+  inc/MantidQtAPI/PowerScaleEngine.h
 )
 
 set ( UI_FILES
@@ -132,7 +137,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidQtAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
-target_link_libraries ( MantidQtAPI LINK_PRIVATE
+target_link_libraries ( MantidQtAPI LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES}
   ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}
 )

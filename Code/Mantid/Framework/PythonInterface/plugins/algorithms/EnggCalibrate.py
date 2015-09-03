@@ -18,9 +18,6 @@ class EnggCalibrate(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
                              "Workspace with the calibration run to use.")
 
-        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input),
-                             "Workspace with the Vanadium (correction and calibration) run.")
-
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", ""),\
     		"A list of dSpacing values where peaks are expected.")
 
@@ -29,6 +26,27 @@ class EnggCalibrate(PythonAlgorithm):
                              "Load from file a list of dSpacing values to be translated into TOF to "
                              "find expected peaks. This takes precedence over 'ExpectedPeaks' if both "
                              "options are given.")
+
+        self.declareProperty(MatrixWorkspaceProperty("VanadiumWorkspace", "", Direction.Input,
+                                                     PropertyMode.Optional),
+                             'Workspace with the Vanadium (correction and calibration) run. '
+                             'Alternatively, when the Vanadium run has been already processed, '
+                             'the properties can be used')
+
+        self.declareProperty(ITableWorkspaceProperty("VanIntegrationWorkspace", "",
+                                                     Direction.Input, PropertyMode.Optional),
+                             'Results of integrating the spectra of a Vanadium run, with one column '
+                             '(integration result) and one row per spectrum. This can be used in '
+                             'combination with OutVanadiumCurveFits from a previous execution and '
+                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
+
+        self.declareProperty(MatrixWorkspaceProperty('VanCurvesWorkspace', '', Direction.Input,
+                                                     PropertyMode.Optional),
+                             doc = 'A workspace2D with the fitting workspaces corresponding to '
+                             'the instrument banks. This workspace has three spectra per bank, as produced '
+                             'by the algorithm Fit. This is meant to be used as an alternative input '
+                             'VanadiumWorkspace for testing and performance reasons. If not given, no '
+                             'workspace is generated.')
 
         import EnggUtils
         self.declareProperty("Bank", '', StringListValidator(EnggUtils.ENGINX_BANKS),
@@ -53,35 +71,32 @@ class EnggCalibrate(PythonAlgorithm):
                              'are added as two columns in a single row. If not given, no table is '
                              'generated.')
 
-        self.declareProperty(ITableWorkspaceProperty("VanadiumIntegWorkspace", "",
-                                                     Direction.Input, PropertyMode.Optional),
-                             'Results of integrating the spectra of a Vanadium run, with one column '
-                             '(integration result) and one row per spectrum. This can be used in '
-                             'combination with OutVanadiumCurveFits from a previous execution and '
-                             'VanadiumWorkspace to provide pre-calculated values for Vanadium correction.')
-
-        self.declareProperty("Difc", 0.0, direction = Direction.Output,\
+        self.declareProperty("Difc", 0.0, direction = Direction.Output,
                              doc = "Calibrated Difc value for the bank or range of pixels/detectors given")
 
-        self.declareProperty("Zero", 0.0, direction = Direction.Output,\
+        self.declareProperty("Zero", 0.0, direction = Direction.Output,
                              doc = "Calibrated Zero value for the bank or range of pixels/detectors given")
 
     def PyExec(self):
 
         import EnggUtils
 
+        # Get peaks in dSpacing from file
+        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
+                                                       self.getProperty('ExpectedPeaks').value)
+
+        prog = Progress(self, start=0, end=1, nreports=2)
+
+        prog.report('Focusing the input workspace')
         focussed_ws = self._focusRun(self.getProperty('InputWorkspace').value,
                                      self.getProperty("VanadiumWorkspace").value,
                                      self.getProperty('Bank').value,
                                      self.getProperty(self.INDICES_PROP_NAME).value)
 
-        # Get peaks in dSpacing from file
-        expectedPeaksD = EnggUtils.readInExpectedPeaks(self.getPropertyValue("ExpectedPeaksFromFile"),
-                                                       self.getProperty('ExpectedPeaks').value)
-
         if len(expectedPeaksD) < 1:
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
+        prog.report('Fitting parameters for the focused run')
         difc, zero = self._fitParams(focussed_ws, expectedPeaksD)
 
         self._produceOutputs(difc, zero)
@@ -124,17 +139,24 @@ class EnggCalibrate(PythonAlgorithm):
         """
         alg = self.createChildAlgorithm('EnggFocus')
         alg.setProperty('InputWorkspace', ws)
-        alg.setProperty('VanadiumWorkspace', vanWS)
+
         alg.setProperty('Bank', bank)
         alg.setProperty(self.INDICES_PROP_NAME, indices)
-
-        integWS = self.getProperty('VanadiumIntegWorkspace').value
-        if integWS:
-            alg.setProperty('VanadiumIntegWorkspace', integWS)
 
         detPos = self.getProperty('DetectorPositions').value
         if detPos:
             alg.setProperty('DetectorPositions', detPos)
+
+        if vanWS:
+            alg.setProperty('VanadiumWorkspace', vanWS)
+
+        integWS = self.getProperty('VanIntegrationWorkspace').value
+        if integWS:
+            alg.setProperty('VanIntegrationWorkspace', integWS)
+
+        curvesWS = self.getProperty('VanCurvesWorkspace').value
+        if curvesWS:
+            alg.setProperty('VanCurvesWorkspace', curvesWS)
 
         alg.execute()
 

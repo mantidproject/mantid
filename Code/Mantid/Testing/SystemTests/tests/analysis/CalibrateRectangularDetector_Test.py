@@ -11,7 +11,7 @@ def _skip_test():
     if "redhat-6" in platform.platform():
         return True
     # run on any other linux
-    return ("Linux" not in platform.platform())
+    return "Linux" not in platform.platform()
 
 class PG3Calibration(stresstesting.MantidStressTest):
     def cleanup(self):
@@ -34,9 +34,11 @@ class PG3Calibration(stresstesting.MantidStressTest):
 
         # run the actual code
         output = CalibrateRectangularDetectors(OutputDirectory = savedir, SaveAs = 'calibration', FilterBadPulses = True,
-                          GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False, Binning = '0.5, -0.0004, 2.5',
-                          MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
-                          CrossCorrelation = False, Instrument = 'PG3', RunNumber = '2538', Extension = '_event.nxs')
+                                               GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
+                                               Binning = '0.5, -0.0004, 2.5',
+                                               MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
+                                               CrossCorrelation = False, Instrument = 'PG3', RunNumber = '2538',
+                                               Extension = '_event.nxs')
 
         if isinstance(output, basestring):
             self.saved_cal_file = output
@@ -45,11 +47,11 @@ class PG3Calibration(stresstesting.MantidStressTest):
 
         # load saved cal file
         LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
-            MakeGroupingWorkspace=False)
+                    MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
         LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_golden.cal", WorkspaceName="PG3_2538_golden",
-            MakeGroupingWorkspace=False)
+                    MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):
@@ -80,9 +82,11 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
 
         # run the actual code
         output = CalibrateRectangularDetectors(OutputDirectory = savedir, SaveAs = 'calibration', FilterBadPulses = True,
-                          GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False, Binning = '0.5, -0.0004, 2.5',
-                          MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
-                          CrossCorrelation = True, Instrument = 'PG3', RunNumber = '2538', Extension = '_event.nxs')
+                                               GroupDetectorsBy = 'All', DiffractionFocusWorkspace = False,
+                                               Binning = '0.5, -0.0004, 2.5',
+                                               MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
+                                               CrossCorrelation = True, Instrument = 'PG3', RunNumber = '2538',
+                                               Extension = '_event.nxs')
 
         if isinstance(output, basestring):
             self.saved_cal_file = output
@@ -91,11 +95,11 @@ class PG3CCCalibration(stresstesting.MantidStressTest):
 
         # load saved cal file
         LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName=self.saved_cal_file, WorkspaceName="PG3_2538",
-            MakeGroupingWorkspace=False)
+                    MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_offsets",MaskedWorkspace="PG3_2538_mask")
         # load golden cal file
         LoadCalFile(InputWorkspace="PG3_2538_calibrated", CalFileName="PG3_goldenCC.cal", WorkspaceName="PG3_2538_golden",
-            MakeGroupingWorkspace=False)
+                    MakeGroupingWorkspace=False)
         MaskDetectors(Workspace="PG3_2538_golden_offsets",MaskedWorkspace="PG3_2538_golden_mask")
 
     def validateMethod(self):

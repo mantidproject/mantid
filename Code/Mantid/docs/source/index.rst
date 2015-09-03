@@ -43,5 +43,6 @@ This is the documentation for Mantid |release|.
 * `Fit Functions <fitfunctions/index.html>`_
 * `API <api/index.html>`_
     - `Python <api/python/index.html>`_
+    - `C++ <http://doxygen.mantidproject.org/>`_ (Doxygen)
 
 
