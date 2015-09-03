@@ -56,7 +56,6 @@ const std::string NotebookBuilder::build(std::string ws_name,
  * If the entry is unrolled this will recurse and output the children of
  * that entry instead. If not, it will just output the algorithm to the stream.
  *
- * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
  */
@@ -84,7 +83,6 @@ void NotebookBuilder::writeHistoryToStream(
  * This moves the iterator forward over each of the child records and writes
  * them to the stream.
  *
- * @param os :: output string stream to append algorithms to.
  * @param iter :: reference to the iterator pointing to the vector of history
  *items
  */
