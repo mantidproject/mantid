@@ -1,6 +1,7 @@
 # pylint: disable=no-init
 
 from mantid.api import FileFinder
+from mantid.simpleapi import *
 from mantid import config
 import os.path
 import stresstesting
@@ -42,7 +43,7 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
         cry_focus.focus_all(expt, "43022")
 
     def validate(self):
-        return 'ResultTOFgrp','hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs'
+        return 'ResultTOFgrp', 'hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs'
 
     def cleanup(self):
         filenames = {"hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
