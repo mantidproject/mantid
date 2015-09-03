@@ -192,8 +192,7 @@ public:
     TS_ASSERT_EQUALS(memberLogs.at(4)->value(), "false");
     TS_ASSERT_EQUALS(memberLogs.at(5)->value(), "ConvFit");
     TS_ASSERT_EQUALS(memberLogs.at(6)->value(), "ReductionWs_");
-    TS_ASSERT_EQUALS(memberLogs.at(7)->value(), "0");
-    TS_ASSERT_EQUALS(memberLogs.at(8)->value(), "1");
+    TS_ASSERT_EQUALS(memberLogs.at(7)->value(), "1");
   }
 
   //------------------------ Private Functions---------------------------
