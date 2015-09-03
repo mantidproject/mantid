@@ -766,7 +766,7 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
             break;
         }
         double x = m_x[i];
-        auto ix0 = std::find_if(ix, xend, [&x](double xx){return x <= xx;});
+        auto ix0 = std::lower_bound(ix, xend, x);
         if ( ix0 == xend ) continue;
         auto j = std::distance( xbegin, ix0 );
         if ( j > 0 )
@@ -908,10 +908,6 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
         }
       }
 
-    }
-    else
-    {
-      std::cerr << "Power spectrum has an unexpected shape: no smoothing" << std::endl;
     }
 
     std::transform( a.begin(), a.end(), wf.begin(), a.begin(), std::multiplies<double>() );
