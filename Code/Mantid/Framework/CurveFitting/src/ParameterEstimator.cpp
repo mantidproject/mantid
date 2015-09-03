@@ -7,6 +7,8 @@
 
 #include "MantidKernel/Logger.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace CurveFitting {
 namespace ParameterEstimator {
@@ -103,7 +105,6 @@ getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
   double left = centre;
   double right = centre;
 
-  const double d2max = der2(centre);
   auto &xp = der2.xPoints();
   auto roots = der2.roughRoots();
   if (!roots.empty()) {
@@ -112,12 +113,12 @@ getPeakLeftRightWidth(double centre, const SimpleChebfun &der2, size_t n = 1) {
       left = roots.back();
       return std::make_pair(left, right);
     }
-    if (std::distance(roots.begin(),iright) < n) {
+    if (static_cast<size_t>(std::distance(roots.begin(),iright)) < n) {
       left = xp.front();
       return std::make_pair(left, right);
     }
     left = *(iright - n);
-    if (std::distance(iright, roots.end()) < n) {
+    if (static_cast<size_t>(std::distance(iright, roots.end())) < n) {
       right = xp.back();
     } else {
       right = *(iright + n - 1);
