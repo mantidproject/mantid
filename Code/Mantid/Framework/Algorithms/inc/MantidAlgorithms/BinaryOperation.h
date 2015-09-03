@@ -139,6 +139,17 @@ protected:
                                       const MantidVec &rhsE, MantidVec &YOut,
                                       MantidVec &EOut) = 0;
 
+  /** Carries out the binary operation on a single spectrum, with another
+   * spectrum as the right-hand operand -- for DX values
+   * @param lhsDx: The vector of lhs x error values
+   * @param rhsDx: The vector of rhs error values, made available if required
+   * @param outWorkspace: the outputworkspace
+   * @param index: the spectrum to perform the operation on
+   */
+  virtual void
+  performBinaryOperationOnDx(const MantidVec &lhsDx, const MantidVec &rhsDx,
+                             API::MatrixWorkspace_sptr &outWorkspace, const int64_t index);
+
   /** Carries out the binary operation when the right hand operand is a single
    *number.
    *
@@ -157,6 +168,17 @@ protected:
                                       const MantidVec &lhsE, const double rhsY,
                                       const double rhsE, MantidVec &YOut,
                                       MantidVec &EOut) = 0;
+
+  /** Carries out the binary operation when the right hand operand is a single
+   * number only for the x error component
+   * @param lhsDx: The vector of lhs x error values
+   * @param rhsDx: The rhs x error value, made available if required
+   * @param outWorkspace: the outputworkspace
+   * @param index: the spectrum to perform the operation on
+   */
+  virtual void
+  performBinaryOperationOnDx(const MantidVec &lhsDx, const double rhsDx,
+                             API::MatrixWorkspace_sptr &outWorkSpace, const int64_t index);
 
   // ===================================== EVENT LIST BINARY OPERATIONS
   // ==========================================

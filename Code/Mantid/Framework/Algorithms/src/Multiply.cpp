@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidKernel/VectorHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -40,6 +41,16 @@ void Multiply::performBinaryOperation(const MantidVec &lhsX,
   }
 }
 
+void Multiply::performBinaryOperationOnDx(const MantidVec &lhsDx,
+                                  const MantidVec &rhsDx,
+                                  API::MatrixWorkspace_sptr &outWorkspace,
+                                  const int64_t index) {
+  auto &DxOut = outWorkspace->dataDx(index);
+  std::transform(lhsDx.begin(), lhsDx.end(), rhsDx.begin(), DxOut.begin(),
+                 VectorHelper::SumGaussError<double>());
+}
+
+
 void Multiply::performBinaryOperation(const MantidVec &lhsX,
                                       const MantidVec &lhsY,
                                       const MantidVec &lhsE, const double rhsY,
@@ -58,6 +69,14 @@ void Multiply::performBinaryOperation(const MantidVec &lhsX,
     // output
     YOut[j] = leftY * rhsY;
   }
+}
+
+void Multiply::performBinaryOperationOnDx(
+    const MantidVec &lhsDx, const double rhsDx,
+    API::MatrixWorkspace_sptr &outWorkspace, const int64_t index) {
+    // Copy the data over from the lhs. The x error should not be affected by a multiplication.
+    auto &DxOut = outWorkspace->dataDx(index);
+    DxOut = lhsDx;
 }
 
 void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,

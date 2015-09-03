@@ -71,7 +71,14 @@ private:
                               const MantidVec &lhsE, const double rhsY,
                               const double rhsE, MantidVec &YOut,
                               MantidVec &EOut);
-
+  void performBinaryOperationOnDx(const MantidVec &lhsDx,
+                                  const MantidVec &rhsDx,
+                                  API::MatrixWorkspace_sptr &outWorkspace,
+                                  const int64_t index);
+  void performBinaryOperationOnDx(const MantidVec &lhsDx,
+                                  const double rhsDx,
+                                  API::MatrixWorkspace_sptr &outWorkspace,
+                                  const int64_t index);
   virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,
                               const API::MatrixWorkspace_const_sptr rhs,
                               API::MatrixWorkspace_sptr out);
