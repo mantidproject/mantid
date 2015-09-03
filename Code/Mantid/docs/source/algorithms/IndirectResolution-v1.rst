@@ -23,6 +23,8 @@ Workflow
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Running IndirectResolution.**
 
 .. testcode:: ExIndirectResolutionSimple
