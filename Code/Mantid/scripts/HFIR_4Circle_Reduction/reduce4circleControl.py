@@ -34,7 +34,7 @@ DebugMode = True
 DET_X_SIZE = 256
 DET_Y_SIZE = 256
 
-
+# TODO - Whether PeakInfo is useful???
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
     """
@@ -167,12 +167,13 @@ class CWSCDReductionControl(object):
         :param scan_number:
         :return:
         """
-        # TODO - Implement parameter over_write
         # Generate the URL for SPICE data file
         file_url = '%sexp%d/Datafiles/HB3A_exp%04d_scan%04d.dat' % (self._myServerURL, exp_number,
                                                                     exp_number, scan_number)
         file_name = '%s_exp%04d_scan%04d.dat' % (self._instrumentName, exp_number, scan_number)
         file_name = os.path.join(self._dataDir, file_name)
+        if os.path.exists(file_name) is True and over_write is False:
+            return True, file_name
 
         # Download
         try:
@@ -201,7 +202,7 @@ class CWSCDReductionControl(object):
         # Form the target file name and path
         xml_file_name = '%s_exp%d_scan%04d_%04d.xml' % (self._instrumentName, exp_no, scan_no, pt_no)
         local_xml_file_name = os.path.join(self._dataDir, xml_file_name)
-        if os.path.exists(local_xml_file_name) is True and overwrite is True:
+        if os.path.exists(local_xml_file_name) is True and overwrite is False:
             return True, local_xml_file_name
 
         # Generate the URL for XML file
@@ -220,7 +221,7 @@ class CWSCDReductionControl(object):
 
         return True, local_xml_file_name
 
-    def download_data_set(self, scan_list):
+    def download_data_set(self, scan_list, overwrite=False):
         """
         Download data set including (1) spice file for a scan and (2) XML files for measurements
         :param scan_list:
@@ -236,7 +237,7 @@ class CWSCDReductionControl(object):
             # Download single spice file for a run
             status, ret_obj = self.download_spice_file(exp_number=self._expNumber,
                                                        scan_number=scan_no,
-                                                       over_write=False)
+                                                       over_write=overwrite)
 
             # Reject if SPICE file cannot download
             if status is False:
@@ -256,7 +257,7 @@ class CWSCDReductionControl(object):
 
             # Download all single-measurement file
             for pt_no in pt_no_list:
-                status, ret_obj = self.download_spice_xml_file(scan_no, pt_no)
+                status, ret_obj = self.download_spice_xml_file(scan_no, pt_no, overwrite=overwrite)
                 if status is False:
                     error_message += '%s\n' % ret_obj
             # END-FOR
@@ -288,46 +289,56 @@ class CWSCDReductionControl(object):
         return True, ""
 
     def find_peak(self, exp_number, scan_number, pt_number):
-        """ Find peak in sample Q space
+        """ Find 1 peak in sample Q space for UB matrix
         :param scan_number:
         :param pt_number:
         :return:tuple as (boolean, object) such as (false, error message) and (true, PeakInfo object)
 
         This part will be redo as 11847_Load_HB3A_Experiment
         """
-        # Download data
-        status_sp, spice_file_name = self.download_spice_file(exp_number, scan_number, over_write=False)
-        status_det, det_file_name = self.download_spice_xml_file(scan_number, pt_number, exp_number, overwrite=False)
+        # TODO - What should be returned!
+        # Check
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
+
+        # Download or make sure data are there
+        status_sp, err_msg_sp = self.download_spice_file(exp_number, scan_number, over_write=False)
+        status_det, err_msg_det = self.download_spice_xml_file(scan_number, pt_number, exp_number,
+                                                               overwrite=False)
         if status_sp is False or status_det is False:
-            err_msg = 'Unable to download SPICE file or detector file. Reason: %s; %s' % (
-                spice_file_name, det_file_name)
-            return False, err_msg
+            return False, 'Unable to access data (1) %s (2) %s' % (err_msg_sp, err_msg_det)
 
-        # Load data
-        status, error_message = self.load_raw_data_to_md(exp_number, scan_number, pt_number,
-                                                         spice_file_name, det_file_name)
-        if status is False:
-            return status, error_message
+        # Collect reduction information: example
+        exp_info_ws_name = get_pt_info_ws_name(exp_number, scan_number)
+        virtual_instrument_info_table_name = get_virtual_instrument_table_name(exp_number, scan_number, pt_number)
+        api.CollectHB3AExperimentInfo(
+            ExperimentNumber=exp_number,
+            ScanList=[scan_number],
+            PtLists=[-1, pt_number],
+            DataDirectory=self._dataDir,
+            GetFileFromServer=False,
+            Detector2ThetaTolerance=0.01,
+            OutputWorkspace=exp_info_ws_name,
+            DetectorTableWorkspace=virtual_instrument_info_table_name)
 
-        # TODO - From this step, refer to script 'load_peaks_md.py'
-        mdwksp = self._getMDWorkspace(runnumber)
+        # Load XML file to MD
+        pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
+        api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name ,
+                                     DetectorTableWorkspace=virtual_instrument_info_table_name,
+                                     OutputWorkspace=pt_md_ws_name,
+                                     SourcePosition=[0, 0, -2],
+                                     SamplePosition=[0, 0, 0],
+                                     PixelDimension=[1, 1, 2, 2, 3, 3, 4, 4],
+                                     Directory=self._dataDir)
 
-        peakws = api.FindPeaksMD(InputWorkspace=mdwksp)
+        # Find peak in Q-space
+        pt_peak_ws_name = get_single_pt_peak_ws_name(exp_number, scan_number, pt_number)
+        api.FindPeaksMD(InputWorkspace=pt_md_ws_name, MaxPeaks=10,
+                        DensityThresholdFactor=0.01, OutputWorkspace=pt_peak_ws_name)
+        peak_ws = AnalysisDataService.retrieve(pt_peak_ws_name)
 
-        # Get number of peaks
-        numpeaks = peakws.rowCount()
-        if numpeaks == 0:
-            return (False, "Unable to find peak in scan %d/pt %d" % (scan_number, pt_number))
-        elif numpeaks >= 2:
-            raise NotImplementedError("It is not implemented for finding more than 1 peak.")
-
-        # Ony case: number of peaks is equal to 1
-        self._storePeakWorkspace(peakws)
-        peakinfo = PeakInfo(peakws, 0)
-
-        # Result shall be popped to table tableWidget_peaksCalUB in GUI
-
-        return True, peakinfo
+        return True, peak_ws
 
     def get_pt_numbers(self, exp_no, scan_no, load_spice_scan=False):
         """ Get Pt numbers (as a list) for a scan in an experiment
@@ -477,69 +488,6 @@ class CWSCDReductionControl(object):
         self._add_raw_workspace(exp_no, scan_no, pt_no, pt_ws)
 
         return True, pt_ws_name
-
-    def load_raw_data_to_md(self, exp_number, scan_number, pt_number,
-                            spice_file_name, det_file_name):
-        """ To rebin and set goniometer
-        :param exp_number:
-        :param scan_number:
-        :param pt_number:
-        :return:
-        """
-        # FIXME - Need a method to standard this
-        # spice_table_name = 'HB3A_%03d_%04d_Raw' % (exp_number, scan_number)
-
-        # Load raw
-        if (exp_number, scan_number) not in self._spiceTableDict:
-            status, err_msg = self.load_spice_scan_file(exp_number, scan_number, spice_file_name)
-            if status is False:
-                return False, err_msg
-
-        if (exp_number, scan_number, pt_number) not in self._expDataDict:
-            status, ret_obj = self.load_spice_xml_file(exp_number, scan_number, pt_number, det_file_name)
-            if status is False:
-                err_msg = ret_obj
-                return False, err_msg
-
-        pt_ws = self._get_raw_workspace(exp_number, scan_number, pt_number)
-        pt_ws_name = pt_ws.name()
-
-        # Rebin and set goniometer
-        api.Rebin(InputWorkspace=pt_ws_name, OutputWorkspace=pt_ws_name,
-                  Params='6,0.01,6.5')
-        api.SetGoniometer(Workspace=pt_ws_name,
-                          Axis0='_omega,0,1,0,-1', Axis1='_chi,0,0,1,-1', Axis2='_phi,0,1,0,-1')
-        self._add_raw_workspace(exp_number, scan_number, pt_number, pt_ws_name)
-
-        return True, ''
-
-    def process_pt_wksp(self, scan_no, pt_no):
-        """
-
-        :param scan_no:
-        :param pt_no:
-        :return:
-        """
-        # Rebin in momentum space: UB matrix only
-        try:
-            ret_obj = api.Rebin(InputWorkspace='s%04d_%04d'%(scan_no, pt_no),
-                                OutputWorkspace='s%04d_%04d'%(scan_no, pt_no),
-                                Params='6,0.01,6.5')
-        except RuntimeError as err:
-            return False, str(err)
-
-        # Set Goniometer
-        try:
-            ret_obj = api.SetGoniometer(Workspace='s%04d_%04d'%(scan_no, pt_no),
-                              Axis0='_omega,0,1,0,-1',
-                              Axis1='_chi,0,0,1,-1',
-                              Axis2='_phi,0,1,0,-1')
-        except RuntimeError as err:
-            return False, str(err)
-
-        processed_ws = ret_obj
-
-        return True, processed_ws
 
     def import_data_to_mantid(self, exp_no, scan_no, pt_no):
         """
@@ -805,5 +753,56 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     :return:
     """
     ws_name = 'HB3A_%03d_%04d_%04d_Raw' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_pt_info_ws_name(exp_number, scan_number):
+    """
+    Information table workspace'name from CollectHB3AInfo
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'ScanPtInfo_Exp%d_Scan%d'  % (exp_number, scan_number)
+
+    return ws_name
+
+
+def get_single_pt_peak_ws_name(exp_number, scan_number, pt_number):
+    """
+    Form the name of the peak workspace
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'Peak_Exp%d_Scan%d_Pt%d' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_single_pt_md_name(exp_number, scan_number, pt_number):
+    """ Form the name of the MDEvnetWorkspace for a single Pt. measurement
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'HB3A_Exp%d_Scan%d_Pt%d_MD' % (exp_number, scan_number, pt_number)
+
+    return ws_name
+
+
+def get_virtual_instrument_table_name(exp_number, scan_number, pt_number):
+    """
+    Generate the name of the table workspace containing the virtual instrument information
+    :param exp_number:
+    :param scan_number:
+    :param pt_number:
+    :return:
+    """
+    ws_name = 'VirtualInstrument_Exp%d_Scan%d_Pt%d_Table' % (exp_number, scan_number, pt_number)
 
     return ws_name

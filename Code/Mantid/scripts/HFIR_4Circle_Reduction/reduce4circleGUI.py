@@ -12,6 +12,7 @@ from PyQt4 import QtCore, QtGui
 
 import reduce4circleControl as r4c
 import guiutility as gutil
+import fourcircle_utility as fcutil
 
 try:
     import mantid
@@ -23,9 +24,6 @@ finally:
     import mantid.kernel
     from mantid.simpleapi import AnalysisDataService
     from mantid.kernel import ConfigService
-
-import fourcircle_utility as fcutil
-
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8

@@ -1,5 +1,5 @@
 from lettuce import *
-from nose.tools import assert_equals
+from nose.tools import assert_equals, assert_true
 
 import sys
 import os
@@ -77,7 +77,7 @@ def downloadData(step):
     wkflow = mydata.getObject()
 
     scanlist = [38, 83, 91]
-    wkflow.download_data_set(scanlist)
+    wkflow.download_data_set(scanlist, overwrite=False)
 
     return
 
@@ -86,33 +86,31 @@ def downloadData(step):
 def addPeak1(step):
     """ Add one peak
     """
+    exp_number = 355
     scanno = 38
     ptno = 11
 
-    # Download data
+    # Find peak
     wkflow = mydata.getObject()
-    if wkflow.existDataFile(scanno, ptno)[0] is False: 
-        wkflow.download_spice_file(scanno)
-        wkflow.download_spice_xml_file(scanno, ptno)
 
+    status, retobj = wkflow.find_peak(exp_number, scanno, ptno)
 
-    status, retobj = wkflow.find_peak(scanno, ptno)
-    if status is True:
-        peakinfo = retobj
-
-    millerindex = (1, 2, 3) 
-    wkflow.addPeak(peakinfo, millerindex)
+    # Check result
+    assert_true(status)
+    peak_ws = retobj
+    assert_equals(peak_ws.rowCount(), 1)
 
     return
 
-
+# TODO - Continue from here!
 @step(u'Then I load another data set, find 1 peak from it and specify its HKL value')
 def addPeak2(step):
     """ Add another peak
     """
+    exp_number = 355
     scanno = 82
     ptno = 11
-    status, retobj = wkflow.find_peak(scanno, ptno)
+    status, retobj = wkflow.find_peak(exp_number, scanno, ptno)
     if status is True:
         peakinfo = retobj
 
