@@ -155,7 +155,7 @@ private:
     TS_ASSERT(cheb.size() > 0);
     TS_ASSERT(cheb.width() > 0.0);
     if (cheb.isGood()) {
-      size_t n = static_cast<size_t>(1.3 * cheb.size());
+      size_t n = static_cast<size_t>(1.3 * static_cast<double>(cheb.size()));
       auto x = cheb.linspace(n);
       for(size_t i = 0; i < n; ++i) {
         //std::cerr << x[i] << ' ' << cheb(x[i]) - fun(x[i]) << std::endl;
