@@ -36,7 +36,6 @@ Usage
   bgType = "Fixed Flat"
   startX = -0.547608
   endX = 0.543217
-  temp = 0
   specMin = 0
   specMax = sample.getNumberHistograms() - 1
   convolve = True
@@ -49,7 +48,7 @@ Usage
     AppendSpectra(InputWorkspace1="__ConvFit_Resolution", InputWorkspace2=resolution.getName(), OutputWorkspace="__ConvFit_Resolution")  
   
   # Run algorithm
-  wsName = ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, Temperature=temp, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
+  wsName = ConvolutionFitSequential(InputWorkspace=sample, Function=function ,BackgroundType=bgType, StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax, Convolve=convolve, Minimizer=minimizer, MaxIterations=maxIt)
 
   # Obtain result
   result_ws = mtd[wsName]
