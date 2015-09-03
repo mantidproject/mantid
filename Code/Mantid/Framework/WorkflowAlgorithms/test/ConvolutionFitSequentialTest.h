@@ -85,14 +85,6 @@ public:
                      std::invalid_argument);
   }
 
-  void test_empty_temperature_is_not_allowed() {
-    Mantid::Algorithms::ConvolutionFitSequential alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT_THROWS(alg.setPropertyValue("Temperature", ""),
-                     std::invalid_argument);
-  }
-
   void test_spectra_min_or_max_number_can_not_be_negative() {
     Mantid::Algorithms::ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -146,7 +138,6 @@ public:
     alg.setProperty("BackgroundType", "Fixed Flat");
     alg.setProperty("StartX", 0.0);
     alg.setProperty("EndX", 3.0);
-    alg.setProperty("Temperature", 0.0);
     alg.setProperty("SpecMin", 0);
     alg.setProperty("SpecMax", 5);
     alg.setProperty("Convolve", true);
