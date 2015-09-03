@@ -17,13 +17,8 @@ using Mantid::Kernel::StatOptions;
 using std::pow;
 
 namespace {
-// Avoid typing static_casts everywhere
-template <typename R, typename T> inline R to(const T val) {
-  return static_cast<R>(val);
-}
 
-// The constants were set as default in the original fortran and their
-// values came from what worked well for POLARIS at ISIS
+// The constants were set as default in the original fortran
 /// Number of muR slices to take
 size_t N_MUR_PTS = 21;
 /// Number of radial points for cylindrical integration
@@ -36,6 +31,11 @@ size_t N_SECOND = 10000;
 size_t N_POLY_ORDER = 4;
 /// 2pi
 double TWOPI = 2.0 * M_PI;
+
+// Avoid typing static_casts everywhere
+template <typename R, typename T> inline R to(const T val) {
+  return static_cast<R>(val);
+}
 
 //-----------------------------------------------------------------------------
 // Utility functions
@@ -74,12 +74,12 @@ namespace Algorithms {
  * Constructor
  * @param params Defines the required parameters for the correction
  */
-MayersSampleCorrection::MayersSampleCorrection(MayersSampleCorrection::Parameters params,
-                                       const std::vector<double> &tof,
-                                       const std::vector<double> &sigIn,
-                                       const std::vector<double> &errIn)
-    : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
-      m_muRrange(0.01, 4.0), m_rng(new MersenneTwister(1)) {
+MayersSampleCorrection::MayersSampleCorrection(
+    MayersSampleCorrection::Parameters params, const std::vector<double> &tof,
+    const std::vector<double> &sigIn, const std::vector<double> &errIn)
+    : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn), 
+      m_histogram(tof.size() == sigIn.size() + 1),
+      m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
   // Sanity check
   assert(sigIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
   assert(errIn.size() == tof.size() || sigIn.size() == tof.size() - 1);
@@ -98,17 +98,12 @@ MayersSampleCorrection::~MayersSampleCorrection() {}
  * @param errOut Error values to correct [In/Out]
  */
 void MayersSampleCorrection::apply(std::vector<double> &sigOut,
-                               std::vector<double> &errOut) {
-  // Local aliases to input values (avoid typing m_)
-  const auto & tof = m_tof;
-  const auto & sigIn = m_sigin;
-  const auto & errIn = m_errin;
-
-  const size_t nsig(sigIn.size());
+                                   std::vector<double> &errOut) {
+  const size_t nsig(m_sigin.size());
   // Sanity check
-  assert(sigOut.size() == sigIn.size());
-  assert(errOut.size() == errIn.size());
-  
+  assert(sigOut.size() == m_sigin.size());
+  assert(errOut.size() == m_errin.size());
+
   // Temporary storage
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
       yabs(N_MUR_PTS + 1, 1.0),  // absorption signals
@@ -116,19 +111,11 @@ void MayersSampleCorrection::apply(std::vector<double> &sigOut,
       yms(N_MUR_PTS + 1, 0.0),   // multiple scattering signals
       wms(N_MUR_PTS + 1, 100.0); // multiple scattering  weights
 
-  // Constants
-  const double vol = M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2);
-  //  Oct 2003 discussion with Jerry Mayers:
-  //  1E-22 factor in formula for RNS was introduced by Jerry to keep
-  //   multiple scattering correction close to 1
-  const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
-
   // Main loop over mur. Limit is nrpts but vectors are nrpts+1. First value set
   // by initial values above
-  const double deltaR = muRmax() - muRmin();
+  const double dmuR = (muRmax() - muRmin()) / to<double>(N_MUR_PTS - 1);
   for (size_t i = 1; i < N_MUR_PTS + 1; ++i) {
-    const double muR =
-        muRmin() + to<double>(i - 1) * deltaR / to<double>(N_MUR_PTS - 1);
+    const double muR = muRmin() + to<double>(i - 1) * dmuR;
     xmur[i] = muR;
 
     auto attenuation = calculateSelfAttenuation(muR);
@@ -149,19 +136,17 @@ void MayersSampleCorrection::apply(std::vector<double> &sigOut,
 
   // corrections to input
   const double muMin(xmur.front()), muMax(xmur.back()),
-      flightPath(m_pars.l1 + m_pars.l2), cylRadCM(m_pars.cylRadius * 1e2);
+      flightPath(m_pars.l1 + m_pars.l2),
+      vol(M_PI * m_pars.cylHeight * pow(m_pars.cylRadius, 2));
+  //  Oct 2003 discussion with Jerry Mayers:
+  //  1E-22 factor in formula for RNS was introduced by Jerry to keep
+  //   multiple scattering correction close to 1
+  const double rns = (vol * 1e6) * (m_pars.rho * 1e24) * 1e-22;
   ChebyshevSeries chebyPoly(N_POLY_ORDER);
 
-  const bool histogram = (tof.size() == nsig + 1);
   for (size_t i = 0; i < nsig; ++i) {
-    const double tusec = histogram ? 0.5*(tof[i] + tof[i+1]) : tof[i];
-    const double tsec = tusec * 1e-6;
-    const double veli = flightPath / tsec;
-    const double sigabs = m_pars.sigmaAbs * 2200.0 / veli;
-    const double sigt = sigabs + m_pars.sigmaSc;
-    // Dimensionless number - rho in (1/Angtroms^3), sigt in barns
-    // (1/Angstrom = 1e8/cm) * (barn = 1e-24cm) --> factors cancel out
-    const double rmu = m_pars.rho * sigt * cylRadCM;
+    const double sigt = sigmaTotal(flightPath, tof(i));
+    const double rmu = muR(sigt);
     // Varies between [-1,+1]
     const double xcap = ((rmu - muMin) - (muMax - rmu)) / (muMax - muMin);
     const double attenfact = chebyPoly(absCfs, xcap);
@@ -171,8 +156,8 @@ void MayersSampleCorrection::apply(std::vector<double> &sigOut,
     const double msfact = (1.0 - beta) / rns;
 
     // apply correction
-    const double yin(sigIn[i]), ein(errIn[i]);
-    sigOut[i] = yin*msfact * attenfact;
+    const double yin(m_sigin[i]), ein(m_errin[i]);
+    sigOut[i] = yin * msfact * attenfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
 }
@@ -224,9 +209,9 @@ double MayersSampleCorrection::calculateSelfAttenuation(const double muR) {
  * @param abs Absorption and self-attenuation factor (\f$A_s\f$ in Mayers paper)
  * @return A pair of (factor,weight)
  */
-std::pair<double, double> MayersSampleCorrection::calculateMS(const size_t irp,
-                                                          const double muR,
-                                                          const double abs) {
+std::pair<double, double>
+MayersSampleCorrection::calculateMS(const size_t irp, const double muR,
+                                    const double abs) {
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
@@ -278,12 +263,73 @@ std::pair<double, double> MayersSampleCorrection::calculateMS(const size_t irp,
 //-----------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------
+/**
+ * Calculate the mu*r range required to cover the given tof range. It requires
+ * that the parameters have been set.
+ * @param tmin Minimum value of TOF in microseconds
+ * @param tmax Maximum value of TOF in microseconds
+ * @return A pair of (min,max) values for muR for the given time of flight
+ */
+std::pair<double, double> MayersSampleCorrection::calculateMuRange() const {
+  const double flightPath(m_pars.l1 + m_pars.l2);
+  const double tmin(tof(0)), tmax(tof(m_sigin.size() - 1));
+  return std::make_pair(muR(flightPath, tmin), muR(flightPath, tmax));
+}
+
+/**
+ * Calculate the value of mu*r for the given flightPath and time of flight
+ * @param flightPath Total distance travelled in metres
+ * @param tof The time of flight in microseconds
+ * @return The mu*r value
+ */
+double MayersSampleCorrection::muR(const double flightPath,
+                                   const double tof) const {
+  return muR(sigmaTotal(flightPath, tof));
+}
+
+/**
+ * Calculate the value of mu*r for the given total scattering cross section
+ * @param sigt The total scattering cross section (barns)
+ * @return The mu*r value
+ */
+double MayersSampleCorrection::muR(const double sigt) const {
+  // Dimensionless number - rho in (1/Angtroms^3), sigt in barns
+  // (1/Angstrom = 1e8/cm) * (barn = 1e-24cm) --> factors cancel out
+  return m_pars.rho * sigt * (m_pars.cylRadius * 1e2);
+}
+
+/**
+ * Calculate the value of the total scattering cross section for the given
+ * flightPath and time of flight
+ * @param flightPath Total distance travelled in metres
+ * @param tof The time of flight in microseconds
+ * @return The total scattering cross section in barns
+ */
+double MayersSampleCorrection::sigmaTotal(const double flightPath,
+                                          const double tof) const {
+  // sigabs = sigabs(@2200(m/s)^-1)*2200 * velocity;
+  const double sigabs = m_pars.sigmaAbs * 2200.0 * tof * 1e-6 / flightPath;
+  return sigabs + m_pars.sigmaSc;
+}
+
+/**
+ * Return the TOF for the given index of the signal value, taking into account
+ * if we have a histogram. Histograms will use the mid point of the bin
+ * as the TOF value. Note that there is no range check for the index.
+ * @param i Index of the signal value
+ * @return The associated TOF value
+ */
+double MayersSampleCorrection::tof(const size_t i) const {
+  return m_histogram ? 0.5 * (m_tof[i] + m_tof[i + 1]) : m_tof[i];
+}
 
 /**
  * (Re-)seed the random number generator
  * @param seed Seed value for the random number generator
  */
-void MayersSampleCorrection::seedRNG(const size_t seed) { m_rng->setSeed(seed); }
+void MayersSampleCorrection::seedRNG(const size_t seed) {
+  m_rng->setSeed(seed);
+}
 
 } // namespace Algorithms
 } // namespace Mantid

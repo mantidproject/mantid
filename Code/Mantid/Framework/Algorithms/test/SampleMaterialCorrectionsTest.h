@@ -51,11 +51,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.38169889, signal.front(), delta);
-    TS_ASSERT_DELTA(0.38255995, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26990187, error.front(), delta);
-    TS_ASSERT_DELTA(0.27051073, error.back(), delta);
+    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
+    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
   }
 
   // ------------------------ Failure cases ----------------------------

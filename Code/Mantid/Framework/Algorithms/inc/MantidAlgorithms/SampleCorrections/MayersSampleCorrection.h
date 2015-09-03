@@ -59,9 +59,9 @@ public:
 
   /// Constructor
   MayersSampleCorrection(MayersSampleCorrection::Parameters params,
-                     const std::vector<double> &tof,
-                     const std::vector<double> &sigIn,
-                     const std::vector<double> &errIn);
+                         const std::vector<double> &tof,
+                         const std::vector<double> &sigIn,
+                         const std::vector<double> &errIn);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrection();
@@ -78,6 +78,12 @@ public:
 private:
   inline double muRmin() const { return m_muRrange.first; }
   inline double muRmax() const { return m_muRrange.second; }
+
+  std::pair<double, double> calculateMuRange() const;
+  double muR(const double flightPath, const double tof) const;
+  double muR(const double sigt) const;
+  double sigmaTotal(const double flightPath, const double tof) const;
+  double tof(const size_t i) const;
   void seedRNG(const size_t seed);
 
   /// A copy of the correction parameters
@@ -88,6 +94,8 @@ private:
   const std::vector<double> &m_sigin;
   /// A reference to the input error values
   const std::vector<double> &m_errin;
+  // True if we have binned TOF values
+  const bool m_histogram;
   /// Limits for the range of mu*r values to cover
   const std::pair<double, double> m_muRrange;
   /// Random number generator

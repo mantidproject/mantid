@@ -696,7 +696,6 @@ set ( TEST_FILES
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxMinTest.h
-	MayersMSCorrectionTest.h
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
@@ -757,6 +756,7 @@ set ( TEST_FILES
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
 	SANSCollimationLengthEstimatorTest.h
+	MayersSampleCorrectionTest.h
 	SassenaFFTTest.h
 	SaveGSASInstrumentFileTest.h
 	ScaleTest.h

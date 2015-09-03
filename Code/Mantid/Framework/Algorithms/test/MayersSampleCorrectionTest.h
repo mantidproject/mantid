@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MAYERSMSCORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_MAYERSMSCORRECTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
+#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -9,14 +9,14 @@
 
 using Mantid::Algorithms::MayersSampleCorrection;
 
-class MayersMSCorrectionTest : public CxxTest::TestSuite {
+class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MayersMSCorrectionTest *createSuite() {
-    return new MayersMSCorrectionTest();
+  static MayersSampleCorrectionTest *createSuite() {
+    return new MayersSampleCorrectionTest();
   }
-  static void destroySuite(MayersMSCorrectionTest *suite) { delete suite; }
+  static void destroySuite(MayersSampleCorrectionTest *suite) { delete suite; }
 
   void test_attentuaton_correction_for_fixed_mur() {
     std::vector<double> dummy(1, 0.0);
@@ -58,11 +58,11 @@ public:
     TS_ASSERT_DELTA(100.0, tof.front(), delta);
     TS_ASSERT_DELTA(199.0, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.38169889, signal.front(), delta);
-    TS_ASSERT_DELTA(0.38255995, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26990187, error.front(), delta);
-    TS_ASSERT_DELTA(0.27051073, error.back(), delta);
+    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
+    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
   }
 
   // clang-format off
@@ -89,11 +89,11 @@ public:
     TS_ASSERT_DELTA(99.5, tof.front(), delta);
     TS_ASSERT_DELTA(199.5, tof.back(), delta);
 
-    TS_ASSERT_DELTA(0.38169889, signal.front(), delta);
-    TS_ASSERT_DELTA(0.38255995, signal.back(), delta);
+    TS_ASSERT_DELTA(0.37497317, signal.front(), delta);
+    TS_ASSERT_DELTA(0.37629282, signal.back(), delta);
 
-    TS_ASSERT_DELTA(0.26990187, error.front(), delta);
-    TS_ASSERT_DELTA(0.27051073, error.back(), delta);
+    TS_ASSERT_DELTA(0.26514607, error.front(), delta);
+    TS_ASSERT_DELTA(0.2660792, error.back(), delta);
   }
 
 private:
@@ -113,4 +113,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_LINDLEYMAYERSELASTICCORRECTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_ */
