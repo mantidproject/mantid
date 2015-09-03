@@ -3,10 +3,12 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/CalculateReflectometry.h"
 #include "MantidDataObjects/FractionalRebinning.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -22,9 +24,51 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+namespace {
+    /** 
+    *  Writes one row to an existing table
+    *  @param vertexes : The table that the rows will be written to
+    *  @param vertex : The vertex from which the data is retrieved for writing i.e lower left, lower right etc.
+    *  @param nHisto : The number of the histogram
+    *  @param nBins : The number of the bin
+    *  @param signal : The Y value of the bin
+    *  @param error : The E value of the bin
+    */
+    void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
+        TableRow row = vertexes->appendRow();
+        row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
+    }
+    /**
+    *  Adds the column headings to a table
+    *  @param vertexes : Table to which the columns are written to.
+    */
+    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes) {
+
+        vertexes->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("int", "OriginIndex");
+        vertexes->addColumn("int", "OriginBin");
+        vertexes->addColumn("double", "CellSignal");
+        vertexes->addColumn("double", "CellError");
+    }
+}
 namespace Mantid {
 namespace DataObjects {
 
+/**
+ * Constructor
+ * @param d0Label : label for the first dimension axis
+ * @param d0ID : unique identifier for the first dimension
+ * @param d0Min : minimum value for the first dimension
+ * @param d0Max : maximum value for the first dimension
+ * @param d0NumBins : number of bins in first dimension
+ * @param d1Label : label for the second dimension axis
+ * @param d1ID : unique identifier for the second dimension
+ * @param d1Min : minimum value for the second dimension
+ * @param d1Max : maximum value for the second dimension
+ * @param d1NumBins : number of bins in the second dimension
+ * @param calc : Pointer to CalculateReflectometry object.
+ */
 ReflectometryTransform::ReflectometryTransform(
     const std::string &d0Label, const std::string &d0ID, double d0Min,
     double d0Max, const std::string &d1Label, const std::string &d1ID,
@@ -38,8 +82,17 @@ ReflectometryTransform::ReflectometryTransform(
         "The supplied minimum values must be less than the maximum values.");
 }
 
+/**
+ * Destructor
+ */
 ReflectometryTransform::~ReflectometryTransform() {}
 
+/**
+ * Creates an MD workspace
+ * @param a : pointer to the first dimension of the MDWorkspace
+  *@param b : pointer to the second dimension of the MDWorkspace
+ * @param boxController : controls how the MDWorkspace will be split
+ */
 boost::shared_ptr<MDEventWorkspace2Lean>
 ReflectometryTransform::createMDWorkspace(
     Mantid::Geometry::IMDDimension_sptr a,
@@ -123,7 +176,12 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
     verticalAxis->setValue(i, qzIncrement);
   }
 }
-
+/**
+ * Performs centre-point rebinning and produces an MDWorkspace
+ * @param inputWs : The workspace you wish to perform centre-point rebinning on.
+ * @param boxController : controls how the MDWorkspace will be split
+ * @returns An MDWorkspace based on centre-point rebinning of the inputWS
+ */
 Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController) const {
@@ -222,10 +280,16 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   }
   return ws;
 }
-
+/**
+ * Execution path for NormalisedPolygon Rebinning
+ * @param inputWs : Workspace to be rebinned
+ * @param vertexes : TableWorkspace for debugging purposes
+ * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
+ */
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
-    MatrixWorkspace_const_sptr inputWS) const {
-
+    MatrixWorkspace_const_sptr inputWS,
+    boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
+        &vertexes, bool dumpVertexes) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
@@ -257,7 +321,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   // Holds the spectrum-detector mapping
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
-
+  // Create a table for the output if we want to debug vertex positioning
+  addColumnHeadings(vertexes);
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {
@@ -271,22 +336,25 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     const double thetaLower = theta - thetaHalfWidth;
     const double thetaUpper = theta + thetaHalfWidth;
 
-    const MantidVec &X = inputWS->readX(0);
-
+    const MantidVec &X = inputWS->readX(i);
+    const MantidVec &Y = inputWS->readY(i);
+    const MantidVec &E = inputWS->readE(i);
     for (size_t j = 0; j < nBins; ++j) {
       const double lamLower = X[j];
       const double lamUpper = X[j + 1];
+      const double signal = Y[j];
+      const double error = E[j];
 
       // fractional rebin
       m_calculator->setThetaFinal(thetaLower);
-      const V2D ll(m_calculator->calculateDim0(lamLower),
+      const V2D ur(m_calculator->calculateDim0(lamLower), // highest qx
                    m_calculator->calculateDim1(lamLower));
       const V2D lr(m_calculator->calculateDim0(lamUpper),
-                   m_calculator->calculateDim1(lamUpper));
+                   m_calculator->calculateDim1(lamUpper)); // lowest qz
       m_calculator->setThetaFinal(thetaUpper);
       const V2D ul(m_calculator->calculateDim0(lamLower),
-                   m_calculator->calculateDim1(lamLower));
-      const V2D ur(m_calculator->calculateDim0(lamUpper),
+                   m_calculator->calculateDim1(lamLower)); // highest qz
+      const V2D ll(m_calculator->calculateDim0(lamUpper), // lowest qx
                    m_calculator->calculateDim1(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
@@ -302,6 +370,13 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
         specNumberMapping.push_back(
             outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
         detIDMapping.push_back(detector->getID());
+      }
+      // Debugging
+      if (dumpVertexes) {
+        writeRow(vertexes, ll, i, j, signal, error);
+        writeRow(vertexes, ul, i, j, signal, error);
+        writeRow(vertexes, ur, i, j, signal, error);
+        writeRow(vertexes, lr, i, j, signal, error);
       }
     }
   }
@@ -335,7 +410,7 @@ void ReflectometryTransform::initAngularCaches(
 
   auto inst = workspace->getInstrument();
   const auto samplePos = inst->getSample()->getPos();
-  const PointingAlong upDir = inst->getReferenceFrame()->pointingUp();
+  const V3D upDirVec = inst->getReferenceFrame()->vecPointingUp();
 
   for (size_t i = 0; i < nhist; ++i) // signed for OpenMP
   {
@@ -356,9 +431,8 @@ void ReflectometryTransform::initAngularCaches(
       continue;
     }
     // We have to convert theta from radians to degrees
-    const double theta = workspace->detectorTwoTheta(det) * 180.0 / M_PI;
+    const double theta = workspace->detectorSignedTwoTheta(det) * 180.0 / M_PI;
     m_theta[i] = theta;
-
     /**
      * Determine width from shape geometry. A group is assumed to contain
      * detectors with the same shape & r, theta value, i.e. a ring mapped-group
@@ -370,7 +444,7 @@ void ReflectometryTransform::initAngularCaches(
       auto dets = group->getDetectors();
       det = dets[0];
     }
-    const auto pos = det->getPos();
+    const auto pos = det->getPos() - samplePos;
     double l2(0.0), t(0.0), p(0.0);
     pos.getSpherical(l2, t, p);
     // Get the shape
@@ -380,9 +454,10 @@ void ReflectometryTransform::initAngularCaches(
     BoundingBox bbox = shape->getBoundingBox();
     auto maxPoint(bbox.maxPoint());
     rot.rotate(maxPoint);
-    double boxWidth = maxPoint[upDir];
+    double halfBoxHeight = maxPoint.scalar_prod(upDirVec);
 
-    m_thetaWidths[i] = std::fabs(2.0 * std::atan(boxWidth / l2)) * 180.0 / M_PI;
+    m_thetaWidths[i] =
+        2.0 * std::fabs(std::atan(halfBoxHeight / l2)) * 180.0 / M_PI;
   }
 }
 }

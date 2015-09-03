@@ -119,9 +119,12 @@ void PDDetermineCharacterizations::init() {
   const std::string defaultMsg =
       " run to use. 0 to use value in table, -1 to not use.";
 
-  declareProperty("BackRun", 0, "Empty container" + defaultMsg);
-  declareProperty("NormRun", 0, "Normalization" + defaultMsg);
-  declareProperty("NormBackRun", 0, "Normalization background" + defaultMsg);
+  declareProperty(new Kernel::ArrayProperty<int32_t>("BackRun", "0"),
+                  "Empty container" + defaultMsg);
+  declareProperty(new Kernel::ArrayProperty<int32_t>("NormRun", "0"),
+                  "Normalization" + defaultMsg);
+  declareProperty(new Kernel::ArrayProperty<int32_t>("NormBackRun", "0"),
+                  "Normalization background" + defaultMsg);
 
   std::vector<std::string> defaultFrequencyNames;
   defaultFrequencyNames.push_back("SpeedRequest1");
@@ -183,11 +186,12 @@ void PDDetermineCharacterizations::getInformationFromTable(
           "bank", m_characterizations->getRef<int>("bank", i));
 
       m_propertyManager->setProperty(
-          "vanadium", m_characterizations->getRef<int>("vanadium", i));
+          "vanadium", m_characterizations->getRef<std::string>("vanadium", i));
       m_propertyManager->setProperty(
-          "container", m_characterizations->getRef<int>("container", i));
+          "container",
+          m_characterizations->getRef<std::string>("container", i));
       m_propertyManager->setProperty(
-          "empty", m_characterizations->getRef<int>("empty", i));
+          "empty", m_characterizations->getRef<std::string>("empty", i));
 
       m_propertyManager->setPropertyValue(
           "d_min", m_characterizations->getRef<std::string>("d_min", i));
@@ -270,15 +274,15 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
   }
   if (!m_propertyManager->existsProperty("vanadium")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<int32_t>("vanadium", 0));
+        new ArrayProperty<int32_t>("vanadium", "0"));
   }
   if (!m_propertyManager->existsProperty("container")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<int32_t>("container", 0));
+        new ArrayProperty<int32_t>("container", "0"));
   }
   if (!m_propertyManager->existsProperty("empty")) {
     m_propertyManager->declareProperty(
-        new PropertyWithValue<int32_t>("empty", 0));
+        new ArrayProperty<int32_t>("empty", "0"));
   }
   if (!m_propertyManager->existsProperty("d_min")) {
     m_propertyManager->declareProperty(
@@ -305,11 +309,16 @@ void PDDetermineCharacterizations::setDefaultsInPropManager() {
  */
 void PDDetermineCharacterizations::overrideRunNumProperty(
     const std::string &inputName, const std::string &propName) {
-  int32_t runnumber = this->getProperty(inputName);
-  if (runnumber != 0) {
-    if (runnumber < 0)
-      runnumber = 0;
-    m_propertyManager->setProperty(propName, runnumber);
+  if (this->isDefault(inputName))
+    return;
+
+  std::vector<int32_t> runnumbers = this->getProperty(inputName);
+  if ((!runnumbers.empty()) && (runnumbers[0] != 0)) {
+    if (runnumbers[0] < 0) {
+      runnumbers.erase(runnumbers.begin(), runnumbers.end());
+      runnumbers.push_back(0);
+    }
+    m_propertyManager->setProperty(propName, runnumbers);
   }
 }
 

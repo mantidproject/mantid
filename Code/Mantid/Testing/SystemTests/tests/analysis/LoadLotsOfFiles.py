@@ -70,14 +70,14 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'MaskLOQData.txt',
                 'DIRECTHAB.983',
                 'loq_batch_mode_reduction.csv',
-                'det_corrected7.nxs', # this file can be loaded by LoadDetectorInfo but I am not sure if generic loader should ever deal with it
+                'det_corrected7.nxs', # this file can be loaded by LoadDetectorInfo; not sure if generic loader should ever deal with it
                 'poldi2013n006903.hdf',
                 'poldi2013n006904.hdf',
                 'poldi2014n019874.hdf',
                 'poldi2014n019881.hdf',
                 'poldi2015n000977.hdf',
                 'USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt'
-                ]
+               ]
 
 EXPECTED_EXT = '.expected'
 
@@ -169,7 +169,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                 cur_index = datafiles.index(fname)
             except ValueError:
                 continue
-            value = datafiles.pop(cur_index)
+            dummy_value = datafiles.pop(cur_index)
             datafiles.insert(insertion_index, fname)
 
         return datafiles
@@ -231,8 +231,8 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
             del wksp
             return False
 
-        id = wksp.id()
-        if id is None or len(id) <= 0:
+        wid = wksp.id()
+        if wid is None or len(wid) <= 0:
             print "Workspace does not have an id"
             del wksp
             return False
@@ -243,7 +243,7 @@ class LoadLotsOfFiles(stresstesting.MantidStressTest):
                 print "Workspace has zero histograms"
                 del wksp
                 return False
-            if "managed" not in id.lower() and wksp.getMemorySize() <= 0:
+            if "managed" not in wid.lower() and wksp.getMemorySize() <= 0:
                 print "Workspace takes no memory: Memory used=" + str(wksp.getMemorySize())
                 del wksp
                 return False

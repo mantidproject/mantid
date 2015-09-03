@@ -53,6 +53,7 @@
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
 #include "MantidQtAPI/GraphOptions.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
 
@@ -364,8 +365,9 @@ public slots:
                 int majorTicks = 5, int minorTicks = 5, int type = 0, bool inverted = false,
                 double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
                 double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0, int minTicksBeforeBreak = 4,
-                int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4, bool breakDecoration = true);
-  void setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType);
+                int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4,
+                bool breakDecoration = true, double nth_power = 2.0);
+  void setScale(QwtPlot::Axis axis, ScaleTransformation::Type scaleType);
   void setScale(QwtPlot::Axis axis, QString logOrLin);
   double axisStep(int axis){return d_user_step[axis];};
   //! Set the axis scale

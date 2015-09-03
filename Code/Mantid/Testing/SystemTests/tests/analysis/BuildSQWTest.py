@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,super-on-old-class
 """
     Defines a system test for converting a set of reduced direct inelastic data
     to a single SQW file.

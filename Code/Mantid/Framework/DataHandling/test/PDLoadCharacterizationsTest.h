@@ -91,9 +91,9 @@ public:
     TS_ASSERT_EQUALS(wksp->Double(0,0), 60.);
     TS_ASSERT_EQUALS(wksp->Double(0,1), 0.900);
     TS_ASSERT_EQUALS(wksp->Int(0,2), 1);
-    TS_ASSERT_EQUALS(wksp->Int(0,3), 15030);
-    TS_ASSERT_EQUALS(wksp->Int(0,4), 15039);
-    TS_ASSERT_EQUALS(wksp->Int(0,5), 0);
+    TS_ASSERT_EQUALS(wksp->String(0,3), "15030");
+    TS_ASSERT_EQUALS(wksp->String(0,4), "15039");
+    TS_ASSERT_EQUALS(wksp->String(0,5), "0");
     TS_ASSERT_EQUALS(wksp->String(0,6), "0.20");
     TS_ASSERT_EQUALS(wksp->String(0,7), "4.12");
     TS_ASSERT_EQUALS(wksp->Double(0,8), 4700.);
@@ -103,9 +103,9 @@ public:
     TS_ASSERT_EQUALS(wksp->Double(5,0), 10.);
     TS_ASSERT_EQUALS(wksp->Double(5,1), 3.198);
     TS_ASSERT_EQUALS(wksp->Int(5,2), 1);
-    TS_ASSERT_EQUALS(wksp->Int(5,3), 15033);
-    TS_ASSERT_EQUALS(wksp->Int(5,4), 15042);
-    TS_ASSERT_EQUALS(wksp->Int(5,5), 0);
+    TS_ASSERT_EQUALS(wksp->String(5,3), "15033");
+    TS_ASSERT_EQUALS(wksp->String(5,4), "15042");
+    TS_ASSERT_EQUALS(wksp->String(5,5), "0");
     TS_ASSERT_EQUALS(wksp->String(5,6), "0.05");
     TS_ASSERT_EQUALS(wksp->String(5,7), "15.40");
     TS_ASSERT_EQUALS(wksp->Double(5,8), 0.);
@@ -174,9 +174,9 @@ public:
     TS_ASSERT_EQUALS(wksp->Double(0,0), 60.);
     TS_ASSERT_EQUALS(wksp->Double(0,1), 1.4);
     TS_ASSERT_EQUALS(wksp->Int(0,2), 1);
-    TS_ASSERT_EQUALS(wksp->Int(0,3), 0);
-    TS_ASSERT_EQUALS(wksp->Int(0,4), 0);
-    TS_ASSERT_EQUALS(wksp->Int(0,5), 0);
+    TS_ASSERT_EQUALS(wksp->String(0,3), "0");
+    TS_ASSERT_EQUALS(wksp->String(0,4), "0");
+    TS_ASSERT_EQUALS(wksp->String(0,5), "0");
     TS_ASSERT_EQUALS(wksp->String(0,6), ".31,.25,.13,.13,.13,.42");
     TS_ASSERT_EQUALS(wksp->String(0,7), "13.66,5.83,3.93,2.09,1.57,31.42");
     TS_ASSERT_EQUALS(wksp->Double(0,8), 300.00);

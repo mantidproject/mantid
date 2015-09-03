@@ -13,10 +13,13 @@ class DOSPhononTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -28,11 +31,14 @@ class DOSPhononCrossSectionScaleTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSCrossSectionScaleTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  ScaleByCrossSection='Incoherent',
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -44,10 +50,13 @@ class DOSCastepTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(CASTEPFile=file_name,
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -60,12 +69,15 @@ class DOSRamanActiveTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSRamanTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         self.tolerance = 1e-3
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -78,11 +90,14 @@ class DOSIRActiveTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSIRTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -95,12 +110,15 @@ class DOSPartialTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSPartialTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
                                  Ions="H,C,O",
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -118,15 +136,18 @@ class DOSPartialSummedContributionsTest(stresstesting.MantidStressTest):
         spec_type = 'DOS'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSTest.nxs'
-        self.tolerance = 1e-10
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
                                  Ions="H,C,O",
                                  SumContributions=True,
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.tolerance = 1e-10
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -139,13 +160,16 @@ class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSPartialCrossSectionScaleTest.nxs'
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
                                  Ions="H,C,O",
                                  ScaleByCrossSection='Incoherent',
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result
 
 #------------------------------------------------------------------------------------
@@ -163,9 +187,8 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStr
         spec_type = 'DOS'
         self.ouput_ws_name = 'squaricn'
         self.ref_result = 'II.DOSCrossSectionScaleTest.nxs'
-        self.tolerance = 1e-10
 
-        SimulatedDensityOfStates(File=file_name,
+        SimulatedDensityOfStates(PHONONFile=file_name,
                                  SpectrumType=spec_type,
                                  Ions="H,C,O",
                                  SumContributions=True,
@@ -173,4 +196,8 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStr
                                  OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
+        self.tolerance = 1e-10
+        self.disableChecking.append('SpectraMap')
+        self.disableChecking.append('Sample')
+
         return self.ouput_ws_name, self.ref_result

@@ -138,20 +138,10 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   vtkDataSet* product = m_presenter->execute(factory, loadingProgressAction, drawingProgressAction);
   
-  //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
-  vtkBox* box = vtkBox::New();
-  box->SetBounds(product->GetBounds());
-  vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
-  clipper->SetInputData(0, product);
-  clipper->SetClipFunction(box);
-  clipper->SetInsideOut(true);
-  clipper->Update();
-  vtkDataSet* clipperOutput = clipper->GetOutput();
-   //--------------------------------------------------------
+  vtkDataSet* output = vtkDataSet::GetData(outInfo);
+  output->ShallowCopy(product);
+  product->Delete();
 
-  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
-  output->ShallowCopy(clipperOutput);
   try
   {
     m_presenter->makeNonOrthogonal(output);
@@ -164,8 +154,6 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   }
   m_presenter->setAxisLabels(output);
 
-  clipper->Delete();
-  
   return 1;
 }
 
@@ -177,8 +165,28 @@ int vtkMDHWNexusReader::RequestInformation(
   if(m_presenter == NULL)
   {
     m_presenter = new MDHWNexusLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWNexusReader>(this), FileName);
-    m_presenter->executeLoadMetadata();
-    setTimeRange(outputVector);
+  }
+
+  if (m_presenter == NULL)
+  {
+    // updater information has been called prematurely. We will reexecute once all attributes are setup.
+    return 1;
+  }
+  if(!m_presenter->canReadFile())
+  {
+    vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
+    return 0;
+  }
+  
+  m_presenter->executeLoadMetadata();
+  setTimeRange(outputVector);
+  MDHWNexusLoadingPresenter *castPresenter =
+      dynamic_cast<MDHWNexusLoadingPresenter *>(m_presenter);
+  if (castPresenter) {
+    std::vector<int> extents = castPresenter->getExtents();
+    outputVector->GetInformationObject(0)
+        ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
+              static_cast<int>(extents.size()));
   }
   return 1;
 }

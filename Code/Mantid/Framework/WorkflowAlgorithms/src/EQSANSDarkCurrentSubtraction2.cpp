@@ -72,6 +72,18 @@ void EQSANSDarkCurrentSubtraction2::exec() {
   Progress progress(this, 0.0, 1.0, 10);
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  
+  // This version of dark current subtraction only works on histograms.
+  // Users need to either make sure the EQSANSLoad algorithm produces
+  // histograms, or turn off the dark current subtraction.
+  EventWorkspace_const_sptr inputEventWS =
+      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (inputEventWS) {
+    g_log.error() << "To use this version of EQSANSDarkCurrentSubtraction, "
+                  << "you need to make sure EQSANSLoad produces histograms. "
+                  << "You can also turn the dark current subtraction off." << std::endl;
+    throw std::invalid_argument("EQSANSDarkCurrentSubtraction-v2 only works on histograms.");
+  }
 
   const std::string fileName = getPropertyValue("Filename");
   MatrixWorkspace_sptr darkWS;

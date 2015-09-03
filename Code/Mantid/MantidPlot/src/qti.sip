@@ -1710,6 +1710,7 @@ public:
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName,
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
+  Table* createDetectorTable(const QString & wsName);
 
   void setIsRunning(bool running);
   bool createScriptInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);

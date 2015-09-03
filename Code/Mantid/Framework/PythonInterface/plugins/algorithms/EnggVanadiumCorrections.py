@@ -13,7 +13,8 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
 
     def category(self):
-        return "Diffraction\\Engineering;PythonAlgorithms"
+        return ("Diffraction\\Engineering;PythonAlgorithms;CorrectionFunctions\\BackgroundCorrections;"
+                "CorrectionFunctions\\EfficiencyCorrections;CorrectionFunctions\\NormalisationCorrections")
 
     def name(self):
         return "EnggVanadiumCorrections"
@@ -32,7 +33,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              "Workspace with the reference Vanadium diffraction data.")
 
         self.declareProperty(ITableWorkspaceProperty("OutIntegrationWorkspace", "", Direction.Output,
-                                                    PropertyMode.Optional),
+                                                     PropertyMode.Optional),
                              'Output integration workspace produced when given an input Vanadium workspace')
 
         self.declareProperty(MatrixWorkspaceProperty("OutCurvesWorkspace", "", Direction.Output,
@@ -40,7 +41,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              'Output curves workspace produced when given an input Vanadium workspace')
 
         self.declareProperty(ITableWorkspaceProperty("IntegrationWorkspace", "", Direction.Input,
-                                                    PropertyMode.Optional),
+                                                     PropertyMode.Optional),
                              "Workspace with the integrated values for every spectra of the reference "
                              "Vanadium diffraction data. One row per spectrum.")
 
@@ -71,6 +72,12 @@ class EnggVanadiumCorrections(PythonAlgorithm):
         integWS = self.getProperty('IntegrationWorkspace').value
         curvesWS = self.getProperty('CurvesWorkspace').value
 
+        preports = 1
+        if ws:
+            preports += 1
+        prog = Progress(self, start=0, end=1, nreports=preports)
+
+        prog.report('Checking availability of vanadium correction features')
         # figure out if we are calculating or re-using pre-calculated corrections
         if vanWS:
             self.log().information("A workspace with reference Vanadium data was passed. Calculating "
@@ -83,6 +90,7 @@ class EnggVanadiumCorrections(PythonAlgorithm):
             raise ValueError('When a VanadiumWorkspace is not passed, both the IntegrationWorkspace and '
                              'the CurvesWorkspace are required inputs. One or both of them were not given')
 
+        prog.report('Applying corrections on the input workspace')
         if ws:
             self._applyVanadiumCorrections(ws, integWS, curvesWS)
             self.setProperty('Workspace', ws)
@@ -103,7 +111,10 @@ class EnggVanadiumCorrections(PythonAlgorithm):
                              "than the number of spectra (rows) in the integration workspace (%d)"%
                              (spectra, integSpectra))
 
+        prog = Progress(self, start=0, end=1, nreports=2)
+        prog.report('Applying sensitivity correction')
         self._applySensitivityCorrection(ws, integWS, curvesWS)
+        prog.report('Applying pixel-by-pixel correction')
         self._applyPixByPixCorrection(ws, curvesWS)
 
     def _applySensitivityCorrection(self, ws, integWS, curvesWS):

@@ -44,7 +44,7 @@ public:
 protected:
   API::ITableWorkspace_sptr determineChunk(const std::string &filename);
   API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
-  void processChunk(API::MatrixWorkspace_sptr wksp);
+  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr wksp);
 
 private:
   void init();

@@ -2,6 +2,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "boost/algorithm/string.hpp"
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -55,7 +57,7 @@ namespace MantidWidgets
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
 
-    // The poco notification will be dispacted from the callers thread but we need to
+    // The poco notification will be dispatched from the callers thread but we need to
     // make sure the updates to the widgets happen on the GUI thread. Dispatching
     // through a Qt signal will make sure it is in the correct thread.
     AlgorithmFactory::Instance().notificationCenter.addObserver(m_updateObserver);
@@ -322,7 +324,7 @@ namespace MantidWidgets
         else
         {
           QString cn = subCats[0];
-          QTreeWidgetItem *catItem = 0;
+          QTreeWidgetItem *catItem = NULL;
           int n = subCats.size();
           for(int j=0;j<n;j++)
           {
@@ -377,13 +379,13 @@ namespace MantidWidgets
     QComboBox::keyPressEvent(e);
   }
 
-   //---------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   /** Update the list of algos in the combo box */
   void FindAlgComboBox::update()
   {
-    typedef std::vector<Algorithm_descriptor> AlgNamesType;
     //include hidden categories in the combo list box
     AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(true);
+    addAliases(names);
 
     // sort by algorithm names only to fill this combobox
     sort(names.begin(),names.end(),Algorithm_descriptor_name_less);
@@ -399,6 +401,38 @@ namespace MantidWidgets
     this->setCurrentIndex(-1);
 
   }
+  
+  /** Adds alias entries to the list of algorithms */
+  void FindAlgComboBox::addAliases(AlgNamesType& algNamesList)
+  {
+    AlgNamesType aliasList;
+    for(AlgNamesType::const_iterator i=algNamesList.begin();i!=algNamesList.end();++i)
+    {
+      //the alias is not empty and is not just different by case from the name
+      if ((!i->alias.empty()) && (!boost::iequals(i->alias,i->name)))
+      {
+        Algorithm_descriptor newAlias(*i);
+        newAlias.name = i->alias + " [" + i->name + "]";
+        aliasList.push_back(newAlias);
+      }
+    }
+    //add them to the list - unsorted
+    algNamesList.reserve( algNamesList.size() + aliasList.size() ); 
+    algNamesList.insert( algNamesList.end(), aliasList.begin(), aliasList.end() );
+  }
+
+  /** if a string is for an alias convert it to the algorithm name */
+  QString FindAlgComboBox::stripAlias(const QString& text) const
+  {
+    QString retVal = text;
+    int foundOpen = text.indexOf("[");
+    if (foundOpen!=-1){
+      int foundClose=text.lastIndexOf("]");
+      if (foundClose!=-1)
+        retVal = text.mid(foundOpen+1, foundClose-foundOpen-1);
+    }
+    return retVal;
+  }
 
   //---------------------------------------------------------------------------
   /** Return the selected algorithm */
@@ -413,6 +447,7 @@ namespace MantidWidgets
       if (matchedIndex > -1)
       {
         typedText = this->itemText(matchedIndex); //text in the combobox at the matched index
+        typedText = stripAlias(typedText);
       }
     }
     //set return values

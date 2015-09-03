@@ -80,7 +80,7 @@
 #include "Folder.h"
 #include "FindDialog.h"
 #include "ScaleDraw.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
 #include "ScriptFileInterpreter.h"
@@ -11803,7 +11803,7 @@ void ApplicationWindow::analyzeCurve(Graph *g, Analysis operation, const QString
       ScaleEngine *se = dynamic_cast<ScaleEngine *>(g->plotWidget()->axisScaleEngine(c->xAxis()));
       if(se)
       {
-        if(se->type() == QwtScaleTransformation::Log10)
+        if(se->type() == ScaleTransformation::Log10)
           fitter = new LogisticFit (this, g);
         else
           fitter = new SigmoidalFit (this, g);
@@ -14048,7 +14048,7 @@ void ApplicationWindow::showmantidplotHelp()
 
 void ApplicationWindow::showBugTracker()
 {
-  QDesktopServices::openUrl(QUrl("mailto:mantid-help@mantidproject.org"));
+  QDesktopServices::openUrl(QUrl("http://forum.mantidproject.org/"));
 }
 
 /*

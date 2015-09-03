@@ -53,6 +53,7 @@ protected:
 private:
   virtual MaskWorkspace *doClone() const { return new MaskWorkspace(*this); }
 
+  virtual IMaskWorkspace *doInterfaceClone() const { return doClone(); };
   /// Clear original incorrect mask
   void clearMask();
 

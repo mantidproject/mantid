@@ -80,7 +80,7 @@ endif ()
 # Force 64-bit compiler as that's all we support
 ###########################################################################
 
-set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Winit-self -Wpointer-arith -Wcast-qual -fno-common  -Wno-deprecated-register")
+set ( CLANG_WARNINGS "-Wall -Wextra -pedantic -Winit-self -Wpointer-arith -Wcast-qual -fno-common  -Wno-deprecated-register -Wno-deprecated-declarations")
 
 set ( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 ${CLANG_WARNINGS}" )
 set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -std=c++0x" )
@@ -131,10 +131,6 @@ if (OSX_VERSION VERSION_LESS 10.9)
 else()
  set(CMAKE_MACOSX_RPATH 1)
  # Assume we are using homebrew for now
- # set Deployment target to 10.8
- set ( CMAKE_OSX_SYSROOT /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk )
- set ( CMAKE_OSX_ARCHITECTURES x86_64 )
- set ( CMAKE_OSX_DEPLOYMENT_TARGET 10.8 )
  # Follow symlinks so cmake copies the file
  # PYQT4_PATH, SITEPACKAGES_PATH, OPENSSL_ROOT_DIR may be defined externally (cmake -D)
  # it would be good do not overwrite them (important for the compilation with macports)
