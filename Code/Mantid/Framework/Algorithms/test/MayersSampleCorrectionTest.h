@@ -19,7 +19,8 @@ public:
   static void destroySuite(MayersSampleCorrectionTest *suite) { delete suite; }
 
   void test_attentuaton_correction_for_fixed_mur() {
-    std::vector<double> dummy(1, 0.0);
+    std::vector<double> dummy(2, 0.0);
+    dummy[1] = 1.0;
     MayersSampleCorrection mscat(createTestParameters(), dummy, dummy, dummy);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
@@ -31,7 +32,8 @@ public:
   void test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor()
   // clang-format on
   {
-    std::vector<double> dummy(1, 0.0);
+    std::vector<double> dummy(2, 0.0);
+    dummy[1] = 1.0;
     MayersSampleCorrection mscat(createTestParameters(), dummy, dummy, dummy);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
@@ -94,6 +96,22 @@ public:
 
     TS_ASSERT_DELTA(0.26514607, error.front(), delta);
     TS_ASSERT_DELTA(0.2660792, error.back(), delta);
+  }
+
+  // ---------------------- Failure tests -----------------------------
+  void test_tof_not_monotonically_increasing_throws_invalid_argument() {
+    const size_t nypts(10);
+    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
+    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
+    double xcur(199.5);
+    std::generate(tof.begin(), tof.end(), [&xcur] {
+      double xold = xcur;
+      xcur -= 1.0;
+      return xold;
+    });
+    TS_ASSERT_THROWS(
+        MayersSampleCorrection(createTestParameters(), tof, signal, error),
+        std::invalid_argument);
   }
 
 private:
