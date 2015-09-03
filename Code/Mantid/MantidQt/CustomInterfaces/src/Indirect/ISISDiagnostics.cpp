@@ -388,7 +388,7 @@ void ISISDiagnostics::doublePropertyChanged(QtProperty *prop, double val) {
     handleNewFile();
   else if (prop == m_properties["SpecMin"]) {
     m_dblManager->setMinimum(m_properties["SpecMax"], val + 1);
-    m_dblManager->setMinimum(m_properties["PreviewSpec"], val + 1);
+    m_dblManager->setMinimum(m_properties["PreviewSpec"], val);
   } else if (prop == m_properties["SpecMax"]) {
     m_dblManager->setMaximum(m_properties["SpecMin"], val - 1);
     m_dblManager->setMaximum(m_properties["PreviewSpec"], val);
