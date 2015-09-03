@@ -126,7 +126,11 @@ class UserProperties(object):
     @property
     def userID(self):
         return self._user_id
+    @userID.setter
+    def userID(self,val):
+        self._user_id = str(val)
 
+#
     def check_input(self,instrument,start_date,cycle,rb_folder):
         """Verify that input is correct"""
         if not instrument in INELASTIC_INSTRUMENTS:
@@ -478,8 +482,23 @@ class MantidConfigDirectInelastic(object):
         else:
             return False
     #
-    def init_user(self,theUser):
-        """Define settings, specific to a user"""
+    def init_user(self,fedIDorUser,theUser=None):
+        """Define settings, specific to a user
+           Supports two interfaces -- old and the new one 
+           where
+           OldInterface: requested two input parameters 
+           fedID   -- users federal id
+           theUser -- class defining all other user property
+           NewInterface: requested single parameter: 
+           theUser -- class defining all user's properties including fedID
+        """
+        if not theUser:
+            if isinstance(fedIDorUser,UserProperties):
+                theUser = fedIDorUser
+            else:
+                raise RuntimeError("self.init_user(val) has to have val of UserProperty type only")
+        else:
+            theUser.userID = fedIDorUser
         #
         # pylint: disable=W0212
         # bad practice but I need all instruments, not the current one

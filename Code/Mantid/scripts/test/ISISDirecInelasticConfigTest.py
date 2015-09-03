@@ -362,6 +362,25 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             if os.path.exists(source):
                 os.remove(source)
 
+    def test_init_user(self):
+        MantidDir = os.path.split(os.path.realpath(__file__))[0]
+        HomeRootDir = self.get_save_dir()
+        mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
+
+        
+        user = UserProperties(self.userID)
+        user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
+
+        mcf.init_user(self.userID,user)
+        user1 = mcf._user
+        self.assertEqual(user,user1)
+
+        mcf.init_user(user)
+        user2 = mcf._user
+        self.assertEqual(user,user2)
+
+        self.assertRaises(RuntimeError,mcf.init_user,'bla_bla_bla')
+
 
 
 
