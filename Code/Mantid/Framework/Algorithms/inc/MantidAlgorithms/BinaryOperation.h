@@ -178,7 +178,7 @@ protected:
    */
   virtual void
   performBinaryOperationOnDx(const MantidVec &lhsDx, const double rhsDx,
-                             API::MatrixWorkspace_sptr &outWorkSpace, const int64_t index);
+                             API::MatrixWorkspace_sptr &outWorkspace, const int64_t index);
 
   // ===================================== EVENT LIST BINARY OPERATIONS
   // ==========================================
