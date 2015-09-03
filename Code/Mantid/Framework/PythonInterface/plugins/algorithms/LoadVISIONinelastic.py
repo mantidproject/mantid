@@ -6,6 +6,7 @@ from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi
 
+
 class LoadVISIONinelastic(PythonAlgorithm):
 
     __forward = "bank1,bank2,bank3,bank4,bank5,bank6,bank7"
@@ -25,10 +26,8 @@ class LoadVISIONinelastic(PythonAlgorithm):
         self.declareProperty("Banks", "all")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
-
     def PyExec(self):
         filename = self.getProperty("Filename").value
-        banks = ""
         banks = self.getProperty("Banks").value
 
         # First lets replace 'All' with 'forward,backward'
@@ -36,11 +35,9 @@ class LoadVISIONinelastic(PythonAlgorithm):
         banks = banks.lower().replace("forward", self.__forward)
         banks = banks.lower().replace("backward", self.__backward)
 
-        self.log.information('Loading data from banks:' + banks.replace("bank", ""))
+        self.getLogger().information('Loading data from banks:' + banks.replace("bank", ""))
 
-        ws = None
         wksp_name = "__tmp"
-
         ws = mantid.simpleapi.LoadEventNexus(Filename=filename, BankName=banks, OutputWorkspace=wksp_name)
 
         self.setProperty("OutputWorkspace", ws)
@@ -48,5 +45,3 @@ class LoadVISIONinelastic(PythonAlgorithm):
 
 # Register
 AlgorithmFactory.subscribe(LoadVISIONinelastic)
-
-
