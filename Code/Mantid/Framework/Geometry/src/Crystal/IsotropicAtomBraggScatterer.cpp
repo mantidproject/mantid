@@ -56,9 +56,7 @@ double IsotropicAtomBraggScatterer::getU() const { return getProperty("U"); }
 /**
  * Calculates the structure factor
  *
- * This method calculates the structure factor, taking into account
- * contributions from all atoms on the stored position
- * _and all symmetrically equivalent_.
+ * This method calculates the structure factor.
  * For details, please refer to the class documentation in the header file.
  *
  * @param hkl :: HKL for which the structure factor should be calculated
@@ -69,16 +67,9 @@ IsotropicAtomBraggScatterer::calculateStructureFactor(const V3D &hkl) const {
   double amplitude =
       getOccupancy() * getDebyeWallerFactor(hkl) * getScatteringLength();
 
-  StructureFactor sum(0.0, 0.0);
+  double phase = 2.0 * M_PI * m_position.scalar_prod(hkl);
 
-  std::vector<V3D> equivalentPositions = getEquivalentPositions();
-  for (auto pos = equivalentPositions.begin(); pos != equivalentPositions.end();
-       ++pos) {
-    double phase = 2.0 * M_PI * (*pos).scalar_prod(hkl);
-    sum += amplitude * StructureFactor(cos(phase), sin(phase));
-  }
-
-  return sum;
+  return amplitude * StructureFactor(cos(phase), sin(phase));
 }
 
 /**

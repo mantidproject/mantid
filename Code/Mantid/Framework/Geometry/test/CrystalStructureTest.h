@@ -68,25 +68,14 @@ public:
 
       // Space group is null
       TS_ASSERT(!structure.spaceGroup());
-      TS_ASSERT_THROWS(std::string sg = structure.getScatterers()->getProperty("SpaceGroup"), Exception::NotFoundError);
-
       TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(m_spaceGroup));
 
       // Not null anymore
-      TS_ASSERT(structure.spaceGroup())
-
-      // No Scatterers present, so space group is not set.
-      TS_ASSERT_THROWS(std::string sg = structure.getScatterers()->getProperty("SpaceGroup"), Exception::NotFoundError);
+      TS_ASSERT(structure.spaceGroup());
 
       // Adding a scatterer should set space group for all scatterers.
       std::vector<BraggScatterer_sptr> scatterer(1, BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
       structure.addScatterers(CompositeBraggScatterer::create(scatterer));
-
-      std::string sg;
-      TS_ASSERT_THROWS_NOTHING(sg = structure.getScatterers()->getPropertyValue("SpaceGroup"));
-
-      // Symbol of test space group is I m -3 m
-      TS_ASSERT_EQUALS(sg, "I m -3 m")
 
       // pointers are different
       TS_ASSERT_DIFFERS(structure.pointGroup(), m_pg);
@@ -314,8 +303,6 @@ public:
       scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0.42,0.42,0.42];U=0.05"));
       siUseStructureFactors.setScatterers(scatterers);
 
-      TS_ASSERT_EQUALS(siUseStructureFactors.getScatterers()->getPropertyValue("SpaceGroup"), "F m -3 m");
-
       hklsStructureFactors = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseStructureFactor);
 
       for(size_t i = 0; i < hklsCentering.size(); ++i) {
@@ -351,8 +338,6 @@ public:
       scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Al;Position=[0,0,0.35217];U=0.005"));
       scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=O;Position=[0.69365,0,0.25];U=0.005"));
       SpaceGroup_const_sptr sgAl2O3 = SpaceGroupFactory::Instance().createSpaceGroup("R -3 c");
-
-      std::cout << sgAl2O3->order() << std::endl;
 
       // O is on the 18e wyckoff position
       std::vector<V3D> positions = sgAl2O3 * V3D(0.69365000,0,0.25000);

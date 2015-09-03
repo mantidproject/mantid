@@ -185,7 +185,8 @@ protected:
   void
   setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  void assignSpaceGroupToScatterers(const SpaceGroup_const_sptr &spaceGroup);
+  void updateScatterersInUnitCell();
+  std::string getV3DasString(const Kernel::V3D &point) const;
   void assignUnitCellToScatterers(const UnitCell &unitCell);
 
   void initializeScatterers();
@@ -206,6 +207,7 @@ protected:
   UnitCell m_cell;
   SpaceGroup_const_sptr m_spaceGroup;
   CompositeBraggScatterer_sptr m_scatterers;
+  CompositeBraggScatterer_sptr m_scatterersInUnitCell;
   PointGroup_sptr m_pointGroup;
   ReflectionCondition_sptr m_centering;
 };

@@ -18,7 +18,6 @@
 #pragma warning(pop)
 #endif
 
-
 namespace Mantid {
 namespace Geometry {
 
@@ -26,16 +25,13 @@ using namespace Kernel;
 
 /// Default constructor.
 BraggScattererInCrystalStructure::BraggScattererInCrystalStructure()
-    : BraggScatterer(), m_position(), m_cell(UnitCell(1, 1, 1, 90, 90, 90)),
-      m_spaceGroup() {}
+    : BraggScatterer(), m_position(), m_cell(UnitCell(1, 1, 1, 90, 90, 90)) {}
 
 /// Sets the position of the scatterer to the supplied coordinates - vector is
-/// wrapped to [0, 1) and equivalent positions are recalculated.
-void
-BraggScattererInCrystalStructure::setPosition(const Kernel::V3D &position) {
+/// wrapped to [0, 1).
+void BraggScattererInCrystalStructure::setPosition(
+    const Kernel::V3D &position) {
   m_position = getWrappedVector(position);
-
-  recalculateEquivalentPositions();
 }
 
 /// Returns the position of the scatterer.
@@ -43,44 +39,17 @@ Kernel::V3D BraggScattererInCrystalStructure::getPosition() const {
   return m_position;
 }
 
-/// Returns all equivalent positions of the scatterer according to the assigned
-/// space group.
-std::vector<Kernel::V3D>
-BraggScattererInCrystalStructure::getEquivalentPositions() const {
-  return m_equivalentPositions;
-}
-
 /// Returns the cell which is currently set.
 UnitCell BraggScattererInCrystalStructure::getCell() const { return m_cell; }
-
-/// Returns the assigned space group.
-SpaceGroup_const_sptr BraggScattererInCrystalStructure::getSpaceGroup() const {
-  return m_spaceGroup;
-}
 
 /// Assigns a unit cell, which may be required for certain calculations.
 void BraggScattererInCrystalStructure::setCell(const UnitCell &cell) {
   m_cell = cell;
 }
 
-/// Sets the space group, which is required for calculation of equivalent
-/// positions.
-void BraggScattererInCrystalStructure::setSpaceGroup(
-    const SpaceGroup_const_sptr &spaceGroup) {
-  m_spaceGroup = spaceGroup;
-
-  recalculateEquivalentPositions();
-}
-
 /// Declares basic properties, should not be overridden by subclasses, use
 /// declareScattererProperties instead.
 void BraggScattererInCrystalStructure::declareProperties() {
-  /* This is required for default behavior. It's not possible to call it
-   * from the constructure, because it's not guaranteed that the space group
-   * factory has been filled at the time the ScattererFactory is filled.
-   */
-  setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("P 1"));
-
   declareProperty(
       new Kernel::PropertyWithValue<std::string>("Position", "[0, 0, 0]"),
       "Position of the scatterer");
@@ -92,14 +61,6 @@ void BraggScattererInCrystalStructure::declareProperties() {
           "UnitCell", "1.0 1.0 1.0 90.0 90.0 90.0", unitCellStringValidator),
       "Unit cell.");
   exposePropertyToComposite("UnitCell");
-
-  IValidator_sptr spaceGroupValidator =
-      boost::make_shared<ListValidator<std::string> >(
-          SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols());
-  declareProperty(new Kernel::PropertyWithValue<std::string>(
-                      "SpaceGroup", "P 1", spaceGroupValidator),
-                  "Space group.");
-  exposePropertyToComposite("SpaceGroup");
 
   declareScattererProperties();
 }
@@ -134,8 +95,7 @@ V3D BraggScattererInCrystalStructure::getPositionFromString(
 /**
  * Additional property processing
  *
- * Takes care of handling new property values, for example for construction of a
- * space group from string and so on.
+ * Takes care of handling new property values.
  *
  * Please note that derived classes should not re-implement this method, as
  * the processing for the base properties is absolutely necessary. Instead, all
@@ -148,26 +108,11 @@ void BraggScattererInCrystalStructure::afterPropertySet(
     std::string position = getProperty("Position");
 
     setPosition(getPositionFromString(position));
-  } else if (propertyName == "SpaceGroup") {
-    setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup(
-        getProperty("SpaceGroup")));
   } else if (propertyName == "UnitCell") {
     setCell(strToUnitCell(getProperty("UnitCell")));
   }
 
   afterScattererPropertySet(propertyName);
-}
-
-/// Uses the stored space group to calculate all equivalent positions or if
-/// present.
-void BraggScattererInCrystalStructure::recalculateEquivalentPositions() {
-  m_equivalentPositions.clear();
-
-  if (m_spaceGroup) {
-    m_equivalentPositions = m_spaceGroup->getEquivalentPositions(m_position);
-  } else {
-    m_equivalentPositions.push_back(m_position);
-  }
 }
 
 /// Return a clone of the validator.

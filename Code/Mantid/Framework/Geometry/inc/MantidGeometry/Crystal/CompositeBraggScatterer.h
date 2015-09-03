@@ -73,7 +73,7 @@ public:
   std::string name() const { return "CompositeBraggScatterer"; }
   BraggScatterer_sptr clone() const;
 
-  void addScatterer(const BraggScatterer_sptr &scatterer);
+  virtual void addScatterer(const BraggScatterer_sptr &scatterer);
   size_t nScatterers() const;
   BraggScatterer_sptr getScatterer(size_t i) const;
   void removeScatterer(size_t i);

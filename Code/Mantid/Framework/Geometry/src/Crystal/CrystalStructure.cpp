@@ -4,6 +4,10 @@
 
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
+
+#include <iostream>
+#include <iomanip>
 
 namespace Mantid {
 namespace Geometry {
@@ -40,6 +44,7 @@ void CrystalStructure::setCell(const UnitCell &cell) {
   m_cell = cell;
 
   assignUnitCellToScatterers(m_cell);
+  updateScatterersInUnitCell();
 }
 
 /// Returns the space group of the crystal structure
@@ -65,7 +70,8 @@ void CrystalStructure::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
 
   setPointGroupFromSpaceGroup(m_spaceGroup);
   setReflectionConditionFromSpaceGroup(m_spaceGroup);
-  assignSpaceGroupToScatterers(m_spaceGroup);
+
+  updateScatterersInUnitCell();
 }
 
 /// Assigns the point group or throws std::runtime_error if the space group has
@@ -134,7 +140,8 @@ void CrystalStructure::addScatterers(
   }
 
   assignUnitCellToScatterers(m_cell);
-  assignSpaceGroupToScatterers(m_spaceGroup);
+
+  updateScatterersInUnitCell();
 }
 
 /// Returns a vector with all allowed HKLs in the given d-range
@@ -249,8 +256,7 @@ void CrystalStructure::setPointGroupFromSpaceGroup(
       m_pointGroup =
           PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
               spaceGroup);
-    }
-    catch (...) {
+    } catch (...) {
       // do nothing - point group will be null
     }
   }
@@ -265,8 +271,8 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
   // First letter is centering
   std::string centering = spaceGroup->hmSymbol().substr(0, 1);
 
-  if(centering == "R") {
-      centering = "Robv";
+  if (centering == "R") {
+    centering = "Robv";
   }
 
   std::vector<ReflectionCondition_sptr> reflectionConditions =
@@ -280,17 +286,43 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
   }
 }
 
-/// Assigns the space group to all scatterers
-void CrystalStructure::assignSpaceGroupToScatterers(
-    const SpaceGroup_const_sptr &spaceGroup) {
-  if (!m_scatterers) {
-    throw std::runtime_error(
-        "Scatterer collection is a null pointer. Aborting.");
-  }
+/// Generates all equivalent positions and creates the corresponding scatterers.
+void CrystalStructure::updateScatterersInUnitCell() {
+  if (m_spaceGroup) {
+    m_scatterersInUnitCell->removeAllScatterers();
 
-  if (m_spaceGroup && m_scatterers->existsProperty("SpaceGroup")) {
-    m_scatterers->setProperty("SpaceGroup", spaceGroup->hmSymbol());
+    for (size_t i = 0; i < m_scatterers->nScatterers(); ++i) {
+      BraggScattererInCrystalStructure_sptr current =
+          boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
+              m_scatterers->getScatterer(i));
+
+      if (current) {
+        std::vector<V3D> positions =
+            m_spaceGroup->getEquivalentPositions(current->getPosition());
+
+        for (auto pos = positions.begin(); pos != positions.end(); ++pos) {
+          BraggScatterer_sptr clone = current->clone();
+          clone->setProperty("Position", getV3DasString(*pos));
+
+          m_scatterersInUnitCell->addScatterer(clone);
+        }
+      }
+    }
+
+  } else {
+    m_scatterersInUnitCell =
+        boost::dynamic_pointer_cast<CompositeBraggScatterer>(
+            m_scatterers->clone());
   }
+}
+
+/// Return V3D as string without losing precision.
+std::string CrystalStructure::getV3DasString(const V3D &point) const {
+  std::ostringstream posStream;
+  posStream << std::setprecision(17);
+  posStream << point;
+
+  return posStream.str();
 }
 
 /// Assigns the cell to all scatterers
@@ -309,6 +341,10 @@ void CrystalStructure::assignUnitCellToScatterers(const UnitCell &unitCell) {
 void CrystalStructure::initializeScatterers() {
   if (!m_scatterers) {
     m_scatterers = CompositeBraggScatterer::create();
+  }
+
+  if (!m_scatterersInUnitCell) {
+    m_scatterersInUnitCell = CompositeBraggScatterer::create();
   }
 }
 
@@ -347,7 +383,7 @@ bool CrystalStructure::isAllowed(
     const V3D &hkl, CrystalStructure::ReflectionConditionMethod method) const {
   switch (method) {
   case UseStructureFactor:
-    return getFSquared(hkl) > 1e-9;
+    return getFSquared(hkl) > 1e-6;
   default:
     return m_centering->isAllowed(static_cast<int>(hkl.X()),
                                   static_cast<int>(hkl.Y()),
@@ -362,7 +398,7 @@ double CrystalStructure::getDValue(const V3D &hkl) const {
 
 /// Returns |F|^2 for the given HKL.
 double CrystalStructure::getFSquared(const V3D &hkl) const {
-  return m_scatterers->calculateFSquared(hkl);
+  return m_scatterersInUnitCell->calculateFSquared(hkl);
 }
 
 } // namespace Geometry
