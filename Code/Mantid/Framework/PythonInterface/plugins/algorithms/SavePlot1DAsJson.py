@@ -1,7 +1,6 @@
 #pylint: disable=no-init,unused-variable
 from mantid.api import *
 from mantid.kernel import *
-import os
 
 
 # See ticket #10234
