@@ -68,7 +68,7 @@ public:
     std::string result[] = {
       "{",
       "   \"metadata\" : {",
-      "      \"name\" : \"example\"",
+      "      \"name\" : \"Mantid Notebook\"",
       "   },",
       "   \"nbformat\" : 3,",
       "   \"nbformat_minor\" : 0,",
