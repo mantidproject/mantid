@@ -22,9 +22,7 @@ public:
   static void destroySuite( CrystalStructureTest *suite ) { delete suite; }
 
   CrystalStructureTest() :
-      m_CsCl(4.126, 4.126, 4.126),
-      m_pg(PointGroupFactory::Instance().createPointGroup("m-3m")),
-      m_centering(new ReflectionConditionPrimitive)
+      m_CsCl(4.126, 4.126, 4.126)
   {
       m_spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("I m -3 m");
 
@@ -32,26 +30,6 @@ public:
       m_scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
   }
 
-
-  void testConstructionDefault()
-  {
-      // Only cell is really required, for the others there's a default value
-      CrystalStructure structure(m_CsCl);
-
-      TS_ASSERT_EQUALS(structure.cell().a(), m_CsCl.a());
-      //TS_ASSERT(boost::dynamic_pointer_cast<PointGroupLaue1>(structure.pointGroup()));
-      TS_ASSERT(boost::dynamic_pointer_cast<ReflectionConditionPrimitive>(structure.centering()));
-      TS_ASSERT_THROWS_NOTHING(structure.crystalSystem());
-      TS_ASSERT_EQUALS(structure.crystalSystem(), PointGroup::Triclinic);
-
-      CrystalStructure structurePg(m_CsCl, m_pg);
-      TS_ASSERT_EQUALS(structurePg.pointGroup(), m_pg);
-      TS_ASSERT(boost::dynamic_pointer_cast<ReflectionConditionPrimitive>(structurePg.centering()));
-      TS_ASSERT_EQUALS(structurePg.crystalSystem(), m_pg->crystalSystem());
-
-      CrystalStructure structureAll(m_CsCl, m_pg, m_centering);
-      TS_ASSERT_EQUALS(structureAll.centering(), m_centering);
-  }
 
   void testConstructionSpaceGroup()
   {
@@ -64,34 +42,20 @@ public:
 
   void testSetSpaceGroup()
   {
-      CrystalStructure structure(m_CsCl, m_pg, m_centering);
+      CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
       // Space group is null
       TS_ASSERT(!structure.spaceGroup());
-      TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(m_spaceGroup));
+      TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("I a -3 d")));
 
       // Not null anymore
       TS_ASSERT(structure.spaceGroup());
-
-      // Adding a scatterer should set space group for all scatterers.
-      std::vector<BraggScatterer_sptr> scatterer(1, BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0]"));
-      structure.addScatterers(CompositeBraggScatterer::create(scatterer));
-
-      // pointers are different
-      TS_ASSERT_DIFFERS(structure.pointGroup(), m_pg);
-      // symbol is the same
-      TS_ASSERT_EQUALS(structure.pointGroup()->getSymbol(), "m-3m");
-
-      // pointers are different
-      TS_ASSERT_DIFFERS(structure.centering(), m_centering);
-      // symbols as well
-      TS_ASSERT_DIFFERS(structure.centering()->getSymbol(), m_centering->getSymbol());
-      TS_ASSERT_EQUALS(structure.centering()->getSymbol(), "I");
+      TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(), "I a -3 d")
   }
 
   void testCellGetSet()
   {
-      CrystalStructure structure(m_CsCl);
+      CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
       TS_ASSERT_EQUALS(structure.cell().a(), m_CsCl.a());
 
       UnitCell Si(5.43, 5.43, 5.43);
@@ -100,98 +64,9 @@ public:
       TS_ASSERT_EQUALS(structure.cell().a(), Si.a());
   }
 
-  void testPointGroupGetSet()  {
-      CrystalStructure structure(m_CsCl, m_pg);
-      TS_ASSERT_EQUALS(structure.pointGroup(), m_pg);
-      TS_ASSERT_EQUALS(structure.crystalSystem(), m_pg->crystalSystem());
-
-      //PointGroup_sptr newPg = boost::make_shared<PointGroupLaue3>();
-      //structure.setPointGroup(newPg);
-
-      //TS_ASSERT_EQUALS(structure.pointGroup(), newPg);
-      //TS_ASSERT_EQUALS(structure.crystalSystem(), newPg->crystalSystem());
-
-      // setting a space group makes setting a point group impossible
-      structure.setSpaceGroup(m_spaceGroup);
-      //TS_ASSERT_DIFFERS(structure.crystalSystem(), newPg->crystalSystem());
-
-      //TS_ASSERT_THROWS(structure.setPointGroup(newPg), std::runtime_error);
-  }
-
-  void testCenteringGetSet()
-  {
-      CrystalStructure structure(m_CsCl, m_pg, m_centering);
-      TS_ASSERT_EQUALS(structure.centering(), m_centering);
-
-      ReflectionCondition_sptr newCentering = boost::make_shared<ReflectionConditionAFaceCentred>();
-      structure.setCentering(newCentering);
-
-      TS_ASSERT_EQUALS(structure.centering(), newCentering);
-
-      // setting a space group makes setting a centering impossible
-      structure.setSpaceGroup(m_spaceGroup);
-      TS_ASSERT_DIFFERS(structure.centering()->getSymbol(), newCentering->getSymbol());
-
-      TS_ASSERT_THROWS(structure.setCentering(newCentering), std::runtime_error);
-  }
-
-  void testSufficientStateForHKLGeneration()
-  {
-      TestableCrystalStructure structure;
-
-      // Default is "UseCentering"
-      ReflectionCondition_sptr nullCentering;
-      structure.setCentering(nullCentering);
-      TS_ASSERT(!structure.isStateSufficientForHKLGeneration(CrystalStructure::UseCentering));
-      structure.setCentering(m_centering);
-      TS_ASSERT(structure.isStateSufficientForHKLGeneration(CrystalStructure::UseCentering));
-
-      // Structure factor requires at least one scatterer - otherwise all hkl are "forbidden"
-      TS_ASSERT(!structure.isStateSufficientForHKLGeneration(CrystalStructure::UseStructureFactor));
-      structure.addScatterers(m_scatterers);
-      TS_ASSERT(structure.isStateSufficientForHKLGeneration(CrystalStructure::UseStructureFactor));
-
-      // centering does not matter for this
-      structure.setCentering(nullCentering);
-      TS_ASSERT(structure.isStateSufficientForHKLGeneration(CrystalStructure::UseStructureFactor));
-
-  }
-
-  void testSufficientStateForUniqueHKLGeneration()
-  {
-      TestableCrystalStructure structure;
-
-      // Default is "UseCentering"
-      ReflectionCondition_sptr nullCentering;
-      PointGroup_sptr nullPointGroup;
-
-      structure.setCentering(nullCentering);
-      structure.setPointGroup(nullPointGroup);
-
-      // Does not work with null point group
-      TS_ASSERT(!structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseCentering));
-
-      // not even when centering is set
-      structure.setCentering(m_centering);
-      TS_ASSERT(!structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseCentering));
-
-      // now it's okay
-      structure.setPointGroup(m_pg);
-      TS_ASSERT(structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseCentering));
-
-      // Structure factor requires at least one scatterer - otherwise all hkl are "forbidden"
-      TS_ASSERT(!structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseStructureFactor));
-      structure.addScatterers(m_scatterers);
-      TS_ASSERT(structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseStructureFactor));
-
-      // point group is required anyway
-      structure.setPointGroup(nullPointGroup);
-      TS_ASSERT(!structure.isStateSufficientForUniqueHKLGeneration(CrystalStructure::UseStructureFactor));
-   }
-
   void testThrowIfRangeUnacceptable()
   {
-      TestableCrystalStructure structure;
+      TestableCrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
       TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(0.0, 1.0), std::invalid_argument);
       TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(-10.0, 1.0), std::invalid_argument);
@@ -199,7 +74,7 @@ public:
       TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(1.0, -1.0), std::invalid_argument);
       TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(2.0, 1.0), std::invalid_argument);
 
-      TS_ASSERT_THROWS_NOTHING(structure.throwIfRangeUnacceptable(1.0, 2.0))
+      TS_ASSERT_THROWS_NOTHING(structure.throwIfRangeUnacceptable(1.0, 2.0));
   }
 
   void testGetUniqueHKLsHappyCase()
@@ -207,7 +82,7 @@ public:
       double dMin = 0.55;
       double dMax = 4.0;
 
-      CrystalStructure structure(m_CsCl, m_pg, m_centering);
+      CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
       TS_ASSERT_THROWS_NOTHING(structure.getUniqueHKLs(dMin, dMax));
 
@@ -233,7 +108,7 @@ public:
       double dMax = 4.0;
 
       // make a structure with P-1
-      CrystalStructure structure(m_CsCl, PointGroupFactory::Instance().createPointGroup("-1"));
+      CrystalStructure structure(m_CsCl, SpaceGroupFactory::Instance().createSpaceGroup("P -1"), m_scatterers);
 
       std::vector<V3D> unique = structure.getUniqueHKLs(dMin, dMax);
       std::vector<V3D> peaks = structure.getHKLs(dMin, dMax);
@@ -250,7 +125,7 @@ public:
       hkls.push_back(V3D(0, 0, 1));
 
       UnitCell ortho(2.0, 3.0, 5.0);
-      CrystalStructure structure(ortho);
+      CrystalStructure structure(ortho, SpaceGroupFactory::Instance().createSpaceGroup("P -1"), m_scatterers);
 
       std::vector<double> dValues = structure.getDValues(hkls);
 
@@ -267,18 +142,17 @@ public:
        */
 
       UnitCell cellSi(5.43, 5.43, 5.43);
-      PointGroup_sptr pgSi = PointGroupFactory::Instance().createPointGroup("m-3m");
-      ReflectionCondition_sptr centeringSi= boost::make_shared<ReflectionConditionAllFaceCentred>();
-
-      // Crystal structure with cell, point group, centering
-      CrystalStructure siUseCentering(cellSi, pgSi, centeringSi);
-      std::vector<V3D> hklsCentering = siUseCentering.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseCentering);
 
       // Crystal structure with cell, space group, scatterers - must be a space group without glides/screws.
       SpaceGroup_const_sptr sgSi = SpaceGroupFactory::Instance().createSpaceGroup("F m -3 m");
       // With an atom at (x, x, x) there are no extra conditions.
       CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
       scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Si;Position=[0.3,0.3,0.3];U=0.05"));
+
+      // Crystal structure with cell, point group, centering
+      CrystalStructure siUseCentering(cellSi, sgSi, scatterers);
+      std::vector<V3D> hklsCentering = siUseCentering.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseCentering);
+
 
       CrystalStructure siUseStructureFactors(cellSi, sgSi, scatterers);
       std::vector<V3D> hklsStructureFactors = siUseStructureFactors.getUniqueHKLs(0.6, 10.0, CrystalStructure::UseStructureFactor);
@@ -352,8 +226,6 @@ public:
 
 private:
     UnitCell m_CsCl;
-    PointGroup_sptr m_pg;
-    ReflectionCondition_sptr m_centering;
 
     SpaceGroup_const_sptr m_spaceGroup;
     CompositeBraggScatterer_sptr m_scatterers;
@@ -361,9 +233,12 @@ private:
     class TestableCrystalStructure : public CrystalStructure
     {
         friend class CrystalStructureTest;
+
     public:
-        TestableCrystalStructure() : CrystalStructure(UnitCell()) { }
-        ~TestableCrystalStructure() { }
+        TestableCrystalStructure(const UnitCell &unitCell,
+                                 const SpaceGroup_const_sptr &spaceGroup,
+                                 const CompositeBraggScatterer_sptr &scatterers) :
+            CrystalStructure(unitCell, spaceGroup, scatterers) {}
     };
 };
 

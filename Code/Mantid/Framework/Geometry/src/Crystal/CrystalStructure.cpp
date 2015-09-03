@@ -14,17 +14,6 @@ namespace Geometry {
 
 using namespace Mantid::Kernel;
 
-/// PointGroup/Centering based constructor
-CrystalStructure::CrystalStructure(const UnitCell &unitCell,
-                                   const PointGroup_sptr &pointGroup,
-                                   const ReflectionCondition_sptr &centering) {
-  initializeScatterers();
-
-  setCell(unitCell);
-  setPointGroup(pointGroup);
-  setCentering(centering);
-}
-
 /// SpaceGroup/Scatterers constructor
 CrystalStructure::CrystalStructure(
     const UnitCell &unitCell, const SpaceGroup_const_sptr &spaceGroup,
@@ -55,63 +44,13 @@ SpaceGroup_const_sptr CrystalStructure::spaceGroup() const {
 /**
  * Assigns a new space group to the crystal structure
  *
- * Setting a new space group on a crystal structure causes several effects:
- *  - The space group is propagated to the scatterers
- *  - A new point group is assigned
- *  - A change in point group can also mean change in crystal system
- *  - A new reflection condition object is assigned
- * After this operation, the crystal structure object may be in a state
- * where it does not have a valid point group or centering.
- *
  * @param spaceGroup :: New space group of the crystal structure
  */
 void CrystalStructure::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
   m_spaceGroup = spaceGroup;
 
-  setPointGroupFromSpaceGroup(m_spaceGroup);
   setReflectionConditionFromSpaceGroup(m_spaceGroup);
-
   updateScatterersInUnitCell();
-}
-
-/// Assigns the point group or throws std::runtime_error if the space group has
-/// been set before.
-void CrystalStructure::setPointGroup(const PointGroup_sptr &pointGroup) {
-  if (m_spaceGroup) {
-    throw std::runtime_error(
-        "Cannot set point group if a space group has been set.");
-  }
-
-  m_pointGroup = pointGroup;
-}
-
-/// Returns the structure's point group
-PointGroup_sptr CrystalStructure::pointGroup() const { return m_pointGroup; }
-
-/// Convenience method to get the PointGroup's crystal system
-PointGroup::CrystalSystem CrystalStructure::crystalSystem() const {
-  if (!m_pointGroup) {
-    throw std::invalid_argument(
-        "Cannot determine crystal system from null-PointGroup.");
-  }
-
-  return m_pointGroup->crystalSystem();
-}
-
-/// Sets the centering or throws std::runtime_error if a space group has been
-/// assigned to the crystal structure
-void CrystalStructure::setCentering(const ReflectionCondition_sptr &centering) {
-  if (m_spaceGroup) {
-    throw std::runtime_error(
-        "Cannot set centering if a space group has been set.");
-  }
-
-  m_centering = centering;
-}
-
-/// Returns the centering of the structure
-ReflectionCondition_sptr CrystalStructure::centering() const {
-  return m_centering;
 }
 
 /// Return a clone of the internal CompositeBraggScatterer instance.
@@ -191,7 +130,7 @@ CrystalStructure::getHKLs(double dMin, double dMax,
 std::vector<Kernel::V3D>
 CrystalStructure::getUniqueHKLs(double dMin, double dMax,
                                 ReflectionConditionMethod method) const {
-  if (!isStateSufficientForUniqueHKLGeneration(method)) {
+  if (!isStateSufficientForHKLGeneration(method)) {
     throw std::invalid_argument("Insufficient data for creation of a "
                                 "reflection list, need at least centering, "
                                 "unit cell and point group.");
@@ -205,6 +144,8 @@ CrystalStructure::getUniqueHKLs(double dMin, double dMax,
   int kMax = static_cast<int>(m_cell.b() / dMin);
   int lMax = static_cast<int>(m_cell.c() / dMin);
 
+  PointGroup_sptr pointGroup = m_spaceGroup->getPointGroup();
+
   for (int h = -hMax; h <= hMax; ++h) {
     for (int k = -kMax; k <= kMax; ++k) {
       for (int l = -lMax; l <= lMax; ++l) {
@@ -212,7 +153,7 @@ CrystalStructure::getUniqueHKLs(double dMin, double dMax,
         double d = getDValue(hkl);
 
         if (d <= dMax && d >= dMin && isAllowed(hkl, method)) {
-          uniqueHKLs.insert(m_pointGroup->getReflectionFamily(hkl));
+          uniqueHKLs.insert(pointGroup->getReflectionFamily(hkl));
         }
       }
     }
@@ -243,23 +184,6 @@ CrystalStructure::getFSquared(const std::vector<V3D> &hkls) const {
   }
 
   return fSquared;
-}
-
-/// Tries to set the point group from the space group symbol or removes the
-/// current point group if creation fails.
-void CrystalStructure::setPointGroupFromSpaceGroup(
-    const SpaceGroup_const_sptr &spaceGroup) {
-  m_pointGroup.reset();
-
-  if (spaceGroup) {
-    try {
-      m_pointGroup =
-          PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
-              spaceGroup);
-    } catch (...) {
-      // do nothing - point group will be null
-    }
-  }
 }
 
 /// Tries to set the centering from the space group symbol or removes the
@@ -357,13 +281,6 @@ bool CrystalStructure::isStateSufficientForHKLGeneration(
   default:
     return static_cast<bool>(m_centering);
   }
-}
-
-/// Check that the internal state is sufficient for generating a list of
-/// symmetry independent HKLs
-bool CrystalStructure::isStateSufficientForUniqueHKLGeneration(
-    CrystalStructure::ReflectionConditionMethod method) const {
-  return isStateSufficientForHKLGeneration(method) && m_pointGroup;
 }
 
 /// Throws std::invalid_argument if dMin <= 0 or dMax >= dMin

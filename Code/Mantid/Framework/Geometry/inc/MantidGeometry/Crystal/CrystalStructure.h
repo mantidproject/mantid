@@ -140,13 +140,6 @@ class DLLExport CrystalStructure {
 public:
   enum ReflectionConditionMethod { UseCentering, UseStructureFactor };
 
-  CrystalStructure(
-      const UnitCell &unitCell,
-      const PointGroup_sptr &pointGroup =
-          PointGroupFactory::Instance().createPointGroup("-1"),
-      const ReflectionCondition_sptr &centering =
-          ReflectionCondition_sptr(new ReflectionConditionPrimitive));
-
   CrystalStructure(const UnitCell &unitCell,
                    const SpaceGroup_const_sptr &spaceGroup,
                    const CompositeBraggScatterer_sptr &scatterers);
@@ -158,13 +151,6 @@ public:
 
   SpaceGroup_const_sptr spaceGroup() const;
   void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
-
-  void setPointGroup(const PointGroup_sptr &pointGroup);
-  PointGroup_sptr pointGroup() const;
-  PointGroup::CrystalSystem crystalSystem() const;
-
-  void setCentering(const ReflectionCondition_sptr &centering);
-  ReflectionCondition_sptr centering() const;
 
   CompositeBraggScatterer_sptr getScatterers() const;
   void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
@@ -181,20 +167,17 @@ public:
   std::vector<double> getFSquared(const std::vector<Kernel::V3D> &hkls) const;
 
 protected:
-  void setPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
-  void
-  setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
-
   void updateScatterersInUnitCell();
   std::string getV3DasString(const Kernel::V3D &point) const;
   void assignUnitCellToScatterers(const UnitCell &unitCell);
 
-  void initializeScatterers();
+  void
+  setReflectionConditionFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  bool
-  isStateSufficientForHKLGeneration(ReflectionConditionMethod method) const;
-  bool isStateSufficientForUniqueHKLGeneration(
-      ReflectionConditionMethod method) const;
+  bool isStateSufficientForHKLGeneration(
+      CrystalStructure::ReflectionConditionMethod method) const;
+
+  void initializeScatterers();
 
   void throwIfRangeUnacceptable(double dMin, double dMax) const;
 
@@ -206,10 +189,9 @@ protected:
 
   UnitCell m_cell;
   SpaceGroup_const_sptr m_spaceGroup;
+  ReflectionCondition_sptr m_centering;
   CompositeBraggScatterer_sptr m_scatterers;
   CompositeBraggScatterer_sptr m_scatterersInUnitCell;
-  PointGroup_sptr m_pointGroup;
-  ReflectionCondition_sptr m_centering;
 };
 
 typedef boost::shared_ptr<CrystalStructure> CrystalStructure_sptr;
