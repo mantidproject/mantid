@@ -6,7 +6,7 @@ import os
 
 # See ticket #10234
 
-class Save1DPlottableAsJson(PythonAlgorithm):
+class SavePlot1DAsJson(PythonAlgorithm):
     """ Save 1D plottable data in json format from workspace.
     """
     def category(self):
@@ -17,7 +17,7 @@ class Save1DPlottableAsJson(PythonAlgorithm):
     def name(self):
         """
         """
-        return "Save1DPlottableAsJson"
+        return "SavePlot1DAsJson"
 
     def summary(self):
         """ Return summary
@@ -108,4 +108,4 @@ class Save1DPlottableAsJson(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(Save1DPlottableAsJson)
+AlgorithmFactory.subscribe(SavePlot1DAsJson)

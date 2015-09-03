@@ -34,7 +34,7 @@ Usage
   # output path
   out_json = "myplot.json"
   # run algorithm
-  Save1DPlottableAsJson(InputWorkspace=dataws, JsonFilename=out_json, PlotName="myplot")
+  SavePlot1DAsJson(InputWorkspace=dataws, JsonFilename=out_json, PlotName="myplot")
 
 
 .. categories::

@@ -20,7 +20,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         out_path = "tempout_curve.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson",
+            "SavePlot1DAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path)
         # executed?
@@ -45,7 +45,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         out_path = "tempout_hist.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson",
+            "SavePlot1DAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path)
         # Executed?
@@ -69,7 +69,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         out_path = "tempout_2curves.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson",
+            "SavePlot1DAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path)
         # executed?
@@ -96,7 +96,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # Execute
         out_path = "tempout_curve_withname.json"
         alg_test = run_algorithm(
-            "Save1DPlottableAsJson",
+            "SavePlot1DAsJson",
             InputWorkspace = datawsname,
             JsonFilename = out_path,
             PlotName = "myplot")
