@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/ReflMainView.h"
 #include "MantidQtCustomInterfaces/ReflTransferStrategy.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidAPI/NotebookWriter.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
@@ -71,8 +72,12 @@ namespace MantidQt
 
       //process selected rows
       void process();
+      //generate an ipython notebook
+      void generateNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
+      //add a code cell to notebook which uses reduction algorithm on the specified row
+      void reduceRowNotebookCell(Mantid::API::NotebookWriter& notebook, int rowNo);
       //process groups of rows
-      void processGroups(std::map<int,std::set<int>> groups, std::set<int> rows);
+      bool processGroups(std::map<int,std::set<int>> groups, std::set<int> rows);
       //Reduce a row
       void reduceRow(int rowNo);
       //prepare a run or list of runs for processing

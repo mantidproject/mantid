@@ -18,6 +18,7 @@
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
+#include <fstream>
 
 #include <QSettings>
 
@@ -25,6 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+
 
 namespace
 {
@@ -314,15 +316,84 @@ namespace MantidQt
         return;
       }
 
-      processGroups(groups, rows);
+      if(!processGroups(groups, rows)) {
+        return;
+      }
+      //TODO else if notebook flag set from gui
+      generateNotebook(groups, rows);
+    }
+
+    /**
+    Generate an ipython notebook
+    @param rows : rows in the model which were processed
+    @param groups : groups of rows which were stitched
+    */
+    void ReflMainViewPresenter::generateNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
+    {
+      std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
+
+      std::string title_string;
+      if(!m_wsName.empty()) {
+        title_string = "Processed data from workspace: " + m_wsName + "\n---------------------";
+      }
+      else {
+        title_string = "Processed data\n---------------------";
+      }
+      notebook->markdownCell(title_string);
+
+      for(auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
+        const std::set<int> groupRows = gIt->second;
+
+        //Reduce each row
+        for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
+          reduceRowNotebookCell(*notebook, *rIt);
+        }
+
+        //todo stitch rows cell
+      }
+
+      //todo plot the unstitched I vs Q
+      //todo plot the stitched I vs Q
+
+      //TODO prompt for filename to save notebook
+      const std::string filename = "/home/jonmd/refl_notebook.ipynb";
+
+      std::string generatedNotebook = notebook->writeNotebook();
+      std::ofstream file(filename.c_str(), std::ofstream::trunc);
+      file << generatedNotebook;
+      file.flush();
+      file.close();
+    }
+
+    /**
+    Add a code cell to the notebook which runs reduce algorithm on the row specified
+    @param notebook : the notebook to add the cell to
+    @param rowNo : the row in the model to run the reduction algorithm on
+    */
+    void ReflMainViewPresenter::reduceRowNotebookCell(Mantid::API::NotebookWriter& notebook, int rowNo)
+    {
+      const std::string   runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
+      const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
+      const std::string  options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
+
+      double theta = 0;
+
+      bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
+
+      if(thetaGiven)
+        theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
+
+      auto runWS = prepareRunWorkspace(runStr);
+      const std::string runNo = getRunNumber(runWS);
     }
 
     /**
     Process stitch groups
     @param rows : rows in the model
     @param groups : groups of rows to stitch
+    @returns true if successful, otherwise false
     */
-    void ReflMainViewPresenter::processGroups(std::map<int,std::set<int>> groups, std::set<int> rows)
+    bool ReflMainViewPresenter::processGroups(std::map<int,std::set<int>> groups, std::set<int> rows)
     {
       int progress = 0;
       //Each group and each row within count as a progress step.
@@ -348,7 +419,7 @@ namespace MantidQt
             const std::string message = "Error encountered while processing row " + rowNo + ":\n";
             m_view->giveUserCritical(message + ex.what(), "Error");
             m_view->setProgress(0);
-            return;
+            return false;
           }
         }
 
@@ -363,9 +434,10 @@ namespace MantidQt
           const std::string message = "Error encountered while stitching group " + groupNo + ":\n";
           m_view->giveUserCritical(message + ex.what(), "Error");
           m_view->setProgress(0);
-          return;
+          return false;
         }
       }
+      return true;
     }
 
     /**
