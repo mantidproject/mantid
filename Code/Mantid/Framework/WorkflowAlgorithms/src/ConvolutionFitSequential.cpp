@@ -94,12 +94,6 @@ void ConvolutionFitSequential::init() {
       "EndX", EMPTY_DBL(), boost::make_shared<MandatoryValidator<double>>(),
       "The end of the range for the fit function.", Direction::Input);
 
-  declareProperty("Temperature", EMPTY_DBL(),
-                  boost::make_shared<MandatoryValidator<double>>(),
-                  "The Temperature correction for the fit. If no there is no "
-                  "temperature correction, use 0.0",
-                  Direction::Input);
-
   auto boundedV = boost::make_shared<BoundedValidator<int>>();
   boundedV->setLower(0);
 
@@ -142,18 +136,11 @@ void ConvolutionFitSequential::exec() {
       convertBackToShort(getProperty("backgroundType"));
   const double startX = getProperty("StartX");
   const double endX = getProperty("EndX");
-  const double temperature = getProperty("Temperature");
   const int specMin = getProperty("SpecMin");
   const int specMax = getProperty("Specmax");
   const bool convolve = getProperty("Convolve");
   const int maxIter = getProperty("MaxIterations");
   const std::string minimizer = getProperty("Minimizer");
-
-  // Handle empty/non-empty temp property
-  bool usingTemp = false;
-  if (temperature != 0.0) {
-    usingTemp = true;
-  }
 
   // Inspect function to obtain fit Type and background
   std::vector<std::string> functionValues = findValuesFromFunction(function);
@@ -315,16 +302,9 @@ void ConvolutionFitSequential::exec() {
   sampleLogStrings["fit_program"] = "ConvFit";
   sampleLogStrings["background"] = backType;
   sampleLogStrings["delta_function"] = usingDelta;
-  sampleLogStrings["temperature_correction"] =
-      boost::lexical_cast<std::string>(usingTemp);
   auto sampleLogNumeric = std::map<std::string, std::string>();
   sampleLogNumeric["lorentzians"] =
       boost::lexical_cast<std::string>(usingLorentzians);
-
-  if (usingTemp) {
-    sampleLogNumeric["temperature_value"] =
-        boost::lexical_cast<std::string>(temperature);
-  }
 
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog", 0.85, 0.90, true);

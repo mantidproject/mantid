@@ -254,7 +254,6 @@ void ConvFit::run() {
   if (temperature.toStdString().compare("") != 0) {
     temp = temperature.toDouble();
   }
-  cfs->setProperty("Temperature", temp);
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
@@ -263,9 +262,44 @@ void ConvFit::run() {
   cfs->setProperty("MaxIterations", maxIterations);
   cfs->execute();
 
+  std::string baseWsName = cfs->getProperty("OutputWorkspace");
+  auto pos = baseWsName.rfind("_");
+  baseWsName = baseWsName.substr(0, pos + 1);
+
+  std::string resultName = baseWsName + "Result";
   MatrixWorkspace_sptr resultWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-          cfs->getProperty("OutputWorkspace"));
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
+
+  std::string groupName = baseWsName + "Workspaces";
+  WorkspaceGroup_sptr groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+  if (temp != 0.0) {
+    const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
+    auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
+    addSample->setProperty("Workspace", resultWs);
+    addSample->setProperty("LogName", "temperature_value");
+    addSample->setProperty("LogText", temperature.toStdString());
+    addSample->setProperty("LogType", "Number");
+    addSample->execute();
+    addSample->setProperty("Workspace", resultWs);
+    addSample->setProperty("LogName", "temperature_correction");
+    addSample->setProperty("LogText", "True");
+    addSample->setProperty("LogType", "String");
+    addSample->execute();
+    for (int i = 0; i < maxSpec; i++) {
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "True");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+    }
+  }
 
   if (save) {
     QString saveDir = QString::fromStdString(
