@@ -27,6 +27,7 @@ NotebookBuilder::NotebookBuilder(boost::shared_ptr<HistoryView> view,
 
 /**
  * Build an ipython notebook for algorithms included in the history view.
+ *
  * @param ws_name :: workspace name
  * @param ws_title :: workspace title
  * @param ws_comment :: workspace comment
@@ -52,7 +53,6 @@ const std::string NotebookBuilder::build(std::string ws_name,
 
 /**
  * Write out an algorithm to the notebook.
- *
  * If the entry is unrolled this will recurse and output the children of
  * that entry instead. If not, it will just output the algorithm to the stream.
  *
@@ -81,7 +81,6 @@ void NotebookBuilder::writeHistoryToStream(
 
 /**
  * Iterate over each of the items children and output them to the script.
- *
  * This moves the iterator forward over each of the child records and writes
  * them to the stream.
  *
