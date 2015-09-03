@@ -726,7 +726,24 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
         set_properties(algm, *args, **final_keywords)
-        algm.execute()
+        try:
+            algm.execute()
+        except RuntimeError:
+            # Check for missing mandatory parameters
+            missing_arg_list = []
+            for p in _algm_object.mandatoryProperties():
+                prop = _algm_object.getProperty(p)
+                if isinstance(prop.isValid,str):
+                    valid_str = prop.isValid
+                else:
+                    valid_str = prop.isValid()
+                if len(valid_str) > 0 and p not in kwargs.keys():
+                    missing_arg_list.append(p)
+            if len(missing_arg_list) != 0:
+                raise RuntimeError("You forgot to give a value to the mandatory property/properties %s" % missing_arg_list)
+            # If the error was not caused by missing property the algorithm specific error should suffice
+            else:
+                algm.execute()
         return _gather_returns(algorithm, lhs, algm)
 
 
