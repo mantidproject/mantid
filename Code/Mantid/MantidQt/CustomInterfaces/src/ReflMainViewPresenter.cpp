@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/NotebookWriter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -19,6 +20,7 @@
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <fstream>
+#include <sstream>
 
 #include <QSettings>
 
@@ -345,9 +347,11 @@ namespace MantidQt
         const std::set<int> groupRows = gIt->second;
 
         //Reduce each row
+        std::ostringstream code_string;
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
-          reduceRowNotebookCell(*notebook, *rIt);
+          code_string << reduceRowNotebookCell(*rIt);
         }
+        notebook->codeCell(code_string.str());
 
         //todo stitch rows cell
       }
@@ -370,8 +374,10 @@ namespace MantidQt
     @param notebook : the notebook to add the cell to
     @param rowNo : the row in the model to run the reduction algorithm on
     */
-    void ReflMainViewPresenter::reduceRowNotebookCell(Mantid::API::NotebookWriter& notebook, int rowNo)
+    std::string ReflMainViewPresenter::reduceRowNotebookCell(int rowNo)
     {
+      std::ostringstream code_string;
+
       const std::string   runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
       const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
       const std::string  options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
@@ -385,6 +391,30 @@ namespace MantidQt
 
       auto runWS = prepareRunWorkspace(runStr);
       const std::string runNo = getRunNumber(runWS);
+
+      Workspace_sptr transWS;
+      if(!transStr.empty())
+        transWS = makeTransWS(transStr);
+
+      code_string << "ReflectometryReductionOneAuto(InputWorkspace = " << runWS->name();
+      if(transWS)
+        code_string << ", " << "FirstTransmissionRun = " << transWS->name();
+      code_string << ", " << "OutputWorkspace = " << "IvsQ_" << runNo;
+      code_string << ", " << "OutputWorkspaceWaveLength = " << "IvsLam_" << runNo;
+      if(thetaGiven)
+        code_string << ", " << "ThetaIn = " << theta;
+
+      //Parse and set any user-specified options
+      auto optionsMap = parseKeyValueString(options);
+      for(auto kvp = optionsMap.begin(); kvp != optionsMap.end(); ++kvp)
+      {
+        code_string << ", " << kvp->first << " = " << kvp->second;
+      }
+      code_string << ")\n";
+
+      //todo rebin etc (look in reduceRow())
+
+      return code_string.str();
     }
 
     /**
