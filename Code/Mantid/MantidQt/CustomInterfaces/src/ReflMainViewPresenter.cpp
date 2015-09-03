@@ -310,26 +310,20 @@ namespace MantidQt
         }
       }
 
-      //Validate the rows
-      for(auto it = rows.begin(); it != rows.end(); ++it)
-      {
-        try
-        {
-          validateRow(*it);
-          autofillRow(*it);
-        }
-        catch(std::exception& ex)
-        {
-          //Allow two theta to be blank
-          if(ex.what() == std::string("Value for two theta could not be found in log."))
-            continue;
-
-          const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
-          m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
-          return;
-        }
+      if(!rowsValid(rows)) {
+        return;
       }
 
+      processGroups(groups, rows);
+    }
+
+    /**
+    Process stitch groups
+    @param rows : rows in the model
+    @param groups : groups of rows to stitch
+    */
+    void ReflMainViewPresenter::processGroups(std::map<int,std::set<int>> groups, std::set<int> rows)
+    {
       int progress = 0;
       //Each group and each row within count as a progress step.
       const int maxProgress = (int)(rows.size() + groups.size());
@@ -372,6 +366,34 @@ namespace MantidQt
           return;
         }
       }
+    }
+
+    /**
+    Validate rows.
+    @param rows : Rows in the model to validate
+    @returns true if all rows are valid and false otherwise
+    */
+    bool ReflMainViewPresenter::rowsValid(std::set<int> rows)
+    {
+      for(auto it = rows.begin(); it != rows.end(); ++it)
+      {
+        try
+        {
+          validateRow(*it);
+          autofillRow(*it);
+        }
+        catch(std::exception& ex)
+        {
+          //Allow two theta to be blank
+          if(ex.what() == std::string("Value for two theta could not be found in log."))
+            continue;
+
+          const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
+          m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
+          return false;
+        }
+      }
+      return true;
     }
 
     /**

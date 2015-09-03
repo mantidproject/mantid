@@ -71,6 +71,8 @@ namespace MantidQt
 
       //process selected rows
       void process();
+      //process groups of rows
+      void processGroups(std::map<int,std::set<int>> groups, std::set<int> rows);
       //Reduce a row
       void reduceRow(int rowNo);
       //prepare a run or list of runs for processing
@@ -83,6 +85,8 @@ namespace MantidQt
       int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
       //make a transmission workspace
       Mantid::API::Workspace_sptr makeTransWS(const std::string& transString);
+      //Validate rows
+      bool rowsValid(std::set<int> rows);
       //Validate a row
       void validateRow(int rowNo) const;
       //Autofill a row with sensible values
