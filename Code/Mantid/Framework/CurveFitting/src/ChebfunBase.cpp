@@ -25,6 +25,11 @@ const double ChebfunBase::g_tolerance = 1e-15;
 // Set the maximum number of points.
 const size_t ChebfunBase::g_maxNumberPoints = 1026;
 
+namespace {
+  // Abs value function to be used with std::transform
+  double AbsValue(double x) {return fabs(x);}
+}
+
 /**
  * Constructor.
  * @param n :: Polynomial order == number of points - 1.
@@ -786,7 +791,7 @@ std::vector<double> ChebfunBase::smooth(const std::vector<double> &xvalues, cons
     std::vector<double> powerSpec(n);
     assert( powerSpec.size() == n );
     // convert the a-coeffs to power spectrum wich is the base of the Wiener filter
-    std::transform( a.begin(), a.end(), powerSpec.begin(), [](double x){return fabs(x);} );
+    std::transform( a.begin(), a.end(), powerSpec.begin(), AbsValue );
 
     // estimate power spectrum's noise as the average of its high frequency half
     double noise = std::accumulate( powerSpec.begin() + n/2, powerSpec.end(), 0.0 );
