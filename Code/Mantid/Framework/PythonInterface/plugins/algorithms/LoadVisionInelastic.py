@@ -7,7 +7,7 @@ from mantid.kernel import *
 import mantid.simpleapi
 
 
-class LoadVISIONinelastic(PythonAlgorithm):
+class LoadVisionInelastic(PythonAlgorithm):
 
     __forward = "bank1,bank2,bank3,bank4,bank5,bank6,bank7"
     __backward = "bank8,bank9,bank10,bank11,bank12,bank13,bank14"
@@ -16,7 +16,7 @@ class LoadVISIONinelastic(PythonAlgorithm):
         return "DataHandling;PythonAlgorithms"
 
     def name(self):
-        return "LoadVISIONinelastic"
+        return "LoadVisionInelastic"
 
     def summary(self):
         return "This algorithm loads only the inelastic detectors on VISION."
@@ -44,4 +44,4 @@ class LoadVISIONinelastic(PythonAlgorithm):
         mantid.simpleapi.DeleteWorkspace(wksp_name)
 
 # Register
-AlgorithmFactory.subscribe(LoadVISIONinelastic)
+AlgorithmFactory.subscribe(LoadVisionInelastic)
