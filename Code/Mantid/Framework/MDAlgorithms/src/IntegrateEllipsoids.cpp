@@ -279,8 +279,8 @@ void IntegrateEllipsoids::init() {
 
   declareProperty(
       "IntegrateIfOnEdge", true,
-      "Only warning if all of peak outer radius is not on detector (default).\n"
-      "If false, do not integrate if the outer radius is not on a detector.");
+      "Set to false to not integrate if peak radius is off edge of detector."
+      "Background will be scaled if background radius is off edge.");
 }
 
 //---------------------------------------------------------------------
@@ -425,17 +425,6 @@ void IntegrateEllipsoids::exec() {
           integrator.ellipseIntegrateEvents(E1Vec,
               peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
-      // Do not integrate if sphere is off edge of detector
-
-      /*if (!detectorQ(peak_q, axes_radii)) {
-        g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
-                           "of detector for peak " << i << std::endl;
-        if (!integrateEdge) {
-          peaks[i].setIntensity(0.0);
-          peaks[i].setSigmaIntensity(0.0);
-          continue;
-        }
-      }*/
       peaks[i].setIntensity(inti);
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
@@ -511,17 +500,6 @@ void IntegrateEllipsoids::exec() {
           integrator.ellipseIntegrateEvents(E1Vec,
               peak_q, specify_size, peak_radius, back_inner_radius,
               back_outer_radius, axes_radii, inti, sigi);
-          // Do not integrate if sphere is off edge of detector
-
-          /*if (!detectorQ(peak_q, axes_radii)) {
-            g_log.warning() << "Warning: sphere/cylinder for integration is off edge "
-                               "of detector for peak " << i << std::endl;
-            if (!integrateEdge) {
-              peaks[i].setIntensity(0.0);
-              peaks[i].setSigmaIntensity(0.0);
-              continue;
-            }
-          }*/
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
           if (axes_radii.size() == 3) {
@@ -629,26 +607,6 @@ void IntegrateEllipsoids::calculateE1(Geometry::Instrument_const_sptr inst) {
     }
   }
 
-  /** Calculate if this Q is on a detector
-   * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
-   * If dv.norm<integration_radius, one of the detector trajectories on the edge
-   *is too close to the peak
-   * This method is applied to all masked pixels. If there are masked pixels
-   *trajectories inside an integration volume, the peak must be rejected.
-   *
-   * @param QLabFrame: The Peak center.
-   * @param r: Peak radius.
-   */
-  bool IntegrateEllipsoids::detectorQ(Mantid::Kernel::V3D QLabFrame, std::vector<double>& r) {
-
-    for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
-      V3D distv = QLabFrame - *E1 * (QLabFrame.scalar_prod(*E1)); // distance to the trajectory as a vector
-      if (distv.norm() < *( std::min_element(r.begin(), r.end())))  {
-        return false;
-      }
-    }
-  return true;
-}
 void IntegrateEllipsoids::runMaskDetectors(
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
     std::string values) {
