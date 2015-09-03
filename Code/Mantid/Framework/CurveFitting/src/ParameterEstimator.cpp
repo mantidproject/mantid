@@ -141,7 +141,6 @@ std::pair<double, double> getPeakLeftRightExtent(double centre,
 /// Get displacements from peak centre where peak reaches half the maximum.
 /// @param centre :: Peak centre.
 /// @param height :: Peak height above background. height == fun(centre) - background.
-/// @param background :: Background value at peak centre.
 /// @param fun :: A function which is expected to be a peak on a background.
 /// @return :: The left and right displacements from peak centre.
 std::pair<double, double> getPeakHWHM(double centre, double height,

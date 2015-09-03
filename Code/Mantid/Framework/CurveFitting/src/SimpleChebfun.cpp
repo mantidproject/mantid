@@ -1,4 +1,5 @@
 #include "MantidCurveFitting/SimpleChebfun.h"
+#include "MantidAPI/IFunction.h"
 
 #include <boost/make_shared.hpp>
 
