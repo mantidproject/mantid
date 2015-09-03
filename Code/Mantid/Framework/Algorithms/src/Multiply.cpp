@@ -74,6 +74,7 @@ void Multiply::performBinaryOperation(const MantidVec &lhsX,
 void Multiply::performBinaryOperationOnDx(
     const MantidVec &lhsDx, const double rhsDx,
     API::MatrixWorkspace_sptr &outWorkspace, const int64_t index) {
+    UNUSED_ARG(rhsDx);
     // Copy the data over from the lhs. The x error should not be affected by a multiplication.
     auto &DxOut = outWorkspace->dataDx(index);
     DxOut = lhsDx;
