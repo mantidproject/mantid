@@ -19,7 +19,7 @@ NotebookWriter::NotebookWriter() : m_cell_buffer(Json::arrayValue)
   /**
  * Add a code cell to the buffer of cells to write to the notebook
  *
- * @param string_code :: Json array of strings containing python code
+ * @param array_code :: Json array of strings containing python code
    * for the code cell
  */
 void NotebookWriter::codeCell(Json::Value array_code) {
@@ -78,7 +78,7 @@ void NotebookWriter::markdownCell(Json::Value string_array) {
   /**
 * Add a markdown cell to the buffer of cells to write to the notebook
 *
-* @param string_array :: string containing the python code for the code cell
+* @param string_text :: string containing the python code for the code cell
 */
 void NotebookWriter::markdownCell(std::string string_text) {
 
