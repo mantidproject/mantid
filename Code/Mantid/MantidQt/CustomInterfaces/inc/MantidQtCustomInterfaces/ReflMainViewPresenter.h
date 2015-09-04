@@ -71,10 +71,6 @@ namespace MantidQt
 
       //process selected rows
       void process();
-      //generate an ipython notebook
-      void generateNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
-      //add a code cell to notebook which uses reduction algorithm on the specified row
-      std::string reduceRowNotebookCell(int rowNo);
       //process groups of rows
       bool processGroups(std::map<int,std::set<int>> groups, std::set<int> rows);
       //Reduce a row
