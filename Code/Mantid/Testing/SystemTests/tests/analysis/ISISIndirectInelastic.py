@@ -3,7 +3,7 @@
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
 # abstract-mehod checking seems to ignore the fact some classes are declared abstract using abc
 
-"""
+'''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
 - OSIRIS/IRIS supported by all tabs / interfaces.
 - VESUVIO is not supported by any interface as of yet.
@@ -65,7 +65,7 @@ stresstesting.MantidStressTest
      |   +--IRISConvFit
      |   +--OSIRISConvFit
      |
-"""
+'''
 
 import stresstesting
 import os
@@ -78,7 +78,7 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq
+from IndirectDataAnalysis import furyfitSeq, furyfitMult
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
     '''
