@@ -29,7 +29,7 @@ def _cleanup_files(dirname, filenames):
 class ISISPowderDiffraction(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
-        return {"HRP39191.raw", "HRP39187.raw", "HRP43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
+        return {"hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
                 "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/Calibration/van_s1_old-0.nxs",
                 "hrpd/test/cycle_09_2/Calibration/van_s1_old-1.nxs",
                 "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"}
