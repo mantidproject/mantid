@@ -48,6 +48,11 @@ private:
   /// Execution code
   void exec();
 
+  /// Get the focused position for the supplied spectrum
+//  void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
+  //                 double &l1, double &l2, double &tth, double &difc);
+
+
 
   /*
 
