@@ -250,10 +250,6 @@ void ConvFit::run() {
                    m_uiForm.cbBackground->currentText().toStdString());
   cfs->setProperty("StartX", stX);
   cfs->setProperty("EndX", enX);
-  double temp = 0.0;
-  if (temperature.toStdString().compare("") != 0) {
-    temp = temperature.toDouble();
-  }
   cfs->setProperty("SpecMin", specMin);
   cfs->setProperty("SpecMax", specMax);
   cfs->setProperty("Convolve", true);
@@ -261,6 +257,11 @@ void ConvFit::run() {
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
   cfs->execute();
+
+  double temp = 0.0;
+  if (temperature.toStdString().compare("") != 0) {
+    temp = temperature.toDouble();
+  }
 
   std::string baseWsName = cfs->getProperty("OutputWorkspace");
   auto pos = baseWsName.rfind("_");
