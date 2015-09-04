@@ -15,6 +15,11 @@ public:
 private slots:
 
 private:
+  virtual void setup();
+  virtual void run();
+  virtual bool validate();
+  virtual void loadSettings(const QSettings &settings);
+
   Ui::ContainerSubtraction m_uiForm;
 };
 

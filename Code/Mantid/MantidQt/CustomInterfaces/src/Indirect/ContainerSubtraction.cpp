@@ -12,5 +12,15 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
     : CorrectionsTab(parent) {
   m_uiForm.setupUi(parent);
 }
+
+void ContainerSubtraction::setup() {}
+void ContainerSubtraction::run() {}
+bool ContainerSubtraction::validate() { return false; }
+
+void ContainerSubtraction::loadSettings(const QSettings &settings) {
+  m_uiForm.dsCorrections->readSettings(settings.group());
+  m_uiForm.dsContainer->readSettings(settings.group());
+  m_uiForm.dsSample->readSettings(settings.group());
+}
 }
 }
