@@ -25,7 +25,7 @@ using namespace Mantid::DataObjects;
 /*****************************************************************************************/
 /********** PLEASE NOTE! CMAKE IS BEING USED TO CREATE AUTO-GENERATED CODE. **************/
 /********** Source = PlusMinusTest.h.in => edit here *************************************/
-/********** Targets = PlusTest.h, MinusTest.h ********************************************/
+/********** Targets = PlusTest.h, MinusTest.h => don't edit ******************************/
 /*****************************************************************************************/
 
 class @PLUSMINUSTEST_CLASS@ : public CxxTest::TestSuite

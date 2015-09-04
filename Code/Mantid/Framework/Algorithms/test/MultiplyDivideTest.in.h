@@ -9,6 +9,7 @@
 #include "MantidAlgorithms/Divide.h"
 #include "MantidAlgorithms/Multiply.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -284,6 +285,89 @@ public:
   }
 
 
+    void test_1D_1D_Histograms_withDX_for_Multiply() {
+    if (!DO_DIVIDE) {
+      // Arrange
+      const int size = 10;
+      const double value1 = 5;
+      const double value2 = 3;
+      const double error1 = 1.5;
+      const double error2 = 2.5;
+      const double xError1 = 1.1;
+      const double xError2 = 2.1;
+      auto ws1 = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(size, value1, error1, xError1);
+      auto ws2 = WorkspaceCreationHelper::Create1DWorkspaceConstantWithXerror(size, value2, error2, xError2);
+      std::string outWorkspaceName = "dx_error_workspace_test";
+      // Act
+      auto algPlus = Mantid::API::FrameworkManager::Instance().createAlgorithm("Multiply");
+      algPlus->initialize();
+      algPlus->setRethrows(true);
+      algPlus->setProperty("LHSWorkspace", ws1);
+      algPlus->setProperty("RHSWorkspace", ws2);
+      algPlus->setProperty("OutputWorkspace", outWorkspaceName);
+      algPlus->execute();
+      // Assert
+      TS_ASSERT(algPlus->isExecuted());
+      auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWorkspaceName);
+      TS_ASSERT(outWS.get());
+      TSM_ASSERT("Output should contain x errors", outWS->hasDx(0));
+
+      auto& dx = outWS->dataDx(0);
+      double expectedDx = sqrt(xError1*xError1 + xError2*xError2);
+      for (size_t i = 0; i < size; ++i) {
+        TSM_ASSERT_EQUALS("Should be sqrt(1.1^2 + 2.1^2)", dx[i], expectedDx);
+      }
+      // Clean the ADS
+      AnalysisDataService::Instance().remove(outWorkspaceName);
+    }
+  }
+
+
+  void test_2D_2D_Histograms_withDX_for_Multiply() {
+    if (!DO_DIVIDE) {
+      // Arrange
+      const double xValue = 1.222;
+      const double value1 = 5;
+      const double value2 = 3;
+      const double error1 = 1.5;
+      const double error2 = 2.5;
+      const double xError1 = 1.1;
+      const double xError2 = 2.1;
+
+      int64_t nHist = 4;
+      int64_t nBins = 10; 
+      bool isHist = true;
+
+      auto ws1 = WorkspaceCreationHelper::Create2DWorkspaceWithValuesAndXerror(nHist, nBins, isHist, xValue, value1, error1, xError1);
+      auto ws2 = WorkspaceCreationHelper::Create2DWorkspaceWithValuesAndXerror(nHist, nBins, isHist, xValue, value2, error2, xError2);
+      std::string outWorkspaceName = "dx_error_workspace_test";
+
+      // Act
+      auto algPlus = Mantid::API::FrameworkManager::Instance().createAlgorithm("Multiply");
+      algPlus->initialize();
+      algPlus->setRethrows(true);
+      algPlus->setProperty("LHSWorkspace", ws1);
+      algPlus->setProperty("RHSWorkspace", ws2);
+      algPlus->setProperty("OutputWorkspace", outWorkspaceName);
+      algPlus->execute();
+
+      // Assert
+      TS_ASSERT(algPlus->isExecuted());
+      auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWorkspaceName);
+      TS_ASSERT(outWS.get());
+      TSM_ASSERT("Output should contain x errors", outWS->hasDx(0));
+
+      auto& dx = outWS->dataDx(0);
+      double expectedDx = sqrt(xError1*xError1 + xError2*xError2);
+      for (size_t spectra = 0; spectra < outWS->getNumberHistograms(); ++spectra) {
+        for (size_t i = 0; i < nBins; ++i) {
+          TSM_ASSERT_EQUALS("Should be sqrt(1.1^2 + 2.1^2)", dx[i], expectedDx);
+        }
+      }
+      // Clean the ADS
+      AnalysisDataService::Instance().remove(outWorkspaceName);
+    }
+  }
 
 
   //========================================= EventWorkspaces ==================================
