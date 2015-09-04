@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidAlgorithms/SampleCorrections/SampleMaterialCorrections.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -19,7 +19,7 @@ using Kernel::Direction;
 using Kernel::V3D;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SampleMaterialCorrections)
+DECLARE_ALGORITHM(MayersSampleCorrection)
 
 //------------------------------------------------------------------------------
 // Public members
@@ -28,30 +28,30 @@ DECLARE_ALGORITHM(SampleMaterialCorrections)
 /**
  * Constructor
  */
-SampleMaterialCorrections::SampleMaterialCorrections() : API::Algorithm() {}
+MayersSampleCorrection::MayersSampleCorrection() : API::Algorithm() {}
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string SampleMaterialCorrections::name() const {
-  return "SampleMaterialCorrections";
+const std::string MayersSampleCorrection::name() const {
+  return "MayersSampleCorrection";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SampleMaterialCorrections::version() const { return 1; }
+int MayersSampleCorrection::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SampleMaterialCorrections::category() const {
+const std::string MayersSampleCorrection::category() const {
   return "Corrections";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string SampleMaterialCorrections::summary() const {
+const std::string MayersSampleCorrection::summary() const {
   return "Corrects the input data for the effects of attenuation & multiple "
          "scattering";
 }
 
 /** Initialize the algorithm's properties.
  */
-void SampleMaterialCorrections::init() {
+void MayersSampleCorrection::init() {
   using API::WorkspaceProperty;
   // Inputs
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
@@ -67,7 +67,7 @@ void SampleMaterialCorrections::init() {
 
 /**
  */
-void SampleMaterialCorrections::exec() {
+void MayersSampleCorrection::exec() {
   using API::Progress;
   using API::WorkspaceFactory;
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -120,7 +120,7 @@ void SampleMaterialCorrections::exec() {
     params.cylRadius = radius;
     params.cylHeight = height;
     MayersSampleCorrectionStrategy correction(params, inX, inputWS->readY(i),
-                                      inputWS->readE(i));
+                                              inputWS->readE(i));
     correction.apply(outputWS->dataY(i), outputWS->dataE(i));
     prog.report();
   }
@@ -134,8 +134,7 @@ void SampleMaterialCorrections::exec() {
 /**
  * @return The validator required for the input workspace
  */
-Kernel::IValidator_sptr
-SampleMaterialCorrections::createInputWSValidator() const {
+Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   using API::InstrumentValidator;
   using API::SampleValidator;
   using Kernel::CompositeValidator;

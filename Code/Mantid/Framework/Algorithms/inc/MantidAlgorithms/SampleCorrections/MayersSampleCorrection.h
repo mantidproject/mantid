@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_
-#define MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_
+#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_
+#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -7,7 +7,7 @@ namespace Mantid {
 namespace Algorithms {
 
 /**
-  Corrects for the effects of absorption and multiple scattering the
+  Corrects for the effects of absorption and multiple scattering using the
   algorithm of Jerry Mayers.
   See https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 
@@ -32,9 +32,9 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL SampleMaterialCorrections : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrection : public API::Algorithm {
 public:
-  SampleMaterialCorrections();
+  MayersSampleCorrection();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -51,4 +51,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_ */
+#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_ */

@@ -215,8 +215,8 @@ set ( SRC_FILES
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
 	src/SANSDirectBeamScaling.cpp
+	src/SampleCorrections/MayersSampleCorrection.cpp
 	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
-	src/SampleCorrections/SampleMaterialCorrections.cpp
 	src/SassenaFFT.cpp
 	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
@@ -488,8 +488,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
 	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
-	inc/MantidAlgorithms/SampleCorrections/SampleMaterialCorrections.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
@@ -697,6 +697,7 @@ set ( TEST_FILES
 	MaskBinsTest.h
 	MaxMinTest.h
 	MayersSampleCorrectionStrategyTest.h
+	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
@@ -756,7 +757,6 @@ set ( TEST_FILES
 	ResizeRectangularDetectorTest.h
 	RingProfileTest.h
 	SANSCollimationLengthEstimatorTest.h
-	SampleMaterialCorrectionsTest.h
 	SassenaFFTTest.h
 	SaveGSASInstrumentFileTest.h
 	ScaleTest.h
