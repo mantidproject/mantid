@@ -1121,6 +1121,18 @@ def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q
 
     return front_data_cropped, rear_data_cropped
 
+def is_1D_workspace(workspace):
+    '''
+    Check if the workspace is 1D, ie if it has only a single spectrum
+    @param workspace: the workspace to check
+    @returns true if the workspace has a single spectrum else false
+    '''
+    if workspace.getNumberHistograms() == 1:
+        return true
+    else:
+        return false
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

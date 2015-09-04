@@ -571,6 +571,19 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     """
     if rAnds.fitScale==False and rAnds.fitShift==False:
         return rAnds.scale, rAnds.shift
+
+    # We need to make sure at this point that the workspaces are 1D. We
+    # don't really know how to match the workspaces for the 2D case.
+    if (not su.is_1D_workspace(mtd[frontData]) or not su.is_1D_workspace(mtd[rearData])):
+        sanslog.warning("Request to perform a fit to find the shift and scale values for"
+                        "a non-1D workspace is not possible. Default values are provided.")
+        scale = rAnds.scale
+        shift = rAnds.shift
+        if scale is not None and shift is not None:
+            return scale, shift
+        else:
+            return 1.0, 0.0
+
     # We need to make suret that the fitting only occurs in the y direction
     constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
 
