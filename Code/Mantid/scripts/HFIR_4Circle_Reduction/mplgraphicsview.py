@@ -97,7 +97,7 @@ class IndicatorManager(object):
 
     def add_horizontal_indicator(self, y, x_min, x_max, color):
         """
-
+        Add a horizontal indicator
         :param y:
         :param x_min:
         :param x_max:
@@ -319,7 +319,7 @@ class MplGraphicsView(QtGui.QWidget):
         key_list = list()
         for vec_x, vec_y in vec_set:
             temp_key = self._myCanvas.add_plot_1d(vec_x, vec_y, color=color, marker=marker,
-                                                  linestyle=line_style, linewidth=line_width)
+                                                  line_style=line_style, line_width=line_width)
             assert isinstance(temp_key, int)
             assert temp_key >= 0
             key_list.append(temp_key)
@@ -578,11 +578,6 @@ class MplGraphicsView(QtGui.QWidget):
         """
         return self._myCanvas.remove_plot_1d(ikey)
 
-    def setXYLimits(self, xmin=None, xmax=None, ymin=None, ymax=None):
-        """
-        """
-        return self._myCanvas.setXYLimit(xmin, xmax, ymin, ymax)
-
     def updateLine(self, ikey, vecx, vecy, linestyle=None, linecolor=None, marker=None, markercolor=None):
         """
         """
@@ -667,6 +662,7 @@ class MplGraphicsView(QtGui.QWidget):
         self._myLineMarkerColorIndex = 0
         return
 
+    # FIXME - Find out difference between setXYLimit() and setXYLimits()
     def setXYLimit(self, xmin, xmax, ymin, ymax):
         """ Set X-Y limit automatically
         """
@@ -676,6 +672,11 @@ class MplGraphicsView(QtGui.QWidget):
         self._myCanvas.draw()
 
         return
+
+    def setXYLimits(self, xmin=None, xmax=None, ymin=None, ymax=None):
+        """
+        """
+        return self._myCanvas.setXYLimit(xmin, xmax, ymin, ymax)
 
     def setAutoLineMarkerColorCombo(self):
         """

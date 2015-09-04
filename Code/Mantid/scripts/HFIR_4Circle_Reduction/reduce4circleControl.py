@@ -34,13 +34,13 @@ DebugMode = True
 DET_X_SIZE = 256
 DET_Y_SIZE = 256
 
-# TODO - Whether PeakInfo is useful???
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
     """
-    def __init__(self):
+    def __init__(self, peak_ws):
         """ Init
         """
+        # TODO - Now: Get information from peak workspace
         # Flag for data storage mode
         self._cacheDataOnly = False
         # Data server's URL
@@ -124,7 +124,7 @@ class CWSCDReductionControl(object):
 
         return
 
-    def calculateUBMatrix(self, peakws, a, b, c, alpha, beta, gamma):
+    def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
         :param peakws:
@@ -136,6 +136,26 @@ class CWSCDReductionControl(object):
         :param gamma:
         :return:
         """
+
+        for peak_info in peak_info_list:
+            scan =83
+            pt = 11
+            matrixws = mtd['HB3A_exp355_scan%04d_%04d'%(scan, pt)]
+            h = float(int(matrixws.run().getProperty('_h').value))
+            k = float(int(matrixws.run().getProperty('_k').value))
+            l = float(int(matrixws.run().getProperty('_l').value))
+            print h, k, l
+            peak1 = peakws.getPeak(1)
+            peak1.setHKL(h, k, l)
+
+        # TODO NOW - Combine peaks
+        CombinePeaksWorkspaces(LHSWorkspace='PeakTable38', RHSWorkspace='PeakTable83', CombineMatchingPeaks=False, OutputWorkspace='Combined')
+
+        CalculateUMatrix(PeaksWorkspace=peakws,a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma)
+
+        ubmatrix = peakws.sample().getOrientedLattice().getUB()
+        print ubmatrix
+
         api.CalculateUMatrix(PeaksWorkspace=peakws,
                 a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma)
 
@@ -340,7 +360,15 @@ class CWSCDReductionControl(object):
                         DensityThresholdFactor=0.01, OutputWorkspace=pt_peak_ws_name)
         peak_ws = AnalysisDataService.retrieve(pt_peak_ws_name)
 
-        return True, peak_ws
+        num_peaks = peak_ws.getNumberPeaks()
+        if num_peaks != 1:
+            err_msg = 'Find %d peak from scan %d pt %d.  ' \
+                      'For UB matrix calculation, 1 and only 1 peak is allowed' % (num_peaks, scan_number, pt_number)
+            return False, err_msg
+        else:
+            self._add_ub_peak_ws(exp_number, scan_number, pt_number, peak_ws)
+
+        return True, ''
 
     def get_pt_numbers(self, exp_no, scan_no, load_spice_scan=False):
         """ Get Pt numbers (as a list) for a scan in an experiment

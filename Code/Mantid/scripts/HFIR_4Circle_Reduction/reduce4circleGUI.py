@@ -15,17 +15,6 @@ import guiutility as gutil
 import fourcircle_utility as fcutil
 
 try:
-    import mantid
-except ImportError:
-    sys.path.append('/home/wzz/Mantid/Code/debug/bin/')
-    import mantid
-finally:
-    import mantid.simpleapi as api
-    import mantid.kernel
-    from mantid.simpleapi import AnalysisDataService
-    from mantid.kernel import ConfigService
-
-try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     def _fromUtf8(s):
@@ -318,14 +307,13 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # Find peak
-        status, ret_obj = self._myControl.find_peak(exp_no, scan_no, pt_no)
+        status, err_msg = self._myControl.find_peak(exp_no, scan_no, pt_no)
         if status is False:
             self.pop_one_button_dialog(ret_obj)
 
         # Set up correct values to table tableWidget_peaksCalUB
-        # TODO - Need to think of how to set up the table workspace!  Can mimic the peak workspace!
-        peak_info = ret_obj
-        qx, qy, qz = peak_info.get_q()
+        peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        self._set_ub_input_table(peak_info)
 
         return
 

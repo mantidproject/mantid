@@ -83,7 +83,7 @@ def downloadData(step):
 
 
 @step(u'Then I load one data set, find 1 peak from it and specify its HKL value')
-def addPeak1(step):
+def add_peak1(step):
     """ Add one peak
     """
     exp_number = 355
@@ -102,27 +102,35 @@ def addPeak1(step):
 
     return
 
-# TODO - Continue from here!
+
 @step(u'Then I load another data set, find 1 peak from it and specify its HKL value')
-def addPeak2(step):
+def add_peak2(step):
     """ Add another peak
     """
     exp_number = 355
     scanno = 82
     ptno = 11
-    status, retobj = wkflow.find_peak(exp_number, scanno, ptno)
-    if status is True:
-        peakinfo = retobj
 
-    millerindex = (1, 2, 3) 
-    wkflow.addPeak(peakinfo, millerindex)
+    # Find peak
+    wk_flow = mydata.getObject()
+
+    status, retobj = wk_flow.find_peak(exp_number, scanno, ptno)
+    assert_true(status)
+    peak_ws = retobj
+    assert_equals(peak_ws.rowCount(), 1)
 
     return
 
+
 @step(u'Then I calculate UB matrix from the 2 reflections')
-def calUBMatrix(step):
+def calculate_ub_matrix(step):
     """ Calculate UB matrix
     """
+
+    peak_list = list()
+    peak_list.append(peak_id, h, k, l)
+    work_flow.calculate_ub_matrix(peak_list)
+
 
     # Set HKL to peak workspace
     peakws = mtd['Combined']
@@ -155,9 +163,11 @@ def calUBMatrix(step):
 
 
 @step(u'Then I get the UB matrix and calculate HKL values for the 2 peaks given earlier')
-def checkUBMatrix(step):
+def check_ub_matrix(step):
     """ Retrive UB matrix and check its value 
     """
+    return
+
     ubmatrix = wkflow.getUBMatrix()
 
     return
