@@ -93,12 +93,14 @@ class CWSCDReductionControl(object):
         # Some set up
         self._expNumber = None
 
+        # Container for MDEventWorkspace
+        self._myMDDict = dict()
         # Container for loaded workspaces
-        self._spiceTableDict = {}
+        self._mySpiceTableDict = {}
         # Container for loaded raw pt workspace
-        self._rawDataDict = {}
+        self._myRawDataWSDict = {}
         # A dictionary to manage all loaded and processed MDEventWorkspaces
-        self._expDataDict = {}
+        # self._expDataDict = {}
 
         return
 
@@ -150,7 +152,7 @@ class CWSCDReductionControl(object):
         :param pt_no:
         :return:
         """
-        return (exp_no, scan_no, pt_no) in self._rawDataDict
+        return (exp_no, scan_no, pt_no) in self._myRawDataWSDict
 
     def does_spice_loaded(self, exp_no, scan_no):
         """ Check whether a SPICE file has been loaded
@@ -158,7 +160,7 @@ class CWSCDReductionControl(object):
         :param scan_no:
         :return:
         """
-        return (exp_no, scan_no) in self._spiceTableDict
+        return (exp_no, scan_no) in self._mySpiceTableDict
 
     def download_spice_file(self, exp_number, scan_number, over_write):
         """
@@ -178,8 +180,8 @@ class CWSCDReductionControl(object):
         # Download
         try:
             api.DownloadFile(Address=file_url, Filename=file_name)
-        except RuntimeError as e:
-            return False, str(e)
+        except RuntimeError as run_err:
+            return False, str(run_err)
 
         # Check file exist?
         if os.path.exists(file_name) is False:
@@ -212,8 +214,8 @@ class CWSCDReductionControl(object):
         try:
             api.DownloadFile(Address=xml_file_url,
                              Filename=local_xml_file_name)
-        except RuntimeError as e:
-            return False, 'Unable to download Detector XML file %s dur to %s.' % (xml_file_name, str(e))
+        except RuntimeError as run_err:
+            return False, 'Unable to download Detector XML file %s dur to %s.' % (xml_file_name, str(run_err))
 
         # Check file exist?
         if os.path.exists(local_xml_file_name) is False:
@@ -251,7 +253,7 @@ class CWSCDReductionControl(object):
                 error_message = ret_obj
                 return False, error_message
             else:
-                spice_table = self._spiceTableDict[(self._expNumber, scan_no)]
+                spice_table = self._mySpiceTableDict[(self._expNumber, scan_no)]
                 assert spice_table
             pt_no_list = self._getPtListFromTable(spice_table)
 
@@ -282,7 +284,7 @@ class CWSCDReductionControl(object):
         # Check xml file
         xmlfilename = '%s_exp%d_scan%04d_%04d.xml'%(self._instrumentName, self._expNumber,
                 scanno, ptno)
-        xmlflename = os.path.join(self._dataDir, xmlfilename)
+        xmlfilename = os.path.join(self._dataDir, xmlfilename)
         if os.path.exists(xmlfilename) is False:
             return (False, "Pt. XML file %s cannot be found."%(xmlfilename))
 
@@ -430,10 +432,10 @@ class CWSCDReductionControl(object):
         :return: status (boolean), error message (string)
         """
         # Check whether the workspace has been loaded
-        assert(isinstance(exp_no, int))
-        assert(isinstance(scan_no, int))
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
         out_ws_name = get_spice_table_name(exp_no, scan_no)
-        if (exp_no, scan_no) in self._spiceTableDict:
+        if (exp_no, scan_no) in self._mySpiceTableDict:
             return True, out_ws_name
 
         # Form standard name for a SPICE file if name is not given
@@ -445,8 +447,8 @@ class CWSCDReductionControl(object):
             spice_table_ws, info_matrix_ws = api.LoadSpiceAscii(Filename=spice_file_name,
                                                                 OutputWorkspace=out_ws_name,
                                                                 RunInfoWorkspace='TempInfo')
-        except RuntimeError as e:
-            return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(e))
+        except RuntimeError as run_err:
+            return False, 'Unable to load SPICE data %s due to %s' % (spice_file_name, str(run_err))
 
         # Store
         self._add_spice_workspace(exp_no, scan_no, spice_table_ws)
@@ -479,8 +481,8 @@ class CWSCDReductionControl(object):
                                             DetectorGeometry='256,256',
                                             SpiceTableWorkspace=spice_table_name,
                                             PtNumber=pt_no)
-        except RuntimeError as e:
-            return False, str(e)
+        except RuntimeError as run_err:
+            return False, str(run_err)
 
         pt_ws = ret_obj
 
@@ -488,26 +490,6 @@ class CWSCDReductionControl(object):
         self._add_raw_workspace(exp_no, scan_no, pt_no, pt_ws)
 
         return True, pt_ws_name
-
-    def import_data_to_mantid(self, exp_no, scan_no, pt_no):
-        """
-
-        :param exp_no:
-        :param scan_no:
-        :param pt_no:
-        :return:
-        """
-        # Check existence of SPICE workspace
-        if self._spiceTableDict.has_key(scan_no) is False:
-            status, ret_obj = self.load_spice_scan_file(exp_no, scan_no)
-            if status is False:
-                return False, ret_obj
-
-        # Check existence of matrix workspace
-        if self._expDataDict[self._expNumber].has_key((scan_no, pt_no)) is False:
-            self.load_spice_xml_file(exp_no, scan_no, pt_no)
-
-        return True, ''
 
     def groupWS(self):
         """
@@ -577,7 +559,7 @@ class CWSCDReductionControl(object):
         :param local_dir:
         :return:
         """
-        # Get absolute path 
+        # Get absolute path
         if os.path.isabs(local_dir) is False:
             # Input is relative path to current working directory
             cwd = os.getcwd()
@@ -587,8 +569,8 @@ class CWSCDReductionControl(object):
         if os.path.exists(local_dir) is False:
             try:
                 os.mkdir(local_dir)
-            except OSError as e:
-                return False, str(e)
+            except OSError as os_err:
+                return False, str(os_err)
 
         # Check whether the target is writable
         if os.access(local_dir, os.W_OK) is False:
@@ -607,10 +589,12 @@ class CWSCDReductionControl(object):
         if os.path.exists(work_dir) is False:
             try:
                 os.mkdir(work_dir)
-            except OSError as e:
-                return False, 'Unable to create working directory %s due to %s.' % (work_dir, str(e))
+            except OSError as os_err:
+                return False, 'Unable to create working directory %s due to %s.' % (work_dir, str(os_err))
         elif os.access(work_dir, os.W_OK) is False:
             return False, 'User specified working directory %s is not writable.' % work_dir
+
+        self._workDir = work_dir
 
         return True, ''
 
@@ -635,7 +619,7 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :return:
         """
-        assert(isinstance(exp_number, int))
+        assert isinstance(exp_number, int)
         self._expNumber = exp_number
 
         return True
@@ -660,21 +644,22 @@ class CWSCDReductionControl(object):
             matrix_ws = raw_ws
         assert isinstance(matrix_ws, mantid.dataobjects._dataobjects.Workspace2D)
 
-        self._rawDataDict[(exp_no, scan_no, pt_no)] = matrix_ws
+        self._myRawDataWSDict[(exp_no, scan_no, pt_no)] = matrix_ws
 
         return
 
     def _add_md_workspace(self, exp_no, scan_no, pt_no, md_ws):
+        """ Add MD workspace to storage
         """
-        """
+
 
     def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
         """
         """
-        assert(isinstance(exp_no, int))
-        assert(isinstance(scan_no, int))
-        assert(isinstance(spice_table_ws, mantid.dataobjects._dataobjects.TableWorkspace))
-        self._spiceTableDict[(exp_no, scan_no)] = spice_table_ws
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(spice_table_ws, mantid.dataobjects._dataobjects.TableWorkspace)
+        self._mySpiceTableDict[(exp_no, scan_no)] = spice_table_ws
 
         return
 
@@ -685,9 +670,9 @@ class CWSCDReductionControl(object):
         :return: Table workspace or None
         """
         try:
-            ws = self._spiceTableDict[(exp_no, scan_no)]
+            ws = self._mySpiceTableDict[(exp_no, scan_no)]
         except KeyError:
-            print '[DB] Keys to SPICE TABLE: %s' % str(self._spiceTableDict.keys())
+            print '[DB] Keys to SPICE TABLE: %s' % str(self._mySpiceTableDict.keys())
             return None
 
         return ws
@@ -696,7 +681,7 @@ class CWSCDReductionControl(object):
         """
         """
         try:
-            ws = self._rawDataDict[(exp_no, scan_no, pt_no)]
+            ws = self._myRawDataWSDict[(exp_no, scan_no, pt_no)]
         except KeyError:
             return None
 

@@ -273,7 +273,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.pop_one_button_dialog(ret_obj)
                 return
             exp_no = ret_obj
-            assert(isinstance(exp_no, int))
+            assert isinstance(exp_no, int)
             server_url = str(self.ui.lineEdit_url.text())
             scan_list = fcutil.get_scans_list(server_url, exp_no, return_list=True)
         self.pop_one_button_dialog('Going to download scans %s.' % str(scan_list))
