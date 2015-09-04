@@ -2,12 +2,14 @@
 #define MANTID_ALGORITHMS_SAMPLEMATERIALCORRECTIONS_H_
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+
 namespace Mantid {
 namespace Algorithms {
 
 /**
-  Corrects for the effects of absorption and multiple scattering using different
-  algorithms.
+  Corrects for the effects of absorption and multiple scattering the
+  algorithm of Jerry Mayers.
+  See https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
