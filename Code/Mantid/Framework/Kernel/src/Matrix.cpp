@@ -1103,7 +1103,7 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
   Find biggest pivot and move to top row. Then
   divide by pivot.
   @param interchange :: odd/even nterchange (+/-1)
-  @param rowperm :: row permuations [nx values]
+  @param rowperm :: row permutations [nx values]
 */
 {
   double sum, dum, big, temp;
@@ -1122,6 +1122,9 @@ void Matrix<T>::lubcmp(int *rowperm, int &interchange)
 
     if (big == 0.0) {
       delete[] vv;
+      for (int j=0;j<static_cast<int>(nx); j++){
+        rowperm[j] = j;
+      }
       return;
     }
     vv[i] = 1.0 / big;
