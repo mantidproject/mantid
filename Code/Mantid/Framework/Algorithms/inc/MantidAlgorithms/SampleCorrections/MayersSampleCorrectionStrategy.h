@@ -46,6 +46,7 @@ public:
    * and sample details
    */
   struct Parameters {
+    bool mscat;       ///< If true then correct for multiple scattering
     double l1;        ///< Nominal distance from source to sample (m)
     double l2;        ///< Nominal distance from sample to detector (m)
     double twoTheta;  ///< Scattering angle of the detector (radians)

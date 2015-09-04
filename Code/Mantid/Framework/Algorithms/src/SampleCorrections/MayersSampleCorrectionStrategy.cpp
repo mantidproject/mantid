@@ -114,8 +114,12 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
   std::vector<double> xmur(N_MUR_PTS + 1, 0.0),
       yabs(N_MUR_PTS + 1, 1.0),  // absorption signals
       wabs(N_MUR_PTS + 1, 1.0),  // absorption weights
-      yms(N_MUR_PTS + 1, 0.0),   // multiple scattering signals
-      wms(N_MUR_PTS + 1, 100.0); // multiple scattering  weights
+      yms(0),   // multiple scattering signals
+      wms(0); // multiple scattering weights
+  if(m_pars.mscat) {
+    yms.resize(N_MUR_PTS + 1, 0.0);
+    wms.resize(N_MUR_PTS + 1, 100.0);
+  }
 
   // Main loop over mur. Limit is nrpts but vectors are nrpts+1. First value set
   // by initial values above
@@ -129,16 +133,19 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
     // track these
     yabs[i] = 1. / absFactor;
     wabs[i] = absFactor;
-    // ratio of second/first scatter
-    auto mscat = calculateMS(i, muR, attenuation);
-    yms[i] = mscat.first;
-    wms[i] = mscat.second;
+    if (m_pars.mscat) {
+      // ratio of second/first scatter
+      auto mscat = calculateMS(i, muR, attenuation);
+      yms[i] = mscat.first;
+      wms[i] = mscat.second;
+    }
   }
 
   // Fit polynomials to absorption values to interpolate to input data range
   ChebyshevPolyFit polyfit(N_POLY_ORDER);
-  auto absCfs = polyfit(xmur, yabs, wabs);
-  auto msCfs = polyfit(xmur, yms, wms);
+  auto absCoeffs = polyfit(xmur, yabs, wabs);
+  decltype(absCoeffs) msCoeffs(0);
+  if(m_pars.mscat) msCoeffs = polyfit(xmur, yms, wms);
 
   // corrections to input
   const double muMin(xmur.front()), muMax(xmur.back()),
@@ -155,15 +162,15 @@ void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
     const double rmu = muR(sigt);
     // Varies between [-1,+1]
     const double xcap = ((rmu - muMin) - (muMax - rmu)) / (muMax - muMin);
-    const double attenfact = chebyPoly(absCfs, xcap);
-    // multiple scatter
-    const double msVal = chebyPoly(msCfs, xcap);
-    const double beta = m_pars.sigmaSc * msVal / sigt;
-    const double msfact = (1.0 - beta) / rns;
-
+    double corrfact = chebyPoly(absCoeffs, xcap);
+    if(m_pars.mscat) {
+      const double msVal = chebyPoly(msCoeffs, xcap);
+      const double beta = m_pars.sigmaSc * msVal / sigt;
+      corrfact *= (1.0 - beta) / rns;
+    }
     // apply correction
     const double yin(m_sigin[i]), ein(m_errin[i]);
-    sigOut[i] = yin * msfact * attenfact;
+    sigOut[i] = yin * corrfact;
     errOut[i] = sigOut[i] * ein / yin;
   }
 }

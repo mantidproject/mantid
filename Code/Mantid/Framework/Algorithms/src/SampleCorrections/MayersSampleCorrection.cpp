@@ -58,7 +58,10 @@ void MayersSampleCorrection::init() {
                                           Direction::Input,
                                           createInputWSValidator()),
                   "An input workspace.");
-
+  declareProperty(
+      "MultipleScattering", false,
+      "If True then also correct for the effects of multiple scattering.",
+      Direction::Input);
   // Outputs
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
@@ -71,6 +74,7 @@ void MayersSampleCorrection::exec() {
   using API::Progress;
   using API::WorkspaceFactory;
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  bool mscatOn = getProperty("MultipleScattering");
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
 
   // Instrument constants
@@ -110,6 +114,7 @@ void MayersSampleCorrection::exec() {
       continue;
 
     MayersSampleCorrectionStrategy::Parameters params;
+    params.mscat = mscatOn;
     params.l1 = l1;
     params.l2 = det->getDistance(*sample);
     params.twoTheta = det->getTwoTheta(sample->getPos(), beamLine);

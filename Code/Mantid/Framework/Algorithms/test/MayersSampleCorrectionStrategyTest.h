@@ -16,12 +16,15 @@ public:
   static MayersSampleCorrectionStrategyTest *createSuite() {
     return new MayersSampleCorrectionStrategyTest();
   }
-  static void destroySuite(MayersSampleCorrectionStrategyTest *suite) { delete suite; }
+  static void destroySuite(MayersSampleCorrectionStrategyTest *suite) {
+    delete suite;
+  }
 
-  void test_attentuaton_correction_for_fixed_mur() {
+  void test_Attentuaton_Correction_For_Fixed_Mur() {
     std::vector<double> dummy(2, 0.0);
     dummy[1] = 1.0;
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy, dummy);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
+                                         dummy);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
@@ -29,12 +32,13 @@ public:
   }
 
   // clang-format off
-  void test_multiple_scattering_with_fixed_mur_and_absorption_correction_factor()
+  void test_Multiple_Scattering_With_Fixed_Mur_And_Absorption_Correction_Factor()
   // clang-format on
   {
     std::vector<double> dummy(2, 0.0);
     dummy[1] = 1.0;
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy, dummy);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy,
+                                         dummy);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
@@ -44,13 +48,14 @@ public:
     TS_ASSERT_DELTA(67.25351289, absFactor.second, delta);
   }
 
-  void test_corrects_both_absorption_and_multiple_scattering_for_point_data() {
+  void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Point_Data() {
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
     double xcur(100.0);
     std::generate(tof.begin(), tof.end(), [&xcur] { return xcur++; });
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal, error);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
+                                         error);
 
     // Correct it
     mscat.apply(signal, error);
@@ -68,7 +73,7 @@ public:
   }
 
   // clang-format off
-  void test_corrects_both_absorption_and_multiple_scattering_for_histogram_data()
+  void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data()
   // clang-format on
   {
     const size_t nypts(100);
@@ -81,7 +86,8 @@ public:
       xcur += 1.0;
       return xold;
     });
-    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal, error);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
+                                         error);
 
     // Correct it
     mscat.apply(signal, error);
@@ -98,8 +104,38 @@ public:
     TS_ASSERT_DELTA(0.2660792, error.back(), delta);
   }
 
+  void test_Corrects_For_Absorption_For_Histogram_Data() {
+    const size_t nypts(100);
+    std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
+    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
+    // Generate a histogram with the same mid points as the point data example
+    double xcur(99.5);
+    std::generate(tof.begin(), tof.end(), [&xcur] {
+      double xold = xcur;
+      xcur += 1.0;
+      return xold;
+    });
+    bool mscatOn(false);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), tof,
+                                         signal, error);
+
+    // Correct it
+    mscat.apply(signal, error);
+
+    // Check some values
+    const double delta(1e-06);
+    TS_ASSERT_DELTA(99.5, tof.front(), delta);
+    TS_ASSERT_DELTA(199.5, tof.back(), delta);
+
+    TS_ASSERT_DELTA(2.3440379, signal.front(), delta);
+    TS_ASSERT_DELTA(2.3489418, signal.back(), delta);
+
+    TS_ASSERT_DELTA(1.6574851, error.front(), delta);
+    TS_ASSERT_DELTA(1.6609527, error.back(), delta);
+  }
+
   // ---------------------- Failure tests -----------------------------
-  void test_tof_not_monotonically_increasing_throws_invalid_argument() {
+  void test_Tof_Not_Monotonically_Increasing_Throws_Invalid_Argument() {
     const size_t nypts(10);
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
@@ -109,15 +145,17 @@ public:
       xcur -= 1.0;
       return xold;
     });
-    TS_ASSERT_THROWS(
-        MayersSampleCorrectionStrategy(createTestParameters(), tof, signal, error),
-        std::invalid_argument);
+    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(), tof,
+                                                    signal, error),
+                     std::invalid_argument);
   }
 
 private:
-  MayersSampleCorrectionStrategy::Parameters createTestParameters() {
+  MayersSampleCorrectionStrategy::Parameters
+  createTestParameters(bool mscatOn = true) {
     // A bit like a POLARIS spectrum
     MayersSampleCorrectionStrategy::Parameters pars;
+    pars.mscat = mscatOn;
     pars.l1 = 14.0;
     pars.l2 = 2.2;
     pars.twoTheta = 0.10821;
