@@ -958,6 +958,14 @@ void ViewBase::removeVisibilityListener() {
   }
 }
 
+/**
+ * Sets the axes grid if the user has this enabled
+ */
+void ViewBase::setAxesGrid() {
+  // Check the access grid state
+}
+
+
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid

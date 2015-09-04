@@ -2,10 +2,17 @@
 #define MANTID_VATES_MD_LOADING_PRESENTER
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include <vtkDataSet.h>
+#include <vtkPVChangeOfBasisHelper.h>
 #include <string>
 #include <vector>
+
+
+namespace {
+Mantid::Kernel::Logger g_log("MDLoadingPresenter");
+}
 
 class vtkUnstructuredGrid;
 namespace Mantid
@@ -49,6 +56,27 @@ namespace Mantid
         virtual std::vector<double> getTimeStepValues() const = 0;
         virtual std::string getTimeStepLabel() const = 0;
         virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
+        virtual void setDefaultCOBandBoundaries(vtkDataSet* visualDataSet) {
+          // Set an identity matrix
+          vtkSmartPointer<vtkMatrix4x4> cobMatrix =
+            vtkSmartPointer<vtkMatrix4x4>::New();
+          cobMatrix->Identity();
+
+          if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(visualDataSet,
+                                                                            cobMatrix)) {
+            g_log.warning("The Change-of-Basis-Matrix could not be added to the field "
+                          "data of the scaled data set.\n");
+          }
+
+          // Set the bounds
+          double boundingBox[6];
+          visualDataSet->GetBounds(boundingBox);
+          if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(visualDataSet,
+                                                                boundingBox)) {
+            g_log.warning("The bounding box could not be added to the field data of "
+                          "the scaled data set.\n");
+          }
+        }
         virtual void makeNonOrthogonal(vtkDataSet* visualDataSet)
         {
           // This is a no-op function for most loaders.

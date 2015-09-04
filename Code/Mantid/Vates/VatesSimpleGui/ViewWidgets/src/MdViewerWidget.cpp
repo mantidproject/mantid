@@ -165,7 +165,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
   useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
   m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi"),
-  m_colorMapEditorPanel(NULL), m_allViews()
+  m_colorMapEditorPanel(NULL), m_useGridAxes(true), m_allViews()
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -181,6 +181,8 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   // Connect the rebinned sources manager
   QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
                    this, SLOT(onSwitchSources(std::string, std::string)));
+
+
 }
 
 /**
@@ -274,6 +276,10 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
+
+  // Set up the Grid Axes
+  m_useGridAxes = ui.axes_on_at_startup_check_box->isChecked();
+
 }
 
 void MdViewerWidget::panelChanged()

@@ -234,6 +234,9 @@ protected:
    */
   void setAutoColorScale();
 
+  /// Set the Axes Grid
+  void setAxesGrid();
+
 private slots:
   /// Called when the rendering begins
   void lockPyGIL();

@@ -159,6 +159,8 @@ private:
   RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
   ColorMapEditorPanel* m_colorMapEditorPanel; ///< Holder for the color map editor panel.
+  bool m_useGridAxes; ///< Holds a flag if the Grid Axes should be on or not.
+
 
   /// Holds the 'visual state' of the views. This relies on Load/SaveXMLState which
   /// produce/consume a vtk XML tree object. Otherwise, the properties to save would be,

@@ -22,7 +22,7 @@ std::string makeAxisTitle(Dimension_const_sptr dim) {
   // update inverse angstrom symbol so it is rendered in mathtex.
   // Consider removing after ConvertToMD provides unit labels with latex
   // symbols.
-  boost::regex re("A\\^-1");
+  boost::regex re("Angstrom\\^-1");
   return boost::regex_replace(title, re, "$\\\\AA^{-1}$");
 }
 

@@ -23,6 +23,7 @@
 #include "pqCollaborationBehavior.h"
 #include "pqViewStreamingBehavior.h"
 #include "pqPluginSettingsBehavior.h"
+#include "pqModelTransformSupportBehavior.h"
 
 #include <Poco/Path.h>
 
@@ -112,11 +113,11 @@ namespace Mantid
         new pqCollaborationBehavior(this);
         new pqViewStreamingBehavior(this);
         new pqPluginSettingsBehavior(this);
+        new pqModelTransformSupportBehavior(this);
       }
 
       VatesParaViewApplication::~VatesParaViewApplication()
       {
-
       }
 
       VatesParaViewApplication* VatesParaViewApplication::instance()

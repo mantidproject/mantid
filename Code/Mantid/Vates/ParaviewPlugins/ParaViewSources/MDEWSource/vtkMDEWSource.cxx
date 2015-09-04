@@ -228,6 +228,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       outInfo->Get(vtkDataObject::DATA_OBJECT()));
     output->ShallowCopy(clipperOutput);
 
+    m_presenter->setDefaultCOBandBoundaries(output);
     m_presenter->setAxisLabels(output);
 
     clipper->Delete();

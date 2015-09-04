@@ -23,10 +23,6 @@
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
 
-namespace {
-
-Mantid::Kernel::Logger g_log("MDHWLoadingPresenter");
-}
 
 namespace Mantid {
 namespace VATES {
@@ -249,6 +245,7 @@ void MDHWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet) {
                   "the data set.\n");
   }
 }
+
 
 /**
 Gets the geometry in a string format.
