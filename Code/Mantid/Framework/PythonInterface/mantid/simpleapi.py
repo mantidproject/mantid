@@ -513,6 +513,32 @@ def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
                            % (func_name, reqd_as_str))
     return tuple(mandatory_args)
 
+def _check_mandatory_args(algorithm, algm, _algm_object, *args, **kwargs):
+    """When a runtime error of the form 'Some invalid Properties found'
+    is thrown call this function to return more specific message to user in
+    the python output.
+    """
+    missing_arg_list = []
+    # Returns all user defined properties
+    props = _algm_object.mandatoryProperties()
+    # Add given positional arguments to keyword arguments
+    for (key, arg) in zip(props[:len(args)], args):
+        kwargs[key] = arg
+    for p in props:
+        prop = _algm_object.getProperty(p)
+        # Mandatory properties are ones with invalid defaults
+        if isinstance(prop.isValid,str):
+            valid_str = prop.isValid
+        else:
+            valid_str = prop.isValid()
+        if len(valid_str) > 0 and p not in kwargs.keys():
+            missing_arg_list.append(p)
+    if len(missing_arg_list) != 0:
+        raise RuntimeError("%s argument(s) not supplied to %s" % (missing_arg_list,algorithm))
+    # If the error was not caused by missing property the algorithm specific error should suffice
+    else:
+        algm.execute()
+
 #------------------------ General simple function calls ----------------------
 
 def _is_workspace_property(prop):
@@ -728,20 +754,10 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         set_properties(algm, *args, **final_keywords)
         try:
             algm.execute()
-        except RuntimeError:
-            # Check for missing mandatory parameters
-            missing_arg_list = []
-            for p in _algm_object.mandatoryProperties():
-                prop = _algm_object.getProperty(p)
-                if isinstance(prop.isValid,str):
-                    valid_str = prop.isValid
-                else:
-                    valid_str = prop.isValid()
-                if len(valid_str) > 0 and p not in kwargs.keys():
-                    missing_arg_list.append(p)
-            if len(missing_arg_list) != 0:
-                raise RuntimeError("You forgot to give a value to the mandatory property/properties %s" % missing_arg_list)
-            # If the error was not caused by missing property the algorithm specific error should suffice
+        except RuntimeError, e:
+            if e.args[0] == 'Some invalid Properties found':
+                # Check for missing mandatory parameters
+                _check_mandatory_args(algorithm, algm, _algm_object, *args, **kwargs)
             else:
                 algm.execute()
         return _gather_returns(algorithm, lhs, algm)
