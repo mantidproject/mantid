@@ -10,9 +10,14 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Logger.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 #include <boost/make_shared.hpp>
+
+namespace {
+  Mantid::Kernel::Logger g_log("BinaryOperation");
+}
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -509,6 +514,11 @@ void BinaryOperation::doSingleValue() {
       PARALLEL_START_INTERUPT_REGION
       m_out->setX(i, m_lhs->refX(i));
       performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
+      if (m_lhs->hasDx(i)) {
+        g_log.warning("Binary Operation: Cannot operate on X Error for "
+                      "EventLists. Functionality is "
+                      "not implemented. The X Errors are ignored.");
+      }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -527,6 +537,10 @@ void BinaryOperation::doSingleValue() {
       MantidVec &outE = m_out->dataE(i);
       performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
                              rhsY, rhsE, outY, outE);
+      if (m_lhs->hasDx(i)) {
+        performBinaryOperationOnDx(m_lhs->dataDx(i), m_rhs->readDx(0)[0], m_out,
+                                   i);
+      }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -558,6 +572,11 @@ void BinaryOperation::doSingleColumn() {
       // m_out->setX(i, m_lhs->refX(i)); //unnecessary - that was copied before.
       if (propagateSpectraMask(m_lhs, m_rhs, i, m_out)) {
         performEventBinaryOperation(m_eout->getEventList(i), rhsY, rhsE);
+        if (m_lhs->hasDx(i)) {
+          g_log.warning("Binary Operation: Cannot operate on X Error for "
+                        "EventLists. Functionality is "
+                        "not implemented. The X Errors are ignored.");
+        }
       }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -581,6 +600,10 @@ void BinaryOperation::doSingleColumn() {
         MantidVec &outE = m_out->dataE(i);
         performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i),
                                m_lhs->readE(i), rhsY, rhsE, outY, outE);
+        if (m_lhs->hasDx(i)) {
+          performBinaryOperationOnDx(m_lhs->dataDx(i), m_rhs->readDx(i)[0],
+                                     m_out, i);
+        }
       }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
@@ -619,6 +642,11 @@ void BinaryOperation::doSingleSpectrum() {
 
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getEventList(i), rhs_spectrum);
+        if (m_lhs->hasDx(i)) {
+          g_log.warning("Binary Operation: Cannot operate on X Error for "
+                        "EventLists. Functionality is "
+                        "not implemented. The X Errors are ignored.");
+        }
         m_progress->report(this->name());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -641,6 +669,11 @@ void BinaryOperation::doSingleSpectrum() {
         // before.
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getEventList(i), rhsX, rhsY, rhsE);
+        if (m_lhs->hasDx(i)) {
+          g_log.warning("Binary Operation: Cannot operate on X Error for "
+                        "EventLists. Functionality is "
+                        "not implemented. The X Errors are ignored.");
+        }
         m_progress->report(this->name());
         PARALLEL_END_INTERUPT_REGION
       }
@@ -672,6 +705,9 @@ void BinaryOperation::doSingleSpectrum() {
       MantidVec &outE = m_out->dataE(i);
       performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
                              rhsY, rhsE, outY, outE);
+      if (m_lhs->hasDx(i)) {
+        performBinaryOperationOnDx(m_lhs->readDx(i), m_rhs->readDx(0), m_out, i);
+      }
       m_progress->report(this->name());
       PARALLEL_END_INTERUPT_REGION
     }
@@ -724,7 +760,11 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         // Perform the operation on the event list on the output (== lhs)
         performEventBinaryOperation(m_eout->getEventList(i),
                                     m_erhs->getEventList(rhs_wi));
-
+        if (m_lhs->hasDx(i)) {
+          g_log.warning("Binary Operation: Cannot operate on X Error for "
+                        "EventLists. Functionality is "
+                        "not implemented. The X Errors are ignored.");
+        }
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
           const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
@@ -757,7 +797,11 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
         performEventBinaryOperation(m_eout->getEventList(i),
                                     m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi),
                                     m_rhs->readE(rhs_wi));
-
+        if (m_lhs->hasDx(i)) {
+          g_log.warning("Binary Operation: Cannot operate on X Error for "
+                        "EventLists. Functionality is "
+                        "not implemented. The X Errors are ignored.");
+        }
         // Free up memory on the RHS if that is possible
         if (m_ClearRHSWorkspace)
           const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
@@ -800,7 +844,9 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
       performBinaryOperation(m_lhs->readX(i), m_lhs->readY(i), m_lhs->readE(i),
                              m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi), outY,
                              outE);
-
+      if (m_lhs->hasDx(i)) {
+        performBinaryOperationOnDx(m_lhs->readDx(i), m_rhs->readDx(rhs_wi), m_out, i);
+      }
       // Free up memory on the RHS if that is possible
       if (m_ClearRHSWorkspace)
         const_cast<EventList &>(m_erhs->getEventList(rhs_wi)).clear();
@@ -1101,6 +1147,23 @@ BinaryOperation::buildBinaryOperationTable(
   }
 
   return table;
+}
+
+// --------------------------------------
+void BinaryOperation::performBinaryOperationOnDx(const MantidVec &,
+                                                 const MantidVec &,
+                                                 API::MatrixWorkspace_sptr &,
+                                                 const int64_t) {
+  g_log.warning("Binary Operation: Cannot operate on X Error. Functionality is "
+                "not implemented. The X Errors are ignored.");
+}
+
+void BinaryOperation::performBinaryOperationOnDx(const MantidVec &,
+                                                 const double,
+                                                 API::MatrixWorkspace_sptr &,
+                                                 const int64_t) {
+  g_log.warning("Binary Operation: Cannot operate on X Error. Functionality is "
+                "not implemented. The X Errors are ignored.");
 }
 
 } // namespace Algorithms

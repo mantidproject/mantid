@@ -91,7 +91,14 @@ Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceRand(int size);
 Mantid::DataObjects::Workspace2D_sptr
 Create1DWorkspaceConstant(int size, double value, double error);
 Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
+Mantid::DataObjects::Workspace2D_sptr
+Create1DWorkspaceConstantWithXerror(int size, double value, double error,
+                                    double xError);
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
+Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
+    int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
+    double eVal, double dxVal,
+    const std::set<int64_t> &maskedWorkspaceIndices = std::set<int64_t>());
 Mantid::DataObjects::Workspace2D_sptr
 Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
 Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(

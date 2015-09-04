@@ -27,6 +27,15 @@ void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                  VectorHelper::SumGaussError<double>());
 }
 
+void Plus::performBinaryOperationOnDx(const MantidVec &lhsDx,
+                                      const MantidVec &rhsDx,
+                                      API::MatrixWorkspace_sptr &outWorkspace,
+                                      const int64_t index) {
+  auto &DxOut = outWorkspace->dataDx(index);
+  std::transform(lhsDx.begin(), lhsDx.end(), rhsDx.begin(), DxOut.begin(),
+                 VectorHelper::SumGaussError<double>());
+}
+
 //---------------------------------------------------------------------------------------------
 void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                                   const MantidVec &lhsE, const double rhsY,
@@ -41,6 +50,19 @@ void Plus::performBinaryOperation(const MantidVec &lhsX, const MantidVec &lhsY,
                    std::bind2nd(VectorHelper::SumGaussError<double>(), rhsE));
   else
     EOut = lhsE;
+}
+
+void Plus::performBinaryOperationOnDx(const MantidVec &lhsDx,
+                                      const double rhsDx,
+                                      API::MatrixWorkspace_sptr &outWorkspace,
+                                      const int64_t index) {
+  auto& DxOut = outWorkspace->dataDx(index);
+  // Only do Dx if non-zero, otherwise just copy
+  if (rhsDx != 0)
+    std::transform(lhsDx.begin(), lhsDx.end(), DxOut.begin(),
+                   std::bind2nd(VectorHelper::SumGaussError<double>(), rhsDx));
+  else
+    DxOut = lhsDx;
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS
