@@ -22,10 +22,10 @@ using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
 
 /*****************************************************************************************/
-/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
-/********** Source = MultiplyDivideTest.h.in *********************************************/
+/********** PLEASE NOTE! CMAKE IS BEING USED TO CREATE AUTO-GENERATED CODE. **************/
+/********** Source = MultiplyDivideTest.h.in => edit here ********************************/
+/********** Targets = MultiplyTest.h, DivideTest.h => don't edit *************************/
 /*****************************************************************************************/
-
 class @MULTIPLYDIVIDETEST_CLASS@ : public CxxTest::TestSuite
 {
 private:
