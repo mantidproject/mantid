@@ -366,7 +366,7 @@ public:
 
       auto& dx = outWS->dataDx(0);
       double expectedDx = sqrt(xError1*xError1 + xError2*xError2);
-      for (size_t i = 0; i < size; ++i) {
+      for (size_t i = 0; i < static_cast<size_t>(size); ++i) {
         TSM_ASSERT_EQUALS("Should be sqrt(1.1^2 + 2.1^2)", dx[i], expectedDx);
       }
       // Clean the ADS
@@ -412,7 +412,7 @@ public:
       auto& dx = outWS->dataDx(0);
       double expectedDx = sqrt(xError1*xError1 + xError2*xError2);
       for (size_t spectra = 0; spectra < outWS->getNumberHistograms(); ++spectra) {
-        for (size_t i = 0; i < nBins; ++i) {
+        for (size_t i = 0; i < static_cast<size_t>(nBins); ++i) {
           TSM_ASSERT_EQUALS("Should be sqrt(1.1^2 + 2.1^2)", dx[i], expectedDx);
         }
       }
