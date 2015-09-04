@@ -246,6 +246,10 @@ void He3TubeEfficiency::getDetectorGeometry(
     boost::shared_ptr<const Geometry::IDetector> det, double &detRadius,
     Kernel::V3D &detAxis) {
   boost::shared_ptr<const Geometry::Object> shape_sptr = det->shape();
+  if(!shape_sptr){
+    throw std::runtime_error("Detector geometry error: detector with id: "+boost::lexical_cast<std::string>(det->getID())+
+                            " does not have shape");
+  }
   std::map<const Geometry::Object *,
            std::pair<double, Kernel::V3D>>::const_iterator it =
       this->shapeCache.find(shape_sptr.get());
