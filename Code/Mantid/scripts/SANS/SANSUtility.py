@@ -1128,9 +1128,9 @@ def is_1D_workspace(workspace):
     @returns true if the workspace has a single spectrum else false
     '''
     if workspace.getNumberHistograms() == 1:
-        return true
+        return True
     else:
-        return false
+        return False
 
 
 ###############################################################################
