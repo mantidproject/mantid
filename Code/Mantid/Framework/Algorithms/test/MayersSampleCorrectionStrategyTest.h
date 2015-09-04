@@ -1,27 +1,27 @@
-#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
+#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGYTEST_H_
+#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGYTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include <algorithm>
 #include <cmath>
 
-using Mantid::Algorithms::MayersSampleCorrection;
+using Mantid::Algorithms::MayersSampleCorrectionStrategy;
 
-class MayersSampleCorrectionTest : public CxxTest::TestSuite {
+class MayersSampleCorrectionStrategyTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MayersSampleCorrectionTest *createSuite() {
-    return new MayersSampleCorrectionTest();
+  static MayersSampleCorrectionStrategyTest *createSuite() {
+    return new MayersSampleCorrectionStrategyTest();
   }
-  static void destroySuite(MayersSampleCorrectionTest *suite) { delete suite; }
+  static void destroySuite(MayersSampleCorrectionStrategyTest *suite) { delete suite; }
 
   void test_attentuaton_correction_for_fixed_mur() {
     std::vector<double> dummy(2, 0.0);
     dummy[1] = 1.0;
-    MayersSampleCorrection mscat(createTestParameters(), dummy, dummy, dummy);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy, dummy);
     auto absFactor = mscat.calculateSelfAttenuation(0.01);
 
     const double delta = 1e-8;
@@ -34,7 +34,7 @@ public:
   {
     std::vector<double> dummy(2, 0.0);
     dummy[1] = 1.0;
-    MayersSampleCorrection mscat(createTestParameters(), dummy, dummy, dummy);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), dummy, dummy, dummy);
     const size_t irp(1);
     const double muR(0.01), abs(0.0003);
     auto absFactor = mscat.calculateMS(irp, muR, abs);
@@ -50,7 +50,7 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
     double xcur(100.0);
     std::generate(tof.begin(), tof.end(), [&xcur] { return xcur++; });
-    MayersSampleCorrection mscat(createTestParameters(), tof, signal, error);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal, error);
 
     // Correct it
     mscat.apply(signal, error);
@@ -81,7 +81,7 @@ public:
       xcur += 1.0;
       return xold;
     });
-    MayersSampleCorrection mscat(createTestParameters(), tof, signal, error);
+    MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal, error);
 
     // Correct it
     mscat.apply(signal, error);
@@ -110,14 +110,14 @@ public:
       return xold;
     });
     TS_ASSERT_THROWS(
-        MayersSampleCorrection(createTestParameters(), tof, signal, error),
+        MayersSampleCorrectionStrategy(createTestParameters(), tof, signal, error),
         std::invalid_argument);
   }
 
 private:
-  MayersSampleCorrection::Parameters createTestParameters() {
+  MayersSampleCorrectionStrategy::Parameters createTestParameters() {
     // A bit like a POLARIS spectrum
-    MayersSampleCorrection::Parameters pars;
+    MayersSampleCorrectionStrategy::Parameters pars;
     pars.l1 = 14.0;
     pars.l2 = 2.2;
     pars.twoTheta = 0.10821;
@@ -131,4 +131,4 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_ */
+#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGYTEST_H_ */

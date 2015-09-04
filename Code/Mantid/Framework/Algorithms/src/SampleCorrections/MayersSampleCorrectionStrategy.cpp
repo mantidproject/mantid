@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Math/ChebyshevPolyFit.h"
@@ -74,9 +74,10 @@ namespace Algorithms {
  * Constructor
  * @param params Defines the required parameters for the correction
  */
-MayersSampleCorrection::MayersSampleCorrection(
-    MayersSampleCorrection::Parameters params, const std::vector<double> &tof,
-    const std::vector<double> &sigIn, const std::vector<double> &errIn)
+MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
+    MayersSampleCorrectionStrategy::Parameters params,
+    const std::vector<double> &tof, const std::vector<double> &sigIn,
+    const std::vector<double> &errIn)
     : m_pars(params), m_tof(tof), m_sigin(sigIn), m_errin(errIn),
       m_histogram(tof.size() == sigIn.size() + 1),
       m_muRrange(calculateMuRange()), m_rng(new MersenneTwister(1)) {
@@ -93,7 +94,7 @@ MayersSampleCorrection::MayersSampleCorrection(
 /**
  * Destructor
  */
-MayersSampleCorrection::~MayersSampleCorrection() {}
+MayersSampleCorrectionStrategy::~MayersSampleCorrectionStrategy() {}
 
 /**
  * Correct the data for absorption and multiple scattering effects. Allows
@@ -102,8 +103,8 @@ MayersSampleCorrection::~MayersSampleCorrection() {}
  * @param sigOut Signal values to correct [In/Out]
  * @param errOut Error values to correct [In/Out]
  */
-void MayersSampleCorrection::apply(std::vector<double> &sigOut,
-                                   std::vector<double> &errOut) {
+void MayersSampleCorrectionStrategy::apply(std::vector<double> &sigOut,
+                                           std::vector<double> &errOut) {
   const size_t nsig(m_sigin.size());
   // Sanity check
   assert(sigOut.size() == m_sigin.size());
@@ -172,7 +173,8 @@ void MayersSampleCorrection::apply(std::vector<double> &sigOut,
  * @param muR Single mu*r slice value
  * @return The self-attenuation factor for this sample
  */
-double MayersSampleCorrection::calculateSelfAttenuation(const double muR) {
+double
+MayersSampleCorrectionStrategy::calculateSelfAttenuation(const double muR) {
   // Integrate over the cylindrical coordinates
   // Constants for calculation
   const double dyr = muR / to<double>(N_RAD - 1);
@@ -215,8 +217,8 @@ double MayersSampleCorrection::calculateSelfAttenuation(const double muR) {
  * @return A pair of (factor,weight)
  */
 std::pair<double, double>
-MayersSampleCorrection::calculateMS(const size_t irp, const double muR,
-                                    const double abs) {
+MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
+                                            const double abs) {
   // Radial coordinate raised to power 1/3 to ensure uniform density of points
   // across circle following discussion with W.G.Marshall (ISIS)
   const double radDistPower = 1. / 3.;
@@ -275,7 +277,8 @@ MayersSampleCorrection::calculateMS(const size_t irp, const double muR,
  * @param tmax Maximum value of TOF in microseconds
  * @return A pair of (min,max) values for muR for the given time of flight
  */
-std::pair<double, double> MayersSampleCorrection::calculateMuRange() const {
+std::pair<double, double>
+MayersSampleCorrectionStrategy::calculateMuRange() const {
   const double flightPath(m_pars.l1 + m_pars.l2);
   const double tmin(tof(0)), tmax(tof(m_sigin.size() - 1));
   return std::make_pair(muR(flightPath, tmin), muR(flightPath, tmax));
@@ -287,8 +290,8 @@ std::pair<double, double> MayersSampleCorrection::calculateMuRange() const {
  * @param tof The time of flight in microseconds
  * @return The mu*r value
  */
-double MayersSampleCorrection::muR(const double flightPath,
-                                   const double tof) const {
+double MayersSampleCorrectionStrategy::muR(const double flightPath,
+                                           const double tof) const {
   return muR(sigmaTotal(flightPath, tof));
 }
 
@@ -297,7 +300,7 @@ double MayersSampleCorrection::muR(const double flightPath,
  * @param sigt The total scattering cross section (barns)
  * @return The mu*r value
  */
-double MayersSampleCorrection::muR(const double sigt) const {
+double MayersSampleCorrectionStrategy::muR(const double sigt) const {
   // Dimensionless number - rho in (1/Angtroms^3), sigt in barns
   // (1/Angstrom = 1e8/cm) * (barn = 1e-24cm) --> factors cancel out
   return m_pars.rho * sigt * (m_pars.cylRadius * 1e2);
@@ -310,8 +313,8 @@ double MayersSampleCorrection::muR(const double sigt) const {
  * @param tof The time of flight in microseconds
  * @return The total scattering cross section in barns
  */
-double MayersSampleCorrection::sigmaTotal(const double flightPath,
-                                          const double tof) const {
+double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath,
+                                                  const double tof) const {
   // sigabs = sigabs(@2200(m/s)^-1)*2200 * velocity;
   const double sigabs = m_pars.sigmaAbs * 2200.0 * tof * 1e-6 / flightPath;
   return sigabs + m_pars.sigmaSc;
@@ -324,7 +327,7 @@ double MayersSampleCorrection::sigmaTotal(const double flightPath,
  * @param i Index of the signal value
  * @return The associated TOF value
  */
-double MayersSampleCorrection::tof(const size_t i) const {
+double MayersSampleCorrectionStrategy::tof(const size_t i) const {
   return m_histogram ? 0.5 * (m_tof[i] + m_tof[i + 1]) : m_tof[i];
 }
 
@@ -332,7 +335,7 @@ double MayersSampleCorrection::tof(const size_t i) const {
  * (Re-)seed the random number generator
  * @param seed Seed value for the random number generator
  */
-void MayersSampleCorrection::seedRNG(const size_t seed) {
+void MayersSampleCorrectionStrategy::seedRNG(const size_t seed) {
   m_rng->setSeed(seed);
 }
 

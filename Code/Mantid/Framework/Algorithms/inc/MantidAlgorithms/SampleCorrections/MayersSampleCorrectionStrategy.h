@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MAYERSMSCORRECTION_H_
-#define MANTID_ALGORITHMS_MAYERSMSCORRECTION_H_
+#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGY_H_
+#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGY_H_
 /**
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -39,7 +39,7 @@ namespace Algorithms {
   https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574 for an array of
   tof, signal & error values
 */
-class MANTID_ALGORITHMS_DLL MayersSampleCorrection {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrectionStrategy {
 public:
   /**
    * Stores parameters for a single calculation for a given angle
@@ -58,13 +58,13 @@ public:
   };
 
   /// Constructor
-  MayersSampleCorrection(MayersSampleCorrection::Parameters params,
-                         const std::vector<double> &tof,
-                         const std::vector<double> &sigIn,
-                         const std::vector<double> &errIn);
+  MayersSampleCorrectionStrategy(
+      MayersSampleCorrectionStrategy::Parameters params,
+      const std::vector<double> &tof, const std::vector<double> &sigIn,
+      const std::vector<double> &errIn);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
-  ~MayersSampleCorrection();
+  ~MayersSampleCorrectionStrategy();
 
   /// Return the correction factors
   void apply(std::vector<double> &sigOut, std::vector<double> &errOut);
@@ -105,4 +105,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_LINDLEYMAYERSELASTICCORRECTION_H_ */
+#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONSTRATEGY_H_ */

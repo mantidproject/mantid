@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAlgorithms/SampleCorrections/SampleMaterialCorrections.h"
-#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
+#include "MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -109,7 +109,7 @@ void SampleMaterialCorrections::exec() {
     if (det->isMonitor() || det->isMasked())
       continue;
 
-    MayersSampleCorrection::Parameters params;
+    MayersSampleCorrectionStrategy::Parameters params;
     params.l1 = l1;
     params.l2 = det->getDistance(*sample);
     params.twoTheta = det->getTwoTheta(sample->getPos(), beamLine);
@@ -119,7 +119,7 @@ void SampleMaterialCorrections::exec() {
     params.sigmaSc = sampleMaterial.totalScatterXSection();
     params.cylRadius = radius;
     params.cylHeight = height;
-    MayersSampleCorrection correction(params, inX, inputWS->readY(i),
+    MayersSampleCorrectionStrategy correction(params, inX, inputWS->readY(i),
                                       inputWS->readE(i));
     correction.apply(outputWS->dataY(i), outputWS->dataE(i));
     prog.report();
