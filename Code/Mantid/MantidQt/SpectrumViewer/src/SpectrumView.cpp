@@ -139,8 +139,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
       sd->addOrther(spectrumDisplay);
     }
     spectrumDisplay->addOrthers(m_spectrumDisplay);
-    spectrumPlot->canvas()->installEventFilter(m_svConnections.get());
-    m_svConnections->initNewSpectrumDisplay(spectrumDisplay.get());
+    //spectrumPlot->canvas()->installEventFilter(m_svConnections.get());
   }
 
   m_spectrumDisplay.append(spectrumDisplay);

@@ -15,6 +15,7 @@
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
+#include "MantidQtSpectrumViewer/TrackingPicker.h"
 
 namespace MantidQt
 {
@@ -49,7 +50,8 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
   m_pointedAtX(0.0), m_pointedAtY(0.0),
   m_imageTable(tableWidget),
   m_totalXMin(0.0), m_totalXMax(0.0),
-  m_totalYMin(0.0), m_totalYMax(0.0)
+  m_totalYMin(0.0), m_totalYMax(0.0),
+  m_imagePicker(NULL)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
@@ -60,6 +62,16 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
 
   m_spectrumPlotItem = new SpectrumPlotItem;
   setupSpectrumPlotItem();
+  m_imagePicker = new TrackingPicker( spectrumPlot->canvas() );
+  m_imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
+  m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
+  m_imagePicker->setRubberBandPen(QColor(Qt::gray));
+
+  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
+  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
+                                  QwtPicker::DragSelection  );
+  QObject::connect( m_imagePicker, SIGNAL(mouseMoved(const QPoint &)),
+                    this, SLOT(imagePickerMoved(const QPoint &)) );
 }
 
 
@@ -120,7 +132,6 @@ void SpectrumDisplay::setDataSource( SpectrumDataSource_sptr dataSource )
                                             m_totalYMin, m_totalYMax,
                                             n_rows, n_cols,
                                             false );
-  std::cerr << "Data array " << m_dataArray->getNRows() << ' ' << m_dataArray->getNCols() << ' ' << m_dataArray.get() << std::endl;
 
   m_spectrumPlot->setAxisScale( QwtPlot::xBottom, m_dataArray->getXMin(), m_dataArray->getXMax() );
   m_spectrumPlot->setAxisScale( QwtPlot::yLeft,   m_dataArray->getYMin(), m_dataArray->getYMax() );
@@ -405,19 +416,24 @@ QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, bool isFr
 
   QPair<double, double> transPoints = getPlotInvTransform(point);
 
-  setHGraph( transPoints.second, isFront );
-  //setVGraph( transPoints.first, isFront );
+  setPointedAtXY(transPoints.first, transPoints.second, isFront );
+
+  return transPoints;
+}
+
+/// Record the point that the user is currently pointing in the scales coordinates
+void SpectrumDisplay::setPointedAtXY( double x, double y, bool isFront ) {
+  setHGraph( y, isFront );
+  setVGraph( x, isFront );
 
   if (isFront) {
-    showInfoList( transPoints.first, transPoints.second );
+    showInfoList( x, y );
     foreach(boost::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
       if (auto display = sd.lock()) {
-        display->setPointedAtPoint(point, false);
+        display->setPointedAtXY(x, y, false);
       }
     }
   }
-
-  return transPoints;
 }
 
 
@@ -443,7 +459,6 @@ void SpectrumDisplay::setHGraph( double y, bool isFront )
   std::vector<float>data   = m_dataArray->getData();
 
   size_t n_cols = m_dataArray->getNCols();
-  std::cerr << "n_cols=" << n_cols << ' ' << m_dataArray.get() << std::endl;
 
   double x_min = m_dataArray->getXMin();
   double x_max = m_dataArray->getXMax();
@@ -630,6 +645,18 @@ void SpectrumDisplay::addOrthers(const QList<boost::shared_ptr<SpectrumDisplay>>
   {
     m_otherDisplays.append(sd);
   }
+}
+
+/**
+ * Update the pointed at position for the m_imagePicker.
+ *
+ * @param point The position moved to.
+ */
+void SpectrumDisplay::imagePickerMoved(const QPoint & point)
+{
+  //m_pickerX = point.x();
+  //m_pickerY = point.y();
+  setPointedAtPoint( point );
 }
 
 } // namespace SpectrumView

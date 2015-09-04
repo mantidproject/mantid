@@ -41,13 +41,11 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
 {
   if(isVertical)
     graphPlot->setAxisMaxMajor( QwtPlot::xBottom, 3 );
-  std::cerr << "make GraphDisplay" << std::endl;
 }
 
 
 GraphDisplay::~GraphDisplay()
 {
-  std::cerr << "del GraphDisplay" << std::endl;
   clearCurves();
 }
 
@@ -117,7 +115,6 @@ void GraphDisplay::setData(const QVector<double> & xData,
     m_minX = xData[0];
     m_maxX = xData[xData.size()-1];
     SVUtils::FindValidInterval( yData, m_minY, m_maxY );
-    std::cerr << "minmax " << m_minY << ' ' << m_maxY << " size " << yData.size() << std::endl;
 
     if ( m_isLogX )                // only set log scale for x if NOT vertical
     {

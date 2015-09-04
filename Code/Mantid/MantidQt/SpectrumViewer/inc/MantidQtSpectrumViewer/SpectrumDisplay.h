@@ -50,8 +50,12 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
+class TrackingPicker;
+
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
 {
+    Q_OBJECT
+
   public:
 
      /// Make an SpectrumDisplay to display with the given widgets and controls
@@ -92,6 +96,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      /// Record the point that the user is currently pointing at with the mouse
      virtual QPair<double,double> setPointedAtPoint( QPoint point, bool isFront = true );
 
+     /// Record the point that the user is currently pointing in the scales coordinates
+     virtual void setPointedAtXY( double x, double y, bool isFront = true );
+
      /// Set horizontal graph wit data from the array at the specified y value
      void setHGraph( double y, bool isFront = true );
 
@@ -120,6 +127,10 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
 
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;
+
+  private slots:
+
+    void imagePickerMoved(const QPoint &point);
 
   private:
      /// Check if the DataSource has been changed under us
@@ -157,6 +168,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      double m_totalYMax;
 
      QList<boost::weak_ptr<SpectrumDisplay>> m_otherDisplays;
+     TrackingPicker* m_imagePicker;
 };
 
 } // namespace SpectrumView

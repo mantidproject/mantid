@@ -71,8 +71,6 @@ public:
   void showColorScale( std::vector<QRgb> & positiveColorTable,
                        std::vector<QRgb> & negativeColorTable );
 
-  void initNewSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
-
 public slots:
   void closeViewer();
   void toggleHScroll();
@@ -82,7 +80,6 @@ public slots:
   void scrollBarMoved();
   void imageSplitterMoved();
   void vgraphSplitterMoved();
-  void imagePickerMoved(const QPoint &point);
   void hGraphPickerMoved(const QPoint &point);
   void vGraphPickerMoved(const QPoint &point);
   void intensitySliderMoved();
@@ -99,6 +96,7 @@ public slots:
   void spectrumColorScale();
 
   void setSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
+  SpectrumDisplay* getCurrentSpectrumDisplay() const;
 
 private:
   /// Event filter for mouse wheel capture
@@ -106,10 +104,10 @@ private:
 
   Ui_SpectrumViewer*  m_svUI;
   SpectrumView*       m_svMainWindow;
-  SpectrumDisplay*    m_spectrumDisplay;
+  QList<SpectrumDisplay*>  m_spectrumDisplays;
+  SpectrumDisplay*  m_currentSpectrumDisplay;
   GraphDisplay*       m_hGraphDisplay;
   GraphDisplay*       m_vGraphDisplay;
-  TrackingPicker*     m_imagePicker;
   TrackingPicker*     m_hGraphPicker;
   TrackingPicker*     m_vGraphPicker;
   QActionGroup*       m_colorGroup;

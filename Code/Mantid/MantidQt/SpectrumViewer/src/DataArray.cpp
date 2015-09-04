@@ -66,7 +66,6 @@ DataArray::DataArray( double xMin,     double xMax,
 
 DataArray::~DataArray()
 {
-  std::cerr << "Deleted " << this << std::endl;
 }
 
 /**
