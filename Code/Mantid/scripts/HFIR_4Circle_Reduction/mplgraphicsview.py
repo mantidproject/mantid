@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called,R0902,too-many-branches,C0302
 import os
 import numpy as np
 
@@ -174,11 +174,10 @@ class IndicatorManager(object):
 
     def get_data(self, line_id):
         """
-
+        Get line's vector x and vector y
         :param line_id:
         :return:
         """
-        # TODO Doc
         return self._lineManager[line_id][0], self._lineManager[line_id][1]
 
     def get_line_style(self, line_id=None):
@@ -196,9 +195,9 @@ class IndicatorManager(object):
         """
         return sorted(self._lineManager.keys())
 
-    def get_marker(self, line_id=None):
+    def get_marker(self):
         """
-
+        Get the marker a line
         :param line_id:
         :return:
         """
@@ -320,7 +319,7 @@ class MplGraphicsView(QtGui.QWidget):
         key_list = list()
         for vec_x, vec_y in vec_set:
             temp_key = self._myCanvas.add_plot_1d(vec_x, vec_y, color=color, marker=marker,
-                                                  line_style=line_style, line_width=line_width)
+                                                  linestyle=line_style, linewidth=line_width)
             assert isinstance(temp_key, int)
             assert temp_key >= 0
             key_list.append(temp_key)
@@ -348,8 +347,9 @@ class MplGraphicsView(QtGui.QWidget):
         :param line_width:
         :return:
         """
-        line_key = self._myCanvas.add_1d_plot_right(vec_x,vec_y, color=color, label=label, marker=marker,
-                                                    line_style=line_style, line_width=line_width)
+        line_key = self._myCanvas.add_1d_plot_right(vec_x, vec_y, label=label,
+                                                    color=color, marker=marker,
+                                                    linestyle=line_style, linewidth=line_width)
 
         return line_key
 
@@ -587,6 +587,29 @@ class MplGraphicsView(QtGui.QWidget):
         """
         """
         return self._myCanvas.updateLine(ikey, vecx, vecy, linestyle, linecolor, marker, markercolor)
+
+    def update_indicator(self, i_key, color):
+        """
+        Update indicator with new color
+        :param i_key:
+        :param vec_x:
+        :param vec_y:
+        :param color:
+        :return:
+        """
+        if self._myIndicatorsManager.get_line_type(i_key) < 2:
+            # horizontal or vertical
+            canvas_line_index = self._myIndicatorsManager.get_canvas_line_index(i_key)
+            self._myCanvas.updateLine(ikey=canvas_line_index, vecx=None, vecy=None, linecolor=color)
+        else:
+            # 2-way
+            canvas_line_index_h, canvas_line_index_v = self._myIndicatorsManager.get_canvas_line_index(i_key)
+            h_vec_set, v_vec_set = self._myIndicatorsManager.get_2way_data(i_key)
+
+            self._myCanvas.updateLine(ikey=canvas_line_index_h, vecx=None, vecy=None, linecolor=color)
+            self._myCanvas.updateLine(ikey=canvas_line_index_v, vecx=None, vecy=None, linecolor=color)
+
+        return
 
     def get_indicator_position(self, indicator_key):
         """ Get position (x or y) of the indicator
@@ -1016,7 +1039,7 @@ class Qt4MplCanvas(FigureCanvas):
 
         # Get all lines in list
         lines = self.axes.lines
-        assert(lines, list)
+        assert isinstance(lines, list)
 
         print 'Number of lines = %d, List: %s' % (len(lines), str(lines))
         print 'Line to remove: key = %s, Line Dict has key = %s' % (str(plot_key), str(self._lineDict.has_key(plot_key)))
