@@ -415,9 +415,7 @@ MantidMatrixModel *MantidMatrix::activeModel()
   case 2: return m_modelE;
   default:
     return m_extensionRequest.getActiveModel(intToModelType(currentIndex), m_extensions, m_modelY);
-  
   }
-  return m_modelY;
 }
 
 /**  Copies the current selection in the active table view into the system clipboard.
