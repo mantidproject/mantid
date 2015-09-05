@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/Crystal/ScalarUtils.cpp
 	src/Crystal/SpaceGroup.cpp
 	src/Crystal/SpaceGroupFactory.cpp
+	src/Crystal/StructureFactorCalculator.cpp
 	src/Crystal/SymmetryElement.cpp
 	src/Crystal/SymmetryElementFactory.cpp
 	src/Crystal/SymmetryOperation.cpp
@@ -159,6 +160,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/ScalarUtils.h
 	inc/MantidGeometry/Crystal/SpaceGroup.h
 	inc/MantidGeometry/Crystal/SpaceGroupFactory.h
+	inc/MantidGeometry/Crystal/StructureFactorCalculator.h
 	inc/MantidGeometry/Crystal/SymmetryElement.h
 	inc/MantidGeometry/Crystal/SymmetryElementFactory.h
 	inc/MantidGeometry/Crystal/SymmetryOperation.h
@@ -348,6 +350,7 @@ set ( TEST_FILES
 	SpaceGroupFactoryTest.h
 	SpaceGroupTest.h
 	SphereTest.h
+	StructureFactorCalculatorTest.h
 	SurfaceFactoryTest.h
 	SurfaceTest.h
 	SymmetryElementFactoryTest.h
