@@ -65,20 +65,20 @@ public:
   }
 
   void testThrowIfRangeUnacceptable() {
-    TestableCrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
+    CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
-    TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(0.0, 1.0),
+    TS_ASSERT_THROWS(structure.getHKLs(0.0, 1.0),
                      std::invalid_argument);
-    TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(-10.0, 1.0),
+    TS_ASSERT_THROWS(structure.getHKLs(-10.0, 1.0),
                      std::invalid_argument);
-    TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(1.0, 0.0),
+    TS_ASSERT_THROWS(structure.getHKLs(1.0, 0.0),
                      std::invalid_argument);
-    TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(1.0, -1.0),
+    TS_ASSERT_THROWS(structure.getHKLs(1.0, -1.0),
                      std::invalid_argument);
-    TS_ASSERT_THROWS(structure.throwIfRangeUnacceptable(2.0, 1.0),
+    TS_ASSERT_THROWS(structure.getHKLs(2.0, 1.0),
                      std::invalid_argument);
 
-    TS_ASSERT_THROWS_NOTHING(structure.throwIfRangeUnacceptable(1.0, 2.0));
+    TS_ASSERT_THROWS_NOTHING(structure.getHKLs(1.0, 2.0));
   }
 
   void testGetUniqueHKLsHappyCase() {
@@ -253,19 +253,8 @@ public:
 
 private:
   UnitCell m_CsCl;
-
   SpaceGroup_const_sptr m_spaceGroup;
   CompositeBraggScatterer_sptr m_scatterers;
-
-  class TestableCrystalStructure : public CrystalStructure {
-    friend class CrystalStructureTest;
-
-  public:
-    TestableCrystalStructure(const UnitCell &unitCell,
-                             const SpaceGroup_const_sptr &spaceGroup,
-                             const CompositeBraggScatterer_sptr &scatterers)
-        : CrystalStructure(unitCell, spaceGroup, scatterers) {}
-  };
 };
 
 #endif /* MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_ */
