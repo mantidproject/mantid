@@ -44,8 +44,7 @@ public:
   {
       CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
 
-      // Space group is null
-      TS_ASSERT(!structure.spaceGroup());
+      TS_ASSERT_EQUALS(structure.spaceGroup()->hmSymbol(), m_spaceGroup->hmSymbol());
       TS_ASSERT_THROWS_NOTHING(structure.setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("I a -3 d")));
 
       // Not null anymore
@@ -82,7 +81,7 @@ public:
       double dMin = 0.55;
       double dMax = 4.0;
 
-      CrystalStructure structure(m_CsCl, m_spaceGroup, m_scatterers);
+      CrystalStructure structure(m_CsCl, SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m"), m_scatterers);
 
       TS_ASSERT_THROWS_NOTHING(structure.getUniqueHKLs(dMin, dMax));
 
