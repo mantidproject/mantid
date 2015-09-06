@@ -14,6 +14,9 @@
 namespace Mantid {
 namespace Geometry {
 
+// Forward declaration
+class StructureFactorCalculator;
+
 /**
     @class CrystalStructure
 
@@ -138,7 +141,10 @@ namespace Geometry {
   */
 class DLLExport CrystalStructure {
 public:
-  enum ReflectionConditionMethod { UseCentering, UseStructureFactor };
+  enum ReflectionConditionMethod {
+    UseCentering,
+    UseStructureFactor
+  };
 
   CrystalStructure(const UnitCell &unitCell,
                    const SpaceGroup_const_sptr &spaceGroup,
@@ -156,19 +162,17 @@ public:
   void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
   void addScatterers(const CompositeBraggScatterer_sptr &scatterers);
 
-  std::vector<Kernel::V3D>
-  getHKLs(double dMin, double dMax,
-          ReflectionConditionMethod method = UseCentering) const;
-  std::vector<Kernel::V3D>
-  getUniqueHKLs(double dMin, double dMax,
-                ReflectionConditionMethod method = UseCentering) const;
+  std::vector<Kernel::V3D> getHKLs(double dMin, double dMax,
+                                   ReflectionConditionMethod method =
+                                       UseCentering) const;
+  std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax,
+                                         ReflectionConditionMethod method =
+                                             UseCentering) const;
 
   std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
   std::vector<double> getFSquared(const std::vector<Kernel::V3D> &hkls) const;
 
 protected:
-  void updateScatterersInUnitCell();
-  std::string getV3DasString(const Kernel::V3D &point) const;
   void assignUnitCellToScatterers(const UnitCell &unitCell);
 
   void
@@ -178,6 +182,7 @@ protected:
       CrystalStructure::ReflectionConditionMethod method) const;
 
   void initializeScatterers();
+  void updateStructureFactorCalculator();
 
   void throwIfRangeUnacceptable(double dMin, double dMax) const;
 
@@ -191,7 +196,7 @@ protected:
   SpaceGroup_const_sptr m_spaceGroup;
   ReflectionCondition_sptr m_centering;
   CompositeBraggScatterer_sptr m_scatterers;
-  CompositeBraggScatterer_sptr m_scatterersInUnitCell;
+  boost::shared_ptr<StructureFactorCalculator> m_calculator;
 };
 
 typedef boost::shared_ptr<CrystalStructure> CrystalStructure_sptr;

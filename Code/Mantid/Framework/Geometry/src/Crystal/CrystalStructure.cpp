@@ -5,6 +5,7 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
+#include "MantidGeometry/Crystal/StructureFactorCalculatorSummation.h"
 
 #include <iostream>
 #include <iomanip>
@@ -18,6 +19,8 @@ using namespace Mantid::Kernel;
 CrystalStructure::CrystalStructure(
     const UnitCell &unitCell, const SpaceGroup_const_sptr &spaceGroup,
     const CompositeBraggScatterer_sptr &scatterers) {
+  m_calculator = boost::make_shared<StructureFactorCalculatorSummation>();
+
   initializeScatterers();
 
   addScatterers(scatterers);
@@ -33,7 +36,7 @@ void CrystalStructure::setCell(const UnitCell &cell) {
   m_cell = cell;
 
   assignUnitCellToScatterers(m_cell);
-  updateScatterersInUnitCell();
+  updateStructureFactorCalculator();
 }
 
 /// Returns the space group of the crystal structure
@@ -50,7 +53,7 @@ void CrystalStructure::setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup) {
   m_spaceGroup = spaceGroup;
 
   setReflectionConditionFromSpaceGroup(m_spaceGroup);
-  updateScatterersInUnitCell();
+  updateStructureFactorCalculator();
 }
 
 /// Return a clone of the internal CompositeBraggScatterer instance.
@@ -79,8 +82,7 @@ void CrystalStructure::addScatterers(
   }
 
   assignUnitCellToScatterers(m_cell);
-
-  updateScatterersInUnitCell();
+  updateStructureFactorCalculator();
 }
 
 /// Returns a vector with all allowed HKLs in the given d-range
@@ -176,14 +178,7 @@ CrystalStructure::getDValues(const std::vector<V3D> &hkls) const {
 /// Returns |F(hkl)|^2 for all supplied hkls.
 std::vector<double>
 CrystalStructure::getFSquared(const std::vector<V3D> &hkls) const {
-  std::vector<double> fSquared;
-  fSquared.reserve(hkls.size());
-
-  for (auto hkl = hkls.begin(); hkl != hkls.end(); ++hkl) {
-    fSquared.push_back(getFSquared(*hkl));
-  }
-
-  return fSquared;
+  return m_calculator->getFsSquared(hkls);
 }
 
 /// Tries to set the centering from the space group symbol or removes the
@@ -210,45 +205,6 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
   }
 }
 
-/// Generates all equivalent positions and creates the corresponding scatterers.
-void CrystalStructure::updateScatterersInUnitCell() {
-  if (m_spaceGroup) {
-    m_scatterersInUnitCell->removeAllScatterers();
-
-    for (size_t i = 0; i < m_scatterers->nScatterers(); ++i) {
-      BraggScattererInCrystalStructure_sptr current =
-          boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
-              m_scatterers->getScatterer(i));
-
-      if (current) {
-        std::vector<V3D> positions =
-            m_spaceGroup->getEquivalentPositions(current->getPosition());
-
-        for (auto pos = positions.begin(); pos != positions.end(); ++pos) {
-          BraggScatterer_sptr clone = current->clone();
-          clone->setProperty("Position", getV3DasString(*pos));
-
-          m_scatterersInUnitCell->addScatterer(clone);
-        }
-      }
-    }
-
-  } else {
-    m_scatterersInUnitCell =
-        boost::dynamic_pointer_cast<CompositeBraggScatterer>(
-            m_scatterers->clone());
-  }
-}
-
-/// Return V3D as string without losing precision.
-std::string CrystalStructure::getV3DasString(const V3D &point) const {
-  std::ostringstream posStream;
-  posStream << std::setprecision(17);
-  posStream << point;
-
-  return posStream.str();
-}
-
 /// Assigns the cell to all scatterers
 void CrystalStructure::assignUnitCellToScatterers(const UnitCell &unitCell) {
   if (!m_scatterers) {
@@ -266,10 +222,10 @@ void CrystalStructure::initializeScatterers() {
   if (!m_scatterers) {
     m_scatterers = CompositeBraggScatterer::create();
   }
+}
 
-  if (!m_scatterersInUnitCell) {
-    m_scatterersInUnitCell = CompositeBraggScatterer::create();
-  }
+void CrystalStructure::updateStructureFactorCalculator() {
+  m_calculator->setCrystalStructure(*this);
 }
 
 /// Check that the internal state is sufficient for generating a list of HKLs
@@ -315,7 +271,7 @@ double CrystalStructure::getDValue(const V3D &hkl) const {
 
 /// Returns |F|^2 for the given HKL.
 double CrystalStructure::getFSquared(const V3D &hkl) const {
-  return m_scatterersInUnitCell->calculateFSquared(hkl);
+  return m_calculator->getFSquared(hkl);
 }
 
 } // namespace Geometry
