@@ -581,6 +581,14 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type) {
 }
 
 /**
+ * Set the exponent for the Power scale type
+ * @param nth_power :: The exponent choice
+ */
+void InstrumentWindow::setExponent(double nth_power) {
+  emit nthPowerChanged(nth_power);
+}
+
+/**
  * This method opens a color dialog to pick the background color,
  * and then sets it.
  */
@@ -791,6 +799,12 @@ void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
 void InstrumentWindow::changeScaleType(int type) {
   m_instrumentActor->changeScaleType(type);
+  setupColorMap();
+  updateInstrumentView();
+}
+
+void InstrumentWindow::changeNthPower(double nth_power) {
+  m_instrumentActor->changeNthPower(nth_power);
   setupColorMap();
   updateInstrumentView();
 }
@@ -1189,14 +1203,14 @@ void InstrumentWindow::createTabs(QSettings &settings) {
 
   // Mask controls
   InstrumentWindowMaskTab *maskTab = new InstrumentWindowMaskTab(this);
-  mControlsTab->addTab(maskTab, QString("Mask/Group"));
+  mControlsTab->addTab(maskTab, QString("Draw"));
   connect(maskTab, SIGNAL(executeAlgorithm(const QString &, const QString &)),
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
   maskTab->loadSettings(settings);
 
   // Instrument tree controls
   InstrumentWindowTreeTab *treeTab = new InstrumentWindowTreeTab(this);
-  mControlsTab->addTab(treeTab, QString("Instrument Tree"));
+  mControlsTab->addTab(treeTab, QString("Instrument"));
   treeTab->loadSettings(settings);
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,

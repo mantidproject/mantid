@@ -155,6 +155,9 @@ public:
 
     // Check detector IDs
     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_1") );
+    std::string columnName;
+    TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getAttr("name", columnName) );
+    TS_ASSERT_EQUALS( columnName, "Detector ID");
     std::vector<int> detIDs;
     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(detIDs));
     nexusHelper.file->closeData();

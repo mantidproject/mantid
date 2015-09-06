@@ -1,9 +1,11 @@
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidKernel/ArrayProperty.h"
@@ -18,6 +20,7 @@
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
 
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -235,6 +238,10 @@ void ConvertToReflectometryQ::init() {
   declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "",
                                                       Direction::Output),
                   "Output 2D Workspace.");
+                  
+  declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputVertexes", "",
+                                                      Direction::Output),
+                  "Output TableWorkspace with vertex information. See DumpVertexes property.");
 
   declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQx", 100),
                   "The number of bins along the qx axis. Optional and only "
@@ -242,6 +249,11 @@ void ConvertToReflectometryQ::init() {
   declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQz", 100),
                   "The number of bins along the qx axis. Optional and only "
                   "applies to 2D workspaces. Defaults to 100.");
+                  
+  declareProperty(
+      new Kernel::PropertyWithValue<bool>("DumpVertexes", false),
+      "If set, with 2D rebinning, the intermediate vertexes for each polygon will be written out for debugging purposes. Creates a second output table workspace.");
+      
   setPropertySettings(
       "NumberBinsQx",
       new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT));
@@ -260,6 +272,8 @@ void ConvertToReflectometryQ::init() {
   setPropertySettings(
       "MaxRecursionDepth",
       new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT));
+      
+   
 }
 
 //----------------------------------------------------------------------------------------------
@@ -338,6 +352,8 @@ void ConvertToReflectometryQ::exec() {
 
   IMDWorkspace_sptr outputWS;
 
+  TableWorkspace_sptr vertexes = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+
   if (outputAsMDWorkspace) {
     if (transMethod == centerTransform()) {
       auto outputMDWS = transform->executeMD(inputWs, bc);
@@ -356,7 +372,10 @@ void ConvertToReflectometryQ::exec() {
       outputWS2D->copyExperimentInfoFrom(inputWs.get());
       outputWS = outputWS2D;
     } else if (transMethod == normPolyTransform()) {
-      auto outputWSRB = transform->executeNormPoly(inputWs);
+      const bool dumpVertexes = this->getProperty("DumpVertexes");
+      auto vertexesTable = vertexes;
+      
+      auto outputWSRB = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes);
       outputWSRB->copyExperimentInfoFrom(inputWs.get());
       outputWS = outputWSRB;
     } else {
@@ -366,6 +385,7 @@ void ConvertToReflectometryQ::exec() {
 
   // Execute the transform and bind to the output.
   setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputVertexes", vertexes);
 }
 
 } // namespace Mantid

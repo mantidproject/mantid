@@ -72,9 +72,9 @@ void GatherWorkspaces::init() {
       "OutputWorkspace", "", Direction::Output, PropertyMode::Optional));
   declareProperty("PreserveEvents", false,
                   "Keep the output workspace as an EventWorkspace, if the "
-                  "input has events (default).\n"
+                  "input has events.\n"
                   "If false, then the workspace gets converted to a "
-                  "Workspace2D histogram.");
+                  "Workspace2D histogram(default to save memory for reduced data)");
   std::vector<std::string> propOptions;
   propOptions.push_back("Add");
   // propOptions.push_back("Replace");
@@ -182,7 +182,7 @@ void GatherWorkspaces::exec() {
         outputWorkspace->dataE(wi) = inputWorkspace->readE(wi);
 
         const int numReqs(3 * (included.size() - 1));
-        mpi::request reqs[numReqs];
+        std::vector<boost::mpi::request> reqs(numReqs);
         int j(0);
 
         // Receive data from all the other processes
@@ -201,7 +201,7 @@ void GatherWorkspaces::exec() {
         }
 
         // Make sure everything's been received before exiting the algorithm
-        mpi::wait_all(reqs, reqs + numReqs);
+        mpi::wait_all(reqs.begin(), reqs.end());
       }
       ISpectrum *outSpec = outputWorkspace->getSpectrum(wi);
       outSpec->clearDetectorIDs();
@@ -211,7 +211,7 @@ void GatherWorkspaces::exec() {
         reduce(included, inputWorkspace->readY(wi), vplus(), 0);
         reduce(included, inputWorkspace->readE(wi), eplus(), 0);
       } else if (accum == "Append") {
-        mpi::request reqs[3];
+        std::vector<boost::mpi::request> reqs(3);
 
         // Send the spectrum to the root process
         reqs[0] = included.isend(0, 0, inputWorkspace->readX(0));
@@ -219,7 +219,7 @@ void GatherWorkspaces::exec() {
         reqs[2] = included.isend(0, 2, inputWorkspace->readE(0));
 
         // Make sure the sends have completed before exiting the algorithm
-        mpi::wait_all(reqs, reqs + 3);
+        mpi::wait_all(reqs.begin(), reqs.end());
       }
     }
   }

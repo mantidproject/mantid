@@ -1,4 +1,4 @@
-#pylint: disable=no-init,non-parent-init-called
+#pylint: disable=no-init,non-parent-init-called,too-few-public-methods
 # non-parent-init-called is disabled to remove false positives from a bug in pyLint < 1.4
 
 from abc import ABCMeta, abstractmethod

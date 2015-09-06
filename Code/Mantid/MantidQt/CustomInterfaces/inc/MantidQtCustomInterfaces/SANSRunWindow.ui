@@ -4143,7 +4143,7 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="12" column="2">
-         <layout class="QHBoxLayout" name="horizontalLayout_24">
+         <layout class="QHBoxLayout" name="horizontalLayout_241">
           <item>
            <widget class="QLabel" name="binning_label">
             <property name="minimumSize">

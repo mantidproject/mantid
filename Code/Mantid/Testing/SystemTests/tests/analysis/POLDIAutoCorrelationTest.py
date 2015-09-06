@@ -32,8 +32,8 @@ class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
             calculatedData = mtd["%sCorr" % (dataFile)].dataY(0)
 
             self.assertEqual(calculatedData.shape[0], referenceData.shape[0],
-                             "Number of d-values does not match for %s (is: %i, should: %i)" % (
-                             dataFile, calculatedData.shape[0], referenceData.shape[0]))
+                             "Number of d-values does not match for %s (is: %i, should: %i)" % (dataFile,\
+                             calculatedData.shape[0], referenceData.shape[0]))
 
             CreateWorkspace(referenceData, calculatedData, OutputWorkspace=workspaceNameTemplate)
 
@@ -47,18 +47,18 @@ class POLDIAutoCorrelationTest(stresstesting.MantidStressTest):
             self.assertDelta(slope, 1.0, 1e-4, "Slope is larger than 1.0 for %s (is: %d)" % (dataFile, slope))
 
             relativeSlopeError = fitResult.cell(1, 2) / slope
-            self.assertLessThan(relativeSlopeError, 5e-4, "Relative error of slope is too large for %s (is: %d)" % (
-                                                          dataFile, relativeSlopeError))
+            self.assertLessThan(relativeSlopeError, 5e-4, "Relative error of slope is too large "
+                                "for %s (is: %d)" % (dataFile, relativeSlopeError))
 
             intercept = fitResult.cell(0, 1)
             self.assertDelta(intercept, 0.0, 1.0, "Intercept deviates too far from 0 %s (is: %d)" % (dataFile, intercept))
 
             relativeInterceptError = fitResult.cell(0, 2) / intercept
-            self.assertLessThan(relativeInterceptError, 1, "Relative error of intercept is too large for %s (is: %d)" % (
-                                                           dataFile, relativeInterceptError))
+            self.assertLessThan(relativeInterceptError, 1, "Relative error of intercept is too large "
+                                "for %s (is: %d)" % (dataFile, relativeInterceptError))
 
             residuals = mtd[fitNameTemplate + "_Workspace"].dataY(2)
             maxAbsoluteResidual = np.max(np.abs(residuals))
-            self.assertLessThan(maxAbsoluteResidual, 1.0, "Maximum absolute residual is too large for %s (is: %d)" % (
-                                                          dataFile, maxAbsoluteResidual))
+            self.assertLessThan(maxAbsoluteResidual, 1.0, "Maximum absolute residual is too large "
+                                "for %s (is: %d)" % (dataFile, maxAbsoluteResidual))
 

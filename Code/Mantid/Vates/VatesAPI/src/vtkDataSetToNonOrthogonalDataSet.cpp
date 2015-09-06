@@ -8,6 +8,7 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 
+#include <vtkPointSet.h>
 #include <vtkDataSet.h>
 #include <vtkFieldData.h>
 #include <vtkFloatArray.h>
@@ -16,11 +17,13 @@
 #include "vtkVector.h"
 #include <vtkNew.h>
 #include <vtkPoints.h>
-#include <vtkUnstructuredGrid.h>
 #include <vtkDataObject.h>
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
 #include <vtkPVChangeOfBasisHelper.h>
+
+#include <vtkPointData.h>
+#include "vtkNew.h"
 
 #include <boost/algorithm/string/find.hpp>
 #include <stdexcept>
@@ -110,8 +113,8 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(
 vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 
 void vtkDataSetToNonOrthogonalDataSet::execute() {
-  // Downcast to a vtkUnstructuredGrid
-  vtkUnstructuredGrid *data = vtkUnstructuredGrid::SafeDownCast(m_dataSet);
+  // Downcast to a vtkPointSet
+  vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
   if (NULL == data)
   {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
@@ -199,12 +202,6 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
   Kernel::DblMatrix wTrans(wMatArr);
   this->createSkewInformation(oLatt, wTrans, affMat);
 
-  // Get the original points
-  vtkPoints *points = data->GetPoints();
-  double outPoint[3];
-  vtkPoints *newPoints = vtkPoints::New();
-  newPoints->Allocate(points->GetNumberOfPoints());
-
   /// Put together the skew matrix for use
   double skew[9];
 
@@ -217,12 +214,17 @@ void vtkDataSetToNonOrthogonalDataSet::execute() {
     }
   }
 
+  vtkNew<vtkPoints> newPoints;
+  double outPoint[3];
+  // Get the original points
+  vtkPoints *points = data->GetPoints();
+  newPoints->Allocate(points->GetNumberOfPoints());
   for (int i = 0; i < points->GetNumberOfPoints(); i++) {
-    double *inPoint = points->GetPoint(i);
-    vtkMatrix3x3::MultiplyPoint(skew, inPoint, outPoint);
+    points->GetPoint(i, outPoint);
+    vtkMatrix3x3::MultiplyPoint(skew, outPoint, outPoint);
     newPoints->InsertNextPoint(outPoint);
   }
-  data->SetPoints(newPoints);
+  data->SetPoints(newPoints.GetPointer());
   this->updateMetaData(data);
 }
 
@@ -339,7 +341,7 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat) {
  * VTK dataset.
  * @param ugrid : The VTK dataset to add the metadata to
  */
-void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
+void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid)
 {
   // Create and add the change of basis matrix
   addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ,

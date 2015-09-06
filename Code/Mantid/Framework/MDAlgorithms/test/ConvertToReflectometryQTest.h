@@ -52,6 +52,7 @@ private:
     alg->setProperty("InputWorkspace", in_ws);
     alg->setProperty("OutputDimensions", outputdimensions);
     alg->setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
+    alg->setPropertyValue("OutputVertexes", "vertexes");
     alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("OutputAsMDWorkspace", outputAsMD);
     alg->setProperty("IncidentTheta", 0.5);
@@ -299,6 +300,7 @@ public:
     alg.setProperty("InputWorkspace", ws->getItem(0));
     alg.setProperty("OutputDimensions", "Q (lab frame)");
     alg.setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
+    alg.setPropertyValue("OutputVertexes", "vertexes");
     alg.setProperty("OverrideIncidentTheta", true);
     alg.setProperty("IncidentTheta", 0.5);
     TS_ASSERT(alg.execute());
@@ -317,6 +319,7 @@ public:
     alg.setProperty("OutputDimensions", "Q (lab frame)");
     alg.setProperty("OutputAsMDWorkspace", false);
     alg.setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
+    alg.setPropertyValue("OutputVertexes", "vertexes");
     alg.setProperty("OverrideIncidentTheta", true);
     alg.setProperty("IncidentTheta", 0.5);
     alg.setProperty("Method", "NormalisedPolygon");

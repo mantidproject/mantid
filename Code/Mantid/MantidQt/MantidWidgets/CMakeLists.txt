@@ -26,6 +26,7 @@ set ( SRC_FILES
     src/MuonFitPropertyBrowser.cpp
     src/MuonSequentialFitDialog.cpp
     src/PeakPicker.cpp
+    src/PeriodicTableWidget.cpp
     src/PreviewPlot.cpp
     src/ProcessingAlgoWidget.cpp
     src/PropertyHandler.cpp
@@ -76,6 +77,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/MWDiag.h
     inc/MantidQtMantidWidgets/MWRunFiles.h
     inc/MantidQtMantidWidgets/PeakPicker.h
+    inc/MantidQtMantidWidgets/PeriodicTableWidget.h
     inc/MantidQtMantidWidgets/pqHelpWindow.h
     inc/MantidQtMantidWidgets/PreviewPlot.h
     inc/MantidQtMantidWidgets/PropertyHandler.h
@@ -126,6 +128,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/SlicingAlgorithmDialog.ui
     inc/MantidQtMantidWidgets/SlitCalculator.ui
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
+    inc/MantidQtMantidWidgets/PeriodicTableWidget.ui
     inc/MantidQtMantidWidgets/PreviewPlot.ui
     inc/MantidQtMantidWidgets/pqHelpWindow.ui
 )

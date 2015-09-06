@@ -144,9 +144,8 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
 /** Construct a time from an ISO8601 string
  *
  * @param ISO8601_string: and ISO8601 formatted string.
- *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a
- *space,
- *    and the time is optional, as is the time-zone specification.
+ *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a space.
+ *    The time must included, but the time-zone specification is optional.
  */
 DateAndTime::DateAndTime(const std::string ISO8601_string) : _nanoseconds(0) {
   this->setFromISO8601(ISO8601_string);
@@ -452,8 +451,7 @@ void DateAndTime::setFromISO8601(const std::string str) {
   // seem to accept only a date as valid, whereas later versions do not. We want
   // the
   // string to always denote the full timestamp so we check for a colon and if
-  // it is
-  // not present then assume the time has not been given
+  // it is not present then throw an exception.
   if (time.find(":") == std::string::npos)
     throw std::invalid_argument("Error interpreting string '" + str +
                                 "' as a date/time.");

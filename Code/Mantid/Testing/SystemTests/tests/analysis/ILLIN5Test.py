@@ -2,7 +2,7 @@
 import stresstesting
 
 from mantid.api import MatrixWorkspace, mtd
-from mantid.simpleapi import LoadILL
+from mantid.simpleapi import *
 
 import unittest
 
@@ -57,7 +57,7 @@ class ILLIN5Tests(unittest.TestCase):
 
     #================== Private methods ================================
 
-
+    #pylint: disable=unused-argument
     def _run_load(self, dataFile, vanaFile=None,vanaWS=None,outWSName=wsData_name):
         """
         ILL Loader
@@ -72,7 +72,7 @@ class ILLIN5Tests(unittest.TestCase):
 #====================================================================================
 
 class LoadILLIN5Test(stresstesting.MantidStressTest):
-
+    _success=False
     def runTest(self):
         self._success = False
         # Custom code to create and run this single test suite

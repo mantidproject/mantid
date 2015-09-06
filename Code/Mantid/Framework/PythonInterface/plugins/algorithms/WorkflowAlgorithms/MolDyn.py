@@ -6,17 +6,8 @@ from mantid.api import *
 import os
 
 
-#pylint: disable=too-many-instance-attributes
 class MolDyn(PythonAlgorithm):
 
-    _plot = None
-    _save = None
-    _sam_path = None
-    _symmetrise = None
-    _functions = None
-    _emax = None
-    _res_ws = None
-    _out_ws = None
     _mtd_plot = None
 
 
@@ -29,18 +20,17 @@ class MolDyn(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(FileProperty('Filename', '',
-                                          action=FileAction.Load,
-                                          extensions=['.cdl', '.dat']),
-                                          doc='File path for data')
+        self.declareProperty('Data', '',
+                             validator=StringMandatoryValidator(),
+                             doc='')
 
         self.declareProperty(StringArrayProperty('Functions'),
-                             doc='The Function to use')
+                             doc='A list of function to load')
 
         self.declareProperty(WorkspaceProperty('Resolution', '', Direction.Input, PropertyMode.Optional),
                              doc='Resolution workspace')
 
-        self.declareProperty(name='MaxEnergy', defaultValue='',
+        self.declareProperty(name='MaxEnergy', defaultValue=Property.EMPTY_DBL,
                              doc='Crop the result spectra at a given energy (leave blank for no crop)')
 
         self.declareProperty(name='SymmetriseEnergy', defaultValue=False,
@@ -60,15 +50,16 @@ class MolDyn(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        symm = self.getProperty('SymmetriseEnergy').value
+        try:
+            self._get_version_and_data_path()
+        except ValueError, vex:
+            issues['Data'] = str(vex)
+
         res_ws = self.getPropertyValue('Resolution')
-        e_max = self.getPropertyValue('MaxEnergy')
+        max_energy = self.getPropertyValue('MaxEnergy')
 
-        if res_ws is not '' and e_max is '':
+        if res_ws != '' and max_energy == Property.EMPTY_DBL:
             issues['MaxEnergy'] = 'MaxEnergy must be set when convolving with an instrument resolution'
-
-        if res_ws is not '' and not symm:
-            issues['SymmetriseEnergy'] = 'Must symmetrise energy when convolving with instrument resolution'
 
         return issues
 
@@ -78,50 +69,63 @@ class MolDyn(PythonAlgorithm):
         from IndirectImport import import_mantidplot
         self._mtd_plot = import_mantidplot()
 
-        # Do setup
-        self._setup()
+        output_ws_name = self.getPropertyValue('OutputWorkspace')
+        version, data_name, _ = self._get_version_and_data_path()
+
+        logger.information('Detected data from nMoldyn version {0}'.format(version))
 
         # Run nMOLDYN import
-        LoadNMoldyn3Ascii(Filename=self.getPropertyValue('Filename'),
-                          OutputWorkspace=self._out_ws,
-                          Functions=self.getPropertyValue('Functions'))
+        if version == 3:
+            LoadNMoldyn3Ascii(Filename=data_name,
+                              OutputWorkspace=output_ws_name,
+                              Functions=self.getPropertyValue('Functions'))
+        elif version == 4:
+            LoadNMoldyn4Ascii(Directory=data_name,
+                              OutputWorkspace=output_ws_name,
+                              Functions=self.getPropertyValue('Functions'))
+        else:
+            raise RuntimeError('No loader for input data')
+
+        symmetrise = self.getProperty('SymmetriseEnergy').value
+        max_energy_param = self.getProperty('MaxEnergy').value
 
         # Do processing specific to workspaces in energy
-        if isinstance(mtd[self._out_ws], WorkspaceGroup):
-            for ws_name in mtd[self._out_ws].getNames():
+        if isinstance(mtd[output_ws_name], WorkspaceGroup):
+            for ws_name in mtd[output_ws_name].getNames():
                 if mtd[ws_name].getAxis(0).getUnit().unitID() == 'Energy':
                     # Get an XMax value, default to max energy if not cropping
-                    e_max = mtd[ws_name].dataX(0).max()
-                    logger.debug('Max energy in workspace %s: %f' % (ws_name, e_max))
+                    max_energy = mtd[ws_name].dataX(0).max()
+                    logger.debug('Max energy in workspace %s: %f' % (ws_name, max_energy))
 
-                    if self._emax is not None:
-                        if self._emax > e_max:
+                    if max_energy_param != Property.EMPTY_DBL:
+                        if max_energy_param > max_energy:
                             raise ValueError('MaxEnergy crop is out of energy range for function %s' % ws_name)
-                        e_max = self._emax
+                        max_energy = max_energy_param
 
                     # If we are going to Symmetrise then there is no need to crop
                     # as the Symmetrise algorithm will do this
-                    if self._symmetrise:
+                    if symmetrise:
                         # Symmetrise the sample workspace in x=0
                         Symmetrise(InputWorkspace=ws_name,
                                    XMin=0,
-                                   XMax=e_max,
+                                   XMax=max_energy,
                                    OutputWorkspace=ws_name)
 
-                    elif self._emax is not None:
+                    elif max_energy_param != Property.EMPTY_DBL:
                         CropWorkspace(InputWorkspace=ws_name,
                                       OutputWorkspace=ws_name,
-                                      XMax=self._emax)
+                                      XMin=-max_energy,
+                                      XMax=max_energy)
 
         # Do convolution if given a resolution workspace
-        if self._res_ws is not '':
+        if self.getPropertyValue('Resolution') != '':
             # Create a workspace with enough spectra for convolution
-            num_sample_hist = mtd[self._out_ws].getItem(0).getNumberHistograms()
+            num_sample_hist = mtd[output_ws_name].getItem(0).getNumberHistograms()
             resolution_ws = self._create_res_ws(num_sample_hist)
 
             # Convolve all workspaces in output group
-            for ws_name in mtd[self._out_ws].getNames():
-                if ws_name.lower().find('sqw') != -1:
+            for ws_name in mtd[output_ws_name].getNames():
+                if 'Energy' in mtd[ws_name].getAxis(0).getUnit().unitID():
                     self._convolve_with_res(resolution_ws, ws_name)
                 else:
                     logger.information('Ignoring workspace %s in convolution step' % ws_name)
@@ -130,45 +134,53 @@ class MolDyn(PythonAlgorithm):
             DeleteWorkspace(resolution_ws)
 
         # Save result workspace group
-        if self._save:
+        if self.getProperty('Save').value:
             workdir = config['defaultsave.directory']
-            out_filename = os.path.join(workdir, self._out_ws + '.nxs')
+            out_filename = os.path.join(workdir, output_ws_name + '.nxs')
             logger.information('Creating file: %s' % out_filename)
-            SaveNexus(InputWorkspace=self._out_ws, Filename=out_filename)
+            SaveNexus(InputWorkspace=output_ws_name, Filename=out_filename)
 
         # Set the output workspace
-        self.setProperty('OutputWorkspace', self._out_ws)
+        self.setProperty('OutputWorkspace', output_ws_name)
 
+        plot = self.getProperty('Plot').value
         # Plot spectra plots
-        if self._plot == 'Spectra' or self._plot == 'Both':
-            if isinstance(mtd[self._out_ws], WorkspaceGroup):
-                for ws_name in mtd[self._out_ws].getNames():
+        if plot == 'Spectra' or plot == 'Both':
+            if isinstance(mtd[output_ws_name], WorkspaceGroup):
+                for ws_name in mtd[output_ws_name].getNames():
                     self._plot_spectra(ws_name)
             else:
-                self._plot_spectra(self._out_ws)
+                self._plot_spectra(output_ws_name)
 
         # Plot contour plot
-        if self._plot == 'Contour' or self._plot == 'Both':
-            self._mtd_plot.plot2D(self._out_ws)
+        if plot == 'Contour' or plot == 'Both':
+            self._mtd_plot.plot2D(output_ws_name)
 
 
-    def _setup(self):
+    def _get_version_and_data_path(self):
         """
-        Gets algorithm properties.
+        Inspects the Data parameter to determine th eversion of nMoldyn it is
+        loading from.
+
+        @return Tuple of (version, data file/directory, file extension)
         """
+        data = self.getPropertyValue('Data')
+        extension = None
 
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
+        if os.path.isdir(data):
+            version = 4
+        else:
+            file_path = FileFinder.getFullPath(data)
+            if os.path.isfile(file_path):
+                version = 3
+                extension = os.path.splitext(file_path)[1][1:]
+                if extension not in ['dat', 'cdl']:
+                    raise ValueError('Incorrect file type, expected file with extension .dat or .cdl')
+                data = file_path
+            else:
+                raise RuntimeError('Unknown input data')
 
-        self._symmetrise = self.getProperty('SymmetriseEnergy').value
-
-        emax_str = self.getPropertyValue('MaxEnergy')
-        self._emax = None
-        if emax_str != '':
-            self._emax = float(emax_str)
-
-        self._res_ws = self.getPropertyValue('Resolution')
-        self._out_ws = self.getPropertyValue('OutputWorkspace')
+        return (version, data, extension)
 
 
     def _create_res_ws(self, num_sample_hist):
@@ -178,8 +190,9 @@ class MolDyn(PythonAlgorithm):
         @param num_sample_hist Number of histgrams required in workspace
         @returns The generated resolution workspace
         """
+        res_ws_name = self.getPropertyValue('Resolution')
 
-        num_res_hist = mtd[self._res_ws].getNumberHistograms()
+        num_res_hist = mtd[res_ws_name].getNumberHistograms()
 
         logger.notice('Creating resolution workspace.')
         logger.information('Sample has %d spectra\nResolution has %d spectra'
@@ -192,7 +205,7 @@ class MolDyn(PythonAlgorithm):
 
             res_ws_list = []
             for _ in range(0, num_sample_hist):
-                res_ws_list.append(self._res_ws)
+                res_ws_list.append(res_ws_name)
 
             res_ws_str_list = ','.join(res_ws_list)
             resolution_ws = ConjoinSpectra(res_ws_str_list, 0)
@@ -202,7 +215,7 @@ class MolDyn(PythonAlgorithm):
         elif num_sample_hist < num_res_hist:
             logger.information('Cropping resolution workspace to sample')
 
-            resolution_ws = CropWorkspace(InputWorkspace=self._res_ws,
+            resolution_ws = CropWorkspace(InputWorkspace=res_ws_name,
                                           StartWorkspaceIndex=0,
                                           EndWorkspaceIndex=num_sample_hist)
 
@@ -210,7 +223,7 @@ class MolDyn(PythonAlgorithm):
         else:
             logger.information('Using resolution workspace as is')
 
-            resolution_ws = CloneWorkspace(self._res_ws)
+            resolution_ws = CloneWorkspace(res_ws_name)
 
         return resolution_ws
 

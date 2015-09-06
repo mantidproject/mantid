@@ -9,7 +9,6 @@ src/BoxInfo.cpp
 src/Common.cpp
 src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
-src/DimensionPresenter.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
 src/IgnoreZerosThresholdRange.cpp
@@ -29,7 +28,6 @@ src/MetadataJsonManager.cpp
 src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
-src/SynchronisingGeometryPresenter.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
@@ -49,6 +47,7 @@ src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkMD0DFactory.cpp
+src/vtkNullStructuredGrid.cpp
 src/vtkNullUnstructuredGrid.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDHexFactory.cpp
@@ -67,13 +66,10 @@ inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
-inc/MantidVatesAPI/DimensionPresenter.h
-inc/MantidVatesAPI/DimensionView.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
-inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
 inc/MantidVatesAPI/LoadVTK.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
@@ -97,7 +93,6 @@ inc/MantidVatesAPI/NullPeaksPresenterVsi.h
 inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
-inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
 inc/MantidVatesAPI/ThresholdRange.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
@@ -119,6 +114,7 @@ inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
 inc/MantidVatesAPI/vtkMD0DFactory.h
+inc/MantidVatesAPI/vtkNullStructuredGrid.h
 inc/MantidVatesAPI/vtkNullUnstructuredGrid.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
@@ -128,6 +124,7 @@ inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
 inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
+inc/MantidVatesAPI/vtkMDHWSignalArray.h
 )
 
 set( TEST_FILES
@@ -136,7 +133,6 @@ test/vtkDataSetToWsNameTest.h
 test/vtkDataSetToWsLocationTest.h
 test/ADSWorkspaceProviderTest.h
 test/BoxInfoTest.h
-test/DimensionPresenterTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
@@ -165,7 +161,6 @@ test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
 test/NormalizationTest.h
 test/SQWLoadingPresenterTest.h
-test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
 test/TimeToTimeStepTest.h
 test/UserDefinedThresholdRangeTest.h
@@ -178,6 +173,8 @@ test/vtkDataSetToScaledDataSetTest.h
 test/vtkDataSetToPeaksFilteredDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
+test/vtkNullStructuredGridTest.h
+test/vtkMDHWSignalArrayTest.h
 test/vtkEllipsoidTransformerTest.h
 test/NullPeaksPresenterVsiTest.h
 test/ConcretePeaksPresenterVsiTest.h

@@ -1,9 +1,9 @@
 #pylint: disable=no-init
 from LoadAndCheckBase import *
 
-'''
-Test File loading and basic data integrity checks of INTER data in Mantid.
-'''
+#
+#Test File loading and basic data integrity checks of INTER data in Mantid.
+#
 class INTERLoadingTest(LoadAndCheckBase):
     def get_raw_workspace_filename(self):
         return "INTER00007709.raw"

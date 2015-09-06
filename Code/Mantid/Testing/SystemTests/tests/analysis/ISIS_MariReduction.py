@@ -319,8 +319,8 @@ if __name__ == "__main__":
 #### uncomment rows below to generate web variables and save then to transfer to ###
     ## web services.
     run_dir = os.path.dirname(os.path.realpath(__file__))
-    file = os.path.join(run_dir,'reduce_vars.py')
-    rd.save_web_variables(file)
+    filename = os.path.join(run_dir,'reduce_vars.py')
+    rd.save_web_variables(filename)
 
 #### Set up time interval (sec) for reducer to check for input data file.  ####
     #  If this file is not present and this value is 0,reduction fails
