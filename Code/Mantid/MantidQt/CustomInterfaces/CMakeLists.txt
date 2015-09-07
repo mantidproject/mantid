@@ -231,7 +231,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h
                 inc/MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h
-				inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h
+                inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
                 inc/MantidQtCustomInterfaces/Indirect/CorrectionsTab.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
@@ -316,7 +316,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.ui
                inc/MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.ui
-			   inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.ui
+               inc/MantidQtCustomInterfaces/Indirect/ContainerSubtraction.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
