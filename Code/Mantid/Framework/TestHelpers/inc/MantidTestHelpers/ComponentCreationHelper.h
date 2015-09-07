@@ -140,7 +140,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
  */
 Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
     int num_banks,
-    const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0., 0.0, 10.),
+    const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
     const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
     const double cylRadius = 0.004, const double cylHeight = 0.0002);
 
