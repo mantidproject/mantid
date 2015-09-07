@@ -65,19 +65,25 @@ public:
     return ki - kf;
   }
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper, double thetaLower){
-  /**THIS IS NOT CORRECT FOR P TRANSFORMATION**/
-    const Mantid::Kernel::V2D ur(calculateDim0(lamLower), // highest qx
+      setThetaFinal(thetaLower);
+      auto dim1UpperRightVertex = calculateDim1(lamLower);
+      auto dim0LowerLeftVertex = calculateDim0(lamUpper);
+      //UPPER LEFT VERTEX
+      const Mantid::Kernel::V2D ul(calculateDim0(lamUpper), // highest qx
                    calculateDim1(lamLower));
-    const Mantid::Kernel::V2D lr(calculateDim0(lamUpper),
-                   calculateDim1(lamUpper)); // lowest qz
-    setThetaFinal(thetaUpper);
-    const Mantid::Kernel::V2D ul(calculateDim0(lamLower),
-                   calculateDim1(lamLower)); // highest qz
-    const Mantid::Kernel::V2D ll(calculateDim0(lamUpper), // lowest qx
-                   calculateDim1(lamUpper));
-    Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
 
-    return quad;
+      setThetaFinal(thetaUpper);
+      const Mantid::Kernel::V2D ll(dim0LowerLeftVertex,
+                   calculateDim1(lamUpper)); // lowest qz
+
+      const Mantid::Kernel::V2D ur(calculateDim0(lamLower),
+                   dim1UpperRightVertex); // highest qz
+      //LOWER RIGHT VERTEX
+      const Mantid::Kernel::V2D lr(calculateDim0(lamLower), // lowest qx
+                   calculateDim1(lamUpper));
+
+      Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
+      return quad;
   }
 };
 }
