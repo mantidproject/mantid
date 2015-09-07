@@ -51,6 +51,21 @@ Calibration sample #
   Number of the calibration sample run (for example Ceria run) used to
   calibrate experiment runs.
 
+Focus
+-----
+
+Here it is possible to focus run files, provided a run number and an
+instrument bank. The focusing process uses the algorithm
+:ref:`EnggFocus <algm-EnggFocus>`. In the documentation of the
+algorithm you can find the details on how the input runs are focused.
+
+The interface will also create workspaces that can be inspected in the
+workspaces window:
+
+1. The *engg_focusing_input_ws workspace* for the data being focused
+2. The *engg_focusing_input_ws workspace* for the corresponding
+   focused data
+
 Settings
 --------
 
@@ -102,8 +117,9 @@ Most of the functionality provided by this interface is based on the
 engineering diffraction Mantid algorithms (which are named with the
 prefix *Engg*). This includes :ref:`EnggCalibrate
 <algm-EnggCalibrate>`, :ref:`EnggCalibrateFull
-<algm-EnggCalibrateFull>`, :ref:`EnggFocus <algm-EnggFocus>` and
-several other algorithms, explained in detail in the Mantid algorithm
-description.
+<algm-EnggCalibrateFull>`, :ref:`EnggVanadiumCorrections
+<algm-EnggVanadiumCorrections>`, :ref:`EnggFocus <algm-EnggFocus>`,
+and several other algorithms, explained in detail in the Mantid
+algorithms documentation.
 
 .. categories:: Interfaces Diffraction

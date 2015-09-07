@@ -71,8 +71,17 @@ public:
                void(const std::string &, const std::vector<double> &,
                     const std::vector<double> &));
 
-  // virtual void enableCalibrateActions(bool enable);
-  MOCK_METHOD1(enableCalibrateActions, void(bool));
+  // virtual void enableCalibrateAndFocusActions(bool enable);
+  MOCK_METHOD1(enableCalibrateAndFocusActions, void(bool));
+
+  // virtual std::string focusingDir() const;
+  MOCK_CONST_METHOD0(focusingDir, std::string());
+
+  // virtual std::string focusingRunNo() const;
+  MOCK_CONST_METHOD0(focusingRunNo, std::string());
+
+  // virtual int focusingBank() const;
+  MOCK_CONST_METHOD0(focusingBank, int());
 
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
