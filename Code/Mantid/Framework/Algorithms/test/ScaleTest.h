@@ -82,6 +82,14 @@ public:
     AnalysisDataService::Instance().remove("added");
   }
 
+  void test_multiply_with_dx_values() {
+
+  }
+
+  void test_add_with_dx_values() {
+
+  }
+
 private:
   void testScaleFactorApplied(const Mantid::API::MatrixWorkspace_const_sptr & inputWS,
                               const Mantid::API::MatrixWorkspace_const_sptr & outputWS,
