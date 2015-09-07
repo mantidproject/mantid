@@ -1,7 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
-
 using namespace Mantid::API;
 
 namespace {
@@ -27,7 +26,119 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
 }
 
 void ContainerSubtraction::setup() {}
-void ContainerSubtraction::run() {}
+
+void ContainerSubtraction::run() {
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
+  IAlgorithm_sptr applyCorrAlg =
+      AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
+  applyCorrAlg->initialize();
+  QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+  MatrixWorkspace_sptr sampleWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          sampleWsName.toStdString());
+  m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
+
+  // If not in wavelength then do conversion
+  if (m_originalSampleUnits != "Wavelength") {
+    g_log.information(
+        "Sample workspace not in wavelength, need to convert to continue.");
+    absCorProps["SampleWorkspace"] =
+        addConvertUnitsStep(sampleWs, "Wavelength");
+  } else {
+    absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
+  }
+
+  QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+  MatrixWorkspace_sptr canWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+          canWsName.toStdString());
+
+  // If not in wavelength then do conversion
+  std::string originalCanUnits = canWs->getAxis(0)->unit()->unitID();
+  if (originalCanUnits != "Wavelength") {
+    g_log.information("Container workspace not in wavelength, need to "
+                      "convert to continue.");
+    absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
+  } else {
+    absCorProps["CanWorkspace"] = canWsName.toStdString();
+  }
+
+  // Check for same binning across sample and container
+  if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
+    QString text = "Binning on sample and container does not match."
+                   "Would you like to rebin the sample to match the container?";
+
+    int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                       QMessageBox::Yes, QMessageBox::No,
+                                       QMessageBox::NoButton);
+
+    if (result == QMessageBox::Yes) {
+      addRebinStep(sampleWsName, canWsName);
+    } else {
+      m_batchAlgoRunner->clearQueue();
+      g_log.error("Cannot apply absorption corrections using a sample and "
+                  "container with different binning.");
+      return;
+    }
+  }
+
+  // Generate output workspace name
+  int nameCutIndex = sampleWsName.lastIndexOf("_");
+  if (nameCutIndex == -1)
+    nameCutIndex = sampleWsName.length();
+
+  QString correctionType;
+  switch (m_uiForm.cbGeometry->currentIndex()) {
+  case 0:
+    correctionType = "flt";
+    break;
+  case 1:
+    correctionType = "cyl";
+    break;
+  }
+  const QString outputWsName =
+      sampleWsName.left(nameCutIndex) + +"_" + correctionType + "_Corrected";
+
+  applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
+
+  // Add corrections algorithm to queue
+  m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
+
+  // Run algorithm queue
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(absCorComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+
+  // Set the result workspace for Python script export
+  m_pythonExportWsName = outputWsName.toStdString();
+}
+
+/**
+ * Adds a rebin to workspace step to the calculation for when using a sample and
+ *container that
+ * have different binning.
+ *
+ * @param toRebin
+ * @param toMatch
+ */
+void ContainerSubtraction::addRebinStep(QString toRebin, QString toMatch) {
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
+  rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
+
+  IAlgorithm_sptr rebinAlg =
+      AlgorithmManager::Instance().create("RebinToWorkspace");
+  rebinAlg->initialize();
+
+  rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
+  rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
+
+  m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
+}
+
+/** 
+ * Validates the user input in the UI
+ * @return if the input was valid
+ */
 bool ContainerSubtraction::validate() {
   UserInputValidator uiv;
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
@@ -47,8 +158,6 @@ bool ContainerSubtraction::validate() {
     uiv.addErrorMessage(
         "Sample and can workspaces must contain the same type of data.");
 
-  // Use corrections?
-
   // Show errors if there are any
   if (!uiv.isAllInputValid())
     emit showMessageBox(uiv.generateErrorMessage());
@@ -62,12 +171,11 @@ void ContainerSubtraction::loadSettings(const QSettings &settings) {
 }
 
 /**
- * Disables corrections when using S(Q, w) as input data.
- *
+ * Displays the sample data on the plot preview
  * @param dataName Name of new data source
  */
 void ContainerSubtraction::newData(const QString &dataName) {
- const MatrixWorkspace_sptr sampleWs =
+  const MatrixWorkspace_sptr sampleWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           dataName.toStdString());
   m_uiForm.spPreviewSpec->setMaximum(
@@ -77,7 +185,6 @@ void ContainerSubtraction::newData(const QString &dataName) {
   m_uiForm.ppPreview->clear();
   m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
 }
-
 
 /**
  * Handles when the type of geometry changes
@@ -110,8 +217,6 @@ void ContainerSubtraction::handleGeometryChange(int index) {
  * @param specIndex Spectrum index to plot
  */
 void ContainerSubtraction::plotPreview(int specIndex) {
-  //bool useCan = m_uiForm.ckUseCan->isChecked();
-
   m_uiForm.ppPreview->clear();
 
   // Plot sample
@@ -125,9 +230,33 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         Qt::green);
 
   // Plot can
- /* if (useCan)
-    m_uiForm.ppPreview->addSpectrum(
-        "Can", m_uiForm.dsContainer->getCurrentDataName(), specIndex, Qt::red);*/
+  m_uiForm.ppPreview->addSpectrum("Container",
+                                  m_uiForm.dsContainer->getCurrentDataName(),
+                                  specIndex, Qt::red);
 }
+
+void ContainerSubtraction::postProcessComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(postProcessComplete(bool)));
+
+  if (error) {
+    emit showMessageBox("Unable to process corrected workspace.\nSee Results "
+                        "Log for more details.");
+    return;
+  }
+
+  // Handle preview plot
+  plotPreview(m_uiForm.spPreviewSpec->value());
+
+  // Handle Mantid plotting
+  QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+  if (plotType == "Spectra" || plotType == "Both")
+    plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+  if (plotType == "Contour" || plotType == "Both")
+    plot2D(QString::fromStdString(m_pythonExportWsName));
 }
-}
+
+} // namespace CustomInterfaces
+} // namespace MantidQt
