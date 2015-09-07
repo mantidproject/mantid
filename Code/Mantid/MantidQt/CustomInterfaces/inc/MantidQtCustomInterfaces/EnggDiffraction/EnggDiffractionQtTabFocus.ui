@@ -13,42 +13,32 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_focus">
      <property name="title">
       <string>Focus run</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout">
+      <item row="2" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="label_run_num">
-          <property name="text">
-           <string>Run #:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
+         <spacer name="horizontalSpacer_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>98</width>
+            <width>238</width>
             <height>20</height>
            </size>
           </property>
          </spacer>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_run_num">
+         <widget class="QPushButton" name="pushButton_focus">
           <property name="text">
-           <string/>
-          </property>
-          <property name="readOnly">
-           <bool>false</bool>
+           <string>Focus</string>
           </property>
          </widget>
         </item>
@@ -92,25 +82,35 @@
         </item>
        </layout>
       </item>
-      <item row="2" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <spacer name="horizontalSpacer_3">
+         <widget class="QLabel" name="label_run_num">
+          <property name="text">
+           <string>Run #:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>238</width>
+            <width>98</width>
             <height>20</height>
            </size>
           </property>
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_focus">
+         <widget class="QLineEdit" name="lineEdit_run_num">
           <property name="text">
-           <string>Focus</string>
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -131,6 +131,39 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="groupBox_focus_2">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QCheckBox" name="checkBox_2">
+          <property name="text">
+           <string>Plot Focused Workspace</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>98</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
   </layout>
  </widget>
