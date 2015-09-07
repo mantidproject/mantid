@@ -258,5 +258,42 @@ void ContainerSubtraction::postProcessComplete(bool error) {
     plot2D(QString::fromStdString(m_pythonExportWsName));
 }
 
+/**
+ * Handles completion of the abs. correction algorithm.
+ *
+ * @param error True if algorithm failed.
+ */
+void ContainerSubtraction::absCorComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(absCorComplete(bool)));
+
+  if (error) {
+    emit showMessageBox(
+        "Unable to apply corrections.\nSee Results Log for more details.");
+    return;
+  }
+
+  // Convert back to original sample units
+  if (m_originalSampleUnits != "Wavelength") {
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+        m_pythonExportWsName);
+    std::string eMode("");
+    if (m_originalSampleUnits == "dSpacing")
+      eMode = "Elastic";
+    addConvertUnitsStep(ws, m_originalSampleUnits, "", eMode);
+  }
+
+  // Add save algorithms if required
+  bool save = m_uiForm.ckSave->isChecked();
+  if (save)
+    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+  // Run algorithm queue
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(postProcessComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+}
+
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

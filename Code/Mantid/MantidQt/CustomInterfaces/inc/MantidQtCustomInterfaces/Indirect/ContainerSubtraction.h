@@ -19,9 +19,8 @@ private slots:
   void newData(const QString &dataName);
   /// Updates the preview mini plot
   void plotPreview(int specIndex);
-
   /// Handle abs. correction algorithm completion
-  //void absCorComplete(bool error);
+  void absCorComplete(bool error);
   /// Handle convert units and save algorithm completion
   void postProcessComplete(bool error);
 
