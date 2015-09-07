@@ -62,13 +62,15 @@ namespace MantidQt {
 
       std::tuple<std::string, std::string> loadWorkspaceString(std::string runStr);
 
+      std::string plusString(std::string input_name, std::string output_name);
+
       std::tuple<std::string, std::string> loadRunString(std::string run);
 
       std::string getRunNumber(std::string ws_name);
 
       std::tuple<std::string, std::string> convertToPointString(std::string wsName);
 
-      std::tuple<std::string, std::string> reductionString(int rowNo, std::string runNo);
+      std::tuple<std::string, std::string> rebinString(int rowNo, std::string runNo);
 
       std::tuple<std::string, std::string> transWSString(std::string trans_ws_str);
 

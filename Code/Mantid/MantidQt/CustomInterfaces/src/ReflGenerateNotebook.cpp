@@ -57,7 +57,7 @@ namespace MantidQt {
         }
         notebook->codeCell(code_string.str());
 
-        //todo plot the unstitched I vs Q
+        // Plot the unstitched I vs Q
         notebook->codeCell(plotIvsQ(ws_names));
 
         //todo stitch group
@@ -148,10 +148,10 @@ namespace MantidQt {
       }
       code_string << ")\n";
 
-      std::tuple<std::string, std::string> reduce_string = reductionString(rowNo, runNo);
-      code_string << std::get<0>(reduce_string);
+      std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
+      code_string << std::get<0>(rebin_string);
 
-      return std::make_tuple(code_string.str(), std::get<1>(reduce_string));
+      return std::make_tuple(code_string.str(), std::get<1>(rebin_string));
     }
 
     std::tuple<std::string, std::string> ReflGenerateNotebook::convertToPointString(std::string wsName)
@@ -163,24 +163,24 @@ namespace MantidQt {
       return std::make_tuple(convert_string.str(), output_name);
     }
 
-    std::tuple<std::string, std::string> ReflGenerateNotebook::reductionString(int rowNo, std::string runNo)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::rebinString(int rowNo, std::string runNo)
     {
       //We need to make sure that qmin and qmax are respected, so we rebin to
       //those limits here.
-      std::ostringstream reduce_string;
-      reduce_string << "IvsQ_" << runNo << " = ";
-      reduce_string << "Rebin(";
-      reduce_string << "IvsQ_" << runNo;
+      std::ostringstream rebin_string;
+      rebin_string << "IvsQ_" << runNo << " = ";
+      rebin_string << "Rebin(";
+      rebin_string << "IvsQ_" << runNo;
 
       const double qmin = m_model->data(m_model->index(rowNo, COL_QMIN)).toDouble();
       const double qmax = m_model->data(m_model->index(rowNo, COL_QMAX)).toDouble();
       const double dqq = m_model->data(m_model->index(rowNo, COL_DQQ)).toDouble();
 
-      reduce_string << ", " << "Params = ";
-      reduce_string << "'" << qmin << ", " << -dqq << ", " << qmax << "'";
-      reduce_string << ")\n";
+      rebin_string << ", " << "Params = ";
+      rebin_string << "'" << qmin << ", " << -dqq << ", " << qmax << "'";
+      rebin_string << ")\n";
 
-      return std::make_tuple(reduce_string.str(), "IvsQ_" + runNo);
+      return std::make_tuple(rebin_string.str(), "IvsQ_" + runNo);
     }
 
     std::tuple<std::string, std::string> ReflGenerateNotebook::transWSString(std::string trans_ws_str)
@@ -240,17 +240,45 @@ namespace MantidQt {
       std::vector<std::string> runs;
       boost::split(runs, runStr, boost::is_any_of("+"));
 
+      std::ostringstream load_strings;
+
       //Remove leading/trailing whitespace from each run
       for (auto runIt = runs.begin(); runIt != runs.end(); ++runIt)
         boost::trim(*runIt);
 
-      //If it is only one run, just load that
-      if (runs.size() == 1)
-        return loadRunString(runs[0]);
+      const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
 
-      // todo deal with case of more than one run to load
-      //const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
-      return std::make_tuple("temp", "temp");
+      std::tuple<std::string, std::string> load_string;
+
+      load_string = loadRunString(runs[0]);
+      load_strings << std::get<0>(load_string);
+
+      // EXIT POINT if there is only one run
+      if(runs.size() == 1) {
+        return std::make_tuple(load_strings.str(), std::get<1>(load_string));
+      }
+      load_strings << outputName << " = " << std::get<1>(load_string) << "\n";
+
+      // Load each subsequent run and add it to the first run
+      for(auto runIt = std::next(runs.begin()); runIt != runs.end(); ++runIt)
+      {
+        load_string = loadRunString(*runIt);
+        load_strings << std::get<0>(load_string);
+        load_strings << plusString(std::get<1>(load_string), outputName);
+      }
+
+      return std::make_tuple(load_strings.str(), outputName);
+    }
+
+    std::string ReflGenerateNotebook::plusString(std::string input_name, std::string output_name)
+    {
+      std::ostringstream plus_string;
+
+      plus_string << output_name << " = Plus('LHSWorkspace' = " << output_name;
+      plus_string << ", 'RHSWorkspace' = " << input_name;
+      plus_string << ")\n";
+
+      return plus_string.str();
     }
 
     std::tuple<std::string, std::string> ReflGenerateNotebook::loadRunString(std::string run) {
