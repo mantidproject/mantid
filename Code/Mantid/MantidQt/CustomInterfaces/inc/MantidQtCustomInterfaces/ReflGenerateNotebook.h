@@ -56,7 +56,7 @@ namespace MantidQt {
 
       std::string plotIvsQ(std::vector<std::string> ws_names);
 
-      std::string stitchGroupString();
+      std::tuple<std::string, std::string> stitchGroupString(std::set<int> rows);
 
       std::tuple<std::string, std::string> reduceRowString(int rowNo);
 
@@ -71,6 +71,9 @@ namespace MantidQt {
       std::tuple<std::string, std::string> scaleString(std::string runNo, double scale);
 
       std::tuple<std::string, std::string> convertToPointString(std::string wsName);
+
+      template<typename T, typename A>
+      std::string vectorParamString(std::string param_name, std::vector<T,A> &param_vec);
 
       std::tuple<std::string, std::string> rebinString(int rowNo, std::string runNo);
 

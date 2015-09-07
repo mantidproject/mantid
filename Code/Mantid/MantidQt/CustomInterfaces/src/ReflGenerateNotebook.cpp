@@ -51,6 +51,7 @@ namespace MantidQt {
         std::ostringstream code_string;
         std::tuple<std::string, std::string> reduce_row_string;
         std::vector<std::string> ws_names;
+        code_string << "#Load and reduce\n";
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
           reduce_row_string = reduceRowString(*rIt);
           code_string << std::get<0>(reduce_row_string);
@@ -61,11 +62,14 @@ namespace MantidQt {
         // Plot the unstitched I vs Q
         notebook->codeCell(plotIvsQ(ws_names));
 
-        //todo stitch group
-        //notebook->codeCell(stitchGroupString());
+        // Stitch group
+        std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows);
+        notebook->codeCell(std::get<0>(stitch_string));
 
-        //todo plot the stitched I vs Q
-        //notebook->codeCell(plotIvsQ());
+        // Plot the stitched I vs Q
+        std::vector<std::string> stitched_ws;
+        stitched_ws.push_back(std::get<1>(stitch_string));
+        notebook->codeCell(plotIvsQ(stitched_ws));
       }
 
       //TODO prompt for filename to save notebook
@@ -76,6 +80,84 @@ namespace MantidQt {
       file << generatedNotebook;
       file.flush();
       file.close();
+    }
+
+    std::tuple<std::string, std::string> ReflGenerateNotebook::stitchGroupString(std::set<int> rows)
+    {
+      std::ostringstream stitch_string;
+
+      stitch_string << "#Stitch workspaces\n";
+
+      //If we can get away with doing nothing, do.
+      if(rows.size() < 2)
+        return std::make_tuple("", "");
+
+      //Properties for Stitch1DMany
+      std::vector<std::string> workspaceNames;
+      std::vector<std::string> runs;
+
+      std::vector<double> params;
+      std::vector<double> startOverlaps;
+      std::vector<double> endOverlaps;
+
+      //Go through each row and prepare the properties
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
+      {
+        const std::string  runStr = m_model->data(m_model->index(*rowIt, COL_RUNS)).toString().toStdString();
+        const double         qmin = m_model->data(m_model->index(*rowIt, COL_QMIN)).toDouble();
+        const double         qmax = m_model->data(m_model->index(*rowIt, COL_QMAX)).toDouble();
+
+        const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr);
+
+        const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
+        runs.push_back(runNo);
+        workspaceNames.push_back("IvsQ_" + runNo);
+
+        startOverlaps.push_back(qmin);
+        endOverlaps.push_back(qmax);
+      }
+
+      double dqq = m_model->data(m_model->index(*(rows.begin()), COL_DQQ)).toDouble();
+
+      //params are qmin, -dqq, qmax for the final output
+      params.push_back(*std::min_element(startOverlaps.begin(), startOverlaps.end()));
+      params.push_back(-dqq);
+      params.push_back(*std::max_element(endOverlaps.begin(), endOverlaps.end()));
+
+      //startOverlaps and endOverlaps need to be slightly offset from each other
+      //See usage examples of Stitch1DMany to see why we discard first qmin and last qmax
+      startOverlaps.erase(startOverlaps.begin());
+      endOverlaps.pop_back();
+
+      std::string outputWSName = "IvsQ_" + boost::algorithm::join(runs, "_");
+
+      stitch_string << outputWSName << ", _ = Stitch1DMany(";
+      stitch_string << vectorParamString("InputWorkspaces", workspaceNames);
+      stitch_string << ", ";
+      stitch_string << vectorParamString("Params", params);
+      stitch_string << ", ";
+      stitch_string << vectorParamString("StartOverlaps", startOverlaps);
+      stitch_string << ", ";
+      stitch_string << vectorParamString("EndOverlaps", endOverlaps);
+      stitch_string << ")\n";
+
+      return std::make_tuple(stitch_string.str(), outputWSName);
+    }
+
+    template<typename T, typename A>
+    std::string ReflGenerateNotebook::vectorParamString(std::string param_name, std::vector<T,A> &param_vec)
+    {
+      std::ostringstream vector_string;
+      const char* separator = "";
+      vector_string << param_name << " = '";
+      for(auto paramIt = param_vec.begin(); paramIt != param_vec.end(); ++paramIt)
+      {
+        vector_string << separator << *paramIt;
+        separator = ", ";
+      }
+      vector_string << "'";
+
+      return vector_string.str();
     }
 
     std::string ReflGenerateNotebook::plotIvsQ(std::vector<std::string> ws_names) {
@@ -96,10 +178,6 @@ namespace MantidQt {
       plot_string << "plt.show() #Draw the plot\n";
 
       return plot_string.str();
-    }
-
-    std::string ReflGenerateNotebook::stitchGroupString() {
-      return "something";
     }
 
     /**
