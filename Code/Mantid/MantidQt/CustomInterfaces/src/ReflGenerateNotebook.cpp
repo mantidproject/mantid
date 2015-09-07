@@ -116,7 +116,7 @@ namespace MantidQt {
 
       double theta = 0;
 
-      bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
+      const bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
 
       if (thetaGiven)
         theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
@@ -127,7 +127,7 @@ namespace MantidQt {
       const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
 
       if (!transStr.empty()) {
-        std::tuple<std::string, std::string> trans_string = transWSString(transStr);
+        const std::tuple<std::string, std::string> trans_string = transWSString(transStr);
         code_string << std::get<0>(trans_string);
         code_string << "IvsQ_" << runNo << ", " << "IvsLam_" << runNo << ", _ = ";
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
@@ -148,7 +148,7 @@ namespace MantidQt {
       }
       code_string << ")\n";
 
-      std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
+      const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
       code_string << std::get<0>(rebin_string);
 
       return std::make_tuple(code_string.str(), std::get<1>(rebin_string));
