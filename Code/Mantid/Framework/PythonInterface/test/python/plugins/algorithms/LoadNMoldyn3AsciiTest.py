@@ -4,7 +4,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
-class MolDynTest(unittest.TestCase):
+class LoadNMoldyn3AsciiTest(unittest.TestCase):
 
     _cdl_filename = 'NaF_DISF.cdl'
     _dat_filename = 'WSH_test.dat'
@@ -14,7 +14,6 @@ class MolDynTest(unittest.TestCase):
         """
         Load an F(Q, t) function from an nMOLDYN 3 .cdl file
         """
-
         moldyn_group = LoadNMoldyn3Ascii(Filename=self._cdl_filename,
                                          Functions=['Fqt-total'],
                                          OutputWorkspace='__LoadNMoldyn3Ascii_test')
@@ -34,9 +33,8 @@ class MolDynTest(unittest.TestCase):
 
     def test_load_sqw_from_cdl(self):
         """
-        Load an S(Q, w) function from a nMOLDYN 3 .cdl file
+        Load an S(Q, w) function from an nMOLDYN 3 .cdl file
         """
-
         moldyn_group = LoadNMoldyn3Ascii(Filename=self._cdl_filename,
                                          Functions=['Sqw-total'],
                                          OutputWorkspace='__LoadNMoldyn3Ascii_test')
@@ -53,11 +51,24 @@ class MolDynTest(unittest.TestCase):
         self.assertEqual(units, 'Energy')
 
 
+    def test_load_dos_from_dat(self):
+        """
+        Load a density of states from an nMOLDYN 3 .dat file.
+        """
+        moldyn_ws = LoadNMoldyn3Ascii(Filename='CDOS_Croco_total_10K.dat',
+                                      OutputWorkspace='__LoadNMoldyn3Ascii_test')
+
+        self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
+        self.assertTrue(moldyn_ws.getNumberHistograms(), 1)
+
+        self.assertEqual(moldyn_ws.getAxis(0).getUnit().label(), 'THz')
+        self.assertEqual(moldyn_ws.YUnitLabel(), 'dos-total vs frequency')
+
+
     def test_load_from_dat(self):
         """
         Load a function from an nMOLDYN 3 .dat file
         """
-
         moldyn_ws = LoadNMoldyn3Ascii(Filename=self._dat_filename,
                                       OutputWorkspace='__LoadNMoldyn3Ascii_test')
 

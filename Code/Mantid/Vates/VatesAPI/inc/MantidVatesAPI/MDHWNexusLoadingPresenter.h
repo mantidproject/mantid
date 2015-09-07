@@ -1,6 +1,7 @@
 #ifndef MANTID_VATES_MDHW_NEXUS_LOADING_PRESENTER
 #define MANTID_VATES_MDHW_NEXUS_LOADING_PRESENTER
 
+#include <vector>
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 
 namespace Mantid
@@ -47,9 +48,13 @@ public:
   virtual ~MDHWNexusLoadingPresenter();
   virtual bool canReadFile() const;
   virtual std::string getWorkspaceTypeName();
+  std::vector<int> getExtents();
 private:
+  void loadWorkspace();
+  void loadWorkspace(ProgressAction& rebinningProgressUpdate);
   const std::string m_filename;
   std::string m_wsTypeName;
+  Mantid::API::IMDHistoWorkspace_sptr m_histoWs;
 };
 }
 }

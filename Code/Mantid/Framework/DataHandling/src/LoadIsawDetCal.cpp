@@ -180,15 +180,18 @@ void LoadIsawDetCal::exec() {
       if (instname .compare("WISH") == 0) center(0.0, 0.0, -0.01 * mL1, "undulator", inname);
       else center(0.0, 0.0, -0.01 * mL1, "moderator", inname);
       // mT0 and time of flight are both in microsec
-      IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-      alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-      alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-      alg1->setProperty("Offset", mT0);
-      alg1->executeAsChildAlg();
-      inputW = alg1->getProperty("OutputWorkspace");
-      // set T0 in the run parameters
       API::Run &run = inputW->mutableRun();
-      run.addProperty<double>("T0", mT0, true);
+      // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
+      if (!run.hasProperty("T0")) {
+        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+        alg1->setProperty("Offset", mT0);
+        alg1->executeAsChildAlg();
+        inputW = alg1->getProperty("OutputWorkspace");
+        // set T0 in the run parameters
+        run.addProperty<double>("T0", mT0, true);
+      }
     }
 
     if (line[0] != '5')

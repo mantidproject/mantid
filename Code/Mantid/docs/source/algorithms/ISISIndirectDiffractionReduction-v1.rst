@@ -42,7 +42,7 @@ Output:
 
     Workspace name: IRS21360_diffspec_red
     Number of spectra: 1
-    Number of bins: 1935
+    Number of bins: 1934
 
 .. categories::
 
