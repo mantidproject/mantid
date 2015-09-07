@@ -63,6 +63,12 @@ void ContainerSubtraction::run() {
     absCorProps["CanWorkspace"] = canWsName.toStdString();
   }
 
+  bool useCanScale = m_uiForm.ckScaleCan->isChecked();
+  if (useCanScale) {
+    double canScaleFactor = m_uiForm.spCanScale->value();
+    applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
+  }
+
   // Check for same binning across sample and container
   if (!checkWorkspaceBinningMatches(sampleWs, canWs)) {
     QString text = "Binning on sample and container does not match."
@@ -135,7 +141,7 @@ void ContainerSubtraction::addRebinStep(QString toRebin, QString toMatch) {
   m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
 }
 
-/** 
+/**
  * Validates the user input in the UI
  * @return if the input was valid
  */
@@ -293,7 +299,6 @@ void ContainerSubtraction::absCorComplete(bool error) {
           SLOT(postProcessComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
 }
-
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
