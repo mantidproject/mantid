@@ -40,7 +40,7 @@ int MayersSampleCorrection::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MayersSampleCorrection::category() const {
-  return "Corrections";
+  return "CorrectionFunctions\\AbsorptionCorrections";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
