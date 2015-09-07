@@ -1512,6 +1512,9 @@ void ConvFit::updatePlotOptions() {
   } else {
     params = getFunctionParameters(QString("One Lorentzian"));
   }
+  if (fitFunctionType < 3 && fitFunctionType != 0) {
+    params.removeAll("PeakCentre");
+  }
   if (fitFunctionType != 0) {
     plotOptions.append(params);
   }
