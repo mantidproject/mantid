@@ -57,8 +57,6 @@ class Quest(PythonAlgorithm):
         sam = self.getPropertyValue('SamNumber')
         rinType = self.getPropertyValue('ResInputType')
         res = self.getPropertyValue('ResNumber')
-        rsnormType = self.getPropertyValue('ResNormInputType')
-        rsnormNum = self.getPropertyValue('ResNormNumber')
         elastic = self.getProperty('ElasticOption').value
         bgd = self.getPropertyValue('BackgroundOption')
         emin = self.getPropertyValue('EnergyMin')
