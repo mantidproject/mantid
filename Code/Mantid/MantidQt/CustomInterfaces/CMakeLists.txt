@@ -93,7 +93,7 @@ set ( SRC_FILES
   src/Tomography/TomoToolConfigDialog.cpp
   src/Tomography/ToolConfig.cpp
   src/UserInputValidator.cpp
-  src/ReflGenerateNotebook.cpp)
+  src/ReflGenerateNotebook.cpp src/ParseKeyValueString.cpp)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
@@ -207,7 +207,7 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
   inc/MantidQtCustomInterfaces/Updateable.h
   inc/MantidQtCustomInterfaces/UserInputValidator.h
-  inc/MantidQtCustomInterfaces/ReflGenerateNotebook.h)
+  inc/MantidQtCustomInterfaces/ReflGenerateNotebook.h inc/MantidQtCustomInterfaces/ParseKeyValueString.h)
 
 set ( SRC_UNITY_IGNORE_FILES )
 

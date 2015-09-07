@@ -49,8 +49,6 @@ namespace MantidQt
       virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
       virtual void setOptions(const std::map<std::string,QVariant>& options);
-      //Public for the purposes of unit testing
-      static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
       //the workspace the model is currently representing
       Mantid::API::ITableWorkspace_sptr m_ws;

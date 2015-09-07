@@ -74,8 +74,6 @@ namespace MantidQt {
 
       std::tuple<std::string, std::string> transWSString(std::string trans_ws_str);
 
-      std::map<std::string, std::string> parseKeyValueString(const std::string &str);
-
       std::string m_wsName;
       QReflTableModel_sptr m_model;
       const std::string m_instrument;
