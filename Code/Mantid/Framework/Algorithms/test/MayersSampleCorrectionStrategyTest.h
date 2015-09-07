@@ -54,8 +54,7 @@ public:
     std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
-    double xcur(100.0);
-    std::generate(tof.begin(), tof.end(), [&xcur] { return xcur++; });
+    std::generate(tof.begin(), tof.end(), Incrementer(100.0));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
                                          error);
 
@@ -84,12 +83,7 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
-    double xcur(99.5);
-    std::generate(tof.begin(), tof.end(), [&xcur] {
-      double xold = xcur;
-      xcur += 1.0;
-      return xold;
-    });
+    std::generate(tof.begin(), tof.end(), Incrementer(99.5));
     MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
                                          error);
 
@@ -115,12 +109,7 @@ public:
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
-    double xcur(99.5);
-    std::generate(tof.begin(), tof.end(), [&xcur] {
-      double xold = xcur;
-      xcur += 1.0;
-      return xold;
-    });
+    std::generate(tof.begin(), tof.end(), Incrementer(99.5));
     bool mscatOn(false);
     MayersSampleCorrectionStrategy mscat(createTestParameters(mscatOn), tof,
                                          signal, error);
@@ -147,18 +136,25 @@ public:
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
     std::transform(signal.begin(), signal.end(), error.begin(),
                    (double (*)(double))sqrt);
-    double xcur(199.5);
-    std::generate(tof.begin(), tof.end(), [&xcur] {
-      double xold = xcur;
-      xcur -= 1.0;
-      return xold;
-    });
-    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(), tof,
-                                                    signal, error),
+    std::generate(tof.begin(), tof.end(), Decrementer(199.5));
+    TS_ASSERT_THROWS(MayersSampleCorrectionStrategy(createTestParameters(),
+                                                    tof, signal, error),
                      std::invalid_argument);
   }
 
 private:
+
+  struct Incrementer {
+    Incrementer(double start) : current(start) {}
+    double operator()() { return current++; }
+    double current;
+  };
+  struct Decrementer {
+    Decrementer(double start) : current(start) {}
+    double operator()() { return current--; }
+    double current;
+  };
+
   MayersSampleCorrectionStrategy::Parameters
   createTestParameters(bool mscatOn = true) {
     // A bit like a POLARIS spectrum
