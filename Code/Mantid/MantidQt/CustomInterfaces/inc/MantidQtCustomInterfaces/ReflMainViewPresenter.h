@@ -149,6 +149,8 @@ namespace MantidQt
       void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
       void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
+      void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
+
     public:
       static const int COL_RUNS         = 0;
       static const int COL_ANGLE        = 1;

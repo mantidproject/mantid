@@ -25,6 +25,8 @@
 #include <sstream>
 
 #include <QSettings>
+#include <QFileDialog>
+
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -280,11 +282,28 @@ namespace MantidQt
         return;
       }
 
-      //TODO else if notebook flag set from gui
+      //TODO if notebook flag set from gui
+      saveNotebook(groups, rows);
+    }
+
+    /**
+    Display a dialog to choose save location for notebook, then save the notebook there
+    @param rows : rows in the model
+    @param groups : groups of rows to stitch
+    */
+    void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
+    {
       std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
         m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
         COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE));
-      notebook->generateNotebook(groups, rows);
+      QString qfilename = QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
+                                                       "IPython Notebook files (*.ipynb);;All files (*.*)",
+                                                       new QString("IPython Notebook files (*.ipynb)"));
+      std::string filename = qfilename.toStdString();
+      if (filename == "") {
+        return;
+      }
+      notebook->generateNotebook(groups, rows, filename);
     }
 
     /**

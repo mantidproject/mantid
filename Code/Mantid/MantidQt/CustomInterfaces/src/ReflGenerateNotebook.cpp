@@ -26,7 +26,7 @@ namespace MantidQt {
       @param rows : rows in the model which were processed
       @param groups : groups of rows which were stitched
       */
-    void ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows) {
+    void ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows, std::string filename) {
       std::unique_ptr<Mantid::API::NotebookWriter> notebook(new Mantid::API::NotebookWriter());
 
       std::string title_string;
@@ -71,9 +71,6 @@ namespace MantidQt {
         stitched_ws.push_back(std::get<1>(stitch_string));
         notebook->codeCell(plotIvsQ(stitched_ws));
       }
-
-      //TODO prompt for filename to save notebook
-      const std::string filename = "/home/jonmd/refl_notebook.ipynb";
 
       std::string generatedNotebook = notebook->writeNotebook();
       std::ofstream file(filename.c_str(), std::ofstream::trunc);
@@ -163,7 +160,7 @@ namespace MantidQt {
     std::string ReflGenerateNotebook::plotIvsQ(std::vector<std::string> ws_names) {
 
       std::ostringstream plot_string;
-      plot_string << "#Plot unstitched I vs Q\n";
+      plot_string << "#Plot I vs Q\n";
       for (auto it = ws_names.begin(); it != ws_names.end(); ++it) {
         std::tuple<std::string, std::string> convert_point_string = convertToPointString(*it);
         plot_string << std::get<0>(convert_point_string);
