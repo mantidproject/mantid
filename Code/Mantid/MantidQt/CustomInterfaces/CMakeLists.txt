@@ -363,6 +363,7 @@ set ( TEST_FILES
   ALCPeakFittingPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
+  ParseKeyValueStringTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
   TomographyIfacePresenterTest.h
