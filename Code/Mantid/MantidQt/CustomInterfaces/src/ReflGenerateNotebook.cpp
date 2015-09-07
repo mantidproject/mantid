@@ -15,11 +15,11 @@ namespace MantidQt {
                                                const std::string instrument, const int runs_column,
                                                const int transmission_column, const int options_column,
                                                const int angle_column, const int min_q, const int max_q,
-                                               const int d_qq) :
+                                               const int d_qq, const int scale_column) :
       m_wsName(name), m_model(model), m_instrument(instrument),
       COL_RUNS(runs_column), COL_TRANSMISSION(transmission_column),
       COL_OPTIONS(options_column), COL_ANGLE(angle_column),
-      COL_QMIN(min_q), COL_QMAX(max_q), COL_DQQ(d_qq){ }
+      COL_QMIN(min_q), COL_QMAX(max_q), COL_DQQ(d_qq), COL_SCALE(scale_column){ }
 
     /**
       Generate an ipython notebook
@@ -148,10 +148,28 @@ namespace MantidQt {
       }
       code_string << ")\n";
 
+      const double scale = m_model->data(m_model->index(rowNo, COL_SCALE)).toDouble();
+      if(scale != 1.0) {
+        const std::tuple<std::string, std::string> scale_string = scaleString(runNo, scale);
+        code_string << std::get<0>(scale_string);
+      }
+
       const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
       code_string << std::get<0>(rebin_string);
 
       return std::make_tuple(code_string.str(), std::get<1>(rebin_string));
+    }
+
+    std::tuple<std::string, std::string> ReflGenerateNotebook::scaleString(std::string runNo, double scale)
+    {
+      std::ostringstream scale_string;
+
+      scale_string << "IvsQ_" << runNo << " = Scale(";
+      scale_string << "InputWorkspace = IvsQ_" << runNo;
+      scale_string << ", Factor = " << 1.0 / scale;
+      scale_string << ")\n";
+
+      return std::make_tuple(scale_string.str(), "IvsQ" + runNo);
     }
 
     std::tuple<std::string, std::string> ReflGenerateNotebook::convertToPointString(std::string wsName)

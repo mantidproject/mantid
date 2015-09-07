@@ -283,7 +283,7 @@ namespace MantidQt
       //TODO else if notebook flag set from gui
       std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
         m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
-        COL_QMIN, COL_QMAX, COL_DQQ));
+        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE));
       notebook->generateNotebook(groups, rows);
     }
 

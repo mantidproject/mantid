@@ -46,7 +46,7 @@ namespace MantidQt {
                            QReflTableModel_sptr model,
                            const std::string instrument,
                            const int COL_RUNS, const int COL_TRANSMISSION, const int COL_OPTIONS, const int COL_ANGLE,
-                           const int COL_QMIN, const int COL_QMAX, const int COL_DQQ);
+                           const int COL_QMIN, const int COL_QMAX, const int COL_DQQ, const int COL_SCALE);
 
       virtual ~ReflGenerateNotebook(){};
 
@@ -68,6 +68,8 @@ namespace MantidQt {
 
       std::string getRunNumber(std::string ws_name);
 
+      std::tuple<std::string, std::string> scaleString(std::string runNo, double scale);
+
       std::tuple<std::string, std::string> convertToPointString(std::string wsName);
 
       std::tuple<std::string, std::string> rebinString(int rowNo, std::string runNo);
@@ -85,6 +87,7 @@ namespace MantidQt {
       const int COL_QMIN;
       const int COL_QMAX;
       const int COL_DQQ;
+      const int COL_SCALE;
 
     };
 
