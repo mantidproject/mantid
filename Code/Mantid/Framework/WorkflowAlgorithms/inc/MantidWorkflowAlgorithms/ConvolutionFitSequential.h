@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_CONVOLUTIONFITSEQUENTIAL_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/Column.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -32,7 +32,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvolutionFitSequential : public API::Algorithm {
+class DLLExport ConvolutionFitSequential : public API::DataProcessorAlgorithm {
 public:
   ConvolutionFitSequential();
   virtual ~ConvolutionFitSequential();
