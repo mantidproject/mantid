@@ -1,6 +1,5 @@
 #ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_
 #define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
@@ -32,7 +31,7 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_ALGORITHMS_DLL MayersSampleCorrection : public API::Algorithm {
+class DLLExport MayersSampleCorrection : public API::Algorithm {
 public:
   MayersSampleCorrection();
 
