@@ -1,4 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
+
 
 using namespace Mantid::API;
 
@@ -26,13 +28,38 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
 
 void ContainerSubtraction::setup() {}
 void ContainerSubtraction::run() {}
-bool ContainerSubtraction::validate() { return false; }
+bool ContainerSubtraction::validate() {
+  UserInputValidator uiv;
+  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+  MatrixWorkspace_sptr sampleWs;
+  QString sample = m_uiForm.dsSample->getCurrentDataName();
+  QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
+  QString container = m_uiForm.dsContainer->getCurrentDataName();
+  QString containerType =
+      container.right(sample.length() - container.lastIndexOf("_"));
+
+  g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
+  g_log.debug() << "Container type is: " << containerType.toStdString()
+                << std::endl;
+
+  if (containerType != sampleType)
+    uiv.addErrorMessage(
+        "Sample and can workspaces must contain the same type of data.");
+
+  // Use corrections?
+
+  // Show errors if there are any
+  if (!uiv.isAllInputValid())
+    emit showMessageBox(uiv.generateErrorMessage());
+
+  return uiv.isAllInputValid();
+}
 
 void ContainerSubtraction::loadSettings(const QSettings &settings) {
   m_uiForm.dsContainer->readSettings(settings.group());
   m_uiForm.dsSample->readSettings(settings.group());
 }
-
 
 /**
  * Disables corrections when using S(Q, w) as input data.
