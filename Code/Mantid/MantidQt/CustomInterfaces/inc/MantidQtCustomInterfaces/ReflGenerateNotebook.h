@@ -34,7 +34,7 @@
 #include <set>
 #include <map>
 #include <string>
-#include <boost/tuple/tuple.hpp>
+//#include <tuple>
 
 namespace MantidQt {
   namespace CustomInterfaces {
@@ -45,22 +45,32 @@ namespace MantidQt {
       ReflGenerateNotebook(std::string name,
                            QReflTableModel_sptr model,
                            const std::string instrument,
-                           const int COL_RUNS, const int COL_TRANSMISSION, const int COL_OPTIONS, const int COL_ANGLE);
+                           const int COL_RUNS, const int COL_TRANSMISSION, const int COL_OPTIONS, const int COL_ANGLE,
+                           const int COL_QMIN, const int COL_QMAX, const int COL_DQQ);
 
       virtual ~ReflGenerateNotebook(){};
 
       void generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
 
     private:
-      std::string reduceRowString(int rowNo);
 
-      boost::tuple<std::string, std::string> loadWorkspaceString(std::string runStr);
+      std::string plotIvsQ(std::vector<std::string> ws_names);
 
-      boost::tuple<std::string, std::string> loadRunString(std::string run);
+      std::string stitchGroupString();
+
+      std::tuple<std::string, std::string> reduceRowString(int rowNo);
+
+      std::tuple<std::string, std::string> loadWorkspaceString(std::string runStr);
+
+      std::tuple<std::string, std::string> loadRunString(std::string run);
 
       std::string getRunNumber(std::string ws_name);
 
-      boost::tuple<std::string, std::string> transWSString(std::string trans_ws_str);
+      std::tuple<std::string, std::string> convertToPointString(std::string wsName);
+
+      std::tuple<std::string, std::string> reductionString(int rowNo, std::string runNo);
+
+      std::tuple<std::string, std::string> transWSString(std::string trans_ws_str);
 
       std::map<std::string, std::string> parseKeyValueString(const std::string &str);
 
@@ -72,6 +82,9 @@ namespace MantidQt {
       const int COL_TRANSMISSION;
       const int COL_OPTIONS;
       const int COL_ANGLE;
+      const int COL_QMIN;
+      const int COL_QMAX;
+      const int COL_DQQ;
 
     };
 

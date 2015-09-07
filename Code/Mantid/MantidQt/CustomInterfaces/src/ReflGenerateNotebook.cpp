@@ -13,10 +13,12 @@ namespace MantidQt {
     ReflGenerateNotebook::ReflGenerateNotebook(std::string name, QReflTableModel_sptr model,
                                                const std::string instrument, const int runs_column,
                                                const int transmission_column, const int options_column,
-                                               const int angle_column) :
+                                               const int angle_column, const int min_q, const int max_q,
+                                               const int d_qq) :
       m_wsName(name), m_model(model), m_instrument(instrument),
       COL_RUNS(runs_column), COL_TRANSMISSION(transmission_column),
-      COL_OPTIONS(options_column), COL_ANGLE(angle_column) { }
+      COL_OPTIONS(options_column), COL_ANGLE(angle_column),
+      COL_QMIN(min_q), COL_QMAX(max_q), COL_DQQ(d_qq){ }
 
     /**
       Generate an ipython notebook
@@ -46,16 +48,24 @@ namespace MantidQt {
 
         //Reduce each row
         std::ostringstream code_string;
+        std::tuple<std::string, std::string> reduce_row_string;
+        std::vector<std::string> ws_names;
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
-          code_string << reduceRowString(*rIt);
+          reduce_row_string = reduceRowString(*rIt);
+          code_string << std::get<0>(reduce_row_string);
+          ws_names.push_back(std::get<1>(reduce_row_string));
         }
         notebook->codeCell(code_string.str());
 
-        //todo stitch rows cell
-      }
+        //todo plot the unstitched I vs Q
+        notebook->codeCell(plotIvsQ(ws_names));
 
-      //todo plot the unstitched I vs Q
-      //todo plot the stitched I vs Q
+        //todo stitch group
+        //notebook->codeCell(stitchGroupString());
+
+        //todo plot the stitched I vs Q
+        //notebook->codeCell(plotIvsQ());
+      }
 
       //TODO prompt for filename to save notebook
       const std::string filename = "/home/jonmd/refl_notebook.ipynb";
@@ -67,13 +77,38 @@ namespace MantidQt {
       file.close();
     }
 
+    std::string ReflGenerateNotebook::plotIvsQ(std::vector<std::string> ws_names) {
+
+      std::ostringstream plot_string;
+      plot_string << "#Plot unstitched I vs Q\n";
+      for (auto it = ws_names.begin(); it != ws_names.end(); ++it) {
+        std::tuple<std::string, std::string> convert_point_string = convertToPointString(*it);
+        plot_string << std::get<0>(convert_point_string);
+
+        plot_string << "plt.loglog(" << std::get<1>(convert_point_string) << ".readX(0), "
+                    << std::get<1>(convert_point_string) << ".readY(0), "
+                    << "basex=10, label='" << *it << "')\n";
+      }
+      plot_string << "plt.title('Unstitched I vs Q')\n";
+      plot_string << "plt.grid() #Show a grid\n";
+      plot_string << "plt.legend() #Show a legend\n";
+      plot_string << "plt.show() #Draw the plot\n";
+
+      return plot_string.str();
+    }
+
+    std::string ReflGenerateNotebook::stitchGroupString() {
+      return "something";
+    }
+
     /**
     Add a code cell to the notebook which runs reduce algorithm on the row specified
     @param notebook : the notebook to add the cell to
     @param rowNo : the row in the model to run the reduction algorithm on
     */
-    std::string ReflGenerateNotebook::reduceRowString(int rowNo) {
+    std::tuple<std::string, std::string> ReflGenerateNotebook::reduceRowString(int rowNo) {
       std::ostringstream code_string;
+      std::vector<std::string> workspace_names;
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
       const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
@@ -86,23 +121,23 @@ namespace MantidQt {
       if (thetaGiven)
         theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
 
-      const boost::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr);
-      code_string << boost::get<0>(load_ws_string);
+      const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr);
+      code_string << std::get<0>(load_ws_string);
 
-      const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
+      const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
 
       if (!transStr.empty()) {
-        boost::tuple<std::string, std::string> trans_string = transWSString(transStr);
-        code_string << boost::get<0>(trans_string);
-        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << boost::get<1>(load_ws_string) << "'";
-        code_string << ", " << "FirstTransmissionRun = '" << boost::get<1>(trans_string) << "'";
+        std::tuple<std::string, std::string> trans_string = transWSString(transStr);
+        code_string << std::get<0>(trans_string);
+        code_string << "IvsQ_" << runNo << ", " << "IvsLam_" << runNo << ", _ = ";
+        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
+        code_string << ", " << "FirstTransmissionRun = '" << std::get<1>(trans_string) << "'";
       }
       else {
-        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << boost::get<1>(load_ws_string) << "'";
+        code_string << "IvsQ_" << runNo << ", " << "IvsLam_" << runNo << ", _ = ";
+        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
       }
 
-      code_string << ", " << "OutputWorkspace = '" << "IvsQ_" << runNo << "'";
-      code_string << ", " << "OutputWorkspaceWaveLength = '" << "IvsLam_" << runNo << "'";
       if (thetaGiven)
         code_string << ", " << "ThetaIn = " << theta;
 
@@ -113,12 +148,42 @@ namespace MantidQt {
       }
       code_string << ")\n";
 
-      //todo rebin etc (look in reduceRow())
+      std::tuple<std::string, std::string> reduce_string = reductionString(rowNo, runNo);
+      code_string << std::get<0>(reduce_string);
 
-      return code_string.str();
+      return std::make_tuple(code_string.str(), std::get<1>(reduce_string));
     }
 
-    boost::tuple<std::string, std::string> ReflGenerateNotebook::transWSString(std::string trans_ws_str)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::convertToPointString(std::string wsName)
+    {
+      const std::string output_name = wsName + "_plot";
+      std::ostringstream convert_string;
+      convert_string << output_name << " = ConvertToPointData(" << wsName << ")\n";
+
+      return std::make_tuple(convert_string.str(), output_name);
+    }
+
+    std::tuple<std::string, std::string> ReflGenerateNotebook::reductionString(int rowNo, std::string runNo)
+    {
+      //We need to make sure that qmin and qmax are respected, so we rebin to
+      //those limits here.
+      std::ostringstream reduce_string;
+      reduce_string << "IvsQ_" << runNo << " = ";
+      reduce_string << "Rebin(";
+      reduce_string << "IvsQ_" << runNo;
+
+      const double qmin = m_model->data(m_model->index(rowNo, COL_QMIN)).toDouble();
+      const double qmax = m_model->data(m_model->index(rowNo, COL_QMAX)).toDouble();
+      const double dqq = m_model->data(m_model->index(rowNo, COL_DQQ)).toDouble();
+
+      reduce_string << ", " << "Params = ";
+      reduce_string << "'" << qmin << ", " << -dqq << ", " << qmax << "'";
+      reduce_string << ")\n";
+
+      return std::make_tuple(reduce_string.str(), "IvsQ_" + runNo);
+    }
+
+    std::tuple<std::string, std::string> ReflGenerateNotebook::transWSString(std::string trans_ws_str)
     {
       const size_t maxTransWS = 2;
 
@@ -131,25 +196,24 @@ namespace MantidQt {
       if(transVec.size() > maxTransWS)
         transVec.resize(maxTransWS);
 
-      boost::tuple<std::string, std::string> load_tuple;
+      std::tuple<std::string, std::string> load_tuple;
       for(auto it = transVec.begin(); it != transVec.end(); ++it)
         load_tuple = loadWorkspaceString(*it);
-        trans_ws_name.push_back(boost::get<1>(load_tuple));
-        trans_string << boost::get<0>(load_tuple);
+        trans_ws_name.push_back(std::get<1>(load_tuple));
+        trans_string << std::get<0>(load_tuple);
 
       //The runs are loaded, so we can create a TransWS
+      std::string wsName = "TRANS_" + getRunNumber(trans_ws_name[0]);
+      if(trans_ws_name.size() > 1)
+        wsName += "_" + getRunNumber(trans_ws_name[1]);
+      trans_string << wsName << " = ";
       trans_string << "CreateTransmissionWorkspaceAuto(";
       trans_string << "FirstTransmissionRun = '" << trans_ws_name[0] << "'";
       if(trans_ws_name.size() > 1)
         trans_string << ", SecondTransmissionRun = '" << trans_ws_name[1] << "'";
+      trans_string << ")\n";
 
-      std::string wsName = "TRANS_" + getRunNumber(trans_ws_name[0]);
-      if(trans_ws_name.size() > 1)
-        wsName += "_" + getRunNumber(trans_ws_name[1]);
-
-      trans_string << ", OutputWorkspace = '" << wsName << "')\n";
-
-      return boost::make_tuple(trans_string.str(), wsName);
+      return std::make_tuple(trans_string.str(), wsName);
     }
 
     std::string ReflGenerateNotebook::getRunNumber(std::string ws_name) {
@@ -172,7 +236,7 @@ namespace MantidQt {
       return ws_name;
     }
 
-    boost::tuple<std::string, std::string> ReflGenerateNotebook::loadWorkspaceString(std::string runStr) {
+    std::tuple<std::string, std::string> ReflGenerateNotebook::loadWorkspaceString(std::string runStr) {
       std::vector<std::string> runs;
       boost::split(runs, runStr, boost::is_any_of("+"));
 
@@ -186,20 +250,20 @@ namespace MantidQt {
 
       // todo deal with case of more than one run to load
       //const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
-      return boost::make_tuple("temp", "temp");
+      return std::make_tuple("temp", "temp");
     }
 
-    boost::tuple<std::string, std::string> ReflGenerateNotebook::loadRunString(std::string run) {
+    std::tuple<std::string, std::string> ReflGenerateNotebook::loadRunString(std::string run) {
       std::ostringstream load_string;
       // We do not have access to AnalysisDataService from notebook, so must load run from file
       const std::string filename = m_instrument + run;
       const std::string ws_name = "TOF_" + run;
+      load_string << ws_name << " = ";
       load_string << "Load(";
       load_string << "Filename = '" << filename << "'";
-      load_string << ", OutputWorkspace = '" << ws_name <<"'";
       load_string << ")\n";
 
-      return boost::make_tuple(load_string.str(), ws_name);
+      return std::make_tuple(load_string.str(), ws_name);
     }
 
     /**
