@@ -207,7 +207,6 @@ void ConvolutionFitSequential::exec() {
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.0, 0.70, true);
-  plotPeaks->setAlwaysStoreInADS(true);
   plotPeaks->setProperty("Input", plotPeakInput);
   plotPeaks->setProperty("OutputWorkspace", outputWsName);
   plotPeaks->setProperty("Function", function);
@@ -221,22 +220,24 @@ void ConvolutionFitSequential::exec() {
   plotPeaks->setProperty("Minimizer", minimizer);
   plotPeaks->setProperty("PassWSIndexToFunction", passIndex);
   plotPeaks->executeAsChildAlg();
-  ITableWorkspace_sptr outputWs =
-      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWsName);
+  ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
+
   // Delete workspaces
-  std::string deleteWorkspaces[] = {
-      (outputWsName + "_NormalisedCovarianceMatrices"),
-      (outputWsName + "_Parameters"), tempFitWsName};
   auto deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
-  for (int i = 0; i < 3; i++) {
-    deleter->setProperty("WorkSpace", deleteWorkspaces[i]);
-    deleter->executeAsChildAlg();
-  }
+  deleter->setProperty("WorkSpace",
+                       outputWsName + "_NormalisedCovarianceMatrices");
+  deleter->executeAsChildAlg();
+  deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
+  deleter->setProperty("WorkSpace", outputWsName + "_Parameters");
+  deleter->executeAsChildAlg();
+
+  std::string paramTableName = outputWsName + "_Parameters";
+  AnalysisDataService::Instance().add(paramTableName, outputWs);
 
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
 
-  // Define params for use in convertParametersToWorkSpace (Refactor to generic)
+
   auto paramNames = std::vector<std::string>();
   auto func = FunctionFactory::Instance().createFunction(funcName);
   if (delta) {
@@ -272,7 +273,6 @@ void ConvolutionFitSequential::exec() {
   // Run ProcessIndirectFitParameters
   auto pifp =
       createChildAlgorithm("ProcessIndirectFitParameters", 0.73, 0.80, true);
-  pifp->setAlwaysStoreInADS(true);
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", "MomentumTransfer"); 
@@ -280,8 +280,7 @@ void ConvolutionFitSequential::exec() {
   pifp->setProperty("OutputWorkspace", resultWsName);
   pifp->executeAsChildAlg();
 
-  API::MatrixWorkspace_sptr resultWs =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultWsName);
+  MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs", 0.80, 0.85, true);
@@ -294,14 +293,13 @@ void ConvolutionFitSequential::exec() {
   // Create Sample Log
   auto sampleLogStrings = std::map<std::string, std::string>();
   sampleLogStrings["sam_workspace"] = inputWs->getName();
-  sampleLogStrings["convolve_members"] =
-      boost::lexical_cast<std::string>(convolve);
+  sampleLogStrings["convolve_members"] = (convolve == 1) ? "true" : "false";
   sampleLogStrings["fit_program"] = "ConvFit";
   sampleLogStrings["background"] = backType;
   sampleLogStrings["delta_function"] = usingDelta;
   auto sampleLogNumeric = std::map<std::string, std::string>();
   sampleLogNumeric["lorentzians"] =
-      boost::lexical_cast<std::string>(usingLorentzians);
+	  boost::lexical_cast<std::string>(LorentzNum);
 
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog", 0.85, 0.90, true);
@@ -323,24 +321,16 @@ void ConvolutionFitSequential::exec() {
   // Copy Logs to GroupWorkspace
   logCopier = createChildAlgorithm("CopyLogs", 0.90, 0.93, true);
   logCopier->setProperty("InputWorkspace", resultWs);
-  logCopier->setProperty("OutputWorkspace",
-                         (outputWs->getName() + "_Workspaces"));
+  std::string groupName = outputWsName + "_Workspaces";
+  logCopier->setProperty("OutputWorkspace", groupName);
   logCopier->executeAsChildAlg();
-
-  // Rename TableWorkspace
-  auto renamer = createChildAlgorithm("RenameWorkspace", 0.93, 0.94, true);
-  renamer->setAlwaysStoreInADS(true);
-  renamer->setProperty("InputWorkspace", outputWs);
-  renamer->setProperty("OutputWorkspace",
-                       (outputWs->getName() + "_Parameters"));
-  renamer->executeAsChildAlg();
 
   // Rename Workspaces in group
   WorkspaceGroup_sptr groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
                                                                  "_Workspaces");
   auto groupWsNames = groupWs->getNames();
-  renamer = createChildAlgorithm("RenameWorkspace", 0.94, 1., true);
+  auto renamer = createChildAlgorithm("RenameWorkspace", 0.93, 1., true);
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i));
     std::string outName = outputWsName + "_";
@@ -350,7 +340,8 @@ void ConvolutionFitSequential::exec() {
     renamer->executeAsChildAlg();
   }
 
-  setProperty("OutputWorkspace", resultWs->name());
+  AnalysisDataService::Instance().add(resultWsName, resultWs);
+  setProperty("OutputWorkspace", resultWsName);
 }
 
 /**
@@ -471,13 +462,13 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
+	//remains in ADS for use in embedded algorithm call
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", wsName);
     convSpec->setProperty("Target", "ElasticQ");
     convSpec->setProperty("EMode", "Indirect");
     convSpec->executeAsChildAlg();
-    tempFitWs = convSpec->getProperty("OutputWorkspace");
   } else if (axis->isNumeric()) {
     // Check that units are Momentum Transfer
     if (axis->unit()->unitID() != "MomentumTransfer") {
