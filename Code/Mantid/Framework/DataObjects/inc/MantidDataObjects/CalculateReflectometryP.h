@@ -5,7 +5,7 @@
 #include "MantidDataObjects/CalculateReflectometry.h"
 
 namespace Mantid {
-namespace MDAlgorithms {
+namespace DataObjects {
 /**
 class CalculateReflectometryP: p-type transformation calculator
 */

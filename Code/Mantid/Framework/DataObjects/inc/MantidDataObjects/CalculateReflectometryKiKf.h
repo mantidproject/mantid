@@ -4,11 +4,12 @@
 #include <cmath>
 
 namespace Mantid {
+namespace DataObjects{
 /**
 class CalculateReflectometryKiKf: Calculation type for converting to ki or kf given
 a theta value (in degrees) and a wavelength
 */
-class CalculateReflectometryKiKf : public DataObjects::CalculateReflectometry {
+class CalculateReflectometryKiKf : public CalculateReflectometry {
 private:
   double m_sin_theta_i;
   double m_sin_theta_f;
@@ -75,5 +76,6 @@ public:
     return quad;
   }
 };
+}
 }
 #endif // MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYKIKF_H_
