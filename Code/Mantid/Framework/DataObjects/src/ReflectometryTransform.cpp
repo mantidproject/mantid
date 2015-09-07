@@ -42,14 +42,32 @@ namespace {
     *  Adds the column headings to a table
     *  @param vertexes : Table to which the columns are written to.
     */
-    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes) {
+    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, std::string outputDimensions) {
 
+        if (outputDimensions == "Q (lab frame)"){
         vertexes->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
         vertexes->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
         vertexes->addColumn("int", "OriginIndex");
         vertexes->addColumn("int", "OriginBin");
         vertexes->addColumn("double", "CellSignal");
         vertexes->addColumn("double", "CellError");
+        }
+        if (outputDimensions == "P (lab frame)"){
+        vertexes->addColumn("double", "Ki + Kf"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Ki - Kf"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("int", "OriginIndex");
+        vertexes->addColumn("int", "OriginBin");
+        vertexes->addColumn("double", "CellSignal");
+        vertexes->addColumn("double", "CellError");
+        }
+        if (outputDimensions == "K (incident, final)"){
+        vertexes->addColumn("double", "Ki"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Kf"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("int", "OriginIndex");
+        vertexes->addColumn("int", "OriginBin");
+        vertexes->addColumn("double", "CellSignal");
+        vertexes->addColumn("double", "CellError");
+        }
     }
 }
 namespace Mantid {
@@ -289,7 +307,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
-        &vertexes, bool dumpVertexes) const {
+        &vertexes, bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
@@ -322,7 +340,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
-  addColumnHeadings(vertexes);
+  addColumnHeadings(vertexes, outputDimensions);
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {
