@@ -146,10 +146,6 @@ void ConvolutionFitSequential::exec() {
   std::vector<std::string> functionValues = findValuesFromFunction(function);
   const std::string LorentzNum = functionValues[0];
   const std::string funcName = functionValues[1];
-  bool usingLorentzians = false;
-  if (boost::lexical_cast<int>(LorentzNum) > 0) {
-    usingLorentzians = true;
-  }
 
   // Check if a delta function is being used
   bool delta = false;

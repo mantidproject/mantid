@@ -188,7 +188,7 @@ public:
     auto memberLogs = memberRun.getLogData();
 
     TS_ASSERT_EQUALS(memberLogs.at(2)->value(), "FixF");
-    TS_ASSERT_EQUALS(memberLogs.at(3)->value(), "1");
+    TS_ASSERT_EQUALS(memberLogs.at(3)->value(), "true");
     TS_ASSERT_EQUALS(memberLogs.at(4)->value(), "false");
     TS_ASSERT_EQUALS(memberLogs.at(5)->value(), "ConvFit");
     TS_ASSERT_EQUALS(memberLogs.at(6)->value(), "ReductionWs_");
