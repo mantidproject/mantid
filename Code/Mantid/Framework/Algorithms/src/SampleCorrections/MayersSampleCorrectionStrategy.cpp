@@ -73,6 +73,10 @@ namespace Algorithms {
 /**
  * Constructor
  * @param params Defines the required parameters for the correction
+ * @param tof The TOF values corresponding to the signals to correct.
+ *      Number of tof values must match number of signal/error or be 1 greater
+ * @param sigIn Values of the signal that will be corrected
+ * @param errIn Values of the errors that will be corrected
  */
 MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(
     MayersSampleCorrectionStrategy::Parameters params,
@@ -279,9 +283,7 @@ MayersSampleCorrectionStrategy::calculateMS(const size_t irp, const double muR,
 //-----------------------------------------------------------------------------
 /**
  * Calculate the mu*r range required to cover the given tof range. It requires
- * that the parameters have been set.
- * @param tmin Minimum value of TOF in microseconds
- * @param tmax Maximum value of TOF in microseconds
+ * that the internal parameters have been set.
  * @return A pair of (min,max) values for muR for the given time of flight
  */
 std::pair<double, double>

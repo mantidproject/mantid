@@ -17,8 +17,8 @@ namespace Kernel {
 //-----------------------------------------------------------------------------
 /**
  * Constructor for an n-th order polynomial
- * @param n Order of the polynomial, which will require n+1 coefficients
- * to evaluate.
+ * @param degree Degree of polynomial required. It will require degree+1
+ * coefficients to evaluate.
  */
 ChebyshevSeries::ChebyshevSeries(const size_t degree)
   : m_bk(degree + 3, 0.0) {
