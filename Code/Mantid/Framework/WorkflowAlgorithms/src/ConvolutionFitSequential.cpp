@@ -275,16 +275,13 @@ void ConvolutionFitSequential::exec() {
   pifp->setAlwaysStoreInADS(true);
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("XAxisUnit", "MomentumTransfer"); 
   pifp->setProperty("ParameterNames", paramNamesList);
   pifp->setProperty("OutputWorkspace", resultWsName);
   pifp->executeAsChildAlg();
 
   API::MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultWsName);
-
-  // Set x units to be momentum transfer
-  auto axis = resultWs->getAxis(0);
-  axis->setUnit("MomentumTransfer");
 
   // Handle sample logs
   auto logCopier = createChildAlgorithm("CopyLogs", 0.80, 0.85, true);
