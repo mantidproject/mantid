@@ -66,7 +66,7 @@ namespace MantidQt {
 
         // Plot the unstitched and stitched I vs Q
         std::ostringstream plot_string;
-        plot_string << "f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)\n";
+        plot_string << "f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(12,4))\n";
         std::vector<std::string> stitched_ws;
         stitched_ws.push_back(std::get<1>(stitch_string));
         plot_string << plotIvsQ(ws_names, "ax1"); // unstitched

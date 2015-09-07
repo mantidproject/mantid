@@ -34,7 +34,7 @@
 #include <set>
 #include <map>
 #include <string>
-//#include <tuple>
+
 
 namespace MantidQt {
   namespace CustomInterfaces {
