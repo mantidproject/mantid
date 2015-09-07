@@ -49,9 +49,11 @@ public:
   }
 
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Point_Data() {
+    using std::sqrt;
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
+    std::transform(signal.begin(), signal.end(), error.begin(),
+                   (double (*)(double))sqrt);
     double xcur(100.0);
     std::generate(tof.begin(), tof.end(), [&xcur] { return xcur++; });
     MayersSampleCorrectionStrategy mscat(createTestParameters(), tof, signal,
@@ -76,9 +78,11 @@ public:
   void test_Corrects_Both_Absorption_And_Multiple_Scattering_For_Histogram_Data()
   // clang-format on
   {
+    using std::sqrt;
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
+    std::transform(signal.begin(), signal.end(), error.begin(),
+                   (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     double xcur(99.5);
     std::generate(tof.begin(), tof.end(), [&xcur] {
@@ -105,9 +109,11 @@ public:
   }
 
   void test_Corrects_For_Absorption_For_Histogram_Data() {
+    using std::sqrt;
     const size_t nypts(100);
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
+    std::transform(signal.begin(), signal.end(), error.begin(),
+                   (double (*)(double))sqrt);
     // Generate a histogram with the same mid points as the point data example
     double xcur(99.5);
     std::generate(tof.begin(), tof.end(), [&xcur] {
@@ -136,9 +142,11 @@ public:
 
   // ---------------------- Failure tests -----------------------------
   void test_Tof_Not_Monotonically_Increasing_Throws_Invalid_Argument() {
+    using std::sqrt;
     const size_t nypts(10);
     std::vector<double> signal(nypts, 2.0), tof(nypts + 1), error(nypts);
-    std::transform(signal.begin(), signal.end(), error.begin(), sqrt);
+    std::transform(signal.begin(), signal.end(), error.begin(),
+                   (double (*)(double))sqrt);
     double xcur(199.5);
     std::generate(tof.begin(), tof.end(), [&xcur] {
       double xold = xcur;
