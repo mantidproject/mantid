@@ -59,17 +59,19 @@ namespace MantidQt {
         }
         notebook->codeCell(code_string.str());
 
-        // Plot the unstitched I vs Q
-        notebook->codeCell(plotIvsQ(ws_names));
-
         // Stitch group
         std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows);
         notebook->codeCell(std::get<0>(stitch_string));
 
-        // Plot the stitched I vs Q
+        // Plot the unstitched and stitched I vs Q
+        std::ostringstream plot_string;
+        plot_string << "f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)\n";
         std::vector<std::string> stitched_ws;
         stitched_ws.push_back(std::get<1>(stitch_string));
-        notebook->codeCell(plotIvsQ(stitched_ws));
+        plot_string << plotIvsQ(ws_names, "ax1"); // unstitched
+        plot_string << plotIvsQ(stitched_ws, "ax2"); // stitched
+        plot_string << "plt.show() #Draw the plot\n";
+        notebook->codeCell(plot_string.str());
       }
 
       std::string generatedNotebook = notebook->writeNotebook();
@@ -79,6 +81,11 @@ namespace MantidQt {
       file.close();
     }
 
+    /**
+      Create string of python code to stitch workspaces in the same group
+      @param rows : rows in the stitch group
+      @return tuple containing the python code string and the output workspace name
+      */
     std::tuple<std::string, std::string> ReflGenerateNotebook::stitchGroupString(std::set<int> rows)
     {
       std::ostringstream stitch_string;
@@ -157,7 +164,7 @@ namespace MantidQt {
       return vector_string.str();
     }
 
-    std::string ReflGenerateNotebook::plotIvsQ(std::vector<std::string> ws_names) {
+    std::string ReflGenerateNotebook::plotIvsQ(std::vector<std::string> ws_names, std::string axes) {
 
       std::ostringstream plot_string;
       plot_string << "#Plot I vs Q\n";
@@ -165,14 +172,13 @@ namespace MantidQt {
         std::tuple<std::string, std::string> convert_point_string = convertToPointString(*it);
         plot_string << std::get<0>(convert_point_string);
 
-        plot_string << "plt.loglog(" << std::get<1>(convert_point_string) << ".readX(0), "
+        plot_string << axes << ".loglog(" << std::get<1>(convert_point_string) << ".readX(0), "
                     << std::get<1>(convert_point_string) << ".readY(0), "
                     << "basex=10, label='" << *it << "')\n";
       }
-      plot_string << "plt.title('Unstitched I vs Q')\n";
-      plot_string << "plt.grid() #Show a grid\n";
-      plot_string << "plt.legend() #Show a legend\n";
-      plot_string << "plt.show() #Draw the plot\n";
+      plot_string << axes << ".set_title('I vs Q')\n";
+      plot_string << axes << ".grid() #Show a grid\n";
+      plot_string << axes << ".legend() #Show a legend\n";
 
       return plot_string.str();
     }

@@ -296,7 +296,7 @@ namespace MantidQt
       std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
         m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
         COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE));
-      QString qfilename = QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
+      QString qfilename = QFileDialog::getSaveFileName(0, "Save notebook file", QDir::currentPath(),
                                                        "IPython Notebook files (*.ipynb);;All files (*.*)",
                                                        new QString("IPython Notebook files (*.ipynb)"));
       std::string filename = qfilename.toStdString();

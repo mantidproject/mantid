@@ -54,7 +54,7 @@ namespace MantidQt {
 
     private:
 
-      std::string plotIvsQ(std::vector<std::string> ws_names);
+      std::string plotIvsQ(std::vector<std::string> ws_names, std::string axes);
 
       std::tuple<std::string, std::string> stitchGroupString(std::set<int> rows);
 
