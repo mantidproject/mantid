@@ -346,6 +346,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       const double error = E[j];
 
       // fractional rebin
+      /*
       m_calculator->setThetaFinal(thetaLower);
       const V2D ur(m_calculator->calculateDim0(lamLower), // highest qx
                    m_calculator->calculateDim1(lamLower));
@@ -358,12 +359,14 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
                    m_calculator->calculateDim1(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
+      */
+      auto inputQ = m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
                                                    zBinsVec);
 
       // Find which qy bin this point lies in
       const auto qIndex =
-          std::upper_bound(zBinsVec.begin(), zBinsVec.end(), ll.Y()) -
+          std::upper_bound(zBinsVec.begin(), zBinsVec.end(), inputQ[0].Y()) -
           zBinsVec.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
@@ -373,10 +376,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       }
       // Debugging
       if (dumpVertexes) {
-        writeRow(vertexes, ll, i, j, signal, error);
-        writeRow(vertexes, ul, i, j, signal, error);
-        writeRow(vertexes, ur, i, j, signal, error);
-        writeRow(vertexes, lr, i, j, signal, error);
+        writeRow(vertexes, inputQ[0], i, j, signal, error);
+        writeRow(vertexes, inputQ[1], i, j, signal, error);
+        writeRow(vertexes, inputQ[2], i, j, signal, error);
+        writeRow(vertexes, inputQ[3], i, j, signal, error);
       }
     }
   }

@@ -20,7 +20,7 @@ ReflectometryTransformKiKf::ReflectometryTransformKiKf(
     double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
     : ReflectometryTransform("Ki", "ki", kiMin, kiMax, "Kf", "kf", kfMin, kfMax,
                              numberOfBinsQx, numberOfBinsQz,
-                             new CalculateReflectometryK()) {
+                             new CalculateReflectometryKiKf()) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
