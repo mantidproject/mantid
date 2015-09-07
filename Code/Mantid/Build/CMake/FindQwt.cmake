@@ -5,11 +5,12 @@
 #   QWT_LIBRARIES:   libraries to link against
 #   QWT_VERSION:     a string containing the version number
 ###############################################################################
-
+# Hacky way to get CMake to find the updated mantidlibs version of qwt 
+set ( MANTIDLIBS mantidlibs34 )
 find_path ( QWT_INCLUDE_DIR qwt.h 
-            PATHS /opt/include /usr/local/include /usr/include ${CMAKE_INCLUDE_PATH}
+            PATHS /opt/rh/${MANTIDLIBS}/root/usr/include /opt/include /usr/local/include /usr/include ${CMAKE_INCLUDE_PATH}
             PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4 qwt )
-find_library ( QWT_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt )
+find_library ( QWT_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt HINTS /opt/rh/${MANTIDLIBS}/root/usr/lib64 )
 find_library ( QWT_LIBRARY_DEBUG qwtd )
 
 # in REQUIRED mode: terminate if one of the above find commands failed
