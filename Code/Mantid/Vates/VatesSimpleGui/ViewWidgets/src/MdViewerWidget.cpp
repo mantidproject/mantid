@@ -165,7 +165,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
   useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
   m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi"),
-  m_colorMapEditorPanel(NULL), m_useGridAxes(true), m_allViews()
+  m_colorMapEditorPanel(NULL), m_gridAxesStartUpOn(true), m_allViews()
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -276,10 +276,6 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
-
-  // Set up the Grid Axes
-  m_useGridAxes = ui.axes_on_at_startup_check_box->isChecked();
-
 }
 
 void MdViewerWidget::panelChanged()
@@ -544,7 +540,10 @@ void MdViewerWidget::onResetViewsStateToAllData()
 pqPipelineSource* MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Load a new source plugin
-  pqPipelineSource* newRebinnedSource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(rebinnedWorkspaceName));
+  auto gridAxesOn = areGridAxesOn();
+  pqPipelineSource *newRebinnedSource = this->currentView->setPluginSource(
+      QString::fromStdString(sourceType),
+      QString::fromStdString(rebinnedWorkspaceName), gridAxesOn);
 
   // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
   pqActiveObjects::instance().setActiveSource(NULL);
@@ -568,7 +567,9 @@ pqPipelineSource* MdViewerWidget::renderOriginalWorkspace(const std::string orig
 {
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
-  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+  auto gridAxesOn = areGridAxesOn();
+  pqPipelineSource *source = this->currentView->setPluginSource(
+      sourcePlugin, QString::fromStdString(originalWorkspaceName), gridAxesOn);
 
   // Render and final setup
   this->renderAndFinalSetup();
@@ -728,6 +729,9 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
+
+    // Set the grid axs to on. This should be set whenever we have 0 sources in the view.
+    m_gridAxesStartUpOn = true;
   }
 
   // Set usage of current color settings to true, since we have loade the VSI
@@ -751,8 +755,11 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
   // Load a new source plugin
-  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
+  auto gridAxesOn = areGridAxesOn();
+  pqPipelineSource *source = this->currentView->setPluginSource(
+      sourcePlugin, workspaceName, gridAxesOn);
   source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
+
   this->renderAndFinalSetup();
 
   // Reset the current view to the correct initial view
@@ -1055,6 +1062,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->viewSwitched = true;
 
   // normally it will just close child SliceView windows
+  auto axesGridOn = areGridAxesOn();
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
   this->hiddenView = this->createAndSetMainViewWidget(this->ui.viewWidget, v);
@@ -1077,7 +1085,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->close();
   this->hiddenView->destroyView();
   this->hiddenView->deleteLater();
-
+  this->currentView->setAxesGrid(axesGridOn);
   // Currently this render will do one or more resetCamera() and even
   // resetDisplay() for different views, see for example
   // StandardView::onRenderDone().
@@ -1654,6 +1662,31 @@ void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views v
   if (!loaded)
     g_log.warning() << "Failed to restore the state of the current view even though I thought I had "
       "a state saved from before. The current state may not be consistent.";
+}
+
+/**
+ * Get the current grid axes setting
+ * @returns the true if the grid axes are on, else false
+ */
+bool MdViewerWidget::areGridAxesOn() {
+  // If we start up then we want to have the grid axes on
+  if (m_gridAxesStartUpOn) {
+    m_gridAxesStartUpOn = false;
+    return true;
+  }
+
+  // Get the state of the Grid Axes
+  auto renderView = this->currentView->getView();
+  vtkSMProxy *gridAxes3DActor =
+      vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true)
+          .GetAsProxy();
+  auto gridAxesSetting =
+      vtkSMPropertyHelper(gridAxes3DActor, "Visibility").GetAsInt();
+  if (gridAxesSetting == 0) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 } // namespace SimpleGui

@@ -118,7 +118,7 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName);
+  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName, bool axesGridOn);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
   /// Set the the background color for the view
@@ -141,7 +141,8 @@ public:
   void setVisibilityListener();
   /// Undo visibiltiy listener
   void removeVisibilityListener();
-
+  /// Set axes Grid
+  void setAxesGrid(bool onOff);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
 

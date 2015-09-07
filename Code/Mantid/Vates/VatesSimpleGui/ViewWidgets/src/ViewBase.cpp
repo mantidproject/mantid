@@ -330,8 +330,10 @@ GCC_DIAG_OFF(strict-aliasing)
  * workspace name. This is used in the plugin mode of the simple interface.
  * @param pluginName name of the ParaView plugin
  * @param wsName name of the Mantid workspace to pass to the plugin
+ * @param axesGridOn: if the axes grid should be on
+ * @returns a pointer to the newly created pipeline source
  */
-pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
+pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName, bool axesGridOn)
 {
   // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -351,6 +353,9 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
               "Recursion Depth").Set(split.get());
   }
   // WORKAROUND END
+
+  // Set the Axes Grid to On if required
+  setAxesGrid(axesGridOn);
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
@@ -961,8 +966,14 @@ void ViewBase::removeVisibilityListener() {
 /**
  * Sets the axes grid if the user has this enabled
  */
-void ViewBase::setAxesGrid() {
-  // Check the access grid state
+void ViewBase::setAxesGrid(bool on) {
+  if (on) {
+    if (auto renderView = getView()) {
+      vtkSMProxy *gridAxes3DActor = vtkSMPropertyHelper(renderView->getProxy(), "AxesGrid", true).GetAsProxy();
+      vtkSMPropertyHelper(gridAxes3DActor, "Visibility").Set(1);
+      gridAxes3DActor->UpdateProperty("Visibility");
+    }
+  }
 }
 
 
