@@ -70,9 +70,9 @@ namespace MantidQt {
         plot_string << "f, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(18,4))\n";
         std::vector<std::string> stitched_ws;
         stitched_ws.push_back(std::get<1>(stitch_string));
-        plot_string << plot1D(unstitched_ws, "ax1", "I vs Q Unstitched");
-        plot_string << plot1D(stitched_ws, "ax2", "I vs Q Stitiched");
-        plot_string << plot1D(IvsLam_ws, "ax3", "I vs Lambda");
+        plot_string << plot1D(unstitched_ws, "ax1", "I vs Q Unstitched", 1) << "\n";
+        plot_string << plot1D(stitched_ws, "ax2", "I vs Q Stitiched", 1) << "\n";
+        plot_string << plot1D(IvsLam_ws, "ax3", "I vs Lambda", 4);
         plot_string << "plt.show() #Draw the plot\n";
         notebook->codeCell(plot_string.str());
       }
@@ -175,7 +175,8 @@ namespace MantidQt {
       @param axes : handle of axes to plot in
       @return string  of python code to plot I vs Q
       */
-    std::string ReflGenerateNotebook::plot1D(std::vector<std::string> ws_names, std::string axes, std::string title) {
+    std::string ReflGenerateNotebook::plot1D(std::vector<std::string> ws_names, std::string axes, std::string title,
+                                             int legendLocation) {
 
       std::ostringstream plot_string;
       for (auto it = ws_names.begin(); it != ws_names.end(); ++it) {
@@ -190,12 +191,12 @@ namespace MantidQt {
                     << "yerr=" << std::get<1>(convert_point_string) << ".readE(0), "
                     << "label='" << *it << "')\n";
 
-        plot_string << axes << ".set_yscale('log')\n";
+        plot_string << axes << ".set_yscale('log'); ";
         plot_string << axes << ".set_xscale('log')\n";
       }
       plot_string << axes << ".set_title('" << title << "')\n";
       plot_string << axes << ".grid() #Show a grid\n";
-      plot_string << axes << ".legend() #Show a legend\n";
+      plot_string << axes << ".legend(loc=" << legendLocation << ") #Show a legend\n";
 
       return plot_string.str();
     }

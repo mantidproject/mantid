@@ -54,7 +54,7 @@ namespace MantidQt {
 
     private:
 
-      std::string plot1D(std::vector<std::string> ws_names, std::string axes, std::string title);
+      std::string plot1D(std::vector<std::string> ws_names, std::string axes, std::string title, int legendLocation);
 
       std::tuple<std::string, std::string> stitchGroupString(std::set<int> rows);
 
