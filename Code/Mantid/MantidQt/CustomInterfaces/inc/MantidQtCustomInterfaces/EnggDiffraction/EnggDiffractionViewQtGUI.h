@@ -107,11 +107,14 @@ public:
 
   virtual int focusingBank() const;
 
+  virtual bool focusedOutWorkspace() const;
+
 private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();
   void calibrateClicked();
   void focusClicked();
+
 
   // slots of the settings tab/section of the interface
   void browseInputDirCalib();
@@ -119,11 +122,11 @@ private slots:
   void browsePixelCalibFilename();
   void browseTemplateGSAS_PRM();
   void browseDirFocusing();
-
   // slots of the calibration tab/section of the interface
 
   // slots of the general part of the interface
   void instrumentChanged(int idx);
+
   // show the standard Mantid help window with this interface's help
   void openHelpWin();
 

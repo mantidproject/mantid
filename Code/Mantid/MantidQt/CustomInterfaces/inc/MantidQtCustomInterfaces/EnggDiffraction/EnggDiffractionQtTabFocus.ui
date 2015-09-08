@@ -141,7 +141,7 @@
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="QCheckBox" name="checkBox_2">
+         <widget class="QCheckBox" name="checkBox_FocusedWS">
           <property name="text">
            <string>Plot Focused Workspace</string>
           </property>

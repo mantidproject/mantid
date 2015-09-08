@@ -106,6 +106,7 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
           SLOT(calibrateClicked()));
 
+
   enableCalibrateAndFocusActions(true);
 }
 
@@ -147,6 +148,10 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
   connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
           SLOT(focusClicked()));
 }
+
+
+
+
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   // change instrument
@@ -339,6 +344,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   // focus
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
+  m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
 }
 
 void
@@ -518,6 +524,10 @@ std::string EnggDiffractionViewQtGUI::focusingDir() const {
 int EnggDiffractionViewQtGUI::focusingBank() const {
   int idx = m_uiTabFocus.comboBox_bank_num->currentIndex();
   return m_uiTabFocus.comboBox_bank_num->itemData(idx).toInt() + 1;
+}
+
+bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
+	return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
