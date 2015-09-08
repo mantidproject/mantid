@@ -23,11 +23,10 @@ namespace MantidQt {
 
     /**
       Generate an ipython notebook
-      @param rows : rows in the model which were processed
       @param groups : groups of rows which were stitched
-      @param filename : location to save notebook to
+      @returns ipython notebook string
       */
-    void ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows, std::string filename) {
+    std::string ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups) {
       std::unique_ptr<Mantid::API::NotebookWriter> notebook(new Mantid::API::NotebookWriter());
 
       std::string title_string;
@@ -75,11 +74,7 @@ namespace MantidQt {
         notebook->codeCell(plot_string.str());
       }
 
-      std::string generatedNotebook = notebook->writeNotebook();
-      std::ofstream file(filename.c_str(), std::ofstream::trunc);
-      file << generatedNotebook;
-      file.flush();
-      file.close();
+      return notebook->writeNotebook();
     }
 
     /**

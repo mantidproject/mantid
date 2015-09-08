@@ -50,7 +50,7 @@ namespace MantidQt {
 
       virtual ~ReflGenerateNotebook(){};
 
-      void generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows, std::string filename);
+      std::string generateNotebook(std::map<int, std::set<int>> groups);
 
     private:
 
