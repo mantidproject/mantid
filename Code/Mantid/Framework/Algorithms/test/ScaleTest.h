@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/Scale.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using Mantid::MantidVec;
 
@@ -82,6 +83,25 @@ public:
     AnalysisDataService::Instance().remove("added");
   }
 
+  void test_multiply_with_dx_values() {
+    bool outputWorkspaceIsInputWorkspace = false;
+    doTestScaleWithDx("Multiply", outputWorkspaceIsInputWorkspace);
+  }
+
+  void test_multiply_with_dx_values_with_out_is_in() {
+    bool outputWorkspaceIsInputWorkspace = true;
+    doTestScaleWithDx("Multiply", outputWorkspaceIsInputWorkspace);
+  }
+
+  void test_add_with_dx_values() {
+    bool outputWorkspaceIsInputWorkspace = false;
+    doTestScaleWithDx("Add", outputWorkspaceIsInputWorkspace);
+  }
+  void test_add_with_dx_values_with_out_is_in() {
+    bool outputWorkspaceIsInputWorkspace = true;
+    doTestScaleWithDx("Add", outputWorkspaceIsInputWorkspace);
+  }
+
 private:
   void testScaleFactorApplied(const Mantid::API::MatrixWorkspace_const_sptr & inputWS,
                               const Mantid::API::MatrixWorkspace_const_sptr & outputWS,
@@ -101,7 +121,53 @@ private:
     }
   }
 
+  void doTestScaleWithDx(std::string type, bool outIsIn = false) {
+      // Arrange
+      const double xValue = 1.222;
+      const double value = 5;
+      const double error = 1.5;
+      const double xError = 1.1;
+      int64_t nHist = 4;
+      int64_t nBins = 10; 
+      bool isHist = true;
+      std::string wsName = "input_scaling";
+      Mantid::API::AnalysisDataService::Instance().add(wsName,WorkspaceCreationHelper::Create2DWorkspaceWithValuesAndXerror(nHist, nBins, isHist, xValue, value, error, xError));
+      std::string outWorkspaceName;
+      if (outIsIn) {
+        outWorkspaceName = wsName;
+      } else {
+        outWorkspaceName = "dx_error_workspace_test";
+      }
 
+      // Act
+      auto algScale = Mantid::API::FrameworkManager::Instance().createAlgorithm("Scale");
+      algScale->initialize();
+      algScale->setRethrows(true);
+      algScale->setPropertyValue("InputWorkspace", wsName);
+      algScale->setPropertyValue("OutputWorkspace", outWorkspaceName);
+      algScale->setProperty("Operation",type);
+      algScale->setProperty("Factor", "10");
+      algScale->execute();
+
+      // Assert
+      TS_ASSERT(algScale->isExecuted());
+      auto outWS = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(outWorkspaceName);
+      TS_ASSERT(outWS.get());
+      TSM_ASSERT("Output should contain x errors", outWS->hasDx(0));
+
+      auto& dx = outWS->dataDx(0);
+      double expectedDx = xError;
+      for (size_t spectra = 0; spectra < outWS->getNumberHistograms(); ++spectra) {
+        for (size_t i = 0; i < static_cast<size_t>(nBins); ++i) {
+          TSM_ASSERT_EQUALS("X Error should be 5", dx[i], expectedDx);
+        }
+      }
+      // Clean the ADS
+      if (!outIsIn) {
+        Mantid::API::AnalysisDataService::Instance().remove(outWorkspaceName);
+      }
+      Mantid::API::AnalysisDataService::Instance().remove(wsName);
+  }
   Mantid::Algorithms::Scale scale;
 };
 
