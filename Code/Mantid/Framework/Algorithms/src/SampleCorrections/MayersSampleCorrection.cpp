@@ -103,7 +103,11 @@ void MayersSampleCorrection::exec() {
   const size_t nhist(inputWS->getNumberHistograms());
   Progress prog(this, 0., 1., nhist);
   prog.setNotifyStep(0.01);
-  for (size_t i = 0; i < nhist; ++i) {
+
+  PARALLEL_FOR2(inputWS, outputWS)
+  for (int64_t i = 0; i < static_cast<int64_t>(nhist); ++i) {
+    PARALLEL_START_INTERUPT_REGION
+
     // Copy the X values over
     const auto &inX = inputWS->readX(i);
     outputWS->dataX(i) = inX;
@@ -131,7 +135,10 @@ void MayersSampleCorrection::exec() {
                                               inputWS->readE(i));
     correction.apply(outputWS->dataY(i), outputWS->dataE(i));
     prog.report();
+
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", outputWS);
 }
