@@ -15,6 +15,7 @@ dump the result to a file.
 
 It currently only support MatrixWorkspace
 
+**Note for usage with ORNL live monitor:** The output file needs to be named :literal:`<inst>_<runnumber>_plot_data.json` to be cataloged and plotted.
 
 Usage
 -----
