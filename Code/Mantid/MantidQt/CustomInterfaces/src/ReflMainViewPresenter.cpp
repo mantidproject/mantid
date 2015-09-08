@@ -282,8 +282,10 @@ namespace MantidQt
         return;
       }
 
-      //TODO if notebook flag set from gui
-      saveNotebook(groups, rows);
+      // If "Output Notebook" checkbox is checked then create an ipython notebook
+      if(m_view->getEnableNotebook()) {
+        saveNotebook(groups, rows);
+      }
     }
 
     /**
