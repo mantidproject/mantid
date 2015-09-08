@@ -81,18 +81,11 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
   for (size_t i = 0; i < dataWS.getNumDims(); ++i) {
     const auto dataDim = dataWS.getDimension(i);
     if (!dataDim->getIsIntegrated()) {
-      int index = shapeWS.getDimensionIndexById(dataDim->getDimensionId());
-      if (index >= dataWS.getNumDims()) {
-        throw std::invalid_argument("Input data workspace cannot be rotated.");
-      }
+      size_t index = shapeWS.getDimensionIndexById(dataDim->getDimensionId());
       axes.push_back(index);
     }
   }
   return axes;
-}
-
-size_t indexInData(const size_t &linearIndexShape, const size_t &dataSize) {
-  return linearIndexShape - size_t(linearIndexShape / dataSize) * dataSize;
 }
 
 std::vector<size_t> resolveIndexes(const size_t &linearIndexShape,
@@ -221,42 +214,6 @@ void ReplicateMD::init() {
                   "An output workspace with replicated data.");
 }
 
-/*
- *def resolve_index(index, data):
-
-    len = data.size
-    newshape = list(reversed(data.shape))
-    remainder = index
-    current_shape = len
-    result = list()
-    for dim in newshape:
-        current_shape = current_shape / dim
-        index_d = int( remainder / current_shape)
-        remainder = remainder - (index_d * current_shape)
-        result.append( index_d )
-    return list(reversed(result))
-
-
-
-
-x = np.arange(3*4*5).reshape(3,4,5)
-index = 4
-integrated_dim = 0
-y = resolve_index(index, x)
-print y
-del y[integrated_dim]
-
-z = np.arange(4*5).reshape(4,5)
-
-shape_prod = 1
-lin_index = 0
-for i in range(0, len(y)):
-    lin_index += y[i] * shape_prod
-    shape_prod = z.shape[i] * shape_prod
-
-print lin_index
-
- */
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
