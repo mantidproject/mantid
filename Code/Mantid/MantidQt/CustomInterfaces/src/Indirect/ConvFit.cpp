@@ -208,6 +208,8 @@ void ConvFit::setup() {
           SLOT(showTieCheckbox(QString)));
   showTieCheckbox(m_uiForm.cbFitType->currentText());
 
+  m_previousFit = m_uiForm.cbFitType->currentText();
+
   updatePlotOptions();
 }
 
@@ -1408,6 +1410,16 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  * @param functionName Name of new fit function
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
+  double oneLValues[3] = {0.0, 0.0, 0.0};
+  std::string p = m_previousFit.toStdString();
+  std::string c =  m_uiForm.cbFitType->currentText().toStdString();
+  if (m_previousFit.compare("One Lorentzian") == 0 &&
+      m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
+		  oneLValues[0] = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+		  oneLValues[1] = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+		  oneLValues[2] = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
+  }
+
   // remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
@@ -1420,7 +1432,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
   QStringList parameters = getFunctionParameters(functionName);
   updatePlotOptions();
 
-  // Two Loremtzians Fit
+  // Two Lorentzians Fit
   if (fitFunctionIndex == 2) {
     m_properties["FitFunction1"] = m_grpManager->addProperty("Lorentzian 1");
     m_cfTree->addProperty(m_properties["FitFunction1"]);
@@ -1447,12 +1459,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
         if (QString(*it).compare("FWHM") == 0) {
           m_dblManager->setValue(m_properties[name], 0.0175);
+        } else if (QString(*it).compare("Amplitude") == 0 ||
+                   QString(*it).compare("Intensity") == 0) {
+          m_dblManager->setValue(m_properties[name], 1.0);
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
-        }
-        if (QString(*it).compare("Amplitude") == 0 ||
-            QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
         }
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
@@ -1475,12 +1486,11 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
 
         if (QString(*it).compare("FWHM") == 0) {
           m_dblManager->setValue(m_properties[name], 0.0175);
+        } else if (QString(*it).compare("Amplitude") == 0 ||
+                   QString(*it).compare("Intensity") == 0) {
+          m_dblManager->setValue(m_properties[name], 1.0);
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
-        }
-        if (QString(*it).compare("Amplitude") == 0 ||
-            QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
         }
 
         m_dblManager->setDecimals(m_properties[name], NUM_DECIMALS);
@@ -1488,6 +1498,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
       }
     }
   }
+  m_previousFit = m_uiForm.cbFitType->currentText();
 }
 
 /**
