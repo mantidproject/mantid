@@ -495,7 +495,8 @@ std::string createParName(size_t index, size_t subIndex,
  *					+- Temperature Correction(yes/no)
  *				+- ProductFunction
  *					|
- *					+- InelasticDiffRotDiscreteCircle(yes/no)
+ *					+-
+ *InelasticDiffRotDiscreteCircle(yes/no)
  *					+- Temperature Correction(yes/no)
  *
  * @param tieCentres :: whether to tie centres of the two lorentzians.
@@ -1412,12 +1413,15 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
 void ConvFit::fitFunctionSelected(const QString &functionName) {
   double oneLValues[3] = {0.0, 0.0, 0.0};
   std::string p = m_previousFit.toStdString();
-  std::string c =  m_uiForm.cbFitType->currentText().toStdString();
+  std::string c = m_uiForm.cbFitType->currentText().toStdString();
+  bool previouslyOneL = false;
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
-		  oneLValues[0] = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
-		  oneLValues[1] = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
-		  oneLValues[2] = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
+    previouslyOneL = true;
+    oneLValues[0] = m_dblManager->value(m_properties["Lorentzian 1.Amplitude"]);
+    oneLValues[1] =
+        m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
+    oneLValues[2] = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
   }
 
   // remove previous parameters from tree
@@ -1458,10 +1462,23 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
-          m_dblManager->setValue(m_properties[name], 0.0175);
-        } else if (QString(*it).compare("Amplitude") == 0 ||
-                   QString(*it).compare("Intensity") == 0) {
-          m_dblManager->setValue(m_properties[name], 1.0);
+          if (previouslyOneL) {
+            m_dblManager->setValue(m_properties[name], oneLValues[2]);
+          } else {
+            m_dblManager->setValue(m_properties[name], 0.0175);
+          }
+        } else if (QString(*it).compare("Amplitude") == 0) {
+          if (previouslyOneL) {
+            m_dblManager->setValue(m_properties[name], oneLValues[0]);
+          } else {
+            m_dblManager->setValue(m_properties[name], 1.0);
+          }
+        } else if (QString(*it).compare("PeakCentre") == 0) {
+          if (previouslyOneL) {
+            m_dblManager->setValue(m_properties[name], oneLValues[1]);
+          } else {
+            m_dblManager->setValue(m_properties[name], 1.0);
+          }
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
         }
