@@ -60,7 +60,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool tra
           size_t m_current;
       public:
           Decreasing(size_t start) : m_current(start){}
-          int operator()() {return --m_current;}
+          size_t operator()() {return --m_current;}
       };
 
       // Generate the axis order 0, 1, 2 ... in reverse
