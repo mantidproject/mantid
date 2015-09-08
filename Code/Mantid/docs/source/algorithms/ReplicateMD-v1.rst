@@ -10,9 +10,9 @@
 Description
 -----------
 
-This is a function to create a higher dimensional dataset by replicating along an additional axis. The synax is similar to that used by The synax is similar to that used by `Horace <http://horace.isis.rl.ac.uk/Reshaping_etc#replicate>`__.
+This algorithm creates a higher dimensional dataset by replicating along an additional axis. The synax is similar to that used by `Horace <http://horace.isis.rl.ac.uk/Reshaping_etc#replicate>`__.
 
-The *ShapeWorkspace* input defines the shape of the *OutputWorkspace*, but not the contents. The *DataWorkspace* provides the data in the lower dimensionality cut, which will be replicated over. This algorithm operates on :ref:`MDHistoWorkspace <MDHistoWorkspace>` and provides a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as an output.
+The *ShapeWorkspace* input defines the shape of the *OutputWorkspace*, but not the contents. The *DataWorkspace* provides the data contents in the lower dimensionality cut, which will be replicated over. This algorithm operates on :ref:`MDHistoWorkspace <MDHistoWorkspace>` inputs and provides a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as an output.
 
 
 Usage
