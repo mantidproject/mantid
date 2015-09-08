@@ -14,8 +14,6 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
   m_uiForm.setupUi(parent);
 
   // Connect slots
-  connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(handleGeometryChanged(int)));
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(newData(const QString &)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
@@ -93,17 +91,8 @@ void ContainerSubtraction::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  QString correctionType;
-  switch (m_uiForm.cbGeometry->currentIndex()) {
-  case 0:
-    correctionType = "flt";
-    break;
-  case 1:
-    correctionType = "cyl";
-    break;
-  }
   const QString outputWsName =
-      sampleWsName.left(nameCutIndex) + +"_" + correctionType + "_Corrected";
+      sampleWsName.left(nameCutIndex)+"_Corrected";
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
@@ -190,31 +179,6 @@ void ContainerSubtraction::newData(const QString &dataName) {
   // Plot the sample curve
   m_uiForm.ppPreview->clear();
   m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
-}
-
-/**
- * Handles when the type of geometry changes
- *
- * Updates the file extension to search for
- */
-void ContainerSubtraction::handleGeometryChange(int index) {
-  QString ext("");
-  switch (index) {
-  case 0:
-    // Geometry is flat
-    ext = "_flt_abs";
-    break;
-  case 1:
-    // Geometry is cylinder
-    ext = "_cyl_abs";
-    break;
-  case 2:
-    // Geometry is annulus
-    ext = "_ann_abs";
-    break;
-  }
-  /*m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-  m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));*/
 }
 
 /**
