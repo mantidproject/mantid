@@ -90,6 +90,16 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   return retVal;
 }
 
+Workspace2D_sptr Create1DWorkspaceConstantWithXerror(int size, double value,
+                                                     double error,
+                                                     double xError) {
+  auto ws = Create1DWorkspaceConstant(size, value, error);
+  MantidVecPtr dx1;
+  dx1.access().resize(size, xError);
+  ws->setDx(0, dx1);
+  return ws;
+}
+
 Workspace2D_sptr Create1DWorkspaceFib(int size) {
   MantidVecPtr x1, y1, e1;
   x1.access().resize(size, 1);
@@ -106,6 +116,7 @@ Workspace2D_sptr Create1DWorkspaceFib(int size) {
 Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries) {
   return Create2DWorkspaceBinned(nhist, numBoundaries);
 }
+
 
 /** Create a Workspace2D where the Y value at each bin is
  * == to the workspace index
@@ -153,6 +164,21 @@ Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool isHist,
   }
   retVal = maskSpectra(retVal, maskedWorkspaceIndices);
   return retVal;
+}
+
+
+Workspace2D_sptr Create2DWorkspaceWithValuesAndXerror(
+    int64_t nHist, int64_t nBins, bool isHist, double xVal, double yVal,
+    double eVal, double dxVal,
+    const std::set<int64_t> &maskedWorkspaceIndices) {
+  auto ws = Create2DWorkspaceWithValues(
+      nHist, nBins, isHist, maskedWorkspaceIndices, xVal, yVal, eVal);
+  MantidVecPtr dx1;
+  dx1.access().resize(isHist ? nBins + 1 : nBins, dxVal);
+  for (int i = 0; i < nHist; i++) {
+    ws->setDx(i, dx1);
+  }
+  return ws;
 }
 
 Workspace2D_sptr
