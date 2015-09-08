@@ -16,7 +16,8 @@ class MDHistoWorkspace;
 }
 namespace MDAlgorithms {
 
-/** ReplicateMD : TODO: DESCRIPTION
+/** ReplicateMD : Algorithm header for ReplicateMD. An algorithm to create a higher dimensionality MDWorkspace from a 
+  lower dimensionality one.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
