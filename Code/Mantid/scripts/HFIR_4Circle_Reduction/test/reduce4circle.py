@@ -137,12 +137,18 @@ def calculate_ub_matrix(step):
     added1, peak_info1 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
     assert_true(added1)
 
+    assert_equals(peak_info1.getExpInfo())
+    assert_equals(peak_info1.getHKL())
+
     # Add peak 2
     exp_number = 355
     scan_number = 82
     pt_number = 11
     added2, peak_info2 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
     assert_true(added2)
+
+    assert_equals(peak_info1.getExpInfo())
+    assert_equals(peak_info1.getHKL())
 
     peak_info_list = [peak_info1, peak_info2]
 

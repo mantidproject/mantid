@@ -24,6 +24,17 @@ except AttributeError:
 from ui_MainWindow import Ui_MainWindow
 
 
+# UB peak information table
+UB_Peak_Table_Setup = [('Scan', 'int'),
+                       ('Pt', 'int'),
+                       ('H', 'float'),
+                       ('K', 'float'),
+                       ('L', 'float'),
+                       ('Q_x', 'float'),
+                       ('Q_y', 'float'),
+                       ('Q_z', 'float'),
+                       ('Status', 'checkbox')]
+
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
@@ -122,11 +133,22 @@ class MainWindow(QtGui.QMainWindow):
         # Initial setup
         self.ui.tabWidget.setCurrentIndex(0)
 
+        self._init_ub_table()
+
         # Tab 'Access'
         self.ui.lineEdit_url.setText('http://neutron.ornl.gov/user_data/hb3a/')
         self.ui.comboBox_mode.setCurrentIndex(0)
         self.ui.lineEdit_localSpiceDir.setEnabled(False)
         self.ui.pushButton_browseLocalDataDir.setEnabled(False)
+
+        return
+
+    def _init_ub_table(self):
+        """ DOC
+        :return:
+        """
+        # UB-peak table
+        self.ui.tableWidget_peaksCalUB.init_setup(UB_Peak_Table_Setup)
 
         return
 
@@ -312,8 +334,12 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(ret_obj)
 
         # Set up correct values to table tableWidget_peaksCalUB
-        peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
-        self._set_ub_input_table(peak_info)
+        self._myControl.add_peak_info(exp_no, scan_no, pt_no)
+        status, peak_info = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        if status is False:
+            err_msg = peak_info
+            raise KeyError(err_msg)
+        self.set_ub_peak_table(peak_info)
 
         return
 
@@ -556,6 +582,25 @@ class MainWindow(QtGui.QMainWindow):
                 info += 'There are %d Pt. skipped.\n' % num_miss_pt
 
             self.pop_one_button_dialog(info)
+
+        return
+
+    def set_ub_peak_table(self, peakinfo):
+        """
+        DOC
+        :param peak_info:
+        :return:
+        """
+        assert isinstance(peakinfo, r4c.PeakInfo)
+
+        exp_number, scan_number, pt_number = peakinfo.getExpInfo()
+        print '[DB Exp/Scan/Pt] ', exp_number, scan_number, pt_number
+
+        hkl = peakinfo.getHKL()
+        print '[DB HKL] ', hkl
+
+        q_sample = peakinfo.getQSample()
+        print '[DB QSample] ', q_sample, type(q_sample)
 
         return
 

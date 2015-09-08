@@ -172,6 +172,8 @@ class CWSCDReductionControl(object):
         self._myRawDataWSDict = dict()
         # Container for PeakWorkspaces for calculating UB matrix
         self._myUBPeakWSDict = dict()
+        # Peak Info
+        self._myPeakInfoDict = dict()
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
@@ -195,6 +197,9 @@ class CWSCDReductionControl(object):
 
         peak_info = PeakInfo(self)
         peak_info.set_from_run_info(exp_number, scan_number, pt_number)
+
+        # Add to data management
+        self._myPeakInfoDict[(exp_number, scan_number, pt_number)] = peak_info
 
         return True, peak_info
 
@@ -223,7 +228,9 @@ class CWSCDReductionControl(object):
             return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
 
         # Construct a new peak workspace by combining all single peak
-        ub_peak_ws = api.CloneWorkspace(InputWorkspace=peak_info_list[0].get_peak_workspace())
+        ub_peak_ws_name = 'Temp_UB_Peak'
+        ub_peak_ws = api.CloneWorkspace(InputWorkspace=peak_info_list[0].get_peak_workspace(),
+                                        OutputWorkspace=ub_peak_ws_name)
 
         for i_peak_info in xrange(1, len(peak_info_list)):
             # Set HKL
@@ -238,12 +245,12 @@ class CWSCDReductionControl(object):
 
             # Combine peak workspace
 
-            api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws, RHSWorkspace=peak_ws,
+            api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws_name, RHSWorkspace=peak_ws,
                                        CombineMatchingPeaks=False, OutputWorkspace=ub_peak_ws)
         # END-FOR(i_peak_info)
 
         # Calculate UB matrix
-        api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws,
+        api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
                              a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
 
         ub_matrix = peak_ws.sample().getOrientedLattice().getUB()
@@ -429,6 +436,15 @@ class CWSCDReductionControl(object):
             OutputWorkspace=exp_info_ws_name,
             DetectorTableWorkspace=virtual_instrument_info_table_name)
 
+        # get raw data workspace
+        raw_data_ws_name = get_raw_data_workspace_name(exp_number, scan_number, pt_number)
+        if AnalysisDataService.doesExist(raw_data_ws_name):
+            raw_data_ws = AnalysisDataService.retrieve(raw_data_ws_name)
+            self._add_raw_workspace(exp_number, scan_number, pt_number, raw_data_ws)
+        else:
+            raise RuntimeError('Mantid algorithm CollectHB3AExperimentInfo changes the '
+                               'output raw data matrix workspace\'s name convention.')
+
         # Load XML file to MD
         pt_md_ws_name = get_single_pt_md_name(exp_number, scan_number, pt_number)
         api.ConvertCWSDExpToMomentum(InputWorkspace=exp_info_ws_name ,
@@ -509,6 +525,22 @@ class CWSCDReductionControl(object):
                 array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
 
         return array2d
+
+    def get_peak_info(self, exp_number, scan_number, pt_number):
+        """
+        DOC!
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :return:
+        """
+        if (exp_number, scan_number, pt_number) not in self._myPeakInfoDict:
+            err_msg = 'Unable to find PeakInfo for Exp %d Scan %d Pt %d. ' \
+                      'Existing keys are %s' % (exp_number, scan_number, pt_number,
+                                                str(self._myPeakInfoDict.keys()))
+            return False, err_msg
+
+        return True, self._myPeakInfoDict[(exp_number, scan_number, pt_number)]
 
     def get_ub_peak_ws(self, exp_number, scan_number, pt_number):
         """
@@ -902,7 +934,7 @@ def get_raw_data_workspace_name(exp_number, scan_number, pt_number):
     :param pt_number:
     :return:
     """
-    ws_name = 'HB3A_%03d_%04d_%04d_Raw' % (exp_number, scan_number, pt_number)
+    ws_name = 'HB3A_exp%d_scan%04d_%04d' % (exp_number, scan_number, pt_number)
 
     return ws_name
 
