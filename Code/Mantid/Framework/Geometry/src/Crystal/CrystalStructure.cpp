@@ -203,6 +203,12 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
       break;
     }
   }
+
+  if (m_centering) {
+    std::cout << m_centering->getSymbol() << std::endl;
+  } else {
+    std::cout << "LOL" << std::endl;
+  }
 }
 
 /// Assigns the cell to all scatterers

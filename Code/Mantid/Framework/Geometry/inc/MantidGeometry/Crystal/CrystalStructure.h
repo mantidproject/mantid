@@ -158,6 +158,8 @@ public:
   SpaceGroup_const_sptr spaceGroup() const;
   void setSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
+  ReflectionCondition_sptr centering() const { return m_centering; }
+
   CompositeBraggScatterer_sptr getScatterers() const;
   void setScatterers(const CompositeBraggScatterer_sptr &scatterers);
   void addScatterers(const CompositeBraggScatterer_sptr &scatterers);
