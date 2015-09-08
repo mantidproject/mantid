@@ -12,6 +12,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringContainsValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <cmath>
 
@@ -233,7 +234,6 @@ void ConvolutionFitSequential::exec() {
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
 
-
   auto paramNames = std::vector<std::string>();
   auto func = FunctionFactory::Instance().createFunction(funcName);
   if (delta) {
@@ -271,7 +271,7 @@ void ConvolutionFitSequential::exec() {
       createChildAlgorithm("ProcessIndirectFitParameters", 0.73, 0.80, true);
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
-  pifp->setProperty("XAxisUnit", "MomentumTransfer"); 
+  pifp->setProperty("XAxisUnit", "MomentumTransfer");
   pifp->setProperty("ParameterNames", paramNamesList);
   pifp->setProperty("OutputWorkspace", resultWsName);
   pifp->executeAsChildAlg();
@@ -295,7 +295,7 @@ void ConvolutionFitSequential::exec() {
   sampleLogStrings["delta_function"] = usingDelta;
   auto sampleLogNumeric = std::map<std::string, std::string>();
   sampleLogNumeric["lorentzians"] =
-	  boost::lexical_cast<std::string>(LorentzNum);
+      boost::lexical_cast<std::string>(LorentzNum);
 
   // Add String Logs
   auto logAdder = createChildAlgorithm("AddSampleLog", 0.85, 0.90, true);
@@ -419,18 +419,14 @@ std::vector<std::string> ConvolutionFitSequential::searchForFitParams(
 }
 
 /**
- * Inline function to Square a number
- */
-static inline double computeSquare(double x) { return x * x; }
-
-/**
  * Squares all the values inside a vector of type double
  * @param target - The vector to be squared
  * @return The vector after being squared
  */
 std::vector<double>
 ConvolutionFitSequential::squareVector(std::vector<double> target) {
-  std::transform(target.begin(), target.end(), target.begin(), computeSquare);
+  std::transform(target.begin(), target.end(), target.begin(),
+                 VectorHelper::Squares<double>());
   return target;
 }
 
@@ -441,8 +437,7 @@ ConvolutionFitSequential::squareVector(std::vector<double> target) {
  */
 std::vector<double>
 ConvolutionFitSequential::cloneVector(const std::vector<double> &original) {
-  auto result = std::vector<double>(original.begin(), original.end());
-  return result;
+  return std::vector<double>(original.begin(), original.end());
 }
 
 /**
@@ -458,7 +453,7 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
     auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
-	//remains in ADS for use in embedded algorithm call
+    // remains in ADS for use in embedded algorithm call
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
     convSpec->setProperty("OutputWorkSpace", wsName);
@@ -527,7 +522,7 @@ void ConvolutionFitSequential::calculateEISF(
                    std::divides<double>());
     // heightE squared
     auto heightESq = cloneVector(heightE);
-    heightE = squareVector(heightESq);
+    heightESq = squareVector(heightESq);
     // ampErr squared
     auto ampErrSq = cloneVector(ampErr);
     ampErrSq = squareVector(ampErrSq);
