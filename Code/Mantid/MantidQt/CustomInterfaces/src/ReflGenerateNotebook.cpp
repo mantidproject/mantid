@@ -8,6 +8,8 @@
 #include <boost/tokenizer.hpp>
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
+#include <boost/range/combine.hpp>
 
 namespace MantidQt {
   namespace CustomInterfaces {
@@ -49,15 +51,19 @@ namespace MantidQt {
 
         //Reduce each row
         std::ostringstream code_string;
-        std::tuple<std::string, std::string, std::string> reduce_row_string;
+        std::tuple<std::string, std::string, std::string, std::string, std::string> reduce_row_string;
         std::vector<std::string> unstitched_ws;
         std::vector<std::string> IvsLam_ws;
+        std::vector<std::string> theta;
+        std::vector<std::string> runNos;
         code_string << "#Load and reduce\n";
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
           reduce_row_string = reduceRowString(*rIt);
           code_string << std::get<0>(reduce_row_string);
           unstitched_ws.push_back(std::get<1>(reduce_row_string));
           IvsLam_ws.push_back(std::get<2>(reduce_row_string));
+          theta.push_back(std::get<3>(reduce_row_string));
+          runNos.push_back(std::get<4>(reduce_row_string));
         }
         notebook->codeCell(code_string.str());
 
@@ -65,7 +71,7 @@ namespace MantidQt {
         std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows);
         notebook->codeCell(std::get<0>(stitch_string));
 
-        // Plot the unstitched and stitched I vs Q
+        // Plot I vs Q and I vs Lambda graphs
         std::ostringstream plot_string;
         plot_string << "f, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(18,4))\n";
         std::vector<std::string> stitched_ws;
@@ -75,9 +81,27 @@ namespace MantidQt {
         plot_string << plot1D(IvsLam_ws, "ax3", "I vs Lambda", 4);
         plot_string << "plt.show() #Draw the plot\n";
         notebook->codeCell(plot_string.str());
+
+        notebook->markdownCell(printThetaString(runNos, theta));
       }
 
       return notebook->writeNotebook();
+    }
+
+    std::string ReflGenerateNotebook::printThetaString(std::vector<std::string> runNos,
+                                                       std::vector<std::string> theta)
+    {
+      std::ostringstream theta_string;
+
+      theta_string << "Run | $\\theta$ Value\n------------- | -------------\n";
+
+      int run_i = 0;
+      for(auto runIt = runNos.begin(); runIt != runNos.end(); ++runIt) {
+        theta_string << *runIt << " | " << theta[run_i] << "\n";
+        run_i++;
+      }
+
+      return theta_string.str();
     }
 
     /**
@@ -179,6 +203,7 @@ namespace MantidQt {
                                              int legendLocation) {
 
       std::ostringstream plot_string;
+
       for (auto it = ws_names.begin(); it != ws_names.end(); ++it) {
         std::tuple<std::string, std::string> convert_point_string = convertToPointString(*it);
         plot_string << std::get<0>(convert_point_string);
@@ -206,7 +231,7 @@ namespace MantidQt {
      @param rowNo : the row in the model to run the reduction algorithm on
      @return tuple containing the python string and the output workspace name
     */
-    std::tuple<std::string, std::string, std::string> ReflGenerateNotebook::reduceRowString(int rowNo) {
+    std::tuple<std::string, std::string, std::string, std::string, std::string> ReflGenerateNotebook::reduceRowString(int rowNo) {
       std::ostringstream code_string;
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
@@ -225,21 +250,28 @@ namespace MantidQt {
 
       const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
       const std::string IvsLamName = "IvsLam_" + runNo;
+      const std::string thetaName = "theta_" + runNo;
 
       if (!transStr.empty()) {
         const std::tuple<std::string, std::string> trans_string = transWSString(transStr);
         code_string << std::get<0>(trans_string);
-        code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", _ = ";
+        code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName << " = ";
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
         code_string << ", " << "FirstTransmissionRun = '" << std::get<1>(trans_string) << "'";
       }
       else {
-        code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", _ = ";
+        code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName << " = ";
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
       }
 
-      if (thetaGiven)
+      std::string thetaStr;
+      if (thetaGiven) {
         code_string << ", " << "ThetaIn = " << theta;
+        thetaStr = static_cast<std::ostringstream *>( &(std::ostringstream() << theta))->str();
+      }
+      else {
+        thetaStr = "theta_" + runNo; // Use variable name if we don't have the value
+      }
 
       //Parse and set any user-specified options
       auto optionsMap = parseKeyValueString(options);
@@ -257,7 +289,7 @@ namespace MantidQt {
       const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
       code_string << std::get<0>(rebin_string);
 
-      return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName);
+      return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName, thetaStr, runNo);
     }
 
      /**

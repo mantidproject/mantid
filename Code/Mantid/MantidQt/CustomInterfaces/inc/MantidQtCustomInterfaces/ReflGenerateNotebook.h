@@ -56,9 +56,11 @@ namespace MantidQt {
 
       std::string plot1D(std::vector<std::string> ws_names, std::string axes, std::string title, int legendLocation);
 
+      std::string printThetaString(std::vector<std::string> runNos, std::vector<std::string> theta);
+
       std::tuple<std::string, std::string> stitchGroupString(std::set<int> rows);
 
-      std::tuple<std::string, std::string, std::string> reduceRowString(int rowNo);
+      std::tuple<std::string, std::string, std::string, std::string, std::string> reduceRowString(int rowNo);
 
       std::tuple<std::string, std::string> loadWorkspaceString(std::string runStr);
 
