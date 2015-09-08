@@ -80,6 +80,8 @@ const QString tipAfter = " Mantid algorithm (the algorithm dialog will show up)"
 QString StandardView::g_binMDToolTipTxt = tipBefore + g_binMDName + tipAfter;
 QString StandardView::g_sliceMDToolTipTxt = tipBefore + g_sliceMDName + tipAfter;
 QString StandardView::g_cutMDToolTipTxt = tipBefore + g_cutMDName + tipAfter;
+const std::string StandardView::SurfaceRepresentation  = "Surface";
+const std::string StandardView::WireFrameRepresentation  = "Wireframe";
 
 // To map action labels to algorithm names
 QMap<QString, QString> StandardView::g_actionToAlgName;
@@ -206,12 +208,12 @@ void StandardView::render()
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
         this->origSrc->getOutputPort(0), this->m_view);
-  QString reptype = "Surface";
+  std::string reptype = StandardView::SurfaceRepresentation;
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    reptype = "Wireframe";
+    reptype = StandardView::WireFrameRepresentation;
   }
-  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
+  vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
   if (!this->isPeaksWorkspace(this->origSrc))
@@ -242,6 +244,15 @@ void StandardView::onScaleButtonClicked()
   this->m_scaler = builder->createFilter("filters",
                                        "MantidParaViewScaleWorkspace",
                                        this->getPvActiveSrc());
+
+  /*
+   Paraview will try to set the respresentation to Outline. This is not good. Instead we listen for the
+   represnetation added as a result of the filter completion, and change the representation to be
+   Surface instead.
+   */
+  QObject::connect(this->m_scaler, SIGNAL(representationAdded (pqPipelineSource *, pqDataRepresentation* , int)), this,
+                                          SLOT(onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation* , int)));
+
 }
 
 /**
@@ -342,6 +353,15 @@ void StandardView::onRebin()
     QString algName = getAlgNameFromMenuLabel(action->text());
     emit rebin(algName.toStdString());
   }
+}
+
+/**
+ * react to the addition of the representation and change it's type to be Surface
+ * @param representation : representation to modify
+ */
+void StandardView::onScaleRepresentationAdded(pqPipelineSource *, pqDataRepresentation * representation, int)
+{
+    vtkSMPropertyHelper(representation->getProxy(), "Representation").Set(StandardView::SurfaceRepresentation.c_str());
 }
 
 /**

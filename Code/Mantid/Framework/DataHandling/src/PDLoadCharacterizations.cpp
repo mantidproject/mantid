@@ -110,9 +110,9 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "frequency");
   wksp->addColumn("double", "wavelength");
   wksp->addColumn("int", "bank");
-  wksp->addColumn("int", "vanadium");
-  wksp->addColumn("int", "container");
-  wksp->addColumn("int", "empty");
+  wksp->addColumn("str", "vanadium");
+  wksp->addColumn("str", "container");
+  wksp->addColumn("str", "empty");
   wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
   wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
   wksp->addColumn("double", "tof_min");
@@ -208,9 +208,9 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[0]);  // frequency
     row << boost::lexical_cast<double>(splitted[1]);  // wavelength
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
-    row << boost::lexical_cast<int32_t>(splitted[3]); // vanadium
-    row << boost::lexical_cast<int32_t>(splitted[4]); // container
-    row << boost::lexical_cast<int32_t>(splitted[5]); // empty
+    row << splitted[3]; // vanadium
+    row << splitted[4]; // container
+    row << splitted[5]; // empty
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min

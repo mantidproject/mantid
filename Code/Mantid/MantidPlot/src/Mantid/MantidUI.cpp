@@ -1103,9 +1103,20 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
 }
 
 /**
+* Show the detector table - this method is here for the Python interface
+*/
+Table* MantidUI::createDetectorTable(const QString & wsName)
+{
+	std::vector<int> indices;
+	Table* t = createDetectorTable(wsName, indices);
+	return t;
+}
+
+/**
 * Create the relevant detector table for the given workspace
 * @param wsName :: The name of the workspace
-* @param indices :: Limit the table to these workspace indices (MatrixWorkspace only)
+* @param indices :: Limit the table to these workspace indices (MatrixWorkspace only). If the vector is empty,
+* all the indices are used.
 * @param include_data :: If true then first value from the each spectrum is displayed (MatrixWorkspace only)
 */
 Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data)

@@ -96,7 +96,6 @@ SliceViewer::SliceViewer(QWidget *parent)
   // Set up the ColorBarWidget
   m_colorBar = ui.colorBarWidget;
   m_colorBar->setViewRange(0, 10);
-  m_colorBar->setLog(true);
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double, double, bool)),
                    this, SLOT(colorRangeChanged()));
 
@@ -185,7 +184,14 @@ SliceViewer::~SliceViewer() {
 void SliceViewer::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
-  bool scaleType = (bool)settings.value("LogColorScale", 0).toInt();
+
+  // Maintain backwards compatibility with use of LogColorScale
+  int scaleType = settings.value("ColorScale", -1).toInt();
+  if (scaleType == -1) {
+    scaleType = settings.value("LogColorScale", 0).toInt();
+  }
+
+  double nth_power = settings.value("PowerScaleExponent", 2.0).toDouble();
 
   // Load Colormap. If the file is invalid the default stored colour map is
   // used.
@@ -200,7 +206,8 @@ void SliceViewer::loadSettings() {
   // Set values from settings
   if (!m_currentColorMapFile.isEmpty())
     loadColorMap(m_currentColorMapFile);
-  m_colorBar->setLog(scaleType);
+  m_colorBar->setScale(scaleType);
+  m_colorBar->setExponent(nth_power);
   // Last saved image file
   m_lastSavedFile = settings.value("LastSavedImagePath", "").toString();
 
@@ -221,7 +228,8 @@ void SliceViewer::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
   settings.setValue("ColormapFile", m_currentColorMapFile);
-  settings.setValue("LogColorScale", (int)m_colorBar->getLog());
+  settings.setValue("ColorScale", m_colorBar->getScale());
+  settings.setValue("PowerScaleExponent", m_colorBar->getExponent());
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
@@ -1641,6 +1649,8 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
 
 //------------------------------------------------------------------------------
 /** Set the color scale limits and log mode via a method call.
+ *  Here for backwards compatibility, setColorScale(double min, double max, int type)
+ *  should be used instead.
  *
  * @param min :: minimum value corresponding to the lowest color on the map
  * @param max :: maximum value corresponding to the highest color on the map
@@ -1655,7 +1665,27 @@ void SliceViewer::setColorScale(double min, double max, bool log) {
     throw std::invalid_argument(
         "For logarithmic color scales, both minimum and maximum must be > 0.");
   m_colorBar->setViewRange(min, max);
-  m_colorBar->setLog(log);
+  m_colorBar->setScale(log ? 1 : 0);
+  this->colorRangeChanged();
+}
+
+//------------------------------------------------------------------------------
+/** Set the color scale limits and type via a method call.
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param type :: 0 for linear, 1 for log, 2 for power
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScale(double min, double max, int type) {
+  if (max <= min)
+    throw std::invalid_argument("Color scale maximum must be > minimum.");
+  if (type == 1 && ((min <= 0) || (max <= 0)))
+    throw std::invalid_argument(
+        "For logarithmic color scales, both minimum and maximum must be > 0.");
+  m_colorBar->setViewRange(min, max);
+  m_colorBar->setScale(type);
   this->colorRangeChanged();
 }
 
@@ -1686,7 +1716,17 @@ void SliceViewer::setColorMapBackground(int r, int g, int b) {
  *        inconsistent with a log color scale
  */
 void SliceViewer::setColorScaleMin(double min) {
-  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleLog());
+  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleType());
+}
+
+//------------------------------------------------------------------------------
+/** Get the colormap scale type
+ *
+ * @return int corresponding to the selected scale type
+ */
+int SliceViewer::getColorScaleType()
+{
+  return m_colorBar->getScale();
 }
 
 //------------------------------------------------------------------------------
@@ -1697,7 +1737,7 @@ void SliceViewer::setColorScaleMin(double min) {
  *        inconsistent with a log color scale
  */
 void SliceViewer::setColorScaleMax(double max) {
-  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleLog());
+  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleType());
 }
 
 //------------------------------------------------------------------------------
@@ -1708,7 +1748,7 @@ void SliceViewer::setColorScaleMax(double max) {
  *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log) {
-  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), log);
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), (int)log);
 }
 
 //------------------------------------------------------------------------------

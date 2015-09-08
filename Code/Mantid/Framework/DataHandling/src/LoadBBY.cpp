@@ -110,6 +110,10 @@ void LoadBBY::init() {
     
   declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>(
       "OutputWorkspace", "", Kernel::Direction::Output));
+  
+  declareProperty(new Kernel::PropertyWithValue<size_t>(
+                      "TubeBinning", 1, Kernel::Direction::Input),
+                  "Default: 1");
 
   declareProperty(new Kernel::PropertyWithValue<double>(
                       "FilterByTofMin", 0, Kernel::Direction::Input),
@@ -133,6 +137,7 @@ void LoadBBY::init() {
                                             Kernel::Direction::Input),
       "Optional: To only include events before the provided stop time, in "
       "seconds (relative to the start of the run).");
+
   declareProperty(new Kernel::PropertyWithValue<double>(
                   "PeriodMaster", 0.0, Kernel::Direction::Input),
                   "Optional:");
@@ -144,6 +149,7 @@ void LoadBBY::init() {
                   "Optional:");
 
   std::string grpOptional = "Optional";
+  setPropertyGroup("TubeBinning", grpOptional);
   setPropertyGroup("FilterByTofMin", grpOptional);
   setPropertyGroup("FilterByTofMax", grpOptional);
   setPropertyGroup("FilterByTimeStart", grpOptional);
@@ -190,13 +196,51 @@ void LoadBBY::exec() {
           mask[s0 + (size_t)y] = false;
       }
       else { // if (offset < 0)
-        for (size_t y = (HISTO_BINS_Y + static_cast<size_t>(offset)); y != HISTO_BINS_Y; y++)
+        for (size_t y = HISTO_BINS_Y + static_cast<size_t>(offset); y != HISTO_BINS_Y; y++)
           mask[s0 + y] = false;
       }
     }
   }
 
   size_t nBins = 1;
+
+  size_t tubeBinning = getProperty("TubeBinning");
+  if (tubeBinning < 1)
+    tubeBinning = 1;
+  else if (tubeBinning > HISTO_BINS_Y)
+    tubeBinning = HISTO_BINS_Y;
+  
+  size_t finalBinsY = HISTO_BINS_Y / tubeBinning;
+  size_t pixelsCutOff = HISTO_BINS_Y % tubeBinning;
+  size_t pixelsCutOffH = pixelsCutOff / 2;
+  size_t pixelsCutOffL = pixelsCutOff - pixelsCutOffH;
+
+  // update masking
+  if (tubeBinning > 1)
+    for (size_t x = 0; x != HISTO_BINS_X; x++) {
+      size_t s0 = HISTO_BINS_Y * x;
+
+      // mask out cut off pixels (low)
+      for (size_t y = 0; y < pixelsCutOffL; y++)
+        mask[s0 + y] = false;
+
+      // mask out cut off pixels (high)
+      for (size_t y = HISTO_BINS_Y - pixelsCutOffH; y < HISTO_BINS_Y; y++)
+        mask[s0 + y] = false;
+
+      // if one pixel is masked then all pixels in that binning group have to be masked
+      for (size_t j = 0; j < finalBinsY; j++) {
+        size_t y0 = j * tubeBinning + pixelsCutOffL;
+        for (size_t dy = 0; dy < tubeBinning; dy++)
+          // if one pixel is masked ...
+          if (!mask[s0 + y0 + dy]) {
+            for (dy = 0; dy < tubeBinning; dy++)
+              mask[s0 + y0 + dy] = false; // ... mask all pixels
+            break;
+          }
+      }
+    }
+
   double tofMinBoundary = getProperty("FilterByTofMin");
   double tofMaxBoundary = getProperty("FilterByTofMax");
 
@@ -211,7 +255,7 @@ void LoadBBY::exec() {
   DataObjects::EventWorkspace_sptr eventWS =
       boost::make_shared<DataObjects::EventWorkspace>();
 
-  eventWS->initialize(HISTO_BINS_Y * HISTO_BINS_X,
+  eventWS->initialize(finalBinsY * HISTO_BINS_X,
                       nBins + 1, // number of TOF bin boundaries
                       nBins);
 
@@ -243,7 +287,7 @@ void LoadBBY::exec() {
   // eventWS->mutableRun().addProperty("duration", duration[0], units);
 
   // create instrument
-  Geometry::Instrument_sptr instrument = createInstrument(file);
+  Geometry::Instrument_sptr instrument = createInstrument(file, pixelsCutOffL, pixelsCutOffH, tubeBinning, finalBinsY);
   eventWS->setInstrument(instrument);
 
   // load events
@@ -253,19 +297,28 @@ void LoadBBY::exec() {
   std::vector<EventVector_pt> eventVectors(numberHistograms, NULL);
   std::vector<size_t> eventCounts(numberHistograms, 0);
   std::vector<detid_t> detIDs = instrument->getDetectorIDs();
-
+  
   // phase correction
   double periodMaster = getProperty("PeriodMaster");
   double periodSlave = getProperty("PeriodSlave");
   double phaseSlave = getProperty("PhaseSlave");
 
+  if ((periodMaster < 0.0) || (periodSlave < 0.0))
+    throw std::runtime_error("Please specify a positive value for PeriodMaster and PeriodSlave.");
+  
+  bool setPeriodMaster = periodMaster > 0.0;
+  bool setPeriodSlave = periodSlave > 0.0;
+  bool setPhaseSlave = phaseSlave != 0.0;
+
+  if ((setPeriodMaster != setPeriodSlave) || setPhaseSlave)
+    throw std::runtime_error("Please specify PeriodMaster, PeriodSlave and PhaseSlave or none of them.");
+
   double periode = periodSlave > 0.0 ? periodSlave : periodMaster;
-  double shift = -1.0/6.0*periodMaster + periodSlave * phaseSlave / 360.0;
-
-
+  double shift = -1.0/6.0*periodMaster - periodSlave * phaseSlave / 360.0;
 
   // count total events per pixel to reserve necessary memory
   ANSTO::EventCounter eventCounter(eventCounts, mask, offsets, HISTO_BINS_Y,
+                                   pixelsCutOffL, tubeBinning, finalBinsY,
                                    periode, shift);
   loadEvents(prog, "loading neutron counts", file, tofMinBoundary,
              tofMaxBoundary, eventCounter);
@@ -291,7 +344,9 @@ void LoadBBY::exec() {
   progTracker.complete();
 
   ANSTO::EventAssigner eventAssigner(eventVectors, mask, offsets,
-                                     HISTO_BINS_Y, periode, shift);
+                                     HISTO_BINS_Y, pixelsCutOffL,
+                                     tubeBinning, finalBinsY,
+                                     periode, shift);
   loadEvents(prog, "loading neutron events", file, tofMinBoundary,
              tofMaxBoundary, eventAssigner);
 
@@ -303,19 +358,37 @@ void LoadBBY::exec() {
   eventWS->setAllX(axis);
 
   if (maskFileLoaded) {
-    // count total number of masked pixels
-    size_t maskedPixels = 0;
-    for (auto itr = mask.begin(); itr != mask.end(); ++itr)
-      if (!*itr)
-        maskedPixels++;
+    // count total number of masked bins
+    size_t maskedBins = 0;
 
-    // create list of masked pixels
-    std::vector<size_t> maskIndexList(maskedPixels);
-    size_t pixelIndex = 0;
-    size_t maskedPixelIndex = 0;
-    for (auto itr = mask.begin(); itr != mask.end(); ++itr, ++pixelIndex)
-      if (!*itr)
-        maskIndexList[maskedPixelIndex++] = pixelIndex;
+    for (size_t x = 0; x != HISTO_BINS_X; x++) {
+      size_t s0 = HISTO_BINS_Y * x;
+      for (size_t j = 0; j < finalBinsY; j++) {
+        size_t y0 = j * tubeBinning + pixelsCutOffL;
+        for (size_t dy = 0; dy < tubeBinning; dy++)
+          if (!mask[s0 + y0 + dy]) {
+            maskedBins++;
+            break;
+          }
+      }
+    }
+
+    // create list of masked bins
+    std::vector<size_t> maskIndexList(maskedBins);
+    size_t binIndex = 0;
+    size_t maskIndex = 0;
+    
+    for (size_t x = 0; x != HISTO_BINS_X; x++) {
+      size_t s0 = HISTO_BINS_Y * x;
+      for (size_t j = 0; j < finalBinsY; j++, binIndex++) {
+        size_t y0 = j * tubeBinning + pixelsCutOffL;
+        for (size_t dy = 0; dy < tubeBinning; dy++)
+          if (!mask[s0 + y0 + dy]) {
+            maskIndexList[maskIndex++] = binIndex;
+            break;
+          }
+      }
+    }
 
     API::IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
     maskingAlg->setProperty("Workspace", eventWS);
@@ -327,7 +400,7 @@ void LoadBBY::exec() {
 }
 
 // instrument creation
-Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile) {
+Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, size_t pixelsCutOffL, size_t pixelsCutOffH, size_t tubeBinning, size_t finalBinsY) {
   // instrument
   Geometry::Instrument_sptr instrument =
       boost::make_shared<Geometry::Instrument>("BILBY");
@@ -424,23 +497,31 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile) {
 
   source->setPos(0.0, 0.0, -L1_chopper_value);
   samplePos->setPos(0.0, 0.0, 0.0);
-
-  // create a component for the detector
-
-  size_t xPixelCount = HISTO_BINS_X / 6;
-  size_t yPixelCount = HISTO_BINS_Y;
-  size_t pixelCount = xPixelCount * yPixelCount;
-
+  
   // dimensions of the detector (height is in y direction, width is in x
   // direction)
   double width = 336.0 / 1000;  // meters
   double height = 640.0 / 1000; // meters
   double angle = 10.0;          // degree
 
-  // we assumed that individual pixels have the same size and shape of a cuboid
-  // with dimensions:
+  // raw data format 
+  size_t xPixelCount = HISTO_BINS_X / 6;
+  size_t yPixelCount = HISTO_BINS_Y;
+  
+  // we assumed that individual pixels have the same size and shape of a cuboid:
   double pixel_width = width / static_cast<double>(xPixelCount);
   double pixel_height = height / static_cast<double>(yPixelCount);
+  
+  // adjusting for binning
+  auto diffPixelsCutOff = (pixelsCutOffL - pixelsCutOffH);
+  double detectorYOffset = static_cast<double>(diffPixelsCutOff)* pixel_height;
+
+  yPixelCount = finalBinsY;
+  pixel_height *= static_cast<double>(tubeBinning);
+  height = pixel_height * static_cast<double>(finalBinsY);
+
+  // final number of pixels
+  size_t pixelCount = xPixelCount * yPixelCount;
 
   // Create size strings for shape creation
   std::string pixel_width_str =
@@ -468,7 +549,7 @@ Geometry::Instrument_sptr LoadBBY::createInstrument(ANSTO::Tar::File &tarFile) {
   // create detector banks
   BbyDetectorBankFactory factory(
       instrument, pixelShape, xPixelCount, yPixelCount, pixel_width,
-      pixel_height, Kernel::V3D(0, (height - pixel_height) / 2, 0));
+      pixel_height, Kernel::V3D(0, (height - pixel_height) / 2 - detectorYOffset, 0));
 
   // curtain l
   factory.createAndAssign(0 * pixelCount,

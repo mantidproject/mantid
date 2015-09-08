@@ -23,10 +23,8 @@ workspace does not contain this value, or if you wish to override this
 value you can do so by providing your own *IncidentTheta* property and
 enabling *OverrideIncidentTheta*.
 
-The algorithm also has the option to create a table of 'DumpVertexes' that resemble
-the transformation before NormalisedPolygon has been used to rebin.
-The table of DumpedVertexes will have uniform bin widths. whereas the table created after
-rebinning with NormalisedPolygon may contain non-uniform bin widths; resulting a Ragged workspace.
+The algorithm also has the ability to produce additional debugging information from the Tableworkspace
+that can be used to create a patch plot of results before any 2D fractional rebinning has happened.
 
 To create this table there are certain properties that must be present in the algorithm:
 
@@ -111,7 +109,7 @@ Usage
     # Should now have signed theta vs Lambda
     ConvertSpectrumAxis(InputWorkspace=I,OutputWorkspace='SignedTheta_vs_Wavelength',Target='signed_theta')
     
-    qxqy, vertexs_qxqy = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
+    qxqy, vertexes_qxqy = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
                                 
     kikf, vertexes_kikf = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength', OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05', OutputAsMDWorkspace=False,Method='NormalisedPolygon')
     
@@ -149,6 +147,17 @@ Usage
     from matplotlib.collections import PatchCollection
     import matplotlib.pyplot as plt
     from matplotlib.colors import LogNorm
+    
+    # full reduction on workspace
+    Load(Filename='data_th_lam.nxs', OutputWorkspace='data_th_lam')
+    CropWorkspace('data_th_lam', StartWorkspaceIndex=124, OutputWorkspace='data_th_lam')
+    data_th_lam = Rebin('data_th_lam', [1e-2])
+    
+    out_ws, dump_vertexes = ConvertToReflectometryQ(InputWorkspace='data_th_lam',OutputWorkspace='QxQy_poly', OutputDimensions='Q (lab frame)', 
+    Extents='-0.0005,0.0005,-0,0.2', OutputAsMDWorkspace=False,Method='NormalisedPolygon',  IncidentTheta=0.44, OverrideIncidentTheta=True, NumberBinsQx=100, NumberBinsQz=100,DumpVertexes=True, OutputVertexes='dump_vertexes')
+    
+    #plot the conversion
+    plotSlice(out_ws)
 
     def patch_plot(vertex_table):
         fig, ax = plt.subplots()
@@ -175,7 +184,7 @@ Usage
 
         plt.show()
     
-    threadsafe_call(patch_plot, mtd['vertex_dump'])
+    threadsafe_call(patch_plot, dump_vertexes)
 
 Output:
 

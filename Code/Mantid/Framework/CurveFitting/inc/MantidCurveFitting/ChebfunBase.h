@@ -147,6 +147,7 @@ public:
 
   /// Create a vector of x values linearly spaced on the approximation interval
   std::vector<double> linspace(size_t n) const;
+  std::vector<double> smooth(const std::vector<double> &xvalues, const std::vector<double> &yvalues) const;
 
 private:
   /// Private assingment operator to stress the immutability of ChebfunBase.

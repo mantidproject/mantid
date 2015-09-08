@@ -24,13 +24,51 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace {void writeRow(Mantid::API::TableRow &row, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
-    row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
-}
+namespace {
+    /** 
+    *  Writes one row to an existing table
+    *  @param vertexes : The table that the rows will be written to
+    *  @param vertex : The vertex from which the data is retrieved for writing i.e lower left, lower right etc.
+    *  @param nHisto : The number of the histogram
+    *  @param nBins : The number of the bin
+    *  @param signal : The Y value of the bin
+    *  @param error : The E value of the bin
+    */
+    void writeRow(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, const V2D &vertex, size_t nHisto, size_t nBins, double signal, double error){
+        TableRow row = vertexes->appendRow();
+        row << vertex.X() << vertex.Y() << int(nHisto) << int(nBins) << signal << error;
+    }
+    /**
+    *  Adds the column headings to a table
+    *  @param vertexes : Table to which the columns are written to.
+    */
+    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes) {
+
+        vertexes->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("int", "OriginIndex");
+        vertexes->addColumn("int", "OriginBin");
+        vertexes->addColumn("double", "CellSignal");
+        vertexes->addColumn("double", "CellError");
+    }
 }
 namespace Mantid {
 namespace DataObjects {
 
+/**
+ * Constructor
+ * @param d0Label : label for the first dimension axis
+ * @param d0ID : unique identifier for the first dimension
+ * @param d0Min : minimum value for the first dimension
+ * @param d0Max : maximum value for the first dimension
+ * @param d0NumBins : number of bins in first dimension
+ * @param d1Label : label for the second dimension axis
+ * @param d1ID : unique identifier for the second dimension
+ * @param d1Min : minimum value for the second dimension
+ * @param d1Max : maximum value for the second dimension
+ * @param d1NumBins : number of bins in the second dimension
+ * @param calc : Pointer to CalculateReflectometry object.
+ */
 ReflectometryTransform::ReflectometryTransform(
     const std::string &d0Label, const std::string &d0ID, double d0Min,
     double d0Max, const std::string &d1Label, const std::string &d1ID,
@@ -44,8 +82,17 @@ ReflectometryTransform::ReflectometryTransform(
         "The supplied minimum values must be less than the maximum values.");
 }
 
+/**
+ * Destructor
+ */
 ReflectometryTransform::~ReflectometryTransform() {}
 
+/**
+ * Creates an MD workspace
+ * @param a : pointer to the first dimension of the MDWorkspace
+  *@param b : pointer to the second dimension of the MDWorkspace
+ * @param boxController : controls how the MDWorkspace will be split
+ */
 boost::shared_ptr<MDEventWorkspace2Lean>
 ReflectometryTransform::createMDWorkspace(
     Mantid::Geometry::IMDDimension_sptr a,
@@ -129,7 +176,12 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
     verticalAxis->setValue(i, qzIncrement);
   }
 }
-
+/**
+ * Performs centre-point rebinning and produces an MDWorkspace
+ * @param inputWs : The workspace you wish to perform centre-point rebinning on.
+ * @param boxController : controls how the MDWorkspace will be split
+ * @returns An MDWorkspace based on centre-point rebinning of the inputWS
+ */
 Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
     Mantid::API::MatrixWorkspace_const_sptr inputWs,
     BoxController_sptr boxController) const {
@@ -228,29 +280,17 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   }
   return ws;
 }
-//creates table
-boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
-createTable(boost::optional<
-            boost::shared_ptr<Mantid::DataObjects::TableWorkspace>> &vertexes) {
-  (*vertexes)->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
-  (*vertexes)->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
-  (*vertexes)->addColumn("int", "OriginIndex");
-  (*vertexes)->addColumn("int", "OriginBin");
-  (*vertexes)->addColumn("double", "CellSignal");
-  (*vertexes)->addColumn("double", "CellError");
 
-  return vertexes;
-}
-
+/**
+ * Execution path for NormalisedPolygon Rebinning
+ * @param inputWs : Workspace to be rebinned
+ * @param vertexes : TableWorkspace for debugging purposes
+ * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
+ */
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
-    boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
-        &vertexes) const {
-  // Create a table for the output if we want to debug vertex positioning
-  if (vertexes) {
-    vertexes = createTable(vertexes);
-  }
-
+    boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
+        &vertexes, bool dumpVertexes) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
@@ -282,7 +322,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   // Holds the spectrum-detector mapping
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
-
+  // Create a table for the output if we want to debug vertex positioning
+  addColumnHeadings(vertexes);
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {
@@ -331,17 +372,12 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
             outWS->getSpectrum(qIndex - 1)->getSpectrumNo());
         detIDMapping.push_back(detector->getID());
       }
-
       // Debugging
-      if (vertexes) {
-        TableRow row = (*vertexes)->appendRow();
-        writeRow(row, ll, i, j, signal, error);
-        row = (*vertexes)->appendRow();
-        writeRow(row, ul, i, j, signal, error);
-        row = (*vertexes)->appendRow();
-        writeRow(row, ur, i, j, signal, error);
-        row = (*vertexes)->appendRow();
-        writeRow(row, lr, i, j, signal, error);
+      if (dumpVertexes) {
+        writeRow(vertexes, ll, i, j, signal, error);
+        writeRow(vertexes, ul, i, j, signal, error);
+        writeRow(vertexes, ur, i, j, signal, error);
+        writeRow(vertexes, lr, i, j, signal, error);
       }
     }
   }
