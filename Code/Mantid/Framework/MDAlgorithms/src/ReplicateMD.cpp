@@ -1,5 +1,7 @@
 #include "MantidMDAlgorithms/ReplicateMD.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Utils.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -89,7 +91,8 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
  * This is a flattening procedure.
  *
  * 1) Convert linear index in shape to an n-dimensional set of indexes
- * 2) Remove the index corresponding to the missing dimension (we're going to replicate over this)
+ * 2) Remove the index corresponding to the missing dimension (we're going to
+ *replicate over this)
  * 3) Using the n-dimensional indexes, create a linear index in the data
  *
  * @param nDimsShape : Number of dimensions in the shape
@@ -316,26 +319,46 @@ void ReplicateMD::exec() {
   auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
       dynamic_cast<MDHistoWorkspaceIterator *>(outputWS->createIterator()));
 
-  do {
+  const int nThreads = Mantid::API::FrameworkManager::Instance()
+                           .getNumOMPThreads(); // NThreads to Request
 
-    const auto sourceIndex = outIt->getLinearIndex();
+  // collection of iterators
+  auto iterators = outputWS->createIterators(nThreads, NULL);
 
-    const size_t targetIndex = linearIndexToLinearIndex(
-        nDimsShape, shapeReplicationIndex, indexMaxShape, indexMakerShape,
-        sourceIndex, indexMakerData, nDimsData);
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int it = 0; it < int(iterators.size()); ++it) {
 
-    outputWS->setSignalAt(sourceIndex,
-                          transposedDataWS->getSignalAt(targetIndex));
-    outputWS->setErrorSquaredAt(sourceIndex,
-                                transposedDataWS->getErrorAt(targetIndex) *
-                                    transposedDataWS->getErrorAt(targetIndex));
-    outputWS->setNumEventsAt(sourceIndex,
-                             transposedDataWS->getNumEventsAt(targetIndex));
-    outputWS->setMDMaskAt(sourceIndex,
-                          transposedDataWS->getIsMaskedAt(targetIndex));
-    progress.report();
+    PARALLEL_START_INTERUPT_REGION
+    auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
 
-  } while (outIt->next());
+    // Iterate over the output workspace
+    do {
+
+      const auto sourceIndex = outIt->getLinearIndex();
+
+      // Figure out the linear index in the data.
+      const size_t targetIndex = linearIndexToLinearIndex(
+          nDimsShape, shapeReplicationIndex, indexMaxShape, indexMakerShape,
+          sourceIndex, indexMakerData, nDimsData);
+
+      // Copy the data across
+      outputWS->setSignalAt(sourceIndex,
+                            transposedDataWS->getSignalAt(targetIndex));
+      outputWS->setErrorSquaredAt(
+          sourceIndex, transposedDataWS->getErrorAt(targetIndex) *
+                           transposedDataWS->getErrorAt(targetIndex));
+      outputWS->setNumEventsAt(sourceIndex,
+                               transposedDataWS->getNumEventsAt(targetIndex));
+      outputWS->setMDMaskAt(sourceIndex,
+                            transposedDataWS->getIsMaskedAt(targetIndex));
+      progress.report();
+
+    } while (outIt->next());
+
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   this->setProperty("OutputWorkspace", outputWS);
 }
