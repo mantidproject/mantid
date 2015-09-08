@@ -59,37 +59,6 @@ namespace Mantid {
     */
     std::map<std::string, std::string> GetAllEi::validateInputs() {
 
-      /** Lambda to validate if appropriate log is present in workspace
-      and if it's present, it is a time-series property
-      * @param Algo         -- pointer to current algorithm
-      * @param prop_name    -- the name of the log to check
-      * @param inputWS      -- the workspace to check for logs
-      * @param err_presence -- core error message to return if no log found
-      * @param err_type     -- core error message to return if 
-      log is of incorrect type
-
-      * @return result      -- map containing check errors -- 
-      if no error found the map is not modified
-      and remains empty.
-      */
-      auto check_time_series_property = [](GetAllEi const* const Algo, 
-        const std::string &prop_name,const API::MatrixWorkspace_sptr &inputWS,
-        const std::string &err_presence,const std::string &err_type,
-        std::map<std::string, std::string> &result)
-      {
-          const std::string LogName = Algo->getProperty(prop_name);
-          try{
-            Kernel::Property * pProp = inputWS->run().getProperty(LogName);
-            auto pTSProp  = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
-            if (pTSProp){
-              result[prop_name] = "Workspace contains " + err_type +LogName+
-                " But its type is not a timeSeries property";
-            }
-          }catch(std::runtime_error &){
-            result[prop_name] = "Workspace has to contain " + err_presence + LogName;
-          }
-
-      };
 
       // Do Validation
       std::map<std::string, std::string> result;
@@ -110,14 +79,41 @@ namespace Mantid {
         }
       }
 
+      /** Lambda to validate if appropriate log is present in workspace
+          and if it's present, it is a time-series property
+      * @param prop_name    -- the name of the log to check
+      * @param err_presence -- core error message to return if no log found
+      * @param err_type     -- core error message to return if 
+      log is of incorrect type
 
-      check_time_series_property(this,"ChopperSpeedLog",inputWS,
-        "chopper speed log with name: ", "chopper speed log ",result);
-      check_time_series_property(this,"ChopperDelayLog",inputWS,
+      * modifies result  -- map containing check errors -- 
+        if no error found the map is not modified and remains empty.
+      */
+      auto check_time_series_property = [&](const std::string &prop_name,
+        const std::string &err_presence,const std::string &err_type)
+      {
+          const std::string LogName = this->getProperty(prop_name);
+          try{
+            Kernel::Property * pProp = inputWS->run().getProperty(LogName);
+            auto pTSProp  = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
+            if (pTSProp){
+              result[prop_name] = "Workspace contains " + err_type +LogName+
+                " But its type is not a timeSeries property";
+            }
+          }catch(std::runtime_error &){
+            result[prop_name] = "Workspace has to contain " + err_presence + LogName;
+          }
+
+      };
+
+
+      check_time_series_property("ChopperSpeedLog",
+        "chopper speed log with name: ", "chopper speed log ");
+      check_time_series_property("ChopperDelayLog",
         "property related to chopper delay log with name: ",
-        "chopper delay log ",result);
-      check_time_series_property(this,"good-uah-log",inputWS,
-        "good current log: ","good current log ",result);
+        "chopper delay log ");
+      check_time_series_property("good-uah-log",
+        "good current log: ","good current log ");
 
 
 
