@@ -83,6 +83,9 @@ public:
   // virtual int focusingBank() const;
   MOCK_CONST_METHOD0(focusingBank, int());
 
+  // virtual bool focusedOutWorkspace() const;
+  MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 };
