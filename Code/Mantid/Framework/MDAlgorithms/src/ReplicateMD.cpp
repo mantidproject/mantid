@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/ReplicateMD.h"
+#include "MantidKernel/Utils.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
@@ -52,27 +53,7 @@ size_t findReplicationDimension(const IMDHistoWorkspace &shapeWS,
   return index;
 }
 
-size_t findStepSize(const IMDHistoWorkspace &shapeWS,
-                    const IMDHistoWorkspace &dataWS) {
 
-  size_t stepSize = 1;
-  for (size_t i = 0; i < shapeWS.getNumDims(); ++i) {
-    const auto shapeDim = shapeWS.getDimension(i);
-
-    const auto dataDim = findMatchingDimension(dataWS, *shapeDim);
-    if (!dataDim || dataDim->getIsIntegrated()) {
-      // We've found the index of the dimension in shape not in data
-      break;
-    } else {
-      stepSize *= shapeDim->getNBins();
-    }
-
-    if (i + 1 == shapeWS.getNumDims()) {
-      throw std::invalid_argument("No unique dimenions in the shape!");
-    }
-  }
-  return stepSize;
-}
 
 std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
                           const IMDHistoWorkspace &dataWS) {
@@ -86,27 +67,6 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
     }
   }
   return axes;
-}
-
-std::vector<size_t> resolveIndexes(const size_t &linearIndexShape,
-                                   const IMDHistoWorkspace &shapeWS) {
-
-  std::vector<size_t> shape;
-  for (size_t i = 0; i < shapeWS.getNumDims(); ++i) {
-    shape.push_back(shapeWS.getDimension(i)->getNBins());
-  }
-
-  size_t remainder = linearIndexShape;
-  size_t currentShape = shapeWS.getNPoints();
-  std::vector<size_t> result;
-  for (auto it = shape.rbegin(); it != shape.rend(); ++it) {
-    currentShape = currentShape / *it;
-    size_t index_d = size_t(remainder / currentShape);
-    remainder = remainder - (index_d * currentShape);
-    result.push_back(index_d);
-  }
-  std::reverse(result.begin(), result.end());
-  return result;
 }
 }
 
@@ -226,38 +186,56 @@ void ReplicateMD::exec() {
   }
   IMDHistoWorkspace_sptr dataWS = this->getProperty("DataWorkspace");
 
+  const size_t nDimsShape = shapeWS->getNumDims();
+  size_t nDimsData = dataWS->getNumDims();
+
   IMDHistoWorkspace_const_sptr transposedDataWS = dataWS;
   if (dataWS->getNumDims() == shapeWS->getNumDims()) {
     auto axes = findAxes(*shapeWS, *dataWS);
     transposedDataWS = transposeMD(dataWS, axes);
+    nDimsData = transposedDataWS->getNumDims();
   }
 
-  size_t shapeReplicationIndex = findReplicationDimension(*shapeWS, *dataWS);
+  // Set up index maker for shape
+  std::vector<size_t> indexMakerShape(nDimsShape);
+  std::vector<size_t> indexMaxShape(nDimsShape);
+  for(size_t i = 0; i < nDimsShape; ++i){
+      indexMaxShape[i] = shapeWS->getDimension(i)->getNBins();
+  }
+  Utils::NestedForLoop::SetUpIndexMaker(nDimsShape, &indexMakerShape[0], &indexMaxShape[0]);
 
-  // const size_t dataSize = size_t(transposedDataWS->getNPoints());
-  // const size_t dataSize = findStepSize(*shapeWS, *dataWS);
+  // Set up index maker for data.
+  std::vector<size_t> indexMakerData(nDimsData);
+  std::vector<size_t> indexMaxData(nDimsData);
+  for(size_t i = 0; i < nDimsData; ++i){
+      indexMaxData[i] = transposedDataWS->getDimension(i)->getNBins();
+  }
+  Utils::NestedForLoop::SetUpIndexMaker(nDimsData, &indexMakerData[0], &indexMaxData[0]);
+
+  size_t shapeReplicationIndex = findReplicationDimension(*shapeWS, *transposedDataWS);
 
   MDHistoWorkspace_sptr outputWS = shapeWS->clone();
   auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
       dynamic_cast<MDHistoWorkspaceIterator *>(outputWS->createIterator()));
+
   auto dataIt = std::unique_ptr<MDHistoWorkspaceIterator>(
       dynamic_cast<MDHistoWorkspaceIterator *>(
           transposedDataWS->createIterator()));
+
+
+
   do {
 
     const auto sourceIndex = outIt->getLinearIndex();
-    std::vector<size_t> vecShapeIndexes = resolveIndexes(sourceIndex, *shapeWS);
+
+    std::vector<size_t> vecShapeIndexes(nDimsShape);
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(nDimsShape, sourceIndex, &indexMakerShape[0], &indexMaxShape[0], &vecShapeIndexes[0]);
 
     vecShapeIndexes.erase(vecShapeIndexes.begin() + shapeReplicationIndex);
 
-    size_t shape_prod = 1;
-    size_t lin_index = 0;
-    for (size_t i = 0; i < vecShapeIndexes.size(); ++i) {
-      lin_index += vecShapeIndexes[i] * shape_prod;
-      shape_prod = dataWS->getDimension(i)->getNBins() * shape_prod;
-    }
+    const size_t targetIndex = Utils::NestedForLoop::GetLinearIndex(nDimsData, &vecShapeIndexes[0],
+                                 &indexMakerData[0]);
 
-    const auto targetIndex = lin_index;
 
     // const auto targetIndex = indexInData(sourceIndex, shapeWS);
     dataIt->jumpTo(targetIndex);
