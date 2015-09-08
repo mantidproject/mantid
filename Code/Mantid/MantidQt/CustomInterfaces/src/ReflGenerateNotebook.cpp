@@ -49,13 +49,15 @@ namespace MantidQt {
 
         //Reduce each row
         std::ostringstream code_string;
-        std::tuple<std::string, std::string> reduce_row_string;
-        std::vector<std::string> ws_names;
+        std::tuple<std::string, std::string, std::string> reduce_row_string;
+        std::vector<std::string> unstitched_ws;
+        std::vector<std::string> IvsLam_ws;
         code_string << "#Load and reduce\n";
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
           reduce_row_string = reduceRowString(*rIt);
           code_string << std::get<0>(reduce_row_string);
-          ws_names.push_back(std::get<1>(reduce_row_string));
+          unstitched_ws.push_back(std::get<1>(reduce_row_string));
+          IvsLam_ws.push_back(std::get<2>(reduce_row_string));
         }
         notebook->codeCell(code_string.str());
 
@@ -65,11 +67,12 @@ namespace MantidQt {
 
         // Plot the unstitched and stitched I vs Q
         std::ostringstream plot_string;
-        plot_string << "f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize=(12,4))\n";
+        plot_string << "f, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(18,4))\n";
         std::vector<std::string> stitched_ws;
         stitched_ws.push_back(std::get<1>(stitch_string));
-        plot_string << plotIvsQ(ws_names, "ax1"); // unstitched
-        plot_string << plotIvsQ(stitched_ws, "ax2"); // stitched
+        plot_string << plot1D(unstitched_ws, "ax1", "I vs Q Unstitched");
+        plot_string << plot1D(stitched_ws, "ax2", "I vs Q Stitiched");
+        plot_string << plot1D(IvsLam_ws, "ax3", "I vs Lambda");
         plot_string << "plt.show() #Draw the plot\n";
         notebook->codeCell(plot_string.str());
       }
@@ -172,19 +175,25 @@ namespace MantidQt {
       @param axes : handle of axes to plot in
       @return string  of python code to plot I vs Q
       */
-    std::string ReflGenerateNotebook::plotIvsQ(std::vector<std::string> ws_names, std::string axes) {
+    std::string ReflGenerateNotebook::plot1D(std::vector<std::string> ws_names, std::string axes, std::string title) {
 
       std::ostringstream plot_string;
-      plot_string << "#Plot I vs Q\n";
       for (auto it = ws_names.begin(); it != ws_names.end(); ++it) {
         std::tuple<std::string, std::string> convert_point_string = convertToPointString(*it);
         plot_string << std::get<0>(convert_point_string);
 
-        plot_string << axes << ".loglog(" << std::get<1>(convert_point_string) << ".readX(0), "
+        plot_string << "#" << axes << ".plot(" << std::get<1>(convert_point_string) << ".readX(0), "
                     << std::get<1>(convert_point_string) << ".readY(0), "
-                    << "basex=10, label='" << *it << "')\n";
+                    << "label='" << *it << "')\n";
+        plot_string << axes << ".errorbar(" << std::get<1>(convert_point_string) << ".readX(0), "
+                    << std::get<1>(convert_point_string) << ".readY(0), "
+                    << "yerr=" << std::get<1>(convert_point_string) << ".readE(0), "
+                    << "label='" << *it << "')\n";
+
+        plot_string << axes << ".set_yscale('log')\n";
+        plot_string << axes << ".set_xscale('log')\n";
       }
-      plot_string << axes << ".set_title('I vs Q')\n";
+      plot_string << axes << ".set_title('" << title << "')\n";
       plot_string << axes << ".grid() #Show a grid\n";
       plot_string << axes << ".legend() #Show a legend\n";
 
@@ -196,7 +205,7 @@ namespace MantidQt {
      @param rowNo : the row in the model to run the reduction algorithm on
      @return tuple containing the python string and the output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::reduceRowString(int rowNo) {
+    std::tuple<std::string, std::string, std::string> ReflGenerateNotebook::reduceRowString(int rowNo) {
       std::ostringstream code_string;
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
@@ -214,16 +223,17 @@ namespace MantidQt {
       code_string << std::get<0>(load_ws_string);
 
       const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
+      const std::string IvsLamName = "IvsLam_" + runNo;
 
       if (!transStr.empty()) {
         const std::tuple<std::string, std::string> trans_string = transWSString(transStr);
         code_string << std::get<0>(trans_string);
-        code_string << "IvsQ_" << runNo << ", " << "IvsLam_" << runNo << ", _ = ";
+        code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", _ = ";
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
         code_string << ", " << "FirstTransmissionRun = '" << std::get<1>(trans_string) << "'";
       }
       else {
-        code_string << "IvsQ_" << runNo << ", " << "IvsLam_" << runNo << ", _ = ";
+        code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", _ = ";
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
       }
 
@@ -246,7 +256,7 @@ namespace MantidQt {
       const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
       code_string << std::get<0>(rebin_string);
 
-      return std::make_tuple(code_string.str(), std::get<1>(rebin_string));
+      return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName);
     }
 
      /**

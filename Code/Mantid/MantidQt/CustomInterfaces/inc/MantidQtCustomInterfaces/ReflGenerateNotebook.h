@@ -54,11 +54,11 @@ namespace MantidQt {
 
     private:
 
-      std::string plotIvsQ(std::vector<std::string> ws_names, std::string axes);
+      std::string plot1D(std::vector<std::string> ws_names, std::string axes, std::string title);
 
       std::tuple<std::string, std::string> stitchGroupString(std::set<int> rows);
 
-      std::tuple<std::string, std::string> reduceRowString(int rowNo);
+      std::tuple<std::string, std::string, std::string> reduceRowString(int rowNo);
 
       std::tuple<std::string, std::string> loadWorkspaceString(std::string runStr);
 

@@ -364,6 +364,7 @@ set ( TEST_FILES
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
   ParseKeyValueStringTest.h
+  ReflGenerateNotebookTest.h
   ReflLegacyTransferStrategyTest.h
   ReflMainViewPresenterTest.h
   TomographyIfacePresenterTest.h
