@@ -1,12 +1,12 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/Indirect/IndirectCorrections.h"
 
-#include "MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h"
-#include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
 #include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
+#include "MantidQtCustomInterfaces/Indirect/ApplyPaalmanPings.h"
+#include "MantidQtCustomInterfaces/Indirect/CalculatePaalmanPings.h"
 #include "MantidQtCustomInterfaces/Indirect/ContainerSubtraction.h"
+#include "MantidQtCustomInterfaces/Indirect/IndirectCorrections.h"
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
