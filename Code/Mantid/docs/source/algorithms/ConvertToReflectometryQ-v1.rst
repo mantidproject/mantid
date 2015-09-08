@@ -77,6 +77,8 @@ overlap with the input bin. The normalised polygon approach gives better accurac
 
 Usage
 -----
+Normalised Polygon Transformation
+#################################
 
 **Example - Normalised Polygon transformation**
 
@@ -135,9 +137,7 @@ ConvertToReflectometryQ has the functionality to produce a table of vertexes bef
 fitted to a normalised polygon. The plotting of these vertexes results in a patch plot that can be
 achieved by running the algorithm below.
 
-Usage
------
-**Example - Patch Plot using the Dumped vertexes from ConvertToReflectometryQ**
+**Example - Patch Plot using the Dumped vertexes from QxQy Transformation**
 
 .. code-block:: python
 
@@ -167,6 +167,9 @@ Usage
         polygon_vertexes = list()   
 
         for vertex in vertex_table:
+            #Column of vertex i.e 'Qx' in this case, is dependant on the type of transform.
+            #'Ki' and 'Kf' are used for the K transformation.
+            #'Pi+Pf' and 'Pi-Pf' are used for the P transformation.
             polygon_vertexes.append((vertex['Qx'], vertex['Qy'] ))
             if len(polygon_vertexes) == 4:
                 poly = Polygon(polygon_vertexes, True,edgecolor='none',linewidth=0)
@@ -186,10 +189,31 @@ Usage
     
     threadsafe_call(patch_plot, dump_vertexes)
 
-Output:
+**Output:**
 
-.. figure:: /images/ConvertToReflectometryQ_PatchPlot.png
-   :alt: patch plot of dumped vertexes
+Patch plot for QxQy Transformation:
+
+.. figure:: /images/ConvertToReflectometryQ_PatchPlotQ.png
+   :alt: patch plot of dumped vertexes using Q transformation
+
+Patch plots from other transformations
+######################################
+
+Patch plots can also be produced using the other Transformations :math:`K_i, K_f` and :math:`P_i-P_f, P_i+P_f`
+
+
+**Patch plot for KiKf Transformation:**
+
+
+.. figure:: /images/ConvertToReflectometryQ_PatchPlotK.png
+   :alt: patch plot of dumped vertexes using K transformation 
+
+
+**Patch plot for P Transformation:**
+
+
+.. figure:: /images/ConvertToReflectometryQ_PatchPlotP.png
+   :alt: patch plot of dumped vertexes using P transformation
 
 .. categories::
 

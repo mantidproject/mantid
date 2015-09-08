@@ -45,24 +45,24 @@ namespace {
     void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, std::string outputDimensions) {
 
         if (outputDimensions == "Q (lab frame)"){
-        vertexes->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
-        vertexes->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Qx");
+        vertexes->addColumn("double", "Qy");
         vertexes->addColumn("int", "OriginIndex");
         vertexes->addColumn("int", "OriginBin");
         vertexes->addColumn("double", "CellSignal");
         vertexes->addColumn("double", "CellError");
         }
         if (outputDimensions == "P (lab frame)"){
-        vertexes->addColumn("double", "Ki + Kf"); //needs to be set to whatever our Transform is.
-        vertexes->addColumn("double", "Ki - Kf"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Pi+Pf");
+        vertexes->addColumn("double", "Pi-Pf");
         vertexes->addColumn("int", "OriginIndex");
         vertexes->addColumn("int", "OriginBin");
         vertexes->addColumn("double", "CellSignal");
         vertexes->addColumn("double", "CellError");
         }
         if (outputDimensions == "K (incident, final)"){
-        vertexes->addColumn("double", "Ki"); //needs to be set to whatever our Transform is.
-        vertexes->addColumn("double", "Kf"); //needs to be set to whatever our Transform is.
+        vertexes->addColumn("double", "Ki"); 
+        vertexes->addColumn("double", "Kf"); 
         vertexes->addColumn("int", "OriginIndex");
         vertexes->addColumn("int", "OriginBin");
         vertexes->addColumn("double", "CellSignal");
@@ -303,6 +303,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
  * @param inputWs : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
+ * @param outputDimensions : used for the column headings for Dump Vertexes
  */
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
