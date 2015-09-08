@@ -57,10 +57,13 @@ void MayersSampleCorrection::init() {
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input,
                                           createInputWSValidator()),
-                  "An input workspace.");
+                  "Input workspace with X units in TOF. The workspace must "
+                  "also have a sample with a cylindrical shape and an "
+                  "instrument with a defined source and sample position.");
   declareProperty(
       "MultipleScattering", false,
-      "If True then also correct for the effects of multiple scattering.",
+      "If True then also correct for the effects of multiple scattering."
+      "Please note that the MS correction assumes the scattering is elastic.",
       Direction::Input);
   // Outputs
   declareProperty(
