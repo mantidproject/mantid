@@ -57,9 +57,9 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool tra
 
       class Decreasing{
       private:
-          int m_current;
+          size_t m_current;
       public:
-          Decreasing(int start) : m_current(start){}
+          Decreasing(size_t start) : m_current(start){}
           int operator()() {return --m_current;}
       };
 
