@@ -67,7 +67,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool tra
       std::vector<int> axes(outWs->getNumDims());
       Decreasing op(outWs->getNumDims());
       for(auto it = axes.begin(); it != axes.end(); ++it){
-          *it = op();
+          *it = static_cast<int>(op());
       }
 
       IAlgorithm *transpose =
