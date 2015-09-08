@@ -127,8 +127,10 @@ set ( SRC_FILES
 	src/GenerateEventsFilter.cpp
 	src/GeneratePeaks.cpp
 	src/GeneratePythonScript.cpp
+	src/GetAllEi.cpp
 	src/GetDetOffsetsMultiPeaks.cpp
 	src/GetDetectorOffsets.cpp
+	src/GetAllEi.cpp
 	src/GetEi.cpp
 	src/GetEi2.cpp
 	src/GetTimeSeriesLogInformation.cpp
@@ -396,6 +398,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FixGSASInstrumentFile.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
+	inc/MantidAlgorithms/GetAllEi.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GenerateEventsFilter.h
 	inc/MantidAlgorithms/GeneratePeaks.h
@@ -678,6 +681,7 @@ set ( TEST_FILES
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
+	GetAllEiTest.h
 	GetDetOffsetsMultiPeaksTest.h
 	GetDetectorOffsetsTest.h
 	GetEiTest.h
