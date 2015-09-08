@@ -8,9 +8,10 @@ namespace Mantid {
 
 namespace Algorithms {
 
-/** 
-    Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+/** Estimate all incident energies, used by chopper instrument.
+
+    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -30,23 +31,25 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlignDetectors : public API::Algorithm {
+class DLLExport GetAllEi : public API::Algorithm {
 public:
-  AlignDetectors();
-  virtual ~AlignDetectors();
+  GetAllEi();
+  virtual ~GetAllEi(){};
 
   /// Algorithms name for identification. @see Algorithm::name
-  virtual const std::string name() const;
+  virtual const std::string name() const { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  virtual const std::string summary() const;
-
+  virtual const std::string summary() const{
+    return "Analyze the chopper logs and estimate all incident energies\n"
+           "registered by given monitor of a direct inelastic instrument\n"
+           "and available in given experiment.";
+  }
   /// Algorithm's version for identification. @see Algorithm::version
-  virtual int version() const ;
+  virtual int version() const{ return 1; } ;
   /// Algorithm's category for identification. @see Algorithm::category
-  virtual const std::string category() const;
+  virtual const std::string category()const { return "Direct\\Inelastic"; };
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
   virtual std::map<std::string, std::string> validateInputs();
-
 private:
   // Implement abstract Algorithm methods
   void init();

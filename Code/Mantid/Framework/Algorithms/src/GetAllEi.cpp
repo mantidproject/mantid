@@ -2,62 +2,128 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GetAllEi.h"
-#include <boost/scoped_ptr.hpp>
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
-namespace Algorithms {
+  namespace Algorithms {
 
-DECLARE_ALGORITHM(GetAllEi)
+    DECLARE_ALGORITHM(GetAllEi)
 
-/// Empty default constructor
-GetAllEi::GetAllEi() : Algorithm(), {}
+    /// Empty default constructor
+    GetAllEi::GetAllEi() : Algorithm() {}
 
-/// Initialization method.
-void GetAllEi::init() {
+    /// Initialization method.
+    void GetAllEi::init() {
 
-  declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "",
-                                                       Direction::Input),
-      "The name of the input workspace to apply the calibration to");
+      declareProperty(
+        new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "",
+        Kernel::Direction::Input),
+        "The input workspace containing the monitor's spectra measured after the last chopper");
+      auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
+      nonNegative->setLower(-1);
+      declareProperty("MonitorSpectraID", 0, nonNegative,
+        "The workspace index (ID) of the spectra, containing monitor's"
+        "signal to analyze.\n"
+        "If omitted, spectra with number 0 (Not workspace ID!) will be used.\n");
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "PositionTable", "", Direction::Input),
-                  "The name of the table workspace containing the new "
-                  "positions of detectors");
-}
+      declareProperty("ChopperSpeedLog", "Chopper_Speed","Default name of the instrument log,"
+        "containing chopper angular velocity.");
+      declareProperty("ChopperDelayLog", "Chopper_Delay", "Default name of the instrument log, "
+        "containing chopper delay time or chopper phase v.r.t. pulse time.");
+      declareProperty("GoodCurrentLog", "good-uah-log", "Default name of the instrument log,"
+        "containing good current, used to identify the experiment start time.");
 
-/** Executes the algorithm. Moving detectors of input workspace to positions
-*indicated in table workspace
-*
-*  @throw FileError Thrown if unable to get instrument from workspace,
-*                   table workspace is incompatible with instrument
-*/
-void GetAllEi::exec() {
-  // Get pointers to the workspace, parameter map and table
-  API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
-  m_pmap = &(inputWS->instrumentParameters()); // Avoids a copy if you get the
-                                               // reference before the
-                                               // instrument
+      declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
+        Kernel::Direction::Output),
+        "Name of the output matrix workspace, containing single spectra with"
+        " monitor peaks energies\n"
+        "together with total intensity within each peak.");
+    }
+    /** Executes the algorithm -- found all existing monitor peaks. */
+    void GetAllEi::exec() {
+      // Get pointers to the workspace, parameter map and table
+      API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
 
-  API::ITableWorkspace_sptr PosTable = getProperty("PositionTable");
-  Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-  if (!instrument) {
-    throw std::runtime_error(
-        "Workspace to apply calibration to has no defined instrument");
-  }
+      specid_t specNum = getProperty("MonitorSpectraID");
+      size_t wsIndex = static_cast<size_t>(specNum);
+      if (wsIndex != 0){
+        wsIndex = inputWS->getIndexFromSpectrumNumber(specNum);
+      }
 
-  size_t numDetector = PosTable->rowCount();
-  ColumnVector<int> detID = PosTable->getVector("Detector ID");
-  ColumnVector<V3D> detPos = PosTable->getVector("Detector Position");
-  // numDetector needs to be got as the number of rows in the table and the
-  // detID got from the (i)th row of table.
-  for (size_t i = 0; i < numDetector; ++i) {
-    setDetectorPosition(instrument, detID[i], detPos[i], false);
-  }
-  // Ensure pointer is only valid for execution
-  m_pmap = NULL;
-}
+    }
+
+    /**Validates if input workspace contains all necessary logs and if all
+    these logs are the logs of appropriate type
+    @return list of invalid logs or empty list if no errors is found.
+    */
+    std::map<std::string, std::string> GetAllEi::validateInputs() {
+
+      /** Lambda to validate if appropriate log is present in workspace
+      and if it's present, it is a time-series property
+      * @param Algo         -- pointer to current algorithm
+      * @param prop_name    -- the name of the log to check
+      * @param inputWS      -- the workspace to check for logs
+      * @param err_presence -- core error message to return if no log found
+      * @param err_type     -- core error message to return if 
+      log is of incorrect type
+
+      * @return result      -- map containing check errors -- 
+      if no error found the map is not modified
+      and remains empty.
+      */
+      auto check_time_series_property = [](GetAllEi const* const Algo, 
+        const std::string &prop_name,const API::MatrixWorkspace_sptr &inputWS,
+        const std::string &err_presence,const std::string &err_type,
+        std::map<std::string, std::string> &result)
+      {
+          const std::string LogName = Algo->getProperty(prop_name);
+          try{
+            Kernel::Property * pProp = inputWS->run().getProperty(LogName);
+            auto pTSProp  = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
+            if (pTSProp){
+              result[prop_name] = "Workspace contains " + err_type +LogName+
+                " But its type is not a timeSeries property";
+            }
+          }catch(std::runtime_error &){
+            result[prop_name] = "Workspace has to contain " + err_presence + LogName;
+          }
+
+      };
+
+      // Do Validation
+      std::map<std::string, std::string> result;
+
+      API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
+      if (!inputWS){
+        result["Workspace"]="Input workspace can not be identified";
+        return result;
+      }
+      specid_t specNum = getProperty("MonitorSpectraID");
+      size_t wsIndex = static_cast<size_t>(specNum);
+      if (wsIndex != 0){
+        try{
+          wsIndex = inputWS->getIndexFromSpectrumNumber(specNum);
+        }catch(std::runtime_error &){
+          result["MonitorSpectraID"] = "Input workspace does not contain spectra with ID: "+boost::lexical_cast<std::string>(specNum);
+          return result;
+        }
+      }
 
 
-} // namespace Algorithms
+      check_time_series_property(this,"ChopperSpeedLog",inputWS,
+        "chopper speed log with name: ", "chopper speed log ",result);
+      check_time_series_property(this,"ChopperDelayLog",inputWS,
+        "property related to chopper delay log with name: ",
+        "chopper delay log ",result);
+      check_time_series_property(this,"good-uah-log",inputWS,
+        "good current log: ","good current log ",result);
+
+
+
+      return result;
+    }
+
+
+  } // namespace Algorithms
 } // namespace Mantid
