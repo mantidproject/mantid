@@ -228,7 +228,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   }
   return ws;
 }
-
+//creates table
 boost::optional<boost::shared_ptr<Mantid::DataObjects::TableWorkspace>>
 createTable(boost::optional<
             boost::shared_ptr<Mantid::DataObjects::TableWorkspace>> &vertexes) {
