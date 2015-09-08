@@ -11,6 +11,9 @@ namespace Mantid {
 namespace API {
 class IMDHistoWorkspace;
 }
+namespace DataObjects {
+class MDHistoWorkspace;
+}
 namespace MDAlgorithms {
 
 /** ReplicateMD : TODO: DESCRIPTION
@@ -49,9 +52,11 @@ public:
   virtual std::map<std::string, std::string> validateInputs();
 
 private:
-  boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>
-  transposeMD(boost::shared_ptr<Mantid::API::IMDHistoWorkspace>& toTranspose,
+  boost::shared_ptr<const Mantid::DataObjects::MDHistoWorkspace>
+  transposeMD(boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace>& toTranspose,
               const std::vector<int> &axes);
+  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> getDataWorkspace() const;
+  boost::shared_ptr<Mantid::DataObjects::MDHistoWorkspace> getShapeWorkspace() const;
   void init();
   void exec();
 };
