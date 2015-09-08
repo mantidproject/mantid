@@ -76,7 +76,10 @@ public:
   void test_AssignmentOperator() {
     // Modify EventList such that is does not contain default values.
     el.setSpectrumNo(42);
-    MantidVec x = {0.1, 0.2, 0.3};
+    MantidVec x;
+    x.push_back(0.1);
+    x.push_back(0.2);
+    x.push_back(0.3);
     el.setX(x);
     el.setDx(x);
 
