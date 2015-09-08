@@ -531,7 +531,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     #applying scale and shift on the front detector reduced data
     if reduce_front_flag:
         frontWS = mtd[retWSname_front]
-        frontWS = (frontWS+shift)*scale
+        buffer = Scale(InputWorkspace = frontWS, Operation = "Add", Factor = shift)
+        frontWS = Scale(InputWorkspace = buffer, Operation = "Multiply", Factor = scale)
         RenameWorkspace(InputWorkspace=frontWS,OutputWorkspace= retWSname_front)
 
     # finished calculating cross section so can restore these value
