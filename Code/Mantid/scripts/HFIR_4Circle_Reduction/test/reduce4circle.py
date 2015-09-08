@@ -93,11 +93,11 @@ def add_peak1(step):
     # Find peak
     wkflow = mydata.getObject()
 
-    status, retobj = wkflow.find_peak(exp_number, scanno, ptno)
-
+    status, err_msg = wkflow.find_peak(exp_number, scanno, ptno)
     # Check result
     assert_true(status)
-    peak_ws = retobj
+    has_ws, peak_ws = wkflow.get_ub_peak_ws(exp_number, scanno, ptno)
+    assert_true(has_ws)
     assert_equals(peak_ws.rowCount(), 1)
 
     return
@@ -114,9 +114,10 @@ def add_peak2(step):
     # Find peak
     wk_flow = mydata.getObject()
 
-    status, retobj = wk_flow.find_peak(exp_number, scanno, ptno)
+    status, err_msg = wk_flow.find_peak(exp_number, scanno, ptno)
     assert_true(status)
-    peak_ws = retobj
+    has_peak_ws, peak_ws = wk_flow.get_ub_peak_ws(exp_number, scanno, ptno)
+    assert_true(has_peak_ws)
     assert_equals(peak_ws.rowCount(), 1)
 
     return
@@ -126,38 +127,32 @@ def add_peak2(step):
 def calculate_ub_matrix(step):
     """ Calculate UB matrix
     """
+    # Work flow
+    wk_flow = mydata.getObject()
 
-    peak_list = list()
-    peak_list.append(peak_id, h, k, l)
-    work_flow.calculate_ub_matrix(peak_list)
+    # Add peak 1
+    exp_number = 355
+    scan_number = 38
+    pt_number = 11
+    added1, peak_info1 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
+    assert_true(added1)
 
+    # Add peak 2
+    exp_number = 355
+    scan_number = 82
+    pt_number = 11
+    added2, peak_info2 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
+    assert_true(added2)
 
-    # Set HKL to peak workspace
-    peakws = mtd['Combined']
-    
-    scan =38
-    pt = 11
-    matrixws = mtd['HB3A_exp355_scan%04d_%04d'%(scan, pt)]
+    peak_info_list = [peak_info1, peak_info2]
 
-    wkflow.addPeakToCalUB(peakws, 0, matrixws)
-    
-    scan =83
-    pt = 11
-    matrixws = mtd['HB3A_exp355_scan%04d_%04d'%(scan, pt)]
-    
-    wkflow.addPeakToCalUB(peakws, 1, matrixws)
+    # Lattice
+    a = b = c = 3.9
+    alpha = beta = gamma = 90.
 
     # Calculate UB matrix
-    a=3.9
-    b=a
-    c=a
-    alpha=90.
-    beta=alpha
-    gamma=alpha
-
-
-    wkflow.CalculateUBMatrix(peakws, a, b, c, alpha, beta, gamm)
-            
+    status, ub_matrix = wk_flow.calculate_ub_matrix(peak_info_list, a, b, c, alpha, beta, gamma)
+    assert_true(status)
 
     return
 

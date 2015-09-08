@@ -34,38 +34,109 @@ DebugMode = True
 DET_X_SIZE = 256
 DET_Y_SIZE = 256
 
+
 class PeakInfo(object):
     """ Class containing a peak's information for GUI
+    In order to manage some operations for a peak
+    It does not contain peak workspace but will hold
     """
-    def __init__(self, peak_ws):
+    def __init__(self, parent):
         """ Init
         """
-        # TODO - Now: Get information from peak workspace
-        # Flag for data storage mode
-        self._cacheDataOnly = False
-        # Data server's URL
-        self._myServerURL = ''
-        # Local data cache directory
-        self._localCacheDir = ''
-        # Experiment number to process
-        self._currentExpNumber = 0
-        # Flag to delete cache dir
-        self._rmdirFlag = False
+        assert isinstance(parent, CWSCDReductionControl)
+
+        # Define class variable
+        self._myParent = parent
+
+        self._myPeakWSKey = None
+        self._myPeakIndex = None
+        self._myPeak = None
 
         return
 
-    def get_peaks(self):
+    def get_peak_workspace(self):
         """
-        Get peaks from
+        Get peak workspace related
         :return:
         """
-        return None
+        exp_number, scan_number, pt_number = self._myPeakWSKey
+        return self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)[1]
 
-
-    def set_peak(self, peakws, rowindex):
-        """ Set peak information from a peak workspace
+    def get_raw_data_ws(self):
         """
-        raise NotImplementedError("ASAP")
+
+        :return:
+        """
+        exp_number, scan_number, pt_number = self._myPeakWSKey
+        data_ws = self._myParent.get_raw_data_workspace(exp_number, scan_number, pt_number)
+        if data_ws is None:
+            print "\nRaw data workspace dict keys:", self._myParent._myRawDataWSDict.keys(), '\n'
+            raise RuntimeError('Unable to find raw data workspace of Exp %d Scan %d Pt %d. ' % (
+                exp_number, scan_number, pt_number))
+        assert isinstance(data_ws, mantid.dataobjects._dataobjects.Workspace2D)
+
+        return data_ws
+
+    def set_from_run_info(self, exp_number, scan_number, pt_number):
+        """ Set from run information with parent
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :return:
+        """
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
+
+        status, peak_ws = self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)
+        if status is True:
+            self._myPeakWSKey = (exp_number, scan_number, pt_number)
+            self._myPeakIndex = 0
+        else:
+            error_message = peak_ws
+            return False, error_message
+
+        return True, ''
+
+    def set_from_peak_ws(self, peak_ws, peak_index):
+        """
+        Set from peak workspace
+        :param peak_ws:
+        :return:
+        """
+        # Check
+        assert isinstance(peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
+
+        # Get peak
+        try:
+            peak = peak_ws.getPeak(peak_index)
+        except RuntimeError as run_err:
+            raise RuntimeError(run_err)
+
+        self._myPeak = peak
+
+        return
+
+    def getExpInfo(self):
+        """
+
+        :return:
+        """
+        return run_number, scan, pt
+
+    def getHKL(self):
+        """
+
+        :return:
+        """
+        return self._myPeak.getHKL()
+
+    def getQSample(self):
+        """
+
+        :return:
+        """
+        return self._myPeak.getQSampleFrame()
 
 
 class CWSCDReductionControl(object):
@@ -93,40 +164,45 @@ class CWSCDReductionControl(object):
         # Some set up
         self._expNumber = None
 
-        # Container for MDEventWorkspace
-        self._myMDDict = dict()
+        # Container for MDEventWorkspace for each Pt.
+        self._myPtMDDict = dict()
         # Container for loaded workspaces
         self._mySpiceTableDict = {}
         # Container for loaded raw pt workspace
-        self._myRawDataWSDict = {}
+        self._myRawDataWSDict = dict()
+        # Container for PeakWorkspaces for calculating UB matrix
+        self._myUBPeakWSDict = dict()
+
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
 
         return
 
-    def addPeakToCalUB(self, peakws, ipeak, matrixws):
-        """ Add a peak to calculate ub matrix
-        :param peakws:
-        :param ipeak:
-        :param matrixws:
+    def add_peak_info(self, exp_number, scan_number, pt_number):
+        """ Add a peak info for calculating UB matrix
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
         :return:
         """
-        # Get HKL
-        try:
-            m_h = float(int(matrixws.run().getProperty('_h').value))
-            m_k = float(int(matrixws.run().getProperty('_k').value))
-            m_l = float(int(matrixws.run().getProperty('_l').value))
-        except ValueError:
-            return (False, "Unable to locate _h, _k or _l in input matrix workspace.")
+        has_peak_ws, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
+        if has_peak_ws is False:
+            return False, 'No peak workspace found for Exp %s Scan %s Pt %s' % (
+                exp_number, scan_number, pt_number
+            )
+        if peak_ws.rowCount() > 1:
+            return False, 'There are more than 1 peak in PeaksWorkspace.'
 
-        new_peak = peakws.getPeak(ipeak)
-        new_peak.setHKL(m_h, m_k, m_l)
+        peak_info = PeakInfo(self)
+        peak_info.set_from_run_info(exp_number, scan_number, pt_number)
 
-        return
+        return True, peak_info
 
     def calculate_ub_matrix(self, peak_info_list, a, b, c, alpha, beta, gamma):
         """
         Calculate UB matrix
+
+        Set Miller index from raw data in Workspace2D.
         :param peakws:
         :param a:
         :param b:
@@ -136,33 +212,43 @@ class CWSCDReductionControl(object):
         :param gamma:
         :return:
         """
-
+        # Check
+        assert isinstance(peak_info_list, list)
         for peak_info in peak_info_list:
-            scan =83
-            pt = 11
-            matrixws = mtd['HB3A_exp355_scan%04d_%04d'%(scan, pt)]
-            h = float(int(matrixws.run().getProperty('_h').value))
-            k = float(int(matrixws.run().getProperty('_k').value))
-            l = float(int(matrixws.run().getProperty('_l').value))
-            print h, k, l
-            peak1 = peakws.getPeak(1)
-            peak1.setHKL(h, k, l)
+            if isinstance(peak_info, PeakInfo) is False:
+                raise NotImplementedError('Input PeakList is of type %s.' % str(type(peak_info_list[0])))
+            assert isinstance(peak_info, PeakInfo)
 
-        # TODO NOW - Combine peaks
-        CombinePeaksWorkspaces(LHSWorkspace='PeakTable38', RHSWorkspace='PeakTable83', CombineMatchingPeaks=False, OutputWorkspace='Combined')
+        if len(peak_info_list) < 2:
+            return False, 'Too few peaks are input to calculate UB matrix.  Must be >= 2.'
 
-        CalculateUMatrix(PeaksWorkspace=peakws,a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma)
+        # Construct a new peak workspace by combining all single peak
+        ub_peak_ws = api.CloneWorkspace(InputWorkspace=peak_info_list[0].get_peak_workspace())
 
-        ubmatrix = peakws.sample().getOrientedLattice().getUB()
-        print ubmatrix
+        for i_peak_info in xrange(1, len(peak_info_list)):
+            # Set HKL
+            matrix_ws = peak_info_list[i_peak_info].get_raw_data_ws()
+            h = float(int(matrix_ws.run().getProperty('_h').value))
+            k = float(int(matrix_ws.run().getProperty('_k').value))
+            l = float(int(matrix_ws.run().getProperty('_l').value))
 
-        api.CalculateUMatrix(PeaksWorkspace=peakws,
-                a=a,b=b,c=c,alpha=alpha,beta=beta,gamma=gamma)
+            peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
+            peak = peak_ws.getPeak(0)
+            peak.setHKL(h, k, l)
 
-        ubmatrix = peakws.sample().getOrientedLattice().getUB()
-        print ubmatrix
+            # Combine peak workspace
 
-        return
+            api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws, RHSWorkspace=peak_ws,
+                                       CombineMatchingPeaks=False, OutputWorkspace=ub_peak_ws)
+        # END-FOR(i_peak_info)
+
+        # Calculate UB matrix
+        api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws,
+                             a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+
+        ub_matrix = peak_ws.sample().getOrientedLattice().getUB()
+
+        return True, ub_matrix
 
     def does_raw_loaded(self, exp_no, scan_no, pt_no):
         """
@@ -275,7 +361,7 @@ class CWSCDReductionControl(object):
             else:
                 spice_table = self._mySpiceTableDict[(self._expNumber, scan_no)]
                 assert spice_table
-            pt_no_list = self._getPtListFromTable(spice_table)
+            pt_no_list = self._get_pt_list_from_spice_table(spice_table)
 
             # Download all single-measurement file
             for pt_no in pt_no_list:
@@ -318,7 +404,6 @@ class CWSCDReductionControl(object):
 
         This part will be redo as 11847_Load_HB3A_Experiment
         """
-        # TODO - What should be returned!
         # Check
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
@@ -413,7 +498,7 @@ class CWSCDReductionControl(object):
         :return: boolean, 2D numpy data
         """
         # Get workspace (in memory or loading)
-        raw_ws = self._get_raw_workspace(exp_no, scan_no, pt_no)
+        raw_ws = self.get_raw_data_workspace(exp_no, scan_no, pt_no)
         if raw_ws is None:
             return False, 'Raw data for Exp %d Scan %d Pt %d is not loaded.' % (exp_no, scan_no, pt_no)
 
@@ -424,6 +509,25 @@ class CWSCDReductionControl(object):
                 array2d[i][j] = raw_ws.readY(i * DET_X_SIZE + j)[0]
 
         return array2d
+
+    def get_ub_peak_ws(self, exp_number, scan_number, pt_number):
+        """
+
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :return:
+        """
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
+
+        if (exp_number, scan_number, pt_number) not in self._myUBPeakWSDict:
+            return False, 'Exp %d Scan %d Pt %d has no peak workspace.' % (exp_number,
+                                                                           scan_number,
+                                                                           pt_number)
+
+        return True, self._myUBPeakWSDict[(exp_number, scan_number, pt_number)]
 
     def indexPeaks(self, srcpeakws, targetpeakws):
         """ Index peaks in a peak workspace by UB matrix
@@ -677,9 +781,46 @@ class CWSCDReductionControl(object):
         return
 
     def _add_md_workspace(self, exp_no, scan_no, pt_no, md_ws):
-        """ Add MD workspace to storage
         """
+         Add MD workspace to storage
+        :param exp_no:
+        :param scan_no:
+        :param pt_no:
+        :param md_ws:
+        :return:
+        """
+        # Check input
+        print '[DB] Type of md_ws is %s.' % str(type(md_ws))
+        assert isinstance(md_ws, mantid.dataobjects._dataobjects.MDEventWorkspace)
 
+        assert isinstance(exp_no, int)
+        assert isinstance(scan_no, int)
+        assert isinstance(pt_no)
+
+        self._myPtMDDict[(exp_no, scan_no, pt_no)] = md_ws
+
+        return
+
+    def _add_ub_peak_ws(self, exp_number, scan_number, pt_number, peak_ws):
+        """
+        Add peak workspace for UB matrix
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param peak_ws:
+        :return:
+        """
+        # Check
+        assert isinstance(peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
+
+        assert isinstance(exp_number, int)
+        assert isinstance(scan_number, int)
+        assert isinstance(pt_number, int)
+
+        # Add
+        self._myUBPeakWSDict[(exp_number, scan_number, pt_number)] = peak_ws
+
+        return
 
     def _add_spice_workspace(self, exp_no, scan_no, spice_table_ws):
         """
@@ -705,31 +846,27 @@ class CWSCDReductionControl(object):
 
         return ws
 
-    def _get_raw_workspace(self, exp_no, scan_no, pt_no):
-        """
+    def get_raw_data_workspace(self, exp_no, scan_no, pt_no):
+        """ Get raw workspace
         """
         try:
             ws = self._myRawDataWSDict[(exp_no, scan_no, pt_no)]
+            assert isinstance(ws, mantid.dataobjects._dataobjects.Workspace2D)
         except KeyError:
             return None
 
         return ws
 
-    def _get_md_workspace(self, exp_no, scan_no, pt_no):
+    def _get_pt_list_from_spice_table(self, spice_table_ws):
         """
+        Get list of Pt. from a SPICE table workspace
+        :param spice_table_ws: SPICE table workspace
+        :return: list of Pt.
         """
-
-        return
-
-
-    def _getPtListFromTable(self, spicetable):
-        # TODO Doc
-        """
-        """
-        numrows = spicetable.rowCount()
+        numrows = spice_table_ws.rowCount()
         ptlist = []
         for irow in xrange(numrows):
-            ptno = int(spicetable.cell(irow, 0))
+            ptno = int(spice_table_ws.cell(irow, 0))
             ptlist.append(ptno)
 
         return ptlist
@@ -737,7 +874,7 @@ class CWSCDReductionControl(object):
 
 def get_spice_file_name(exp_number, scan_number):
     """
-
+    Get standard HB3A SPICE file name from experiment number and scan number
     :param exp_number:
     :param scan_num:
     :return:
