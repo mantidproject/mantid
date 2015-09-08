@@ -200,7 +200,7 @@ void ContainerSubtraction::plotPreview(int specIndex) {
   // Plot result
   if (!m_pythonExportWsName.empty())
     m_uiForm.ppPreview->addSpectrum(
-        "Corrected", QString::fromStdString(m_pythonExportWsName), specIndex,
+        "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
 
   // Plot can
