@@ -289,6 +289,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
  * @return reference to this
  * */
 EventList &EventList::operator=(const EventList &rhs) {
+  IEventList::operator=(rhs);
   // Copy all data from the rhs.
   this->events.assign(rhs.events.begin(), rhs.events.end());
   this->weightedEvents.assign(rhs.weightedEvents.begin(),
@@ -296,10 +297,7 @@ EventList &EventList::operator=(const EventList &rhs) {
   this->weightedEventsNoTime.assign(rhs.weightedEventsNoTime.begin(),
                                     rhs.weightedEventsNoTime.end());
   this->eventType = rhs.eventType;
-  this->refX = rhs.refX;
   this->order = rhs.order;
-  // Copy the detector ID set
-  this->detectorIDs = rhs.detectorIDs;
   return *this;
 }
 
