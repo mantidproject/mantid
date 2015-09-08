@@ -87,12 +87,16 @@ void ContainerSubtraction::run() {
   }
 
   // Generate output workspace name
-  int nameCutIndex = sampleWsName.lastIndexOf("_");
-  if (nameCutIndex == -1)
-    nameCutIndex = sampleWsName.length();
+  QString containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+  int sampleNameCutIndex = sampleWsName.lastIndexOf("_");
+  if (sampleNameCutIndex == -1)
+    sampleNameCutIndex = sampleWsName.length();
+  int containerNameCutIndex = containerWsName.indexOf("_");
+  if(containerNameCutIndex == -1)
+	  containerNameCutIndex = containerWsName.length();
 
   const QString outputWsName =
-      sampleWsName.left(nameCutIndex)+"_Corrected";
+      sampleWsName.left(sampleNameCutIndex)+"_Subtract_"+containerWsName.left(containerNameCutIndex);
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
