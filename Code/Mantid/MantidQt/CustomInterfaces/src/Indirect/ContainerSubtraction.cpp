@@ -92,11 +92,12 @@ void ContainerSubtraction::run() {
   if (sampleNameCutIndex == -1)
     sampleNameCutIndex = sampleWsName.length();
   int containerNameCutIndex = containerWsName.indexOf("_");
-  if(containerNameCutIndex == -1)
-	  containerNameCutIndex = containerWsName.length();
+  if (containerNameCutIndex == -1)
+    containerNameCutIndex = containerWsName.length();
 
-  const QString outputWsName =
-      sampleWsName.left(sampleNameCutIndex)+"_Subtract_"+containerWsName.left(containerNameCutIndex);
+  const QString outputWsName = sampleWsName.left(sampleNameCutIndex) +
+                               "_Subtract_" +
+                               containerWsName.left(containerNameCutIndex);
 
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
@@ -203,7 +204,7 @@ void ContainerSubtraction::plotPreview(int specIndex) {
         "Subtracted", QString::fromStdString(m_pythonExportWsName), specIndex,
         Qt::green);
 
-  // Plot can
+  // Plot container
   m_uiForm.ppPreview->addSpectrum("Container",
                                   m_uiForm.dsContainer->getCurrentDataName(),
                                   specIndex, Qt::red);
