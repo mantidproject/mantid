@@ -65,6 +65,7 @@ void testExecution()
 {
   //Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true)); 
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
@@ -125,6 +126,7 @@ void testTimeLabel()
 {
   // Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());
@@ -155,6 +157,7 @@ void testAxisLabels()
 {
   //Setup view
   MockMDLoadingView* view = new MockMDLoadingView;
+  EXPECT_CALL(*view, getTime()).WillRepeatedly(Return(0));
   EXPECT_CALL(*view, getRecursionDepth()).Times(AtLeast(0));
   EXPECT_CALL(*view, getLoadInMemory()).Times(AtLeast(1)).WillRepeatedly(testing::Return(true));
   EXPECT_CALL(*view, updateAlgorithmProgress(_,_)).Times(AnyNumber());

@@ -65,6 +65,7 @@ private slots:
   void surfaceTypeChanged(int index);
   void colorMapChanged();
   void scaleTypeChanged(int);
+  void nthPowerChanged(double);
   void glOptionChanged(bool);
   void showMenuToolTip(QAction*);
   void setUCorrection();

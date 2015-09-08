@@ -1,8 +1,9 @@
-# pylint: disable=too-many-locals
 import mantid.simpleapi as api
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
 from mantid.kernel import Direction, StringArrayProperty, StringListValidator, V3D
 import numpy as np
+
+import mlzutils
 
 
 class DNSMergeRuns(PythonAlgorithm):
@@ -25,6 +26,7 @@ class DNSMergeRuns(PythonAlgorithm):
         self.wavelength = 0
         self.xaxis = '2theta'
         self.outws_name = None
+        self.is_normalized = False
 
     def category(self):
         """
@@ -54,48 +56,6 @@ class DNSMergeRuns(PythonAlgorithm):
                              "otherwise the separate normalization workspace will be created.")
         return
 
-    def _dimensions_valid(self):
-        """
-        Checks validity of the workspace dimensions:
-        all given workspaces must have the same number of dimensions
-        and the same number of histograms
-        and the same number of bins
-        """
-        ndims = []
-        nhists = []
-        nbins = []
-        for wsname in self.workspace_names:
-            wks = api.AnalysisDataService.retrieve(wsname)
-            ndims.append(wks.getNumDims())
-            nhists.append(wks.getNumberHistograms())
-            nbins.append(wks.blocksize())
-
-        ndi = ndims[0]
-        nhi = nhists[0]
-        nbi = nbins[0]
-        if ndims.count(ndi) == len(ndims) and nhists.count(nhi) == len(nhists) and nbins.count(nbi) == len(nbins):
-            return True
-        else:
-            message = "Cannot merge workspaces with different dimensions."
-            self.log().error(message)
-            return False
-
-    def _ws_exist(self):
-        """
-        Checks whether the workspace and its normalization workspaces exist
-        """
-        for wsname in self.workspace_names:
-            if not api.AnalysisDataService.doesExist(wsname):
-                message = "Workspace " + wsname + " does not exist! Cannot merge."
-                self.log().error(message)
-                return False
-            if not api.AnalysisDataService.doesExist(wsname + '_NORM'):
-                message = "Workspace " + wsname + "_NORM does not exist! Cannot merge."
-                self.log().error(message)
-                return False
-
-        return True
-
     def _can_merge(self):
         """
         checks whether it is possible to merge the given list of workspaces
@@ -104,62 +64,32 @@ class DNSMergeRuns(PythonAlgorithm):
         if not self.workspace_names:
             message = "No workspace names has been specified! Nothing to merge."
             self.log().error(message)
-            return False
-        # workspaces and normalization workspaces must exist
-        if not self._ws_exist():
-            return False
+            raise RuntimeError(message)
+
+        # workspaces must exist
+        mlzutils.ws_exist(self.workspace_names, self.log())
+
+        # all workspaces must be either normalized or not normalized, but not mixed
+        self._are_normalized()
+
+        # if data are not normalized, normalization workspaces must exist
+        if not self.is_normalized:
+            wslist = [wsname + '_NORM' for wsname in self.workspace_names]
+            mlzutils.ws_exist(wslist, self.log())
+
         # they must have the same dimensions
-        if not self._dimensions_valid():
-            return False
+        mlzutils.same_dimensions(self.workspace_names)
+
         # and the same wavelength
-        if not self._same_wavelength():
-            return False
+        self._same_wavelength()
+
         # algorithm must warn if some properties_to_compare are different
         ws1 = api.AnalysisDataService.retrieve(self.workspace_names[0])
         run1 = ws1.getRun()
         for wsname in self.workspace_names[1:]:
             wks = api.AnalysisDataService.retrieve(wsname)
             run = wks.getRun()
-            self._check_properties(run1, run)
-        return True
-
-    def _check_properties(self, lhs_run, rhs_run):
-        """
-        checks whether properties match
-        """
-        lhs_title = ""
-        rhs_title = ""
-        if lhs_run.hasProperty('run_title'):
-            lhs_title = lhs_run.getProperty('run_title').value
-        if rhs_run.hasProperty('run_title'):
-            rhs_title = rhs_run.getProperty('run_title').value
-
-        for property_name in self.properties_to_compare:
-            if lhs_run.hasProperty(property_name) and rhs_run.hasProperty(property_name):
-                lhs_property = lhs_run.getProperty(property_name)
-                rhs_property = rhs_run.getProperty(property_name)
-                if lhs_property.type == rhs_property.type:
-                    if lhs_property.type == 'string':
-                        if lhs_property.value != rhs_property.value:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + lhs_property.value + ", but " + \
-                                rhs_title + ": " + rhs_property.value
-                            self.log().warning(message)
-                    if lhs_property.type == 'number':
-                        if abs(lhs_property.value - rhs_property.value) > 5e-3:
-                            message = "Property " + property_name + " does not match! " + \
-                                lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                                rhs_title + ": " + str(rhs_property.value)
-                            self.log().warning(message)
-                else:
-                    message = "Property " + property_name + " does not match! " + \
-                        lhs_title + ": " + str(lhs_property.value) + ", but " + \
-                        rhs_title + ": " + str(rhs_property.value)
-                    self.log().warning(message)
-            else:
-                message = "Property " + property_name + " is not present in " +\
-                    lhs_title + " or " + rhs_title + " - skipping comparison."
-                self.log().warning(message)
+            mlzutils.compare_properties(run1, run, self.properties_to_compare, self.log())
         return True
 
     def _same_wavelength(self):
@@ -177,7 +107,7 @@ class DNSMergeRuns(PythonAlgorithm):
             else:
                 message = " Workspace " + wks.getName() + " does not have property wavelength! Cannot merge."
                 self.log().error(message)
-                return False
+                raise RuntimeError(message)
         wlength = wls[0]
         if wls.count(wlength) == len(wls):
             self.wavelength = wlength
@@ -186,56 +116,83 @@ class DNSMergeRuns(PythonAlgorithm):
         else:
             message = "Cannot merge workspaces with different wavelength!"
             self.log().error(message)
-            return False
+            raise RuntimeError(message)
 
-    def _merge_workspaces(self):
+    def _are_normalized(self):
         """
-        merges given workspaces into one,
-        corresponding normalization workspaces are also merged
+        Checks whether the given workspaces are normalized
+            @ returns True if all given workspaces are normalized
+            @ returns False if all given workspaces are not normalized
+            raises exception if mixed workspaces are given
+            or if no 'normalized' sample log has been found
+        """
+        norms = []
+        for wsname in self.workspace_names:
+            wks = api.AnalysisDataService.retrieve(wsname)
+            run = wks.getRun()
+            if run.hasProperty('normalized'):
+                norms.append(run.getProperty('normalized').value)
+            else:
+                message = " Workspace " + wks.getName() + " does not have property normalized! Cannot merge."
+                self.log().error(message)
+                raise RuntimeError(message)
+
+        is_normalized = norms[0]
+        if norms.count(is_normalized) == len(norms):
+            if is_normalized == 'yes':
+                self.is_normalized = True
+                self.log().information("Merge normalized workspaces")
+                return True
+            else:
+                self.is_normalized = False
+                self.log().information("Merge not normalized workspaces")
+                return False
+        else:
+            message = "Cannot merge workspaces with different wavelength!"
+            self.log().error(message)
+            raise RuntimeError(message)
+
+        return True
+
+    def _merge_workspaces(self, norm=False):
+        """
+        merges given workspaces into one
+            @param norm If True, normalization workspaces will be merged
         """
         arr = []
-        arr_norm = []
         beamDirection = V3D(0, 0, 1)
+        if norm:
+            suffix = '_NORM'
+        else:
+            suffix = ''
         # merge workspaces, existance has been checked by _can_merge function
         for ws_name in self.workspace_names:
-            wks = api.AnalysisDataService.retrieve(ws_name)
-            wsnorm = api.AnalysisDataService.retrieve(ws_name + '_NORM')
+            wks = api.AnalysisDataService.retrieve(ws_name + suffix)
             samplePos = wks.getInstrument().getSample().getPos()
             n_hists = wks.getNumberHistograms()
             two_theta = np.array([wks.getDetector(i).getTwoTheta(samplePos, beamDirection) for i in range(0, n_hists)])
             # round to approximate hardware accuracy 0.05 degree ~ 1 mrad
             two_theta = np.round(two_theta, 4)
             dataY = np.rot90(wks.extractY())[0]
-            dataYnorm = np.rot90(wsnorm.extractY())[0]
             dataE = np.rot90(wks.extractE())[0]
-            dataEnorm = np.rot90(wsnorm.extractE())[0]
             for i in range(n_hists):
                 arr.append([two_theta[i], dataY[i], dataE[i]])
-                arr_norm.append([two_theta[i], dataYnorm[i], dataEnorm[i]])
         data = np.array(arr)
-        norm = np.array(arr_norm)
         # sum up intensities for dublicated angles
         data_sorted = data[np.argsort(data[:, 0])]
-        norm_sorted = norm[np.argsort(norm[:, 0])]
         # unique values
         unX = np.unique(data_sorted[:, 0])
         if len(data_sorted[:, 0]) - len(unX) > 0:
             arr = []
-            arr_norm = []
             self.log().information("There are dublicated 2Theta angles in the dataset. Sum up the intensities.")
             # we must sum up the values
             for i in range(len(unX)):
                 idx = np.where(np.fabs(data_sorted[:, 0] - unX[i]) < 1e-4)
                 new_y = sum(data_sorted[idx][:, 1])
-                new_y_norm = sum(norm_sorted[idx][:, 1])
                 err = data_sorted[idx][:, 2]
-                err_norm = norm_sorted[idx][:, 2]
                 new_e = np.sqrt(np.dot(err, err))
-                new_e_norm = np.sqrt(np.dot(err_norm, err_norm))
                 arr.append([unX[i], new_y, new_e])
-                arr_norm.append([unX[i], new_y_norm, new_e_norm])
             data = np.array(arr)
-            norm = np.array(arr_norm)
 
         # define x axis
         if self.xaxis == "2theta":
@@ -254,11 +211,13 @@ class DNSMergeRuns(PythonAlgorithm):
 
         data_sorted = data[np.argsort(data[:, 0])]
         api.CreateWorkspace(dataX=data_sorted[:, 0], dataY=data_sorted[:, 1], dataE=data_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=self.outws_name)
-        norm[:, 0] = data[:, 0]
-        norm_sorted = norm[np.argsort(norm[:, 0])]
-        api.CreateWorkspace(dataX=norm_sorted[:, 0], dataY=norm_sorted[:, 1], dataE=norm_sorted[:, 2],
-                            UnitX=unitx, OutputWorkspace=self.outws_name + '_NORM')
+                            UnitX=unitx, OutputWorkspace=self.outws_name + suffix)
+        outws = api.AnalysisDataService.retrieve(self.outws_name + suffix)
+        # assume that all input workspaces have the same YUnits and YUnitLabel
+        wks = api.AnalysisDataService.retrieve(self.workspace_names[0] + suffix)
+        outws.setYUnit(wks.YUnit())
+        outws.setYUnitLabel(wks.YUnitLabel())
+
         return
 
     def PyExec(self):
@@ -270,26 +229,39 @@ class DNSMergeRuns(PythonAlgorithm):
 
         self.log().information("Workspaces to merge: %i" % (len(self.workspace_names)))
         # check whether given workspaces can be merged
-        if not self._can_merge():
-            message = "Impossible to merge given workspaces."
+        self._can_merge()
+
+        if self.is_normalized and normalize:
+            message = "Invalid setting for Normalize property. The given workspaces are already normalized."
+            self.log().error(message)
             raise RuntimeError(message)
 
         self._merge_workspaces()
+        if not self.is_normalized:
+            self._merge_workspaces(norm=True)
+
         outws = api.AnalysisDataService.retrieve(self.outws_name)
         api.CopyLogs(self.workspace_names[0], outws)
         api.RemoveLogs(outws, self.sample_logs)
-        yunit = 'Counts'
-        ylabel = 'Intensity'
 
         if normalize:
             normws = api.AnalysisDataService.retrieve(self.outws_name + '_NORM')
+            run = normws.getRun()
+            if run.hasProperty('normalization'):
+                norm = run.getProperty('normalization').value
+                if norm == 'duration':
+                    yunit = "Counts per second"
+                elif norm == 'monitor':
+                    yunit = "Counts per monitor"
+                else:
+                    yunit = ""
+            else:
+                yunit = ""
+            ylabel = "Normalized Intensity"
             api.Divide(LHSWorkspace=outws, RHSWorkspace=normws, OutputWorkspace=self.outws_name)
             api.DeleteWorkspace(normws)
-            yunit = ""
-            ylabel = "Normalized Intensity"
-
-        outws.setYUnit(yunit)
-        outws.setYUnitLabel(ylabel)
+            outws.setYUnit(yunit)
+            outws.setYUnitLabel(ylabel)
 
         self.setProperty("OutputWorkspace", outws)
         return

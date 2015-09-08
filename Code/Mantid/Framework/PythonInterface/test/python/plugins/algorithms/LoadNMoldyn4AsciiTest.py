@@ -50,20 +50,26 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         """
         Tests loading a single F(Q, t) function.
         """
-        function_ws = LoadNMoldyn4Ascii(Directory=self._data_directory,
-                                        Functions=['fqt_total'],
-                                        OutputWorkspace='__LoadNMoldyn4Ascii_test')
-        self._validate_fqt_ws(function_ws)
+        function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
+                                         Functions=['fqt_total'],
+                                         OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
+        self.assertEqual(len(function_wsg), 1)
+        self.assertTrue(function_wsg.contains('fqt_total'))
+        self._validate_fqt_ws(mtd['fqt_total'])
 
 
     def test_load_single_sqf_function(self):
         """
         Tests loading a single S(Q, f) function.
         """
-        function_ws = LoadNMoldyn4Ascii(Directory=self._data_directory,
-                                        Functions=['sqf_total'],
-                                        OutputWorkspace='__LoadNMoldyn4Ascii_test')
-        self._validate_sqf_ws(function_ws)
+        function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
+                                         Functions=['sqf_total'],
+                                         OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
+        self.assertEqual(len(function_wsg), 1)
+        self.assertTrue(function_wsg.contains('sqf_total'))
+        self._validate_sqf_ws(mtd['sqf_total'])
 
 
     def test_load_multiple_functions_list_short_name(self):

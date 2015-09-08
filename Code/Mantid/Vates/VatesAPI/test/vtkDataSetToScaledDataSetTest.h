@@ -22,6 +22,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
+#include <vtkPointSet.h>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
@@ -68,31 +69,19 @@ public:
 
   void testThrowIfInputNull() {
     vtkUnstructuredGrid *in = NULL;
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    TS_ASSERT_THROWS(vtkDataSetToScaledDataSet scaler(in, out),
+
+    vtkDataSetToScaledDataSet scaler;
+
+    TS_ASSERT_THROWS(scaler.execute(1, 1, 1, in),
                      std::runtime_error);
   }
 
-  void testThrowIfOutputNull() {
-    vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
-    vtkUnstructuredGrid *out = NULL;
-    TS_ASSERT_THROWS(vtkDataSetToScaledDataSet scaler(in, out),
-                     std::runtime_error);
-  }
-
-  void testExecThrowIfNoInit() {
-    vtkUnstructuredGrid *in = vtkUnstructuredGrid::New();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    vtkDataSetToScaledDataSet scaler(in, out);
-    TS_ASSERT_THROWS(scaler.execute(), std::runtime_error);
-  }
 
   void testExecution() {
+
+    vtkDataSetToScaledDataSet scaler;
     vtkUnstructuredGrid *in = makeDataSet();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
-    vtkDataSetToScaledDataSet scaler(in, out);
-    scaler.initialize(0.1, 0.5, 0.2);
-    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+    vtkPointSet* out = scaler.execute(0.1, 0.5, 0.2, in);
 
     // Check bounds are scaled
     double *bb = out->GetBounds();
@@ -144,12 +133,10 @@ public:
   void testJsonMetadataExtractionFromScaledDataSet() {
     // Arrange
     vtkUnstructuredGrid *in = makeDataSetWithJsonMetadata();
-    vtkUnstructuredGrid *out = vtkUnstructuredGrid::New();
 
     // Act
-    vtkDataSetToScaledDataSet scaler(in, out);
-    scaler.initialize(0.1, 0.5, 0.2);
-    TS_ASSERT_THROWS_NOTHING(scaler.execute());
+    vtkDataSetToScaledDataSet scaler;
+    vtkPointSet* out = scaler.execute(0.1, 0.5, 0.2, in);
 
     vtkFieldData *fieldData = out->GetFieldData();
     MetadataJsonManager manager;

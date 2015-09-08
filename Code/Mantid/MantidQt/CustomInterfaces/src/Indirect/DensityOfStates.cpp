@@ -41,12 +41,12 @@ bool DensityOfStates::validate() {
   // .phonon file
   QString filename = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo fileInfo(filename);
-  bool canDoPartialDoS = fileInfo.suffix() == "phonon";
+  bool isPhononFile = fileInfo.suffix() == "phonon";
 
   QString specType = m_uiForm.cbSpectrumType->currentText();
   auto items = m_uiForm.lwIons->selectedItems();
 
-  if (specType == "DensityOfStates" && canDoPartialDoS && items.size() < 1)
+  if (specType == "DensityOfStates" && isPhononFile && items.size() < 1)
     uiv.addErrorMessage("Must select at least one ion for DensityOfStates.");
 
   // Give error message when there are errors
@@ -67,18 +67,23 @@ void DensityOfStates::run() {
   QString filename = m_uiForm.mwInputFile->getFirstFilename();
   QFileInfo inputFileInfo(filename);
   QString specType = m_uiForm.cbSpectrumType->currentText();
+  bool isPhononFile = inputFileInfo.suffix() == "phonon";
+
+  std::string filePropName("CASTEPFile");
+  if (isPhononFile)
+    filePropName = "PHONONFile";
 
   m_outputWsName = inputFileInfo.baseName() + "_" + specType;
 
   // Set common properties
-  dosAlgo->setProperty("File", filename.toStdString());
+  dosAlgo->setProperty(filePropName, filename.toStdString());
   dosAlgo->setProperty("OutputWorkspace", m_outputWsName.toStdString());
 
   QString peakShape = m_uiForm.cbPeakShape->currentText();
   dosAlgo->setProperty("Function", peakShape.toStdString());
 
-  double peakWidth = m_uiForm.spPeakWidth->value();
-  dosAlgo->setProperty("PeakWidth", peakWidth);
+  QString peakWidth = m_uiForm.spPeakWidth->text();
+  dosAlgo->setProperty("PeakWidth", peakWidth.toStdString());
 
   double binWidth = m_uiForm.spBinWidth->value();
   dosAlgo->setProperty("BinWidth", binWidth);
@@ -164,15 +169,19 @@ void DensityOfStates::handleFileChange() {
 
   // Check if we have a .phonon file
   QFileInfo fileInfo(filename);
-  bool canDoPartialDoS = fileInfo.suffix() == "phonon";
+  bool isPhononFile = fileInfo.suffix() == "phonon";
+
+  std::string filePropName("CASTEPFile");
+  if (isPhononFile)
+    filePropName = "PHONONFile";
 
   // Need a .phonon file for ion contributions
-  if (canDoPartialDoS) {
+  if (isPhononFile) {
     // Load the ion table to populate the list of ions
     IAlgorithm_sptr ionTableAlgo =
         AlgorithmManager::Instance().create("SimulatedDensityOfStates");
     ionTableAlgo->initialize();
-    ionTableAlgo->setProperty("File", filename.toStdString());
+    ionTableAlgo->setProperty(filePropName, filename.toStdString());
     ionTableAlgo->setProperty("SpectrumType", "IonTable");
     ionTableAlgo->setProperty("OutputWorkspace", "__dos_ions");
 
@@ -188,11 +197,11 @@ void DensityOfStates::handleFileChange() {
   }
 
   // Enable partial DOS related optons when they can be used
-  m_uiForm.lwIons->setEnabled(canDoPartialDoS);
-  m_uiForm.pbSelectAllIons->setEnabled(canDoPartialDoS);
-  m_uiForm.pbDeselectAllIons->setEnabled(canDoPartialDoS);
-  m_uiForm.ckSumContributions->setEnabled(canDoPartialDoS);
-  m_uiForm.ckCrossSectionScale->setEnabled(canDoPartialDoS);
+  m_uiForm.lwIons->setEnabled(isPhononFile);
+  m_uiForm.pbSelectAllIons->setEnabled(isPhononFile);
+  m_uiForm.pbDeselectAllIons->setEnabled(isPhononFile);
+  m_uiForm.ckSumContributions->setEnabled(isPhononFile);
+  m_uiForm.ckCrossSectionScale->setEnabled(isPhononFile);
 }
 
 /**
@@ -211,17 +220,21 @@ void DensityOfStates::ionLoadComplete(bool error) {
   // Get the list of ions from algorithm
   ITableWorkspace_sptr ionTable =
       AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("__dos_ions");
-  Column_sptr ionColumn = ionTable->getColumn("Ion");
+  Column_sptr ionColumn = ionTable->getColumn("Species");
   size_t numIons = ionColumn->size();
 
   // Remove old ions
   m_uiForm.lwIons->clear();
 
   // Add ions to list
+  QStringList ionSpecies;
   for (size_t ion = 0; ion < numIons; ion++) {
-    const std::string ionName = ionColumn->cell<std::string>(ion);
-    m_uiForm.lwIons->addItem(QString::fromStdString(ionName));
+    const QString species =
+        QString::fromStdString(ionColumn->cell<std::string>(ion));
+    if (!ionSpecies.contains(species))
+      ionSpecies << species;
   }
+  m_uiForm.lwIons->addItems(ionSpecies);
 
   // Select all ions by default
   m_uiForm.lwIons->selectAll();
