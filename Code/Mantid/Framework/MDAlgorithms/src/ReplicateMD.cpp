@@ -315,7 +315,7 @@ void ReplicateMD::exec() {
       findReplicationDimension(*shapeWS, *transposedDataWS);
 
   // Create the output workspace from the shape.
-  MDHistoWorkspace_sptr outputWS = shapeWS->clone();
+  MDHistoWorkspace_sptr outputWS(shapeWS->clone().release());
   auto outIt = std::unique_ptr<MDHistoWorkspaceIterator>(
       dynamic_cast<MDHistoWorkspaceIterator *>(outputWS->createIterator()));
 
