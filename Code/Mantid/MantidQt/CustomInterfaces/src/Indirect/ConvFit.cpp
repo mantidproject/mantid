@@ -1412,8 +1412,6 @@ QStringList ConvFit::getFunctionParameters(QString functionName) {
  */
 void ConvFit::fitFunctionSelected(const QString &functionName) {
   double oneLValues[3] = {0.0, 0.0, 0.0};
-  std::string p = m_previousFit.toStdString();
-  std::string c = m_uiForm.cbFitType->currentText().toStdString();
   bool previouslyOneL = false;
   if (m_previousFit.compare("One Lorentzian") == 0 &&
       m_uiForm.cbFitType->currentText().compare("Two Lorentzians") == 0) {
@@ -1424,7 +1422,7 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
     oneLValues[2] = m_dblManager->value(m_properties["Lorentzian 1.FWHM"]);
   }
 
-  // remove previous parameters from tree
+  // Remove previous parameters from tree
   m_cfTree->removeProperty(m_properties["FitFunction1"]);
   m_cfTree->removeProperty(m_properties["FitFunction2"]);
 
@@ -1462,22 +1460,22 @@ void ConvFit::fitFunctionSelected(const QString &functionName) {
         m_properties[name] = m_dblManager->addProperty(*it);
 
         if (QString(*it).compare("FWHM") == 0) {
-          if (previouslyOneL) {
+          if (previouslyOneL && count < 3) {
             m_dblManager->setValue(m_properties[name], oneLValues[2]);
           } else {
             m_dblManager->setValue(m_properties[name], 0.0175);
           }
         } else if (QString(*it).compare("Amplitude") == 0) {
-          if (previouslyOneL) {
+          if (previouslyOneL && count < 3) {
             m_dblManager->setValue(m_properties[name], oneLValues[0]);
           } else {
             m_dblManager->setValue(m_properties[name], 1.0);
           }
         } else if (QString(*it).compare("PeakCentre") == 0) {
-          if (previouslyOneL) {
+          if (previouslyOneL && count < 3) {
             m_dblManager->setValue(m_properties[name], oneLValues[1]);
           } else {
-            m_dblManager->setValue(m_properties[name], 1.0);
+            m_dblManager->setValue(m_properties[name], 0.0);
           }
         } else {
           m_dblManager->setValue(m_properties[name], 0.0);
