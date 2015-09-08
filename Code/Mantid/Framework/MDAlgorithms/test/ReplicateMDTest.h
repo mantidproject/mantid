@@ -11,6 +11,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <boost/assign/list_of.hpp>
 
 using namespace Mantid::MDAlgorithms;
@@ -19,7 +20,7 @@ using namespace Mantid::API;
 
 namespace {
 
-MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape) {
+MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool transpose = false) {
 
   IAlgorithm *create =
       FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
@@ -52,6 +53,34 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape) {
   create->setPropertyValue("OutputWorkspace", "dummy");
   create->execute();
   IMDHistoWorkspace_sptr outWs = create->getProperty("OutputWorkspace");
+
+  if(transpose){
+
+      class Increasing{
+      private:
+          int m_current;
+      public:
+          Increasing(int start) : m_current(start){}
+          int operator()() {return m_current++;}
+      };
+
+      // Generate the axis order 0, 1, 2 ... in reverse
+      std::vector<int> axes(outWs->getNumDims());
+      Increasing op(0);
+      std::generate(axes.rbegin(), axes.rend(), op);
+
+      IAlgorithm *transpose =
+          FrameworkManager::Instance().createAlgorithm("TransposeMD");
+      transpose->setChild(true);
+      transpose->initialize();
+      transpose->setProperty("InputWorkspace", outWs);
+      transpose->setProperty("Axes", axes);
+      transpose->setPropertyValue("OutputWorkspace", "dummy");
+      transpose->execute();
+      outWs = transpose->getProperty("OutputWorkspace");
+
+  }
+
   return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
 }
 }
@@ -229,6 +258,32 @@ public:
     TSM_ASSERT_EQUALS("Horzontal points should be same in data and output",
                       dataWS->getSignalAt(1), outWS->getSignalAt(1));
   }
+
+  void test_auto_transpose_2d() {
+
+    std::vector<int> shapeShape = boost::assign::list_of(10)(20)(10);
+    auto shapeWS = makeHistoWorkspace(shapeShape);
+
+    std::vector<int> dataShapePreTranspose = boost::assign::list_of(10)(20);
+    auto dataWSTranspose = makeHistoWorkspace(dataShapePreTranspose, true /*transpose it to make it 20 by 10*/);
+
+
+    ReplicateMD alg;
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.initialize();
+    alg.setProperty("DataWorkspace", dataWSTranspose);
+    alg.setProperty("ShapeWorkspace", shapeWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+
+    // Very basic sanity checks
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(shapeWS->getNumDims(), outWS->getNumDims());
+    TS_ASSERT_EQUALS(shapeWS->getNPoints(), outWS->getNPoints());
+  }
+
 };
 
 //=====================================================================================
