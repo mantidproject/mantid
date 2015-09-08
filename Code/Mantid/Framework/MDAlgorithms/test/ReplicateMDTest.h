@@ -11,7 +11,6 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <boost/assign/list_of.hpp>
 
 using namespace Mantid::MDAlgorithms;
@@ -67,7 +66,9 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool tra
       // Generate the axis order 0, 1, 2 ... in reverse
       std::vector<int> axes(outWs->getNumDims());
       Decreasing op(outWs->getNumDims());
-      std::generate(axes.begin(), axes.end(), op);
+      for(auto it = axes.begin(); it != axes.end(); ++it){
+          *it = op();
+      }
 
       IAlgorithm *transpose =
           FrameworkManager::Instance().createAlgorithm("TransposeMD");
