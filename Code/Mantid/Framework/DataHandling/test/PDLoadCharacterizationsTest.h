@@ -232,6 +232,50 @@ public:
     std::vector<double> azi = alg.getProperty("Azimuthal");
     TS_ASSERT_EQUALS(azi.size(), 0);
   }
+
+  void test_ExpIni() {
+    // this file doesn't have enough information
+    const std::string CHAR_FILE("Test_characterizations_focus_and_char2.txt");
+    const std::string WKSP_NAME("test_ExpIni");
+
+    // initialize and run the algorithm
+    PDLoadCharacterizations alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("Filename", CHAR_FILE);
+    alg.setPropertyValue("ExpIniFilename", "NOMAD_exp.ini");
+    alg.setPropertyValue("OutputWorkspace", WKSP_NAME);
+    TS_ASSERT(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // test the table workspace
+    ITableWorkspace_sptr wksp;
+    wksp = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(WKSP_NAME));
+    TS_ASSERT(wksp);
+
+    TS_ASSERT_EQUALS(wksp->rowCount(), 1);
+    TS_ASSERT_EQUALS(wksp->String(0, 3), "49258"); // vanadium
+    TS_ASSERT_EQUALS(wksp->String(0, 4), "49086"); // container
+    TS_ASSERT_EQUALS(wksp->String(0, 5), "49257"); // empty
+  }
+
+  void test_ExpIni_failing() {
+    // this file doesn't have enough information
+    const std::string CHAR_FILE("Test_characterizations_focus.txt");
+    const std::string WKSP_NAME("test_ExpIni_failing");
+
+    // initialize and run the algorithm
+    PDLoadCharacterizations alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setProperty("Filename", CHAR_FILE);
+    alg.setPropertyValue("ExpIniFilename", "NOMAD_exp.ini");
+    alg.setPropertyValue("OutputWorkspace", WKSP_NAME);
+    alg.setRethrows(true); // so the exception can be seen by testing
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+    TS_ASSERT(!alg.isExecuted());
+  }
 };
 
 
