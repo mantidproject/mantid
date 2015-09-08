@@ -56,18 +56,18 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape, bool tra
 
   if(transpose){
 
-      class Increasing{
+      class Decreasing{
       private:
           int m_current;
       public:
-          Increasing(int start) : m_current(start){}
-          int operator()() {return m_current++;}
+          Decreasing(int start) : m_current(start){}
+          int operator()() {return --m_current;}
       };
 
       // Generate the axis order 0, 1, 2 ... in reverse
       std::vector<int> axes(outWs->getNumDims());
-      Increasing op(0);
-      std::generate(axes.rbegin(), axes.rend(), op);
+      Decreasing op(outWs->getNumDims());
+      std::generate(axes.begin(), axes.end(), op);
 
       IAlgorithm *transpose =
           FrameworkManager::Instance().createAlgorithm("TransposeMD");
