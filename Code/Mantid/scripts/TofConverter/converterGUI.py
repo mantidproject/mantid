@@ -67,9 +67,10 @@ class MainWindow(QtGui.QMainWindow):
         showCustomInterfaceHelp("TOF_Converter") #need to find a way to import this module
 
     def convert(self):
-        if self.ui.InputVal.text() == "":
-            return
         try:
+            if self.ui.InputVal.text() == "":
+                raise RuntimeError("Input value is required for conversion")
+
             inOption = self.ui.inputUnits.currentText()
             outOption = self.ui.outputUnits.currentText()
             if self.ui.totalFlightPathInput.text() !='':
@@ -83,6 +84,7 @@ class MainWindow(QtGui.QMainWindow):
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
+
         except ArithmeticError, e:
             QtGui.QMessageBox.warning(self, "TofConverter", str(e))
             return
