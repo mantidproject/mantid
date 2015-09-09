@@ -107,5 +107,4 @@ def energy2output(Energy, outOption, theta, flightpath):
 
     elif outOption == 'Energy (meV)':
         OutputVal = Energy
-
     return OutputVal

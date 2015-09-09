@@ -86,3 +86,6 @@ class MainWindow(QtGui.QMainWindow):
         except ArithmeticError, e:
             QtGui.QMessageBox.warning(self, "TofConverter", str(e))
             return
+        except RuntimeError, re:
+            QtGui.QMessageBox.warning(self, "TofConverter", str(re))
+            return
