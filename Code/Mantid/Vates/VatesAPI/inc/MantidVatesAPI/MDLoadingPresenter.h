@@ -58,33 +58,8 @@ namespace Mantid
         virtual std::vector<double> getTimeStepValues() const = 0;
         virtual std::string getTimeStepLabel() const = 0;
         virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
-        virtual void setDefaultCOBandBoundaries(vtkDataSet* visualDataSet) {
-          // Set an identity matrix
-          vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-            vtkSmartPointer<vtkMatrix4x4>::New();
-          cobMatrix->Identity();
-
-          if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(visualDataSet,
-                                                                            cobMatrix)) {
-            g_log.warning("The Change-of-Basis-Matrix could not be added to the field "
-                          "data of the scaled data set.\n");
-          }
-
-          // Set the bounds
-          double boundingBox[6];
-          visualDataSet->GetBounds(boundingBox);
-          if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(visualDataSet,
-                                                                boundingBox)) {
-            g_log.warning("The bounding box could not be added to the field data of "
-                          "the scaled data set.\n");
-          }
-        }
-        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet)
-        {
-          std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
-          vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
-          converter.execute();
-        }
+        virtual void setDefaultCOBandBoundaries(vtkDataSet* visualDataSet);
+        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
         virtual bool canReadFile() const = 0;
         virtual const std::string& getGeometryXML() const = 0;
         virtual ~MDLoadingPresenter(){}
