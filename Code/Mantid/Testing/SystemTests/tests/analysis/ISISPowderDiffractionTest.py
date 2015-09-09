@@ -11,21 +11,6 @@ sys.path.append(F_DIR)
 import cry_ini
 import cry_focus
 
-
-# ==============================================================================
-def _cleanup_files(dirname, filenames):
-    """
-       Attempts to remove each filename from
-       the given directory
-    """
-    for filename in filenames:
-        path = os.path.join(dirname, filename)
-        try:
-            os.remove(path)
-        except OSError:
-            print 'Did not delete generated file: ' + filename
-# ==============================================================================
-
 class ISISPowderDiffraction(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
@@ -45,7 +30,8 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
     def validate(self):
         return 'ResultTOFgrp', 'hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs'
 
-    def cleanup(self):
+    def _cleanup_files(self):
+        dirs = config['datasearch.directories'].split(';')
         filenames = {"hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss",
                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs",
@@ -55,6 +41,12 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat',
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat',
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
-                     'hrpd/test/cycle_09_2/hrpd_new_072_01_corr.cal'}
-        _cleanup_files(config['defaultsave.directory'], filenames)
+                     'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal'}
+        try:
+            for file in filenames:
+                path = os.path.join(dirs[0], file)
+                os.remove(path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
 
