@@ -88,8 +88,8 @@ namespace MantidQt {
       return notebook->writeNotebook();
     }
 
-    std::string ReflGenerateNotebook::printThetaString(std::vector<std::string> runNos,
-                                                       std::vector<std::string> theta)
+    std::string ReflGenerateNotebook::printThetaString(const std::vector<std::string> & runNos,
+                                                       const std::vector<std::string> & theta)
     {
       std::ostringstream theta_string;
 
@@ -109,7 +109,7 @@ namespace MantidQt {
       @param rows : rows in the stitch group
       @return tuple containing the python code string and the output workspace name
       */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::stitchGroupString(std::set<int> rows)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::stitchGroupString(const std::set<int> & rows)
     {
       std::ostringstream stitch_string;
 
@@ -178,7 +178,7 @@ namespace MantidQt {
       @return string of comma separated list of parameter values
       */
     template<typename T, typename A>
-    std::string ReflGenerateNotebook::vectorParamString(std::string param_name, std::vector<T,A> &param_vec)
+    std::string ReflGenerateNotebook::vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec)
     {
       std::ostringstream vector_string;
       const char* separator = "";
@@ -199,8 +199,8 @@ namespace MantidQt {
       @param axes : handle of axes to plot in
       @return string  of python code to plot I vs Q
       */
-    std::string ReflGenerateNotebook::plot1D(std::vector<std::string> ws_names, std::string axes, std::string title,
-                                             int legendLocation) {
+    std::string ReflGenerateNotebook::plot1D(const std::vector<std::string> & ws_names, const std::string & axes,
+                                             const std::string & title, const int legendLocation) {
 
       std::ostringstream plot_string;
 
@@ -231,7 +231,7 @@ namespace MantidQt {
      @param rowNo : the row in the model to run the reduction algorithm on
      @return tuple containing the python string and the output workspace name
     */
-    std::tuple<std::string, std::string, std::string, std::string, std::string> ReflGenerateNotebook::reduceRowString(int rowNo) {
+    std::tuple<std::string, std::string, std::string, std::string, std::string> ReflGenerateNotebook::reduceRowString(const int rowNo) {
       std::ostringstream code_string;
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
@@ -298,7 +298,7 @@ namespace MantidQt {
       @param scale : value of scaling factor to use
       @return tuple of strings of python code and output workspace name
       */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::scaleString(std::string runNo, double scale)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::scaleString(const std::string & runNo, const double scale)
     {
       std::ostringstream scale_string;
 
@@ -315,7 +315,7 @@ namespace MantidQt {
       @param wsName : name of workspace to convert to point data
       @return tuple of strings of python code and output workspace name
       */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::convertToPointString(std::string wsName)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::convertToPointString(const std::string & wsName)
     {
       const std::string output_name = wsName + "_plot";
       std::ostringstream convert_string;
@@ -330,7 +330,7 @@ namespace MantidQt {
      @param runNo : the number of the run to rebin
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::rebinString(int rowNo, std::string runNo)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::rebinString(const int rowNo, const std::string & runNo)
     {
       //We need to make sure that qmin and qmax are respected, so we rebin to
       //those limits here.
@@ -355,7 +355,7 @@ namespace MantidQt {
      @param trans_ws_str : string of workspaces to create transmission workspace from
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::transWSString(std::string trans_ws_str)
+    std::tuple<std::string, std::string> ReflGenerateNotebook::transWSString(const std::string & trans_ws_str)
     {
       const size_t maxTransWS = 2;
 
@@ -393,7 +393,7 @@ namespace MantidQt {
      @param ws_name : workspace name
      @return run number, as a string
     */
-    std::string ReflGenerateNotebook::getRunNumber(std::string ws_name) {
+    std::string ReflGenerateNotebook::getRunNumber(const std::string & ws_name) {
       //Matches TOF_13460 -> 13460
       boost::regex outputRegex("(TOF|IvsQ|IvsLam)_([0-9]+)");
 
@@ -418,7 +418,7 @@ namespace MantidQt {
      @param runStr : string of workspaces to load
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::loadWorkspaceString(std::string runStr) {
+    std::tuple<std::string, std::string> ReflGenerateNotebook::loadWorkspaceString(const std::string & runStr) {
       std::vector<std::string> runs;
       boost::split(runs, runStr, boost::is_any_of("+"));
 
@@ -458,7 +458,7 @@ namespace MantidQt {
      @param output_name : other workspace will be added to the one with this name
      @return string of python code
     */
-    std::string ReflGenerateNotebook::plusString(std::string input_name, std::string output_name)
+    std::string ReflGenerateNotebook::plusString(const std::string & input_name, const std::string & output_name)
     {
       std::ostringstream plus_string;
 
@@ -474,7 +474,7 @@ namespace MantidQt {
      @param run : run to load
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::loadRunString(std::string run) {
+    std::tuple<std::string, std::string> ReflGenerateNotebook::loadRunString(const std::string & run) {
       std::ostringstream load_string;
       // We do not have access to AnalysisDataService from notebook, so must load run from file
       const std::string filename = m_instrument + run;

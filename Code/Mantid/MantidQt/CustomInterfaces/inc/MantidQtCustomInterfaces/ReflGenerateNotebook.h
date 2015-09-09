@@ -54,32 +54,34 @@ namespace MantidQt {
 
     private:
 
-      std::string plot1D(std::vector<std::string> ws_names, std::string axes, std::string title, int legendLocation);
+      std::string plot1D(const std::vector<std::string> & ws_names, const std::string & axes,
+                         const std::string & title, const int legendLocation);
 
-      std::string printThetaString(std::vector<std::string> runNos, std::vector<std::string> theta);
+      std::string printThetaString(const std::vector<std::string> & runNos,
+                                   const std::vector<std::string> & theta);
 
-      std::tuple<std::string, std::string> stitchGroupString(std::set<int> rows);
+      std::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows);
 
-      std::tuple<std::string, std::string, std::string, std::string, std::string> reduceRowString(int rowNo);
+      std::tuple<std::string, std::string, std::string, std::string, std::string> reduceRowString(const int rowNo);
 
-      std::tuple<std::string, std::string> loadWorkspaceString(std::string runStr);
+      std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr);
 
-      std::string plusString(std::string input_name, std::string output_name);
+      std::string plusString(const std::string & input_name, const std::string & output_name);
 
-      std::tuple<std::string, std::string> loadRunString(std::string run);
+      std::tuple<std::string, std::string> loadRunString(const std::string & run);
 
-      std::string getRunNumber(std::string ws_name);
+      std::string getRunNumber(const std::string & ws_name);
 
-      std::tuple<std::string, std::string> scaleString(std::string runNo, double scale);
+      std::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
 
-      std::tuple<std::string, std::string> convertToPointString(std::string wsName);
+      std::tuple<std::string, std::string> convertToPointString(const std::string & wsName);
 
       template<typename T, typename A>
-      std::string vectorParamString(std::string param_name, std::vector<T,A> &param_vec);
+      std::string vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec);
 
-      std::tuple<std::string, std::string> rebinString(int rowNo, std::string runNo);
+      std::tuple<std::string, std::string> rebinString(const int rowNo, const std::string & runNo);
 
-      std::tuple<std::string, std::string> transWSString(std::string trans_ws_str);
+      std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str);
 
       std::string m_wsName;
       QReflTableModel_sptr m_model;
