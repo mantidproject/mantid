@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#pylint: disable=invalid-module-name,relative-import,invalid-constant-name
+#pylint: disable=C0103,relative-import
 import sys
 from PyQt4 import QtGui
 

@@ -108,7 +108,7 @@ def add_peak2(step):
     """ Add another peak
     """
     exp_number = 355
-    scanno = 82
+    scanno = 83
     ptno = 11
 
     # Find peak
@@ -136,19 +136,29 @@ def calculate_ub_matrix(step):
     pt_number = 11
     added1, peak_info1 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
     assert_true(added1)
+    peak_info1.setHKL()
 
-    assert_equals(peak_info1.getExpInfo())
-    assert_equals(peak_info1.getHKL())
+    exp_no_new, scan_no_new, pt_no_new = peak_info1.getExpInfo()
+    assert_equals((exp_number, scan_number, pt_number), (exp_no_new, scan_no_new, pt_no_new))
+    h, k, l = peak_info1.getHKL()
+    assert_equals(h, 2.0)
+    assert_equals(k, 2.0)
+    assert_equals(l, 2.0)
 
     # Add peak 2
     exp_number = 355
-    scan_number = 82
+    scan_number = 83
     pt_number = 11
     added2, peak_info2 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
     assert_true(added2)
+    peak_info2.setHKL()
 
-    assert_equals(peak_info1.getExpInfo())
-    assert_equals(peak_info1.getHKL())
+    exp_no_new, scan_no_new, pt_no_new = peak_info2.getExpInfo()
+    assert_equals((exp_number, scan_number, pt_number), (exp_no_new, scan_no_new, pt_no_new))
+    h, k, l = peak_info2.getHKL()
+    assert_equals(h, 2.0)
+    assert_equals(k, -2.0)
+    assert_equals(l, 0.0)
 
     peak_info_list = [peak_info1, peak_info2]
 

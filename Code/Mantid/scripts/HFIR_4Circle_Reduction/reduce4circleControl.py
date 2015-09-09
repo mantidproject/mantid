@@ -1,3 +1,4 @@
+#pylint: disable=C0103,R0902,R0904
 ################################################################################
 #
 # Controlling class
@@ -52,6 +53,10 @@ class PeakInfo(object):
         self._myPeakIndex = None
         self._myPeak = None
 
+        self._myExpNumber = None
+        self._myScanNumber = None
+        self._myPtNumber = None
+
         return
 
     def get_peak_workspace(self):
@@ -92,9 +97,14 @@ class PeakInfo(object):
         if status is True:
             self._myPeakWSKey = (exp_number, scan_number, pt_number)
             self._myPeakIndex = 0
+            self._myPeak = peak_ws.getPeak(0)
         else:
             error_message = peak_ws
             return False, error_message
+
+        self._myExpNumber = exp_number
+        self._myScanNumber = scan_number
+        self._myPtNumber = pt_number
 
         return True, ''
 
@@ -120,23 +130,45 @@ class PeakInfo(object):
     def getExpInfo(self):
         """
 
-        :return:
+        :return: 3-tuple of integer as experiment number, scan number and Pt number
         """
-        return run_number, scan, pt
+        return self._myExpNumber, self._myScanNumber, self._myPtNumber
 
     def getHKL(self):
         """
 
-        :return:
+        :return: 3-tuple of float as (H, K, L)
         """
-        return self._myPeak.getHKL()
+        hkl = self._myPeak.getHKL()
+
+        return hkl.getX(), hkl.getY(), hkl.getZ()
 
     def getQSample(self):
         """
 
+        :return: 3-tuple of floats as Qx, Qy, Qz
+        """
+        q_sample = self._myPeak.getQSampleFrame()
+        return q_sample.getX(), q_sample.getY(), q_sample.getZ()
+
+    def setHKL(self, h=None, k=None, l=None):
+        """
+
+        :param h:
+        :param k:
+        :param l:
         :return:
         """
-        return self._myPeak.getQSampleFrame()
+        if h is None or k is None or l is None:
+            # Set HKL
+            matrix_ws = self.get_raw_data_ws()
+            h = float(int(matrix_ws.run().getProperty('_h').value))
+            k = float(int(matrix_ws.run().getProperty('_k').value))
+            l = float(int(matrix_ws.run().getProperty('_l').value))
+
+        self._myPeak.setHKL(h, k, l)
+
+        return
 
 
 class CWSCDReductionControl(object):
@@ -189,11 +221,15 @@ class CWSCDReductionControl(object):
         """
         has_peak_ws, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
         if has_peak_ws is False:
-            return False, 'No peak workspace found for Exp %s Scan %s Pt %s' % (
-                exp_number, scan_number, pt_number
-            )
+            err_msg = 'No peak workspace found for Exp %s Scan %s Pt %s' % (
+                exp_number, scan_number, pt_number)
+            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
+            return False, err_msg
+
         if peak_ws.rowCount() > 1:
-            return False, 'There are more than 1 peak in PeaksWorkspace.'
+            err_msg = 'There are more than 1 peak in PeaksWorkspace.'
+            print '\n[DB] Fail to add peak info due to %s\n' % err_msg
+            return False, err_msg
 
         peak_info = PeakInfo(self)
         peak_info.set_from_run_info(exp_number, scan_number, pt_number)

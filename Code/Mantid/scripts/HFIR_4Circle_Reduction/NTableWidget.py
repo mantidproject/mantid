@@ -1,4 +1,4 @@
-#
+#pylint: disable=C0103,R0904
 # N(DAV)TableWidget
 #
 
