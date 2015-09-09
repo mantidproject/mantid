@@ -1,7 +1,7 @@
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/MultiThreaded.h"
-
+#include <boost/math/special_functions/fpclassify.hpp>
 namespace MantidQt
 {
   namespace API
