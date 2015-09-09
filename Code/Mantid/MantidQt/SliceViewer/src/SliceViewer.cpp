@@ -25,6 +25,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/MdSettings.h"
+#include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
@@ -56,6 +57,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using MantidQt::API::SyncedCheckboxes;
+using MantidQt::API::SignalBlocker;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -177,13 +179,21 @@ SliceViewer::SliceViewer(QWidget *parent)
 
 void SliceViewer::updateAspectRatios() {
 
-  /* Lock aspect ratios, if that feature has been enabled, and if the plot x and
-   * y units
-   * are suitable.
-  */
-  const bool lockAspectRatios = m_lockAspectRatiosAction->isChecked() &&
-                                m_X->getMDUnits().isQUnit() &&
-                                m_Y->getMDUnits().isQUnit();
+  bool lockAspectRatios = false;
+
+  if (m_aspectRatioType == Guess) {
+    /* Lock aspect ratios, if that feature has been enabled, and if the plot x
+ * and
+ * y units
+ * are suitable.
+*/
+    lockAspectRatios =
+        m_X->getMDUnits().isQUnit() && m_Y->getMDUnits().isQUnit();
+
+  } else {
+    // Lock everything (or not)
+    lockAspectRatios = m_aspectRatioType == All;
+  }
 
   m_rescaler->setEnabled(lockAspectRatios);
   m_rescaler->setReferenceAxis(QwtPlot::xBottom);
@@ -242,8 +252,8 @@ void SliceViewer::loadSettings() {
       static_cast<Mantid::API::MDNormalization>(norm);
   this->setNormalization(normaliz);
 
-  const bool lockAspectRatioEnabled = settings.value("LockAspectRatios", 1).toInt();
-  this->m_lockAspectRatiosAction->setChecked(lockAspectRatioEnabled);
+  const int aspectRatioOption = settings.value("LockAspectRatios", 0).toInt();
+  this->setAspectRatio(static_cast<AspectRatioType>(aspectRatioOption));
 
   settings.endGroup();
 }
@@ -262,8 +272,7 @@ void SliceViewer::saveSettings() {
   settings.setValue("Normalization",
                     static_cast<int>(this->getNormalization()));
 
-  settings.setValue("LockAspectRatios",
-                    m_lockAspectRatiosAction->isChecked() ? 1 : 0);
+  settings.setValue("LockAspectRatios", static_cast<int>(m_aspectRatioType));
   settings.endGroup();
 }
 //------------------------------------------------------------------------------
@@ -439,12 +448,28 @@ void SliceViewer::initMenus() {
 
   m_menuView->addSeparator();
 
-  action = new QAction(QPixmap(), "Lock &Aspect Ratios", this);
+  group = new QActionGroup(this);
+
+  action = new QAction(QPixmap(), "Lock Aspect Ratios (Guess)", this);
   action->setCheckable(true);
-  action->setChecked(true);
-  m_lockAspectRatiosAction = action;
-  connect(action, SIGNAL(toggled(bool)), this,
-          SLOT(setAspectRatioChoice(bool)));
+  action->setChecked(true); // This is our default
+  action->setActionGroup(group);
+  m_lockAspectRatiosActionGuess = action;
+  connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioGuess()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Lock Aspect Ratios (All)", this);
+  action->setCheckable(true);
+  action->setActionGroup(group);
+  m_lockAspectRatiosActionAll = action;
+  connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioAll()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Unlock Aspect Ratios (All)", this);
+  action->setCheckable(true);
+  action->setActionGroup(group);
+  m_lockAspectRatiosActionUnlock = action;
+  connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioUnlock()));
   m_menuView->addAction(action);
 
   // --------------- Color options Menu ----------------------------------------
@@ -832,18 +857,26 @@ void SliceViewer::setColorScaleAutoSlice() {
   this->updateDisplay();
 }
 
-//------------------------------------------------------------------------------
-/** Automatically lock aspect ratios, or switch that behaviour off.
- * @param lockRatios : True to lock the aspect ratios
- */
-void SliceViewer::setAspectRatioChoice(bool lockRatios) {
-  m_lockAspectRatiosAction->blockSignals(true);
-  m_lockAspectRatiosAction->setChecked(lockRatios);
-  m_lockAspectRatiosAction->blockSignals(false);
+void SliceViewer::setAspectRatio(AspectRatioType type) {
 
+  SignalBlocker<QAction> actionGuess(m_lockAspectRatiosActionGuess);
+  SignalBlocker<QAction> actionAll(m_lockAspectRatiosActionAll);
+  SignalBlocker<QAction> actionUnlock(m_lockAspectRatiosActionUnlock);
+
+  actionGuess->setChecked(type == Guess);
+  actionAll->setChecked(type == All);
+  actionUnlock->setChecked(type == Unlock);
+
+  m_aspectRatioType = type;
   // Redraw the view.
-  this->updateDisplay(true/*force axis reset*/);
+  this->updateDisplay(true /*force axis reset*/);
 }
+
+void SliceViewer::changeAspectRatioGuess() { this->setAspectRatio(Guess); }
+
+void SliceViewer::changeAspectRatioAll() { this->setAspectRatio(All); }
+
+void SliceViewer::changeAspectRatioUnlock() { this->setAspectRatio(Unlock); }
 
 //------------------------------------------------------------------------------
 /// Slot called when the ColorBarWidget changes the range of colors
@@ -858,9 +891,8 @@ void SliceViewer::colorRangeChanged() {
  * @param transparent :: true if you want zeros to be transparent.
  */
 void SliceViewer::setTransparentZeros(bool transparent) {
-  m_actionTransparentZeros->blockSignals(true);
-  m_actionTransparentZeros->setChecked(transparent);
-  m_actionTransparentZeros->blockSignals(false);
+  SignalBlocker<QAction> transparentZeros(m_actionTransparentZeros);
+  transparentZeros->setChecked(transparent);
   // Set and display
   m_data->setZerosAsNan(transparent);
   this->updateDisplay();
@@ -903,29 +935,28 @@ void SliceViewer::onNormalizationChanged(const QString &normalizationKey) {
  */
 void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
                                    bool update) {
-  m_actionNormalizeNone->blockSignals(true);
-  m_actionNormalizeVolume->blockSignals(true);
-  m_actionNormalizeNumEvents->blockSignals(true);
 
-  m_actionNormalizeNone->setChecked(norm == Mantid::API::NoNormalization);
-  m_actionNormalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
-  m_actionNormalizeNumEvents->setChecked(norm ==
-                                         Mantid::API::NumEventsNormalization);
+  {
+    SignalBlocker<QAction> normalizeNone(m_actionNormalizeNone);
+    SignalBlocker<QAction> normalizeVolume(m_actionNormalizeVolume);
+    SignalBlocker<QAction> normalizeNumEvents(m_actionNormalizeNumEvents);
 
-  m_actionNormalizeNone->blockSignals(false);
-  m_actionNormalizeVolume->blockSignals(false);
-  m_actionNormalizeNumEvents->blockSignals(false);
+    normalizeNone->setChecked(norm == Mantid::API::NoNormalization);
+    normalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
+    normalizeNumEvents->setChecked(norm == Mantid::API::NumEventsNormalization);
+  }
 
   // Sync the normalization combobox.
-  this->ui.comboNormalization->blockSignals(true);
-  if (norm == Mantid::API::NoNormalization) {
-    this->ui.comboNormalization->setCurrentIndex(0);
-  } else if (norm == Mantid::API::VolumeNormalization) {
-    this->ui.comboNormalization->setCurrentItem(1);
-  } else {
-    this->ui.comboNormalization->setCurrentIndex(2);
+  {
+    SignalBlocker<QComboBox> comboNormalization(ui.comboNormalization);
+    if (norm == Mantid::API::NoNormalization) {
+      comboNormalization->setCurrentIndex(0);
+    } else if (norm == Mantid::API::VolumeNormalization) {
+      comboNormalization->setCurrentItem(1);
+    } else {
+      comboNormalization->setCurrentIndex(2);
+    }
   }
-  this->ui.comboNormalization->blockSignals(false);
 
   m_data->setNormalization(norm);
   if (update)
@@ -1712,7 +1743,8 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
 
 //------------------------------------------------------------------------------
 /** Set the color scale limits and log mode via a method call.
- *  Here for backwards compatibility, setColorScale(double min, double max, int type)
+ *  Here for backwards compatibility, setColorScale(double min, double max, int
+ *type)
  *  should be used instead.
  *
  * @param min :: minimum value corresponding to the lowest color on the map
@@ -1787,10 +1819,7 @@ void SliceViewer::setColorScaleMin(double min) {
  *
  * @return int corresponding to the selected scale type
  */
-int SliceViewer::getColorScaleType()
-{
-  return m_colorBar->getScale();
-}
+int SliceViewer::getColorScaleType() { return m_colorBar->getScale(); }
 
 //------------------------------------------------------------------------------
 /** Set the maximum value corresponding to the lowest color on the map
@@ -1811,7 +1840,8 @@ void SliceViewer::setColorScaleMax(double max) {
  *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log) {
-  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), (int)log);
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(),
+                      (int)log);
 }
 
 //------------------------------------------------------------------------------

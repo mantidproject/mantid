@@ -197,7 +197,9 @@ public slots:
   // Peaks overlay
   void peakOverlay_clicked();
   // Aspect ratios
-  void setAspectRatioChoice(bool lockRatios);
+  void changeAspectRatioGuess();
+  void changeAspectRatioAll();
+  void changeAspectRatioUnlock();
 
 protected:
 
@@ -205,6 +207,7 @@ protected:
   void dropEvent(QDropEvent *e);
 
 private:
+  enum AspectRatioType{Guess=0, All=1, Unlock=2};
   void loadSettings();
   void saveSettings();
   void setIconFromString(QAction* action, const std::string& iconName,
@@ -236,6 +239,9 @@ private:
 
   // Rescaler methods
   void updateAspectRatios();
+
+  // Set aspect ratio type.
+  void setAspectRatio(AspectRatioType type);
 
 private:
   
@@ -320,7 +326,10 @@ private:
   QAction *m_actionNormalizeVolume;
   QAction *m_actionNormalizeNumEvents;
   QAction *m_actionRefreshRebin;
-  QAction *m_lockAspectRatiosAction;
+  QAction *m_lockAspectRatiosActionGuess;
+  QAction *m_lockAspectRatiosActionAll;
+  QAction *m_lockAspectRatiosActionUnlock;
+
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
@@ -367,6 +376,8 @@ private:
   static const QString NoNormalizationKey;
   static const QString VolumeNormalizationKey;
   static const QString NumEventsNormalizationKey;
+
+  AspectRatioType m_aspectRatioType;
 
 };
 
