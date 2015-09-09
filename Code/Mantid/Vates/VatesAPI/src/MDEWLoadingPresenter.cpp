@@ -185,12 +185,6 @@ namespace Mantid
         g_log.warning("The basis names could not be added to the field data of "
                       "the data set.\n");
       }
-#if 0
-      vtkFieldData* fieldData = visualDataSet->GetFieldData();
-      setAxisLabel("AxisTitleForX", axisLabels[0], fieldData);
-      setAxisLabel("AxisTitleForY", axisLabels[1], fieldData);
-      setAxisLabel("AxisTitleForZ", axisLabels[2], fieldData);
-#endif
     }
 
     /**
