@@ -136,7 +136,7 @@ def calculate_ub_matrix(step):
     pt_number = 11
     added1, peak_info1 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
     assert_true(added1)
-    peak_info1.setHKL()
+    peak_info1.set_hkl_raw_data()
 
     exp_no_new, scan_no_new, pt_no_new = peak_info1.getExpInfo()
     assert_equals((exp_number, scan_number, pt_number), (exp_no_new, scan_no_new, pt_no_new))
@@ -151,7 +151,7 @@ def calculate_ub_matrix(step):
     pt_number = 11
     added2, peak_info2 = wk_flow.add_peak_info(exp_number, scan_number, pt_number)
     assert_true(added2)
-    peak_info2.setHKL()
+    peak_info2.set_hkl_raw_data()
 
     exp_no_new, scan_no_new, pt_no_new = peak_info2.getExpInfo()
     assert_equals((exp_number, scan_number, pt_number), (exp_no_new, scan_no_new, pt_no_new))
@@ -169,6 +169,8 @@ def calculate_ub_matrix(step):
     # Calculate UB matrix
     status, ub_matrix = wk_flow.calculate_ub_matrix(peak_info_list, a, b, c, alpha, beta, gamma)
     assert_true(status)
+
+    assert_equals(ub_matrix.shape, (3, 3))
 
     return
 

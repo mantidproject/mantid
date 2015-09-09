@@ -46,6 +46,7 @@ class NTableWidget(QtGui.QTableWidget):
         if len(row_value_list) != self.columnCount():
             ret_msg = 'Input number of values (%d) is different from ' \
                       'column number (%d).' % (len(row_value_list), self.columnCount())
+            return False, ret_msg
         else:
             ret_msg = ''
 
@@ -56,7 +57,7 @@ class NTableWidget(QtGui.QTableWidget):
         # Set values
         for i_col in xrange(min(len(row_value_list), self.columnCount())):
             item = QtGui.QTableWidgetItem()
-            item.setText(_fromUtf8(row_value_list[i_col]))
+            item.setText(_fromUtf8(str(row_value_list[i_col])))
             item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
             if type_list[i_col] == 'checkbox':
                 self.set_check_box(row_number, i_col, False)
@@ -64,7 +65,7 @@ class NTableWidget(QtGui.QTableWidget):
                 self.setItem(row_number, i_col, item)
         # END-FOR(i_col)
 
-        return ret_msg
+        return True, ret_msg
 
     def get_selected_rows(self):
         """

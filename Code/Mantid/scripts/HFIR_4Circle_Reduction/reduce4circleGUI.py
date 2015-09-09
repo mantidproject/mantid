@@ -35,6 +35,7 @@ UB_Peak_Table_Setup = [('Scan', 'int'),
                        ('Q_z', 'float'),
                        ('Status', 'checkbox')]
 
+
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
@@ -98,6 +99,9 @@ class MainWindow(QtGui.QMainWindow):
         # Tab 'calculate ub matrix'
         self.connect(self.ui.pushButton_findPeak, QtCore.SIGNAL('clicked()'),
                      self.do_find_peak)
+
+        self.connect(self.ui.pushButton_addPeakToCalUB, QtCore.SIGNAL('clicked()'),
+                     self.do_add_ub_peak)
 
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
                 self.doCalUBMatrix)
@@ -188,6 +192,39 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(error_message)
 
         return
+
+    def do_add_ub_peak(self):
+        """ Add current to ub peaks
+        :return:
+        """
+        # Add peak
+        status, int_list = gutil.parse_integers_editors([self.ui.lineEdit_exp,
+                                                         self.ui.lineEdit_scanNumber,
+                                                         self.ui.lineEdit_ptNumber])
+        if status is False:
+            self.pop_one_button_dialog(int_list)
+        exp_no, scan_no, pt_no = int_list
+
+        status, peakinfo = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
+        if status is False:
+            error_message = peakinfo
+            self.pop_one_button_dialog(error_message)
+        self.set_ub_peak_table(peakinfo)
+
+        # Clear
+        self.ui.lineEdit_scanNumber.setText('')
+        self.ui.lineEdit_ptNumber.setText('')
+
+        self.ui.lineEdit_sampleQx.setText('')
+        self.ui.lineEdit_sampleQy.setText('')
+        self.ui.lineEdit_sampleQz.setText('')
+
+        self.ui.lineEdit_H.setText('')
+        self.ui.lineEdit_K.setText('')
+        self.ui.lineEdit_L.setText('')
+
+        return
+
 
     def doAcceptCalUB(self):
         """ Accept the calculated UB matrix
@@ -339,7 +376,19 @@ class MainWindow(QtGui.QMainWindow):
         if status is False:
             err_msg = peak_info
             raise KeyError(err_msg)
-        self.set_ub_peak_table(peak_info)
+        assert isinstance(peak_info, r4c.PeakInfo)
+
+        h, k, l = peak_info.getHKL()
+        self.ui.lineEdit_H.setText('%.2f' % h)
+        self.ui.lineEdit_K.setText('%.2f' % k)
+        self.ui.lineEdit_L.setText('%.2f' % l)
+
+        q_sample = peak_info.getQSample()
+        self.ui.lineEdit_sampleQx.setText('%.5E' % q_sample[0])
+        self.ui.lineEdit_sampleQy.setText('%.5E' % q_sample[1])
+        self.ui.lineEdit_sampleQz.setText('%.5E' % q_sample[2])
+
+        # self.set_ub_peak_table(peak_info)
 
         return
 
@@ -593,14 +642,19 @@ class MainWindow(QtGui.QMainWindow):
         """
         assert isinstance(peakinfo, r4c.PeakInfo)
 
+        # Get data
         exp_number, scan_number, pt_number = peakinfo.getExpInfo()
-        print '[DB Exp/Scan/Pt] ', exp_number, scan_number, pt_number
-
-        hkl = peakinfo.getHKL()
-        print '[DB HKL] ', hkl
-
+        h, k, l = peakinfo.getHKL()
         q_sample = peakinfo.getQSample()
-        print '[DB QSample] ', q_sample, type(q_sample)
+
+        print '[DB Exp/Scan/Pt] ', exp_number, scan_number, pt_number, '[HKL]', h, k, l,\
+            '[QSample] ', q_sample, type(q_sample)
+
+        # Set to table
+        status, err_msg = self.ui.tableWidget_peaksCalUB.append_row(
+            [scan_number, pt_number, h, k, l, q_sample[0], q_sample[1], q_sample[2], False])
+        if status is False:
+            self.pop_one_button_dialog(err_msg)
 
         return
 

@@ -57,6 +57,8 @@ class PeakInfo(object):
         self._myScanNumber = None
         self._myPtNumber = None
 
+        self._myLastPeakUB = None
+
         return
 
     def get_peak_workspace(self):
@@ -151,9 +153,9 @@ class PeakInfo(object):
         q_sample = self._myPeak.getQSampleFrame()
         return q_sample.getX(), q_sample.getY(), q_sample.getZ()
 
-    def setHKL(self, h=None, k=None, l=None):
+    def set_hkl_raw_data(self, h=None, k=None, l=None):
         """
-
+        Set HKL to peak/peak workspace from sample log in raw data file/workspace
         :param h:
         :param k:
         :param l:
@@ -166,7 +168,7 @@ class PeakInfo(object):
             k = float(int(matrix_ws.run().getProperty('_k').value))
             l = float(int(matrix_ws.run().getProperty('_l').value))
 
-        self._myPeak.setHKL(h, k, l)
+        self._myPeak.set_hkl_raw_data(h, k, l)
 
         return
 
@@ -277,19 +279,23 @@ class CWSCDReductionControl(object):
 
             peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
             peak = peak_ws.getPeak(0)
-            peak.setHKL(h, k, l)
+            peak.set_hkl_raw_data(h, k, l)
 
             # Combine peak workspace
-
-            api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws_name, RHSWorkspace=peak_ws,
-                                       CombineMatchingPeaks=False, OutputWorkspace=ub_peak_ws)
+            ub_peak_ws = api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws,
+                                                    RHSWorkspace=peak_ws,
+                                                    CombineMatchingPeaks=False,
+                                                    OutputWorkspace=ub_peak_ws_name)
         # END-FOR(i_peak_info)
 
         # Calculate UB matrix
         api.CalculateUMatrix(PeaksWorkspace=ub_peak_ws_name,
                              a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+        # ub_peak_ws = AnalysisDataService.retrieve(ub_peak_ws_name)
 
-        ub_matrix = peak_ws.sample().getOrientedLattice().getUB()
+        ub_matrix = ub_peak_ws.sample().getOrientedLattice().getUB()
+
+        self._myLastPeakUB = ub_peak_ws
 
         return True, ub_matrix
 
@@ -597,28 +603,28 @@ class CWSCDReductionControl(object):
 
         return True, self._myUBPeakWSDict[(exp_number, scan_number, pt_number)]
 
-    def indexPeaks(self, srcpeakws, targetpeakws):
+    def index_peaks(self, ub_peak_ws, target_peak_ws):
         """ Index peaks in a peak workspace by UB matrix
-        :param srcpeakws: peak workspace containing UB matrix
-        :param targetpeakws: peak workspace to get peaks indexed
+        :param ub_peak_ws: peak workspace containing UB matrix
+        :param target_peak_ws: peak workspace to get peaks indexed
         :return: (Boolean, Object) - Boolean = True,  Object = ??? - Boolean = False, Object = error message (str)
         """
         # Check input
-        if isinstance(peakws, PeakWorkspace) is False:
-            return False, "Input workspace %s is not a PeakWorkspace" % (str(peakws))
+        assert isinstance(ub_peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
+        assert isinstance(target_peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
 
         # Get UB matrix
         if DebugMode is True:
-            ubmatrix = peakws.sample().getOrientedLattice().getUB()
+            ubmatrix = ub_peak_ws.sample().getOrientedLattice().getUB()
             print "[DB] UB matrix is %s\n" % (str(ubmatrix))
 
         # Copy sample/ub matrix to target
-        api.CopySample(InputWorkspace=srcpeakws,
-                       OutputWorkspace=str(targetpeakws),
-                       CopyName=0, CopyMaterial=0, CopyEnvironment=0,
-                       CopyShape=0,CopyLattice=1,CopyOrientationOnly=0)
+        api.CopySample(InputWorkspace=ub_peak_ws,
+                       OutputWorkspace=target_peak_ws.name(),
+                       CopyName=False, CopyMaterial=False, CopyEnvironment=False,
+                       CopyShape=False,CopyLattice=True, CopyOrientationOnly=False)
 
-        numindexed = CalculatePeaksHKL(PeaksWorkspace=targetpeakws, Overwrite=True)
+        numindexed = api.CalculatePeaksHKL(PeaksWorkspace=target_peak_ws, Overwrite=True)
 
         print "[INFO] There are %d peaks that are indexed." % (numindexed)
 
@@ -691,20 +697,33 @@ class CWSCDReductionControl(object):
 
         return True, pt_ws_name
 
-    def groupWS(self):
+    def group_workspaces(self, exp_number, group_name):
         """
 
         :return:
         """
-        inputws = ''
-        for pt in [11]:
-            
-            inputws += 's%04d_%04d'%(scanno, pt)
-            if pt != numrows:
-                inputws += ','
-        # ENDFOR
-        
-        GroupWorkspaces(InputWorkspaces=inputws, OutputWorkspace='Group_exp0355_scan%04d'%(scanno))
+        # Find out the input workspace name
+        ws_names_str = ''
+        for key in self._myRawDataWSDict.keys():
+            if key[0] == exp_number:
+                ws_names_str += '%s,' % self._myRawDataWSDict[key].name()
+
+        for key in self._mySpiceTableDict.keys():
+            if key[0] == exp_number:
+                ws_names_str += '%s,' % self._mySpiceTableDict[key].name()
+
+        # Check
+        if len(ws_names_str) == 0:
+            return False, 'No workspace is found for experiment %d.' % exp_number
+
+        # Remove last ','
+        ws_names_str = ws_names_str[:-1]
+
+        # Group
+        api.GroupWorkspaces(InputWorkspaces=ws_names_str,
+                            OutputWorkspace=group_name)
+
+        return
 
     def set_server_url(self, server_url):
         """
