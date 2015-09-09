@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include <vtkDataSet.h>
 #include <vtkPVChangeOfBasisHelper.h>
 #include <string>
@@ -79,8 +81,9 @@ namespace Mantid
         }
         virtual void makeNonOrthogonal(vtkDataSet* visualDataSet)
         {
-          // This is a no-op function for most loaders.
-          UNUSED_ARG(visualDataSet);
+          std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
+          vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
+          converter.execute();
         }
         virtual bool canReadFile() const = 0;
         virtual const std::string& getGeometryXML() const = 0;

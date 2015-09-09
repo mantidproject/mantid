@@ -223,15 +223,6 @@ void MDHWLoadingPresenter::appendMetadata(vtkDataSet *visualDataSet,
   outputFD->Delete();
 }
 
-/**
- * Change the data based on non-orthogonal axis information
- * @param visualDataSet : The VTK dataset to modify
- */
-void MDHWLoadingPresenter::makeNonOrthogonal(vtkDataSet *visualDataSet) {
-  std::string wsName = vtkDataSetToWsName::exec(visualDataSet);
-  vtkDataSetToNonOrthogonalDataSet converter(visualDataSet, wsName);
-  converter.execute();
-}
 
 /**
  * Set the axis labels from the current dimensions
