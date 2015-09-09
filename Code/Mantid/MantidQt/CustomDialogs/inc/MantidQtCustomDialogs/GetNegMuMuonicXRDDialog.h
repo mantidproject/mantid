@@ -45,7 +45,8 @@ class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   PeriodicTableWidget *periodicTable;
   /// QLineEdit used for input of y-position property
   QLineEdit *yPosition;
-
+  /// QLineEdit used for input of GroupWorkspaceSpace
+  QLineEdit *groupWorkspaceNameInput;
   //Check box for showing or hiding the Legend for PeriodicTableWidget
   QCheckBox *showLegendCheck;
   /// Validate that the input is not empty before running algorithm
@@ -63,7 +64,6 @@ class GetNegMuMuonicXRDDialog : public API::AlgorithmDialog {
   protected:
   // create the initial layout
   void initLayout();
-
   signals:
   /// signal emitted when validateDialogInput passes
   void validInput();
