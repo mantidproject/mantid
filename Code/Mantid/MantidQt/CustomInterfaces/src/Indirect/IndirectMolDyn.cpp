@@ -53,10 +53,6 @@ bool IndirectMolDyn::validate() {
   if (m_uiForm.ckResolution->isChecked())
     uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
-  // Validate symmetrise on when resolution is convolved
-  if (m_uiForm.ckResolution->isChecked() && !m_uiForm.ckSymmetrise->isChecked())
-    uiv.addErrorMessage("Must symmetrise when convolving with resolution.");
-
   emit showMessageBox(uiv.generateErrorMessage());
   return uiv.isAllInputValid();
 }

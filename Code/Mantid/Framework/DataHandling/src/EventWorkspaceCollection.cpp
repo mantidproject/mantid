@@ -290,5 +290,14 @@ void EventWorkspaceCollection::applyFilter(boost::function<void (MatrixWorkspace
   }
 }
 
+//-----------------------------------------------------------------------------
+/** Returns true if the EventWorkspace is safe for multithreaded operations.
+ */
+bool EventWorkspaceCollection::threadSafe() const {
+  // Since there is a mutex lock around sorting, EventWorkspaces are always
+  // safe.
+  return true;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

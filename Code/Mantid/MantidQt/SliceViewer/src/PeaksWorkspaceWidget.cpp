@@ -1,29 +1,17 @@
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidQtSliceViewer/PeaksViewer.h"
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
+#include "MantidQtAPI/SignalBlocker.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <QColorDialog>
 #include <QPlastiqueStyle>
 
-namespace {
 
-class SignalBlocker{
-private:
-    QObject* m_obj;
-
-public:
-    SignalBlocker(QObject* obj) : m_obj(obj) {
-        m_obj->blockSignals(true);
-    }
-    ~SignalBlocker(){
-        m_obj->blockSignals(false);
-    }
-};
-
-}
 
 namespace MantidQt {
 namespace SliceViewer {
+
+using MantidQt::API::SignalBlocker;
 
 /**
 Constructor
@@ -323,13 +311,13 @@ void PeaksWorkspaceWidget::onAddPeaksToggled(bool on)
 }
 
 void PeaksWorkspaceWidget::exitClearPeaksMode() {
-    const SignalBlocker blocker(ui.btnRemovePeak);
-    ui.btnRemovePeak->setChecked(false);
+    SignalBlocker<QPushButton> scopedBlocker(ui.btnRemovePeak);
+    scopedBlocker->setChecked(false);
 }
 
 void PeaksWorkspaceWidget::exitAddPeaksMode() {
-    const SignalBlocker blocker(ui.btnAddPeak);
-    ui.btnAddPeak->setChecked(false);
+    SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
+    scopedBlocker->setChecked(false);
 }
 
 } // namespace
