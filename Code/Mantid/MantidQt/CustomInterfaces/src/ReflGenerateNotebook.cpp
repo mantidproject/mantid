@@ -88,6 +88,12 @@ namespace MantidQt {
       return notebook->writeNotebook();
     }
 
+    /**
+      Create string of markdown to display a table of run numbers and theta values
+      @param runNos : vector of run numbers
+      @param theta : vector of theta values
+      @return markdown string of table
+      */
     std::string ReflGenerateNotebook::printThetaString(const std::vector<std::string> & runNos,
                                                        const std::vector<std::string> & theta)
     {
@@ -231,7 +237,8 @@ namespace MantidQt {
      @param rowNo : the row in the model to run the reduction algorithm on
      @return tuple containing the python string and the output workspace name
     */
-    std::tuple<std::string, std::string, std::string, std::string, std::string> ReflGenerateNotebook::reduceRowString(const int rowNo) {
+    std::tuple<std::string, std::string, std::string, std::string, std::string>
+    ReflGenerateNotebook::reduceRowString(const int rowNo) {
       std::ostringstream code_string;
 
       const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
@@ -298,7 +305,8 @@ namespace MantidQt {
       @param scale : value of scaling factor to use
       @return tuple of strings of python code and output workspace name
       */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::scaleString(const std::string & runNo, const double scale)
+    std::tuple<std::string, std::string>
+     ReflGenerateNotebook::scaleString(const std::string & runNo, const double scale)
     {
       std::ostringstream scale_string;
 
