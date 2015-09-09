@@ -106,7 +106,6 @@ void EnggDiffractionViewQtGUI::doSetupTabCalib() {
   connect(m_uiTabCalib.pushButton_new_calib, SIGNAL(released()), this,
           SLOT(calibrateClicked()));
 
-
   enableCalibrateAndFocusActions(true);
 }
 
@@ -148,10 +147,6 @@ void EnggDiffractionViewQtGUI::doSetupTabFocus() {
   connect(m_uiTabFocus.pushButton_focus, SIGNAL(released()), this,
           SLOT(focusClicked()));
 }
-
-
-
-
 
 void EnggDiffractionViewQtGUI::doSetupGeneralWidgets() {
   // change instrument
@@ -347,10 +342,9 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
 }
 
-void
-EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
-                                            const std::vector<double> &difc,
-                                            const std::vector<double> &tzero) {
+void EnggDiffractionViewQtGUI::writeOutCalibFile(
+    const std::string &outFilename, const std::vector<double> &difc,
+    const std::vector<double> &tzero) {
   // TODO: this is horrible and should not last much here.
   // Avoid running Python code
   // Update this as soon as we have a more stable way of generating IPARM files
@@ -359,7 +353,8 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
   // vanadium_run=236516, template_file=None):
 
   // this replace is to prevent issues with network drives on windows:
-  const std::string  safeOutFname= boost::replace_all_copy(outFilename, "\\","/");
+  const std::string safeOutFname =
+      boost::replace_all_copy(outFilename, "\\", "/");
   std::string pyCode = "import EnggUtils\n";
   pyCode += "import os\n";
   // normalize apparently not needed after the replace, but to be double-safe:
@@ -527,7 +522,7 @@ int EnggDiffractionViewQtGUI::focusingBank() const {
 }
 
 bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
-	return m_uiTabFocus.checkBox_FocusedWS->checkState();
+  return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {
