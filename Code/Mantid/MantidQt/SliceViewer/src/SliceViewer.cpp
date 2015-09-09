@@ -1383,9 +1383,12 @@ void SliceViewer::findRangeFull() {
   // Iterate through the entire workspace
   m_colorRangeFull =
       API::SignalRange(*workspace_used, this->getNormalization()).interval();
-  double maxR = m_colorRangeFull.maxValue();
-  double minR = pow(10., log10(maxR)-10.);
-  if (this->getColorScaleType() == 1) m_colorRangeFull = QwtDoubleInterval(minR, maxR);
+  double minR = m_colorRangeFull.minValue();
+  if (minR <= 0 && this->getColorScaleType() == 1) {
+    double maxR = m_colorRangeFull.maxValue();
+    minR = pow(10., log10(maxR)-10.);
+    m_colorRangeFull = QwtDoubleInterval(minR, maxR);
+  }
 }
 
 //------------------------------------------------------------------------------
