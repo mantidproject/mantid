@@ -39,14 +39,69 @@
 namespace MantidQt {
   namespace CustomInterfaces {
 
+
+    // Column numbers to find data in model
+    struct col_numbers {
+
+      col_numbers(const int runs_column, const int transmission_column, const int options_column, const int angle_column,
+                  const int qmin_column, const int qmax_column, const int dqq_column, const int scale_column)
+        : runs(runs_column), transmission(transmission_column), options(options_column), angle(angle_column),
+          qmin(qmin_column), qmax(qmax_column), dqq(dqq_column), scale(scale_column) {}
+
+      const int runs;
+      const int transmission;
+      const int options;
+      const int angle;
+      const int qmin;
+      const int qmax;
+      const int dqq;
+      const int scale;
+    };
+
+
+    std::string plot1DString(const std::vector<std::string> & ws_names, const std::string & axes,
+                             const std::string & title, const int legendLocation);
+
+    std::string printThetaString(const std::vector<std::string> & runNos,
+                                 const std::vector<std::string> & theta);
+
+    std::tuple<std::string, std::string>
+      stitchGroupString(const std::set<int> & rows, const std::string & instrument, QReflTableModel_sptr model,
+                        col_numbers col_nums);
+
+    std::tuple<std::string, std::string, std::string, std::string, std::string>
+      reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, col_numbers col_nums);
+
+    std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument);
+
+    std::string plusString(const std::string & input_name, const std::string & output_name);
+
+    std::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument);
+
+    std::string getRunNumber(const std::string & ws_name);
+
+    std::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
+
+    std::tuple<std::string, std::string> convertToPointString(const std::string & wsName);
+
+    template<typename T, typename A>
+    std::string vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec);
+
+    std::tuple<std::string, std::string>
+      rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, col_numbers col_nums);
+
+    std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument);
+
+
     class DLLExport ReflGenerateNotebook {
+
     public:
 
       ReflGenerateNotebook(std::string name,
                            QReflTableModel_sptr model,
                            const std::string instrument,
-                           const int COL_RUNS, const int COL_TRANSMISSION, const int COL_OPTIONS, const int COL_ANGLE,
-                           const int COL_QMIN, const int COL_QMAX, const int COL_DQQ, const int COL_SCALE);
+                           const int col_runs, const int col_transmission, const int col_options, const int col_angle,
+                           const int col_qmin, const int col_qmax, const int col_dqq, const int col_scale);
 
       virtual ~ReflGenerateNotebook(){};
 
@@ -54,47 +109,11 @@ namespace MantidQt {
 
     private:
 
-      std::string plot1D(const std::vector<std::string> & ws_names, const std::string & axes,
-                         const std::string & title, const int legendLocation);
-
-      std::string printThetaString(const std::vector<std::string> & runNos,
-                                   const std::vector<std::string> & theta);
-
-      std::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows);
-
-      std::tuple<std::string, std::string, std::string, std::string, std::string> reduceRowString(const int rowNo);
-
-      std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr);
-
-      std::string plusString(const std::string & input_name, const std::string & output_name);
-
-      std::tuple<std::string, std::string> loadRunString(const std::string & run);
-
-      std::string getRunNumber(const std::string & ws_name);
-
-      std::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
-
-      std::tuple<std::string, std::string> convertToPointString(const std::string & wsName);
-
-      template<typename T, typename A>
-      std::string vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec);
-
-      std::tuple<std::string, std::string> rebinString(const int rowNo, const std::string & runNo);
-
-      std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str);
-
       std::string m_wsName;
       QReflTableModel_sptr m_model;
       const std::string m_instrument;
 
-      const int COL_RUNS;
-      const int COL_TRANSMISSION;
-      const int COL_OPTIONS;
-      const int COL_ANGLE;
-      const int COL_QMIN;
-      const int COL_QMAX;
-      const int COL_DQQ;
-      const int COL_SCALE;
+      col_numbers col_nums;
 
     };
 

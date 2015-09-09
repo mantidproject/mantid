@@ -13,15 +13,14 @@
 
 namespace MantidQt {
   namespace CustomInterfaces {
+
     ReflGenerateNotebook::ReflGenerateNotebook(std::string name, QReflTableModel_sptr model,
                                                const std::string instrument, const int runs_column,
                                                const int transmission_column, const int options_column,
                                                const int angle_column, const int min_q, const int max_q,
                                                const int d_qq, const int scale_column) :
       m_wsName(name), m_model(model), m_instrument(instrument),
-      COL_RUNS(runs_column), COL_TRANSMISSION(transmission_column),
-      COL_OPTIONS(options_column), COL_ANGLE(angle_column),
-      COL_QMIN(min_q), COL_QMAX(max_q), COL_DQQ(d_qq), COL_SCALE(scale_column){ }
+      col_nums{runs_column, transmission_column, options_column, angle_column, min_q, max_q, d_qq, scale_column} { }
 
     /**
       Generate an ipython notebook
@@ -58,7 +57,7 @@ namespace MantidQt {
         std::vector<std::string> runNos;
         code_string << "#Load and reduce\n";
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
-          reduce_row_string = reduceRowString(*rIt);
+          reduce_row_string = reduceRowString(*rIt, m_instrument, m_model, col_nums);
           code_string << std::get<0>(reduce_row_string);
           unstitched_ws.push_back(std::get<1>(reduce_row_string));
           IvsLam_ws.push_back(std::get<2>(reduce_row_string));
@@ -68,7 +67,7 @@ namespace MantidQt {
         notebook->codeCell(code_string.str());
 
         // Stitch group
-        std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows);
+        std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows, m_instrument, m_model, col_nums);
         notebook->codeCell(std::get<0>(stitch_string));
 
         // Plot I vs Q and I vs Lambda graphs
@@ -76,9 +75,9 @@ namespace MantidQt {
         plot_string << "f, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(18,4))\n";
         std::vector<std::string> stitched_ws;
         stitched_ws.push_back(std::get<1>(stitch_string));
-        plot_string << plot1D(unstitched_ws, "ax1", "I vs Q Unstitched", 1) << "\n";
-        plot_string << plot1D(stitched_ws, "ax2", "I vs Q Stitiched", 1) << "\n";
-        plot_string << plot1D(IvsLam_ws, "ax3", "I vs Lambda", 4);
+        plot_string << plot1DString(unstitched_ws, "ax1", "I vs Q Unstitched", 1) << "\n";
+        plot_string << plot1DString(stitched_ws, "ax2", "I vs Q Stitiched", 1) << "\n";
+        plot_string << plot1DString(IvsLam_ws, "ax3", "I vs Lambda", 4);
         plot_string << "plt.show() #Draw the plot\n";
         notebook->codeCell(plot_string.str());
 
@@ -94,7 +93,7 @@ namespace MantidQt {
       @param theta : vector of theta values
       @return markdown string of table
       */
-    std::string ReflGenerateNotebook::printThetaString(const std::vector<std::string> & runNos,
+    std::string printThetaString(const std::vector<std::string> & runNos,
                                                        const std::vector<std::string> & theta)
     {
       std::ostringstream theta_string;
@@ -115,7 +114,8 @@ namespace MantidQt {
       @param rows : rows in the stitch group
       @return tuple containing the python code string and the output workspace name
       */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::stitchGroupString(const std::set<int> & rows)
+    std::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows, const std::string & instrument,
+                                                           QReflTableModel_sptr model, col_numbers col_nums)
     {
       std::ostringstream stitch_string;
 
@@ -136,11 +136,11 @@ namespace MantidQt {
       //Go through each row and prepare the properties
       for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt)
       {
-        const std::string  runStr = m_model->data(m_model->index(*rowIt, COL_RUNS)).toString().toStdString();
-        const double         qmin = m_model->data(m_model->index(*rowIt, COL_QMIN)).toDouble();
-        const double         qmax = m_model->data(m_model->index(*rowIt, COL_QMAX)).toDouble();
+        const std::string  runStr = model->data(model->index(*rowIt, col_nums.runs)).toString().toStdString();
+        const double         qmin = model->data(model->index(*rowIt, col_nums.qmin)).toDouble();
+        const double         qmax = model->data(model->index(*rowIt, col_nums.qmax)).toDouble();
 
-        const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr);
+        const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr, instrument);
 
         const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
         runs.push_back(runNo);
@@ -150,7 +150,7 @@ namespace MantidQt {
         endOverlaps.push_back(qmax);
       }
 
-      double dqq = m_model->data(m_model->index(*(rows.begin()), COL_DQQ)).toDouble();
+      double dqq = model->data(model->index(*(rows.begin()), col_nums.dqq)).toDouble();
 
       //params are qmin, -dqq, qmax for the final output
       params.push_back(*std::min_element(startOverlaps.begin(), startOverlaps.end()));
@@ -184,7 +184,7 @@ namespace MantidQt {
       @return string of comma separated list of parameter values
       */
     template<typename T, typename A>
-    std::string ReflGenerateNotebook::vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec)
+    std::string vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec)
     {
       std::ostringstream vector_string;
       const char* separator = "";
@@ -205,7 +205,7 @@ namespace MantidQt {
       @param axes : handle of axes to plot in
       @return string  of python code to plot I vs Q
       */
-    std::string ReflGenerateNotebook::plot1D(const std::vector<std::string> & ws_names, const std::string & axes,
+    std::string plot1DString(const std::vector<std::string> & ws_names, const std::string & axes,
                                              const std::string & title, const int legendLocation) {
 
       std::ostringstream plot_string;
@@ -238,21 +238,21 @@ namespace MantidQt {
      @return tuple containing the python string and the output workspace name
     */
     std::tuple<std::string, std::string, std::string, std::string, std::string>
-    ReflGenerateNotebook::reduceRowString(const int rowNo) {
+    reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, col_numbers col_nums) {
       std::ostringstream code_string;
 
-      const std::string runStr = m_model->data(m_model->index(rowNo, COL_RUNS)).toString().toStdString();
-      const std::string transStr = m_model->data(m_model->index(rowNo, COL_TRANSMISSION)).toString().toStdString();
-      const std::string options = m_model->data(m_model->index(rowNo, COL_OPTIONS)).toString().toStdString();
+      const std::string runStr = model->data(model->index(rowNo, col_nums.runs)).toString().toStdString();
+      const std::string transStr = model->data(model->index(rowNo, col_nums.transmission)).toString().toStdString();
+      const std::string options = model->data(model->index(rowNo, col_nums.options)).toString().toStdString();
 
       double theta = 0;
 
-      const bool thetaGiven = !m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty();
+      const bool thetaGiven = !model->data(model->index(rowNo, col_nums.angle)).toString().isEmpty();
 
       if (thetaGiven)
-        theta = m_model->data(m_model->index(rowNo, COL_ANGLE)).toDouble();
+        theta = model->data(model->index(rowNo, col_nums.angle)).toDouble();
 
-      const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr);
+      const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr, instrument);
       code_string << std::get<0>(load_ws_string);
 
       const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
@@ -260,7 +260,7 @@ namespace MantidQt {
       const std::string thetaName = "theta_" + runNo;
 
       if (!transStr.empty()) {
-        const std::tuple<std::string, std::string> trans_string = transWSString(transStr);
+        const std::tuple<std::string, std::string> trans_string = transWSString(transStr, instrument);
         code_string << std::get<0>(trans_string);
         code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName << " = ";
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
@@ -287,13 +287,13 @@ namespace MantidQt {
       }
       code_string << ")\n";
 
-      const double scale = m_model->data(m_model->index(rowNo, COL_SCALE)).toDouble();
+      const double scale = model->data(model->index(rowNo, col_nums.scale)).toDouble();
       if(scale != 1.0) {
         const std::tuple<std::string, std::string> scale_string = scaleString(runNo, scale);
         code_string << std::get<0>(scale_string);
       }
 
-      const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo);
+      const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo, model, col_nums);
       code_string << std::get<0>(rebin_string);
 
       return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName, thetaStr, runNo);
@@ -306,7 +306,7 @@ namespace MantidQt {
       @return tuple of strings of python code and output workspace name
       */
     std::tuple<std::string, std::string>
-     ReflGenerateNotebook::scaleString(const std::string & runNo, const double scale)
+     scaleString(const std::string & runNo, const double scale)
     {
       std::ostringstream scale_string;
 
@@ -323,7 +323,7 @@ namespace MantidQt {
       @param wsName : name of workspace to convert to point data
       @return tuple of strings of python code and output workspace name
       */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::convertToPointString(const std::string & wsName)
+    std::tuple<std::string, std::string> convertToPointString(const std::string & wsName)
     {
       const std::string output_name = wsName + "_plot";
       std::ostringstream convert_string;
@@ -338,7 +338,8 @@ namespace MantidQt {
      @param runNo : the number of the run to rebin
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::rebinString(const int rowNo, const std::string & runNo)
+    std::tuple<std::string, std::string>
+      rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, col_numbers col_nums)
     {
       //We need to make sure that qmin and qmax are respected, so we rebin to
       //those limits here.
@@ -347,9 +348,9 @@ namespace MantidQt {
       rebin_string << "Rebin(";
       rebin_string << "IvsQ_" << runNo;
 
-      const double qmin = m_model->data(m_model->index(rowNo, COL_QMIN)).toDouble();
-      const double qmax = m_model->data(m_model->index(rowNo, COL_QMAX)).toDouble();
-      const double dqq = m_model->data(m_model->index(rowNo, COL_DQQ)).toDouble();
+      const double qmin = model->data(model->index(rowNo, col_nums.qmin)).toDouble();
+      const double qmax = model->data(model->index(rowNo, col_nums.qmax)).toDouble();
+      const double dqq = model->data(model->index(rowNo, col_nums.dqq)).toDouble();
 
       rebin_string << ", " << "Params = ";
       rebin_string << "'" << qmin << ", " << -dqq << ", " << qmax << "'";
@@ -363,7 +364,7 @@ namespace MantidQt {
      @param trans_ws_str : string of workspaces to create transmission workspace from
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::transWSString(const std::string & trans_ws_str)
+    std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument)
     {
       const size_t maxTransWS = 2;
 
@@ -378,7 +379,7 @@ namespace MantidQt {
 
       std::tuple<std::string, std::string> load_tuple;
       for(auto it = transVec.begin(); it != transVec.end(); ++it)
-        load_tuple = loadWorkspaceString(*it);
+        load_tuple = loadWorkspaceString(*it, instrument);
         trans_ws_name.push_back(std::get<1>(load_tuple));
         trans_string << std::get<0>(load_tuple);
 
@@ -401,7 +402,7 @@ namespace MantidQt {
      @param ws_name : workspace name
      @return run number, as a string
     */
-    std::string ReflGenerateNotebook::getRunNumber(const std::string & ws_name) {
+    std::string getRunNumber(const std::string & ws_name) {
       //Matches TOF_13460 -> 13460
       boost::regex outputRegex("(TOF|IvsQ|IvsLam)_([0-9]+)");
 
@@ -426,7 +427,7 @@ namespace MantidQt {
      @param runStr : string of workspaces to load
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::loadWorkspaceString(const std::string & runStr) {
+    std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument) {
       std::vector<std::string> runs;
       boost::split(runs, runStr, boost::is_any_of("+"));
 
@@ -440,7 +441,7 @@ namespace MantidQt {
 
       std::tuple<std::string, std::string> load_string;
 
-      load_string = loadRunString(runs[0]);
+      load_string = loadRunString(runs[0], instrument);
       load_strings << std::get<0>(load_string);
 
       // EXIT POINT if there is only one run
@@ -452,7 +453,7 @@ namespace MantidQt {
       // Load each subsequent run and add it to the first run
       for(auto runIt = std::next(runs.begin()); runIt != runs.end(); ++runIt)
       {
-        load_string = loadRunString(*runIt);
+        load_string = loadRunString(*runIt, instrument);
         load_strings << std::get<0>(load_string);
         load_strings << plusString(std::get<1>(load_string), outputName);
       }
@@ -466,7 +467,7 @@ namespace MantidQt {
      @param output_name : other workspace will be added to the one with this name
      @return string of python code
     */
-    std::string ReflGenerateNotebook::plusString(const std::string & input_name, const std::string & output_name)
+    std::string plusString(const std::string & input_name, const std::string & output_name)
     {
       std::ostringstream plus_string;
 
@@ -482,10 +483,10 @@ namespace MantidQt {
      @param run : run to load
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> ReflGenerateNotebook::loadRunString(const std::string & run) {
+    std::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument) {
       std::ostringstream load_string;
       // We do not have access to AnalysisDataService from notebook, so must load run from file
-      const std::string filename = m_instrument + run;
+      const std::string filename = instrument + run;
       const std::string ws_name = "TOF_" + run;
       load_string << ws_name << " = ";
       load_string << "Load(";
