@@ -54,6 +54,13 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
+protected: // for testing, private otherwise.
+  /**process logs and retrieve chopper speed and chopper delay*/
+  void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
+       double &chop_speed,double &chop_delay);
+  // if log, which identifies that instrument is running is available on workspace.
+  // The log should be positive when instrument is running and negative otherwise.
+  bool m_useFilterLog; 
 
 };
 
