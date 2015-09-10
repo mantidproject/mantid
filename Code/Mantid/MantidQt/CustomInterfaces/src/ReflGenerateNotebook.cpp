@@ -18,16 +18,16 @@ namespace MantidQt {
                                                const std::string instrument, const int runs_column,
                                                const int transmission_column, const int options_column,
                                                const int angle_column, const int min_q, const int max_q,
-                                               const int d_qq, const int scale_column) :
+                                               const int d_qq, const int scale_column, const int group_column) :
       m_wsName(name), m_model(model), m_instrument(instrument),
-      col_nums{runs_column, transmission_column, options_column, angle_column, min_q, max_q, d_qq, scale_column} { }
+      col_nums{runs_column, transmission_column, options_column, angle_column, min_q, max_q, d_qq, scale_column, group_column} { }
 
     /**
       Generate an ipython notebook
       @param groups : groups of rows which were stitched
       @returns ipython notebook string
       */
-    std::string ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups) {
+    std::string ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows) {
       std::unique_ptr<Mantid::API::NotebookWriter> notebook(new Mantid::API::NotebookWriter());
 
       const std::string plotFunctionsTitle = "Plot functions\n---------------";
@@ -44,6 +44,8 @@ namespace MantidQt {
       title_string += "\nNotebook generated from the ISIS Reflectometry (Polref) Interface";
       notebook->markdownCell(title_string);
 
+      notebook->markdownCell(tableString(m_model, col_nums, rows));
+
       int groupNo = 1;
       for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt, ++groupNo) {
         const std::set<int> groupRows = gIt->second;
@@ -54,19 +56,15 @@ namespace MantidQt {
 
         //Reduce each row
         std::ostringstream code_string;
-        std::tuple<std::string, std::string, std::string, std::string, std::string> reduce_row_string;
+        std::tuple<std::string, std::string, std::string> reduce_row_string;
         std::vector<std::string> unstitched_ws;
         std::vector<std::string> IvsLam_ws;
-        std::vector<std::string> theta;
-        std::vector<std::string> runNos;
         code_string << "#Load and reduce\n";
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
           reduce_row_string = reduceRowString(*rIt, m_instrument, m_model, col_nums);
           code_string << std::get<0>(reduce_row_string);
           unstitched_ws.push_back(std::get<1>(reduce_row_string));
           IvsLam_ws.push_back(std::get<2>(reduce_row_string));
-          theta.push_back(std::get<3>(reduce_row_string));
-          runNos.push_back(std::get<4>(reduce_row_string));
         }
         notebook->codeCell(code_string.str());
 
@@ -89,33 +87,31 @@ namespace MantidQt {
 
         plot_string << plot1DString(workspaceList, "['I vs Q Unstitched', 'I vs Q Stitiched', 'I vs Lambda']");
         notebook->codeCell(plot_string.str());
-
-        notebook->markdownCell(printThetaString(runNos, theta));
       }
 
       return notebook->writeNotebook();
     }
 
-    /**
-      Create string of markdown to display a table of run numbers and theta values
-      @param runNos : vector of run numbers
-      @param theta : vector of theta values
-      @return markdown string of table
-      */
-    std::string printThetaString(const std::vector<std::string> & runNos,
-                                                       const std::vector<std::string> & theta)
+    std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows)
     {
-      std::ostringstream theta_string;
+      std::ostringstream table_string;
 
-      theta_string << "Run | $\\theta$ Value\n------------- | -------------\n";
+      table_string << "Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | Scale | Group | Options\n";
+      table_string << "------ | ----- | ------------------- | ----- | ----- | ---- | ----- | ----- | -------\n";
 
-      int run_i = 0;
-      for(auto runIt = runNos.begin(); runIt != runNos.end(); ++runIt) {
-        theta_string << *runIt << " | " << theta[run_i] << "\n";
-        run_i++;
+      for(auto rowIt = rows.begin(); rowIt != rows.end(); ++rowIt) {
+        table_string << model->data(model->index(*rowIt, col_nums.runs)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.angle)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.transmission)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.qmin)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.qmax)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.dqq)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.scale)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.group)).toString().toStdString() << " | ";
+        table_string << model->data(model->index(*rowIt, col_nums.options)).toString().toStdString() << "\n";
       }
 
-      return theta_string.str();
+      return table_string.str();
     }
 
     std::string plotsFunctionString()
@@ -199,7 +195,7 @@ namespace MantidQt {
       @return tuple containing the python code string and the output workspace name
       */
     std::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows, const std::string & instrument,
-                                                           QReflTableModel_sptr model, col_numbers col_nums)
+                                                           QReflTableModel_sptr model, ColNumbers col_nums)
     {
       std::ostringstream stitch_string;
 
@@ -313,8 +309,8 @@ namespace MantidQt {
      @param rowNo : the row in the model to run the reduction algorithm on
      @return tuple containing the python string and the output workspace name
     */
-    std::tuple<std::string, std::string, std::string, std::string, std::string>
-    reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, col_numbers col_nums) {
+    std::tuple<std::string, std::string, std::string>
+    reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, ColNumbers col_nums) {
       std::ostringstream code_string;
 
       const std::string runStr = model->data(model->index(rowNo, col_nums.runs)).toString().toStdString();
@@ -372,7 +368,7 @@ namespace MantidQt {
       const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo, model, col_nums);
       code_string << std::get<0>(rebin_string);
 
-      return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName, thetaStr, runNo);
+      return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName);
     }
 
      /**
@@ -415,7 +411,7 @@ namespace MantidQt {
      @return tuple of strings of python code and output workspace name
     */
     std::tuple<std::string, std::string>
-      rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, col_numbers col_nums)
+      rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, ColNumbers col_nums)
     {
       //We need to make sure that qmin and qmax are respected, so we rebin to
       //those limits here.

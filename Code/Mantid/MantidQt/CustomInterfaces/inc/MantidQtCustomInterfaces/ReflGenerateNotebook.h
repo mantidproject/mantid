@@ -41,12 +41,13 @@ namespace MantidQt {
 
 
     // Column numbers to find data in model
-    struct col_numbers {
+    struct ColNumbers {
 
-      col_numbers(const int runs_column, const int transmission_column, const int options_column, const int angle_column,
-                  const int qmin_column, const int qmax_column, const int dqq_column, const int scale_column)
+      ColNumbers(const int runs_column, const int transmission_column, const int options_column,
+                 const int angle_column, const int qmin_column, const int qmax_column,
+                 const int dqq_column, const int scale_column, const int group_column)
         : runs(runs_column), transmission(transmission_column), options(options_column), angle(angle_column),
-          qmin(qmin_column), qmax(qmax_column), dqq(dqq_column), scale(scale_column) {}
+          qmin(qmin_column), qmax(qmax_column), dqq(dqq_column), scale(scale_column), group(group_column) {}
 
       const int runs;
       const int transmission;
@@ -56,25 +57,25 @@ namespace MantidQt {
       const int qmax;
       const int dqq;
       const int scale;
+      const int group;
     };
 
     std::string plot1DString(const std::vector<std::string> & ws_names,
                              const std::string & title);
 
+    std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows);
+
     template<typename T, typename A>
     std::string vectorString(const std::vector<T,A> &param_vec);
 
-    std::string printThetaString(const std::vector<std::string> & runNos,
-                                 const std::vector<std::string> & theta);
-
     std::tuple<std::string, std::string>
       stitchGroupString(const std::set<int> & rows, const std::string & instrument, QReflTableModel_sptr model,
-                        col_numbers col_nums);
+                        ColNumbers col_nums);
 
     std::string plotsFunctionString();
 
-    std::tuple<std::string, std::string, std::string, std::string, std::string>
-      reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, col_numbers col_nums);
+    std::tuple<std::string, std::string, std::string>
+      reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, ColNumbers col_nums);
 
     std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument);
 
@@ -92,7 +93,7 @@ namespace MantidQt {
     std::string vectorParamString(const std::string & param_name, const std::vector<T,A> &param_vec);
 
     std::tuple<std::string, std::string>
-      rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, col_numbers col_nums);
+      rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, ColNumbers col_nums);
 
     std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument);
 
@@ -105,11 +106,12 @@ namespace MantidQt {
                            QReflTableModel_sptr model,
                            const std::string instrument,
                            const int col_runs, const int col_transmission, const int col_options, const int col_angle,
-                           const int col_qmin, const int col_qmax, const int col_dqq, const int col_scale);
+                           const int col_qmin, const int col_qmax, const int col_dqq,
+                           const int col_scale, const int col_group);
 
       virtual ~ReflGenerateNotebook(){};
 
-      std::string generateNotebook(std::map<int, std::set<int>> groups);
+      std::string generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows);
 
     private:
 
@@ -117,7 +119,7 @@ namespace MantidQt {
       QReflTableModel_sptr m_model;
       const std::string m_instrument;
 
-      col_numbers col_nums;
+      ColNumbers col_nums;
 
     };
 

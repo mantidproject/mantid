@@ -284,7 +284,7 @@ namespace MantidQt
 
       // If "Output Notebook" checkbox is checked then create an ipython notebook
       if(m_view->getEnableNotebook()) {
-        saveNotebook(groups);
+        saveNotebook(groups, rows);
       }
     }
 
@@ -292,11 +292,11 @@ namespace MantidQt
     Display a dialog to choose save location for notebook, then save the notebook there
     @param groups : groups of rows to stitch
     */
-    void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups)
+    void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
     {
       std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
         m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
-        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE));
+        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE, COL_GROUP));
       QString qfilename = QFileDialog::getSaveFileName(0, "Save notebook file", QDir::currentPath(),
                                                        "IPython Notebook files (*.ipynb);;All files (*.*)",
                                                        new QString("IPython Notebook files (*.ipynb)"));
@@ -304,7 +304,7 @@ namespace MantidQt
       if (filename == "") {
         return;
       }
-      std::string generatedNotebook = notebook->generateNotebook(groups);
+      std::string generatedNotebook = notebook->generateNotebook(groups, rows);
 
       std::ofstream file(filename.c_str(), std::ofstream::trunc);
       file << generatedNotebook;
