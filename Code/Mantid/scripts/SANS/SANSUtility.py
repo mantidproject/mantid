@@ -1067,6 +1067,38 @@ def millimeter_2_meter(num):
     '''
     return num/1000.
 
+def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_workspace):
+    '''
+    We need to transfer the DX error values from the original workspaces to the subtracted
+    workspace. Richard wants us to ignore potential DX values for the CAN workspace (they
+    would be very small any way). The Q Resolution functionality only exists currently
+    for 1D, ie when only one spectrum is present.
+    @param original_workspace: the original workspace
+    @param can_workspace: the can workspace
+    @param subtracted_workspace: the subtracted workspace
+    '''
+    dummy1 = can_workspace
+    if original_workspace.getNumHistograms() == 1:
+        subtracted_workspace.setDx(0, original_workspace.dataDx(0))
+
+def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
+                                    norm_ws_front, norm_ws_rear,
+                                    output_ws):
+    '''
+    We need to transfer the DX error values from the original workspaces to the merged worksapce.
+    Richard suggested to weight the errors. The Q Resolution functionality only exists currently
+    for 1D, ie when only one spectrum is present.
+    @param count_ws_front: the front counts
+    @param count_ws_rear: the rear counts
+    @param norm_ws_front: the front norm
+    @param norm_ws_rear: the rear norm
+    @param output_ws: the output workspace
+    '''
+    if count_ws_rear.getNumHistograms() != 1:
+        return
+    if count_ws_rear.hasDx(0):
+        sanslog.warning("Merging workspaces with X errors has currently not been implemented")
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

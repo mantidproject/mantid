@@ -24,7 +24,7 @@ from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata, extract_spectra,
                          extract_child_ws_for_added_eventdata, load_monitors_for_multiperiod_event_data,
                          MaskWithCylinder, get_masked_det_ids, get_masked_det_ids_from_mask_file, INCIDENT_MONITOR_TAG,
-                         can_load_as_event_workspace,is_convertible_to_float)
+                         can_load_as_event_workspace,is_convertible_to_float,correct_q_resolution_for_can)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -497,6 +497,8 @@ class CanSubtraction(ReductionStep):
 
         #we now have the can workspace, use it
         Minus(LHSWorkspace=tmp_smp,RHSWorkspace= tmp_can,OutputWorkspace= workspace)
+        # Correct the Q resolution entries in the output workspace
+        correct_q_resolution_for_can(mtd[tmp_smp], mtd[tmp_can], mtd[workspace])
 
         #clean up the workspaces ready users to see them if required
         if reducer.to_Q.output_type == '1D':
@@ -525,6 +527,17 @@ class CanSubtraction(ReductionStep):
             GroupWorkspaces([sample_name, can_name], OutputWorkspace=gp_name)
 
     periods_in_file = property(get_periods_in_file, None, None, None)
+
+    def _pass_dx_values_to_can_subtracted_if_required(self, original_ws, subtracted_ws):
+        '''
+        We pass the DX values from the original workspace to the subtracted workspace.
+        This means we currently do nothing with potential DX values in the can workspace.
+        Also that if there are DX values, then they are in all spectra
+        '''
+        if not original_ws.hasDx(0):
+            return
+        for index in range(0, original_ws.getNumHistograms()):
+            subtraced_ws.setDx(index, original_ws.dataDX(index))
 
 class Mask_ISIS(ReductionStep):
     """
