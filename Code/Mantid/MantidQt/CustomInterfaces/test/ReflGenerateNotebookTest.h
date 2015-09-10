@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
+#include "MantidQtCustomInterfaces/ReflVectorString.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/TableRow.h"

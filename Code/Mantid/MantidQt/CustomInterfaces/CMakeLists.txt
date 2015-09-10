@@ -207,7 +207,10 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/Tomography/ToolConfigTomoPy.h
   inc/MantidQtCustomInterfaces/Updateable.h
   inc/MantidQtCustomInterfaces/UserInputValidator.h
-  inc/MantidQtCustomInterfaces/ReflGenerateNotebook.h inc/MantidQtCustomInterfaces/ParseKeyValueString.h)
+  inc/MantidQtCustomInterfaces/ReflGenerateNotebook.h
+  inc/MantidQtCustomInterfaces/ParseKeyValueString.h
+  inc/MantidQtCustomInterfaces/ReflVectorString.h
+)
 
 set ( SRC_UNITY_IGNORE_FILES )
 

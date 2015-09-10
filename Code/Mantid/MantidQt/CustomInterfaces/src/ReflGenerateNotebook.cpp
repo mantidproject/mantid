@@ -1,6 +1,7 @@
 #include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidQtCustomInterfaces/ParseKeyValueString.h"
+#include "MantidQtCustomInterfaces/ReflVectorString.h"
 
 #include <sstream>
 #include <fstream>
