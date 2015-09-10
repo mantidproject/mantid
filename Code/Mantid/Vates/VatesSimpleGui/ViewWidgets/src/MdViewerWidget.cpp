@@ -716,7 +716,7 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the
   //             VSI window to not close properly. Moving it here ensures that we have the switch, but
   //             after the window is started again.
@@ -972,7 +972,7 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
  */
 void MdViewerWidget::setupPluginMode()
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   this->useCurrentColorSettings = false; // Don't use the current color map at start up.
   this->setupUiAndConnections();
   this->createMenus();
@@ -1187,7 +1187,7 @@ void MdViewerWidget::shutdown()
 {
   // This seems to cure a XInitThreads error.
   pqPVApplicationCore::instance()->deleteLater();
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   // Ensure that the MathText utilties are cleaned up as they call Python cleanup code
   // and we need to make sure this can happen before MantidPlot shuts down the interpreter
   vtkMathTextUtilitiesCleanup();
