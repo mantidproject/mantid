@@ -37,7 +37,7 @@ public:
   void test_exec()
   {
     // --- Get an instrument -----
-    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
     // --- Make up some data ----
     GroupingWorkspace_sptr groupWS(new GroupingWorkspace(inst));
