@@ -239,6 +239,7 @@ protected:
   void setAxesGrid();
 
 private slots:
+  void setupVTKEventConnections(pqRenderView* view);
   /// Called when the rendering begins
   void lockPyGIL();
   /// Called when the rendering finishes
@@ -264,7 +265,7 @@ private:
   QString m_internallyRebinnedWorkspaceIdentifier;
 
   vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
-  PyGILStateService m_gilStateStore; ///< Python GIL state storage
+  RecursivePythonGIL m_pythonGIL;
 };
 
 }

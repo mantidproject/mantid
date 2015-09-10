@@ -51,7 +51,7 @@ namespace Mantid
                                    "set this variable.");
         }
 
-        GlobalInterpreterLock gil;
+        ScopedPythonGIL gil;
         Q_ASSERT(pqApplicationCore::instance()==NULL);
 
         // Provide ParaView's application core with a path to the running executable
