@@ -60,6 +60,19 @@ protected:
   crystalStructureSetHook(const CrystalStructure &crystalStructure);
 };
 
+typedef boost::shared_ptr<StructureFactorCalculator> StructureFactorCalculator_sptr;
+
+namespace StructureFactorCalculatorFactory {
+    /// Small templated factory function that creates the desired calculator
+    /// and initializes it by setting the crystal structure.
+    template<typename T> StructureFactorCalculator_sptr create(const CrystalStructure &crystalStructure) {
+        boost::shared_ptr<T> calculator = boost::make_shared<T>();
+        calculator->setCrystalStructure(crystalStructure);
+
+        return calculator;
+    }
+}
+
 } // namespace Geometry
 } // namespace Mantid
 

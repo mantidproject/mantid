@@ -24,16 +24,10 @@ public:
 
   void testEquivalentPositionsAreUsed() {
     // Approximate crystal structure of Silicon
-    CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
-    scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer(
-        "IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0];U=0.05"));
-
-    CrystalStructure si(
-        UnitCell(5.43, 5.43, 5.43),
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m"), scatterers);
+    CrystalStructure_sptr si = getCrystalStructure();
 
     StructureFactorCalculatorSummation calculator;
-    calculator.setCrystalStructure(si);
+    calculator.setCrystalStructure(*si);
 
     // {1 0 0} reflections are not allowed because of F centering
     TS_ASSERT_LESS_THAN(calculator.getFSquared(V3D(1, 0, 0)), 1e-9);
@@ -42,14 +36,39 @@ public:
     TS_ASSERT_LESS_THAN(calculator.getFSquared(V3D(2, 2, 2)), 1e-9);
 
     // With space group P-1, those are allowed.
-    si.setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("P -1"));
+    si->setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("P -1"));
 
-    calculator.setCrystalStructure(si);
+    calculator.setCrystalStructure(*si);
     // {1 0 0} reflections are not allowed because of F centering
     TS_ASSERT_LESS_THAN(1e-9, calculator.getFSquared(V3D(1, 0, 0)));
 
     // {2 2 2} is forbidden because of Si on special position
     TS_ASSERT_LESS_THAN(1e-9, calculator.getFSquared(V3D(2, 2, 2)));
+  }
+
+  void testCreateWithFactory() {
+    CrystalStructure_sptr si = getCrystalStructure();
+
+    StructureFactorCalculator_sptr calculator =
+            StructureFactorCalculatorFactory::create<StructureFactorCalculatorSummation>(*si);
+
+    // same reflections as in testEquivalentPositionsAreUsed
+    TS_ASSERT_LESS_THAN(calculator->getFSquared(V3D(1, 0, 0)), 1e-9);
+    TS_ASSERT_LESS_THAN(calculator->getFSquared(V3D(2, 2, 2)), 1e-9);
+  }
+
+private:
+  CrystalStructure_sptr getCrystalStructure()
+  {
+      CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer(
+          "IsotropicAtomBraggScatterer", "Element=Si;Position=[0,0,0];U=0.05"));
+
+      CrystalStructure_sptr si = boost::make_shared<CrystalStructure>(
+          UnitCell(5.43, 5.43, 5.43),
+          SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m"), scatterers);
+
+      return si;
   }
 };
 
