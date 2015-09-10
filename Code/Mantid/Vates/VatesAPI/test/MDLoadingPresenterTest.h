@@ -96,4 +96,4 @@ public:
   }
 };
 
-#endif VATES_API_MD_LOADING_PRESENTER_TEST_H
+#endif
