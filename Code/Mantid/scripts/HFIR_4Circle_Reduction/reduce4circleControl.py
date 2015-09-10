@@ -603,7 +603,32 @@ class CWSCDReductionControl(object):
 
         return True, self._myUBPeakWSDict[(exp_number, scan_number, pt_number)]
 
-    def index_peaks(self, ub_peak_ws, target_peak_ws):
+    def index_peak(self, exp_number, scan_number, pt_number, ub_peak_ws):
+        """ Index peaks in a Pt.
+        :param exp_number:
+        :param scan_number:
+        :param pt_number:
+        :param ub_peak_ws:
+        :return:
+        """
+        # Load data and reduce
+        status, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
+        if status is False:
+            # not exist, then load
+            status, ret_obj = self.find_peak(exp_number, scan_number, pt_number)
+            if status is False:
+                err_msg = ret_obj
+                return False, err_msg
+            peak_ws = ret_obj
+
+        # Index
+        num_peak_indexed = self.index_peak_ws(ub_peak_ws, peak_ws)
+        if num_peak_indexed != peak_ws.rowCount():
+            raise RuntimeError('Number of peaks indexed is not same as number of peaks!')
+
+        return True, ''
+
+    def index_peak_ws(self, ub_peak_ws, target_peak_ws):
         """ Index peaks in a peak workspace by UB matrix
         :param ub_peak_ws: peak workspace containing UB matrix
         :param target_peak_ws: peak workspace to get peaks indexed

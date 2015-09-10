@@ -12,3 +12,5 @@ Feature: Mantid developer
 		Then I load another data set, find 1 peak from it and specify its HKL value
 		Then I calculate UB matrix from the 2 reflections
 		Then I get the UB matrix and calculate HKL values for the 2 peaks given earlier
+	    Then I used the calculated UB matrix to index some peaks
+	    Then I import more peaks to refine UB matrix and lattice parameters

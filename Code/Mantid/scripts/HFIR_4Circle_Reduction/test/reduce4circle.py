@@ -172,6 +172,8 @@ def calculate_ub_matrix(step):
 
     assert_equals(ub_matrix.shape, (3, 3))
 
+    wk_flow.save_current_ub()
+
     return
 
 
@@ -179,8 +181,52 @@ def calculate_ub_matrix(step):
 def check_ub_matrix(step):
     """ Retrive UB matrix and check its value 
     """
+    # Work flow
+    wk_flow = mydata.getObject()
+
+    # Get UB matrix
+    status, ret_obj = wk_flow.get_last_ub()
+    assert_true(status)
+
+    ub_matrix = ret_obj[1]
+
+    # Get UB matrix
+    assert_equals(ub_matrix.shape, (3,3))
+    assert_equals(ub_matrix[0][0], 1.0)
+    assert_equals(ub_matrix[2][2], 2.0)
+
     return
 
-    ubmatrix = wkflow.getUBMatrix()
+@step(u'Then I used the calculated UB matrix to index some peaks')
+def index_peaks_by_ub(step):
+    """ Index peaks of scan/pt 38/11 and 83/11 with calculated UB matrix
+    :param step:
+    :return:
+    """
+    # Work flow
+    wk_flow = mydata.getObject()
+
+    # Get UB matrix
+    status, ret_obj = wk_flow.get_last_ub()
+    assert_true(status)
+
+    ub_peak_ws = ret_obj[0]
+
+    # Index peak 1
+    exp_number = 355
+    scan_number = 38
+    pt_number = 11
+    wk_flow.index_peak(exp_number, scan_number, pt_number, ub_peak_ws)
+
+    return
+
+@step(u'Then I import more peaks to refine UB matrix and lattice parameters')
+def refine_ub_matrix(step):
+    """ Refine UB matrix
+    :param step:
+    :return:
+    """
+    # Get work flow
+    wk_flow = mydata.getObject()
 
     return

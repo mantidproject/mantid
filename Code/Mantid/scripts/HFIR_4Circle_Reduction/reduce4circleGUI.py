@@ -104,7 +104,7 @@ class MainWindow(QtGui.QMainWindow):
                      self.do_add_ub_peak)
 
         self.connect(self.ui.pushButton_calUB, QtCore.SIGNAL('clicked()'),
-                self.doCalUBMatrix)
+                self.do_cal_ub_matrix)
 
         self.connect(self.ui.pushButton_acceptUB, QtCore.SIGNAL('clicked()'),
                 self.doAcceptCalUB)
@@ -296,9 +296,33 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def doCalUBMatrix(self):
+    def do_cal_ub_matrix(self):
         """ Calculate UB matrix by 2 or 3 reflections
         """
+        # Get reflections
+        num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
+        peak_info_list = list()
+        for i_row in xrange(num_rows):
+            if self.ui.tableWidget_peaksCalUB.is_selected() is True:
+                scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info()
+                h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl()
+                peak_info = self._myControl.add_peak_info(exp_number, scan_number, pt_num)
+                peak_info.setHKL(h, k, l)
+                peak_info_list.append(peak_info)
+        # END-FOR
+
+        # Get lattice
+        a, b, c, alpha, beta, gamma = self._get_lattice_parameters()
+
+        # Calculate UB matrix
+        status, ub_matrix = self._myControl.calculate_ub_matrix(peak_info_list, a, b, c, alpha, beta, gamma)
+
+        # Deal with result
+        if status is True:
+            self._show_ub_matrix(ub_matrix)
+        else:
+            err_msg = ub_matrix
+            self.pop_one_button_dialog(err_msg)
 
         return
 

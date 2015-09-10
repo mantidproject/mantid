@@ -21,18 +21,165 @@
        <layout class="QHBoxLayout" name="horizontalLayout_General">
         <item>
          <widget class="QLabel" name="label_exp">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
           <property name="text">
            <string>Experiment</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit_exp"/>
+         <widget class="QLineEdit" name="lineEdit_exp">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QPushButton" name="pushButton_setExp">
           <property name="text">
            <string>Set</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_11">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_15">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Unit Cell</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_16">
+          <property name="text">
+           <string>a</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_a">
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_23">
+          <property name="text">
+           <string>b</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_b">
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_24">
+          <property name="text">
+           <string>c</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_c">
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_25">
+          <property name="text">
+           <string>alpha</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_alpha">
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_26">
+          <property name="text">
+           <string>beta</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_beta">
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_27">
+          <property name="text">
+           <string>gamma</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_gamma">
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>16777215</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -43,7 +190,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>4</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -680,9 +827,6 @@
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_10"/>
-              </item>
-              <item>
                <layout class="QHBoxLayout" name="horizontalLayout_12">
                 <item>
                  <widget class="QLabel" name="label_7">
@@ -961,6 +1105,13 @@
                     </property>
                    </widget>
                   </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_7">
+                    <property name="text">
+                     <string>Index Peak</string>
+                    </property>
+                   </widget>
+                  </item>
                  </layout>
                 </item>
                </layout>
@@ -1179,6 +1330,44 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="tab_indexPeak">
+           <attribute name="title">
+            <string>Index Peaks</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_11">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_16">
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Scan Number</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="lineEdit_scanIndexPeak"/>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_6">
+                <property name="text">
+                 <string>Index Peaks</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_5">
+                <property name="text">
+                 <string>Show UB Matrix</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QTableView" name="tableView_peakIndex"/>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="tab_advsetup">
            <attribute name="title">
             <string>Advanced Setup</string>
@@ -1296,7 +1485,7 @@
      <x>0</x>
      <y>0</y>
      <width>1378</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
