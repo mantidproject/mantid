@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <QDoubleValidator>
 #include <QFileInfo>
@@ -231,67 +232,101 @@ void ConvFit::run() {
 
   CompositeFunction_sptr func = createFunction(useTies);
   std::string function = std::string(func->asString());
-  QString stX = m_properties["StartX"]->valueText();
-  QString enX = m_properties["EndX"]->valueText();
-  QString specMin = m_uiForm.spSpectraMin->text();
-  QString specMax = m_uiForm.spSpectraMax->text();
+  std::string stX = m_properties["StartX"]->valueText().toStdString();
+  std::string enX = m_properties["EndX"]->valueText().toStdString();
+  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
+  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
-
-  QString pyInput = "from IndirectDataAnalysis import confitSeq\n"
-                    "input = '" +
-                    m_cfInputWSName + "'\n"
-                                      "func = r'" +
-                    QString::fromStdString(function) + "'\n"
-                                                       "startx = " +
-                    stX + "\n"
-                          "endx = " +
-                    enX + "\n"
-                          "plot = '" +
-                    m_uiForm.cbPlotType->currentText() + "'\n"
-                                                         "ties = " +
-                    ties + "\n"
-                           "specMin = " +
-                    specMin + "\n"
-                              "specMax = " +
-                    specMax + "\n"
-                              "max_iterations = " +
-                    QString::number(maxIterations) + "\n"
-                                                     "minimizer = '" +
-                    minimizerString("$outputname_$wsindex") + "'\n"
-                                                              "save = " +
-                    (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
-
-  if (m_blnManager->value(m_properties["Convolve"]))
-    pyInput += "convolve = True\n";
-  else
-    pyInput += "convolve = False\n";
-
   QString temperature = m_uiForm.leTempCorrection->text();
-  bool useTempCorrection =
-      (!temperature.isEmpty() && m_uiForm.ckTempCorrection->isChecked());
-  if (useTempCorrection) {
-    pyInput += "temp=" + temperature + "\n";
-  } else {
-    pyInput += "temp=None\n";
+  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
+  const bool save = m_uiForm.ckSave->isChecked();
+
+  // Run ConvolutionFitSequential Algorithm
+  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
+  cfs->setProperty("Function", function);
+  cfs->setProperty("BackgroundType",
+                   m_uiForm.cbBackground->currentText().toStdString());
+  cfs->setProperty("StartX", stX);
+  cfs->setProperty("EndX", enX);
+  cfs->setProperty("SpecMin", specMin);
+  cfs->setProperty("SpecMax", specMax);
+  cfs->setProperty("Convolve", true);
+  cfs->setProperty("Minimizer",
+                   minimizerString("$outputname_$wsindex").toStdString());
+  cfs->setProperty("MaxIterations", maxIterations);
+  cfs->execute();
+
+  double temp = 0.0;
+  if (temperature.toStdString().compare("") != 0) {
+    temp = temperature.toDouble();
   }
 
-  pyInput += "bg = '" + bgType + "'\n"
-                                 "ftype = '" +
-             fitType +
-             "'\n"
-             "rws = confitSeq(input, func, startx, endx, ftype, bg, temp, "
-             "specMin, specMax, convolve, max_iterations=max_iterations, "
-             "minimizer=minimizer, Plot=plot, Save=save)\n"
-             "AddSampleLog(Workspace=rws, LogName='res_workspace', LogText='" +
-             m_uiForm.dsResInput->getCurrentDataName() + "')\n"
-                                                         "print rws\n";
+  std::string baseWsName = cfs->getProperty("OutputWorkspace");
+  auto pos = baseWsName.rfind("_");
+  baseWsName = baseWsName.substr(0, pos + 1);
 
-  QString pyOutput = runPythonCode(pyInput);
+  std::string resultName = baseWsName + "Result";
+  MatrixWorkspace_sptr resultWs =
+      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
-  // Set the result workspace for Python script export
-  m_pythonExportWsName = pyOutput.toStdString();
+  std::string groupName = baseWsName + "Workspaces";
+  WorkspaceGroup_sptr groupWs =
+      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
+  if (temp != 0.0) {
+    const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
+    auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
+    addSample->setProperty("Workspace", resultWs);
+    addSample->setProperty("LogName", "temperature_value");
+    addSample->setProperty("LogText", temperature.toStdString());
+    addSample->setProperty("LogType", "Number");
+    addSample->execute();
+    addSample->setProperty("Workspace", resultWs);
+    addSample->setProperty("LogName", "temperature_correction");
+    addSample->setProperty("LogText", "True");
+    addSample->setProperty("LogType", "String");
+    addSample->execute();
+    for (int i = 0; i < maxSpec; i++) {
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "True");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+    }
+  }
+
+  if (save) {
+    QString saveDir = QString::fromStdString(
+        Mantid::Kernel::ConfigService::Instance().getString(
+            "defaultsave.directory"));
+    // Check validity of save path
+    QString QresultWsName = QString::fromStdString(resultWs->getName());
+    QString fullPath = saveDir.append(QresultWsName).append(".nxs");
+    addSaveWorkspaceToQueue(QresultWsName, fullPath);
+  }
+
+  if (!(plot.compare("None") == 0)) {
+    if (plot.compare("All") == 0) {
+      int specEnd = (int)resultWs->getNumberHistograms();
+      for (int i = 0; i < specEnd; i++) {
+        IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                  i, i);
+      }
+    } else {
+      // -1 to account for None in dropDown
+      int specNumber = m_uiForm.cbPlotType->currentIndex() - 1;
+      IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
+                                specNumber, specNumber);
+    }
+  }
+  m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
 }
 
@@ -370,7 +405,6 @@ void ConvFit::newDataLoaded(const QString wsName) {
 void ConvFit::extendResolutionWorkspace() {
   if (m_cfInputWS && m_uiForm.dsResInput->isValid()) {
     const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
-
     API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
     appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
 
@@ -1477,6 +1511,9 @@ void ConvFit::updatePlotOptions() {
     params = getFunctionParameters(m_uiForm.cbFitType->currentText());
   } else {
     params = getFunctionParameters(QString("One Lorentzian"));
+  }
+  if (fitFunctionType < 3 && fitFunctionType != 0) {
+    params.removeAll("PeakCentre");
   }
   if (fitFunctionType != 0) {
     plotOptions.append(params);
