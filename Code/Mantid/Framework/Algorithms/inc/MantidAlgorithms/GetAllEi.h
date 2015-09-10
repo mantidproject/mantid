@@ -1,8 +1,8 @@
 #ifndef MANTID_ALGORITHMS_GETALLEI_H_
 #define MANTID_ALGORITHMS_GETALLEI_H_
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 
@@ -55,6 +55,9 @@ private:
   void init();
   void exec();
 protected: // for testing, private otherwise.
+   /**Return average time series log value for the appropriately filtered log*/
+   double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
+          std::vector<Kernel::SplittingInterval> &splitter);
   /**process logs and retrieve chopper speed and chopper delay*/
   void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
        double &chop_speed,double &chop_delay);
