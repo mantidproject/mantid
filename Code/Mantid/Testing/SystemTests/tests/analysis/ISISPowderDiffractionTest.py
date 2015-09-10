@@ -18,6 +18,14 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                 "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/Calibration/van_s1_old-0.nxs",
                 "hrpd/test/cycle_09_2/Calibration/van_s1_old-1.nxs",
                 "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"}
+    def _clean_up_files(self, filenames, directories):
+        try:
+            for file in filenames:
+                path = os.path.join(directories[0], file)
+                os.remove(path)
+        except OSError, ose:
+            print 'could not delete generated file : ', ose.filename
+
 
     def runTest(self):
         dirs = config['datasearch.directories'].split(';')
@@ -30,7 +38,7 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
     def validate(self):
         return 'ResultTOFgrp', 'hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs'
 
-    def _cleanup_files(self):
+    def cleanup(self):
         dirs = config['datasearch.directories'].split(';')
         filenames = {"hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss",
@@ -42,11 +50,5 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat',
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
                      'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal'}
-        try:
-            for file in filenames:
-                path = os.path.join(dirs[0], file)
-                os.remove(path)
-        except OSError, ose:
-            print 'could not delete generated file : ', ose.filename
 
-
+        self._clean_up_files(filenames, dirs)
