@@ -9,7 +9,7 @@
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/VatesXMLDefinitions.h"
-#include "MantidVatesAPI/VatesConfigurations.h"setAxisLabels
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/Common.h"
 
 #include <boost/scoped_ptr.hpp>
