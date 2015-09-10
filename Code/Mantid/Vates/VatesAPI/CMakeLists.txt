@@ -66,6 +66,7 @@ inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
+inc/MantidVatesAPI/ColorScaleGuard.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h

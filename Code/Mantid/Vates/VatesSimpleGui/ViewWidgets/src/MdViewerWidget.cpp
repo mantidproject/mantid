@@ -274,6 +274,10 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
+
+  // Add the color scale lock to the ColoSelectionWidget, which should
+  // now be initialized
+  ui.colorSelectionWidget->setColorScaleLock(&m_colorScaleLock);
 }
 
 void MdViewerWidget::panelChanged()
@@ -710,6 +714,7 @@ void MdViewerWidget::renderingDone()
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
   GlobalInterpreterLock gil;
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the
   //             VSI window to not close properly. Moving it here ensures that we have the switch, but
   //             after the window is started again.

@@ -128,7 +128,6 @@ namespace Mantid
       {
         // For more information http://www.vtk.org/Wiki/VTK/Tutorials/Callbacks
         vtkSmartPointer<vtkCallbackCommand> backgroundColorChangeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
-
         backgroundColorChangeCallback->SetCallback(backgroundColorChangeCallbackFunction);
 
         view->getViewProxy()->GetProperty("Background")->AddObserver(vtkCommand::ModifiedEvent, backgroundColorChangeCallback);
