@@ -24,18 +24,6 @@ except AttributeError:
 from ui_MainWindow import Ui_MainWindow
 
 
-# UB peak information table
-UB_Peak_Table_Setup = [('Scan', 'int'),
-                       ('Pt', 'int'),
-                       ('H', 'float'),
-                       ('K', 'float'),
-                       ('L', 'float'),
-                       ('Q_x', 'float'),
-                       ('Q_y', 'float'),
-                       ('Q_z', 'float'),
-                       ('Status', 'checkbox')]
-
-
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
@@ -152,7 +140,11 @@ class MainWindow(QtGui.QMainWindow):
         :return:
         """
         # UB-peak table
-        self.ui.tableWidget_peaksCalUB.init_setup(UB_Peak_Table_Setup)
+        # NOTE: have to call this because pyqt set column and row to 0 after __init__
+        #       thus a 2-step initialization has to been adopted
+        self.ui.tableWidget_peaksCalUB.setup()
+
+        self.ui.tableWidget_ubMatrix.setup()
 
         return
 
@@ -302,11 +294,12 @@ class MainWindow(QtGui.QMainWindow):
         # Get reflections
         num_rows = self.ui.tableWidget_peaksCalUB.rowCount()
         peak_info_list = list()
+        status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         for i_row in xrange(num_rows):
-            if self.ui.tableWidget_peaksCalUB.is_selected() is True:
+            if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
                 scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info()
                 h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl()
-                peak_info = self._myControl.add_peak_info(exp_number, scan_number, pt_num)
+                peak_info = self._myControl.add_peak_info(exp_number, scan_num, pt_num)
                 peak_info.setHKL(h, k, l)
                 peak_info_list.append(peak_info)
         # END-FOR
@@ -682,6 +675,24 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def _get_lattice_parameters(self):
+        """
+
+        :return:
+        """
+        status, ret_list = gutil.parse_integers_editors([self.ui.lineEdit_a,
+                                                         self.ui.lineEdit_b,
+                                                         self.ui.lineEdit_c,
+                                                         self.ui.lineEdit_alpha,
+                                                         self.ui.lineEdit_beta,
+                                                         self.ui.lineEdit_gamma])
+        if status is False:
+            raise TypeError('Unable to parse unit cell due to %s' % ret_list)
+
+        a, b, c, alpha, beta, gamma = ret_list
+
+        return a, b, c, alpha, beta, gamma
+
     def _plot_raw_xml_2d(self, exp_no, scan_no, pt_no):
         """ Plot raw workspace from XML file for a measurement/pt.
         """
@@ -741,5 +752,18 @@ class MainWindow(QtGui.QMainWindow):
 
         data_server = str(self.ui.lineEdit_url.text())
         self._myControl.set_server_url(data_server)
+
+        return
+
+    def _show_ub_matrix(self, ubmatrix):
+        """ Show UB matrix
+        :param ubmatrix:
+        :return:
+        """
+        assert ubmatrix.shape == (3, 3)
+
+        for i in xrange(3):
+            for j in xrange(3):
+                self.ui.tableWidget_ubMatrix.update_cell_value(i, j, ubmatrix[i][j])
 
         return

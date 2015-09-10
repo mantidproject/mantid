@@ -81,6 +81,33 @@ class NTableWidget(QtGui.QTableWidget):
 
         return rows_list
 
+    def get_cell_value(self, row_index, col_index):
+        """
+
+        :param row_index:
+        :param col_index:
+        :return:
+        """
+        c_type = self._myColumnTypeList[col_index]
+
+        return_value = None
+        if c_type == 'checkbox':
+            # Check box
+            cell_i_j = self.cellWidget(row_index, col_index)
+            assert isinstance(cell_i_j, QtGui.QCheckBox)
+            return_value = cell_i_j.isChecked()
+        else:
+            # Regular cell
+            item_i_j = self.item(row_index, col_index)
+            assert isinstance(item_i_j, QtGui.QTableWidgetItem)
+            value = str(item_i_j.text())
+            if c_type == 'int':
+                return_value = int(value)
+            elif c_type == 'float':
+                return_value = float(value)
+
+        return return_value
+
     def get_row_value(self, row_index):
         """
         :param row_index:
@@ -120,6 +147,8 @@ class NTableWidget(QtGui.QTableWidget):
         :param column_tup_list: list of 2-tuple as string (column name) and string (data type)
         :return:
         """
+        print '[DB] Init set up table with %d columns!' % len(column_tup_list)
+
         # Define column headings
         num_cols = len(column_tup_list)
 
@@ -135,6 +164,16 @@ class NTableWidget(QtGui.QTableWidget):
 
         self.setColumnCount(num_cols)
         self.setHorizontalHeaderLabels(self._myHeaderList)
+
+        return
+
+    def init_size(self, num_rows, num_cols):
+        """
+
+        :return:
+        """
+        self.setColumnCount(num_cols)
+        self.setRowCount(num_rows)
 
         return
 
@@ -160,5 +199,55 @@ class NTableWidget(QtGui.QTableWidget):
             # centers it within the table column :-)
             self.setCellWidget(row, col, checkbox)
         # END-IF-ELSE
+
+        return
+
+    def set_value_cell(self, row, col, value=''):
+        """
+        Set value to a cell with integer, float or string
+        :param row:
+        :param col:
+        :param value:
+        :return:
+        """
+        # Check
+        if row < 0 or row >= self.rowCount() or col < 0 or col >= self.columnCount():
+            raise IndexError('Input row number or column number is out of range.')
+
+        # Init cell
+        cell_item = QtGui.QTableWidgetItem()
+        cell_item.setText(_fromUtf8(str(value)))
+        cell_item.setFlags(cell_item.flags() & ~QtCore.Qt.ItemIsEditable)
+
+        self.setItem(row, col, cell_item)
+
+        return
+
+    def update_cell_value(self, row, col, value):
+        """
+
+        :param row:
+        :param col:
+        :param value:
+        :return:
+        """
+        cell_item = self.item(row, col)
+        cell_widget = self.cellWidget(row, col)
+
+        if cell_item is not None and cell_widget is None:
+            # TableWidgetItem
+            assert isinstance(cell_item, QtGui.QTableWidgetItem)
+            if isinstance(value, float):
+                self.cellWidget(row, col).setText(_fromUtf8('%.7f' % value))
+            else:
+                cell_item.setText(_fromUtf8(str(value)))
+        elif cell_item is None and cell_widget is not None:
+            # TableCellWidget
+            if isinstance(cell_item, QtGui.QCheckBox) is True:
+                cell_item.setChecked(value)
+            else:
+                raise TypeError('Cell of type %s is not supported.' % str(type(cell_item)))
+        else:
+            raise TypeError('Table cell (%d, %d) is in an unsupported situation!' % (row, col))
 
         return

@@ -4,13 +4,21 @@
 from PyQt4 import QtGui
 
 
-def parse_integers_editors(line_edit_list):
+def parse_integers_editors(line_edits):
     """
     :param line_edit_list:
     :return: (True, list of integers); (False, error message)
     """
-    # Check
-    assert isinstance(line_edit_list, list)
+    # Set flag
+    return_single_value = False
+
+    if isinstance(line_edits, QtGui.QLineEdit) is True:
+        line_edit_list = [line_edits]
+        return_single_value = True
+    elif isinstance(line_edits, list) is True:
+        line_edit_list = line_edits
+    else:
+        raise RuntimeError('Input is not LineEdit or list of LineEdit.')
 
     error_message = ''
     integer_list = []
@@ -33,5 +41,7 @@ def parse_integers_editors(line_edit_list):
     
     if len(error_message) > 0:
         return False, error_message
+    elif return_single_value is True:
+        return True, integer_list[0]
     
     return True, integer_list

@@ -971,7 +971,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_7">
                 <item>
-                 <widget class="NTableWidget" name="tableWidget_peaksCalUB"/>
+                 <widget class="UBMatrixPeakTable" name="tableWidget_peaksCalUB"/>
                 </item>
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -992,14 +992,17 @@
                    </widget>
                   </item>
                   <item>
-                   <spacer name="verticalSpacer_8">
+                   <spacer name="verticalSpacer_11">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
                       <width>20</width>
-                      <height>40</height>
+                      <height>20</height>
                      </size>
                     </property>
                    </spacer>
@@ -1071,7 +1074,38 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
-                 <widget class="QTableWidget" name="tableWidget_ubMatrix"/>
+                 <widget class="UBMatrixTable" name="tableWidget_ubMatrix">
+                  <row>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </row>
+                  <row>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </row>
+                  <row>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </row>
+                  <column>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </column>
+                 </widget>
                 </item>
                 <item>
                  <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1485,7 +1519,7 @@
      <x>0</x>
      <y>0</y>
      <width>1378</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1603,9 +1637,14 @@
    <header>mplgraphicsview.h</header>
   </customwidget>
   <customwidget>
-   <class>NTableWidget</class>
+   <class>UBMatrixPeakTable</class>
    <extends>QTableWidget</extends>
-   <header location="global">NTableWidget.h</header>
+   <header>UBMatrixPeakTable.h</header>
+  </customwidget>
+  <customwidget>
+   <class>UBMatrixTable</class>
+   <extends>QTableWidget</extends>
+   <header>UBMatrixTable.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
