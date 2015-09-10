@@ -30,6 +30,10 @@ namespace MantidQt {
     std::string ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups) {
       std::unique_ptr<Mantid::API::NotebookWriter> notebook(new Mantid::API::NotebookWriter());
 
+      const std::string plotFunctionsTitle = "Plot functions\n---------------";
+      notebook->markdownCell(plotFunctionsTitle);
+      notebook->codeCell(plotsFunctionString());
+
       std::string title_string;
       if (!m_wsName.empty()) {
         title_string = "Processed data from workspace: " + m_wsName + "\n---------------------";
@@ -70,15 +74,20 @@ namespace MantidQt {
         std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows, m_instrument, m_model, col_nums);
         notebook->codeCell(std::get<0>(stitch_string));
 
-        // Plot I vs Q and I vs Lambda graphs
+        // Group workspaces which should be plotted on same axes
         std::ostringstream plot_string;
-        plot_string << "f, (ax1, ax2, ax3) = plt.subplots(1, 3, sharey=True, figsize=(18,4))\n";
-        std::vector<std::string> stitched_ws;
-        stitched_ws.push_back(std::get<1>(stitch_string));
-        plot_string << plot1DString(unstitched_ws, "ax1", "I vs Q Unstitched", 1) << "\n";
-        plot_string << plot1DString(stitched_ws, "ax2", "I vs Q Stitiched", 1) << "\n";
-        plot_string << plot1DString(IvsLam_ws, "ax3", "I vs Lambda", 4);
-        plot_string << "plt.show() #Draw the plot\n";
+        plot_string << "#Group workspaces which should be plotted on same axes\n";
+        plot_string << "unstitchedGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", unstitched_ws) << ")\n";
+        plot_string << "IvsLamGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", IvsLam_ws) << ")\n";
+
+        // Plot I vs Q and I vs Lambda graphs
+        plot_string << "#Plot workspaces\n";
+        std::vector<std::string> workspaceList;
+        workspaceList.push_back("unstitchedGroupWS");
+        workspaceList.push_back(std::get<1>(stitch_string));
+        workspaceList.push_back("IvsLamGroupWS");
+
+        plot_string << plot1DString(workspaceList, "['I vs Q Unstitched', 'I vs Q Stitiched', 'I vs Lambda']");
         notebook->codeCell(plot_string.str());
 
         notebook->markdownCell(printThetaString(runNos, theta));
@@ -107,6 +116,81 @@ namespace MantidQt {
       }
 
       return theta_string.str();
+    }
+
+    std::string plotsFunctionString()
+    {
+      return "def plotWithOptions(ax, ws, ops, n):\n"
+        "    \"\"\"\n"
+        "    Enable/disable legend, grid, limits according to\n"
+        "    options (ops) for the given axes (ax).\n"
+        "    Plot with or without errorbars.\n"
+        "    \"\"\"\n"
+        "    ws_plot = ConvertToPointData(ws)\n"
+        "    if ops['errorbars']:\n"
+        "        ax.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=ws.name())\n"
+        "    else:\n"
+        "        ax.plot(ws_plot.readX(0), ws_plot.readY(0), label=ws.name())\n"
+        "    \n"
+        "    if ops['legend']: ax.legend(loc=ops['legendLocation'])\n"
+        "    ax.grid(ops['grid'])\n"
+        "    ax.set_xscale(ops['xScale']); ax.set_yscale(ops['yScale'])\n"
+        "    if ops['xLimits'] != 'auto': ax.set_xlim(ops['xLimits'])\n"
+        "    if ops['yLimits'] != 'auto': ax.set_ylim(ops['yLimits'])\n"
+        "    \n"
+        "    # If a list of titles was given, use it to title each subplot\n"
+        "    if hasattr(ops['title'], \"__iter__\"):\n"
+        "        ax.set_title(ops['title'][n])\n"
+        "    \n"
+        "\n"
+        "def plots(listOfWorkspaces, *args, **kwargs):\n"
+        "    \"\"\"\n"
+        "    Draw a default reflectivity plot.\n"
+        "    Workspaces within a group workspace are plotted together on the same axes.\n"
+        "\n"
+        "    Examples:\n"
+        "    plots(rr)\n"
+        "    plots(rr, 'TheGraphTitle')\n"
+        "    plots(rr, 'TheGraphTitle', grid=True, legend=True, xScale='linear', yScale='log', xLimits=[0.008, 0.16])\n"
+        "    plots(rr, sharedAxes = False, xLimits = [0, 0.1], yLimits = [1e-5, 2], Title='ASF070_07 I=1A T=3K dq/q=2%', legend=True, legendLocation=3, errorbars=False)\n"
+        "    \"\"\"\n"
+        "\n"
+        "    if not hasattr(listOfWorkspaces, \"__iter__\"):\n"
+        "        listOfWorkspaces = [listOfWorkspaces]\n"
+        "\n"
+        "    # Process the function arguments.  In either case(named or unnamed) build a dictionary of options)\n"
+        "    keylist = ['title', 'grid', 'legend', 'legendLocation', 'xScale', 'yScale', 'xLimits', 'yLimits', 'sharedAxes', 'errorbars']\n"
+        "    defaultValues = ['', True, True, 1, 'log', 'log', 'auto', 'auto', True, 'True']\n"
+        "\n"
+        "    # Fill ops with the default values\n"
+        "    ops=dict(zip(keylist,defaultValues))\n"
+        "    for i in range(len(args)):  # copy in values provided in args\n"
+        "        defaultValues[i]=args[i]\n"
+        "    ops=dict(zip(keylist,defaultValues))\n"
+        "\n"
+        "    for k in ops.keys():  # copy in any key word given arguments\n"
+        "        ops[k]= kwargs.get(k,ops[k])\n"
+        "\n"
+        "    # Create subplots for workspaces in the list\n"
+        "    fig, ax = plt.subplots(1, len(listOfWorkspaces), sharey=ops['sharedAxes'], figsize=(6*len(listOfWorkspaces),4))\n"
+        "\n"
+        "    if not hasattr(ax, \"__iter__\"):\n"
+        "        ax = [ax]\n"
+        "\n"
+        "    for n, ws in enumerate(listOfWorkspaces):\n"
+        "        if type(ws) == mantid.api._api.WorkspaceGroup:\n"
+        "            # Plot grouped workspaces on the same axes\n"
+        "            for sub_ws in ws:\n"
+        "                plotWithOptions(ax[n], sub_ws, ops, n)\n"
+        "        else:\n"
+        "            plotWithOptions(ax[n], ws, ops, n)\n"
+        "            \n"
+        "    # If a single title was given, use it to title the whole figure\n"
+        "    if not hasattr(ops['title'], \"__iter__\"):\n"
+        "        fig.suptitle(ops['title'])\n"
+        "    plt.show()\n"
+        "    \n"
+        "    return plt.gcf()";
     }
 
     /**
@@ -184,50 +268,42 @@ namespace MantidQt {
       @return string of comma separated list of parameter values
       */
     template<typename T, typename A>
-    std::string vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec)
+    std::string vectorParamString(const std::string & param_name, const std::vector<T,A> &param_vec)
+    {
+      std::ostringstream param_vector_string;
+
+      param_vector_string << param_name << " = '";
+      param_vector_string << vectorString(param_vec);
+      param_vector_string << "'";
+
+      return param_vector_string.str();
+    }
+
+    template<typename T, typename A>
+    std::string vectorString(const std::vector<T,A> &param_vec)
     {
       std::ostringstream vector_string;
       const char* separator = "";
-      vector_string << param_name << " = '";
       for(auto paramIt = param_vec.begin(); paramIt != param_vec.end(); ++paramIt)
       {
         vector_string << separator << *paramIt;
         separator = ", ";
       }
-      vector_string << "'";
 
       return vector_string.str();
     }
 
     /**
-      Create string of python code to plot I vs Q from workspaces
-      @param ws_names : vector of workspace names to plot on the same axes
-      @param axes : handle of axes to plot in
+      Create string of python code to create 1D plots from workspaces
+      @param ws_names : vector of workspace names to plot
       @return string  of python code to plot I vs Q
       */
-    std::string plot1DString(const std::vector<std::string> & ws_names, const std::string & axes,
-                                             const std::string & title, const int legendLocation) {
+    std::string plot1DString(const std::vector<std::string> & ws_names,
+                             const std::string & title) {
 
       std::ostringstream plot_string;
 
-      for (auto it = ws_names.begin(); it != ws_names.end(); ++it) {
-        std::tuple<std::string, std::string> convert_point_string = convertToPointString(*it);
-        plot_string << std::get<0>(convert_point_string);
-
-        plot_string << "#" << axes << ".plot(" << std::get<1>(convert_point_string) << ".readX(0), "
-                    << std::get<1>(convert_point_string) << ".readY(0), "
-                    << "label='" << *it << "')\n";
-        plot_string << axes << ".errorbar(" << std::get<1>(convert_point_string) << ".readX(0), "
-                    << std::get<1>(convert_point_string) << ".readY(0), "
-                    << "yerr=" << std::get<1>(convert_point_string) << ".readE(0), "
-                    << "label='" << *it << "')\n";
-
-        plot_string << axes << ".set_yscale('log'); ";
-        plot_string << axes << ".set_xscale('log')\n";
-      }
-      plot_string << axes << ".set_title('" << title << "')\n";
-      plot_string << axes << ".grid() #Show a grid\n";
-      plot_string << axes << ".legend(loc=" << legendLocation << ") #Show a legend\n";
+      plot_string << "fig = plots([" << vectorString(ws_names) << "], title=" << title << ")\n";
 
       return plot_string.str();
     }

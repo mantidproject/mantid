@@ -58,9 +58,11 @@ namespace MantidQt {
       const int scale;
     };
 
+    std::string plot1DString(const std::vector<std::string> & ws_names,
+                             const std::string & title);
 
-    std::string plot1DString(const std::vector<std::string> & ws_names, const std::string & axes,
-                             const std::string & title, const int legendLocation);
+    template<typename T, typename A>
+    std::string vectorString(const std::vector<T,A> &param_vec);
 
     std::string printThetaString(const std::vector<std::string> & runNos,
                                  const std::vector<std::string> & theta);
@@ -68,6 +70,8 @@ namespace MantidQt {
     std::tuple<std::string, std::string>
       stitchGroupString(const std::set<int> & rows, const std::string & instrument, QReflTableModel_sptr model,
                         col_numbers col_nums);
+
+    std::string plotsFunctionString();
 
     std::tuple<std::string, std::string, std::string, std::string, std::string>
       reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, col_numbers col_nums);
@@ -85,7 +89,7 @@ namespace MantidQt {
     std::tuple<std::string, std::string> convertToPointString(const std::string & wsName);
 
     template<typename T, typename A>
-    std::string vectorParamString(const std::string & param_name, std::vector<T,A> &param_vec);
+    std::string vectorParamString(const std::string & param_name, const std::vector<T,A> &param_vec);
 
     std::tuple<std::string, std::string>
       rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, col_numbers col_nums);
