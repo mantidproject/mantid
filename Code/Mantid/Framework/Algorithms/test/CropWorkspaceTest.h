@@ -106,7 +106,7 @@ public:
     EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(36, 50, 50, 0.0, 2., 2);
     //Fake a unit in the data.
     test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
-    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(4, false) );
+    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(4) );
     //Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
   }
