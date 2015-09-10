@@ -80,8 +80,8 @@ private:
 
   void createModel(const std::string &wsName)
   {
-    ITableWorkspace_sptr m_ws = createPrefilledWorkspace(wsName);
-    m_model.reset(new QReflTableModel(m_ws));
+    ITableWorkspace_sptr prefilled_ws = createPrefilledWorkspace(wsName);
+    m_model.reset(new QReflTableModel(prefilled_ws));
   }
 
   const std::string m_wsName = "TESTWORKSPACE";
@@ -98,15 +98,13 @@ public:
   {
     createModel(m_wsName);
 
-    std::set<int> rows;
     // Populate rows with every index in the model
     for(int idx = 0; idx < m_model->rowCount(); ++idx)
-      rows.insert(idx);
+      m_rows.insert(idx);
 
     //Map group numbers to the set of rows in that group we want to process
-    std::map<int,std::set<int> > groups;
-    for(auto it = rows.begin(); it != rows.end(); ++it)
-      groups[m_model->data(m_model->index(*it, col_nums.group)).toInt()].insert(*it);
+    for(auto it = m_rows.begin(); it != m_rows.end(); ++it)
+      m_groups[m_model->data(m_model->index(*it, col_nums.group)).toInt()].insert(*it);
   }
 
   void testGenerateNotebook() {
@@ -141,7 +139,156 @@ public:
     }
 
   }
-  
+
+  void testPlot1DString() {
+
+    std::vector<std::string> ws_names;
+    ws_names.push_back("workspace1");
+    ws_names.push_back("workspace2");
+
+    std::string output = plot1DString(ws_names, "Plot Title");
+
+    const std::string result = "fig = plots([workspace1, workspace2], title=Plot Title, legendLocation=[1, 1, 4])\n";
+
+    TS_ASSERT_EQUALS(output, result)
+  }
+
+  void testTableString() {
+
+    std::string output = tableString(m_model, col_nums, m_rows);
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, output, boost::is_any_of("\n"));
+
+    const std::string result[] = {
+      "Run(s) | Angle | Transmission Run(s) | Q min | Q max | dQ/Q | Scale | Group | Options",
+      "------ | ----- | ------------------- | ----- | ----- | ---- | ----- | ----- | -------",
+      "12345 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | 0 | ",
+      "12346 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | 0 | ",
+      "24681 | 0.5 |  | 0.1 | 1.6 | 0.04 | 1 | 1 | ",
+      "24682 | 1.5 |  | 1.4 | 2.9 | 0.04 | 1 | 1 | ",
+      ""
+    };
+
+    int i=0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+  }
+
+  void testVectorString() {
+
+    std::vector<std::string> stringVector;
+    stringVector.push_back("A");
+    stringVector.push_back("B");
+    stringVector.push_back("C");
+
+    const std::string stringOutput = vectorString(stringVector);
+
+    std::vector<int> intVector;
+    intVector.push_back(1);
+    intVector.push_back(2);
+    intVector.push_back(3);
+
+    const std::string intOutput = vectorString(intVector);
+
+    // Test string list output is correct for vector of strings and vector of ints
+    TS_ASSERT_EQUALS(stringOutput, "A, B, C")
+    TS_ASSERT_EQUALS(intOutput, "1, 2, 3")
+  }
+
+  void testTitleString() {
+
+    // Test with workspace name
+    std::string output = titleString("TEST_WORKSPACE");
+
+    const std::string result[] = {
+      "Processed data from workspace: TEST_WORKSPACE",
+      "---------------",
+      "Notebook generated from the ISIS Reflectometry (Polref) Interface",
+      ""
+    };
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, output, boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
+    // Test without workspace name
+    std::string outputEmptyStr = titleString("");
+
+    const std::string resultEmptyStr[] = {
+      "Processed data",
+      "---------------",
+      "Notebook generated from the ISIS Reflectometry (Polref) Interface",
+      ""
+    };
+
+    std::vector<std::string> notebookLinesEmptyStr;
+    boost::split(notebookLinesEmptyStr, outputEmptyStr, boost::is_any_of("\n"));
+
+    i=0;
+    for (auto it = notebookLinesEmptyStr.begin(); it != notebookLinesEmptyStr.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, resultEmptyStr[i])
+    }
+
+  }
+
+  void testStitchGroupString() {
+
+  }
+
+  void testPlotsFunctionString() {
+
+  }
+
+  void testPlotsString() {
+
+  }
+
+  void testReduceRowString() {
+
+  }
+
+  void testLoadWorkspaceString() {
+
+  }
+
+  void testPlusString() {
+
+  }
+
+  void testLoadRunString() {
+
+  }
+
+  void testGetRunNumber() {
+
+  }
+
+  void testScaleString() {
+
+  }
+
+  void testVectorParamString() {
+
+  }
+
+  void testRebinString() {
+
+  }
+
+  void testTransWSString() {
+
+  }
+
 };
 
 #endif //MANTID_CUSTOMINTERFACES_REFLGENERATENOTEBOOKTEST_H

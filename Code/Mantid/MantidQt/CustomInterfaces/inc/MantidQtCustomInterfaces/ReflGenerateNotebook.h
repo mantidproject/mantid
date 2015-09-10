@@ -34,6 +34,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <sstream>
 
 
 namespace MantidQt {
@@ -65,9 +66,6 @@ namespace MantidQt {
 
     std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows);
 
-    template<typename T, typename A>
-    std::string vectorString(const std::vector<T,A> &param_vec);
-
     std::string titleString(const std::string & wsName);
 
     std::tuple<std::string, std::string>
@@ -92,13 +90,47 @@ namespace MantidQt {
 
     std::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
 
-    template<typename T, typename A>
-    std::string vectorParamString(const std::string & param_name, const std::vector<T,A> &param_vec);
-
     std::tuple<std::string, std::string>
       rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, ColNumbers col_nums);
 
     std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument);
+
+    /**
+    Create string of comma separated list of values from a vector
+    @param param_vec : vector of values
+    @return string of comma separated list of values
+    */
+    template<typename T, typename A>
+    std::string vectorString(const std::vector<T,A> &param_vec)
+    {
+      std::ostringstream vector_string;
+      const char* separator = "";
+      for(auto paramIt = param_vec.begin(); paramIt != param_vec.end(); ++paramIt)
+      {
+        vector_string << separator << *paramIt;
+        separator = ", ";
+      }
+
+      return vector_string.str();
+    }
+
+    /**
+    Create string of comma separated list of parameter values from a vector
+    @param param_name : name of the parameter we are creating a list of
+    @param param_vec : vector of parameter values
+    @return string of comma separated list of parameter values
+    */
+    template<typename T, typename A>
+    std::string vectorParamString(const std::string & param_name, const std::vector<T,A> &param_vec)
+    {
+      std::ostringstream param_vector_string;
+
+      param_vector_string << param_name << " = '";
+      param_vector_string << vectorString(param_vec);
+      param_vector_string << "'";
+
+      return param_vector_string.str();
+    }
 
 
     class DLLExport ReflGenerateNotebook {
