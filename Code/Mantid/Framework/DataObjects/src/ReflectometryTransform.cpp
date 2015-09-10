@@ -280,6 +280,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   }
   return ws;
 }
+
 /**
  * Execution path for NormalisedPolygon Rebinning
  * @param inputWs : Workspace to be rebinned

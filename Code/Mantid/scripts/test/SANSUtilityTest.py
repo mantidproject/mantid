@@ -8,6 +8,7 @@ from mantid.kernel import DateAndTime, time_duration, FloatTimeSeriesProperty,Bo
 import SANSUtility as su
 import re
 import random
+import numpy as np
 
 TEST_STRING_DATA = 'SANS2D0003434-add' + su.ADDED_EVENT_DATA_TAG
 TEST_STRING_MON = 'SANS2D0003434-add_monitors' + su.ADDED_EVENT_DATA_TAG
@@ -59,6 +60,15 @@ def provide_event_ws(name, start_time, extra_time_shift):
 
 def provide_event_ws_wo_proton_charge(name, start_time, extra_time_shift):
     return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = False)
+
+def provide_histo_workspace_with_one_spectrum(ws_name, x_start, x_end, bin_width):
+    CreateSampleWorkspace(OutputWorkspace = ws_name,
+                          NumBanks=1,
+                          BankPixelWidth=1,
+                          XMin=x_start,
+                          XMax = x_end,
+                          BinWidth = bin_width)
+
 
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 
@@ -851,6 +861,130 @@ class TestConvertToAndFromPythonStringList(unittest.TestCase):
         # Assert
         expected = "test1.xml,test2.xml,test3.xml"
         self.assertEqual(expected, result)
+
+class HelperRescaleShift(object):
+    def __init__(self, hasValues=True, min= 1, max= 2):
+        super(HelperRescaleShift, self).__init__()
+        self.qRangeUserSelected = hasValues
+        self.qMin = min
+        self.qMax = max
+
+class TestExtractionOfQRange(unittest.TestCase):
+    def _delete_workspace(self, workspace_name):
+        if workspace_name in mtd:
+            DeleteWorkspace(workspace_name)
+
+    def test_that_correct_q_range_is_extracted_from_rescaleAndShift_object_which_lies_inside_the_data_range(self):
+        # Arrange
+        front_q_min = 10
+        front_q_max = 20
+        front_name = "front_ws"
+        rear_q_min = 1
+        rear_q_max =30
+        rear_name = "rear_ws"
+        bin_width = 1 
+        provide_histo_workspace_with_one_spectrum(rear_name, rear_q_min, rear_q_max, bin_width)
+        provide_histo_workspace_with_one_spectrum(front_name, front_q_min, front_q_max, bin_width)
+        rescale_shift = HelperRescaleShift(True, 15, 17)
+        # Act
+        result_q_min, result_q_max = su.get_start_q_and_end_q_values(rear_data_name = rear_name,
+                                                                     front_data_name = front_name,
+                                                                     rescale_shift = rescale_shift)
+        # Assert
+        self.assertEqual(15, result_q_min)
+        self.assertEqual(17, result_q_max)
+        # Clean up
+        self._delete_workspace(front_name)
+        self._delete_workspace(rear_name)
+
+    def test_that_correct_q_range_is_extracted_when_no_rescaleAndShift_is_applied_and_front_detector_data_lies_within_rear_detector_data(self):
+        # Arrange
+        front_q_min = 10
+        front_q_max = 20
+        front_name = "front_ws"
+        rear_q_min = 1
+        rear_q_max =30
+        rear_name = "rear_ws"
+        bin_width = 1 
+        provide_histo_workspace_with_one_spectrum(rear_name, rear_q_min, rear_q_max, bin_width)
+        provide_histo_workspace_with_one_spectrum(front_name, front_q_min, front_q_max, bin_width)
+        rescale_shift = HelperRescaleShift(False, 1, 2)
+        # Act
+        result_q_min, result_q_max = su.get_start_q_and_end_q_values(rear_data_name = rear_name,
+                                                                     front_data_name = front_name,
+                                                                     rescale_shift = rescale_shift)
+        # Assert
+        self.assertEqual(10, result_q_min)
+        self.assertEqual(20, result_q_max)
+        # Clean up
+        self._delete_workspace(front_name)
+        self._delete_workspace(rear_name)
+
+    def test_that_execption_is_raised_when_data_does_not_overlap(self):
+        # Arrange
+        front_q_min = 10
+        front_q_max = 20
+        front_name = "front_ws"
+        rear_q_min = 1
+        rear_q_max =9
+        rear_name = "rear_ws"
+        bin_width = 1 
+        provide_histo_workspace_with_one_spectrum(rear_name, rear_q_min, rear_q_max, bin_width)
+        provide_histo_workspace_with_one_spectrum(front_name, front_q_min, front_q_max, bin_width)
+        rescale_shift = HelperRescaleShift(False, 1, 2)
+        # Act + Assert
+        args=[]
+        kwargs = {"rear_data_name":rear_name, "front_data_name":front_name, "rescale_shift":rescale_shift}
+        self.assertRaises(RuntimeError, su.get_start_q_and_end_q_values, *args, **kwargs)
+
+        # Clean up
+        self._delete_workspace(front_name)
+        self._delete_workspace(rear_name)
+
+
+class TestErrorPropagationFitAndRescale(unittest.TestCase):
+    def _createWorkspace(self, x1, y1, err1, x2, y2, err2):
+        front = CreateWorkspace(DataX = x1,
+                                DataY =y1,
+                                DataE = err1,
+                                NSpec = 1,
+                                UnitX = "MomentumTransfer")
+        rear = CreateWorkspace(DataX = x2,
+                               DataY =y2,
+                               DataE = err2,
+                               NSpec = 1,
+                               UnitX = "MomentumTransfer")
+        return front, rear
+
+    def test_that_error_is_transferred(self):
+        # Arrange
+        x1 = [1,2,3,4,5,6,7,8,9]
+        x2 = [1,2,3,4,5,6,7,8,9]
+        y1 = [2,2,2,2,2,2,2,2]
+        y2 = [2,2,2,2,2,2,2,2]
+        e1 = [1,1,1,1,1,1,1,1]
+        e2 = [2,2,2,2,2,2,2,2]
+        front, rear = self._createWorkspace(x1,y1, e1, x2, y2, e2)
+
+        x_min = 3
+        x_max = 7
+        # Act 
+        f_return, r_return = su.get_error_corrected_front_and_rear_data_sets(front, rear,x_min, x_max)
+
+        # Assert
+        self.assertEqual(5, len(f_return.dataX(0)))
+        self.assertEqual(5, len(r_return.dataX(0)))
+
+        expected_errors_in_rear = [np.sqrt(5),np.sqrt(5),np.sqrt(5),np.sqrt(5)]
+        self.assertTrue(expected_errors_in_rear[0] == r_return.dataE(0)[0])
+        self.assertTrue(expected_errors_in_rear[1] == r_return.dataE(0)[1])
+        self.assertTrue(expected_errors_in_rear[2] == r_return.dataE(0)[2])
+        self.assertTrue(expected_errors_in_rear[3] == r_return.dataE(0)[3])
+
+        # Clean up
+        DeleteWorkspace(front)
+        DeleteWorkspace(rear)
+
 
 if __name__ == "__main__":
     unittest.main()

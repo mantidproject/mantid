@@ -95,6 +95,19 @@ public:
       LabelUnitFactory factory;
       auto product = factory.create("anything");
       TS_ASSERT(dynamic_cast<LabelUnit*>(product.get()));
+      TSM_ASSERT("This is not a q-unit", !product->isQUnit());
+  }
+
+  void test_label_unit_factory_is_q(){
+      LabelUnitFactory factory;
+
+      auto product = factory.create("A^-1");
+      TS_ASSERT(dynamic_cast<LabelUnit*>(product.get()));
+      TSM_ASSERT("This is a label unit, but denotes Q", product->isQUnit());
+
+      product = factory.create("in 4.436 A^-1");
+      TS_ASSERT(dynamic_cast<LabelUnit*>(product.get()));
+      TSM_ASSERT("This is a label unit, but denotes Q", product->isQUnit());
   }
 
   void test_RLU_factory(){
@@ -107,9 +120,6 @@ public:
       InverseAngstromsUnitFactory factory;
 
       auto product = factory.create(Units::Symbol::InverseAngstrom);
-      TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
-
-      product = factory.create("A^-1");
       TS_ASSERT(dynamic_cast<InverseAngstromsUnit*>(product.get()));
   }
 
