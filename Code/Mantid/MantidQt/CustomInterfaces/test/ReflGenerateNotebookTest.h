@@ -243,22 +243,111 @@ public:
 
   void testStitchGroupString() {
 
+    std::tuple<std::string, std::string> output = stitchGroupString(m_rows, m_instrument, m_model, col_nums);
+
+    const std::string result[] = {
+      "#Stitch workspaces",
+      "IvsQ_12345_12346_24681_24682, _ = Stitch1DMany(InputWorkspaces = 'IvsQ_12345, IvsQ_12346, IvsQ_24681,"
+        " IvsQ_24682', Params = '0.1, -0.04, 2.9', StartOverlaps = '1.4, 0.1, 1.4', EndOverlaps = '1.6, 2.9, 1.6')",
+      ""
+    };
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, std::get<0>(output), boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
   }
 
   void testPlotsFunctionString() {
+
+    std::string output = plotsFunctionString();
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, output, boost::is_any_of("\n"));
+
+    const std::string result[] = {
+      "def plotWithOptions(ax, ws, ops, n):",
+      "    \"\"\"",
+      "    Enable/disable legend, grid, limits according to",
+      "    options (ops) for the given axes (ax).",
+      "    Plot with or without errorbars.",
+      "    \"\"\"",
+      "    ws_plot = ConvertToPointData(ws)",
+      "    if ops['errorbars']:",
+      "        ax.errorbar(ws_plot.readX(0), ws_plot.readY(0), yerr=ws_plot.readE(0), label=ws.name())",
+      "    else:",
+      "        ax.plot(ws_plot.readX(0), ws_plot.readY(0), label=ws.name())",
+    };
+
+    // Check that the first 10 lines are output as expected
+    for (int i=0; i<11; ++i)
+    {
+      TS_ASSERT_EQUALS(notebookLines[i], result[i])
+    }
 
   }
 
   void testPlotsString() {
 
+    std::vector<std::string> unstitched_ws;
+    unstitched_ws.push_back("TEST_WS1");
+    unstitched_ws.push_back("TEST_WS2");
+
+    std::vector<std::string> IvsLam_ws;
+    IvsLam_ws.push_back("TEST_WS3");
+    IvsLam_ws.push_back("TEST_WS4");
+
+    std::string output = plotsString(unstitched_ws, IvsLam_ws, "TEST_WS5");
+
+    const std::string result[] = {
+      "#Group workspaces to be plotted on same axes",
+      "unstitchedGroupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS1, TEST_WS2')",
+      "IvsLamGroupWS = GroupWorkspaces(InputWorkspaces = 'TEST_WS3, TEST_WS4')",
+      "#Plot workspaces",
+      "fig = plots([unstitchedGroupWS, TEST_WS5, IvsLamGroupWS], title=['I vs Q Unstitched', 'I vs Q Stitiched', 'I vs Lambda'], legendLocation=[1, 1, 4])",
+      ""
+    };
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, output, boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
   }
 
   void testReduceRowString() {
 
+    std::tuple<std::string, std::string, std::string> output = reduceRowString(1, m_instrument, m_model, col_nums);
+
+    const std::string result[] = {
+      "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
+      "IvsQ_12346, IvsLam_12346, theta_12346 = ReflectometryReductionOneAuto(InputWorkspace = 'TOF_12346', ThetaIn = 1.5)",
+      "IvsQ_12346 = Rebin(IvsQ_12346, Params = '1.4, -0.04, 2.9')",
+      ""
+    };
+
+    std::vector<std::string> notebookLines;
+    boost::split(notebookLines, std::get<0>(output), boost::is_any_of("\n"));
+
+    int i=0;
+    for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
+    {
+      TS_ASSERT_EQUALS(*it, result[i])
+    }
+
   }
 
   void testLoadWorkspaceString() {
-
+    
   }
 
   void testPlusString() {
