@@ -68,11 +68,16 @@ namespace MantidQt {
     template<typename T, typename A>
     std::string vectorString(const std::vector<T,A> &param_vec);
 
+    std::string titleString(const std::string & wsName);
+
     std::tuple<std::string, std::string>
       stitchGroupString(const std::set<int> & rows, const std::string & instrument, QReflTableModel_sptr model,
                         ColNumbers col_nums);
 
     std::string plotsFunctionString();
+
+    std::string plotsString(const std::vector<std::string> & unstitched_ws,
+                            const std::vector<std::string> & IvsLam_ws, const std::string & stitched_wsStr);
 
     std::tuple<std::string, std::string, std::string>
       reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, ColNumbers col_nums);
@@ -120,7 +125,6 @@ namespace MantidQt {
       const std::string m_instrument;
 
       ColNumbers col_nums;
-
     };
 
   }

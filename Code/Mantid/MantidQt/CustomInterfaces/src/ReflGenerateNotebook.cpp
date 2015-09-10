@@ -32,17 +32,10 @@ namespace MantidQt {
 
       const std::string plotFunctionsTitle = "Plot functions\n---------------";
       notebook->markdownCell(plotFunctionsTitle);
+
       notebook->codeCell(plotsFunctionString());
 
-      std::string title_string;
-      if (!m_wsName.empty()) {
-        title_string = "Processed data from workspace: " + m_wsName + "\n---------------------";
-      }
-      else {
-        title_string = "Processed data\n---------------------";
-      }
-      title_string += "\nNotebook generated from the ISIS Reflectometry (Polref) Interface";
-      notebook->markdownCell(title_string);
+      notebook->markdownCell(titleString(m_wsName));
 
       notebook->markdownCell(tableString(m_model, col_nums, rows));
 
@@ -72,24 +65,45 @@ namespace MantidQt {
         std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows, m_instrument, m_model, col_nums);
         notebook->codeCell(std::get<0>(stitch_string));
 
-        // Group workspaces which should be plotted on same axes
-        std::ostringstream plot_string;
-        plot_string << "#Group workspaces to be plotted on same axes\n";
-        plot_string << "unstitchedGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", unstitched_ws) << ")\n";
-        plot_string << "IvsLamGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", IvsLam_ws) << ")\n";
-
-        // Plot I vs Q and I vs Lambda graphs
-        plot_string << "#Plot workspaces\n";
-        std::vector<std::string> workspaceList;
-        workspaceList.push_back("unstitchedGroupWS");
-        workspaceList.push_back(std::get<1>(stitch_string));
-        workspaceList.push_back("IvsLamGroupWS");
-
-        plot_string << plot1DString(workspaceList, "['I vs Q Unstitched', 'I vs Q Stitiched', 'I vs Lambda']");
-        notebook->codeCell(plot_string.str());
+        // Draw plots
+        notebook->codeCell(plotsString(unstitched_ws, IvsLam_ws, std::get<1>(stitch_string)));
       }
 
       return notebook->writeNotebook();
+    }
+
+    std::string titleString(const std::string & wsName) {
+      std::string title_string;
+
+      if (!wsName.empty()) {
+        title_string = "Processed data from workspace: " + wsName + "\n---------------";
+      }
+      else {
+        title_string = "Processed data\n---------------";
+      }
+      title_string += "\nNotebook generated from the ISIS Reflectometry (Polref) Interface";
+
+      return title_string;
+    }
+
+    std::string plotsString(const std::vector<std::string> & unstitched_ws,
+                            const std::vector<std::string> & IvsLam_ws, const std::string & stitched_wsStr)
+    {
+      // Group workspaces which should be plotted on same axes
+      std::ostringstream plot_string;
+      plot_string << "#Group workspaces to be plotted on same axes\n";
+      plot_string << "unstitchedGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", unstitched_ws) << ")\n";
+      plot_string << "IvsLamGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", IvsLam_ws) << ")\n";
+
+      // Plot I vs Q and I vs Lambda graphs
+      plot_string << "#Plot workspaces\n";
+      std::vector<std::string> workspaceList;
+      workspaceList.push_back("unstitchedGroupWS");
+      workspaceList.push_back(stitched_wsStr);
+      workspaceList.push_back("IvsLamGroupWS");
+
+      plot_string << plot1DString(workspaceList, "['I vs Q Unstitched', 'I vs Q Stitiched', 'I vs Lambda']");
+      return plot_string.str();
     }
 
     std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows)
