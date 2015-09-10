@@ -25,9 +25,11 @@ namespace MantidQt {
     /**
       Generate an ipython notebook
       @param groups : groups of rows which were stitched
+      @param rows : rows which were processed
       @returns ipython notebook string
       */
     std::string ReflGenerateNotebook::generateNotebook(std::map<int, std::set<int>> groups, std::set<int> rows) {
+
       std::unique_ptr<Mantid::API::NotebookWriter> notebook(new Mantid::API::NotebookWriter());
 
       const std::string plotFunctionsTitle = "Plot functions\n---------------";
@@ -72,6 +74,11 @@ namespace MantidQt {
       return notebook->writeNotebook();
     }
 
+    /**
+      Create string of markdown code for title of the data processing part of the notebook
+      @param wsName : name of the table workspace
+      @return string containing markdown code
+      */
     std::string titleString(const std::string & wsName) {
       std::string title_string;
 
@@ -86,6 +93,13 @@ namespace MantidQt {
       return title_string;
     }
 
+    /**
+      Create string of python code to call plots() with the required workspaces
+      @param unstitched_ws : vector of unstitched data workspace names to be plotted together
+      @param IvsLam_ws : vector of I vs lambda data workspace names to be plotted together
+      @param stitched_wsStr : name of stitched data workspace
+      @return string containing the python code
+      */
     std::string plotsString(const std::vector<std::string> & unstitched_ws,
                             const std::vector<std::string> & IvsLam_ws, const std::string & stitched_wsStr)
     {
@@ -106,6 +120,13 @@ namespace MantidQt {
       return plot_string.str();
     }
 
+    /**
+      Create string of markdown code to display a table of data from the GUI
+      @param model : tablemodel for the full table
+      @param col_nums : column number for each column title
+      @param rows : rows from full table to include
+      @return string containing the markdown code
+      */
     std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows)
     {
       std::ostringstream table_string;
@@ -128,6 +149,10 @@ namespace MantidQt {
       return table_string.str();
     }
 
+    /**
+      Create string of python code for plotting functions
+      @return string containing the python code
+      */
     std::string plotsFunctionString()
     {
       return "def plotWithOptions(ax, ws, ops, n):\n"
@@ -292,6 +317,11 @@ namespace MantidQt {
       return param_vector_string.str();
     }
 
+    /**
+      Create string of comma separated list of values from a vector
+      @param param_vec : vector of values
+      @return string of comma separated list of values
+      */
     template<typename T, typename A>
     std::string vectorString(const std::vector<T,A> &param_vec)
     {
