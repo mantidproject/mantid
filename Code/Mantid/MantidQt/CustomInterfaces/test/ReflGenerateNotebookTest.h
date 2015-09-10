@@ -107,8 +107,8 @@ public:
       m_groups[m_model->data(m_model->index(*it, col_nums.group)).toInt()].insert(*it);
   }
 
-  void testGenerateNotebook() {
-
+  void testGenerateNotebook()
+  {
     std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(m_wsName, m_model, m_instrument,
                                                    col_nums.runs, col_nums.transmission, col_nums.options, col_nums.angle,
                                                    col_nums.qmin, col_nums.qmax, col_nums.dqq, col_nums.scale, col_nums.group));
@@ -140,8 +140,8 @@ public:
 
   }
 
-  void testPlot1DString() {
-
+  void testPlot1DString()
+  {
     std::vector<std::string> ws_names;
     ws_names.push_back("workspace1");
     ws_names.push_back("workspace2");
@@ -153,8 +153,8 @@ public:
     TS_ASSERT_EQUALS(output, result)
   }
 
-  void testTableString() {
-
+  void testTableString()
+  {
     std::string output = tableString(m_model, col_nums, m_rows);
 
     std::vector<std::string> notebookLines;
@@ -178,8 +178,8 @@ public:
 
   }
 
-  void testVectorString() {
-
+  void testVectorString()
+  {
     std::vector<std::string> stringVector;
     stringVector.push_back("A");
     stringVector.push_back("B");
@@ -199,8 +199,8 @@ public:
     TS_ASSERT_EQUALS(intOutput, "1, 2, 3")
   }
 
-  void testTitleString() {
-
+  void testTitleString()
+  {
     // Test with workspace name
     std::string output = titleString("TEST_WORKSPACE");
 
@@ -241,8 +241,8 @@ public:
 
   }
 
-  void testStitchGroupString() {
-
+  void testStitchGroupString()
+  {
     std::tuple<std::string, std::string> output = stitchGroupString(m_rows, m_instrument, m_model, col_nums);
 
     const std::string result[] = {
@@ -263,8 +263,8 @@ public:
 
   }
 
-  void testPlotsFunctionString() {
-
+  void testPlotsFunctionString()
+  {
     std::string output = plotsFunctionString();
 
     std::vector<std::string> notebookLines;
@@ -292,8 +292,8 @@ public:
 
   }
 
-  void testPlotsString() {
-
+  void testPlotsString()
+  {
     std::vector<std::string> unstitched_ws;
     unstitched_ws.push_back("TEST_WS1");
     unstitched_ws.push_back("TEST_WS2");
@@ -324,8 +324,8 @@ public:
 
   }
 
-  void testReduceRowString() {
-
+  void testReduceRowString()
+  {
     std::tuple<std::string, std::string, std::string> output = reduceRowString(1, m_instrument, m_model, col_nums);
 
     const std::string result[] = {
@@ -346,36 +346,57 @@ public:
 
   }
 
-  void testLoadWorkspaceString() {
-    
+  void testPlusString()
+  {
+    std::string output = plusString("INPUT_WS", "OUTPUT_WS");
+    const std::string result = "OUTPUT_WS = Plus('LHSWorkspace' = OUTPUT_WS, 'RHSWorkspace' = INPUT_WS)\n";
+    TS_ASSERT_EQUALS(output, result)
   }
 
-  void testPlusString() {
-
+  void testLoadRunString()
+  {
+    std::tuple<std::string, std::string> output = loadRunString("12345", m_instrument);
+    const std::string result = "TOF_12345 = Load(Filename = 'INSTRUMENT12345')\n";
+    TS_ASSERT_EQUALS(std::get<0>(output), result)
   }
 
-  void testLoadRunString() {
+  void testGetRunNumber()
+  {
+    // Test with no run number in string
+    std::string output = getRunNumber("TEST_WORKSPACE");
+    const std::string result = "TEST_WORKSPACE";
+    TS_ASSERT_EQUALS(output, result)
 
+    // Test with instrument and number
+    std::string output1 = getRunNumber("INSTRUMENT12345");
+    const std::string result1 = "12345";
+    TS_ASSERT_EQUALS(output1, result1)
   }
 
-  void testGetRunNumber() {
-
+  void testScaleString()
+  {
+    std::tuple<std::string, std::string> output = scaleString("12345", 1.0);
+    const std::string result = "IvsQ_12345 = Scale(InputWorkspace = IvsQ_12345, Factor = 1)\n";
+    TS_ASSERT_EQUALS(std::get<0>(output), result)
   }
 
-  void testScaleString() {
+  void testVectorParamString()
+  {
+    std::vector<std::string> stringVector;
+    stringVector.push_back("A");
+    stringVector.push_back("B");
+    stringVector.push_back("C");
 
+    const std::string stringOutput = vectorParamString("PARAM_NAME", stringVector);
+
+    TS_ASSERT_EQUALS(stringOutput, "PARAM_NAME = 'A, B, C'")
   }
 
-  void testVectorParamString() {
-
-  }
-
-  void testRebinString() {
-
-  }
-
-  void testTransWSString() {
-
+  void testRebinString()
+  {
+    std::tuple<std::string, std::string> output = rebinString(1, "12345", m_model, col_nums);
+    const std::string result = "IvsQ_12345 = Rebin(IvsQ_12345, Params = '1.4, -0.04, 2.9')\n";
+    TS_ASSERT_EQUALS(std::get<0>(output), result)
   }
 
 };
