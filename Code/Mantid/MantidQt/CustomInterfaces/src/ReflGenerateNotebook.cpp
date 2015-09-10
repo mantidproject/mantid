@@ -74,7 +74,7 @@ namespace MantidQt {
 
         // Group workspaces which should be plotted on same axes
         std::ostringstream plot_string;
-        plot_string << "#Group workspaces which should be plotted on same axes\n";
+        plot_string << "#Group workspaces to be plotted on same axes\n";
         plot_string << "unstitchedGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", unstitched_ws) << ")\n";
         plot_string << "IvsLamGroupWS = GroupWorkspaces(" << vectorParamString("InputWorkspaces", IvsLam_ws) << ")\n";
 
@@ -128,7 +128,6 @@ namespace MantidQt {
         "    else:\n"
         "        ax.plot(ws_plot.readX(0), ws_plot.readY(0), label=ws.name())\n"
         "    \n"
-        "    if ops['legend']: ax.legend(loc=ops['legendLocation'])\n"
         "    ax.grid(ops['grid'])\n"
         "    ax.set_xscale(ops['xScale']); ax.set_yscale(ops['yScale'])\n"
         "    if ops['xLimits'] != 'auto': ax.set_xlim(ops['xLimits'])\n"
@@ -137,6 +136,10 @@ namespace MantidQt {
         "    # If a list of titles was given, use it to title each subplot\n"
         "    if hasattr(ops['title'], \"__iter__\"):\n"
         "        ax.set_title(ops['title'][n])\n"
+        "    if ops['legend'] and hasattr(ops['legendLocation'], \"__iter__\"):\n"
+        "        ax.legend(loc=ops['legendLocation'][n])\n"
+        "    elif ops['legend']:\n"
+        "        ax.legend(loc=ops['legendLocation'])"
         "    \n"
         "\n"
         "def plots(listOfWorkspaces, *args, **kwargs):\n"
@@ -299,7 +302,8 @@ namespace MantidQt {
 
       std::ostringstream plot_string;
 
-      plot_string << "fig = plots([" << vectorString(ws_names) << "], title=" << title << ")\n";
+      plot_string << "fig = plots([" << vectorString(ws_names) << "], title=" << title
+                  << ", legendLocation=[1, 1, 4])\n";
 
       return plot_string.str();
     }
