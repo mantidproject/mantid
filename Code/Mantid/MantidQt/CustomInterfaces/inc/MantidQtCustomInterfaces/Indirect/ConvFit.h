@@ -72,6 +72,7 @@ private:
   Mantid::API::IAlgorithm_sptr m_singleFitAlg;
   QString m_singleFitOutputName;
   QStringList m_fitStrings;
+  QString m_previousFit;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
