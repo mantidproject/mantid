@@ -820,6 +820,12 @@ void InstrumentActor::changeScaleType(int type)
   resetColors();
 }
 
+void InstrumentActor::changeNthPower(double nth_power)
+{
+  m_colorMap.setNthPower(nth_power);
+  resetColors();
+}
+
 void InstrumentActor::loadSettings()
 {
   QSettings settings;

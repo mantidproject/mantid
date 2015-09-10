@@ -179,6 +179,7 @@ set ( SRC_FILES
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
+	src/ProcessIndirectFitParameters.cpp
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
@@ -451,6 +452,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
+	inc/MantidAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
@@ -722,6 +724,7 @@ set ( TEST_FILES
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
+	ProcessIndirectFitParametersTest.h
 	Q1D2Test.h
 	Q1DWeightedTest.h
 	QxyTest.h
@@ -781,8 +784,8 @@ set ( TEST_FILES
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h
-	TOFSANSResolutionByPixelTest.h
 	TOFSANSResolutionByPixelCalculatorTest.h
+	TOFSANSResolutionByPixelTest.h
 	TimeAtSampleStrategyDirectTest.h
 	TimeAtSampleStrategyElasticTest.h
 	TimeAtSampleStrategyIndirectTest.h

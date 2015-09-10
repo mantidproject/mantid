@@ -5,6 +5,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 import numpy as np
+import scipy.constants as sc
 import ast
 import fnmatch
 import re
@@ -82,6 +83,10 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
                 v_axis = self._load_axis(function[2][0])
                 x_axis = self._load_axis(function[2][1])
 
+                # Perform axis unit conversions
+                v_axis = self._axis_conversion(*v_axis)
+                x_axis = self._axis_conversion(*x_axis)
+
                 # Create the workspace for function
                 create_workspace = AlgorithmManager.Instance().create('CreateWorkspace')
                 create_workspace.initialize()
@@ -93,7 +98,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
                 create_workspace.setProperty('UnitX', x_axis[1])
                 create_workspace.setProperty('YUnitLabel', function[1])
                 create_workspace.setProperty('VerticalAxisValues', v_axis[0])
-                create_workspace.setProperty('VerticalAxisUnit', 'Empty')
+                create_workspace.setProperty('VerticalAxisUnit', v_axis[1])
                 create_workspace.setProperty('WorkspaceTitle', func_name)
                 create_workspace.execute()
 
@@ -106,12 +111,8 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         out_ws_name = self.getPropertyValue('OutputWorkspace')
         if len(loaded_function_workspaces) == 0:
             raise RuntimeError('Failed to load any functions for data')
-        elif len(functions) == 1:
-            RenameWorkspace(InputWorkspace=loaded_function_workspaces[0],
-                            OutputWorkspace=out_ws_name)
-        else:
-            GroupWorkspaces(InputWorkspaces=loaded_function_workspaces,
-                            OutputWorkspace=out_ws_name)
+        GroupWorkspaces(InputWorkspaces=loaded_function_workspaces,
+                        OutputWorkspace=out_ws_name)
 
         # Set the output workspace
         self.setProperty('OutputWorkspace', out_ws_name)
@@ -173,7 +174,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
         Loads an axis by name from the data directory.
 
         @param axis_name Name of axis to load
-        @return Tuple of (Numpy array of data, unit)
+        @return Tuple of (Numpy array of data, unit, name)
         @exception ValueError If axis is not found
         """
         if axis_name in self._axis_cache:
@@ -212,7 +213,7 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
                         # Now parse the data
                         data = self._load_1d_slice(f_handle, length)
 
-        return (data, unit)
+        return (data, unit, axis_name)
 
 #------------------------------------------------------------------------------
 
@@ -260,6 +261,47 @@ class LoadNMoldyn4Ascii(PythonAlgorithm):
             data[v_idx] = np.array(values)
 
         return data
+
+#------------------------------------------------------------------------------
+
+    def _axis_conversion(self, data, unit, name):
+        """
+        Converts an axis to a Mantid axis type (possibly performing a unit
+        conversion).
+
+        @param data The axis data as Numpy array
+        @param unit The axis unit as read from the file
+        @param name The axis name as read from the file
+        @return Tuple containing updated axis details
+        """
+        logger.debug('Axis for conversion: name={0}, unit={1}'.format(name, unit))
+
+        # Q (nm**-1) to Q (Angstrom**-1)
+        if name.lower() == 'q' and unit.lower() == 'inv_nm':
+            logger.information('Axis {0} will be converted to Q in Angstrom**-1'.format(name))
+            unit = 'MomentumTransfer'
+            data /= sc.nano # nm to m
+            data *= sc.angstrom # m to Angstrom
+
+        # Frequency (THz) to Energy (meV)
+        elif name.lower() == 'frequency' and unit.lower() == 'thz':
+            logger.information('Axis {0} will be converted to energy in meV'.format(name))
+            unit = 'Energy'
+            data *= sc.tera # THz to Hz
+            data *= sc.value('Planck constant in eV s') # Hz to eV
+            data /= sc.milli # eV to meV
+
+        # Time (ps) to TOF (s)
+        elif name.lower() == 'time' and unit.lower() == 'ps':
+            logger.information('Axis {0} will be converted to time in microsecond'.format(name))
+            unit = 'TOF'
+            data *= sc.micro # ps to us
+
+        # No conversion
+        else:
+            unit = 'Empty'
+
+        return (data, unit, name)
 
 #------------------------------------------------------------------------------
 

@@ -70,6 +70,11 @@ void SaveCSV::init() {
   declareProperty("LineSeparator", "\n",
                   "The string to place at the end of lines (default new line\n"
                   "character)");
+  declareProperty(
+      new PropertyWithValue<bool>("SaveXerrors", 0, Direction::Input),
+      "This option saves out the x errors if any are present. If you have x errors\n"
+      "in your workspace and you do not select this option, then the x errors\n"
+      "are not saved to the file.");
 }
 
 /** Executes the algorithm. Retrieve the Filename, separator and Lineseparator
@@ -179,6 +184,11 @@ void SaveCSV::exec() {
       p.report();
     }
 
+    // Potentially save the x errors
+    if (getProperty("SaveXerrors")) {
+      saveXerrors(outCSV_File, localworkspace, numberOfHist);
+    }
+
   } else {
     outCSV_File.close(); // and should probably delete file from disk as well
     throw Exception::NotImplementedError(
@@ -187,6 +197,27 @@ void SaveCSV::exec() {
   outCSV_File.close();
   // only gets here if everything happened normally
   return;
+}
+
+
+void SaveCSV::saveXerrors(std::ofstream& stream, const Mantid::DataObjects::Workspace2D_sptr workspace, const size_t numberOfHist) {
+  // If there isn't a dx values present in the first entry then return
+  if (!workspace->hasDx(0)) {
+    return;
+  }
+  Progress p(this, 0.0, 1.0, numberOfHist);
+  stream << "\nXERRORS\n";
+  for (size_t i = 0; i < numberOfHist; i++) {
+    const MantidVec &dXvalue = workspace->dataDx(i);
+
+    stream << i;
+
+    for (int j = 0; j < (int)dXvalue.size(); j++) {
+      stream<< std::setw(15) << dXvalue[j] << m_separator;
+    }
+    stream << m_lineSeparator;
+    p.report("Saving x errors...");
+  }
 }
 
 } // namespace DataHandling

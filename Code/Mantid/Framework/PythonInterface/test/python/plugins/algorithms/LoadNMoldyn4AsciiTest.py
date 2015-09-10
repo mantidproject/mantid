@@ -29,7 +29,8 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
         self.assertEqual(workspace.getNumberHistograms(), 21)
         self.assertEqual(workspace.blocksize(), 100)
-        self.assertEqual(str(workspace.getAxis(0).getUnit().symbol()), 'ps')
+        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'TOF')
+        self.assertEqual(str(workspace.getAxis(1).getUnit().unitID()), 'MomentumTransfer')
 
 
     def _validate_sqf_ws(self, workspace):
@@ -41,27 +42,34 @@ class LoadNMoldyn4AsciiTest(unittest.TestCase):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))
         self.assertEqual(workspace.getNumberHistograms(), 21)
         self.assertEqual(workspace.blocksize(), 199)
-        self.assertEqual(str(workspace.getAxis(0).getUnit().symbol()), 'THz')
+        self.assertEqual(str(workspace.getAxis(0).getUnit().unitID()), 'Energy')
+        self.assertEqual(str(workspace.getAxis(1).getUnit().unitID()), 'MomentumTransfer')
 
 
     def test_load_single_fqt_function(self):
         """
         Tests loading a single F(Q, t) function.
         """
-        function_ws = LoadNMoldyn4Ascii(Directory=self._data_directory,
-                                        Functions=['fqt_total'],
-                                        OutputWorkspace='__LoadNMoldyn4Ascii_test')
-        self._validate_fqt_ws(function_ws)
+        function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
+                                         Functions=['fqt_total'],
+                                         OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
+        self.assertEqual(len(function_wsg), 1)
+        self.assertTrue(function_wsg.contains('fqt_total'))
+        self._validate_fqt_ws(mtd['fqt_total'])
 
 
     def test_load_single_sqf_function(self):
         """
         Tests loading a single S(Q, f) function.
         """
-        function_ws = LoadNMoldyn4Ascii(Directory=self._data_directory,
-                                        Functions=['sqf_total'],
-                                        OutputWorkspace='__LoadNMoldyn4Ascii_test')
-        self._validate_sqf_ws(function_ws)
+        function_wsg = LoadNMoldyn4Ascii(Directory=self._data_directory,
+                                         Functions=['sqf_total'],
+                                         OutputWorkspace='__LoadNMoldyn4Ascii_test')
+        self.assertTrue(isinstance(function_wsg, WorkspaceGroup))
+        self.assertEqual(len(function_wsg), 1)
+        self.assertTrue(function_wsg.contains('sqf_total'))
+        self._validate_sqf_ws(mtd['sqf_total'])
 
 
     def test_load_multiple_functions_list_short_name(self):

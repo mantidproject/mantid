@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -58,8 +60,14 @@ public:
   /// @return the name of the dimension as can be displayed along the axis
   virtual std::string getName() const = 0;
 
+  /// @return the MDFrame
+  virtual const Geometry::MDFrame& getMDFrame() const = 0;
+
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const = 0;
+
+  /// @return the mdunits of the dimension
+  virtual const Kernel::MDUnit& getMDUnits() const = 0;
 
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various

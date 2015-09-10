@@ -1,45 +1,48 @@
-set ( SRC_FILES
-  src/AlgorithmDialog.cpp
-  src/AlgorithmInputHistory.cpp
-  src/AlgorithmPropertiesWidget.cpp
-  src/AlgorithmRunner.cpp
-  src/BatchAlgorithmRunner.cpp
-  src/BoolPropertyWidget.cpp
-  src/FilePropertyWidget.cpp
-  src/GenericDialog.cpp
-  src/HelpWindow.cpp
-  src/InterfaceFactory.cpp
-  src/InterfaceManager.cpp
-  src/ManageUserDirectories.cpp
-  src/MantidColorMap.cpp
-  src/MantidDialog.cpp
-  src/MantidHelpInterface.cpp
-  src/MantidQwtIMDWorkspaceData.cpp
-  src/MantidQwtWorkspaceData.cpp
-  src/MantidWidget.cpp
-  src/MdConstants.cpp
-  src/MdPlottingCmapsProvider.cpp
-  src/MdSettings.cpp
-  src/Message.cpp
-  src/OptionsPropertyWidget.cpp
-  src/PlotAxis.cpp
-  src/PropertyWidget.cpp
-  src/PropertyWidgetFactory.cpp
-  src/PythonThreading.cpp
-  src/PythonRunner.cpp
-  src/QtSignalChannel.cpp
-  src/QwtRasterDataMD.cpp
-  src/QwtWorkspaceBinData.cpp
-  src/QwtWorkspaceSpectrumData.cpp
-  src/SignalRange.cpp
-  src/ScriptRepositoryView.cpp
-  src/RepoModel.cpp
-  src/SyncedCheckboxes.cpp
-  src/TextPropertyWidget.cpp
-  src/UserSubWindow.cpp
-  src/VatesViewerInterface.cpp
-  src/WorkspaceObserver.cpp
-  src/SelectionNotificationService.cpp
+ set ( SRC_FILES
+	src/AlgorithmDialog.cpp
+	src/AlgorithmInputHistory.cpp
+	src/AlgorithmPropertiesWidget.cpp
+	src/AlgorithmRunner.cpp
+	src/BatchAlgorithmRunner.cpp
+	src/BoolPropertyWidget.cpp
+	src/FilePropertyWidget.cpp
+	src/GenericDialog.cpp
+	src/HelpWindow.cpp
+	src/InterfaceFactory.cpp
+	src/InterfaceManager.cpp
+	src/ManageUserDirectories.cpp
+	src/MantidColorMap.cpp
+	src/MantidDialog.cpp
+	src/MantidHelpInterface.cpp
+	src/MantidQwtIMDWorkspaceData.cpp
+	src/MantidQwtWorkspaceData.cpp
+	src/MantidWidget.cpp
+	src/MdConstants.cpp
+	src/MdPlottingCmapsProvider.cpp
+	src/MdSettings.cpp
+	src/Message.cpp
+	src/OptionsPropertyWidget.cpp
+	src/PlotAxis.cpp
+	src/PowerScaleEngine.cpp
+	src/PropertyWidget.cpp
+	src/PropertyWidgetFactory.cpp
+	src/PythonRunner.cpp
+	src/PythonThreading.cpp
+	src/QtSignalChannel.cpp
+	src/QwtRasterDataMD.cpp
+	src/QwtWorkspaceBinData.cpp
+	src/QwtWorkspaceSpectrumData.cpp
+	src/RepoModel.cpp
+	src/ScaleEngine.cpp
+	src/ScriptRepositoryView.cpp
+	src/SelectionNotificationService.cpp
+	src/SignalBlocker.cpp
+	src/SignalRange.cpp
+	src/SyncedCheckboxes.cpp
+	src/TextPropertyWidget.cpp
+	src/UserSubWindow.cpp
+	src/VatesViewerInterface.cpp
+	src/WorkspaceObserver.cpp
 )
 
 set ( MOC_FILES
@@ -71,32 +74,36 @@ set ( MOC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-  ${MOC_FILES}
-  inc/MantidQtAPI/AlgorithmInputHistory.h
-  inc/MantidQtAPI/AlgorithmRunner.h
-  inc/MantidQtAPI/BatchAlgorithmRunner.h
-  inc/MantidQtAPI/DllOption.h
-  inc/MantidQtAPI/FileDialogHandler.h
-  inc/MantidQtAPI/GraphOptions.h
-  inc/MantidQtAPI/HelpWindow.h
-  inc/MantidQtAPI/InterfaceFactory.h
-  inc/MantidQtAPI/InterfaceManager.h
-  inc/MantidQtAPI/PlotAxis.h
-  inc/MantidQtAPI/MantidColorMap.h
-  inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
-  inc/MantidQtAPI/MantidQwtWorkspaceData.h
-  inc/MantidQtAPI/MdConstants.h
-  inc/MantidQtAPI/MdPlottingCmapsProvider.h
-  inc/MantidQtAPI/MdSettings.h
-  inc/MantidQtAPI/PythonThreading.h
-  inc/MantidQtAPI/PythonSystemHeader.h
-  inc/MantidQtAPI/PropertyWidgetFactory.h
-  inc/MantidQtAPI/QwtRasterDataMD.h
-  inc/MantidQtAPI/QwtWorkspaceBinData.h
-  inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
-  inc/MantidQtAPI/ScriptRepositoryView.h
-  inc/MantidQtAPI/SelectionNotificationService.h
-  inc/MantidQtAPI/SignalRange.h
+	${MOC_FILES}
+	inc/MantidQtAPI/AlgorithmInputHistory.h
+	inc/MantidQtAPI/AlgorithmRunner.h
+	inc/MantidQtAPI/BatchAlgorithmRunner.h
+	inc/MantidQtAPI/DllOption.h
+	inc/MantidQtAPI/FileDialogHandler.h
+	inc/MantidQtAPI/GraphOptions.h
+	inc/MantidQtAPI/HelpWindow.h
+	inc/MantidQtAPI/InterfaceFactory.h
+	inc/MantidQtAPI/InterfaceManager.h
+	inc/MantidQtAPI/MantidColorMap.h
+	inc/MantidQtAPI/MantidQwtIMDWorkspaceData.h
+	inc/MantidQtAPI/MantidQwtWorkspaceData.h
+	inc/MantidQtAPI/MdConstants.h
+	inc/MantidQtAPI/MdPlottingCmapsProvider.h
+	inc/MantidQtAPI/MdSettings.h
+	inc/MantidQtAPI/PlotAxis.h
+	inc/MantidQtAPI/PowerScaleEngine.h
+	inc/MantidQtAPI/PropertyWidgetFactory.h
+	inc/MantidQtAPI/PythonSystemHeader.h
+	inc/MantidQtAPI/PythonThreading.h
+	inc/MantidQtAPI/QwtRasterDataMD.h
+	inc/MantidQtAPI/QwtWorkspaceBinData.h
+	inc/MantidQtAPI/QwtWorkspaceSpectrumData.h
+	inc/MantidQtAPI/ScaleEngine.h
+	inc/MantidQtAPI/ScriptRepositoryView.h
+	inc/MantidQtAPI/SelectionNotificationService.h
+	inc/MantidQtAPI/SignalBlocker.h
+	inc/MantidQtAPI/SignalRange.h
+	inc/MantidQtAPI/qwt_compat.h
 )
 
 set ( UI_FILES
@@ -113,6 +120,7 @@ set( TEST_FILES
    QwtWorkspaceSpectrumDataTest.h
    SelectionNotificationServiceTest.h
    SignalRangeTest.h
+   SignalBlockerTest.h
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
@@ -167,5 +175,5 @@ install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 
 set ( TEST_FILES
-  ScriptRepositoryViewTest.h
+	ScriptRepositoryViewTest.h
 )

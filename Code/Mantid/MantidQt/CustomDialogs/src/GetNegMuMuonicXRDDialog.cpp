@@ -30,7 +30,10 @@ void GetNegMuMuonicXRDDialog::initLayout() {
 
   // assign yPosition member to a new QLineEdit
   yPosition = new QLineEdit();
-
+  //assign GroupWorkspaceName member to a new QLineEdit
+  groupWorkspaceNameInput = new QLineEdit();
+  auto *groupWsInputLabel = new QLabel("OutputWorkspace");
+  groupWorkspaceNameInput->setMaximumWidth(250);
   // Disable all buttons on the periodicTable
   // as we only have a select few that need to be
   // enabled.
@@ -75,6 +78,8 @@ void GetNegMuMuonicXRDDialog::initLayout() {
   main_layout->addWidget(showLegendCheck);
   main_layout->addWidget(yPositionLabel);
   main_layout->addWidget(yPosition);
+  main_layout->addWidget(groupWsInputLabel);
+  main_layout->addWidget(groupWorkspaceNameInput);
   main_layout->addWidget(runButton);
 }
 
@@ -142,6 +147,9 @@ void GetNegMuMuonicXRDDialog::runClicked() {
       // used as default value for yPosition property if the user does not input
       // one.
       storePropertyValue("YAxisPosition", yPosition->placeholderText());
+    }
+    if (validateDialogInput(groupWorkspaceNameInput->text())){
+        storePropertyValue("OutputWorkspace", groupWorkspaceNameInput->text());
     }
     emit validInput();
   }

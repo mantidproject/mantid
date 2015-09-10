@@ -1,5 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
+from testhelpers.mlzhelpers import create_fake_dns_workspace
 from mantid.api import AnalysisDataService
 import numpy as np
 import mantid.simpleapi as api
@@ -10,46 +11,12 @@ class DNSMergeRunsTest(unittest.TestCase):
     workspaces = []
     angles = None
 
-    def _create_fake_workspace(self, wsname, angle):
-        """
-        creates DNS workspace with fake data
-        """
-        ndet = 24
-        dataX = np.zeros(2*ndet)
-        dataX.fill(4.2 + 0.00001)
-        dataX[::2] -= 0.000002
-        dataY = np.ones(ndet)
-        dataE = np.sqrt(dataY)
-        # create workspace
-        api.CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        outws = api.mtd[wsname]
-        api.LoadInstrument(outws, InstrumentName='DNS')
-        p_names = 'wavelength,slit_i_left_blade_position,slit_i_right_blade_position,\
-            slit_i_lower_blade_position,slit_i_upper_blade_position,polarisation,flipper'
-        p_values = '4.2,10,10,5,20,x,ON'
-        api.AddSampleLogMultiple(Workspace=outws, LogNames=p_names, LogValues=p_values, ParseType=True)
-        # rotate instrument component ans set deterota
-        api.RotateInstrumentComponent(outws, "bank0", X=0, Y=1, Z=0, Angle=angle)
-        api.AddSampleLog(outws, LogName='deterota', LogText=str(angle),
-                         LogType='Number', LogUnit='Degrees')
-        # create the normalization workspace
-        dataY.fill(1.0)
-        dataE.fill(1.0)
-        api.CreateWorkspace(OutputWorkspace=wsname + '_NORM', DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        normws = api.mtd[wsname + '_NORM']
-        api.LoadInstrument(normws, InstrumentName='DNS')
-        api.AddSampleLogMultiple(Workspace=normws, LogNames=p_names, LogValues=p_values, ParseType=True)
-
-        return outws
-
     def setUp(self):
         self.workspaces = []
         for i in range(4):
             angle = -7.5 - i*0.5
             wsname = "__testws" + str(i)
-            self._create_fake_workspace(wsname, angle)
+            create_fake_dns_workspace(wsname, angle=angle, loadinstrument=True)
             self.workspaces.append(wsname)
         # create reference values
         angles = np.empty(0)
