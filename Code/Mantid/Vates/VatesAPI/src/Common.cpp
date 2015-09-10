@@ -22,13 +22,13 @@ std::string makeAxisTitle(Dimension_const_sptr dim) {
 
   auto latexSymbol = dim->getMDUnits().getUnitLabel().latex();
   auto asciiSymbol = dim->getMDUnits().getUnitLabel().ascii();
-  auto hasLatexSymbol = asciiSymbol != latexSymbol ? true: false;
+  auto hasLatexSymbol = asciiSymbol != latexSymbol ? true : false;
   std::string symbol;
 
-  if (!hasLatexSymbol) {
-    symbol = convertAxesTitleToLatex(latexSymbol);
-  } else {
+  if (hasLatexSymbol) {
     symbol = latexSymbol;
+  } else {
+    symbol = convertAxesTitleToLatex(latexSymbol);
   }
 
   std::string title = dim->getName();
@@ -40,7 +40,6 @@ std::string makeAxisTitle(Dimension_const_sptr dim) {
 
 std::string convertAxesTitleToLatex(std::string toConvert) {
   std::string converted;
-
   // Check if the input has a unit of A\\^-1: this is converted to \\\\AA^{-1}
   // else
   // Check if the input has a unit of Ang: this is convered to \\\\AA
@@ -54,6 +53,12 @@ std::string convertAxesTitleToLatex(std::string toConvert) {
   } else {
     converted = toConvert;
   }
+
+  // Finally if there are any spaces they will disappear in Mathmode, hence we need to replace
+  // any space with $ $.
+  boost::regex re(" ");
+  converted = boost::regex_replace(converted, re, "$ $");
+
   return converted;
 }
 

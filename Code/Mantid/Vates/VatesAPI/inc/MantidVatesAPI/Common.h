@@ -29,10 +29,12 @@ std::string makeAxisTitle(Dimension_const_sptr dim);
 
 /*
  * For legacy data sets we don't have unique latex labels, but they are rather
- * the same as the ascii string. There are several symbols we need to catch and convert to
- * latex
+ * the same as the ascii string. There are several symbols we need to catch and
+ * convert to latex. If you find other legacy symbols which need conversion,
+ * then add them here.
  * @param input: the input string
- * @returns a converted string with the correct latex if possible, or unconverted
+ * @returns a converted string with the correct latex if possible, or
+ * unconverted
  */
 std::string convertAxesTitleToLatex(std::string toConvert);
 

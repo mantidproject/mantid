@@ -223,7 +223,7 @@ void testDepthChanged()
     TSM_ASSERT_EQUALS("Y Label should match exactly",
                       getStringFieldDataValue(ds, "AxisTitleForY"), "B ($A$)");
     TSM_ASSERT_EQUALS("Z Label should match exactly",
-                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$");
+                      getStringFieldDataValue(ds, "AxisTitleForZ"), "C ($A$)");
   }
 
   void testCanLoadFileBasedOnExtension()
