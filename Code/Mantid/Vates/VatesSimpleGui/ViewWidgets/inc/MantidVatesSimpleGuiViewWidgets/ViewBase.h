@@ -6,7 +6,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
-
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
 
@@ -141,6 +141,8 @@ public:
   void setVisibilityListener();
   /// Undo visibiltiy listener
   void removeVisibilityListener();
+  /// Set color scale lock
+  void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
 
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
@@ -261,6 +263,8 @@ private:
 
   vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
   PyGILStateService m_gilStateStore; ///< Python GIL state storage
+  Mantid::VATES::ColorScaleLock* m_colorScaleLock;
+
 };
 
 }

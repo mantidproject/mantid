@@ -28,6 +28,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
+#include "MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h"
 
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
@@ -260,7 +261,9 @@ void MdViewerWidget::setupUiAndConnections()
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
 
-  pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  //pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  VsiApplyBehaviour* applyBehavior = new VsiApplyBehaviour(&m_colorScaleLock, this);
+
   applyBehavior->registerPanel(this->ui.propertiesPanel);
   VatesParaViewApplication::instance()->setupParaViewBehaviors();
   //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
@@ -361,6 +364,9 @@ ViewBase* MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
     view = NULL;
     break;
   }
+
+  // Set the colorscale lock
+  view->setColorScaleLock(&m_colorScaleLock);
 
   return view;
 }
@@ -978,6 +984,7 @@ void MdViewerWidget::setupPluginMode()
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   this->setColorForBackground();
   this->currentView->render();
   this->setColorMap();
@@ -1014,6 +1021,7 @@ void MdViewerWidget::setColorForBackground()
  */
 void MdViewerWidget::checkForUpdates()
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   if (NULL == src)
   {

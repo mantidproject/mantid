@@ -26,8 +26,7 @@ class DLLExport ColorScaleLockGuard {
 public:
   ColorScaleLockGuard(ColorScaleLock *lock) {
     if (lock->isLocked()) {
-      g_log.warning("Attempted to accept an already locked color scale lock.");
-      m_lock = nullptr;
+      m_lock = NULL;
     } else {
       m_lock = lock;
       m_lock->lock();
@@ -35,7 +34,7 @@ public:
   }
 
   ~ColorScaleLockGuard() {
-    if (m_lock != nullptr) {
+    if (m_lock != NULL) {
       m_lock->unlock();
     }
   }
