@@ -555,7 +555,7 @@ void ColorSelectionWidget::setColorScaleLock(
  */
 bool ColorSelectionWidget::isColorScaleLocked() const {
   if (m_colorScaleLock) {
-    m_colorScaleLock->isLocked();
+    return m_colorScaleLock->isLocked();
   } else {
     return false;
   }
