@@ -439,20 +439,6 @@ namespace MantidQt {
     }
 
     /**
-      Create string of python code to convert to point data, which can be plotted
-      @param wsName : name of workspace to convert to point data
-      @return tuple of strings of python code and output workspace name
-      */
-    std::tuple<std::string, std::string> convertToPointString(const std::string & wsName)
-    {
-      const std::string output_name = wsName + "_plot";
-      std::ostringstream convert_string;
-      convert_string << output_name << " = ConvertToPointData(" << wsName << ")\n";
-
-      return std::make_tuple(convert_string.str(), output_name);
-    }
-
-    /**
      Create string of python code to rebin data in a workspace
      @param rowNo : the number of the row to rebin
      @param runNo : the number of the run to rebin

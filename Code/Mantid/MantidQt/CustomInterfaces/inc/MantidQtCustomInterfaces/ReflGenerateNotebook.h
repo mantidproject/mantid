@@ -92,8 +92,6 @@ namespace MantidQt {
 
     std::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
 
-    std::tuple<std::string, std::string> convertToPointString(const std::string & wsName);
-
     template<typename T, typename A>
     std::string vectorParamString(const std::string & param_name, const std::vector<T,A> &param_vec);
 
