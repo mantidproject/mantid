@@ -40,32 +40,17 @@ void PhaseQuadMuon::init() {
  *
  */
 void PhaseQuadMuon::exec() {
+
   // Get input workspace
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
   // Get input phase table
   API::ITableWorkspace_sptr phaseTable = getProperty("PhaseTable");
 
-  // Get input phase list
-  std::string filename = getPropertyValue("PhaseList");
-
   // Set number of histograms
   m_nHist = static_cast<int>(inputWs->getNumberHistograms());
   // Set number of data points per histogram
   m_nData = static_cast<int>(inputWs->getSpectrum(0)->readY().size());
-
-  // Set time resolution
-  m_res =
-      inputWs->getSpectrum(0)->readX()[1] - inputWs->getSpectrum(0)->readX()[0];
-
-  // Create a deadTimeTable to apply deadtime corrections. It will be filled by
-  // loadPhaseTable or loadPhaseList
-  API::ITableWorkspace_sptr deadTimeTable =
-      API::WorkspaceFactory::Instance().createTable();
-  deadTimeTable->addColumn("int", "Spectrum no");
-  deadTimeTable->addColumn("double", "Deadtime");
-
-  loadPhaseTable(phaseTable, deadTimeTable);
 
   // Create temporary workspace to perform operations on it
   API::MatrixWorkspace_sptr tempWs =
@@ -92,46 +77,6 @@ void PhaseQuadMuon::exec() {
   setProperty("OutputWorkspace", outputWs);
 }
 
-
-//----------------------------------------------------------------------------------------------
-/** Load PhaseTable file to a vector of HistData.
-* @param phaseTable :: [input] phase table containing detector info
-* @param deadTimeTable :: [output] phase table containing dead times
-*/
-void PhaseQuadMuon::loadPhaseTable(API::ITableWorkspace_sptr phaseTable,
-                                   API::ITableWorkspace_sptr deadTimeTable) {
-  if (phaseTable->rowCount()) {
-    if (phaseTable->columnCount() < 4) {
-      throw std::invalid_argument(
-          "PhaseQuad: PhaseTable must contain at least four columns");
-    }
-
-    // Check number of histograms in inputWs match number of detectors in phase
-    // table
-    if (m_nHist != static_cast<int>(phaseTable->rowCount())) {
-      throw std::runtime_error("PhaseQuad: Number of histograms in phase table "
-                               "does not match number of spectra in workspace");
-    }
-
-    for (size_t i = 0; i < phaseTable->rowCount(); ++i) {
-      API::TableRow phaseRow = phaseTable->getRow(i);
-
-      // The first three columns go to m_histData
-      HistData tempHist;
-      tempHist.detOK = phaseRow.Bool(0);
-      tempHist.alpha = phaseRow.Double(1);
-      tempHist.phi = phaseRow.Double(2);
-      m_histData.push_back(tempHist);
-
-      // The last column goes to deadTimeTable
-      API::TableRow deadRow = deadTimeTable->appendRow();
-      deadRow << static_cast<int>(i) + 1 << phaseRow.Double(3);
-    }
-
-  } else {
-    throw std::invalid_argument("PhaseQuad: PhaseTable is empty");
-  }
-}
 
 
 //----------------------------------------------------------------------------------------------
