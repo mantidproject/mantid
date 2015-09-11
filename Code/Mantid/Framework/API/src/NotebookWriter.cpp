@@ -42,7 +42,7 @@ void NotebookWriter::codeCell(Json::Value array_code) {
  *
  * @param string_code :: string containing the python for the code cell
  */
-void NotebookWriter::codeCell(std::string string_code) {
+std::string NotebookWriter::codeCell(std::string string_code) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
@@ -55,6 +55,8 @@ void NotebookWriter::codeCell(std::string string_code) {
   cell_data["outputs"] = Json::Value(Json::arrayValue);
 
   m_cell_buffer.append(cell_data);
+  Json::StyledWriter writer;
+  return writer.write(cell_data);
 }
 
   /**
@@ -80,7 +82,7 @@ void NotebookWriter::markdownCell(Json::Value string_array) {
 *
 * @param string_text :: string containing the python code for the code cell
 */
-void NotebookWriter::markdownCell(std::string string_text) {
+std::string NotebookWriter::markdownCell(std::string string_text) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
@@ -90,6 +92,8 @@ void NotebookWriter::markdownCell(std::string string_text) {
   cell_data["source"] = string_text;
 
   m_cell_buffer.append(cell_data);
+  Json::StyledWriter writer;
+  return writer.write(cell_data);
 }
 
   /**
@@ -124,15 +128,23 @@ void NotebookWriter::headerCode() {
 
   Json::Value import_mantid(Json::arrayValue);
 
-  import_mantid.append(Json::Value("import sys\n"));
-  import_mantid.append(Json::Value("import os\n\n"));
-
-  import_mantid.append(Json::Value("#Tell python where Mantid is installed.\n"));
-  import_mantid.append(Json::Value("#The official packages put this information in an environment variable called \"MANTIDPATH\"\n"));
-  import_mantid.append(Json::Value("sys.path.append(os.environ['MANTIDPATH'])\n\n"));
-
-  import_mantid.append(Json::Value("#We can now import Mantid's Python API\n"));
-  import_mantid.append(Json::Value("from mantid.simpleapi import *"));
+  import_mantid.append(Json::Value("import sys\n"
+                                   "import os\n"
+                                   "\n"
+                                   "#Find where Mantid is installed and tell python.\n"
+                                   "def find_path():\n"
+                                   "    for r,d,f in os.walk(os.path.abspath(os.sep)):\n"
+                                   "        for files in f:\n"
+                                   "            if files == 'MantidPlot.exe' or files == 'MantidPlot' or files == 'MantidPlot.app':\n"
+                                   "                return r\n"
+                                   "\n"
+                                   "mantidPath = 'C://MantidInstall/bin'\n"
+                                   "if os.path.isdir(mantidPath): sys.path.append(mantidPath)\n"
+                                   "else: sys.path.append(find_path())\n"
+                                   "\n"
+                                   "#We can now import Mantid's Python API\n"
+                                   "from mantid.simpleapi import *\n"
+                                   "#If import fails then replace path on line \"mantidPath = ...\" with correct path to the MantidPlot executable"));
 
   codeCell(import_mantid);
 

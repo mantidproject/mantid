@@ -179,10 +179,13 @@ public:
     std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
     std::vector<std::string> notebookLines;
-    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    // Compare line 52 (1 indexed) with expected result
-    TS_ASSERT_EQUALS(notebookLines[70], result)
+    // Compare line with expected result
+    TS_ASSERT_EQUALS(notebookLines[64], result)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -214,10 +217,13 @@ public:
     std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
-    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[70], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[106], result_code)
+    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
+    TS_ASSERT_EQUALS(notebookLines[100], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -258,10 +264,13 @@ public:
     std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
-    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[70], result_markdown)
-    TS_ASSERT_EQUALS(notebookLines[80], result_code)
+    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
+    TS_ASSERT_EQUALS(notebookLines[74], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -290,9 +299,12 @@ public:
     std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
     std::vector<std::string> notebookLines;
-    boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    TS_ASSERT_EQUALS(notebookLines[70], result)
+    TS_ASSERT_EQUALS(notebookLines[64], result)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");

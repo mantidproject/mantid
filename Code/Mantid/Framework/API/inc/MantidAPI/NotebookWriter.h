@@ -42,8 +42,8 @@ public:
   NotebookWriter();
   virtual ~NotebookWriter(){};
 
-  void markdownCell(std::string string_array);
-  void codeCell(std::string string_code);
+  std::string markdownCell(std::string string_array);
+  std::string codeCell(std::string string_code);
   std::string writeNotebook();
 
 private:

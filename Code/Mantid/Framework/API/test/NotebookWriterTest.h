@@ -31,34 +31,30 @@ public:
   {
     std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
     std::string test_data = "Test markdown cell";
-    notebook->markdownCell(test_data);
-
-    std::string notebookText = notebook->writeNotebook();
+    std::string notebookText = notebook->markdownCell(test_data);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     // Test if the markdown cell is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[63], "               \"cell_type\" : \"markdown\",")
+    TS_ASSERT_EQUALS(notebookLines[1], "   \"cell_type\" : \"markdown\",")
     // Test if the test_data string is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[65], "               \"source\" : \"" + test_data + "\"")
+    TS_ASSERT_EQUALS(notebookLines[3], "   \"source\" : \"" + test_data + "\"")
   }
 
   void test_codeCell()
   {
     std::unique_ptr<NotebookWriter> notebook(new NotebookWriter());
     std::string test_data = "print 'Test code cell'";
-    notebook->codeCell(test_data);
-
-    std::string notebookText = notebook->writeNotebook();
+    std::string notebookText = notebook->codeCell(test_data);
 
     std::vector<std::string> notebookLines;
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     // Test if the code cell is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[63], "               \"cell_type\" : \"code\",")
+    TS_ASSERT_EQUALS(notebookLines[1], "   \"cell_type\" : \"code\",")
     // Test if the test_data string is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[65], "               \"input\" : \""+ test_data + "\",")
+    TS_ASSERT_EQUALS(notebookLines[3], "   \"input\" : \""+ test_data + "\",")
   }
 
 };

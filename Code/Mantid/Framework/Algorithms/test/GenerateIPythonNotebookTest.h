@@ -97,10 +97,10 @@ public:
       if (lineCount < 8) {
         TS_ASSERT_EQUALS(result[lineCount], notebookLine)
       }
-      else if (lineCount == 94) {
+      else if (lineCount == 88) {
         TS_ASSERT_EQUALS("               \"input\" : \"Power(InputWorkspace='testGenerateIPythonNotebook', OutputWorkspace='testGenerateIPythonNotebook', Exponent=1.5)\",", notebookLine)
       }
-      else if (lineCount == 70) {
+      else if (lineCount == 64) {
         TS_ASSERT_EQUALS("               \"input\" : \"NonExistingAlgorithm()\",", notebookLine)
       }
       //else if (lineCount == )
