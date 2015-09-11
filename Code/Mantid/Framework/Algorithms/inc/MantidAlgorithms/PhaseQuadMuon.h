@@ -38,10 +38,8 @@ class DLLExport PhaseQuadMuon : public API::Algorithm {
 public:
   /// Default constructor
   PhaseQuadMuon()
-      : API::Algorithm(), m_muLife(2.19703), m_bigNumber(1e10), m_tPulseOver(0),
-        m_pulseTail(182), m_poissonLim(30), m_pulseTwo(0.325), m_nHist(0),
-        m_nData(0), m_res(0.0), m_meanLag(0.0), m_tValid(0), m_isDouble(false),
-        m_tMin(0.0){};
+      : API::Algorithm(), m_muLife(2.19703), m_nHist(0),
+        m_nData(0), m_res(0.0){};
   /// Destructor
   virtual ~PhaseQuadMuon(){};
   /// Algorithm's name for identification overriding a virtual method
@@ -69,22 +67,9 @@ private:
   void init();
   /// Run the algorithm
   void exec();
-  /// Convert X units from micro-secs to nano-secs and shift to start at t=0
-  void convertToNanoSecs(API::MatrixWorkspace_sptr inputWs);
-  /// Convert X units from nano-secs to micro-secs and shift back
-  void convertToMicroSecs(API::MatrixWorkspace_sptr inputWs);
   /// Load the Phase Table
   void loadPhaseTable(API::ITableWorkspace_sptr phaseTable,
                       API::ITableWorkspace_sptr deadTimeTable);
-  /// Load the Phase List
-  void loadPhaseList(const std::string &filename,
-                     API::ITableWorkspace_sptr deadTimeTable);
-  /// Apply dead time correction
-  void deadTimeCorrection(API::MatrixWorkspace_sptr inputWs,
-                          API::ITableWorkspace_sptr deadTimeTable,
-                          API::MatrixWorkspace_sptr &tempWs);
-  /// Rescale detector efficiency to maximum value
-  void normaliseAlphas(std::vector<HistData> &m_histData);
   /// Remove exponential decay from input histograms
   void loseExponentialDecay(API::MatrixWorkspace_sptr tempWs);
   /// Create squashograms
@@ -94,32 +79,12 @@ private:
   void regainExponential(API::MatrixWorkspace_sptr outputWs);
   /// Muon lifetime
   double m_muLife;
-  /// Maximum counts expected
-  double m_bigNumber;
-  /// Pulse definitely finished by here (bin no)
-  int m_tPulseOver;
-  /// Number of bins to exclude after lag-time (ie pulse arrival time)
-  double m_pulseTail;
-  /// Poisson limit
-  double m_poissonLim;
-  /// Time (microsec) by which a well-def'd point in the first proton/pion pulse
-  /// leads its counterpart in the second
-  double m_pulseTwo;
   /// Number of input histograms
   int m_nHist;
   /// Number of datapoints per histogram
   int m_nData;
   /// Time resolution
   double m_res;
-  /// Mean of time-shifts
-  double m_meanLag;
-  /// Good muons from here on (bin no). Unused now but can be needed in the
-  /// future
-  int m_tValid;
-  /// Double-pulse flag
-  bool m_isDouble;
-  /// Minimum value of t
-  double m_tMin;
   /// Vector of detector data
   std::vector<HistData> m_histData;
 };
