@@ -6,6 +6,7 @@
 
 #include "ApplicationWindow.h"
 #include "ScriptFileInterpreter.h"
+#include "ScriptOutputDisplay.h"
 
 #include "ScriptingEnv.h"
 #include "ScriptingLangDialog.h"
@@ -102,13 +103,14 @@ void MultiTabScriptInterpreter::newTab(int index, const QString &filename) {
   setTabTitle(scriptRunner, filename); // Make sure the tooltip is set
   scriptRunner->setFocus();
   scriptRunner->editor()->zoomIn(globalZoomLevel());
-  connect(scriptRunner->editor(), SIGNAL(textZoomedIn()), this,
+  scriptRunner->messages()->setZoom(globalZoomLevel());
+  connect(scriptRunner, SIGNAL(textZoomedIn()), this,
           SLOT(zoomInAllButCurrent()));
-  connect(scriptRunner->editor(), SIGNAL(textZoomedIn()), this,
+  connect(scriptRunner, SIGNAL(textZoomedIn()), this,
           SLOT(trackZoomIn()));
-  connect(scriptRunner->editor(), SIGNAL(textZoomedOut()), this,
+  connect(scriptRunner, SIGNAL(textZoomedOut()), this,
           SLOT(zoomOutAllButCurrent()));
-  connect(scriptRunner->editor(), SIGNAL(textZoomedOut()), this,
+  connect(scriptRunner, SIGNAL(textZoomedOut()), this,
           SLOT(trackZoomOut()));
 
   emit newTabCreated(index);
@@ -303,15 +305,24 @@ void MultiTabScriptInterpreter::clearScriptVariables() {
 }
 
 /// Tracks the global zoom level
-void MultiTabScriptInterpreter::trackZoomIn() { ++m_globalZoomLevel; }
+void MultiTabScriptInterpreter::trackZoomIn()
+{
+  if (m_globalZoomLevel < 20)
+    ++m_globalZoomLevel;
+}
 
 /// Tracks the global zoom level
-void MultiTabScriptInterpreter::trackZoomOut() { --m_globalZoomLevel; }
+void MultiTabScriptInterpreter::trackZoomOut()
+{
+  if (m_globalZoomLevel > -10)
+    --m_globalZoomLevel;
+}
 
 /// Increase font size on all tabs
 void MultiTabScriptInterpreter::zoomIn() {
   for (int index = 0; index < count(); ++index) {
     interpreterAt(index)->editor()->zoomIn();
+    interpreterAt(index)->messages()->zoom(1);
   }
 }
 
@@ -321,8 +332,10 @@ void MultiTabScriptInterpreter::zoomIn() {
 void MultiTabScriptInterpreter::zoomInAllButCurrent() {
   int skipIndex = this->currentIndex();
   for (int i = 0; i < count(); ++i) {
-    if (i != skipIndex)
+    if (i != skipIndex) {
       interpreterAt(i)->editor()->zoomIn();
+      interpreterAt(i)->messages()->zoom(1);
+    }
   }
 }
 
@@ -330,6 +343,7 @@ void MultiTabScriptInterpreter::zoomInAllButCurrent() {
 void MultiTabScriptInterpreter::zoomOut() {
   for (int i = 0; i < count(); ++i) {
     interpreterAt(i)->editor()->zoomOut();
+    interpreterAt(i)->messages()->zoom(-1);
   }
 }
 
@@ -339,8 +353,10 @@ void MultiTabScriptInterpreter::zoomOut() {
 void MultiTabScriptInterpreter::zoomOutAllButCurrent() {
   int skipIndex = this->currentIndex();
   for (int i = 0; i < count(); ++i) {
-    if (i != skipIndex)
+    if (i != skipIndex) {
       interpreterAt(i)->editor()->zoomOut();
+      interpreterAt(i)->messages()->zoom(-1);
+    }
   }
 }
 
@@ -351,6 +367,7 @@ void MultiTabScriptInterpreter::resetZoom() {
   m_globalZoomLevel = 0;
   for (int i = 0; i < count(); ++i) {
     interpreterAt(i)->editor()->zoomTo(m_globalZoomLevel);
+    interpreterAt(i)->messages()->setZoom(m_globalZoomLevel);
   }
 }
 

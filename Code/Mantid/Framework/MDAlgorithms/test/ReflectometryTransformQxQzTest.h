@@ -2,7 +2,6 @@
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
 
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/CalculateReflectometryQxQz.h"
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
 
 #include <cxxtest/TestSuite.h>

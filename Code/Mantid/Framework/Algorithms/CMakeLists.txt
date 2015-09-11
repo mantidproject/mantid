@@ -179,7 +179,6 @@ set ( SRC_FILES
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
-	src/ProcessIndirectFitParameters.cpp
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
@@ -217,6 +216,8 @@ set ( SRC_FILES
 	src/RingProfile.cpp
 	src/SANSCollimationLengthEstimator.cpp
 	src/SANSDirectBeamScaling.cpp
+	src/SampleCorrections/MayersSampleCorrection.cpp
+	src/SampleCorrections/MayersSampleCorrectionStrategy.cpp
 	src/SassenaFFT.cpp
 	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
@@ -452,7 +453,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
-	inc/MantidAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
@@ -490,6 +490,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RingProfile.h
 	inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h
+	inc/MantidAlgorithms/SampleCorrections/MayersSampleCorrectionStrategy.h
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
@@ -696,6 +698,8 @@ set ( TEST_FILES
 	MaskBinsFromTableTest.h
 	MaskBinsTest.h
 	MaxMinTest.h
+	MayersSampleCorrectionStrategyTest.h
+	MayersSampleCorrectionTest.h
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
@@ -724,7 +728,6 @@ set ( TEST_FILES
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
-	ProcessIndirectFitParametersTest.h
 	Q1D2Test.h
 	Q1DWeightedTest.h
 	QxyTest.h

@@ -179,10 +179,12 @@ namespace Mantid
      */
     void MDEWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet)
     {
-      vtkFieldData* fieldData = visualDataSet->GetFieldData();
-      setAxisLabel("AxisTitleForX", axisLabels[0], fieldData);
-      setAxisLabel("AxisTitleForY", axisLabels[1], fieldData);
-      setAxisLabel("AxisTitleForZ", axisLabels[2], fieldData);
+      if (!vtkPVChangeOfBasisHelper::AddBasisNames(
+              visualDataSet, axisLabels[0].c_str(), axisLabels[1].c_str(),
+              axisLabels[2].c_str())) {
+        g_log.warning("The basis names could not be added to the field data of "
+                      "the data set.\n");
+      }
     }
 
     /**
