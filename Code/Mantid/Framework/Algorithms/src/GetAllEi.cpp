@@ -57,32 +57,60 @@ namespace Mantid {
         wsIndex = inputWS->getIndexFromSpectrumNumber(specNum);
       }
 
-      double chop_speed,chop_delay;
-      find_chop_speed_and_delay(inputWS,chop_speed,chop_delay);
+      double chopSpeed,chopDelay;
+      find_chop_speed_and_delay(inputWS,chopSpeed,chopDelay);
+
+      ////---> recalculate chopper delay to monitor position:
+      auto pInstrument = inputWS->getInstrument();
+      auto nChoppers = pInstrument->getNumberOfChopperPoints();
+
+      // get last chopper.
+      /*
+      if( nChoppers==0)throw std::runtime_error("Insturment does not have any choppers defined");
+
+      auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
+      auto moderator   = pInstrument->getSource();
+      double chopDistance  = lastChopper->getDistance(*moderator);
+      double velocity  = chopDistance/chopDelay;
+
+      auto detector1   = inputWS->getDetector(wsIndex);
+      double mon1Distance = detector1->getDistance(*moderator);
+      double TOF0      = mon1Distance/velocity;
+      ///<---------------------------------------------------
+      */
+      // meanwhile assume detector located at monitor
+      auto moderator   = pInstrument->getSource();
+      double mon1Distance = detector1->getDistance(*moderator);
+
 
     }
     /**Return average time series log value for the appropriately filtered log
     @param inputWS      -- shared pointer to the input workspace containing
-                           the log to process
+    the log to process
     @param propertyName -- log name
     @param splitter     -- array of Kernel::splittingInterval data, used to
-                           filter input events or empty array to use 
-                           experiment start/end times.
+    filter input events or empty array to use 
+    experiment start/end times.
     */
     double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
       const std::string &propertyName,std::vector<Kernel::SplittingInterval> &splitter){
 
         const std::string LogName = this->getProperty(propertyName);
         auto pIProperty  = (inputWS->run().getProperty(LogName));
+
+        // this will always provide a defined pointer as this has been verified in validator.
         auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pIProperty);
 
-        // this will always provide a defined pointer as this has been verified earlier.
         if(splitter.size()==0){
           auto TimeStart = inputWS->run().startTime();
           auto TimeEnd   = inputWS->run().endTime();
           pTimeSeries->filterByTime(TimeStart,TimeEnd);
         }else{
           pTimeSeries->filterByTimes(splitter);
+        }
+        if(pTimeSeries->size() == 0){
+          throw std::runtime_error("Can not find average value for log: "+LogName+
+            " As no valid log values are found.");
         }
 
         return pTimeSeries->getStatistics().mean;
@@ -95,17 +123,83 @@ namespace Mantid {
     void GetAllEi::find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
       double &chop_speed,double &chop_delay){
 
+        //TODO: Make it dependent on inputWS time range
+        //const double tolerance(1.e-6);
+        const double tolerance(0);
+
         std::vector<Kernel::SplittingInterval> splitter;
         if(m_useFilterLog){
-          const std::string ChopDelayLogName = this->getProperty("FilterBaseLog");
+          const std::string FilterLogName = this->getProperty("FilterBaseLog");
+          // pointer will not be null as this has been verified in validators
+          auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>
+            (inputWS->run().getProperty(FilterLogName));
+
+          // Define selecting function
+          bool inSelection(false);
+          // time interval to select (start-end)
+          Kernel::DateAndTime startTime,endTime;
+          /**Select time interval on the basis of previous time interval state */
+          auto SelectInterval = [&](const Kernel::DateAndTime &time, double value){
+
+            endTime = time;
+            if(value>0){
+              if (!inSelection){
+                startTime = time+tolerance;
+              }
+              inSelection = true;
+            }else{
+              if (inSelection){
+                inSelection = false;
+                if(endTime>startTime) return true;
+              }
+            }
+            return false;
+          };
+          //
+          // Analyze filtering log
+          auto dateAndTimes = pTimeSeries->valueAsCorrectMap();
+          auto it = dateAndTimes.begin();
+          // initialize selection log
+          SelectInterval(it->first,it->second);
+          if(dateAndTimes.size()==1){
+            if(inSelection){
+              startTime = inputWS->run().startTime();
+              endTime    = inputWS->run().endTime();
+              Kernel::SplittingInterval interval(startTime, endTime, 0);
+              splitter.push_back(interval);
+            }else{
+              throw std::runtime_error("filter log :"+FilterLogName+" filters all data points. Nothing to do");
+            }
+          }
+
+          it++;
+          for (; it != dateAndTimes.end(); ++it) {
+            if(SelectInterval(it->first,it->second)){
+              Kernel::SplittingInterval interval(startTime, endTime - tolerance, 0);
+              splitter.push_back(interval);
+            }
+          }
+          // final interval
+          if(inSelection && (endTime>startTime)){
+            Kernel::SplittingInterval interval(startTime, endTime - tolerance, 0);
+            splitter.push_back(interval);
+          }
         }
 
 
         chop_speed = this->getAvrgLogValue(inputWS,"ChopperSpeedLog",splitter);
-        chop_delay = this->getAvrgLogValue(inputWS,"ChopperDelayLog",splitter);
+        chop_speed = std::fabs(chop_speed);
+        if(chop_speed <1.e-7){
+          throw std::runtime_error("Chopper speed can not be zero ");
+        }
+        chop_delay = std::fabs(this->getAvrgLogValue(inputWS,"ChopperDelayLog",splitter));
 
-        //auto goodCurrentMap = pGoodCurProp->valueAsMap();
-
+        // process chopper delay in the units of degree (phase)
+        auto pProperty  = (inputWS->run().getProperty(this->getProperty("ChopperDelayLog")));
+        std::string units = pProperty->units();
+        if (units=="deg" || units.c_str()[0] == -80){
+          chop_delay*=1.e+6/(360.*chop_speed); // conver in uSec
+        }
 
     }
 

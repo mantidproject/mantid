@@ -50,7 +50,8 @@
     </parameter>
     <parameter name="Delay (us)">
       <logfile id="fermi_delay" extract-single-value-as="last_value" />
-      <description is="Delay is the time chopper waits for...? (test description)"/>
+      <description is="Delay is the time between the moment when beam hits moderator and the moment, 
+	  when neutrom passes through chopper first time."/>
     </parameter>
   </component>
   <type name="fermi-chopper" is="chopper">
