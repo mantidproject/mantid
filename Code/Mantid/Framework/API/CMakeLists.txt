@@ -123,6 +123,7 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
+	src/WorkspaceValidators.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp

@@ -6,7 +6,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
-
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
 
@@ -143,6 +143,8 @@ public:
   void removeVisibilityListener();
   /// Set axes Grid
   void setAxesGrid(bool onOff);
+  /// Set color scale lock
+  void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
 
@@ -266,6 +268,8 @@ private:
 
   vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
   RecursivePythonGIL m_pythonGIL;
+  Mantid::VATES::ColorScaleLock* m_colorScaleLock;
+
 };
 
 }

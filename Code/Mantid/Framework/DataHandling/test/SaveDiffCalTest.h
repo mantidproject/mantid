@@ -38,7 +38,7 @@ public:
   }
 
   Instrument_sptr createInstrument() {
-      return ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK, false);
+      return ComponentCreationHelper::createTestInstrumentCylindrical(NUM_BANK);
   }
 
   GroupingWorkspace_sptr createGrouping(Instrument_sptr instr) {

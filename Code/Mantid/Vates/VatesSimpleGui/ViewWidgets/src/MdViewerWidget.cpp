@@ -28,6 +28,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
+#include "MantidVatesSimpleGuiViewWidgets/VsiApplyBehaviour.h"
 
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
@@ -262,7 +263,9 @@ void MdViewerWidget::setupUiAndConnections()
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
 
-  pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  //pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  VsiApplyBehaviour* applyBehavior = new VsiApplyBehaviour(&m_colorScaleLock, this);
+
   applyBehavior->registerPanel(this->ui.propertiesPanel);
   VatesParaViewApplication::instance()->setupParaViewBehaviors();
   //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
@@ -276,6 +279,10 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
+
+  // Add the color scale lock to the ColoSelectionWidget, which should
+  // now be initialized
+  ui.colorSelectionWidget->setColorScaleLock(&m_colorScaleLock);
 }
 
 void MdViewerWidget::panelChanged()
@@ -359,6 +366,9 @@ ViewBase* MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
     view = NULL;
     break;
   }
+
+  // Set the colorscale lock
+  view->setColorScaleLock(&m_colorScaleLock);
 
   return view;
 }
@@ -717,6 +727,7 @@ void MdViewerWidget::renderingDone()
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
   ScopedPythonGIL gil;
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the
   //             VSI window to not close properly. Moving it here ensures that we have the switch, but
   //             after the window is started again.
@@ -986,6 +997,7 @@ void MdViewerWidget::setupPluginMode()
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   this->setColorForBackground();
   this->currentView->render();
   this->setColorMap();
@@ -1022,6 +1034,7 @@ void MdViewerWidget::setColorForBackground()
  */
 void MdViewerWidget::checkForUpdates()
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
   if (NULL == src)
   {

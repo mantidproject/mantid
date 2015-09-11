@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -69,7 +70,7 @@ ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManag
   QWidget(parent), m_rebinnedSourcesManager(rebinnedSourcesManager),
   m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi"),
   m_vtkConnections(vtkSmartPointer<vtkEventQtSlotConnect>::New()),
-  m_pythonGIL()
+  m_pythonGIL(), m_colorScaleLock(NULL)
 {
 }
 
@@ -904,6 +905,15 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
   backgroundRgbProvider.observe(this->getView());
 }
 
+
+/**
+ * Set color scale lock
+ * @param colorScaleLock: the color scale lock
+ */
+void ViewBase::setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock) {
+  m_colorScaleLock = colorScaleLock;
+}
+
 /**
  * React to a change of the visibility of a representation of a source.
  * This can be a change of the status if the "eye" symbol in the PipelineBrowserWidget
@@ -913,6 +923,7 @@ void ViewBase::setColorForBackground(bool useCurrentColorSettings)
  */
 void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
 {
+  Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(m_colorScaleLock);
   // Reset the colorscale if it is set to autoscale
   if (colorUpdater.isAutoScale())
   {

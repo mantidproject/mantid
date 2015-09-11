@@ -144,7 +144,7 @@ class ResNorm(PythonAlgorithm):
         NormaliseToUnity(InputWorkspace=self._res_ws,
                          OutputWorkspace=norm_res_ws)
 
-        ws_name = '__ResNorm_res_%s_%dspec' % (self._res_ws, num_hist)
+        ws_name = '%s' % (self._res_ws)
 
         for idx in range(num_hist):
             input_ws_1 = ws_name
