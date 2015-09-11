@@ -10,6 +10,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 
 #include "boost/shared_ptr.hpp"
 
@@ -159,6 +160,7 @@ private:
   RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
   ColorMapEditorPanel* m_colorMapEditorPanel; ///< Holder for the color map editor panel.
+  Mantid::VATES::ColorScaleLock m_colorScaleLock; ///< Holds a color scale lock object
 
   /// Holds the 'visual state' of the views. This relies on Load/SaveXMLState which
   /// produce/consume a vtk XML tree object. Otherwise, the properties to save would be,
