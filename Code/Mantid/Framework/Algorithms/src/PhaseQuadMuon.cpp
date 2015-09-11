@@ -28,8 +28,8 @@ void PhaseQuadMuon::init() {
 
   declareProperty(
       new API::WorkspaceProperty<API::ITableWorkspace>(
-          "PhaseTable", "", Direction::Input, API::PropertyMode::Optional),
-      "Name of the Phase Table");
+          "DetectorTable", "", Direction::Input, API::PropertyMode::Optional),
+      "Name of the table containing detector phases");
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
@@ -45,12 +45,7 @@ void PhaseQuadMuon::exec() {
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
   // Get input phase table
-  API::ITableWorkspace_sptr phaseTable = getProperty("PhaseTable");
-
-  // Set number of histograms
-  m_nHist = static_cast<int>(inputWs->getNumberHistograms());
-  // Set number of data points per histogram
-  m_nData = static_cast<int>(inputWs->getSpectrum(0)->readY().size());
+  API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
 
   // Create temporary workspace to perform operations on it
   API::MatrixWorkspace_sptr tempWs =

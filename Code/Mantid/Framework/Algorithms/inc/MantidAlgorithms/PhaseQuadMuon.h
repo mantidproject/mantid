@@ -37,16 +37,14 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport PhaseQuadMuon : public API::Algorithm {
 public:
   /// Default constructor
-  PhaseQuadMuon()
-      : API::Algorithm(), m_muLife(2.19703), m_nHist(0),
-        m_nData(0), m_res(0.0){};
+  PhaseQuadMuon() {};
   /// Destructor
   virtual ~PhaseQuadMuon(){};
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "PhaseQuad"; }
   /// Summary of algorithm's purpose
   virtual const std::string summary() const {
-    return "Calculate Muon squashograms from InputWorkspace and PhaseTable/PhaseList.";
+    return "Calculate Muon squashograms from InputWorkspace and DetectorPhases.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -55,21 +53,10 @@ public:
   virtual const std::string category() const { return "Muon"; }
 
 private:
-  class HistData {
-  public:
-    bool detOK;   // Detector is OK
-    double n0;    // Detector n0
-    double alpha; // Detector efficiency
-    double phi;   // Detector phase
-  };
-
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
-  /// Load the Phase Table
-  void loadPhaseTable(API::ITableWorkspace_sptr phaseTable,
-                      API::ITableWorkspace_sptr deadTimeTable);
   /// Remove exponential decay from input histograms
   void loseExponentialDecay(API::MatrixWorkspace_sptr tempWs);
   /// Create squashograms
@@ -77,16 +64,6 @@ private:
               API::MatrixWorkspace_sptr outputWs);
   /// Put back in exponential decay
   void regainExponential(API::MatrixWorkspace_sptr outputWs);
-  /// Muon lifetime
-  double m_muLife;
-  /// Number of input histograms
-  int m_nHist;
-  /// Number of datapoints per histogram
-  int m_nData;
-  /// Time resolution
-  double m_res;
-  /// Vector of detector data
-  std::vector<HistData> m_histData;
 };
 
 } // namespace Algorithms
