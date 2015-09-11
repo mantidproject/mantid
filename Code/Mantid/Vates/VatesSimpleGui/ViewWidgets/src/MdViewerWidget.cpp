@@ -711,6 +711,7 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
+    Mantid::VATES::ColorScaleLockGuard colorScaleLockGuard(&m_colorScaleLock);
     this->setColorMap(); // Load the default color map
     this->currentView->setColorsForView(this->ui.colorSelectionWidget);
     this->viewSwitched = false;
