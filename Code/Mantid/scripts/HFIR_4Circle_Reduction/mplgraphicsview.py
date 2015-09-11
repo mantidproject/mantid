@@ -186,6 +186,7 @@ class IndicatorManager(object):
         :param line_id:
         :return:
         """
+        assert isinstance(line_id, None)
         return '--'
 
     def get_live_indicator_ids(self):
@@ -262,7 +263,7 @@ class IndicatorManager(object):
         :return:
         """
         for i_id in self._lineManager.keys():
-            # FIXME - Need a new flag for direction of the indicating line, vertical or horizontal
+            # NEXT - Need a new flag for direction of the indicating line, vertical or horizontal
             if True:
                 self._lineManager[i_id][1][0] = y_range[0]
                 self._lineManager[i_id][1][-1] = y_range[1]
@@ -360,6 +361,9 @@ class MplGraphicsView(QtGui.QWidget):
         :param color:
         :return:
         """
+        if master_line is not None:
+            raise RuntimeError('Implement how to use master_line ASAP.')
+
         x_min, x_max = self._myCanvas.getXLimit()
         if x is None:
             x = (x_min + x_max) * 0.5
@@ -599,7 +603,7 @@ class MplGraphicsView(QtGui.QWidget):
         else:
             # 2-way
             canvas_line_index_h, canvas_line_index_v = self._myIndicatorsManager.get_canvas_line_index(i_key)
-            h_vec_set, v_vec_set = self._myIndicatorsManager.get_2way_data(i_key)
+            # h_vec_set, v_vec_set = self._myIndicatorsManager.get_2way_data(i_key)
 
             self._myCanvas.updateLine(ikey=canvas_line_index_h, vecx=None, vecy=None, linecolor=color)
             self._myCanvas.updateLine(ikey=canvas_line_index_v, vecx=None, vecy=None, linecolor=color)
@@ -610,7 +614,7 @@ class MplGraphicsView(QtGui.QWidget):
         """ Get position (x or y) of the indicator
         :return:
         """
-        # TODO - Consider a better and more consistent return
+        # NEXT - Consider a better and more consistent return
         vec_x, vec_y = self._myIndicatorsManager.get_data(indicator_key)
         if vec_x[0] == vec_x[1]:
             return vec_x[0]
@@ -662,7 +666,7 @@ class MplGraphicsView(QtGui.QWidget):
         self._myLineMarkerColorIndex = 0
         return
 
-    # FIXME - Find out difference between setXYLimit() and setXYLimits()
+    # NEXT-Urgent! - Find out difference between setXYLimit() and setXYLimits()
     def setXYLimit(self, xmin, xmax, ymin, ymax):
         """ Set X-Y limit automatically
         """

@@ -1,4 +1,4 @@
-#pylint: disable=C0103,R0902,R0904,R0913
+#pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621
 ################################################################################
 #
 # Controlling class
@@ -212,6 +212,8 @@ class CWSCDReductionControl(object):
         self._myPeakInfoDict = dict()
         # Last UB matrix calculated
         self._myLastPeakUB = None
+        # Flag for data storage
+        self._cacheDataOnly = False
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
@@ -632,8 +634,8 @@ class CWSCDReductionControl(object):
         :return: (Boolean, Object) - Boolean = True,  Object = ??? - Boolean = False, Object = error message (str)
         """
         # Check input
-        assert isinstance(ub_peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
-        assert isinstance(target_peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
+        assert isinstance(ub_peak_ws, mantid.dataobjects.PeaksWorkspace)
+        assert isinstance(target_peak_ws, mantid.dataobjects.PeaksWorkspace)
 
         # Get UB matrix
         if DebugMode is True:
@@ -697,7 +699,7 @@ class CWSCDReductionControl(object):
 
         # Get spice table
         spice_table_ws = self._get_spice_workspace(exp_no, scan_no)
-        assert isinstance(spice_table_ws, mantid.dataobjects._dataobjects.TableWorkspace)
+        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
         spice_table_name = spice_table_ws.name()
 
         # Load SPICE Pt. file
@@ -904,7 +906,7 @@ class CWSCDReductionControl(object):
             matrix_ws = AnalysisDataService.retrieve(raw_ws)
         else:
             matrix_ws = raw_ws
-        assert isinstance(matrix_ws, mantid.dataobjects._dataobjects.Workspace2D)
+        assert isinstance(matrix_ws, mantid.dataobjects.Workspace2D)
 
         self._myRawDataWSDict[(exp_no, scan_no, pt_no)] = matrix_ws
 
@@ -921,7 +923,7 @@ class CWSCDReductionControl(object):
         """
         # Check input
         print '[DB] Type of md_ws is %s.' % str(type(md_ws))
-        assert isinstance(md_ws, mantid.dataobjects._dataobjects.MDEventWorkspace)
+        assert isinstance(md_ws, mantid.dataobjects.MDEventWorkspace)
 
         assert isinstance(exp_no, int)
         assert isinstance(scan_no, int)
@@ -941,7 +943,7 @@ class CWSCDReductionControl(object):
         :return:
         """
         # Check
-        assert isinstance(peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
+        assert isinstance(peak_ws, mantid.dataobjects.PeaksWorkspace)
 
         assert isinstance(exp_number, int)
         assert isinstance(scan_number, int)
@@ -957,7 +959,7 @@ class CWSCDReductionControl(object):
         """
         assert isinstance(exp_no, int)
         assert isinstance(scan_no, int)
-        assert isinstance(spice_table_ws, mantid.dataobjects._dataobjects.TableWorkspace)
+        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace)
         self._mySpiceTableDict[(exp_no, scan_no)] = spice_table_ws
 
         return
@@ -981,7 +983,7 @@ class CWSCDReductionControl(object):
         """
         try:
             ws = self._myRawDataWSDict[(exp_no, scan_no, pt_no)]
-            assert isinstance(ws, mantid.dataobjects._dataobjects.Workspace2D)
+            assert isinstance(ws, mantid.dataobjects.Workspace2D)
         except KeyError:
             return None
 
