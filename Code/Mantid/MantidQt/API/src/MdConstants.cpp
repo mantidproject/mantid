@@ -178,7 +178,7 @@ namespace MantidQt
      * Get the number of events normalization
      * @returns the number of events normalization
      */
-    QString getNumberEventNormalization() const {
+    QString MdConstants::getNumberEventNormalization() const {
       return m_numberEventNormalization;
     }
 
@@ -186,7 +186,7 @@ namespace MantidQt
      * Get no normalization
      * @returns the no normalization
      */
-    QString getNoNormalization() const {
+    QString MdConstants::getNoNormalization() const {
       return m_noNormalization;
     }
 

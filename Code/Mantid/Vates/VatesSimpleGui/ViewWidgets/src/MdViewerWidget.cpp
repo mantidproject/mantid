@@ -1661,7 +1661,7 @@ void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views v
  */
 void MdViewerWidget::onDefaultNormalizationChanged() {
   // Get current text and save it.
-  mdSettings.setUserSettingsNormalization(ui.defaultNormalization->currentText());
+  mdSettings.setUserSettingNormalization(ui.defaultNormalization->currentText());
 }
 
 /**
@@ -1669,9 +1669,9 @@ void MdViewerWidget::onDefaultNormalizationChanged() {
  */
 void MdViewerWidget::setupDefaultNormalizations() {
   auto normalizations = mdConstants.getAllNormalizations();
-  ui.defaultNormalization->addItems(views);
+  ui.defaultNormalization->addItems(normalizations);
 
-  auto indexDefaultNormalization = ui.defaultNormalization->findData(mdSettings.getUserSettingsNormalization(), Qt::DisplayRole);
+  auto indexDefaultNormalization = ui.defaultNormalization->findData(mdSettings.getUserSettingNormalization(), Qt::DisplayRole);
 
   if (indexDefaultNormalization != -1)
   {

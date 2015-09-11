@@ -106,7 +106,7 @@ namespace MantidQt
         QString m_techniqueDependence;
 
         QString m_autoNormalization;
-        QString m_volumneNormalization;
+        QString m_volumeNormalization;
         QString m_numberEventNormalization;
         QString m_noNormalization;
 
