@@ -168,7 +168,7 @@ class PeakInfo(object):
             k = float(int(matrix_ws.run().getProperty('_k').value))
             l = float(int(matrix_ws.run().getProperty('_l').value))
 
-        self._myPeak.set_hkl_raw_data(h, k, l)
+        self._myPeak.setHKL(h, k, l)
 
         return
 
@@ -219,7 +219,7 @@ class CWSCDReductionControl(object):
         :param exp_number:
         :param scan_number:
         :param pt_number:
-        :return:
+        :return: (boolean, PeakInfo/string)
         """
         has_peak_ws, peak_ws = self.get_ub_peak_ws(exp_number, scan_number, pt_number)
         if has_peak_ws is False:
@@ -271,15 +271,17 @@ class CWSCDReductionControl(object):
                                         OutputWorkspace=ub_peak_ws_name)
 
         for i_peak_info in xrange(1, len(peak_info_list)):
-            # Set HKL
+            # Set HKL as optional
+            peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
+            """
             matrix_ws = peak_info_list[i_peak_info].get_raw_data_ws()
             h = float(int(matrix_ws.run().getProperty('_h').value))
             k = float(int(matrix_ws.run().getProperty('_k').value))
             l = float(int(matrix_ws.run().getProperty('_l').value))
 
-            peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
             peak = peak_ws.getPeak(0)
-            peak.set_hkl_raw_data(h, k, l)
+            peak.setHKL(h, k, l)
+            """
 
             # Combine peak workspace
             ub_peak_ws = api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws,

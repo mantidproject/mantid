@@ -26,6 +26,38 @@ class UBMatrixPeakTable(base.NTableWidget):
 
         return
 
+    def get_exp_info(self, row_index):
+        """
+        Get experiment information from a row
+        :return:
+        """
+        assert isinstance(row_index, int)
+
+        scan_number = self.get_cell_value(row_index, 0)
+        assert isinstance(scan_number, int)
+        pt_number = self.get_cell_value(row_index, 1)
+        assert isinstance(pt_number, int)
+
+        return scan_number, pt_number
+
+    def get_hkl(self, row_index):
+        """
+        Get reflection's miller index
+        :param row_index:
+        :return:
+        """
+        assert isinstance(row_index, int)
+
+        h = self.get_cell_value(row_index, 2)
+        k = self.get_cell_value(row_index, 3)
+        l = self.get_cell_value(row_index, 4)
+
+        assert isinstance(h, float)
+        assert isinstance(k, float)
+        assert isinstance(l, float)
+
+        return h, k, l
+
     def is_selected(self, row_index):
         """
 

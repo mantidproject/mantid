@@ -15,13 +15,6 @@ class UBMatrixTable(tableBase.NTableWidget):
 
         return
 
-    def get_exp_info(self):
-        """
-
-        :return:
-        """
-        NOW!
-
     def setup(self):
         """
         Init setup

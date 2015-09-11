@@ -197,10 +197,22 @@ class MainWindow(QtGui.QMainWindow):
             self.pop_one_button_dialog(int_list)
         exp_no, scan_no, pt_no = int_list
 
+        # Get HKL
+        status, float_list = gutil.parse_float_editors([self.ui.lineEdit_H,
+                                                        self.ui.lineEdit_K,
+                                                        self.ui.lineEdit_L])
+        if status is False:
+            err_msg = float_list
+            self.pop_one_button_dialog(err_msg)
+        h, k, l = float_list
+
         status, peakinfo = self._myControl.get_peak_info(exp_no, scan_no, pt_no)
         if status is False:
             error_message = peakinfo
             self.pop_one_button_dialog(error_message)
+            return
+        assert isinstance(peakinfo, r4c.PeakInfo)
+        peakinfo.set_hkl_raw_data(h, k, l)
         self.set_ub_peak_table(peakinfo)
 
         # Clear
@@ -297,10 +309,14 @@ class MainWindow(QtGui.QMainWindow):
         status, exp_number = gutil.parse_integers_editors(self.ui.lineEdit_exp)
         for i_row in xrange(num_rows):
             if self.ui.tableWidget_peaksCalUB.is_selected(i_row) is True:
-                scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info()
-                h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl()
-                peak_info = self._myControl.add_peak_info(exp_number, scan_num, pt_num)
-                peak_info.setHKL(h, k, l)
+                scan_num, pt_num = self.ui.tableWidget_peaksCalUB.get_exp_info(i_row)
+                h, k, l = self.ui.tableWidget_peaksCalUB.get_hkl(i_row)
+                status, peak_info = self._myControl.add_peak_info(exp_number, scan_num, pt_num)
+                if status is False:
+                    self.pop_one_button_dialog(peak_info)
+                    return
+                assert isinstance(peak_info, r4c.PeakInfo)
+                peak_info.set_hkl_raw_data(h, k, l)
                 peak_info_list.append(peak_info)
         # END-FOR
 
@@ -680,12 +696,12 @@ class MainWindow(QtGui.QMainWindow):
 
         :return:
         """
-        status, ret_list = gutil.parse_integers_editors([self.ui.lineEdit_a,
-                                                         self.ui.lineEdit_b,
-                                                         self.ui.lineEdit_c,
-                                                         self.ui.lineEdit_alpha,
-                                                         self.ui.lineEdit_beta,
-                                                         self.ui.lineEdit_gamma])
+        status, ret_list = gutil.parse_float_editors([self.ui.lineEdit_a,
+                                                      self.ui.lineEdit_b,
+                                                      self.ui.lineEdit_c,
+                                                      self.ui.lineEdit_alpha,
+                                                      self.ui.lineEdit_beta,
+                                                      self.ui.lineEdit_gamma])
         if status is False:
             raise TypeError('Unable to parse unit cell due to %s' % ret_list)
 
