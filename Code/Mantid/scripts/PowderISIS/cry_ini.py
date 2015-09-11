@@ -13,13 +13,16 @@ ANALYSIS_DIR = ''
 
 
 class Files:
-    def __init__(self, instr, RawDir="", Analysisdir="", UnitTest=False, debugMode=False):
+    def __init__(self, instr, RawDir="", Analysisdir="", UnitTest=False, debugMode=False, forceRootDirFromScripts=True, inputInstDir=''):
         global ANALYSIS_DIR
         self.debugMode = False
         if debugMode:
             self.debugMode = True
         self.instr = instr.lower()
-        self.InsDir = join(dirname(abspath(__file__)), instr)
+        if forceRootDirFromScripts:
+            self.InsDir = join(dirname(abspath(__file__)), instr)
+        else:
+            self.InsDir = join(inputInstDir, instr)
         print '--------------------- '
         print 'INSTRUMENT DIRECTORY: ' + self.InsDir
         print '--------------------- '
