@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/LoadEventAndCompress.cpp
 	src/MuonCalculateAsymmetry.cpp
 	src/MuonLoad.cpp
+	src/ProcessIndirectFitParameters.cpp
 	src/RefReduction.cpp
 	src/RefRoi.cpp
 	src/SANSBeamFinder.cpp
@@ -65,6 +66,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/LoadEventAndCompress.h
 	inc/MantidWorkflowAlgorithms/MuonCalculateAsymmetry.h
 	inc/MantidWorkflowAlgorithms/MuonLoad.h
+	inc/MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
@@ -84,6 +86,7 @@ set ( TEST_FILES
 	LoadEventAndCompressTest.h
 	MuonCalculateAsymmetryTest.h
 	MuonLoadTest.h
+	ProcessIndirectFitParametersTest.h
 	SANSSolidAngleCorrectionTest.h
 	SendUsageTest.h
 	StepScanTest.h
