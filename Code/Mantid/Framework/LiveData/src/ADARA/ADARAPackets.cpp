@@ -499,8 +499,7 @@ BeamlineInfoPkt::BeamlineInfoPkt(const BeamlineInfoPkt &pkt) :
 
 BeamMonitorConfigPkt::BeamMonitorConfigPkt(const uint8_t *data,
 		uint32_t len) :
-	Packet(data, len), m_fields((const uint32_t *)payload())
-{
+	Packet(data, len), m_fields((const uint32_t *)payload()) {
 	size_t sectionSize = sizeof(double) + (4 * sizeof(uint32_t));
 
 	if (m_payload_len !=
@@ -518,11 +517,9 @@ BeamMonitorConfigPkt::BeamMonitorConfigPkt(
 
 /* ------------------------------------------------------------------------ */
 
-DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data,
-		uint32_t len) :
-	Packet(data, len), m_fields((const uint32_t *)payload()),
-	m_sectionOffsets(NULL), m_after_banks_offset(NULL)
-{
+DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len) :
+		Packet(data, len), m_fields((const uint32_t *)payload()),
+		m_sectionOffsets(NULL), m_after_banks_offset(NULL) {
 	// Get Number of Detector Bank Sets...
 	//    - Basic Packet Size Sanity Check
 
@@ -618,13 +615,28 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data,
 
 DetectorBankSetsPkt::DetectorBankSetsPkt(
 		const DetectorBankSetsPkt &pkt ) :
-	Packet(pkt), m_fields((const uint32_t *)payload())
+	Packet(pkt), m_fields((const uint32_t *)payload()),
+	m_sectionOffsets(NULL), m_after_banks_offset(NULL)
 {
-	if ( m_sectionOffsets != NULL )
-		delete[] m_sectionOffsets;
+	uint32_t numSets = detBankSetCount();
 
-	if ( m_after_banks_offset != NULL )
-		delete[] m_after_banks_offset;
+	// Don't Allocate Anything if there are No Detector Bank Sets...
+	if ( numSets < 1 )
+		return;
+
+	m_sectionOffsets = new uint32_t[numSets];
+	memcpy(const_cast<uint32_t *> (m_sectionOffsets),
+		pkt.m_sectionOffsets, numSets * sizeof(uint32_t));
+
+	m_after_banks_offset = new uint32_t[numSets];
+	memcpy(const_cast<uint32_t *> (m_after_banks_offset),
+		pkt.m_after_banks_offset, numSets * sizeof(uint32_t));
+}
+
+DetectorBankSetsPkt::~DetectorBankSetsPkt()
+{
+	delete[] m_sectionOffsets;
+	delete[] m_after_banks_offset;
 }
 
 /* ------------------------------------------------------------------------ */

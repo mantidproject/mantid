@@ -1,5 +1,6 @@
 import unittest
 from testhelpers import run_algorithm
+from testhelpers.mlzhelpers import create_fake_dns_workspace
 from mantid.api import AnalysisDataService
 import numpy as np
 import mantid.simpleapi as api
@@ -13,51 +14,22 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
     __sf_nicrws = None
     __nsf_nicrws = None
 
-    def _create_fake_workspace(self, wsname, dataY, flipper):
-        """
-        creates DNS workspace with fake data
-        """
-        ndet = 24
-        dataX = np.zeros(2*ndet)
-        dataX.fill(4.2 + 0.00001)
-        dataX[::2] -= 0.000002
-        dataE = np.sqrt(dataY)
-        # create workspace
-        api.CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        outws = api.mtd[wsname]
-        api.LoadInstrument(outws, InstrumentName='DNS')
-        p_names = 'deterota,wavelength,slit_i_left_blade_position,slit_i_right_blade_position,\
-            slit_i_lower_blade_position,slit_i_upper_blade_position,polarisation,flipper'
-        p_values = '-7.53,4.2,10,10,5,20,x,' + flipper
-        api.AddSampleLogMultiple(Workspace=outws, LogNames=p_names, LogValues=p_values, ParseType=True)
-        # create the normalization workspace
-        dataY.fill(1.0)
-        dataE.fill(1.0)
-        api.CreateWorkspace(OutputWorkspace=wsname + '_NORM', DataX=dataX, DataY=dataY,
-                            DataE=dataE, NSpec=ndet, UnitX="Wavelength")
-        normws = api.mtd[wsname + '_NORM']
-        api.LoadInstrument(normws, InstrumentName='DNS')
-        api.AddSampleLogMultiple(Workspace=normws, LogNames=p_names, LogValues=p_values, ParseType=True)
-
-        return outws
-
     def setUp(self):
         dataY = np.array([2997., 2470., 2110., 1818., 840., 1095., 944., 720., 698., 699., 745., 690.,
                           977., 913., 906., 1007., 1067., 1119., 1467., 1542., 2316., 1536., 1593., 1646.])
-        self.__sf_bkgrws = self._create_fake_workspace('__sf_bkgrws', dataY/620.0, flipper='ON')
+        self.__sf_bkgrws = create_fake_dns_workspace('__sf_bkgrws', dataY=dataY/620.0, flipper='ON')
         self.workspaces.append('__sf_bkgrws')
         dataY = np.array([14198., 7839., 4386., 3290., 1334., 1708., 1354., 1026., 958., 953., 888., 847.,
                           1042., 1049., 1012., 1116., 1294., 1290., 1834., 1841., 2740., 1750., 1965., 1860.])
-        self.__nsf_bkgrws = self._create_fake_workspace('__nsf_bkgrws', dataY/619.0, flipper='OFF')
+        self.__nsf_bkgrws = create_fake_dns_workspace('__nsf_bkgrws', dataY=dataY/619.0, flipper='OFF')
         self.workspaces.append('__nsf_bkgrws')
         dataY = np.array([5737., 5761., 5857., 5571., 4722., 5102., 4841., 4768., 5309., 5883., 5181., 4455.,
                           4341., 4984., 3365., 4885., 4439., 4103., 4794., 14760., 10516., 4445., 5460., 3942.])
-        self.__nsf_nicrws = self._create_fake_workspace('__nsf_nicrws', dataY/58.0, flipper='OFF')
+        self.__nsf_nicrws = create_fake_dns_workspace('__nsf_nicrws', dataY=dataY/58.0, flipper='OFF')
         self.workspaces.append('__nsf_nicrws')
         dataY = np.array([2343., 2270., 2125., 2254., 1534., 1863., 1844., 1759., 1836., 2030., 1848., 1650.,
                           1555., 1677., 1302., 1750., 1822., 1663., 2005., 4025., 3187., 1935., 2331., 2125.])
-        self.__sf_nicrws = self._create_fake_workspace('__sf_nicrws', dataY/295.0, flipper='ON')
+        self.__sf_nicrws = create_fake_dns_workspace('__sf_nicrws', dataY=dataY/295.0, flipper='ON')
         self.workspaces.append('__sf_nicrws')
 
     def tearDown(self):
@@ -135,9 +107,13 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
 
     def test_DNSTwoTheta(self):
         outputWorkspaceName = "DNSFlippingRatioCorrTest_Test5"
+
         # rotate detector bank to different angles
         dataws_sf = self.__sf_nicrws - self.__sf_bkgrws
         dataws_nsf = self.__nsf_nicrws - self.__nsf_bkgrws
+        wslist = [dataws_sf, dataws_nsf, self.__sf_nicrws, self.__nsf_nicrws, self.__sf_bkgrws, self.__nsf_bkgrws]
+        for wks in wslist:
+            api.LoadInstrument(wks, InstrumentName='DNS')
         api.RotateInstrumentComponent(dataws_sf, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
         api.RotateInstrumentComponent(dataws_nsf, "bank0", X=0, Y=1, Z=0, Angle=-7.53)
         api.RotateInstrumentComponent(self.__sf_nicrws, "bank0", X=0, Y=1, Z=0, Angle=-8.02)
@@ -179,11 +155,11 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         # create fake vanadium data workspaces
         dataY = np.array([1811., 2407., 3558., 3658., 3352., 2321., 2240., 2617., 3245., 3340., 3338., 3310.,
                           2744., 3212., 1998., 2754., 2791., 2509., 3045., 3429., 3231., 2668., 3373., 2227.])
-        __sf_vanaws = self._create_fake_workspace('__sf_vanaws', dataY/58.0, flipper='ON')
+        __sf_vanaws = create_fake_dns_workspace('__sf_vanaws', dataY=dataY/58.0, flipper='ON')
         self.workspaces.append('__sf_vanaws')
         dataY = np.array([2050., 1910., 2295., 2236., 1965., 1393., 1402., 1589., 1902., 1972., 2091., 1957.,
                           1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
-        __nsf_vanaws = self._create_fake_workspace('__nsf_vanaws', dataY/58.0, flipper='OFF')
+        __nsf_vanaws = create_fake_dns_workspace('__nsf_vanaws', dataY=dataY/58.0, flipper='OFF')
         self.workspaces.append('__nsf_vanaws')
         # consider normalization=1.0 as set in self._create_fake_workspace
         dataws_sf = __sf_vanaws - self.__sf_bkgrws
@@ -221,11 +197,11 @@ class DNSFlippingRatioCorrTest(unittest.TestCase):
         # create fake vanadium data workspaces
         dataY = np.array([1811., 2407., 3558., 3658., 3352., 2321., 2240., 2617., 3245., 3340., 3338., 3310.,
                           2744., 3212., 1998., 2754., 2791., 2509., 3045., 3429., 3231., 2668., 3373., 2227.])
-        __sf_vanaws = self._create_fake_workspace('__sf_vanaws', dataY/58.0, flipper='ON')
+        __sf_vanaws = create_fake_dns_workspace('__sf_vanaws', dataY=dataY/58.0, flipper='ON')
         self.workspaces.append('__sf_vanaws')
         dataY = np.array([2050., 1910., 2295., 2236., 1965., 1393., 1402., 1589., 1902., 1972., 2091., 1957.,
                           1593., 1952., 1232., 1720., 1689., 1568., 1906., 2001., 2051., 1687., 1975., 1456.])
-        __nsf_vanaws = self._create_fake_workspace('__nsf_vanaws', dataY/58.0, flipper='OFF')
+        __nsf_vanaws = create_fake_dns_workspace('__nsf_vanaws', dataY=dataY/58.0, flipper='OFF')
         self.workspaces.append('__nsf_vanaws')
         # consider normalization=1.0 as set in self._create_fake_workspace
         dataws_sf = __sf_vanaws - self.__sf_bkgrws

@@ -132,27 +132,34 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
  * 4 5 6
  * 1 2 3
  * @param num_banks :: number of 9-cylinder banks to create
- * @param verbose :: prints out the instrument after creation.
+ * @param sourcePos :: Position of the source component
+ * @param samplePos :: Position of the sample component.
  * @param cylRadius :: radius of each detector
  * @param cylHeight :: height of each detector
  * @return Created instrument
  */
-Mantid::Geometry::Instrument_sptr
-createTestInstrumentCylindrical(int num_banks, bool verbose = false,
-                                const double cylRadius = 0.004,
-                                const double cylHeight = 0.0002);
+Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
+    int num_banks,
+    const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0.0, 0.0, -10.),
+    const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(),
+    const double cylRadius = 0.004, const double cylHeight = 0.0002);
+
 /// Create a test instrument with n panels of rectangular detectors,
 /// pixels*pixels in size, a source and spherical sample shape.
 Mantid::Geometry::Instrument_sptr
 createTestInstrumentRectangular(int num_banks, int pixels,
-                                double pixelSpacing = 0.008, double bankDistanceFromSample= 5.0);
+                                double pixelSpacing = 0.008,
+                                double bankDistanceFromSample = 5.0);
 
 Mantid::Geometry::Instrument_sptr
 createTestInstrumentRectangular2(int num_banks, int pixels,
                                  double pixelSpacing = 0.008);
 
 /// Creates a mimimal valid virtual instrument.
-Mantid::Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sourcePos, const Mantid::Kernel::V3D& samplePos, const Mantid::Kernel::V3D& detectorPos );
+Mantid::Geometry::Instrument_sptr
+createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
+                        const Mantid::Kernel::V3D &samplePos,
+                        const Mantid::Kernel::V3D &detectorPos);
 }
 
 #endif // COMPONENTCREATIONHELPERS_H_

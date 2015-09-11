@@ -93,6 +93,8 @@ set ( SRC_FILES
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
 	src/NullCoordTransform.cpp
+        src/NotebookBuilder.cpp
+      	src/NotebookWriter.cpp 
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
 	src/ParameterReference.cpp
@@ -123,7 +125,8 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
-        src/NotebookWriter.cpp src/NotebookBuilder.cpp)
+        src/WorkspaceValidators.cpp
+)
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/IDataFileChecker.cpp
@@ -259,6 +262,8 @@ set ( INC_FILES
 	inc/MantidAPI/MultiPeriodGroupWorker.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+        inc/MantidAPI/NotebookBuilder.h
+        inc/MantidAPI/NotebookWriter.h  
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -297,7 +302,7 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceValidators.h
-        inc/MantidAPI/NotebookWriter.h inc/MantidAPI/NotebookBuilder.h)
+)
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h

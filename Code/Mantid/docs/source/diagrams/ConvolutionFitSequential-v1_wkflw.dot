@@ -1,0 +1,67 @@
+digraph ConvolutionFitSequential {
+  label="ConvolutionFitSequential Flowchart"
+  $global_style
+
+  subgraph params  {
+    $param_style
+    InputWorkspace
+    FitType
+    FitParameters
+    Background
+    Function
+    BackgroundType
+    XStart
+    XEnd
+    Temperature
+    SpecMin
+    SpecMax
+    Convolve
+    Minimizer
+    MaxIterations
+    ParameterTable
+    FitWorkspaces
+    NormalisedCovarianceWorkspace
+    ParameterNames
+    ResultWorkspace
+	OutputWorkspace
+    SampleLog
+  }
+
+  subgraph algorithms  {
+    $algorithm_style
+    ConvertSpectrumAxis
+    PlotPeakByLogValue
+    DeleteWorkspace
+    ProcessIndirectFitParameters
+    CopyLogs
+    AddSampleLog
+    RenameWorkspace
+  }
+
+  InputWorkspace                 -> FitFunction
+  Background                     -> FitFunction
+  FitType                        -> FitFunction
+  FitParameters                  -> FitFunction
+  InputWorkspace                 -> ConvertSpectrumAxis            [label="Convert to Elastic Q"]
+  ConvertSpectrumAxis            -> PlotPeakByLogValue             [label="InputWorkspace"]
+  FitFunction                    -> PlotPeakByLogValue
+  StartX                         -> PlotPeakByLogValue
+  EndX                           -> PlotPeakByLogValue
+  Convolve                       -> PlotPeakByLogValue
+  Minimizer                      -> PlotPeakByLogValue
+  PlotPeakByLogValue             -> NormalisedCovarianceWorkspace
+  PlotPeakByLogValue             -> ParameterTable
+  PlotPeakByLogValue             -> FitWorkspaces
+  NormalisedCovarianceWorkspace  -> DeleteWorkspace                [label="Unrequired product of PlotPeakByLogValue"]
+  FitType                        -> ParameterNames                 [label="Desired parameters obtained from FitType"]
+  ParameterTable                 -> ProcessIndirectFitParameters
+  ParameterNames                 -> ProcessIndirectFitParameters
+  ProcessIndirectFitParameters   -> ResultWorkspace
+  InputWorkspace                 -> CopyLogs
+  ResultWorkspace                -> CopyLogs
+  CopyLogs                       -> OutputWorkspace
+  SampleLog                      -> CopyLogs
+  FitWorkspace                   -> CopyLogs
+  ParameterTable                 -> RenameWorkspace                [label="Change name to expected name for table"]
+  FitWorkspaces                  -> RenameWorkspace                [label="Renames to match input names"]
+}
