@@ -160,6 +160,7 @@ private:
   RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
   ColorMapEditorPanel* m_colorMapEditorPanel; ///< Holder for the color map editor panel.
+  bool m_gridAxesStartUpOn; /// flag for the initial grid axes setting
   Mantid::VATES::ColorScaleLock m_colorScaleLock; ///< Holds a color scale lock object
 
   /// Holds the 'visual state' of the views. This relies on Load/SaveXMLState which
@@ -238,6 +239,8 @@ private:
   void saveViewState(ViewBase *view);
   /// Restore the state of the next (new) view when switching to it
   void restoreViewState(ViewBase *view, ModeControlWidget::Views vtype);
+  /// Get the current grid axes setting
+  bool areGridAxesOn();
 };
 
 } // SimpleGui
