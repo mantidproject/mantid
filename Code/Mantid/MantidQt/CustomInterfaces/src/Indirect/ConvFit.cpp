@@ -93,7 +93,7 @@ void ConvFit::setup() {
   m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
   m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
   m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
-  m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
+  m_dblManager->setValue(m_properties["FABADAChainLength"], 1000000);
   m_properties["FABADAConvergenceCriteria"] =
       m_dblManager->addProperty("Convergence Criteria");
   m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
