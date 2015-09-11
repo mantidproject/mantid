@@ -1,4 +1,5 @@
-import NTableWidget as tableBase
+#pylint: disable=W0403,C1013,R0901,R0904
+import HFIR_4Circle_Reduction.NTableWidget as tableBase
 
 
 class UBMatrixTable(tableBase.NTableWidget):

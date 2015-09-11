@@ -28,8 +28,8 @@ def parse_float_editors(line_edits):
         try:
             str_value = str(line_edit.text()).strip()
             float_value = float(str_value)
-        except ValueError as e:
-            error_message += 'Unable to parse to integer. %s\n' % (str(e))
+        except ValueError as value_err:
+            error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
         else:
             float_list.append(float_value)
         # END-TRY
@@ -67,8 +67,8 @@ def parse_integers_editors(line_edits):
         try:
             str_value = str(line_edit.text()).strip()
             int_value = int(str_value)
-        except ValueError as e:
-            error_message += 'Unable to parse to integer. %s\n' % (str(e))
+        except ValueError as value_err:
+            error_message += 'Unable to parse to integer. %s\n' % (str(value_err))
         else:
             if str_value != '%d' % int_value:
                 error_message += 'Value %s is not a proper integer.\n' % str_value

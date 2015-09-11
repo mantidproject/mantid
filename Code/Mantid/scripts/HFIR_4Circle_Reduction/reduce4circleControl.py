@@ -1,4 +1,4 @@
-#pylint: disable=C0103,R0902,R0904
+#pylint: disable=C0103,R0902,R0904,R0913
 ################################################################################
 #
 # Controlling class
@@ -49,7 +49,7 @@ class PeakInfo(object):
         # Define class variable
         self._myParent = parent
 
-        self._myPeakWSKey = None
+        self._myPeakWSKey = (None, None, None)
         self._myPeakIndex = None
         self._myPeak = None
 
@@ -66,6 +66,7 @@ class PeakInfo(object):
         Get peak workspace related
         :return:
         """
+        assert isinstance(self._myPeakWSKey, tuple)
         exp_number, scan_number, pt_number = self._myPeakWSKey
         return self._myParent.get_ub_peak_ws(exp_number, scan_number, pt_number)[1]
 
@@ -74,13 +75,14 @@ class PeakInfo(object):
 
         :return:
         """
+        assert isinstance(self._myPeakWSKey, tuple)
         exp_number, scan_number, pt_number = self._myPeakWSKey
         data_ws = self._myParent.get_raw_data_workspace(exp_number, scan_number, pt_number)
         if data_ws is None:
             print "\nRaw data workspace dict keys:", self._myParent._myRawDataWSDict.keys(), '\n'
             raise RuntimeError('Unable to find raw data workspace of Exp %d Scan %d Pt %d. ' % (
                 exp_number, scan_number, pt_number))
-        assert isinstance(data_ws, mantid.dataobjects._dataobjects.Workspace2D)
+        assert isinstance(data_ws, mantid.dataobjects.Workspace2D)
 
         return data_ws
 
@@ -117,7 +119,7 @@ class PeakInfo(object):
         :return:
         """
         # Check
-        assert isinstance(peak_ws, mantid.dataobjects._dataobjects.PeaksWorkspace)
+        assert isinstance(peak_ws, mantid.dataobjects.PeaksWorkspace)
 
         # Get peak
         try:
@@ -208,6 +210,8 @@ class CWSCDReductionControl(object):
         self._myUBPeakWSDict = dict()
         # Peak Info
         self._myPeakInfoDict = dict()
+        # Last UB matrix calculated
+        self._myLastPeakUB = None
 
         # A dictionary to manage all loaded and processed MDEventWorkspaces
         # self._expDataDict = {}
@@ -273,15 +277,6 @@ class CWSCDReductionControl(object):
         for i_peak_info in xrange(1, len(peak_info_list)):
             # Set HKL as optional
             peak_ws = peak_info_list[i_peak_info].get_peak_workspace()
-            """
-            matrix_ws = peak_info_list[i_peak_info].get_raw_data_ws()
-            h = float(int(matrix_ws.run().getProperty('_h').value))
-            k = float(int(matrix_ws.run().getProperty('_k').value))
-            l = float(int(matrix_ws.run().getProperty('_l').value))
-
-            peak = peak_ws.getPeak(0)
-            peak.setHKL(h, k, l)
-            """
 
             # Combine peak workspace
             ub_peak_ws = api.CombinePeaksWorkspaces(LHSWorkspace=ub_peak_ws,
@@ -869,6 +864,27 @@ class CWSCDReductionControl(object):
         self._expNumber = exp_number
 
         return True
+
+    def set_hkl_to_peak(self, exp_number, scan_number, pt_number):
+        """
+
+        :return:
+        """
+        status, peak_info = self.get_peak_info(exp_number, scan_number, pt_number)
+        if status is False:
+            err_msg = peak_info
+            return False, err_msg
+
+        matrix_ws = peak_info.get_raw_data_ws()
+        m_h = float(int(matrix_ws.run().getProperty('_h').value))
+        m_k = float(int(matrix_ws.run().getProperty('_k').value))
+        m_l = float(int(matrix_ws.run().getProperty('_l').value))
+
+        peak_ws = peak_info.get_peak_workspace()
+        peak = peak_ws.getPeak(0)
+        peak.setHKL(m_h, m_k, m_l)
+
+        return True, (m_h, m_k, m_l)
 
     def _add_raw_workspace(self, exp_no, scan_no, pt_no, raw_ws):
         """ Add raw Pt.'s workspace

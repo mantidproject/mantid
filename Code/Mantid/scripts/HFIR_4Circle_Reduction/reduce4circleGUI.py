@@ -104,8 +104,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_addToRefine, QtCore.SIGNAL('clicked()'),
                 self.doAddScanPtToRefineUB)
 
-        # Validator
-        # TODO
+        # Validator ... (NEXT)
 
         # Declaration of class variable
         self._runID = None
@@ -242,9 +241,7 @@ class MainWindow(QtGui.QMainWindow):
         And the added scan number and pt numbers will be reflected in the (left sidebar)
 
         """
-        raise NotImplementedError("ASAP")
-
-        return
+        raise RuntimeError("ASAP")
 
     def do_browse_local_cache_dir(self):
         """ Browse local cache directory
@@ -729,7 +726,7 @@ class MainWindow(QtGui.QMainWindow):
                 return
         # END-IF(does_exist)
 
-        # TODO - Clean up rest of the codes to mimic how to deal with SPICE file
+        # NEXT - Clean up rest of the codes to mimic how to deal with SPICE file
 
         # Load Data for Pt's xml file
         does_exist = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no)

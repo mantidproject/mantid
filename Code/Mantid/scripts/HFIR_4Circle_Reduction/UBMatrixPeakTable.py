@@ -1,3 +1,5 @@
+#pylint: disable=W0403,C1013,R0901,R0904
+
 import NTableWidget as base
 
 # UB peak information table
@@ -48,15 +50,15 @@ class UBMatrixPeakTable(base.NTableWidget):
         """
         assert isinstance(row_index, int)
 
-        h = self.get_cell_value(row_index, 2)
-        k = self.get_cell_value(row_index, 3)
-        l = self.get_cell_value(row_index, 4)
+        m_h = self.get_cell_value(row_index, 2)
+        m_k = self.get_cell_value(row_index, 3)
+        m_l = self.get_cell_value(row_index, 4)
 
-        assert isinstance(h, float)
-        assert isinstance(k, float)
-        assert isinstance(l, float)
+        assert isinstance(m_h, float)
+        assert isinstance(m_k, float)
+        assert isinstance(m_l, float)
 
-        return h, k, l
+        return m_h, m_k, m_l
 
     def is_selected(self, row_index):
         """
