@@ -15784,7 +15784,6 @@ ApplicationWindow *ApplicationWindow::loadScript(const QString &fn,
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   setScriptingLanguage("Python");
   restoreApplicationGeometry();
-  bool oldScriptingWindow = scriptingWindow;
   showScriptWindow(existingProject, false);
   scriptingWindow->openUnique(fn);
   QApplication::restoreOverrideCursor();
