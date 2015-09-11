@@ -166,6 +166,11 @@ public:
   /// and close back-up files.
   virtual void clearFileBacked(bool LoadFileBackedData);
 
+  /// Preferred visual normalizaiton method for any histo workspaces created from this.
+  void  setHistoDisplayNormalization(Mantid::API::MDNormalization preferredNormalization);
+  /// Preferred visual normalization method.
+  virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
+
   /// Preferred visual normalization method.
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
@@ -189,6 +194,8 @@ protected:
   /// Box controller in use
   API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
+  /// Display normalization to pass onto generated histo workspaces
+  Mantid::API::MDNormalization m_histoDisplayNormalization;
 private:
   virtual MDEventWorkspace *doClone() const {
     return new MDEventWorkspace(*this);

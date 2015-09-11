@@ -800,10 +800,26 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
 }
 
 /**
+  Set the display normalization for any subsequently generated histoworkspaces.
+  @param preferredNormalization : Display normalization preference to pass on to generated histo workspaces.
+*/
+TMDE(void MDEventWorkspace)::setHistoDisplayNormalization(
+     const Mantid::API::MDNormalization preferredNormalization) {
+  m_histoDisplayNormalization = preferredNormalization;
+}
+
+/**
 Return the preferred normalization to use for visualization.
 */
 TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
   return VolumeNormalization; // volume normalization preferred for display purposes.
+}
+
+/**
+Return the preferred normalization preference for subsequent histoworkspaces.
+*/
+TMDE(MDNormalization MDEventWorkspace)::displayNormalizationHisto() const {
+  return m_histoDisplayNormalization; // volume normalization preferred for display purposes.
 }
 
 } // namespace DataObjects

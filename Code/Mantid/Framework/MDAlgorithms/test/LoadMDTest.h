@@ -499,6 +499,7 @@ public:
 
     TS_ASSERT_EQUALS( ws->getNPoints(), newWS->getNPoints());
     TS_ASSERT_EQUALS( ws->getNumDims(), newWS->getNumDims());
+    TS_ASSERT_EQUALS( ws->displayNormalization(), newWS->displayNormalization());
     for (size_t i=0; i<ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA(ws->getSignalAt(i), newWS->getSignalAt(i), 1e-6);
@@ -539,6 +540,7 @@ public:
 
     TS_ASSERT_EQUALS( ws->getNPoints(), newWS->getNPoints());
     TS_ASSERT_EQUALS( ws->getNumDims(), newWS->getNumDims());
+    TS_ASSERT_EQUALS( ws->displayNormalization(), newWS->displayNormalization());
     for (size_t i=0; i<ws->getNPoints(); i++)
     {
       TS_ASSERT_DELTA(ws->getSignalAt(i), newWS->getSignalAt(i), 1e-6);
@@ -551,14 +553,22 @@ public:
       Poco::File(filename).remove();
   }
 
-  void test_histo2() 
+  void test_histo1D()
+  {
+    std::vector<Geometry::IMDDimension_sptr> dims(1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", -10, 10, 5));
+    MDHistoWorkspace_sptr ws = boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
+    doTestHistoV1(ws);
+    doTestHisto(ws);
+  }
+
+  void test_histo2D()
   {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
     doTestHistoV1(ws);
     doTestHisto(ws);
   }
 
-  void test_histo3()
+  void test_histo3D()
   {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 3, 4, 10.0, 3.5, "histo3", 4.5);
     doTestHistoV1(ws);

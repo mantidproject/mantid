@@ -40,12 +40,16 @@ public:
                    Mantid::Geometry::MDHistoDimension_sptr dimZ =
                        Mantid::Geometry::MDHistoDimension_sptr(),
                    Mantid::Geometry::MDHistoDimension_sptr dimT =
-                       Mantid::Geometry::MDHistoDimension_sptr());
+                       Mantid::Geometry::MDHistoDimension_sptr(),
+                   Mantid::API::MDNormalization displayNormalization
+                   = Mantid::API::NoNormalization);
 
   MDHistoWorkspace(
-      std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions);
+      std::vector<Mantid::Geometry::MDHistoDimension_sptr> &dimensions, Mantid::API::MDNormalization displayNormalization
+          = Mantid::API::NoNormalization);
   MDHistoWorkspace(
-      std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions);
+      std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions, Mantid::API::MDNormalization displayNormalization
+          = Mantid::API::NoNormalization);
 
   virtual ~MDHistoWorkspace();
 
@@ -431,6 +435,9 @@ private:
   mutable uint64_t m_nEventsContributed;
 
   Kernel::SpecialCoordinateSystem m_coordSystem;
+
+  /// Display normalization to use
+  Mantid::API::MDNormalization m_displayNormalization;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

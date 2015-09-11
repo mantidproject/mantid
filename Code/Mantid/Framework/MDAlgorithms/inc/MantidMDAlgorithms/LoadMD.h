@@ -6,6 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -79,6 +80,8 @@ private:
 
   void loadCoordinateSystem();
 
+  void loadVisualNormalization();
+
   /// Load all the affine matricies
   void loadAffineMatricies(API::IMDWorkspace_sptr ws);
   /// Load a given affine matrix
@@ -104,6 +107,12 @@ private:
 
   /// Version of SaveMD used to save the file
   int m_saveMDVersion ;
+
+  /// Visual normalization
+  boost::optional<Mantid::API::MDNormalization> m_visualNormalization;
+
+  /// Named entry
+  static const std::string VISUAL_NORMALIZATION_KEY;
 };
 
 } // namespace DataObjects
