@@ -274,6 +274,11 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(triggerAcceptForNewFilters()),
                    this->ui.propertiesPanel,
                    SLOT(apply()));
+
+  // Setup the Default Normalization options
+  setupDefaultNormalizations();
+  QObject::connect(ui.defaultNormalization,SIGNAL(), 
+                   this, SLOT(onDefaultNormalizationChanged()));
 }
 
 void MdViewerWidget::panelChanged()
@@ -1649,6 +1654,31 @@ void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views v
     g_log.warning() << "Failed to restore the state of the current view even though I thought I had "
       "a state saved from before. The current state may not be consistent.";
 }
+
+
+/** 
+ * React to normalization changes
+ */
+void MdViewerWidget::onDefaultNormalizationChanged() {
+  // Get current text and save it.
+  mdSettings.setUserSettingsNormalization(ui.defaultNormalization->currentText());
+}
+
+/**
+ * Setup the default normalization 
+ */
+void MdViewerWidget::setupDefaultNormalizations() {
+  auto normalizations = mdConstants.getAllNormalizations();
+  ui.defaultNormalization->addItems(views);
+
+  auto indexDefaultNormalization = ui.defaultNormalization->findData(mdSettings.getUserSettingsNormalization(), Qt::DisplayRole);
+
+  if (indexDefaultNormalization != -1)
+  {
+    ui.defaultNormalization->setCurrentIndex(indexDefaultNormalization);
+  }
+}
+
 
 } // namespace SimpleGui
 } // namespace Vates

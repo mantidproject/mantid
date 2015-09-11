@@ -115,6 +115,7 @@ set( TEST_FILES
    BatchAlgorithmRunnerTest.h
    InterfaceManagerTest.h
    MantidColorMapTest.h
+   MdSettingsTest.h
    PlotAxisTest.h
    QwtWorkspaceBinDataTest.h
    QwtWorkspaceSpectrumDataTest.h

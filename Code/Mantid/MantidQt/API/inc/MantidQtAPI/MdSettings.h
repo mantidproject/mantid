@@ -165,7 +165,32 @@ namespace MantidQt
          * @returns Was a log scale state?
          */
          bool getLastSessionLogScale();
-         
+        
+        /**
+         * Set the user setting for the default normalization
+         * @param normalization: the default normalization
+         */
+         void setUserSettingNormalization(QString normalization);
+
+        /**
+         * Get the user setting for the default normalization
+         * @returns the default normalization
+         */
+         QString getUserSettingNormalization();
+
+        /**
+         * Get the normalization as an integer
+         * @returns the current user setting as an integer
+         */ 
+        int getUserSettingNormalizationAsInteger();
+
+        /**
+         * Convert normalization string to integer
+         * @param normalization: normalization string
+         * @returns normalization as an integer 
+         */
+        int convertNormalizationToInteger(QString normalization);
+        
       private:
         MdConstants m_mdConstants;
 
@@ -187,6 +212,9 @@ namespace MantidQt
 
         QString m_lblUserSettingInitialView;
         QString m_lblLastSessionLogScale;
+
+        QString m_lblDefaultNormalization;
+
     };
   }
 }

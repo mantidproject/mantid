@@ -1,5 +1,6 @@
 #include "MantidQtAPI/MdSettings.h"
 #include "MantidQtAPI/MdConstants.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "boost/scoped_ptr.hpp"
 #include <QSettings>
 #include <QString>
@@ -226,4 +227,39 @@ void MdSettings::setUserSettingIntialView(QString initialView)
   settings.beginGroup(m_vsiGroup);
   settings.setValue(m_lblUserSettingInitialView, initialView);
   settings.endGroup();
+}
+
+void MdSettings::setUserSettingNormalization(QString normalization) {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  settings.setValue(m_lblDefaultNormalization, normalization);
+  settings.endGroup();
+}
+
+QString MdSettings::getUserSettingNormalization() {
+  QSettings settings;
+
+  settings.beginGroup(m_vsiGroup);
+  QString defaultNormalization = settings.value(m_lblDefaultNormalization, m_mdConstants.getAutoNormalization()).asString();
+  settings.endGroup();
+
+  return defaultNormalization; 
+}
+
+int MdSettings::convertNormalizationToInteger(QString normalization) {
+  if (normalization == m_mdConstants.getNoNormalization()) {
+    return static_cast<int>(Mantid::API::NoNormalization);
+  } else if (normalization == m_mdConstants.getVolumeNormalization()) {
+    return static_cast<int>(Mantid::API::VolumeNormalization);
+  } else if (normalization == m_mdConstants.getNumberEventNormalization()) {
+    return static_cast<int>(Mantid::API::VolumeNormalization);
+  } else {
+    return 3;
+  }
+}
+
+int MdSettings::getUserSettingNormalizationAsInteger() {
+  auto normalization = getUserSettingNormalization();
+  return convertNormalizationToInteger(normalization);
 }

@@ -352,6 +352,11 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   }
   // WORKAROUND END
 
+  // Set the normalization for MDHisto and MDEvent workspaces
+  if (isMDHistoWorkspace(src) || isMDEventWorkspace(src)) {
+    vtkSMPropertyHelper(src->getProxy(),"Normalization").Set(m_mdSettings.getUserSettingNormalizationAsInteger());
+  }
+
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
   src->updatePipeline(); // Updates the pipeline
@@ -684,6 +689,26 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
     wsType = src->getSMName();
   }
   return wsType.contains("MDHistoWorkspace");
+}
+
+/**
+ * This function checks if a pqPipelineSource is an MDEventWorkspace.
+ * @return true if the source is a MDEventWorkspace
+ */
+bool ViewBase::isMDEventWorkspace(pqPipelineSource *src)
+{
+  if (NULL == src)
+  {
+    return false;
+  }
+  QString wsType(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceTypeName", true).GetAsString());
+
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
+  return wsType.contains("MDEventWorkspace");
 }
 
 /**

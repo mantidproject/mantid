@@ -2,6 +2,7 @@
 #define VIEWBASE_H_
 
 #include "MantidQtAPI/PythonThreading.h"
+#include "MantidQtAPI/MdSettings"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -261,6 +262,7 @@ private:
 
   vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
   PyGILStateService m_gilStateStore; ///< Python GIL state storage
+  MantidQt::API::MdSettings m_mdSettings;///<Holds the MD settings which are used to persist data
 };
 
 }

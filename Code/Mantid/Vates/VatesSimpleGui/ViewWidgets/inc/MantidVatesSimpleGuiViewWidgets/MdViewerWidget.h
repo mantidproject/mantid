@@ -121,6 +121,8 @@ protected slots:
   void onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType);
   /// reset state of all the views
   void onResetViewsStateToAllData();
+  /// On default normalization changes
+  void onDefaultNormalizationChanged();
 
 protected:
   /// Handle workspace preDeletion tasks.
@@ -236,6 +238,8 @@ private:
   void saveViewState(ViewBase *view);
   /// Restore the state of the next (new) view when switching to it
   void restoreViewState(ViewBase *view, ModeControlWidget::Views vtype);
+  /// Setup the normalizations
+  void setupDefaultNormalizations();
 };
 
 } // SimpleGui
