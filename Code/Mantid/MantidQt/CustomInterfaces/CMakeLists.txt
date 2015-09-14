@@ -70,10 +70,12 @@ set ( SRC_FILES
   src/Muon/MuonAnalysisHelper.cpp
   src/Muon/MuonAnalysisOptionTab.cpp
   src/Muon/MuonAnalysisResultTableTab.cpp
+  src/ParseKeyValueString.cpp
   src/QReflTableModel.cpp
   src/QtReflMainView.cpp
   src/QtReflOptionsDialog.cpp
   src/ReflCatalogSearcher.cpp
+  src/ReflGenerateNotebook.cpp
   src/ReflLegacyTransferStrategy.cpp
   src/ReflMainViewPresenter.cpp
   src/ReflSearchModel.cpp
@@ -93,7 +95,7 @@ set ( SRC_FILES
   src/Tomography/TomoToolConfigDialog.cpp
   src/Tomography/ToolConfig.cpp
   src/UserInputValidator.cpp
-  src/ReflGenerateNotebook.cpp src/ParseKeyValueString.cpp)
+)
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
