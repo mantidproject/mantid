@@ -14,10 +14,10 @@ import cry_focus
 class ISISPowderDiffraction(stresstesting.MantidStressTest):
 
     def requiredFiles(self):
-        return {"hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
+        return set(["hrp39191.raw", "hrp39187.raw", "hrp43022.raw", "hrpd/test/GrpOff/hrpd_new_072_01.cal",
                 "hrpd/test/GrpOff/hrpd_new_072_01_corr.cal", "hrpd/test/cycle_09_2/Calibration/van_s1_old-0.nxs",
                 "hrpd/test/cycle_09_2/Calibration/van_s1_old-1.nxs",
-                "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"}
+                "hrpd/test/cycle_09_2/Calibration/van_s1_old-2.nxs", "hrpd/test/cycle_09_2/tester/mtd.pref"])
     def _clean_up_files(self, filenames, directories):
         try:
             for file in filenames:
@@ -40,7 +40,7 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
 
     def cleanup(self):
         dirs = config['datasearch.directories'].split(';')
-        filenames = {"hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
+        filenames = set(["hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal",
                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss",
                      "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs",
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_D.dat',
@@ -49,6 +49,6 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat',
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat',
                      'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
-                     'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal'}
+                     'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal'])
 
         self._clean_up_files(filenames, dirs)
