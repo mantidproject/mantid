@@ -19,6 +19,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="toolTip">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select the initial default normalization when loading a workspace for the first time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0">
    <property name="spacing">
     <number>0</number>
@@ -165,7 +168,18 @@
       </spacer>
      </item>
      <item>
-      <widget class="QComboBox" name="defaultNormalization"/>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Initial Normalization:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="defaultNormalization">
+       <property name="toolTip">
+        <string extracomment="Select the default initial normalization when workspaces are loaded"/>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_5">
