@@ -31,6 +31,24 @@ ScriptFileInterpreter::ScriptFileInterpreter(QWidget *parent, const QString & se
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
           this, SLOT(showContextMenu(const QPoint&)));
+
+  connect(m_editor, SIGNAL(textZoomedIn()), m_messages,
+          SLOT(zoomUp()));
+  connect(m_editor, SIGNAL(textZoomedOut()), m_messages,
+          SLOT(zoomDown()));
+  connect(m_messages, SIGNAL(textZoomedIn()), m_editor,
+          SLOT(zoomIn()));
+  connect(m_messages, SIGNAL(textZoomedOut()), m_editor,
+          SLOT(zoomOut()));
+  connect(m_editor, SIGNAL(textZoomedIn()), this,
+          SLOT(emitZoomIn()));
+  connect(m_editor, SIGNAL(textZoomedOut()), this,
+          SLOT(emitZoomOut()));
+  connect(m_messages, SIGNAL(textZoomedIn()), this,
+          SLOT(emitZoomIn()));
+  connect(m_messages, SIGNAL(textZoomedOut()), this,
+          SLOT(emitZoomOut()));
+
 }
 
 /// Destroy the object
@@ -264,6 +282,15 @@ void ScriptFileInterpreter::setStoppedStatus()
 {
   m_status->showMessage("Status: Stopped");
   m_editor->setReadOnly(false);
+}
+
+void ScriptFileInterpreter::emitZoomIn()
+{
+  emit textZoomedIn();
+}
+void ScriptFileInterpreter::emitZoomOut()
+{
+  emit textZoomedOut();
 }
 
 /**

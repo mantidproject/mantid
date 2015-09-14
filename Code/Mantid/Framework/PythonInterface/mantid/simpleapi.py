@@ -513,7 +513,7 @@ def _get_mandatory_args(func_name, required_args ,*args, **kwargs):
                            % (func_name, reqd_as_str))
     return tuple(mandatory_args)
 
-def _check_mandatory_args(algorithm, algm, _algm_object, *args, **kwargs):
+def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
     """When a runtime error of the form 'Some invalid Properties found'
     is thrown call this function to return more specific message to user in
     the python output.
@@ -537,7 +537,7 @@ def _check_mandatory_args(algorithm, algm, _algm_object, *args, **kwargs):
         raise RuntimeError("%s argument(s) not supplied to %s" % (missing_arg_list,algorithm))
     # If the error was not caused by missing property the algorithm specific error should suffice
     else:
-        algm.execute()
+        raise RuntimeError(error.message)
 
 #------------------------ General simple function calls ----------------------
 
@@ -757,9 +757,9 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         except RuntimeError, e:
             if e.args[0] == 'Some invalid Properties found':
                 # Check for missing mandatory parameters
-                _check_mandatory_args(algorithm, algm, _algm_object, *args, **kwargs)
+                _check_mandatory_args(algorithm, _algm_object, e, *args, **kwargs)
             else:
-                algm.execute()
+                raise RuntimeError(e.message)
         return _gather_returns(algorithm, lhs, algm)
 
 

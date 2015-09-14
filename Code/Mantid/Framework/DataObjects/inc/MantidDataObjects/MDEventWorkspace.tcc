@@ -37,7 +37,7 @@ TMDE(MDEventWorkspace)::MDEventWorkspace()
     : API::IMDEventWorkspace(), data(NULL),
       m_BoxController(new BoxController(nd)), m_coordSystem(None) {
   // First box is at depth 0, and has this default boxController
-  data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
+  data = new MDBox<MDE, nd>(m_BoxController.get(), 0); 
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -729,7 +729,7 @@ TMDE(void MDEventWorkspace)::getLinePlot(const Mantid::Kernel::VMD &start,
           normalizer = box->getInverseVolume();
           break;
         case NumEventsNormalization:
-          normalizer = double(box->getNPoints());
+          normalizer = 1.0 / double(box->getNPoints());
           break;
         }
 

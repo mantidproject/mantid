@@ -130,7 +130,7 @@ private:
 
     void appendPath(const QString & path)
     {
-      GlobalInterpreterLock pythonLock;
+      ScopedPythonGIL pythonLock;
       QString code =
         "if r'%1' not in sys.path:\n"
         "    sys.path.append(r'%1')";
@@ -139,7 +139,7 @@ private:
     }
     void removePath(const QString & path)
     {
-      GlobalInterpreterLock pythonLock;
+      ScopedPythonGIL pythonLock;
       QString code =
         "if r'%1' in sys.path:\n"
         "    sys.path.remove(r'%1')";
