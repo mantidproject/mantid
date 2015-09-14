@@ -6,7 +6,6 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 from tempfile import mkstemp
-from pdb import set_trace as tr
 
 #conversion factor from energy (in meV) to vawevector (in inverse Angstroms)
 ENERGY_TO_WAVEVECTOR = 2.072
