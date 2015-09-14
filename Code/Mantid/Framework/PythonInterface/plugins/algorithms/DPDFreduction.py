@@ -11,7 +11,7 @@ from tempfile import mkstemp
 # conversion factor from energy (in meV) to vawevector (in inverse Angstroms)
 ENERGY_TO_WAVEVECTOR = 2.072
 
-
+#pylint: disable=too-many-instance-attributes
 class DPDFreduction(PythonAlgorithm):
     channelgroup = None
 
