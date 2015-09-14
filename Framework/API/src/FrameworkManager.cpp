@@ -432,9 +432,11 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string &wsName) {
   return retVal;
 }
 
+#ifdef MPI_BUILD
 boost::mpi::communicator &FrameworkManagerImpl::getMPICommunicator() {
   return m_mpi_communicator;
 }
+#endif
 
 } // namespace API
 } // Namespace Mantid

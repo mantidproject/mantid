@@ -103,8 +103,10 @@ public:
   /// Deletes a workspace from the framework
   bool deleteWorkspace(const std::string &wsName);
 
+#ifdef MPI_BUILD
   /// Returns the MPI communicator
   boost::mpi::communicator &getMPICommunicator();
+#endif
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FrameworkManagerImpl>;
