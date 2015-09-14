@@ -179,7 +179,6 @@ set ( SRC_FILES
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
-	src/ProcessIndirectFitParameters.cpp
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
@@ -270,7 +269,7 @@ set ( SRC_FILES
 	src/WienerSmooth.cpp
 	src/WorkspaceJoiners.cpp
 	src/XDataConverter.cpp
-)
+    src/GenerateIPythonNotebook.cpp)
 
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
@@ -454,7 +453,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
-	inc/MantidAlgorithms/ProcessIndirectFitParameters.h
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
@@ -546,7 +544,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/WienerSmooth.h
 	inc/MantidAlgorithms/WorkspaceJoiners.h
 	inc/MantidAlgorithms/XDataConverter.h
-)
+    inc/MantidAlgorithms/GenerateIPythonNotebook.h)
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp
@@ -680,6 +678,7 @@ set ( TEST_FILES
 	FlatPlateAbsorptionTest.h
 	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
+	GenerateIPythonNotebookTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
 	GetDetOffsetsMultiPeaksTest.h
@@ -730,7 +729,6 @@ set ( TEST_FILES
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
-	ProcessIndirectFitParametersTest.h
 	Q1D2Test.h
 	Q1DWeightedTest.h
 	QxyTest.h

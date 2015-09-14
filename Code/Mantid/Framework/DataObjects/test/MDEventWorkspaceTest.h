@@ -496,6 +496,31 @@ public:
     TS_ASSERT_EQUALS(Mantid::Kernel::QLab, ws->getSpecialCoordinateSystem());
   }
 
+  void test_getLinePlot()
+  {
+    MDEventWorkspace3Lean::sptr ew = MDEventsTestHelper::makeMDEW<3>(4, 0.0, 7.0, 3);
+
+    double volume = pow(7.0 / 4.0, 3);
+    double signal = 3.0;
+
+    Mantid::Kernel::VMD start(0,0,0);
+    Mantid::Kernel::VMD end(2,0,0);
+    std::vector<coord_t> x;
+    std::vector<signal_t> y, e;
+    ew->getLinePlot(start, end, NoNormalization, x, y, e);
+    for(size_t i = 0; i < y.size(); i+=10) {
+      TS_ASSERT_EQUALS(y[i], signal);
+    }
+    ew->getLinePlot(start, end, VolumeNormalization, x, y, e);
+    for(size_t i = 0; i < y.size(); i+=10) {
+      TS_ASSERT_DELTA(y[i], signal / volume, 1e-7);
+    }
+    ew->getLinePlot(start, end, NumEventsNormalization, x, y, e);
+    for(size_t i = 0; i < y.size(); i+=10) {
+      TS_ASSERT_EQUALS(y[i], 1.0);
+    }
+  }
+
 };
 
 

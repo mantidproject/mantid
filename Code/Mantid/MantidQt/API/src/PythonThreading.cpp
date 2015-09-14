@@ -2,85 +2,47 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidQtAPI/PythonThreading.h"
-#include <QThread>
+#include <iostream>
 
 //------------------------------------------------------------------------------
-// GlobalInterpreterLock Static helpers
-//------------------------------------------------------------------------------
-
-/**
- * @return A handle to the Python threadstate before the acquire() call.
- */
-PyGILState_STATE GlobalInterpreterLock::acquire() {
-  return PyGILState_Ensure();
-}
-
-/**
- * There must be have been a call to acquire() to create the tstate value given here.
- * @param tstate The thread-state returned by acquire()
- */
-void GlobalInterpreterLock::release(PyGILState_STATE tstate) {
-  PyGILState_Release(tstate);
-}
-
-//------------------------------------------------------------------------------
-// GlobalInterpreterLock Public members
+// PythonGIL Public members
 //------------------------------------------------------------------------------
 
 /**
- * Calls PyGILState_Ensure()
+ * Leaves the lock unlocked. You are strongly encouraged to use
+ * the ScopedInterpreterLock class to control this
  */
-GlobalInterpreterLock::GlobalInterpreterLock()
-  : m_state(this->acquire()) {
-}
+PythonGIL::PythonGIL() : m_state(PyGILState_UNLOCKED) {}
+
+/**
+ * Calls PyGILState_Ensure. A call to this must be matched by a call to release
+ * on the same thread.
+ */
+void PythonGIL::acquire() { m_state = PyGILState_Ensure(); }
 
 /**
  * Calls PyGILState_Release
  */
-GlobalInterpreterLock::~GlobalInterpreterLock() {
-  this->release(m_state);
-}
+void PythonGIL::release() { PyGILState_Release(m_state); }
 
 //------------------------------------------------------------------------------
-// PyGILStateService static helpers
+// RecursivePythonGIL public members
 //------------------------------------------------------------------------------
 /**
- * @param targetStore The PyGILStateService object to store the state
+ * Leaves the lock unlocked. You are strongly encouraged to use
+ * the ScopedRecursiveInterpreterLock class to control this
  */
-void PyGILStateService::acquireAndStore(PyGILStateService &targetStore) {
-  if(!targetStore.contains(QThread::currentThread())) {
-    targetStore.add(QThread::currentThread(), GlobalInterpreterLock::acquire());
+RecursivePythonGIL::RecursivePythonGIL() : m_count(0), m_lock() {}
+
+void RecursivePythonGIL::acquire() {
+  if(m_count == 0) {
+    m_lock.acquire();
   }
+  m_count += 1;
 }
 
-/**
- * @param targetStore The PyGILStateService object from which to relesae
- * the state
- * @param targetStore The PyGILStateService object storing the state
- */
-void PyGILStateService::dropAndRelease(PyGILStateService &targetStore) {
-  if(targetStore.contains(QThread::currentThread())) {
-    GlobalInterpreterLock::release(targetStore.take(QThread::currentThread()));
+void RecursivePythonGIL::release() {
+  if (--m_count == 0) {
+    m_lock.release();
   }
-}
-
-//------------------------------------------------------------------------------
-// PyGILStateService public members
-//------------------------------------------------------------------------------
-/**
- * @param thread A pointer to the current QThread object that defines a thread
- * @param tstate The value of PyGILState provided by a call to PyGILState_Ensure()
- */
-void PyGILStateService::add(QThread* thread, PyGILState_STATE tstate) {
-  m_mapping.insert(thread, tstate);
-}
-
-/**
- * A call to add() must have been performed for the given thread
- * @param thread A pointer to a QThread whose tstate should be retrieved. If found, the
- * state is dropped from the map.
- * @return tstate PyGILState_STATE value associated with the given thread
- */
-PyGILState_STATE PyGILStateService::take(QThread* thread) {
-  return m_mapping.take(thread);
 }

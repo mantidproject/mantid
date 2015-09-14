@@ -42,14 +42,32 @@ namespace {
     *  Adds the column headings to a table
     *  @param vertexes : Table to which the columns are written to.
     */
-    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes) {
+    void addColumnHeadings(boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes, std::string outputDimensions) {
 
-        vertexes->addColumn("double", "Qx"); //needs to be set to whatever our Transform is.
-        vertexes->addColumn("double", "Qy"); //needs to be set to whatever our Transform is.
+        if (outputDimensions == "Q (lab frame)"){
+        vertexes->addColumn("double", "Qx");
+        vertexes->addColumn("double", "Qy");
         vertexes->addColumn("int", "OriginIndex");
         vertexes->addColumn("int", "OriginBin");
         vertexes->addColumn("double", "CellSignal");
         vertexes->addColumn("double", "CellError");
+        }
+        if (outputDimensions == "P (lab frame)"){
+        vertexes->addColumn("double", "Pi+Pf");
+        vertexes->addColumn("double", "Pi-Pf");
+        vertexes->addColumn("int", "OriginIndex");
+        vertexes->addColumn("int", "OriginBin");
+        vertexes->addColumn("double", "CellSignal");
+        vertexes->addColumn("double", "CellError");
+        }
+        if (outputDimensions == "K (incident, final)"){
+        vertexes->addColumn("double", "Ki"); 
+        vertexes->addColumn("double", "Kf"); 
+        vertexes->addColumn("int", "OriginIndex");
+        vertexes->addColumn("int", "OriginBin");
+        vertexes->addColumn("double", "CellSignal");
+        vertexes->addColumn("double", "CellError");
+        }
     }
 }
 namespace Mantid {
@@ -286,11 +304,12 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
  * @param inputWs : Workspace to be rebinned
  * @param vertexes : TableWorkspace for debugging purposes
  * @param dumpVertexes : determines whether vertexes will be written to for debugging purposes or not
+ * @param outputDimensions : used for the column headings for Dump Vertexes
  */
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     MatrixWorkspace_const_sptr inputWS,
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
-        &vertexes, bool dumpVertexes) const {
+        &vertexes, bool dumpVertexes, std::string outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);
@@ -323,7 +342,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
   std::vector<specid_t> specNumberMapping;
   std::vector<detid_t> detIDMapping;
   // Create a table for the output if we want to debug vertex positioning
-  addColumnHeadings(vertexes);
+  addColumnHeadings(vertexes, outputDimensions);
   for (size_t i = 0; i < nHistos; ++i) {
     IDetector_const_sptr detector = inputWS->getDetector(i);
     if (!detector || detector->isMasked() || detector->isMonitor()) {
@@ -347,6 +366,7 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       const double error = E[j];
 
       // fractional rebin
+      /*
       m_calculator->setThetaFinal(thetaLower);
       const V2D ur(m_calculator->calculateDim0(lamLower), // highest qx
                    m_calculator->calculateDim1(lamLower));
@@ -359,12 +379,14 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
                    m_calculator->calculateDim1(lamUpper));
 
       Quadrilateral inputQ(ll, lr, ur, ul);
+      */
+      auto inputQ = m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j, outWS,
                                                    zBinsVec);
 
       // Find which qy bin this point lies in
       const auto qIndex =
-          std::upper_bound(zBinsVec.begin(), zBinsVec.end(), ll.Y()) -
+          std::upper_bound(zBinsVec.begin(), zBinsVec.end(), inputQ[0].Y()) -
           zBinsVec.begin();
       if (qIndex != 0 && qIndex < static_cast<int>(zBinsVec.size())) {
         // Add this spectra-detector pair to the mapping
@@ -374,10 +396,10 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       }
       // Debugging
       if (dumpVertexes) {
-        writeRow(vertexes, ll, i, j, signal, error);
-        writeRow(vertexes, ul, i, j, signal, error);
-        writeRow(vertexes, ur, i, j, signal, error);
-        writeRow(vertexes, lr, i, j, signal, error);
+        writeRow(vertexes, inputQ[0], i, j, signal, error);
+        writeRow(vertexes, inputQ[1], i, j, signal, error);
+        writeRow(vertexes, inputQ[2], i, j, signal, error);
+        writeRow(vertexes, inputQ[3], i, j, signal, error);
       }
     }
   }

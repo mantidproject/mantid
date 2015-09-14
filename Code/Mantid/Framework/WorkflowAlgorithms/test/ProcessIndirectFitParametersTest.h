@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/ProcessIndirectFitParameters.h"
+#include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
