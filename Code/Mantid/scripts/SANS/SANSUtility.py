@@ -1165,7 +1165,7 @@ def correct_q_resolution_for_can(original_workspace, can_workspace, subtracted_w
     @param subtracted_workspace: the subtracted workspace
     '''
     dummy1 = can_workspace
-    if original_workspace.getNumHistograms() == 1:
+    if original_workspace.getNumberHistograms() == 1:
         subtracted_workspace.setDx(0, original_workspace.dataDx(0))
 
 def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
@@ -1181,7 +1181,7 @@ def correct_q_resolution_for_merged(count_ws_front, count_ws_rear,
     @param norm_ws_rear: the rear norm
     @param output_ws: the output workspace
     '''
-    if count_ws_rear.getNumHistograms() != 1:
+    if count_ws_rear.getNumberHistograms() != 1:
         return
     if count_ws_rear.hasDx(0):
         sanslog.warning("Merging workspaces with X errors has currently not been implemented")

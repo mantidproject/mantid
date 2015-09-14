@@ -986,5 +986,76 @@ class TestErrorPropagationFitAndRescale(unittest.TestCase):
         DeleteWorkspace(rear)
 
 
+class TestGetCorrectQResolution(unittest.TestCase):
+    def _get_sample_workspace(self, workspace_name,use_xerror = True, nspec = 1):
+        x_in = [1,2,3,4,5,6,7,8,9,10]
+        y_in = [2,2,2,2,2,2,2,2,2]
+        e_in = [1,1,1,1,1,1,1,1,1]
+        x_error = [1.1,2.2,3.3,4.4,5.5,6.6,7.7,8.8,9.9, 10.1]
+
+        x = []
+        y = []
+        e = []
+        for item in range(0, nspec):
+            x = x + x_in
+            y = y + y_in
+            e = e + e_in
+
+        CreateWorkspace(DataX = x,
+                        DataY =y,
+                        DataE = e,
+                        NSpec = nspec,
+                        UnitX = "MomentumTransfer",
+                        OutputWorkspace = workspace_name)
+        if use_xerror:
+            ws = mtd[workspace_name]
+            for hists in range(0, nspec):
+                x_error_array = np.asarray(x_error)
+                ws.setDx(hists, x_error_array)
+
+    def test_error_is_passed_from_original_to_subtracted_workspace(self):
+        # Arrange
+        orig_name = "orig"
+        can_name = "can"
+        result_name = "result"
+        self._get_sample_workspace(orig_name, True)
+        can = self._get_sample_workspace(can_name, True)
+        result = self._get_sample_workspace(result_name, False)
+        orig = mtd[orig_name]
+        can = mtd[can_name]
+        result = mtd[result_name]
+        # Act
+        su.correct_q_resolution_for_can(orig, can, result)
+        # Assert
+        dx_orig = orig.dataDx(0)
+        dx_result = result.dataDx(0)
+        self.assertTrue(result.hasDx(0))
+        for index in range(0, len(dx_orig)):
+            self.assertEqual(dx_orig[index], dx_result[index])
+        # Clean up
+        DeleteWorkspace(orig)
+        DeleteWorkspace(can)
+        DeleteWorkspace(result)
+
+    def test_error_is_ignored_for_more_than_one_spectrum(self):
+        # Arrange
+        orig_name = "orig"
+        can_name = "can"
+        result_name = "result"
+        self._get_sample_workspace(orig_name, True, 2)
+        can = self._get_sample_workspace(can_name, True, 2)
+        result = self._get_sample_workspace(result_name, False, 2)
+        orig = mtd[orig_name]
+        can = mtd[can_name]
+        result = mtd[result_name]
+        # Act
+        su.correct_q_resolution_for_can(orig, can, result)
+        # Assert
+        self.assertFalse(result.hasDx(0))
+        # Clean up
+        DeleteWorkspace(orig)
+        DeleteWorkspace(can)
+        DeleteWorkspace(result)
+
 if __name__ == "__main__":
     unittest.main()
