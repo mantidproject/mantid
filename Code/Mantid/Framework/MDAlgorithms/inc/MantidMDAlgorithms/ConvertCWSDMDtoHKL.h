@@ -2,6 +2,9 @@
 #define MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKL_H_
 
 #include "MantidMDAlgorithms/DllConfig.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -29,10 +32,35 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_MDALGORITHMS_DLL ConvertCWSDMDtoHKL {
+class MANTID_MDALGORITHMS_DLL ConvertCWSDMDtoHKL : public API::Algorithm {
 public:
   ConvertCWSDMDtoHKL();
   virtual ~ConvertCWSDMDtoHKL();
+
+  /// Algorithm's name
+  virtual const std::string name() const { return "ConvertCWSDMDtoHKL"; }
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Convert constant wavelength single crystal diffractomer's data"
+           "in MDEventWorkspace and in unit of Q-sample to the HKL space "
+           "by UB matrix.";
+  }
+
+  /// Algorithm's version
+  virtual int version() const { return (1); }
+
+  /// Algorithm's category for identification
+  virtual const std::string category() const {
+    return "Diffraction;MDAlgorithms";
+  }
+
+private:
+  /// Initialisation code
+  void init();
+
+  /// Execution code
+  void exec();
 };
 
 } // namespace MDAlgorithms
