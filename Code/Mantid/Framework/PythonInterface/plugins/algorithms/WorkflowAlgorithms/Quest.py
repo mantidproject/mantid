@@ -57,33 +57,24 @@ class Quest(PythonAlgorithm):
         sam = self.getPropertyValue('SamNumber')
         rinType = self.getPropertyValue('ResInputType')
         res = self.getPropertyValue('ResNumber')
-        rsnormType = self.getPropertyValue('ResNormInputType')
-        rsnormNum = self.getPropertyValue('ResNormNumber')
         elastic = self.getProperty('ElasticOption').value
         bgd = self.getPropertyValue('BackgroundOption')
         emin = self.getPropertyValue('EnergyMin')
         emax = self.getPropertyValue('EnergyMax')
         nbin = self.getPropertyValue('SamBinning')
         nbins = [nbin, 1]
-        nbet = self.getPropertyValue('NumberBeta')
-        nsig = self.getPropertyValue('NumberSigma')
+        nbet = self.getProperty('NumberBeta').value
+        nsig = self.getProperty('NumberSigma').value
         nbs = [nbet, nsig]
 
         sname = prefix+sam+'_'+ana + '_red'
         rname = prefix+res+'_'+ana + '_res'
-        rsname = prefix+rsnormNum+'_'+ana+ '_ResNorm_Paras'
         erange = [float(emin), float(emax)]
         if elastic:
             o_el = 1
         else:
             o_el = 0
-        if bgd == 'Sloping':
-            o_bgd = 2
-        if bgd == 'Flat':
-            o_bgd = 1
-        if bgd == 'Zero':
-            o_bgd = 0
-        fitOp = [o_el, o_bgd, 0, 0]
+        fitOp = [o_el, bgd, 0, 0]
         loopOp = self.getProperty('Sequence').value
         verbOp = self.getProperty('Verbose').value
         plotOp = self.getPropertyValue('Plot')
@@ -104,16 +95,9 @@ class Quest(PythonAlgorithm):
         else:
             Rmessage = 'Resolution from Workspace : '+rname
 
-        if rsnormType == 'File':
-            rpath = os.path.join(workdir, rsname+'.nxs')        # path name for res nxs file
-            LoadNexusProcessed(Filename=rpath, OutputWorkspace=rsname)
-            Rmessage = 'ResNorm from File : '+rpath
-        else:
-            Rmessage = 'ResNorm from Workspace : '+rsname
-
         if verbOp:
             logger.notice(Smessage)
             logger.notice(Rmessage)
-        Main.QuestRun(sname,rname,rsname,nbs,erange,nbins,fitOp,loopOp,verbOp,plotOp,saveOp)
+        Main.QuestRun(sname,rname,nbs,erange,nbins,fitOp,loopOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(Quest)         # Register algorithm with Mantid
