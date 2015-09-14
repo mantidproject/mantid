@@ -634,16 +634,30 @@ bool SpectrumDisplay::dataSourceRangeChanged()
            m_totalXMax != m_dataSource->getXMax() );
 }
 
-void SpectrumDisplay::addOrther(const boost::shared_ptr<SpectrumDisplay>& other)
+void SpectrumDisplay::addOther(const boost::shared_ptr<SpectrumDisplay>& other)
 {
   m_otherDisplays.append(other);
 }
 
-void SpectrumDisplay::addOrthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others)
+void SpectrumDisplay::addOthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others)
 {
   foreach(boost::shared_ptr<SpectrumDisplay> sd, others)
   {
     m_otherDisplays.append(sd);
+  }
+}
+
+void SpectrumDisplay::removeOther(const boost::shared_ptr<SpectrumDisplay>& other)
+{
+  QList<int> toRemove;
+  for(int i = 0; i < m_otherDisplays.size(); ++i) {
+    auto ds = m_otherDisplays[i].lock();
+    if (!ds || ds.get() == other.get()) {
+      toRemove.push_front(i);
+    }
+  }
+  foreach(int i, toRemove) {
+    m_otherDisplays.removeAt(i);
   }
 }
 
@@ -654,8 +668,6 @@ void SpectrumDisplay::addOrthers(const QList<boost::shared_ptr<SpectrumDisplay>>
  */
 void SpectrumDisplay::imagePickerMoved(const QPoint & point)
 {
-  //m_pickerX = point.x();
-  //m_pickerY = point.y();
   setPointedAtPoint( point );
 }
 

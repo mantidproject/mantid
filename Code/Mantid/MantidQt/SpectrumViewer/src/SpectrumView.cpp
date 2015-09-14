@@ -38,6 +38,7 @@ SpectrumView::SpectrumView(QWidget *parent) :
   m_ui->setupUi(this);
   //m_ui->x_min_input->setValidator(new QDoubleValidator(this));
   connect(m_ui->imageTabs,SIGNAL(currentChanged(int)),this,SLOT(changeSpectrumDisplay(int)));
+  connect(m_ui->imageTabs,SIGNAL(tabCloseRequested(int)),this,SLOT(respondToTabCloseReqest(int)));
   updateHandlers();
   setAcceptDrops(true);
 
@@ -118,6 +119,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
     layout->addWidget(spectrumPlot);
     widget->setLayout(layout);
     tab = m_ui->imageTabs->addTab(widget, QString::fromStdString(wksp->name()));
+    m_ui->imageTabs->setTabsClosable(true);
   }
 
   auto spectrumDisplay = boost::make_shared<SpectrumDisplay>( spectrumPlot,
@@ -136,9 +138,9 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
   else
   {
     foreach(boost::shared_ptr<SpectrumDisplay> sd, m_spectrumDisplay) {
-      sd->addOrther(spectrumDisplay);
+      sd->addOther(spectrumDisplay);
     }
-    spectrumDisplay->addOrthers(m_spectrumDisplay);
+    spectrumDisplay->addOthers(m_spectrumDisplay);
     //spectrumPlot->canvas()->installEventFilter(m_svConnections.get());
   }
 
@@ -229,6 +231,27 @@ void SpectrumView::changeSpectrumDisplay(int tab)
   m_svConnections->setSpectrumDisplay(spectrumDisplay);
   m_hGraph->clear();
   m_vGraph->clear();
+}
+
+void SpectrumView::respondToTabCloseReqest(int tab)
+{
+  if (m_spectrumDisplay.size() > 1) {
+    auto displayToRemove = m_spectrumDisplay[tab];
+    for (auto disp = m_spectrumDisplay.begin(); disp != m_spectrumDisplay.end();
+         ++disp) {
+      if (disp->get() != displayToRemove.get()) {
+        (**disp).removeOther(displayToRemove);
+      }
+    }
+    m_svConnections->removeSpectrumDisplay(displayToRemove.get());
+    m_spectrumDisplay.remove(displayToRemove);
+    m_ui->imageTabs->removeTab(tab);
+    m_hGraph->clear();
+    m_vGraph->clear();
+  }
+  if (m_spectrumDisplay.size() == 1) {
+    m_ui->imageTabs->setTabsClosable(false);
+  }
 }
 
 } // namespace SpectrumView

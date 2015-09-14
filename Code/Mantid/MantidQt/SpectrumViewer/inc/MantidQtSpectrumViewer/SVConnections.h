@@ -97,6 +97,7 @@ public slots:
 
   void setSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
   SpectrumDisplay* getCurrentSpectrumDisplay() const;
+  void removeSpectrumDisplay(SpectrumDisplay* spectrumDisplay);
 
 private:
   /// Event filter for mouse wheel capture

@@ -726,5 +726,16 @@ SpectrumDisplay* SVConnections::getCurrentSpectrumDisplay() const {
   return m_currentSpectrumDisplay;
 }
 
+void SVConnections::removeSpectrumDisplay(SpectrumDisplay* spectrumDisplay) {
+  if (m_spectrumDisplays.contains(spectrumDisplay)) {
+    m_spectrumDisplays.remove(spectrumDisplay);
+  }
+  if (m_spectrumDisplays.isEmpty()) {
+    m_currentSpectrumDisplay = NULL;
+  } else {
+    m_currentSpectrumDisplay = m_spectrumDisplays.back();
+  }
+}
+
 } // namespace SpectrumView
 } // namespace MantidQt

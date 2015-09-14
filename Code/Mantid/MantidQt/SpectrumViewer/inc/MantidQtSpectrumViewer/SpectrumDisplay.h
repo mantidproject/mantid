@@ -122,8 +122,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
 
      QwtPlot* spectrumPlot() const {return m_spectrumPlot;}
 
-     void addOrther(const boost::shared_ptr<SpectrumDisplay>& other);
-     void addOrthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others);
+     void addOther(const boost::shared_ptr<SpectrumDisplay>& other);
+     void addOthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others);
+     void removeOther(const boost::shared_ptr<SpectrumDisplay>& other);
 
   protected:
      SpectrumPlotItem*    m_spectrumPlotItem;

@@ -80,6 +80,7 @@ signals:
 protected slots:
   void closeWindow();
   void changeSpectrumDisplay(int tab);
+  void respondToTabCloseReqest(int tab);
 
 protected:
   virtual void resizeEvent(QResizeEvent * event);
