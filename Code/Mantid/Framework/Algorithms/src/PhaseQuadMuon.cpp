@@ -2,11 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,58 +46,54 @@ void PhaseQuadMuon::exec() {
   // Get input phase table
   API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
 
-  // Create temporary workspace to perform operations on it
-  API::MatrixWorkspace_sptr tempWs =
-      boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", m_nHist,
-                                                   m_nData + 1, m_nData));
-
-  // Create output workspace with two spectra (squashograms)
-  API::MatrixWorkspace_sptr outputWs =
-      boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          API::WorkspaceFactory::Instance().create("Workspace2D", 2,
-                                                   m_nData + 1, m_nData));
-  outputWs->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
-
   // Remove exponential decay and save results into tempWs
-  loseExponentialDecay(tempWs);
+  API::MatrixWorkspace_sptr tempws = loseExponentialDecay(inputWs);
 
   // Compute squashograms
-  squash(tempWs, outputWs);
+  API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
 
   // Regain exponential decay
-  regainExponential(outputWs);
+  regainExponential(ows);
 
-  setProperty("OutputWorkspace", outputWs);
+  setProperty("OutputWorkspace", ows);
 }
 
 
 
 //----------------------------------------------------------------------------------------------
 /** Remove exponential decay from input histograms, i.e., calculate asymmetry
-* @param tempWs :: workspace containing the spectra to remove exponential from
+* @param ws :: [Input/Output] Workspace containing the spectra to remove exponential from
 */
-void PhaseQuadMuon::loseExponentialDecay(API::MatrixWorkspace_sptr tempWs) {
+API::MatrixWorkspace_sptr
+PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
-  // TODO rewrite this algorithm using RemoveExponencialDecay
+  API::IAlgorithm_sptr alg = createChildAlgorithm("RemoveExpDecay");
+  alg->setProperty("InputWorkspace",ws);
+  alg->execute();
+  API::MatrixWorkspace_sptr ows = alg->getProperty("OutputWorkspace");
+  return ows;
+
 }
 
 //----------------------------------------------------------------------------------------------
 /** Compute Squashograms
-* @param tempWs :: input workspace containing the asymmetry in the lab frame
-* @param outputWs :: output workspace to hold squashograms
+* @param ws :: [Input/Output] workspace containing the asymmetry in the lab frame
 */
-void PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr tempWs,
-                           API::MatrixWorkspace_sptr outputWs) {
+API::MatrixWorkspace_sptr
+PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
+                      const API::ITableWorkspace_sptr &phase) {
 
   double sxx = 0;
   double syy = 0;
   double sxy = 0;
 
-  for (int h = 0; h < m_nHist; h++) {
-    auto data = m_histData[h];
-    double X = data.n0 * data.alpha * cos(data.phi);
-    double Y = data.n0 * data.alpha * sin(data.phi);
+  size_t nspec = ws->getNumberHistograms();
+  size_t npoints = ws->blocksize();
+
+  for (size_t h = 0; h < nspec; h++) {
+    double phi = phase->Double(h,1);
+    double X = cos(phi);
+    double Y = sin(phi);
     sxx += X * X;
     syy += Y * Y;
     sxy += X * Y;
@@ -109,19 +104,19 @@ void PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr tempWs,
   double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
   double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
   std::vector<double> aj, bj;
-  for (int h = 0; h < m_nHist; h++) {
-    auto data = m_histData[h];
-    double X = data.n0 * data.alpha * cos(data.phi);
-    double Y = data.n0 * data.alpha * sin(data.phi);
+  for (int h = 0; h < nspec; h++) {
+    double phi = phase->Double(h,1);
+    double X = cos(phi);
+    double Y = sin(phi);
     aj.push_back((lam1 * X + mu1 * Y) * 0.5);
     bj.push_back((lam2 * X + mu2 * Y) * 0.5);
   }
 
-  std::vector<double> data1(m_nData, 0), data2(m_nData, 0);
-  std::vector<double> sigm1(m_nData, 0), sigm2(m_nData, 0);
-  for (int i = 0; i < m_nData; i++) {
-    for (int h = 0; h < m_nHist; h++) {
-      auto spec = tempWs->getSpectrum(h);
+  std::vector<double> data1(npoints, 0), data2(npoints, 0);
+  std::vector<double> sigm1(npoints, 0), sigm2(npoints, 0);
+  for (int i = 0; i < npoints; i++) {
+    for (int h = 0; h < nspec; h++) {
+      auto spec = ws->getSpectrum(h);
       data1[i] += aj[h] * spec->readY()[i];
       data2[i] += bj[h] * spec->readY()[i];
       sigm1[i] += aj[h] * aj[h] * spec->readE()[i] * spec->readE()[i];
@@ -131,30 +126,41 @@ void PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr tempWs,
     sigm2[i] = sqrt(sigm2[i]);
   }
 
-  outputWs->getSpectrum(0)->dataX() = tempWs->getSpectrum(0)->readX();
-  outputWs->getSpectrum(0)->dataY() = data1;
-  outputWs->getSpectrum(0)->dataE() = sigm1;
-  outputWs->getSpectrum(1)->dataX() = tempWs->getSpectrum(1)->readX();
-  outputWs->getSpectrum(1)->dataY() = data2;
-  outputWs->getSpectrum(1)->dataE() = sigm2;
+  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create("Workspace2D",2,npoints,npoints);
+  ows->dataY(0).assign(data1.begin(),data1.end());
+  ows->dataE(0).assign(sigm1.begin(),sigm1.end());
+  ows->dataY(1).assign(data2.begin(),data2.end());
+  ows->dataE(1).assign(sigm2.begin(),sigm2.end());
+  // X
+  MantidVec x = ws->readX(0);
+  ows->dataX(0).assign(x.begin(),x.end());
+  ows->dataX(1).assign(x.begin(),x.end());
+  return ows;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Put back in exponential decay
-* @param outputWs :: output workspace with squashograms to update
+* @param ws :: [Input/Output] Workspace containing squashograms to update
 */
-void PhaseQuadMuon::regainExponential(API::MatrixWorkspace_sptr outputWs) {
-  auto specRe = outputWs->getSpectrum(0);
-  auto specIm = outputWs->getSpectrum(1);
+void PhaseQuadMuon::regainExponential(API::MatrixWorkspace_sptr &ws) {
 
-  for (int i = 0; i < m_nData; i++) {
-    double x = outputWs->getSpectrum(0)->readX()[i];
-    double e = exp(-x / m_muLife / 1000);
+#define MULIFE 2.19703
+
+  auto specRe = ws->getSpectrum(0);
+  auto specIm = ws->getSpectrum(1);
+
+  size_t npoints = ws->blocksize();
+
+  for (int i = 0; i < npoints; i++) {
+    double x = ws->getSpectrum(0)->readX()[i];
+    double e = exp(-x / MULIFE);
     specRe->dataY()[i] /= e;
     specIm->dataY()[i] /= e;
     specRe->dataE()[i] /= e;
     specIm->dataE()[i] /= e;
   }
+
+#undef MULIFE
 }
 }
 }

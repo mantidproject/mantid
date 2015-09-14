@@ -58,12 +58,13 @@ private:
   /// Run the algorithm
   void exec();
   /// Remove exponential decay from input histograms
-  void loseExponentialDecay(API::MatrixWorkspace_sptr tempWs);
+  API::MatrixWorkspace_sptr
+  loseExponentialDecay(const API::MatrixWorkspace_sptr &ws);
   /// Create squashograms
-  void squash(const API::MatrixWorkspace_sptr tempWs,
-              API::MatrixWorkspace_sptr outputWs);
+  API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
+                                   const API::ITableWorkspace_sptr &phase);
   /// Put back in exponential decay
-  void regainExponential(API::MatrixWorkspace_sptr outputWs);
+  void regainExponential(API::MatrixWorkspace_sptr &ws);
 };
 
 } // namespace Algorithms
