@@ -2,6 +2,10 @@
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -9,6 +13,8 @@ namespace MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDAlgorithms;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 DECLARE_ALGORITHM(ConvertCWSDMDtoHKL)
 
@@ -28,7 +34,7 @@ void ConvertCWSDMDtoHKL::init() {
                   "Name of the input MDEventWorkspace that stores detectors "
                   "counts from a constant-wave powder diffraction experiment.");
 
-  Mantid::Kernel::IPropertyManager::declareProperty(
+  declareProperty(
       new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace", "",
                                                Direction::Output),
       "Name of the output MDEventWorkspace in HKL-space.");
@@ -38,14 +44,14 @@ void ConvertCWSDMDtoHKL::init() {
   */
 void ConvertCWSDMDtoHKL::exec() {
 
-  IMDEventWorkspace_sprt inputWS = getProperty("InputWorkspace");
+  IMDEventWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // 1. Check the units of the MDEvents
   // 2. Export all the events to text file
   // 3. Get a UB matrix
   // 4. Refer to IndexPeak to calculate H,K,L of each MDEvent
 }
 
-void ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws) {
+std::vector<std::vector<double> > ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws) {
   size_t numevents = mdws->getNEvents();
 
   std::vector<std::vector<double> > vec_md_events(numevents);
@@ -68,6 +74,23 @@ void ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws) {
 
     return vec_md_events;
   }
+}
+
+void ConvertCWSDMDtoHKL::indexQSample(IMDEventWorkspace_sptr mdws, PeaksWorkspace_sptr peakws)
+{
+  std::vector<V3D> miller_indices;
+  std::vector<V3D> q_vectors;
+
+  OrientedLattice o_lattice = peakws->mutableSample().getOrientedLattice();
+  Matrix<double> UB = o_lattice.getUB();
+  Matrix<double> tempUB(UB);
+
+  int num_indexed = 0;
+  int original_indexed = 0;
+  double original_error = 0;
+  original_indexed = IndexingUtils::CalculateMillerIndices(
+      tempUB, q_vectors, tolerance, miller_indices, original_error);
+
 }
 
 } // namespace MDAlgorithms

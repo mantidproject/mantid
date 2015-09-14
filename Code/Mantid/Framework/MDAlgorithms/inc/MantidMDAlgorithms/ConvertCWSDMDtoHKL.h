@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -61,6 +62,10 @@ private:
 
   /// Execution code
   void exec();
+
+  std::vector<std::vector<double> > exportEvents(API::IMDEventWorkspace_sptr mdws);
+
+  void ConvertCWSDMDtoHKL::indexQSample(API::IMDEventWorkspace_sptr mdws, DataObjects::PeaksWorkspace_sptr peakws);
 };
 
 } // namespace MDAlgorithms
