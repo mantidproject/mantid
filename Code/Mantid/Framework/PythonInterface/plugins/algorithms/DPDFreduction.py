@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import os
 import numpy
 import re
@@ -14,6 +14,16 @@ ENERGY_TO_WAVEVECTOR = 2.072
 
 class DPDFreduction(PythonAlgorithm):
     channelgroup = None
+
+    _runs = None
+    _vanfile = None
+    _ecruns = None
+    _ebins_str = None
+    _qbins_str = None
+    _snorm = None
+    _clean = None
+    _qbins = None
+    _ebins = None
 
     def category(self):
         return "Inelastic;PythonAlgorithms"
@@ -45,14 +55,15 @@ class DPDFreduction(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        # Patter validator for run numbers
-        def checkRunNumbers(runs_property_name):
+
+        # Pattern validator for run numbers
+        def checkrunnumbers(runs_property_name):
             runs_string = self.getPropertyValue(runs_property_name)
-            pattern = re.compile(r'^\s*\d+\s*$|^\s*\d+\s*-\s*\d+\s*$|^\s*[\d++]+\d+\s*$')
-            if not pattern.match(runs_string):
+            regexp_pattern = re.compile(r'^\s*\d+\s*$|^\s*\d+\s*-\s*\d+\s*$|^\s*[\d++]+\d+\s*$')
+            if not regexp_pattern.match(runs_string):
                 issues[runs_property_name] = runs_property_name + ' allowed syntaxes:\n' + \
                                              '(1)Single number\n' + \
-                                             '(2) A continous range of numbers, like 5123-5130\n' + \
+                                             '(2) A continuous range of numbers, like 5123-5130\n' + \
                                              '(3)Addition of numbers, like 5123+5128+5130'
             elif re.compile(r'^\s*\d+\s*-\s*\d+\s*$').match(runs_string):
                 first, second = [int(x) for x in runs_string.split('-')]
@@ -60,13 +71,13 @@ class DPDFreduction(PythonAlgorithm):
                     issues[runs_property_name] = runs_property_name + ' should be increasing'
 
         # check syntax for RunNumbers
-        checkRunNumbers('RunNumbers')
+        checkrunnumbers('RunNumbers')
         # check syntax for EmptyCanRunNumbers
         if self.getPropertyValue('EmptyCanRunNumbers'):
-            checkRunNumbers('EmptyCanRunNumbers')
+            checkrunnumbers('EmptyCanRunNumbers')
         # check energy bins
         ebins = self.getPropertyValue('EnergyBins')
-        pattern = re.compile(r'^\s*\d+[\.\d+]*\s*$|' + \
+        pattern = re.compile(r'^\s*\d+[\.\d+]*\s*$|' +
                              r'^\s*\d+[\.\d+]*\s*,\s*\d+[\.\d+]*\s*,\s*\d+[\.\d+]*\s*$')
         if not pattern.match(ebins):
             issues['EnergyBins'] = 'Energy bins is a string containing ' + \
@@ -144,7 +155,7 @@ class DPDFreduction(PythonAlgorithm):
             ws_ec_data = api.mtd[wn_ec_data]
             ec_Ei = ws_ec_data.getRun()['EnergyRequest'].getStatistics().mean
             if abs(Ei - ec_Ei) > Ei_std:
-                raise RuntimeError('Empty can runs were obtained at a significant' + \
+                raise RuntimeError('Empty can runs were obtained at a significant' +
                                    ' different incident energy than the sample runs')
 
         # Obtain energy range
@@ -183,7 +194,7 @@ class DPDFreduction(PythonAlgorithm):
             if not self._qbins:
                 # insert dQ if empty qbins
                 dE = self._ebins[1]
-                self._qbins.append(numpy.sqrt((Ei + dE) / ENERGY_TO_WAVEVECTOR) - \
+                self._qbins.append(numpy.sqrt((Ei + dE) / ENERGY_TO_WAVEVECTOR) -
                                    numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR))
             mins, maxs = api.ConvertToMDMinMaxLocal(wn_reduced, Qdimensions='|Q|',
                                                     dEAnalysisMode='Direct')
@@ -225,6 +236,9 @@ class DPDFreduction(PythonAlgorithm):
         api.Divide(wn_ste, wn_van_st, OutputWorkspace=wn_sten)
         api.ClearMaskFlag(Workspace=wn_sten)
 
+        max_i_theta = 0.0
+        min_i_theta = 0.0
+
         # Linear interpolation
         # First, find minimum theta index with a non-zero histogram
         ws_sten = api.mtd[wn_sten]
@@ -242,7 +256,7 @@ class DPDFreduction(PythonAlgorithm):
         api.CloneWorkspace(InputWorkspace=wn_sten, OutputWorkspace=wn_steni)
         ws_steni = api.mtd[wn_steni]
         i_theta = 1 + min_i_theta
-        while (i_theta < max_i_theta):
+        while i_theta < max_i_theta:
             if not ws_steni.dataY(i_theta).any():
                 nonnull_i_theta_start = i_theta - 1  # angle index of non-null histogram
                 # scan until we find a non-null histogram
