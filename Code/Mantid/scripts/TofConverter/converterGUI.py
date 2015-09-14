@@ -64,7 +64,7 @@ class MainWindow(QtGui.QMainWindow):
     def helpClicked(self):
         # Temporary import while method is in the wrong place
         from pymantidplot.proxies import showCustomInterfaceHelp
-        showCustomInterfaceHelp("TOF_Converter") #need to find a way to import this module
+        showCustomInterfaceHelp("TOF_Converter")
 
     def convert(self):
         #Always reset these values before conversion.
@@ -73,7 +73,8 @@ class MainWindow(QtGui.QMainWindow):
         try:
             if self.ui.InputVal.text() == "":
                 raise RuntimeError("Input value is required for conversion")
-
+            if float(self.ui.InputVal.text()) <= 0:
+                raise RuntimeError("Input value must be greater than 0 for conversion")
             inOption = self.ui.inputUnits.currentText()
             outOption = self.ui.outputUnits.currentText()
             if self.ui.totalFlightPathInput.text() !='':
