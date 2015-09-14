@@ -291,6 +291,7 @@ namespace MantidQt
     /**
     Display a dialog to choose save location for notebook, then save the notebook there
     @param groups : groups of rows to stitch
+    @param groups : rows selected for processing
     */
     void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
     {

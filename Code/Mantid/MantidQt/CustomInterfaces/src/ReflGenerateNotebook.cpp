@@ -235,6 +235,9 @@ namespace MantidQt {
     /**
       Create string of python code to stitch workspaces in the same group
       @param rows : rows in the stitch group
+      @param instrument : name of the instrument
+      @param model : table model containing details of runs and processing settings
+      @param col_nums : column numbers used to find data in model
       @return tuple containing the python code string and the output workspace name
       */
     std::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows, const std::string & instrument,
@@ -303,6 +306,7 @@ namespace MantidQt {
     /**
       Create string of python code to create 1D plots from workspaces
       @param ws_names : vector of workspace names to plot
+      @param title : title for figure
       @return string  of python code to plot I vs Q
       */
     std::string plot1DString(const std::vector<std::string> & ws_names,
@@ -319,6 +323,9 @@ namespace MantidQt {
     /**
      Create string of python code to run reduction algorithm on the specified row
      @param rowNo : the row in the model to run the reduction algorithm on
+     @param instrument : name of the instrument
+     @param model : table model containing details of runs and processing settings
+     @param col_nums : column numbers used to find data in model
      @return tuple containing the python string and the output workspace name
     */
     std::tuple<std::string, std::string, std::string>
@@ -401,6 +408,8 @@ namespace MantidQt {
      Create string of python code to rebin data in a workspace
      @param rowNo : the number of the row to rebin
      @param runNo : the number of the run to rebin
+     @param model : table model containing details of runs and processing settings
+     @param col_nums : column numbers used to find data in model
      @return tuple of strings of python code and output workspace name
     */
     std::tuple<std::string, std::string>
@@ -427,6 +436,7 @@ namespace MantidQt {
     /**
      Create string of python code to create a transmission workspace
      @param trans_ws_str : string of workspaces to create transmission workspace from
+     @param instrument : name of the instrument
      @return tuple of strings of python code and output workspace name
     */
     std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument)
@@ -490,6 +500,7 @@ namespace MantidQt {
     /**
      Create string of python code to load workspaces
      @param runStr : string of workspaces to load
+     @param instrument : name of the instrument
      @return tuple of strings of python code and output workspace name
     */
     std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument) {
@@ -546,6 +557,7 @@ namespace MantidQt {
     /**
      Create string of python code to load a single workspace
      @param run : run to load
+     @param instrument : name of the instrument
      @return tuple of strings of python code and output workspace name
     */
     std::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument) {
