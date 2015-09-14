@@ -63,9 +63,19 @@ private:
   /// Execution code
   void exec();
 
-  std::vector<std::vector<double> > exportEvents(API::IMDEventWorkspace_sptr mdws);
+  std::vector<std::vector<double> >
+  exportEvents(API::IMDEventWorkspace_sptr mdws);
 
-  void ConvertCWSDMDtoHKL::indexQSample(API::IMDEventWorkspace_sptr mdws, DataObjects::PeaksWorkspace_sptr peakws);
+  void indexQSample(API::IMDEventWorkspace_sptr mdws,
+                    DataObjects::PeaksWorkspace_sptr peakws);
+
+  API::IMDEventWorkspace_sptr createHKLMDWorkspace();
+
+  void addMDEvents(std::vector<std::vector<coord_t> > &vec_q_sample,
+                   std::vector<double> vec_signal,
+                   Mantid::DataObjects::PeaksWorkspace_sptr ubpeakws);
+
+  API::IMDEventWorkspace_sptr m_outputWS;
 };
 
 } // namespace MDAlgorithms
