@@ -41,6 +41,7 @@ public:
     Start,                 ///< Start and setup interface
     LoadExistingCalib,     ///< Load a calibration already availble on disk
     CalcCalib,             ///< Calculate a (new) calibration
+    FocusRun,              ///< Focus a run file
     LogMsg,                ///< need to send a message to the Mantid log system
     InstrumentChange,      ///< Instrument selection updated
     ShutDown               ///< closing the interface

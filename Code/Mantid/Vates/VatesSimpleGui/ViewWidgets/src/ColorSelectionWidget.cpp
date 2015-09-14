@@ -43,7 +43,7 @@ namespace SimpleGui
  */
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
     colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01),
-    m_ignoreColorChangeCallbacks(false), m_inProcessUserRequestedAutoScale(false)
+    m_ignoreColorChangeCallbacks(false), m_inProcessUserRequestedAutoScale(false), m_colorScaleLock(NULL)
 {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
@@ -537,6 +537,28 @@ void ColorSelectionWidget::reset()
   this->m_ui.useLogScaleCheckBox->setChecked(false);
   this->m_ui.minValLineEdit->setText("");
   this->m_ui.maxValLineEdit->setText("");
+}
+
+/**
+ * Set the color scale lock
+ * @param lock
+ */
+void ColorSelectionWidget::setColorScaleLock(
+    Mantid::VATES::ColorScaleLock *lock) {
+  if (m_colorScaleLock == NULL) {
+    m_colorScaleLock = lock;
+  }
+}
+
+/**
+ * Is the color selection widget locked or not
+ */
+bool ColorSelectionWidget::isColorScaleLocked() const {
+  if (m_colorScaleLock) {
+    return m_colorScaleLock->isLocked();
+  } else {
+    return false;
+  }
 }
 
 } // SimpleGui

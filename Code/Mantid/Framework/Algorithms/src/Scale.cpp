@@ -36,16 +36,43 @@ void Scale::exec() {
   const double factor = getProperty("Factor");
   const std::string op = getPropertyValue("Operation");
 
+  auto hasDx = inputWS->hasDx(0);
+
+  // We require a copy of the workspace if the 
+  auto inPlace = outputWS == inputWS;
+  MatrixWorkspace_sptr bufferWS;
+
   if (op == "Multiply") {
-    if (outputWS == inputWS)
+    if (outputWS == inputWS) {
+      if (hasDx) {
+        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+      }
       inputWS *= factor;
-    else
+    }
+    else {
       outputWS = inputWS * factor;
+    }
   } else {
-    if (outputWS == inputWS)
+    if (outputWS == inputWS) {
+      if (hasDx) {
+        bufferWS = MatrixWorkspace_sptr(inputWS->clone().release());
+      }
       inputWS += factor;
-    else
+    }
+    else {
       outputWS = inputWS + factor;
+    }
+  }
+
+  // If there are any Dx values in the input workspace, then
+  // copy them across. We check only the first spectrum.
+  if (hasDx) {
+    if (!inPlace) {
+      bufferWS = inputWS;
+    }
+    for (size_t index = 0; index < bufferWS->getNumberHistograms(); ++index) {
+      outputWS->setDx(0,bufferWS->dataDx(0));
+    }
   }
 
   setProperty("OutputWorkspace", outputWS);

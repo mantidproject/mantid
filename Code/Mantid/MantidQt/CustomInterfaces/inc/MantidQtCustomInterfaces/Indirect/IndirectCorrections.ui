@@ -41,6 +41,11 @@
         <string>Absorption</string>
        </attribute>
       </widget>
+      <widget class="QWidget" name="tabContainerSubtraction">
+        <attribute name="title">
+          <string>Container Subtraction</string>
+        </attribute>
+      </widget>
      </widget>
     </item>
     <item>

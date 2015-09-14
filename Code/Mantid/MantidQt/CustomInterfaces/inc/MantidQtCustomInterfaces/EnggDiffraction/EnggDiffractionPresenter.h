@@ -58,9 +58,13 @@ public:
 
   virtual void notify(IEnggDiffractionPresenter::Notification notif);
 
-  // this is the calibration hard work that a worker / thread will run
+  /// the calibration hard work that a worker / thread will run
   void doNewCalibration(const std::string &outFilename,
                         const std::string &vanNo, const std::string &ceriaNo);
+
+  /// the focusing hard work that a worker / thread will run
+  void doFocusRun(const std::string &dir, const std::string &outFilename,
+                  const std::string &runNo, int bank);
 
 protected:
   void initialize();
@@ -71,14 +75,18 @@ protected:
   void processStart();
   void processLoadExistingCalib();
   void processCalcCalib();
+  void processFocusRun();
   void processLogMsg();
   void processInstChange();
   void processShutDown();
 
 protected slots:
   void calibrationFinished();
+  void focusingFinished();
 
 private:
+  /// @name Calibration related private methods
+  //@{
   void inputChecksBeforeCalibrate(const std::string &newVanNo,
                                   const std::string &newCeriaNo);
 
@@ -89,15 +97,32 @@ private:
                               std::string &vanNo, std::string &ceriaNo);
 
   // this may need to be mocked up in tests
-  virtual void startAsynCalibWorker(const std::string &outFilename,
-                                    const std::string &vanNo,
-                                    const std::string &ceriaNo);
+  virtual void startAsyncCalibWorker(const std::string &outFilename,
+                                     const std::string &vanNo,
+                                     const std::string &ceriaNo);
 
   void doCalib(const EnggDiffCalibSettings &cs, const std::string &vanNo,
                const std::string &ceriaNo, const std::string &outFilename);
 
   std::string buildCalibrateSuggestedFilename(const std::string &vanNo,
                                               const std::string &ceriaNo) const;
+  //@}
+
+  /// @name Focusing related private methods
+  //@{
+  /// this may also need to be mocked up in tests
+  virtual void startAsyncFocusWorker(const std::string &dir,
+                                     const std::string &outFilename,
+                                     const std::string &runNo, int bank);
+
+  void inputChecksBeforeFocus(const std::string &runNo, int bank);
+
+  std::string outputFocusFilename(const std::string &runNo, int bank);
+
+  void doFocusing(const EnggDiffCalibSettings &cs,
+                  const std::string &fullFilename, const std::string &runNo,
+                  int bank);
+  //@}
 
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
@@ -129,6 +154,8 @@ private:
 
   /// true if the last calibration completed successfully
   bool m_calibFinishedOK;
+  /// true if the last focusing completed successfully
+  bool m_focusFinishedOK;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffractionView *const m_view;

@@ -38,11 +38,18 @@ class EnggDiffWorker : public QObject {
   Q_OBJECT
 
 public:
-  EnggDiffWorker(EnggDiffractionPresenter *pres,
-                  const std::string &outFilename, const std::string &vanNo,
-                  const std::string &ceriaNo)
+  /// for calibration
+  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outFilename,
+                 const std::string &vanNo, const std::string &ceriaNo)
       : m_pres(pres), m_outFilename(outFilename), m_vanNo(vanNo),
-        m_ceriaNo(ceriaNo) {}
+        m_ceriaNo(ceriaNo), m_bank(-1) {}
+
+  /// for focusing
+  EnggDiffWorker(EnggDiffractionPresenter *pres, const std::string &outDir,
+                 const std::string &outFilename, const std::string &runNo,
+                 int bank)
+      : m_pres(pres), m_outFilename(outFilename), m_runNo(runNo),
+        m_outDir(outDir), m_bank(bank) {}
 
 private slots:
 
@@ -55,6 +62,15 @@ private slots:
     emit finished();
   }
 
+  /**
+   * Focus a run. You must connect this from a thread started()
+   * signal.
+   */
+  void focus() {
+    m_pres->doFocusRun(m_outDir, m_outFilename, m_runNo, m_bank);
+    emit finished();
+  }
+
 signals:
   void finished();
 
@@ -62,6 +78,12 @@ private:
   EnggDiffractionPresenter *m_pres;
   /// parameters for calibration
   std::string m_outFilename, m_vanNo, m_ceriaNo;
+  /// sample run to process
+  const std::string m_runNo;
+  /// Output directory
+  const std::string m_outDir;
+  /// instrument bank
+  int m_bank;
 };
 
 } // namespace CustomInterfaces

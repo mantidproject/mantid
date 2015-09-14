@@ -25,6 +25,7 @@ src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
+src/MDLoadingPresenter.cpp
 src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
@@ -66,6 +67,7 @@ inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
+inc/MantidVatesAPI/ColorScaleGuard.h
 inc/MantidVatesAPI/DimensionViewFactory.h
 inc/MantidVatesAPI/EventNexusLoadingPresenter.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
@@ -156,6 +158,7 @@ test/MDEWLoadingPresenterTest.h
 test/MDHWInMemoryLoadingPresenterTest.h
 test/MDHWLoadingPresenterTest.h
 test/MDHWNexusLoadingPresenterTest.h
+test/MDLoadingPresenterTest.h
 test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
