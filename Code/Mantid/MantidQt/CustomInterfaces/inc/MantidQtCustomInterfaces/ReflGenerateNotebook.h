@@ -35,6 +35,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <boost/tuple/tuple.hpp>
 
 
 namespace MantidQt {
@@ -68,7 +69,7 @@ namespace MantidQt {
 
     std::string titleString(const std::string & wsName);
 
-    std::tuple<std::string, std::string>
+    boost::tuple<std::string, std::string>
       stitchGroupString(const std::set<int> & rows, const std::string & instrument, QReflTableModel_sptr model,
                         ColNumbers col_nums);
 
@@ -77,23 +78,23 @@ namespace MantidQt {
     std::string plotsString(const std::vector<std::string> & unstitched_ws,
                             const std::vector<std::string> & IvsLam_ws, const std::string & stitched_wsStr);
 
-    std::tuple<std::string, std::string, std::string>
+    boost::tuple<std::string, std::string, std::string>
       reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, ColNumbers col_nums);
 
-    std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument);
+    boost::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument);
 
     std::string plusString(const std::string & input_name, const std::string & output_name);
 
-    std::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument);
+    boost::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument);
 
     std::string getRunNumber(const std::string & ws_name);
 
-    std::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
+    boost::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
 
-    std::tuple<std::string, std::string>
+    boost::tuple<std::string, std::string>
       rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, ColNumbers col_nums);
 
-    std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument);
+    boost::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument);
 
     class DLLExport ReflGenerateNotebook {
 

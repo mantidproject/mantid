@@ -52,24 +52,24 @@ namespace MantidQt {
 
         //Reduce each row
         std::ostringstream code_string;
-        std::tuple<std::string, std::string, std::string> reduce_row_string;
+        boost::tuple<std::string, std::string, std::string> reduce_row_string;
         std::vector<std::string> unstitched_ws;
         std::vector<std::string> IvsLam_ws;
         code_string << "#Load and reduce\n";
         for (auto rIt = groupRows.begin(); rIt != groupRows.end(); ++rIt) {
           reduce_row_string = reduceRowString(*rIt, m_instrument, m_model, col_nums);
-          code_string << std::get<0>(reduce_row_string);
-          unstitched_ws.push_back(std::get<1>(reduce_row_string));
-          IvsLam_ws.push_back(std::get<2>(reduce_row_string));
+          code_string << boost::get<0>(reduce_row_string);
+          unstitched_ws.push_back(boost::get<1>(reduce_row_string));
+          IvsLam_ws.push_back(boost::get<2>(reduce_row_string));
         }
         notebook->codeCell(code_string.str());
 
         // Stitch group
-        std::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows, m_instrument, m_model, col_nums);
-        notebook->codeCell(std::get<0>(stitch_string));
+        boost::tuple<std::string, std::string> stitch_string = stitchGroupString(groupRows, m_instrument, m_model, col_nums);
+        notebook->codeCell(boost::get<0>(stitch_string));
 
         // Draw plots
-        notebook->codeCell(plotsString(unstitched_ws, IvsLam_ws, std::get<1>(stitch_string)));
+        notebook->codeCell(plotsString(unstitched_ws, IvsLam_ws, boost::get<1>(stitch_string)));
       }
 
       return notebook->writeNotebook();
@@ -240,7 +240,7 @@ namespace MantidQt {
       @param col_nums : column numbers used to find data in model
       @return tuple containing the python code string and the output workspace name
       */
-    std::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows, const std::string & instrument,
+    boost::tuple<std::string, std::string> stitchGroupString(const std::set<int> & rows, const std::string & instrument,
                                                            QReflTableModel_sptr model, ColNumbers col_nums)
     {
       std::ostringstream stitch_string;
@@ -249,7 +249,7 @@ namespace MantidQt {
 
       //If we can get away with doing nothing, do.
       if(rows.size() < 2)
-        return std::make_tuple("", "");
+        return boost::make_tuple("", "");
 
       //Properties for Stitch1DMany
       std::vector<std::string> workspaceNames;
@@ -266,9 +266,9 @@ namespace MantidQt {
         const double         qmin = model->data(model->index(*rowIt, col_nums.qmin)).toDouble();
         const double         qmax = model->data(model->index(*rowIt, col_nums.qmax)).toDouble();
 
-        const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr, instrument);
+        const boost::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr, instrument);
 
-        const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
+        const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
         runs.push_back(runNo);
         workspaceNames.push_back("IvsQ_" + runNo);
 
@@ -300,7 +300,7 @@ namespace MantidQt {
       stitch_string << vectorParamString("EndOverlaps", endOverlaps);
       stitch_string << ")\n";
 
-      return std::make_tuple(stitch_string.str(), outputWSName);
+      return boost::make_tuple(stitch_string.str(), outputWSName);
     }
 
     /**
@@ -328,7 +328,7 @@ namespace MantidQt {
      @param col_nums : column numbers used to find data in model
      @return tuple containing the python string and the output workspace name
     */
-    std::tuple<std::string, std::string, std::string>
+    boost::tuple<std::string, std::string, std::string>
     reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, ColNumbers col_nums) {
       std::ostringstream code_string;
 
@@ -343,23 +343,23 @@ namespace MantidQt {
       if (thetaGiven)
         theta = model->data(model->index(rowNo, col_nums.angle)).toDouble();
 
-      const std::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr, instrument);
-      code_string << std::get<0>(load_ws_string);
+      const boost::tuple<std::string, std::string> load_ws_string = loadWorkspaceString(runStr, instrument);
+      code_string << boost::get<0>(load_ws_string);
 
-      const std::string runNo = getRunNumber(std::get<1>(load_ws_string));
+      const std::string runNo = getRunNumber(boost::get<1>(load_ws_string));
       const std::string IvsLamName = "IvsLam_" + runNo;
       const std::string thetaName = "theta_" + runNo;
 
       if (!transStr.empty()) {
-        const std::tuple<std::string, std::string> trans_string = transWSString(transStr, instrument);
-        code_string << std::get<0>(trans_string);
+        const boost::tuple<std::string, std::string> trans_string = transWSString(transStr, instrument);
+        code_string << boost::get<0>(trans_string);
         code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName << " = ";
-        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
-        code_string << ", " << "FirstTransmissionRun = '" << std::get<1>(trans_string) << "'";
+        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << boost::get<1>(load_ws_string) << "'";
+        code_string << ", " << "FirstTransmissionRun = '" << boost::get<1>(trans_string) << "'";
       }
       else {
         code_string << "IvsQ_" << runNo << ", " << IvsLamName << ", " << thetaName << " = ";
-        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
+        code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << boost::get<1>(load_ws_string) << "'";
       }
 
       if (thetaGiven) {
@@ -375,14 +375,14 @@ namespace MantidQt {
 
       const double scale = model->data(model->index(rowNo, col_nums.scale)).toDouble();
       if(scale != 1.0) {
-        const std::tuple<std::string, std::string> scale_string = scaleString(runNo, scale);
-        code_string << std::get<0>(scale_string);
+        const boost::tuple<std::string, std::string> scale_string = scaleString(runNo, scale);
+        code_string << boost::get<0>(scale_string);
       }
 
-      const std::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo, model, col_nums);
-      code_string << std::get<0>(rebin_string);
+      const boost::tuple<std::string, std::string> rebin_string = rebinString(rowNo, runNo, model, col_nums);
+      code_string << boost::get<0>(rebin_string);
 
-      return std::make_tuple(code_string.str(), std::get<1>(rebin_string), IvsLamName);
+      return boost::make_tuple(code_string.str(), boost::get<1>(rebin_string), IvsLamName);
     }
 
      /**
@@ -391,7 +391,7 @@ namespace MantidQt {
       @param scale : value of scaling factor to use
       @return tuple of strings of python code and output workspace name
       */
-    std::tuple<std::string, std::string>
+    boost::tuple<std::string, std::string>
      scaleString(const std::string & runNo, const double scale)
     {
       std::ostringstream scale_string;
@@ -401,7 +401,7 @@ namespace MantidQt {
       scale_string << ", Factor = " << 1.0 / scale;
       scale_string << ")\n";
 
-      return std::make_tuple(scale_string.str(), "IvsQ" + runNo);
+      return boost::make_tuple(scale_string.str(), "IvsQ" + runNo);
     }
 
     /**
@@ -412,7 +412,7 @@ namespace MantidQt {
      @param col_nums : column numbers used to find data in model
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string>
+    boost::tuple<std::string, std::string>
       rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, ColNumbers col_nums)
     {
       //We need to make sure that qmin and qmax are respected, so we rebin to
@@ -430,7 +430,7 @@ namespace MantidQt {
       rebin_string << "'" << qmin << ", " << -dqq << ", " << qmax << "'";
       rebin_string << ")\n";
 
-      return std::make_tuple(rebin_string.str(), "IvsQ_" + runNo);
+      return boost::make_tuple(rebin_string.str(), "IvsQ_" + runNo);
     }
 
     /**
@@ -439,7 +439,7 @@ namespace MantidQt {
      @param instrument : name of the instrument
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument)
+    boost::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument)
     {
       const size_t maxTransWS = 2;
 
@@ -452,11 +452,11 @@ namespace MantidQt {
       if(transVec.size() > maxTransWS)
         transVec.resize(maxTransWS);
 
-      std::tuple<std::string, std::string> load_tuple;
+      boost::tuple<std::string, std::string> load_tuple;
       for(auto it = transVec.begin(); it != transVec.end(); ++it)
         load_tuple = loadWorkspaceString(*it, instrument);
-        trans_ws_name.push_back(std::get<1>(load_tuple));
-        trans_string << std::get<0>(load_tuple);
+        trans_ws_name.push_back(boost::get<1>(load_tuple));
+        trans_string << boost::get<0>(load_tuple);
 
       //The runs are loaded, so we can create a TransWS
       std::string wsName = "TRANS_" + getRunNumber(trans_ws_name[0]);
@@ -469,7 +469,7 @@ namespace MantidQt {
         trans_string << ", SecondTransmissionRun = '" << trans_ws_name[1] << "'";
       trans_string << ")\n";
 
-      return std::make_tuple(trans_string.str(), wsName);
+      return boost::make_tuple(trans_string.str(), wsName);
     }
 
     /**
@@ -503,7 +503,7 @@ namespace MantidQt {
      @param instrument : name of the instrument
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument) {
+    boost::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument) {
       std::vector<std::string> runs;
       boost::split(runs, runStr, boost::is_any_of("+"));
 
@@ -515,26 +515,26 @@ namespace MantidQt {
 
       const std::string outputName = "TOF_" + boost::algorithm::join(runs, "_");
 
-      std::tuple<std::string, std::string> load_string;
+      boost::tuple<std::string, std::string> load_string;
 
       load_string = loadRunString(runs[0], instrument);
-      load_strings << std::get<0>(load_string);
+      load_strings << boost::get<0>(load_string);
 
       // EXIT POINT if there is only one run
       if(runs.size() == 1) {
-        return std::make_tuple(load_strings.str(), std::get<1>(load_string));
+        return boost::make_tuple(load_strings.str(), boost::get<1>(load_string));
       }
-      load_strings << outputName << " = " << std::get<1>(load_string) << "\n";
+      load_strings << outputName << " = " << boost::get<1>(load_string) << "\n";
 
       // Load each subsequent run and add it to the first run
       for(auto runIt = std::next(runs.begin()); runIt != runs.end(); ++runIt)
       {
         load_string = loadRunString(*runIt, instrument);
-        load_strings << std::get<0>(load_string);
-        load_strings << plusString(std::get<1>(load_string), outputName);
+        load_strings << boost::get<0>(load_string);
+        load_strings << plusString(boost::get<1>(load_string), outputName);
       }
 
-      return std::make_tuple(load_strings.str(), outputName);
+      return boost::make_tuple(load_strings.str(), outputName);
     }
 
     /**
@@ -560,7 +560,7 @@ namespace MantidQt {
      @param instrument : name of the instrument
      @return tuple of strings of python code and output workspace name
     */
-    std::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument) {
+    boost::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument) {
       std::ostringstream load_string;
       // We do not have access to AnalysisDataService from notebook, so must load run from file
       const std::string filename = instrument + run;
@@ -570,7 +570,7 @@ namespace MantidQt {
       load_string << "Filename = '" << filename << "'";
       load_string << ")\n";
 
-      return std::make_tuple(load_string.str(), ws_name);
+      return boost::make_tuple(load_string.str(), ws_name);
     }
 
   }
