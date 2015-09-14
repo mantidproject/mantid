@@ -16,7 +16,7 @@ def input2energy(inputval, inOption, theta, flightpath):
     e2t = 0.086165 #using t = (m*v^2)/(2kb) kb: Boltzmann const
     e2cm = 0.123975 #cm = 8.06554465*E E:energy
     iv2 = inputval ** 2
-    
+
     if inOption == 'Wavelength (Angstroms)':
         Energy = e2lam / iv2
 
