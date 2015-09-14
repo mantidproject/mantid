@@ -688,7 +688,7 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
   {
     wsType = src->getSMName();
   }
-  return wsType.contains("MDHistoWorkspace");
+  return (wsType.contains("MDHistoWorkspace") || wsType.contains("MDHWSource"));
 }
 
 /**
