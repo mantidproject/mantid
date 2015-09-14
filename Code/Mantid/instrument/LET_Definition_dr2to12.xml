@@ -25,6 +25,7 @@
      components defined in this file to face a position by default -->    
      <components-are-facing x="0.0" y="0.0" z="0.0" />
    </defaults>
+   
    <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
    <!-- detector components -->
     <properties>
@@ -89,6 +90,7 @@
      </cylinder> 
      <algebra val="some-shape" />
    </type>
+   
  
    <!-- Sample-position types -->
    <type name="nickel-holder" is="SamplePos">
@@ -666,6 +668,17 @@
   <id start="12470001" end="12471024" />
   <id start="12480001" end="12481024" />
  </idlist>
+<!-- Chopper position -->
+ <component type="chopper-position">
+    <location z="-1.5"/>
+	<description is="The component provides sample-choper distance, used
+	in conjuction with chopper delay time to estimate average energy of neutrons
+	hitting the sample. This parameter is present until full chopper description 
+	is availibe, which will be then used to estimate this and other choper parameters
+	with better accuracy."/>
+  </component>
+  <type name="chopper-position" is="ChopperPos"></type>  
+  
   <!-- DETECTOR PARAMETERS -->
   <component-link name="monitors">
    <parameter name="DelayTime">

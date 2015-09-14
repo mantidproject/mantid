@@ -4,6 +4,9 @@
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/Unit.h"
+#include <boost/format.hpp>
 
 namespace Mantid {
   namespace Algorithms {
@@ -58,39 +61,99 @@ namespace Mantid {
       }
 
       double chopSpeed,chopDelay;
-      find_chop_speed_and_delay(inputWS,chopSpeed,chopDelay);
+      findChopSpeedAndDelay(inputWS,chopSpeed,chopDelay);
 
       ////---> recalculate chopper delay to monitor position:
+      //TODO: until chopper class is fully defined use light-weight chopper-position component
       auto pInstrument = inputWS->getInstrument();
-      auto nChoppers = pInstrument->getNumberOfChopperPoints();
+      auto lastChopPositionComponent = pInstrument->getComponentByName("chopper-position");
+      if(!lastChopPositionComponent){
+        throw std::runtime_error("Instrument does not have chopper position component named 'chopper-position'");
+      }
+      auto moderator       = pInstrument->getSource();
+      double chopDistance  = lastChopPositionComponent->getDistance(*moderator);
 
-      // get last chopper.
-      /*
-      if( nChoppers==0)throw std::runtime_error("Insturment does not have any choppers defined");
-
-      auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
-      auto moderator   = pInstrument->getSource();
-      double chopDistance  = lastChopper->getDistance(*moderator);
       double velocity  = chopDistance/chopDelay;
 
+      // recalculate delay time from chopper position to monitor position
       auto detector1   = inputWS->getDetector(wsIndex);
       double mon1Distance = detector1->getDistance(*moderator);
       double TOF0      = mon1Distance/velocity;
+
+      //--->> below is reserved until full chopper's implementation is available;
+      //auto nChoppers = pInstrument->getNumberOfChopperPoints();
+      // get last chopper.
+      /*
+      if( nChoppers==0)throw std::runtime_error("Instrument does not have any choppers defined");
+
+      auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
       ///<---------------------------------------------------
       */
-      // meanwhile assume detector located at monitor
-      auto moderator   = pInstrument->getSource();
-      double mon1Distance = detector1->getDistance(*moderator);
+      auto baseSpectrum = inputWS->getSpectrum(wsIndex);
+      std::pair<double,double> TOF_range  = baseSpectrum->getXDataRange();
+
+      double Period  = (0.5*1.e+6)/chopSpeed; // 0.5 because some choppers open twice.
+      // Would be nice to have it 1 or 0.5 depending on chopper type, but
+      // it looks like not enough information on what chopper is available on ws;
+      std::vector<double> guess_opening;
+      this->findGuessOpeningTimes(TOF_range,TOF0,Period,guess_opening);
+
+      // convert to energy
+      double unused(0.0);
+      auto   destUnit = Kernel::UnitFactory::Instance().create("Energy");
+      destUnit->initialize(mon1Distance, 0., 0., static_cast<int>(Kernel::DeltaEMode::Elastic),0.,unused);
+      for(size_t i=0;i<guess_opening.size();i++){
+        guess_opening[i] = destUnit->singleFromTOF(guess_opening[i]);
+      }
+
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
 
     }
+    /**function calculates list of provisional chopper opening times.
+    *@param TOF_range -- std::pair containing min and max time, of signal
+    *                    measured on monitors
+    *@param  ChopDelay -- the time of flight neutrons travel from source 
+    *                     to the chopper opening.
+    *@param  Period  -- period of chopper openings
+
+    *@return guess_opening_times -- vector of times at which neutrons may
+    *                               pass through the chopper.
+    */
+    void GetAllEi::findGuessOpeningTimes(const std::pair<double,double> &TOF_range,
+      double ChopDelay,double Period,std::vector<double > & guess_opening_times){
+
+        if(ChopDelay>= TOF_range.second){
+          std::string chop = boost::str(boost::format("%.2g") % ChopDelay);
+          std::string t_min =boost::str(boost::format("%.2g") % TOF_range.first);
+          std::string t_max =boost::str(boost::format("%.2g") % TOF_range.second);
+          throw std::runtime_error("Logical error: Chopper opening time: "+chop+
+            " is outside of time interval: "+t_min+":"+t_max+
+            " of the signal, measured on monitors.");
+        }
+
+        // number of times chopper with specified rotation period opens.
+        size_t n_openings = static_cast<size_t>((TOF_range.second-ChopDelay)/Period)+1;
+        // number of periods falling outside of the time period, measuring on monitor.
+        size_t n_start(0);
+        if(ChopDelay<TOF_range.first){
+          n_start = static_cast<size_t>((TOF_range.first-ChopDelay)/Period)+1;
+          n_openings -= n_start;
+        }
+
+        guess_opening_times.resize(n_openings);
+        for(size_t i=n_start;i<n_openings+n_start;i++){
+          guess_opening_times[i-n_start]= ChopDelay + static_cast<double>(i)*Period;
+        }
+    }
+
     /**Return average time series log value for the appropriately filtered log
-    @param inputWS      -- shared pointer to the input workspace containing
-    the log to process
-    @param propertyName -- log name
-    @param splitter     -- array of Kernel::splittingInterval data, used to
-    filter input events or empty array to use 
-    experiment start/end times.
+    * @param inputWS      -- shared pointer to the input workspace containing
+    *                        the log to process
+    * @param propertyName -- log name
+    * @param splitter     -- array of Kernel::splittingInterval data, used to
+    *                        filter input events or empty array to use 
+    *                        experiment start/end times.
     */
     double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS,
       const std::string &propertyName,std::vector<Kernel::SplittingInterval> &splitter){
@@ -120,7 +183,7 @@ namespace Mantid {
     @return chop_speed -- chopper speed in uSec
     @return chop_delay -- chopper delay in uSec
     */
-    void GetAllEi::find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
+    void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
       double &chop_speed,double &chop_delay){
 
         //TODO: Make it dependent on inputWS time range
@@ -234,12 +297,12 @@ namespace Mantid {
       * @param prop_name    -- the name of the log to check
       * @param err_presence -- core error message to return if no log found
       * @param err_type     -- core error message to return if 
-      log is of incorrect type
+      *                        log is of incorrect type
       * @param fail         -- fail or warn if appropriate log is not available.
 
       * @return             -- false if all properties are fine, or true if check is failed
-      * modifies result  -- map containing check errors -- 
-      if no error found the map is not modified and remains empty.
+      * modifies result    -- map containing check errors
+      *                       if no error found the map is not modified and remains empty.
       */
       auto check_time_series_property = [&](const std::string &prop_name,
         const std::string &err_presence,const std::string &err_type, bool fail)

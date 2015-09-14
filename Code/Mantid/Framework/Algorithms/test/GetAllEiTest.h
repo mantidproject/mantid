@@ -15,7 +15,11 @@ class GetAllEiTester : public GetAllEi
 public:
   void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
     double &chop_speed,double &chop_delay){
-      GetAllEi::find_chop_speed_and_delay(inputWS,chop_speed,chop_delay);
+      GetAllEi::findChopSpeedAndDelay(inputWS,chop_speed,chop_delay);
+  }
+  void findGuessOpeningTimes(const std::pair<double,double> &TOF_range,
+    double ChopDelay,double Period,std::vector<double > & guess_opening_times){
+      GetAllEi::findGuessOpeningTimes(TOF_range,ChopDelay,Period,guess_opening_times);
   }
   bool filterLogProvided()const{
     return m_useFilterLog;
@@ -162,6 +166,34 @@ public:
     m_getAllEi.find_chop_speed_and_delay(ws,chop_speed,chop_delay);
     TSM_ASSERT_DELTA("Chopper delay should have special speed",0.1, chop_delay,1.e-6);
 
+  }
+  void test_guess_opening_times(){
+
+    std::pair<double,double> TOF_range(5,100);
+    double t0(6),Period(10);
+    std::vector<double> guess_tof;
+    m_getAllEi.findGuessOpeningTimes(TOF_range,t0,Period,guess_tof);
+    TSM_ASSERT_EQUALS("should have 10 periods within the specified interval",guess_tof.size(),10);
+
+    guess_tof.resize(0);
+    t0 = TOF_range.first;
+    m_getAllEi.findGuessOpeningTimes(TOF_range,t0,Period,guess_tof);
+    TSM_ASSERT_EQUALS("Still should be 10 periods within the specified interval",guess_tof.size(),10);
+
+    t0 = TOF_range.second;
+    TSM_ASSERT_THROWS("Should throw out of range",m_getAllEi.findGuessOpeningTimes(TOF_range,t0,Period,guess_tof),std::runtime_error);
+
+    t0 = 1;
+    guess_tof.resize(0);
+    m_getAllEi.findGuessOpeningTimes(TOF_range,t0,Period,guess_tof);
+    TSM_ASSERT_EQUALS(" should be 9 periods within the specified interval",guess_tof.size(),9);
+
+    guess_tof.resize(0);
+    t0 = 21;
+    TOF_range.first = 20;
+    m_getAllEi.findGuessOpeningTimes(TOF_range,t0,Period,guess_tof);
+    TSM_ASSERT_EQUALS(" should be 8 periods within the specified interval",guess_tof.size(),8);
+ 
   }
 
 

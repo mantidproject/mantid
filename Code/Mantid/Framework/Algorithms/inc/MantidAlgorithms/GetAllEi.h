@@ -59,8 +59,11 @@ protected: // for testing, private otherwise.
    double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
           std::vector<Kernel::SplittingInterval> &splitter);
   /**process logs and retrieve chopper speed and chopper delay*/
-  void find_chop_speed_and_delay(const API::MatrixWorkspace_sptr &inputWS,
+  void findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
        double &chop_speed,double &chop_delay);
+  void findGuessOpeningTimes(const std::pair<double,double> &TOF_range,
+      double ChopDelay,double Period,std::vector<double > & guess_opening_times);
+
   // if log, which identifies that instrument is running is available on workspace.
   // The log should be positive when instrument is running and negative otherwise.
   bool m_useFilterLog; 
