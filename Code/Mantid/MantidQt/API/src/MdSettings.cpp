@@ -253,7 +253,7 @@ int MdSettings::convertNormalizationToInteger(QString normalization) {
   } else if (normalization == m_mdConstants.getVolumeNormalization()) {
     return static_cast<int>(Mantid::API::VolumeNormalization);
   } else if (normalization == m_mdConstants.getNumberEventNormalization()) {
-    return static_cast<int>(Mantid::API::VolumeNormalization);
+    return static_cast<int>(Mantid::API::NumEventsNormalization);
   } else {
     return 3;
   }

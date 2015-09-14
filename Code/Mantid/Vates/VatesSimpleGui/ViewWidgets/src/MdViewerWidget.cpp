@@ -277,8 +277,8 @@ void MdViewerWidget::setupUiAndConnections()
 
   // Setup the Default Normalization options
   setupDefaultNormalizations();
-  QObject::connect(ui.defaultNormalization,SIGNAL(), 
-                   this, SLOT(onDefaultNormalizationChanged()));
+  QObject::connect(ui.defaultNormalization,SIGNAL(currentIndexChanged(const QString&)), 
+                   this, SLOT(onDefaultNormalizationChanged(const QString&)));
 }
 
 void MdViewerWidget::panelChanged()
@@ -1659,9 +1659,9 @@ void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views v
 /** 
  * React to normalization changes
  */
-void MdViewerWidget::onDefaultNormalizationChanged() {
+void MdViewerWidget::onDefaultNormalizationChanged(const QString& currentText) {
   // Get current text and save it.
-  mdSettings.setUserSettingNormalization(ui.defaultNormalization->currentText());
+  mdSettings.setUserSettingNormalization(currentText);
 }
 
 /**

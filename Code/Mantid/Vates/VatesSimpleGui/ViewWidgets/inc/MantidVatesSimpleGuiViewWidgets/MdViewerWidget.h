@@ -122,7 +122,7 @@ protected slots:
   /// reset state of all the views
   void onResetViewsStateToAllData();
   /// On default normalization changes
-  void onDefaultNormalizationChanged();
+  void onDefaultNormalizationChanged(const QString& currentText);
 
 protected:
   /// Handle workspace preDeletion tasks.

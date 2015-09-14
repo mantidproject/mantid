@@ -708,7 +708,8 @@ bool ViewBase::isMDEventWorkspace(pqPipelineSource *src)
   {
     wsType = src->getSMName();
   }
-  return wsType.contains("MDEventWorkspace");
+
+  return (wsType.contains("IEventWorkspace") || wsType.contains("MDEWSource")) ;
 }
 
 /**
