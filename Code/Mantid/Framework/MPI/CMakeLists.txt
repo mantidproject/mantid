@@ -8,6 +8,7 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+  HelpersTest.h
 )
 
 if (COVERALLS)
