@@ -21,7 +21,7 @@ namespace MantidQt {
                                                const int angle_column, const int min_q, const int max_q,
                                                const int d_qq, const int scale_column, const int group_column) :
       m_wsName(name), m_model(model), m_instrument(instrument),
-      col_nums{runs_column, transmission_column, options_column, angle_column, min_q, max_q, d_qq, scale_column, group_column} { }
+      col_nums(runs_column, transmission_column, options_column, angle_column, min_q, max_q, d_qq, scale_column, group_column) { }
 
     /**
       Generate an ipython notebook
