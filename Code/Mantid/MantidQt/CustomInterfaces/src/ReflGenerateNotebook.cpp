@@ -355,13 +355,8 @@ namespace MantidQt {
         code_string << "ReflectometryReductionOneAuto(InputWorkspace = '" << std::get<1>(load_ws_string) << "'";
       }
 
-      std::string thetaStr;
       if (thetaGiven) {
         code_string << ", " << "ThetaIn = " << theta;
-        thetaStr = static_cast<std::ostringstream *>( &(std::ostringstream() << theta))->str();
-      }
-      else {
-        thetaStr = "theta_" + runNo; // Use variable name if we don't have the value
       }
 
       //Parse and set any user-specified options
