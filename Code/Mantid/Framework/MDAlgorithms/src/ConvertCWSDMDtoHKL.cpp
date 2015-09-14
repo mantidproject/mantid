@@ -37,10 +37,37 @@ void ConvertCWSDMDtoHKL::init() {
 /**
   */
 void ConvertCWSDMDtoHKL::exec() {
+
+  IMDEventWorkspace_sprt inputWS = getProperty("InputWorkspace");
   // 1. Check the units of the MDEvents
   // 2. Export all the events to text file
   // 3. Get a UB matrix
   // 4. Refer to IndexPeak to calculate H,K,L of each MDEvent
+}
+
+void ConvertCWSDMDtoHKL::exportEvents(IMDEventWorkspace_sptr mdws) {
+  size_t numevents = mdws->getNEvents();
+
+  std::vector<std::vector<double> > vec_md_events(numevents);
+
+  IMDIterator *mditer = mdws->createIterator();
+  bool scancell = true;
+  size_t nextindex = 1;
+  int currindex = 0;
+  while (scancell) {
+    size_t numevent_cell = mditer->getNumEvents();
+    for (size_t iev = 0; iev < numevent_cell; ++iev) {
+      double tempx = mditer->getInnerPosition(iev, 0);
+      double tempy = mditer->getInnerPosition(iev, 1);
+      double tempz = mditer->getInnerPosition(iev, 2);
+      std::vector<double> v = { 1, 2, 3, 4 };
+      vec_md_events[currindex] = v;
+
+      ++currindex;
+    }
+
+    return vec_md_events;
+  }
 }
 
 } // namespace MDAlgorithms
