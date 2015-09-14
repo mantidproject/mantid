@@ -216,6 +216,7 @@ public:
   void initialize();
   bool execute();
   void executeAsChildAlg();
+  void exec(MPI::ExecutionMode executionMode);
   virtual std::map<std::string, std::string> validateInputs();
   virtual bool isInitialized() const;
   virtual bool isExecuted() const;
@@ -305,6 +306,32 @@ protected:
   virtual void init() = 0;
   /// Virtual method - must be overridden by concrete algorithm
   virtual void exec() = 0;
+
+  virtual void execDistributed() { exec(); }
+
+  /** Get correct execution mode based on input storage modes for an MPI run.
+   *
+   * The default implementation returns ExecutionMode::Invalid. Classes
+   * inheriting from Algorithm can re-implement this if they support execution
+   * with multiple MPI ranks. May not return ExecutionMode::Serial, because that
+   * is not a "parallel" execution mode. */
+  virtual MPI::ExecutionMode getParallelExecutionMode(
+      const std::map<std::string, MPI::StorageMode> &storageModes) const;
+
+  /** Get storage mode for an output workspace.
+   *
+   * The default implementation returns the storage mode of the input workspace.
+   * If there is more than one input workspace it throws an exception. Classes
+   * inheriting from Algorithm can re-implement this when needed. The workspace
+   * is identified by the name if its property in the Algorithm (*not* the name
+   * of the Workspace). */
+  virtual MPI::StorageMode
+  getStorageModeForOutputWorkspace(const std::string &propertyName) const;
+
+  /** Helper function to translate from StorageMode to ExecutionMode */
+  MPI::ExecutionMode
+  getCorrespondingExecutionMode(MPI::StorageMode storageMode) const;
+  void propagateWorkspaceStorageMode() const;
 
   /// Returns a semi-colon separated list of workspace types to attach this
   /// algorithm
@@ -399,6 +426,19 @@ private:
   // Report that the algorithm has completed.
   void reportCompleted(const double &duration,
                        const bool groupProcessing = false);
+
+  /** Get a (valid) execution mode for this algorithm.
+   *
+   * "Valid" implies that this function does check whether or not the Algorithm
+   * actually support the mode. If it cannot return a valid mode it throws an
+   * error. As a consequence, the return value of this function can be used
+   * without further sanitization of the return value. */
+  MPI::ExecutionMode getExecutionMode() const;
+
+  /** Get map of storage modes of all input workspaces.
+   *
+   * The key to the name is the property name of the respective workspace. */
+  std::map<std::string, MPI::StorageMode> getInputWorkspaceStorageModes() const;
 
   // --------------------- Private Members -----------------------------------
   /// Poco::ActiveMethod used to implement asynchronous execution.
