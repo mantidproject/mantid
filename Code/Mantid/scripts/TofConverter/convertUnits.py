@@ -23,40 +23,44 @@ def input2energy(inputval, inOption, theta, flightpath):
     elif inOption == 'Energy (meV)':
         Energy = inputval
 
-    elif inOption == 'Nu (Thz)':
-        Energy = e2nu * inputval
+    elif inOption == 'Nu (THz)':
+        Energy = e2nu*inputval
 
     elif inOption == 'Velocity (m/s)':
-        Energy = e2v *iv2
+        Energy = e2v*iv2
 
     elif inOption == 'Momentum (k Angstroms^-1)':
         Energy = e2k*iv2
 
     elif inOption == 'Temperature (K)':
-        Energy = e2t *inputval
+        Energy = e2t*inputval
 
     elif inOption == 'Energy (cm^-1)':
-        Energy = e2cm * inputval
+        Energy = e2cm*inputval
 
     elif inOption == 'Momentum transfer (Q Angstroms^-1)':
         if theta >= 0.0:
-            k = inputval * 0.5 / math.sin(theta)
-            Energy = e2k * k * k
+            k = inputval*0.5/math.sin(theta)
+            Energy = e2k*k*k
         else:
             raise RuntimeError("Theta > 0 is required for conversion from Q")
 
     elif inOption == 'd-spacing (Angstroms)':
-        lam = 2 * inputval * math.sin(theta)
-        Energy = e2lam / (lam * lam)
+        if theta >= 0.0:
+            lam = 2 * inputval*math.sin(theta)
+            Energy = e2lam / (lam * lam)
+        else:
+            raise RuntimeError("Theta > 0 is required for conversion from Q")
 
     elif  inOption == 'Time of flight (microseconds)':
         if flightpath >= 0.0:
-            Energy = 1000000 * flightpath
-            Energy = e2v * Energy *Energy / iv2
+            Energy = 1000000*flightpath
+            Energy = e2v*Energy*Energy / iv2
         else:
             raise RuntimeError("Flight path >= 0 is required for conversion from TOF")
 
     return Energy
+
 
 # Convert intermediate energy to output type
 def energy2output(Energy, outOption, theta, flightpath):
@@ -70,7 +74,7 @@ def energy2output(Energy, outOption, theta, flightpath):
     if outOption == 'Wavelength (Angstroms)':
         OutputVal =  (e2lam/ Energy)**0.5
 
-    elif outOption == 'Nu (Thz)':
+    elif outOption == 'Nu (THz)':
         OutputVal = Energy / e2nu
 
     elif outOption == 'Velocity (m/s)':

@@ -998,10 +998,10 @@ QString MWRunFiles::openFileDialog() {
       filenames.append(file);
   } else if (m_allowMultipleFiles) {
     filenames =
-        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter);
+        QFileDialog::getOpenFileNames(this, "Open file", dir, m_fileFilter, 0, QFileDialog::DontResolveSymlinks);
   } else {
     QString file =
-        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter);
+        QFileDialog::getOpenFileName(this, "Open file", dir, m_fileFilter, 0, QFileDialog::DontResolveSymlinks);
     if (!file.isEmpty())
       filenames.append(file);
   }

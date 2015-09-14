@@ -120,7 +120,7 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (plotOptions == "Stretch" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
   if (plotOptions == "Fit" || plotOptions == "All")
-    plotSpectrum(fitWsName);
+    plotSpectrum(fitWsName, 0, 1);
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);

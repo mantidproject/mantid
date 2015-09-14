@@ -336,7 +336,7 @@ void ConvolutionFitSequential::exec() {
     renamer->executeAsChildAlg();
   }
 
-  AnalysisDataService::Instance().add(resultWsName, resultWs);
+  AnalysisDataService::Instance().addOrReplace(resultWsName, resultWs);
   setProperty("OutputWorkspace", resultWsName);
 }
 
