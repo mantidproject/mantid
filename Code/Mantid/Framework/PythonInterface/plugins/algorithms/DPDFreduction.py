@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name
 import os
 import numpy
 import re
@@ -89,6 +89,7 @@ class DPDFreduction(PythonAlgorithm):
                                              'containing either one number or a triad separated by commas'
         return issues
 
+    #pylint: disable=too-many-locals, too-many-branches
     def PyExec(self):
         config['default.facility'] = 'SNS'
         config['default.instrument'] = 'ARCS'
@@ -140,9 +141,9 @@ class DPDFreduction(PythonAlgorithm):
 
         # Retrieve the mask from the vanadium workspace, and apply it to the data
         # (and empty can, if submitted)
-        mask = api.MaskDetectors(Workspace=wn_data, MaskedWorkspace=wn_van)
+        api.MaskDetectors(Workspace=wn_data, MaskedWorkspace=wn_van)
         if self._ecruns:
-            mask = api.MaskDetectors(Workspace=wn_ec_data, MaskedWorkspace=wn_van)
+            api.MaskDetectors(Workspace=wn_ec_data, MaskedWorkspace=wn_van)
 
         # Obtain incident energy as the mean of the nominal Ei values.
         # There is one nominal value per events file.
