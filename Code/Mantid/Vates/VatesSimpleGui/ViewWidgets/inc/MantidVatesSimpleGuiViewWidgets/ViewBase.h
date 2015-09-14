@@ -7,7 +7,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
-
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
 
@@ -121,7 +121,7 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName);
+  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName, bool axesGridOn);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
   /// Set the the background color for the view
@@ -144,7 +144,10 @@ public:
   void setVisibilityListener();
   /// Undo visibiltiy listener
   void removeVisibilityListener();
-
+  /// Set axes Grid
+  void setAxesGrid(bool onOff);
+  /// Set color scale lock
+  void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
 
@@ -237,7 +240,11 @@ protected:
    */
   void setAutoColorScale();
 
+  /// Set the Axes Grid
+  void setAxesGrid();
+
 private slots:
+  void setupVTKEventConnections(pqRenderView* view);
   /// Called when the rendering begins
   void lockPyGIL();
   /// Called when the rendering finishes
@@ -263,8 +270,10 @@ private:
   QString m_internallyRebinnedWorkspaceIdentifier;
 
   vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
-  PyGILStateService m_gilStateStore; ///< Python GIL state storage
+  RecursivePythonGIL m_pythonGIL;
+  Mantid::VATES::ColorScaleLock* m_colorScaleLock;
   MantidQt::API::MdSettings m_mdSettings;///<Holds the MD settings which are used to persist data
+
 };
 
 }
