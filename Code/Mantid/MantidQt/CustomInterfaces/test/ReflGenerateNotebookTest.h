@@ -90,7 +90,7 @@ private:
   QReflTableModel_sptr m_model;
   std::set<int> m_rows;
   std::map<int,std::set<int> > m_groups;
-  const ColNumbers col_nums{0, 2, 8, 1, 3, 4, 5, 6, 7};
+  ColNumbers col_nums{0, 2, 8, 1, 3, 4, 5, 6, 7};
 
 public:
 

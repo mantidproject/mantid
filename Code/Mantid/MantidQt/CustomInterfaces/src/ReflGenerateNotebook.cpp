@@ -10,7 +10,6 @@
 #include <boost/regex.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
-#include <boost/range/combine.hpp>
 
 namespace MantidQt {
   namespace CustomInterfaces {
@@ -47,8 +46,9 @@ namespace MantidQt {
         const std::set<int> groupRows = gIt->second;
 
         // Announce the stitch group in the notebook
-        notebook->markdownCell(
-          "Stitch group " + static_cast<std::ostringstream*>( &(std::ostringstream() << groupNo) )->str());
+        std::ostringstream stitch_title_string;
+        stitch_title_string << "Stitch group " << groupNo;
+        notebook->markdownCell(stitch_title_string.str());
 
         //Reduce each row
         std::ostringstream code_string;
