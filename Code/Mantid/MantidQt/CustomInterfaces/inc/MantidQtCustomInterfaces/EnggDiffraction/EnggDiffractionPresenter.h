@@ -4,8 +4,15 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
+#include "MantidQtAPI/PythonRunner.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+
+
+
+//#include "MantidQtCustomInterfaces/Indirect/IndirectDataAnalysisTab.h"
+// #include "MantidQtCustomInterfaces/Indirect/IndirectTab.h"
+
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -122,7 +129,6 @@ private:
   void doFocusing(const EnggDiffCalibSettings &cs,
                   const std::string &fullFilename, const std::string &runNo,
                   int bank);
-  //@}
 
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
@@ -143,6 +149,14 @@ private:
   void calcVanadiumWorkspaces(const std::string &vanNo,
                               Mantid::API::ITableWorkspace_sptr &vanIntegWS,
                               Mantid::API::MatrixWorkspace_sptr &vanCurvesWS);
+
+  /// Plot a spectrum plot with a given spectrum index
+  void plotSpectrum(const QStringList &workspaceNames, int specIndex = 0);
+  /// Plot a spectrum plot of a given workspace
+  void plotSpectra(const QString &workspaceName, int specIndex = 0);
+
+  /// Use a Python runner for when we need the output of a script
+  MantidQt::API::PythonRunner m_pythonRunner;
 
   /// string to use for ENGINX file names (as a prefix, etc.)
   const static std::string g_enginxStr;
@@ -167,4 +181,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
+# endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

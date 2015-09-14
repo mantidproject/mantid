@@ -743,49 +743,52 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     throw;
   }
 
-  bool plotFocusedWS = m_view->focusedOutWorkspace();
-  if (plotFocusedWS == true) {
+  const std::string outWSName = "engggui_focusing_output_ws";
+  try {
+    auto alg = Algorithm::fromString("EnggFocus");
+    alg->initialize();
+    alg->setProperty("InputWorkspace", inWSName);
+    alg->setProperty("OutputWorkspace", outWSName);
+    alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
+    alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
+    alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
+    // TODO: use detector positions (from calibrate full) when available
+    // alg->setProperty(DetectorPositions, TableWorkspace)
+    alg->execute();
 
-    const std::string outWSName = "engggui_focusing_output_ws";
-    try {
-      auto alg = Algorithm::fromString("EnggFocus");
-      alg->initialize();
-      alg->setProperty("InputWorkspace", inWSName);
-      alg->setProperty("OutputWorkspace", outWSName);
-      alg->setProperty("VanIntegrationWorkspace", vanIntegWS);
-      alg->setProperty("VanCurvesWorkspace", vanCurvesWS);
-      alg->setPropertyValue("Bank", boost::lexical_cast<std::string>(bank));
-      // TODO: use detector positions (from calibrate full) when available
-      // alg->setProperty(DetectorPositions, TableWorkspace)
-      alg->execute();
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Error in calibration. ",
-          "Could not run the algorithm EnggCalibrate succesfully for bank " +
-              boost::lexical_cast<std::string>(bank) + ". Error description: " +
-              re.what() + " Please check also the log messages for details.";
-      throw;
+    bool plotFocusedWS = m_view->focusedOutWorkspace();
+    if (plotFocusedWS == true) {
+      plotSpectra(QString::fromStdString(outWSName)); // @shah
     }
 
-    g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
-    try {
-      g_log.debug() << "Going to save focused output into nexus file: "
-                    << fullFilename << std::endl;
-      auto alg = Algorithm::fromString("SaveNexus");
-      alg->initialize();
-      alg->setPropertyValue("InputWorkspace", outWSName);
-      alg->setPropertyValue("Filename", fullFilename);
-      alg->execute();
-    } catch (std::runtime_error &re) {
-      g_log.error() << "Error in calibration. ",
-          "Could not run the algorithm EnggCalibrate succesfully for bank " +
-              boost::lexical_cast<std::string>(bank) + ". Error description: " +
-              re.what() + " Please check also the log messages for details.";
-      throw;
-    }
-    g_log.notice() << "Saved focused workspace as file: " << fullFilename
-                   << std::endl;
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in calibration. ",
+        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+            boost::lexical_cast<std::string>(bank) + ". Error description: " +
+            re.what() + " Please check also the log messages for details.";
+    throw;
   }
+
+  g_log.notice() << "Produced focused workspace: " << outWSName << std::endl;
+  try {
+    g_log.debug() << "Going to save focused output into nexus file: "
+                  << fullFilename << std::endl;
+    auto alg = Algorithm::fromString("SaveNexus");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", outWSName);
+    alg->setPropertyValue("Filename", fullFilename);
+    alg->execute();
+  } catch (std::runtime_error &re) {
+    g_log.error() << "Error in calibration. ",
+        "Could not run the algorithm EnggCalibrate succesfully for bank " +
+            boost::lexical_cast<std::string>(bank) + ". Error description: " +
+            re.what() + " Please check also the log messages for details.";
+    throw;
+  }
+  g_log.notice() << "Saved focused workspace as file: " << fullFilename
+                 << std::endl;
 }
+
 
 /**
  * Produce the two workspaces that are required to apply Vanadium
@@ -996,6 +999,32 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
 
   vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
+}
+
+void EnggDiffractionPresenter::plotSpectrum(const QStringList &workspaceNames,
+                                            int specIndex) {
+  if (workspaceNames.isEmpty())
+    return;
+
+  QString pyInput = "from mantidplot import plotSpectrum\n";
+
+  pyInput += "plotSpectrum(['";
+  pyInput += workspaceNames.join("','");
+  pyInput += "'], ";
+  pyInput += QString::number(specIndex);
+  pyInput += ")\n";
+
+  m_pythonRunner.runPythonCode(pyInput);
+}
+
+void EnggDiffractionPresenter::plotSpectra(const QString &workspaceName,
+                                           int specIndex) {
+  if (workspaceName.isEmpty())
+    return;
+
+  QStringList workspaceNames;
+  workspaceNames << workspaceName;
+  plotSpectrum(workspaceNames, specIndex);
 }
 
 } // namespace CustomInterfaces
