@@ -6,12 +6,14 @@
 #include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
 #include "MantidQtCustomInterfaces/ReflVectorString.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 
 class ReflGenerateNotebookTest : public CxxTest::TestSuite {
 
@@ -85,18 +87,30 @@ private:
     m_model.reset(new QReflTableModel(prefilled_ws));
   }
 
-  const std::string m_wsName = "TESTWORKSPACE";
-  const std::string m_instrument = "INSTRUMENT";
+  std::string m_wsName;
+  std::string m_instrument;
   QReflTableModel_sptr m_model;
   std::set<int> m_rows;
   std::map<int,std::set<int> > m_groups;
-  ColNumbers col_nums{0, 2, 8, 1, 3, 4, 5, 6, 7};
+  ColNumbers col_nums;
 
 public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ReflGenerateNotebookTest *createSuite() {
+    return new ReflGenerateNotebookTest();
+  }
+  static void destroySuite(ReflGenerateNotebookTest *suite) { delete suite; }
+
+  ReflGenerateNotebookTest() : col_nums(0, 2, 8, 1, 3, 4, 5, 6, 7) { FrameworkManager::Instance(); }
 
   // Create a notebook to test
   void setUp()
   {
+    m_wsName = "TESTWORKSPACE";
+    m_instrument = "INSTRUMENT";
+
     createModel(m_wsName);
 
     // Populate rows with every index in the model
@@ -244,7 +258,7 @@ public:
 
   void testStitchGroupString()
   {
-    std::tuple<std::string, std::string> output = stitchGroupString(m_rows, m_instrument, m_model, col_nums);
+    boost::tuple<std::string, std::string> output = stitchGroupString(m_rows, m_instrument, m_model, col_nums);
 
     const std::string result[] = {
       "#Stitch workspaces",
@@ -254,7 +268,7 @@ public:
     };
 
     std::vector<std::string> notebookLines;
-    boost::split(notebookLines, std::get<0>(output), boost::is_any_of("\n"));
+    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
 
     int i=0;
     for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
@@ -327,7 +341,7 @@ public:
 
   void testReduceRowString()
   {
-    std::tuple<std::string, std::string, std::string> output = reduceRowString(1, m_instrument, m_model, col_nums);
+    boost::tuple<std::string, std::string, std::string> output = reduceRowString(1, m_instrument, m_model, col_nums);
 
     const std::string result[] = {
       "TOF_12346 = Load(Filename = 'INSTRUMENT12346')",
@@ -337,7 +351,7 @@ public:
     };
 
     std::vector<std::string> notebookLines;
-    boost::split(notebookLines, std::get<0>(output), boost::is_any_of("\n"));
+    boost::split(notebookLines, boost::get<0>(output), boost::is_any_of("\n"));
 
     int i=0;
     for (auto it = notebookLines.begin(); it != notebookLines.end(); ++it, ++i)
@@ -356,9 +370,9 @@ public:
 
   void testLoadRunString()
   {
-    std::tuple<std::string, std::string> output = loadRunString("12345", m_instrument);
+    boost::tuple<std::string, std::string> output = loadRunString("12345", m_instrument);
     const std::string result = "TOF_12345 = Load(Filename = 'INSTRUMENT12345')\n";
-    TS_ASSERT_EQUALS(std::get<0>(output), result)
+    TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 
   void testGetRunNumber()
@@ -376,9 +390,9 @@ public:
 
   void testScaleString()
   {
-    std::tuple<std::string, std::string> output = scaleString("12345", 1.0);
+    boost::tuple<std::string, std::string> output = scaleString("12345", 1.0);
     const std::string result = "IvsQ_12345 = Scale(InputWorkspace = IvsQ_12345, Factor = 1)\n";
-    TS_ASSERT_EQUALS(std::get<0>(output), result)
+    TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 
   void testVectorParamString()
@@ -395,9 +409,9 @@ public:
 
   void testRebinString()
   {
-    std::tuple<std::string, std::string> output = rebinString(1, "12345", m_model, col_nums);
+    boost::tuple<std::string, std::string> output = rebinString(1, "12345", m_model, col_nums);
     const std::string result = "IvsQ_12345 = Rebin(IvsQ_12345, Params = '1.4, -0.04, 2.9')\n";
-    TS_ASSERT_EQUALS(std::get<0>(output), result)
+    TS_ASSERT_EQUALS(boost::get<0>(output), result)
   }
 
 };
