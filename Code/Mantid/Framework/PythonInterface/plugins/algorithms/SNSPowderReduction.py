@@ -330,15 +330,19 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 else:
                     canFilterWall = (0., 0.)
 
-                if "%s_%d" % (self._instrument, canRuns[samRunIndex]) in mtd:
-                    canRun = mtd["%s_%d" % (self._instrument, canRuns[samRunIndex])]
+                if len(canRuns) == 1:
+                    canRun = canRuns[0]
+                else:
+                    canRun = canRuns[samRunIndex]
+                if "%s_%d" % (self._instrument, canRun) in mtd:
+                    canRun = mtd["%s_%d" % (self._instrument, canRun)]
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
                     if self.getProperty("Sum").value:
                         canRun = self._focusAndSum(canRuns, SUFFIX, canFilterWall, calib,\
                                preserveEvents=preserveEvents)
                     else:
-                        canRun = self._focusChunks(canRuns[samRunIndex], SUFFIX, canFilterWall, calib,\
+                        canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,\
                                                    normalisebycurrent=self._normalisebycurrent,
                                                    preserveEvents=preserveEvents)
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
@@ -351,7 +355,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # process the vanadium run
             vanRuns = self._info["vanadium"].value
             if not noRunSpecified(vanRuns):
-                vanRun = vanRuns[samRunIndex]
+                if len(vanRuns) == 1:
+                    vanRun = vanRuns[0]
+                else:
+                    vanRun = vanRuns[samRunIndex]
                 if self.getProperty("FilterCharacterizations").value:
                     vanFilterWall = {'FilterByTimeStart':timeFilterWall[0], 'FilterByTimeStop':timeFilterWall[1]}
                 else:
