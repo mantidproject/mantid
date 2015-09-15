@@ -26,6 +26,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+#include "MantidKernel/System.h"
+
 #include <string>
 #include <map>
 
@@ -33,7 +35,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 namespace MantidQt {
   namespace CustomInterfaces {
 
-    std::map<std::string,std::string> parseKeyValueString(const std::string& str);
+    std::map<std::string,std::string> DLLExport parseKeyValueString(const std::string& str);
 
   }
 }
