@@ -92,7 +92,7 @@ Finally, we load experimental data for these two temperatures so that we can com
 
 .. include:: ../usagedata-note.txt
 
-.. testcode:: Ex
+.. code-block:: python
 
     temp_flt = [100, 150, 200, 250, 300, 350]
     workspaces = ['exp100K', 'exp150K', 'exp200K', 'exp250K', 'exp300K', 'exp350K']
@@ -100,28 +100,19 @@ Finally, we load experimental data for these two temperatures so that we can com
       LoadNexus(FileName='DSFinterp/{0}.nxs'.format(workspaces[i]), OutputWorkspace=workspaces[i])  #load QENS data
     target_temps = [175, 225]
     outworkspaces = ['int175K', 'int225K']
-    try:
-      import dsfinterp  # Have you installed the dsfinterp module? (pip install dsfinterp)
-      DSFinterp(Workspaces=workspaces, ParameterValues=temp_flt, RegressionWindow=0, TargetParameters=target_temps, OutputWorkspaces=outworkspaces)
-      #Now load experimental data for target temperatures
-      LoadNexus(FileName='DSFinterp/exp175K.nxs', OutputWorkspace='exp175K')
-      LoadNexus(FileName='DSFinterp/exp225K.nxs', OutputWorkspace='exp225K')
-      #Compare one of the predicted spectrum with a fit to experimental data
-      myFunc= 'name=TabulatedFunction,Workspace=int225K,WorkspaceIndex=8,Scaling=1.00424'
-      fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
-      Fit(Function=myFunc, InputWorkspace='exp225K', WorkspaceIndex=8, Output='fit')
-      #print "The fit was: " + fitStatus
-      #print("Fitted Height value is: %.2f" % paramTable.column(1)[0])
-      #print("Chi-square is: %.2f" % paramTable.column(1)[1])
-    except ImportError as exc:
-      #print("Error: failed to import settings module ({0})".format(exc))
-      pass
 
-Output:
+    import dsfinterp  # Have you installed the dsfinterp module? (pip install dsfinterp)
+    DSFinterp(Workspaces=workspaces, ParameterValues=temp_flt, RegressionWindow=0, TargetParameters=target_temps, OutputWorkspaces=outworkspaces)
 
-    The fit was: success
-    Fitted Height value is: 1.00
-    Chi-square is: 2.27
+    #Now load experimental data for target temperatures
+    LoadNexus(FileName='DSFinterp/exp175K.nxs', OutputWorkspace='exp175K')
+    LoadNexus(FileName='DSFinterp/exp225K.nxs', OutputWorkspace='exp225K')
+
+    #Compare one of the predicted spectrum with a fit to experimental data
+    myFunc= 'name=TabulatedFunction,Workspace=int225K,WorkspaceIndex=8,Scaling=1.00424'
+    fitStatus, chiSq, covarianceTable, paramTable, fitWorkspace =\
+    Fit(Function=myFunc, InputWorkspace='exp225K', WorkspaceIndex=8, Output='fit')
+
 
 .. categories::
 
