@@ -1636,11 +1636,14 @@ std::map<std::string, MPI::StorageMode> Algorithm::getInputWorkspaceStorageModes
 }
 
 void Algorithm::propagateWorkspaceStorageMode() const {
-  if(MPI::numberOfRanks() == 1)
+  if(MPI::numberOfRanks() == 1) {
     for (const auto &wsProp : m_outputWorkspaceProps)
-      wsProp->getWorkspace()->setStorageMode(MPI::StorageMode::Cloned);
-  else
+      if (wsProp->getWorkspace())
+        wsProp->getWorkspace()->setStorageMode(MPI::StorageMode::Cloned);
+  } else {
     for (const auto &wsProp : m_outputWorkspaceProps) {
+      if (!wsProp->getWorkspace())
+        continue;
       // This is the reverse cast of what is done in cacheWorkspaceProperties(),
       // so it should never fail.
       const Property &prop = dynamic_cast<Property &>(*wsProp);
@@ -1649,6 +1652,7 @@ void Algorithm::propagateWorkspaceStorageMode() const {
       getLogger().notice() << "Set storage mode of output \"" + prop.name() +
                                   "\" to " + MPI::toString(mode) + ".\n";
     }
+  }
 }
 
 MPI::ExecutionMode Algorithm::getParallelExecutionMode(
@@ -1661,7 +1665,8 @@ MPI::ExecutionMode Algorithm::getParallelExecutionMode(
 MPI::StorageMode Algorithm::getStorageModeForOutputWorkspace(
     const std::string &propertyName) const {
   if(m_inputWorkspaceProps.size() == 1)
-    return m_inputWorkspaceProps.front()->getWorkspace()->getStorageMode();
+    if (m_inputWorkspaceProps.front()->getWorkspace())
+      return m_inputWorkspaceProps.front()->getWorkspace()->getStorageMode();
   std::string error("Could not determine StorageMode for output workspace " +
                     propertyName + ".");
   getLogger().error() << error << "\n";
