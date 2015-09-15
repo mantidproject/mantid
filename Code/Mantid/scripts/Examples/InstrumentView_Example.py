@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # Example: Instrument view control
 #

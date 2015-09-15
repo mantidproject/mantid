@@ -1,10 +1,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidCrystal/CentroidPeaks.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidAPI/MemoryManager.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -74,7 +72,7 @@ void CentroidPeaks::integrate() {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
-    peakWS = inPeakWS->clone();
+    peakWS.reset(inPeakWS->clone().release());
 
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");
@@ -210,7 +208,7 @@ void CentroidPeaks::integrateEvent() {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutPeaksWorkspace");
   if (peakWS != inPeakWS)
-    peakWS = inPeakWS->clone();
+    peakWS.reset(inPeakWS->clone().release());
 
   /// Radius to use around peaks
   int PeakRadius = getProperty("PeakRadius");

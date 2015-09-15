@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
@@ -20,6 +21,7 @@ public:
 
   StripPeaksTest()
   {
+    FrameworkManager::Instance();
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,200,0.5,0.02);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
@@ -34,8 +36,8 @@ public:
 
       // Spectrum 1
       const double x = (X[i]+X[i+1])/2;
-      double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.012,2));
-      funcVal += 1000*exp(-0.5*pow((x-1.22)/0.01,2));
+      double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.022,2));
+      funcVal += 1000*exp(-0.5*pow((x-1.22)/0.02,2));
       Y1[i] = 5000 + funcVal;
       E1[i] = sqrt(Y1[i]);
     }

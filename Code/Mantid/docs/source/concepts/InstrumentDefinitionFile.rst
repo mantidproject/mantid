@@ -2,6 +2,8 @@
 
 Instrument Definition File
 ==========================
+.. contents::
+   :depth: 3
 
 .. role:: xml(literal)
    :class: highlight
@@ -14,6 +16,7 @@ parameters of instrument components may optionally be stored in
 To get started creating an IDF follow the instructions on the :ref:`Create an
 IDF <Create_an_IDF>` page, then return here for more detailed
 explanations of syntax and structures.
+
 
 Introduction
 ------------
@@ -125,28 +128,55 @@ An IDF can be loaded manually from any file with extension .xml or .XML
 using :ref:`LoadInstrument <algm-LoadInstrument>` or
 :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>`.
 
-IDFs located in the MantidInstall instrument directory are automatically
-loaded together with e.g. the loading of raw data file. Such files are
+When loading a data file if the file has an embedded mantid instrument definition
+(as in some nexus files) then this one will be used, otherwise we will attempt to
+determine a matching file from the IDFs located in the MantidInstall instrument directory.
+
+To be found automatically Instrument definition files are
 required to have the format INSTRUMENTNAME\_DefinitionANYTHING.xml,
 where INSTRUMENTNAME is the name of the instrument and ANYTHING can be
 any string including an empty string. Where more than one IDF is defined
 for an instrument the appropriate IDF is loaded based on its
-:ref:`valid-from <Top level instrument>` and
-`valid-to <Top level instrument>` dates. Note for this to work
+:ref:`valid-from <Top level instrument>` date. Note for this to work
 the :ref:`Workspace <Workspace>` for which an IDF is loaded into must
 contain a record of when the data were collected. This information is
 taken from the workspace's :ref:`Run <Run>` object, more specifically the
 *run\_start* property of this object.
 
-In order to programmatically determine which is the correct filename for
-a given date/time you can access a helper method from Python:
+You can determine which file would be selected for an instrument and date
+using the following python:
 
-.. code-block:: python
+**Example: Getting the right instrument filename**
 
-   import mantid.api
-   # if no date is given it will default to returning the IDF filename that is currently valid.
-   currentIDF = mantid.api.ExperimentInfo.getInstrumentFilename("ARCS")
-   otherIDF = mantid.api.ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30")
+.. testcode:: getInstrumentFilename
+
+    # if no date is given it will default to returning the IDF filename that is currently valid.
+    from mantid.api import ExperimentInfo
+    currentIDF = ExperimentInfo.getInstrumentFilename("ARCS")
+    otherIDF = ExperimentInfo.getInstrumentFilename("ARCS", "2012-10-30T00:00:00")
+
+
+Downloaded Instrument File Definitions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As well as the instrument definitions that ship with Mantid, mantid can also download updates
+or new instrument definitions when it is started.  This is a great way of keeping the files
+current without needing a new release of Mantid for each instrument change.
+
+Mantid does not overwrite files in the MantidInstall instrument directory when downloading files,
+it writes to another location that is a little different on windows and linux.
+
+For windows:
+    %appdata%\\mantidproject\\instrument
+
+For Linux:
+    ~/.mantid/instrument
+
+You should not edit files there, or add new ones as the may be deleted or overwritten.
+If you have a change to an instrument definition you wish to use then edit a copy in the
+MantidInstall instrument directory, but updated the valid-from date so mantid will pick that one
+up in preference.  Or if you just wish to force a particular instrument definition for a particular
+workspace just run :ref:`LoadInstrument <algm-LoadInstrument>` for that workspace.
 
 More detailed descriptions of various parts of the IDF
 ------------------------------------------------------
@@ -162,18 +192,22 @@ For information on how to define geometric shapes see
 Top level <instrument>
 ~~~~~~~~~~~~~~~~~~~~~~
 
-<instrument> is the top level XML element of an IDF. It takes attributes, two of
+<instrument> is the top level XML element of an IDF. It takes attributes, three of
 which must be included. An example is
 
 .. code-block:: xml
 
-      <instrument name="ARCS"
+      <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+                  name="ARCS"
                   valid-from="1900-01-31 23:59:59"
-                  valid-to="2100-01-31 23:59:59"
-                  last-modified="2010-10-12 08:54:07.279621">
+                  valid-to="2100-01-31 23:59:59">
 
-Of the four attributes in the example above
+Of the attributes in the example above
 
+-  xmlns, xmlns:xsi, xsi:schemaLocation are required attributes that can
+   be copied verbatim as above
 -  name is (at present) optional, although it is recommended to specify
    something sensible
 -  valid-from is compulsory and is the date from which the IDF is valid
@@ -181,13 +215,10 @@ Of the four attributes in the example above
    23:59:01
 -  valid-to may optionally be added to indicate the date to which the
    IDF is valid to. If not used, the file is permanently valid. (+)
--  last-modified is optional. Changing it can be used as an alternative
-   to force MantidPlot to reload the IDF, which e.g. might be useful
-   during the build up of an IDF
 
 (+) Both valid-from and valid-to are required to be set using the ISO
 8601 date-time format, i.e. as YYYY-MM-DD HH:MM:SS or
-YYYY-MM-DDTHH:MM:SS `2 <http://en.wikipedia.org/wiki/ISO_8601YYYY>`__.
+YYYY-MM-DDTHH:MM:SS `2 <http://en.wikipedia.org/wiki/ISO_8601>`__.
 Valid ranges may overlap, provided the valid-from times are all
 different. If several files are currently valid, the one with the most
 recent valid-from time is selected.
@@ -1237,9 +1268,7 @@ apply facing.
 ^^^^^^^^^
 
 Originally introduced to handle detector position coordinates as defined
-by the
-`Ariel <http://www.isis.rl.ac.uk/Disordered/GEM/ariel/index_ariel.htm>`__
-software.
+by the Ariel software.
 
 .. code-block:: xml
 

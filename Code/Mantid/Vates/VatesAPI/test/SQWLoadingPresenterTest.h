@@ -119,7 +119,7 @@ void testExecutionInMemory()
   TSM_ASSERT("Should have generated a vtkDataSet", NULL != product);
   TSM_ASSERT_EQUALS("Wrong type of output generated", "vtkUnstructuredGrid", std::string(product->GetClassName()));
   TSM_ASSERT("No field data!", NULL != product->GetFieldData());
-  TSM_ASSERT_EQUALS("One array expected on field data!", 1, product->GetFieldData()->GetNumberOfArrays());
+  TSM_ASSERT_EQUALS("Two arrays expected on field data, one for XML and one for JSON!", 2, product->GetFieldData()->GetNumberOfArrays());
   TS_ASSERT_THROWS_NOTHING(presenter.hasTDimensionAvailable());
   TS_ASSERT_THROWS_NOTHING(presenter.getGeometryXML());
   TS_ASSERT(!presenter.getWorkspaceTypeName().empty());
@@ -231,13 +231,13 @@ void testAxisLabels()
   TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(product));
   TSM_ASSERT_EQUALS("X Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForX"),
-                    "qx (A^-1)");
+                    "qx ($\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Y Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForY"),
-                    "qy (A^-1)");
+                    "qy ($\\AA^{-1}$)");
   TSM_ASSERT_EQUALS("Z Label should match exactly",
                     getStringFieldDataValue(product, "AxisTitleForZ"),
-                    "qz (A^-1)");
+                    "qz ($\\AA^{-1}$)");
 
   TS_ASSERT(Mock::VerifyAndClearExpectations(view));
   TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));

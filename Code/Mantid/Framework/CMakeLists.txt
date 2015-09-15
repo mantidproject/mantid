@@ -1,5 +1,5 @@
 # This is mainly here so you don't get a complaint when running cmake
-cmake_minimum_required (VERSION 2.8.5)
+cmake_minimum_required (VERSION 2.8.12)
 
 # Add the path to our custom 'find' modules
 set ( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../Build/CMake")
@@ -26,9 +26,6 @@ option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab interface in the case of M
 ###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
-
-# gsl is currently needed by Geometry, Algorithms & Curvefitting
-find_package ( GSL REQUIRED )
 
 check_include_files ( stdint.h stdint )
 if ( stdint )
@@ -58,6 +55,8 @@ if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" AND ${CMAKE_SYSTEM_NAME} MA
   if ( MPI_BUILD )
   include ( MPISetup )
         set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} ${MPI_CXX_LIBRARIES} )
+        find_package ( OpenGL REQUIRED )
+        find_package ( GSL REQUIRED )
   endif ( MPI_BUILD )
 endif ()
 
@@ -96,7 +95,6 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
-add_subdirectory (RemoteAlgorithms)
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
@@ -105,6 +103,8 @@ add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
 add_subdirectory (LiveData)
+add_subdirectory (RemoteAlgorithms)
+add_subdirectory (RemoteJobManagers)
 add_subdirectory (SINQ)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
@@ -121,13 +121,10 @@ endif ()
 # Unit test helper packages
 if ( CXXTEST_FOUND )
   add_subdirectory ( UserAlgorithms )
-  # This needs to be here so that a Framework-only build will work.
-#  add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools/gmock-${GMOCK_VERSION} )
-  add_subdirectory ( ../TestingTools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/TestingTools )
+  add_subdirectory ( ../Testing/Tools ${${CMAKE_PROJECT_NAME}_BINARY_DIR}/Testing/Tools )
 endif ()
 
 add_subdirectory (MDAlgorithms)
-add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
 add_subdirectory (ISISLiveData)
@@ -136,11 +133,13 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
-                     PythonGeometryModule PythonAPIModule DataObjects
+set ( FRAMEWORK_LIBS Kernel Geometry API DataObjects
+                     PythonKernelModule PythonGeometryModule PythonAPIModule
+                     PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms
-                     LiveData ISISLiveData RemoteAlgorithms SINQ
+                     Crystal MDAlgorithms WorkflowAlgorithms
+                     LiveData ISISLiveData RemoteAlgorithms RemoteJobManagers
+                     SINQ
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )
@@ -157,7 +156,8 @@ install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
           DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE GROUP_WRITE
                                 WORLD_READ WORLD_EXECUTE WORLD_WRITE
-          PATTERN "*UNIT_TESTING*" EXCLUDE
+          PATTERN "*UNIT_TESTING*" EXCLUDE 
+          PATTERN ".gitignore" EXCLUDE
 )
 
 # Ships .py files but only ship compiled pyd files for supported platforms.
@@ -165,11 +165,11 @@ if ( WIN32 ) # General windows environment
   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
     # Excludes .so files & _win32 binaries
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE )
+              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
   else ()
     # Excludes so files & _win64 binaries
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
+              PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
   endif ()
     # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
     file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
@@ -177,7 +177,7 @@ if ( WIN32 ) # General windows environment
   else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
   install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN "*.pyc" EXCLUDE
-            PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE )
+            PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE PATTERN "CMakeLists.txt" EXCLUDE )
 endif ()
 
 # THIS MUST BE THE LAST SUB_DIRECTORY ADDED. See Properties/CMakeLists.txt.

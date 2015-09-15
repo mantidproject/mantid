@@ -1,5 +1,6 @@
 #include "MantidGeometry/Instrument/IDFObject.h"
-#include <Poco/DateTimeFormatter.h>
+#include "MantidKernel/ChecksumHelper.h"
+#include <Poco/String.h>
 
 namespace Mantid {
 namespace Geometry {
@@ -31,7 +32,7 @@ IDFObject::~IDFObject() {}
 Gets the parent directory of the file.
 @return Parent directory path.
 */
-const Poco::Path &IDFObject::getParentDirectory() const {
+const Poco::Path IDFObject::getParentDirectory() const {
   return m_cacheParentDirectory;
 }
 
@@ -66,28 +67,13 @@ std::string IDFObject::getExtension() const {
 }
 
 /**
-Gets the last modified timestamp of the file.
-@return last modified timestamp.
-*/
-Poco::Timestamp IDFObject::getLastModified() const {
-  return m_defFile.getLastModified();
-}
-
-/**
-Gets a formatted string of the last modified timestamp.
-@return timestamp as a formatted string.
-*/
-std::string IDFObject::getFormattedLastModified() const {
-  return Poco::DateTimeFormatter::format(this->getLastModified(),
-                                         "%Y-%d-%mT%H:%M:%S");
-}
-
-/**
 Gets the idf file as a mangled name.
 @return the idf file as a mangled name.
 */
 std::string IDFObject::getMangledName() const {
-  return this->getFileNameOnly() + this->getFormattedLastModified();
+  std::string idfText = Kernel::ChecksumHelper::loadFile(getFileFullPathStr(),true);
+  std::string checksum = Kernel::ChecksumHelper::sha1FromString(Poco::trim(idfText));
+  return this->getFileNameOnly() + checksum;
 }
 
 /**

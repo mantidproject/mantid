@@ -123,7 +123,14 @@ DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
 //----------------------------------------------------------------------------------------------
 /** Constructor
   */
-GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks() : API::Algorithm() {}
+GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
+    : API::Algorithm(), m_inputWS(), m_eventW(), m_isEvent(false), m_backType(),
+      m_peakType(), m_maxChiSq(0.), m_minPeakHeight(0.), m_leastMaxObsY(0.),
+      m_maxOffset(0.), m_peakPositions(), m_fitWindows(), m_inputResolutionWS(),
+      m_hasInputResolution(false), m_minResFactor(0.), m_maxResFactor(0.),
+      m_outputW(), m_outputNP(), m_maskWS(), m_infoTableWS(),
+      m_peakOffsetTableWS(), m_resolutionWS(), m_useFitWindowTable(false),
+      m_vecFitWindow() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -255,9 +262,9 @@ void GetDetOffsetsMultiPeaks::exec() {
   calculateDetectorsOffsets();
 
   // Return the output
-  setProperty("OutputWorkspace", outputW);
-  setProperty("NumberPeaksWorkspace", outputNP);
-  setProperty("MaskWorkspace", maskWS);
+  setProperty("OutputWorkspace", m_outputW);
+  setProperty("NumberPeaksWorkspace", m_outputNP);
+  setProperty("MaskWorkspace", m_maskWS);
   setProperty("FittedResolutionWorkspace", m_resolutionWS);
   setProperty("SpectraFitInfoTableWorkspace", m_infoTableWS);
   setProperty("PeaksOffsetTableWorkspace", m_peakOffsetTableWS);
@@ -267,8 +274,8 @@ void GetDetOffsetsMultiPeaks::exec() {
   if (!filename.empty()) {
     progress(0.9, "Saving .cal file");
     IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
-    childAlg->setProperty("OffsetsWorkspace", outputW);
-    childAlg->setProperty("MaskWorkspace", maskWS);
+    childAlg->setProperty("OffsetsWorkspace", m_outputW);
+    childAlg->setProperty("MaskWorkspace", m_maskWS);
     childAlg->setPropertyValue("Filename", filename);
     childAlg->executeAsChildAlg();
   }
@@ -330,11 +337,11 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   }
 
   // Some shortcuts for event workspaces
-  eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
-  // bool isEvent = false;
-  isEvent = false;
-  if (eventW)
-    isEvent = true;
+  m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
+  // bool m_isEvent = false;
+  m_isEvent = false;
+  if (m_eventW)
+    m_isEvent = true;
 
   // Cache the peak and background function names
   m_peakType = this->getPropertyValue("PeakFunction");
@@ -347,11 +354,11 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
   // Create output workspaces
-  outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
-  outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+  m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+  m_outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
   MatrixWorkspace_sptr tempmaskws(
       new MaskWorkspace(m_inputWS->getInstrument()));
-  maskWS = tempmaskws;
+  m_maskWS = tempmaskws;
 
   // Input resolution
   std::string reswsname = getPropertyValue("InputResolutionWorkspace");
@@ -469,7 +476,7 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
-      maskWS->getDetectorIDToWorkspaceIndexMap(true);
+      m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // Fit all the spectra with a gaussian
   Progress prog(this, 0, 1.0, nspec);
@@ -495,11 +502,11 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
         std::set<detid_t>::iterator it;
         for (it = dets.begin(); it != dets.end(); ++it) {
           // Set value to output peak offset workspace
-          outputW->setValue(*it, offsetresult.offset, offsetresult.fitSum);
+          m_outputW->setValue(*it, offsetresult.offset, offsetresult.fitSum);
 
           // Set value to output peak number workspace
-          outputNP->setValue(*it, offsetresult.peakPosFittedSize,
-                             offsetresult.chisqSum);
+          m_outputNP->setValue(*it, offsetresult.peakPosFittedSize,
+                               offsetresult.chisqSum);
 
           // Set value to mask workspace
           const auto mapEntry = pixel_to_wi.find(*it);
@@ -509,11 +516,11 @@ void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
           const size_t workspaceIndex = mapEntry->second;
           if (offsetresult.mask > 0.9) {
             // Being masked
-            maskWS->maskWorkspaceIndex(workspaceIndex);
-            maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
+            m_maskWS->maskWorkspaceIndex(workspaceIndex);
+            m_maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
           } else {
             // Using the detector
-            maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
+            m_maskWS->dataY(workspaceIndex)[0] = offsetresult.mask;
 
             // check the average value of delta(d)/d.  if it is far off the
             // theorical value, output
@@ -567,8 +574,13 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   fr.numpeakstofit = 0;
   fr.numpeaksindrange = 0;
 
+  fr.highestpeakpos = 0.0;
+  fr.highestpeakdev = 0.0;
+  fr.resolution = 0.0;
+  fr.dev_resolution = 0.0;
+
   // Checks for empty and dead detectors
-  if ((isEvent) && (eventW->getEventList(wi).empty())) {
+  if ((m_isEvent) && (m_eventW->getEventList(wi).empty())) {
     // empty detector will be masked
     fr.offset = BAD_OFFSET;
     fr.fitoffsetstatus = "empty det";
@@ -577,10 +589,19 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
     const MantidVec &Y = m_inputWS->readY(wi);
     const int YLength = static_cast<int>(Y.size());
     double sumY = 0.0;
-    for (int i = 0; i < YLength; i++)
+    size_t numNonEmptyBins = 0;
+    for (int i = 0; i < YLength; i++) {
       sumY += Y[i];
+      if (Y[i] > 0.)
+        numNonEmptyBins += 1;
+    }
     if (sumY < 1.e-30) {
       // Dead detector will be masked
+      fr.offset = BAD_OFFSET;
+      fr.fitoffsetstatus = "dead det";
+    }
+    if (numNonEmptyBins <= 3) {
+      // Another dead detector check
       fr.offset = BAD_OFFSET;
       fr.fitoffsetstatus = "dead det";
     }
@@ -956,10 +977,13 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
 
   // Check
   size_t numrows = peakslist->rowCount();
-  if (numrows != peakPositionRef.size())
-    throw std::runtime_error("Number of peaks in PeaksList (from FindPeaks) is "
-                             "not same as number of "
-                             "referenced peaks' positions. ");
+  if (numrows != peakPositionRef.size()) {
+    std::stringstream msg;
+    msg << "Number of peaks in PeaksList (from FindPeaks=" << numrows
+        << ") is not same as number of "
+        << "referenced peaks' positions (" << peakPositionRef.size() << ")";
+    throw std::runtime_error(msg.str());
+  }
 
   std::vector<double> vec_widthDivPos;
   std::vector<double> vec_offsets;
@@ -1176,7 +1200,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
     m_resolutionWS->dataE(wi)[0] = offsetresult.dev_resolution;
   } else {
     // Only add successfully calculated value
-    m_resolutionWS->dataY(wi)[0] = -0.0;
+    m_resolutionWS->dataY(wi)[0] = 0.0;
     m_resolutionWS->dataE(wi)[0] = 0.0;
   }
 
@@ -1212,7 +1236,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
 
     double numdelta = static_cast<double>(numpeaksfitted);
     double stddev = 0.;
-    if (numpeaksfitted > 1)
+    if (numpeaksfitted > 1.)
       stddev = sqrt(sumdelta2 / numdelta -
                     (sumdelta1 / numdelta) * (sumdelta1 / numdelta));
 
@@ -1294,9 +1318,26 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
     }
   }
 
-  double avgchi2 = sumchi2 / static_cast<double>(numunmasked);
-  double wtavgchi2 =
-      weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);
+  double avgchi2 = .0;
+  double wtavgchi2 = .0;
+  if (0 == numunmasked) {
+    g_log.warning()
+        << "Found 0 unmasked rows in the spectra info table. "
+           "Cannot calculate Chi-sq sensibly. it's value will be NaN"
+        << std::endl;
+    avgchi2 = NAN;
+  } else {
+    avgchi2 = sumchi2 / static_cast<double>(numunmasked);
+  }
+
+  if (0 == weight_numfittedpeaks) {
+    g_log.warning() << "Found 0 fitted peaks in the spectra info table. "
+                       "Cannot calculate the weighted average Chi-sq sensibly"
+                    << std::endl;
+    wtavgchi2 = NAN;
+  } else {
+    wtavgchi2 = weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);
+  }
 
   g_log.notice() << "Unmasked spectra     = " << numunmasked << " \t"
                  << "Average chi-sq       = " << avgchi2 << " \t"

@@ -16,8 +16,7 @@ then masking.
 Workflow
 ########
 
-.. figure:: /images/DgsRemapWorkflow.png
-   :alt: DgsRemapWorkflow.png
+.. diagram:: DgsRemap-v1_wkflw.dot
 
 Usage
 -----
@@ -28,3 +27,5 @@ Usage
     within :ref:`DgsReduction <algm-DgsReduction>`.
 
 .. categories::
+
+.. sourcelink::

@@ -188,6 +188,17 @@ void MantidHelpWindow::showWikiPage(const string &page)
 }
 
 /**
+ * Convenience method for HelpWindowImpl::showWikiPage(const string &).
+ *
+ * @param page The name of the wiki page to show. If this is empty show
+ * the wiki homepage.
+ */
+void MantidHelpWindow::showWikiPage(const QString &page)
+{
+    this->showWikiPage(page.toStdString());
+}
+
+/**
  * Show the help page for a particular algorithm. The page is picked
  * using matching naming conventions.
  *
@@ -215,7 +226,7 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version)
     else // qt-assistant disabled
     {
         if (name.empty())
-            this->showWikiPage("Category:Algorithms");
+            this->showWikiPage(std::string("Category:Algorithms"));
         else
             this->showWikiPage(name);
     }
@@ -236,7 +247,7 @@ void MantidHelpWindow::showAlgorithm(const QString &name, const int version)
 
 
 /**
- * Show the help page for a particular concept. 
+ * Show the help page for a particular concept.
  *
  * @param name The name of the concept to show. If this is empty show
  * the concept index.
@@ -256,7 +267,7 @@ void MantidHelpWindow::showConcept(const string &name)
     else // qt-assistant disabled
     {
         if (name.empty())
-            this->showWikiPage("Category:Concepts");
+            this->showWikiPage(std::string("Category:Concepts"));
         else
             this->showWikiPage(name);
     }
@@ -264,7 +275,7 @@ void MantidHelpWindow::showConcept(const string &name)
 
 
 /**
- * Show the help page for a particular concept. 
+ * Show the help page for a particular concept.
  *
  * @param name The name of the concept to show. If this is empty show
  * the concept index.
@@ -297,9 +308,50 @@ void MantidHelpWindow::showFitFunction(const std::string &name)
     else // qt-assistant disabled
     {
         if (name.empty())
-            this->showWikiPage("Category:Fit_functions");
+            this->showWikiPage(std::string("Category:Fit_functions"));
         else
             this->showWikiPage(name);
+    }
+}
+
+/**
+ * Show the help page for a particular fit function. The page is
+ * picked using matching naming conventions.
+ *
+ * @param name The name of the fit function to show. If it is empty show
+ * the fit function index.
+ */
+void MantidHelpWindow::showFitFunction(const QString &name)
+{
+    this->showFitFunction(name.toStdString());
+}
+
+/**
+ * Show the help page for a given custom interface.
+ *
+ * @param name The name of the interface to show
+ */
+void MantidHelpWindow::showCustomInterface(const QString &name)
+{
+    this->showCustomInterface(name.toStdString());
+}
+
+/**
+ * Show the help page for a given custom interface.
+ *
+ * @param name The name of the interface to show
+ */
+void MantidHelpWindow::showCustomInterface(const std::string &name)
+{
+    if (bool(g_helpWindow))
+    {
+        QString url(BASE_URL);
+        url += "interfaces/";
+        if (name.empty())
+            url += "index.html";
+        else
+          url += QString(name.c_str()) + ".html";
+        this->showHelp(url);
     }
 }
 
@@ -326,7 +378,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     m_collectionFile = "";
 
     QDir searchDir(QString::fromStdString(binDir));
-        
+
     // try next to the executable
     QString path = searchDir.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";

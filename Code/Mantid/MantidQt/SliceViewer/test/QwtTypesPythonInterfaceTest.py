@@ -16,3 +16,6 @@ class QwtTypesPythonInterfaceTest(unittest.TestCase):
     def test_QwtDoubleInterval(self):
         # TODO: How can I create the type?
         pass
+
+if __name__ == '__main__':
+    unittest.main()

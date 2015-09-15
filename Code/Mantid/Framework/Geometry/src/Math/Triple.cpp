@@ -126,8 +126,6 @@ T &Triple<T>::operator[](const int A)
   default:
     throw "Range Error";
   }
-  // Never gets here
-  return first;
 }
 
 template <typename T>
@@ -148,8 +146,6 @@ T Triple<T>::operator[](const int A) const
   default:
     throw "Range Error";
   }
-  // Never gets here
-  return first;
 }
 
 /*

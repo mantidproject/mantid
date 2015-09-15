@@ -1,17 +1,16 @@
 #ifndef MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_
 #define MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_
 
-#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidMDAlgorithms/CentroidPeaksMD2.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -20,16 +19,14 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::Geometry::MDHistoDimension;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
@@ -98,9 +95,9 @@ public:
 
     Peak pIn(inst, 1, 1.0, startPos );
     if (CoordinatesToUse == "Q (lab frame)")
-      pIn.setQLabFrame(startPos);
+      pIn.setQLabFrame(startPos, 1 /*sample to detector distance*/);
     else if (CoordinatesToUse == "Q (sample frame)")
-      pIn.setQSampleFrame(startPos);
+      pIn.setQSampleFrame(startPos,  1 /*sample to detector distance*/);
     else if (CoordinatesToUse == "HKL")
       pIn.setHKL(startPos);
     peakWS->addPeak( pIn );
@@ -158,18 +155,18 @@ public:
 
     if (CoordinatesToUse == "HKL")
     {
-      mdews->setCoordinateSystem(Mantid::API::HKL);
+      mdews->setCoordinateSystem(Mantid::Kernel::HKL);
       doRun(V3D( 0.,0.,0.), 1.0, V3D( 0.,0.,0.), "Start at the center, get the center");
 
       doRun(V3D( 0.2,0.2,0.2), 1.8, V3D( 0.,0.,0.), "Somewhat off center");
     }
 	else if (CoordinatesToUse == "Q (lab frame)")
 	{
-	  mdews->setCoordinateSystem(Mantid::API::QLab);
+	  mdews->setCoordinateSystem(Mantid::Kernel::QLab);
 	}
 	else if (CoordinatesToUse == "Q (sample frame)")
 	{
-	  mdews->setCoordinateSystem(Mantid::API::QSample);
+	  mdews->setCoordinateSystem(Mantid::Kernel::QSample);
 	}
 
     doRun(V3D( 2.,3.,4.), 1.0, V3D( 2.,3.,4.), "Start at the center, get the center");

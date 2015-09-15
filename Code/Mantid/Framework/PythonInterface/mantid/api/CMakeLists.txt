@@ -32,6 +32,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceProperty.cpp
   src/Exports/ITableWorkspace.cpp
   src/Exports/ITableWorkspaceProperty.cpp
+  src/Exports/ISplittersWorkspace.cpp
   src/Exports/MDGeometry.cpp
   src/Exports/IMDWorkspace.cpp
   src/Exports/IMDWorkspaceProperty.cpp
@@ -43,6 +44,7 @@ set ( EXPORT_FILES
   src/Exports/MatrixWorkspaceProperty.cpp
   src/Exports/IEventWorkspace.cpp
   src/Exports/IEventWorkspaceProperty.cpp
+  src/Exports/IMaskWorkspace.cpp
   src/Exports/IPeaksWorkspace.cpp
   src/Exports/IPeaksWorkspaceProperty.cpp
   src/Exports/BinaryOperations.cpp
@@ -54,6 +56,7 @@ set ( EXPORT_FILES
   src/Exports/IPeak.cpp
   src/Exports/BoxController.cpp
   src/Exports/FileFinder.cpp
+  src/Exports/FileLoaderRegistry.cpp
   src/Exports/Sample.cpp
   src/Exports/ScriptRepository.cpp
   src/Exports/ScriptRepositoryFactory.cpp
@@ -66,11 +69,17 @@ set ( EXPORT_FILES
   src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
   src/Exports/Progress.cpp
+  src/Exports/Projection.cpp
   src/Exports/FunctionProperty.cpp
   src/Exports/AlgorithmProperty.cpp
 )
 
-# Files containing additional helper code that are not related to exporting class/functions
+set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
+create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
+
+#############################################################################################
+# Helper code
+#############################################################################################
 set ( SRC_FILES
   src/Algorithms/RunPythonScript.cpp
   src/FitFunctions/IFunctionAdapter.cpp
@@ -79,6 +88,7 @@ set ( SRC_FILES
   src/PythonAlgorithm/AlgorithmAdapter.cpp
   src/PythonAlgorithm/DataProcessorAdapter.cpp
   src/CloneMatrixWorkspace.cpp
+  src/ExtractWorkspace.cpp
 )
 
 set ( INC_FILES
@@ -90,6 +100,7 @@ set ( INC_FILES
   ${HEADER_DIR}/api/PythonAlgorithm/DataProcessorAdapter.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
+  ${HEADER_DIR}/api/ExtractWorkspace.h
   ${HEADER_DIR}/api/WorkspacePropertyExporter.h
 )
 
@@ -100,11 +111,6 @@ set ( PY_FILES
   _workspaceops.py
 )
 
-#############################################################################################
-# Generate a source file from the export definitions
-#############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES
-                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -124,13 +130,25 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonAPIModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonAPIModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES}
+              ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule API )
+target_link_libraries ( PythonAPIModule LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+            PythonGeometryModule
+            PythonKernelModule
+            API
+            Kernel
+            Geometry
+            ${PYTHON_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES} )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")
+endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################

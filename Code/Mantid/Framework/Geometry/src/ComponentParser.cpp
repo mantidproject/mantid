@@ -1,6 +1,4 @@
 #include "MantidGeometry/ComponentParser.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/Component.h"
 
 using namespace Mantid::Kernel;
 
@@ -71,6 +69,10 @@ void ComponentParser::endElement(const Poco::XML::XMLString &,
   Component *current = NULL;
   if (!m_current.empty())
     current = m_current.back();
+
+  if (!current) {
+    throw std::runtime_error("Failed to find last component");
+  }
 
   if (localName == "pos") {
     V3D pos;

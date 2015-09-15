@@ -80,3 +80,5 @@ Output:
    After RemoveBins [ 10.3    0.     0.     0.15   0.3 ]
    
 .. categories::
+
+.. sourcelink::

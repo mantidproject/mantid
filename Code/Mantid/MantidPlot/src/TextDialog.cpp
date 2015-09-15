@@ -48,130 +48,136 @@
 #include <qwt_scale_widget.h>
 
 TextDialog::TextDialog(TextType type, QWidget* parent, Qt::WFlags fl)
-	: QDialog( parent, fl)
+  : QDialog( parent, fl)
 {
-	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowTitle( tr( "MantidPlot - Text options" ) );
-	setSizeGripEnabled( true );
+  setAttribute(Qt::WA_DeleteOnClose);
+  setWindowTitle( tr( "MantidPlot - Text options" ) );
+  setSizeGripEnabled( true );
 
-	d_graph = NULL;
-	d_scale = NULL;
-	d_legend = NULL;
+  d_graph = NULL;
+  d_scale = NULL;
+  d_legend = NULL;
 
-	textType = type;
+  textType = type;
 
-	// top groupbox
-	groupBox1 = new QGroupBox(QString());
-	QGridLayout * topLayout = new QGridLayout(groupBox1);
-	topLayout->addWidget(new QLabel(tr("Text Color")), 0, 0);
+  // top groupbox
+  groupBox1 = new QGroupBox(QString());
+  QGridLayout * topLayout = new QGridLayout(groupBox1);
+  topLayout->addWidget(new QLabel(tr("Text Color")), 0, 0);
 
-	colorBtn = new ColorButton();
-	topLayout->addWidget(colorBtn, 0, 1);
+  colorBtn = new ColorButton();
+  topLayout->addWidget(colorBtn, 0, 1);
 
-	buttonOk = new QPushButton(tr("&OK"));
-	buttonOk->setAutoDefault( true );
-	buttonOk->setDefault( true );
+  buttonOk = new QPushButton(tr("&OK"));
+  buttonOk->setAutoDefault( true );
+  buttonOk->setDefault( true );
 
-	topLayout->addWidget(buttonOk, 0, 3);
-	topLayout->addWidget(new QLabel(tr("Font")), 1, 0);
+  topLayout->addWidget(buttonOk, 0, 3);
+  topLayout->addWidget(new QLabel(tr("Font")), 1, 0);
 
-	buttonFont = new QPushButton(tr( "&Font" ));
-	topLayout->addWidget(buttonFont, 1, 1);
+  buttonFont = new QPushButton(tr( "&Font" ));
+  topLayout->addWidget(buttonFont, 1, 1);
 
-	buttonApply = new QPushButton(tr( "&Apply" ));
-	buttonApply->setDefault( true );
-	topLayout->addWidget( buttonApply, 1, 3 );
+  buttonApply = new QPushButton(tr( "&Apply" ));
+  buttonApply->setDefault( true );
+  topLayout->addWidget( buttonApply, 1, 3 );
 
-	if (textType != TextDialog::TextMarker){
-		topLayout->addWidget(new QLabel(tr("Alignment")), 2, 0);
-		alignmentBox = new QComboBox();
-		alignmentBox->addItem( tr( "Center" ) );
-		alignmentBox->addItem( tr( "Left" ) );
-		alignmentBox->addItem( tr( "Right" ) );
-		topLayout->addWidget(alignmentBox, 2, 1);
+  alignmentBox = NULL;
+  backgroundBox = NULL;
+  if (textType != TextDialog::TextMarker){
+    topLayout->addWidget(new QLabel(tr("Alignment")), 2, 0);
+    alignmentBox = new QComboBox();
+    alignmentBox->addItem( tr( "Center" ) );
+    alignmentBox->addItem( tr( "Left" ) );
+    alignmentBox->addItem( tr( "Right" ) );
+    topLayout->addWidget(alignmentBox, 2, 1);
 
-		boxApplyToAll = new QCheckBox(tr("Apply format to all &labels in layer"));
-		topLayout->addWidget(boxApplyToAll, 3, 0 );
-	} else {
-		topLayout->addWidget(new QLabel(tr("Frame")), 2, 0);
-		backgroundBox = new QComboBox();
-		backgroundBox->addItem( tr( "None" ) );
-		backgroundBox->addItem( tr( "Rectangle" ) );
-		backgroundBox->addItem( tr( "Shadow" ) );
-		topLayout->addWidget(backgroundBox, 2, 1);
-	}
+    boxApplyToAll = new QCheckBox(tr("Apply format to all &labels in layer"));
+    topLayout->addWidget(boxApplyToAll, 3, 0 );
+  } else {
+    topLayout->addWidget(new QLabel(tr("Frame")), 2, 0);
+    backgroundBox = new QComboBox();
+    backgroundBox->addItem( tr( "None" ) );
+    backgroundBox->addItem( tr( "Rectangle" ) );
+    backgroundBox->addItem( tr( "Shadow" ) );
+    topLayout->addWidget(backgroundBox, 2, 1);
+  }
 
-	buttonCancel = new QPushButton( tr( "&Cancel" ) );
-	topLayout->addWidget( buttonCancel, 2, 3 );
+  buttonCancel = new QPushButton( tr( "&Cancel" ) );
+  topLayout->addWidget( buttonCancel, 2, 3 );
 
-	if (textType == TextMarker)
-	{ //TODO: Sometime background features for axes lables should be implemented
-		topLayout->addWidget(new QLabel(tr("Opacity")), 3, 0);
-		boxBackgroundTransparency = new QSpinBox();
-		boxBackgroundTransparency->setRange(0, 255);
-     	boxBackgroundTransparency->setSingleStep(5);
-		boxBackgroundTransparency->setWrapping(true);
-     	boxBackgroundTransparency->setSpecialValueText(tr("Transparent"));
+  backgroundBtn = NULL;
 
-		topLayout->addWidget( boxBackgroundTransparency, 3, 1 );
-		topLayout->addWidget(new QLabel(tr("Background color")), 4, 0);
-		backgroundBtn = new ColorButton(groupBox1);
-		backgroundBtn->setEnabled(false);
-		topLayout->addWidget( backgroundBtn, 4, 1 );
+  buttonDefault = NULL;
+  boxBackgroundTransparency = NULL;
+  if (textType == TextMarker)
+  { //TODO: Sometime background features for axes lables should be implemented
+    topLayout->addWidget(new QLabel(tr("Opacity")), 3, 0);
+    boxBackgroundTransparency = new QSpinBox();
+    boxBackgroundTransparency->setRange(0, 255);
+    boxBackgroundTransparency->setSingleStep(5);
+    boxBackgroundTransparency->setWrapping(true);
+    boxBackgroundTransparency->setSpecialValueText(tr("Transparent"));
 
-		connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)),
+    topLayout->addWidget( boxBackgroundTransparency, 3, 1 );
+    topLayout->addWidget(new QLabel(tr("Background color")), 4, 0);
+    backgroundBtn = new ColorButton(groupBox1);
+    backgroundBtn->setEnabled(false);
+    topLayout->addWidget( backgroundBtn, 4, 1 );
+
+    connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)),
 				this, SLOT(updateTransparency(int)));
 
-		boxApplyToAll = new QCheckBox(tr("Apply format to all &labels in layer"));
-		topLayout->addWidget(boxApplyToAll, 5, 0 );
+    boxApplyToAll = new QCheckBox(tr("Apply format to all &labels in layer"));
+    topLayout->addWidget(boxApplyToAll, 5, 0 );
 
-		buttonDefault = new QPushButton( tr( "Set As &Default" ) );
-		topLayout->addWidget( buttonDefault, 3, 3 );
-		connect( buttonDefault, SIGNAL(clicked()), this, SLOT(setDefaultValues()));
-	}
+    buttonDefault = new QPushButton( tr( "Set As &Default" ) );
+    topLayout->addWidget( buttonDefault, 3, 3 );
+    connect( buttonDefault, SIGNAL(clicked()), this, SLOT(setDefaultValues()));
+  }
 
-	// align the OK, Apply, and Cancel buttons to the right
-	topLayout->setColumnStretch(2, 1);
+  // align the OK, Apply, and Cancel buttons to the right
+  topLayout->setColumnStretch(2, 1);
 
-	/* TODO: Angle feature not implemented, yet
-	 * caution: This code is still the old Qt3 code
-	   QLabel* rotate=new QLabel(tr( "Rotate (deg.)" ),GroupBox1, "TextLabel1_2",0);
-	   rotate->hide();
+  /* TODO: Angle feature not implemented, yet
+   * caution: This code is still the old Qt3 code
+   QLabel* rotate=new QLabel(tr( "Rotate (deg.)" ),GroupBox1, "TextLabel1_2",0);
+   rotate->hide();
 
-	   rotateBox = new QComboBox( false, GroupBox1, "rotateBox" );
-	   rotateBox->insertItem( tr( "0" ) );
-	   rotateBox->insertItem( tr( "45" ) );
-	   rotateBox->insertItem( tr( "90" ) );
-	   rotateBox->insertItem( tr( "135" ) );
-	   rotateBox->insertItem( tr( "180" ) );
-	   rotateBox->insertItem( tr( "225" ) );
-	   rotateBox->insertItem( tr( "270" ) );
-	   rotateBox->insertItem( tr( "315" ) );
-	   rotateBox->setEditable (true);
-	   rotateBox->setCurrentItem(0);
-	   rotateBox->hide();
-	   */
+   rotateBox = new QComboBox( false, GroupBox1, "rotateBox" );
+   rotateBox->insertItem( tr( "0" ) );
+   rotateBox->insertItem( tr( "45" ) );
+   rotateBox->insertItem( tr( "90" ) );
+   rotateBox->insertItem( tr( "135" ) );
+   rotateBox->insertItem( tr( "180" ) );
+   rotateBox->insertItem( tr( "225" ) );
+   rotateBox->insertItem( tr( "270" ) );
+   rotateBox->insertItem( tr( "315" ) );
+   rotateBox->setEditable (true);
+   rotateBox->setCurrentItem(0);
+   rotateBox->hide();
+  */
 
-	textEditBox = new QTextEdit();
-	textEditBox->setTextFormat(Qt::PlainText);
-	textEditBox->setFont(QFont());
+  textEditBox = new QTextEdit();
+  textEditBox->setTextFormat(Qt::PlainText);
+  textEditBox->setFont(QFont());
 
-	formatButtons =  new TextFormatButtons(textEditBox, TextFormatButtons::AxisLabel);
+  formatButtons =  new TextFormatButtons(textEditBox, TextFormatButtons::AxisLabel);
 
-	setFocusPolicy(Qt::StrongFocus);
-	setFocusProxy(textEditBox);
+  setFocusPolicy(Qt::StrongFocus);
+  setFocusProxy(textEditBox);
 
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->addWidget(groupBox1);
-	mainLayout->addWidget(formatButtons);
-	mainLayout->addWidget(textEditBox);
-	setLayout( mainLayout );
+  QVBoxLayout* mainLayout = new QVBoxLayout();
+  mainLayout->addWidget(groupBox1);
+  mainLayout->addWidget(formatButtons);
+  mainLayout->addWidget(textEditBox);
+  setLayout( mainLayout );
 
-	// signals and slots connections
-	connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-	connect( buttonApply, SIGNAL( clicked() ), this, SLOT( apply() ) );
-	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-	connect( buttonFont, SIGNAL( clicked() ), this, SLOT(customFont() ) );
+  // signals and slots connections
+  connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+  connect( buttonApply, SIGNAL( clicked() ), this, SLOT( apply() ) );
+  connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+  connect( buttonFont, SIGNAL( clicked() ), this, SLOT(customFont() ) );
 }
 
 void TextDialog::setGraph(Graph *g)

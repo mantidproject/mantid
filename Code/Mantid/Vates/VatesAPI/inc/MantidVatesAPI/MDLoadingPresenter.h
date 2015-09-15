@@ -2,10 +2,19 @@
 #define MANTID_VATES_MD_LOADING_PRESENTER
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include <vtkDataSet.h>
+#include <vtkPVChangeOfBasisHelper.h>
 #include <string>
 #include <vector>
+
+
+namespace {
+Mantid::Kernel::Logger g_log("MDLoadingPresenter");
+}
 
 class vtkUnstructuredGrid;
 namespace Mantid
@@ -42,31 +51,51 @@ namespace Mantid
     */
     class DLLExport MDLoadingPresenter
     {
-    public:
-      virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate) = 0;
-      virtual void executeLoadMetadata() = 0;
-      virtual bool hasTDimensionAvailable() const = 0;
-      virtual std::vector<double> getTimeStepValues() const = 0;
-      virtual std::string getTimeStepLabel() const = 0;
-      virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
-      virtual void makeNonOrthogonal(vtkDataSet* visualDataSet)
-      {
-        // This is a no-op function for most loaders.
-        UNUSED_ARG(visualDataSet);
-      }
-      virtual bool canReadFile() const = 0;
-      virtual const std::string& getGeometryXML() const = 0;
-      virtual ~MDLoadingPresenter(){}
-      virtual std::string getWorkspaceTypeName()
-      {
-        return "NotSet";
-      }
-      virtual int getSpecialCoordinates()
-      {
-        return API::None;
-      }
-    };
+      public:
+        virtual vtkDataSet* execute(vtkDataSetFactory* factory, ProgressAction& rebinningProgressUpdate, ProgressAction& drawingProgressUpdate) = 0;
+        virtual void executeLoadMetadata() = 0;
+        virtual bool hasTDimensionAvailable() const = 0;
+        virtual std::vector<double> getTimeStepValues() const = 0;
+        virtual std::string getTimeStepLabel() const = 0;
+        virtual void setAxisLabels(vtkDataSet* visualDataSet) = 0;
+        virtual void setDefaultCOBandBoundaries(vtkDataSet* visualDataSet);
+        virtual void makeNonOrthogonal(vtkDataSet* visualDataSet);
+        virtual bool canReadFile() const = 0;
+        virtual const std::string& getGeometryXML() const = 0;
+        virtual ~MDLoadingPresenter(){}
+        virtual std::string getWorkspaceTypeName()
+        {
+          return "NotSet";
+        }
+        virtual int getSpecialCoordinates()
+        {
+        return Kernel::None;
+        }
 
+        /**
+         * Gets the minimum value.
+         * @returns The minimum value of the dataset or 0.0
+         */
+        virtual double getMinValue()
+        {
+          return 0.0;
+        };
+
+        /**
+         * Gets the maximum value.
+         * @returns The maximum value of the dataset or 0.0
+         */
+        virtual double getMaxValue()
+        {
+          return 0.0;	
+        };
+
+        /**
+         * Gets the instrument associated with the dataset.
+         * @returns The instrument associated with the dataset.
+         */
+        virtual const std::string& getInstrument() = 0;
+    };
   }
 }
 

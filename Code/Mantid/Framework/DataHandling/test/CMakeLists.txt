@@ -12,10 +12,22 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
-  target_link_libraries( DataHandlingTest DataHandling )
+  target_link_libraries( DataHandlingTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            API
+            DataHandling
+            DataObjects
+            Geometry
+            Kernel
+            Nexus
+            ${NEXUS_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${HDF5_LIBRARIES} )
   add_dependencies ( DataHandlingTest Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests DataHandlingTest )
+  # Test data
+  add_dependencies ( DataHandlingTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataHandlingTest PROPERTY FOLDER "UnitTests" )
 endif ()
-

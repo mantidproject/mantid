@@ -17,6 +17,8 @@ passing to this algorithm.
 
 This algorithm is for use with small workspaces loaded. It is
 particularly suitable for reformatting workspaces loaded via
-`LoadASCII <http://www.mantidproject.org/LoadASCII>`_. Input workspaces must be a distribution.
+:ref:`LoadAscii <algm-LoadAscii>`. Input workspaces must be a distribution.
 
 .. categories::
+
+.. sourcelink::

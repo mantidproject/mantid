@@ -43,10 +43,10 @@ using namespace Kernel;
  * Constructor
  */
 MonteCarloAbsorption::MonteCarloAbsorption()
-    : m_samplePos(), m_sourcePos(), m_blocks(), m_blkHalfX(0.0),
-      m_blkHalfY(0.0), m_blkHalfZ(0.0), m_rngs(0), m_inputWS(),
-      m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
-      m_xStepSize(0), m_numberOfEvents(300) {}
+    : m_samplePos(), m_sourcePos(), m_numVolumeElements(0), m_blocks(),
+      m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0), m_rngs(0), m_inputWS(),
+      m_sampleShape(NULL), m_sampleMaterial(NULL), m_container(NULL),
+      m_numberOfPoints(0), m_xStepSize(0), m_numberOfEvents(300) {}
 
 /**
  * Destructor
@@ -195,6 +195,11 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
       ++numDetected;
     }
   }
+
+  if (0 == numDetected)
+    throw std::runtime_error(
+        "Unexpected inconsistency found while running simulation: the number "
+        "of events detected is 0.");
 
   // Attenuation factor is simply the average value
   attenFactor /= numDetected;
@@ -452,10 +457,11 @@ void MonteCarloAbsorption::initCaches() {
 
   m_numVolumeElements = m_blocks.size();
   g_log.debug() << "Sample + container divided into " << m_numVolumeElements
-                << " blocks.";
-  if (m_numVolumeElements == numPossibleVolElements)
-    g_log.debug("\n");
-  else
+                << " blocks.\n";
+  if (m_numVolumeElements == 0) {
+    throw std::runtime_error("No intersection with sample + container.");
+  }
+  if (m_numVolumeElements != numPossibleVolElements)
     g_log.debug()
         << " Skipped " << (numPossibleVolElements - m_numVolumeElements)
         << " blocks that do not intersect with the sample + container\n";

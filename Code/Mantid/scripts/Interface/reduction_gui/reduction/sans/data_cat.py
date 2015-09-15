@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Simple local data catalog for Mantid
     Gets main information from data files in a directory and stores
@@ -175,7 +176,7 @@ class DataCatalog(object):
         self.db = None
 
         try:
-             self._create_db(db_path, replace_db)
+            self._create_db(db_path, replace_db)
         except:
             print "DataCatalog: Could not access local data catalog\n%s" % sys.exc_value
 

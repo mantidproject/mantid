@@ -4,17 +4,17 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace {
-double HKLSum(const Mantid::API::IPeak &p) {
+double HKLSum(const Mantid::Geometry::IPeak &p) {
   return p.getH() + p.getK() + p.getL();
 }
 
-double HKL2(const Mantid::API::IPeak &p) {
+double HKL2(const Mantid::Geometry::IPeak &p) {
   return p.getH() * p.getH() + p.getK() * p.getK() + p.getL() * p.getL();
 }
 
-double intensity(const Mantid::API::IPeak &p) { return p.getIntensity(); }
+double intensity(const Mantid::Geometry::IPeak &p) { return p.getIntensity(); }
 
-double SN(const Mantid::API::IPeak &p) {
+double SN(const Mantid::Geometry::IPeak &p) {
   return p.getIntensity() / p.getSigmaIntensity();
 }
 }
@@ -40,9 +40,9 @@ FilterPeaks::FilterPeaks() {}
 FilterPeaks::~FilterPeaks() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string FilterPeaks::name() const { return "FilterPeaks"; };
+const std::string FilterPeaks::name() const { return "FilterPeaks"; }
 /// Algorithm's version for identification. @see Algorithm::version
-int FilterPeaks::version() const { return 1; };
+int FilterPeaks::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string FilterPeaks::category() const { return "Crystal"; }
 
@@ -89,7 +89,7 @@ void FilterPeaks::exec() {
   filteredWS->copyExperimentInfoFrom(inputWS.get());
 
   const std::string FilterVariable = getProperty("FilterVariable");
-  double (*filterFunction)(const Mantid::API::IPeak &) = 0;
+  double (*filterFunction)(const Mantid::Geometry::IPeak &) = 0;
   if (FilterVariable == "h+k+l")
     filterFunction = &HKLSum;
   else if (FilterVariable == "h^2+k^2+l^2")
@@ -104,7 +104,7 @@ void FilterPeaks::exec() {
 
   for (int i = 0; i < inputWS->getNumberPeaks(); ++i) {
     bool pass(false);
-    const API::IPeak &currentPeak = inputWS->getPeak(i);
+    const Geometry::IPeak &currentPeak = inputWS->getPeak(i);
     const double currentValue =
         filterFunction(currentPeak); // filterFunction pointer set above
 

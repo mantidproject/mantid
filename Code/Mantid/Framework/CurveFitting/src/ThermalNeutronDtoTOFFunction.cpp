@@ -5,8 +5,6 @@
 #include <gsl/gsl_sf_erf.h>
 #include <cmath>
 
-#define PI 3.14159265358979323846264338327950288419716939937510
-
 using namespace Mantid::API;
 using namespace std;
 
@@ -116,9 +114,9 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out,
     double deriv_zero = n;
     double deriv_zerot = (1 - n);
     double deriv_width = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) *
-                         exp(-u * u) / sqrt(PI) * (tcross - 1 / x);
+                         exp(-u * u) / sqrt(M_PI) * (tcross - 1 / x);
     double deriv_tcross = -(zero + dtt1 * x - zerot - dtt1t * x + dtt2t / x) *
-                          exp(-u * u) / sqrt(PI) * width;
+                          exp(-u * u) / sqrt(M_PI) * width;
 
     // b) Set
     out->set(i, 0, deriv_dtt1);

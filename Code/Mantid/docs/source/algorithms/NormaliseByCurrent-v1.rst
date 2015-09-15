@@ -11,8 +11,11 @@ Description
 
 Normalises a workspace according to the good proton charge figure taken
 from the Input Workspace log data, which is stored in the workspace's
-`Sample <http://www.mantidproject.org/Sample>`_ object). Every data point (and its error) is divided
-by that number.
+`sample objects <../api/python/mantid/api/Sample.html>`__). Every data point
+(and its error) is divided by that number.
+The good proton charge value is added to the normalized workspace
+as the value of *NormalizationFactor* log. 
+
 
 ISIS Calculation Details
 ------------------------
@@ -56,10 +59,12 @@ Usage
 
    #Run the Algorithm
    wsN = NormaliseByCurrent(ws)
+   norm_factor = wsN.getRun().getLogData('NormalizationFactor').value
 
    #Print results
    print "Before normalisation", ws.readY(0);
    print "After normalisation ", wsN.readY(0);
+   print "Normalisation factor", norm_factor;
 
 
 Output:
@@ -69,6 +74,8 @@ Output:
    Good Proton Charge = 10.0
    Before normalisation [ 17.  12.]
    After normalisation  [ 1.7  1.2]
-
+   Normalisation factor 10.0   
 
 .. categories::
+
+.. sourcelink::

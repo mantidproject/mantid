@@ -31,7 +31,7 @@ namespace CustomDialogs
 {
 
 // Declare the dialog. Name must match the class name
-DECLARE_DIALOG(FitDialog);
+DECLARE_DIALOG(FitDialog)
 
 //------------------------------------------------------
 // InputWorkspaceWidget methods

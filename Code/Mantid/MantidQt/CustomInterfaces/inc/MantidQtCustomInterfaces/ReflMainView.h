@@ -7,6 +7,10 @@
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
+#include <map>
+#include <set>
+#include <string>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -60,6 +64,9 @@ namespace MantidQt
       //Set the status of the progress bar
       virtual void setProgressRange(int min, int max) = 0;
       virtual void setProgress(int progress) = 0;
+
+      //Get status of the checkbox which dictates whether an ipython notebook is produced
+      virtual bool getEnableNotebook() = 0;
 
       //Settor methods
       virtual void setSelection(const std::set<int>& rows) = 0;

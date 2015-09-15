@@ -27,7 +27,7 @@ using std::size_t;
 DECLARE_FUNCTION(CompositeFunction)
 
 /// Default constructor
-CompositeFunction::CompositeFunction() : IFunction(), m_nParams(0) {
+CompositeFunction::CompositeFunction() : IFunction(), m_nParams(0), m_iConstraintFunction(false) {
   declareAttribute("NumDeriv", Attribute(false));
 }
 

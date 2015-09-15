@@ -2,11 +2,13 @@
 #define MANTID_VATES_VTK_MD_HISTO_QUAD_FACTORY_H_
 
 #include "MantidKernel/System.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 namespace Mantid
 {
@@ -44,7 +46,7 @@ however, some visualisation frameworks won't be able to treat these factories in
     public:
 
       /// Constructor
-      vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
+      vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
 
       /// Assignment operator
       vtkMDHistoQuadFactory& operator=(const vtkMDHistoQuadFactory& other);
@@ -74,9 +76,9 @@ however, some visualisation frameworks won't be able to treat these factories in
       virtual void validate() const;
 
     private:
-      Mantid::MDEvents::MDHistoWorkspace_sptr m_workspace;
+      Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
 
-      std::string m_scalarName;
+      VisualNormalization m_normalizationOption;
 
       mutable ThresholdRange_scptr m_thresholdRange;
     

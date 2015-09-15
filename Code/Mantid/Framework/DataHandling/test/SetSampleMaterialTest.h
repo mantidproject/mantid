@@ -54,17 +54,25 @@ public:
 
 	  TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("InputWorkspace", wsName) );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ChemicalFormula","Al2-O3") );
-    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("SampleNumberDensity","0.0236649") );
-    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ScatteringXSection","15.7048") );
-    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("AttenuationXSection","0.46257") );
+    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("SampleNumberDensity","0.1183245") );
+    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ScatteringXSection","3.1404") );
+    TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("AttenuationXSection","0.0925") );
     TS_ASSERT_THROWS_NOTHING( setmat->execute() );
     TS_ASSERT( setmat->isExecuted() );
-    
+
+    // check some of the output properties
+    double value = setmat->getProperty("bAverage");
+    TS_ASSERT_DELTA(value, 1.8503, 0.0001);
+    value = setmat->getProperty("bSquaredAverage");
+    TS_ASSERT_DELTA(value, 9.1140, 0.0001);
+    value = setmat->getProperty("NormalizedLaue");
+    TS_ASSERT_DELTA(value, 1.6618, 0.0001);
+
 	//can get away with holding pointer as it is an inout ws property
     const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
-    TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.0236649, 0.0001 );
-    TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 15.7048, 0.0001);
-    TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.46257, 0.0001);
+    TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.1183245, 0.0001 );
+    TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 3.1404, 0.0001);
+    TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925, 0.0001);
 
     checkOutputProperties(setmat,m_sampleMaterial);
 
@@ -94,7 +102,7 @@ public:
     TS_ASSERT( setmat->isExecuted() );
 
     const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
-    TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.0236649, 0.0001 );
+    TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.1183245, 0.0001 );
     TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 3.1404, 0.0001);
     TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925, 0.0001);
 	  
@@ -121,6 +129,14 @@ public:
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ChemicalFormula","Ni") );
     TS_ASSERT_THROWS_NOTHING( setmat->execute() );
     TS_ASSERT( setmat->isExecuted() );
+
+    // check some of the output properties
+    double value = setmat->getProperty("bAverage");
+    TS_ASSERT_DELTA(value, 10.3, 0.0001);
+    value = setmat->getProperty("bSquaredAverage");
+    TS_ASSERT_DELTA(value, 106.09, 0.0001);
+    value = setmat->getProperty("NormalizedLaue");
+    TS_ASSERT_DELTA(value, 0., 0.0001);
 
     const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
     TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.0913375, 0.0001 );

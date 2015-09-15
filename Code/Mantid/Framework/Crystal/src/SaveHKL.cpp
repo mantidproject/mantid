@@ -1,21 +1,16 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveHKL.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include "Poco/File.h"
 #include "boost/assign.hpp"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -37,7 +32,7 @@ DECLARE_ALGORITHM(SaveHKL)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SaveHKL::SaveHKL() {}
+SaveHKL::SaveHKL(): m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -99,6 +94,9 @@ void SaveHKL::init() {
   declareProperty("WidthBorder", EMPTY_INT(), "Width of border of detectors");
   declareProperty("MinIntensity", EMPTY_DBL(), mustBePositive,
                   "The minimum Intensity");
+  declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "SaveHKLOutput",
+                                                        Direction::Output), "Output PeaksWorkspace");
+  declareProperty("HKLDecimalPlaces", EMPTY_INT(), "Number of decimal places for fractional HKL.  Default is integer HKL.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -108,6 +106,10 @@ void SaveHKL::exec() {
 
   std::string filename = getPropertyValue("Filename");
   ws = getProperty("InputWorkspace");
+  // HKL will be overwritten by equivalent HKL but never seen by user
+  PeaksWorkspace_sptr peaksW = getProperty("OutputWorkspace");
+  if (peaksW != ws)
+    peaksW.reset(ws->clone().release());
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
   double wlMin = getProperty("MinWavelength");
@@ -116,6 +118,7 @@ void SaveHKL::exec() {
   double minIsigI = getProperty("MinIsigI");
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
+  int decimalHKL = getProperty("HKLDecimalPlaces");
 
   // Sequence and run number
   int seqNum = 1;
@@ -134,14 +137,14 @@ void SaveHKL::exec() {
     // Get back the result
     DataObjects::PeaksWorkspace_sptr ws2 =
         load_alg->getProperty("OutputWorkspace");
-    ws2->setInstrument(ws->getInstrument());
+    ws2->setInstrument(peaksW->getInstrument());
 
     IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
-    plus_alg->setProperty("LHSWorkspace", ws);
+    plus_alg->setProperty("LHSWorkspace", peaksW);
     plus_alg->setProperty("RHSWorkspace", ws2);
     plus_alg->executeAsChildAlg();
     // Get back the result
-    ws = plus_alg->getProperty("OutputWorkspace");
+    peaksW = plus_alg->getProperty("OutputWorkspace");
     out.open(filename.c_str(), std::ios::out);
   } else {
     out.open(filename.c_str(), std::ios::out);
@@ -158,26 +161,26 @@ void SaveHKL::exec() {
   criteria.push_back(std::pair<std::string, bool>("h", true));
   criteria.push_back(std::pair<std::string, bool>("k", true));
   criteria.push_back(std::pair<std::string, bool>("l", true));
-  ws->sort(criteria);
+  peaksW->sort(criteria);
 
   bool correctPeaks = getProperty("ApplyAnvredCorrections");
-  std::vector<Peak> peaks = ws->getPeaks();
+  std::vector<Peak> &peaks = peaksW->getPeaks();
   std::vector<std::vector<double>> spectra;
   std::vector<std::vector<double>> time;
   int iSpec = 0;
-  smu = getProperty("LinearScatteringCoef"); // in 1/cm
-  amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
-  radius = getProperty("Radius");            // in cm
-  power_th = getProperty("PowerLambda");     // in cm
-  const Material &sampleMaterial = ws->sample().getMaterial();
+  m_smu = getProperty("LinearScatteringCoef"); // in 1/cm
+  m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
+  m_radius = getProperty("Radius");            // in cm
+  m_power_th = getProperty("PowerLambda");     // in cm
+  const Material &sampleMaterial = peaksW->sample().getMaterial();
   if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
     double rho = sampleMaterial.numberDensity();
-    if (smu == EMPTY_DBL())
-      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
+    if (m_smu == EMPTY_DBL())
+      m_smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
             rho;
-    if (amu == EMPTY_DBL())
-      amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    if (m_amu == EMPTY_DBL())
+      m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.notice() << "Sample number density = " << rho
                    << " atoms/Angstrom^3\n";
     g_log.notice() << "Cross sections for wavelength = "
@@ -190,28 +193,28 @@ void SaveHKL::exec() {
                    << " barns\n"
                    << "    Absorption = " << sampleMaterial.absorbXSection()
                    << " barns\n";
-  } else if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) // Save input in Sample
+  } else if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) // Save input in Sample
                                                        // with wrong atomic
                                                        // number and name
   {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
-    Object shape = ws->sample().getShape(); // copy
+                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
+    Object shape = peaksW->sample().getShape(); // copy
     shape.setMaterial(Material("SetInSaveHKL", neutron, 1.0));
-    ws->mutableSample().setShape(shape);
+    peaksW->mutableSample().setShape(shape);
   }
-  if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
-    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
-                   << "LinearAbsorptionCoef = " << amu << " 1/cm\n"
-                   << "Radius = " << radius << " cm\n"
-                   << "Power Lorentz corrections = " << power_th << " \n";
-  API::Run &run = ws->mutableRun();
+  if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
+    g_log.notice() << "LinearScatteringCoef = " << m_smu << " 1/cm\n"
+                   << "LinearAbsorptionCoef = " << m_amu << " 1/cm\n"
+                   << "Radius = " << m_radius << " cm\n"
+                   << "Power Lorentz corrections = " << m_power_th << " \n";
+  API::Run &run = peaksW->mutableRun();
   if (run.hasProperty("Radius")) {
     Kernel::Property *prop = run.getProperty("Radius");
-    if (radius == EMPTY_DBL())
-      radius = boost::lexical_cast<double, std::string>(prop->value());
+    if (m_radius == EMPTY_DBL())
+      m_radius = boost::lexical_cast<double, std::string>(prop->value());
   } else {
-    run.addProperty<double>("Radius", radius, true);
+    run.addProperty<double>("Radius", m_radius, true);
   }
   if (correctPeaks) {
     std::vector<double> spec(11);
@@ -219,67 +222,77 @@ void SaveHKL::exec() {
     std::ifstream infile;
     std::string spectraFile = getPropertyValue("SpectraFile");
     infile.open(spectraFile.c_str());
-    size_t a = 0;
-    if (iSpec == 1) {
-      while (!infile.eof()) // To get you all the lines.
-      {
-        // Set up sizes. (HEIGHT x WIDTH)
-        spectra.resize(a + 1);
-        getline(infile, STRING); // Saves the line in STRING.
-        infile >> spec[0] >> spec[1] >> spec[2] >> spec[3] >> spec[4] >>
-            spec[5] >> spec[6] >> spec[7] >> spec[8] >> spec[9] >> spec[10];
-        for (int i = 0; i < 11; i++)
-          spectra[a].push_back(spec[i]);
-        a++;
-      }
-    } else {
-      for (int wi = 0; wi < 8; wi++)
-        getline(infile, STRING); // Saves the line in STRING.
-      while (!infile.eof())      // To get you all the lines.
-      {
-        time.resize(a + 1);
-        spectra.resize(a + 1);
-        getline(infile, STRING); // Saves the line in STRING.
-        std::stringstream ss(STRING);
-        if (STRING.find("Bank") == std::string::npos) {
-          double time0, spectra0;
-          ss >> time0 >> spectra0;
-          time[a].push_back(time0);
-          spectra[a].push_back(spectra0);
-
-        } else {
+    if (infile.is_open()){
+      size_t a = 0;
+      if (iSpec == 1) {
+        while (!infile.eof()) // To get you all the lines.
+        {
+          // Set up sizes. (HEIGHT x WIDTH)
+          spectra.resize(a + 1);
+          getline(infile, STRING); // Saves the line in STRING.
+          infile >> spec[0] >> spec[1] >> spec[2] >> spec[3] >> spec[4] >>
+              spec[5] >> spec[6] >> spec[7] >> spec[8] >> spec[9] >> spec[10];
+          for (int i = 0; i < 11; i++)
+            spectra[a].push_back(spec[i]);
           a++;
         }
-      }
-    }
-    infile.close();
-  }
+      } else {
+        for (int wi = 0; wi < 8; wi++)
+          getline(infile, STRING); // Saves the line in STRING.
+        while (!infile.eof())      // To get you all the lines.
+        {
+          time.resize(a + 1);
+          spectra.resize(a + 1);
+          getline(infile, STRING); // Saves the line in STRING.
+          std::stringstream ss(STRING);
+          if (STRING.find("Bank") == std::string::npos) {
+            double time0, spectra0;
+            ss >> time0 >> spectra0;
+            time[a].push_back(time0);
+            spectra[a].push_back(spectra0);
 
+          } else {
+            a++;
+          }
+        }
+      }
+      infile.close();
+    }
+  }
   // ============================== Save all Peaks
   // =========================================
-
+  std::vector<int> banned;
   // Go through each peak at this run / bank
-  for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
+  for (int wi = 0; wi < peaksW->getNumberPeaks(); wi++) {
 
     Peak &p = peaks[wi];
     if (p.getIntensity() == 0.0 || boost::math::isnan(p.getIntensity()) ||
-        boost::math::isnan(p.getSigmaIntensity()))
+        boost::math::isnan(p.getSigmaIntensity())){
+      banned.push_back(wi);
       continue;
+    }
     if (minIsigI != EMPTY_DBL() &&
-        p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity()))
+        p.getIntensity() < std::abs(minIsigI * p.getSigmaIntensity())){
+      banned.push_back(wi);
       continue;
-    if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity)
+    }
+    if (minIntensity != EMPTY_DBL() && p.getIntensity() < minIntensity){
+      banned.push_back(wi);
       continue;
+    }
     int run = p.getRunNumber();
     int bank = 0;
     std::string bankName = p.getBankName();
     int nCols, nRows;
     sizeBanks(bankName, nCols, nRows);
-    if (widthBorder != EMPTY_INT() &&
+    // peaks with detectorID=-1 are from LoadHKL
+    if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
         (p.getCol() < widthBorder || p.getRow() < widthBorder ||
          p.getCol() > (nCols - widthBorder) ||
-         p.getRow() > (nRows - widthBorder)))
+         p.getRow() > (nRows - widthBorder))){
+      banned.push_back(wi);
       continue;
+    }
     // Take out the "bank" part of the bank name and convert to an int
     bankName.erase(remove_if(bankName.begin(), bankName.end(),
                              not1(std::ptr_fun(::isdigit))),
@@ -293,22 +306,32 @@ void SaveHKL::exec() {
     double scattering = p.getScattering();
     double lambda = p.getWavelength();
     double dsp = p.getDSpacing();
+    if (dsp < dMin || lambda < wlMin || lambda > wlMax){
+      banned.push_back(wi);
+      continue;
+    }
     double transmission = 0;
-    if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) {
+    if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) {
       transmission = absor_sphere(scattering, lambda, tbar);
     }
-    if (dsp < dMin || lambda < wlMin || lambda > wlMax)
-      continue;
 
     // Anvred write from Art Schultz/
     // hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n'
     //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM,
     //    TRANSMISSION, DN, TWOTH, DSP))
     // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
-    if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0)
+    if (p.getH() == 0 && p.getK() == 0 && p.getL() == 0){
+      banned.push_back(wi);
       continue;
-    out << std::setw(4) << Utils::round(-p.getH()) << std::setw(4)
-        << Utils::round(-p.getK()) << std::setw(4) << Utils::round(-p.getL());
+    }
+    if (decimalHKL == EMPTY_INT() )
+      out << std::setw(4) << Utils::round(-p.getH())
+            << std::setw(4) << Utils::round(-p.getK())
+            << std::setw(4) << Utils::round(-p.getL());
+    else
+      out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getH()
+            << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getK()
+            << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getL();
     double correc = scaleFactor;
     double relSigSpect = 0.0;
     if (bank != bankold)
@@ -321,9 +344,9 @@ void SaveHKL::exec() {
       double depth = 0.2;
       double eff_center =
           1.0 - std::exp(-mu * depth); // efficiency at center of detector
-      IComponent_const_sptr sample = ws->getInstrument()->getSample();
+      IComponent_const_sptr sample = peaksW->getInstrument()->getSample();
       double cosA =
-          ws->getInstrument()->getComponentByName(p.getBankName())->getDistance(
+          peaksW->getInstrument()->getComponentByName(p.getBankName())->getDistance(
               *sample) /
           p.getL2();
       double pathlength = depth / cosA;
@@ -331,7 +354,7 @@ void SaveHKL::exec() {
       double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
 
       double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
-      double wl4 = std::pow(lambda, 4);
+      double wl4 = std::pow(lambda, m_power_th);
       double cmonx = 1.0;
       if (p.getMonitorCount() > 0)
         cmonx = 100e6 / p.getMonitorCount();
@@ -357,7 +380,7 @@ void SaveHKL::exec() {
       }
       correc = scaleFactor * sinsqt * cmonx * sp_ratio /
                (wl4 * spect * transmission);
-      if (ws->getInstrument()->getName() == "TOPAZ" &&
+      if (peaksW->getInstrument()->getName() == "TOPAZ" &&
           detScale.find(bank) != detScale.end())
         correc *= detScale[bank];
     }
@@ -365,14 +388,17 @@ void SaveHKL::exec() {
     // SHELX can read data without the space between the l and intensity
     if (p.getDetectorID() != -1) {
       double ckIntensity = correc * p.getIntensity();
+      double cksigI = std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
+          std::pow(relSigSpect * correc * p.getIntensity(), 2));
+      p.setIntensity(ckIntensity);
+      p.setSigmaIntensity(cksigI);
       if (ckIntensity > 99999.985)
         g_log.warning() << "Scaled intensity, " << ckIntensity
                         << " is too large for format.  Decrease ScalePeaks.\n";
       out << std::setw(8) << std::fixed << std::setprecision(2) << ckIntensity;
 
       out << std::setw(8) << std::fixed << std::setprecision(2)
-          << std::sqrt(std::pow(correc * p.getSigmaIntensity(), 2) +
-                       std::pow(relSigSpect * correc * p.getIntensity(), 2));
+          << cksigI;
     } else {
       // This is data from LoadHKL which is already corrected
       out << std::setw(8) << std::fixed << std::setprecision(2)
@@ -407,12 +433,26 @@ void SaveHKL::exec() {
 
     out << std::endl;
   }
-  out << "   0   0   0    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
+  if (decimalHKL == EMPTY_INT() )
+    out << std::setw(4) << 0
+          << std::setw(4) << 0
+          << std::setw(4) << 0;
+  else
+    out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
+          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
+          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0;
+  out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
          "  0";
   out << std::endl;
 
   out.flush();
   out.close();
+  // delete banned peaks
+  for (std::vector<int>::const_reverse_iterator it = banned.rbegin();
+       it != banned.rend(); ++it) {
+    peaksW->removePeak(*it);
+  }
+  setProperty("OutputWorkspace", peaksW);
 }
 /**
  *       function to calculate a spherical absorption correction
@@ -423,7 +463,7 @@ void SaveHKL::exec() {
  *       in this paper, a is the transmission and a* = 1/a is
  *       the absorption correction.
  *
- *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
+p *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
  *       linear absorption coefficients, the radius r of the sample
  *       the theta angle and wavelength.
  *       the absorption (absn) and tbar are returned.
@@ -442,9 +482,9 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   //  order polynomial in excel. these values are given in the static array
   //  pc[][]
 
-  mu = smu + (amu / 1.8f) * wl;
+  mu = m_smu + (m_amu / 1.8f) * wl;
 
-  mur = mu * radius;
+  mur = mu * m_radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;

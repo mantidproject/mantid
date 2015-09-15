@@ -12,6 +12,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
@@ -81,6 +82,11 @@ public:
   /// Delete
   virtual ~MatrixWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<MatrixWorkspace> clone() const {
+    return std::unique_ptr<MatrixWorkspace>(doClone());
+  }
+
   using IMDWorkspace::toString;
   /// String description of state
   const std::string toString() const;
@@ -90,8 +96,7 @@ public:
   Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
   double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
   double detectorSignedTwoTheta(Geometry::IDetector_const_sptr det) const;
-  double gravitationalDrop(Geometry::IDetector_const_sptr det,
-                           const double waveLength) const;
+
   //@}
 
   virtual void populateInstrumentParameters();
@@ -117,7 +122,7 @@ public:
                      const bool ignoreMaskedDetectors = false) const;
   //@}
 
-  void updateSpectraUsing(const SpectrumDetectorMapping &map);
+  virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
   /// Build the default spectra mapping, most likely wanted after an instrument
   /// update
   void rebuildSpectraMapping(const bool includeMonitors = true);
@@ -126,10 +131,10 @@ public:
   spec2index_map getSpectrumToWorkspaceIndexMap() const;
   detid2index_map
   getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets = false) const;
-  void
+  virtual void
   getDetectorIDToWorkspaceIndexVector(std::vector<size_t> &out, detid_t &offset,
                                       bool throwIfMultipleDets = false) const;
-  void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
+  virtual void getSpectrumToWorkspaceIndexVector(std::vector<size_t> &out,
                                          specid_t &offset) const;
   void getIndicesFromSpectra(const std::vector<specid_t> &spectraList,
                              std::vector<size_t> &indexList) const;
@@ -158,7 +163,7 @@ public:
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   virtual const std::string getTitle() const;
 
-  Kernel::DateAndTime getFirstPulseTime() const;
+  virtual Kernel::DateAndTime getFirstPulseTime() const;
   Kernel::DateAndTime getLastPulseTime() const;
 
   /// Returns the bin index for a given X value of a given workspace index
@@ -242,6 +247,11 @@ public:
     return getSpectrum(index)->ptrX();
   }
 
+  /// Returns a pointer to the dX  (X Error) data
+  virtual Kernel::cow_ptr<MantidVec> refDx(const std::size_t index) const {
+    return getSpectrum(index)->ptrDx();
+  }
+
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVec &X) {
     getSpectrum(index)->setX(X);
@@ -257,6 +267,24 @@ public:
   /// Set the specified X array to point to the given existing array
   virtual void setX(const std::size_t index, const MantidVecPtr::ptr_type &X) {
     getSpectrum(index)->setX(X);
+    invalidateCommonBinsFlag();
+  }
+
+  /// Set the specified Dx (X Error) array to point to the given existing array
+  virtual void setDx(const std::size_t index, const MantidVec &Dx) {
+    getSpectrum(index)->setDx(Dx);
+    invalidateCommonBinsFlag();
+  }
+
+  /// Set the specified Dx (X Error) array to point to the given existing array
+  virtual void setDx(const std::size_t index, const MantidVecPtr &Dx) {
+    getSpectrum(index)->setDx(Dx);
+    invalidateCommonBinsFlag();
+  }
+
+  /// Set the specified Dx (X Error) array to point to the given existing array
+  virtual void setDx(const std::size_t index, const MantidVecPtr::ptr_type &Dx) {
+    getSpectrum(index)->setX(Dx);
     invalidateCommonBinsFlag();
   }
 
@@ -285,6 +313,14 @@ public:
     getSpectrum(index)->setData(Y, E);
   }
 
+  /**
+   * Probes if DX (X Error) values were set on a particular spectrum
+   * @param index: the spectrum index
+   */
+  virtual bool hasDx(const std::size_t index) const {
+    return getSpectrum(index)->hasDx();
+  }
+
   /// Generate the histogram or rebin the existing histogram.
   virtual void generateHistogram(const std::size_t index, const MantidVec &X,
                                  MantidVec &Y, MantidVec &E,
@@ -303,7 +339,7 @@ public:
   //----------------------------------------------------------------------
 
   int axes() const;
-  Axis *getAxis(const std::size_t &axisIndex) const;
+  virtual Axis *getAxis(const std::size_t &axisIndex) const;
   void replaceAxis(const std::size_t &axisIndex, Axis *const newAxis);
 
   /// Returns true if the workspace contains data in histogram form (as opposed
@@ -337,7 +373,7 @@ public:
   const MaskList &maskedBins(const size_t &spectrumIndex) const;
 
   // Methods handling the internal monitor workspace
-  void setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
+  virtual void setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
   boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
   void saveInstrumentNexus(::NeXus::File *file) const;
@@ -392,7 +428,7 @@ public:
   void clearMDMasking();
 
   /// @return the special coordinate system used if any.
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Mantid::Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const;
 
   //=====================================================================================
@@ -426,6 +462,11 @@ public:
   //=====================================================================================
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  MatrixWorkspace(const MatrixWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  MatrixWorkspace &operator=(const MatrixWorkspace &other);
+
   MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory *factory = NULL);
 
   /// Initialises the workspace. Sets the size and lengths of the arrays. Must
@@ -441,10 +482,8 @@ protected:
   std::vector<Axis *> m_axes;
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  MatrixWorkspace(const MatrixWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  MatrixWorkspace &operator=(const MatrixWorkspace &);
+  virtual MatrixWorkspace *doClone() const = 0;
+
   /// Create an MantidImage instance.
   MantidImage_sptr
   getImage(const MantidVec &(MatrixWorkspace::*read)(std::size_t const) const,

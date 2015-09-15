@@ -2,12 +2,14 @@
 #define IMD_DIMENSIONFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidKernel/UnitLabel.h"
+
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/XML/XMLException.h>
-#include <Poco/AutoPtr.h>
 
 using namespace Mantid::Geometry;
 
@@ -21,7 +23,7 @@ private:
         + "<Units>Cubits</Units>"
         + "<UpperBounds>3</UpperBounds>" + "<LowerBounds>-3</LowerBounds>"
         + "<NumberOfBins>8</NumberOfBins>"
-        + "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" + "</Dimension>";
+        + "</Dimension>";
 
     return xmlToParse;
   }
@@ -31,7 +33,7 @@ private:
     std::string xmlToParse = std::string("<Dimension ID=\"qz\">") + "<Name>Qz</Name>"
         + "<UpperBounds>3</UpperBounds>" + "<LowerBounds>-3</LowerBounds>"
         + "<NumberOfBins>8</NumberOfBins>"
-        + "<ReciprocalDimensionMapping>q3</ReciprocalDimensionMapping>" + "</Dimension>";
+        + "</Dimension>";
 
     return xmlToParse;
   }
@@ -41,6 +43,18 @@ private:
     return std::string("<Dimension ID=\"en\">") + "<Name>Energy</Name>"
         + "<UpperBounds>150</UpperBounds>" + "<LowerBounds>0</LowerBounds>"
         + "<NumberOfBins>4</NumberOfBins>" + "</Dimension>";
+  }
+
+  std::string constructDimensionWithFrameXMLString()
+  {
+    std::string xmlToParse = std::string("<Dimension ID=\"qz\">") + "<Name>Qz</Name>"
+        + "<Units></Units>"
+        + "<Frame>QSample</Frame>"
+        + "<UpperBounds>3</UpperBounds>" + "<LowerBounds>-3</LowerBounds>"
+        + "<NumberOfBins>8</NumberOfBins>"
+        + "</Dimension>";
+
+    return xmlToParse;
   }
 
   Poco::AutoPtr<Poco::XML::Document> constructNonReciprocalDimensionXML()
@@ -118,5 +132,12 @@ public:
     std::string missingNumberOfBinsValue = constructNonReciprocalDimensionXMLString().erase(110,1);
     TS_ASSERT_THROWS( createDimension(missingNumberOfBins), std::invalid_argument );
   }
+
+  void testExtractFrame(){
+    IMDDimension_const_sptr dimension = createDimension(constructDimensionWithFrameXMLString());
+    const auto& frame = dimension->getMDFrame();
+    TS_ASSERT_EQUALS(frame.name(), "QSample");
+  }
+
 };
 #endif

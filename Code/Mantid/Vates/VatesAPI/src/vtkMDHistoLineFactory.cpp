@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -9,12 +10,18 @@
 #include <vector>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using Mantid::API::IMDWorkspace;
-using Mantid::MDEvents::MDHistoWorkspace;
+using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDHistoLineFactory");
+}
 
 namespace Mantid
 {
@@ -22,7 +29,7 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
+    vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normaliztionOption) : m_normalizationOption(normaliztionOption),
       m_thresholdRange(thresholdRange)
     {
     }
@@ -36,7 +43,7 @@ namespace Mantid
     {
       if(this != &other)
       {
-        this->m_scalarName = other.m_scalarName;
+        this->m_normalizationOption = other.m_normalizationOption;
         this->m_thresholdRange = other.m_thresholdRange;
         this->m_workspace = other.m_workspace;
       }
@@ -49,7 +56,7 @@ namespace Mantid
     */
     vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other)
     {
-      this->m_scalarName = other.m_scalarName;
+      this->m_normalizationOption = other.m_normalizationOption;
       this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
@@ -68,6 +75,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
@@ -82,7 +91,7 @@ namespace Mantid
 
         vtkFloatArray * signal = vtkFloatArray::New();
         signal->Allocate(imageSize);
-        signal->SetName(m_scalarName.c_str());
+        signal->SetName(vtkDataSetFactory::ScalarName.c_str());
         signal->SetNumberOfComponents(1);
 
         UnstructuredPoint unstructPoint;
@@ -150,6 +159,15 @@ namespace Mantid
         points->Delete();
         signal->Delete();
         visualDataSet->Squeeze();
+
+        // Hedge against empty data sets
+        if (visualDataSet->GetNumberOfPoints() <= 0)
+        {
+          visualDataSet->Delete();
+          vtkNullUnstructuredGrid nullGrid;
+          visualDataSet = nullGrid.createNullData();
+        }
+
         return visualDataSet;
       }
     }

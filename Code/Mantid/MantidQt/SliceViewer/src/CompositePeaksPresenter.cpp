@@ -2,7 +2,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
 
-using Mantid::API::PeakTransform_sptr;
+using Mantid::Geometry::PeakTransform_sptr;
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -13,7 +13,7 @@ CompositePeaksPresenter::CompositePeaksPresenter(
     ZoomablePeaksView *const zoomablePlottingWidget,
     PeaksPresenter_sptr defaultPresenter)
     : m_zoomablePlottingWidget(zoomablePlottingWidget),
-      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1) {
+      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1){
   if (m_zoomablePlottingWidget == NULL) {
     throw std::runtime_error("Zoomable Plotting Widget is NULL");
   }
@@ -86,9 +86,41 @@ CompositePeaksPresenter::isLabelOfFreeAxis(const std::string &label) const {
 Clear all peaks
 */
 void CompositePeaksPresenter::clear() {
-  m_subjects.clear();
-  PeakPalette temp;
-  m_palette = temp;
+  if (!m_subjects.empty()) {
+    m_subjects.clear();
+    this->m_zoomablePlottingWidget->detach();
+    PeakPalette temp;
+    m_palette = temp;
+  }
+}
+
+/**
+ * @brief Determine wheter the workspace contents is different with another
+ * presenter.
+ * @param other
+ * @return
+ */
+bool CompositePeaksPresenter::contentsDifferent(
+    PeaksPresenter const *const other) const {
+  /*
+   What we are doing here is looking through all workspaces associated with the
+   incoming presenter
+   and seeing if ANY of the exising subjects of this composite is already
+   presenting one of these workspaces.
+   ONLY if there is no intesection between the two sets will we allow addition.
+   */
+  const SetPeaksWorkspaces otherWorkspaces = other->presentedWorkspaces();
+  const SetPeaksWorkspaces existingWorkspaces = this->presentedWorkspaces();
+
+  SetPeaksWorkspaces difference;
+  std::set_difference(existingWorkspaces.begin(), existingWorkspaces.end(),
+                      otherWorkspaces.begin(), otherWorkspaces.end(),
+                      std::inserter(difference, difference.end()));
+
+  // Is the candidate set the same as the difference set (i.e. no intesection)
+  // and also non-zero in size
+  const bool different = (difference.size() == existingWorkspaces.size());
+  return different;
 }
 
 /**
@@ -101,8 +133,12 @@ void CompositePeaksPresenter::addPeaksPresenter(PeaksPresenter_sptr presenter) {
                                 "simultaneously displayed is 10.");
   }
 
+  // Look for the same presenter added twice.
   auto result_it = std::find(m_subjects.begin(), m_subjects.end(), presenter);
-  if (result_it == m_subjects.end()) {
+
+  // Only add a peaks presenter if the contents are different. The presenter may
+  // be different, but manage the same workspace set.
+  if (result_it == m_subjects.end() && presenter->contentsDifferent(this)) {
     m_subjects.push_back(presenter);
     presenter->registerOwningPresenter(this);
   }
@@ -280,6 +316,9 @@ void CompositePeaksPresenter::remove(
   if (iterator != m_subjects.end()) {
     m_subjects.erase(iterator);
   }
+  if (m_subjects.empty()) {
+    this->m_zoomablePlottingWidget->detach();
+  }
 }
 
 /**
@@ -342,6 +381,20 @@ void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
        presenterIterator != m_subjects.end(); ++presenterIterator) {
     (*presenterIterator)->setPeakSizeOnProjection(fraction);
   }
+}
+
+/**
+ * Enter a peak edit mode
+ * @param mode : Mode to enter.
+ */
+void CompositePeaksPresenter::peakEditMode(EditMode mode) {
+    if (useDefault()) {
+      return m_default->peakEditMode(mode);
+    }
+    for (auto presenterIterator = m_subjects.begin();
+         presenterIterator != m_subjects.end(); ++presenterIterator) {
+      (*presenterIterator)->peakEditMode(mode);
+    }
 }
 
 /**
@@ -448,7 +501,7 @@ CompositePeaksPresenter::getPresenterIteratorFromName(const QString &name) {
 }
 
 /**
- * Get the peaks presenter correspoinding to a peaks workspace name.
+ * Get the peaks presenter corresponding to a peaks workspace name.
  * @param name
  * @return Peaks presenter.
  */
@@ -566,7 +619,27 @@ CompositePeaksPresenter::getZoomedPeakPresenter() const {
  * @return a zoomed peak index.
  */
 int CompositePeaksPresenter::getZoomedPeakIndex() const {
-  return m_zoomedPeakIndex;
+    return m_zoomedPeakIndex;
+}
+
+void CompositePeaksPresenter::editCommand(
+    EditMode editMode,
+    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+  if (auto ws = target.lock()) {
+
+    // Change the right subject to the desired edit mode.
+    auto targetIterator = this->getPresenterIteratorFromWorkspace(ws);
+    if (targetIterator != m_subjects.end()) {
+      (*targetIterator)->peakEditMode(editMode);
+    }
+    // Reset everything else.
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      if (it != targetIterator) {
+        // All other subjects must be in a neutral edit mode.
+        (*it)->peakEditMode(None);
+      }
+    }
+  }
 }
 
 void CompositePeaksPresenter::updatePeaksWorkspace(
@@ -612,5 +685,55 @@ void CompositePeaksPresenter::notifyWorkspaceChanged(
     }
   }
 }
+
+bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box){
+    if (useDefault()) {
+      return m_default->deletePeaksIn(box);
+    }
+    // Forward the request onwards
+    bool result = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      result |= (*it)->deletePeaksIn(box);
+    }
+    return result;
+}
+
+bool CompositePeaksPresenter::hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target){
+    bool hasMode  = false;
+    if(auto temp = target.lock()) {
+        auto it = this->getPresenterIteratorFromWorkspace(temp);
+        if(it != m_subjects.end()) {
+            hasMode = (*it)->hasPeakAddMode();
+        }
+    }
+    return hasMode;
+}
+
+bool CompositePeaksPresenter::hasPeakAddMode() const{
+    if (useDefault()) {
+      return m_default->hasPeakAddMode();
+    }
+    // Forward the request onwards
+    bool hasMode = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      hasMode |= (*it)->hasPeakAddMode();
+    }
+    return hasMode;
+}
+
+bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX, double plotCoordsPointY)
+{
+    if (useDefault()) {
+      return m_default->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+    }
+    // Forward the request onwards
+    bool result = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      result |= (*it)->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+    }
+    return result;
+}
+
 }
 }
+

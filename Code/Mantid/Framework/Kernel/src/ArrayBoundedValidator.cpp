@@ -1,9 +1,5 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 
-#include <iostream>
-#include <sstream>
-#include <string>
-
 namespace Mantid {
 namespace Kernel {
 

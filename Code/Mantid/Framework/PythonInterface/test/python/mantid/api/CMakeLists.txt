@@ -10,7 +10,6 @@ set ( TEST_PY_FILES
   AnalysisDataServiceTest.py
   AxisTest.py
   CatalogManagerTest.py
-  CutMDTest.py
   DataProcessorAlgorithmTest.py
   DeprecatedAlgorithmCheckerTest.py
   ExperimentInfoTest.py
@@ -21,6 +20,7 @@ set ( TEST_PY_FILES
   FunctionPropertyTest.py
   IEventWorkspaceTest.py
   IFunction1DTest.py
+  IMaskWorkspaceTest.py
   IPeakFunctionTest.py
   IPeaksWorkspaceTest.py
   ITableWorkspaceTest.py
@@ -31,6 +31,7 @@ set ( TEST_PY_FILES
   MultipleExperimentInfos.py
   MultipleFilePropertyTest.py
   ProgressTest.py
+  ProjectionTest.py
   PythonAlgorithmPropertiesTest.py
   PythonAlgorithmChildAlgCallTest.py
   PythonAlgorithmTraitsTest.py

@@ -1,20 +1,16 @@
 #ifndef MANTID_MDALGORITHMS_ORMDTEST_H_
 #define MANTID_MDALGORITHMS_ORMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/OrMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
 class OrMDTest : public CxxTest::TestSuite
 {

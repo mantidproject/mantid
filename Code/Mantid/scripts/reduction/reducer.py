@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Base reduction class. Hold a list of data and a list of reduction steps to apply to them.
 
@@ -22,14 +23,14 @@ import sys
 import time
 import types
 import inspect
-from instrument import Instrument
+from reduction.instrument import Instrument
 import mantid
 from mantid import simpleapi
 import warnings
 import inspect
 import random
 import string
-from find_data import find_data
+from reduction.find_data import find_data
 
 
 ## Version number
@@ -102,7 +103,7 @@ def validate_loader(f):
                         kwargs[kwargs["AlternateName"]] = data_file
 
                     self.algorithm = alg
-                    simpleapi._set_properties(alg, *(), **kwargs)
+                    simpleapi.set_properties(alg, *(), **kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
@@ -239,7 +240,7 @@ def validate_step(f):
                         kwargs["OutputWorkspace"] = outputworkspace
 
                     self.algorithm = alg
-                    simpleapi._set_properties(alg,*(),**kwargs)
+                    simpleapi.set_properties(alg,*(),**kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
@@ -537,7 +538,7 @@ class ReductionStep(object):
             @param inputworkspace: Name of the workspace to apply this step to
             @param outputworkspace: Name of the workspace to have as an output. If this is None it will be set to inputworkspace
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 def extract_workspace_name(filepath, suffix=''):

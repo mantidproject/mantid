@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

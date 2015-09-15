@@ -67,3 +67,5 @@ Output:
    Contents of the file = [ 9.  5.  7.].
 
 .. categories::
+
+.. sourcelink::

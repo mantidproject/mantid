@@ -1,5 +1,4 @@
 #include "MantidMDAlgorithms/AndMD.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -22,16 +21,16 @@ AndMD::~AndMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AndMD::name() const { return "AndMD"; };
+const std::string AndMD::name() const { return "AndMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AndMD::version() const { return 1; };
+int AndMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void
-AndMD::execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
+AndMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->operator&=(*operand);
 }
 

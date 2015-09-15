@@ -65,6 +65,12 @@ set ( TEST_FILES
 	CompositeCatalogTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(ICat SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -82,12 +88,17 @@ add_library ( ICat ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat 
                                         COMPILE_DEFINITIONS IN_MANTID_ICAT )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( ICat PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET ICat PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
+target_link_libraries ( ICat LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

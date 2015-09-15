@@ -7,10 +7,10 @@
 #include "MantidVatesAPI/MedianAndBelowThresholdRange.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 //=====================================================================================

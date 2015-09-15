@@ -10,9 +10,9 @@ Description
 -----------
 
 This algorithm loads information into a
-`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ for the 
-characterization information and a collection of output parameters for 
-the focus positions to be used in :ref:`algm-EditInstrumentGeometry`. If 
+`TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ for the
+characterization information and a collection of output parameters for
+the focus positions to be used in :ref:`algm-EditInstrumentGeometry`. If
 a section is missing then those parameters will be empty. This includes an empty
 table (zero rows) if that information is missing. The resulting TableWorkspace
 is intented to be used by :ref:`algm-PDDetermineCharacterizations`
@@ -23,7 +23,7 @@ This algorithm is one of the workflow algorithms that helps
 Characterization File
 #####################
 
-An example from POWGEN shows both of the available portions of a 
+An example from POWGEN shows both of the available portions of a
 characterization file::
 
   Instrument parameter file:
@@ -41,15 +41,17 @@ characterization file::
 
 The first line ``Instrument parameter file:`` must be present to mark the
 beginning of the first section. Whatever string appears after the semicolon
-is copied into the ``IParmFilename`` output property. The following lines 
+is copied into the ``IParmFilename`` output property. The following lines
 are of the form "bank l2 polar" with the last line being the keyword ``L1``
-followed by the effective primary flight path. This information is saved 
-in the ``IParmFilename``, ``SpectrumIDs``, ``L2``, ``Polar``, and 
+followed by the effective primary flight path. This information is saved
+in the ``IParmFilename``, ``SpectrumIDs``, ``L2``, ``Polar``, and
 ``PrimaryFlightPath`` properties. The ``Azimuthal`` properties is filled with zeros
 and is the same length as ``SpectrumIDs``, ``L2``, ``Polar``, and ``PrimaryFlightPath``.
 
 The second section of the characterizations file is read into the output
 `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`__ as described below.
+
+The :literal:`exp.ini` file is specific to the NOMAD instrument at SNS and is optional.
 
 Characterization TableWorkspace
 ###############################
@@ -71,3 +73,5 @@ tof_max    double
 ========== =======
 
 .. categories::
+
+.. sourcelink::

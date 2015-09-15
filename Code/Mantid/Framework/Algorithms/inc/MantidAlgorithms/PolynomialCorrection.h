@@ -52,7 +52,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class DLLExport PolynomialCorrection : public UnaryOperation {
 public:
   /// Default constructor
-  PolynomialCorrection() : UnaryOperation(){};
+  PolynomialCorrection();
   /// Destructor
   virtual ~PolynomialCorrection(){};
   /// Algorithm's name for identification

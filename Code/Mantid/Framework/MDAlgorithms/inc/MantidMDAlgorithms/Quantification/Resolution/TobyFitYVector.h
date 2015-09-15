@@ -77,7 +77,7 @@ public:
         8, // width-coordinate of point of detection in detector frame
     DetectorHeightCoord =
         9, // height-coordinate of point of detection in detector frame
-    DetectionTime = 10, // deviation in detection time of neutron
+    DetectionTime = 10 // deviation in detection time of neutron
   };
 
   /// Returns the number of parameters, i.e. length of the Y vector

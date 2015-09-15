@@ -238,6 +238,30 @@ MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const
     return m_maskWorkspace;
 }
 
+/** set the mask workspace
+*/
+void InstrumentActor::setMaskMatrixWorkspace(MatrixWorkspace_sptr wsMask) const
+{
+    m_maskWorkspace = wsMask;
+}
+
+void InstrumentActor::invertMaskWorkspace() const
+{
+  Mantid::API::MatrixWorkspace_sptr outputWS;
+  
+  const std::string maskName = "__InstrumentActor_MaskWorkspace_invert";
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(maskName, getMaskMatrixWorkspace());
+  Mantid::API::IAlgorithm * invertAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm("BinaryOperateMasks",-1);
+  invertAlg->setChild(true);
+  invertAlg->setPropertyValue("InputWorkspace1", maskName);
+  invertAlg->setPropertyValue("OutputWorkspace", maskName);
+  invertAlg->setPropertyValue("OperationType", "NOT");
+  invertAlg->execute();
+
+  m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
+  Mantid::API::AnalysisDataService::Instance().remove( maskName );
+}
+
 /**
   * Returns the mask workspace relating to this instrument view as a IMaskWorkspace.
   * Guarantees to return a valid pointer
@@ -342,11 +366,7 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
     // Call the local getInstrument, NOT the one on the workspace
     return this->getInstrument()->getDetector(m_detIDs.at(i));
   }
-  catch(...)
-  {
-    return IDetector_const_sptr();
-  }
-  // Add line that can never be reached to quiet compiler complaints
+  catch(...) { };
   return IDetector_const_sptr();
 }
 
@@ -663,8 +683,10 @@ void InstrumentActor::resetColors()
   }
   if (m_scene.getNumberOfActors() > 0)
   {
-    dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))->setColors();
-    invalidateDisplayLists();
+    if (auto actor = dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))) {
+      actor->setColors();
+      invalidateDisplayLists();
+    }
   }
   emit colorMapChanged();
 }
@@ -798,6 +820,12 @@ void InstrumentActor::changeScaleType(int type)
   resetColors();
 }
 
+void InstrumentActor::changeNthPower(double nth_power)
+{
+  m_colorMap.setNthPower(nth_power);
+  resetColors();
+}
+
 void InstrumentActor::loadSettings()
 {
   QSettings settings;
@@ -867,6 +895,23 @@ void InstrumentActor::setAutoscaling(bool on)
 }
 
 /**
+ * Extracts the current applied mask to the main workspace
+ * @returns the current applied mask to the main workspace
+ */
+Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const
+{
+  const std::string maskName = "__InstrumentActor_MaskWorkspace";
+  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
+  alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
+  alg->setPropertyValue( "OutputWorkspace", maskName );
+  alg->execute();
+
+  Mantid::API::MatrixWorkspace_sptr maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
+  Mantid::API::AnalysisDataService::Instance().remove( maskName );
+  return maskWorkspace;
+}
+
+/**
  * Initialize the helper mask workspace with the mask from the data workspace.
  */
 void InstrumentActor::initMaskHelper() const
@@ -875,19 +920,12 @@ void InstrumentActor::initMaskHelper() const
   try
   {
     // extract the mask (if any) from the data to the mask workspace
-    const std::string maskName = "__InstrumentActor_MaskWorkspace";
-    Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
-    alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
-    alg->setPropertyValue( "OutputWorkspace", maskName );
-    alg->execute();
-
-    m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
-    Mantid::API::AnalysisDataService::Instance().remove( maskName );
+    m_maskWorkspace = extractCurrentMask();
   }
   catch( ... )
   {
     // don't know what to do here yet ...
-    QMessageBox::warning(NULL,"MantidPlot - Warning","An error accured when extracting the mask.","OK");
+    QMessageBox::warning(NULL,"MantidPlot - Warning","An error occurred when extracting the mask.","OK");
   }
 }
 

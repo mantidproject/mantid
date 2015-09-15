@@ -47,7 +47,7 @@ namespace MantidQt
       QwtDoubleInterval interval() const;
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(SignalRange);
+      DISABLE_DEFAULT_CONSTRUCT(SignalRange)
 
       /// Find the min/max signal values in the entire workspace
       void findFullRange(const Mantid::API::IMDWorkspace & workspace,

@@ -168,9 +168,13 @@ int CompAssembly::remove(IComponent *comp) {
  * @return m_children.size()
  */
 int CompAssembly::nelements() const {
-  if (m_map)
-    return dynamic_cast<const CompAssembly *>(m_base)->nelements();
-  else
+  if (m_map) {
+    auto compAss = dynamic_cast<const CompAssembly *>(m_base);
+    if (!compAss) {
+      throw std::logic_error("Failed to cast base component to CompAssembly");
+    }
+    return compAss->nelements();
+  } else
     return static_cast<int>(m_children.size());
 }
 
@@ -187,11 +191,13 @@ int CompAssembly::nelements() const {
 boost::shared_ptr<IComponent> CompAssembly::getChild(const int i) const {
   if (m_map) {
     // Get the child of the base (unparametrized) assembly
-    boost::shared_ptr<IComponent> child_base =
-        dynamic_cast<const CompAssembly *>(m_base)->getChild(i);
+    auto child_base = dynamic_cast<const CompAssembly *>(m_base);
+    if (!child_base) {
+      throw std::logic_error("Failed to cast base component to CompAssembly");
+    }
     // And build up a parametrized version of it using the factory, and return
     // that
-    return ParComponentFactory::create(child_base, m_map);
+    return ParComponentFactory::create(child_base->getChild(i), m_map);
   } else {
     if (i < 0 || i > static_cast<int>(m_children.size() - 1)) {
       throw std::runtime_error("CompAssembly::getChild() range not valid");

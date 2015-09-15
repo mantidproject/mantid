@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_NULLPEAKSPRESENTER_H_
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -43,13 +44,20 @@ public:
   virtual double getPeakSizeOnProjection() const { return 0; }
   virtual double getPeakSizeIntoProjection() const { return 0; }
   virtual bool getShowBackground() const { return false; }
-  virtual void registerOwningPresenter(UpdateableOnDemand *){};
-  virtual void zoomToPeak(const int){};
+  virtual void registerOwningPresenter(UpdateableOnDemand *){}
+  virtual void zoomToPeak(const int){}
   virtual bool isHidden() const { return true; }
   virtual void reInitialize(
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
+  virtual bool contentsDifferent(const PeaksPresenter * ) const { return true; }
+
+  void peakEditMode(EditMode){/*Do nothing*/}
+  bool deletePeaksIn(PeakBoundingBox){return false;/*Do nothing. Delete nothing.*/}
+  bool addPeakAt(double, double){return false;/*Do nothing. Add nothing.*/}
+  bool hasPeakAddMode() const {return false; /*Do nothing.*/}
 };
+
 }
 }
 

@@ -1,22 +1,24 @@
-from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+#pylint: disable=invalid-name
+from ui_converter import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 import math
+import TofConverter.convertUnits
 
 class MainWindow(QtGui.QMainWindow):
-    needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-Spacing (Angstroms)']
-    needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-Spacing (Angstroms)']
+    needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
+    needsThetaOutputList = ['Momentum transfer (Q Angstroms^-1)', 'd-spacing (Angstroms)']
     needsFlightPathInputList = ['Time of flight (microseconds)']
     needsFlightPathOutputList = ['Time of flight (microseconds)']
 
     def thetaEnable (self, enabled):
-        self.ui.lineEdit_4.setEnabled(enabled)
+        self.ui.scatteringAngleInput.setEnabled(enabled)
         if  enabled == False:
-            self.ui.lineEdit_4.clear()
+            self.ui.scatteringAngleInput.clear()
 
     def flightPathEnable (self, enabled):
-        self.ui.lineEdit_3.setEnabled(enabled)
+        self.ui.totalFlightPathInput.setEnabled(enabled)
         if  enabled == False:
-            self.ui.lineEdit_3.clear()
+            self.ui.totalFlightPathInput.clear()
 
     def setInstrumentInputs (self):
         #disable both
@@ -46,9 +48,10 @@ class MainWindow(QtGui.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
-        self.ui.lineEdit_3.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_3))
-        self.ui.lineEdit_4.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_4))
+        self.ui.totalFlightPathInput.setValidator(QtGui.QDoubleValidator(self.ui.totalFlightPathInput))
+        self.ui.scatteringAngleInput.setValidator(QtGui.QDoubleValidator(self.ui.scatteringAngleInput))
         QtCore.QObject.connect(self.ui.convert, QtCore.SIGNAL("clicked()"), self.convert )
+        QtCore.QObject.connect(self.ui.helpButton, QtCore.SIGNAL("clicked()"), self.helpClicked)
         QtCore.QObject.connect(self.ui.inputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
         QtCore.QObject.connect(self.ui.outputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
         self.setInstrumentInputs()
@@ -56,128 +59,41 @@ class MainWindow(QtGui.QMainWindow):
         ##defaults
         self.flightpath = -1.0
         self.Theta = -1.0
-        self.stage1output = 0.0
-        self.stage2output = 0.0
+        self.output = 0.0
+
+    def helpClicked(self):
+        # Temporary import while method is in the wrong place
+        from pymantidplot.proxies import showCustomInterfaceHelp
+        showCustomInterfaceHelp("TOF_Converter")
 
     def convert(self):
-        if self.ui.InputVal.text() == "":
-            return
+        #Always reset these values before conversion.
+        self.Theta = None
+        self.flightpath = None
         try:
+            if self.ui.InputVal.text() == "":
+                raise RuntimeError("Input value is required for conversion")
+            if float(self.ui.InputVal.text()) <= 0:
+                raise RuntimeError("Input value must be greater than 0 for conversion")
             inOption = self.ui.inputUnits.currentText()
             outOption = self.ui.outputUnits.currentText()
-            if self.ui.lineEdit_3.text() !='':
-                self.flightpath = float(self.ui.lineEdit_3.text())
+            if self.ui.totalFlightPathInput.text() !='':
+                self.flightpath = float(self.ui.totalFlightPathInput.text())
             else:
                 self.flightpath = -1.0
-            if self.ui.lineEdit_4.text() !='':
-                self.Theta = float(self.ui.lineEdit_4.text()) * math.pi / 360.0
-            self.stage1output = self.input2energy(float(self.ui.InputVal.text()), inOption)
-            self.stage2output = self.energy2output(self.stage1output,outOption)
+            if self.ui.scatteringAngleInput.text() !='':
+                self.Theta = float(self.ui.scatteringAngleInput.text()) * math.pi / 360.0
 
-            self.ui.lineEdit_2.clear()
-            self.ui.lineEdit_2.insert(str(self.stage2output))
-        except Exception, e:
-            QtGui.QMessageBox.warning(self, "TofConverter", str(e))
+            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption, self.Theta, self.flightpath)
+
+            self.ui.convertedVal.clear()
+            self.ui.convertedVal.insert(str(self.output))
+        except UnboundLocalError, ule:
+            QtGui.QMessageBox.warning(self, "TofConverter", str(ule))
             return
-
-    def input2energy(self, inputval, inOption):
-        e2lam = 81.787
-        e2nu = 4.139
-        e2v = 0.0000052276
-        e2k = 2.717
-        e2t = 0.086165
-        e2cm = 0.123975
-        iv2 = inputval ** 2
-
-        if inOption == 'Wavelength (Angstroms)':
-            Energy = e2lam / iv2
-
-        elif inOption == 'Energy  (meV)':
-            Energy = inputval
-
-        elif inOption == 'Nu (THz)':
-            Energy = e2nu * inputval
-
-        elif inOption == 'Velocity (m/s)':
-            Energy = e2v *iv2
-
-        elif inOption == 'Momentum ( k Angstroms^-1)':
-            Energy = e2k*iv2
-
-        elif inOption == 'Temperature (K)':
-            Energy = e2t *inputval
-
-        elif inOption == 'Energy (cm^-1)':
-            Energy = e2cm * inputval
-
-        elif inOption == 'Momentum transfer (Q Angstroms^-1)':
-            if self.Theta >= 0.0:
-                k = inputval * 0.5 / math.sin(self.Theta)
-                Energy = e2k * k * k
-            else:
-                raise RuntimeError("Theta > 0 is required for conversion from Q")
-
-        elif inOption == 'd-Spacing (Angstroms)':
-            lam = 2 * inputval * math.sin(self.Theta)
-            Energy = e2lam / (lam * lam)
-
-        elif  inOption == 'Time of flight (microseconds)':
-            if self.flightpath >= 0.0:
-                Energy = 1000000 * self.flightpath
-                Energy = e2v * Energy *Energy / iv2
-            else:
-                raise RuntimeError("Flight path >= 0 is required for conversion from TOF")
-
-        return Energy
-
-    def energy2output(self, Energy, inOption):
-        e2lam = 81.787
-        e2nu = 4.139
-        e2v = 0.0000052276
-        e2k = 2.0717
-        e2t = 0.086165
-        e2cm = 0.123975
-        iv2 = Energy ** 2
-
-        if inOption == 'Wavelength (Angstroms)':
-            OutputVal =  (e2lam/ Energy)**0.5
-
-        elif inOption == 'Nu (THz)':
-            OutputVal = Energy / e2nu
-
-        elif inOption == 'Velocity (m/s)':
-            OutputVal = (Energy / e2v)**0.5
-
-        elif inOption == 'Momentum ( k Angstroms^-1)':
-            OutputVal = (Energy / e2k)**0.5
-
-        elif inOption == 'Temperature (K)':
-            OutputVal = Energy / e2t
-
-        elif inOption == 'Energy (cm^-1)':
-            OutputVal = Energy / e2cm
-
-        elif inOption == 'Momentum transfer (Q Angstroms^-1)':
-            if self.Theta >= 0.0:
-                k = (Energy / e2k) ** 0.5
-                OutputVal = 2 * k * math.sin(self.Theta)
-            else:
-                raise RuntimeError("Theta > 0 is required for conversion to Q")
-
-        elif inOption == 'd-Spacing (Angstroms)':
-            if self.Theta >= 0.0:
-                lam = (e2lam / Energy)**0.5
-                OutputVal = lam * 0.5 / math.sin(self.Theta)
-            else:
-                raise RuntimeError("Theta > 0 is required for conversion to d-Spacing")
-
-        elif inOption == 'Time of flight (microseconds)':
-            if self.flightpath >= 0.0:
-                OutputVal = self.flightpath * 1000 * ((e2v * 1000000 / Energy) ** 0.5)
-            else:
-                raise RuntimeError("Flight path >= 0 is required for conversion to TOF")
-
-        elif inOption == 'Energy  (meV)':
-            OutputVal = Energy
-
-        return OutputVal
+        except ArithmeticError, ae:
+            QtGui.QMessageBox.warning(self, "TofConverter", str(ae))
+            return
+        except RuntimeError, re:
+            QtGui.QMessageBox.warning(self, "TofConverter", str(re))
+            return

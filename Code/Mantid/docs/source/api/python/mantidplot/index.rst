@@ -79,4 +79,4 @@ Submodules
 .. toctree::
    :maxdepth: 1
 
-   future/index
+   pyplot/index

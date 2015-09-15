@@ -32,10 +32,10 @@ CreateTransmissionWorkspace::~CreateTransmissionWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateTransmissionWorkspace::name() const {
   return "CreateTransmissionWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateTransmissionWorkspace::version() const { return 1; };
+int CreateTransmissionWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateTransmissionWorkspace::category() const {

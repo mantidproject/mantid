@@ -15,8 +15,8 @@ The NumberOfBins and BackgroundOuterRadius are global to all Peaks. The actual b
 Integrates arbitary shaped single crystal peaks defined on an
 :ref:`MDHistoWorkspace <MDHistoWorkspace>` using connected component
 analysis to determine regions of interest around each peak of the
-`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_. The output is an integrated
-`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ as well as a group of images :ref:`WorkspaceGroup <WorkspaceGroup>` of :ref:`MDWorkspaces <MDWorkspace>`  containing the
+:ref:`PeaksWorkspace <PeaksWorkspace>`. The output is an integrated
+:ref:`PeaksWorkspace <PeaksWorkspace>` as well as a group of images :ref:`WorkspaceGroup <WorkspaceGroup>` of :ref:`MDWorkspaces <MDWorkspace>`  containing the
 labels assigned to each cluster for diagnostic and visualisation
 purposes.
 
@@ -48,7 +48,7 @@ the detector/TOF space is no longer accessible.
 No Cluster Corresponding to Peak
 ################################
 
-This is because the input `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ has peaks
+This is because the input :ref:`PeaksWorkspace <PeaksWorkspace>` has peaks
 that do not align with peaks in the image. The error could either be on
 the side of the input PeaksWorkspace (spurious peaks), or of the
 :ref:`MDHistoWorkspace <MDHistoWorkspace>` generated as part of processing.
@@ -73,3 +73,5 @@ Usage
    integrated_peaks, cluster_images = IntegratePeaksHybrid(InputWorkspace=mdew, PeaksWorkspace=peaks, BackgroundOuterRadius=0.4)
 
 .. categories::
+
+.. sourcelink::

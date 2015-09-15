@@ -25,10 +25,10 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         # Create a test data set
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',
             Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='mdw')
-        FakeMDEventData("mdw",  UniformParams="1e4")
-        FakeMDEventData("mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
+        FakeMDEventData(InputWorkspace="mdw",  UniformParams="1e4")
+        FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e3, 1, 2, 3, 1.0")
         BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=1, AlignedDim0="x,0,10,30",  AlignedDim1="y,0,10,30",  AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
-        CreateWorkspace('workspace2d', '1,2,3', '2,3,4')
+        CreateWorkspace('1,2,3', '2,3,4', OutputWorkspace='workspace2d')
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z', Units='m,m,m',SplitInto='5',SplitThreshold=100, MaxRecursionDepth='20',OutputWorkspace='empty')
         # Get the factory to create the SliceViewerWindow in C++
         self.svw = mantidqtpython.MantidQt.Factory.WidgetFactory.Instance().createSliceViewerWindow("uniform", "")
@@ -279,10 +279,17 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(sv.getColorScaleMin(), 10)
         self.assertEqual(sv.getColorScaleMax(), 30)
         self.assertEqual(sv.getColorScaleLog(), False)
+	self.assertEqual(sv.getColorScaleType(), 0)
         sv.setColorScale(20, 1000, True)
         self.assertEqual(sv.getColorScaleMin(), 20)
         self.assertEqual(sv.getColorScaleMax(), 1000)
         self.assertEqual(sv.getColorScaleLog(), True)
+	self.assertEqual(sv.getColorScaleType(), 1)
+	sv.setColorScale(30, 75, 2)
+	self.assertEqual(sv.getColorScaleMin(), 30)
+        self.assertEqual(sv.getColorScaleMax(), 75)
+        self.assertEqual(sv.getColorScaleLog(), False)
+	self.assertEqual(sv.getColorScaleType(), 2)
 
     def test_setColorScale_throwsOnBadInputs(self):
         sv = self.sv
@@ -294,14 +301,14 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv = self.sv
         sv.setNormalization(1) # Make sure volume normalization is set
         sv.setColorScaleAutoFull()
-        self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
+        self.assertAlmostEqual(sv.getColorScaleMin(), 0.0, 3)
         self.assertAlmostEqual(sv.getColorScaleMax(), 540.0, 3)
 
     def test_setColorScaleAutoSlice(self):
         sv = self.sv
         sv.setNormalization(1) # Make sure volume normalization is set
         sv.setColorScaleAutoSlice()
-        self.assertAlmostEqual(sv.getColorScaleMin(), 27.0, 3)
+        self.assertAlmostEqual(sv.getColorScaleMin(), 0.0, 3)
         self.assertAlmostEqual(sv.getColorScaleMax(), 81.0, 3)
 
     def test_setNormalization(self):
@@ -450,6 +457,5 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEqual(ws.getNPoints(), 50*200*1)
 
 
-
-
-
+if __name__ == '__main__':
+    unittest.main()

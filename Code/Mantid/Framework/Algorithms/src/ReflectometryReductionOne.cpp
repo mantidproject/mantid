@@ -95,10 +95,10 @@ ReflectometryReductionOne::~ReflectometryReductionOne() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ReflectometryReductionOne::name() const {
   return "ReflectometryReductionOne";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ReflectometryReductionOne::version() const { return 1; };
+int ReflectometryReductionOne::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ReflectometryReductionOne::category() const {
@@ -168,6 +168,9 @@ void ReflectometryReductionOne::init() {
                                                 Direction::Output),
                   "Calculated final theta in degrees.");
 
+  declareProperty("NormalizeByIntegratedMonitors", true,
+                  "Normalize by dividing by the integrated monitors.");
+
   declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true,
                                               Direction::Input),
                   "Correct detector positions using ThetaIn (if given)");
@@ -190,7 +193,40 @@ void ReflectometryReductionOne::init() {
 
   declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true,
                                               Direction::Input),
-                  "Enforces spectrum number checking prior to normalisation");
+                  "Enforces spectrum number checking prior to normalization");
+
+  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
+      "None")("PolynomialCorrection")("ExponentialCorrection");
+  declareProperty("CorrectionAlgorithm", "None",
+                  boost::make_shared<StringListValidator>(correctionAlgorithms),
+                  "The type of correction to perform.");
+
+  declareProperty(new ArrayProperty<double>("Polynomial"),
+                  "Coefficients to be passed to the PolynomialCorrection"
+                  " algorithm.");
+
+  declareProperty(
+      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      "C0 value to be passed to the ExponentialCorrection algorithm.");
+
+  declareProperty(
+      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      "C1 value to be passed to the ExponentialCorrection algorithm.");
+
+  setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
+  setPropertyGroup("Polynomial", "Polynomial Corrections");
+  setPropertyGroup("C0", "Polynomial Corrections");
+  setPropertyGroup("C1", "Polynomial Corrections");
+
+  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
+                                        "CorrectionAlgorithm", IS_EQUAL_TO,
+                                        "PolynomialCorrection"));
+  setPropertySettings(
+      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
+                                            "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
+                                            "ExponentialCorrection"));
 
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
@@ -486,20 +522,26 @@ void ReflectometryReductionOne::exec() {
         detectorWS = divide(detectorWS, regionOfDirectBeamWS);
       }
     }
-    auto integrationAlg = this->createChildAlgorithm("Integration");
-    integrationAlg->initialize();
-    integrationAlg->setProperty("InputWorkspace", monitorWS);
-    integrationAlg->setProperty("RangeLower",
-                                monitorIntegrationWavelengthInterval.get<0>());
-    integrationAlg->setProperty("RangeUpper",
-                                monitorIntegrationWavelengthInterval.get<1>());
-    integrationAlg->execute();
-    MatrixWorkspace_sptr integratedMonitor =
-        integrationAlg->getProperty("OutputWorkspace");
 
-    IvsLam = divide(
-        detectorWS,
-        integratedMonitor); // Normalize by the integrated monitor counts.
+    const bool normalizeByIntMon = getProperty("NormalizeByIntegratedMonitors");
+    if (normalizeByIntMon) {
+      auto integrationAlg = this->createChildAlgorithm("Integration");
+      integrationAlg->initialize();
+      integrationAlg->setProperty("InputWorkspace", monitorWS);
+      integrationAlg->setProperty(
+          "RangeLower", monitorIntegrationWavelengthInterval.get<0>());
+      integrationAlg->setProperty(
+          "RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+      integrationAlg->execute();
+      MatrixWorkspace_sptr integratedMonitor =
+          integrationAlg->getProperty("OutputWorkspace");
+
+      IvsLam = divide(
+          detectorWS,
+          integratedMonitor); // Normalize by the integrated monitor counts.
+    } else {
+      IvsLam = divide(detectorWS, monitorWS);
+    }
   } else {
     // Neither TOF or Lambda? Abort.
     throw std::invalid_argument(
@@ -514,6 +556,8 @@ void ReflectometryReductionOne::exec() {
         firstTransmissionRun.get(), secondTransmissionRun, stitchingStart,
         stitchingDelta, stitchingEnd, stitchingStartOverlap,
         stitchingEndOverlap, wavelengthStep, processingCommands);
+  } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
+    IvsLam = algorithmicCorrection(IvsLam);
   } else {
     g_log.warning("No transmission correction will be applied.");
   }
@@ -641,6 +685,35 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
   // Do normalization.
   MatrixWorkspace_sptr normalizedIvsLam = divide(IvsLam, denominator);
   return normalizedIvsLam;
+}
+
+/**
+ * Perform transmission correction using alternative correction algorithms.
+ * @param IvsLam : Run workspace which is to be normalized by the results of the
+ * transmission corrections.
+ * @return Corrected workspace
+ */
+MatrixWorkspace_sptr
+ReflectometryReductionOne::algorithmicCorrection(MatrixWorkspace_sptr IvsLam) {
+
+  const std::string corrAlgName = getProperty("CorrectionAlgorithm");
+
+  IAlgorithm_sptr corrAlg = createChildAlgorithm(corrAlgName);
+  corrAlg->initialize();
+  if (corrAlgName == "PolynomialCorrection") {
+    corrAlg->setPropertyValue("Coefficients", getPropertyValue("Polynomial"));
+  } else if (corrAlgName == "ExponentialCorrection") {
+    corrAlg->setPropertyValue("C0", getPropertyValue("C0"));
+    corrAlg->setPropertyValue("C1", getPropertyValue("C1"));
+  } else {
+    throw std::runtime_error("Unknown correction algorithm: " + corrAlgName);
+  }
+
+  corrAlg->setProperty("InputWorkspace", IvsLam);
+  corrAlg->setProperty("Operation", "Divide");
+  corrAlg->execute();
+
+  return corrAlg->getProperty("OutputWorkspace");
 }
 
 /**

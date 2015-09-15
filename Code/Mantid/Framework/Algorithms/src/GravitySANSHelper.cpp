@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include <math.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
+
 namespace Mantid {
 namespace Algorithms {
 using Kernel::V3D;
@@ -10,9 +12,11 @@ using Kernel::V3D;
 *  effects across a spectrum
 *  @param ws :: the workspace that contains the neutron counts
 *  @param det :: the detector for which the calculations will be for
+*  @param extraLength :: extra length for gravity correction
 */
 GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
-                                     Geometry::IDetector_const_sptr det)
+                                     Geometry::IDetector_const_sptr det,
+                                     const double extraLength)
     : m_beamLineNorm(-1), m_det(det), m_dropPerAngstrom2(-1), m_cachedDrop(0) {
   m_samplePos = ws->getInstrument()->getSample()->getPos();
   const V3D sourcePos = ws->getInstrument()->getSource()->getPos();
@@ -25,7 +29,7 @@ GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
   m_cachedLineOfSight = m_det->getPos() - m_samplePos;
   // the drop is proportional to the wave length squared and using this to do
   // the full calculation only once increases the speed a lot
-  m_dropPerAngstrom2 = ws->gravitationalDrop(m_det, 1e-10);
+  m_dropPerAngstrom2 = gravitationalDrop(ws, m_det, 1e-10, extraLength);
 }
 /** Caclulates the sin of the that the neutron left the sample at, before the
 * effect of gravity
@@ -79,5 +83,37 @@ double GravitySANSHelper::calcSinTheta() const {
   // This is sin(theta)
   return sqrt(0.5 - halfcosTheta);
 }
-}
+
+
+/**Calculates the distance a neutron coming from the sample will have deviated
+* from a
+*  straight tragetory before hitting a detector. If calling this function many
+* times
+*  for the same detector you can call this function once, with waveLength=1, and
+* use
+*  the fact drop is proportional to wave length squared .This function has no
+* knowledge
+*  of which axis is vertical for a given instrument
+*  @param ws :: workspace
+*  @param det :: the detector that the neutron entered
+*  @param waveLength :: the neutrons wave length in meters
+*  @param extraLength :: additional length
+*  @return the deviation in meters
+*/
+double GravitySANSHelper::gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
+                                            Geometry::IDetector_const_sptr det,
+                                           const double waveLength,
+                                           const double extraLength) const {
+  using namespace PhysicalConstants;
+  /// Pre-factor in gravity calculation: gm^2/2h^2
+  static const double gm2_OVER_2h2 =
+      g * NeutronMass * NeutronMass / (2.0 * h * h);
+
+  const V3D samplePos = ws->getInstrument()->getSample()->getPos();
+  const double pathLength = det->getPos().distance(samplePos) + extraLength;
+  // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
+  const double L2 = gm2_OVER_2h2 * std::pow(pathLength, 2);
+
+  return waveLength * waveLength * L2;
+}}
 }

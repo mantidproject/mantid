@@ -45,6 +45,9 @@
 
 namespace
 {
+  // Avoids a compiler warning about implicit 'const char *'->'char*' conversion under clang
+  #define STR_LITERAL(str) const_cast<char*>(str)
+
   /**
    * A callback, set using PyEval_SetTrace, that is called by Python
    * to allow inspection into the current execution frame. It is currently
@@ -59,9 +62,8 @@ namespace
     Q_UNUSED(arg);
     int retcode(0);
     if(event != PyTrace_LINE) return retcode;
-      std::string str1 = "lineNumberChanged";
-      std::string str2 = "O i";
-    PyObject_CallMethod(scriptObj,&str1[0],&str2[0], frame->f_code->co_filename, frame->f_lineno);
+    PyObject_CallMethod(scriptObj, STR_LITERAL("lineNumberChanged"), STR_LITERAL("O i"),
+                        frame->f_code->co_filename, frame->f_lineno);
     return retcode;
   }
 
@@ -78,8 +80,8 @@ namespace
 PythonScript::PythonScript(PythonScripting *env, const QString &name, const InteractionType interact,
                            QObject * context)
   : Script(env, name, interact, context), m_pythonEnv(env), localDict(NULL),
-    stdoutSave(NULL), stderrSave(NULL), m_CodeFileObject(NULL), isFunction(false), m_isInitialized(false),
-    m_pathHolder(name), m_workspaceHandles()
+    stdoutSave(NULL), stderrSave(NULL), m_codeFileObject(NULL), m_threadID(-1), isFunction(false),
+    m_isInitialized(false), m_pathHolder(name), m_workspaceHandles()
 {
   initialize(name, context);
 }
@@ -89,13 +91,15 @@ PythonScript::PythonScript(PythonScripting *env, const QString &name, const Inte
  */
 PythonScript::~PythonScript()
 {
-  GlobalInterpreterLock pythonLock;
+  ScopedPythonGIL lock;
+  this->abort();
   observeAdd(false);
   observeAfterReplace(false);
   observePostDelete(false);
   observeADSClear(false);
 
   this->disconnect();
+  Py_XDECREF(m_algorithmInThread);
   Py_XDECREF(localDict);
 }
 
@@ -145,7 +149,7 @@ PyObject * PythonScript::createSipInstanceFromMe()
 bool PythonScript::compilesToCompleteStatement(const QString & code) const
 {
   bool result(false);
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   PyObject *compiledCode = Py_CompileString(code.toAscii(), "", Py_file_input);
   if( PyObject *exception = PyErr_Occurred() )
   {
@@ -180,7 +184,7 @@ bool PythonScript::compilesToCompleteStatement(const QString & code) const
  */
 void PythonScript::lineNumberChanged(PyObject *codeObject, int lineNo)
 {
-  if(codeObject == m_CodeFileObject)
+  if(codeObject == m_codeFileObject)
   {
     sendLineChangeSignal(getRealLineNo(lineNo), false);
   }
@@ -202,7 +206,7 @@ void PythonScript::sendLineChangeSignal(int lineNo, bool error)
  */
 void PythonScript::generateAutoCompleteList()
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   PyObject *main_module = PyImport_AddModule("__main__");
   PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
@@ -235,7 +239,7 @@ void PythonScript::generateAutoCompleteList()
 void PythonScript::emit_error()
 {
   // gil is necessary so other things don't continue
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   // return early if nothing happened
   if (!PyErr_Occurred())
@@ -342,7 +346,7 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
     QString text = m_pythonEnv->toString(textObject, true).trimmed();
     int offset = static_cast<int>(m_pythonEnv->toLong(PyObject_GetAttrString(syntaxError, "offset")));
     QString offsetMarker = QString(offset-1, ' ') + "^";
-    msg = 
+    msg =
       "File \"%1\", line %2\n"
       "    %3\n"
       "    %4\n"
@@ -353,7 +357,7 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
   }
   else
   {
-    msg = 
+    msg =
       "File \"%1\", line %2\n"
       "SyntaxError: %3";
     msg = msg.arg(filename);
@@ -373,15 +377,15 @@ QString PythonScript::constructSyntaxErrorStr(PyObject *syntaxError)
    * @param traceback A traceback object
    * @param root If true then this is the root of the traceback
    */
-void PythonScript::tracebackToMsg(QTextStream &msgStream, 
-                                  PyTracebackObject* traceback, 
+void PythonScript::tracebackToMsg(QTextStream &msgStream,
+                                  PyTracebackObject* traceback,
                                   bool root)
 {
   if(traceback == NULL) return;
   msgStream << "\n  ";
   if (root) msgStream << "at";
   else msgStream << "caused by";
-  
+
   int lineno = traceback->tb_lineno;
   QString filename = QString::fromAscii(PyString_AsString(traceback->tb_frame->f_code->co_filename));
   if(filename == identifier().c_str())
@@ -390,7 +394,7 @@ void PythonScript::tracebackToMsg(QTextStream &msgStream,
     sendLineChangeSignal(lineno, true);
 
   }
-  
+
   msgStream << " line " << lineno << " in \'" << filename  << "\'";
   tracebackToMsg(msgStream, traceback->tb_next, false);
 }
@@ -427,7 +431,7 @@ void PythonScript::setContext(QObject *context)
  */
 void PythonScript::clearLocals()
 {
-  GlobalInterpreterLock pythonLock;
+  ScopedPythonGIL pythonLock;
 
   PyObject *mainModule = PyImport_AddModule("__main__");
   PyObject *cleanLocals = PyDict_Copy(PyModule_GetDict(mainModule));
@@ -454,9 +458,13 @@ void PythonScript::initialize(const QString & name, QObject *context)
 {
   clearLocals(); // holds and releases GIL
 
-  GlobalInterpreterLock pythonlock;
+  ScopedPythonGIL pythonlock;
   PythonScript::setIdentifier(name);
   setContext(context);
+
+  PyObject *ialgorithm = PyObject_GetAttrString(PyImport_AddModule("mantid.api"), "IAlgorithm");
+  m_algorithmInThread = PyObject_GetAttrString(ialgorithm, "_algorithmInThread");
+  Py_INCREF(m_algorithmInThread);
 }
 
 
@@ -515,7 +523,7 @@ bool PythonScript::compileImpl()
  */
 QVariant PythonScript::evaluateImpl()
 {
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
   PyObject *compiledCode = this->compileToByteCode(true);
   if(!compiledCode)
   {
@@ -619,9 +627,56 @@ QVariant PythonScript::evaluateImpl()
   return qret;
 }
 
+/**
+ * On construction set a reference to a given value and at destruction reset it
+ * to its original
+ */
+struct TemporaryValue {
+  TemporaryValue(long & refVal, long tmp) : initial(refVal), ref(refVal){
+    ref = tmp;
+  }
+  ~TemporaryValue() {
+    ref = initial;
+  }
+private:
+  long initial;
+  long & ref;
+};
+
 bool PythonScript::executeImpl()
 {
+  TemporaryValue holder(m_threadID, getThreadID());
   return executeString();
+}
+
+void PythonScript::abortImpl()
+{
+  // The current thread for this script could be
+  // in one of two states:
+  //   1. A C++ algorithm is being executed so it must be
+  //      interrupted using algorithm.cancel()
+  //   2. Pure Python is executing and can be interrupted
+  //      with a KeyboardInterrupt exception
+  // In both situations we issue a KeyboardInterrupt just in case the algorithm
+  // hasn't implemented cancel() checking so that when control returns the Python the
+  // interrupt should be picked up.
+  ScopedPythonGIL lock;
+  m_pythonEnv->raiseAsyncException(m_threadID, PyExc_KeyboardInterrupt);
+  PyObject *curAlg = PyObject_CallFunction(m_algorithmInThread, STR_LITERAL("l"), m_threadID);
+  if(curAlg && curAlg != Py_None){
+    PyObject_CallMethod(curAlg, STR_LITERAL("cancel"), STR_LITERAL(""));
+  }
+}
+
+/**
+ * The value returned here is only valid when called by a valid
+ * thread that has a valid Python threadstate
+ * @return A long int giving a unique ID for the thread
+ */
+long PythonScript::getThreadID()
+{
+  ScopedPythonGIL lock;
+  return PyThreadState_Get()->thread_id;
 }
 
 
@@ -630,7 +685,7 @@ bool PythonScript::executeString()
 {
   emit started(MSG_STARTED);
   bool success(false);
-  GlobalInterpreterLock gil;
+  ScopedPythonGIL gil;
 
   PyObject * compiledCode = compileToByteCode(false);
   PyObject *result(NULL);
@@ -644,6 +699,11 @@ bool PythonScript::executeString()
   if(!result)
   {
     emit_error();
+    // If a script was aborted we both raise a KeyboardInterrupt and 
+    // call Algorithm::cancel to make sure we capture it. The doubling
+    // can leave an interrupt in the pipeline so we clear it was we've
+    // got the error info out
+    m_pythonEnv->raiseAsyncException(m_threadID, NULL);
   }
   else
   {
@@ -686,7 +746,7 @@ namespace
     }
   private:
     InstallTrace();
-    Q_DISABLE_COPY(InstallTrace);
+    Q_DISABLE_COPY(InstallTrace)
     PyObject *m_sipWrappedScript;
   };
 }
@@ -817,14 +877,14 @@ PyObject *PythonScript::compileToByteCode(bool for_eval)
   {
   }
 
-  if(success) 
+  if(success)
   {
-    m_CodeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
+    m_codeFileObject = ((PyCodeObject*)(compiledCode))->co_filename;
   }
   else
   {
     compiledCode = NULL;
-    m_CodeFileObject = NULL;
+    m_codeFileObject = NULL;
   }
   return compiledCode;
 }
@@ -876,7 +936,7 @@ void PythonScript::clearADSHandle()
     // i.e. the postfix operator
     this->deletePythonReference(*(itr++));
   }
-  
+
   assert(m_workspaceHandles.empty());
 }
 

@@ -2,11 +2,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Jacobian.h"
+#include "MantidAPI/PeakFunctionIntegrator.h"
+#include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 #include <cmath>
 
 namespace Mantid {
@@ -38,6 +42,35 @@ public:
    * @param iP :: The parameter index of an individual function.
    */
   double get(size_t iY, size_t iP) { return m_J->get(m_iY0 + iY, iP); }
+};
+
+class TempJacobian : public Jacobian {
+public:
+  TempJacobian(size_t y, size_t p) : m_y(y), m_p(p), m_J(y * p) {}
+  void set(size_t iY, size_t iP, double value) {
+      m_J[iY * m_p + iP] = value;
+  }
+  double get(size_t iY, size_t iP) {
+      return m_J[iY * m_p + iP];
+  }
+  size_t maxParam(size_t iY) {
+      double max = -DBL_MAX;
+      size_t maxIndex = 0;
+      for(size_t i = 0; i < m_p; ++i) {
+          double current = get(iY, i);
+          if(current > max) {
+              maxIndex = i;
+              max = current;
+          }
+      }
+
+      return maxIndex;
+  }
+
+protected:
+  size_t m_y;
+  size_t m_p;
+  std::vector<double> m_J;
 };
 
 /// Default value for the peak radius
@@ -128,6 +161,64 @@ void IPeakFunction::setPeakRadius(const int &r) {
     Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",
                                                 setting);
   }
+}
+
+/// Returns the integral intensity of the peak function, using the peak radius
+/// to determine integration borders.
+double IPeakFunction::intensity() const {
+  double x0 = centre();
+  double dx = fabs(s_peakRadius * fwhm());
+
+  PeakFunctionIntegrator integrator;
+  IntegrationResult result = integrator.integrate(*this, x0 - dx, x0 + dx);
+
+  if (!result.success) {
+    return 0.0;
+  }
+
+  return result.result;
+}
+
+/// Sets the integral intensity of the peak by adjusting the height.
+void IPeakFunction::setIntensity(const double newIntensity) {
+  double currentHeight = height();
+  double currentIntensity = intensity();
+
+  if (currentIntensity == 0.0) {
+    // Try to set a different height first.
+    setHeight(2.0);
+
+    currentHeight = height();
+    currentIntensity = intensity();
+
+    // If the current intensity is still 0, there's nothing left to do.
+    if (currentIntensity == 0.0) {
+      throw std::invalid_argument(
+          "Cannot set new intensity, not enough information available.");
+    }
+  }
+
+  setHeight(newIntensity / currentIntensity * currentHeight);
+}
+
+std::string IPeakFunction::getCentreParameterName() const {
+  FunctionParameterDecorator_sptr fn =
+      boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+          FunctionFactory::Instance().createFunction("PeakParameterFunction"));
+
+  if (!fn) {
+    throw std::runtime_error(
+        "PeakParameterFunction could not be created successfully.");
+  }
+
+  fn->setDecoratedFunction(this->name());
+
+  FunctionDomain1DVector domain(std::vector<double>(4, 0.0));
+  TempJacobian jacobian(4, fn->nParams());
+
+  fn->functionDeriv(domain, jacobian);
+
+  return parameterName(jacobian.maxParam(0));
 }
 
 } // namespace API

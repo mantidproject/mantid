@@ -185,6 +185,25 @@ public:
     }
 }
 
+  void testIntensity()
+  {
+      const double s = 4.0;
+      const double I = 2.1;
+      BackToBackExponential b2bExp;
+      b2bExp.initialize();
+      b2bExp.setParameter("I", I);
+      b2bExp.setParameter("A", 6.0);// large A and B make
+      b2bExp.setParameter("B", 6.0);// the exponentials narrow
+      b2bExp.setParameter("X0",0.0);
+      b2bExp.setParameter("S", s);
+
+      TS_ASSERT_EQUALS(b2bExp.intensity(), 2.1);
+      TS_ASSERT_THROWS_NOTHING(b2bExp.setIntensity(3.0));
+
+      TS_ASSERT_EQUALS(b2bExp.intensity(), 3.0);
+      TS_ASSERT_EQUALS(b2bExp.getParameter("I"), 3.0);
+  }
+
 
 };
 

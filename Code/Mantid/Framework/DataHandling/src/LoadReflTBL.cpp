@@ -15,7 +15,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_FILELOADER_ALGORITHM(LoadReflTBL);
+DECLARE_FILELOADER_ALGORITHM(LoadReflTBL)
 
 using namespace Kernel;
 using namespace API;

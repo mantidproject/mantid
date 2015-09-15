@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/ConvertEmptyToTof.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -23,6 +24,10 @@ public:
   }
   static void destroySuite(ConvertEmptyToTofTest *suite) {
     delete suite;
+  }
+
+  ConvertEmptyToTofTest() {
+    FrameworkManager::Instance();
   }
 
   void test_Init() {

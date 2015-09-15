@@ -15,6 +15,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -22,7 +23,7 @@
 
 #include <boost/algorithm/string.hpp>    
 
-vtkStandardNewMacro(vtkPeaksReader);
+vtkStandardNewMacro(vtkPeaksReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;

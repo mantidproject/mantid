@@ -57,8 +57,8 @@ public:
   void restore();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(SobolSequence);
-  DISABLE_COPY_AND_ASSIGN(SobolSequence);
+  DISABLE_DEFAULT_CONSTRUCT(SobolSequence)
+  DISABLE_COPY_AND_ASSIGN(SobolSequence)
 
   /// Set the number of dimensions
   void setNumberOfDimensions(const unsigned int ndims);

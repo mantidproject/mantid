@@ -1,32 +1,23 @@
 /*
+ *
  * OptimizeCrystalPlacement.cpp
  *
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
-#include "MantidAPI/IPeak.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
-#include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/V3D.h"
-#include <boost/lexical_cast.hpp>
-#include <cstdarg>
-#include <iostream>
-#include <map>
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidCrystal/PeakHKLErrors.h"
+#include "MantidCrystal/SCDCalibratePanels.h"
 
-#include <math.h>
-#include <sstream>
+
+#include <cstdarg>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -35,6 +26,7 @@ using Mantid::Geometry::IndexingUtils;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Geometry::ParameterMap;
+using namespace Mantid::Geometry;
 
 namespace Mantid {
 
@@ -159,7 +151,7 @@ void OptimizeCrystalPlacement::exec() {
   PeaksWorkspace_sptr OutPeaks = getProperty("ModifiedPeaksWorkspace");
 
   if (Peaks != OutPeaks) {
-    boost::shared_ptr<PeaksWorkspace> X(Peaks->clone());
+    boost::shared_ptr<PeaksWorkspace> X(Peaks->clone().release());
     OutPeaks = X;
   }
 

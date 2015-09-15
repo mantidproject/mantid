@@ -78,8 +78,8 @@ public:
   void resetStreamToStart();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(FileDescriptor);
-  DISABLE_COPY_AND_ASSIGN(FileDescriptor);
+  DISABLE_DEFAULT_CONSTRUCT(FileDescriptor)
+  DISABLE_COPY_AND_ASSIGN(FileDescriptor)
 
   /// Open the file and cache description elements
   void initialize(const std::string &filename);

@@ -134,9 +134,12 @@ public:
     setChecked( ! isChecked() );
     m_property->setOption( m_optionName, isChecked() );
     update();
+    emit optionChanged(m_property, m_optionName, isChecked());
   }
   void setChecked(bool on){m_checked = on;}
   bool isChecked() const {return m_checked;}
+signals:
+  void optionChanged(QtProperty*, const QString&, bool);
 private:
   QtProperty *m_property;
   QString m_optionName;
@@ -152,7 +155,7 @@ class QtTreePropertyBrowserPrivate
 
 public:
     QtTreePropertyBrowserPrivate();
-    void init(QWidget *parent, const QStringList &options);
+    void init(QWidget *parent, const QStringList &options, bool darkTopLevel);
 
     void propertyInserted(QtBrowserItem *index, QtBrowserItem *afterIndex);
     void propertyRemoved(QtBrowserItem *index);
@@ -185,6 +188,7 @@ public:
     QTreeWidgetItem *editedItem() const;
 
     const QStringList& options() const {return m_options;}
+    void setColumnSizes(int s0, int s1, int s2);
 
 private:
     void updateItem(QTreeWidgetItem *item);
@@ -210,7 +214,7 @@ class QtPropertyEditorView : public QTreeWidget
 {
     Q_OBJECT
 public:
-    QtPropertyEditorView(QWidget *parent = 0);
+    QtPropertyEditorView(QWidget *parent, bool darkTopLevel);
 
     void setEditorPrivate(QtTreePropertyBrowserPrivate *editorPrivate)
         { m_editorPrivate = editorPrivate; }
@@ -225,11 +229,13 @@ protected:
 
 private:
     QtTreePropertyBrowserPrivate *m_editorPrivate;
+    bool m_darkTopLevel;
 };
 
-QtPropertyEditorView::QtPropertyEditorView(QWidget *parent) :
+QtPropertyEditorView::QtPropertyEditorView(QWidget *parent, bool darkTopLevel) :
     QTreeWidget(parent),
-    m_editorPrivate(0)
+    m_editorPrivate(0),
+    m_darkTopLevel(darkTopLevel)
 {
     connect(header(), SIGNAL(sectionDoubleClicked(int)), this, SLOT(resizeColumnToContents(int)));
 }
@@ -249,7 +255,7 @@ void QtPropertyEditorView::drawRow(QPainter *painter, const QStyleOptionViewItem
         opt.palette.setColor(QPalette::AlternateBase, c);
     } else {
         QColor c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
-        if (index.parent() == QModelIndex())
+        if (index.parent() == QModelIndex() && m_darkTopLevel)
         {
           c = option.palette.color(QPalette::Mid);
         }
@@ -348,6 +354,9 @@ public:
 
     QTreeWidgetItem *editedItem() const { return m_editedItem; }
 
+signals:
+    void optionChanged(QtProperty*, const QString&, bool);
+
 private slots:
     void slotEditorDestroyed(QObject *object);
 
@@ -432,6 +441,7 @@ QWidget *QtPropertyEditorDelegate::createEditor(QWidget *parent,
       if ( property->hasOption(optionName) )
       {
         QWidget *editor = new PropertyOptionCheckBox(parent,property,optionName);
+        connect(editor,SIGNAL(optionChanged(QtProperty*, const QString&, bool)),this,SIGNAL(optionChanged(QtProperty*, const QString&, bool)));
         return editor;
       }
     }
@@ -563,11 +573,11 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style)
     return rc;
 }
 
-void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options)
+void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &options, bool darkTopLevel)
 {
     QHBoxLayout *layout = new QHBoxLayout(parent);
     layout->setMargin(0);
-    m_treeWidget = new QtPropertyEditorView(parent);
+    m_treeWidget = new QtPropertyEditorView(parent,darkTopLevel);
     m_treeWidget->setEditorPrivate(this);
     m_treeWidget->setIconSize(QSize(18, 18));
     layout->addWidget(m_treeWidget);
@@ -588,6 +598,7 @@ void QtTreePropertyBrowserPrivate::init(QWidget *parent, const QStringList &opti
     m_treeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
     m_delegate = new QtPropertyEditorDelegate(parent);
     m_delegate->setEditorPrivate(this);
+    QObject::connect(m_delegate,SIGNAL(optionChanged(QtProperty*, const QString&, bool)),parent,SIGNAL(optionChanged(QtProperty*, const QString&, bool)));
     m_treeWidget->setItemDelegate(m_delegate);
     m_treeWidget->header()->setMovable(false);
     m_treeWidget->header()->setResizeMode(QHeaderView::Stretch);
@@ -831,6 +842,19 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
     }
 }
 
+void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2)
+{
+  m_treeWidget->header()->setResizeMode(QHeaderView::Interactive);
+  m_treeWidget->header()->setStretchLastSection(false);
+  m_treeWidget->header()->resizeSection(0, s0);
+  m_treeWidget->header()->resizeSection(1, s1);
+  if (!m_options.isEmpty())
+  {
+    if (s2 < 0) s2 = s1;
+    m_treeWidget->header()->resizeSection(2, s2);
+  }
+}
+
 /**
     \class QtTreePropertyBrowser
 
@@ -877,13 +901,13 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
 /**
     Creates a property browser with the given \a parent.
 */
-QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList &options)
+QtTreePropertyBrowser::QtTreePropertyBrowser(QWidget *parent, const QStringList &options, bool darkTopLevel)
     : QtAbstractPropertyBrowser(parent)
 {
     d_ptr = new QtTreePropertyBrowserPrivate;
     d_ptr->q_ptr = this;
 
-    d_ptr->init(this,options);
+    d_ptr->init(this,options,darkTopLevel);
     connect(this, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(slotCurrentBrowserItemChanged(QtBrowserItem*)));
 }
 
@@ -1188,6 +1212,11 @@ void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item)
 void QtTreePropertyBrowser::editItem(QtBrowserItem *item)
 {
     d_ptr->editItem(item);
+}
+
+void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2)
+{
+  d_ptr->setColumnSizes(s0, s1, s2);
 }
 
 #if QT_VERSION >= 0x040400

@@ -1,10 +1,8 @@
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <cstdio>
 
 namespace Mantid {
 namespace Crystal {
@@ -141,25 +139,10 @@ void FindUBUsingLatticeParameters::exec() {
     double calc_beta = o_lattice.beta();
     double calc_gamma = o_lattice.gamma();
     // Show the modified lattice parameters
-    sprintf(
-        logInfo,
-        std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f")
-            .c_str(),
-        calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
-    g_log.notice(std::string(logInfo));
+    g_log.notice() << o_lattice << "\n";
 
-    g_log.notice() << "Parameter Errors  :" << std::fixed
-                   << std::setprecision(3) << std::setw(9) << sigabc[0]
-                   << std::fixed << std::setprecision(3) << std::setw(9)
-                   << sigabc[1] << std::fixed << std::setprecision(3)
-                   << std::setw(9) << sigabc[2] << std::fixed
-                   << std::setprecision(3) << std::setw(9) << sigabc[3]
-                   << std::fixed << std::setprecision(3) << std::setw(9)
-                   << sigabc[4] << std::fixed << std::setprecision(3)
-                   << std::setw(9) << sigabc[5] << std::endl;
-
-    sprintf(logInfo, std::string("Lattice Parameters (Refined - Input): %8.3f "
-                                 "%8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+    sprintf(logInfo, std::string("Lattice Parameters (Refined - Input): %11.6f "
+                                 "%11.6f %11.6f %11.6f %11.6f %11.6f").c_str(),
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha,
             calc_beta - beta, calc_gamma - gamma);
     g_log.notice(std::string(logInfo));

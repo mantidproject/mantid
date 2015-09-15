@@ -219,7 +219,9 @@ CompositeFunction_sptr FunctionFactoryImpl::createComposite(
     }
   }
 
-  cfun->applyTies();
+  if (cfun) {
+    cfun->applyTies();
+  }
   return cfun;
 }
 

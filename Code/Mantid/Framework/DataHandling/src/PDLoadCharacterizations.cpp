@@ -1,5 +1,6 @@
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -17,10 +18,15 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PDLoadCharacterizations)
 
+namespace {
 /// key for a instrument parameter file being listed
 static const std::string IPARM_KEY("Instrument parameter file:");
 static const std::string L1_KEY("L1");
 static const std::string ZERO("0.");
+static const std::string EXP_INI_VAN_KEY("Vana");
+static const std::string EXP_INI_EMPTY_KEY("VanaBg");
+static const std::string EXP_INI_CAN_KEY("MTc");
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -36,10 +42,10 @@ PDLoadCharacterizations::~PDLoadCharacterizations() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PDLoadCharacterizations::name() const {
   return "PDLoadCharacterizations";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PDLoadCharacterizations::version() const { return 1; };
+int PDLoadCharacterizations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PDLoadCharacterizations::category() const {
@@ -54,6 +60,9 @@ void PDLoadCharacterizations::init() {
   exts.push_back(".txt");
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
                   "Characterizations file");
+  declareProperty(
+      new FileProperty("ExpIniFilename", "", FileProperty::OptionalLoad, "ini"),
+      "(Optional) exp.ini file used at NOMAD");
 
   declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
@@ -109,14 +118,21 @@ void PDLoadCharacterizations::exec() {
   wksp->addColumn("double", "frequency");
   wksp->addColumn("double", "wavelength");
   wksp->addColumn("int", "bank");
-  wksp->addColumn("int", "vanadium");
-  wksp->addColumn("int", "container");
-  wksp->addColumn("int", "empty");
+  wksp->addColumn("str", "vanadium");
+  wksp->addColumn("str", "container");
+  wksp->addColumn("str", "empty");
   wksp->addColumn("str", "d_min"); // b/c it is an array for NOMAD
   wksp->addColumn("str", "d_max"); // b/c it is an array for NOMAD
   wksp->addColumn("double", "tof_min");
   wksp->addColumn("double", "tof_max");
   this->readCharInfo(file, wksp);
+
+  // optional exp.ini file for NOMAD
+  std::string iniFilename = this->getProperty("ExpIniFilename");
+  if (!iniFilename.empty()) {
+    this->readExpIni(iniFilename, wksp);
+  }
+
   this->setProperty("OutputWorkspace", wksp);
 }
 
@@ -207,13 +223,57 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     row << boost::lexical_cast<double>(splitted[0]);  // frequency
     row << boost::lexical_cast<double>(splitted[1]);  // wavelength
     row << boost::lexical_cast<int32_t>(splitted[2]); // bank
-    row << boost::lexical_cast<int32_t>(splitted[3]); // vanadium
-    row << boost::lexical_cast<int32_t>(splitted[4]); // container
-    row << boost::lexical_cast<int32_t>(splitted[5]); // empty
+    row << splitted[3]; // vanadium
+    row << splitted[4]; // container
+    row << splitted[5]; // empty
     row << splitted[6];                               // d_min
     row << splitted[7];                               // d_max
     row << boost::lexical_cast<double>(splitted[8]);  // tof_min
     row << boost::lexical_cast<double>(splitted[9]);  // tof_max
+  }
+}
+
+/**
+ * Parse the (optional) exp.ini file found on NOMAD
+ * @param filename full path to a exp.ini file
+ * @param wksp The table workspace to modify.
+ */
+void PDLoadCharacterizations::readExpIni(const std::string &filename,
+                                         API::ITableWorkspace_sptr &wksp) {
+  if (wksp->rowCount() == 0)
+    throw std::runtime_error("Characterizations file does not have any "
+                             "characterizations information");
+
+  std::ifstream file(filename.c_str());
+  if (!file) {
+    throw Exception::FileError("Unable to open file", filename);
+  }
+
+  // parse the file
+  for (std::string line = Strings::getLine(file); !file.eof();
+       line = Strings::getLine(file)) {
+    line = Strings::strip(line);
+    // skip empty lines and "comments"
+    if (line.empty())
+      continue;
+    if (line.substr(0, 1) == "#")
+      continue;
+
+    // split the line and see if it has something meaningful
+    std::vector<std::string> splitted;
+    boost::split(splitted, line, boost::is_any_of("\t "),
+                 boost::token_compress_on);
+    if (splitted.size() < 2)
+      continue;
+
+    // update the various charaterization runs
+    if (splitted[0] == EXP_INI_VAN_KEY) {
+      wksp->getRef<std::string>("vanadium", 0) = splitted[1];
+    } else if (splitted[0] == EXP_INI_EMPTY_KEY) {
+      wksp->getRef<std::string>("container", 0) = splitted[1];
+    } else if (splitted[0] == EXP_INI_CAN_KEY) {
+      wksp->getRef<std::string>("empty", 0) = splitted[1];
+    }
   }
 }
 

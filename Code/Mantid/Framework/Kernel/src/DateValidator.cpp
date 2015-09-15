@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DateValidator.h"
 #include <boost/lexical_cast.hpp>
-#include <time.h>
 
 namespace Mantid {
 namespace Kernel {
@@ -27,6 +26,7 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
   timeinfo.tm_mon = 0;
   timeinfo.tm_year = 0;
   timeinfo.tm_wday = 0;
+  timeinfo.tm_yday = 0;
   timeinfo.tm_isdst = -1;
 
   std::basic_string<char>::size_type index, off = 0;

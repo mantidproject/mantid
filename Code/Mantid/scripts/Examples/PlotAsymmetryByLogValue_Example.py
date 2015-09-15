@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # -----------------------------------------------------
 #  Runs PlotAssymetryByLogValue algorithm
 #  and plots the output in MantidPlot using a Python

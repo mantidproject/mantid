@@ -30,10 +30,10 @@ SetInstrumentParameter::~SetInstrumentParameter() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetInstrumentParameter::name() const {
   return "SetInstrumentParameter";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SetInstrumentParameter::version() const { return 1; };
+int SetInstrumentParameter::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SetInstrumentParameter::category() const {

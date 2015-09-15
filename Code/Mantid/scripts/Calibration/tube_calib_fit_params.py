@@ -1,7 +1,7 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 
-class TubeCalibFitParams:
+class TubeCalibFitParams(object):
 
 # This class is to take the fitting method and parameters for fitting the peaks crated by the calibration slits etc
 # and to deliver them to TubeCalib, so it can fit the peaks appropriately

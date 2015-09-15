@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
 import __builtin__
 import mantid
+import mantidqtpython
 
 #-----------------------------------------------------------------------------
 #--------------------------- MultiThreaded Access ----------------------------
@@ -160,7 +161,7 @@ class QtProxyObject(QtCore.QObject):
         """
         Reroute a method call to the the stored object via
         the threadsafe call mechanism. Essentially this guarantees
-        that when the method is called it wil be on the GUI thread
+        that when the method is called it will be on the GUI thread
         """
         callable = getattr(self._getHeldObject(), attr)
         return CrossThreadCall(callable)
@@ -278,7 +279,7 @@ class Layer(QtProxyObject):
     # The only purpose of listing them here is that these will be returned by this class' __dir()__, and
     #    shown interactively, while the ones not listed and/or overloaded here may not be shown in ipython, etc.
     additional_methods = ['logLogAxes', 'logXLinY', 'logXLinY',
-                          'removeLegend', 'saveImage', 'setAxisScale', 'setCurveLineColor', 'setCurveLineStyle',
+                          'removeLegend', 'export', 'setAxisScale', 'setCurveLineColor', 'setCurveLineStyle',
                           'setCurveLineWidth', 'setCurveSymbol', 'setScale', 'setTitle', 'setXTitle', 'setYTitle']
 
     def __init__(self, toproxy):
@@ -628,6 +629,7 @@ class InstrumentWindow(MDIWindow):
         warnings.warn("InstrumentWindow.selectComponent has been deprecated. Use the tree tab selectComponentByName method instead.")
         QtProxyObject.__getattr__(self, "selectComponent")(name)
 
+
 #-----------------------------------------------------------------------------
 class SliceViewerWindowProxy(QtProxyObject):
     """Proxy for a C++ SliceViewerWindow object.
@@ -905,3 +907,27 @@ class TiledWindowProxy(QtProxyObject):
         Clear the content this TiledWindow.
         """
         threadsafe_call(self._getHeldObject().clear)
+
+def showHelpPage(page_name=None):
+    """Show a page in the help system"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showHelpPage, page_name)
+
+def showWikiPage(page_name=None):
+    """Show a wiki page through the help system"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showWikiPage, page_name)
+
+def showAlgorithmHelp(algorithm=None, version=-1):
+    """Show an algorithm help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showAlgorithmHelp, algorithm, version)
+
+def showConceptHelp(name=None):
+    """Show a concept help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showConceptHelp, name)
+
+def showFitFunctionHelp(name=None):
+    """Show a fit function help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showFitFunctionHelp, name)
+
+def showCustomInterfaceHelp(name=None):
+    """Show a custom interface help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showCustomInterfaceHelp, name)

@@ -11,7 +11,7 @@ namespace CurveFitting {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FUNCTION(Lorentzian);
+DECLARE_FUNCTION(Lorentzian)
 
 void Lorentzian::init() {
   declareParameter("Amplitude", 1.0, "Intensity scaling");

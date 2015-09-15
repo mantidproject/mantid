@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include <nexus/NeXusException.hpp>
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/LogParser.h"
+//#include "MantidKernel/LogParser.h"
 #include "MantidAPI/FileProperty.h"
 #include <cctype>
 
@@ -119,6 +119,9 @@ void LoadNexusLogs::exec() {
         group_class == "IXselog" || group_name == "framelog") {
       loadLogs(file, group_name, group_class, workspace);
     }
+    if(group_class == "IXperiods") {
+        loadNPeriods(file, workspace);
+    }
   }
 
   // Freddie Akeroyd 12/10/2011
@@ -133,9 +136,6 @@ void LoadNexusLogs::exec() {
   // the code below will allow current SANS2D files to load
   if (workspace->mutableRun().hasProperty("proton_log")) {
     std::vector<int> event_frame_number;
-    Kernel::TimeSeriesProperty<double> *plog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            workspace->mutableRun().getProperty("proton_log"));
     this->getLogger().notice()
         << "Using old ISIS proton_log and event_frame_number indirection..."
         << std::endl;
@@ -167,6 +167,12 @@ void LoadNexusLogs::exec() {
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
+      Kernel::TimeSeriesProperty<double> *plog =
+          dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+              workspace->mutableRun().getProperty("proton_log"));
+      if (!plog)
+        throw std::runtime_error("Could not cast (interpret) proton_log as a time "
+                                 "series property. Cannot continue.");
       Kernel::TimeSeriesProperty<double> *pcharge =
           new Kernel::TimeSeriesProperty<double>("proton_charge");
       std::vector<double> pval;
@@ -264,6 +270,28 @@ void LoadNexusLogs::loadVetoPulses(
   file.closeGroup();
 }
 
+void LoadNexusLogs::loadNPeriods(
+    ::NeXus::File &file,
+    boost::shared_ptr<API::MatrixWorkspace> workspace) const {
+  int value = 1; // Default to 1-period unless
+  try {
+    file.openGroup("periods", "IXperiods");
+    file.openData("number");
+    file.getData(&value);
+    file.closeData();
+    file.closeGroup();
+  } catch (::NeXus::Exception &) {
+    // Likely missing IXperiods.
+      return;
+  }
+
+  API::Run& run = workspace->mutableRun();
+  const std::string nPeriodsLabel = "nperiods";
+  if(!run.hasProperty(nPeriodsLabel)){
+      run.addProperty(new PropertyWithValue<int>(nPeriodsLabel, value));
+  }
+}
+
 /**
  * Load log entries from the given group
  * @param file :: A reference to the NeXus file handle opened such that the
@@ -287,11 +315,16 @@ void LoadNexusLogs::loadLogs(
     } else if (log_class == "IXseblock") {
       loadSELog(file, itr->first, workspace);
     }
+    else if(log_class == "NXcollection"){
+        int jj = 0;
+        ++jj;
+    }
   }
   loadVetoPulses(file, workspace);
 
   file.closeGroup();
 }
+
 
 /**
  * Load an NX log entry a group type that has value and time entries.

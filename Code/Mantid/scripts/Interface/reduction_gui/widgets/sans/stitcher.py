@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import os
 from reduction_gui.settings.application_settings import GeneralSettings
@@ -39,7 +40,7 @@ class StitcherWidget(BaseWidget):
             settings = GeneralSettings()
         self._settings = settings
 
-       # Connect do UI data update
+        # Connect do UI data update
         self._settings.data_updated.connect(self._data_updated)
 
         self._low_q_data = None
@@ -54,7 +55,7 @@ class StitcherWidget(BaseWidget):
         self._referenceID = 0
 
         self._graph = "StitchedData"
-        self._output_dir = None
+        self._output_dir = self._settings.data_output_dir
         self._stitcher = None
         self._plotted = False
 

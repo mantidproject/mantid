@@ -1,8 +1,8 @@
+#pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 import os
-import sys
 from reduction_workflow.find_data import find_data
 
 class SANSBeamSpreaderTransmission(PythonAlgorithm):
@@ -57,6 +57,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
+    #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         # Get the reduction property manager
         property_manager_name = self.getProperty("ReductionProperties").value
@@ -85,7 +86,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
                 Logger("SANSBeamSpreaderTransmission").error("SANS reduction not set up properly: missing load algorithm")
-                raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+                raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)
@@ -114,7 +115,6 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
                         [direct_spread, direct_spreader_ws],
                         [sample_scatt, sample_scatt_ws],
                         [direct_scatt, direct_scatt_ws]]
-            dark_current_data = self.getPropertyValue("DarkCurrentFilename")
 
             for f in ws_names:
                 filepath = find_data(f[0], instrument=instrument)
@@ -228,7 +228,6 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         dark_current_data = self.getPropertyValue("DarkCurrentFilename")
         property_manager_name = self.getProperty("ReductionProperties").value
 
-        dark_current_property = "DefaultDarkCurrentAlgorithm"
         def _dark(workspace, dark_current_property):
             if property_manager.existsProperty(dark_current_property):
                 p=property_manager.getProperty(dark_current_property)

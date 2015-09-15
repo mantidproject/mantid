@@ -4,6 +4,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/NotebookWriter.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -14,17 +15,24 @@
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtCustomInterfaces/QtReflOptionsDialog.h"
+#include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
 #include "MantidQtMantidWidgets/AlgorithmHintStrategy.h"
+#include "MantidQtCustomInterfaces/ParseKeyValueString.h"
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
+#include <fstream>
+#include <sstream>
 
 #include <QSettings>
+#include <QFileDialog>
+
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
+
 
 namespace
 {
@@ -219,50 +227,6 @@ namespace MantidQt
     }
 
     /**
-    Parses a string in the format `a = 1,b=2, c = "1,2,3,4", d = 5.0, e='a,b,c'` into a map of key/value pairs
-    @param str The input string
-    @throws std::runtime_error on an invalid input string
-    */
-    std::map<std::string,std::string> ReflMainViewPresenter::parseKeyValueString(const std::string& str)
-    {
-      //Tokenise, using '\' as an escape character, ',' as a delimiter and " and ' as quote characters
-      boost::tokenizer<boost::escaped_list_separator<char> > tok(str, boost::escaped_list_separator<char>("\\", ",", "\"'"));
-
-      std::map<std::string,std::string> kvp;
-
-      for(auto it = tok.begin(); it != tok.end(); ++it)
-      {
-        std::vector<std::string> valVec;
-        boost::split(valVec, *it, boost::is_any_of("="));
-
-        if(valVec.size() > 1)
-        {
-          //We split on all '='s. The first delimits the key, the rest are assumed to be part of the value
-          std::string key = valVec[0];
-          //Drop the key from the values vector
-          valVec.erase(valVec.begin());
-          //Join the remaining sections,
-          std::string value = boost::algorithm::join(valVec, "=");
-
-          //Remove any unwanted whitespace
-          boost::trim(key);
-          boost::trim(value);
-
-          if(key.empty() || value.empty())
-            throw std::runtime_error("Invalid key value pair, '" + *it + "'");
-
-
-          kvp[key] = value;
-        }
-        else
-        {
-          throw std::runtime_error("Invalid key value pair, '" + *it + "'");
-        }
-      }
-      return kvp;
-    }
-
-    /**
     Process selected rows
     */
     void ReflMainViewPresenter::process()
@@ -310,26 +274,53 @@ namespace MantidQt
         }
       }
 
-      //Validate the rows
-      for(auto it = rows.begin(); it != rows.end(); ++it)
-      {
-        try
-        {
-          validateRow(*it);
-          autofillRow(*it);
-        }
-        catch(std::exception& ex)
-        {
-          //Allow two theta to be blank
-          if(ex.what() == std::string("Value for two theta could not be found in log."))
-            continue;
-
-          const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
-          m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
-          return;
-        }
+      if(!rowsValid(rows)) {
+        return;
       }
 
+      if(!processGroups(groups, rows)) {
+        return;
+      }
+
+      // If "Output Notebook" checkbox is checked then create an ipython notebook
+      if(m_view->getEnableNotebook()) {
+        saveNotebook(groups, rows);
+      }
+    }
+
+    /**
+    Display a dialog to choose save location for notebook, then save the notebook there
+    @param groups : groups of rows to stitch
+    @param rows : rows selected for processing
+    */
+    void ReflMainViewPresenter::saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows)
+    {
+      std::unique_ptr<ReflGenerateNotebook> notebook(new ReflGenerateNotebook(
+        m_wsName, m_model, m_view->getProcessInstrument(), COL_RUNS, COL_TRANSMISSION, COL_OPTIONS, COL_ANGLE,
+        COL_QMIN, COL_QMAX, COL_DQQ, COL_SCALE, COL_GROUP));
+      QString qfilename = QFileDialog::getSaveFileName(0, "Save notebook file", QDir::currentPath(),
+                                                       "IPython Notebook files (*.ipynb);;All files (*.*)",
+                                                       new QString("IPython Notebook files (*.ipynb)"));
+      std::string filename = qfilename.toStdString();
+      if (filename == "") {
+        return;
+      }
+      std::string generatedNotebook = notebook->generateNotebook(groups, rows);
+
+      std::ofstream file(filename.c_str(), std::ofstream::trunc);
+      file << generatedNotebook;
+      file.flush();
+      file.close();
+    }
+
+    /**
+    Process stitch groups
+    @param rows : rows in the model
+    @param groups : groups of rows to stitch
+    @returns true if successful, otherwise false
+    */
+    bool ReflMainViewPresenter::processGroups(std::map<int,std::set<int>> groups, std::set<int> rows)
+    {
       int progress = 0;
       //Each group and each row within count as a progress step.
       const int maxProgress = (int)(rows.size() + groups.size());
@@ -354,7 +345,7 @@ namespace MantidQt
             const std::string message = "Error encountered while processing row " + rowNo + ":\n";
             m_view->giveUserCritical(message + ex.what(), "Error");
             m_view->setProgress(0);
-            return;
+            return false;
           }
         }
 
@@ -369,9 +360,38 @@ namespace MantidQt
           const std::string message = "Error encountered while stitching group " + groupNo + ":\n";
           m_view->giveUserCritical(message + ex.what(), "Error");
           m_view->setProgress(0);
-          return;
+          return false;
         }
       }
+      return true;
+    }
+
+    /**
+    Validate rows.
+    @param rows : Rows in the model to validate
+    @returns true if all rows are valid and false otherwise
+    */
+    bool ReflMainViewPresenter::rowsValid(std::set<int> rows)
+    {
+      for(auto it = rows.begin(); it != rows.end(); ++it)
+      {
+        try
+        {
+          validateRow(*it);
+          autofillRow(*it);
+        }
+        catch(std::exception& ex)
+        {
+          //Allow two theta to be blank
+          if(ex.what() == std::string("Value for two theta could not be found in log."))
+            continue;
+
+          const std::string rowNo = Mantid::Kernel::Strings::toString<int>(*it + 1);
+          m_view->giveUserCritical("Error found in row " + rowNo + ":\n" + ex.what(), "Error");
+          return false;
+        }
+      }
+      return true;
     }
 
     /**
@@ -711,6 +731,25 @@ namespace MantidQt
         m_tableDirty = true;
       }
 
+      //We need to make sure that qmin and qmax are respected, so we rebin to
+      //those limits here.
+      IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
+      algCrop->initialize();
+      algCrop->setProperty("InputWorkspace", "IvsQ_" + runNo);
+      algCrop->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+      const double qmin = m_model->data(m_model->index(rowNo, COL_QMIN)).toDouble();
+      const double qmax = m_model->data(m_model->index(rowNo, COL_QMAX)).toDouble();
+      const double dqq = m_model->data(m_model->index(rowNo, COL_DQQ)).toDouble();
+      std::vector<double> params;
+      params.push_back(qmin);
+      params.push_back(-dqq);
+      params.push_back(qmax);
+      algCrop->setProperty("Params", params);
+      algCrop->execute();
+
+      if(!algCrop->isExecuted())
+        throw std::runtime_error("Failed to run Rebin algorithm");
+
       //Also fill in theta if needed
       if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty() && thetaGiven)
         m_model->setData(m_model->index(rowNo, COL_ANGLE), theta);
@@ -1025,7 +1064,9 @@ namespace MantidQt
     {
       if(!m_wsName.empty())
       {
-        AnalysisDataService::Instance().addOrReplace(m_wsName,boost::shared_ptr<ITableWorkspace>(m_ws->clone()));
+        AnalysisDataService::Instance().addOrReplace(
+            m_wsName,
+            boost::shared_ptr<ITableWorkspace>(m_ws->clone().release()));
         m_tableDirty = false;
       }
       else
@@ -1088,7 +1129,8 @@ namespace MantidQt
       ITableWorkspace_sptr origTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(toOpen);
 
       //We create a clone of the table for live editing. The original is not updated unless we explicitly save.
-      ITableWorkspace_sptr newTable = boost::shared_ptr<ITableWorkspace>(origTable->clone());
+      ITableWorkspace_sptr newTable =
+          boost::shared_ptr<ITableWorkspace>(origTable->clone().release());
       try
       {
         validateModel(newTable);

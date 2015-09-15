@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
@@ -148,7 +149,7 @@ class DataReflWidget(BaseRefWidget):
         m.incident_medium_index_selected = self._summary.incident_medium_combobox.currentIndex()
 
 
-        m.data_x_range = [int(self._summary.x_min_edit.text()),
+        m.data_x_range = [int(self._summary.x_min_edit.text()),\
                      int(self._summary.x_max_edit.text())]
         m.data_x_range_flag = self._summary.data_low_res_range_switch.isChecked()
 

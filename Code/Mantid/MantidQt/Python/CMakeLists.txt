@@ -49,7 +49,7 @@ add_custom_command ( OUTPUT ${SIP_SRC}
 )                     
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
-include_directories ( ${SIP_INCLUDE_DIR} )
+include_directories ( SYSTEM ${SIP_INCLUDE_DIR} )
 
 # Needed for sip generated files to find includes in src
 include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -76,17 +76,30 @@ if(WIN32)
 elseif ( APPLE )
 	# Mac: and in .so on the Mac, with no "lib" prefix either
   	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( mantidqtpython PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif () 
+
 else ()
 	# Linux: needs to NOT have the usual "lib" prefix. 
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" )
 endif ()
 
 # ... and links to other required libs ...
-target_link_libraries ( mantidqtpython 
-	MantidQtAPI MantidQtSliceViewer MantidQtFactory MantidQtRefDetectorViewer
-	${QT_LIBRARIES} ${QWT_LIBRARIES}
-	${PYTHON_LIBRARIES}
-	)
+target_link_libraries ( mantidqtpython LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            MantidQtAPI
+            MantidQtSliceViewer
+            MantidQtFactory
+            MantidQtRefDetectorViewer
+            MantidWidgets
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${PYTHON_LIBRARIES}
+            )
 
 
 

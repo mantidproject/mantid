@@ -6,6 +6,7 @@
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
+#include "MantidKernel/UnitFactory.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
 using namespace Mantid::Poldi;
@@ -81,83 +82,16 @@ public:
         std::vector<double> testList(testListRaw, testListRaw + 17);
 
         std::list<std::vector<double>::const_iterator> maxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
-        TS_ASSERT_EQUALS(maxima.size(), 3);
+        TS_ASSERT_EQUALS(maxima.size(), 4);
 
         maxima.sort();
 
-        double shouldGiveMaxima[] = {12.0, 34.0, 12.0};
+        double shouldGiveMaxima[] = {12.0, 34.0, 12.0, 7.0};
 
-        for(size_t i = 0; i < 3; ++i) {
+        for(size_t i = 0; i < 4; ++i) {
             TS_ASSERT_EQUALS(*maxima.front(), shouldGiveMaxima[i]);
             maxima.pop_front();
         }
-
-        // Same test with absolute recursion borders gives one additional peak at the right edge
-        poldiPeakSearch.setRecursionAbsoluteBorders(testList.begin(), testList.end());
-        std::list<std::vector<double>::const_iterator> edgeCasesMaxima = poldiPeakSearch.findPeaksRecursive(testList.begin(), testList.end());
-        TS_ASSERT_EQUALS(edgeCasesMaxima.size(), 4);
-
-        edgeCasesMaxima.sort();
-
-        double shouldGiveAbsoluteBordersMaxima[] = {12.0, 34.0, 12.0, 7.0};
-
-        for(size_t i = 0; i < 4; ++i) {
-            TS_ASSERT_EQUALS(*edgeCasesMaxima.front(), shouldGiveAbsoluteBordersMaxima[i]);
-            edgeCasesMaxima.pop_front();
-        }
-    }
-
-    void testsetRecursionAbsoluteBorders()
-    {
-        TestablePoldiPeakSearch poldiPeakSearch;
-
-        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
-        std::vector<double> baseData(testListRaw, testListRaw + 5);
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionBordersInitialized, false);
-
-        poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionAbsoluteBegin, baseData.begin());
-        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionAbsoluteEnd, baseData.end());
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.m_recursionBordersInitialized, true);
-    }
-
-    void testgetLeftRangeBegin()
-    {
-        int minimumDistance = 2;
-
-        TestablePoldiPeakSearch poldiPeakSearch;
-        poldiPeakSearch.setMinimumDistance(minimumDistance);
-
-        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
-        std::vector<double> baseData(testListRaw, testListRaw + 5);
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.getLeftRangeBegin(baseData.begin()), baseData.begin() + minimumDistance);
-
-        poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.getLeftRangeBegin(baseData.begin()), baseData.begin());
-        TS_ASSERT_EQUALS(poldiPeakSearch.getLeftRangeBegin(baseData.end() - minimumDistance), baseData.end());
-    }
-
-    void testgetRightRangeEnd()
-    {
-        int minimumDistance = 2;
-
-        TestablePoldiPeakSearch poldiPeakSearch;
-        poldiPeakSearch.setMinimumDistance(minimumDistance);
-
-        double testListRaw[] = {2.0, -3.0, -2.0, 12.0, 3.0 };
-        std::vector<double> baseData(testListRaw, testListRaw + 5);
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.getRightRangeEnd(baseData.end()), baseData.end() - minimumDistance);
-
-        poldiPeakSearch.setRecursionAbsoluteBorders(baseData.begin(), baseData.end());
-
-        TS_ASSERT_EQUALS(poldiPeakSearch.getRightRangeEnd(baseData.end()), baseData.end());
-        TS_ASSERT_EQUALS(poldiPeakSearch.getRightRangeEnd(baseData.begin() + minimumDistance), baseData.begin());
     }
 
     void testfindPeaks()
@@ -200,9 +134,10 @@ public:
 
         maxima.sort();
 
-        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), maxima, testXData);
+        Unit_sptr qUnit = UnitFactory::Instance().create("MomentumTransfer");
+        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), baseData.end(), maxima, testXData, qUnit);
 
-        TS_ASSERT_EQUALS(peaks.size(), 3);
+        TS_ASSERT_EQUALS(peaks.size(), 4);
 
         PoldiPeak_sptr peak0 = peaks[0];
         TS_ASSERT_EQUALS(peak0->q(), 3.0);

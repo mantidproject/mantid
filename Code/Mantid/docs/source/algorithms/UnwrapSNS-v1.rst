@@ -65,3 +65,5 @@ Output:
     Output 0.0
 
 .. categories::
+
+.. sourcelink::

@@ -1,10 +1,10 @@
-#ifndef MANTID_MDEVENTS_LOAD_SQW_H_
-#define MANTID_MDEVENTS_LOAD_SQW_H_
+#ifndef MANTID_MDALGORITHMS_LOAD_SQW_H_
+#define MANTID_MDALGORITHMS_LOAD_SQW_H_
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidAPI/Progress.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include <fstream>
 #include <string>
@@ -51,9 +51,10 @@ struct dataPositions {
   /// Default Constructor
   dataPositions()
       : if_sqw_start(18), n_dims_start(22), sqw_header_start(26),
-        detectors_start(0), data_start(0), geom_start(0),
-        s_start(0), // the following values have to be identified from the file
-                    // itself
+        component_headers_starts(), detectors_start(0), data_start(0),
+        geom_start(0), npax_start(0), s_start(0),
+        // the following values have to be identified from the file
+        // itself
         err_start(0), n_cell_pix_start(0), min_max_start(0), pix_start(0),
         mdImageSize(0){}; // the following values have to be identified from the
                           // file itself
@@ -109,7 +110,7 @@ private:
 protected: // for testing
   /// Read events onto the workspace.
   virtual void readEvents(
-      Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> *ws);
+      Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws);
 
   /// Read DND dimensions.
   void readDNDDimensions(
@@ -121,7 +122,7 @@ protected: // for testing
 
   /// Extract lattice information
   virtual void addLattice(
-      Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> *ws);
+      Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws);
 
   /// Parse metadata from file.
   void parseMetadata(const std::string &fileName); // New controlling function
@@ -131,7 +132,7 @@ protected: // for testing
       std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector);
   /// add range of dimensions to the workspace;
   void addDimsToWs(
-      Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> *ws,
+      Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws,
       std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector);
 
   /// read real box sizes for all Horace Boxes;
@@ -166,6 +167,6 @@ protected: // for testing
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

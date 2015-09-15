@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <vector>
 #include <set>
@@ -12,6 +13,25 @@
 
 namespace Mantid {
 namespace Geometry {
+
+/// Functor for fuzzy comparison of V3D-objects using Kernel::Tolerance
+struct MANTID_GEOMETRY_DLL FuzzyV3DLessThan {
+  bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) {
+    if (fabs(lhs.X() - rhs.X()) > Kernel::Tolerance) {
+      return lhs.X() < rhs.X();
+    }
+
+    if (fabs(lhs.Y() - rhs.Y()) > Kernel::Tolerance) {
+      return lhs.Y() < rhs.Y();
+    }
+
+    if (fabs(lhs.Z() - rhs.Z()) > Kernel::Tolerance) {
+      return lhs.Z() < rhs.Z();
+    }
+
+    return false;
+  }
+};
 
 /**
     @class Group
@@ -109,6 +129,18 @@ namespace Geometry {
   */
 class MANTID_GEOMETRY_DLL Group {
 public:
+  enum CoordinateSystem {
+    Orthogonal,
+    Hexagonal
+  };
+
+  enum GroupAxiom {
+    Closure,
+    Identity,
+    Inversion,
+    Associativity
+  };
+
   Group();
   Group(const std::string &symmetryOperationString);
   Group(const std::vector<SymmetryOperation> &symmetryOperations);
@@ -118,7 +150,9 @@ public:
   virtual ~Group() {}
 
   size_t order() const;
+  CoordinateSystem getCoordinateSystem() const;
   std::vector<SymmetryOperation> getSymmetryOperations() const;
+  bool containsOperation(const SymmetryOperation &operation) const;
 
   Group operator*(const Group &other) const;
 
@@ -127,12 +161,24 @@ public:
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;
 
+  bool fulfillsAxiom(GroupAxiom axiom) const;
+  bool isGroup() const;
+
 protected:
   void setSymmetryOperations(
       const std::vector<SymmetryOperation> &symmetryOperations);
 
+  CoordinateSystem getCoordinateSystemFromOperations(
+      const std::vector<SymmetryOperation> &symmetryOperations) const;
+
+  bool isClosed() const;
+  bool hasIdentity() const;
+  bool eachElementHasInverse() const;
+  bool associativityHolds() const;
+
   std::vector<SymmetryOperation> m_allOperations;
   std::set<SymmetryOperation> m_operationSet;
+  CoordinateSystem m_axisSystem;
 };
 
 typedef boost::shared_ptr<Group> Group_sptr;
@@ -144,6 +190,14 @@ namespace GroupFactory {
 template <typename T>
 Group_const_sptr create(const std::string &initializationString) {
   return boost::make_shared<const T>(initializationString);
+}
+
+/// Creates a Group sub-class of type T if T has a constructor that takes a
+/// vector of SymmetryOperations.
+template <typename T>
+Group_const_sptr
+create(const std::vector<SymmetryOperation> &symmetryOperations) {
+  return boost::make_shared<const T>(symmetryOperations);
 }
 }
 

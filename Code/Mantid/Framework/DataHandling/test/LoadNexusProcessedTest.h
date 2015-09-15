@@ -2,22 +2,35 @@
 #define LOADNEXUSPROCESSEDTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataHandling/Load.h"
-#include "SaveNexusProcessedTest.h"
-#include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <Poco/File.h>
-#include <boost/lexical_cast.hpp>
-#include "MantidGeometry/IDTypes.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "SaveNexusProcessedTest.h"
+
+#include <boost/assign/list_of.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include <cxxtest/TestSuite.h>
+
+#include <hdf5.h>
+
+#include <Poco/File.h>
+
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -42,15 +55,16 @@ public:
     delete suite;
   }
 
-  LoadNexusProcessedTest() :
-      testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest")
+  LoadNexusProcessedTest():
+      testFile("GEM38370_Focussed_Legacy.nxs"), output_ws("nxstest"),
+      m_savedTmpEventFile("")
   {
-
   }
 
   ~LoadNexusProcessedTest()
   {
     AnalysisDataService::Instance().clear();
+    clearTmpEventNexus();
   }
 
   void testFastMultiPeriodDefault()
@@ -403,6 +417,148 @@ public:
     dotest_LoadAnEventFile(WEIGHTED_NOTIME);
   }
 
+  void test_loadEventNexus_Min()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    // this should imply 4==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
+  }
+
+  void test_loadEventNexus_Max()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 2, 2);
+  }
+
+  void test_loadEventNexus_Min_Max()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "2");
+    alg.setPropertyValue("SpectrumMax", "4");
+    // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    // in history, expect: load + LoadInst (child)
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Fail()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "1,3,5,89");
+    // the 89 should cause trouble, but gracefully...
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(!alg.isExecuted());
+  }
+
+  void test_loadEventNexus_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "1,3,5");
+    // this should imply 3==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Min_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumList", "5");
+    alg.setPropertyValue("SpectrumMin", "4");
+    // this should imply 2==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 3, 2);
+  }
+
+  void test_loadEventNexus_Max_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMax", "2");
+    alg.setPropertyValue("SpectrumList", "3,5");
+    // this should imply 4==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 4, 2);
+  }
+
+  void test_loadEventNexus_Min_Max_List()
+  {
+    writeTmpEventNexus();
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized());
+
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("OutputWorkspace", output_ws);
+    alg.setPropertyValue("SpectrumMin", "3");
+    alg.setPropertyValue("SpectrumMax", "5");
+    alg.setPropertyValue("SpectrumList", "1,2,3,5");
+    // this should imply 5(all)==ws->getNumberHistograms()
+
+    // expected number of spectra and length of the alg history
+    doCommonEventLoadChecks(alg, 5, 2);
+  }
+
   void test_load_saved_workspace_group()
   {
     LoadNexusProcessed alg;
@@ -632,6 +788,143 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_peaks_workspace_with_shape_format()
+  {
+      LoadNexusProcessed loadAlg;
+      loadAlg.setChild(true);
+      loadAlg.initialize();
+      loadAlg.setPropertyValue("Filename", "SingleCrystalPeakTable.nxs");
+      loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+      loadAlg.execute();
+
+      Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+      auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+      TS_ASSERT(peakWS);
+
+      TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
+      // In this peaks workspace one of the peaks has been marked as spherically integrated.
+      TS_ASSERT_EQUALS("spherical", peakWS->getPeak(0).getPeakShape().shapeName());
+      TS_ASSERT_EQUALS("none", peakWS->getPeak(1).getPeakShape().shapeName());
+      TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
+  }
+
+  /* The nexus format for this type of workspace has a legacy format with no shape information
+   * We should still be able to load that */
+  void test_peaks_workspace_no_shape_format()
+  {
+      LoadNexusProcessed loadAlg;
+      loadAlg.setChild(true);
+      loadAlg.initialize();
+      loadAlg.setPropertyValue("Filename", "SingleCrystalPeakTableLegacy.nxs");
+      loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+      loadAlg.execute();
+
+      Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+      auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
+      TS_ASSERT(peakWS);
+  }
+
+  void test_coordinates_saved_and_loaded_on_peaks_workspace()
+  {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    // Loading a peaks workspace without a instrument from an IDF doesn't work ...
+    const std::string filename = FileFinder::Instance().getFullPath(
+          "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(NULL);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    peaksTestWS->setCoordinateSystem(appliedCoordinateSystem);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "LoadAndSaveNexusProcessedCoordinateSystem.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "__unused");
+    loadAlg.execute();
+    
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS =
+        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+    Poco::File testFile(filePath);
+    if(testFile.exists())
+    {
+      testFile.remove();
+    }
+    
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());
+  }
+
+  // backwards compatability check
+  void test_coordinates_saved_and_loaded_on_peaks_workspace_from_expt_info()
+  {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    // Loading a peaks workspace without a instrument from an IDF doesn't work ...
+    const std::string filename = FileFinder::Instance().getFullPath(
+          "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(NULL);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+
+    // simulate old-style file with "CoordinateSystem" log
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    peaksTestWS->logs()->addProperty("CoordinateSystem",
+                                     static_cast<int>(appliedCoordinateSystem));
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "LoadAndSaveNexusProcessedCoordinateSystemOldFormat.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    // Remove the coordinate_system entry so it falls back on the log. NeXus
+    // can't do this so use the HDF5 API directly
+    auto fid = H5Fopen(filePath.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    auto mantid_id = H5Gopen(fid, "mantid_workspace_1", H5P_DEFAULT);
+    auto peaks_id = H5Gopen(mantid_id, "peaks_workspace", H5P_DEFAULT);
+    if (peaks_id > 0) {
+      H5Ldelete(peaks_id, "coordinate_system", H5P_DEFAULT);
+      H5Gclose(peaks_id);
+      H5Gclose(mantid_id);
+    } else {
+      TS_FAIL("Cannot unlink coordinate_system group. Test file has unexpected "
+              "structure.");
+    }
+    H5Fclose(fid);
+    
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "__unused");
+    loadAlg.execute();
+    
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS =
+        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+    Poco::File testFile(filePath);
+    if(testFile.exists())
+    {
+      testFile.remove();
+    }
+    
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());
+  }
+
+  
   void testTableWorkspace_vectorColumn()
   {
     // Create a table we will save
@@ -664,8 +957,9 @@ public:
     saveAlg.initialize();
     saveAlg.setPropertyValue("InputWorkspace", inTableEntry.name());
     saveAlg.setPropertyValue("Filename", savedFileName);
-    TS_ASSERT_THROWS_NOTHING( saveAlg.execute());
-    TS_ASSERT( saveAlg.isExecuted());
+
+    TS_ASSERT_THROWS_NOTHING(saveAlg.execute());
+    TS_ASSERT(saveAlg.isExecuted());
 
     if (!saveAlg.isExecuted())
       return; // Nothing to check
@@ -721,6 +1015,108 @@ public:
     }
   }
 
+  void test_SaveAndLoadOnHistogramWS() {
+    // Test SaveNexusProcessed/LoadNexusProcessed on a histogram workspace
+
+    // Create histogram workspace with two spectra and 4 points
+    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> y1 = boost::assign::list_of(1)(2);
+    std::vector<double> x2 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> y2 = boost::assign::list_of(1)(2);
+    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
+        "Workspace2D", 2, x1.size(), y1.size());
+    inputWs->dataX(0) = x1;
+    inputWs->dataX(1) = x2;
+    inputWs->dataY(0) = y1;
+    inputWs->dataY(1) = y2;
+
+    // Save workspace
+    IAlgorithm_sptr save =
+        AlgorithmManager::Instance().create("SaveNexusProcessed");
+    save->initialize();
+    TS_ASSERT(save->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(save->execute());
+
+    // Load workspace
+    IAlgorithm_sptr load =
+        AlgorithmManager::Instance().create("LoadNexusProcessed");
+    load->initialize();
+    TS_ASSERT(load->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        load->setPropertyValue("OutputWorkspace", "output"));
+    TS_ASSERT_THROWS_NOTHING(load->execute());
+
+    // Check spectra in loaded workspace
+    MatrixWorkspace_sptr outputWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
+    TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
+    TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
+    TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
+    TS_ASSERT_EQUALS(inputWs->readY(1), outputWs->readY(1));
+    TS_ASSERT_EQUALS(inputWs->readE(0), outputWs->readE(0));
+    TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
+
+    // Remove workspace and saved nexus file
+    AnalysisDataService::Instance().remove("output");
+    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+  }
+
+  void test_SaveAndLoadOnPointLikeWS() {
+    // Test SaveNexusProcessed/LoadNexusProcessed on a point-like workspace
+
+    // Create histogram workspace with two spectra and 4 points
+    std::vector<double> x1 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> y1 = boost::assign::list_of(1)(2)(3);
+    std::vector<double> x2 = boost::assign::list_of(10)(20)(30);
+    std::vector<double> y2 = boost::assign::list_of(10)(20)(30);
+    MatrixWorkspace_sptr inputWs = WorkspaceFactory::Instance().create(
+        "Workspace2D", 2, x1.size(), y1.size());
+    inputWs->dataX(0) = x1;
+    inputWs->dataX(1) = x2;
+    inputWs->dataY(0) = y1;
+    inputWs->dataY(1) = y2;
+
+    // Save workspace
+    IAlgorithm_sptr save =
+        AlgorithmManager::Instance().create("SaveNexusProcessed");
+    save->initialize();
+    TS_ASSERT(save->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(save->setProperty("InputWorkspace", inputWs));
+    TS_ASSERT_THROWS_NOTHING(save->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(save->execute());
+
+    // Load workspace
+    IAlgorithm_sptr load =
+        AlgorithmManager::Instance().create("LoadNexusProcessed");
+    load->initialize();
+    TS_ASSERT(load->isInitialized());
+    TS_ASSERT_THROWS_NOTHING(load->setPropertyValue(
+        "Filename", "TestSaveAndLoadNexusProcessed.nxs"));
+    TS_ASSERT_THROWS_NOTHING(
+        load->setPropertyValue("OutputWorkspace", "output"));
+    TS_ASSERT_THROWS_NOTHING(load->execute());
+
+    // Check spectra in loaded workspace
+    MatrixWorkspace_sptr outputWs =
+        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("output");
+    TS_ASSERT_EQUALS(inputWs->readX(0), outputWs->readX(0));
+    TS_ASSERT_EQUALS(inputWs->readX(1), outputWs->readX(1));
+    TS_ASSERT_EQUALS(inputWs->readY(0), outputWs->readY(0));
+    TS_ASSERT_EQUALS(inputWs->readY(1), outputWs->readY(1));
+    TS_ASSERT_EQUALS(inputWs->readE(0), outputWs->readE(0));
+    TS_ASSERT_EQUALS(inputWs->readE(1), outputWs->readE(1));
+
+    // Remove workspace and saved nexus file
+    AnalysisDataService::Instance().remove("output");
+    Poco::File("TestSaveAndLoadNexusProcessed.nxs").remove();
+  }
+
   void do_load_multiperiod_workspace(bool fast)
   {
     LoadNexusProcessed loader;
@@ -769,6 +1165,7 @@ public:
   }
 
 private:
+
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
   {
     const WorkspaceHistory history = matrix_ws->getHistory();
@@ -784,8 +1181,88 @@ private:
     }
   }
 
-  LoadNexusProcessed algToBeTested;
+  /**
+   * Do a few standard checks that are repeated in multiple tests of
+   * partial event data loading
+   *
+   * @param alg initialized and parameterized load algorithm
+   * @param nSpectra expected number of spectra
+   * @param nHistory expected number of entries in the algorithm
+   * history
+   **/
+  void doCommonEventLoadChecks(LoadNexusProcessed& alg, size_t nSpectra,
+                               size_t nHistory)
+  {
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted());
+
+    // Test basic props of the ws
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve(output_ws));
+    TS_ASSERT(workspace);
+    if (!workspace)
+      return;
+    TS_ASSERT(workspace.get());
+
+    EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    TS_ASSERT(ews);
+    if (!ews)
+      return;
+    TS_ASSERT(ews.get());
+    TS_ASSERT_EQUALS(ews->getNumberHistograms(), nSpectra);
+
+    TS_ASSERT_EQUALS(ews->getHistory().size(), nHistory);
+  }
+
+  void writeTmpEventNexus()
+  {
+    //return;
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+      return;
+
+    std::vector< std::vector<int> > groups(6);
+    groups[0].push_back(9);
+    groups[0].push_back(12);
+    groups[1].push_back(5);
+    groups[1].push_back(10);
+    groups[2].push_back(20);
+    groups[2].push_back(21);
+    groups[3].push_back(10);
+    groups[4].push_back(50);
+    groups[5].push_back(15);
+    groups[5].push_back(20);
+
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateGroupedEventWorkspace(groups, 30, 1.0);
+    ws->getEventList(4).clear();
+
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), groups.size());
+
+    SaveNexusProcessed alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+    m_savedTmpEventFile = "LoadNexusProcessed_TmpEvent.nxs";
+    alg.setPropertyValue("Filename", m_savedTmpEventFile);
+    alg.setPropertyValue("Title", "Tmp test event workspace as NexusProcessed file");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get absolute path to the saved file
+    m_savedTmpEventFile = alg.getPropertyValue("Filename");
+  }
+
+  void clearTmpEventNexus()
+  {
+    // remove saved/re-loaded test event data file
+    if (!m_savedTmpEventFile.empty() && Poco::File(m_savedTmpEventFile).exists())
+      Poco::File(m_savedTmpEventFile).remove();
+  }
+
   std::string testFile, output_ws;
+  /// Saved using SaveNexusProcessed and re-used in several load event tests
+  std::string m_savedTmpEventFile;
+  static const EventType m_savedTmpType = TOF;
+
 };
 
 //------------------------------------------------------------------------------

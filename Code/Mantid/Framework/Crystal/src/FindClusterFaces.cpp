@@ -2,29 +2,19 @@
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Utils.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <map>
-#include <deque>
-#include <algorithm>
-
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 namespace {
@@ -59,7 +49,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
     PeakClusterProjection projection(clusterImage);
 
     for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i) {
-      IPeak &peak = filterWorkspace->getPeak(i);
+      Mantid::Geometry::IPeak &peak = filterWorkspace->getPeak(i);
       const int labelIdAtPeakCenter =
           static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {
@@ -270,10 +260,10 @@ FindClusterFaces::~FindClusterFaces() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string FindClusterFaces::name() const { return "FindClusterFaces"; };
+const std::string FindClusterFaces::name() const { return "FindClusterFaces"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int FindClusterFaces::version() const { return 1; };
+int FindClusterFaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string FindClusterFaces::category() const { return "Crystal"; }

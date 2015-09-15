@@ -59,7 +59,6 @@ public:
 private:
   void init();
   void exec();
-  void afterPropertySet(const std::string &);
 };
 
 } // namespace LiveData

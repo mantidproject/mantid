@@ -12,7 +12,7 @@ Description
 `MDEventWorkspaces <http://www.mantidproject.org/MDEventWorkspace>`_ and
 :ref:`MDHistoWorkspaces <MDHistoWorkspace>` can be used with any type of
 coordinate system. On the other hand
-`PeaksWorkspaces <http://www.mantidproject.org/PeaksWorkspace>`_ may be plotted either in QLab,
+:ref:`PeaksWorkspaces <PeaksWorkspace>` may be plotted either in QLab,
 QSample or HKL. There is an inherent link between a PeaksWorkspace and a
 MDWorkspace in that an MDWorkspace may utilise the same coordinate
 systems as the PeaksWorkspaces. For example, workspaces created via
@@ -30,3 +30,5 @@ flags are new, and legacy workspaces will need to be corrected in order
 for them to work as expected with the Mantid tools.
 
 .. categories::
+
+.. sourcelink::

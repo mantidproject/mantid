@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -15,7 +16,7 @@ def getBooleanElement(instrument_dom, keyname, default):
     (1) True/False
     (2) 1/0
     """
-    tempbool = BaseScriptElement.getStringElement(instrument_dom,
+    tempbool = BaseScriptElement.getStringElement(instrument_dom,\
             keyname, default=default)
 
     if tempbool == "True":
@@ -30,7 +31,7 @@ def getFloatElement(instrument_dom, keyname, default):
     return the default value.
     """
     try:
-        return BaseScriptElement.getFloatElement(instrument_dom,
+        return BaseScriptElement.getFloatElement(instrument_dom,\
                                keyname, default=default)
     except ValueError:
         return default
@@ -56,6 +57,8 @@ class AdvancedSetupScript(BaseScriptElement):
     extension = "_event.nxs"
     outputfileprefix = ""
     scaledata = ""
+
+    parnamelist = None
 
     def __init__(self, inst_name):
         """ Initialization
@@ -182,22 +185,22 @@ class AdvancedSetupScript(BaseScriptElement):
                                                           AdvancedSetupScript.removepropmppulsewidth)
 
             try:
-                self.maxchunksize = BaseScriptElement.getIntElement(instrument_dom,
+                self.maxchunksize = BaseScriptElement.getIntElement(instrument_dom,\
                     "maxchunksize", default=AdvancedSetupScript.maxchunksize)
             except ValueError:
                 self.maxchunksize = AdvancedSetupScript.maxchunksize
 
-            self.filterbadpulses = getFloatElement(instrument_dom,
+            self.filterbadpulses = getFloatElement(instrument_dom,\
                     "filterbadpulses", AdvancedSetupScript.filterbadpulses)
 
-            self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,
+            self.bkgdsmoothpars = BaseScriptElement.getStringElement(instrument_dom,\
                 "bkgdsmoothpars", default=AdvancedSetupScript.bkgdsmoothpars)
 
 
-            self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,
+            self.pushdatapositive = BaseScriptElement.getStringElement(instrument_dom,\
                     "pushdatapositive", default=AdvancedSetupScript.pushdatapositive)
 
-            self.stripvanadiumpeaks = getBooleanElement(instrument_dom,
+            self.stripvanadiumpeaks = getBooleanElement(instrument_dom,\
                     "stripvanadiumpeaks", AdvancedSetupScript.stripvanadiumpeaks)
 
             self.vanadiumfwhm = getFloatElement(instrument_dom, "vanadiumfwhm",
@@ -206,16 +209,16 @@ class AdvancedSetupScript(BaseScriptElement):
             self.vanadiumpeaktol = getFloatElement(instrument_dom, "vanadiumpeaktol",
                                                    AdvancedSetupScript.vanadiumpeaktol)
 
-            self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
+            self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,\
                 "vanadiumsmoothparams", default=AdvancedSetupScript.vanadiumsmoothparams)
 
-            self.extension = BaseScriptElement.getStringElement(instrument_dom,
+            self.extension = BaseScriptElement.getStringElement(instrument_dom,\
                     "extension", default=AdvancedSetupScript.extension)
 
             self.preserveevents = getBooleanElement(instrument_dom, "preserveevents",
                                                     default=AdvancedSetupScript.preserveevents)
 
-            self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,
+            self.outputfileprefix = BaseScriptElement.getStringElement(instrument_dom,\
                     "outputfileprefix", default = AdvancedSetupScript.outputfileprefix)
 
             self.scaledata = getFloatElement(instrument_dom, "scaledata",

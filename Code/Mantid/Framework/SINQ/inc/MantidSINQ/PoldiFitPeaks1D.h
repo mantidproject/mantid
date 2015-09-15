@@ -13,7 +13,6 @@
 
 namespace Mantid {
 namespace Poldi {
-
 /** PoldiFitPeaks1D :
 
   PoldiFitPeaks1D fits multiple peaks to POLDI auto-correlation data.
@@ -41,7 +40,6 @@ namespace Poldi {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class MANTID_SINQ_DLL PoldiFitPeaks1D : public API::Algorithm {
 public:
   PoldiFitPeaks1D();
@@ -57,35 +55,25 @@ public:
   virtual const std::string category() const;
 
 protected:
-  void setPeakFunction(std::string peakFunction);
-  PoldiPeakCollection_sptr
-  getInitializedPeakCollection(DataObjects::TableWorkspace_sptr peakTable);
+  void setPeakFunction(const std::string &peakFunction);
+  PoldiPeakCollection_sptr getInitializedPeakCollection(
+      const DataObjects::TableWorkspace_sptr &peakTable) const;
 
-  API::IFunction_sptr getPeakProfile(PoldiPeak_sptr poldiPeak);
-  void setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak,
-                                    API::IFunction_sptr fittedFunction);
-  double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction);
+  API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
+  void
+  setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak,
+                               const API::IFunction_sptr &fittedFunction) const;
+  double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
 
   API::IAlgorithm_sptr
-  getFitAlgorithm(DataObjects::Workspace2D_sptr dataWorkspace,
-                  PoldiPeak_sptr peak, API::IFunction_sptr profile);
-
-  void addPeakFitCharacteristics(API::ITableWorkspace_sptr fitResult);
-  void initializeFitResultWorkspace(API::ITableWorkspace_sptr fitResult);
-
-  void initializePeakResultWorkspace(
-      DataObjects::TableWorkspace_sptr peakResultWorkspace);
-  void storePeakResult(API::TableRow tableRow, PoldiPeak_sptr peak);
-  DataObjects::TableWorkspace_sptr
-  generateResultTable(PoldiPeakCollection_sptr peaks);
+  getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,
+                  const PoldiPeak_sptr &peak,
+                  const API::IFunction_sptr &profile);
 
   PoldiPeakCollection_sptr m_peaks;
   std::string m_profileTemplate;
   API::IFunction_sptr m_backgroundTemplate;
   std::string m_profileTies;
-
-  DataObjects::TableWorkspace_sptr m_fitCharacteristics;
-  DataObjects::TableWorkspace_sptr m_peakResultOutput;
 
   double m_fwhmMultiples;
 

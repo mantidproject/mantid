@@ -1,7 +1,7 @@
 #ifndef NEXUSFILEIO_H
 #define NEXUSFILEIO_H
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -60,7 +60,7 @@ public:
   /// Default constructor
   NexusFileIO();
 
-  /// Contructor with Progress suplied
+  /// Contructor with Progress supplied
   NexusFileIO(API::Progress *prog);
 
   /// Destructor
@@ -128,7 +128,9 @@ public:
 
 private:
   /// C++ API file handle
+  // clang-format off
   boost::shared_ptr< ::NeXus::File> m_filehandle;
+  // clang-format on
   /// Nexus compression method
   int m_nexuscompression;
   /// Allow an externally supplied progress object to be used

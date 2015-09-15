@@ -7,12 +7,13 @@ set ( SRC_FILES
 	src/BinFinder.cpp
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
-	src/CompositeValidator.cpp
-	src/ConfigService.cpp
 	src/ChecksumHelper.cpp
+	src/CompositeValidator.cpp
+	src/ComputeResourceInfo.cpp
+	src/ConfigService.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateTimeValidator.cpp 
+	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
@@ -41,13 +42,18 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MDUnit.cpp
+	src/MDUnitFactory.cpp
 	src/MagneticFormFactorTable.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Material.cpp
+	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
+	src/Math/Distributions/ChebyshevPolynomial.cpp
+	src/Math/Distributions/ChebyshevSeries.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
@@ -79,6 +85,7 @@ set ( SRC_FILES
 	src/StartsWithValidator.cpp
 	src/Statistics.cpp
 	src/StdoutChannel.cpp
+	src/StringContainsValidator.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
 	src/ThreadPool.cpp
@@ -127,9 +134,12 @@ set ( INC_FILES
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
-	inc/MantidKernel/CompositeValidator.h
-	inc/MantidKernel/ConfigService.h
+	inc/MantidKernel/Chainable.h
+	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
+	inc/MantidKernel/CompositeValidator.h
+	inc/MantidKernel/ComputeResourceInfo.h
+	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/DataItem.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
@@ -171,6 +181,8 @@ set ( INC_FILES
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
+	inc/MantidKernel/MDUnit.h
+	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -178,7 +190,10 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
+	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
+	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
+	inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
@@ -196,6 +211,7 @@ set ( INC_FILES
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
+	inc/MantidKernel/PocoVersion.h
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
@@ -214,9 +230,11 @@ set ( INC_FILES
 	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
+	inc/MantidKernel/SpecialCoordinateSystem.h
 	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/StdoutChannel.h
+	inc/MantidKernel/StringContainsValidator.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/Task.h
@@ -261,9 +279,13 @@ set ( TEST_FILES
 	CPUTimerTest.h
 	CacheTest.h
 	CatalogInfoTest.h
-	CompositeValidatorTest.h
-	ConfigServiceTest.h
+	ChebyshevPolyFitTest.h
+	ChebyshevPolynomialTest.h
+	ChebyshevSeriesTest.h
 	ChecksumHelperTest.h
+	CompositeValidatorTest.h
+	ComputeResourceInfoTest.h
+	ConfigServiceTest.h
 	DataServiceTest.h
 	DateAndTimeTest.h
 	DateTimeValidatorTest.h
@@ -295,6 +317,8 @@ set ( TEST_FILES
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
+	MDUnitFactoryTest.h
+	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
@@ -327,9 +351,11 @@ set ( TEST_FILES
 	RegexStringsTest.h
 	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
+	SpecialCoordinateSystemTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
 	StdoutChannelTest.h
+	StringContainsValidatorTest.h
 	StringsTest.h
 	TaskTest.h
 	ThreadPoolRunnableTest.h
@@ -353,6 +379,12 @@ set ( TEST_FILES
 	VisibleWhenPropertyTest.h
 	WriteLockTest.h
 )
+
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     LIST( APPEND SRC_FILES src/NetworkProxyOSX.cpp )
@@ -379,18 +411,26 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS "IN_MANTID_KERNEL;PSAPI_VERSION=1" )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 
 # For older gcc versions (<4.5) if we do not put stdc++ first then things crash when an exceptions are
 # thrown in Python.
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
- target_link_libraries ( Kernel stdc++ )
+ target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} 
-                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
+target_link_libraries ( Kernel LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} )
+
+if (WITH_ASAN)
+  target_link_libraries ( Kernel LINK_PRIVATE -lasan )
+endif ()
+
 if ( WIN32 )
-  target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
+  target_link_libraries ( Kernel LINK_PRIVATE Psapi.lib ) # For memory usage queries
 endif()
 
 # Add the unit tests directory
@@ -409,6 +449,13 @@ if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersio
                    ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
   )
 endif ()
+
+###########################################################################
+# This section deals with creating the PocoVersion implementation
+###########################################################################
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/PocoVersion.h
+)
 
 ###########################################################################
 # This section deals with creating the ParaViewVersion implementation
@@ -430,15 +477,20 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
-set ( PV_PLUGINS "./pvplugins" )
+if ( MAKE_VATES )
+  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+else ()
+  set ( PV_PLUGINS "" )
+endif ()
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "0" )
 set ( ENABLE_USAGE_REPORTS "0" )
 set ( PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins" )
-set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/AutoTestData/UsageData;${MANTID_ROOT}/instrument )
+set ( DATADIRS ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
-set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish_debug" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository?debug=1" )
 set ( HTML_ROOT ${DOCS_BUILDDIR}/html )
 
 # Construct script paths.
@@ -512,9 +564,10 @@ endif ()
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python" )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "1" )
+set ( CHECK_FOR_NEW_MANTID_VERSION "1" )
 set ( ENABLE_USAGE_REPORTS "1" )
 set ( DATADIRS "" )
-set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
+set ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository" )
 set ( HTML_ROOT ../share/doc/html )
 
 # Construct script paths by replacing the old MANTID_ROOT with the new one.

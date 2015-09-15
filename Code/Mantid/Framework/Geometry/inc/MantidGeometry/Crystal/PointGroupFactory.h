@@ -2,14 +2,46 @@
 #define MANTID_GEOMETRY_POINTGROUPFACTORY_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
+#include "MantidKernel/RegistrationHelper.h"
 
 #include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
+
+class MANTID_GEOMETRY_DLL PointGroupGenerator {
+public:
+  PointGroupGenerator(const std::string &hmSymbol,
+                      const std::string &generatorInformation,
+                      const std::string &description);
+
+  ~PointGroupGenerator() {}
+
+  inline std::string getHMSymbol() const { return m_hmSymbol; }
+  inline std::string getGeneratorString() const { return m_generatorString; }
+  inline std::string getDescription() const { return m_description; }
+
+  PointGroup_sptr getPrototype();
+
+private:
+  inline bool hasValidPrototype() const {
+    return static_cast<bool>(m_prototype);
+  }
+
+  PointGroup_sptr generatePrototype();
+
+  std::string m_hmSymbol;
+  std::string m_generatorString;
+  std::string m_description;
+
+  PointGroup_sptr m_prototype;
+};
+
+typedef boost::shared_ptr<PointGroupGenerator> PointGroupGenerator_sptr;
+
 /**
   @class PointGroupFactory
 
@@ -46,46 +78,43 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_GEOMETRY_DLL PointGroupFactoryImpl
-    : public Kernel::DynamicFactory<PointGroup> {
+class MANTID_GEOMETRY_DLL PointGroupFactoryImpl {
 public:
-  PointGroup_sptr createPointGroup(const std::string &hmSymbol) const;
-  PointGroup_sptr createPointGroupFromSpaceGroupSymbol(
-      const std::string &spaceGroupSymbol) const;
+  PointGroup_sptr createPointGroup(const std::string &hmSymbol);
+  PointGroup_sptr
+  createPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  PointGroup_sptr
+  createPointGroupFromSpaceGroup(const SpaceGroup &spaceGroup);
+
+  bool isSubscribed(const std::string &hmSymbol) const;
 
   std::vector<std::string> getAllPointGroupSymbols() const;
   std::vector<std::string>
-  getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem) const;
+  getPointGroupSymbols(const PointGroup::CrystalSystem &crystalSystem);
 
-  /// Subscribes a point group into the factory
-  template <class C> void subscribePointGroup() {
-    Kernel::Instantiator<C, PointGroup> *instantiator =
-        new Kernel::Instantiator<C, PointGroup>;
-    PointGroup_sptr temporaryPointgroup = instantiator->createInstance();
-    std::string hmSymbol = temporaryPointgroup->getSymbol();
-
-    subscribe(hmSymbol, instantiator);
-
-    addToCrystalSystemMap(temporaryPointgroup->crystalSystem(), hmSymbol);
-  }
+  void subscribePointGroup(const std::string &hmSymbol,
+                           const std::string &generatorString,
+                           const std::string &description);
 
   /// Unsubscribes a point group from the factory
   void unsubscribePointGroup(const std::string &hmSymbol) {
-    unsubscribe(hmSymbol);
-    removeFromCrystalSystemMap(hmSymbol);
+    m_generatorMap.erase(hmSymbol);
   }
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PointGroupFactoryImpl>;
 
   PointGroupFactoryImpl();
-  void addToCrystalSystemMap(const PointGroup::CrystalSystem &crystalSystem,
-                             const std::string &hmSymbol);
-  void removeFromCrystalSystemMap(const std::string &hmSymbol);
 
   std::string pointGroupSymbolFromSpaceGroupSymbol(
       const std::string &spaceGroupSymbol) const;
 
+  PointGroup_sptr getPrototype(const std::string &hmSymbol);
+  void subscribe(const PointGroupGenerator_sptr &generator);
+  PointGroup_sptr
+  constructFromPrototype(const PointGroup_sptr &prototype) const;
+
+  std::map<std::string, PointGroupGenerator_sptr> m_generatorMap;
   std::map<std::string, PointGroup::CrystalSystem> m_crystalSystemMap;
 
   boost::regex m_screwAxisRegex;
@@ -97,20 +126,24 @@ private:
 // This is taken from FuncMinimizerFactory
 #ifdef _WIN32
 template class MANTID_GEOMETRY_DLL
-    Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
+Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>;
 #endif
 
 typedef Mantid::Kernel::SingletonHolder<PointGroupFactoryImpl>
-    PointGroupFactory;
+PointGroupFactory;
 
 } // namespace Geometry
 } // namespace Mantid
 
-#define DECLARE_POINTGROUP(classname)                                          \
+#define PGF_CONCAT_IMPL(x, y) x##y
+#define PGF_CONCAT(x, y) PGF_CONCAT_IMPL(x, y)
+
+#define DECLARE_POINTGROUP(hmSymbol, generators, description)                  \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_pointgroup_##classname(          \
-      ((Mantid::Geometry::PointGroupFactory::Instance()                        \
-            .subscribePointGroup<classname>()),                                \
+  Mantid::Kernel::RegistrationHelper PGF_CONCAT(register_pointgroup,           \
+                                                __COUNTER__)(                  \
+      ((Mantid::Geometry::PointGroupFactory::Instance().subscribePointGroup(   \
+           hmSymbol, generators, description)),                                \
        0));                                                                    \
   }
 

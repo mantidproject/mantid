@@ -1,22 +1,18 @@
 #ifndef MANTID_MDALGORITHMS_MINUSMDTEST_H_
 #define MANTID_MDALGORITHMS_MINUSMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class MinusMDTest : public CxxTest::TestSuite
 {
@@ -50,8 +46,8 @@ public:
   {
     AnalysisDataService::Instance().clear();
     // Make two input workspaces
-    MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("MinusMDTest_lhs", lhs_file);
-    MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("MinusMDTest_rhs", rhs_file);
+    MDEventWorkspace3Lean::sptr lhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_lhs", lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("MinusMDTest_rhs", rhs_file);
     std::string outWSName = "MinusMDTest_out";
     if (inPlace == 1)
       outWSName = "MinusMDTest_lhs";

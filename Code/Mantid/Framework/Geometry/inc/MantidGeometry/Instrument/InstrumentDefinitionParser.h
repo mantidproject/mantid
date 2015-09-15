@@ -58,25 +58,21 @@ class Object;
 class DLLExport InstrumentDefinitionParser {
 public:
   InstrumentDefinitionParser();
+  InstrumentDefinitionParser(const std::string &filename, const std::string &instName,
+                  const std::string &xmlText);
+  InstrumentDefinitionParser(const IDFObject_const_sptr xmlFile, 
+                  const IDFObject_const_sptr expectedCacheFile, 
+                  const std::string& instName, const std::string& xmlText);
   ~InstrumentDefinitionParser();
 
   /// Caching
   enum CachingOption {
     NoneApplied,
-    ReadAdjacent,
+    ReadGeomCache,
     ReadFallBack,
-    WroteCacheAdjacent,
+    WroteGeomCache,
     WroteCacheTemp
   };
-
-  /// Set up parser
-  void initialize(const std::string &filename, const std::string &instName,
-                  const std::string &xmlText);
-
-  /// Set up parser.
-  void initialize(IDFObject_const_sptr xmlFile,
-                  IDFObject_const_sptr expectedCacheFile,
-                  const std::string &instName, const std::string &xmlText);
 
   /// Parse XML contents
   boost::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *prog);
@@ -104,7 +100,19 @@ public:
   /// Getter the the applied caching option.
   CachingOption getAppliedCachingOption() const;
 
+  ///creates a vtp filename from a given xml filename
+  const std::string createVTPFileName();
+
 private:
+  ///shared Constructor logic
+  void initialise(const std::string &filename, 
+                  const std::string &instName,
+                  const std::string &xmlText,
+                  const std::string &vtpFilename);
+
+  ///lazy loads the document and returns a pointer
+  Poco::AutoPtr<Poco::XML::Document> getDocument();
+
   /// Set location (position) of comp as specified in XML location element
   void setLocation(Geometry::IComponent *comp, const Poco::XML::Element *pElem,
                    const double angleConvertConst,
@@ -209,8 +217,8 @@ private:
   /// Take as input a \<locations\> element. Such an element is a short-hand
   /// notation for a sequence of \<location\> elements.
   /// This method return this sequence as a xml string
-  std::string convertLocationsElement(const Poco::XML::Element *pElem);
-
+  Poco::AutoPtr<Poco::XML::Document>
+  convertLocationsElement(const Poco::XML::Element *pElem);
 public: // for testing
   /// return absolute position of point which is set relative to the
   /// coordinate system of the input component
@@ -218,14 +226,12 @@ public: // for testing
                                               Kernel::V3D);
 
 private:
-  /// Checks if the proposed cache file can be read from.
-  bool canUseProposedCacheFile(IDFObject_const_sptr cache) const;
-
   /// Reads from a cache file.
   void applyCache(IDFObject_const_sptr cacheToApply);
 
   /// Write out a cache file.
-  CachingOption writeAndApplyCache(IDFObject_const_sptr usedCache);
+  CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
+    IDFObject_const_sptr usedCache);
 
   /// This method returns the parent appended which its child components and
   /// also name of type of the last child component
@@ -259,10 +265,8 @@ private:
   /// Name of the instrument
   std::string m_instName;
 
-  /// XML document loaded
-  Poco::AutoPtr<Poco::XML::Document> pDoc;
-  /// Root element of the parsed XML
-  Poco::XML::Element *pRootElem;
+  /// XML document is lazy loaded
+  Poco::AutoPtr<Poco::XML::Document> m_pDoc;
 
   /** Holds all the xml elements that have a \<parameter\> child element.
    *  Added purely for the purpose of computing speed and is used in

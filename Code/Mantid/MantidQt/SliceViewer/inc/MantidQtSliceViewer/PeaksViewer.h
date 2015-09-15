@@ -6,7 +6,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -19,6 +19,7 @@ namespace MantidQt {
 namespace SliceViewer {
 /// Forward dec.
 class ProxyCompositePeaksPresenter;
+class PeaksWorkspaceWidget;
 
 /**
 
@@ -36,9 +37,13 @@ public:
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace);
   bool removePeaksWorkspace(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove);
+  bool removePeaksWorkspace(const std::string &toRemove);
   void hide();
   ~PeaksViewer();
   bool hasThingsToShow() const;
+  void clearPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
+  void addPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
+
 public slots:
   void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
   void onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr,

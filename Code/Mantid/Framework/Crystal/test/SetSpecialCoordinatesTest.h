@@ -84,7 +84,7 @@ public:
 
   void test_ModifyMDEventWorkspace()
   {
-    IMDEventWorkspace_sptr inWS = Mantid::MDEvents::MDEventsTestHelper::makeMDEW<1>(1, 0, 1, 1);
+    IMDEventWorkspace_sptr inWS = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<1>(1, 0, 1, 1);
     AnalysisDataService::Instance().add("inWS", inWS);
 
     SetSpecialCoordinates alg;
@@ -95,13 +95,13 @@ public:
     alg.execute();
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("inWS");
-    TS_ASSERT_EQUALS(QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 
   void test_ModifyMDHistoWorkspace()
   {
-    IMDHistoWorkspace_sptr inWS = Mantid::MDEvents::MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
+    IMDHistoWorkspace_sptr inWS = Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
     AnalysisDataService::Instance().add("inWS", inWS);
 
     SetSpecialCoordinates alg;
@@ -112,7 +112,7 @@ public:
     alg.execute();
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("inWS");
-    TS_ASSERT_EQUALS(QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 
@@ -129,7 +129,7 @@ public:
     alg.execute();
 
     auto outWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("inWS");
-    TS_ASSERT_EQUALS(QSample, outWS->getSpecialCoordinateSystem());
+    TS_ASSERT_EQUALS(Mantid::Kernel::QSample, outWS->getSpecialCoordinateSystem());
     AnalysisDataService::Instance().remove("inWS");
   }
 

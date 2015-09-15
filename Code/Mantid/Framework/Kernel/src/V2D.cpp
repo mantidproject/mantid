@@ -5,7 +5,8 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
-#include <cmath>
+
+#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

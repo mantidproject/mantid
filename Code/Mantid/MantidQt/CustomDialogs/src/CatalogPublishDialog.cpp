@@ -4,6 +4,7 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/ICatalog.h"
 #include "MantidAPI/ICatalogInfoService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -14,7 +15,7 @@ namespace MantidQt
 {
   namespace CustomDialogs
   {
-    DECLARE_DIALOG(CatalogPublishDialog);
+    DECLARE_DIALOG(CatalogPublishDialog)
 
     /**
      * Default constructor.

@@ -8,6 +8,17 @@
    ...
 }
 {
+   <AlgorithmManagerTest_omp_2>
+   Memcheck:Leak
+   ...
+   fun:pthread_create@@GLIBC_2.2.5
+   obj:/usr/lib64/libgomp.so.1.0.0
+   fun:_ZN59TestDescription_suite_AlgorithmManagerTest_testThreadSafety7runTestEv
+   fun:_ZN7CxxTest10TestRunner8runWorldEv
+   fun:_ZN7CxxTest4MainINS_12XUnitPrinterEEEiRT_iPPc
+   fun:main
+}
+{
    <MemoryManagerTest_omp>
    Memcheck:Leak
    ...
@@ -20,7 +31,7 @@
    <Leak_within_nexus_library>
    Memcheck:Leak
    ...
-   fun:nxigetnextattr_
+   ...
    fun:_ZN5NeXus4File11getNextAttrEv
    fun:_ZN5NeXus4File7hasAttrERKSs
    fun:_ZN6Mantid3API13PropertyNexus12loadPropertyEPN5NeXus4FileERKSs

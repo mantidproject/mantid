@@ -2,6 +2,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
+
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -18,11 +20,13 @@ using namespace Mantid::Kernel;
 
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType)
     : m_peaks(), m_intensityType(intensityType), m_profileFunctionName(),
-      m_pointGroup() {}
+      m_pointGroup(PointGroupFactory::Instance().createPointGroup("1")),
+      m_unitCell() {}
 
 PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace)
     : m_peaks(), m_intensityType(Maximum), m_profileFunctionName(),
-      m_pointGroup() {
+      m_pointGroup(PointGroupFactory::Instance().createPointGroup("1")),
+      m_unitCell() {
   if (workspace) {
     constructFromTableWorkspace(workspace);
   }
@@ -38,8 +42,10 @@ PoldiPeakCollection::PoldiPeakCollection(
         "Cannot create PoldiPeakCollection from invalid CrystalStructure.");
   }
 
-  m_pointGroup =
-      pointGroupFromString(pointGroupToString(crystalStructure->pointGroup()));
+  m_pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
+      crystalStructure->spaceGroup());
+
+  m_unitCell = crystalStructure->cell();
 
   std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(
       dMin, dMax, Geometry::CrystalStructure::UseStructureFactor);
@@ -54,6 +60,8 @@ PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
   PoldiPeakCollection_sptr clone =
       boost::make_shared<PoldiPeakCollection>(m_intensityType);
   clone->setProfileFunctionName(m_profileFunctionName);
+  clone->setPointGroup(m_pointGroup);
+  clone->setUnitCell(m_unitCell);
 
   for (size_t i = 0; i < m_peaks.size(); ++i) {
     clone->addPeak(m_peaks[i]->clone());
@@ -98,10 +106,22 @@ bool PoldiPeakCollection::hasProfileFunctionName() const {
 }
 
 void PoldiPeakCollection::setPointGroup(const PointGroup_sptr &pointGroup) {
-  m_pointGroup = pointGroup;
+  if (!pointGroup) {
+    throw std::invalid_argument(
+        "Cannot assign null-pointer to pointgroup in PoldiPeakCollection.");
+  }
+
+  m_pointGroup =
+      PointGroupFactory::Instance().createPointGroup(pointGroup->getSymbol());
 }
 
 PointGroup_sptr PoldiPeakCollection::pointGroup() const { return m_pointGroup; }
+
+void PoldiPeakCollection::setUnitCell(const UnitCell &unitCell) {
+  m_unitCell = unitCell;
+}
+
+UnitCell PoldiPeakCollection::unitCell() const { return m_unitCell; }
 
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
   TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(
@@ -116,10 +136,14 @@ TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
 
 void PoldiPeakCollection::prepareTable(const TableWorkspace_sptr &table) {
   table->addColumn("str", "HKL");
-  table->addColumn("str", "d");
-  table->addColumn("str", "Q");
-  table->addColumn("str", "Intensity");
-  table->addColumn("str", "FWHM (rel.)");
+  table->addColumn("double", "d");
+  table->addColumn("double", "delta d");
+  table->addColumn("double", "Q");
+  table->addColumn("double", "delta Q");
+  table->addColumn("double", "Intensity");
+  table->addColumn("double", "delta Intensity");
+  table->addColumn("double", "FWHM (rel.)");
+  table->addColumn("double", "delta FWHM (rel.)");
 }
 
 void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table) {
@@ -130,17 +154,21 @@ void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table) {
                                      m_profileFunctionName);
   tableLog->addProperty<std::string>("PointGroup",
                                      pointGroupToString(m_pointGroup));
+  tableLog->addProperty<std::string>("UnitCell",
+                                     Geometry::unitCellToStr(m_unitCell));
 }
 
 void PoldiPeakCollection::peaksToTable(const TableWorkspace_sptr &table) {
   for (std::vector<PoldiPeak_sptr>::const_iterator peak = m_peaks.begin();
        peak != m_peaks.end(); ++peak) {
     TableRow newRow = table->appendRow();
-    newRow << MillerIndicesIO::toString((*peak)->hkl())
-           << UncertainValueIO::toString((*peak)->d())
-           << UncertainValueIO::toString((*peak)->q())
-           << UncertainValueIO::toString((*peak)->intensity())
-           << UncertainValueIO::toString((*peak)->fwhm(PoldiPeak::Relative));
+
+    newRow << MillerIndicesIO::toString((*peak)->hkl()) << (*peak)->d().value()
+           << (*peak)->d().error() << (*peak)->q().value()
+           << (*peak)->q().error() << (*peak)->intensity().value()
+           << (*peak)->intensity().error()
+           << (*peak)->fwhm(PoldiPeak::Relative).value()
+           << (*peak)->fwhm(PoldiPeak::Relative).error();
   }
 }
 
@@ -154,15 +182,15 @@ void PoldiPeakCollection::constructFromTableWorkspace(
 
     for (size_t i = 0; i < newPeakCount; ++i) {
       TableRow nextRow = tableWorkspace->getRow(i);
-      std::string hklString, dString, qString, intensityString, fwhmString;
-      nextRow >> hklString >> dString >> qString >> intensityString >>
-          fwhmString;
+      std::string hklString;
+      double d, deltaD, q, deltaQ, intensity, deltaIntensity, fwhm, deltaFwhm;
+      nextRow >> hklString >> d >> deltaD >> q >> deltaQ >> intensity >>
+          deltaIntensity >> fwhm >> deltaFwhm;
 
-      PoldiPeak_sptr peak =
-          PoldiPeak::create(MillerIndicesIO::fromString(hklString),
-                            UncertainValueIO::fromString(dString),
-                            UncertainValueIO::fromString(intensityString),
-                            UncertainValueIO::fromString(fwhmString));
+      PoldiPeak_sptr peak = PoldiPeak::create(
+          MillerIndicesIO::fromString(hklString), UncertainValue(d, deltaD),
+          UncertainValue(intensity, deltaIntensity),
+          UncertainValue(fwhm, deltaFwhm));
       m_peaks[i] = peak;
     }
   }
@@ -170,16 +198,20 @@ void PoldiPeakCollection::constructFromTableWorkspace(
 
 bool
 PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace) {
-  if (tableWorkspace->columnCount() != 5) {
+  if (tableWorkspace->columnCount() != 9) {
     return false;
   }
 
   std::vector<std::string> shouldNames;
   shouldNames.push_back("HKL");
   shouldNames.push_back("d");
+  shouldNames.push_back("delta d");
   shouldNames.push_back("Q");
+  shouldNames.push_back("delta Q");
   shouldNames.push_back("Intensity");
+  shouldNames.push_back("delta Intensity");
   shouldNames.push_back("FWHM (rel.)");
+  shouldNames.push_back("delta FWHM (rel.)");
 
   std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 
@@ -216,6 +248,7 @@ void PoldiPeakCollection::recoverDataFromLog(
   m_intensityType = intensityTypeFromString(getIntensityTypeFromLog(tableLog));
   m_profileFunctionName = getProfileFunctionNameFromLog(tableLog);
   m_pointGroup = pointGroupFromString(getPointGroupStringFromLog(tableLog));
+  m_unitCell = unitCellFromString(getUnitCellStringFromLog(tableLog));
 }
 
 std::string
@@ -231,6 +264,11 @@ std::string PoldiPeakCollection::getProfileFunctionNameFromLog(
 std::string PoldiPeakCollection::getPointGroupStringFromLog(
     const LogManager_sptr &tableLog) {
   return getStringValueFromLog(tableLog, "PointGroup");
+}
+
+std::string
+PoldiPeakCollection::getUnitCellStringFromLog(const LogManager_sptr &tableLog) {
+  return getStringValueFromLog(tableLog, "UnitCell");
 }
 
 std::string
@@ -271,22 +309,33 @@ PoldiPeakCollection::intensityTypeFromString(std::string typeString) const {
 std::string PoldiPeakCollection::pointGroupToString(
     const PointGroup_sptr &pointGroup) const {
   if (pointGroup) {
-    return pointGroup->getName();
+    return pointGroup->getSymbol();
   }
 
-  return "";
+  return "1";
 }
 
 PointGroup_sptr PoldiPeakCollection::pointGroupFromString(
     const std::string &pointGroupString) const {
-  std::vector<PointGroup_sptr> allPointGroups = getAllPointGroups();
-  for (auto it = allPointGroups.begin(); it != allPointGroups.end(); ++it) {
-    if ((*it)->getName() == pointGroupString) {
-      return *it;
-    }
+  if (PointGroupFactory::Instance().isSubscribed(pointGroupString)) {
+    return PointGroupFactory::Instance().createPointGroup(pointGroupString);
   }
 
-  return PointGroup_sptr();
+  return PointGroupFactory::Instance().createPointGroup("1");
+}
+
+UnitCell PoldiPeakCollection::unitCellFromString(
+    const std::string &unitCellString) const {
+  UnitCell cell;
+
+  try {
+    cell = strToUnitCell(unitCellString);
+  }
+  catch (std::runtime_error) {
+    // do nothing
+  }
+
+  return cell;
 }
 }
 }

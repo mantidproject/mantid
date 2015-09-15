@@ -2,6 +2,7 @@
 #define MANTID_PLANETEST__
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -138,17 +139,16 @@ public :
 
 	void makeMatrix(Matrix<double>& A) const
 	{
-	 const double pi=3.141592653589793238462643383279502884197169399375 ;
 		A.setMem(3,3);
 		A[0][0]=1.0;
 		A[1][0]=0.0; 
 		A[0][1]=0.0;
 		A[0][2]=0.0;
 		A[2][0]=0.0;
-		A[1][1]=cos(90.0*pi/180.0);
-		A[2][1]=-sin(90.0*pi/180.0);
-		A[1][2]=sin(90.0*pi/180.0);
-		A[2][2]=cos(90.0*pi/180.0);
+		A[1][1]=cos(90.0*M_PI/180.0);
+		A[2][1]=-sin(90.0*M_PI/180.0);
+		A[1][2]=sin(90.0*M_PI/180.0);
+		A[2][2]=cos(90.0*M_PI/180.0);
 		return;
 	}
 

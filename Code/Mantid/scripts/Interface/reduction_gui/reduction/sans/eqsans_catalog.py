@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Data catalog for EQSANS
 """

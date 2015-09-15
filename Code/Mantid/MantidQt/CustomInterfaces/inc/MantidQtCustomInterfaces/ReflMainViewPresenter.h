@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_REFLMAINVIEWPRESENTER_H
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/IReflSearcher.h"
@@ -49,8 +49,6 @@ namespace MantidQt
       virtual void notify(IReflPresenter::Flag flag);
       virtual const std::map<std::string,QVariant>& options() const;
       virtual void setOptions(const std::map<std::string,QVariant>& options);
-      //Public for the purposes of unit testing
-      static std::map<std::string,std::string> parseKeyValueString(const std::string& str);
     protected:
       //the workspace the model is currently representing
       Mantid::API::ITableWorkspace_sptr m_ws;
@@ -71,6 +69,8 @@ namespace MantidQt
 
       //process selected rows
       void process();
+      //process groups of rows
+      bool processGroups(std::map<int,std::set<int>> groups, std::set<int> rows);
       //Reduce a row
       void reduceRow(int rowNo);
       //prepare a run or list of runs for processing
@@ -83,6 +83,8 @@ namespace MantidQt
       int getUnusedGroup(std::set<int> ignoredRows = std::set<int>()) const;
       //make a transmission workspace
       Mantid::API::Workspace_sptr makeTransWS(const std::string& transString);
+      //Validate rows
+      bool rowsValid(std::set<int> rows);
       //Validate a row
       void validateRow(int rowNo) const;
       //Autofill a row with sensible values
@@ -146,6 +148,8 @@ namespace MantidQt
       void handleClearEvent(Mantid::API::ClearADSNotification_ptr pNf);
       void handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf);
       void handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+
+      void saveNotebook(std::map<int,std::set<int>> groups, std::set<int> rows);
 
     public:
       static const int COL_RUNS         = 0;

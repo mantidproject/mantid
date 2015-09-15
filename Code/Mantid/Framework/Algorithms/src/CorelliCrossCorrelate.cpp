@@ -84,6 +84,10 @@ std::map<std::string, std::string> CorelliCrossCorrelate::validateInputs() {
   else if (!inputWS->run().hasProperty("chopper4_TDC"))
     errors["InputWorkspace"] = "Workspace is missing chopper4 TDCs.";
 
+  // Must include the chopper4 MotorSpeed.
+  else if (!inputWS->run().hasProperty("BL9:Chop:Skf4:MotorSpeed"))
+    errors["InputWorkspace"] = "Workspace is missing chopper4 Motor Speed.";
+
   // Check if input workspace is sorted.
   else if (inputWS->getSortType() == UNSORTED)
     errors["InputWorkspace"] = "The workspace needs to be a sorted.";
@@ -149,18 +153,22 @@ void CorelliCrossCorrelate::exec() {
 
   // Read in the TDC timings for the correlation chopper and apply the timing
   // offset.
-  std::vector<DateAndTime> tdc =
-      dynamic_cast<ITimeSeriesProperty *>(
-          inputWS->run().getLogData("chopper4_TDC"))->timesAsVector();
+  auto chopperTdc = dynamic_cast<ITimeSeriesProperty *>(
+      inputWS->run().getLogData("chopper4_TDC"));
+  if (!chopperTdc) {
+    throw std::runtime_error("chopper4_TDC not found");
+  }
+  std::vector<DateAndTime> tdc = chopperTdc->timesAsVector();
+
   int offset_int = getProperty("TimingOffset");
   const int64_t offset = static_cast<int64_t>(offset_int);
   for (unsigned long i = 0; i < tdc.size(); ++i)
     tdc[i] += offset;
 
-  // Determine period from TDC.
-  double period = static_cast<double>(tdc[tdc.size() - 1].totalNanoseconds() -
-                                      tdc[1].totalNanoseconds()) /
-                  double(tdc.size() - 2);
+  // Determine period from chopper frequency.
+  auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(
+      inputWS->run().getProperty("BL9:Chop:Skf4:MotorSpeed"));
+  double period = 1e9 / static_cast<double>(motorSpeed->timeAverageValue());
   g_log.information() << "Frequency = " << 1e9 / period
                       << "Hz Period = " << period << "ns\n";
 
@@ -194,20 +202,9 @@ void CorelliCrossCorrelate::exec() {
     EventList *evlist = outputWS->getEventListPtr(i);
     IDetector_const_sptr detector = inputWS->getDetector(i);
 
-    switch (evlist->getEventType()) {
-    case TOF:
-      // Switch to weights if needed.
+    // Switch to weighted if needed.
+    if (evlist->getEventType() == TOF)
       evlist->switchTo(WEIGHTED);
-    /* no break */
-    // Fall through
-    case WEIGHTED:
-      break;
-    case WEIGHTED_NOTIME:
-      // Should never get here
-      throw std::runtime_error(
-          "This event list has no pulse time information.");
-      break;
-    }
 
     std::vector<WeightedEvent> &events = evlist->getWeightedEvents();
 

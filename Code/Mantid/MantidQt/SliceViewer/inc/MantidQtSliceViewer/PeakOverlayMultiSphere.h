@@ -1,23 +1,23 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTISPHERE_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAYMULTISPHERE_H_
 
-#include "DllOption.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
-#include <q3iconview.h>
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
-#include <qwt_plot.h>
-#include <qpainter.h>
-#include <qcolor.h>
-#include "MantidQtSliceViewer/PeakOverlayView.h"
+#include "MantidQtSliceViewer/PeakOverlayInteractive.h"
 #include "MantidQtSliceViewer/PhysicalSphericalPeak.h"
+#include "DllOption.h"
 
+class QwtPlot;
+class QWidget;
 
 namespace MantidQt
 {
+
+namespace MantidWidgets {
+class InputController;
+}
+
 namespace SliceViewer
 {
+   class PeaksPresenter;
 
   /** Widget representing a peak sphere on the plot. Used for representing spherically integrated peaks.
     
@@ -43,13 +43,14 @@ namespace SliceViewer
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiSphere : public QWidget, public PeakOverlayView
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiSphere : public PeakOverlayInteractive
   {
     Q_OBJECT
 
   public:
     /// Constructor
-    PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const QColor& peakColour, const QColor& backColour);
+    PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
+                           const QColor& peakColour, const QColor& backColour);
     /// Destructor
     virtual ~PeakOverlayMultiSphere();
     /// Set the slice point at position.
@@ -61,7 +62,7 @@ namespace SliceViewer
     /// Update the view.
     virtual void updateView();
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
-    void movePosition(Mantid::API::PeakTransform_sptr peakTransform);
+    void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
     /// Change foreground colour
     virtual void changeForegroundColour(const QColor);
     /// Change background colour
@@ -88,19 +89,13 @@ namespace SliceViewer
     virtual QColor getBackgroundColour() const;
     /// Get the current foreground colour
     virtual QColor getForegroundColour() const;
+    /// Take settings from another view
+    void takeSettingsFrom(const PeakOverlayView * const);
 
   private:
 
-    //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
-    void paintEvent(QPaintEvent *event);
-
-    QSize sizeHint() const;
-    QSize size() const;
-    int height() const;
-    int width() const;
-
-    /// QwtPlot containing this
-    QwtPlot * m_plot;
+    /// Draw the peak representations. Pure virtual on base class.
+    virtual void doPaintPeaks(QPaintEvent *);
     /// Physical peak object
     VecPhysicalSphericalPeak m_physicalPeaks;
     /// Peak colour
@@ -111,6 +106,7 @@ namespace SliceViewer
     std::vector<bool> m_viewablePeaks;
     /// Show the background radius.
     bool m_showBackground;
+    /// Input controller.
   };
 
 

@@ -34,7 +34,7 @@ The algorithm proceeds in this way:
 -  This is repeated until we find up to MaxPeaks peaks.
 
 Each peak created is placed in the output
-`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_, which can be a new workspace or
+:ref:`PeaksWorkspace <PeaksWorkspace>`, which can be a new workspace or
 replace the old one.
 
 This algorithm works on a :ref:`MDHistoWorkspace <MDHistoWorkspace>`
@@ -44,13 +44,13 @@ is not accessible. It may give better results on
 :ref:`Workspace2D <Workspace2D>`'s that were converted to
 :ref:`MDWorkspaces <MDWorkspace>`.
 
-   
+
 Usage
 ------
 
 **Example - IntegratePeaks:**
 
-The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own 
+The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own
 event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
 file is availible in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
@@ -88,7 +88,7 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
    # build peak workspace necessary for IntegrateEllipsoids algorithm to work
    ConvertToMD(InputWorkspace='TOPAZ_3132_event',QDimensions='Q3D',dEAnalysisMode='Elastic',Q3DFrames='Q_sample',LorentzCorrection='1',OutputWorkspace='TOPAZ_3132_md',\
    MinValues='-25,-25,-25',MaxValues='25,25,25',SplitInto='2',SplitThreshold='50',MaxRecursionDepth='13',MinRecursionDepth='7')
-   peaks=FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.37680',MaxPeaks='50',DensityThresholdFactor='100',OutputWorkspace='TOPAZ_3132_peaks')   
+   peaks=FindPeaksMD(InputWorkspace='TOPAZ_3132_md',PeakDistanceThreshold='0.37680',MaxPeaks='50',DensityThresholdFactor='100',OutputWorkspace='TOPAZ_3132_peaks')
 
    # print 10 rows of table workspace
    print_tableWS(peaks,10)
@@ -115,3 +115,5 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
 
 
 .. categories::
+
+.. sourcelink::

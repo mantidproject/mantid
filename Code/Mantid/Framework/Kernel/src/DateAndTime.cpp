@@ -1,12 +1,8 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Logger.h"
-#include <time.h>
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
-#include <boost/date_time/posix_time/posix_time_config.hpp>
-#include <ostream>
-#include <ctime>
 
 namespace Mantid {
 namespace Kernel {
@@ -16,16 +12,19 @@ namespace {
 Logger g_log("DateAndTime");
 
 /// Max allowed nanoseconds in the time; 2^62-1
-int64_t MAX_NANOSECONDS = 4611686018427387903LL;
+const int64_t MAX_NANOSECONDS = 4611686018427387903LL;
 
 /// Max allowed seconds in the time
-int64_t MAX_SECONDS = 4611686017LL;
+const int64_t MAX_SECONDS = 4611686017LL;
 
 /// Min allowed nanoseconds in the time; -2^62+1
-int64_t MIN_NANOSECONDS = -4611686018427387903LL;
+const int64_t MIN_NANOSECONDS = -4611686018427387903LL;
 
 /// Min allowed seconds in the time
-int64_t MIN_SECONDS = -4611686017LL;
+const int64_t MIN_SECONDS = -4611686017LL;
+
+/// Number of nanoseconds in one second
+const int64_t NANO_PER_SEC = 1000000000LL;
 }
 
 namespace DateAndTimeHelpers {
@@ -145,9 +144,8 @@ DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
 /** Construct a time from an ISO8601 string
  *
  * @param ISO8601_string: and ISO8601 formatted string.
- *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a
- *space,
- *    and the time is optional, as is the time-zone specification.
+ *    "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"; although the T can be replaced by a space.
+ *    The time must included, but the time-zone specification is optional.
  */
 DateAndTime::DateAndTime(const std::string ISO8601_string) : _nanoseconds(0) {
   this->setFromISO8601(ISO8601_string);
@@ -192,7 +190,7 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds) {
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = static_cast<int64_t>(seconds * 1000000000LL + nanoseconds);
+    _nanoseconds = seconds * NANO_PER_SEC + nanoseconds;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -203,12 +201,15 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds) {
  * @param nanoseconds :: nanoseconds to add to the number of seconds
  */
 DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds) {
-  if (seconds >= MAX_SECONDS)
+  const int64_t seconds_64bit = static_cast<int64_t>(seconds);
+
+  if (seconds_64bit >= MAX_SECONDS)
     _nanoseconds = MAX_NANOSECONDS;
-  else if (seconds <= MIN_SECONDS)
+  else if (seconds_64bit <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = static_cast<int64_t>(seconds * 1000000000LL + nanoseconds);
+    _nanoseconds = seconds_64bit * NANO_PER_SEC +
+                   static_cast<int64_t>(nanoseconds);
 }
 
 //===========================================================================================
@@ -450,8 +451,7 @@ void DateAndTime::setFromISO8601(const std::string str) {
   // seem to accept only a date as valid, whereas later versions do not. We want
   // the
   // string to always denote the full timestamp so we check for a colon and if
-  // it is
-  // not present then assume the time has not been given
+  // it is not present then throw an exception.
   if (time.find(":") == std::string::npos)
     throw std::invalid_argument("Error interpreting string '" + str +
                                 "' as a date/time.");
@@ -536,7 +536,7 @@ int DateAndTime::second() const { return to_ptime().time_of_day().seconds(); }
  * @return the nanoseconds
  */
 int DateAndTime::nanoseconds() const {
-  return static_cast<int>(_nanoseconds % 1000000000);
+  return static_cast<int>(_nanoseconds % NANO_PER_SEC);
 }
 
 //------------------------------------------------------------------------------------------------

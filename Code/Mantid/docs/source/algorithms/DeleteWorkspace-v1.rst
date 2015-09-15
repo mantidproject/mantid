@@ -49,3 +49,5 @@ Output:
    single_value exists in mantid: False
 
 .. categories::
+
+.. sourcelink::

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # Example: Retrieving log information from a data set
 #

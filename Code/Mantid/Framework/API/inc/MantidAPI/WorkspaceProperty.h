@@ -78,7 +78,7 @@ class WorkspaceProperty
       public IWorkspaceProperty {
 public:
   /** Constructor.
-  *  Sets the property and workspace names but initialises the workspace pointer
+  *  Sets the property and workspace names but initializes the workspace pointer
   * to null.
   *  @param name :: The name to assign to the property
   *  @param wsName :: The name of the workspace
@@ -269,6 +269,9 @@ public:
       // Workspace groups will not have a value since they are not of type TYPE
       if (!Kernel::PropertyWithValue<boost::shared_ptr<TYPE>>::m_value) {
         Mantid::API::Workspace_sptr wksp;
+        //if the workspace name is empty then there is no point asking the ADS
+        if (m_workspaceName.empty()) return isOptionalWs();
+
         try {
           wksp = AnalysisDataService::Instance().retrieve(m_workspaceName);
         } catch (Kernel::Exception::NotFoundError &) {

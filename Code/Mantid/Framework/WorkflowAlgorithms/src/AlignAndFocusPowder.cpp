@@ -36,7 +36,10 @@ using API::FileProperty;
 DECLARE_ALGORITHM(AlignAndFocusPowder)
 
 AlignAndFocusPowder::AlignAndFocusPowder()
-    : API::Algorithm(), m_progress(NULL) {}
+    : API::DataProcessorAlgorithm(), m_l1(0.0), m_resampleX(0), dspace(false), xmin(0.0),
+      xmax(0.0), LRef(0.0), DIFCref(0.0), minwl(0.0), maxwl(0.), tmin(0.0), tmax(0.0),
+      m_preserveEvents(false), m_processLowResTOF(false), m_lowResSpecOffset(0),
+      m_progress(NULL) {}
 
 AlignAndFocusPowder::~AlignAndFocusPowder() {
   if (m_progress)
@@ -68,21 +71,32 @@ void AlignAndFocusPowder::init() {
   //   Direction::Output, PropertyMode::Optional),
   //   "The name of the workspace containing the filtered low resolution TOF
   //   data.");
+  std::vector<std::string> exts;
+  exts.push_back(".h5");
+  exts.push_back(".hd5");
+  exts.push_back(".hdf");
+  exts.push_back(".cal");
   declareProperty(
-      new FileProperty("CalFileName", "", FileProperty::OptionalLoad, ".cal"),
+      new FileProperty("CalFileName", "", FileProperty::OptionalLoad, exts),
       "The name of the CalFile with offset, masking, and grouping data");
   declareProperty(
       new WorkspaceProperty<GroupingWorkspace>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A GroupingWorkspace giving the grouping info.");
+
+  declareProperty(
+      new WorkspaceProperty<ITableWorkspace>(
+          "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional: A Workspace containing the calibration information. Either "
+      "this or CalibrationFile needs to be specified.");
   declareProperty(
       new WorkspaceProperty<OffsetsWorkspace>(
           "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An OffsetsWorkspace giving the detector calibration values.");
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>(
-          "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: A workspace giving which detectors are masked.");
+  declareProperty(new WorkspaceProperty<MaskWorkspace>("MaskWorkspace", "",
+                                                       Direction::Input,
+                                                       PropertyMode::Optional),
+                  "Optional: A workspace giving which detectors are masked.");
   declareProperty(new WorkspaceProperty<TableWorkspace>("MaskBinTable", "",
                                                         Direction::Input,
                                                         PropertyMode::Optional),
@@ -104,11 +118,15 @@ void AlignAndFocusPowder::init() {
                   "Bin in Dspace. (True is Dspace; False is TOF)");
   declareProperty(new ArrayProperty<double>("DMin"),
                   "Minimum for Dspace axis. (Default 0.) ");
+  mapPropertyName("DMin", "d_min");
   declareProperty(new ArrayProperty<double>("DMax"),
                   "Maximum for Dspace axis. (Default 0.) ");
+  mapPropertyName("DMax", "d_max");
   declareProperty("TMin", EMPTY_DBL(), "Minimum for TOF axis. Defaults to 0. ");
+  mapPropertyName("TMin", "tof_min");
   declareProperty("TMax", EMPTY_DBL(),
                   "Maximum for TOF or dspace axis. Defaults to 0. ");
+  mapPropertyName("TMax", "tof_max");
   declareProperty("PreserveEvents", true, "If the InputWorkspace is an "
                                           "EventWorkspace, this will preserve "
                                           "the full event list (warning: this "
@@ -127,6 +145,9 @@ void AlignAndFocusPowder::init() {
   declareProperty(
       "CropWavelengthMin", 0.,
       "Crop the data at this minimum wavelength. Overrides LowResRef.");
+  declareProperty(
+      "CropWavelengthMax", EMPTY_DBL(),
+      "Crop the data at this maximum wavelength. Forces use of CropWavelengthMin.");
   declareProperty("PrimaryFlightPath", -1.0,
                   "If positive, focus positions are changed.  (Default -1) ");
   declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
@@ -182,60 +203,20 @@ void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
 
 //----------------------------------------------------------------------------------------------
 /**
- * Function to get a property either from a PropertyManager or the algorithm
- * properties.
- * @param apname : The algorithm property to retrieve.
- * @param pmpname : The property manager property name.
- * @param pm : The PropertyManager instance.
- * @return : The value of the requested property.
- */
-double AlignAndFocusPowder::getPropertyFromPmOrSelf(
-    const std::string &apname, const std::string &pmpname,
-    boost::shared_ptr<PropertyManager> pm) {
-  // Look at algorithm first
-  double param = getProperty(apname);
-  if (param != EMPTY_DBL()) {
-    g_log.information() << "Returning algorithm parameter" << std::endl;
-    return param;
-  }
-  // Look in property manager
-  if (pm && pm->existsProperty(pmpname)) {
-    g_log.information() << "Have property manager and returning value."
-                        << std::endl;
-    return pm->getProperty(pmpname);
-  } else {
-    g_log.information() << "No property, using default." << std::endl;
-    return 0.0;
-  }
-}
-
-//----------------------------------------------------------------------------------------------
-/**
  * Function to get a vector property either from a PropertyManager or the
  * algorithm
  * properties. If both PM and algorithm properties are specified, the algorithm
  * one wins.
  * The return value is the first element in the vector if it is not empty.
- * @param apname : The algorithm property to retrieve.
+ * @param name : The algorithm property to retrieve.
  * @param avec : The vector to hold the property value.
- * @param pmpname : The property manager property name.
- * @param pm : The PropertyManager instance.
  * @return : The default value of the requested property.
  */
 double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(
-    const std::string &apname, std::vector<double> &avec,
-    const std::string &pmpname, boost::shared_ptr<PropertyManager> pm) {
-  avec = getProperty(apname);
-  // Look at algorithm first
+    const std::string &name, std::vector<double> &avec) {
+  avec = getProperty(name);
   if (!avec.empty()) {
     return avec[0];
-  }
-  // Look in property manager
-  if (pm && pm->existsProperty(pmpname)) {
-    avec = pm->getProperty(pmpname);
-    if (!avec.empty()) {
-      return avec[0];
-    }
   }
   // No overrides provided.
   return 0.0;
@@ -249,15 +230,6 @@ double AlignAndFocusPowder::getVecPropertyFromPmOrSelf(
  * successfully
  */
 void AlignAndFocusPowder::exec() {
-  // Get the reduction property manager
-  const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
-  if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
-    reductionManager =
-        PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-  }
-
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_inputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_inputW);
@@ -265,7 +237,7 @@ void AlignAndFocusPowder::exec() {
   m_instName =
       Kernel::ConfigService::Instance().getInstrument(m_instName).shortName();
   std::string calFileName = getPropertyValue("CalFileName");
-  m_offsetsWS = getProperty("OffsetsWorkspace");
+  m_calibrationWS = getProperty("CalibrationWorkspace");
   m_maskWS = getProperty("MaskWorkspace");
   m_groupWS = getProperty("GroupingWorkspace");
   DataObjects::TableWorkspace_sptr maskBinTableWS = getProperty("MaskBinTable");
@@ -277,14 +249,16 @@ void AlignAndFocusPowder::exec() {
   m_params = getProperty("Params");
   dspace = getProperty("DSpacing");
   auto dmin =
-      getVecPropertyFromPmOrSelf("DMin", m_dmins, "d_min", reductionManager);
+      getVecPropertyFromPmOrSelf("DMin", m_dmins);
   auto dmax =
-      getVecPropertyFromPmOrSelf("DMax", m_dmaxs, "d_max", reductionManager);
+      getVecPropertyFromPmOrSelf("DMax", m_dmaxs);
   LRef = getProperty("UnwrapRef");
   DIFCref = getProperty("LowResRef");
   minwl = getProperty("CropWavelengthMin");
-  tmin = getPropertyFromPmOrSelf("TMin", "tof_min", reductionManager);
-  tmax = getPropertyFromPmOrSelf("TMax", "tof_max", reductionManager);
+  maxwl = getProperty("CropWavelengthMax");
+  if (maxwl == 0.) maxwl = EMPTY_DBL(); // python can only specify 0 for unused
+  tmin = getProperty("TMin");
+  tmax = getProperty("TMax");
   m_preserveEvents = getProperty("PreserveEvents");
   m_resampleX = getProperty("ResampleX");
   // determine some bits about d-space and binning
@@ -481,12 +455,12 @@ void AlignAndFocusPowder::exec() {
     m_outputW = rebin(m_outputW);
   m_progress->report();
 
-  if (m_offsetsWS) {
+  if (m_calibrationWS) {
     g_log.information() << "running AlignDetectors\n";
     API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
     alignAlg->setProperty("InputWorkspace", m_outputW);
     alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
+    alignAlg->setProperty("CalibrationWorkspace", m_calibrationWS);
     alignAlg->executeAsChildAlg();
     m_outputW = alignAlg->getProperty("OutputWorkspace");
   } else {
@@ -494,7 +468,7 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (LRef > 0. || minwl > 0. || DIFCref > 0.) {
+  if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "TOF");
   }
   m_progress->report();
@@ -516,9 +490,15 @@ void AlignAndFocusPowder::exec() {
   }
   m_progress->report();
 
-  if (minwl > 0.) {
-    g_log.information() << "running RemoveLowResTOF(MinWavelength=" << minwl
-                        << ",Tmin=" << tmin << ". ";
+  if (minwl > 0. || (!isEmpty(maxwl))) { // just crop the worksapce
+    // turn off the low res stuff
+    m_processLowResTOF = false;
+
+    g_log.information() << "running CropWorkspace(MinWavelength=" << minwl;
+    if (!isEmpty(maxwl))
+        g_log.information() << ", MaxWavelength=" << maxwl;
+    g_log.information() << ")\n";
+
     EventWorkspace_sptr ews =
         boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -526,19 +506,15 @@ void AlignAndFocusPowder::exec() {
                           << ". ";
     g_log.information("\n");
 
-    API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
+    m_outputW = convertUnits(m_outputW, "Wavelength");
+
+    API::IAlgorithm_sptr removeAlg = createChildAlgorithm("CropWorkspace");
     removeAlg->setProperty("InputWorkspace", m_outputW);
     removeAlg->setProperty("OutputWorkspace", m_outputW);
-    removeAlg->setProperty("MinWavelength", minwl);
-    if (tmin > 0.)
-      removeAlg->setProperty("Tmin", tmin);
-    if (m_processLowResTOF)
-      removeAlg->setProperty("LowResTOFWorkspace", m_lowResW);
-
+    removeAlg->setProperty("XMin", minwl);
+    removeAlg->setProperty("XMax", maxwl);
     removeAlg->executeAsChildAlg();
     m_outputW = removeAlg->getProperty("OutputWorkspace");
-    if (m_processLowResTOF)
-      m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
   } else if (DIFCref > 0.) {
     g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                         << ",K=3.22)\n";
@@ -583,7 +559,7 @@ void AlignAndFocusPowder::exec() {
   m_progress->report();
 
   // Convert units
-  if (LRef > 0. || minwl > 0. || DIFCref > 0.) {
+  if (LRef > 0. || minwl > 0. || DIFCref > 0. || (!isEmpty(maxwl))) {
     m_outputW = convertUnits(m_outputW, "dSpacing");
     if (m_processLowResTOF)
       m_lowResW = convertUnits(m_lowResW, "dSpacing");
@@ -874,6 +850,21 @@ AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
   return outws;
 }
 
+void AlignAndFocusPowder::convertOffsetsToCal(
+    DataObjects::OffsetsWorkspace_sptr &offsetsWS) {
+  if (!offsetsWS)
+    return;
+
+  IAlgorithm_sptr alg = createChildAlgorithm("ConvertDiffCal");
+  alg->setProperty("OffsetsWorkspace", offsetsWS);
+  alg->setPropertyValue("OutputWorkspace", m_instName + "_cal");
+  alg->executeAsChildAlg();
+
+  m_calibrationWS = alg->getProperty("OutputWorkspace");
+  AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
+                                               m_calibrationWS);
+}
+
 //----------------------------------------------------------------------------------------------
 /**
  * Loads the .cal file if necessary.
@@ -890,18 +881,33 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
       ; // not noteworthy
     }
   }
-  if ((!m_offsetsWS) && (!calFileName.empty())) {
-    try {
-      m_offsetsWS =
-          AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
-              m_instName + "_offsets");
-    } catch (Exception::NotFoundError &) {
-      ; // not noteworthy
+  if ((!m_calibrationWS) && (!calFileName.empty())) {
+    OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+    if (offsetsWS) {
+      convertOffsetsToCal(offsetsWS);
+    } else {
+      try {
+        m_calibrationWS =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                m_instName + "_cal");
+      } catch (Exception::NotFoundError &) {
+        ; // not noteworthy
+      }
+      if (!m_calibrationWS) {
+        try {
+          OffsetsWorkspace_sptr offsetsWS =
+              AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(
+                  m_instName + "_offsets");
+          convertOffsetsToCal(offsetsWS);
+        } catch (Exception::NotFoundError &) {
+          ; // not noteworthy
+        }
+      }
     }
   }
   if ((!m_maskWS) && (!calFileName.empty())) {
     try {
-      m_maskWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+      m_maskWS = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(
           m_instName + "_mask");
     } catch (Exception::NotFoundError &) {
       ; // not noteworthy
@@ -909,7 +915,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
   }
 
   // see if everything exists to exit early
-  if (m_groupWS && m_offsetsWS && m_maskWS)
+  if (m_groupWS && m_calibrationWS && m_maskWS)
     return;
 
   // see if the calfile is specified
@@ -920,18 +926,16 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
 
   // bunch of booleans to keep track of things
   bool loadGrouping = !m_groupWS;
-  bool loadOffsets = !m_offsetsWS;
+  bool loadCalibration = !m_calibrationWS;
   bool loadMask = !m_maskWS;
 
-  // Load the .cal file
-  IAlgorithm_sptr alg = createChildAlgorithm("LoadCalFile");
-  alg->setPropertyValue("CalFilename", calFileName);
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadDiffCal");
   alg->setProperty("InputWorkspace", m_inputW);
-  alg->setProperty<std::string>("WorkspaceName", m_instName);
-  alg->setProperty("MakeGroupingWorkspace", loadGrouping);
-  alg->setProperty("MakeOffsetsWorkspace", loadOffsets);
-  alg->setProperty("MakeMaskWorkspace", loadMask);
-  alg->setLogging(true);
+  alg->setPropertyValue("Filename", calFileName);
+  alg->setProperty<bool>("MakeCalWorkspace", loadCalibration);
+  alg->setProperty<bool>("MakeGroupingWorkspace", loadGrouping);
+  alg->setProperty<bool>("MakeMaskWorkspace", loadMask);
+  alg->setPropertyValue("WorkspaceName", m_instName);
   alg->executeAsChildAlg();
 
   // replace workspaces as appropriate
@@ -940,10 +944,10 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName) {
     AnalysisDataService::Instance().addOrReplace(m_instName + "_group",
                                                  m_groupWS);
   }
-  if (loadOffsets) {
-    m_offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
-    AnalysisDataService::Instance().addOrReplace(m_instName + "_offsets",
-                                                 m_offsetsWS);
+  if (loadCalibration) {
+    m_calibrationWS = alg->getProperty("OutputCalWorkspace");
+    AnalysisDataService::Instance().addOrReplace(m_instName + "_cal",
+                                                 m_calibrationWS);
   }
   if (loadMask) {
     m_maskWS = alg->getProperty("OutputMaskWorkspace");

@@ -75,7 +75,7 @@ muParserScript::muParserScript(ScriptingEnv *env,  const QString &name, QObject 
   rparser = parser;
   parser.SetVarFactory(mu_addVariable);
   rparser.SetVarFactory(mu_addVariableR);
-  
+
 }
 
 double muParserScript::col(const QString &arg)
@@ -485,4 +485,9 @@ bool muParserScript::executeImpl()
     return false;
   }
   return true;
+}
+
+void muParserScript::abortImpl()
+{
+  // does nothing
 }

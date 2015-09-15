@@ -41,13 +41,13 @@ ScopedFile &ScopedFile::operator=(const ScopedFile &other) {
     other.release();
   }
   return *this;
-};
+}
 
 /// Copy construction.
 ScopedFile::ScopedFile(const ScopedFile &other) {
   this->m_filename = other.m_filename;
   other.release();
-};
+}
 
 /**
 Common method used by all constructors. Creates a file containing the ASCII file

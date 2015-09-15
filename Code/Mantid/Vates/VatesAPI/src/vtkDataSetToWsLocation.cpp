@@ -1,12 +1,12 @@
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include <vtkDataSet.h>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/AutoPtr.h>
 
 namespace Mantid
 {

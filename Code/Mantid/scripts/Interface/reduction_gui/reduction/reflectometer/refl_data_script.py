@@ -112,7 +112,7 @@ class DataSets(BaseScriptElement):
 
         # sf configuration file
 #        if self.scaling_factor_file != '':
-        if (self.scaling_factor_file_flag):
+        if self.scaling_factor_file_flag:
             script += "ScalingFactorFile='%s',\n" % str(self.scaling_factor_file)
         else:
             script += "ScalingFactorFile='',\n"
@@ -227,12 +227,12 @@ class DataSets(BaseScriptElement):
 
         #data metadata
         _tthd_value = BaseScriptElement.getStringElement(instrument_dom, "tthd_value")
-        if (_tthd_value == ''):
+        if _tthd_value == '':
             _tthd_value = 'N/A'
         self.tthd_value = _tthd_value
 
         _ths_value = BaseScriptElement.getStringElement(instrument_dom, "ths_value")
-        if (_ths_value == ''):
+        if _ths_value == '':
             _ths_value = 'N/A'
         self.ths_value = _ths_value
 

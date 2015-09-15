@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------
 #include "WidgetDllOption.h"
+#include "MantidKernel/FilterChannel.h"
 #include "MantidQtAPI/Message.h"
 #include "MantidQtAPI/QtSignalChannel.h"
 
@@ -41,7 +42,7 @@ namespace MantidQt
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MessageDisplay : public QWidget
     {
       Q_OBJECT
-      Q_PROPERTY(QString source READ source WRITE setSource);
+      Q_PROPERTY(QString source READ source WRITE setSource)
 
     public:
       /// Controls whether the display is allowed to set the log levels
@@ -106,7 +107,7 @@ namespace MantidQt
       void setGlobalLogLevel(int priority);
 
     private:
-      Q_DISABLE_COPY(MessageDisplay);
+      Q_DISABLE_COPY(MessageDisplay)
       /// Setup the actions
       void initActions();
       /// Initialize the text formats
@@ -120,6 +121,8 @@ namespace MantidQt
       LogLevelControl m_logLevelControl;
       /// A reference to the log channel
       API::QtSignalChannel *m_logChannel;
+      /// A reference to the log channel
+      Poco::FilterChannel *m_filterChannel;
       /// The actual widget holding the text
       QPlainTextEdit * m_textDisplay;
       /// Map priority to text formatting

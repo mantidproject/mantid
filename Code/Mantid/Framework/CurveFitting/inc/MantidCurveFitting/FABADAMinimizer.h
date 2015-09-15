@@ -40,8 +40,6 @@ public:
   /// Constructor
   FABADAMinimizer();
   virtual ~FABADAMinimizer();
-  /// Lo ha puesto Roman y no se para que!! creo que es el destructor
-
   /// Name of the minimizer.
   std::string name() const { return "FABADA"; }
   /// Initialize minimizer, i.e. pass a function to minimize.
@@ -51,6 +49,8 @@ public:
   virtual bool iterate(size_t iter);
   /// Return current value of the cost function
   virtual double costFunctionVal();
+  /// Finalize minimization, eg store additional outputs
+  virtual void finalize();
 
 private:
   /// Pointer to the cost function. Must be the least squares.
@@ -85,8 +85,9 @@ private:
   std::vector<bool> m_bound;
   /// Convergence criteria for each parameter
   std::vector<double> m_criteria;
+  /// Maximum number of iterations
+  size_t m_max_iter;
 };
-
 } // namespace CurveFitting
 } // namespace Mantid
 

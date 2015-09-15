@@ -42,72 +42,73 @@
 #include <QComboBox>
 
 FilterDialog::FilterDialog(int type, QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+  : QDialog( parent, fl ), graph(NULL), buttonFilter(NULL), buttonCancel(NULL),
+    boxName(NULL), boxOffset(NULL), boxStart(NULL), boxEnd(NULL), boxColor(NULL)
 {
-	setWindowTitle(tr("MantidPlot - Filter options"));
+    setWindowTitle(tr("MantidPlot - Filter options"));
     filter_type = type;
 
     setName( "FilterDialog" );
 
     QGroupBox *gb1 = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(gb1);
-	gl1->addWidget(new QLabel(tr("Filter curve: ")), 0, 0);
+    gl1->addWidget(new QLabel(tr("Filter curve: ")), 0, 0);
 
-	boxName = new QComboBox();
-	gl1->addWidget(boxName, 0, 1);
+    boxName = new QComboBox();
+    gl1->addWidget(boxName, 0, 1);
 
-	if (type <= FFTFilter::HighPass)
-		gl1->addWidget(new QLabel(tr("Frequency cutoff (Hz)")), 1, 0);
-	else
-		gl1->addWidget(new QLabel(tr("Low Frequency (Hz)")), 1, 0);
+    if (type <= FFTFilter::HighPass)
+      gl1->addWidget(new QLabel(tr("Frequency cutoff (Hz)")), 1, 0);
+    else
+      gl1->addWidget(new QLabel(tr("Low Frequency (Hz)")), 1, 0);
 
-	boxStart = new QLineEdit();
-	boxStart->setText(tr("0"));
-	gl1->addWidget(boxStart, 1, 1);
+    boxStart = new QLineEdit();
+    boxStart->setText(tr("0"));
+    gl1->addWidget(boxStart, 1, 1);
 
-	boxColor = new ColorBox();
-	boxColor->setColor(QColor(Qt::red));
-	if (type >= FFTFilter::BandPass)
-		{
-	    gl1->addWidget(new QLabel(tr("High Frequency (Hz)")), 2, 0);
+    boxColor = new ColorBox();
+    boxColor->setColor(QColor(Qt::red));
+    if (type >= FFTFilter::BandPass)
+    {
+        gl1->addWidget(new QLabel(tr("High Frequency (Hz)")), 2, 0);
 
-		boxEnd = new QLineEdit();
-		boxEnd->setText(tr("0"));
+        boxEnd = new QLineEdit();
+        boxEnd->setText(tr("0"));
         gl1->addWidget(boxEnd, 2, 1);
 
-		if (type == FFTFilter::BandPass)
-		    gl1->addWidget(new QLabel(tr("Add DC Offset")), 3, 0);
-		else
-		    gl1->addWidget(new QLabel(tr("Substract DC Offset")), 3, 0);
+        if (type == FFTFilter::BandPass)
+          gl1->addWidget(new QLabel(tr("Add DC Offset")), 3, 0);
+        else
+          gl1->addWidget(new QLabel(tr("Substract DC Offset")), 3, 0);
 
-		boxOffset = new QCheckBox();
-		gl1->addWidget(boxOffset, 3, 1);
+        boxOffset = new QCheckBox();
+        gl1->addWidget(boxOffset, 3, 1);
 
-		gl1->addWidget(new QLabel(tr("Color")), 4, 0);
-		gl1->addWidget(boxColor, 4, 1);
+        gl1->addWidget(new QLabel(tr("Color")), 4, 0);
+        gl1->addWidget(boxColor, 4, 1);
         gl1->setRowStretch(5, 1);
-		}
+    }
     else
-        {
+    {
         gl1->addWidget(new QLabel(tr("Color")), 2, 0);
-		gl1->addWidget(boxColor, 2, 1);
+        gl1->addWidget(boxColor, 2, 1);
         gl1->setRowStretch(3, 1);
-        }
+    }
 
-	buttonFilter = new QPushButton(tr( "&Filter" ));
+    buttonFilter = new QPushButton(tr( "&Filter" ));
     buttonFilter->setDefault( true );
     buttonCancel = new QPushButton(tr( "&Close" ));
 
     QVBoxLayout *vl = new QVBoxLayout();
- 	vl->addWidget(buttonFilter);
-	vl->addWidget(buttonCancel);
+    vl->addWidget(buttonFilter);
+    vl->addWidget(buttonCancel);
     vl->addStretch();
 
     QHBoxLayout *hb = new QHBoxLayout(this);
     hb->addWidget(gb1);
     hb->addLayout(vl);
 
-	connect( buttonFilter, SIGNAL( clicked() ), this, SLOT( filter() ) );
+    connect( buttonFilter, SIGNAL( clicked() ), this, SLOT( filter() ) );
     connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
 }
 
@@ -190,4 +191,4 @@ void FilterDialog::setGraph(Graph *g)
 {
 graph = g;
 boxName->addItems (g->analysableCurvesList());
-};
+}

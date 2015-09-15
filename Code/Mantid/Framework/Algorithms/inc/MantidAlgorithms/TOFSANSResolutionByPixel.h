@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,8 +19,8 @@ namespace Algorithms {
 */
 class DLLExport TOFSANSResolutionByPixel : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  TOFSANSResolutionByPixel() : API::Algorithm() {}
+  /// Default constructor
+  TOFSANSResolutionByPixel();
   /// Virtual destructor
   virtual ~TOFSANSResolutionByPixel() {}
   /// Algorithm's name
@@ -42,8 +42,18 @@ private:
   void exec();
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
+  /// Get the collimation length when we evaluate it using 5 Guards
+  double getCollimationLengthWithGuard(Mantid::API::MatrixWorkspace_sptr inWS, const double L1, const double collimationLengthCorrection) const;
+  /// Return the default collimation length
+  double provideDefaultLCollimationLength(Mantid::API::MatrixWorkspace_sptr inWS) const;
+  /// Check input
+  void checkInput(Mantid::API::MatrixWorkspace_sptr inWS);
+  /// Get the moderator workspace
+  Mantid::API::MatrixWorkspace_sptr getModeratorWorkspace(Mantid::API::MatrixWorkspace_sptr inWS);
+  /// Create an output workspace
+  Mantid::API::MatrixWorkspace_sptr setupOutputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
   /// Wavelength resolution (constant for all wavelengths)
-  double wl_resolution;
+  double m_wl_resolution;
 };
 
 } // namespace Algorithms

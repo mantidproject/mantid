@@ -1,5 +1,4 @@
 #include "MantidCrystal/PeakIntensityVsRadius.h"
-#include "MantidKernel/Strings.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/TextAxis.h"
@@ -29,10 +28,10 @@ PeakIntensityVsRadius::~PeakIntensityVsRadius() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PeakIntensityVsRadius::name() const {
   return "PeakIntensityVsRadius";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PeakIntensityVsRadius::version() const { return 1; };
+int PeakIntensityVsRadius::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PeakIntensityVsRadius::category() const { return "Crystal"; }
@@ -200,7 +199,7 @@ void PeakIntensityVsRadius::exec() {
       PeaksWorkspace_sptr outPeaks = alg->getProperty("OutputWorkspace");
       for (int i = 0; i < outPeaks->getNumberPeaks(); i++) {
         size_t wi = size_t(i); // workspace index in output
-        IPeak &p = outPeaks->getPeak(i);
+        Geometry::IPeak &p = outPeaks->getPeak(i);
         outWS->dataX(wi)[step] = radius;
         outWS->dataY(wi)[step] = p.getIntensity();
         outWS->dataE(wi)[step] = p.getSigmaIntensity();

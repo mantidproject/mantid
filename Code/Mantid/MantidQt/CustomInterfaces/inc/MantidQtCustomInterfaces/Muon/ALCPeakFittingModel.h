@@ -5,6 +5,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/Muon/IALCPeakFittingModel.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 using namespace Mantid::API;
 
@@ -41,6 +42,7 @@ namespace CustomInterfaces
     // -- IALCPeakFittingModel interface -----------------------------------------------------------
     IFunction_const_sptr fittedPeaks() const { return m_fittedPeaks; }
     MatrixWorkspace_const_sptr data() const { return m_data; }
+    ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 
     void fitPeaks(IFunction_const_sptr peaks);
     // -- End of IALCPeakFittingModel interface ----------------------------------------------------
@@ -57,6 +59,9 @@ namespace CustomInterfaces
   private:
     /// The data we are fitting peaks to
     MatrixWorkspace_const_sptr m_data;
+
+    /// Parameter table containing fit results
+    ITableWorkspace_sptr m_parameterTable;
 
     /// Setter for convenience
     void setFittedPeaks(IFunction_const_sptr fittedPeaks);

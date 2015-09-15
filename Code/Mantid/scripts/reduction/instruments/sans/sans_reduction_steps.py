@@ -1,14 +1,11 @@
+#pylint: disable=invalid-name
 """
     Implementation of reduction steps for SANS
 """
-import os
-import sys
 import math
 import pickle
 from reduction import ReductionStep
-from reduction import extract_workspace_name, find_data
 from reduction import validate_step
-import warnings
 
 # Mantid imports
 import mantid
@@ -56,10 +53,10 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
 
-        beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,
-                                         UseDirectBeamMethod=direct_beam,
-                                         BeamRadius=self._beam_radius,
-                                         PersistentCorrection=self._persistent,
+        beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,\
+                                         UseDirectBeamMethod=direct_beam,\
+                                         BeamRadius=self._beam_radius,\
+                                         PersistentCorrection=self._persistent,\
                                          ReductionProperties=reducer.get_reduction_table_name())
 
         self._beam_center_x = beam_x
@@ -540,7 +537,7 @@ class ConvertToQ(ReductionStep):
             self._grav_set = True
 
         if (not self._grav_set) or override:
-                self._use_gravity = bool(flag)
+            self._use_gravity = bool(flag)
         else:
             msg = "User file can't override previous gravity setting, do gravity correction remains " + str(self._use_gravity)
             print msg
@@ -755,7 +752,7 @@ class SampleGeomCor(ReductionStep):
 
     def calculate_volume(self, reducer):
         geo = reducer.get_sample().geometry
-        assert( issubclass(geo.__class__, GetSampleGeom))
+        assert  issubclass(geo.__class__, GetSampleGeom)
 
         try:
             if geo.shape == 'cylinder-axis-up':
@@ -807,14 +804,14 @@ class StripEndZeros(ReductionStep):
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-            if ( y_vals[i] != self._flag_value ):
+            if  y_vals[i] != self._flag_value :
                 start = i
                 break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0,-1):
-            if ( y_vals[j] != self._flag_value ):
+            if  y_vals[j] != self._flag_value :
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace

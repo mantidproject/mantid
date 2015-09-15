@@ -1,21 +1,18 @@
-import math
+#pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 import numpy
 
-from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from FilterEvents.ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from matplotlib.figure import Figure
-from matplotlib.pyplot import gcf, setp
+from matplotlib.pyplot import setp
 
 import mantid
 import mantid.simpleapi as api
 import mantid.kernel
-from mantid.simpleapi import AnalysisDataService 
+from mantid.kernel import Logger
+from mantid.simpleapi import AnalysisDataService
 
 from mantid.kernel import ConfigService
 
@@ -23,7 +20,7 @@ import os
 
 HUGE_FAST = 10000
 HUGE_PARALLEL = 100000
-MAXTIMEBINSIZE = 20000
+MAXTIMEBINSIZE = 3000
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -37,7 +34,7 @@ class MyPopErrorMsg(QWidget):
     def __init__(self):
         """ Init
         """
-        import Ui_ErrorMessage as errui
+        import FilterEvents.ui_ErrorMessage as errui
         QWidget.__init__(self)
 
 
@@ -62,29 +59,29 @@ class MyPopErrorMsg(QWidget):
 
         return
 
-    def XpaintEvent(self, e):
+    def XpaintEvent(self, _):
         """ ???
         """
-        import Ui_ErrorMessage as errui
+        import FilterEvents.ui_ErrorMessage as errui
 
         self.ui = errui.Ui_Dialog()
         self.ui.setupUi(self)
 
         return
 
-class MainWindow(QtGui.QMainWindow): 
+class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
 
     Copy to ui.setupUI
 
-    # Version 3.0 + Import for Ui_MainWindow.py
-        from MplFigureCanvas import Qt4MplCanvas 
+    # Version 3.0 + Import for ui_MainWindow.py
+        from MplFigureCanvas import Qt4MplCanvas
 
         # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
         self.graphicsView = Qt4MplCanvas(self.centralwidget)
         self.mainplot = self.graphicsView.getPlot()
 
-        
+
     # Version 2.0 + Import
         import matplotlib
         from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -109,10 +106,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.setGeometry(QtCore.QRect(40, 230, 821, 411))
         self.ui.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
-    """ 
-    
+    """
+
+    _errMsgWindow = None
+
     def __init__(self, parent=None):
-        """ Intialization and set up 
+        """ Intialization and set up
         """
         # Base class
         QtGui.QMainWindow.__init__(self,parent)
@@ -121,12 +120,14 @@ class MainWindow(QtGui.QMainWindow):
         config = ConfigService.Instance()
         self._instrument = config["default.instrument"]
 
-        # Central widget 
+        # Central widget
         self.centralwidget = QtGui.QWidget(self)
 
-        # UI Window (from Qt Designer) 
-        self.ui = Ui_MainWindow() 
+        # UI Window (from Qt Designer)
+        self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.ui.mainplot = self.ui.graphicsView.getPlot()
+
 
         # Do initialize plotting
         vecx, vecy, xlim, ylim = self.computeMock()
@@ -163,12 +164,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.horizontalSlider_2.setTracking(True)
         self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.connect(self.ui.horizontalSlider_2, SIGNAL('valueChanged(int)'), self.move_rightSlider)
-        
-        # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"), 
-        #         self.set_startTime)    
+
+        # self.connect(self.ui.lineEdit_3, QtCore.SIGNAL("textChanged(QString)"),
+        #         self.set_startTime)
         self.ui.lineEdit_3.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_3))
-        self.connect(self.ui.pushButton_setT0, QtCore.SIGNAL("clicked()"), self.set_startTime)    
-        # self.connect(self.ui.lineEdit_4, QtCore.SIGNAL("textChanged(QString)"), 
+        self.connect(self.ui.pushButton_setT0, QtCore.SIGNAL("clicked()"), self.set_startTime)
+        # self.connect(self.ui.lineEdit_4, QtCore.SIGNAL("textChanged(QString)"),
         #         self.set_stopTime)
         self.ui.lineEdit_4.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_4))
         self.connect(self.ui.pushButton_setTf, QtCore.SIGNAL("clicked()"), self.set_stopTime)
@@ -194,11 +195,11 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_7.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_7))
         self.ui.lineEdit_8.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_8))
         self.ui.lineEdit_9.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_9))
-        
-        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"), 
-                self.set_minLogValue)    
-        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"), 
-                self.set_maxLogValue)    
+
+        self.connect(self.ui.lineEdit_5, QtCore.SIGNAL("textChanged(QString)"),\
+                self.set_minLogValue)
+        self.connect(self.ui.lineEdit_6, QtCore.SIGNAL("textChanged(QString)"),\
+                self.set_maxLogValue)
 
         dirchangeops = ["Both", "Increase", "Decrease"]
         self.ui.comboBox_4.addItems(dirchangeops)
@@ -209,6 +210,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_4, SIGNAL('clicked()'), self.plotLogValue)
 
         self.connect(self.ui.pushButton_filterLog, SIGNAL('clicked()'), self.filterByLogValue)
+
+        #Set up help button
+        self.connect(self.ui.helpBtn, QtCore.SIGNAL('clicked()'), self.helpClicked)
 
         # Set up vertical slide
         self._upperSlideValue = 99
@@ -226,11 +230,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
+        self.ui.checkBox_fastLog.setChecked(False)
         self.ui.checkBox_filterByPulse.setChecked(False)
         self.ui.checkBox_from1.setChecked(False)
         self.ui.checkBox_groupWS.setChecked(True)
 
-        self.connect(self.ui.comboBox_tofCorr, SIGNAL('currentIndexChanged(int)'), self.showHideEi) 
+        self.connect(self.ui.comboBox_tofCorr, SIGNAL('currentIndexChanged(int)'), self.showHideEi)
         self.connect(self.ui.pushButton_refreshCorrWSList, SIGNAL('clicked()'),  self._searchTableWorkspaces)
 
         self.ui.lineEdit_Ei.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_Ei))
@@ -254,8 +259,8 @@ class MainWindow(QtGui.QMainWindow):
         # Side information
         self.ui.label_mean.hide()
         self.ui.label_meanvalue.hide()
-        self.ui.label_avg.hide() 
-        self.ui.label_timeAvgValue.hide() 
+        self.ui.label_avg.hide()
+        self.ui.label_timeAvgValue.hide()
         self.ui.label_freq.hide()
         self.ui.label_freqValue.hide()
         self.ui.label_logname.hide()
@@ -263,15 +268,15 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_logsize.hide()
         self.ui.label_logsizevalue.hide()
 
-        # Default 
+        # Default
         self._defaultdir = os.getcwd()
 
         # self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
-        
+
         # QtCore.QObject.connect(self.ui.convert, QtCore.SIGNAL("clicked()"), self.convert )
         # QtCore.QObject.connect(self.ui.inputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
         # QtCore.QObject.connect(self.ui.outputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
-        # self.setInstrumentInputs() 
+        # self.setInstrumentInputs()
 
         ##defaults
 
@@ -284,7 +289,7 @@ class MainWindow(QtGui.QMainWindow):
         x = event.xdata
         y = event.ydata
 
-        if x is not None and y is not None: 
+        if x is not None and y is not None:
             msg = "You've clicked on a bar with coords:\n %f, %f" % (x, y)
             QMessageBox.information(self, "Click!", msg)
 
@@ -294,15 +299,13 @@ class MainWindow(QtGui.QMainWindow):
     def computeMock(self):
         """ Compute vecx and vecy as mocking
         """
-        import random, math
-
         x0 = 0.
         xf = 1.
         dx = 0.1
 
         vecx = []
         vecy = []
-        
+
         x = x0
         while x < xf:
             y = 0.0
@@ -317,9 +320,9 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def move_leftSlider(self):
-        """ Re-setup left range line in figure. 
-        Triggered by a change in Qt Widget.  NO EVENT is required. 
-        """ 
+        """ Re-setup left range line in figure.
+        Triggered by a change in Qt Widget.  NO EVENT is required.
+        """
         newx = self.ui.horizontalSlider.value()
         if newx <= self._rightSlideValue and newx != self._leftSlideValue:
             # Allowed value: move the value bar
@@ -348,18 +351,20 @@ class MainWindow(QtGui.QMainWindow):
         """ Set the starting time and left slide bar
         """
         inps = str(self.ui.lineEdit_3.text())
-        print "Starting time = %s" % (inps)
-       
+        info_msg = "Starting time = %s" % (inps)
+        Logger("Filter_Events").information(info_msg)
+
         xlim = self.ui.mainplot.get_xlim()
         if inps == "":
             # Empty. Use default
             newtime0 = xlim[0]
-        else: 
+        else:
             newtime0 = float(inps)
 
         # Convert to integer slide value
         ileftvalue = int( (newtime0-xlim[0])/(xlim[1] - xlim[0])*100 )
-        print "iLeftSlide = %d" % (ileftvalue)
+        debug_msg = "iLeftSlide = %s" % str(ileftvalue)
+        Logger("Filter_Events").debug(debug_msg)
 
         # Skip if same as origina
         if ileftvalue == self._leftSlideValue:
@@ -378,7 +383,8 @@ class MainWindow(QtGui.QMainWindow):
 
         if resetT is True:
             newtime0 = xlim[0] + ileftvalue*(xlim[1]-xlim[0])*0.01
-        print "Corrected iLeftSlide = %d (vs. right = %d)" % (ileftvalue, self._rightSlideValue)
+        info_msg = "Corrected iLeftSlide = %s (vs. right = %s)" % (str(ileftvalue), str(self._rightSlideValue))
+        Logger("Filter_Events").information(info_msg)
 
         # Move the slide bar (left)
         self._leftSlideValue = ileftvalue
@@ -390,18 +396,18 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.graphicsView.draw()
 
-        # Set the value to left slider 
+        # Set the value to left slider
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
-        # Reset the value of line edit 
-        if resetT is True: 
+        # Reset the value of line edit
+        if resetT is True:
             self.ui.lineEdit_3.setText(str(newtime0))
 
         return
 
     def move_rightSlider(self):
-        """ Re-setup left range line in figure. 
-        Triggered by a change in Qt Widget.  NO EVENT is required. 
-        """ 
+        """ Re-setup left range line in figure.
+        Triggered by a change in Qt Widget.  NO EVENT is required.
+        """
         newx = self.ui.horizontalSlider_2.value()
         if newx >= self._leftSlideValue and newx != self._rightSlideValue:
             # Allowed value: move the value bar
@@ -429,19 +435,21 @@ class MainWindow(QtGui.QMainWindow):
         """ Set the starting time and left slide bar
         """
         inps = str(self.ui.lineEdit_4.text())
-        print "Stopping time = %s" % (inps)
-        
+        info_msg = "Stopping time = %s" % (inps)
+        Logger("Filter_Events").information(info_msg)
+
         xlim = self.ui.mainplot.get_xlim()
         if inps == "":
             # Empty. Use default
             newtimef = xlim[1]
         else:
-            # Parse 
+            # Parse
             newtimef = float(inps)
 
         # Convert to integer slide value
         irightvalue = int( (newtimef-xlim[0])/(xlim[1] - xlim[0])*100 )
-        print "iRightSlide = %d" % (irightvalue)
+        info_msg = "iRightSlide = %s" % str(irightvalue)
+        Logger("Filter_Events").information(info_msg)
 
         # Return if no change
         if irightvalue == self._rightSlideValue:
@@ -449,8 +457,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Correct value
         resetT = True
-        if irightvalue >= 100:
-            irightvalue == 100
+        if irightvalue > 100:
+            irightvalue = 100
         elif irightvalue < self._leftSlideValue:
             irightvalue = self._leftSlideValue
         else:
@@ -469,7 +477,7 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.graphicsView.draw()
 
-        # Set the value to left slider 
+        # Set the value to left slider
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
 
         # Reset to line edit
@@ -479,11 +487,12 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def move_lowerSlider(self):
-        """ Re-setup upper range line in figure. 
-        Triggered by a change in Qt Widget.  NO EVENT is required. 
-        """ 
+        """ Re-setup upper range line in figure.
+        Triggered by a change in Qt Widget.  NO EVENT is required.
+        """
         inewy = self.ui.verticalSlider_2.value()
-        print "LowerSlider is set with value %d  vs. class variable %d" % (inewy, self._lowerSlideValue)
+        debug_msg = "LowerSlFider is set with value %s  vs. class variable %s" % (str(inewy), str(self._lowerSlideValue))
+        Logger("Filter_Events").debug(debug_msg)
 
         # Return with no change
         if inewy == self._lowerSlideValue:
@@ -509,7 +518,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView.draw()
 
         # Set line edit input
-        if setLineEdit is True: 
+        if setLineEdit is True:
             # Change value to line edit (5)
             self.ui.lineEdit_5.setText(str(newy))
             # Reset the class variable
@@ -520,20 +529,22 @@ class MainWindow(QtGui.QMainWindow):
     def set_minLogValue(self):
         """ Set the starting time and left slide bar
         """
-        print "Minimum Log Value = %s" %(str(self.ui.lineEdit_5.text()))
+        debug_msg = "Minimum Log Value = %s" %(str(self.ui.lineEdit_5.text()))
+        Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
-      
+
         if str(self.ui.lineEdit_5.text()) == "":
             # Empty. Default to minY
             newminY = ylim[0]
-        else: 
+        else:
             # Non empty.  Parse
             newminY = float(self.ui.lineEdit_5.text())
 
         # Convert to integer slide value
         iminlogval = int( (newminY-ylim[0])/(ylim[1] - ylim[0])*100 )
-        print "ilowerSlide = %d" % (iminlogval)
+        debug_msg = "ilowerSlide = %s" % str(iminlogval)
+        Logger("Filter_Events").debug(debug_msg)
 
         # Return if no change
         if iminlogval == self._lowerSlideValue:
@@ -551,14 +562,15 @@ class MainWindow(QtGui.QMainWindow):
 
         # Move the vertical line
         lowerx =  self.ui.mainplot.get_xlim()
-        lowery =  [newminY, newminY]        
+        lowery =  [newminY, newminY]
         setp(self.lowerslideline, xdata=lowerx, ydata=lowery)
 
         self.ui.graphicsView.draw()
 
         # Move the slide bar (lower)
         self._lowerSlideValue = iminlogval
-        print "LineEdit5 set slide to %d" % (self._lowerSlideValue)
+        debug_msg = "LineEdit5 set slide to %s" % str(self._lowerSlideValue)
+        Logger("Filter_Events").debug(debug_msg)
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
 
         # Reset line Edit if using default
@@ -568,9 +580,9 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def move_upperSlider(self):
-        """ Re-setup upper range line in figure. 
-        Triggered by a change in Qt Widget.  NO EVENT is required. 
-        """ 
+        """ Re-setup upper range line in figure.
+        Triggered by a change in Qt Widget.  NO EVENT is required.
+        """
         inewy = self.ui.verticalSlider.value()
 
         # Return w/o change
@@ -607,7 +619,8 @@ class MainWindow(QtGui.QMainWindow):
         """ Set maximum log value from line-edit
         """
         inps = str(self.ui.lineEdit_6.text())
-        print "Maximum Log Value = %s" %(inps)
+        debug_msg = "Maximum Log Value = %s" %(inps)
+        Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
         if inps == "":
@@ -619,7 +632,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Convert to integer slide value
         imaxlogval = int( (newmaxY-ylim[0])/(ylim[1] - ylim[0])*100 )
-        print "iUpperSlide = %d" % (imaxlogval)
+        debug_msg = "iUpperSlide = %s" % str(imaxlogval)
+        Logger("Filter_Events").debug(debug_msg)
 
         # Return if no change
         if imaxlogval == self._upperSlideValue:
@@ -640,7 +654,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # Move the vertical line
         upperx =  self.ui.mainplot.get_xlim()
-        uppery =  [newmaxY, newmaxY]        
+        uppery =  [newmaxY, newmaxY]
         setp(self.upperslideline, xdata=upperx, ydata=uppery)
 
         self.ui.graphicsView.draw()
@@ -658,12 +672,14 @@ class MainWindow(QtGui.QMainWindow):
     def browse_File(self):
         """ Open a file dialog to get file
         """
-        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog', 
+        filename = QtGui.QFileDialog.getOpenFileName(self, 'Input File Dialog',\
             self._defaultdir, "Data (*.nxs *.dat);;All files (*.*)")
 
         self.ui.lineEdit.setText(str(filename))
 
-        # print "Selected file: ", filename
+        info_msg = "Selected file: %s." % str(filename)
+        Logger("Filter_Events").information(info_msg)
+
 
         return
 
@@ -674,16 +690,16 @@ class MainWindow(QtGui.QMainWindow):
         filename = str(self.ui.lineEdit.text())
 
         # Find out it is relative path or absolute path
-        if os.path.abspath(filename) == filename:
-            isabspath = True
-        else:
-            isabspath = False
+        #if os.path.abspath(filename) == filename:
+        #    isabspath = True
+        #else:
+        #    isabspath = False
 
         dataws = self._loadFile(str(filename))
         if dataws is None:
-            errmsg = "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
-            print errmsg
-            self._setErrorMsg(errmsg)
+            error_msg = "Unable to locate run %s in default directory %s." % (filename, self._defaultdir)
+            Logger("Filter_Events").error(error_msg)
+            self._setErrorMsg(error_msg)
         else:
             self._importDataWorkspace(dataws)
             self._defaultdir = os.path.dirname(str(filename))
@@ -699,10 +715,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         wsname = str(self.ui.comboBox.currentText())
 
-        try: 
+        try:
             dataws = AnalysisDataService.retrieve(wsname)
             self._importDataWorkspace(dataws)
-        except KeyError: 
+        except KeyError:
             pass
 
         # Reset GUI
@@ -725,10 +741,11 @@ class MainWindow(QtGui.QMainWindow):
         vecvalue = samplelog.value
 
         # check
-        if len(vectimes) == 0: 
-            print "Empty log!"
+        if len(vectimes) == 0:
+            error_msg = "Empty log!"
+            Logger("Filter_Events").error(error_msg)
 
-        # Convert absolute time to relative time in seconds
+        #Convert absolute time to relative time in seconds
         t0 = self._dataWS.getRun().getProperty("proton_charge").times[0]
         t0ns = t0.totalNanoseconds()
 
@@ -748,7 +765,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
         self.ui.mainplot.set_ylim(ylim[0], ylim[1])
 
-        setp(self.mainline, xdata=vecreltimes, ydata=vecvalue) 
+        setp(self.mainline, xdata=vecreltimes, ydata=vecvalue)
 
         samunit = samplelog.units
         if len(samunit) == 0:
@@ -767,7 +784,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
         self.ui.lineEdit_5.setText("")
 
-        setp(self.upperslideline, xdata=xlim, ydata=[ylim[1], ylim[1]]) 
+        setp(self.upperslideline, xdata=xlim, ydata=[ylim[1], ylim[1]])
         self._upperSlideValue = 100
         self.ui.verticalSlider.setValue(self._upperSlideValue)
         self.ui.lineEdit_6.setText("")
@@ -785,8 +802,8 @@ class MainWindow(QtGui.QMainWindow):
 
         self.ui.label_mean.show()
         self.ui.label_meanvalue.show()
-        self.ui.label_avg.show() 
-        self.ui.label_timeAvgValue.show() 
+        self.ui.label_avg.show()
+        self.ui.label_timeAvgValue.show()
         self.ui.label_freq.show()
         self.ui.label_freqValue.show()
         self.ui.label_logname.show()
@@ -803,7 +820,7 @@ class MainWindow(QtGui.QMainWindow):
         # Set suggested processing scheme
         if numentries > HUGE_FAST:
             self.ui.checkBox_fastLog.setCheckState(True)
-            if numentries > HUGE_PARALLEL: 
+            if numentries > HUGE_PARALLEL:
                 self.ui.checkBox_doParallel.setCheckState(True)
             else:
                 self.ui.checkBox_doParallel.setCheckState(False)
@@ -817,7 +834,7 @@ class MainWindow(QtGui.QMainWindow):
     def _importDataWorkspace(self, dataws):
         """ Import data workspace for filtering
         """
-        if dataws is None: 
+        if dataws is None:
             return
 
         # Plot time counts
@@ -827,7 +844,7 @@ class MainWindow(QtGui.QMainWindow):
                     failure! \n%s\n" % (str(dataws), errmsg)
             self._setErrorMsg(errmsg)
             return False
-        
+
         # Import log
         self._sampleLogNames = [""]
 
@@ -837,19 +854,19 @@ class MainWindow(QtGui.QMainWindow):
             pv = p.value
             if isinstance(pv, numpy.ndarray):
                 times = p.times
-                if len(times) > 1: 
+                if len(times) > 1:
                     self._sampleLogNames.append(p.name)
         # ENDFOR(p)
 
-        # Set up sample log 
+        # Set up sample log
         self.ui.comboBox_2.clear()
         self.ui.comboBox_2.addItems(self._sampleLogNames)
 
         # Side information
         self.ui.label_mean.hide()
         self.ui.label_meanvalue.hide()
-        self.ui.label_avg.hide() 
-        self.ui.label_timeAvgValue.hide() 
+        self.ui.label_avg.hide()
+        self.ui.label_timeAvgValue.hide()
         self.ui.label_freq.hide()
         self.ui.label_freqValue.hide()
 
@@ -858,12 +875,12 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.label_lognamevalue.hide()
 
         # Set dataws to class variable
-        self._dataWS = dataws 
+        self._dataWS = dataws
 
         return True
 
     def scanEventWorkspaces(self):
-        """ 
+        """
         """
         wsnames = AnalysisDataService.getObjectNames()
 
@@ -874,7 +891,7 @@ class MainWindow(QtGui.QMainWindow):
                 eventwsnames.append(wsname)
         # ENDFOR
 
-        if len(eventwsnames) > 0: 
+        if len(eventwsnames) > 0:
             self.ui.comboBox.clear()
             self.ui.comboBox.addItems(eventwsnames)
 
@@ -892,9 +909,10 @@ class MainWindow(QtGui.QMainWindow):
             # Construct a file name from run number
             runnumber = int(filename)
             if runnumber <= 0:
-                print "Run number cannot be less or equal to zero.  User gives %s. " % (filename)
+                error_msg = "Run number cannot be less or equal to zero.  User gives %s. " % (filename)
+                Logger("Filter_Events").error(error_msg)
                 return None
-            else: 
+            else:
                 ishort = config.getInstrument(self._instrument).shortName()
                 filename = "%s_%s" %(ishort, filename)
                 wsname = filename + "_event"
@@ -913,31 +931,36 @@ class MainWindow(QtGui.QMainWindow):
                 wsname = "%s_%s_event" % (ishort, str_runnumber)
             else:
                 # Non-supported
-                print "File name / run number in such format %s is not supported. " % (filename)
+                error_msg = "File name / run number in such format %s is not supported. " % (filename)
+                Logger("Filter_Events").error(error_msg)
+
                 return None
 
         else:
             # Unsupported format
-            print "File name / run number in such format %s is not supported. " % (filename)
+            error_msg = "File name / run number in such format %s is not supported. " % (filename)
+            Logger("Filter_Events").error(error_msg)
+
             return None
 
         # Load
-        try: 
+        try:
             ws = api.Load(Filename=filename, OutputWorkspace=wsname)
-        except:
+        except RuntimeError as e:
             ws = None
+            return str(e)
 
         return ws
 
-    
+
     def _plotTimeCounts(self, wksp):
-        """ Plot time/counts 
+        """ Plot time/counts
         """
         import datetime
         # Rebin events by pulse time
         try:
             # Get run start and run stop
-            if wksp.getRun().hasProperty("run_start"): 
+            if wksp.getRun().hasProperty("run_start"):
                 runstart = wksp.getRun().getProperty("run_start").value
             else:
                 runstart = wksp.getRun().getProperty("proton_charge").times[0]
@@ -945,11 +968,11 @@ class MainWindow(QtGui.QMainWindow):
 
             runstart = str(runstart).split(".")[0].strip()
             runstop = str(runstop).split(".")[0].strip()
-            
+
             t0 = datetime.datetime.strptime(runstart, "%Y-%m-%dT%H:%M:%S")
             tf = datetime.datetime.strptime(runstop, "%Y-%m-%dT%H:%M:%S")
-           
-            # Calcualte 
+
+            # Calcualte
             dt = tf-t0
             timeduration = dt.days*3600*24 + dt.seconds
 
@@ -959,13 +982,13 @@ class MainWindow(QtGui.QMainWindow):
 
             sumwsname = "_Summed_%s"%(str(wksp))
             if AnalysisDataService.doesExist(sumwsname) is False:
-                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname, 
-                    Params="0, %f, %d"%(timeres, timeduration))
-                sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
-                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+                sumws = api.SumSpectra(InputWorkspace=wksp, OutputWorkspace=sumwsname)
+                sumws = api.RebinByPulseTimes(InputWorkspace=sumws, OutputWorkspace = sumwsname,\
+                    Params="%f"%(timeres))
+                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=sumwsname)
             else:
                 sumws = AnalysisDataService.retrieve(sumwsname)
-        except Exception as e:
+        except RuntimeError as e:
             return str(e)
 
         vecx = sumws.readX(0)
@@ -976,7 +999,7 @@ class MainWindow(QtGui.QMainWindow):
         ymin = min(vecy)
         ymax = max(vecy)
 
-        # Reset graph  
+        # Reset graph
         self.ui.mainplot.set_xlim(xmin, xmax)
         self.ui.mainplot.set_ylim(ymin, ymax)
 
@@ -984,16 +1007,16 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.mainplot.set_ylabel('Counts', fontsize=13)
 
         # Set up main line
-        setp(self.mainline, xdata=vecx, ydata=vecy) 
+        setp(self.mainline, xdata=vecx, ydata=vecy)
 
         # Reset slide
         newslidery = [min(vecy), max(vecy)]
 
         newleftx = xmin + (xmax-xmin)*self._leftSlideValue*0.01
-        setp(self.leftslideline, xdata=[newleftx, newleftx], ydata=newslidery) 
+        setp(self.leftslideline, xdata=[newleftx, newleftx], ydata=newslidery)
 
         newrightx = xmin + (xmax-xmin)*self._rightSlideValue*0.01
-        setp(self.rightslideline, xdata=[newrightx, newrightx], ydata=newslidery) 
+        setp(self.rightslideline, xdata=[newrightx, newrightx], ydata=newslidery)
 
         self.ui.graphicsView.draw()
 
@@ -1019,18 +1042,14 @@ class MainWindow(QtGui.QMainWindow):
         splitinfowsname = str(self._dataWS) + "_info"
 
         title = str(self.ui.lineEdit_title.text())
+        fastLog = self.ui.checkBox_fastLog.isChecked()
 
-        """ Debug 
-        for k in kwargs.keys():
-            print k, kwargs[k], type(kwargs[k])
-        print "Input workspace = ", str(self._dataWS)
-         END DB """
-
-        splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
+        splitws, infows = api.GenerateEventsFilter(\
+                InputWorkspace      = self._dataWS,\
+                UnitOfTime          = "Seconds",\
+                TitleOfSplitters    = title,\
+                OutputWorkspace     = splitwsname,\
+                FastLog             = fastLog,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
         self.splitWksp(splitws, infows)
@@ -1044,54 +1063,63 @@ class MainWindow(QtGui.QMainWindow):
         kwargs = {}
         samplelog = str(self.ui.comboBox_2.currentText())
         if len(samplelog) == 0:
-            print "No sample log is selected!"
+            error_msg = "No sample log is selected!"
+            Logger("Filter_Events").error(error_msg)
             return
 
 
         if self.ui.lineEdit_3.text() != "":
             rel_starttime = float(self.ui.lineEdit_3.text())
             kwargs["StartTime"] = str(rel_starttime)
+
         if self.ui.lineEdit_4.text() != "":
             rel_stoptime = float(self.ui.lineEdit_4.text())
             kwargs["StopTime"] = str(rel_stoptime)
+
         if self.ui.lineEdit_5.text() != "":
             minlogvalue = float(self.ui.lineEdit_5.text())
             kwargs["MinimumLogValue"] = minlogvalue
+
         if self.ui.lineEdit_6.text() != "":
             maxlogvalue = float(self.ui.lineEdit_6.text())
             kwargs["MaximumLogValue"] = maxlogvalue
+
         if self.ui.lineEdit_7.text() != "":
             logvalueintv = float(self.ui.lineEdit_7.text())
             kwargs["LogValueInterval"] = logvalueintv
         logvalchangedir = str(self.ui.comboBox_4.currentText())
         kwargs["FilterLogValueByChangingDirection"] = logvalchangedir
+
         if self.ui.lineEdit_9.text() != "":
             logvalueintv = float(self.ui.lineEdit_9.text())
             kwargs["TimeTolerance"] = logvalueintv
         logboundtype = str(self.ui.comboBox_5.currentText())
         kwargs["LogBoundary"] = logboundtype
+
         if self.ui.lineEdit_8.text() != "":
             logvaluetol = float(self.ui.lineEdit_8.text())
             kwargs["LogValueTolerance"] = logvaluetol
-    
+
 
         splitwsname = str(self._dataWS) + "_splitters"
         splitinfowsname = str(self._dataWS) + "_info"
+        fastLog = self.ui.checkBox_fastLog.isChecked()
 
         title = str(self.ui.lineEdit_title.text())
 
-        splitws, infows = api.GenerateEventsFilter(
-                InputWorkspace      = self._dataWS,
-                UnitOfTime          = "Seconds",
-                TitleOfSplitters    = title,
-                OutputWorkspace     = splitwsname,
-                LogName             = samplelog,
+        splitws, infows = api.GenerateEventsFilter(\
+                InputWorkspace      = self._dataWS,\
+                UnitOfTime          = "Seconds",\
+                TitleOfSplitters    = title,\
+                OutputWorkspace     = splitwsname,\
+                LogName             = samplelog,\
+                FastLog             = fastLog,\
                 InformationWorkspace = splitinfowsname, **kwargs)
 
-        try: 
+        try:
             self.splitWksp(splitws, infows)
-        except Exception as mtderror:
-            self._setErrorMsg("Splitting Failed!\n %s" % (str(mtderror)))
+        except RuntimeError as e:
+            self._setErrorMsg("Splitting Failed!\n %s" % (str(e)))
 
         return
 
@@ -1119,19 +1147,19 @@ class MainWindow(QtGui.QMainWindow):
         if len(outbasewsname) == 0:
             outbasewsname = "tempsplitted"
             self.ui.lineEdit_outwsname.setText(outbasewsname)
-         
-        api.FilterEvents(
-                InputWorkspace          = self._dataWS, 
-                SplitterWorkspace       = splitws, 
-                InformationWorkspace    = infows, 
-                OutputWorkspaceBaseName = outbasewsname, 
-                GroupWorkspaces         = dogroupws, 
-                FilterByPulseTime       = filterbypulse, 
-                CorrectionToSample      = corr2sample, 
-                SpectrumWithoutDetector = how2skip, 
-                SplitSampleLogs         = splitsamplelog, 
-                OutputWorkspaceIndexedFrom1     = startfrom1, 
-                OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)  
+
+        api.FilterEvents(\
+                InputWorkspace          = self._dataWS,\
+                SplitterWorkspace       = splitws,\
+                InformationWorkspace    = infows,\
+                OutputWorkspaceBaseName = outbasewsname,\
+                GroupWorkspaces         = dogroupws,\
+                FilterByPulseTime       = filterbypulse,\
+                CorrectionToSample      = corr2sample,\
+                SpectrumWithoutDetector = how2skip,\
+                SplitSampleLogs         = splitsamplelog,\
+                OutputWorkspaceIndexedFrom1     = startfrom1,\
+                OutputTOFCorrectionWorkspace    = 'TOFCorrTable', **kwargs)
 
         return
 
@@ -1173,12 +1201,12 @@ class MainWindow(QtGui.QMainWindow):
         tablewsnames = []
         for wsname in wsnames:
             wksp = AnalysisDataService.retrieve(wsname)
-            if isinstance(wksp, mantid.api._api.ITableWorkspace): 
+            if isinstance(wksp, mantid.api.ITableWorkspace):
                 tablewsnames.append(wsname)
         # ENDFOR
 
         self.ui.comboBox_corrWS.clear()
-        if len(tablewsnames) > 0: 
+        if len(tablewsnames) > 0:
             self.ui.comboBox_corrWS.addItems(tablewsnames)
 
         return
@@ -1193,7 +1221,7 @@ class MainWindow(QtGui.QMainWindow):
 
     def _setErrorMsg(self, errmsg):
         """ Clear error message
-        """ 
+        """
         #self.ui.plainTextEdit_ErrorMsg.setPlainText(errmsg)
         #self.ui.label_error.show()
 
@@ -1204,9 +1232,12 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def helpClicked(self):
+        from pymantidplot.proxies import showCustomInterfaceHelp
+        showCustomInterfaceHelp("FilterEventUI")
 
-    def _resetGUI(self, resetfilerun=False, resetwslist=False):
-        """ Reset GUI including all text edits and etc. 
+    def _resetGUI(self, resetfilerun=False):
+        """ Reset GUI including all text edits and etc.
         """
         if resetfilerun is True:
             self.ui.lineEdit.clear()
@@ -1231,7 +1262,7 @@ class MainWindow(QtGui.QMainWindow):
         ylim = self.ui.mainplot.get_ylim()
         miny = ylim[0]
         maxy = ylim[1]
-        xlim = self.ui.mainplot.get_xlim() 
+        xlim = self.ui.mainplot.get_xlim()
         setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
         setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
         self.ui.graphicsView.draw()
@@ -1251,7 +1282,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.checkBox_doParallel.setCheckState(False)
 
         self.ui.comboBox_skipSpectrum.setCurrentIndex(0)
-        
+
         self.ui.checkBox_filterByPulse.setCheckState(False)
         self.ui.checkBox_from1.setCheckState(False)
         self.ui.checkBox_groupWS.setCheckState(True)

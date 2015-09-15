@@ -7,6 +7,7 @@
 #include "MantidQtCustomInterfaces/IReflPresenter.h"
 #include "MantidQtCustomInterfaces/ReflSearchModel.h"
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
+#include "MantidQtMantidWidgets/SlitCalculator.h"
 #include <boost/scoped_ptr.hpp>
 #include <QSignalMapper>
 #include "ui_ReflMainWidget.h"
@@ -69,6 +70,9 @@ namespace MantidQt
       virtual void setProgressRange(int min, int max);
       virtual void setProgress(int progress);
 
+      //Get status of the checkbox which dictates whether an ipython notebook is produced
+      virtual bool getEnableNotebook();
+
       //Settor methods
       virtual void setSelection(const std::set<int>& rows);
       virtual void setTableList(const std::set<std::string>& tables);
@@ -100,6 +104,7 @@ namespace MantidQt
       //the workspace the user selected to open
       std::string m_toOpen;
       QSignalMapper* m_openMap;
+      MantidWidgets::SlitCalculator* m_calculator;
 
     private slots:
       void on_actionNewTable_triggered();
@@ -123,6 +128,7 @@ namespace MantidQt
       void on_actionHelp_triggered();
       void on_actionPlotRow_triggered();
       void on_actionPlotGroup_triggered();
+      void on_actionSlitCalculator_triggered();
 
       void on_comboSearchInstrument_currentIndexChanged(int index);
       void on_comboProcessInstrument_currentIndexChanged(int index);

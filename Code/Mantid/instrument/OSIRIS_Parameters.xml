@@ -24,6 +24,9 @@
 <parameter name="cm-1-convert-choice" type="string">
     <value val="false" />
 </parameter>
+<parameter name="save-nexus-choice" type="string">
+    <value val="true" />
+</parameter>
 <parameter name="save-ascii-choice" type="string">
     <value val="false" />
 </parameter>
@@ -69,6 +72,9 @@
 </parameter>
 <parameter name="Workflow.SE-log" type="string">
     <value val="sample" />
+</parameter>
+<parameter name="Workflow.SE-log-value" type="string">
+    <value val="last_value" />
 </parameter>
 <parameter name="Workflow.beam-width" type="string">
     <value val="2.2" />

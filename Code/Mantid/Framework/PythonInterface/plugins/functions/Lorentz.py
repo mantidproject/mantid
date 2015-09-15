@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
@@ -30,7 +31,7 @@ import numpy as np
 class Lorentz(IFunction1D):
     """
         Provide a Lorentz model for SANS
-        
+
         I(q) = scale / ( 1 + q^2 L^2 ) + background
     """
 
@@ -48,7 +49,8 @@ class Lorentz(IFunction1D):
             Evaluate the model
             @param xvals: numpy array of q-values
         """
-        return self.getParameterValue("Scale") / (1.0 + np.power(xvals*self.getParameterValue('Length'), 2)) + self.getParameterValue('Background')
+        return self.getParameterValue("Scale") / (1.0 + np.power(xvals*self.getParameterValue('Length'), 2)) +\
+               self.getParameterValue('Background')
 
     def functionDeriv1D(self, xvals, jacobian):
         """

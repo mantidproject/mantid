@@ -67,7 +67,7 @@ const std::string typeFromName(const std::string &name) {
         "\""
         "Peak column names/types must be explicitly marked in PeakColumn.cpp");
   }
-};
+}
 }
 
 //----------------------------------------------------------------------------------------------

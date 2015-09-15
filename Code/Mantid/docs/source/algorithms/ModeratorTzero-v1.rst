@@ -81,3 +81,5 @@ conditions, use of :ref:`algm-ModeratorTzeroLinear` is
 preferred.
 
 .. categories::
+
+.. sourcelink::

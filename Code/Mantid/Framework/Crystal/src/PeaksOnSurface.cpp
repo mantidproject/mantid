@@ -2,7 +2,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <boost/assign.hpp>
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 typedef std::vector<double> VecDouble;
@@ -25,10 +24,10 @@ PeaksOnSurface::~PeaksOnSurface() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PeaksOnSurface::name() const { return "PeaksOnSurface"; };
+const std::string PeaksOnSurface::name() const { return "PeaksOnSurface"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PeaksOnSurface::version() const { return 1; };
+int PeaksOnSurface::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PeaksOnSurface::category() const { return "Crystal"; }

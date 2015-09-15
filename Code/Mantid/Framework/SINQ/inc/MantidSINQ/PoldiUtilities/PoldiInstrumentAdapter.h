@@ -5,7 +5,7 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <map>
 

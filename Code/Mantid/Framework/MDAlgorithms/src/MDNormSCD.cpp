@@ -2,8 +2,8 @@
 
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -12,7 +12,7 @@ namespace MDAlgorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -218,7 +218,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = boost::make_shared<MDHistoWorkspace>(dataWS);
+  m_normWS.reset(dataWS.clone().release());
   m_normWS->setTo(0., 0., 0.);
 }
 

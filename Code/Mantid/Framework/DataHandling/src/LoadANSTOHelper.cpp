@@ -51,34 +51,83 @@ void ProgressTracker::complete() {
 
 // EventCounter
 EventCounter::EventCounter(std::vector<size_t> &eventCounts,
-                           const std::vector<bool> &mask)
+                           const std::vector<bool> &mask,
+                           const std::vector<int> &offsets, size_t stride,
+                           size_t pixelsCutOffL, size_t tubeBinning,
+                           size_t finalBinsY,
+                           double periode, double phase)
     : m_eventCounts(eventCounts), m_mask(mask),
+      m_offsets(offsets), m_stride(stride),
+      m_pixelsCutOffL(pixelsCutOffL),
+      m_tubeBinning(tubeBinning),
+      m_finalBinsY(finalBinsY),
       m_tofMin(std::numeric_limits<double>::max()),
-      m_tofMax(std::numeric_limits<double>::min()) {}
+      m_tofMax(std::numeric_limits<double>::min()),
+      m_period(periode), m_phase(phase) {}
 double EventCounter::tofMin() const {
   return m_tofMin <= m_tofMax ? m_tofMin : 0.0;
 }
 double EventCounter::tofMax() const {
   return m_tofMin <= m_tofMax ? m_tofMax : 0.0;
 }
-void EventCounter::addEvent(size_t s, double tof) {
-  if (m_mask[s]) {
-    if (m_tofMin > tof)
-      m_tofMin = tof;
-    if (m_tofMax < tof)
-      m_tofMax = tof;
+void EventCounter::addEvent(size_t x, size_t y, double tof) {
+  // correction
+  if (m_period > 0.0) {
+    tof += m_phase;
+    while (tof > m_period)
+      tof -= m_period;
+    while (tof < 0)
+      tof += m_period;
+  }
 
-    m_eventCounts[s]++;
+  y = y + (size_t)m_offsets[x];
+  if (y < m_stride) { // sufficient because yNew is size_t
+    if (m_mask[m_stride * x + y]) {
+      if (m_tofMin > tof)
+        m_tofMin = tof;
+      if (m_tofMax < tof)
+        m_tofMax = tof;
+
+      // transformation to bin index
+      size_t j = (y - m_pixelsCutOffL) / m_tubeBinning;
+
+      m_eventCounts[m_finalBinsY * x + j]++;
+    }
   }
 }
 
 // EventAssigner
 EventAssigner::EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                             const std::vector<bool> &mask)
-    : m_eventVectors(eventVectors), m_mask(mask) {}
-void EventAssigner::addEvent(size_t s, double tof) {
-  if (m_mask[s])
-    m_eventVectors[s]->push_back(tof);
+                             const std::vector<bool> &mask,
+                             const std::vector<int> &offsets, size_t stride,
+                             size_t pixelsCutOffL, size_t tubeBinning,
+                             size_t finalBinsY,
+                             double periode, double phase)
+    : m_eventVectors(eventVectors), m_mask(mask),
+      m_offsets(offsets), m_stride(stride),
+      m_pixelsCutOffL(pixelsCutOffL),
+      m_tubeBinning(tubeBinning),
+      m_finalBinsY(finalBinsY),
+      m_period(periode), m_phase(phase) {}
+void EventAssigner::addEvent(size_t x, size_t y, double tof) {
+  // correction
+  if (m_period > 0.0) {
+    tof += m_phase;
+    while (tof > m_period)
+      tof -= m_period;
+    while (tof < 0)
+      tof += m_period;
+  }
+  
+  y = y + (size_t)m_offsets[x];
+  if (y < m_stride) { // sufficient because yNew is size_t
+    if (m_mask[m_stride * x + y]) {
+      // transformation to bin index
+      size_t j = (y - m_pixelsCutOffL) / m_tubeBinning;
+      
+      m_eventVectors[m_finalBinsY * x + j]->push_back(tof);
+    }
+  }
 }
 
 // FastReadOnlyFile

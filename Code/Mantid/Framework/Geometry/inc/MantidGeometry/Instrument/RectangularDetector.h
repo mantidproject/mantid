@@ -157,6 +157,8 @@ public:
   // ------------ End of IObjComponent methods ----------------
 
 private:
+  /// initialize members to bare defaults
+  void init();
   /// Pointer to the base RectangularDetector, for parametrized instruments
   const RectangularDetector *m_rectBase;
   /// Private copy assignment operator
@@ -183,7 +185,7 @@ private:
   double m_ystep;
 
   /// Texture ID to use in rendering
-  unsigned int mTextureID;
+  unsigned int m_textureID;
 
   /// Pointer to the shape of the pixels in this detector array.
   boost::shared_ptr<Object> mShape;

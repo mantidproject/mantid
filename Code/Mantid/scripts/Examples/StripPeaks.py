@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # MantidPlot example script
 #
 # Using StripPeaks + dialog boxes

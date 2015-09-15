@@ -1,11 +1,13 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiCross.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PhysicalCrossPeak.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
@@ -17,8 +19,8 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayMultiCrossFactory::PeakOverlayMultiCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber)
-    : PeakOverlayViewFactoryBase(plot, parent, colourNumber),
+    PeakOverlayMultiCrossFactory::PeakOverlayMultiCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber)
+    : PeakOverlayViewFactoryBase(plot, parent, plotXIndex, plotYIndex, colourNumber),
       m_peaksWS(peaksWS),
       m_zMax(0),
       m_zMin(0)
@@ -39,7 +41,7 @@ namespace MantidQt
     {
     }
 
-    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiCrossFactory::createView(PeakTransform_const_sptr transform) const
+    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiCrossFactory::createView(PeaksPresenter* const presenter, PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
       VecPhysicalCrossPeak physicalPeaks(m_peaksWS->rowCount());
@@ -51,7 +53,7 @@ namespace MantidQt
       }
 
       // Make the overlay widget.
-      return boost::make_shared<PeakOverlayMultiCross>(m_plot, m_parent, physicalPeaks, this->m_peakColour);
+      return boost::make_shared<PeakOverlayMultiCross>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour);
     }
 
     int PeakOverlayMultiCrossFactory::FOM() const

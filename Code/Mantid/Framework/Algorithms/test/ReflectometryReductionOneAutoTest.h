@@ -6,14 +6,18 @@
 #include "MantidAlgorithms/ReflectometryReductionOneAuto.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/assign/list_of.hpp>
 
 using Mantid::Algorithms::ReflectometryReductionOneAuto;
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace boost::assign;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 using Mantid::MantidVec;
+using Mantid::MantidVecPtr;
+using namespace boost::assign;
 
 namespace
 {
@@ -143,7 +147,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 1.0);
-    alg->setPropertyValue("ProcessingInstructions", "0, 1");
+    alg->setPropertyValue("ProcessingInstructions", "0");
     alg->setPropertyValue("OutputWorkspace", outWSQName);
     alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName);
     alg->setRethrows(true);
@@ -249,27 +253,6 @@ public:
     TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument);
   }
 
-  void test_workspace_index_list_throw_if_not_pairs()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "0");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-  }
-
-  void test_workspace_index_list_values_not_positive_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "-1, 0"); //-1 is not acceptable.
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "1, 0"); //1 > 0.
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
-  }
-
   void test_cannot_set_direct_beam_region_of_interest_without_multidetector_run()
   {
     auto alg = construct_standard_algorithm();
@@ -304,14 +287,14 @@ public:
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_bad_sample_component_name_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("SampleComponentName", "made-up");
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
 
@@ -394,6 +377,120 @@ public:
     AnalysisDataService::Instance().remove(outWSLamName);
   }
 
+  void test_normalize_by_detmon()
+  {
+    //Prepare workspace
+    //-----------------
+    MantidVecPtr x, e, detData, monData;
+
+    //Single bin from 0->1
+    x.access().resize(2);
+    x.access()[0] = 0;
+    x.access()[1] = 1;
+    //No error at all
+    e.access().resize(1, 0.0);
+
+    //Set the detector and monitor y values
+    detData.access().resize(1, 10);
+    monData.access().resize(1, 5);
+
+    auto tinyWS = MatrixWorkspace_sptr(new Workspace2D());
+    // 2 spectra, 2 x values, 1 y value per spectra
+    tinyWS->initialize(2, 2, 1);
+    tinyWS->setX(0, x);
+    tinyWS->setX(1, x);
+    tinyWS->setData(0, detData, e);
+    tinyWS->setData(1, monData, e);
+
+    tinyWS->setTitle("Test histogram");
+    tinyWS->getAxis(0)->setUnit("Wavelength");
+    tinyWS->setYUnit("Counts");
+
+
+    //Prepare instrument
+    //------------------
+    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    instrument->setReferenceFrame(
+        boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+
+    ObjComponent *source = new ObjComponent("source");
+    source->setPos(V3D(0, 0, 0));
+    instrument->add(source);
+    instrument->markAsSource(source);
+
+
+    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    source->setPos(V3D(15, 0, 0));
+    instrument->add(sample);
+    instrument->markAsSamplePos(sample);
+
+    Detector *det = new Detector("point-detector", 1, NULL);
+    det->setPos(20, (20 - sample->getPos().X()), 0);
+    instrument->add(det);
+    instrument->markAsDetector(det);
+
+    Detector *monitor = new Detector("Monitor", 2, NULL);
+    monitor->setPos(14, 0, 0);
+    instrument->add(monitor);
+    instrument->markAsMonitor(monitor);
+
+    //Add instrument to workspace
+    tinyWS->setInstrument(instrument);
+    tinyWS->getSpectrum(0)->addDetectorID(det->getID());
+    tinyWS->getSpectrum(1)->addDetectorID(monitor->getID());
+
+    //Now we can parameterize the instrument
+    auto tinyInst = tinyWS->getInstrument();
+    ParameterMap_sptr params = tinyInst->getParameterMap();
+    params->addDouble(tinyInst.get(), "PointDetectorStart", 0.0);
+    params->addDouble(tinyInst.get(), "PointDetectorStop", 0.0);
+    params->addDouble(tinyInst.get(), "I0MonitorIndex", 1.0);
+    params->addDouble(tinyInst.get(), "LambdaMin", 0.0);
+    params->addDouble(tinyInst.get(), "LambdaMax", 10.0);
+    params->addDouble(tinyInst.get(), "MonitorBackgroundMin", 0.0);
+    params->addDouble(tinyInst.get(), "MonitorBackgroundMax", 0.0);
+    params->addDouble(tinyInst.get(), "MonitorIntegralMin", 0.0);
+    params->addDouble(tinyInst.get(), "MonitorIntegralMax", 10.0);
+
+    tinyWS->mutableRun().addLogData(new PropertyWithValue<double>("Theta", 0.1));
+
+    //Run the required algorithms
+    //---------------------------
+
+    //Convert units
+    IAlgorithm_sptr conv = AlgorithmManager::Instance().create("ConvertUnits");
+    conv->initialize();
+    conv->setProperty("InputWorkspace", tinyWS);
+    conv->setProperty("OutputWorkspace", inWSName);
+    conv->setProperty("Target", "TOF");
+    conv->execute();
+    TS_ASSERT(conv->isExecuted());
+
+    //Reduce
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ReflectometryReductionOneAuto");
+    alg->setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inWSName));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NormalizeByIntegratedMonitors", false));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("WavelengthStep", 1.0));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outWSQName));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName));
+    alg->execute();
+    TS_ASSERT(alg->isExecuted());
+
+    //Get results
+    MatrixWorkspace_sptr outWSLam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName);
+
+    //Check results (10 / 5 = 2)
+    TS_ASSERT_DELTA(outWSLam->readY(0)[0], 2, 1e-5);
+    TS_ASSERT_DELTA(outWSLam->readX(0)[0], 0, 1e-5);
+    TS_ASSERT_DELTA(outWSLam->readX(0)[1], 1, 1e-5);
+
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(inWSName);
+    AnalysisDataService::Instance().remove(outWSQName);
+    AnalysisDataService::Instance().remove(outWSLamName);
+  }
 };
 
 #endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTOTEST_H_ */

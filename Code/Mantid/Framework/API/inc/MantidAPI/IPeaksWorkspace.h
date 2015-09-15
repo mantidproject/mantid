@@ -1,17 +1,21 @@
-#ifndef MANTID_API_IPEAKSPACE_H_
-#define MANTID_API_IPEAKSPACE_H_ 1
+#ifndef MANTID_API_IPEAKSWORKSPACE_H_
+#define MANTID_API_IPEAKSWORKSPACE_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include <boost/optional.hpp>
 
 namespace Mantid {
-
-namespace API {
+namespace Geometry {
 class IPeak;
+}
+namespace API {
+
 
 //==========================================================================================
 /** Interface to the class Mantid::DataObjects::PeaksWorkspace
@@ -47,16 +51,13 @@ public:
   /// Ctor
   IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {}
 
-  /// Copy constructor
-  IPeaksWorkspace(const IPeaksWorkspace &other)
-      : ITableWorkspace(other), ExperimentInfo(other) {}
-
   /// Destructor
   virtual ~IPeaksWorkspace();
 
-  // boost::shared_ptr<IPeaksWorkspace> clone() = 0;
-  // void appendFile( std::string filename, Mantid::Geometry::Instrument_sptr
-  // inst) = 0;
+  /// Returns a clone of the workspace
+  std::unique_ptr<IPeaksWorkspace> clone() const {
+    return std::unique_ptr<IPeaksWorkspace>(doClone());
+  }
 
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks
@@ -73,37 +74,46 @@ public:
   /** Add a peak to the list
    * @param ipeak :: Peak object to add (copy) into this.
    */
-  virtual void addPeak(const IPeak &ipeak) = 0;
+  virtual void addPeak(const Mantid::Geometry::IPeak &ipeak) = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Return a reference to the Peak
    * @param peakNum :: index of the peak to get.
    * @return a reference to a Peak object.
    */
-  virtual IPeak &getPeak(int peakNum) = 0;
+  virtual Mantid::Geometry::IPeak &getPeak(int peakNum) = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Return a reference to the Peak (const version)
    * @param peakNum :: index of the peak to get.
    * @return a reference to a Peak object.
    */
-  virtual const IPeak &getPeak(int peakNum) const = 0;
+  virtual const Mantid::Geometry::IPeak &getPeak(int peakNum) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Return a pointer to the Peak
    * @param peakNum :: index of the peak to get.
    * @return a pointer to a Peak object.
    */
-  IPeak *getPeakPtr(const int peakNum) { return &this->getPeak(peakNum); }
+  Mantid::Geometry::IPeak *getPeakPtr(const int peakNum) { return &this->getPeak(peakNum); }
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
-   * @param QLabFrame :: Q of the center of the peak, in reciprocal space
-   * @param detectorDistance :: distance between the sample and the detector.
+   * @param QLabFrame :: Q of the center of the peak in the lab frame, in
+   * reciprocal space
+   * @param detectorDistance :: Optional distance between the sample and the
+   * detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
-  virtual IPeak *createPeak(Mantid::Kernel::V3D QLabFrame,
-                            double detectorDistance = 1.0) const = 0;
+  virtual Mantid::Geometry::IPeak *createPeak(Mantid::Kernel::V3D QLabFrame,
+                            boost::optional<double> detectorDistance) const = 0;
+
+  /**
+   * Create an instance of a peak using a V3D
+   * @param HKL V3D
+   * @return a pointer to a new Peak object.
+   */
+  virtual Mantid::Geometry::IPeak *createPeakHKL(Mantid::Kernel::V3D HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Determine if the workspace has been integrated using a peaks integration
@@ -127,29 +137,33 @@ public:
    * @param coordinateSystem : Special Q3D coordinate system to use.
    */
   virtual void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
-
+      const Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
   //---------------------------------------------------------------------------------------------
   /**
    * Get the special coordinate system.
    * @returns special Q3D coordinate system to use being used by this
    * PeaksWorkspace object. Probably the one the workspace was generated with.
    */
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const = 0;
+
   virtual std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;
   virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IPeaksWorkspace(const IPeaksWorkspace &other)
+      : ITableWorkspace(other), ExperimentInfo(other) {}
+  /// Protected copy assignment operator. Assignment not implemented.
+  IPeaksWorkspace &operator=(const IPeaksWorkspace &other);
+
   virtual const std::string toString() const;
+
+private:
+  virtual IPeaksWorkspace *doClone() const = 0;
 };
 
-/// Typedef for a shared pointer to a peaks workspace.
-typedef boost::shared_ptr<IPeaksWorkspace> IPeaksWorkspace_sptr;
-
-/// Typedef for a shared pointer to a const peaks workspace.
-typedef boost::shared_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_sptr;
 }
 }
 #endif

@@ -47,6 +47,31 @@
   <value val="0.005"/>
 </parameter>
 
+<parameter name="collimation-length-correction">
+  <!-- This is a correction length in meter for the L1 value to obtain the default collimation length-->
+  <value val="17.2765"/>
+</parameter>
+
+<parameter name="special-default-collimation-length-method">
+  <!-- This method determines how the default collimation is to be calculated-->
+  <value val="guide"/>
+</parameter>
+
+<parameter name="guide-collimation-length-increment">
+  <!-- This is a correction length increment in meter-->
+  <value val="2.0"/>
+</parameter>
+
+<parameter name="guide-cutoff">
+  <!-- This is the cutoff value for the guides-->
+  <value val="130.0"/>
+</parameter>
+
+<parameter name="number-of-guides">
+  <!-- This number of guides-->
+  <value val="5"/>
+</parameter>
+
 </component-link>
 
 </parameter-file>

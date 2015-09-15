@@ -1,9 +1,9 @@
+#pylint: disable=invalid-name
 """
     Instrument-specific utility functions for EQSANS
 """
-from hfir_instrument import get_default_beam_center, _get_pixel_info
+from hfir_instrument import _get_pixel_info
 
-import sys
 
 def get_pixel_from_coordinate(x, y, workspace):
     """

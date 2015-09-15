@@ -2,13 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {

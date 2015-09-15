@@ -44,3 +44,5 @@ Uses the :ref:`algm-SolidAngle`, :ref:`algm-Integration` and
 :ref:`algm-ConvertToDistribution` algorithms.
 
 .. categories::
+
+.. sourcelink::

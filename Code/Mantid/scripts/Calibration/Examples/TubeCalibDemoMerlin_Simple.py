@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MERLIN
 #
@@ -67,7 +68,7 @@ def CalibrateMerlin(RunNumber):
 
     # == Get the calibration and put results into calibration table ==
     # also put peaks into PeakFile
-    calibrationTable,peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
+    calibrationTable,peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,\
                                       outputPeak=True, fitPar=fitPar, plotTube=range(0,280,20))
     print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
 

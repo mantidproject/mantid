@@ -1,25 +1,23 @@
 #ifndef MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_
 #define MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
-#include "MantidMDAlgorithms/SlicingAlgorithm.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
+#include <iomanip>
+
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
+using Mantid::coord_t;
 
 //------------------------------------------------------------------------------------------------
 /** Concrete declaration of SlicingAlgorithm for testing */
@@ -28,8 +26,8 @@ class SlicingAlgorithmImpl : public SlicingAlgorithm
   // Make all the members public so I can test them.
   friend class SlicingAlgorithmTest;
 public:
-  virtual const std::string name() const { return "SlicingAlgorithmImpl";};
-  virtual int version() const { return 1;};
+  virtual const std::string name() const { return "SlicingAlgorithmImpl";}
+  virtual int version() const { return 1;}
   virtual const std::string category() const { return "Testing";}
   virtual const std::string summary() const { return "Summary of this test."; }
   void init() {}

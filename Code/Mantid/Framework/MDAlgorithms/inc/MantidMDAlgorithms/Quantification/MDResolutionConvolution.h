@@ -25,7 +25,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
@@ -117,7 +117,7 @@ protected:
   const API::IFunctionMD &getFittingFunction() const;
 
 private:
-  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolution);
+  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolution)
 
   /// Required for function interface
   void function(const Mantid::API::FunctionDomain &,

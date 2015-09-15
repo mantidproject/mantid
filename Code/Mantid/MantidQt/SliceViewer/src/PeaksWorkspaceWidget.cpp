@@ -1,10 +1,17 @@
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
+#include "MantidQtSliceViewer/PeaksViewer.h"
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
+#include "MantidQtAPI/SignalBlocker.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <QColorDialog>
 #include <QPlastiqueStyle>
 
+
+
 namespace MantidQt {
 namespace SliceViewer {
+
+using MantidQt::API::SignalBlocker;
 
 /**
 Constructor
@@ -13,15 +20,17 @@ Constructor
 @param coordinateSystem : Name of coordinate system used
 @param defaultForegroundColour : Default peak foreground colour
 @param defaultBackgroundColour : Default peak background colour
+@param canAddPeaks : Flag to indicate that peaks can be added. False for no add mode.
 @param parent : parent widget
 */
 PeaksWorkspaceWidget::PeaksWorkspaceWidget(
     Mantid::API::IPeaksWorkspace_const_sptr ws,
     const std::string &coordinateSystem, const QColor &defaultForegroundColour,
-    const QColor &defaultBackgroundColour, QWidget *parent)
+    const QColor &defaultBackgroundColour, const bool canAddPeaks, PeaksViewer *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem),
       m_foregroundColour(defaultForegroundColour),
-      m_backgroundColour(defaultBackgroundColour) {
+      m_backgroundColour(defaultBackgroundColour),
+      m_parent(parent) {
 
   ui.setupUi(this);
 
@@ -35,6 +44,8 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   connect(ui.btnRemove, SIGNAL(clicked()), this,
           SLOT(onRemoveWorkspaceClicked()));
   connect(ui.btnHide, SIGNAL(clicked()), this, SLOT(onToggleHideInPlot()));
+  connect(ui.btnAddPeak, SIGNAL(toggled(bool)), this, SLOT(onAddPeaksToggled(bool)));
+  connect(ui.btnRemovePeak, SIGNAL(toggled(bool)), this, SLOT(onClearPeaksToggled(bool)));
 
   // Override the styles for the colour buttons, because with some inherited
   // styles, the button background colour will be hidden.
@@ -46,6 +57,9 @@ PeaksWorkspaceWidget::PeaksWorkspaceWidget(
   ui.btnBackgroundColor->setVisible(integratedPeaks);
   ui.ckShowBackground->setVisible(integratedPeaks);
   ui.lblShowBackgroundColour->setVisible(integratedPeaks);
+
+  // Don't allow peaks to be added if it has been forbidden
+  ui.btnAddPeak->setEnabled(canAddPeaks);
 
   // Populate controls with data.
   populate();
@@ -171,7 +185,6 @@ Handler for removing a workspace from the plotting tools.
 */
 void PeaksWorkspaceWidget::onRemoveWorkspaceClicked() {
   emit removeWorkspace(this->m_ws);
-  this->hide();
 }
 
 /**
@@ -275,6 +288,36 @@ void PeaksWorkspaceWidget::onCurrentChanged(QModelIndex index, QModelIndex)
     if (index.isValid()) {
       emit zoomToPeak(this->m_ws, index.row());
     }
+}
+
+/**
+ * @brief PeaksWorkspaceWidget::onClearPeaksToggled
+ * @param on : Enter mode
+ */
+void PeaksWorkspaceWidget::onClearPeaksToggled(bool on)
+{
+    //We should now tell the PeaksViewer about this.
+    m_parent->clearPeaksModeRequest(this, on);
+}
+
+/**
+ * @brief PeaksWorkspaceWidget::onAddPeaksToggled
+ * @param on : Enter mode
+ */
+void PeaksWorkspaceWidget::onAddPeaksToggled(bool on)
+{
+    // We should now tell the PeaksViewer about this. It should have a global mode for AddingPeaks it merely needs to know the destination workspace
+    m_parent->addPeaksModeRequest(this, on);
+}
+
+void PeaksWorkspaceWidget::exitClearPeaksMode() {
+    SignalBlocker<QPushButton> scopedBlocker(ui.btnRemovePeak);
+    scopedBlocker->setChecked(false);
+}
+
+void PeaksWorkspaceWidget::exitAddPeaksMode() {
+    SignalBlocker<QPushButton> scopedBlocker(ui.btnAddPeak);
+    scopedBlocker->setChecked(false);
 }
 
 } // namespace

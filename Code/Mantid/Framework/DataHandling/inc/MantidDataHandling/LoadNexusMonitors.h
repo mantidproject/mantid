@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -79,6 +79,9 @@ private:
                                 const std::vector<std::string> &monitorNames);
   /// is it possible to open the file?
   bool canOpenAsNeXus(const std::string &fname);
+
+  /// split multi period histogram workspace into a workspace group
+  void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
   /// The name and path of the input file
   std::string filename;

@@ -1,10 +1,11 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDAlgorithms/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -30,7 +31,7 @@ DECLARE_ALGORITHM(IntegratePeaksMD)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
@@ -163,21 +164,21 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS =
       getProperty("OutputWorkspace");
   if (peakWS != inPeakWS)
-    peakWS = inPeakWS->clone();
+    peakWS.reset(inPeakWS->clone().release());
 
   /// Value of the CoordinatesToUse property.
   std::string CoordinatesToUseStr = getPropertyValue("CoordinatesToUse");
-  int CoordinatesToUse = ws->getSpecialCoordinateSystem();
+  Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
   g_log.warning() << " Warning" << CoordinatesToUse << std::endl;
-  if (CoordinatesToUse == 1 && CoordinatesToUseStr != "Q (lab frame)")
+  if (CoordinatesToUse == Kernel::QLab && CoordinatesToUseStr != "Q (lab frame)")
     g_log.warning() << "Warning: used Q (lab frame) coordinates for MD "
                        "workspace, not CoordinatesToUse from input "
                     << std::endl;
-  else if (CoordinatesToUse == 2 && CoordinatesToUseStr != "Q (sample frame)")
+  else if (CoordinatesToUse == Kernel::QSample && CoordinatesToUseStr != "Q (sample frame)")
     g_log.warning() << "Warning: used Q (sample frame) coordinates for MD "
                        "workspace, not CoordinatesToUse from input "
                     << std::endl;
-  else if (CoordinatesToUse == 3 && CoordinatesToUseStr != "HKL")
+  else if (CoordinatesToUse == Kernel::HKL && CoordinatesToUseStr != "HKL")
     g_log.warning() << "Warning: used HKL coordinates for MD workspace, not "
                        "CoordinatesToUse from input " << std::endl;
 
@@ -276,11 +277,11 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Get the peak center as a position in the dimensions of the workspace
     V3D pos;
-    if (CoordinatesToUse == 1) //"Q (lab frame)"
+    if (CoordinatesToUse == Kernel::QLab) //"Q (lab frame)"
       pos = p.getQLabFrame();
-    else if (CoordinatesToUse == 2) //"Q (sample frame)"
+    else if (CoordinatesToUse == Kernel::QSample) //"Q (sample frame)"
       pos = p.getQSampleFrame();
-    else if (CoordinatesToUse == 3) //"HKL"
+    else if (CoordinatesToUse == Kernel::HKL) //"HKL"
       pos = p.getHKL();
 
     // Get the instrument and its detectors
@@ -328,6 +329,13 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       BackgroundInnerRadiusVector[i] = lenQpeak * BackgroundInnerRadius;
       BackgroundOuterRadiusVector[i] = lenQpeak * BackgroundOuterRadius;
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
+
+      if(Peak* shapeablePeak = dynamic_cast<Peak*>(&p)){
+
+          PeakShape* sphere = new PeakShapeSpherical(PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
+                                                     BackgroundOuterRadiusVector[i], CoordinatesToUse, this->name(), this->version());
+          shapeablePeak->setPeakShape(sphere);
+      }
 
       // Perform the integration into whatever box is contained within.
       ws->getBox()->integrateSphere(
@@ -487,7 +495,7 @@ void IntegratePeaksMD::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         findpeaks->setProperty<bool>("HighBackground", true);
         findpeaks->setProperty<bool>("RawPeakParameters", true);
         std::vector<double> peakPosToFit;
-        peakPosToFit.push_back(static_cast<double>(numSteps / 2));
+        peakPosToFit.push_back(static_cast<double>(numSteps) / 2.0);
         findpeaks->setProperty("PeakPositions", peakPosToFit);
         findpeaks->setProperty<int>("MinGuessedPeakWidth", 4);
         findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);
@@ -681,4 +689,4 @@ double f_eval(double x, void *params) {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

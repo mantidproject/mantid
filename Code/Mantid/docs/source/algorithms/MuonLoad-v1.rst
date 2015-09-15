@@ -24,7 +24,7 @@ Specifically:
 Workflow
 ########
 
-.. image:: ../images/MuonWorkflow.png
+.. diagram:: MuonLoad-v1_wkflw.dot
 
 Usage
 -----
@@ -66,3 +66,5 @@ Output:
    Integrated asymmetry for the run: 1.701
 
 .. categories::
+
+.. sourcelink::

@@ -3,6 +3,8 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -58,8 +60,14 @@ public:
   /// @return the name of the dimension as can be displayed along the axis
   virtual std::string getName() const = 0;
 
+  /// @return the MDFrame
+  virtual const Geometry::MDFrame& getMDFrame() const = 0;
+
   /// @return the units of the dimension as a string
   virtual const Kernel::UnitLabel getUnits() const = 0;
+
+  /// @return the mdunits of the dimension
+  virtual const Kernel::MDUnit& getMDUnits() const = 0;
 
   /// short name which identify the dimension among other dimension. A dimension
   /// can be usually find by its ID and various
@@ -107,7 +115,7 @@ public:
 
 /// Shared Pointer for IMDDimension. Frequently used type in framework.
 typedef boost::shared_ptr<IMDDimension> IMDDimension_sptr;
-/// Shared Pointer to const IMDDimension. Not stictly necessary since
+/// Shared Pointer to const IMDDimension. Not strictly necessary since
 /// IMDDimension is pure abstract.
 typedef boost::shared_ptr<const IMDDimension> IMDDimension_const_sptr;
 /// Vector of constant shared pointers to IMDDimensions.

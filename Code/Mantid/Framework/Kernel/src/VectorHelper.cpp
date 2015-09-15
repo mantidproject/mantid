@@ -3,10 +3,8 @@
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
-#include <vector>
-#include <numeric>
-#include <limits>
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 
@@ -368,7 +366,9 @@ void convertToBinCentre(const std::vector<double> &bin_edges,
  * that the first and last bin centers are in the center of the
  * first and last bins, respectively. For a particular set of
  * bin centers, this may not be correct, but it is the best that
- * can be done, lacking any other information.
+ * can be done, lacking any other information. For an empty input vector, an
+ * empty output is returned. For an input vector of size 1, i.e., a single bin,
+ * there is no information about a proper bin size, so it is set to 1.0.
  *
  * @param bin_centers :: A vector of values specifying bin centers.
  * @param bin_edges   :: An output vector of values specifying bin
@@ -378,8 +378,21 @@ void convertToBinCentre(const std::vector<double> &bin_edges,
 void convertToBinBoundary(const std::vector<double> &bin_centers,
                           std::vector<double> &bin_edges) {
   const std::vector<double>::size_type n = bin_centers.size();
-  if (bin_edges.size() != (n + 1)) {
-    bin_edges.resize(n + 1);
+
+  // Special case empty input: output is also empty
+  if (n == 0) {
+    bin_edges.resize(0);
+    return;
+  }
+
+  bin_edges.resize(n + 1);
+
+  // Special case input of size one: we have no means of guessing the bin size,
+  // set it to 1.
+  if (n == 1) {
+    bin_edges[0] = bin_centers[0] - 0.5;
+    bin_edges[1] = bin_centers[0] + 0.5;
+    return;
   }
 
   for (size_t i = 0; i < n - 1; ++i) {

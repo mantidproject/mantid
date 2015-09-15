@@ -7,7 +7,6 @@ Framework/API
 Framework/Geometry
 Framework/Kernel
 Framework/DataObjects
-Framework/MDEvents
 )
 
 set ( COMMONVATES_SETUP_DONE TRUE )

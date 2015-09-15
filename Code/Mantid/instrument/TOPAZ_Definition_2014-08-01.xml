@@ -5,8 +5,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="TOPAZ" valid-from   ="2014-08-01 00:00:01"
-              valid-to     ="2100-12-31 23:59:59"
-		      last-modified="2014-08-20 17:16:33">
+              valid-to     ="2014-12-31 23:59:59"
+		      last-modified="2015-01-28 10:45:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the TOPAZ.py script from the Translation Service calibration/geometry/ code. -->
   <!--Modified valid-to by A.Savici-->

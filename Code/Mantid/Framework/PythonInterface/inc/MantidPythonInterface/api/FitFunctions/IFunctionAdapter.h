@@ -106,8 +106,8 @@ protected:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(IFunctionAdapter);
-  DISABLE_COPY_AND_ASSIGN(IFunctionAdapter);
+  DISABLE_DEFAULT_CONSTRUCT(IFunctionAdapter)
+  DISABLE_COPY_AND_ASSIGN(IFunctionAdapter)
 
   /// The name of the function
   std::string m_name;

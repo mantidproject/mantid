@@ -6,7 +6,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include <cmath>
 #include <cfloat>
 #include <limits>
 
@@ -318,7 +317,9 @@ double TOF::conversionTOFMax() const { return DBL_MAX; }
  */
 DECLARE_UNIT(Wavelength)
 
-Wavelength::Wavelength() : Unit() {
+Wavelength::Wavelength()
+    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
+      factorFrom(DBL_MIN), do_sfpFrom(false) {
   const double AngstromsSquared = 1e20;
   const double factor =
       (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
@@ -443,7 +444,7 @@ DECLARE_UNIT(Energy)
 const UnitLabel Energy::label() const { return Symbol::MilliElectronVolts; }
 
 /// Constructor
-Energy::Energy() : Unit() {
+Energy::Energy() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Energy_inWavenumber", PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
   const double factor =
@@ -499,7 +500,8 @@ DECLARE_UNIT(Energy_inWavenumber)
 const UnitLabel Energy_inWavenumber::label() const { return Symbol::InverseCM; }
 
 /// Constructor
-Energy_inWavenumber::Energy_inWavenumber() : Unit() {
+Energy_inWavenumber::Energy_inWavenumber()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("Energy", 1.0 / PhysicalConstants::meVtoWavenumber);
   const double toAngstroms = 1e10;
   const double factor =
@@ -566,7 +568,7 @@ DECLARE_UNIT(dSpacing)
 
 const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
 
-dSpacing::dSpacing() : Unit() {
+dSpacing::dSpacing() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   const double factor = 2.0 * M_PI;
   addConversion("MomentumTransfer", factor, -1.0);
   addConversion("QSquared", (factor * factor), -2.0);
@@ -608,7 +610,8 @@ const UnitLabel MomentumTransfer::label() const {
   return Symbol::InverseAngstrom;
 }
 
-MomentumTransfer::MomentumTransfer() : Unit() {
+MomentumTransfer::MomentumTransfer()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("QSquared", 1.0, 2.0);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -1.0);
@@ -661,7 +664,7 @@ DECLARE_UNIT(QSquared)
 
 const UnitLabel QSquared::label() const { return Symbol::InverseAngstromSq; }
 
-QSquared::QSquared() : Unit() {
+QSquared::QSquared() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
   addConversion("MomentumTransfer", 1.0, 0.5);
   const double factor = 2.0 * M_PI;
   addConversion("dSpacing", factor, -0.5);
@@ -721,6 +724,12 @@ Unit *QSquared::clone() const { return new QSquared(*this); }
 DECLARE_UNIT(DeltaE)
 
 const UnitLabel DeltaE::label() const { return Symbol::MilliElectronVolts; }
+
+DeltaE::DeltaE()
+    : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN), t_other(DBL_MIN),
+      t_otherFrom(DBL_MIN), unitScaling(DBL_MIN) {
+  addConversion("DeltaE_inWavenumber", PhysicalConstants::meVtoWavenumber, 1.);
+}
 
 void DeltaE::init() {
   // Efixed must be set to something
@@ -830,10 +839,6 @@ double DeltaE::conversionTOFMax() const {
 
 Unit *DeltaE::clone() const { return new DeltaE(*this); }
 
-DeltaE::DeltaE() : Unit() {
-  addConversion("DeltaE_inWavenumber", PhysicalConstants::meVtoWavenumber, 1.);
-}
-
 // =====================================================================================================
 /* Energy Transfer in units of wavenumber
  * =====================================================================================================
@@ -875,7 +880,9 @@ DECLARE_UNIT(Momentum)
 
 const UnitLabel Momentum::label() const { return Symbol::InverseAngstrom; }
 
-Momentum::Momentum() : Unit() {
+Momentum::Momentum()
+    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
+      factorFrom(DBL_MIN), do_sfpFrom(false) {
 
   const double AngstromsSquared = 1e20;
   const double factor =
@@ -1090,28 +1097,26 @@ DECLARE_UNIT(Time)
 
 const UnitLabel Time::label() const { return Symbol::Second; }
 
-Time::Time() : Unit() {}
+Time::Time() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {}
 
 void Time::init() {}
 
 double Time::singleToTOF(const double x) const {
   UNUSED_ARG(x);
   throw std::runtime_error("Time is not allowed to be convert to TOF. ");
-  return 0.0;
 }
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Time is not allwed to be converted from TOF. ");
-  return 0.0;
 }
 
 double Time::conversionTOFMax() const {
   return std::numeric_limits<double>::quiet_NaN();
-};
+}
 double Time::conversionTOFMin() const {
   return std::numeric_limits<double>::quiet_NaN();
-};
+}
 
 Unit *Time::clone() const { return new Time(*this); }
 
@@ -1122,9 +1127,33 @@ Unit *Time::clone() const { return new Time(*this); }
  * Degrees prints degrees as a label
  */
 
+DECLARE_UNIT(Degrees)
+
 Degrees::Degrees() : Empty(), m_label("degrees") {}
 
 const UnitLabel Degrees::label() const { return m_label; }
+
+void Degrees::init() {}
+
+double Degrees::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error("Degrees is not allowed to be convert to TOF. ");
+}
+
+double Degrees::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
+}
+
+double Degrees::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double Degrees::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+Unit *Degrees::clone() const { return new Degrees(*this); }
 
 } // namespace Units
 

@@ -1,4 +1,5 @@
 #include <QAbstractTableModel>
+#include "DllOption.h"
 #include <boost/shared_ptr.hpp>
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
@@ -9,10 +10,12 @@
 // Forward declarations
 namespace Mantid
 {
-  namespace API
-  {
-    class IPeaksWorkspace;
+  namespace Geometry {
     class IPeak;
+  }
+
+  namespace API {
+    class IPeaksWorkspace; 
   }
 }
 
@@ -47,7 +50,7 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class QPeaksTableModel : public QAbstractTableModel
+    class EXPORT_OPT_MANTIDQT_SLICEVIEWER QPeaksTableModel : public QAbstractTableModel
     {
       Q_OBJECT
     public:
@@ -163,7 +166,7 @@ namespace MantidQt
       mutable int m_dataCachePeakIndex;
 
       QString findColumnName(const int colIndex) const;
-      void updateDataCache(const Mantid::API::IPeak& peak, const int row) const;
+      void updateDataCache(const Mantid::Geometry::IPeak& peak, const int row) const;
 
       /// Collection of data for viewing.
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;

@@ -1,27 +1,19 @@
 #ifndef MANTID_MD_CONVEVENTS2_Q_NDANY_TEST_H_
 #define MANTID_MD_CONVEVENTS2_Q_NDANY_TEST_H_
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidMDEvents/MDTransfFactory.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
 
 class ConvertEvents2MDEvTestHelper: public ConvertToMD
 {
@@ -57,10 +49,8 @@ void testEventWS()
    TS_ASSERT_THROWS_NOTHING(spws = AnalysisDataService::Instance().retrieve("testMDEvWorkspace"));
    TSM_ASSERT(" Worskpace should be retrieved",spws.get());
 
-   boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>,3> > ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>,3> >(spws);
+   boost::shared_ptr<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>,3> > ws = boost::dynamic_pointer_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<3>,3> >(spws);
    TSM_ASSERT("It shoudl be 3D MD workspace",ws.get());
-   //boost::shared_ptr<MDEvents::MDEventWorkspace<MDEvents::MDEvent<2>,2> > ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<2>,2> >(spws);
-   //TSM_ASSERT("It shoudl be 2D MD workspace",ws.get());
 
 
    if(ws.get()){

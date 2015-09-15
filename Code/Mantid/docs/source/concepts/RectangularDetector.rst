@@ -1,7 +1,7 @@
 .. _RectangularDetector:
 
-RectangularDetector
-===================
+Rectangular Detector
+====================
 
 The rectangular detector is a detector bank that is marked as being a regular rectangular bank. It is a particular class in Mantid (RectangularDetector).
 

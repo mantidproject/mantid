@@ -23,6 +23,11 @@ A background range can also be provided which will first calculate
 and subtract a flat background from the raw data before the
 integration is performed.
 
+Workflow
+--------
+
+.. diagram:: TimeSlice-v1_wkflw.dot
+
 Usage
 -----
 
@@ -33,8 +38,8 @@ Usage
 .. testcode:: ExTimeSliceSimple
 
     time_slice_results = TimeSlice(InputFiles=['IRS26173.raw'],
-                            SpectraRange=[3, 53],
-                            PeakRange=[62500, 65000])
+                                   SpectraRange=[3, 53],
+                                   PeakRange=[62500, 65000])
 
     print time_slice_results.getNames()
 
@@ -45,3 +50,5 @@ Output:
     ['irs26173_slice']
 
 .. categories::
+
+.. sourcelink::

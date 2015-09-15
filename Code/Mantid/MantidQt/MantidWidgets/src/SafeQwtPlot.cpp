@@ -1,6 +1,8 @@
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ReadLock.h"
+
 
 using namespace Mantid::Kernel;
 

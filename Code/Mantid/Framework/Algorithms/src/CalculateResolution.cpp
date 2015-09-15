@@ -34,10 +34,10 @@ CalculateResolution::~CalculateResolution() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CalculateResolution::name() const {
   return "CalculateResolution";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateResolution::version() const { return 1; };
+int CalculateResolution::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalculateResolution::category() const {
@@ -48,7 +48,7 @@ const std::string CalculateResolution::category() const {
 const std::string CalculateResolution::summary() const {
   return "Calculates the reflectometry resolution (dQ/Q) for a given "
          "workspace.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

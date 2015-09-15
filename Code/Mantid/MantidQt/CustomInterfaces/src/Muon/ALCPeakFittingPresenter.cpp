@@ -31,7 +31,12 @@ namespace CustomInterfaces
 
   void ALCPeakFittingPresenter::fit()
   {
-    m_model->fitPeaks(m_view->function(""));
+    IFunction_const_sptr func = m_view->function("");
+    if ( func ) {
+      m_model->fitPeaks(func);
+    } else {
+       m_view->displayError("Couldn't fit an empty function");
+    }
   }
 
   void ALCPeakFittingPresenter::onCurrentFunctionChanged()
@@ -103,7 +108,8 @@ namespace CustomInterfaces
 
   void ALCPeakFittingPresenter::onDataChanged()
   {
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)));
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(m_model->data(), 0)),
+                         ALCHelper::curveErrorsFromWs(m_model->data(), 0));
   }
 
 } // namespace CustomInterfaces

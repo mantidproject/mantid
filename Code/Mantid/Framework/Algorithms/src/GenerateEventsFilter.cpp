@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -24,7 +25,13 @@ DECLARE_ALGORITHM(GenerateEventsFilter)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GenerateEventsFilter::GenerateEventsFilter() {}
+GenerateEventsFilter::GenerateEventsFilter()
+    : API::Algorithm(), m_dataWS(), m_splitWS(), m_filterWS(), m_filterInfoWS(),
+      m_startTime(), m_stopTime(), m_runEndTime(),
+      m_timeUnitConvertFactorToNS(0.), m_dblLog(NULL), m_intLog(NULL),
+      m_logAtCentre(false), m_logTimeTolerance(0.), m_forFastLog(false),
+      m_splitters(), m_vecSplitterTime(), m_vecSplitterGroup(),
+      m_useParallel(false), m_vecSplitterTimeSet(), m_vecGroupIndexSet() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -74,8 +81,14 @@ void GenerateEventsFilter::init() {
       "while the relative time takes integer or float. ");
 
   // Split by time (only) in steps
-  declareProperty("TimeInterval", EMPTY_DBL(),
-                  "Length of the time splices if filtered in time only.");
+  declareProperty(new ArrayProperty<double>("TimeInterval"),
+                  "Array for lengths of time intervals for splitters.  "
+                  "If the array is empty, then there will be one splitter "
+                  "created from StartTime and StopTime. "
+                  "If the array has one value, then all splitters will have "
+                  "same time intervals. "
+                  "If the size of the array is larger than one, then the "
+                  "splitters can have various time interval values.");
   setPropertySettings("TimeInterval",
                       new VisibleWhenProperty("LogName", IS_EQUAL_TO, ""));
 
@@ -112,16 +125,6 @@ void GenerateEventsFilter::init() {
                   "If not given, then only value ");
   setPropertySettings("LogValueInterval",
                       new VisibleWhenProperty("LogName", IS_NOT_EQUAL_TO, ""));
-
-  /*
-    Documentation doesn't include property options in property descriptions or
-  anywhere else.
-   For example, FilterLogValueByChangingDirection doesn't let me know that
-  Increasing and Decreasing
-  are valid options without using the MantidPlotGui to open the algorithm
-  dialog.
-
-    */
 
   std::vector<std::string> filteroptions;
   filteroptions.push_back("Both");
@@ -379,10 +382,10 @@ void GenerateEventsFilter::processInputTime() {
 /** Set splitters by time value / interval only
  */
 void GenerateEventsFilter::setFilterByTimeOnly() {
-  double timeinterval = this->getProperty("TimeInterval");
+  vector<double> vec_timeintervals = this->getProperty("TimeInterval");
 
   bool singleslot = false;
-  if (timeinterval == EMPTY_DBL())
+  if (vec_timeintervals.size() == 0)
     singleslot = true;
 
   // Progress
@@ -401,7 +404,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     ss << "Time Interval From " << m_startTime << " to " << m_stopTime;
 
     addNewTimeFilterSplitter(m_startTime, m_stopTime, wsindex, ss.str());
-  } else {
+  } else if (vec_timeintervals.size() == 1) {
+    double timeinterval = vec_timeintervals[0];
     int64_t timeslot = 0;
 
     // Explicitly N time intervals
@@ -439,6 +443,63 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       }
     } // END-WHILE
   }   // END-IF-ELSE
+  else {
+    // Explicitly N time intervals with various interval
+
+    // Construct a vector for time intervals in nanosecond
+    size_t numtimeintervals = vec_timeintervals.size();
+    std::vector<int64_t> vec_dtimens(numtimeintervals);
+    for (size_t id = 0; id < numtimeintervals; ++id) {
+      int64_t deltatime_ns = static_cast<int64_t>(vec_timeintervals[id] *
+                                                  m_timeUnitConvertFactorToNS);
+      vec_dtimens[id] = deltatime_ns;
+    }
+
+    // Build the splitters
+    int64_t timeslot = 0;
+
+    int64_t curtime_ns = m_startTime.totalNanoseconds();
+    int wsindex = 0;
+    while (curtime_ns < m_stopTime.totalNanoseconds()) {
+      int64_t deltatime_ns;
+      for (size_t id = 0; id < numtimeintervals; ++id) {
+        // get next time interval value
+        deltatime_ns = vec_dtimens[id];
+        // Calculate next.time
+        int64_t nexttime_ns = curtime_ns + deltatime_ns;
+        bool breaklater = false;
+        if (nexttime_ns > m_stopTime.totalNanoseconds()) {
+          nexttime_ns = m_stopTime.totalNanoseconds();
+          breaklater = true;
+        }
+
+        // Create splitter and information
+        Kernel::DateAndTime t0(curtime_ns);
+        Kernel::DateAndTime tf(nexttime_ns);
+        std::stringstream ss;
+        ss << "Time Interval From " << t0 << " to " << tf;
+
+        addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
+
+        // Update loop variable
+        curtime_ns = nexttime_ns;
+        ++wsindex;
+
+        // Update progress
+        int64_t newtimeslot =
+            (curtime_ns - m_startTime.totalNanoseconds()) * 90 / totaltime;
+        if (newtimeslot > timeslot) {
+          // There is change and update progress
+          timeslot = newtimeslot;
+          double prog = 0.1 + double(timeslot) / 100.0;
+          progress(prog);
+        }
+
+        if (breaklater)
+          break;
+      } // END-FOR
+    }   // END-WHILE
+  }
 
   return;
 }
@@ -946,8 +1007,8 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   // tempvectimes.reserve(m_dblLog->size());
   vector<int> tempvecgroup;
   // tempvecgroup.reserve(m_dblLog->size());
-  vecSplitterTimeSet.push_back(tempvectimes);
-  vecGroupIndexSet.push_back(tempvecgroup);
+  m_vecSplitterTimeSet.push_back(tempvectimes);
+  m_vecGroupIndexSet.push_back(tempvecgroup);
   int istart = 0;
   int iend = static_cast<int>(logsize - 1);
 
@@ -1038,15 +1099,15 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
   }
 
   // Create partial vectors
-  vecSplitterTimeSet.clear();
-  vecGroupIndexSet.clear();
+  m_vecSplitterTimeSet.clear();
+  m_vecGroupIndexSet.clear();
   for (int i = 0; i < numThreads; ++i) {
     vector<DateAndTime> tempvectimes;
     tempvectimes.reserve(m_dblLog->size());
     vector<int> tempvecgroup;
     tempvecgroup.reserve(m_dblLog->size());
-    vecSplitterTimeSet.push_back(tempvectimes);
-    vecGroupIndexSet.push_back(tempvecgroup);
+    m_vecSplitterTimeSet.push_back(tempvectimes);
+    m_vecGroupIndexSet.push_back(tempvecgroup);
   }
 
   // Create event filters/splitters in parallel
@@ -1059,7 +1120,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
       int iend = vecEnd[i];
 
       makeMultipleFiltersByValuesPartialLog(
-          istart, iend, vecSplitterTimeSet[i], vecGroupIndexSet[i],
+          istart, iend, m_vecSplitterTimeSet[i], m_vecGroupIndexSet[i],
           indexwsindexmap, logvalueranges, tol, filterIncrease, filterDecrease,
           startTime, stopTime);
       PARALLEL_END_INTERUPT_REGION
@@ -1068,28 +1129,29 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
 
     // Concatenate splitters on different threads together
     for (int i = 1; i < numThreads; ++i) {
-      if (vecSplitterTimeSet[i - 1].back() == vecSplitterTimeSet[i].front()) {
+      if (m_vecSplitterTimeSet[i - 1].back() ==
+          m_vecSplitterTimeSet[i].front()) {
         // T_(i).back() = T_(i+1).front()
-        if (vecGroupIndexSet[i - 1].back() == vecGroupIndexSet[i].front()) {
+        if (m_vecGroupIndexSet[i - 1].back() == m_vecGroupIndexSet[i].front()) {
           // G_(i).back() = G_(i+1).front(), combine these adjacent 2 splitters
           // Rule out impossible situation
-          if (vecGroupIndexSet[i - 1].back() == -1) {
+          if (m_vecGroupIndexSet[i - 1].back() == -1) {
             // Throw with detailed error message
             stringstream errss;
             errss << "Previous vector of group index set (" << (i - 1)
                   << ") is equal to -1. "
                   << "It is not likely to happen!  Size of previous vector of "
-                     "group is " << vecGroupIndexSet[i - 1].size()
+                     "group is " << m_vecGroupIndexSet[i - 1].size()
                   << ". \nSuggest to use sequential mode. ";
             throw runtime_error(errss.str());
           }
 
           // Pop back last element
-          vecGroupIndexSet[i - 1].pop_back();
-          DateAndTime newt0 = vecSplitterTimeSet[i - 1].front();
-          vecSplitterTimeSet[i - 1].pop_back();
-          DateAndTime origtime = vecSplitterTimeSet[i][0];
-          vecSplitterTimeSet[i][0] = newt0;
+          m_vecGroupIndexSet[i - 1].pop_back();
+          DateAndTime newt0 = m_vecSplitterTimeSet[i - 1].front();
+          m_vecSplitterTimeSet[i - 1].pop_back();
+          DateAndTime origtime = m_vecSplitterTimeSet[i][0];
+          m_vecSplitterTimeSet[i][0] = newt0;
           g_log.debug() << "Splitter at the end of thread " << i
                         << " is extended from " << origtime << " to " << newt0
                         << "\n";
@@ -1100,25 +1162,26 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
         }
       } else {
         // T_(i).back() != T_(i+1).front(): need to fill the gap in time
-        int lastindex = vecGroupIndexSet[i - 1].back();
-        int firstindex = vecGroupIndexSet[i].front();
+        int lastindex = m_vecGroupIndexSet[i - 1].back();
+        int firstindex = m_vecGroupIndexSet[i].front();
 
         if (lastindex != -1 && firstindex != -1) {
           // T_stop < T_start, I_stop != -1, I_start != 1. : Insert a minus-one
           // entry to make it complete
-          vecGroupIndexSet[i - 1].push_back(-1);
-          vecSplitterTimeSet[i - 1].push_back(vecSplitterTimeSet[i].front());
-        } else if (lastindex == -1 && vecGroupIndexSet[i - 1].size() == 1) {
+          m_vecGroupIndexSet[i - 1].push_back(-1);
+          m_vecSplitterTimeSet[i - 1].push_back(
+              m_vecSplitterTimeSet[i].front());
+        } else if (lastindex == -1 && m_vecGroupIndexSet[i - 1].size() == 1) {
           // Empty splitter of the thread. Extend this to next
-          vecSplitterTimeSet[i - 1].back() = vecSplitterTimeSet[i].front();
+          m_vecSplitterTimeSet[i - 1].back() = m_vecSplitterTimeSet[i].front();
           g_log.debug() << "Thread = " << i << ", change ending time of "
-                        << i - 1 << " to " << vecSplitterTimeSet[i].front()
+                        << i - 1 << " to " << m_vecSplitterTimeSet[i].front()
                         << "\n";
-        } else if (firstindex == -1 && vecGroupIndexSet[i].size() == 1) {
+        } else if (firstindex == -1 && m_vecGroupIndexSet[i].size() == 1) {
           // Empty splitter of the thread. Extend last one to this
-          vecSplitterTimeSet[i].front() = vecSplitterTimeSet[i - 1].back();
+          m_vecSplitterTimeSet[i].front() = m_vecSplitterTimeSet[i - 1].back();
           g_log.debug() << "Thread = " << i << ", change starting time to "
-                        << vecSplitterTimeSet[i].front() << "\n";
+                        << m_vecSplitterTimeSet[i].front() << "\n";
         } else {
           throw runtime_error("It is not possible to have start or end of "
                               "filter to be minus-one index. ");
@@ -1335,10 +1398,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         }
       }
     } // ENDIF (log entry in specified time)
-    else {
-      // Log Index i falls out b/c out of time range...
-      currindex = -1;
-    }
 
     // d) Create Splitter
     if (createsplitter) {
@@ -1749,11 +1808,11 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspace() {
 void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
   // Determine size of output matrix workspace
   size_t numtimes = 0;
-  size_t numThreads = vecSplitterTimeSet.size();
+  size_t numThreads = m_vecSplitterTimeSet.size();
   for (size_t i = 0; i < numThreads; ++i) {
-    numtimes += vecGroupIndexSet[i].size();
+    numtimes += m_vecGroupIndexSet[i].size();
     g_log.debug() << "[DB] Thread " << i << " have "
-                  << vecGroupIndexSet[i].size() << " splitter "
+                  << m_vecGroupIndexSet[i].size() << " splitter "
                   << "\n";
   }
   ++numtimes;
@@ -1768,15 +1827,15 @@ void GenerateEventsFilter::generateSplittersInMatrixWorkspaceParallel() {
 
   size_t index = 0;
   for (size_t i = 0; i < numThreads; ++i) {
-    for (size_t j = 0; j < vecGroupIndexSet[i].size(); ++j) {
+    for (size_t j = 0; j < m_vecGroupIndexSet[i].size(); ++j) {
       dataX[index] =
-          static_cast<double>(vecSplitterTimeSet[i][j].totalNanoseconds());
-      dataY[index] = static_cast<double>(vecGroupIndexSet[i][j]);
+          static_cast<double>(m_vecSplitterTimeSet[i][j].totalNanoseconds());
+      dataY[index] = static_cast<double>(m_vecGroupIndexSet[i][j]);
       ++index;
     }
   }
-  dataX[index] =
-      static_cast<double>(vecSplitterTimeSet.back().back().totalNanoseconds());
+  dataX[index] = static_cast<double>(
+      m_vecSplitterTimeSet.back().back().totalNanoseconds());
 
   return;
 }
@@ -1831,6 +1890,9 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             m_dataWS->run().getProperty("proton_charge"));
+    if (!protonchargelog) {
+      throw std::runtime_error("proton_charge log not found");
+    }
 
     if (protonchargelog->size() > 1) {
       Kernel::DateAndTime tmpendtime = protonchargelog->lastTime();

@@ -25,9 +25,9 @@ DiffPeaksWorkspaces::~DiffPeaksWorkspaces() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DiffPeaksWorkspaces::name() const {
   return "DiffPeaksWorkspaces";
-};
+}
 /// Algorithm's version for identification. @see Algorithm::version
-int DiffPeaksWorkspaces::version() const { return 1; };
+int DiffPeaksWorkspaces::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DiffPeaksWorkspaces::category() const { return "Crystal"; }
 
@@ -72,7 +72,7 @@ void DiffPeaksWorkspaces::exec() {
   }
 
   // Copy the first workspace to our output workspace
-  PeaksWorkspace_sptr output(LHSWorkspace->clone());
+  PeaksWorkspace_sptr output(LHSWorkspace->clone().release());
   // Get hold of the peaks in the second workspace
   auto &rhsPeaks = RHSWorkspace->getPeaks();
   // Get hold of the peaks in the first workspace as we'll need to examine them

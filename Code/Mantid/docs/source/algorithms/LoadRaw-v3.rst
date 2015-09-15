@@ -9,7 +9,7 @@
 Description
 -----------
 
-The LoadRaw algorithm stores data from the `RAW <http://www.mantidproject.org/Raw File>`__ file in a
+The LoadRaw algorithm stores data from the :ref:`RAW file <RAW File>` in a
 `Workspace2D <http://www.mantidproject.org/Workspace2D>`__, which will naturally contain histogram
 data with each spectrum going into a separate histogram. The time bin
 boundaries (X values) will be common to all histograms and will have
@@ -21,7 +21,7 @@ be set to be the square root of the number of counts in the bin.
 Optional properties
 ###################
 
-If only a portion of the data in the `RAW <http://www.mantidproject.org/Raw File>`__ file is
+If only a portion of the data in the :ref:`RAW file <RAW File>` is
 required, then the optional 'spectrum' properties can be set before
 execution of the algorithm. Prior to loading of the data the values
 provided are checked and the algorithm will fail if they are found to be
@@ -35,7 +35,7 @@ and the different periods will be output as separate workspaces, which
 after the first one will have the period number appended (e.g.
 OutputWorkspace\_period). Each workspace will share the same
 `Instrument <http://www.mantidproject.org/Instrument>`__, SpectraToDetectorMap and
-`Sample <http://www.mantidproject.org/Sample>`__ objects. If the optional 'spectrum' properties are
+`sample objects <../api/python/mantid/api/Sample.html>`__. If the optional 'spectrum' properties are
 set for a multiperiod dataset, then they will ignored.
 
 If PeriodList property isn't empty then only periods listed there will be
@@ -60,7 +60,7 @@ aspects of the output `Workspace <http://www.mantidproject.org/Workspace>`__:
    `Instrument <http://www.mantidproject.org/Instrument>`__.
 -  :ref:`algm-LoadLog` - Will look for any log files in the same
    directory as the RAW file and load their data into the workspace's
-   `Sample <http://www.mantidproject.org/Sample>`__ object.
+   `sample objects <../api/python/mantid/api/Sample.html>`__.
 
 Previous Versions
 -----------------
@@ -187,3 +187,5 @@ Output
 
 
 .. categories::
+
+.. sourcelink::

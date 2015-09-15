@@ -19,9 +19,11 @@ using namespace API;
 
 /// Constructor
 GeneralisedSecondDifference::GeneralisedSecondDifference()
-    : Algorithm(), Cij(0), Cij2(0), z(0), m(0) {}
+    : Algorithm(), m_Cij(0), m_Cij2(0), m_z(0), m_m(0) {}
+
 /// Destructor
 GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
+
 /// Initialisation method.
 void GeneralisedSecondDifference::init() {
 
@@ -78,22 +80,26 @@ void GeneralisedSecondDifference::exec() {
   }
 
   // Get some more input fields
-  z = getProperty("Z");
-  m = getProperty("M");
-  const int n_av = z * m + 1;
+  m_z = getProperty("Z");
+  m_m = getProperty("M");
+  const int n_av = m_z * m_m + 1;
 
   // Calculate the Cij and Cij^2 coefficients
   computePrefactors();
 
   const int n_specs = spec_max - spec_min + 1;
   const int n_points = static_cast<int>(inputWS->dataY(0).size()) - 2 * n_av;
+  if (n_points < 1) {
+    throw std::invalid_argument("Invalid (M,Z) values");
+  }
   // Create OuputWorkspace
   MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create(
       inputWS, n_specs, n_points + 1, n_points);
 
   const int nsteps = 2 * n_av + 1;
 
-  m_progress = new Progress(this, 0.0, 1.0, (spec_max - spec_min));
+  boost::shared_ptr<API::Progress> progress =
+      boost::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
     out->getSpectrum(out_index)
@@ -112,13 +118,13 @@ void GeneralisedSecondDifference::exec() {
     MantidVec::iterator itOutE = outE.begin();
     for (; itOutY != outY.end(); ++itOutY, ++itInY, ++itOutE, ++itInE) {
       // Calculate \sum_{j}Cij.Y(j)
-      (*itOutY) = std::inner_product(itInY, itInY + nsteps, Cij.begin(), 0.0);
+      (*itOutY) = std::inner_product(itInY, itInY + nsteps, m_Cij.begin(), 0.0);
       // Calculate the error bars sqrt(\sum_{j}Cij^2.E^2)
       double err2 =
-          std::inner_product(itInE, itInE + nsteps, Cij2.begin(), 0.0);
+          std::inner_product(itInE, itInE + nsteps, m_Cij2.begin(), 0.0);
       (*itOutE) = sqrt(err2);
     }
-    m_progress->report();
+    progress->report();
   }
   setProperty("OutputWorkspace", out);
 
@@ -136,12 +142,12 @@ void GeneralisedSecondDifference::computePrefactors() {
   previous[1] = -2;
   previous[2] = 1;
 
-  if (z == 0) //
+  if (m_z == 0) //
   {
-    Cij.resize(3);
-    std::copy(previous.begin(), previous.end(), Cij.begin());
-    Cij2.resize(3);
-    std::transform(Cij.begin(), Cij.end(), Cij2.begin(),
+    m_Cij.resize(3);
+    std::copy(previous.begin(), previous.end(), m_Cij.begin());
+    m_Cij2.resize(3);
+    std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
                    VectorHelper::Squares<double>());
     return;
   }
@@ -149,13 +155,13 @@ void GeneralisedSecondDifference::computePrefactors() {
   // Calculate the Cij iteratively.
   do {
     zz++;
-    int max_index = zz * m + 1;
+    int max_index = zz * m_m + 1;
     int n_el = 2 * max_index + 1;
     next.resize(n_el);
     std::fill(next.begin(), next.end(), 0.0);
     for (int i = 0; i < n_el; ++i) {
       int delta = -max_index + i;
-      for (int l = delta - m; l <= delta + m; l++) {
+      for (int l = delta - m_m; l <= delta + m_m; l++) {
         int index = l + max_index_prev;
         if (index >= 0 && index < n_el_prev)
           next[i] += previous[index];
@@ -165,12 +171,12 @@ void GeneralisedSecondDifference::computePrefactors() {
     std::copy(next.begin(), next.end(), previous.begin());
     max_index_prev = max_index;
     n_el_prev = n_el;
-  } while (zz != z);
+  } while (zz != m_z);
 
-  Cij.resize(2 * z * m + 3);
-  std::copy(previous.begin(), previous.end(), Cij.begin());
-  Cij2.resize(2 * z * m + 3);
-  std::transform(Cij.begin(), Cij.end(), Cij2.begin(),
+  m_Cij.resize(2 * m_z * m_m + 3);
+  std::copy(previous.begin(), previous.end(), m_Cij.begin());
+  m_Cij2.resize(2 * m_z * m_m + 3);
+  std::transform(m_Cij.begin(), m_Cij.end(), m_Cij2.begin(),
                  VectorHelper::Squares<double>());
   return;
 }

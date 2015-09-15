@@ -151,6 +151,10 @@ protected:
   PoldiPeakCollection_sptr
   getIntensitySortedPeakCollection(const PoldiPeakCollection_sptr &peaks) const;
 
+  void assignCrystalStructureParameters(
+      PoldiPeakCollection_sptr &indexedPeaks,
+      const PoldiPeakCollection_sptr &phasePeaks) const;
+
   PoldiPeakCollection_sptr m_measuredPeaks;
   std::vector<PoldiPeakCollection_sptr> m_expectedPhases;
   std::vector<std::string> m_phaseNames;

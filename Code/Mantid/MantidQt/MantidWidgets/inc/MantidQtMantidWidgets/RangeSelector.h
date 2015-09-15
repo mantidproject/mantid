@@ -13,6 +13,8 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
+  class PreviewPlot;
+
   /**
   * Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
   * @author Michael Whitty, RAL ISIS
@@ -25,6 +27,7 @@ namespace MantidWidgets
     enum SelectType { XMINMAX, XSINGLE, YMINMAX, YSINGLE };
 
     RangeSelector(QwtPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
+    RangeSelector(PreviewPlot* plot, SelectType type=XMINMAX, bool visible=true, bool infoOnly=false);
     ~RangeSelector() {};
 
     std::pair<double,double> getRange();
@@ -33,13 +36,16 @@ namespace MantidWidgets
     double getMinimum() { return m_min; } ///< Returns current min value
     double getMaximum() { return m_max; } ///< Reutnrs current max value
 
+    SelectType getType() { return m_type; }
+    bool isVisible() { return m_visible; }
+
   signals:
     void minValueChanged(double);
     void maxValueChanged(double);
     void rangeChanged(double, double);
     void selectionChanged(double, double);
     void selectionChangedLazy(double, double);
-    
+
   public slots:
     void setRange(double, double);
     void setMinimum(double); ///< outside setting of value
@@ -51,6 +57,7 @@ namespace MantidWidgets
     void setVisible(bool state);
 
   private:
+    void init();
     void setMin(double val);
     void setMax(double val);
     void setMaxMin(const double min, const double max);
@@ -69,7 +76,7 @@ namespace MantidWidgets
     double m_max;
     double m_lower; ///< lowest allowed value for range
     double m_higher; ///< highest allowed value for range
-    
+
     QwtPlotCanvas* m_canvas;
     QwtPlot* m_plot;
 

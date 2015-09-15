@@ -117,6 +117,9 @@ private:
 
   /// Name of the instrument
   std::string m_instName;
+
+  /// Mutex to avoid simultaneous access
+  static Poco::Mutex m_mutex;
 };
 
 } // namespace DataHandling

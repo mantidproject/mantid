@@ -45,10 +45,20 @@ if(DOXYGEN_FOUND)
                      )
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Mantid_template.doxyfile
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile @ONLY)
+  add_custom_command ( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html.in
+                       COMMAND ${DOXYGEN_EXECUTABLE} -w html doxy_header.html.in  dontuse_footer.html  dontuse_style.css Mantid.doxyfile
+                       DEPENDS  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
+                      )
+  add_custom_command ( OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html
+                       COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/make_header.py ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html.in
+                       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html.in
+                               ${CMAKE_CURRENT_SOURCE_DIR}/make_header.py)
   add_custom_target( doxygen # not being added to 'all'
                      ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
 		     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		     COMMENT "Generating API documentation with Doxygen" VERBATIM
-		     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
+         DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/Mantid.doxyfile
+                 ${CMAKE_CURRENT_BINARY_DIR}/../../doxygen/html/Mantid_Logo_Transparent.png
+                 ${CMAKE_CURRENT_BINARY_DIR}/doxy_header.html
 		   )
 endif(DOXYGEN_FOUND)

@@ -20,6 +20,7 @@
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco {
+class Channel;
 namespace Util {
 class PropertyFileConfiguration;
 class SystemConfiguration;
@@ -132,6 +133,8 @@ public:
                         bool use_cache = true) const;
   /// Searches for a key in the configuration property
   std::vector<std::string> getKeys(const std::string &keyName) const;
+  /// Returns a list of all full keys in the config
+  std::vector<std::string> keys() const;
   /// Removes the value from a selected keyName
   void remove(const std::string &rootName) const;
   /// Checks to see whether a key has a value assigned to it
@@ -204,6 +207,8 @@ public:
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
   const std::string getInstrumentDirectory() const;
+  ///get the vtp file directory
+  const std::string getVTPFileDirectory();
   //@}
 
   /// Load facility information from instrumentDir/Facilities.xml file
@@ -219,6 +224,14 @@ public:
   /// Set the default facility
   void setFacility(const std::string &facilityName);
 
+  
+  ///Sets the log level priority for the File log channel
+  void setFileLogLevel(int logLevel);
+  ///Sets the log level priority for the Console log channel
+  void setConsoleLogLevel(int logLevel);
+  ///Sets the log level priority for the selected Filter log channel
+  void setFilterChannelLogLevel(const std::string& filterChannelName, int logLevel);
+
   /// Look for an instrument
   const InstrumentInfo &
   getInstrument(const std::string &instrumentName = "") const;
@@ -232,23 +245,15 @@ public:
   // Starts up the logging
   void configureLogging();
 
-  /// Set the path to the paraview libraries
-  void setParaviewLibraryPath(const std::string &path);
+  /// Return true if ParaView plugins are available
+  bool pvPluginsAvailable() const;
 
-  /// Quick check to determine if paraview is available.
-  bool quickParaViewCheck() const;
-
-  /// Quick check to determine if vates has been installed.
-  bool quickVatesCheck() const;
+  /// Return the path to the pv plugins
+  const std::string getPVPluginsPath() const;
 
   /// Gets the proxy for the system
   Kernel::ProxyInfo &getProxy(const std::string &url);
 
-  /// Get the ParaViewPath
-  const std::string getParaViewPath() const;
-
-  /// Get the initial view for vates
-  const std::string getVsiInitialView() const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
@@ -266,7 +271,7 @@ private:
   void loadConfig(const std::string &filename, const bool append = false);
   /// Read a file and place its contents into the given string
   bool readFile(const std::string &filename, std::string &contents) const;
-  /// Provies a string of a default configuration
+  /// Provides a string of a default configuration
   std::string defaultConfig() const;
   /// Writes out a fresh user properties file
   void createUserPropertiesFile() const;
@@ -287,12 +292,13 @@ private:
   /// Empty the list of facilities, deleting the FacilityInfo objects in the
   /// process
   void clearFacilities();
-  /// Set the PV_PLUGIN_PATH to point at this version of Mantid.
-  void setParaViewPluginPath() const;
   /// Verifies the directory exists and add it to the back of the directory list
   /// if valid
   bool addDirectoryifExists(const std::string &directoryName,
                             std::vector<std::string> &directoryList);
+  /// Returns a list of all keys under a given root key
+  void getKeysRecursive(const std::string &root,
+                        std::vector<std::string> &allKeys) const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;
@@ -331,8 +337,6 @@ private:
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
-  /// Define a flag value for a removed property
-  const std::string m_removedFlag;
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;

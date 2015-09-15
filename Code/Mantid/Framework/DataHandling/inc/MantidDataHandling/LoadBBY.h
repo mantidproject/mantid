@@ -69,7 +69,7 @@ protected:
 
 private:
   // instrument creation
-  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile);
+  Geometry::Instrument_sptr createInstrument(ANSTO::Tar::File &tarFile, size_t pixelsCutOffL, size_t pixelsCutOffH, size_t tubeBinning, size_t finalBinsY);
 
   // load nx dataset
   template <class T>
@@ -81,9 +81,12 @@ private:
   static void loadEvents(API::Progress &prog, const char *progMsg,
                          ANSTO::Tar::File &file, const double tofMinBoundary,
                          const double tofMaxBoundary, Counter &counter);
-  static std::vector<bool> createMaskVector(const std::string &maskFilename,
-                                            bool &maskFileLoaded);
+  static std::vector<bool> createMaskVector(const std::string &filename,
+                                            bool &fileLoaded);
+  static std::vector<int> createOffsetVector(const std::string &filename,
+                                            bool &fileLoaded);
 };
+
 }
 }
 #endif // DATAHANDING_LOADBBY_H_

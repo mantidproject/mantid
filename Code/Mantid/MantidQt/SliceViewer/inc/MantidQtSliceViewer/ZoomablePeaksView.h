@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V2D.h"
+#include <boost/shared_ptr.hpp>
+
 
 namespace MantidQt
 {
@@ -42,6 +44,8 @@ namespace MantidQt
       virtual void zoomToRectangle(const PeakBoundingBox&) = 0;
       /// Zoom out
       virtual void resetView() = 0;
+      /// Detach
+      virtual void detach() = 0;
       /// Destructor
       virtual ~ZoomablePeaksView(){ }
     };

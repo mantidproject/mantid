@@ -53,7 +53,7 @@ class IMDNode {
   */
 
 public:
-  virtual ~IMDNode(){};
+  virtual ~IMDNode(){}
   //---------------- ISAVABLE
   /**Return the pointer to the structure responsible for saving the box on disk
    * if the workspace occupies too much memory */
@@ -246,6 +246,9 @@ public:
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL) = 0;
   /** Calculate the centroid of this box and all sub-boxes. */
   virtual void calculateCentroid(coord_t * /*centroid*/) const = 0;
+  /** Calculate the centroid of this box and all sub-boxes. */
+  virtual void calculateCentroid(coord_t * /*centroid*/,
+                                 const int /*runindex*/) const = 0;
   /** Get the centroid of this box and all sub-boxes. */
   virtual coord_t *getCentroid() const = 0;
   //----------------------------------------------------------------------------------------------------------------------------------
@@ -279,6 +282,11 @@ public:
   // to avoid casting (which need also the number of dimensions) method say if
   // Node is a box. if not, it is gridbox
   virtual bool isBox() const = 0;
+
+  virtual signal_t getSignalByNEvents() const {
+    return this->getSignal()/static_cast<signal_t>(this->getNPoints());
+  }
+
   // ----------------------------- Helper Methods
   // --------------------------------------------------------
   //-----------------------------------------------------------------------------------------------

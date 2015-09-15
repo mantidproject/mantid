@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
@@ -92,10 +93,10 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.filterbadpulses_edit.setText("95.")
 
         # Connections from action/event to function to handle
-        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.stripvanpeaks_chkbox, QtCore.SIGNAL("clicked()"),\
                 self._stripvanpeaks_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
                 self._show_help)
         # Hanlder for events
         # FIXME - Need to add an event hanlder for the change of instrument and facility

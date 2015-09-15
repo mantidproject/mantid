@@ -13,7 +13,7 @@
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 //=====================================================================================
@@ -25,7 +25,7 @@ public:
 
   void testGetFactoryTypeName()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
@@ -35,7 +35,7 @@ public:
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -53,7 +53,7 @@ public:
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -65,7 +65,7 @@ public:
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -76,7 +76,7 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     //initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
@@ -87,7 +87,7 @@ public:
     //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
     EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> >
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> >
             ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
     //Rebin it to make it possible to compare cells to bins.
@@ -101,7 +101,7 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     vtkDataSet* product = factory.create(mockProgressAction);
@@ -128,7 +128,7 @@ public:
 
   void setUp()
   {
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> > input 
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> > input 
       = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     //Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;
@@ -151,7 +151,7 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     vtkDataSet* product = factory.create(progressAction);

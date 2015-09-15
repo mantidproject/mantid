@@ -32,7 +32,7 @@ public:
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.6, -0.1, 1.8));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nBin width must be a positive value.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBin width must be a positive value.");
   }
 
   void test_zeroWidthRebin()
@@ -40,7 +40,7 @@ public:
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.6, 0.0, 1.8));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nBin width must be non-zero.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBin width must be non-zero.");
   }
 
   void test_zeroRangeRebin()
@@ -48,7 +48,7 @@ public:
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.6, 0.1, 0.6));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nBinning ranges must be non-zero.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBinning ranges must be non-zero.");
   }
 
   void test_reverseRangeRebin()
@@ -56,7 +56,7 @@ public:
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(1.8, 0.1, 0.6));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nThe start of a binning range must be less than the end.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nThe start of a binning range must be less than the end.");
   }
 
   void test_binsNotFactorsRebin()
@@ -64,7 +64,7 @@ public:
     UserInputValidator uiv;
     TS_ASSERT(!uiv.checkBins(0.0, 0.2, 0.7));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nBin width must allow for even splitting of the range.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nBin width must allow for even splitting of the range.");
   }
 
   void test_validRange()
@@ -81,7 +81,7 @@ public:
     std::pair<double, double> range(10, 5);
     TS_ASSERT(!uiv.checkValidRange("test range", range));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nThe start of test range must be less than the end.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nThe start of test range must be less than the end.");
   }
 
   void test_invalidRangeZeroWidth()
@@ -90,7 +90,7 @@ public:
     std::pair<double, double> range(5, 5);
     TS_ASSERT(!uiv.checkValidRange("test range", range));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\ntest range must have a non-zero width.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\ntest range must have a non-zero width.");
   }
 
   void test_nonOverlappingRanges()
@@ -109,7 +109,7 @@ public:
     std::pair<double, double> rangeB(3, 8);
     TS_ASSERT(!uiv.checkRangesDontOverlap(rangeA, rangeB));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nThe ranges must not overlap: [1,5], [3,8].");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nThe ranges must not overlap: [1,5], [3,8].");
   }
 
   void test_enclosedRange()
@@ -128,7 +128,7 @@ public:
     std::pair<double, double> inner(3, 15);
     TS_ASSERT(!uiv.checkRangeIsEnclosed("outer range", outer, "inner range", inner));
     TS_ASSERT(!uiv.isAllInputValid());
-    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\n\nouter range must completely enclose inner range.");
+    TS_ASSERT_EQUALS(uiv.generateErrorMessage(), "Please correct the following:\nouter range must completely enclose inner range.");
   }
 
 };

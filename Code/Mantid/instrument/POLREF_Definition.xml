@@ -4,7 +4,7 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="POLREF" valid-from   ="1901-01-01 00:00:00"
+ name="POLREF" valid-from   ="1901-01-01 00:01:00"
                           valid-to     ="2100-01-31 23:59:59"
 		          last-modified="2012-07-16 23:59:59">
 
@@ -181,7 +181,8 @@
 
   <type name="lineardetector">
     <component type="lineardetector-pixel" >
-      <location z="0" />
+      <locations z="0" z-end="0.2868" n-elements="240" name="" />
+      <!-- <location z="0" />
       <location z="0.0012" />
       <location z="0.0024" />
       <location z="0.0036" />
@@ -420,7 +421,7 @@
       <location z="0.2832" />
       <location z="0.2844" />
       <location z="0.2856" />
-      <location z="0.2868" />    
+      <location z="0.2868" /> -->
     </component>
   </type>
   
@@ -452,7 +453,8 @@
   
   <type name="OSMOND">
     <component type="OSMOND-pixel" > 
-		<location z="0.32" />
+        <locations z="-2.74086309204336E-16" z-end="0.32" n-elements="641" name="" />
+		<!-- <location z="0.32" />
 		<location z="0.3195" />
 		<location z="0.319" />
 		<location z="0.3185" />
@@ -1092,7 +1094,8 @@
 		<location z="0.00149999999999973" />
 		<location z="0.000999999999999726" />
 		<location z="0.000499999999999726" />
-		<location z="-2.74086309204336E-16" />
+		<location z="-2.74086309204336E-16" /> -->
+
       </component>
   </type>
 

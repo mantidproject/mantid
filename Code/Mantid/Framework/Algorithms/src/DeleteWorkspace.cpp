@@ -8,7 +8,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm
-DECLARE_ALGORITHM(DeleteWorkspace);
+DECLARE_ALGORITHM(DeleteWorkspace)
 
 //--------------------------------------------------------------------------
 // Private member functions

@@ -313,6 +313,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="checkEnableNotebook">
+              <property name="text">
+               <string>Output Notebook</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QToolButton" name="buttonProcess">
               <property name="text">
                <string>Process</string>
@@ -341,7 +348,7 @@
      <x>0</x>
      <y>0</y>
      <width>959</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -367,6 +374,8 @@
     <addaction name="separator"/>
     <addaction name="actionImportTable"/>
     <addaction name="actionExportTable"/>
+    <addaction name="separator"/>
+    <addaction name="actionSlitCalculator"/>
     <addaction name="separator"/>
     <addaction name="actionOptionsDialog"/>
    </widget>
@@ -683,6 +692,15 @@
    </property>
    <property name="whatsThis">
     <string>Creates a plot of the stitched IvsQ workspaces produced by any groups any selected rows are in.</string>
+   </property>
+  </action>
+  <action name="actionSlitCalculator">
+   <property name="icon">
+    <iconset resource="../../../../MantidPlot/icons/icons.qrc">
+     <normaloff>:/param_range_btn.png</normaloff>:/param_range_btn.png</iconset>
+   </property>
+   <property name="text">
+    <string>Slit Calculator</string>
    </property>
   </action>
  </widget>

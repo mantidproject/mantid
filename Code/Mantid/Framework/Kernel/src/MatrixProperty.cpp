@@ -43,7 +43,7 @@ template class MANTID_KERNEL_DLL MatrixProperty<float>;
 /**
  * IPropertyManager::getValue definitions
  */
-DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::DblMatrix);
-DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::IntMatrix);
-DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::Matrix<float>);
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::DblMatrix)
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::IntMatrix)
+DEFINE_IPROPERTYMANAGER_GETVALUE(Mantid::Kernel::Matrix<float>)
 ///@endcond

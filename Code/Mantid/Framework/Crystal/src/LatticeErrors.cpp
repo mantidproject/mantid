@@ -6,27 +6,16 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCrystal/LatticeErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/IObjComponent.h"
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
-#include <cctype>
-#include <string>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using Mantid::Geometry::CompAssembly;
 using Mantid::Geometry::IObjComponent_const_sptr;
 

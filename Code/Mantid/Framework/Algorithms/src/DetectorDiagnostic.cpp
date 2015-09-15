@@ -737,6 +737,6 @@ double DetectorDiagnostic::advanceProgress(double toAdd) {
 void DetectorDiagnostic::failProgress(RunTime aborted) {
   advanceProgress(-aborted);
   m_TotalTime -= aborted;
-};
+}
 }
 }

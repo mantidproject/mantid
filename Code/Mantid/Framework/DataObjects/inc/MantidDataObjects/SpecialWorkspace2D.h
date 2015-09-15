@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
 #define MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 
@@ -31,6 +31,11 @@ public:
   SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);
   ~SpecialWorkspace2D();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<SpecialWorkspace2D> clone() const {
+    return std::unique_ptr<SpecialWorkspace2D>(doClone());
+  }
+
   /** Gets the name of the workspace type
   @return Standard string name  */
   virtual const std::string id() const { return "SpecialWorkspace2D"; }
@@ -52,14 +57,17 @@ public:
   virtual void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews);
 
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  SpecialWorkspace2D(const SpecialWorkspace2D &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &);
-
+  virtual SpecialWorkspace2D *doClone() const {
+    return new SpecialWorkspace2D(*this);
+  }
   bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  SpecialWorkspace2D(const SpecialWorkspace2D &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  SpecialWorkspace2D &operator=(const SpecialWorkspace2D &other);
+
   virtual void init(const size_t &NVectors, const size_t &XLength,
                     const size_t &YLength);
 

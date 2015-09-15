@@ -426,6 +426,18 @@ public:
         TS_ASSERT_EQUALS(transformedSmaller.z(), 0);
     }
 
+    void testVectorOperator()
+    {
+        V3R test = V3R(1, 2, 3) / 4;
+
+        std::vector<double> approximations(test);
+
+        TS_ASSERT_EQUALS(approximations.size(), 3);
+        TS_ASSERT_EQUALS(approximations[0], 0.25);
+        TS_ASSERT_EQUALS(approximations[1], 0.5);
+        TS_ASSERT_EQUALS(approximations[2], 0.75);
+    }
+
 };
 
 

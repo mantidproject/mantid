@@ -78,3 +78,5 @@ Output:
     Value after 1.00
 
 .. categories::
+
+.. sourcelink::

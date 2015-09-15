@@ -72,8 +72,8 @@ protected:
   inline std::vector<double> &getNextPointCache() { return m_nextPoint; }
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(NDRandomNumberGenerator);
-  DISABLE_COPY_AND_ASSIGN(NDRandomNumberGenerator);
+  DISABLE_DEFAULT_CONSTRUCT(NDRandomNumberGenerator)
+  DISABLE_COPY_AND_ASSIGN(NDRandomNumberGenerator)
 
   /// The number of dimensions
   const unsigned int m_ndims;

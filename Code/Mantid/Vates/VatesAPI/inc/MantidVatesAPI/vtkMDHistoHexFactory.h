@@ -30,12 +30,12 @@
 
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-#include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
 #include <vtkHexahedron.h>
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 namespace Mantid
 {
@@ -47,7 +47,7 @@ class DLLExport vtkMDHistoHexFactory: public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarname);
+  vtkMDHistoHexFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
 
   /// Assignment operator
   vtkMDHistoHexFactory& operator=(const vtkMDHistoHexFactory& other);
@@ -73,17 +73,17 @@ protected:
 
   virtual void validate() const;
 
-  vtkDataSet* create3Dor4D(size_t timestep, bool do4D, ProgressAction & update) const;
+  vtkDataSet* create3Dor4D(size_t timestep, ProgressAction & update) const;
 
   void validateWsNotNull() const;
 
   void validateDimensionsPresent() const;
 
   /// Image from which to draw.
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_workspace;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
 
-  /// Name of the scalar to provide on mesh.
-  std::string m_scalarName;
+  /// Normalization option
+  VisualNormalization m_normalizationOption;
 
   /// Threshold range.
   mutable ThresholdRange_scptr m_thresholdRange;

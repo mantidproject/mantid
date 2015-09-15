@@ -9,12 +9,12 @@
 
 #include "MantidMDAlgorithms/PowerMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
 class PowerMDTest : public CxxTest::TestSuite
 {

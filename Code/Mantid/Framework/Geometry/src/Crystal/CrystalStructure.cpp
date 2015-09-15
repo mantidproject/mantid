@@ -220,7 +220,7 @@ CrystalStructure::getDValues(const std::vector<V3D> &hkls) const {
 
   std::vector<double> dValues(hkls.size());
   std::transform(hkls.begin(), hkls.end(), dValues.begin(),
-                 boost::bind<double>(&CrystalStructure::getDValue, this, _1));
+                 boost::bind(&CrystalStructure::getDValue, this, _1));
 
   return dValues;
 }
@@ -247,9 +247,10 @@ void CrystalStructure::setPointGroupFromSpaceGroup(
   if (spaceGroup) {
     try {
       m_pointGroup =
-          PointGroupFactory::Instance().createPointGroupFromSpaceGroupSymbol(
-              spaceGroup->hmSymbol());
-    } catch (...) {
+          PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
+              spaceGroup);
+    }
+    catch (...) {
       // do nothing - point group will be null
     }
   }
@@ -263,6 +264,10 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
 
   // First letter is centering
   std::string centering = spaceGroup->hmSymbol().substr(0, 1);
+
+  if(centering == "R") {
+      centering = "Robv";
+  }
 
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();

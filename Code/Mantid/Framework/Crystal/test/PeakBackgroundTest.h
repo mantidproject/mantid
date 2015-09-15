@@ -98,7 +98,7 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::API::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     EXPECT_CALL(mockIterator, getNormalizedSignal()).WillOnce(Return(threshold+1)); // Returns above the threshold.
@@ -115,7 +115,7 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::API::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     V3D iteratorCenter(hklPeak[0] + radius, hklPeak[1], hklPeak[2]); // Offset so to be outside of peak radius.
@@ -133,7 +133,7 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::API::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     V3D iteratorCenter(hklPeak[0] + radius - 1e-4, hklPeak[1], hklPeak[2]); // Offset so to be outside of peak radius.
@@ -151,7 +151,7 @@ public:
     IPeaksWorkspace_const_sptr peaksWS = make_peaks_workspace(hklPeak);
     const double radius = 1;
     const double threshold = 100;
-    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::API::HKL);
+    PeakBackground strategy(peaksWS, radius, threshold, NoNormalization, Mantid::Kernel::HKL);
 
     MockIMDIterator mockIterator;
     EXPECT_CALL(mockIterator, getNormalizedSignal()).WillOnce(Return(threshold)); // Returns equal to the threshold. Exclusive checking.

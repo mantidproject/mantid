@@ -57,6 +57,31 @@ void Poldi2DFunction::function1DSpectrum(const FunctionDomain1DSpectrum &domain,
   UNUSED_ARG(values);
 }
 
+/**
+ * Calculates the 1D spectrum for this function
+ *
+ * This method checks all member functions whether they implement the
+ * IPoldiFunction1D interface. Those who do are used for calculating
+ * the function on the 1D d-domain.
+ *
+ * @param indices :: Allowed workspace indices.
+ * @param domain :: d-based 1D-domain.
+ * @param values :: Function values.
+ */
+void Poldi2DFunction::poldiFunction1D(const std::vector<int> &indices,
+                                      const FunctionDomain1D &domain,
+                                      FunctionValues &values) const {
+  for (size_t i = 0; i < nFunctions(); ++i) {
+    IFunction_sptr currentFunction = getFunction(i);
+    boost::shared_ptr<IPoldiFunction1D> spectrumFunction =
+        boost::dynamic_pointer_cast<IPoldiFunction1D>(currentFunction);
+
+    if (spectrumFunction) {
+      spectrumFunction->poldiFunction1D(indices, domain, values);
+    }
+  }
+}
+
 void Poldi2DFunction::iterationFinished() { ++m_iteration; }
 
 } // namespace Poldi

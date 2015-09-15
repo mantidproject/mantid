@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/ComptonScatteringCountRate.h"
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
 #include <boost/bind.hpp>
@@ -20,7 +21,7 @@ const char *BKGD_ORDER_ATTR_NAME = "BackgroundOrderAttr";
 Logger g_log("ComptonScatteringCountRate");
 }
 
-DECLARE_FUNCTION(ComptonScatteringCountRate);
+DECLARE_FUNCTION(ComptonScatteringCountRate)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

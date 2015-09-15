@@ -30,7 +30,8 @@ described in
    photoemission lineshape analysis, Journal of Electron Spectroscopy
    and Related Phenomena, Volume 69, Issue 2, 29 September 1994, Pages
    125-132, ISSN 0368-2048,
-   10.1016/0368-2048(94)02189-7.(http://www.sciencedirect.com/science/article/pii/0368204894021897)
+   10.1016/0368-2048(94)02189-7.
+   `(Article) <http://www.sciencedirect.com/science/article/pii/0368204894021897>`__
 
 The approximation uses a combination of 4 Lorentzians in two variables
 to generate good approximation to the true function.
@@ -40,3 +41,5 @@ to generate good approximation to the true function.
 .. properties::
 
 .. categories::
+
+.. sourcelink::

@@ -14,7 +14,7 @@ converts it into a `MDEventWorkspace <http://www.mantidproject.org/MDEventWorksp
 viewed in the `SliceViewer <http://www.mantidproject.org/SliceViewer>`_.
 
 The algorithm currently only works for instruments with
-`RectangularDetectors <http://www.mantidproject.org/InstrumentDefinitionFile#Creating_Rectangular_Area_Detectors>`_. The coordinates of the
+:ref:`rectangular detectors <Creating Rectangular Area Detectors>`. The coordinates of the
 output workspace are:
 
 -  Pixel X coordinate (integer starting at 0)
@@ -43,9 +43,9 @@ screenshot for example:
 BankNumbers Parameter
 #####################
 
-If your instrument has several `RectangularDetectors <http://www.mantidproject.org/InstrumentDefinitionFile#Creating_Rectangular_Area_Detectors>`_, you can use the
+If your instrument has several :ref:`rectangular detectors <Creating Rectangular Area Detectors>`, you can use the
 *BankNumbers* property to specify which one(s) to convert. The algorithm
-looks for `RectangularDetectors <http://www.mantidproject.org/InstrumentDefinitionFile#Creating_Rectangular_Area_Detectors>`_ with the name 'bankXX' where XX is the
+looks for :ref:`rectangular detectors <Creating Rectangular Area Detectors>` with the name 'bankXX' where XX is the
 bank number.
 
 If you specify more than one bank number, then the algorithm will create
@@ -53,3 +53,5 @@ a 4D `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_. The fo
 number, allowing you to easily pick a bank to view.
 
 .. categories::
+
+.. sourcelink::

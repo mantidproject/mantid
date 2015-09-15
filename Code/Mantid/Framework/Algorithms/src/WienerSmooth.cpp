@@ -38,7 +38,7 @@ WienerSmooth::~WienerSmooth() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
-int WienerSmooth::version() const { return 1; };
+int WienerSmooth::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string WienerSmooth::category() const {
@@ -48,7 +48,7 @@ const std::string WienerSmooth::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string WienerSmooth::summary() const {
   return "Smooth spectra using Wiener filter.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -1,14 +1,15 @@
+#pylint: disable=no-init,invalid-name
 import os
-import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
-from reduction_workflow.instruments.sans import hfir_instrument
 from reduction_workflow.find_data import find_data
 
 class SANSAbsoluteScale(PythonAlgorithm):
     """
         Normalise detector counts by the sample thickness
     """
+
+    instrument = None
 
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
@@ -85,6 +86,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
             self.setProperty("OutputMessage", msg)
             return
 
+    #pylint: disable=too-many-locals,too-many-branches
     def _hfir_scaling(self, property_manager):
         property_manager_name = self.getProperty("ReductionProperties").value
         input_ws = self.getProperty("InputWorkspace").value
@@ -101,7 +103,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
                 Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
-                raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+                raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setChild(True)
@@ -143,7 +145,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
                 beam_diameter = ref_ws.getRun().getProperty("beam-diameter").value
                 Logger("SANSAbsoluteScale").debug("Found beamstop diameter: %g" % beam_diameter)
             else:
-                raise RuntimeError, "AbsoluteScale could not read the beam radius and none was provided"
+                raise RuntimeError("AbsoluteScale could not read the beam radius and none was provided")
 
         # Apply sensitivity correction
         apply_sensitivity = self.getProperty("ApplySensitivity").value
@@ -174,7 +176,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setProperty("Workspace", ref_ws)
         alg.setPropertyValue("ShapeXML", cylXML)
         alg.execute()
-        det_list = alg.getProperty("DetectorList").value
+        #det_list = alg.getProperty("DetectorList").value
         det_list_str = alg.getPropertyValue("DetectorList")
 
         det_count_ws_name = "__absolute_scale"
@@ -197,7 +199,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         if pixel_size_param is not None:
             pixel_size = pixel_size_param[0]
         else:
-            raise RuntimeError, "AbsoluteScale could not read the pixel size"
+            raise RuntimeError("AbsoluteScale could not read the pixel size")
 
         attenuator_trans = self.getProperty("AttenuatorTransmission").value
         # (detector count rate)/(attenuator transmission)/(monitor rate)*(pixel size/SDD)**2

@@ -54,18 +54,18 @@ private:
   void checkInputs();
 
   template <typename MDE, size_t nd>
-  void doMinus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void doMinus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Run the algorithm with an MDEventWorkspace as output
   void execEvent();
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
   void
-  execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
                   Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 };
 

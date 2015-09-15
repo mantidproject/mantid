@@ -42,63 +42,63 @@
 #include <QLayout>
 
 InterpolationDialog::InterpolationDialog( QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+  : QDialog( parent, fl ), graph(NULL)
 {
     setName( "InterpolationDialog" );
-	setWindowTitle(tr("MantidPlot - Interpolation Options"));
+    setWindowTitle(tr("MantidPlot - Interpolation Options"));
 
     QGroupBox *gb1 = new QGroupBox();
-	QGridLayout *gl1 = new QGridLayout(gb1);
-	gl1->addWidget(new QLabel(tr("Make curve from")), 0, 0);
+    QGridLayout *gl1 = new QGridLayout(gb1);
+    gl1->addWidget(new QLabel(tr("Make curve from")), 0, 0);
 
-	boxName = new QComboBox();
-	gl1->addWidget(boxName, 0, 1);
+    boxName = new QComboBox();
+    gl1->addWidget(boxName, 0, 1);
 
-	gl1->addWidget(new QLabel(tr("Spline")), 1, 0);
-	boxMethod = new QComboBox();
-	boxMethod->insertItem(tr("Linear"));
+    gl1->addWidget(new QLabel(tr("Spline")), 1, 0);
+    boxMethod = new QComboBox();
+    boxMethod->insertItem(tr("Linear"));
     boxMethod->insertItem(tr("Cubic"));
     boxMethod->insertItem(tr("Non-rounded Akima"));
-	gl1->addWidget(boxMethod, 1, 1);
+    gl1->addWidget(boxMethod, 1, 1);
 
-	gl1->addWidget(new QLabel(tr("Points")), 2, 0);
-	boxPoints = new QSpinBox();
-	boxPoints->setRange(3,100000);
-	boxPoints->setSingleStep(10);
-	boxPoints->setValue(1000);
-	gl1->addWidget(boxPoints, 2, 1);
+    gl1->addWidget(new QLabel(tr("Points")), 2, 0);
+    boxPoints = new QSpinBox();
+    boxPoints->setRange(3,100000);
+    boxPoints->setSingleStep(10);
+    boxPoints->setValue(1000);
+    gl1->addWidget(boxPoints, 2, 1);
 
-	gl1->addWidget(new QLabel(tr("From Xmin")), 3, 0);
-	boxStart = new QLineEdit();
-	boxStart->setText(tr("0"));
-	gl1->addWidget(boxStart, 3, 1);
+    gl1->addWidget(new QLabel(tr("From Xmin")), 3, 0);
+    boxStart = new QLineEdit();
+    boxStart->setText(tr("0"));
+    gl1->addWidget(boxStart, 3, 1);
 
-	gl1->addWidget(new QLabel(tr("To Xmax")), 4, 0);
-	boxEnd = new QLineEdit();
-	gl1->addWidget(boxEnd, 4, 1);
+    gl1->addWidget(new QLabel(tr("To Xmax")), 4, 0);
+    boxEnd = new QLineEdit();
+    gl1->addWidget(boxEnd, 4, 1);
 
-	gl1->addWidget(new QLabel(tr("Color")), 5, 0);
+    gl1->addWidget(new QLabel(tr("Color")), 5, 0);
 
-	boxColor = new ColorBox();
-	boxColor->setColor(QColor(Qt::red));
-	gl1->addWidget(boxColor, 5, 1);
-	gl1->setRowStretch(6, 1);
+    boxColor = new ColorBox();
+    boxColor->setColor(QColor(Qt::red));
+    gl1->addWidget(boxColor, 5, 1);
+    gl1->setRowStretch(6, 1);
 
-	buttonFit = new QPushButton(tr( "&Make" ));
+    buttonFit = new QPushButton(tr( "&Make" ));
     buttonFit->setDefault( true );
     buttonCancel = new QPushButton(tr( "&Close" ));
 
-	QVBoxLayout *vl = new QVBoxLayout();
- 	vl->addWidget(buttonFit);
-	vl->addWidget(buttonCancel);
+    QVBoxLayout *vl = new QVBoxLayout();
+    vl->addWidget(buttonFit);
+    vl->addWidget(buttonCancel);
     vl->addStretch();
 
     QHBoxLayout *hb = new QHBoxLayout(this);
     hb->addWidget(gb1);
     hb->addLayout(vl);
 
-	connect( boxName, SIGNAL(activated(const QString&)), this, SLOT( activateCurve(const QString&)));
-	connect( buttonFit, SIGNAL( clicked() ), this, SLOT( interpolate() ) );
+    connect( boxName, SIGNAL(activated(const QString&)), this, SLOT( activateCurve(const QString&)));
+    connect( buttonFit, SIGNAL( clicked() ), this, SLOT( interpolate() ) );
     connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
 }
 
@@ -173,7 +173,7 @@ void InterpolationDialog::setGraph(Graph *g)
 
 	connect (graph, SIGNAL(closedGraph()), this, SLOT(close()));
 	connect (graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
-};
+}
 
 void InterpolationDialog::activateCurve(const QString& curveName)
 {
@@ -189,7 +189,7 @@ void InterpolationDialog::activateCurve(const QString& curveName)
 	graph->range(graph->curveIndex(curveName), &start, &end);
 	boxStart->setText(QString::number(QMIN(start, end), 'g', app->d_decimal_digits));
 	boxEnd->setText(QString::number(QMAX(start, end), 'g', app->d_decimal_digits));
-};
+}
 
 void InterpolationDialog::changeDataRange()
 {

@@ -2,7 +2,7 @@
 #define VTK_MD_HEX_4D_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
@@ -13,7 +13,7 @@
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -37,21 +37,36 @@ public:
 
     //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
 
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), "signal", 0);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> inside(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 2)), Mantid::VATES::VolumeNormalization, 0);
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create(progressAction));
+    vtkStructuredGrid *insideProduct =
+        dynamic_cast<vtkStructuredGrid *>(inside.create(progressAction));
 
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)),"signal", 0);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> below(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 0.5)), Mantid::VATES::VolumeNormalization, 0);
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create(progressAction));
+    vtkStructuredGrid *belowProduct =
+        dynamic_cast<vtkStructuredGrid *>(below.create(progressAction));
 
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), "signal", 0);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> above(ThresholdRange_scptr(new UserDefinedThresholdRange(2, 3)), Mantid::VATES::VolumeNormalization, 0);
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressAction));
+    vtkStructuredGrid *aboveProduct =
+        dynamic_cast<vtkStructuredGrid *>(above.create(progressAction));
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
+    for (auto i = 0; i < insideProduct->GetNumberOfCells(); ++i) {
+      TS_ASSERT(insideProduct->IsCellVisible(i) != 0);
+    }
+
+    // This has changed. Cells are still present but not visible.
+    TS_ASSERT_EQUALS((10 * 10 * 10), belowProduct->GetNumberOfCells());
+    for (auto i = 0; i < belowProduct->GetNumberOfCells(); ++i) {
+      TS_ASSERT(belowProduct->IsCellVisible(i) == 0);
+    }
+
+    TS_ASSERT_EQUALS((10 * 10 * 10), aboveProduct->GetNumberOfCells());
+    for (auto i = 0; i < aboveProduct->GetNumberOfCells(); ++i) {
+      TS_ASSERT(aboveProduct->IsCellVisible(i) == 0);
+    }
   }
 
   void testProgressUpdating()
@@ -61,7 +76,7 @@ public:
     EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
     MDHistoWorkspace_sptr ws_sptr = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4);
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(new NoThresholdRange), "signal", 0);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(new NoThresholdRange), Mantid::VATES::VolumeNormalization, 0);
 
     factory.initialize(ws_sptr);
     vtkDataSet* product= factory.create(mockProgressAction);
@@ -81,13 +96,13 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory =
-      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", 0);
+      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, 0);
     factory.initialize(ws_sptr);
 
     vtkDataSet* product = factory.create(progressUpdate);
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
     vtkDataArray* signalData = product->GetCellData()->GetArray(0);
-    TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), signalData->GetName());
+    TSM_ASSERT_EQUALS("The obtained cell data has the wrong name.", std::string("signal"), std::string(signalData->GetName()));
     const int correctCellNumber = 10*10*10;
     TSM_ASSERT_EQUALS("The number of signal values generated is incorrect.", correctCellNumber, signalData->GetSize());
     
@@ -100,7 +115,7 @@ public:
     IMDWorkspace* nullWorkspace = NULL;
     Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, 1);
 
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::invalid_argument);
   }
@@ -110,7 +125,7 @@ public:
     FakeProgressAction progressAction;
 
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 1);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, 1);
     TS_ASSERT_THROWS(factory.create(progressAction), std::runtime_error);
   }
 
@@ -128,7 +143,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory =
-      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, (double)0);
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -148,7 +163,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory =
-      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, (double)0);
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
@@ -170,7 +185,7 @@ public:
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory =
-      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, (double)0);
 
     //Successor is provided.
     factory.SetSuccessor(pMockFactorySuccessor);
@@ -188,7 +203,7 @@ public:
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100);
 
     vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory =
-      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), "signal", (double)0);
+      vtkMDHistoHex4DFactory<TimeStepToTimeStep> (ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, (double)0);
     TS_ASSERT_EQUALS("vtkMDHistoHex4DFactory", factory.getFactoryTypeName());
   }
 
@@ -217,7 +232,7 @@ public:
     FakeProgressAction progressUpdate;
 
     UserDefinedThresholdRange* pRange = new UserDefinedThresholdRange(0, 100000);
-    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), "signal", 0);
+    vtkMDHistoHex4DFactory<TimeStepToTimeStep> factory(ThresholdRange_scptr(pRange), Mantid::VATES::VolumeNormalization, 0);
     factory.initialize(m_ws_sptr);
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
   }

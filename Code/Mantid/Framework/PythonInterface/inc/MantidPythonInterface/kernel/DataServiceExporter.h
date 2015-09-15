@@ -23,11 +23,12 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 #include "MantidKernel/Exception.h"
+#include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/extract.hpp>
 
 #include <set>
 
@@ -38,9 +39,10 @@ namespace PythonInterface {
  * @tparam SvcType Type of DataService to export
  * @tparam SvcHeldType The type held within the DataService map
  */
-template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
-  /// typedef the type created by boost.python
+template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
+  // typedef the type created by boost.python
   typedef boost::python::class_<SvcType, boost::noncopyable> PythonType;
+  typedef boost::weak_ptr<typename SvcPtrType::element_type> WeakPtr;
 
   /**
    * Define the necessary boost.python framework to expor the templated
@@ -60,20 +62,18 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
   static PythonType define(const char *pythonClassName) {
     using namespace boost::python;
     using namespace Mantid::Kernel;
-    namespace Policies = Mantid::PythonInterface::Policies;
 
     auto classType =
         PythonType(pythonClassName, no_init)
-            .def("add", &SvcType::add,
+            .def("add", &DataServiceExporter::addItem,
                  "Adds the given object to the service with the given name. If "
                  "the name/object exists it will raise an error.")
-            .def("addOrReplace", &SvcType::addOrReplace,
+            .def("addOrReplace", &DataServiceExporter::addOrReplaceItem,
                  "Adds the given object to the service with the given name. "
                  "The the name exists the object is replaced.")
             .def("doesExist", &SvcType::doesExist,
                  "Returns True if the object is found in the service.")
             .def("retrieve", &DataServiceExporter::retrieveOrKeyError,
-                 return_value_policy<Policies::ToWeakPtrWithDowncast>(),
                  "Retrieve the named object. Raises an exception if the name "
                  "does not exist")
             .def("remove", &SvcType::remove, "Remove a named object")
@@ -86,13 +86,55 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
 
             // Make it act like a dictionary
             .def("__len__", &SvcType::size)
-            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError,
-                 return_value_policy<Policies::ToWeakPtrWithDowncast>())
-            .def("__setitem__", &SvcType::addOrReplace)
+            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError)
+            .def("__setitem__", &DataServiceExporter::addOrReplaceItem)
             .def("__contains__", &SvcType::doesExist)
             .def("__delitem__", &SvcType::remove);
 
     return classType;
+  }
+
+  /**
+   * Add an item into the service, if it exists then an error is raised
+   * @param self A reference to the calling object
+   * @param name The name to assign to this in the service
+   * @param item A boost.python wrapped SvcHeldType object
+   */
+  static void addItem(SvcType &self, const std::string &name,
+                      const boost::python::object &item) {
+    self.add(name, extractCppValue(item));
+  }
+
+  /**
+   * Add or replace an item into the service, if it exists then an error is
+   * raised
+   * @param self A reference to the calling object
+   * @param name The name to assign to this in the service
+   * @param item A boost.python wrapped SvcHeldType object
+   */
+  static void addOrReplaceItem(SvcType &self, const std::string &name,
+                               const boost::python::object &item) {
+    self.addOrReplace(name, extractCppValue(item));
+  }
+
+  /**
+   * Extract a SvcPtrType C++ value from the Python object
+   * @param pyvalue Value of the
+   * @return The extracted value or thows an std::invalid_argument error
+   */
+  static SvcPtrType extractCppValue(const boost::python::object &pyvalue) {
+    // Test for a weak pointer first
+    boost::python::extract<WeakPtr &> extractWeak(pyvalue);
+    if (extractWeak.check()) {
+      return extractWeak().lock();
+    }
+    boost::python::extract<SvcPtrType &> extractShared(pyvalue);
+    if (extractShared.check()) {
+      return extractShared();
+    } else {
+      throw std::invalid_argument(
+          "Cannot extract pointer from Python object argument. Incorrect type");
+    }
   }
 
   /**
@@ -105,10 +147,9 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static SvcHeldType retrieveOrKeyError(SvcType &self,
-                                        const std::string &name) {
+  static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
     using namespace Mantid::Kernel;
-    SvcHeldType item;
+    SvcPtrType item;
     try {
       item = self.retrieve(name);
     } catch (Exception::NotFoundError &) {
@@ -117,7 +158,7 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
       PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
-    return item;
+    return WeakPtr(item);
   }
 
   /**

@@ -1,8 +1,10 @@
 // from mantid
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/InternetHelper.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
 #include <utility>
@@ -18,11 +20,12 @@ using Mantid::Kernel::NetworkProxy;
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
 #include <Poco/URI.h>
-#include <Poco/Net/HTTPClientSession.h>
-#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Exception.h>
-#include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/NetException.h>
+/*#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPResponse.h>
+*/
 #include <Poco/Net/HTMLForm.h>
 #include "Poco/Net/FilePartSource.h"
 
@@ -41,7 +44,6 @@ using Mantid::Kernel::NetworkProxy;
 #include <stdlib.h>
 #endif
 #include <Poco/StreamCopier.h>
-#include <Poco/Net/NetException.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/DateTimeParser.h>
 #include <Poco/DateTimeFormatter.h>
@@ -60,23 +62,6 @@ namespace API {
 namespace {
 /// static logger
 Kernel::Logger g_log("ScriptRepositoryImpl");
-}
-
-static ScriptRepoException pocoException(const std::string &info,
-                                         Poco::Exception &ex) {
-  std::stringstream ss;
-  if (dynamic_cast<Poco::FileAccessDeniedException *>(&ex))
-    ss << info << ", because you do not have access to write to this path :"
-       << ex.message() << std::ends;
-  else if (dynamic_cast<Poco::Net::HostNotFoundException *>(&ex))
-    ss << info << ". The definition of the remote url is not correct. Please "
-                  "check the Mantid settings, the ScriptRepository entry. "
-                  "Current: " << ex.message() << std::ends;
-  else {
-    ss << info << " . Unknown:" << ex.displayText() << std::ends;
-  }
-
-  return ScriptRepoException(ss.str(), ex.displayText());
 }
 
 const char *timeformat = "%Y-%b-%d %H:%M:%S";
@@ -781,18 +766,9 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
   try {
     g_log.notice() << "ScriptRepository uploading " << file_path << " ..."
                    << std::endl;
-    Poco::URI uri(remote_upload);
-    std::string path(uri.getPathAndQuery());
-    HTTPClientSession session(uri.getHost(), uri.getPort());
 
-    // configure proxy
-    std::string proxy_config;
-    unsigned short proxy_port;
-    if (getProxyConfig(proxy_config, proxy_port))
-      session.setProxy(proxy_config, proxy_port);
-    // proxy end
-
-    HTTPRequest req(HTTPRequest::HTTP_POST, path, HTTPMessage::HTTP_1_0);
+    Kernel::InternetHelper inetHelper;
+    
     HTMLForm form(HTMLForm::ENCODING_MULTIPART);
 
     // add the fields author, email and comment
@@ -816,32 +792,23 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
     FilePartSource *m_file = new FilePartSource(absolute_path);
     form.addPart("file", m_file);
 
-    // get the size of everything
-    std::stringstream sst;
-    form.write(sst);
-    // move back to the begining of the file
-    m_file->stream().clear();
-    m_file->stream().seekg(0, std::ios::beg);
-    // set the size
-    req.setContentLength((int)sst.str().size());
+    inetHelper.setBody(form);
+    std::stringstream server_reply;
 
-    form.prepareSubmit(req);
-    std::ostream &ostr = session.sendRequest(req);
-    // send the request.
-    ostr << sst.str();
-
-    HTTPResponse response;
-    std::istream &rs = session.receiveResponse(response);
-
+    int status;
+    try {
+      status = inetHelper.sendRequest(remote_upload,server_reply);
+    } catch (Kernel::Exception::InternetError &ie) {
+      status = ie.errorCode();
+    }
+      
     g_log.information() << "ScriptRepository upload status: "
-                        << response.getStatus() << " " << response.getReason()
+                        << status
                         << std::endl;
     std::stringstream answer;
     { // remove the status message from the end of the reply, in order not to
       // get exception from the read_json parser
-      std::stringstream server_reply;
       std::string server_reply_str;
-      Poco::StreamCopier::copyStream(rs, server_reply);
       server_reply_str = server_reply.str();
       size_t pos = server_reply_str.rfind("}");
       if (pos != std::string::npos)
@@ -891,12 +858,71 @@ void ScriptRepositoryImpl::upload(const std::string &file_path,
       g_log.information() << "ScriptRepository update local json " << std::endl;
       updateLocalJson(file_path, entry); /// FIXME: performance!
 
+      // add the entry to the repository.json. The
+      // repository.json should change at the
+      // remote repository, and we could just download the new one, but
+      // we can not rely on the server updating it fast enough.
+      // So add to the file locally to avoid race condition.
+      RepositoryEntry &remote_entry = repo.at(file_path);
+      if (!published_date.empty())
+          remote_entry.pub_date = DateAndTime(published_date);
+      remote_entry.status = BOTH_UNCHANGED;
+      g_log.debug() << "ScriptRepository updating repository json " << std::endl;
+      updateRepositoryJson(file_path, remote_entry);
+
     } else
       throw ScriptRepoException(info, detail);
 
   } catch (Poco::Exception &ex) {
     throw ScriptRepoException(ex.displayText(), ex.className());
   }
+}
+
+/*
+* Adds an entry to .repository.json
+* This is necessary when uploading a file to keep .repository.json and
+* .local.json in sync, and thus display correct file status in the GUI.
+* Requesting an updated .repository.json from the server is not viable
+* at such a time as it would create a race condition.
+* @param path: relative path of uploaded file
+* @param entry: the entry to add to the json file
+*/
+void ScriptRepositoryImpl::updateRepositoryJson(const std::string &path,
+                                               const RepositoryEntry &entry) {
+                                           
+  ptree repository_json;
+  std::string filename = std::string(local_repository).append(".repository.json");
+  read_json(filename, repository_json);
+
+  ptree::const_assoc_iterator it = repository_json.find(path);
+  if (it == repository_json.not_found()) {
+    boost::property_tree::ptree array;
+    array.put(std::string("author"),
+              entry.author);
+    array.put(std::string("description"),
+              entry.description);
+    std::string directory =
+        (const char *)((entry.directory) ? "true" : "false");
+    array.put(std::string("directory"),
+              directory);
+    array.put(std::string("pub_date"),
+              entry.pub_date.toFormattedString());
+    repository_json.push_back(
+        std::pair<std::string,
+                  boost::property_tree::basic_ptree<std::string, std::string>>(
+            path, array));
+  }
+  
+  g_log.debug() << "Update LOCAL JSON FILE" << std::endl;
+  #if defined(_WIN32) || defined(_WIN64)
+    // set the .repository.json and .local.json not hidden to be able to edit it
+    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_NORMAL);
+  #endif
+    write_json(filename, repository_json);
+  #if defined(_WIN32) || defined(_WIN64)
+    // set the .repository.json and .local.json hidden
+    SetFileAttributes(filename.c_str(), FILE_ATTRIBUTE_HIDDEN);
+  #endif
 }
 
 /**
@@ -984,10 +1010,8 @@ void ScriptRepositoryImpl::remove(const std::string &file_path,
 
     // prepare the request, and call doDeleteRemoteFile to request the server to
     // remove the file
-    std::string remote_delete = remote_upload;
-    boost::replace_all(remote_delete, "publish", "remove");
     std::stringstream answer;
-    answer << doDeleteRemoteFile(remote_delete, file_path, author, email,
+    answer << doDeleteRemoteFile(remote_upload, file_path, author, email,
                                  comment);
     g_log.debug() << "Answer from doDelete: " << answer.str() << std::endl;
 
@@ -1092,20 +1116,10 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
   using namespace Poco::Net;
   std::stringstream answer;
   try {
-    // create the poco httprequest object
-    Poco::URI uri(url);
-    std::string path(uri.getPathAndQuery());
-    HTTPClientSession session(uri.getHost(), uri.getPort());
-    HTTPRequest req(HTTPRequest::HTTP_POST, path, HTTPMessage::HTTP_1_0);
     g_log.debug() << "Receive request to delete file " << file_path << " using "
                   << url << std::endl;
 
-    // configure proxy
-    std::string proxy_config;
-    unsigned short proxy_port;
-    if (getProxyConfig(proxy_config, proxy_port))
-      session.setProxy(proxy_config, proxy_port);
-    // proxy end
+    Kernel::InternetHelper inetHelper;
 
     // fill up the form required from the server to delete one file, with the
     // fields
@@ -1117,22 +1131,23 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(
     form.add("file_n", file_path);
 
     // send the request to the server
-    form.prepareSubmit(req);
-    std::ostream &ostr = session.sendRequest(req);
-    form.write(ostr);
+    inetHelper.setBody(form);
+    std::stringstream server_reply;
+    int status;
+    try {
+      status = inetHelper.sendRequest(url,server_reply);
+    } catch (Kernel::Exception::InternetError &ie)
+    {
+      status = ie.errorCode();
+    }
 
-    // get the answer from the server
-    HTTPResponse response;
-    std::istream &rs = session.receiveResponse(response);
 
-    g_log.debug() << "ScriptRepository delete status: " << response.getStatus()
-                  << " " << response.getReason() << std::endl;
+    g_log.debug() << "ScriptRepository delete status: " << status
+                  << std::endl;
 
     {
       // get the answer from the server
-      std::stringstream server_reply;
       std::string server_reply_str;
-      Poco::StreamCopier::copyStream(rs, server_reply);
       server_reply_str = server_reply.str();
       // remove the status message from the end of the reply,
       // in order not to get exception from the read_json parser
@@ -1242,13 +1257,13 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
     boost::replace_all(newignore, "*", ".*");
     ignoreregex = std::string("(").append(newignore).append(")");
   }
-};
+}
 /**
  @todo describe
  */
 std::string ScriptRepositoryImpl::ignorePatterns(void) {
   ConfigServiceImpl &config = ConfigService::Instance();
-  std::string ignore_string = config.getString("ScriptRepositoryIgnore", "");
+  std::string ignore_string = config.getString("ScriptRepositoryIgnore", false);
   return ignore_string;
 }
 
@@ -1332,9 +1347,10 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
                                           const std::string &local_file_path) {
   g_log.debug() << "DoDownloadFile : " << url_file
                 << " to file: " << local_file_path << std::endl;
+
+
   // get the information from url_file
-  Poco::URI uri(url_file);
-  std::string path(uri.getPathAndQuery());
+  std::string path(url_file);
   if (path.empty())
     path = "/";
   std::string given_path;
@@ -1346,69 +1362,29 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
     given_path = path;
   // Configure Poco HTTP Client Session
   try {
-    Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-    session.setTimeout(Poco::Timespan(3, 0)); // 3 secconds
-
-    // configure proxy
-    std::string proxy_config;
-    unsigned short proxy_port;
-    if (getProxyConfig(proxy_config, proxy_port))
-      session.setProxy(proxy_config, proxy_port);
-    // proxy end
-
-    Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
-                                   Poco::Net::HTTPMessage::HTTP_1_1);
-    Poco::Net::HTTPResponse response;
-
-    session.sendRequest(request);
-
-    std::istream &rs = session.receiveResponse(response);
-    g_log.debug() << "Answer from mantid web: " << response.getStatus() << " "
-                  << response.getReason() << std::endl;
-    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
-      if (local_file_path.empty()) {
-        // ignore the answer, trow it away
-        Poco::NullOutputStream null;
-        Poco::StreamCopier::copyStream(rs, null);
-        return;
-      } else {
-        // copy the file
-        Poco::FileStream _out(local_file_path);
-        Poco::StreamCopier::copyStream(rs, _out);
-        _out.close();
-      }
-    } else {
-      std::stringstream info;
-      std::stringstream ss;
-      Poco::StreamCopier::copyStream(rs, ss);
-      if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_NOT_FOUND)
-        info << "Failed to download " << given_path
-             << " because it failed to find this file at the link "
-             << "<a href=\"" << url_file << "\">.\n"
-             << "Hint. Check that link is correct and points to the correct "
-                "server "
-             << "which you can find at <a "
-                "href=\"http://www.mantidproject.org/ScriptRepository\">"
-             << "Script Repository Help Page</a>";
-      else {
-        // show the error
-        // fixme, process this error
-        info << response.getReason();
-        info << ss.str();
-      }
-      throw ScriptRepoException(info.str(), ss.str());
+    Kernel::InternetHelper inetHelper;
+    int timeout;
+    if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",timeout)) {
+      timeout = 5; // the default value if the key is not found
     }
-  } catch (Poco::Net::HostNotFoundException &ex) {
-    // this exception occurrs when the pc is not connected to the internet
+    inetHelper.setTimeout(timeout);
+    
+    //std::stringstream ss;
+    int status = inetHelper.downloadFile(url_file,local_file_path);
+
+    g_log.debug() << "Answer from mantid web: " << status << std::endl;
+  }
+  catch (Kernel::Exception::InternetError &ie) {
     std::stringstream info;
     info << "Failed to download " << given_path
-         << " because there is no connection to the host " << ex.message()
-         << ".\nHint: Check your connection following this link: <a href=\""
-         << url_file << "\">" << given_path << "</a>";
-    throw ScriptRepoException(info.str(), ex.displayText(), __FILE__, __LINE__);
-
-  } catch (Poco::Exception &ex) {
-    throw pocoException("Connection and request failed", ex);
+          << " because it failed to find this file at the link "
+          << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n"
+          << "Hint. Check that link is correct and points to the correct "
+            "server "
+          << "which you can find at <a "
+            "href=\"http://www.mantidproject.org/ScriptRepository\">"
+          << "Script Repository Help Page</a>";
+    throw ScriptRepoException(info.str(), ie.what());
   }
 }
 
@@ -1635,7 +1611,6 @@ std::string ScriptRepositoryImpl::printStatus(SCRIPTSTATUS st) {
   default:
     return "FAULT: INVALID STATUS";
   }
-  return "FAULT: INVALID STATUS";
 }
 /**
  @todo describe
@@ -1770,62 +1745,6 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   return path;
 }
 
-bool ScriptRepositoryImpl::getProxyConfig(std::string &proxy_server,
-                                          unsigned short &proxy_port) {
-  // these variables are made static, so, to not query the system for the proxy
-  // configuration
-  // everytime this information is needed
-
-  Mantid::Kernel::NetworkProxy proxyHelper;
-  ProxyInfo proxyInfo = proxyHelper.getHttpProxy(remote_url);
-  if (proxyInfo.emptyProxy()) {
-    g_log.information(
-        "ScriptRepository: No HTTP network proxy settings found. None used.");
-  } else {
-    g_log.information(
-        "ScriptRepository: HTTP System network proxy settings found.");
-    g_log.debug() << "ScriptRepository Host found: " << proxyInfo.host()
-                  << " Port found: " << proxyInfo.port() << std::endl;
-  }
-
-  if (!proxyInfo.emptyProxy()) {
-    try {
-      // test if the proxy is valid for connecting to remote repository
-      Poco::URI uri(remote_url);
-      Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-      // setup a request to read the remote url
-      Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, "/",
-                                     Poco::Net::HTTPMessage::HTTP_1_1);
-      // through the proxy
-      session.setProxy(proxyInfo.host(),
-                       static_cast<Poco::UInt16>(proxyInfo.port()));
-      session.sendRequest(
-          request); // if it fails, it will throw exception here.
-
-      // clear the answer.
-      Poco::Net::HTTPResponse response;
-      std::istream &rs = session.receiveResponse(response);
-      Poco::NullOutputStream null;
-      Poco::StreamCopier::copyStream(rs, null);
-      // report that the proxy was configured
-      g_log.information() << "ScriptRepository proxy found. Host: "
-                          << proxyInfo.host() << " Port: " << proxyInfo.port()
-                          << std::endl;
-      proxy_server = proxyInfo.host();
-      proxy_port = static_cast<unsigned short>(proxyInfo.port());
-    } catch (Poco::Net::HostNotFoundException &ex) {
-      g_log.information() << "ScriptRepository found that proxy can not be "
-                             "used for this connection.\n" << ex.displayText()
-                          << std::endl;
-    } catch (...) {
-      g_log.warning() << "Unexpected error while looking for the proxy for "
-                         "ScriptRepository." << std::endl;
-    }
-  }
-
-  return !proxyInfo.emptyProxy();
-  ;
-}
 
 } // END API
 

@@ -14,13 +14,16 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <vector>
+#include <Poco/Path.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using ScopedFileHelper::ScopedFile;
 
 class LoadIDFFromNexusTest : public CxxTest::TestSuite
 {
@@ -42,6 +45,8 @@ public:
 
   void testExec()
   {
+    // We load a processed Nexus file with embedded parameters
+
     if ( !loader.isInitialized() ) loader.initialize();
 
     //Create a workspace with some sample data
@@ -54,7 +59,7 @@ public:
 
     // Set properties
     loader.setPropertyValue("Workspace", wsName);
-    loader.setPropertyValue("Filename", "LOQ48127.nxs");
+    loader.setPropertyValue("Filename", "LOQ48127.nxs"); 
     loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
     inputFile = loader.getPropertyValue("Filename"); // get full pathname
     
@@ -120,6 +125,282 @@ public:
 	  AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_parameter_source() {
+
+    // We load a processed Nexus file with embedded parameters, one of which has been made different 
+    // from the same parameter in the file on disk (LOQ_Parameters.xml)
+
+    if ( !loader.isInitialized() ) loader.initialize();
+
+    //Create a workspace with some sample data
+    wsName = "LoadIDFFromNexusTest2";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //Put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Set properties 
+    loader.setPropertyValue("Workspace", wsName);
+    loader.setPropertyValue("Filename", "LOQ48127p.nxs"); 
+    loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
+    inputFile = loader.getPropertyValue("Filename"); // get full pathname
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    // We now check the parameter that is different in the embedded parameters
+    const ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "LAB");
+    // If this gives "main-detector-bank" instead of "LAB", 
+    // then the embedded parameters have not, been read and the parameter file has been used instead.
+
+  }
+
+   void test_parameter_file() {
+
+    // We load a processed Nexus file without embedded parameters and 
+    // check that parameters has been loaded (from file) despite that
+
+    if ( !loader.isInitialized() ) loader.initialize();
+
+    //Create a workspace with some sample data
+    wsName = "LoadIDFFromNexusTest3";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //Put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Set properties 
+    loader.setPropertyValue("Workspace", wsName);
+    loader.setPropertyValue("Filename", "LOQ48127np.nxs"); 
+    loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
+    inputFile = loader.getPropertyValue("Filename"); // get full pathname
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    // We now check a parameter
+    const ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "main-detector-bank");
+
+  }
+
+  
+    void test_parameter_correction_file_append () {  
+
+    // We load a processed Nexus file with embedded parameters, which are corrected by 
+    // a correction file created for this test. Append is set to true and tested.
+
+    if ( !loader.isInitialized() ) loader.initialize();
+
+    //Create a workspace with some sample data and add a run with a start date
+    wsName = "LoadIDFFromNexusTestParameterCorrectionFileAppend";
+    Workspace_sptr wsd = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr wsd2D = boost::dynamic_pointer_cast<Workspace2D>(wsd);
+    Run &runDetails = wsd2D->mutableRun();
+    runDetails.addProperty("run_start", std::string("2015-08-01 12:00:00"));
+
+    //Put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, wsd2D));
+
+    // Create correction file and a parameter file to which it refers
+    std::string cContents = 
+      "<EmbeddedParameterCorrections name='XXX'>"
+      "   <correction  valid-from='2015-07-22 00:00:00'  valid-to='2015-08-31 11:59:59' file='parameter_file_referred_to.xml' append='true'/>"
+      "</EmbeddedParameterCorrections>";
+    std::string cFilename = "LOQ_parameter_correction_file_append_test.xml";
+    ScopedFile cFile( cContents, cFilename);
+    std::string cFullFilename = cFile.getFileName();
+
+    std::string pContents = 
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      "<parameter-file instrument=\"LOQ\" valid-from=\"2002-02-26T09:30:00\">\n"
+      "\t<component-link name=\"LOQ\">\n"
+      "\t\t<parameter name=\"high-angle-detector-name\" type=\"string\">\n"
+      "\t\t\t<value val=\"HAB App\"/>\n"
+      "\t\t</parameter>\n"
+       "\t\t<parameter name=\"high-angle-detector-short-name\" type=\"string\">\n"
+       "\t\t\t<value val=\"HABA\"/>\n"
+       "\t\t</parameter>\n"
+       "\t</component-link>\n"
+       "</parameter-file>"
+       ;   // Contents coverted to string by means of http://tomeko.net/online_tools/cpp_text_escape.php?lang=en 
+    std::string pFilename = "parameter_file_referred_to.xml";
+    ScopedFile pFile( pContents, pFilename);
+    std::string pFullFilename = pFile.getFileName();
+
+    // First we check that both scoped files are in the same directory,
+    // because the rest of the test relies on this.
+    Poco::Path cPath(cFullFilename);
+    Poco::Path pPath(pFullFilename);
+    TS_ASSERT_EQUALS(cPath.parent().toString(), pPath.parent().toString() );
+
+    // Set properties 
+    loader.setPropertyValue("Workspace", wsName);
+    loader.setPropertyValue("Filename", "LOQ48127.nxs"); 
+    loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
+    loader.setPropertyValue("ParameterCorrectionFilePath",cFullFilename); 
+    inputFile = loader.getPropertyValue("Filename"); // get full pathname
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    // We now check a parameter that has been changed by this
+    const ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"), "HAB App");
+    // If this gives "main-detector-bank" instead of "HAB", 
+    // then the parementer file specified by the correction file has not been read and acted upon.
+
+    // Also check a parameter from the embedded IDF to test the append
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "main-detector-bank");
+
+  }
+
+    void xtest_parameter_correction_file_replace () {   // Disabled till fix of issue 13328. 
+
+    // We load a processed Nexus file with embedded parameters, which are corrected by 
+    // a correction file created for this test. Append is set to false and tested
+
+    if ( !loader.isInitialized() ) loader.initialize();
+
+    //Create a workspace with some sample data and add a run with a start date
+    wsName = "LoadIDFFromNexusTestParameterCorrectionFileReplace";
+    Workspace_sptr wsd = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr wsd2D = boost::dynamic_pointer_cast<Workspace2D>(wsd);
+    Run &runDetails = wsd2D->mutableRun();
+    runDetails.addProperty("run_start", std::string("2015-08-01 12:00:00"));
+
+    //Put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, wsd2D));
+
+    // Create correction file and a parameter file to which it refers
+    std::string cContents = 
+      "<EmbeddedParameterCorrections name='XXX'>"
+      "   <correction  valid-from='2015-07-22 00:00:00'  valid-to='2015-08-31 11:59:59' file='parameter_file_referred_to.xml' append='false'/>"
+      "</EmbeddedParameterCorrections>";
+    std::string cFilename = "LOQ_parameter_correction_file_replace_test.xml";
+    ScopedFile cFile( cContents, cFilename);
+    std::string cFullFilename = cFile.getFileName();
+
+    std::string pContents = 
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      "<parameter-file instrument=\"LOQ\" valid-from=\"2002-02-26T09:30:00\">\n"
+      "\t<component-link name=\"LOQ\">\n"
+      "\t\t<parameter name=\"high-angle-detector-name\" type=\"string\">\n"
+      "\t\t\t<value val=\"HAB Rep\"/>\n"
+      "\t\t</parameter>\n"
+       "\t\t<parameter name=\"high-angle-detector-short-name\" type=\"string\">\n"
+       "\t\t\t<value val=\"HABR\"/>\n"
+       "\t\t</parameter>\n"
+       "\t</component-link>\n"
+       "</parameter-file>"
+       ;   // Contents coverted to string by means of http://tomeko.net/online_tools/cpp_text_escape.php?lang=en 
+    std::string pFilename = "parameter_file_referred_to.xml";
+    ScopedFile pFile( pContents, pFilename);
+    std::string pFullFilename = pFile.getFileName();
+
+    // First we check that both scoped files are in the same directory,
+    // because the rest of the test relies on this.
+    Poco::Path cPath(cFullFilename);
+    Poco::Path pPath(pFullFilename);
+    TS_ASSERT_EQUALS(cPath.parent().toString(), pPath.parent().toString() );
+
+    // Set properties 
+    loader.setPropertyValue("Workspace", wsName);
+    loader.setPropertyValue("Filename", "LOQ48127p.nxs"); 
+    loader.setPropertyValue("InstrumentParentPath","mantid_workspace_1"); 
+    loader.setPropertyValue("ParameterCorrectionFilePath",cFullFilename); 
+    inputFile = loader.getPropertyValue("Filename"); // get full pathname
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    // We now check a parameter that has been changed by this
+    const ParameterMap& paramMap = output->instrumentParameters();
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "high-angle-detector-name"), "HAB Rep");
+    // If this gives "main-detector-bank" instead of "HAB", 
+    // then the parementer file specified by the correction file has not been read and acted upon.
+
+    // Also check a parameter from the embedded IDF to test the append, which is false
+    TS_ASSERT_EQUALS(paramMap.getString(i.get(), "low-angle-detector-name"), "");
+
+  }
+
+
+  void test_get_parameter_correction_file() {
+
+    // We test the function the looks for a parameter correction file 
+    // for a given instrument.
+
+    // TEST1 file exists
+    std::string testpath1 = loader.getParameterCorrectionFile("TEST1");
+    Poco::Path iPath( true );  // Absolute path
+    TS_ASSERT(iPath.tryParse(testpath1)); // Result has correct syntax
+    TS_ASSERT(iPath.isFile()); // Result is a file
+    TS_ASSERT(iPath.getFileName()=="TEST1_Parameter_Corrections.xml"); // Correct filename
+    TS_ASSERT(iPath.directory(iPath.depth()-1)=="embedded_instrument_corrections"); // Correct folder
+
+    // TEST0 file does not exist
+    std::string testpath0 = loader.getParameterCorrectionFile("TEST0"); 
+    TS_ASSERT(testpath0 == ""); // Nothing should be found
+  }
+
+  void test_read_parameter_correction_file() {
+    std::string contents = 
+      "<EmbeddedParameterCorrections name='XXX'>"
+      "   <correction  valid-from='2015-06-26 00:00:00'  valid-to='2015-07-21 23:59:59' file='test1.xml' append='false'/>"
+      "   <correction  valid-from='2015-07-22 00:00:00'  valid-to='2015-07-31 11:59:59' file='test2.xml' append='true'/>"
+      "</EmbeddedParameterCorrections>";
+    std::string correctionFilename = "parameter_correction_test.xml";
+    ScopedFile file( contents, correctionFilename, "." );
+    std::string parameterFile;
+    bool append;
+
+    // Date too early for correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-06-25 23:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == ""); 
+
+    // Date for first correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-06-30 13:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == "test1.xml");
+    TS_ASSERT(append == false);
+
+    // Date for second correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-07-30 13:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == "test2.xml");
+    TS_ASSERT(append == true);
+
+    // Date too late for correction
+    TS_ASSERT_THROWS_NOTHING(loader.readParameterCorrectionFile(correctionFilename, "2015-07-31 12:00:00", parameterFile, append ));
+    TS_ASSERT(parameterFile == ""); 
+    
+  }
 
 
 private:

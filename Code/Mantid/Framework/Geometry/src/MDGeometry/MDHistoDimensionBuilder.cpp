@@ -1,12 +1,13 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/UnitLabelTypes.h"
 
 namespace Mantid {
 namespace Geometry {
 
 /// Constructor
 MDHistoDimensionBuilder::MDHistoDimensionBuilder()
-    : m_min(0), m_max(0), m_nbins(0), m_minSet(false), m_maxSet(false) {}
+    : m_units(Kernel::Units::Symbol::EmptyLabel), m_min(0), m_max(0), m_nbins(0), m_minSet(false), m_maxSet(false) {}
 
 /// Destructor
 MDHistoDimensionBuilder::~MDHistoDimensionBuilder() {}
@@ -59,7 +60,7 @@ void MDHistoDimensionBuilder::setId(std::string id) { m_id = id; }
 Setter for the dimension units
 @param units : unit type of dimension
 */
-void MDHistoDimensionBuilder::setUnits(std::string units) { m_units = units; }
+void MDHistoDimensionBuilder::setUnits(const Kernel::UnitLabel& units) { m_units = units; }
 
 /*
 Setter for the dimension min
@@ -98,7 +99,7 @@ MDHistoDimension *MDHistoDimensionBuilder::createRaw() {
     throw std::invalid_argument(
         "Cannot create MDHistogramDimension without setting a id.");
   }
-  if (m_units.empty()) {
+  if (m_units.ascii().empty()) {
     throw std::invalid_argument(
         "Cannot create MDHistogramDimension without setting a unit type.");
   }

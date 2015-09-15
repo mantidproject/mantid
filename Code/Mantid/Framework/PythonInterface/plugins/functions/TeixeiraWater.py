@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Spencer Howells, ISIS
 @date December 05, 2013
@@ -24,8 +25,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 '''
 
 from mantid.api import IFunction1D, FunctionFactory
-from mantid import logger
-import math, numpy as np
+import numpy as np
 
 class TeixeiraWater(IFunction1D):
 
@@ -55,8 +55,8 @@ class TeixeiraWater(IFunction1D):
         i = 0
         for x in xvals:
             h = x*x*length/(tau*(1+x*x*length))
-            jacobian.set(i,0,-h/tau);
-            jacobian.set(i,1,h*(1.0-h*tau)/length);
+            jacobian.set(i,0,-h/tau)
+            jacobian.set(i,1,h*(1.0-h*tau)/length)
             i += 1
 
 # Required to have Mantid recognise the new function

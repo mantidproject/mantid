@@ -7,22 +7,10 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
-#include <cctype>
-#include <string>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -30,6 +18,7 @@ using namespace Mantid::Kernel;
 using Mantid::Geometry::CompAssembly;
 using Mantid::Geometry::IObjComponent_const_sptr;
 using Mantid::Geometry::IComponent_const_sptr;
+using Mantid::Geometry::IPeak;
 
 namespace Mantid {
 
@@ -258,7 +247,7 @@ void PeakHKLErrors::getRun2MatMap(
     std::map<int, Mantid::Kernel::Matrix<double>> &Res) const {
 
   for (int i = 0; i < Peaks->getNumberPeaks(); ++i) {
-    IPeak &peak_old = Peaks->getPeak((int)i);
+    Geometry::IPeak &peak_old = Peaks->getPeak((int)i);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = boost::lexical_cast<std::string>(runNum);

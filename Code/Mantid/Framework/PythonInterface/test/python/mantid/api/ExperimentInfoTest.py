@@ -6,6 +6,7 @@ import unittest
 from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.geometry import Instrument
 from mantid.api import Sample, Run
+from math import pi
 
 class ExperimentInfoTest(unittest.TestCase):
 
@@ -37,8 +38,8 @@ class ExperimentInfoTest(unittest.TestCase):
 
 #    def test_set_and_get_efixed(self):
 #      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
-#        ws.setEFixed(1, 3.1415)
-#      self.assertEquals(ws.getEFixed(1), 3.1415)
+#        ws.setEFixed(1, pi)
+#      self.assertEquals(ws.getEFixed(1), pi)
 
 if __name__ == '__main__':
     unittest.main()

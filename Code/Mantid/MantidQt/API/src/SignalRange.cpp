@@ -1,6 +1,7 @@
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
-
+#include "MantidKernel/MultiThreaded.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 namespace MantidQt
 {
   namespace API
@@ -83,17 +84,18 @@ namespace MantidQt
       // Combine the overall min/max
       double minSignal = DBL_MAX;
       double maxSignal = -DBL_MAX;
-      auto inf = std::numeric_limits<double>::infinity();
       for (size_t i=0; i < iterators.size(); i++)
       {
         delete iterators[i];
 
         double signal;
         signal = intervals[i].minValue();
-        if (signal != inf && signal < minSignal) minSignal = signal;
+        if (boost::math::isnan(signal) || boost::math::isinf(signal)) continue;
+        if ( signal < minSignal) minSignal = signal;
 
         signal = intervals[i].maxValue();
-        if (signal != inf && signal > maxSignal) maxSignal = signal;
+        if (boost::math::isnan(signal) || boost::math::isinf(signal)) continue;
+        if ( signal > maxSignal) maxSignal = signal;
       }
 
       if (minSignal == DBL_MAX)

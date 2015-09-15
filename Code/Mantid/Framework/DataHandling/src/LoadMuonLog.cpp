@@ -6,7 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/LogParser.h"
+//#include "MantidKernel/LogParser.h"
 
 #include <ctime>
 

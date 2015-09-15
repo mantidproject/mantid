@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import sys
 
 """
@@ -63,7 +64,7 @@ class LoadSNSRoi:
 
     def calculatePixelRange(self):
         nbr_x = len(self.x_list)
-        if ((nbr_x % 304) == 0):
+        if (nbr_x % 304) == 0:
             _list = self.y_list #REF_L
         else:
             _list = self.x_list #REF_M

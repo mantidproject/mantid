@@ -45,7 +45,7 @@ public:
   ElasticDiffRotDiscreteCircle();
 
   /// Destructor
-  virtual ~ElasticDiffRotDiscreteCircle(){};
+  virtual ~ElasticDiffRotDiscreteCircle() {};
 
   /// overwrite IFunction base class methods
   virtual std::string name() const { return "ElasticDiffRotDiscreteCircle"; }
@@ -82,7 +82,12 @@ protected:
                           const size_t nData) const;
 
 private:
+  /// Cache Q values from the workspace
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+
   const double m_hbar; // Plank constant, in meV*THz (or ueV*PHz)
+
+  std::vector<double> m_qValueCache; // List of calculated Q values
 };
 
 /* Class representing the dynamics structure factor of a particle undergoing
@@ -94,7 +99,7 @@ private:
 class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
 public:
   /// Destructor
-  ~DiffRotDiscreteCircle(){};
+  ~DiffRotDiscreteCircle() {};
 
   virtual std::string name() const { return "DiffRotDiscreteCircle"; }
 

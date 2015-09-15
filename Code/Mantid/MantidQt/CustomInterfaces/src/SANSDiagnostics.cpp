@@ -7,6 +7,9 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/IDetector.h"
 
+#include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
+
 using Mantid::specid_t;
 using Mantid::detid_t;
 
@@ -686,12 +689,12 @@ namespace MantidQt
       
       QString detName= getDetectorName(0);
       //give the detectorname_H for workspace
-      detName+="_H";
-      const QString opws(detName);
+      const QString integrationType ="H";
+
       ///horizontal integral range string
       QString hiRange=m_SANSForm->hirange_edit1->text();
      
-      IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask1->isChecked(),true);
+      IntegralClicked(hiRange,orientation,minSpec,maxSpec,detName, integrationType ,m_SANSForm->tcmask1->isChecked(),true);
          
     }
 
@@ -733,13 +736,11 @@ namespace MantidQt
       }
       QString detName= getDetectorName(0);
       //give the detectorname_V for workspace
-      detName+="_V";
-      QString opws(detName);
+      const QString integrationType ="V";
       ///horizontal integral range string
       QString viRange=m_SANSForm->virange_edit1->text();
       
-      IntegralClicked(viRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask2->isChecked(),true);
-
+      IntegralClicked(viRange,orientation,minSpec,maxSpec,detName,integrationType,m_SANSForm->tcmask2->isChecked(),true);
     }
 
 
@@ -798,12 +799,13 @@ namespace MantidQt
     * @param orientation orientation
     * @param specMin- minimum spectrum index
     * @param specMax - maximum spectrum index
-    * @param opws - output workspace.
+    * @param detectorName - name of the detector.
+    * @param integrationType - the type of the integration, i.e. H, V or T
     * @param bMask boolean used for masking
     * @param time_pixel true if time masking,false if pixel mask
     */
     void SANSDiagnostics::IntegralClicked(const QString& range,const QString& orientation,
-      const QString& specMin,const QString& specMax,const QString& opws,bool bMask,bool time_pixel)
+      const QString& specMin,const QString& specMax,const QString& detectorName, const QString& integrationType, bool bMask,bool time_pixel)
     {
       /// now run the load algorithm with the spec_min and spec_max
       if(!runLoadAlgorithm(m_fileName,specMin,specMax))
@@ -812,7 +814,7 @@ namespace MantidQt
       } 
       //get the workspace name
       QString loadedws = getWorkspaceToProcess(); 
-            
+
       //aplly mask
       if(bMask)
       {
@@ -823,6 +825,10 @@ namespace MantidQt
       {        
         QString HVMin,HVMax;
         HVMinHVMaxStringValues(Mantid::EMPTY_INT(),Mantid::EMPTY_INT(),HVMin,HVMax);
+
+        // Create output workspace name
+        QString opws = createOutputWorkspaceName(m_outws_load, detectorName, integrationType, HVMin, HVMax);
+
         if(!runsumRowColumn(loadedws,opws,orientation,HVMin,HVMax))
         {
           return ;
@@ -832,7 +838,6 @@ namespace MantidQt
         return;
       }
       //parse the range string
-      int count=0;
       UserStringParser parser;
       std::vector<std::vector<unsigned int> > parsedVals;
       try
@@ -853,8 +858,8 @@ namespace MantidQt
       QString wsPlotString;
       //loop through each element of the parsed value vector
       std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
-      for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
-	  {
+      for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr) 
+      {
         if((*parsedValcitr).empty())
         {
           return;
@@ -881,20 +886,18 @@ namespace MantidQt
 
         QString HVMin,HVMax;
         HVMinHVMaxStringValues(min,max,HVMin,HVMax);
-        
-        ++count;
-        std::stringstream num;
-        num<<count;
-        QString outputwsname=opws+QString::fromStdString(num.str());
+
+        // Create output workspace name
+        QString opws = createOutputWorkspaceName(m_outws_load, detectorName, integrationType, HVMin, HVMax);
 
         //now execute sumrowcolumn with hvmin and havmax from the first and last vales from the vector
-        if(!runsumRowColumn(loadedws,outputwsname,orientation,HVMin,HVMax))
+        if(!runsumRowColumn(loadedws,opws,orientation,HVMin,HVMax))
         {
           return ;
         }
-               
+
         wsPlotString+="\"";
-        wsPlotString+=outputwsname;
+        wsPlotString+= opws;
         wsPlotString+="\"";
         wsPlotString+=",";
       }
@@ -1113,11 +1116,10 @@ namespace MantidQt
       }
       QString detName= getDetectorName(detNum);
       //give the detectorname_H for workspace
-      detName+="_H";
-      QString opws(detName);
+      QString integrationType = "H";
       ///horizontal integral range string
       QString hiRange=m_SANSForm->hirange_edit2->text();
-      IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask3->isChecked(),true);
+      IntegralClicked(hiRange,orientation,minSpec,maxSpec,detName, integrationType,m_SANSForm->tcmask3->isChecked(),true);
 
     }
     /// Handler for second detector horizontal integral button
@@ -1157,12 +1159,10 @@ namespace MantidQt
       }
       QString detName= getDetectorName(detNum);
       //give the detectorname_H for workspace
-      detName+="_V";
-      QString opws(detName);
-
+      QString integrationType = "V";
       ///horizontal integral range string
       QString viRange=m_SANSForm->virange_edit2->text();
-      IntegralClicked(viRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask4->isChecked(),true);
+      IntegralClicked(viRange,orientation,minSpec,maxSpec,detName,integrationType,m_SANSForm->tcmask4->isChecked(),true);
     }
     /// Handler for second detector horizontal integral button
     void SANSDiagnostics::secondDetectorTimeIntegralClicked()
@@ -1247,8 +1247,12 @@ namespace MantidQt
     ///save settings
     void SANSDiagnostics::saveSettings()
     {
-      m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
-      m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+      if( Mantid::Kernel::ConfigService::Instance().hasProperty("datasearch.directories") )
+      {
+        m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
+        if( !m_dataDir.isEmpty() )
+          m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+      }
       QSettings settings;
       m_settingsGroup="CustomInterfaces/SANSRunWindow/SANSDiagnostics";
       settings.beginGroup(m_settingsGroup);
@@ -1522,5 +1526,53 @@ namespace MantidQt
       m_SANSForm->pmask2->setEnabled(true);
     }
 
+    /**
+     * Rename the output workspace to a form {runnumber}-{detector}-detector
+     * @param originalWorkspaceName :: name of the original workspace
+     * @param detectorName :: name of the detector
+     * @param integrationType :: the type of integration, i.e. H, V or T
+     * @param min :: minimum as string
+     * @param max :: maximum as string
+     * @returns an output workspace name
+     */
+    QString SANSDiagnostics::createOutputWorkspaceName(QString originalWorkspaceName, QString detectorName, QString integrationType, QString min, QString max)
+    {
+      // Get run number from the loaded workspace
+      boost::optional<int> runNumber = boost::none;
+      try
+      {
+        Mantid::API::Workspace_sptr ws_sptr= Mantid::API::AnalysisDataService::Instance().retrieve(originalWorkspaceName.toStdString());
+        Mantid::API::MatrixWorkspace_sptr matrix_ws_sptr = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+
+        if (matrix_ws_sptr)
+        {
+          runNumber = matrix_ws_sptr->getRunNumber();
+        }
+      }
+      catch(...)
+      {
+        g_log.error()<<"Error when extracting the run number from the Workspace "+ originalWorkspaceName.toStdString()<<std::endl;
+      }
+
+      // Build the output name 
+      QString outputWorkspaceName;
+      if (runNumber)
+      {
+        outputWorkspaceName = QString::number(*runNumber);
+      }
+      else
+      {
+        g_log.error()<<"Error: It seems that workspace "+ originalWorkspaceName.toStdString()<< " does not have a run number." <<std::endl;
+        outputWorkspaceName = "xxxxx";
+      }
+
+      // Detector, Min value,  and Max values, 
+      QString appendix = "-" + detectorName + "-" + integrationType + min + "-" + integrationType + max;
+      outputWorkspaceName += appendix;
+
+      outputWorkspaceName.replace("-", "_");
+
+      return outputWorkspaceName;
+    }
   }
 }

@@ -31,6 +31,12 @@
 
 %Module _qti
 
+%UnitCode
+  #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+    #pragma GCC system_header
+  #endif
+%End
+
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 %Import mantidqt.sip
@@ -1361,6 +1367,12 @@ class InstrumentWindowTab: QFrame
 %TypeHeaderCode
 #include "src/Mantid/InstrumentWidget/InstrumentWindowTab.h"
 %End
+public:
+	// This is a duplicate from the same enum in InstrumentWindow, just so you
+	// can do like InstrumentWindowRenderTab.FULL3D
+	enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
+                     SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
+                     RENDERMODE_SIZE };
 private:
   InstrumentWindowTab(const InstrumentWindowTab &);
 };
@@ -1384,6 +1396,7 @@ class InstrumentWindow: MdiSubWindow
 %End
 
 public:
+  // Note this enum is also defined in InstrumentWindowTab
   enum SurfaceType { FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z,
                      SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z,
                      RENDERMODE_SIZE };
@@ -1672,7 +1685,8 @@ sipClass=sipFindClass(sipCpp->className());
 public:
   // Plotting methods
   MultiLayer* plot1D(const QList<QString>& wsnames, const QList<int>&, bool spectrumPlot, bool errs=false,
-    Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL, bool clearWindow = false);
+    Graph::CurveType style = Graph::Unspecified, MultiLayer* window = NULL,
+                     bool clearWindow = false, bool waterfallPlot = false);
 
   MultiLayer* drawSingleColorFillPlot(const QString & name, Graph::CurveType style = Graph::ColorMap,
                                       MultiLayer* window = NULL);
@@ -1696,6 +1710,7 @@ public:
   Table* createTableFromSpectraList(const QString& tableName, const QString& workspaceName,
       QList<int> indexList, bool errs=true, bool binCentres=false) /PyName = workspaceToTable/;
   Table* importTableWorkspace(const QString&, bool = false, bool = false);
+  Table* createDetectorTable(const QString & wsName);
 
   void setIsRunning(bool running);
   bool createScriptInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);

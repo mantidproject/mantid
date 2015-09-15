@@ -1,6 +1,5 @@
 #include "MantidCrystal/DisjointElement.h"
-#include <stdexcept>
-#include <iostream>
+
 namespace Mantid {
 namespace Crystal {
 

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -5,6 +6,7 @@ import os
 import math
 import sys
 
+#pylint: disable=too-few-public-methods
 class REFLOptions(object):
     def __init__(self):
         from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
@@ -88,14 +90,14 @@ class REFLReprocess(PythonAlgorithm):
         for item in os.listdir(output_dir):
             if item.endswith('.txt') and \
                (len(filter_string)==0 or item.find(filter_string)>=0):
-                basename, ext = os.path.splitext(item)
+                basename, _ = os.path.splitext(item)
                 Load(Filename=os.path.join(output_dir, item), OutputWorkspace=basename)
                 (_name,_ts) = basename.split('_#')
                 CloneWorkspace(InputWorkspace=basename, OutputWorkspace=_name)
 
 
     def stitch_data(self, input_file, output_dir, q_min, q_step):
-        from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
+        from LargeScaleStructures.data_stitching import DataSet, Stitcher#, RangeSelector
         # Identify the data sets to stitch and order them
         workspace_list = []
         _list_name = []
@@ -103,9 +105,9 @@ class REFLReprocess(PythonAlgorithm):
         ws_list = AnalysisDataService.getObjectNames()
         for item in ws_list:
             if item.endswith('ts'):
-                    (_name,_ts) = item.split('_#')
-                    _list_name.append(item)
-                    _list_ts.append(_ts)
+                (_name,_ts) = item.split('_#')
+                _list_name.append(item)
+                _list_ts.append(_ts)
 
         _name_ts = zip(_list_ts, _list_name)
         _name_ts.sort()
@@ -118,7 +120,7 @@ class REFLReprocess(PythonAlgorithm):
         for item in workspace_list:
             data = DataSet(item)
             data.load(True, True)
-            x_min, x_max = data.get_range()
+            dummy_x_min, x_max = data.get_range()
             if x_max > q_max:
                 q_max = x_max
             s.append(data)
@@ -147,16 +149,16 @@ def weightedMean(data_array, error_array):
     sz = len(data_array)
 
     # calculate the numerator of mean
-    dataNum = 0;
+    dataNum = 0
     for i in range(sz):
-        if not (data_array[i] == 0):
+        if not data_array[i] == 0:
             tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
             dataNum += tmpFactor
 
     # calculate denominator
-    dataDen = 0;
+    dataDen = 0
     for i in range(sz):
-        if not (error_array[i] == 0):
+        if not error_array[i] == 0:
             tmpFactor = 1./float((pow(error_array[i],2)))
             dataDen += tmpFactor
 
@@ -212,7 +214,7 @@ def _average_y_of_same_x_(q_min, q_step, q_max=2):
         data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
         for j in range(len(data_y_i)):
             if data_y[j]>0 and data_y_i[j]>0:
-                [data_y[j], data_e[j]] = weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]]);
+                [data_y[j], data_e[j]] = weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
             elif (data_y[j] == 0) and (data_y_i[j]>0):
                 data_y[j] = data_y_i[j]
                 data_e[j] = data_e_i[j]

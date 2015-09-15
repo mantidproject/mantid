@@ -1,38 +1,47 @@
 #include "MantidPythonInterface/kernel/PropertyWithValueExporter.h"
 
+#include <boost/python/copy_const_reference.hpp>
+
 using Mantid::PythonInterface::PropertyWithValueExporter;
 
-void export_BasicPropertyWithValueTypes()
-{
-  // cut down copy-and-paste code
-#define EXPORT_PROP(CType, ExportName) \
-  PropertyWithValueExporter<CType>::define(ExportName);
+void export_BasicPropertyWithValueTypes() {
+  // ints & vectors
+  PropertyWithValueExporter<int>::define("IntPropertyWithValue");
+  PropertyWithValueExporter<std::vector<int>>::define(
+      "VectorIntPropertyWithValue");
+  PropertyWithValueExporter<unsigned int>::define("UIntPropertyWithValue");
+  PropertyWithValueExporter<std::vector<unsigned int>>::define(
+      "VectorUIntPropertyWithValue");
 
-  //ints & vectors
-  EXPORT_PROP(int, "IntPropertyWithValue");
-  EXPORT_PROP(std::vector<int>, "VectorIntPropertyWithValue");
-  EXPORT_PROP(unsigned int, "UIntPropertyWithValue");
-  EXPORT_PROP(std::vector<unsigned int>, "VectorUIntPropertyWithValue");
   // longs & vectors
-  EXPORT_PROP(long, "LongPropertyWithValue");
-  EXPORT_PROP(std::vector<long>, "VectorLongPropertyWithValue");
-  EXPORT_PROP(unsigned long, "ULongPropertyWithValue");
-  EXPORT_PROP(std::vector<unsigned long>, "VectorULongPropertyWithValue");
+  PropertyWithValueExporter<long>::define("LongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<long>>::define(
+      "VectorLongPropertyWithValue");
+  PropertyWithValueExporter<unsigned long>::define("ULongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<unsigned long>>::define(
+      "VectorULongPropertyWithValue");
+
   // long long long longs & vectors
-  EXPORT_PROP(long long, "LongLongPropertyWithValue");
-  EXPORT_PROP(std::vector<long long>, "VectorLongLongPropertyWithValue");
-  EXPORT_PROP(unsigned long long, "ULongLongPropertyWithValue");
-  EXPORT_PROP(std::vector<unsigned long long>, "VectorULongLongPropertyWithValue");
+  PropertyWithValueExporter<long long>::define("LongLongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<long long>>::define(
+      "VectorLongLongPropertyWithValue");
+  PropertyWithValueExporter<unsigned long long>::define(
+      "ULongLongPropertyWithValue");
+  PropertyWithValueExporter<std::vector<unsigned long long>>::define(
+      "VectorULongLongPropertyWithValue");
+
   // double
-  EXPORT_PROP(double, "FloatPropertyWithValue");
-  EXPORT_PROP(std::vector<double>, "VectorFloatPropertyWithValue");
+  PropertyWithValueExporter<double>::define("FloatPropertyWithValue");
+  PropertyWithValueExporter<std::vector<double>>::define(
+      "VectorFloatPropertyWithValue");
+
   // boolean
-  EXPORT_PROP(bool, "BoolPropertyWithValue");
-  EXPORT_PROP(std::vector<bool>, "VectorBoolPropertyWithValue");
+  PropertyWithValueExporter<bool>::define("BoolPropertyWithValue");
+  PropertyWithValueExporter<std::vector<bool>>::define(
+      "VectorBoolPropertyWithValue");
+
   // std::string
-  EXPORT_PROP(std::string, "StringPropertyWithValue");
-  EXPORT_PROP(std::vector<std::string>, "VectorStringPropertyWithValue");
-
-
-#undef EXPORT_PROP
+  PropertyWithValueExporter<std::string>::define("StringPropertyWithValue");
+  PropertyWithValueExporter<std::vector<std::string>>::define(
+      "VectorStringPropertyWithValue");
 }

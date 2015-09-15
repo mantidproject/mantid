@@ -66,7 +66,7 @@ namespace MantidQt
       void messageReceived(const Message & msg);
 
     private:
-      Q_DISABLE_COPY(QtSignalChannel);
+      Q_DISABLE_COPY(QtSignalChannel)
 
       /// Optional source (use std::string to avoid conversion in comparison)
       QString m_source;

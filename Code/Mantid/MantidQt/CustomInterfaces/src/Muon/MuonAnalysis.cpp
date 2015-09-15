@@ -7,6 +7,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/ScopedWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IComponent.h"
@@ -63,7 +64,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(MuonAnalysis);
+  DECLARE_SUBWINDOW(MuonAnalysis)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -703,6 +704,9 @@ MatrixWorkspace_sptr MuonAnalysis::getPeriodWorkspace(PeriodType periodType, Wor
 */
 void MuonAnalysis::userSelectInstrument(const QString& prefix)
 {
+  // Set file browsing to current instrument
+  m_uiForm.mwRunFiles->setInstrumentOverride(prefix);
+
   if ( prefix != m_curInterfaceSetup )
   {
     runClearGroupingButton();
@@ -1996,15 +2000,12 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
     {
       QStringList& s = acquireWindowScript; // To keep short
 
-      s << "w = graph('%WSNAME%-1')";
-      s << "if w == None:";
-      s << "  pw = newGraph('%WSNAME%', 0)";
-      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw)";
-      s << "  w.setObjectName('%WSNAME%')";
-      s << "else:";
-      s << "  plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = w, clearWindow = True)";
-      s << "  w.show()";
-      s << "  w.setFocus()";
+      s << "pw = newGraph('%WSNAME%-1', 0)";
+      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
+      s << "w.setName('%WSNAME%-1')";
+      s << "w.setObjectName('%WSNAME%')";
+      s << "w.show()";
+      s << "w.setFocus()";
     }
 
     QString pyS;

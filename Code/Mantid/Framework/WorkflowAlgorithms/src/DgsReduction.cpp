@@ -39,10 +39,10 @@ DgsReduction::~DgsReduction() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsReduction::name() const { return "DgsReduction"; };
+const std::string DgsReduction::name() const { return "DgsReduction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsReduction::version() const { return 1; };
+int DgsReduction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsReduction::category() const {
@@ -673,9 +673,10 @@ double DgsReduction::getParameter(std::string algParam, MatrixWorkspace_sptr ws,
 /** Execute the algorithm.
  */
 void DgsReduction::exec() {
-  // Reduction property manager
+  // Reduction property manager - don't call getProcessProperties as
+  // it will reuse. This needs to create a fresh one every time
   const std::string reductionManagerName =
-      this->getProperty("ReductionProperties");
+          this->getProperty("ReductionProperties");
   if (reductionManagerName.empty()) {
     g_log.error() << "ERROR: Reduction Property Manager name is empty"
                   << std::endl;
@@ -768,7 +769,7 @@ void DgsReduction::exec() {
     diag->setProperty("SampleWorkspace", sampleWS);
     diag->setProperty("SampleMonitorWorkspace", sampleMonWS);
     diag->setProperty("HardMaskWorkspace", hardMaskWS);
-    diag->setProperty("ReductionProperties", reductionManagerName);
+    diag->setProperty("ReductionProperties", getPropertyValue("ReductionProperties"));
     diag->executeAsChildAlg();
     maskWS = diag->getProperty("OutputWorkspace");
 
@@ -783,7 +784,7 @@ void DgsReduction::exec() {
     detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
     detVan->setProperty("MaskWorkspace", maskWS);
     std::string idetVanName = outputWsName + "_idetvan";
-    detVan->setProperty("ReductionProperties", reductionManagerName);
+    detVan->setProperty("ReductionProperties", getPropertyValue("ReductionProperties"));
     detVan->executeAsChildAlg();
     MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
     idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
@@ -813,7 +814,7 @@ void DgsReduction::exec() {
   if (groupingWS) {
     etConv->setProperty("GroupingWorkspace", groupingWS);
   }
-  etConv->setProperty("ReductionProperties", reductionManagerName);
+  etConv->setProperty("ReductionProperties", getPropertyValue("ReductionProperties"));
   std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
   etConv->executeAsChildAlg();
   outputWS = etConv->getProperty("OutputWorkspace");
@@ -850,7 +851,7 @@ void DgsReduction::exec() {
                              absDetVanMonWS);
     absUnitsRed->setProperty("GroupingWorkspace", absGroupingWS);
     absUnitsRed->setProperty("MaskWorkspace", maskWS);
-    absUnitsRed->setProperty("ReductionProperties", reductionManagerName);
+    absUnitsRed->setProperty("ReductionProperties", getPropertyValue("ReductionProperties"));
     absUnitsRed->executeAsChildAlg();
     MatrixWorkspace_sptr absUnitsWS =
         absUnitsRed->getProperty("OutputWorkspace");

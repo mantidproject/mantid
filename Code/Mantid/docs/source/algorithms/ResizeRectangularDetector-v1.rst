@@ -10,17 +10,17 @@ Description
 -----------
 
 This algorithm will resize a
-`RectangularDetector <http://www.mantidproject.org/RectangularDetector>`_ by applying X and Y
+:ref:`RectangularDetector <RectangularDetector>` by applying X and Y
 scaling factors. Each pixel's position will be modifed relative to the
 0,0 point of the detector by these factors. Typically, a
 RectangularDetector is constructed around its center, so this would
 scale the detector around its center.
 
-This only works on `RectangularDetectors <http://www.mantidproject.org/RectangularDetector>`_. Banks
+This only works on :ref:`RectangularDetectors <RectangularDetector>`. Banks
 formed by e.g. tubes cannot be scaled in this way.
 
 Internally, this sets the "scalex" and "scaley" parameters on the
-`RectangularDetector <http://www.mantidproject.org/RectangularDetector>`_. Note that the scaling is
+:ref:`RectangularDetector <RectangularDetector>`. Note that the scaling is
 relative to the original size, and is not cumulative: that is, if you
 Resize \* 2 and again \* 3, your final detector is 3 times larger than
 the original, not 6 times.
@@ -61,3 +61,5 @@ Output:
 	bank 2 was not scaled and remains 0.08 by 0.08
 
 .. categories::
+
+.. sourcelink::

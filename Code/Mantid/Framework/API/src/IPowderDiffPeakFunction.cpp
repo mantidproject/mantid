@@ -10,7 +10,6 @@
 #include <cmath>
 
 const double IGNOREDCHANGE = 1.0E-9;
-const double PI = 3.14159265358979323846264338327950288419716939937510582;
 
 namespace Mantid {
 namespace API {
@@ -22,7 +21,10 @@ int IPowderDiffPeakFunction::s_peakRadius = 5;
  * property
   */
 IPowderDiffPeakFunction::IPowderDiffPeakFunction()
-    : LATTICEINDEX(9999), HEIGHTINDEX(9999) {
+    : m_centre(0.), m_dcentre(0.), m_fwhm(0.), m_hasNewParameterValue(false),
+      m_cellParamValueChanged(false), m_sortedProfileParameterNames(),
+      m_unitCell(), m_unitCellSize(0.), m_parameterValid(false), mH(0), mK(0),
+      mL(0), mHKLSet(false), LATTICEINDEX(9999), HEIGHTINDEX(9999) {
   // Set peak's radius from configuration
   int peakRadius;
   if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
@@ -271,7 +273,7 @@ std::complex<double> E1(std::complex<double> z) {
     exp_e1 = exp_e1 * exp(-z);
     if (rz < 0.0 && fabs(imag(z)) < 1.0E-10) {
       std::complex<double> u(0.0, 1.0);
-      exp_e1 = exp_e1 - (PI * u);
+      exp_e1 = exp_e1 - (M_PI * u);
     }
   }
 

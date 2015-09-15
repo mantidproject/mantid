@@ -1,14 +1,10 @@
 #include "MantidCrystal/TransformHKL.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/Matrix.h"
-#include <cstdio>
 #include "MantidCrystal/SelectCellWithForm.h"
 
 namespace Mantid {

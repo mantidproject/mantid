@@ -119,10 +119,10 @@ PolarizationCorrection::~PolarizationCorrection() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PolarizationCorrection::name() const {
   return "PolarizationCorrection";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PolarizationCorrection::version() const { return 1; };
+int PolarizationCorrection::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PolarizationCorrection::category() const {

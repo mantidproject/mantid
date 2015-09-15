@@ -1,19 +1,25 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from mantid import config, logger
-from IndirectImport import import_mantidplot
+from mantid import logger
 import numpy
-import os.path
 
 
 class IndirectTransmissionMonitor(PythonAlgorithm):
 
+    _sample_ws_in = None
+    _can_ws_in = None
+    _out_ws = None
+
+
     def category(self):
         return "Workflow\\Inelastic;PythonAlgorithms;Inelastic"
 
+
     def summary(self):
         return "Calculates the sample transmission using the raw data files of the sample and its background or container."
+
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -25,15 +31,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
-        self.declareProperty(name='Verbose', defaultValue=False, doc='Output more verbose message to log')
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False, doc='Save result workspace to nexus file in the default save directory')
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime
         self._setup()
-
-        StartTime('IndirectTransmissionMonitor')
 
         ws_basename = str(self._sample_ws_in)
 
@@ -47,7 +47,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         # Divide sample and can workspaces
         Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=trans_ws)
+
         trans = numpy.average(mtd[trans_ws].readY(0))
+        logger.information('Average Transmission: ' + str(trans))
 
         AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=self._can_ws_in)
 
@@ -57,23 +59,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
-        if self._verbose:
-            logger.notice('Transmission : ' + str(trans))
-
-        # Save the tranmissin workspace group to a nexus file
-        if self._save:
-            workdir = config['defaultsave.directory']
-            path = os.path.join(workdir, self._out_ws + '.nxs')
-            SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=path)
-            if self._verbose:
-                logger.notice('Output file created : ' + path)
-
-        # Plot spectra from transmission workspace
-        if self._plot:
-            mtd_plot = import_mantidplot()
-            mtd_plot.plotSpectrum(self._out_ws, 0)
-
-        EndTime('IndirectTransmissionMonitor')
 
     def _setup(self):
         """
@@ -83,9 +68,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self._sample_ws_in = self.getPropertyValue("SampleWorkspace")
         self._can_ws_in = self.getPropertyValue("CanWorkspace")
         self._out_ws = self.getPropertyValue('OutputWorkspace')
-        self._verbose = self.getProperty("Verbose").value
-        self._plot = self.getProperty("Plot").value
-        self._save = self.getProperty("Save").value
+
 
     def _get_spectra_index(self, input_ws):
         """
@@ -93,34 +76,46 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         Assumes monitors are named monitor1 and monitor2
         """
 
-        instrument = mtd[input_ws].getInstrument()
+        workspace = mtd[input_ws]
+        instrument = workspace.getInstrument()
+
+        # Get workspace index of first detector
+        detector_1_idx = 2
 
         try:
+            # First try to get first detector for current analyser bank
             analyser = instrument.getStringParameter('analyser')[0]
             detector_1_idx = instrument.getComponentByName(analyser)[0].getID() - 1
-            if self._verbose:
-                logger.information('Got index of first detector for analyser %s: %d' % (analyser, detector_1_idx))
+            logger.information('Got index of first detector for analyser %s: %d' % (analyser, detector_1_idx))
+
         except IndexError:
-            detector_1_idx = 2
-            logger.warning('Could not determine index of first detetcor, using default value.')
+            # If that fails just get the first spectrum which is a detector
+            for spec_idx in range(workspace.getNumberHistograms()):
+                if not workspace.getDetector(spec_idx).isMonitor():
+                    detector_1_idx = spec_idx
+                    logger.information('Got index of first detector in workspace: %d' % (detector_1_idx))
+                    break
 
-        try:
-            monitor_1_idx = self._get_detector_spectrum_index(input_ws, instrument.getComponentByName('monitor1').getID())
+        # Get workspace index of monitor(s)
+        monitor_1_idx = 0
+        monitor_2_idx = None
 
-            monitor_2 = instrument.getComponentByName('monitor2')
-            if monitor_2 is not None:
-                monitor_2_idx = self._get_detector_spectrum_index(input_ws, monitor_2.getID())
-            else:
-                monitor_2_idx = None
+        if instrument.hasParameter('Workflow.Monitor1-SpectrumNumber'):
+            # First try to get monitors based on workflow parameters in IPF
+            monitor_1_idx = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
 
-            if self._verbose:
-                logger.information('Got index of monitors: %d, %s' % (monitor_1_idx, str(monitor_2_idx)))
-        except IndexError:
-            monitor_1_idx = 0
+            if instrument.hasParameter('Workflow.Monitor2-SpectrumNumber'):
+                monitor_2_idx = int(instrument.getNumberParameter('Workflow.Monitor2-SpectrumNumber')[0])
+
+            logger.information('Got index of monitors: %d, %s' % (monitor_1_idx, str(monitor_2_idx)))
+
+        else:
+            # If that fails just use some default values (correct ~60% of the time)
             monitor_2_idx = 1
             logger.warning('Could not determine index of monitors, using default values.')
 
         return monitor_1_idx, monitor_2_idx, detector_1_idx
+
 
     def _get_detector_spectrum_index(self, workspace, detector_id):
         """
@@ -136,6 +131,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         return None
 
+
     def _unwrap_mon(self, input_ws):
         out_ws = '_unwrap_mon_out'
 
@@ -144,20 +140,39 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         _, join = UnwrapMonitor(InputWorkspace=input_ws, OutputWorkspace=out_ws, LRef='37.86')
 
         # Fill bad (dip) in spectrum
-        RemoveBins(InputWorkspace=out_ws, OutputWorkspace=out_ws, Xmin=join - 0.001, Xmax=join + 0.001, Interpolation="Linear")
-        FFTSmooth(InputWorkspace=out_ws, OutputWorkspace=out_ws, WorkspaceIndex=0, IgnoreXBins=True)  # Smooth - FFT
+        RemoveBins(InputWorkspace=out_ws,
+                   OutputWorkspace=out_ws,
+                   Xmin=join-0.001,
+                   Xmax=join+0.001,
+                   Interpolation="Linear")
+        FFTSmooth(InputWorkspace=out_ws,
+                  OutputWorkspace=out_ws,
+                  WorkspaceIndex=0,
+                  IgnoreXBins=True)
 
         DeleteWorkspace(input_ws)
 
         return out_ws
 
+
     def _trans_mon(self, ws_basename, file_type, input_ws):
         monitor_1_idx, monitor_2_idx, detector_1_idx = self._get_spectra_index(input_ws)
 
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1', StartWorkspaceIndex=monitor_1_idx, EndWorkspaceIndex=monitor_1_idx)
+        CropWorkspace(InputWorkspace=input_ws,
+                      OutputWorkspace='__m1',
+                      StartWorkspaceIndex=monitor_1_idx,
+                      EndWorkspaceIndex=monitor_1_idx)
+
         if monitor_2_idx is not None:
-            CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2', StartWorkspaceIndex=monitor_2_idx, EndWorkspaceIndex=monitor_2_idx)
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det', StartWorkspaceIndex=detector_1_idx, EndWorkspaceIndex=detector_1_idx)
+            CropWorkspace(InputWorkspace=input_ws,
+                          OutputWorkspace='__m2',
+                          StartWorkspaceIndex=monitor_2_idx,
+                          EndWorkspaceIndex=monitor_2_idx)
+
+        CropWorkspace(InputWorkspace=input_ws,
+                      OutputWorkspace='__det',
+                      StartWorkspaceIndex=detector_1_idx,
+                      EndWorkspaceIndex=detector_1_idx)
 
         # Check for single or multiple time regimes
         mon_tcb_start = mtd['__m1'].readX(0)[0]
@@ -168,14 +183,19 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         if spec_tcb_start == mon_tcb_start:
             mon_ws = self._unwrap_mon('__m1')  # unwrap the monitor spectrum and convert to wavelength
-            RenameWorkspace(InputWorkspace=mon_ws, OutputWorkspace='__Mon1')
+            RenameWorkspace(InputWorkspace=mon_ws,
+                            OutputWorkspace='__Mon1')
         else:
-            ConvertUnits(InputWorkspace='__m1', OutputWorkspace='__Mon1', Target="Wavelength")
+            ConvertUnits(InputWorkspace='__m1',
+                         OutputWorkspace='__Mon1',
+                         Target="Wavelength")
 
         mon_ws = ws_basename + '_' + file_type
 
         if monitor_2_idx is not None:
-            ConvertUnits(InputWorkspace='__m2', OutputWorkspace='__Mon2', Target="Wavelength")
+            ConvertUnits(InputWorkspace='__m2',
+                         OutputWorkspace='__Mon2',
+                         Target="Wavelength")
             DeleteWorkspace('__m2')
 
             x_in = mtd['__Mon1'].readX(0)
@@ -189,14 +209,23 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
             wmin = max(xmin1, xmin2)
             wmax = min(xmax1, xmax2)
 
-            CropWorkspace(InputWorkspace='__Mon1', OutputWorkspace='__Mon1', XMin=wmin, XMax=wmax)
-            RebinToWorkspace(WorkspaceToRebin='__Mon2', WorkspaceToMatch='__Mon1', OutputWorkspace='__Mon2')
-            Divide(LHSWorkspace='__Mon2', RHSWorkspace='__Mon1', OutputWorkspace=mon_ws)
+            CropWorkspace(InputWorkspace='__Mon1',
+                          OutputWorkspace='__Mon1',
+                          XMin=wmin,
+                          XMax=wmax)
+            RebinToWorkspace(WorkspaceToRebin='__Mon2',
+                             WorkspaceToMatch='__Mon1',
+                             OutputWorkspace='__Mon2')
+            Divide(LHSWorkspace='__Mon2',
+                   RHSWorkspace='__Mon1',
+                   OutputWorkspace=mon_ws)
 
             DeleteWorkspace('__Mon1')
             DeleteWorkspace('__Mon2')
+
         else:
-            RenameWorkspace(InputWorkspace='__Mon1', OutputWorkspace=mon_ws)
+            RenameWorkspace(InputWorkspace='__Mon1',
+                            OutputWorkspace=mon_ws)
 
 
 # Register algorithm with Mantid

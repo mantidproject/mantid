@@ -18,3 +18,5 @@ The LogNormal fit function is defined by
 .. properties::
 
 .. categories::
+
+.. sourcelink::

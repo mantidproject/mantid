@@ -73,6 +73,27 @@ public:
     TS_ASSERT_EQUALS(rel[2].tof(), 50);
   }
 
+  void test_AssignmentOperator() {
+    // Modify EventList such that is does not contain default values.
+    el.setSpectrumNo(42);
+    MantidVec x;
+    x.push_back(0.1);
+    x.push_back(0.2);
+    x.push_back(0.3);
+    el.setX(x);
+    el.setDx(x);
+
+    EventList other;
+    other = el;
+
+    TS_ASSERT_EQUALS(other, el);
+    // operator== does not compare everything, so we do some extra comparisons
+    TS_ASSERT_EQUALS(other.getSpectrumNo(), el.getSpectrumNo());
+    TS_ASSERT_EQUALS(other.getDetectorIDs(), el.getDetectorIDs());
+    TS_ASSERT_EQUALS(other.readX(), el.readX());
+    TS_ASSERT_EQUALS(other.readDx(), el.readDx());
+  }
+
   //==================================================================================
   //--- Plus Operators  ----
   //==================================================================================
@@ -1333,7 +1354,7 @@ public:
       TS_ASSERT_DELTA( this->el.readX()[1], MAX_TOF, 1e-4);
 
       //Do convert
-      this->el.convertTof(2.5, 1);
+      this->el.convertTof(2.5, 1.);
       //Unchanged size
       TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
       //Original tofs were 100, 5100, 10100, etc.)

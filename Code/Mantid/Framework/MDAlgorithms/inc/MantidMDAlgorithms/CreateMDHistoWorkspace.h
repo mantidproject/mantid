@@ -1,13 +1,12 @@
-#ifndef MANTID_MDEVENTS_CREATEMDHISTOWORKSPACE_H_
-#define MANTID_MDEVENTS_CREATEMDHISTOWORKSPACE_H_
+#ifndef MANTID_MDALGORITHMS_CREATEMDHISTOWORKSPACE_H_
+#define MANTID_MDALGORITHMS_CREATEMDHISTOWORKSPACE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/ImportMDHistoWorkspaceBase.h"
+#include "MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** CreateMDHistoWorkspace : TODO: DESCRIPTION
+/** CreateMDHistoWorkspace
 
   @date 2012-06-21
 
@@ -33,7 +32,7 @@ namespace MDAlgorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport CreateMDHistoWorkspace
-    : public MDEvents::ImportMDHistoWorkspaceBase {
+    : public MDAlgorithms::ImportMDHistoWorkspaceBase {
 public:
   CreateMDHistoWorkspace();
   virtual ~CreateMDHistoWorkspace();
@@ -53,7 +52,7 @@ private:
   void exec();
 };
 
-} // namespace MDEvents
+} // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_MDEVENTS_CREATEMDHISTOWORKSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_CREATEMDHISTOWORKSPACE_H_ */

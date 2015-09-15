@@ -2,7 +2,7 @@
 #define H_MDTRANSF_DE_HELPER
 
 namespace Mantid {
-namespace MDEvents {
+namespace DataObjects {
 /** The class is here do define common operations/interfaces involved in dE
   (energy transfer) for the MD transformations,
   * which actually do energy transfer analyzis
@@ -67,7 +67,7 @@ private:
   const std::vector<std::string> EmodesList;
 };
 
-} // endnamespace MDEvents
+} // endnamespace DataObjects
 } // endnamespace Mantid
 
 #endif

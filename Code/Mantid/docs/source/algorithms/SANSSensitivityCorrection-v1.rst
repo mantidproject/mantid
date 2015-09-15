@@ -61,3 +61,5 @@ workflow algorithm to create a sensitivity workspace, which can then be saved an
 for EQSANS reduction as a pre-calculated sensitivity file.
 
 .. categories::
+
+.. sourcelink::

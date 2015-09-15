@@ -54,10 +54,10 @@ Output:
 .. testoutput:: ExCreateTransWSSimple
 
     The first four transWS Y values are:
-    0.0160
-    0.0348
-    0.0908
-    0.1187
+    0.0223
+    0.0602
+    0.1020
+    0.1207
 
 **Example - Create a transmission run from two runs**
 
@@ -89,9 +89,11 @@ Output:
 .. testoutput:: ExCreateTransWSTwo
 
     The first four transWS Y values are:
-    0.0563
-    0.0564
-    0.0569
-    0.0582
+    0.0567
+    0.0575
+    0.0577
+    0.0580
 
 .. categories::
+
+.. sourcelink::

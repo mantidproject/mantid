@@ -1,0 +1,1 @@
+This is basically a fork of the performance test support code in the main Mantid repository (https://github.com/mantidproject/mantid/tree/master/Test/PerformanceTests) to enable performance monitoring of the system tests in a similar fashion.

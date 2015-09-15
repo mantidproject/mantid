@@ -2,14 +2,15 @@
 #define MANTIDDOCK_H
 
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+
+#include "Mantid/MantidWSIndexDialog.h"
 
 #include <QActionGroup>
 #include <QAtomicInt>
@@ -165,7 +166,7 @@ public:
   void mouseDoubleClickEvent(QMouseEvent *e);
 
   QStringList getSelectedWorkspaceNames() const;
-  QMultiMap<QString,std::set<int> > chooseSpectrumFromSelected() const;
+  MantidWSIndexDialog::UserInput chooseSpectrumFromSelected(bool showWaterfallOpt = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;

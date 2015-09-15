@@ -1,4 +1,6 @@
 #include "MantidAlgorithms/SofQCommon.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid {
 namespace Algorithms {

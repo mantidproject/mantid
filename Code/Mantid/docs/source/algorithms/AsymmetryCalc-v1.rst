@@ -10,7 +10,11 @@ Description
 -----------
 
 This algorithm is used to calculate the asymmetry for a Muon workspace.
-The asymmetry is given by:
+It first groups the input workspace according to the spectra numbers
+provided as *ForwardSpectra* and *BackwardSpectra*. If these properties
+are not supplied, the algorithm assumes that the first spectrum in the
+workspace is the forward group and the second one is the backward
+group. It then calculates the asymmetry as:
 
 .. math:: Asymmetry = \frac{F-\alpha B}{F+\alpha B}
 
@@ -25,11 +29,6 @@ the errors in :math:`F-\alpha B` and :math:`F+\alpha B`.
 
 The output workspace contains one set of data for the time of flight:
 the asymmetry and the asymmetry errors.
-
-.. note::
-   This algorithm does not perform any grouping. The grouping must be
-   done using :ref:`algm-MuonGroupDetectors` or *AutoGroup* option
-   of :ref:`algm-LoadMuonNexus`.
 
 .. [1] See :ref:`algm-AlphaCalc`
 
@@ -58,3 +57,5 @@ Output:
    Errors: [ 0.5396295   0.69971423  0.28688766]
 
 .. categories::
+
+.. sourcelink::

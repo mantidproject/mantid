@@ -24,7 +24,7 @@ namespace MantidQt
 {
 namespace CustomDialogs
 {
-  DECLARE_DIALOG(CreateSampleShapeDialog);
+  DECLARE_DIALOG(CreateSampleShapeDialog)
 }
 }
 

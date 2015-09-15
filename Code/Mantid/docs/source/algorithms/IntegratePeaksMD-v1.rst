@@ -16,3 +16,5 @@ The V1 of the algorithm is deprecated and left for compartibility with the scrip
 *CoordinatesToUse* set. Use :ref:`algm-IntegratePeaksMD-v2` for any new scripts.
 
 .. categories::
+
+.. sourcelink::

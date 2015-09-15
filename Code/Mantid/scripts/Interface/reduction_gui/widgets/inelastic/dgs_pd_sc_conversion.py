@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget

@@ -1,9 +1,9 @@
+#pylint: disable=invalid-name
 """
     Simple Reducer example
 """
 from reduction import Reducer
 from reduction.instruments.example.ExampleRedStep import ExampleRedStep
-from reduction.instruments.example.ExampleRedStep import ExampleLoader
 # Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.
 # It also does minimal type checking to ensure that the object that is passed is valid
 from reduction import validate_step, validate_loader

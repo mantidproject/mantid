@@ -8,7 +8,7 @@
 namespace Mantid {
 namespace Geometry {
 /// Type to describe pointing along options
-enum PointingAlong { X, Y, Z };
+enum PointingAlong { X=0, Y=1, Z=2 };
 /// Type to distingusih between l and r handedness
 enum Handedness { Left, Right };
 

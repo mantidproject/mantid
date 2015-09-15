@@ -15,10 +15,6 @@
 	<value val="104" />
 </parameter>
 
-<parameter name="efixed-val">
-	<value val="0.2067" />
-</parameter>
-
 <parameter name="peak-start">
 	<value val="189000" />
 </parameter>
@@ -47,5 +43,5 @@
 <parameter name="Efixed"> <value val="0.2067" /> </parameter>
 <parameter name="resolution"> <value val="0.0012" /> </parameter>
 </component-link>
-  
+
 </parameter-file>

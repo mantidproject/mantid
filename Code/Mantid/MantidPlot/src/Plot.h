@@ -90,21 +90,21 @@ public:
 
     void axisLabelFormat(int axis, char &f, int &prec) const;
 
-	int axisLabelFormat(int axis);
-	int axisLabelPrecision(int axis);
+    int axisLabelFormat(int axis);
+    int axisLabelPrecision(int axis);
 
-	QColor frameColor();
-	const QColor & paletteBackgroundColor() const;
+    QColor frameColor();
+    const QColor & paletteBackgroundColor() const;
 
     using QwtPlot::print; // Avoid Intel compiler warning
-    void print(QPainter *, const QRect &rect, const QwtPlotPrintFilter & = QwtPlotPrintFilter());
-	void updateLayout();
+    void print(QPainter *, const QRect &rect, const QwtPlotPrintFilter & = QwtPlotPrintFilter()) const;
+    void updateLayout();
 
     void updateCurveLabels();
-  // pass through method that is public on the base class in later qwt versions
-  void updateAxes() { QwtPlot::updateAxes(); }
+    // pass through method that is public on the base class in later qwt versions
+    void updateAxes() { QwtPlot::updateAxes(); }
 
-  void reverseCurveOrder(); // Created in connection with waterfall plots. Called from Graph method of same name.
+    void reverseCurveOrder(); // Created in connection with waterfall plots. Called from Graph method of same name.
 
 signals:
   void dragMousePress(QPoint);

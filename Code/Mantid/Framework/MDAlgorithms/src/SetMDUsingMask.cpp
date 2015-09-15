@@ -2,12 +2,12 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include <float.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -27,10 +27,10 @@ SetMDUsingMask::~SetMDUsingMask() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SetMDUsingMask::name() const { return "SetMDUsingMask"; };
+const std::string SetMDUsingMask::name() const { return "SetMDUsingMask"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SetMDUsingMask::version() const { return 1; };
+int SetMDUsingMask::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SetMDUsingMask::category() const {

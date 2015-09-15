@@ -1,23 +1,28 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace MantidQt
 {
   namespace SliceViewer
   {
 
-    PeakOverlayMultiSphereFactory::PeakOverlayMultiSphereFactory(IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber) :
-        PeakOverlayViewFactoryBase(plot, parent, colourNumber),
+    PeakOverlayMultiSphereFactory::PeakOverlayMultiSphereFactory(IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber) :
+        PeakOverlayViewFactoryBase(plot, parent, plotXIndex, plotYIndex, colourNumber),
         m_peakRadius(0),
         m_backgroundInnerRadius(0),
         m_backgroundOuterRadius(0),
         m_peaksWS(peaksWS),
         m_FOM(0)
     {
-      if (m_peaksWS->hasIntegratedPeaks())
+      if (m_peaksWS->hasIntegratedPeaks()) // TODO depends on the shape.
       {
     	  try
     	  {
@@ -46,19 +51,38 @@ namespace MantidQt
       }
     }
 
-    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(Mantid::API::PeakTransform_const_sptr transform) const
+    GCC_DIAG_OFF(strict-aliasing)
+    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(PeaksPresenter* const presenter, Mantid::Geometry::PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
       VecPhysicalSphericalPeak physicalPeaks(m_peaksWS->rowCount());
       for(size_t i = 0; i < physicalPeaks.size(); ++i)
       {
-        const IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
+        const Mantid::Geometry::IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
+        const Mantid::Geometry::PeakShape& peakShape = peak.getPeakShape();
         auto position = transform->transformPeak(peak);
-        physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius[i], m_backgroundInnerRadius[i], m_backgroundOuterRadius[i]);
-      }
+        if(const PeakShapeSpherical* sphericalShape = dynamic_cast<const PeakShapeSpherical*>(&peakShape)){
+            auto radius = sphericalShape->radius();
+            auto optOuterRadius = sphericalShape->backgroundOuterRadius();
+            auto optInnerRadius = sphericalShape->backgroundInnerRadius();
+
+
+            auto outerRadius = optOuterRadius.is_initialized() ? optOuterRadius.get() : radius;
+            auto innerRadius = optInnerRadius.is_initialized() ? optInnerRadius.get() : radius;
+
+
+            physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, radius, innerRadius, outerRadius);
+
+        } else {
+            // This method of doing things is effectivlely deprecated now since we have the PeakShape. I will eventually strip this out.
+            physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius[i], m_backgroundInnerRadius[i], m_backgroundOuterRadius[i]);
+
+        }
+
+       }
 
       // Make the overlay widget.
-      return boost::make_shared<PeakOverlayMultiSphere>(m_plot, m_parent, physicalPeaks, this->m_peakColour, this->m_backColour);
+      return boost::make_shared<PeakOverlayMultiSphere>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour, this->m_backColour);
     }
 
     PeakOverlayMultiSphereFactory::~PeakOverlayMultiSphereFactory()

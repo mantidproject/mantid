@@ -6,10 +6,26 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/format.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include "MantidKernel/Logger.h"
 namespace {
 Mantid::Kernel::Logger g_log("NumericAxis");
+
+class EqualWithinTolerance {
+public:
+  EqualWithinTolerance(double tolerance) : m_tolerance(tolerance) {};
+  bool operator()(double a, double b) {
+    if (boost::math::isnan(a) && boost::math::isnan(b))
+      return true;
+    if (boost::math::isinf(a) && boost::math::isinf(b))
+      return true;
+    return std::abs(a - b) <= m_tolerance;
+  }
+
+private:
+  double m_tolerance;
+};
 }
 
 namespace Mantid {
@@ -140,6 +156,16 @@ size_t NumericAxis::indexOfValue(const double value) const {
  *  @return true if self and second axis are equal
  */
 bool NumericAxis::operator==(const Axis &axis2) const {
+  return equalWithinTolerance(axis2, 1e-15);
+}
+
+/** Check if two numeric axis are equivalent to a given tolerance
+ *  @param axis2 :: Reference to the axis to compare to
+ *  @param tolerance :: Tolerance to compare to
+ *  @return true if self and second axis are equal
+ */
+bool NumericAxis::equalWithinTolerance(const Axis &axis2,
+                                       const double tolerance) const {
   if (length() != axis2.length()) {
     return false;
   }
@@ -147,7 +173,10 @@ bool NumericAxis::operator==(const Axis &axis2) const {
   if (!spec2) {
     return false;
   }
-  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin());
+  // Check each value is within tolerance
+  EqualWithinTolerance comparison(tolerance);
+  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin(),
+                    comparison);
 }
 
 /** Returns a text label which shows the value at index and identifies the

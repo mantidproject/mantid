@@ -1,4 +1,4 @@
-import mantid.simpleapi as api
+#pylint: disable=invalid-name
 from mantid.api import *
 from mantid.kernel import *
 import os
@@ -29,6 +29,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         Logger("TransmissionUtils").error(str(sys.exc_value))
     return alg
 
+#pylint: disable=too-many-locals
 def load_monitors(self, property_manager):
     """
         Load files necessary to compute transmission.
@@ -46,20 +47,20 @@ def load_monitors(self, property_manager):
         beam_center_y = beam_center_y_input
 
     # Get instrument to use with FileFinder
-    instrument = ''
-    if property_manager.existsProperty("InstrumentName"):
-        instrument = property_manager.getProperty("InstrumentName").value
+    #instrument = ''
+    #if property_manager.existsProperty("InstrumentName"):
+    #    instrument = property_manager.getProperty("InstrumentName").value
 
     # Get the data loader
     def _load_data(filename, output_ws):
         if not property_manager.existsProperty("LoadAlgorithm"):
             Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
-            raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+            raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
         p=property_manager.getProperty("LoadAlgorithm")
 
         alg_props = {"Filename": filename,
                      "OutputWorkspace": output_ws,
-                     "ReductionProperties": property_manager_name,
+                     "ReductionProperties": property_manager_name,\
                      }
         if beam_center_x is not None and beam_center_y is not None:
             alg_props["BeamCenterX"] = beam_center_x
@@ -111,7 +112,7 @@ def load_monitors(self, property_manager):
     # since the beam center may be at a different location
     alg = _execute("FindDetectorsInShape",
                    {"Workspace": sample_ws,
-                    "ShapeXML": cylXML
+                    "ShapeXML": cylXML\
                     })
     det_list = alg.getProperty("DetectorList").value
     first_det = det_list[0]
@@ -131,7 +132,7 @@ def load_monitors(self, property_manager):
             alg = _execute(p.valueAsStr,
                            {"InputWorkspace": workspace,
                             "OutputWorkspace": workspace,
-                            "ReductionProperties": property_manager_name
+                            "ReductionProperties": property_manager_name\
                             },
                            is_name=False)
             msg = ''
@@ -157,19 +158,19 @@ def load_monitors(self, property_manager):
         alg = _execute("ExtractSingleSpectrum",
                        {"InputWorkspace": empty_ws,
                         "OutputWorkspace": '__reference_binning',
-                        "WorkspaceIndex": det_list[0]
+                        "WorkspaceIndex": det_list[0]\
                         })
         reference_ws = alg.getProperty("OutputWorkspace").value
         alg = _execute("RebinToWorkspace",
                        {"WorkspaceToRebin": empty_ws,
                         "WorkspaceToMatch": reference_ws,
-                        "OutputWorkspace": empty_ws_name
+                        "OutputWorkspace": empty_ws_name\
                         })
         empty_ws = alg.getProperty("OutputWorkspace").value
         alg = _execute("RebinToWorkspace",
                        {"WorkspaceToRebin": sample_ws,
                         "WorkspaceToMatch": reference_ws,
-                        "OutputWorkspace": sample_ws_name
+                        "OutputWorkspace": sample_ws_name\
                         })
         sample_ws = alg.getProperty("OutputWorkspace").value
 
@@ -177,7 +178,7 @@ def load_monitors(self, property_manager):
                    {"InputWorkspace": empty_ws,
                     "OutputWorkspace": empty_mon_ws_name,
                     "DetectorList": det_list,
-                    "KeepUngroupedSpectra": True
+                    "KeepUngroupedSpectra": True\
                     })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
@@ -185,31 +186,32 @@ def load_monitors(self, property_manager):
                    {"InputWorkspace": sample_ws,
                     "OutputWorkspace": sample_mon_ws_name,
                     "DetectorList": det_list,
-                    "KeepUngroupedSpectra": True
+                    "KeepUngroupedSpectra": True\
                     })
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("ConvertToMatrixWorkspace",
                    {"InputWorkspace": empty_mon_ws,
-                    "OutputWorkspace": empty_mon_ws_name
+                    "OutputWorkspace": empty_mon_ws_name\
                     })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("ConvertToMatrixWorkspace",
                    {"InputWorkspace": sample_mon_ws,
-                    "OutputWorkspace": sample_mon_ws_name
+                    "OutputWorkspace": sample_mon_ws_name\
                     })
     sample_mon_ws = alg.getProperty("OutputWorkspace").value
 
     alg = _execute("RebinToWorkspace",
                    {"WorkspaceToRebin": empty_mon_ws,
                     "WorkspaceToMatch": sample_mon_ws,
-                    "OutputWorkspace": empty_mon_ws_name
+                    "OutputWorkspace": empty_mon_ws_name\
                     })
     empty_mon_ws = alg.getProperty("OutputWorkspace").value
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
 
+#pylint: disable=too-many-arguments
 def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                            trans_output_workspace, monitor_det_ID=None):
     """
@@ -267,9 +269,9 @@ def apply_transmission(self, workspace, trans_workspace):
                    {"WorkspaceToRebin": trans_workspace,
                     "WorkspaceToMatch": workspace,
                     "OutputWorkspace": '__trans_rebin',
-                    "PreserveEvents": False
+                    "PreserveEvents": False\
                     })
-    rebinned_ws = alg.getProperty("OutputWorkspace").value;
+    rebinned_ws = alg.getProperty("OutputWorkspace").value
 
     # Apply angle-dependent transmission correction using the zero-angle transmission
     theta_dependent = self.getProperty("ThetaDependent").value
@@ -278,7 +280,7 @@ def apply_transmission(self, workspace, trans_workspace):
                    {"InputWorkspace": workspace,
                     "TransmissionWorkspace": rebinned_ws,
                     "OutputWorkspace": '__corrected_output',
-                    "ThetaDependent": theta_dependent
+                    "ThetaDependent": theta_dependent\
                     })
     output_ws = alg.getProperty("OutputWorkspace").value
     return output_ws
@@ -294,9 +296,9 @@ def subtract_dark_current(self, workspace, property_manager):
     dark_current_data = self.getPropertyValue("DarkCurrentFilename")
     property_manager_name = self.getProperty("ReductionProperties").value
     # Get instrument to use with FileFinder
-    instrument = ''
-    if property_manager.existsProperty("InstrumentName"):
-        instrument = property_manager.getProperty("InstrumentName").value
+    #instrument = ''
+    #if property_manager.existsProperty("InstrumentName"):
+    #    instrument = property_manager.getProperty("InstrumentName").value
 
     dark_current_property = "DefaultDarkCurrentAlgorithm"
     def _dark(ws, dark_current_property, dark_current_file=None):
@@ -305,7 +307,7 @@ def subtract_dark_current(self, workspace, property_manager):
 
             alg_props = {"InputWorkspace": ws,
                          "PersistentCorrection": False,
-                         "ReductionProperties": property_manager_name
+                         "ReductionProperties": property_manager_name\
                          }
             if dark_current_file is not None:
                 alg_props["Filename"] = dark_current_file

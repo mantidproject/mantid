@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -13,6 +14,7 @@ class ConjoinFiles(PythonAlgorithm):
     def summary(self):
         return "Conjoin two file-based workspaces."
 
+    #pylint: disable=too-many-arguments
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None
         for ext in exts:
@@ -25,15 +27,14 @@ class ConjoinFiles(PythonAlgorithm):
                 self.log().information("Trying to load '%s'" % filename)
                 loader(Filename=filename, OutputWorkspace=wksp)
                 return
-            except Exception, e:
+            except (RuntimeError, IOError, ValueError) as e:
                 logger.information(str(e))
-                pass
         raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))
 
     def PyInit(self):
         greaterThanZero = IntArrayBoundedValidator()
         greaterThanZero.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumbers",values=[0], validator=greaterThanZero), doc="Run numbers")
+        self.declareProperty(IntArrayProperty("RunNumbers",values=[0],validator=greaterThanZero), doc="Run numbers")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
         self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))
 
@@ -64,3 +65,4 @@ class ConjoinFiles(PythonAlgorithm):
         self.setProperty("OutputWorkspace", mtd[wksp])
 
 AlgorithmFactory.subscribe(ConjoinFiles)
+

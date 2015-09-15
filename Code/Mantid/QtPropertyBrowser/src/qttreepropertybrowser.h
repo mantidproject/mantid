@@ -118,7 +118,7 @@ public:
         ResizeToContents
     };
 
-    QtTreePropertyBrowser(QWidget *parent = 0, const QStringList &options = QStringList());
+    QtTreePropertyBrowser(QWidget *parent = 0, const QStringList &options = QStringList(), bool darkTopLevel = true);
     ~QtTreePropertyBrowser();
 
     int indentation() const;
@@ -153,11 +153,13 @@ public:
     bool propertiesWithoutValueMarked() const;
 
     void editItem(QtBrowserItem *item);
+    void setColumnSizes(int s0, int s1, int s2 = -1);
 
 Q_SIGNALS:
 
     void collapsed(QtBrowserItem *item);
     void expanded(QtBrowserItem *item);
+    void optionChanged(QtProperty*, const QString&, bool);
 
 protected:
     virtual void itemInserted(QtBrowserItem *item, QtBrowserItem *afterItem);

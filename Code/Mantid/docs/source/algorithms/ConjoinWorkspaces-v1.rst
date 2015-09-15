@@ -78,3 +78,5 @@ Output:
     Number of spectra after ConjoinWorkspaces 5
 
 .. categories::
+
+.. sourcelink::

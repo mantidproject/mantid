@@ -1,10 +1,11 @@
+#pylint: disable=invalid-name
 """
     List of user commands.
 """
 
-from reducer import Reducer
+from reduction_workflow.reducer import Reducer
 
-class ReductionSingleton:
+class ReductionSingleton(object):
     """ Singleton reduction class """
 
     ## storage for the instance reference

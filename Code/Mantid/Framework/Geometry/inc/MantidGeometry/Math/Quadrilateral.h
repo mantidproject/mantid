@@ -5,7 +5,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Math/ConvexPolygon.h"
-#include "MantidGeometry/Math/Vertex2D.h"
+#include "MantidKernel/V2D.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -14,9 +14,6 @@ namespace Geometry {
 
     A ConvexPolygon with only 4 vertices. Better performance as no dynamic
    allocation
-
-    @author Martyn Gigg
-    @date 2011-07-22
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
    National Laboratory & European Spallation Source
@@ -45,35 +42,47 @@ public:
   Quadrilateral(const Kernel::V2D &lowerLeft, const Kernel::V2D &lowerRight,
                 const Kernel::V2D &upperRight, const Kernel::V2D &upperLeft);
   /// Special constructor for a rectangle
-  Quadrilateral(const double lowerX, const double upperX, const double lowerY,
-                const double upperY);
+  Quadrilateral(const double lowerX, const double upperX,
+                const double lowerY, const double upperY);
   /// Copy constructor
   Quadrilateral(const Quadrilateral &other);
   /// Copy-assignment operator
   Quadrilateral &operator=(const Quadrilateral &rhs);
 
-  /// Destructor
-  ~Quadrilateral();
   /// Index access.
   virtual const Kernel::V2D &operator[](const size_t index) const;
-  /// Compute the area of the quadrilateral
+  /// Bounds-checked index access
+  virtual const Kernel::V2D &at(const size_t index) const;
+  /// Return the number of vertices
+  virtual size_t npoints() const { return 4; }
+  /// Is a point inside this polygon
+  virtual bool contains(const Kernel::V2D &point) const;
+  /// Is a the given polygon completely encosed by this one
+  virtual bool contains(const ConvexPolygon &poly) const;
+  /// Compute the area of the polygon using triangulation
   virtual double area() const;
   /// Compute the 'determinant' of the points
   virtual double determinant() const;
+  /// Return the lowest X value in the polygon
+  virtual double minX() const;
+  /// Return the max X value in the polygon
+  virtual double maxX() const;
+  /// Return the lowest Y value in the polygon
+  virtual double minY() const;
+  /// Return the max Y value in the polygon
+  virtual double maxY() const;
+  /// Return a new Polygon based on the current Quadrilateral
+  virtual ConvexPolygon toPoly() const;
 
 private:
-  /// Default constructor
-  Quadrilateral();
-  /// Initalize the object
-  void initialize();
   /// Lower left
-  Vertex2D m_lowerLeft;
+  Kernel::V2D m_lowerLeft;
   /// Lower right
-  Vertex2D m_lowerRight;
+  Kernel::V2D m_lowerRight;
   /// Upper right
-  Vertex2D m_upperRight;
+  Kernel::V2D m_upperRight;
   /// Upper left
-  Vertex2D m_upperLeft;
+  Kernel::V2D m_upperLeft;
 };
 
 } // namespace Geometry

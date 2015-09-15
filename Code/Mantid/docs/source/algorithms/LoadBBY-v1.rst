@@ -9,9 +9,11 @@
 Description
 -----------
 
-Load data from the Bilby beamline at ANSTO.
+Load data from the Bilby beamline at ANSTO. The workspace generated is a TOF EventWorkspace.
 
 .. categories::
+
+.. sourcelink::
 
 Usage
 -----

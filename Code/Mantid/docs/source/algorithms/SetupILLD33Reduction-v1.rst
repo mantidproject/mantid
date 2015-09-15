@@ -89,3 +89,5 @@ Output:
 	This workspace has 2 dimensions and has 1 histograms.
 
 .. categories::
+
+.. sourcelink::

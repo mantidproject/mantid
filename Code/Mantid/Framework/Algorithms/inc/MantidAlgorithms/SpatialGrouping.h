@@ -85,7 +85,7 @@ private:
                       const size_t &noNeighbours);
   /// create expanded bounding box for our purposes
   void createBox(boost::shared_ptr<const Geometry::IDetector> det,
-                 Geometry::BoundingBox &bndbox);
+                 Geometry::BoundingBox &bndbox, double searchDist);
   /// grow dimensions of our bounding box to the factor
   void growBox(double &min, double &max, const double &factor);
 
@@ -95,8 +95,6 @@ private:
   std::set<specid_t> m_included;
   /// first and last values for each group
   std::vector<std::vector<int>> m_groups;
-  /// number of pixels to search through for finding group
-  double m_pix;
 
   /// Source workspace
   Mantid::API::MatrixWorkspace_const_sptr inputWorkspace;

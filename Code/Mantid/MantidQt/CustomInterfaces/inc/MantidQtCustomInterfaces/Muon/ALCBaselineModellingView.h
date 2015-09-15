@@ -13,6 +13,14 @@
 
 namespace MantidQt
 {
+namespace MantidWidgets
+{
+  class ErrorCurve;
+}
+}
+
+namespace MantidQt
+{
 namespace CustomInterfaces
 {
 
@@ -47,6 +55,7 @@ namespace CustomInterfaces
 
   public:
     ALCBaselineModellingView(QWidget* widget);
+    ~ALCBaselineModellingView();
 
   // -- IALCBaselineModellingView interface --------------------------------------------------------
   public:
@@ -57,16 +66,18 @@ namespace CustomInterfaces
 
   public slots:
     void initialize();
-    void setDataCurve(const QwtData& data);
-    void setCorrectedCurve(const QwtData& data);
+    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
+    void setCorrectedCurve(const QwtData &data,
+                           const std::vector<double> &errors);
     void setBaselineCurve(const QwtData& data);
-    void setFunction(const QString& func);
+    void setFunction(Mantid::API::IFunction_const_sptr func);
     void setNoOfSectionRows(int rows);
     void setSectionRow(int row, SectionRow values);
     void addSectionSelector(int index, SectionSelector values);
     void deleteSectionSelector(int index);
     void updateSectionSelector(int index, SectionSelector values);
     void displayError(const QString& message);
+    void help();
   // -- End of IALCBaselineModellingView interface -------------------------------------------------
 
   private slots:
@@ -86,6 +97,10 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
+
+    /// Error curves
+    MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve,
+        *m_correctedErrorCurve;
 
     /// Range selectors
     std::map<int, RangeSelector*> m_rangeSelectors;

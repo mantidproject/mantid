@@ -3,7 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/Utils.h"
 #include <iostream>
 #include <fstream>
@@ -17,7 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace ::NeXus;
 
 // A reference to the logger is provided by the base class, it is called g_log.
@@ -127,6 +127,9 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
     spectraLength = static_cast<int>(inf.dims[1]);
   }
 
+  g_log.debug() << "Reading " << nSpectra << " spectra of length "
+                << spectraLength << "." << std::endl;
+
   // need to locate x-axis data too.....
   std::map<std::string, std::string>::const_iterator it;
   std::vector<double> xData;
@@ -158,18 +161,22 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                           spectraLength, spectraLength));
-  for (int i = 0; i < nSpectra; i++) {
-    Mantid::MantidVec &Y = ws->dataY(i);
+  for (int wsIndex = 0; wsIndex < nSpectra; wsIndex++) {
+    Mantid::MantidVec &Y = ws->dataY(wsIndex);
     for (int j = 0; j < spectraLength; j++) {
-      Y[j] = data[spectraLength * i + j];
+      Y[j] = data[spectraLength * wsIndex + j];
     }
     // Create and fill another vector for the errors, containing sqrt(count)
-    Mantid::MantidVec &E = ws->dataE(i);
+    Mantid::MantidVec &E = ws->dataE(wsIndex);
     std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    ws->setX(i, xData);
+    ws->setX(wsIndex, xData);
     // Xtof		ws->getAxis(1)->spectraNo(i)= i;
-    ws->getSpectrum(i)->setSpectrumNo(static_cast<specid_t>(yData[i]));
+    ws->getSpectrum(wsIndex)
+        ->setSpectrumNo(static_cast<specid_t>(yData[wsIndex]));
+    ws->getSpectrum(wsIndex)
+        ->setDetectorID(static_cast<detid_t>(yData[wsIndex]));
   }
+
   ws->setYUnit("Counts");
 
   // assign an x-axis-name
@@ -179,6 +186,10 @@ void LoadFlexiNexus::load2DWorkspace(NeXus::File *fin) {
   } else {
     const std::string xname(it->second);
     ws->getAxis(0)->title() = xname;
+    if (xname.compare("TOF") == 0) {
+      g_log.debug() << "Setting X-unit to be TOF" << std::endl;
+      ws->getAxis(0)->setUnit("TOF");
+    }
   }
 
   addMetaData(fin, ws, (ExperimentInfo_sptr)ws);

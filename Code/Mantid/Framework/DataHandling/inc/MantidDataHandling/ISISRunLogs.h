@@ -52,9 +52,11 @@ public:
   void addStatusLog(API::Run &exptRun);
   /// Adds period related logs
   void addPeriodLogs(const int period, API::Run &exptRun);
+  /// Add 'period i' log.
+  void addPeriodLog(const int i, API::Run &exptRun);
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs);
+  DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs)
 
   /// A LogParser object
   boost::scoped_ptr<Kernel::LogParser> m_logParser;

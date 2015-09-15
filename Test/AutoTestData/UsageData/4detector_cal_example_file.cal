@@ -1,6 +1,0 @@
-# Ariel detector file, written Sat Nov 24 16:52:56 2007
-# Format: number  UDET offset  select  group
-    0          4  0.0000000  1    1
-    1          5  0.0000000  1    1
-    2          6  0.0000000  1    2
-    3          7  0.0000000  1    2

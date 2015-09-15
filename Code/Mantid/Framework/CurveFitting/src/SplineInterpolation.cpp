@@ -1,4 +1,5 @@
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/SplineInterpolation.h"
@@ -7,7 +8,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SplineInterpolation);
+DECLARE_ALGORITHM(SplineInterpolation)
 
 using namespace API;
 using namespace Kernel;
@@ -90,7 +91,7 @@ void SplineInterpolation::exec() {
   MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
   MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
-  MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, histNo);
+  MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, iws);
 
   Progress pgress(this, 0.0, 1.0, histNo);
 
@@ -107,12 +108,17 @@ void SplineInterpolation::exec() {
 
     // check if we want derivatives
     if (order > 0) {
+      derivs[i] = WorkspaceFactory::Instance().create(mws, order);
+      NumericAxis *vAxis = new API::NumericAxis(order);
+
       // calculate the derivatives for each order chosen
-      derivs[i] = setupOutputWorkspace(mws, order);
       for (int j = 0; j < order; ++j) {
+        vAxis->setValue(j, j + 1);
         derivs[i]->setX(j, mws->readX(0));
         calculateDerivatives(mwspt, derivs[i], j + 1);
       }
+
+      derivs[i]->replaceAxis(1, vAxis);
     }
 
     pgress.report();
@@ -136,23 +142,20 @@ void SplineInterpolation::exec() {
  *it with the desired number of spectra.
  * Also labels the axis of each spectra with Yi, where i is the index
  *
- * @param inws :: The input workspace
- * @param size :: The number of spectra the workspace should be created with
+ * @param mws :: The input workspace to match
+ * @param iws :: The input workspace to interpolate
  * @return The pointer to the newly created workspace
  */
 API::MatrixWorkspace_sptr
-SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr inws,
-                                          int size) const {
+SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
+                                          API::MatrixWorkspace_sptr iws) const {
+  size_t numSpec = iws->getNumberHistograms();
   MatrixWorkspace_sptr outputWorkspace =
-      WorkspaceFactory::Instance().create(inws, size);
+      WorkspaceFactory::Instance().create(mws, numSpec);
 
-  // create labels for output workspace
-  API::TextAxis *tAxis = new API::TextAxis(size);
-  for (int i = 0; i < size; ++i) {
-    std::string index = boost::lexical_cast<std::string>(i);
-    tAxis->setLabel(i, "Y" + index);
-  }
-  outputWorkspace->replaceAxis(1, tAxis);
+  // Use the vertical axis form the workspace to interpolate on the output WS
+  Axis *vAxis = iws->getAxis(1)->clone(mws.get());
+  outputWorkspace->replaceAxis(1, vAxis);
 
   return outputWorkspace;
 }

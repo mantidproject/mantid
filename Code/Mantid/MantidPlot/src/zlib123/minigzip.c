@@ -50,6 +50,15 @@
 #  include <unix.h> /* for fileno */
 #endif
 
+/* New versions of zlib use _Z_OF rather than OF */
+#ifndef OF
+#  ifdef _Z_OF
+#    define OF _Z_OF
+#  else
+#    define OF(args) args
+#  endif
+#endif
+
 #ifndef WIN32 /* unlink already in stdio.h for WIN32 */
   extern int unlink OF((const char *));
 #else
@@ -243,7 +252,7 @@ void file_uncompress(file)
     {
         outfile = file;
         infile = buf;
-        // Add the .gz suffix to the filename in buf/infile
+        /* Add the .gz suffix to the filename in buf/infile */
         strcat(buf, GZ_SUFFIX);
     }
     in = gzopen(infile, "rb");

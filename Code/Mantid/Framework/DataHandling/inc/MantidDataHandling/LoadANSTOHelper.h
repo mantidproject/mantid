@@ -52,19 +52,31 @@ private:
   // fields
   std::vector<size_t> &m_eventCounts;
   const std::vector<bool> &m_mask;
+  const std::vector<int> &m_offsets;
+  const size_t m_stride;
+  const size_t m_pixelsCutOffL;
+  const size_t m_tubeBinning;
+  const size_t m_finalBinsY;
+  // tof boundaries
   double m_tofMin;
   double m_tofMax;
+  // correction
+  const double m_period;
+  const double m_phase;
 
 public:
   // construction
-  EventCounter(std::vector<size_t> &eventCounts, const std::vector<bool> &mask);
+  EventCounter(std::vector<size_t> &eventCounts, const std::vector<bool> &mask,
+               const std::vector<int> &offsets, size_t stride,
+               size_t pixelsCutOffL, size_t tubeBinning, size_t finalBinsY,
+               double periode, double phase);
 
   // properties
   double tofMin() const;
   double tofMax() const;
 
   // methods
-  void addEvent(size_t s, double tof);
+  void addEvent(size_t x, size_t y, double tof);
 };
 
 class EventAssigner {
@@ -72,14 +84,24 @@ private:
   // fields
   std::vector<EventVector_pt> &m_eventVectors;
   const std::vector<bool> &m_mask;
+  const std::vector<int> &m_offsets;
+  const size_t m_stride;
+  const size_t m_pixelsCutOffL;
+  const size_t m_tubeBinning;
+  const size_t m_finalBinsY;
+  // correction
+  const double m_period;
+  const double m_phase;
 
 public:
   // construction
-  EventAssigner(std::vector<EventVector_pt> &eventVectors,
-                const std::vector<bool> &mask);
+  EventAssigner(std::vector<EventVector_pt> &eventVectors, const std::vector<bool> &mask,
+                const std::vector<int> &offsets, size_t stride,
+                size_t pixelsCutOffL, size_t tubeBinning, size_t finalBinsY,
+                double periode, double phase);
 
   // methods
-  void addEvent(size_t s, double tof);
+  void addEvent(size_t x, size_t y, double tof);
 };
 
 class FastReadOnlyFile {
@@ -184,6 +206,7 @@ public:
   size_t read(void *dst, size_t size);
   int read_byte();
 };
+
 }
 }
 }

@@ -65,6 +65,9 @@ protected:
                           const boost::shared_ptr<Mantid::API::Workspace> ws);
   void resizeEvent(QResizeEvent *event);
 
+  void renameHandle(const std::string& oldName,
+          const std::string& newName);
+
   /// The SliceViewer
   MantidQt::SliceViewer::SliceViewer *m_slicer;
 

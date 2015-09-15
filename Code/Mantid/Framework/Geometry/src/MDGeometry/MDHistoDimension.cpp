@@ -1,14 +1,15 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
+
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
 
 namespace Mantid {
 namespace Geometry {
@@ -37,6 +38,12 @@ std::string MDHistoDimension::toXMLString() const {
   AutoPtr<Text> unitsText = pDoc->createTextNode(this->getUnits());
   unitsElement->appendChild(unitsText);
   pDimensionElement->appendChild(unitsElement);
+
+  // Set the frame.
+  AutoPtr<Element> frameElement = pDoc->createElement("Frame");
+  AutoPtr<Text> frameText = pDoc->createTextNode(this->getMDFrame().name());
+  frameElement->appendChild(frameText);
+  pDimensionElement->appendChild(frameElement);
 
   // Set the upper bounds
   AutoPtr<Element> upperBoundsElement = pDoc->createElement("UpperBounds");

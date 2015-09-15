@@ -41,8 +41,11 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-	ExpDecayDialog::ExpDecayDialog(int type, QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+ExpDecayDialog::ExpDecayDialog(int type, QWidget* parent, Qt::WFlags fl )
+  : QDialog( parent, fl ), fitter(NULL), graph(NULL),
+    buttonFit(NULL), buttonCancel(NULL), boxName(NULL), boxAmplitude(NULL),
+    boxFirst(NULL), boxSecond(NULL), boxThird(NULL), boxStart(NULL), boxYOffset(NULL),
+    thirdLabel(NULL), dampingLabel(NULL), boxColor(NULL)
 {
     setName( "ExpDecayDialog" );
 
@@ -158,7 +161,7 @@ void ExpDecayDialog::setGraph(Graph *g)
 
 	connect (graph, SIGNAL(closedGraph()), this, SLOT(close()));
     connect (graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
-};
+}
 
 void ExpDecayDialog::activateCurve(const QString& curveName)
 {
@@ -178,7 +181,7 @@ void ExpDecayDialog::activateCurve(const QString& curveName)
 	if (slopes < 2)
         boxAmplitude->setText(QString::number(c->maxYValue() - c->minYValue(), 'g', precision));
 
-};
+}
 
 void ExpDecayDialog::changeDataRange()
 {

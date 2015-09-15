@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/SingletonHolder.h"
 
 using namespace Mantid::Kernel;
@@ -23,10 +24,10 @@ AppendSpectra::AppendSpectra() : WorkspaceJoiners() {}
 AppendSpectra::~AppendSpectra() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AppendSpectra::name() const { return "AppendSpectra"; };
+const std::string AppendSpectra::name() const { return "AppendSpectra"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AppendSpectra::version() const { return 1; };
+int AppendSpectra::version() const { return 1; }
 
 /** Initialize the algorithm's properties.
  */
@@ -43,6 +44,11 @@ void AppendSpectra::init() {
   declareProperty(
       "ValidateInputs", true,
       "Perform a set of checks that the two input workspaces are compatible.");
+
+  declareProperty("Number", 1,
+                  boost::make_shared<BoundedValidator<int>>(1, EMPTY_INT()),
+                  "Append the spectra from InputWorkspace2 multiple times (for "
+                  "MatrixWorkspaces only)");
 
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
@@ -79,10 +85,13 @@ void AppendSpectra::exec() {
   }
 
   const bool mergeLogs = getProperty("MergeLogs");
+  const int number = getProperty("Number");
 
   if (event_ws1 && event_ws2) {
     // Both are event workspaces. Use the special method
     MatrixWorkspace_sptr output = this->execEvent();
+    if (number > 1)
+      g_log.warning("Number property is ignored for event workspaces");
     if (mergeLogs)
       combineLogs(ws1->run(), ws2->run(), output->mutableRun());
     // Set the output workspace
@@ -97,6 +106,8 @@ void AppendSpectra::exec() {
         "Workspace2D's must have the same number of bins.");
 
   MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+  for (int i = 1; i < number; i++)
+    output = execWS2D(output, ws2);
   if (mergeLogs)
     combineLogs(ws1->run(), ws2->run(), output->mutableRun());
 

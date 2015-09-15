@@ -5,7 +5,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IEventWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

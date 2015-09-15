@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -15,7 +16,7 @@ namespace Mantid
   namespace VATES
   {
 
-        /*
+    /*
     Constructor
     @param view : MVP view
     @param filename : name of file to load

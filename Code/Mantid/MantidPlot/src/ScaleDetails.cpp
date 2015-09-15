@@ -7,9 +7,9 @@
 #include "DoubleSpinBox.h"
 #include <qwt_scale_widget.h>
 //#include <qwt_plot.h>
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "Plot.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 #include "MantidKernel/Logger.h"
 
@@ -95,8 +95,20 @@ ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
   m_cmbScaleType = new QComboBox();
   m_cmbScaleType->addItem(tr("linear"));
   m_cmbScaleType->addItem(tr("logarithmic"));
+  m_cmbScaleType->addItem(tr("power"));
   middleLayout->addWidget(m_lblScaleTypeLabel, 2, 0);
   middleLayout->addWidget(m_cmbScaleType, 2, 1);
+
+  m_lblN = new QLabel(tr("n ="));
+  m_dspnN = new DoubleSpinBox();
+  m_dspnN->setLocale(m_app->locale());
+  m_dspnN->setDecimals(m_app->d_graphing_digits);
+  middleLayout->addWidget(m_lblN, 3, 0);
+  middleLayout->addWidget(m_dspnN, 3, 1);
+
+  m_lblWarn = new QLabel(tr("Ensure axis and data ranges are\ncompatible with chosen axis scale."));
+  middleLayout->addWidget(m_lblWarn, 4, 0, 1, 2);
+  m_lblWarn->setVisible(false);
 
   m_chkInvert = new QCheckBox();
   m_chkInvert->setText(tr("Inverted"));
@@ -282,29 +294,30 @@ void ScaleDetails::initWidgets()
     }
     else if (type == ScaleDraw::Time)
     {
-      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis));
-      QTime origin = sclDraw->dateTimeOrigin().time();
+      if (ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis))) {
+        QTime origin = sclDraw->dateTimeOrigin().time();
 
-      m_dspnStart->hide();
-      m_dteStartDateTime->hide();
-      m_timStartTime->show();
-      m_timStartTime->setDisplayFormat(sclDraw->format());
-      m_timStartTime->setTime(origin.addMSecs((int) start));
+        m_dspnStart->hide();
+        m_dteStartDateTime->hide();
+        m_timStartTime->show();
+        m_timStartTime->setDisplayFormat(sclDraw->format());
+        m_timStartTime->setTime(origin.addMSecs((int) start));
 
-      m_dspnEnd->hide();
-      m_dteEndDateTime->hide();
-      m_timEndTime->show();
-      m_timEndTime->setDisplayFormat(sclDraw->format());
-      m_timEndTime->setTime(origin.addMSecs((int) end));
+        m_dspnEnd->hide();
+        m_dteEndDateTime->hide();
+        m_timEndTime->show();
+        m_timEndTime->setDisplayFormat(sclDraw->format());
+        m_timEndTime->setTime(origin.addMSecs((int) end));
 
-      m_cmbUnit->show();
-      m_cmbUnit->insertItem(tr("millisec."));
-      m_cmbUnit->insertItem(tr("sec."));
-      m_cmbUnit->insertItem(tr("min."));
-      m_cmbUnit->insertItem(tr("hours"));
-      m_cmbUnit->setCurrentIndex(1);
-      m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 1e3);
-      m_dspnStep->setSingleStep(1000);
+        m_cmbUnit->show();
+        m_cmbUnit->insertItem(tr("millisec."));
+        m_cmbUnit->insertItem(tr("sec."));
+        m_cmbUnit->insertItem(tr("min."));
+        m_cmbUnit->insertItem(tr("hours"));
+        m_cmbUnit->setCurrentIndex(1);
+        m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 1e3);
+        m_dspnStep->setSingleStep(1000);
+      }
     }
     else
     {
@@ -349,9 +362,9 @@ void ScaleDetails::initWidgets()
       m_dspnStepBeforeBreak->setValue(sc_engine->stepBeforeBreak());
       m_dspnStepAfterBreak->setValue(sc_engine->stepAfterBreak());
 
-      QwtScaleTransformation::Type scale_type = sc_engine->type();
+      ScaleTransformation::Type scale_type = sc_engine->type();
       m_cmbMinorTicksBeforeBreak->clear();
-      if (scale_type == QwtScaleTransformation::Log10)
+      if (scale_type == ScaleTransformation::Log10)
       {
         m_cmbMinorTicksBeforeBreak->addItems(QStringList() << "0" << "2" << "4" << "8");
       }
@@ -366,8 +379,9 @@ void ScaleDetails::initWidgets()
       m_chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
       m_chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
       m_cmbScaleType->setCurrentItem(scale_type);
+      m_dspnN->setValue(sc_engine->nthPower());
       m_cmbMinorValue->clear();
-      if (scale_type == QwtScaleTransformation::Log10)
+      if (scale_type == ScaleTransformation::Log10)
       {
         m_cmbMinorValue->addItems(QStringList() << "0" << "2" << "4" << "8");
       }
@@ -394,6 +408,7 @@ void ScaleDetails::initWidgets()
     m_spnMajorValue->setValue(lst.count());
 
     checkstep();
+    checkscaletype();
 
     connect(m_grpAxesBreaks,SIGNAL(clicked()), this, SLOT(setModified()));
     connect(m_chkInvert,SIGNAL(clicked()), this, SLOT(setModified()));
@@ -406,8 +421,10 @@ void ScaleDetails::initWidgets()
     connect(m_cmbMinorValue,SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
     connect(m_cmbUnit,SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
     connect(m_cmbScaleType,SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbScaleType,SIGNAL(currentIndexChanged(int)), this, SLOT(checkscaletype()));
     connect(m_dspnEnd, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnStart, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
+    connect(m_dspnN, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnStep, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnBreakStart, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
     connect(m_dspnStepBeforeBreak, SIGNAL(valueChanged(double)), this, SLOT(setModified()));
@@ -561,7 +578,8 @@ void ScaleDetails::apply()
     m_graph->setScale(m_mappedaxis, start, end, step, m_spnMajorValue->value(), m_cmbMinorValue->currentText().toInt(),
       m_cmbScaleType->currentIndex(), m_chkInvert->isChecked(), breakLeft, breakRight, m_spnBreakPosition->value(),
       m_dspnStepBeforeBreak->value(),m_dspnStepAfterBreak->value(), m_cmbMinorTicksBeforeBreak->currentText().toInt(),
-      m_cmbMinorTicksAfterBreak->currentText().toInt(), m_chkLog10AfterBreak->isChecked(), m_spnBreakWidth->value(), m_chkBreakDecoration->isChecked());
+      m_cmbMinorTicksAfterBreak->currentText().toInt(), m_chkLog10AfterBreak->isChecked(), m_spnBreakWidth->value(),
+      m_chkBreakDecoration->isChecked(), m_dspnN->value());
     m_graph->changeIntensity(true);
     m_graph->notifyChanges();
     m_modified = false;
@@ -620,6 +638,25 @@ void ScaleDetails::checkstep()
     m_cmbUnit->setEnabled(false);
     m_radMajor->setChecked(true);
     m_spnMajorValue->setEnabled(true);
+  }
+}
+
+/*
+ * Enable the "n =" widget and display warning message
+ * if power scale type is selected
+ */
+void ScaleDetails::checkscaletype()
+{
+  // If "power X^n" scale option is selected
+  if (m_cmbScaleType->currentIndex() == 2)
+  {
+    m_dspnN->setEnabled(true);
+    m_lblWarn->setVisible(true);
+  }
+  else
+  {
+    m_dspnN->setEnabled(false);
+    m_lblWarn->setVisible(false);
   }
 }
 

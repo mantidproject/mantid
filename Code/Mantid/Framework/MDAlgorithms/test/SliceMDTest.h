@@ -1,24 +1,19 @@
 #ifndef MANTID_MDEVENTS_SLICEMDTEST_H_
 #define MANTID_MDEVENTS_SLICEMDTEST_H_
 
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/VMD.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDAlgorithms/SliceMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include <Poco/File.h>
+#include "MantidMDAlgorithms/SliceMD.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
+
+using Mantid::coord_t;
 
 class SliceMDTest : public CxxTest::TestSuite
 {
@@ -137,6 +132,8 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeAnyMDEW<MDE,nd>(10, 0.0, 10.0, 1);
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
     AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws") );
@@ -165,6 +162,8 @@ public:
     if(!out) return;
 
     TSM_ASSERT_EQUALS("Should default to TakeMaxRecursionDepthFromInput == true", in_ws->getBoxController()->getMaxDepth(), out->getBoxController()->getMaxDepth());
+
+    TS_ASSERT_EQUALS(appliedCoord, out->getSpecialCoordinateSystem());
 
     // Took this many events out with the slice
     TS_ASSERT_EQUALS(out->getNPoints(), expectedNumPoints);

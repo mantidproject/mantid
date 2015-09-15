@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -44,8 +45,16 @@ def _count_monitors(raw_file):
 
         return mon_count, False
 
-
+#pylint: disable=too-many-instance-attributes
 class TimeSlice(PythonAlgorithm):
+
+    _raw_files = None
+    _spectra_range = None
+    _peak_range = None
+    _output_ws_name_suffix = None
+    _background_range = None
+    _calib_ws = None
+    _out_ws_group = None
 
     def category(self):
         return 'PythonAlgorithms;Inelastic'
@@ -59,7 +68,7 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceProperty(name='CalibrationWorkspace', defaultValue='',\
                              direction=Direction.Input, optional=PropertyMode.Optional),
                              doc='Calibration workspace')
 
@@ -72,19 +81,10 @@ class TimeSlice(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Background range in time of flight')
 
-        self.declareProperty(name='Verbose', defaultValue=False,
-                             doc='Output more messages to results log')
-
-        self.declareProperty(name='Plot', defaultValue=False,
-                             doc='Plot result workspaces')
-
-        self.declareProperty(name='Save', defaultValue=False,
-                             doc='Save result workspaces as nexus files to default save directory')
-
         self.declareProperty(name='OutputNameSuffix', defaultValue='_slice',
                              doc='Suffix to append to raw file name for name of output workspace')
 
-        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',
+        self.declareProperty(WorkspaceGroupProperty(name='OutputWorkspace', defaultValue='',\
                              direction=Direction.Output),
                              doc='Name of workspace group to group result workspaces into')
 
@@ -107,7 +107,7 @@ class TimeSlice(PythonAlgorithm):
         return ''
 
 
-    def validateInput(self):
+    def validateInputs(self):
         issues = dict()
 
         issues['SpectraRange'] = self._validate_range('SpectraRange')
@@ -120,7 +120,7 @@ class TimeSlice(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import CheckXrange
+        #from IndirectCommon import CheckXrange
 
         self._setup()
 
@@ -142,26 +142,9 @@ class TimeSlice(PythonAlgorithm):
             out_ws_list.append(slice_file)
             DeleteWorkspace(raw_file)
 
-            if self._save:
-                work_dir = config['defaultsave.directory']
-                save_path = os.path.join(work_dir, slice_file + '.nxs')
-                SaveNexusProcessed(InputWorkspace=slice_file, Filename=save_path)
-
-                if self._verbose:
-                    logger.notice('Output file :' + save_path)
-
         all_workspaces = ','.join(out_ws_list)
         GroupWorkspaces(InputWorkspaces=all_workspaces, OutputWorkspace=self._out_ws_group)
         self.setProperty('OutputWorkspace', self._out_ws_group)
-
-        if self._plot:
-            try:
-                from IndirectImport import import_mantidplot
-                mp = import_mantidplot()
-                mp.plotSpectrum(slice_file, 0)
-            except RuntimeError, e:
-                # User clicked cancel on plot so don't do anything
-                pass
 
 
     def _setup(self):
@@ -184,10 +167,6 @@ class TimeSlice(PythonAlgorithm):
 
         self._out_ws_group = self.getPropertyValue('OutputWorkspace')
 
-        self._verbose = self.getProperty('Verbose').value
-        self._plot = self.getProperty('Plot').value
-        self._save = self.getProperty('Save').value
-
 
     def _read_raw_file(self, filename):
         """
@@ -197,8 +176,7 @@ class TimeSlice(PythonAlgorithm):
         @returns Name of workspace loaded into
         """
 
-        if self._verbose:
-            logger.notice('Reading file :' + filename)
+        logger.information('Reading file :' + filename)
 
         # Load the raw file
         f_name = os.path.split(filename)[1]
@@ -230,8 +208,10 @@ class TimeSlice(PythonAlgorithm):
             calib_spec_max -= mon_count + 1
 
         # Crop the calibration workspace, excluding the monitors
-        CropWorkspace(InputWorkspace=self._calib_ws, OutputWorkspace=self._calib_ws,
-                      StartWorkspaceIndex=calib_spec_min, EndWorkspaceIndex=calib_spec_max)
+        CropWorkspace(InputWorkspace=self._calib_ws,
+                      OutputWorkspace=self._calib_ws,
+                      StartWorkspaceIndex=calib_spec_min,
+                      EndWorkspaceIndex=calib_spec_max)
 
 
     def _process_raw_file(self, raw_file):
@@ -244,7 +224,8 @@ class TimeSlice(PythonAlgorithm):
 
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
-        CropWorkspace(InputWorkspace=raw_file, OutputWorkspace=raw_file,
+        CropWorkspace(InputWorkspace=raw_file,
+                      OutputWorkspace=raw_file,
                       StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
                       EndWorkspaceIndex=int(self._spectra_range[1]) - 1)
 
@@ -259,16 +240,24 @@ class TimeSlice(PythonAlgorithm):
         slice_file = raw_file[:3].lower() + run + self._output_ws_name_suffix
 
         if self._background_range is None:
-            Integration(InputWorkspace=raw_file, OutputWorkspace=slice_file,
-                        RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1],
-                        StartWorkspaceIndex=0, EndWorkspaceIndex=num_hist - 1)
+            Integration(InputWorkspace=raw_file,
+                        OutputWorkspace=slice_file,
+                        RangeLower=self._peak_range[0],
+                        RangeUpper=self._peak_range[1],
+                        StartWorkspaceIndex=0,
+                        EndWorkspaceIndex=num_hist - 1)
         else:
-            CalculateFlatBackground(InputWorkspace=raw_file, OutputWorkspace=slice_file,
-                                    StartX=self._background_range[0], EndX=self._background_range[1],
+            CalculateFlatBackground(InputWorkspace=raw_file,
+                                    OutputWorkspace=slice_file,
+                                    StartX=self._background_range[0],
+                                    EndX=self._background_range[1],
                                     Mode='Mean')
-            Integration(InputWorkspace=slice_file, OutputWorkspace=slice_file,
-                        RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1],
-                        StartWorkspaceIndex=0, EndWorkspaceIndex=num_hist - 1)
+            Integration(InputWorkspace=slice_file,
+                        OutputWorkspace=slice_file,
+                        RangeLower=self._peak_range[0],
+                        RangeUpper=self._peak_range[1],
+                        StartWorkspaceIndex=0,
+                        EndWorkspaceIndex=num_hist - 1)
 
         return slice_file
 

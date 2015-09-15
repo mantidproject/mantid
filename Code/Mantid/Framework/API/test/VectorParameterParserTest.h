@@ -94,7 +94,7 @@ public:
     TSM_ASSERT_THROWS("No successor, so should throw!", parser.createParameter(pRootElem), std::runtime_error);
   }
 
-  DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double);
+  DECLARE_VECTOR_PARAMETER(SucessorVectorParameter, double)
 
   void testChainOfResponsibility()
   {

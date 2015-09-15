@@ -87,7 +87,16 @@ namespace MantidWidgets
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui):
   QDockWidget("Fit Function",parent),
+  m_workspaceIndex(NULL),
+  m_startX(NULL),
+  m_endX(NULL),
+  m_output(NULL),
+  m_minimizer(NULL),
+  m_ignoreInvalidData(NULL),
+  m_costFunction(NULL),
+  m_maxIterations(NULL),
   m_logValue(NULL),
+  m_plotDiff(NULL),
   m_plotCompositeMembers(NULL),
   m_convolveMembers(NULL),
   m_rawData(NULL),
@@ -223,8 +232,7 @@ void FitPropertyBrowser::init()
 
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares" << "Rwp";
-                  //<< "Ignore positive peaks";
+  m_costFunctions << "Least squares" << "Rwp" << "Unweighted least squares";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
   m_maxIterations = m_intManager->addProperty("Max Iterations");
   m_intManager->setValue( m_maxIterations, settings.value("Max Iterations",500).toInt() );

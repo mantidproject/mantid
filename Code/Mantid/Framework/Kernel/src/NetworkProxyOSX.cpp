@@ -156,15 +156,13 @@ ProxyInfoVec proxyInformationFromPac(CFDictionaryRef dict,
 /**
  * Proxy from dictionary.
  * @param dict
- * @param type
  * @param enableKey
  * @param hostKey
  * @param portKey
  * @return return Proxy object.
  */
-ProxyInfo proxyFromDictionary(CFDictionaryRef dict, ProxyType type,
-                              CFStringRef enableKey, CFStringRef hostKey,
-                              CFStringRef portKey) {
+ProxyInfo proxyFromDictionary(CFDictionaryRef dict, CFStringRef enableKey,
+                              CFStringRef hostKey, CFStringRef portKey) {
   ProxyInfo proxyInfo;
   CFNumberRef protoEnabled;
   CFNumberRef protoPort;
@@ -193,9 +191,9 @@ ProxyInfo proxyFromDictionary(CFDictionaryRef dict, ProxyType type,
  * @return Return the proxy info object.
  */
 ProxyInfo httpProxyFromSystem(CFDictionaryRef dict) {
-  ProxyInfo tempProxy = proxyFromDictionary(
-      dict, HttpProxy, kSCPropNetProxiesHTTPEnable, kSCPropNetProxiesHTTPProxy,
-      kSCPropNetProxiesHTTPPort);
+  ProxyInfo tempProxy = proxyFromDictionary(dict, kSCPropNetProxiesHTTPEnable,
+                                            kSCPropNetProxiesHTTPProxy,
+                                            kSCPropNetProxiesHTTPPort);
 
   return tempProxy;
 }
@@ -212,7 +210,7 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfo httpProxy;
   CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
   if (!dict) {
-    logger.debug("ScriptRepository SCDynamicStoreCopyProxies returned NULL");
+    logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL");
   }
 
   // Query the proxy pac first.
@@ -237,7 +235,7 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   }
 
   if (!foundHttpProxy) {
-    logger.debug("ScriptRepositry. No system HTTP Proxy set!");
+    logger.debug("NetworkProxyOSX. No system HTTP Proxy set!");
   }
 
   return httpProxy;

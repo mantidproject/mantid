@@ -49,7 +49,7 @@ public:
   const TimeSeriesProperty<HeldType> *unfiltered() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(FilteredTimeSeriesProperty);
+  DISABLE_DEFAULT_CONSTRUCT(FilteredTimeSeriesProperty)
 
   /// The original unfiltered property as an owned pointer
   const TimeSeriesProperty<HeldType> *m_unfiltered;

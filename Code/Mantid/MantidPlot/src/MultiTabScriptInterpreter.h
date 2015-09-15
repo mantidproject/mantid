@@ -26,15 +26,16 @@ class QStringList;
 
 class ScriptingWindow;
 
-/** 
+/**
     This class manages ScriptEditor objects and displays them in a series
     of tabs. It is also the single point of entry for executing scripts
     with in the current ScriptingEnv
-    
+
     @author Martyn Gigg, Tessella Support Services plc
     @date 19/08/2009
 
-    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
+    Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+   National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
@@ -52,22 +53,21 @@ class ScriptingWindow;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MultiTabScriptInterpreter : public QTabWidget, Scripted
-{
+class MultiTabScriptInterpreter : public QTabWidget, Scripted {
   Q_OBJECT
 
 public:
   /// Constructor
   MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent);
-  ///Destructor
+  /// Destructor
   ~MultiTabScriptInterpreter();
 
   /// Current interpreter
-  ScriptFileInterpreter * currentInterpreter();
+  ScriptFileInterpreter *currentInterpreter();
   /// Interpreter at given index
-  ScriptFileInterpreter * interpreterAt(int index);
+  ScriptFileInterpreter *interpreterAt(int index);
 
   /// Is a script running in the environment
   bool isExecuting();
@@ -75,15 +75,17 @@ public:
   /// Returns the global zoom level
   int globalZoomLevel() const { return m_globalZoomLevel; }
 
- /// this method appends the file names of scripts
- ///in different tabs to a string and returns 
+  /// this method appends the file names of scripts
+  /// in different tabs to a string and returns
   QString saveToString();
-  ///this method returns a list containing  recent scripts
+  /// Saves Filenames associated with each tab to a QStringList
+  QStringList fileNamesToQStringList();
+  /// this method returns a list containing  recent scripts
   QStringList recentScripts();
   /// update the Recent Scripts menu items
-  void updateRecentScriptList(const QString & filename);
-  ///set the recent script list
-  void setRecentScripts(const QStringList & scriptList);
+  void updateRecentScriptList(const QString &filename);
+  /// set the recent script list
+  void setRecentScripts(const QStringList &scriptList);
 
 signals:
   /// Signal that a tab has been created
@@ -104,12 +106,13 @@ signals:
   void executionStateChanged(bool state);
 
 public slots:
-  /// Create a new tab for script editing with the text within the file imported and insert it at the index
-  void newTab(int index = -1, const QString & filename = "");
+  /// Create a new tab for script editing with the text within the file imported
+  /// and insert it at the index
+  void newTab(int index = -1, const QString &filename = "");
   /// Open a file in the current tab
-  void openInCurrentTab(const QString & filename = QString());
+  void openInCurrentTab(const QString &filename = QString());
   /// Open a file in a new tab
-  void openInNewTab(const QString & filename = QString());
+  void openInNewTab(const QString &filename = QString());
   /// open recent scripts
   void openRecentScript(int index);
   /// Save current file
@@ -147,8 +150,10 @@ public slots:
   //@{
   /// Execute all using the given mode
   void executeAll(const Script::ExecutionMode mode);
-  ///Execute selection using the given mode
+  /// Execute selection using the given mode
   void executeSelection(const Script::ExecutionMode mode);
+  /// Abort the current script
+  void abortCurrentScript();
   /// Evaluate
   void evaluate();
   /// Clear out any previous variable definitions in the current script
@@ -186,6 +191,8 @@ public slots:
   void showSelectFont();
 
 private slots:
+  /// Close a tab with a given index
+  void closeTabAtIndex(int index);
   /// Close clicked tab
   void closeClickedTab();
   /// Current editor's modification status has changed
@@ -202,24 +209,24 @@ private:
   void contextMenuEvent(QContextMenuEvent *event);
   /// A custom defined event handler
   void customEvent(QEvent *event);
-  ///Open a script
-  void open(bool newtab, const QString & filename = QString());
+  /// Open a script
+  void open(bool newtab, const QString &filename = QString());
   /// Sets the tab title & tooltip from the filename
-  void setTabTitle(QWidget *widget, const QString & filename);
+  void setTabTitle(QWidget *widget, const QString &filename);
   /// Returns the tab title for the given filename
-  QString createTabTitle(const QString & filename) const;
-  ///Close a tab with a given index
-  void closeTabAtIndex(int index);
-  ///Close a tab at a given position
-  void closeTabAtPosition(const QPoint & pos);
+  QString createTabTitle(const QString &filename) const;
+  /// Close a tab at a given position
+  void closeTabAtPosition(const QPoint &pos);
 
- private:
+private:
   friend class ScriptingWindow;
 
   /// The last directory visited with a file dialog
   QString m_last_dir;
-  // The cursor position within the tab bar when the right-mouse button was last clicked
-  // I need this to ensure that the position of a call to tabBar()->tabAt() is accurate
+  // The cursor position within the tab bar when the right-mouse button was last
+  // clicked
+  // I need this to ensure that the position of a call to tabBar()->tabAt() is
+  // accurate
   // as Qt doesn't provide an action signal parameterised on a position
   QPoint m_cursor_pos;
   /// Current progress report state
@@ -228,8 +235,6 @@ private:
   enum { MaxRecentScripts = 5 };
   /// List of recent scripts, with most recent at the top
   QStringList m_recentScriptList;
-  /// Flag to indicate whether stdout should be redirected
-  bool m_capturePrint;
   /// A pointer to the Null object
   NullScriptFileInterpreter *m_nullScript;
   /// A pointer to the current interpreter

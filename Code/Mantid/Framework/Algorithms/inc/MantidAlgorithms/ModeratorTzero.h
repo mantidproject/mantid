@@ -72,12 +72,8 @@ namespace Algorithms {
 */
 class DLLExport ModeratorTzero : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ModeratorTzero()
-      : Mantid::API::Algorithm(),
-        m_convfactor(0.5e+12 * Mantid::PhysicalConstants::NeutronMass /
-                     Mantid::PhysicalConstants::meV),
-        m_niter(1), m_t1min(200.0) {}
+  /// Default constructor
+  ModeratorTzero();
   /// Virtual destructor
   virtual ~ModeratorTzero() {}
   /// Algorithm's name
@@ -108,15 +104,15 @@ private:
   /// Execution code for histogram workspace
   void exec();
   /// Execution code for event workspace
-  void execEvent();
-  /// Calculate distance from source to sample or monitor
-  double CalculateL1(Mantid::API::MatrixWorkspace_sptr inputWS, size_t i);
-  /// Calculate time from sample to detector
-  double CalculateT2(Mantid::API::MatrixWorkspace_sptr inputWS, size_t i);
-  /// Calculate emission time from the moderator for a given detector (L1, t2)
-  /// and TOF
-  double CalculateT0(const double &tof, const double &L1, const double &t2,
-                     double &E1, mu::Parser &parser);
+  void execEvent(const std::string &emode);
+  /// Calculate emission time from the moderator for a given
+  /// detector (L1, t2) and TOF when Emode==Inelastic
+  double CalculateT0indirect(const double &tof, const double &L1,
+    const double &t2, double &E1, mu::Parser &parser);
+  /// Calculate emission time from the moderator for a given
+  /// detector (L1, t2) and TOF when Emode==Elastic
+  double CalculateT0elastic(const double &tof, const double &L12,
+    double &E1, mu::Parser &parser);
   const double m_convfactor;
   /// Maximum number of iterations when calculating the emission time from the
   /// moderator

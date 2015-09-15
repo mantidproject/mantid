@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/Group.h"
+#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidKernel/V3D.h"
 
@@ -73,14 +74,24 @@ public:
     const std::vector<SymmetryOperation> &symmetryOperations =
         getSymmetryOperations();
 
-    std::set<T> equivalents;
+    std::vector<T> equivalents;
     for (auto it = symmetryOperations.begin(); it != symmetryOperations.end();
          ++it) {
-      equivalents.insert(Geometry::getWrappedVector((*it) * position));
+      equivalents.push_back(Geometry::getWrappedVector((*it) * position));
     }
 
-    return std::vector<T>(equivalents.begin(), equivalents.end());
+    // Use fuzzy compare with the same condition as V3D::operator==().
+    std::sort(equivalents.begin(), equivalents.end(), FuzzyV3DLessThan());
+    equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
+                      equivalents.end());
+
+    return equivalents;
   }
+
+  bool isAllowedReflection(const Kernel::V3D &hkl) const;
+
+  PointGroup_sptr getPointGroup() const;
+  Group_const_sptr getSiteSymmetryGroup(const Kernel::V3D &position) const;
 
 protected:
   size_t m_number;

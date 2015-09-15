@@ -1,17 +1,17 @@
 #include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -31,10 +31,10 @@ MergeMD::~MergeMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MergeMD::name() const { return "MergeMD"; };
+const std::string MergeMD::name() const { return "MergeMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MergeMD::version() const { return 1; };
+int MergeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MergeMD::category() const { return "MDAlgorithms"; }

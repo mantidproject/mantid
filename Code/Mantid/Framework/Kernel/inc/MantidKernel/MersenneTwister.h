@@ -80,8 +80,8 @@ public:
   virtual void restore();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(MersenneTwister);
-  DISABLE_COPY_AND_ASSIGN(MersenneTwister);
+  DISABLE_DEFAULT_CONSTRUCT(MersenneTwister)
+  DISABLE_COPY_AND_ASSIGN(MersenneTwister)
 
   /// The boost Mersenne Twister generator
   boost::mt19937 m_generator;

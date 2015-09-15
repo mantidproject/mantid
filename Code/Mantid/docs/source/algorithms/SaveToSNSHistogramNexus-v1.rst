@@ -15,7 +15,7 @@ workspace contains. The histograms do not need to be the same size (in
 number of bins), but the number of pixels needs to be the same.
 
 In addition, this only works for instruments that use
-`RectangularDetectors <http://www.mantidproject.org/RectangularDetector>`__ (SNAP, TOPAZ, POWGEN, for
+:ref:`RectangularDetectors <RectangularDetector>` (SNAP, TOPAZ, POWGEN, for
 example); in addition, the name in the instrument definition file must
 match the name in the NXS file.
 
@@ -31,3 +31,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

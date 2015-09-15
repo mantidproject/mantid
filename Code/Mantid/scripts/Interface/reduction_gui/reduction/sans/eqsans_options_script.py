@@ -31,10 +31,10 @@ class ReductionOptions(BaseOptions):
 
     # Perform EQSANS TOF correction
     perform_TOF_correction = True
-    
+
     # Turn off the wedges
     n_wedges = 0
-    
+
     # Turn off log binning alignment with decades
     align_log_with_decades = False
 
@@ -216,7 +216,7 @@ class ReductionOptions(BaseOptions):
         # Resolution
         self.compute_resolution = BaseScriptElement.getBoolElement(dom, "ComputeResolution",
                                                                    default = ReductionOptions.compute_resolution)
-        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",
+        self.sample_aperture_diameter = BaseScriptElement.getFloatElement(dom, "SampleApertureDiameter",\
                                                                          default = ReductionOptions.sample_aperture_diameter)
 
         # TOF correction

@@ -814,6 +814,8 @@ void RepoModel::setupModelData(RepoItem *root)
 {
 
   QStringList lines;
+  // check server for updates to repository
+  repo_ptr->check4Update();
   // get the list of entries inside the scriptrepository
   std::vector<std::string> list = repo_ptr->listFiles();
   
@@ -940,21 +942,21 @@ bool RepoModel::isUploading(const QModelIndex & index)const{
 
 
 /// @return string to define the LOCAL_ONLY state
-const QString & RepoModel::localOnlySt(){return LOCALONLY;}; 
+const QString & RepoModel::localOnlySt(){return LOCALONLY;}
 /// @return string to define the REMOTE_ONLY state
-const QString & RepoModel::remoteOnlySt(){return REMOTEONLY;}; 
+const QString & RepoModel::remoteOnlySt(){return REMOTEONLY;}
 /// @return string to define the LOCAL_CHANGED state
-const QString & RepoModel::localChangedSt(){return LOCALCHANGED;}; 
+const QString & RepoModel::localChangedSt(){return LOCALCHANGED;}
 /// @return string to define the REMOTE_CHANGED state
-const QString & RepoModel::remoteChangedSt(){return REMOTECHANGED;}; 
+const QString & RepoModel::remoteChangedSt(){return REMOTECHANGED;}
 /// @return string to define the BOTH_UNCHANGED state
-const QString & RepoModel::updatedSt(){return BOTHUNCHANGED;}; 
+const QString & RepoModel::updatedSt(){return BOTHUNCHANGED;}
 /// @return string to define the BOTH_CHANGED state
-const QString & RepoModel::bothChangedSt(){return BOTHCHANGED;};
+const QString & RepoModel::bothChangedSt(){return BOTHCHANGED;}
 /// @return string to define the downloading state
-const QString & RepoModel::downloadSt(){return DOWNLOADST;};
+const QString & RepoModel::downloadSt(){return DOWNLOADST;}
 /// @return string to define the uploading state
-const QString & RepoModel::uploadSt(){return UPLOADST;};
+const QString & RepoModel::uploadSt(){return UPLOADST;}
 
 
 

@@ -1,8 +1,7 @@
 #include "MantidCurveFitting/ReflectivityMulf.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <boost/lexical_cast.hpp>
-
-#define PI 3.14159265358979323846264338327950288419716939937510582
+#include <cmath>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -92,7 +91,7 @@ void ReflectivityMulf::function1D(double *out, const double *xValues,
   std::complex<double> a321(0.0, 0.0);
   std::complex<double> a322(0.0, 0.0);
 
-  double theta0 = coeff[0] * PI / 180.0;
+  double theta0 = coeff[0] * M_PI / 180.0;
   double scalefac = coeff[1];
   rnbn[0] = coeff[2];
   rnbn[m_nlayer + 1] = coeff[3];
@@ -130,11 +129,11 @@ void ReflectivityMulf::function1D(double *out, const double *xValues,
   // Could be parallelized at this point
 
   for (size_t j = 0; j < nData; ++j) {
-    double lambda = 4 * PI * sin(theta0) / xValues[j];
+    double lambda = 4 * M_PI * sin(theta0) / xValues[j];
     cy[j] = 0.0;
     double tl = lambda * lambda;
-    double tlc = 8.0 * PI * PI / tl;
-    double con = tl / (2.0 * PI);
+    double tlc = 8.0 * M_PI * M_PI / tl;
+    double con = tl / (2.0 * M_PI);
 
     for (k = 0; k < m_nlayer + 2; k++) {
       rnfn[k] = (1.0 - con * rnbn[k]);
@@ -157,7 +156,7 @@ void ReflectivityMulf::function1D(double *out, const double *xValues,
       pfn[m_nlayer + 1] = sqrt(rnf - (rnf1 * ct0 * ct0));
 
       for (int i = 1; i < m_nlayer + 1; i++) {
-        betan[i] = 2.0 * PI * dn[i] * pfn[i] / lambda;
+        betan[i] = 2.0 * M_PI * dn[i] * pfn[i] / lambda;
       }
 
       a111 = cr;

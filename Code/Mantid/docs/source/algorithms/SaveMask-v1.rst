@@ -17,14 +17,14 @@ file. This algorithm has previously been renamed from SaveDetectorMasks.
 
 There are two types of mask workspace that can serve as input.
 
-1. `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__
-##################################################################
+1. MaskWorkspace
+################
 
 In this case, :ref:`algm-SaveMask` will read Y values to determine
 which detectors are masked;
 
-2. A non-\ `MaskWorkspace <http://www.mantidproject.org/MaskWorkspace>`__ :ref:`MatrixWorkspace <MatrixWorkspace>` containing :ref:`Instrument <Instrument>`
-################################################################################################################################################################################################################
+2. A non-MaskWorkspace :ref:`MatrixWorkspace <MatrixWorkspace>` containing :ref:`Instrument <Instrument>`
+#########################################################################################################
 
 In this case, :ref:`algm-SaveMask` will scan through all detectors to
 determine which are masked.
@@ -55,3 +55,5 @@ Example 1:
    </detector-masking>
 
 .. categories::
+
+.. sourcelink::

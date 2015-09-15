@@ -191,9 +191,9 @@ public:
 
 };
 
-DECLARE_FUNCTION(ConvolutionTest_Gauss);
-DECLARE_FUNCTION(ConvolutionTest_Lorentz);
-DECLARE_FUNCTION(ConvolutionTest_Linear);
+DECLARE_FUNCTION(ConvolutionTest_Gauss)
+DECLARE_FUNCTION(ConvolutionTest_Lorentz)
+DECLARE_FUNCTION(ConvolutionTest_Linear)
 
 class ConvolutionTest : public CxxTest::TestSuite
 {

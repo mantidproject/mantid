@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -175,8 +176,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                "sambkg_errorbar_criterion",
                                                                                default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)
-            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
-                                                              "background_tof_start",
+            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,\
+                                                              "background_tof_start",\
                                                               default=DiagnoseDetectorsScript.tof_start)
             self.tof_end = BaseScriptElement.getIntElement(instrument_dom,
                                                            "background_tof_end",

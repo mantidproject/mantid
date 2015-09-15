@@ -100,9 +100,6 @@ private:
   int64_t m_lengthIn;
   /// number of time regime
   int64_t m_noTimeRegimes;
-
-  /// TimeSeriesProperty<int> containing data periods.
-  boost::shared_ptr<Kernel::Property> m_perioids;
 };
 }
 }

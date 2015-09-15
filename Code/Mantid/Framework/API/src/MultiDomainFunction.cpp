@@ -141,27 +141,32 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
     throw std::invalid_argument(
         "Non-CompositeDomain passed to MultiDomainFunction.");
   }
-  const CompositeDomain &cd = dynamic_cast<const CompositeDomain &>(domain);
-  // domain must not have less parts than m_maxIndex
-  if (cd.getNParts() < m_maxIndex) {
-    throw std::invalid_argument(
-        "CompositeDomain has too few parts (" +
-        boost::lexical_cast<std::string>(cd.getNParts()) +
-        ") for MultiDomainFunction (max index " +
-        boost::lexical_cast<std::string>(m_maxIndex) + ").");
-  }
 
-  countValueOffsets(cd);
-  // evaluate member functions derivatives
-  for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {
-    // find the domains member function must be applied to
-    std::vector<size_t> domains;
-    getDomainIndices(iFun, cd.getNParts(), domains);
+  if (getAttribute("NumDeriv").asBool()) {
+    calNumericalDeriv(domain, jacobian);
+  } else {
+    const CompositeDomain &cd = dynamic_cast<const CompositeDomain &>(domain);
+    // domain must not have less parts than m_maxIndex
+    if (cd.getNParts() < m_maxIndex) {
+      throw std::invalid_argument(
+          "CompositeDomain has too few parts (" +
+          boost::lexical_cast<std::string>(cd.getNParts()) +
+          ") for MultiDomainFunction (max index " +
+          boost::lexical_cast<std::string>(m_maxIndex) + ").");
+    }
 
-    for (auto i = domains.begin(); i != domains.end(); ++i) {
-      const FunctionDomain &d = cd.getDomain(*i);
-      PartialJacobian J(&jacobian, m_valueOffsets[*i], paramOffset(iFun));
-      getFunction(iFun)->functionDeriv(d, J);
+    countValueOffsets(cd);
+    // evaluate member functions derivatives
+    for (size_t iFun = 0; iFun < nFunctions(); ++iFun) {
+      // find the domains member function must be applied to
+      std::vector<size_t> domains;
+      getDomainIndices(iFun, cd.getNParts(), domains);
+
+      for (auto i = domains.begin(); i != domains.end(); ++i) {
+        const FunctionDomain &d = cd.getDomain(*i);
+        PartialJacobian J(&jacobian, m_valueOffsets[*i], paramOffset(iFun));
+        getFunction(iFun)->functionDeriv(d, J);
+      }
     }
   }
 }

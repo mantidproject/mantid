@@ -443,7 +443,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   refAlg->setProperty("ConvertToQ", false);
   refAlg->setProperty("SumPixels", true);
   refAlg->setProperty("NormalizeSum", true);
-
+  refAlg->setProperty("AverageOverIntegratedAxis", integrateY);
   refAlg->setProperty("YPixelMin", ymin);
   refAlg->setProperty("YPixelMax", ymax);
   refAlg->setProperty("XPixelMin", xmin);
@@ -504,7 +504,8 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       if (polarization.compare(PolStateNone) != 0)
         loadAlg->setProperty("NXentryName", polarization);
       loadAlg->executeAsChildAlg();
-      rawWS = loadAlg->getProperty("OutputWorkspace");
+      Workspace_sptr temp = loadAlg->getProperty("OutputWorkspace");
+      rawWS = boost::dynamic_pointer_cast<IEventWorkspace>(temp);
       if (rawWS->getNumberEvents() == 0) {
         g_log.notice() << "No data in " << polarization << std::endl;
         m_output_message += "    |No data for " + polarization + "\n";
@@ -515,10 +516,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       if (instrument.compare("REF_M") == 0) {
         double det_distance =
             rawWS->getInstrument()->getDetector(0)->getPos().Z();
-        Mantid::Kernel::Property *prop =
-            rawWS->run().getProperty("SampleDetDis");
-        Mantid::Kernel::TimeSeriesProperty<double> *dp =
-            dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+        auto dp = rawWS->run().getTimeSeriesProperty<double>("SampleDetDis");
         double sdd = dp->getStatistics().mean / 1000.0;
         IAlgorithm_sptr mvAlg =
             createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.25);
@@ -635,9 +633,7 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
 
   double direct_beam_pix = getProperty("DirectPixel");
   if (isEmpty(direct_beam_pix)) {
-    Mantid::Kernel::Property *prop = workspace->run().getProperty("DIRPIX");
-    Mantid::Kernel::TimeSeriesProperty<double> *dp =
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    auto dp = workspace->run().getTimeSeriesProperty<double>("DIRPIX");
     direct_beam_pix = dp->getStatistics().mean;
   }
 
@@ -662,13 +658,10 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
 }
 
 double RefReduction::calculateAngleREFL(MatrixWorkspace_sptr workspace) {
-  Mantid::Kernel::Property *prop = workspace->run().getProperty("ths");
-  Mantid::Kernel::TimeSeriesProperty<double> *dp =
-      dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  auto dp = workspace->run().getTimeSeriesProperty<double>("ths");
   const double ths = dp->getStatistics().mean;
 
-  prop = workspace->run().getProperty("tthd");
-  dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  dp = workspace->run().getTimeSeriesProperty<double>("tthd");
   const double tthd = dp->getStatistics().mean;
 
   double offset = getProperty("AngleOffset");
@@ -712,7 +705,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     leftAlg->setProperty("ConvertToQ", false);
     leftAlg->setProperty("SumPixels", true);
     leftAlg->setProperty("NormalizeSum", true);
-
+    leftAlg->setProperty("AverageOverIntegratedAxis", integrateY);
     leftAlg->setProperty("YPixelMin", ymin);
     leftAlg->setProperty("YPixelMax", ymax);
     leftAlg->setProperty("XPixelMin", xmin);
@@ -737,7 +730,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     rightAlg->setProperty("ConvertToQ", false);
     rightAlg->setProperty("SumPixels", true);
     rightAlg->setProperty("NormalizeSum", true);
-
+    rightAlg->setProperty("AverageOverIntegratedAxis", integrateY);
     rightAlg->setProperty("YPixelMin", ymin);
     rightAlg->setProperty("YPixelMax", ymax);
     rightAlg->setProperty("XPixelMin", xmin);
@@ -778,7 +771,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     refAlg->setProperty("ConvertToQ", false);
     refAlg->setProperty("SumPixels", true);
     refAlg->setProperty("NormalizeSum", true);
-
+    refAlg->setProperty("AverageOverIntegratedAxis", integrateY);
     refAlg->setProperty("YPixelMin", ymin);
     refAlg->setProperty("YPixelMax", ymax);
     refAlg->setProperty("XPixelMin", xmin);

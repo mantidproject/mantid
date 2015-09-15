@@ -107,7 +107,7 @@ protected:
                            double &arlu2, double &arlu3);
 
 private:
-  DISABLE_COPY_AND_ASSIGN(ForegroundModel);
+  DISABLE_COPY_AND_ASSIGN(ForegroundModel)
 
   /// Required by the interface
   void function(const Mantid::API::FunctionDomain &,

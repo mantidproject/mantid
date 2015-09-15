@@ -14,6 +14,8 @@ workspace. It maintains events if the input is an
 :ref:`EventWorkspace <EventWorkspace>`. It will call CloneMDWorkspace for a
 `MDEventWorkspace <http://www.mantidproject.org/MDEventWorkspace>`_ or a
 :ref:`MDHistoWorkspace <MDHistoWorkspace>`. It can also clone a
-`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_.
+:ref:`PeaksWorkspace <PeaksWorkspace>`.
 
 .. categories::
+
+.. sourcelink::

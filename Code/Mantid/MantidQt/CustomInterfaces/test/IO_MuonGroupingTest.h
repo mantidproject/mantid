@@ -34,14 +34,14 @@ public:
     {
       Poco::Path path(*it);
 
-      if(path.directory(path.depth() - 1) == "AutoTestData")
+      if(path.directory(path.depth() - 1) == "UnitTest")
       {
         m_testDataDir = *it;
         break;
       }
     }
 
-    TSM_ASSERT("Unable to find AutoTestData directory", !m_testDataDir.empty());
+    TSM_ASSERT("Unable to find UnitTest data directory", !m_testDataDir.empty());
 
     m_tmpDir = ConfigService::Instance().getTempDir();
 

@@ -15,52 +15,58 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-	void testInit()
-	{    
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+  void testInit()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
-		CatalogLogin loginobj;
-		TS_ASSERT_THROWS_NOTHING( loginobj.initialize());
-		TS_ASSERT( loginobj.isInitialized() );
-	}
-	void testLogin()
-	{
-		CatalogLogin loginobj;
+    CatalogLogin loginobj;
+    TS_ASSERT_THROWS_NOTHING( loginobj.initialize());
+    TS_ASSERT( loginobj.isInitialized() );
+  }
 
-	   if ( !loginobj.isInitialized() ) loginobj.initialize();
+  void testLoginMandatoryParams()
+  {
+    CatalogLogin loginobj;
 
-		// Should fail because mandatory parameter has not been set
-		TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
+    if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		// Now set it...
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser");
-		//loginobj.setPropertyValue("DBServer", "");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		TS_ASSERT(loginobj.isExecuted() );
-		
-	}
-	void testLoginFail()
-	{
-		
-		CatalogLogin loginobj;
+    // Should fail because mandatory parameter has not been set
+    TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
+  }
 
-	   if ( !loginobj.isInitialized() ) loginobj.initialize();
+  void testLogin()
+  {
+    CatalogLogin loginobj;
 
-		// Should fail because mandatory parameter has not been set
-		TS_ASSERT_THROWS(loginobj.execute(),std::runtime_error);
+    if ( !loginobj.isInitialized() ) loginobj.initialize();
 
-		//invalid username
-		loginobj.setPropertyValue("Username", "mantid_test");
-		loginobj.setPropertyValue("Password", "mantidtestuser1");
-		//loginobj.setPropertyValue("DBServer", "");
-		
-		TS_ASSERT_THROWS_NOTHING(loginobj.execute());
-		//should fail
-		TS_ASSERT( !loginobj.isExecuted() );
-	}
+    loginobj.setPropertyValue("Username", "mantidtest@fitsp10.isis.cclrc.ac.uk");
+    loginobj.setPropertyValue("Password", "MantidTestUser4");
+    loginobj.setProperty("KeepSessionAlive", false);
 
-		
+    TS_ASSERT_THROWS_NOTHING(loginobj.execute());
+    TS_ASSERT(loginobj.isExecuted() );
+
+    ICatTestHelper::logout();
+
+  }
+  void testLoginFail()
+  {
+
+    CatalogLogin loginobj;
+
+    if ( !loginobj.isInitialized() ) loginobj.initialize();
+
+    //invalid username
+    loginobj.setPropertyValue("Username", "mantid_test");
+    loginobj.setPropertyValue("Password", "mantidtestuser1");
+    //loginobj.setPropertyValue("DBServer", "");
+
+    TS_ASSERT_THROWS_NOTHING(loginobj.execute());
+    //should fail
+    TS_ASSERT( !loginobj.isExecuted() );
+  }
+
+
 };
 #endif

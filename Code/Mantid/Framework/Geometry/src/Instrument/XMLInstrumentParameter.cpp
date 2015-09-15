@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include <ctime>
 #include <fstream>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -33,13 +34,14 @@ using namespace Kernel;
 *  @param comp :: The pointer to the instrument component
 *  @param interpolation :: The pointer to the interpolation class
 *  @param formula :: The string formula to apply
-*  @param formulaUnit :: The unit that the formul requires the input vaule in
+*  @param formulaUnit :: The unit that the formula requires the input value in
 *  @param resultUnit :: The unit of the result of the formula
 *  @param tie :: What to tie the value to
 *  @param constraint :: The constraint associated with this parameter
 *  @param penaltyFactor :: The level of penalty associated with the constraint
 *  @param fitFunc :: What fit function this applies to
 *  @param angleConvertConst :: angle conversion constant?????
+*  @param description :: text description of the parameter
 */
 XMLInstrumentParameter::XMLInstrumentParameter(
     const std::string &logfileID, const std::string &value,
@@ -50,14 +52,22 @@ XMLInstrumentParameter::XMLInstrumentParameter(
     const std::vector<std::string> &constraint, std::string &penaltyFactor,
     const std::string &fitFunc, const std::string &extractSingleValueAs,
     const std::string &eq, const Geometry::IComponent *comp,
-    double angleConvertConst)
+    double angleConvertConst,
+    const std::string &description)
     : m_logfileID(logfileID), m_value(value), m_paramName(paramName),
       m_type(type), m_tie(tie), m_constraint(constraint),
       m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc),
       m_formula(formula), m_formulaUnit(formulaUnit), m_resultUnit(resultUnit),
       m_interpolation(interpolation),
       m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
-      m_angleConvertConst(angleConvertConst) {}
+      m_angleConvertConst(angleConvertConst),
+      m_description(""){
+        if(!description.empty()){ // remove multiple spaces
+          boost::regex re("\\s+");
+          std::string desc = boost::regex_replace(description,re," ");
+          (const_cast<std::string *>(&m_description))->assign(desc);
+        }
+}
 
 /** Returns the parameter value.
  * This interprets the XML parameter specification in order to do one of these
