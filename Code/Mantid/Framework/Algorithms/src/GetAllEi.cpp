@@ -24,12 +24,15 @@ namespace Mantid {
         new API::WorkspaceProperty<API::MatrixWorkspace>("Workspace", "",
         Kernel::Direction::Input),
         "The input workspace containing the monitor's spectra measured after the last chopper");
-      auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
-      nonNegative->setLower(-1);
-      declareProperty("MonitorSpectraID", 0, nonNegative,
-        "The workspace index (ID) of the spectra, containing monitor's"
-        "signal to analyze.\n"
-        "If omitted, spectra with number 0 (Not workspace ID!) will be used.\n");
+      auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+      mustBePositive->setLower(1);
+
+      declareProperty("Monitor1SpecID", EMPTY_INT(), mustBePositive,
+        "The workspace index (ID) of the spectra, containing first monitor's"
+        "signal to analyze.");
+      declareProperty("Monitor2SpecID", EMPTY_INT(), mustBePositive,
+        "The workspace index (ID) of the spectra, containing second monitor's"
+        "signal to analyze.");
 
       declareProperty("ChopperSpeedLog", "Chopper_Speed","Name of the instrument log,"
         "containing chopper angular velocity.");
@@ -52,13 +55,6 @@ namespace Mantid {
       // Get pointers to the workspace, parameter map and table
       API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
 
-      // at this stage all properties are validated so its safe to access them without 
-      // big additional checks.
-      specid_t specNum = getProperty("MonitorSpectraID");
-      size_t wsIndex = static_cast<size_t>(specNum);
-      if (wsIndex != 0){
-        wsIndex = inputWS->getIndexFromSpectrumNumber(specNum);
-      }
 
       double chopSpeed,chopDelay;
       findChopSpeedAndDelay(inputWS,chopSpeed,chopDelay);
@@ -72,11 +68,14 @@ namespace Mantid {
       }
       auto moderator       = pInstrument->getSource();
       double chopDistance  = lastChopPositionComponent->getDistance(*moderator);
-
       double velocity  = chopDistance/chopDelay;
 
+      // build workspace to find monitor's peaks
+      size_t det1WSIndex;
+      auto workingWS = buildWorkspaceToFit(inputWS,det1WSIndex);
+
       // recalculate delay time from chopper position to monitor position
-      auto detector1   = inputWS->getDetector(wsIndex);
+      auto detector1   = inputWS->getDetector(det1WSIndex);
       double mon1Distance = detector1->getDistance(*moderator);
       double TOF0      = mon1Distance/velocity;
 
@@ -89,7 +88,7 @@ namespace Mantid {
       auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
       ///<---------------------------------------------------
       */
-      auto baseSpectrum = inputWS->getSpectrum(wsIndex);
+      auto baseSpectrum = workingWS->getSpectrum(0);
       std::pair<double,double> TOF_range  = baseSpectrum->getXDataRange();
 
       double Period  = (0.5*1.e+6)/chopSpeed; // 0.5 because some choppers open twice.
@@ -106,9 +105,51 @@ namespace Mantid {
         guess_opening[i] = destUnit->singleFromTOF(guess_opening[i]);
       }
 
-      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
 
+    }
+    /**Build 2-spectra workspace in units of energy, used as source
+    *to identify actual monitors spectra 
+    *@param inputWS shared pointer to initial workspace
+    *@param wsIndex0 -- returns workspace index for first detector.
+    *@return shared pointer to intermediate workspace, in units of energy
+    *        used to fit monitor's spectra.
+    */
+    API::MatrixWorkspace_sptr GetAllEi::buildWorkspaceToFit(
+      const API::MatrixWorkspace_sptr &inputWS, size_t &wsIndex0){
+
+
+
+        // at this stage all properties are validated so its safe to access them without
+        // additional checks.
+        specid_t specNum1 = getProperty("Monitor1SpecID");
+        wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
+        specid_t specNum2 = getProperty("Monitor2SpecID");
+        size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
+        auto pSpectr    = inputWS->getSpectrum(wsIndex0);
+        size_t XLength  = pSpectr->dataX().size();
+        size_t YLength  = pSpectr->dataY().size();
+        auto working_ws =API::WorkspaceFactory::Instance().create(inputWS,2,
+                             XLength, YLength);
+        working_ws->setX(0,*(pSpectr->dataX()));
+        working_ws->setData(0,*(pSpectr->dataY()),*(pSpectr->dataE()));
+        pSpectr    = inputWS->getSpectrum(wsIndex1);
+        working_ws->setX(1,*pSpectr->dataX());
+        working_ws->setData(1,*pSpectr->dataY(),*pSpectr->dataE());
+
+
+        if(inputWS->getAxis(0)->unit()->caption() != "Energy"){
+          API::IAlgorithm_sptr conv = createChildAlgorithm("ConvertUnits");
+          conv->initialize();
+          conv->setProperty("InputWorkspace",working_ws);
+          conv->setProperty("OutputWorkspace",working_ws);
+          conv->setPropertyValue("Target","Energy");
+          conv->setPropertyValue("EMode","Elastic");
+          conv->execute();
+
+        }
+
+        return working_ws;
     }
     /**function calculates list of provisional chopper opening times.
     *@param TOF_range -- std::pair containing min and max time, of signal
@@ -260,8 +301,9 @@ namespace Mantid {
         // process chopper delay in the units of degree (phase)
         auto pProperty  = (inputWS->run().getProperty(this->getProperty("ChopperDelayLog")));
         std::string units = pProperty->units();
+        // its chopper phase provided
         if (units=="deg" || units.c_str()[0] == -80){
-          chop_delay*=1.e+6/(360.*chop_speed); // conver in uSec
+          chop_delay*=1.e+6/(360.*chop_speed); // convert in uSec
         }
 
     }
@@ -281,16 +323,23 @@ namespace Mantid {
         result["Workspace"]="Input workspace can not be identified";
         return result;
       }
-      specid_t specNum = getProperty("MonitorSpectraID");
-      size_t wsIndex = static_cast<size_t>(specNum);
-      if (wsIndex != 0){
-        try{
-          wsIndex = inputWS->getIndexFromSpectrumNumber(specNum);
-        }catch(std::runtime_error &){
-          result["MonitorSpectraID"] = "Input workspace does not contain spectra with ID: "+boost::lexical_cast<std::string>(specNum);
-          return result;
-        }
+      if (!inputWS->isHistogramData()){
+        result["Workspace"] = "Only histogram workspaces are currently supported. Rebin input workspace first.";
       }
+
+      specid_t specNum1 = getProperty("Monitor1SpecID");
+      try{
+        size_t wsIndex = inputWS->getIndexFromSpectrumNumber(specNum1);
+      }catch(std::runtime_error &){
+        result["Monitor1SpecID"] = "Input workspace does not contain spectra with ID: "+boost::lexical_cast<std::string>(specNum1);
+      }
+      specid_t specNum2 = getProperty("Monitor2SpecID");
+      try{
+        size_t wsIndex = inputWS->getIndexFromSpectrumNumber(specNum2);
+      }catch(std::runtime_error &){
+        result["Monitor2SpecID"] = "Input workspace does not contain spectra with ID: "+boost::lexical_cast<std::string>(specNum2);
+      }
+
 
       /** Lambda to validate if appropriate log is present in workspace
       and if it's present, it is a time-series property

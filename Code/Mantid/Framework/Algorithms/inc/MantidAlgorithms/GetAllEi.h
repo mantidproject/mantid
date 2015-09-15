@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 
 namespace Mantid {
 
@@ -55,6 +57,11 @@ private:
   void init();
   void exec();
 protected: // for testing, private otherwise.
+  // prepare working workspace with appropriate monitor spectra for fitting 
+ API::MatrixWorkspace_sptr 
+    GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
+    size_t &wsIndex0);
+
    /**Return average time series log value for the appropriately filtered log*/
    double getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const std::string &propertyName,
           std::vector<Kernel::SplittingInterval> &splitter);
