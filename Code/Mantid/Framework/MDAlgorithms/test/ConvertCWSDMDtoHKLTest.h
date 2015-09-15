@@ -14,14 +14,13 @@ public:
   static ConvertCWSDMDtoHKLTest *createSuite() { return new ConvertCWSDMDtoHKLTest(); }
   static void destroySuite( ConvertCWSDMDtoHKLTest *suite ) { delete suite; }
 
-
-  void test_Something()
-  {
-    TS_FAIL( "You forgot to write a test!");
+  void test_init() {
+    ConvertCWSDMDtoHKL alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
   }
 
 
 };
-
 
 #endif /* MANTID_MDALGORITHMS_CONVERTCWSDMDTOHKLTEST_H_ */
