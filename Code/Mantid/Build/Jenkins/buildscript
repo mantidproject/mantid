@@ -147,7 +147,7 @@ if [[ "$BUILDPKG" == true ]]; then
   if [[ $(uname) != 'Darwin' ]]; then
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
-      # do nothing
+      echo "Performing release build" # do nothing
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
