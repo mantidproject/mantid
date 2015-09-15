@@ -203,7 +203,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Run PlotPeaksByLogValue
-  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.0, 0.70, true);
+  auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue");
   plotPeaks->setProperty("Input", plotPeakInput);
   plotPeaks->setProperty("OutputWorkspace", outputWsName);
   plotPeaks->setProperty("Function", function);
@@ -220,11 +220,11 @@ void ConvolutionFitSequential::exec() {
   ITableWorkspace_sptr outputWs = plotPeaks->getProperty("OutputWorkspace");
 
   // Delete workspaces
-  auto deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
+  auto deleter = createChildAlgorithm("DeleteWorkspace");
   deleter->setProperty("WorkSpace",
                        outputWsName + "_NormalisedCovarianceMatrices");
   deleter->executeAsChildAlg();
-  deleter = createChildAlgorithm("DeleteWorkspace", 0.70, 0.73, true);
+  deleter = createChildAlgorithm("DeleteWorkspace");
   deleter->setProperty("WorkSpace", outputWsName + "_Parameters");
   deleter->executeAsChildAlg();
 
@@ -268,7 +268,7 @@ void ConvolutionFitSequential::exec() {
 
   // Run ProcessIndirectFitParameters
   auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters", 0.73, 0.80, true);
+      createChildAlgorithm("ProcessIndirectFitParameters");
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", "MomentumTransfer");
@@ -279,7 +279,7 @@ void ConvolutionFitSequential::exec() {
   MatrixWorkspace_sptr resultWs = pifp->getProperty("OutputWorkspace");
 
   // Handle sample logs
-  auto logCopier = createChildAlgorithm("CopyLogs", 0.80, 0.85, true);
+  auto logCopier = createChildAlgorithm("CopyLogs");
   logCopier->setProperty("InputWorkspace", inputWs);
   logCopier->setProperty("OutputWorkspace", resultWs);
   logCopier->executeAsChildAlg();
@@ -298,7 +298,7 @@ void ConvolutionFitSequential::exec() {
       boost::lexical_cast<std::string>(LorentzNum);
 
   // Add String Logs
-  auto logAdder = createChildAlgorithm("AddSampleLog", 0.85, 0.90, true);
+  auto logAdder = createChildAlgorithm("AddSampleLog");
   for (auto it = sampleLogStrings.begin(); it != sampleLogStrings.end(); ++it) {
     logAdder->setProperty("Workspace", resultWs);
     logAdder->setProperty("LogName", it->first);
@@ -315,7 +315,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->executeAsChildAlg();
   }
   // Copy Logs to GroupWorkspace
-  logCopier = createChildAlgorithm("CopyLogs", 0.90, 0.93, true);
+  logCopier = createChildAlgorithm("CopyLogs");
   logCopier->setProperty("InputWorkspace", resultWs);
   std::string groupName = outputWsName + "_Workspaces";
   logCopier->setProperty("OutputWorkspace", groupName);
@@ -326,7 +326,7 @@ void ConvolutionFitSequential::exec() {
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outputWsName +
                                                                  "_Workspaces");
   auto groupWsNames = groupWs->getNames();
-  auto renamer = createChildAlgorithm("RenameWorkspace", 0.93, 1., true);
+  auto renamer = createChildAlgorithm("RenameWorkspace");
   for (int i = specMin; i < specMax + 1; i++) {
     renamer->setProperty("InputWorkspace", groupWsNames.at(i));
     std::string outName = outputWsName + "_";
@@ -452,7 +452,7 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
       "Workspace2D", inputWs->getNumberHistograms(), 2, 1);
   auto axis = inputWs->getAxis(1);
   if (axis->isSpectra()) {
-    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis", -1, -1, true);
+    auto convSpec = createChildAlgorithm("ConvertSpectrumAxis");
     // remains in ADS for use in embedded algorithm call
     convSpec->setAlwaysStoreInADS(true);
     convSpec->setProperty("InputWorkSpace", inputWs);
@@ -465,7 +465,7 @@ API::MatrixWorkspace_sptr ConvolutionFitSequential::convertInputToElasticQ(
     if (axis->unit()->unitID() != "MomentumTransfer") {
       throw std::runtime_error("Input must have axis values of Q");
     }
-    auto cloneWs = createChildAlgorithm("CloneWorkspace", -1, -1, true);
+    auto cloneWs = createChildAlgorithm("CloneWorkspace");
     cloneWs->setProperty("InputWorkspace", inputWs);
     cloneWs->setProperty("OutputWorkspace", wsName);
     cloneWs->executeAsChildAlg();
