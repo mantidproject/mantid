@@ -12,7 +12,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SplineSmoothing);
+DECLARE_ALGORITHM(SplineSmoothing)
 
 using namespace API;
 using namespace Kernel;
@@ -32,10 +32,10 @@ SplineSmoothing::~SplineSmoothing() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SplineSmoothing::name() const { return "SplineSmoothing"; };
+const std::string SplineSmoothing::name() const { return "SplineSmoothing"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SplineSmoothing::version() const { return 1; };
+int SplineSmoothing::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SplineSmoothing::category() const {
@@ -69,6 +69,12 @@ void SplineSmoothing::init() {
   errorSizeValidator->setLower(0.0);
   declareProperty("Error", 0.05, errorSizeValidator,
                   "The amount of error we wish to tolerate in smoothing");
+
+  auto numOfBreaks = boost::make_shared<BoundedValidator<int>>();
+  numOfBreaks->setLower(0);
+  declareProperty("MaxNumberOfBreaks", M_START_SMOOTH_POINTS, numOfBreaks,
+                  "To set the positions of the break-points, default 10 "
+                  "equally spaced real values in interval 0.0 - 1.0");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -80,6 +86,9 @@ void SplineSmoothing::exec() {
   int histNo = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   int order = static_cast<int>(getProperty("DerivOrder"));
 
+  // retrieving number of breaks
+  int maxBreaks = static_cast<int>(getProperty("MaxNumberOfBreaks"));
+
   m_inputWorkspacePointData = convertBinnedData(m_inputWorkspace);
   m_outputWorkspace = setupOutputWorkspace(m_inputWorkspacePointData, histNo);
 
@@ -90,7 +99,7 @@ void SplineSmoothing::exec() {
 
   Progress pgress(this, 0.0, 1.0, histNo);
   for (int i = 0; i < histNo; ++i) {
-    smoothSpectrum(i);
+    smoothSpectrum(i, maxBreaks);
     calculateSpectrumDerivatives(i, order);
     pgress.report();
   }
@@ -105,13 +114,14 @@ void SplineSmoothing::exec() {
 /** Smooth a single spectrum of the input workspace
  *
  * @param index :: index of the spectrum to smooth
+ * @param maxBreaks :: the number to set the positions of the break-points
  */
-void SplineSmoothing::smoothSpectrum(int index) {
+void SplineSmoothing::smoothSpectrum(int index, int maxBreaks) {
   m_cspline = boost::make_shared<BSpline>();
   m_cspline->setAttributeValue("Uniform", false);
 
   // choose some smoothing points from input workspace
-  selectSmoothingPoints(m_inputWorkspacePointData, index);
+  selectSmoothingPoints(m_inputWorkspacePointData, index, maxBreaks);
   performAdditionalFitting(m_inputWorkspacePointData, index);
 
   // compare the data set against our spline
@@ -204,10 +214,9 @@ SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) {
  * @param outputWorkspace :: The output workspace
  * @param row :: The row of spectra to use
  */
-void
-SplineSmoothing::calculateSmoothing(MatrixWorkspace_const_sptr inputWorkspace,
-                                    MatrixWorkspace_sptr outputWorkspace,
-                                    size_t row) const {
+void SplineSmoothing::calculateSmoothing(
+    MatrixWorkspace_const_sptr inputWorkspace,
+    MatrixWorkspace_sptr outputWorkspace, size_t row) const {
   // define the spline's parameters
   const auto &xIn = inputWorkspace->readX(row);
   size_t nData = xIn.size();
@@ -300,20 +309,26 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
  *
  * @param inputWorkspace :: The input workspace containing noisy data
  * @param row :: The row of spectra to use
+ * @param maxBreaks :: the number to set the positions of the break-points
  */
 void SplineSmoothing::selectSmoothingPoints(
-    MatrixWorkspace_const_sptr inputWorkspace, size_t row) {
+    MatrixWorkspace_const_sptr inputWorkspace, size_t row, int maxBreaks) {
   std::set<int> smoothPts;
   const auto &xs = inputWorkspace->readX(row);
   const auto &ys = inputWorkspace->readY(row);
 
   int xSize = static_cast<int>(xs.size());
-
+  // if retrienved value is default zero
+  if (maxBreaks == 0) {
+    setProperty("MaxNumberOfBreaks", xs.size());
+    maxBreaks = getProperty("MaxNumberOfBreaks");
+  }
   // number of points to start with
-  int numSmoothPts(M_START_SMOOTH_POINTS);
+  int numSmoothPts(maxBreaks);
 
   // evenly space initial points over data set
   int delta = xSize / numSmoothPts;
+
   for (int i = 0; i < xSize; i += delta) {
     smoothPts.insert(i);
   }
@@ -322,7 +337,7 @@ void SplineSmoothing::selectSmoothingPoints(
   bool resmooth(true);
   while (resmooth) {
     // if we're using all points then we can't do anything more.
-    if (smoothPts.size() >= xs.size() - 1)
+    if (smoothPts.size() > (unsigned)(maxBreaks + 2))
       break;
 
     addSmoothingPoints(smoothPts, xs.data(), ys.data());

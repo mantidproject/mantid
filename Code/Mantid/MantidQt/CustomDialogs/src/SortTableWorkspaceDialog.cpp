@@ -4,6 +4,7 @@
 #include "MantidQtCustomDialogs/SortTableWorkspaceDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Exception.h"
 
 
@@ -15,7 +16,7 @@ namespace CustomDialogs
 {
 
 // Declare the dialog. Name must match the class name
-DECLARE_DIALOG(SortTableWorkspaceDialog);
+DECLARE_DIALOG(SortTableWorkspaceDialog)
 
 
 /// Default constructor

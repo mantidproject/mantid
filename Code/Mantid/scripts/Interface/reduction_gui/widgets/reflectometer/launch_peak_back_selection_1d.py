@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 # used to parse files more easily
 from __future__ import with_statement
 
@@ -48,6 +49,27 @@ class DesignerMainWindow(QtGui.QMainWindow):
     x2=None
     y1=None
     y2=None
+    topHorizontalLayout = None
+    topHorizontalLayoutPeak = None
+    peakTo = None
+    peakFrom = None
+    topHorizontalLayoutBack = None
+    label = None
+    backTo = None
+    backFrom = None
+    topHorizontalLayoutLowres = None
+    lowresTo = None
+    lowresFrom = None
+    topHorizontalLayoutRight = None
+    log = None
+    linear = None
+    main_frame = None
+    mpl_toolbar = None
+    dpi = None
+    fig = None
+    canvas = None
+    bottomHorizontalLayout = None
+    _file_menu = None
 
     def __init__(self, wk1=None, wk2=None, parent=None, type='data'):
 
@@ -60,7 +82,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.y2 = mt2.readY(0)[:]
 
         self.dataType = type
-        if (type == 'data'):
+        if type == 'data':
             self._peakFromValue=float(parent._summary.data_peak_from_pixel.text())
             self._peakToValue=float(parent._summary.data_peak_to_pixel.text())
             self._backFromValue=float(parent._summary.data_background_from_pixel1.text())
@@ -252,7 +274,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def update_peak_back_selection_mode(self, bPeak):
         """Make sure that only 1 peak/back selection is activated at the same time"""
         self.peakSwitch.setChecked(bPeak)
-        self.backSwitch.setChecked(not(bPeak))
+        self.backSwitch.setChecked(not bPeak)
 
         if bPeak:
 #            class_name = self.from_peak_input.__class__.__name__
@@ -275,7 +297,7 @@ class DesignerMainWindow(QtGui.QMainWindow):
     def update_linear_log_selection_mode(self, bLinear):
         """Make sure that only linear or log are selected at the same time"""
         self.linear.setChecked(bLinear)
-        self.log.setChecked(not(bLinear))
+        self.log.setChecked(not bLinear)
 
     def update_linear_selection_mode(self):
         self.update_linear_log_selection_mode(True)

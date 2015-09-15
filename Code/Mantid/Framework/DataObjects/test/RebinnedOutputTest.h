@@ -31,6 +31,21 @@ public:
     ws = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
   }
 
+  void testClone() {
+    RebinnedOutput_sptr cloned(ws->clone().release());
+
+    // Swap ws with cloned pointer, such that we can reuse existing tests.
+    ws.swap(cloned);
+
+    // Run all other tests on ws.
+    testId();
+    testRepresentation();
+    testSetF();
+
+    // Undo swap, to avoid possible interferences.
+    ws.swap(cloned);
+  }
+
   void testId()
   {
     TS_ASSERT_EQUALS( ws->id(), "RebinnedOutput" );

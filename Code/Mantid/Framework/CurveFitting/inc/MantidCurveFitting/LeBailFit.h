@@ -6,11 +6,11 @@
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 #include <gsl/gsl_sf_erf.h>
 
@@ -253,7 +253,7 @@ private:
                         bool prevBetterRwp);
 
   ///  Limit proposed value in the specified boundary
-  double limitProposedValueInBound(Parameter param, double newvalue,
+  double limitProposedValueInBound(const Parameter &param, double newvalue,
                                    double direction, int choice);
 
   /// Book keep the (sopposed) best MC result

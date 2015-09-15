@@ -59,7 +59,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(SANSRunWindow);
+  DECLARE_SUBWINDOW(SANSRunWindow)
 
 
 using namespace MantidQt::MantidWidgets;
@@ -148,6 +148,8 @@ namespace
       settings->setProperty(name, value);
   }
 }
+
+
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -310,6 +312,13 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
   connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
+
+  // Setup the Transmission Settings
+  initTransmissionSettings();
+
+  // Set the validators
+  setValidators();
+
   readSettings();
 }
 /** Ssetup the controls for the Analysis Tab on this form
@@ -419,13 +428,27 @@ void SANSRunWindow::saveWorkspacesDialog()
 {
   //Qt::WA_DeleteOnClose must be set for the dialog to aviod a memory leak
   m_saveWorkspaces =
-    new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats);
+    new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats, m_uiForm.zeroErrorCheckBox->isChecked());
   //this dialog sometimes needs to run Python, pass this to Mantidplot via our runAsPythonScript() signal
   connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&, bool)),
     this, SIGNAL(runAsPythonScript(const QString&, bool)));
   //we need know if we have a pointer to a valid window or not
   connect(m_saveWorkspaces, SIGNAL(closing()),
     this, SLOT(saveWorkspacesClosed()));
+  // Connect the request for a zero-error-free workspace
+  // cpp-check does not understand that the input are two references
+  // cppcheck-suppress duplicateExpression
+  connect(m_saveWorkspaces, SIGNAL(createZeroErrorFreeWorkspace(QString& , QString&)),
+          // cppcheck-suppress duplicateExpression
+          this, SLOT(createZeroErrorFreeClone(QString&, QString&)));
+  // Connect the request for deleting a zero-error-free workspace
+  connect(m_saveWorkspaces, SIGNAL(deleteZeroErrorFreeWorkspace(QString&)),
+         this, SLOT(deleteZeroErrorFreeClone(QString&) ));
+  // Connect to change in the zero-error removal checkbox
+  connect(m_uiForm.zeroErrorCheckBox, SIGNAL(stateChanged(int)),
+          m_saveWorkspaces, SLOT(onSaveAsZeroErrorFreeChanged(int)));
+
+
   m_uiForm.saveSel_btn->setEnabled(false);
   m_saveWorkspaces->show();
 }
@@ -517,7 +540,7 @@ void SANSRunWindow::initWidgetMaps()
   m_allowed_batchtags.insert("background_trans",-1);
   m_allowed_batchtags.insert("background_direct_beam",-1);
   m_allowed_batchtags.insert("output_as",6);
-
+  m_allowed_batchtags.insert("user_file",7);
   //            detector info  
   // SANS2D det names/label map
     QHash<QString, QLabel*> labelsmap;
@@ -741,7 +764,7 @@ bool SANSRunWindow::loadUserFile()
     m_cfg_loaded = false;
     return false;
   }
-  
+
   QFile user_file(filetext);
   if( !user_file.open(QIODevice::ReadOnly) )
   {
@@ -751,14 +774,14 @@ bool SANSRunWindow::loadUserFile()
   }
 
   user_file.close();
-  
+
   //Clear the def masking info table.
   int mask_table_count = m_uiForm.mask_table->rowCount();
   for( int i = mask_table_count - 1; i >= 0; --i )
   {
     m_uiForm.mask_table->removeRow(i);
   }
-  
+
   QString pyCode = "i.Clean()";
   pyCode += "\ni." + getInstrumentClass();
   pyCode += "\ni.ReductionSingleton().user_settings =";
@@ -882,6 +905,9 @@ bool SANSRunWindow::loadUserFile()
     "print i.ReductionSingleton().transmission_calculator.interpolate"
     ).trimmed() == "True");
 
+  // Transmission settings
+  setTransmissionSettingsFromUserFile();
+
   //Direct efficiency correction
   m_uiForm.direct_file->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.detector_file('rear')"));
@@ -904,7 +930,6 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.enableFrontFlood_ck->setChecked( ! m_uiForm.floodFrontFile->isEmpty() );
   m_uiForm.floodFrontFile->setEnabled(m_uiForm.enableFrontFlood_ck->checkState()
                                      == Qt::Checked);
-  
 
   //Scale factor
   dbl_param = runReduceScriptFunction(
@@ -920,10 +945,16 @@ bool SANSRunWindow::loadUserFile()
   // from the ticket #5942 both detectors have center coordinates
   dbl_param = runReduceScriptFunction(
     "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
-  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*1000.0));
+  // get the scale factor1 for the beam centre to scale it correctly
+  double dbl_paramsf = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center_scale_factor1()").toDouble();
+  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*dbl_paramsf));
+  // get scale factor2 for the beam centre to scale it correctly
+  dbl_paramsf = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center_scale_factor2()").toDouble();
   dbl_param = runReduceScriptFunction(
     "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
-  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*1000.0));
+  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*dbl_paramsf));
   // front
   dbl_param = runReduceScriptFunction(
     "print i.ReductionSingleton().get_beam_center('front')[0]").toDouble();
@@ -945,10 +976,16 @@ bool SANSRunWindow::loadUserFile()
   {
     m_uiForm.gravity_check->setChecked(false);
   }
-  
+
+  // Read the extra length for the gravity correction
+  const double extraLengthParam =  runReduceScriptFunction(
+    "print i.ReductionSingleton().to_Q.get_extra_length()").toDouble();
+  m_uiForm.gravity_extra_length_line_edit->setText(QString::number(extraLengthParam));
+
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.det_selection").trimmed();
+
   if (detName == "REAR" || detName == "MAIN"){
      m_uiForm.detbank_sel->setCurrentIndex(0);
   }else if (detName == "FRONT" || detName == "HAB"){
@@ -1856,7 +1893,7 @@ void SANSRunWindow::selectDataDir()
  */
 void SANSRunWindow::selectUserFile()
 {
-  if( !browseForFile("Select a user file", m_uiForm.userfile_edit) )
+  if( !browseForFile("Select a user file", m_uiForm.userfile_edit, "Text files (*.txt)") )
   {
     return;
   }
@@ -2262,7 +2299,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   {
     exec_reduce += "False";
   }
-  exec_reduce += ")\n";
+  // Take into acount of the additional length
+  exec_reduce += ", extra_length=" + m_uiForm.gravity_extra_length_line_edit->text().trimmed() + ")\n";
+
   //Sample offset
   exec_reduce += "i.SetSampleOffset('"+
                  m_uiForm.smpl_offset->text()+"')\n";
@@ -2275,6 +2314,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += "i.SetTransSpectrum('" + m_uiForm.trans_monitor->text().trimmed() + "',";
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ")\n";
+
+  //Set the Transmision settings
+  writeTransmissionSettingsToPythonScript(exec_reduce);
 
   // set the user defined center (Geometry Tab)
   // this information is used just after loading the data in order to move to the center
@@ -2434,6 +2476,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 
     py_code += "combineDet=";
     py_code += combineDetOption;
+    py_code += ",";
+    py_code += " save_as_zero_error_free=";
+    py_code += m_uiForm.zeroErrorCheckBox->isChecked() ? "True" : "False";
     py_code += ")";
   }
 
@@ -2459,8 +2504,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     shift = runReduceScriptFunction("print fit_settings['shift']").trimmed().toDouble();
   }
   // update gui
-  m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 3));
-  m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 3));
+  m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 8));
+  m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 8));
   // first process pythonStdOut
   QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
   if ( pythonDiag.count() > 1 )
@@ -2482,6 +2527,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
 
   std::cout << "\n\n" << py_code.toStdString() << "\n\n";
+
   runReduceScriptFunction(py_code);
   }
   // Mark that a reload is necessary to rerun the same reduction
@@ -2778,6 +2824,17 @@ void SANSRunWindow::handleDefSaveClick()
     QMessageBox::warning(this, "Filename required", "A filename must be entered into the text box above to save this file");
   }
 
+  // If we save with a zero-error-free correction we need to swap the 
+  QString workspaceNameBuffer = m_outputWS;
+  QString clonedWorkspaceName = m_outputWS + "_cloned_temp";
+  if (m_uiForm.zeroErrorCheckBox->isChecked()) {
+    createZeroErrorFreeClone(m_outputWS, clonedWorkspaceName);
+    if (AnalysisDataService::Instance().doesExist(clonedWorkspaceName.toStdString())) {
+      m_outputWS = clonedWorkspaceName;
+    }
+  }
+
+
   const QStringList algs(getSaveAlgs());
   QString saveCommand;
   for(QStringList::const_iterator alg = algs.begin(); alg != algs.end(); ++alg)
@@ -2825,6 +2882,16 @@ void SANSRunWindow::handleDefSaveClick()
 
   saveCommand += "print 'success'\n";
   QString result = runPythonCode(saveCommand).trimmed();
+
+  // Revert changes and delete the zero-free workspace
+  if (this->m_uiForm.zeroErrorCheckBox->isChecked()) {
+    if (AnalysisDataService::Instance().doesExist(clonedWorkspaceName.toStdString())) {
+      deleteZeroErrorFreeClone(clonedWorkspaceName);
+    }
+  }
+  m_outputWS = workspaceNameBuffer;
+
+
   if ( result != "success" )
   {
     QMessageBox::critical(this, "Error saving workspace", "Problem encountered saving workspace, does it still exist. There may be more information in the results console?");
@@ -2955,10 +3022,15 @@ void SANSRunWindow::handleInstrumentChange()
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.cur_detector().name()");
-  int ind = m_uiForm.detbank_sel->findText(detect);  
-  if( ind != -1 )
-  {
-    m_uiForm.detbank_sel->setCurrentIndex(ind);
+  QString detectorSelection = runReduceScriptFunction(
+    "print i.ReductionSingleton().instrument.det_selection").trimmed();
+  int ind = m_uiForm.detbank_sel->findText(detect);
+  // We set the detector selection only if nothing is set yet.
+  // Previously, we didn't handle merged and both at this point
+  if (detectorSelection == m_constants.getPythonEmptyKeyword() || detectorSelection.isEmpty()) {
+    if( ind != -1 ) {
+      m_uiForm.detbank_sel->setCurrentIndex(ind);
+    }
   }
 
   m_uiForm.beam_rmin->setText("60");
@@ -3793,8 +3865,367 @@ void SANSRunWindow::openHelpPage()
   QDesktopServices::openUrl(QUrl(helpPageUrl));
 }
 
+// Set the validators for inputs
+void SANSRunWindow::setValidators()
+{
+  // Validator policies
+  QDoubleValidator* mustBeDouble = new QDoubleValidator(this);
+
+  // For gravity extra length
+  m_uiForm.gravity_extra_length_line_edit->setValidator(mustBeDouble);
+}
+
+/**
+ * Create a zero-error free workspace clone of a reduced workspace, ie one which has been through either
+ * Q1D or Qxy
+ * @param originalWorkspaceName :: The name of the original workspace which might contain errors with 0 value.
+ * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
+ * @returns The name of the cloned workspace
+ */
+void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QString& clonedWorkspaceName) {
+  if (workspaceExists(originalWorkspaceName) && isValidWsForRemovingZeroErrors(originalWorkspaceName)) {
+    // Run the python script which creates the cloned workspace
+    QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
+    pythonCode += originalWorkspaceName + "',";
+    pythonCode += " output_workspace_name='" + clonedWorkspaceName + "')\n";
+    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
+    QString result(runPythonCode(pythonCode, false));
+    result = result.simplified();
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
+      g_log.warning("Error creating a zerror error free cloned workspace. Will save original workspace. More info: " + result.toStdString());
+    }
+  }
+}
+
+/**
+ * Destroy a zero-error free workspace clone.
+ * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
+ */
+void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
+  if (workspaceExists(clonedWorkspaceName)) {
+    // Run the python script which destroys the cloned workspace
+    QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
+    pythonCode += clonedWorkspaceName + "')\n";
+    pythonCode += "print '" + m_constants.getPythonSuccessKeyword() + "'\n";
+    QString result(runPythonCode(pythonCode, false));
+    result = result.simplified();
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
+      g_log.warning("Error deleting a zerror error free cloned workspace. More info: " + result.toStdString());
+    }
+  }
+}
+
+/**
+ * Check if the workspace can have a zero error correction performed on it
+ * @param wsName :: The name of the workspace.
+ */
+bool SANSRunWindow::isValidWsForRemovingZeroErrors(QString& wsName) {
+    QString pythonCode("\nprint i.IsValidWsForRemovingZeroErrors(input_workspace_name='");
+    pythonCode += wsName + "')";
+    pythonCode += "\nprint '" + m_constants.getPythonSuccessKeyword() + "'";
+    QString result(runPythonCode(pythonCode, false));
+    result = result.simplified();
+    bool isValid = true;
+    if (result != m_constants.getPythonSuccessKeyword()) {
+      result.replace(m_constants.getPythonSuccessKeyword(), "");
+      g_log.warning("Not a valid workspace for zero error replacement. Will save original workspace. More info: " + result.toStdString());
+      isValid = false;
+    }
+    return isValid;
+}
+
+/**
+ * Set the M3M4 check box and line edit field logic
+ * @param setting :: the checked item
+ * @param isNowChecked :: What is the current check-state of the setting?
+ */
+void SANSRunWindow::setM3M4Logic(TransSettings setting, bool isNowChecked) {
+  switch (setting) {
+    case TransSettings::M3:
+      this->m_uiForm.trans_M4_check_box->setChecked(false);
+      break;
+    case TransSettings::M4:
+      this->m_uiForm.trans_M3_check_box->setChecked(false);
+      break;
+    default:
+      return;
+  }
+
+  // Disable all ROI, Radius and Mask related options
+  setRadiusAndMaskLogic(false);
+  setROIAndMaskLogic(false);
+
+  // Uncheck the both Radius and ROI
+  this->m_uiForm.trans_radius_check_box->setChecked(false);
+  this->m_uiForm.trans_roi_files_checkbox->setChecked(false);
+
+  // Enable the M3M4 line edit field
+  this->m_uiForm.trans_M3M4_line_edit->setEnabled(isNowChecked);
+}
+
+
+/**
+ * Set beam stop logic for Radius, ROI and Mask
+ * @param setting :: the checked item
+ * @param isNowChecked :: What is the current check-state of the setting?
+ */
+void SANSRunWindow::setBeamStopLogic(TransSettings setting, bool isNowChecked) {
+  if (setting == TransSettings::RADIUS) {
+    setRadiusAndMaskLogic(isNowChecked);
+    // If we are turning off the radius checkbox and have then ROI checkbox
+    // enabled, then we don' want to turn off the mask
+    if (this->m_uiForm.trans_roi_files_checkbox->isChecked() && !isNowChecked) {
+      this->m_uiForm.trans_masking_line_edit->setEnabled(true);
+    }
+  }
+  else if (setting == TransSettings::ROI) {
+    setROIAndMaskLogic(isNowChecked);
+    // If we are turning off the radius checkbox and have then ROI checkbox
+    // enabled, then we don' want to turn off the mask
+    if (this->m_uiForm.trans_radius_check_box->isChecked() && !isNowChecked) {
+      this->m_uiForm.trans_masking_line_edit->setEnabled(true);
+    }
+  } else {
+    return;
+  }
+
+  // Disable the M3M4 line edit field and uncheck the M3 and M4 box
+  if (isNowChecked) {
+    this->m_uiForm.trans_M3M4_line_edit->setEnabled(false);
+    this->m_uiForm.trans_M3_check_box->setChecked(false);
+    this->m_uiForm.trans_M4_check_box->setChecked(false);
+  }
+}
+
+/**
+ * Reads the transmission settings from the user file and sets it in the GUI
+ */
+void SANSRunWindow::setTransmissionSettingsFromUserFile() {
+  // Reset all trans-related fields
+  resetAllTransFields();
+
+  // Read the Radius settings
+  QString transmissionRadiusRequest("\nprint i.GetTransmissionRadiusInMM()");
+  QString resultTransmissionRadius(runPythonCode(transmissionRadiusRequest, false));
+  resultTransmissionRadius = resultTransmissionRadius.simplified();
+  if (resultTransmissionRadius != m_constants.getPythonEmptyKeyword()) {
+      this->m_uiForm.trans_radius_line_edit->setText(resultTransmissionRadius);
+      this->m_uiForm.trans_radius_check_box->setChecked(true);
+      setBeamStopLogic(TransSettings::RADIUS, true);
+  }
+
+  // Read the ROI settings
+  QString transmissionROIRequest("\nprint i.GetTransmissionROI()");
+  QString resultTransmissionROI(runPythonCode(transmissionROIRequest, false));
+  resultTransmissionROI = resultTransmissionROI.simplified();
+  if (resultTransmissionROI != m_constants.getPythonEmptyKeyword()) {
+      resultTransmissionROI = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionROI+ ")", false);
+      this->m_uiForm.trans_roi_files_line_edit->setText(resultTransmissionROI);
+      this->m_uiForm.trans_roi_files_checkbox->setChecked(true);
+      setBeamStopLogic(TransSettings::ROI, true);
+  }
+
+
+  // Read the MASK settings
+  QString transmissionMaskRequest("\nprint i.GetTransmissionMask()");
+  QString resultTransmissionMask(runPythonCode(transmissionMaskRequest, false));
+  resultTransmissionMask = resultTransmissionMask.simplified();
+  if (resultTransmissionMask != m_constants.getPythonEmptyKeyword()) {
+    resultTransmissionMask = runPythonCode("\nprint i.ConvertFromPythonStringList(to_convert=" + resultTransmissionMask+ ")", false);
+    this->m_uiForm.trans_masking_line_edit->setText(resultTransmissionMask);
+  }
+
+  // Read the Transmission Monitor Spectrum Shift
+  QString transmissionMonitorSpectrumShiftRequest("\nprint i.GetTransmissionMonitorSpectrumShift()");
+  QString resultTransmissionMonitorSpectrumShift(runPythonCode(transmissionMonitorSpectrumShiftRequest, false));
+  resultTransmissionMonitorSpectrumShift = resultTransmissionMonitorSpectrumShift.simplified();
+  if (resultTransmissionMonitorSpectrumShift != m_constants.getPythonEmptyKeyword()) {
+    this->m_uiForm.trans_M3M4_line_edit->setText(resultTransmissionMonitorSpectrumShift);
+  }
+
+  // Read Transmission Monitor Spectrum, we expect either 3 or 4. If this is selected, then this takes precedence over
+  // the radius, roi and mask settings
+  QString transmissionMonitorSpectrumRequest("\nprint i.GetTransmissionMonitorSpectrum()");
+  QString resultTransmissionMonitorSpectrum(runPythonCode(transmissionMonitorSpectrumRequest, false));
+  resultTransmissionMonitorSpectrum = resultTransmissionMonitorSpectrum.simplified();
+  if (resultTransmissionMonitorSpectrum != m_constants.getPythonEmptyKeyword()) {
+    if (resultTransmissionMonitorSpectrum == "3") {
+      this->m_uiForm.trans_M3_check_box->setChecked(true);
+      setM3M4Logic(TransSettings::M3, true);
+    } else if (resultTransmissionMonitorSpectrum == "4") {
+      this->m_uiForm.trans_M4_check_box->setChecked(true);
+      setM3M4Logic(TransSettings::M4, true);
+    } else {
+      this->m_uiForm.trans_M3_check_box->setChecked(false);
+      this->m_uiForm.trans_M4_check_box->setChecked(false);
+      setM3M4Logic(TransSettings::M3,false);
+      setM3M4Logic(TransSettings::M4, false);
+      g_log.notice("No transmission monitor, transmission radius nor trasmission ROI was set. The reducer will use the default value.");
+    }
+  }
+}
+
+/**
+ * Initialize the transmission settings. We are setting up checkboxes
+ * and want to make use of the clicked signal in order to distinguish
+ * between user-induced and programmatic changes to the checkbox.
+ */
+void SANSRunWindow::initTransmissionSettings() {
+  QObject::connect(m_uiForm.trans_M3_check_box, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionM3CheckboxChanged()));
+  QObject::connect(m_uiForm.trans_M4_check_box, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionM4CheckboxChanged()));
+  QObject::connect(m_uiForm.trans_radius_check_box, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionRadiusCheckboxChanged()));
+  QObject::connect(m_uiForm.trans_roi_files_checkbox, SIGNAL(clicked()),
+                   this, SLOT(onTransmissionROIFilesCheckboxChanged()));
+
+  // Set the Tooltips
+  const QString m3CB = "Selects the monitor spectrum 3\n"
+                       "for the transmission calculation.";
+  const QString m4CB = "Selects the monitor spectrum 4\n"
+                       "for the transmission calculation.";
+  const QString shift = "Sets the shift of the selected monitor in mm.";
+  const QString radiusCB = "Selects a radius when using the beam stop\n"
+                           "for the transmission calculation.";
+  const QString radius = "Sets a radius in mm when using the beam stop\n"
+                         "for the transmission calculation.";
+  const QString roiCB = "Selects a comma-separated list of ROI files\n"
+                        "when using the beam stop for the\n"
+                        "transmission calculation.";
+  const QString roi = "Sets a comma-separated list of ROI files\n"
+                      "when using the beam stop for the\n"
+                      "transmission calculation.";
+  const QString mask = "Sets a comma-separated list of Mask files\n"
+                       "when using the beam stop for the\n"
+                       "transmission calculation.";
+
+  m_uiForm.trans_M3_check_box->setToolTip(m3CB);
+  m_uiForm.trans_M4_check_box->setToolTip(m4CB);
+  m_uiForm.trans_M3M4_line_edit->setToolTip(shift);
+  m_uiForm.trans_radius_check_box->setToolTip(radiusCB);
+  m_uiForm.trans_radius_line_edit->setToolTip(radius);
+  m_uiForm.trans_roi_files_checkbox->setToolTip(roiCB);
+  m_uiForm.trans_roi_files_line_edit->setToolTip(roi);
+  m_uiForm.trans_masking_line_edit->setToolTip(mask);
+}
+
+/**
+ * React to a change of the M3 transmission monitor spectrum checkbox
+ */
+void SANSRunWindow::onTransmissionM3CheckboxChanged() {
+  setM3M4Logic(TransSettings::M3, this->m_uiForm.trans_M3_check_box->isChecked());
+}
+
+/**
+ * React to a change of the M3 transmission monitor spectrum checkbox
+ */
+void SANSRunWindow::onTransmissionM4CheckboxChanged() {
+  setM3M4Logic(TransSettings::M4, this->m_uiForm.trans_M4_check_box->isChecked());
+}
+
+/**
+ * React to the change of the Radius checkbox
+ */
+void SANSRunWindow::onTransmissionRadiusCheckboxChanged() {
+  setBeamStopLogic(TransSettings::RADIUS, this->m_uiForm.trans_radius_check_box->isChecked());
+}
+
+/**
+ * React to the change of the ROI file checkbox
+ */
+void SANSRunWindow::onTransmissionROIFilesCheckboxChanged() {
+  setBeamStopLogic(TransSettings::ROI, this->m_uiForm.trans_roi_files_checkbox->isChecked());
+}
+
+/**
+ * Set the radius and the mask logic
+ * @param isNowChecked :: The check state
+ */
+void SANSRunWindow::setRadiusAndMaskLogic(bool isNowChecked) {
+  this->m_uiForm.trans_masking_line_edit->setEnabled(isNowChecked);
+  this->m_uiForm.trans_radius_line_edit->setEnabled(isNowChecked);
+}
+
+/**
+ * Set the ROI and the mask logic
+ * @param isNowChecked :: The check state
+ */
+void SANSRunWindow::setROIAndMaskLogic(bool isNowChecked) {
+  this->m_uiForm.trans_masking_line_edit->setEnabled(isNowChecked);
+  this->m_uiForm.trans_roi_files_line_edit->setEnabled(isNowChecked);
+}
+
+/**
+ * Write the transmission settings to a python code string. If there
+ * is a transmission monitor set use it, otherwise check if there is
+ * a radius or a ROI being set.
+ * @param pythonCode :: The python code string
+ */
+void SANSRunWindow::writeTransmissionSettingsToPythonScript(QString& pythonCode) {
+  auto m3 = m_uiForm.trans_M3_check_box->isChecked();
+  auto m4 = m_uiForm.trans_M4_check_box->isChecked();
+
+  if (m3 || m4) {
+    // Handle M3/M4 settings and the TRANSPEC
+    auto spectrum = m3 ? 3 : 4;
+    pythonCode+="i.SetTransmissionMonitorSpectrum(trans_mon=" + QString::number(spectrum) + ")\n";
+
+    auto transSpec = m_uiForm.trans_M3M4_line_edit->text();
+    if (!transSpec.isEmpty()) {
+      pythonCode+="i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" + transSpec + ")\n";
+    }
+  } else {
+    // Handle Radius
+    auto radius = m_uiForm.trans_radius_line_edit->text();
+    if (m_uiForm.trans_radius_check_box->isChecked() && !radius.isEmpty()) {
+      pythonCode+="i.SetTransmissionRadiusInMM(trans_radius=" + radius + ")\n";
+    }
+    // Handle ROI
+    auto roi = m_uiForm.trans_roi_files_line_edit->text();
+    if (m_uiForm.trans_roi_files_checkbox->isChecked() && !roi.isEmpty()) {
+      roi = "'" + roi.simplified() + "'";
+      roi = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" + roi + ")", false);
+      pythonCode+="i.SetTransmissionROI(trans_roi_files=" + roi + ")\n";
+    }
+    // Handle Mask
+    auto mask = m_uiForm.trans_masking_line_edit->text();
+    if (!mask.isEmpty()) {
+      mask = "'" + mask.simplified() + "'";
+      mask = runPythonCode("\nprint i.ConvertToPythonStringList(to_convert=" + mask + ")", false);
+      pythonCode+="i.SetTransmissionMask(trans_mask_files=" + mask + ")\n";
+    }
+
+    // Unset a potential monitor setting which had been set by the user file.
+     pythonCode+="i.UnsetTransmissionMonitorSpectrum()\n";
+  }
+}
+
+/**
+ * Set the enabled state for all trans-related fields
+ */
+void SANSRunWindow::resetAllTransFields() {
+  bool state = false;
+  m_uiForm.trans_radius_line_edit->setEnabled(state);
+  m_uiForm.trans_radius_line_edit->clear();
+
+  m_uiForm.trans_roi_files_line_edit->setEnabled(state);
+  m_uiForm.trans_roi_files_line_edit->clear();
+
+  m_uiForm.trans_masking_line_edit->setEnabled(state);
+  m_uiForm.trans_masking_line_edit->clear();
+
+  m_uiForm.trans_M3M4_line_edit->setEnabled(state);
+  m_uiForm.trans_M3M4_line_edit->clear();
+
+  m_uiForm.trans_M3_check_box->setChecked(state);
+  m_uiForm.trans_M4_check_box->setChecked(state);
+  m_uiForm.trans_roi_files_checkbox->setChecked(state);
+  m_uiForm.trans_radius_check_box->setChecked(state);
+}
+
 } //namespace CustomInterfaces
 
 } //namespace MantidQt
-
-

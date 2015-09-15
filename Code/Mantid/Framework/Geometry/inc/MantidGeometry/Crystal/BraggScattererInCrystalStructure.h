@@ -9,7 +9,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** BraggScattererInCrystalStructure
+/**
+    @class BraggScattererInCrystalStructure
 
     This class provides an extension of BraggScatterer, suitable
     for scatterers that are part of a crystal structure. Information about
@@ -71,6 +72,7 @@ protected:
 
   virtual void declareProperties();
 
+  Kernel::V3D getPositionFromString(const std::string &positionString) const;
   void recalculateEquivalentPositions();
 
   Kernel::V3D m_position;

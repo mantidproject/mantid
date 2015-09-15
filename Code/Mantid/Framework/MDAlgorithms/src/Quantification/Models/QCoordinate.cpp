@@ -4,7 +4,7 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-DECLARE_FOREGROUNDMODEL(QCoordinate);
+DECLARE_FOREGROUNDMODEL(QCoordinate)
 
 namespace // anonymous
     {
@@ -15,6 +15,8 @@ const char *ATTR_NAMES[NATTS] = {"Coord"};
 /// 2 \pi
 const double TWO_PI = 2. * M_PI;
 }
+
+QCoordinate::QCoordinate() : ForegroundModel(), m_coord(0) {}
 
 /**
  * Initialize the model

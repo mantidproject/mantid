@@ -98,8 +98,8 @@ public:
   bool classTypeExists(const std::string &classType) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(NexusDescriptor);
-  DISABLE_COPY_AND_ASSIGN(NexusDescriptor);
+  DISABLE_DEFAULT_CONSTRUCT(NexusDescriptor)
+  DISABLE_COPY_AND_ASSIGN(NexusDescriptor)
 
   /// Initialize object with filename
   void initialize(const std::string &filename);

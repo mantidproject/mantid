@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 #define MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -22,15 +22,25 @@ public:
   OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
   ~OffsetsWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<OffsetsWorkspace> clone() const {
+    return std::unique_ptr<OffsetsWorkspace>(doClone());
+  }
+
   /** Gets the name of the workspace type
   @return Standard string name  */
   virtual const std::string id() const { return "OffsetsWorkspace"; }
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  OffsetsWorkspace(const OffsetsWorkspace &other) : SpecialWorkspace2D(other) {}
+  /// Protected copy assignment operator. Assignment not implemented.
+  OffsetsWorkspace &operator=(const OffsetsWorkspace &other);
+
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  OffsetsWorkspace(const OffsetsWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  OffsetsWorkspace &operator=(const OffsetsWorkspace &);
+  virtual OffsetsWorkspace *doClone() const {
+    return new OffsetsWorkspace(*this);
+  }
 };
 
 /// shared pointer to the OffsetsWorkspace class

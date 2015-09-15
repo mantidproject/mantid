@@ -74,3 +74,5 @@ This is just a brief description for how to use this algorithm.
 | ``7. ``\ *``Save``*\ ``: save current work and history to a Nexus file.``
 
 .. categories::
+
+.. sourcelink::

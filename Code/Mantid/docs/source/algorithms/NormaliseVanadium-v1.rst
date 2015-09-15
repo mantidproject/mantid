@@ -33,3 +33,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

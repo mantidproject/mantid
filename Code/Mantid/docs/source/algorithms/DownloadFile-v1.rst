@@ -11,8 +11,8 @@ Description
 -----------
 
 This is a simple algorithm that will download the contents of a url address to a file.
-It can support http:// and https:// based urls, and if the method is not supplied then http:// will be assumed.
-For example: If the address is www.mantidproject.org, then this will be adjusted to http://www.mantidproject.org.
+It can support :literal:`http://` and :literal:`https://` based urls, and if the method is not supplied then :literal:`http://` will be assumed.
+For example: If the address is :literal:`www.mantidproject.org`, then this will be adjusted to :literal:`http://www.mantidproject.org`.
 
 
 Usage
@@ -20,7 +20,7 @@ Usage
 
 **Example - http**
 
-.. testcode:: DownloadFileHttp
+.. code-block:: python
 
     #import the os path libraries for directory functions
     import os
@@ -33,20 +33,16 @@ Usage
 
     print "File Exists:", os.path.exists(savefile)
 
-.. testcleanup:: DownloadFileHttp
-
-    os.remove(savefile)
-
 Output:
 
-.. testoutput:: DownloadFileHttp
+.. code-block:: python
 
     File Exists: True
 
 
 **Example - https**
 
-.. testcode:: DownloadFileHttps
+.. code-block:: python
 
     #import the os path libraries for directory functions
     import os
@@ -59,15 +55,13 @@ Output:
 
     print "File Exists:", os.path.exists(savefile)
 
-.. testcleanup:: DownloadFileHttps
-
-    os.remove(savefile)
-
 Output:
 
-.. testoutput:: DownloadFileHttps
+.. code-block:: python
 
     File Exists: True
 
 .. categories::
+
+.. sourcelink::
 

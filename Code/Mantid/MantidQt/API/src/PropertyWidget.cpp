@@ -171,7 +171,7 @@ namespace API
   /**
    * Destructor.
    */
-  ClickableLabel::~ClickableLabel() {};
+  ClickableLabel::~ClickableLabel() {}
 
   /**
    * Catches the mouse press event and emits the signal.

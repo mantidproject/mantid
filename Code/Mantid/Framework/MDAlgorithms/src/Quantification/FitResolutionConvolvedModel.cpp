@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
@@ -11,7 +12,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(FitResolutionConvolvedModel);
+DECLARE_ALGORITHM(FitResolutionConvolvedModel)
 
 using Kernel::Direction;
 using Kernel::ListValidator;

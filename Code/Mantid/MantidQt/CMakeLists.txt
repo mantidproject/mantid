@@ -1,6 +1,7 @@
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
+find_package ( QScintilla REQUIRED )
 
 include ( UseSystemQt4 )
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )

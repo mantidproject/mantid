@@ -7,12 +7,19 @@
 
 #include <fstream>
 #include <Poco/File.h>
+using namespace Mantid::API;
+
+namespace {
+  const size_t nSpec = 1;
+  const size_t nBins = 10;
+}
+
 
 class SaveRKHTest : public CxxTest::TestSuite
 {
 public:
 
-    static SaveRKHTest *createSuite() { return new SaveRKHTest(); }
+  static SaveRKHTest *createSuite() { return new SaveRKHTest(); }
   static void destroySuite(SaveRKHTest *suite) { delete suite; }
   ///Constructor
   SaveRKHTest() : outputFile("SAVERKH.out")
@@ -34,7 +41,6 @@ public:
  
     TS_ASSERT_THROWS_NOTHING(testAlgorithm2.initialize());
     TS_ASSERT_EQUALS(testAlgorithm2.isInitialized(), true);
- 
   }
 
   void testExecHorizontal()
@@ -43,9 +49,7 @@ public:
     
     //No parameters have been set yet, so it should throw
     TS_ASSERT_THROWS(testAlgorithm1.execute(), std::runtime_error);
-    
     //Need a test workspace to use as input
-    using namespace Mantid::API;
     MatrixWorkspace_sptr inputWS1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 1.0);
     inputWS1->isDistribution(true);
 
@@ -177,12 +181,107 @@ public:
     file2.close();
   }
 
+  void testExecWithDx() {
+
+    if ( !testAlgorithm3.isInitialized() ) testAlgorithm3.initialize();
+
+    //No parameters have been set yet, so it should throw
+    TS_ASSERT_THROWS(testAlgorithm3.execute(), std::runtime_error);
+    //Need a test workspace to use as input
+    auto inputWS3 = createInputWorkspaceHistoWithXerror();
+    inputWS3->isDistribution(false);
+
+    //Register workspace
+    AnalysisDataService::Instance().add("testInputThree", inputWS3);
+
+    testAlgorithm3.setPropertyValue("InputWorkspace", "testInputThree");
+    testAlgorithm3.setPropertyValue("Filename", outputFile);
+    outputFile = testAlgorithm3.getPropertyValue("Filename"); //get absolute path
+    testAlgorithm3.setProperty<bool>("Append", false);
+
+    //Execute the algorithm
+    TS_ASSERT_THROWS_NOTHING( testAlgorithm3.execute() );
+    TS_ASSERT( testAlgorithm3.isExecuted() );
+
+    //Check if the file exists
+    TS_ASSERT( Poco::File(outputFile).exists() );
+
+    //Open it and check a few lines
+    std::ifstream file(outputFile.c_str());
+
+    TS_ASSERT(file);
+
+    //Bury the first 5 lines and then read the next
+    int count(0);
+    std::string fileline;
+    while( ++count < 7 )
+    {
+      getline(file, fileline);
+    }
+    std::istringstream strReader(fileline);
+    double x(0.0), y(0.0), err(0.0), dx(0.0);
+    strReader >> x >> y >> err >> dx;
+
+    //Test values
+    TSM_ASSERT_DELTA("Expecting mean of 0 and 1", x, 0.5, 1e-08);  
+    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", y, 1.0, 1e-08);
+    TSM_ASSERT_DELTA("Expecting mean of 1 and 1",err, 1.0, 1e-06);
+    TSM_ASSERT_DELTA("Expecting mean of sqrt(0) and sqrt(1)",dx, 0.5, 1e-06);
+
+    //We are at the first data entry now. We step over
+    // Three more entries
+    count = 0;
+    while( ++count < 4)
+    {
+      getline(file, fileline);
+    }
+
+    x = 0.0;
+    y = 0.0;
+    err = 0.0;
+    dx = 0.0;
+    strReader.clear();
+    strReader.str(fileline.c_str());
+    strReader >> x >> y >> err >> dx;
+
+    //Test values
+    TSM_ASSERT_DELTA("Expecting mean of 3 and 4", x, 3.5, 1e-08);  
+    TSM_ASSERT_DELTA("Expecting mean of 1 and 1", y, 1.0, 1e-08);
+    TSM_ASSERT_DELTA("Expecting mean of 1 and 1",err, 1.0, 1e-06);
+    TSM_ASSERT_DELTA("Expecting mean of sqrt(3) and sqrt(4)",dx, (sqrt(3) + sqrt(4))/2, 1e-06);
+
+    file.close();
+  }
+
 private:
   ///The algorithm object
-  Mantid::DataHandling::SaveRKH testAlgorithm1, testAlgorithm2;
+  Mantid::DataHandling::SaveRKH testAlgorithm1, testAlgorithm2, testAlgorithm3;
 
   ///The name of the file to use as output
   std::string outputFile;
+
+  /// Provides a workpace with a x error value
+  MatrixWorkspace_sptr createInputWorkspaceHistoWithXerror(std::string type = "histo") const
+  {
+    size_t x_length = 0;
+    size_t y_length = nBins;
+    if (type == "histo") {
+      x_length = nBins + 1;
+    } else  {
+      x_length = nBins;
+    }
+    // Set up a small workspace for testing
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", nSpec, x_length, y_length);
+    for (size_t j = 0; j < nSpec; ++j) {
+      for (size_t k = 0; k < x_length; ++k) {
+        ws->dataX(j)[k] = double(k);
+        ws->dataDx(j)[k] = sqrt(double(k));
+      }
+      ws->dataY(j).assign(y_length, double(1));
+      ws->dataE(j).assign(y_length, double(1));
+    }
+    return ws;
+  }
 };
 
 #endif  //SAVERKHTEST_H_

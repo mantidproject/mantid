@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class StopRemoteTransaction : public Mantid::API::Algorithm {
+class DLLExport StopRemoteTransaction : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   StopRemoteTransaction() : Mantid::API::Algorithm() {}

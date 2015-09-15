@@ -71,7 +71,9 @@ protected:
   Geometry::UnitCell getUnitCellFromProperties() const;
   Geometry::UnitCell getConstrainedUnitCell(
       const Geometry::UnitCell &unitCell,
-      const Geometry::PointGroup::CrystalSystem &crystalSystem) const;
+      const Geometry::PointGroup::CrystalSystem &crystalSystem,
+      const Geometry::Group::CoordinateSystem &coordinateSystem =
+          Geometry::Group::Orthogonal) const;
 
 private:
   void init();

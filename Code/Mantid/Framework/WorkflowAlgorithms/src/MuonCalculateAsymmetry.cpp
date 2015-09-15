@@ -28,10 +28,10 @@ MuonCalculateAsymmetry::~MuonCalculateAsymmetry() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonCalculateAsymmetry::name() const {
   return "MuonCalculateAsymmetry";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MuonCalculateAsymmetry::version() const { return 1; };
+int MuonCalculateAsymmetry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MuonCalculateAsymmetry::category() const {
@@ -48,14 +48,13 @@ const std::string MuonCalculateAsymmetry::category() const {
 void MuonCalculateAsymmetry::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("FirstPeriodWorkspace",
                                                          "", Direction::Input),
-                  "First period data. If second period is not specified - the "
-                  "only one used.");
+                  "First period data. The only one used if second period is "
+                  "not specified.");
 
-  declareProperty(
-      new WorkspaceProperty<MatrixWorkspace>("SecondPeriodWorkspace", "",
-                                             Direction::Input,
-                                             PropertyMode::Optional),
-      "Second period data. If not spefied - first period used only.");
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+                      "SecondPeriodWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
+                  "Second period data.");
 
   std::vector<std::string> allowedOperations;
   allowedOperations.push_back("+");
@@ -71,22 +70,22 @@ void MuonCalculateAsymmetry::init() {
   allowedTypes.push_back("GroupCounts");
   declareProperty("OutputType", "PairAsymmetry",
                   boost::make_shared<StringListValidator>(allowedTypes),
-                  "What kind of workspace required for analysis.");
+                  "What kind of calculation required for analysis.");
 
   declareProperty("PairFirstIndex", EMPTY_INT(),
-                  "Workspace index of the first group of the pair. Used when "
+                  "Workspace index of the first group of the pair. Only used when "
                   "OutputType is PairAsymmetry.");
 
   declareProperty("PairSecondIndex", EMPTY_INT(),
-                  "Workspace index of the second group of the pair. Used when "
+                  "Workspace index of the second group of the pair. Only used when "
                   "OutputType is PairAsymmetry.");
 
   declareProperty(
       "Alpha", 1.0,
-      "Alpha value of the pair. Used when OutputType is PairAsymmetry.");
+      "Alpha value of the pair. Only used when OutputType is PairAsymmetry.");
 
-  declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group. "
-                                             "Used then OutputType is "
+  declareProperty("GroupIndex", EMPTY_INT(), "Workspace index of the group to analyse. "
+                                             "Only used then OutputType is "
                                              "GroupAsymmetry or GroupCounts.");
 
   declareProperty(
@@ -101,22 +100,23 @@ void MuonCalculateAsymmetry::init() {
  * Execute the algorithm.
  */
 void MuonCalculateAsymmetry::exec() {
+
   MatrixWorkspace_sptr firstPeriodWS = getProperty("FirstPeriodWorkspace");
   MatrixWorkspace_sptr secondPeriodWS = getProperty("SecondPeriodWorkspace");
 
-  MatrixWorkspace_sptr firstConverted = convertWorkspace(firstPeriodWS);
+  MatrixWorkspace_sptr convertedWS;
 
   if (secondPeriodWS) {
     // Two periods
-    MatrixWorkspace_sptr secondConverted = convertWorkspace(secondPeriodWS);
+    MatrixWorkspace_sptr mergedWS = mergePeriods(firstPeriodWS, secondPeriodWS);
+    convertedWS = convertWorkspace(mergedWS);
 
-    setProperty("OutputWorkspace",
-                mergePeriods(firstConverted, secondConverted));
   } else {
     // Single period only
-
-    setProperty("OutputWorkspace", firstConverted);
+    convertedWS = convertWorkspace(firstPeriodWS);
   }
+
+  setProperty("OutputWorkspace", convertedWS);
 }
 
 /**

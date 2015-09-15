@@ -8,7 +8,10 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/MDGeometry/MDFrame.h"
+#include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/MDUnit.h"
 
 #include <numeric>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -42,6 +45,34 @@ MatrixWorkspace::MatrixWorkspace(
       m_nearestNeighboursFactory(
           (nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
       m_nearestNeighbours() {}
+
+MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
+    : IMDWorkspace(other), ExperimentInfo(other) {
+  m_axes.resize(other.m_axes.size());
+  for (size_t i = 0; i < m_axes.size(); ++i)
+    m_axes[i] = other.m_axes[i]->clone(this);
+
+  m_isInitialized = other.m_isInitialized;
+  m_YUnit = other.m_YUnit;
+  m_YUnitLabel = other.m_YUnitLabel;
+  m_isDistribution = other.m_isDistribution;
+  m_isCommonBinsFlagSet = other.m_isCommonBinsFlagSet;
+  m_isCommonBinsFlag = other.m_isCommonBinsFlag;
+  m_masks = other.m_masks;
+  m_indexCalculator = other.m_indexCalculator;
+  // I think it is necessary to create our own copy of the factory, since we do
+  // not know who owns the factory in other and how its lifetime is controlled.
+  m_nearestNeighboursFactory.reset(new NearestNeighboursFactory);
+  // m_nearestNeighbours seem to be built automatically when needed, so we do
+  // not copy here.
+
+  // TODO: Do we need to init m_monitorWorkspace?
+
+  // This call causes copying of m_parmap (ParameterMap). The constructor of
+  // ExperimentInfo just kept a shared_ptr to the same map as in other, which
+  // is not enough as soon as the maps in one of the workspaces it edited.
+  instrumentParameters();
+}
 
 /// Destructor
 // RJT, 3/10/07: The Analysis Data Service needs to be able to delete
@@ -152,8 +183,12 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
     auto spec = getSpectrum(j);
     try {
-      spec->setDetectorIDs(
-          map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
+      if(map.indexIsSpecNumber())
+        spec->setDetectorIDs(
+            map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
+      else
+        spec->setDetectorIDs(
+            map.getDetectorIDsForSpectrumIndex(j));
     } catch (std::out_of_range &e) {
       // Get here if the spectrum number is not in the map.
       spec->clearDetectorIDs();
@@ -548,6 +583,10 @@ MatrixWorkspace::getIndexFromSpectrumNumber(const specid_t specNo) const {
 //---------------------------------------------------------------------------------------
 /** Converts a list of detector IDs to the corresponding workspace indices.
 *
+     *  Note that only known detector IDs are converted (so an empty vector will be returned
+     *  if none of the IDs are recognised), and that the returned workspace indices are
+     *  effectively a set (i.e. there are no duplicates).
+     *
 *  @param detIdList :: The list of detector IDs required
 *  @param indexList :: Returns a reference to the vector of indices
 */
@@ -809,33 +848,7 @@ MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
   return det->getTwoTheta(samplePos, beamLine);
 }
 
-/**Calculates the distance a neutron coming from the sample will have deviated
-* from a
-*  straight tragetory before hitting a detector. If calling this function many
-* times
-*  for the same detector you can call this function once, with waveLength=1, and
-* use
-*  the fact drop is proportional to wave length squared .This function has no
-* knowledge
-*  of which axis is vertical for a given instrument
-*  @param det :: the detector that the neutron entered
-*  @param waveLength :: the neutrons wave length in meters
-*  @return the deviation in meters
-*/
-double MatrixWorkspace::gravitationalDrop(Geometry::IDetector_const_sptr det,
-                                          const double waveLength) const {
-  using namespace PhysicalConstants;
-  /// Pre-factor in gravity calculation: gm^2/2h^2
-  static const double gm2_OVER_2h2 =
-      g * NeutronMass * NeutronMass / (2.0 * h * h);
 
-  const V3D samplePos = getInstrument()->getSample()->getPos();
-  const double pathLength = det->getPos().distance(samplePos);
-  // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
-  const double L2 = gm2_OVER_2h2 * std::pow(pathLength, 2);
-
-  return waveLength * waveLength * L2;
-}
 
 //---------------------------------------------------------------------------------------
 /** Add parameters to the instrument parameter map that are defined in
@@ -1267,7 +1280,7 @@ class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWDimension(const Axis *axis, const std::string &dimensionId)
       : m_axis(*axis), m_dimensionId(dimensionId),
-        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL) {}
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != NULL), m_frame(new Geometry::GeneralFrame(m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
   virtual std::string getName() const {
@@ -1329,12 +1342,21 @@ public:
     throw std::runtime_error("Not implemented");
   }
 
+  const Kernel::MDUnit &getMDUnits() const{
+      return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame& getMDFrame() const{
+      return *m_frame;
+  }
+
   virtual ~MWDimension() {}
 
 private:
   const Axis &m_axis;
   const std::string m_dimensionId;
   const bool m_haveEdges;
+  const Geometry::MDFrame_const_uptr m_frame;
+
 };
 
 //===============================================================================
@@ -1344,7 +1366,7 @@ private:
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
   MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_dimensionId(dimensionId) {
+      : m_ws(ws), m_dimensionId(dimensionId), m_frame(new Geometry::GeneralFrame(m_ws->getAxis(0)->unit()->label(), m_ws->getAxis(0)->unit()->label())) {
     m_X = ws->readX(0);
   }
 
@@ -1397,6 +1419,12 @@ public:
   virtual std::string toXMLString() const {
     throw std::runtime_error("Not implemented");
   }
+  const Kernel::MDUnit &getMDUnits() const{
+      return m_frame->getMDUnit();
+  }
+  const Geometry::MDFrame& getMDFrame() const{
+      return *m_frame;
+  }
 
 private:
   /// Workspace we refer to
@@ -1405,6 +1433,8 @@ private:
   MantidVec m_X;
   /// Dimension ID string
   const std::string m_dimensionId;
+  /// Unit
+  const Geometry::MDFrame_const_uptr m_frame;
 };
 
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
@@ -1551,9 +1581,14 @@ signal_t MatrixWorkspace::getSignalAtCoord(
         switch (normalization) {
         case NoNormalization:
           return y;
-        case VolumeNormalization:
+        case VolumeNormalization: {
           // Divide the signal by the area
-          return y / (yBinSize * (X[i] - X[i - 1]));
+          auto volume = yBinSize * (X[i] - X[i - 1]);
+          if (volume == 0.0) {
+            return std::numeric_limits<double>::quiet_NaN();
+          }
+          return y / volume;
+        }
         case NumEventsNormalization:
           // Not yet implemented, may not make sense
           return y;
@@ -1704,9 +1739,9 @@ void MatrixWorkspace::clearMDMasking() {
 /**
 @return the special coordinate system used if any.
 */
-Mantid::API::SpecialCoordinateSystem
+Mantid::Kernel::SpecialCoordinateSystem
 MatrixWorkspace::getSpecialCoordinateSystem() const {
-  return Mantid::API::None;
+  return Mantid::Kernel::None;
 }
 
 /**
@@ -1973,6 +2008,8 @@ void MatrixWorkspace::setImage(
       (this->*dataVec)(spec)[0] = *pixel;
     }
   }
+  // suppress warning when built without openmp.
+  UNUSED_ARG(parallelExecution)
 }
 
 /**

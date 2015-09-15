@@ -2,6 +2,8 @@
 #define _vtkMDEWSource_h
 
 #include "vtkUnstructuredGridAlgorithm.h"
+#include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <string>
 
 namespace Mantid
@@ -45,11 +47,12 @@ class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkMDEWSource *New();
-  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);
   void SetDepth(int depth);
+  void SetNormalization(int option);
 
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
@@ -67,6 +70,12 @@ public:
   const char* GetWorkspaceName();
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
+  /// Getter for the minimum value of the workspace data.
+  double GetMinValue();
+  /// Getter for the maximum value of the workspace data.
+  double GetMaxValue();
+  /// Getter for the instrument associated with the workspace data.
+  const char* GetInstrument();
 
 protected:
   vtkMDEWSource();
@@ -90,6 +99,9 @@ private:
 
   /// Cached typename.
   std::string typeName;
+
+  /// Normalization option
+  Mantid::VATES::VisualNormalization m_normalization;
 
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);

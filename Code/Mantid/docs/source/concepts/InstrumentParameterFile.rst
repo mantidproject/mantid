@@ -17,7 +17,7 @@ Creating a Parameter File
 Using a Schema
 ~~~~~~~~~~~~~~
 
-To create a parameters file it is advisable to consult the parameter file schema, located in your mantid directory at mantid\code\instrument\Schema\ParameterFileSchema.xsd. Set up your editting program to validate your XML file against this schema following `these instructions <http://www.mantidproject.org/Using_XML_Schema>`__. Once set up, the schema can be used to find any errors in the structure of your parameter file and suggest auto-fill options to help write your parameter file.
+To create a parameters file it is advisable to consult the parameter file schema, located in your mantid directory at mantid\code\instrument\Schema\ParameterFileSchema.xsd. Set up your editting program to validate your XML file against this schema following :ref:`these instructions <Using_XML_Schema>`. Once set up, the schema can be used to find any errors in the structure of your parameter file and suggest auto-fill options to help write your parameter file.
 
 General Structure
 ~~~~~~~~~~~~~~~~~

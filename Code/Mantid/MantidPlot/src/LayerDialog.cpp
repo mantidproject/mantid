@@ -41,155 +41,155 @@
 #include <QMessageBox>
 
 LayerDialog::LayerDialog( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+  : QDialog( parent, fl ), multi_layer(NULL)
 {
     setName("LayerDialog");
-	setWindowTitle(tr( "MantidPlot - Arrange Layers" ));
+    setWindowTitle(tr( "MantidPlot - Arrange Layers" ));
 
     QGroupBox *gb1 = new QGroupBox(tr("Layers"));
-	QGridLayout *gl1 = new QGridLayout(gb1);
-	gl1->addWidget(new QLabel(tr("Number")), 0, 0);
-	layersBox = new QSpinBox();
-	layersBox->setRange(0, 100);
-	gl1->addWidget(layersBox, 0, 1);
+    QGridLayout *gl1 = new QGridLayout(gb1);
+    gl1->addWidget(new QLabel(tr("Number")), 0, 0);
+    layersBox = new QSpinBox();
+    layersBox->setRange(0, 100);
+    gl1->addWidget(layersBox, 0, 1);
 
-	fitBox = new QCheckBox(tr("Automatic &layout"));
-	fitBox->setChecked(false);
-	gl1->addWidget(fitBox, 1, 1);
-	gl1->setRowStretch(2, 1);
+    fitBox = new QCheckBox(tr("Automatic &layout"));
+    fitBox->setChecked(false);
+    gl1->addWidget(fitBox, 1, 1);
+    gl1->setRowStretch(2, 1);
 
     QGroupBox *gb2 = new QGroupBox(tr("Alignment"));
-	QGridLayout *gl2 = new QGridLayout(gb2);
-	gl2->addWidget(new QLabel(tr("Horizontal")), 0, 0);
+    QGridLayout *gl2 = new QGridLayout(gb2);
+    gl2->addWidget(new QLabel(tr("Horizontal")), 0, 0);
 
-	alignHorBox = new QComboBox( );
-	alignHorBox->insertItem( tr( "Center" ) );
-	alignHorBox->insertItem( tr( "Left" ) );
-	alignHorBox->insertItem( tr( "Right" ) );
-	gl2->addWidget(alignHorBox, 0, 1);
+    alignHorBox = new QComboBox( );
+    alignHorBox->insertItem( tr( "Center" ) );
+    alignHorBox->insertItem( tr( "Left" ) );
+    alignHorBox->insertItem( tr( "Right" ) );
+    gl2->addWidget(alignHorBox, 0, 1);
 
-	gl2->addWidget(new QLabel( tr( "Vertical" )), 1, 0 );
-	alignVertBox = new QComboBox();
-	alignVertBox->insertItem( tr( "Center" ) );
-	alignVertBox->insertItem( tr( "Top" ) );
-	alignVertBox->insertItem( tr( "Bottom" ) );
-	gl2->addWidget(alignVertBox, 1, 1);
-	gl2->setRowStretch(2, 1);
+    gl2->addWidget(new QLabel( tr( "Vertical" )), 1, 0 );
+    alignVertBox = new QComboBox();
+    alignVertBox->insertItem( tr( "Center" ) );
+    alignVertBox->insertItem( tr( "Top" ) );
+    alignVertBox->insertItem( tr( "Bottom" ) );
+    gl2->addWidget(alignVertBox, 1, 1);
+    gl2->setRowStretch(2, 1);
 
     GroupGrid = new QGroupBox(tr("Grid"));
-	QGridLayout *gl3 = new QGridLayout(GroupGrid);
-	gl3->addWidget(new QLabel(tr("Columns")), 0, 0);
-	boxX = new QSpinBox();
-	boxX->setRange(1, 100);
-	gl3->addWidget(boxX, 0, 1);
-	gl3->addWidget(new QLabel( tr( "Rows" )), 1, 0);
-	boxY = new QSpinBox();
-	boxY->setRange(1, 100);
-	gl3->addWidget(boxY, 1, 1);
+    QGridLayout *gl3 = new QGridLayout(GroupGrid);
+    gl3->addWidget(new QLabel(tr("Columns")), 0, 0);
+    boxX = new QSpinBox();
+    boxX->setRange(1, 100);
+    gl3->addWidget(boxX, 0, 1);
+    gl3->addWidget(new QLabel( tr( "Rows" )), 1, 0);
+    boxY = new QSpinBox();
+    boxY->setRange(1, 100);
+    gl3->addWidget(boxY, 1, 1);
 
-	GroupCanvasSize = new QGroupBox(tr("&Layer Canvas Size"));
-	GroupCanvasSize->setCheckable(true);
-	GroupCanvasSize->setChecked(false);
+    GroupCanvasSize = new QGroupBox(tr("&Layer Canvas Size"));
+    GroupCanvasSize->setCheckable(true);
+    GroupCanvasSize->setChecked(false);
 
-	QGridLayout *gl5 = new QGridLayout(GroupCanvasSize);
-	gl5->addWidget(new QLabel(tr("Width")), 0, 0);
-	boxCanvasWidth = new QSpinBox();
-	boxCanvasWidth->setRange(0, 10000);
-	boxCanvasWidth->setSingleStep(50);
-	boxCanvasWidth->setSuffix(tr(" pixels"));
-	gl5->addWidget(boxCanvasWidth, 0, 1);
-	gl5->addWidget(new QLabel( tr( "Height" )), 1, 0);
-	boxCanvasHeight = new QSpinBox();
-	boxCanvasHeight->setRange(0, 10000);
-	boxCanvasHeight->setSingleStep(50);
-	boxCanvasHeight->setSuffix(tr(" pixels"));
-	gl5->addWidget(boxCanvasHeight, 1, 1);
+    QGridLayout *gl5 = new QGridLayout(GroupCanvasSize);
+    gl5->addWidget(new QLabel(tr("Width")), 0, 0);
+    boxCanvasWidth = new QSpinBox();
+    boxCanvasWidth->setRange(0, 10000);
+    boxCanvasWidth->setSingleStep(50);
+    boxCanvasWidth->setSuffix(tr(" pixels"));
+    gl5->addWidget(boxCanvasWidth, 0, 1);
+    gl5->addWidget(new QLabel( tr( "Height" )), 1, 0);
+    boxCanvasHeight = new QSpinBox();
+    boxCanvasHeight->setRange(0, 10000);
+    boxCanvasHeight->setSingleStep(50);
+    boxCanvasHeight->setSuffix(tr(" pixels"));
+    gl5->addWidget(boxCanvasHeight, 1, 1);
 
     QGroupBox *gb4 = new QGroupBox(tr("Spacing"));
-	QGridLayout *gl4 = new QGridLayout(gb4);
-	gl4->addWidget(new QLabel(tr("Columns gap")), 0, 0);
-	boxColsGap = new QSpinBox();
-	boxColsGap->setRange(0, 1000);
-	boxColsGap->setSingleStep(5);
-	boxColsGap->setSuffix(tr(" pixels"));
-	gl4->addWidget(boxColsGap, 0, 1);
-	gl4->addWidget(new QLabel( tr( "Rows gap" )), 1, 0);
-	boxRowsGap = new QSpinBox();
-	boxRowsGap->setRange(0, 1000);
-	boxRowsGap->setSingleStep(5);
-	boxRowsGap->setSuffix(tr(" pixels"));
-	gl4->addWidget(boxRowsGap, 1, 1);
-	gl4->addWidget(new QLabel( tr( "Left margin" )), 2, 0);
-	boxLeftSpace = new QSpinBox();
-	boxLeftSpace->setRange(0, 1000);
-	boxLeftSpace->setSingleStep(5);
-	boxLeftSpace->setSuffix(tr(" pixels"));
-	gl4->addWidget(boxLeftSpace, 2, 1);
-	gl4->addWidget(new QLabel( tr( "Right margin" )), 3, 0);
-	boxRightSpace = new QSpinBox();
-	boxRightSpace->setRange(0, 1000);
-	boxRightSpace->setSingleStep(5);
-	boxRightSpace->setSuffix(tr(" pixels"));
-	gl4->addWidget(boxRightSpace, 3, 1);
-	gl4->addWidget(new QLabel( tr( "Top margin" )), 4, 0);
-	boxTopSpace = new QSpinBox();
-	boxTopSpace->setRange(0, 1000);
-	boxTopSpace->setSingleStep(5);
-	boxTopSpace->setSuffix(tr(" pixels"));
-	gl4->addWidget(boxTopSpace, 4, 1);
-	gl4->addWidget(new QLabel( tr( "Bottom margin") ), 5, 0);
-	boxBottomSpace = new QSpinBox();
-	boxBottomSpace->setRange(0, 1000);
-	boxBottomSpace->setSingleStep(5);
-	boxBottomSpace->setSuffix(tr(" pixels"));
-	gl4->addWidget(boxBottomSpace, 5, 1);
+    QGridLayout *gl4 = new QGridLayout(gb4);
+    gl4->addWidget(new QLabel(tr("Columns gap")), 0, 0);
+    boxColsGap = new QSpinBox();
+    boxColsGap->setRange(0, 1000);
+    boxColsGap->setSingleStep(5);
+    boxColsGap->setSuffix(tr(" pixels"));
+    gl4->addWidget(boxColsGap, 0, 1);
+    gl4->addWidget(new QLabel( tr( "Rows gap" )), 1, 0);
+    boxRowsGap = new QSpinBox();
+    boxRowsGap->setRange(0, 1000);
+    boxRowsGap->setSingleStep(5);
+    boxRowsGap->setSuffix(tr(" pixels"));
+    gl4->addWidget(boxRowsGap, 1, 1);
+    gl4->addWidget(new QLabel( tr( "Left margin" )), 2, 0);
+    boxLeftSpace = new QSpinBox();
+    boxLeftSpace->setRange(0, 1000);
+    boxLeftSpace->setSingleStep(5);
+    boxLeftSpace->setSuffix(tr(" pixels"));
+    gl4->addWidget(boxLeftSpace, 2, 1);
+    gl4->addWidget(new QLabel( tr( "Right margin" )), 3, 0);
+    boxRightSpace = new QSpinBox();
+    boxRightSpace->setRange(0, 1000);
+    boxRightSpace->setSingleStep(5);
+    boxRightSpace->setSuffix(tr(" pixels"));
+    gl4->addWidget(boxRightSpace, 3, 1);
+    gl4->addWidget(new QLabel( tr( "Top margin" )), 4, 0);
+    boxTopSpace = new QSpinBox();
+    boxTopSpace->setRange(0, 1000);
+    boxTopSpace->setSingleStep(5);
+    boxTopSpace->setSuffix(tr(" pixels"));
+    gl4->addWidget(boxTopSpace, 4, 1);
+    gl4->addWidget(new QLabel( tr( "Bottom margin") ), 5, 0);
+    boxBottomSpace = new QSpinBox();
+    boxBottomSpace->setRange(0, 1000);
+    boxBottomSpace->setSingleStep(5);
+    boxBottomSpace->setSuffix(tr(" pixels"));
+    gl4->addWidget(boxBottomSpace, 5, 1);
 
-	QVBoxLayout *vbox1 = new QVBoxLayout();
-	vbox1->addWidget(GroupGrid);
-	vbox1->addWidget(GroupCanvasSize);
+    QVBoxLayout *vbox1 = new QVBoxLayout();
+    vbox1->addWidget(GroupGrid);
+    vbox1->addWidget(GroupCanvasSize);
 
-	buttonApply = new QPushButton(tr( "&Apply" ));
-	buttonOk = new QPushButton(tr( "&OK" ));
-	buttonCancel = new QPushButton(tr( "&Cancel" ));
+    buttonApply = new QPushButton(tr( "&Apply" ));
+    buttonOk = new QPushButton(tr( "&OK" ));
+    buttonCancel = new QPushButton(tr( "&Cancel" ));
 
-	QHBoxLayout *hbox1 = new QHBoxLayout();
+    QHBoxLayout *hbox1 = new QHBoxLayout();
     hbox1->addStretch();
-	hbox1->addWidget(buttonApply);
-	hbox1->addWidget(buttonOk);
-	hbox1->addWidget(buttonCancel);
+    hbox1->addWidget(buttonApply);
+    hbox1->addWidget(buttonOk);
+    hbox1->addWidget(buttonCancel);
 
-	QGroupBox *gb5 = new QGroupBox(tr("Swap Layers"));
-	QHBoxLayout *hbox2 = new QHBoxLayout(gb5);
-	hbox2->addWidget(new QLabel( tr( "Source Layer") ));
+    QGroupBox *gb5 = new QGroupBox(tr("Swap Layers"));
+    QHBoxLayout *hbox2 = new QHBoxLayout(gb5);
+    hbox2->addWidget(new QLabel( tr( "Source Layer") ));
 
-	boxLayerSrc = new QSpinBox();
-	hbox2->addWidget(boxLayerSrc);
+    boxLayerSrc = new QSpinBox();
+    hbox2->addWidget(boxLayerSrc);
 
-	hbox2->addWidget(new QLabel( tr( "Destination Layer") ));
-	boxLayerDest = new QSpinBox();
-	hbox2->addWidget(boxLayerDest);
+    hbox2->addWidget(new QLabel( tr( "Destination Layer") ));
+    boxLayerDest = new QSpinBox();
+    hbox2->addWidget(boxLayerDest);
 
-	buttonSwapLayers = new QPushButton(tr( "&Swap" ));
-	hbox2->addWidget(buttonSwapLayers);
+    buttonSwapLayers = new QPushButton(tr( "&Swap" ));
+    hbox2->addWidget(buttonSwapLayers);
 
-	QGridLayout *gl6 = new QGridLayout();
-	gl6->addWidget(gb1, 0, 0);
-	gl6->addWidget(gb2, 0, 1);
-	gl6->addLayout(vbox1, 1, 0);
-	gl6->addWidget(gb4, 1, 1);
-	gl6->setRowStretch(2, 1);
+    QGridLayout *gl6 = new QGridLayout();
+    gl6->addWidget(gb1, 0, 0);
+    gl6->addWidget(gb2, 0, 1);
+    gl6->addLayout(vbox1, 1, 0);
+    gl6->addWidget(gb4, 1, 1);
+    gl6->setRowStretch(2, 1);
 
-	QVBoxLayout *vbox2 = new QVBoxLayout(this);
-	vbox2->addLayout(gl6);
-	vbox2->addWidget(gb5);
-	vbox2->addStretch();
-	vbox2->addLayout(hbox1);
+    QVBoxLayout *vbox2 = new QVBoxLayout(this);
+    vbox2->addLayout(gl6);
+    vbox2->addWidget(gb5);
+    vbox2->addStretch();
+    vbox2->addLayout(hbox1);
 
-	connect( buttonSwapLayers, SIGNAL( clicked() ), this, SLOT( swapLayers() ) );
-	connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-	connect( buttonApply, SIGNAL( clicked() ), this, SLOT(update() ) );
-	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-	connect( fitBox, SIGNAL( toggled(bool) ), this, SLOT(enableLayoutOptions(bool) ) );
+    connect( buttonSwapLayers, SIGNAL( clicked() ), this, SLOT( swapLayers() ) );
+    connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+    connect( buttonApply, SIGNAL( clicked() ), this, SLOT(update() ) );
+    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+    connect( fitBox, SIGNAL( toggled(bool) ), this, SLOT(enableLayoutOptions(bool) ) );
 }
 
 void LayerDialog::enableLayoutOptions(bool ok)
@@ -239,6 +239,7 @@ void LayerDialog::update()
 		if (dn < 0)
 		{// Customize new layers with user default settings
       ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+      if (!app) return;
 			for (int i = old_graphs+1; i <= graphs; i++)
 				app->setPreferences(multi_layer->layer(i));
 		}

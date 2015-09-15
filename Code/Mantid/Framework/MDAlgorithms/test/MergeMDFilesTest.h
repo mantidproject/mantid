@@ -1,21 +1,17 @@
 #ifndef MANTID_MDEVENTS_MERGEMDEWTEST_H_
 #define MANTID_MDEVENTS_MERGEMDEWTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidMDAlgorithms/MergeMDFiles.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+
+#include <cxxtest/TestSuite.h>
+
 #include <Poco/File.h>
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class MergeMDFilesTest : public CxxTest::TestSuite
 {
@@ -48,6 +44,7 @@ public:
 
     // Create a bunch of input files
     std::vector<std::vector<std::string> > filenames;
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
     // how many events put into each file.
     long nFileEvents(1000);
@@ -55,7 +52,8 @@ public:
     {
       std::ostringstream mess;
       mess << "MergeMDFilesTestInput" << i;
-      MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents);
+      MDEventWorkspace3Lean::sptr ws = 
+          MDAlgorithmsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents,appliedCoord);
       inWorkspaces.push_back(ws);
       filenames.push_back(std::vector<std::string>(1,ws->getBoxController()->getFilename()));
     }
@@ -87,6 +85,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     
+    TS_ASSERT_EQUALS(appliedCoord, ws->getSpecialCoordinateSystem());
     TS_ASSERT_EQUALS( ws->getNPoints(), 3*nFileEvents);
     MDBoxBase3Lean * box = ws->getBox();
     TS_ASSERT_EQUALS( box->getNumChildren(), 1000);

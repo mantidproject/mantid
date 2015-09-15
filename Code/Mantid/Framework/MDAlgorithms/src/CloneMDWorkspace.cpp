@@ -1,15 +1,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidAPI/FileProperty.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/CloneMDWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -108,10 +108,8 @@ CloneMDWorkspace::doClone(const typename MDEventWorkspace<MDE, nd>::sptr ws) {
                       boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
   } else {
     // Perform the clone in memory.
-    boost::shared_ptr<MDEventWorkspace<MDE, nd>> outWS(
-        new MDEventWorkspace<MDE, nd>(*ws));
-    this->setProperty("OutputWorkspace",
-                      boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
+    IMDWorkspace_sptr outWS(ws->clone().release());
+    setProperty("OutputWorkspace", outWS);
   }
 }
 
@@ -128,11 +126,10 @@ void CloneMDWorkspace::exec() {
   if (inWS) {
     CALL_MDEVENT_FUNCTION(this->doClone, inWS);
   } else if (inHistoWS) {
-    // Clone using the copy constructor
-    MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(*inHistoWS));
+    // Polymorphic clone().
+    IMDWorkspace_sptr outWS(inHistoWS->clone().release());
     // And set to the output. Easy.
-    this->setProperty("OutputWorkspace",
-                      boost::dynamic_pointer_cast<IMDWorkspace>(outWS));
+    this->setProperty("OutputWorkspace", outWS);
   } else {
     // Call CloneWorkspace as a fall-back?
     throw std::runtime_error("CloneMDWorkspace can only clone a "
@@ -142,4 +139,4 @@ void CloneMDWorkspace::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

@@ -3,23 +3,19 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <iomanip>
-#include <iostream>
 
-using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace testing;
 
 class MockBinaryOperationMD : public BinaryOperationMD
@@ -28,8 +24,8 @@ public:
   MOCK_CONST_METHOD0(commutative, bool());
   MOCK_METHOD0(checkInputs, void());
   MOCK_METHOD0(execEvent, void());
-  MOCK_METHOD2(execHistoHisto, void(Mantid::MDEvents::MDHistoWorkspace_sptr, Mantid::MDEvents::MDHistoWorkspace_const_sptr));
-  MOCK_METHOD2(execHistoScalar, void(Mantid::MDEvents::MDHistoWorkspace_sptr, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
+  MOCK_METHOD2(execHistoHisto, void(Mantid::DataObjects::MDHistoWorkspace_sptr, Mantid::DataObjects::MDHistoWorkspace_const_sptr));
+  MOCK_METHOD2(execHistoScalar, void(Mantid::DataObjects::MDHistoWorkspace_sptr, Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar));
   void exec()
   { BinaryOperationMD::exec();  }
 };

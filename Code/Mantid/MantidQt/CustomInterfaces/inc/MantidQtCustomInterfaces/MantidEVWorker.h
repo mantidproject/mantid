@@ -95,8 +95,16 @@ public:
   bool loadIsawPeaks( const std::string & peaks_ws_name,
                       const std::string & file_name );
 
+  bool loadNexusPeaks( const std::string & peaks_ws_name,
+                                      const std::string & file_name );
+
   /// Save the peaks workspace to a .peaks or .integrate file
   bool saveIsawPeaks( const std::string & peaks_ws_name,
+                      const std::string & file_name,
+                            bool          append );
+
+  /// Save the peaks workspace to a .nxs file
+  bool saveNexusPeaks( const std::string & peaks_ws_name,
                       const std::string & file_name,
                             bool          append );
 

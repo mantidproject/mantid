@@ -14,24 +14,21 @@ SymmetryOperationSymbolParser::SymmetryOperationSymbolParser() {}
  * Tries to parse the given symbol
  *
  * This method tries to parse a given symbol and returns the matrix/vector pair
- *resulting from
- * the parsing process. It takes a string representing a symmetry operation in
- *the format:
+ * resulting from the parsing process. It takes a string representing a
+ * symmetry operation in the format:
  *      x+a/b, -y-c/d, e/f-z
  * where x, y and z are the literals 'x', 'y' and 'z', while a-f are integers,
- *representing
- * rational numbers. The latter don't need to be present, a string "x,y,z" is
- *valid. Leading plus-signs
- * may be included if desired, so that "+x,+y,+z" is also valid.
+ * representing rational numbers. The latter don't need to be present,
+ * a string "x,y,z" is valid. Leading plus-signs may be included if desired,
+ * so that "+x,+y,+z" is also valid.
  *
  * If there is a problem, a Kernel::Exception::ParseError exception is thrown.
  *
  * See also SymmetryOperationSymbolParser::getNormalizedIdentifier, which
- *performs the opposite operation.
+ * performs the opposite operation.
  *
  * @param identifier :: Symbol representing a symmetry operation
- * @return Pair of Kernel::IntMatrix and V3R, representing the symmetry
- *operation.
+ * @return Kernel::IntMatrix and V3R, representing the symmetry operation.
  */
 std::pair<Kernel::IntMatrix, V3R>
 SymmetryOperationSymbolParser::parseIdentifier(const std::string &identifier) {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>998</width>
-    <height>560</height>
+    <width>990</width>
+    <height>730</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>998</width>
-    <height>560</height>
+    <width>990</width>
+    <height>730</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>998</width>
-    <height>560</height>
+    <width>990</width>
+    <height>730</height>
    </size>
   </property>
   <property name="font">
@@ -38,308 +38,70 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QDialog#FirstTimeSetup{
+	background-color: rgb(190, 230, 190);
 	background-image: url(:/First_use_Background.png);
+    background-repeat: no-repeat;
+	image: url(:/mantid.png);
+	image-position: right bottom
 }
 QDialog#FirstTimeSetup QLabel{
-	font: 12px &quot;Segoe UI&quot;;
-    font-weight: bold;
+	font: 14px &quot;Open Sans&quot;;
 }
 QDialog#FirstTimeSetup QCheckbox{
-	font: 12px &quot;Segoe UI&quot;;
-    font-weight: bold;
-}
-QDialog#FirstTimeSetup QGroupBox{
-	font: 12px &quot;Segoe UI&quot;;
-    font-weight: bold;
+	font: 18px &quot;Open Sans&quot;;
 }
 QDialog#FirstTimeSetup QPushButton{
-	font: 12px &quot;Segoe UI&quot;;
-}
-QDialog#FirstTimeSetup QComboBox{
-	font: 12px &quot;Segoe UI&quot;;
+	font: 14px &quot;Open Sans&quot;;
 }
 QDialog#FirstTimeSetup QCommandLinkButton{
-	font: 28px &quot;Segoe UI&quot;;
-    font-weight: bold;
+	font: 28px &quot;Open Sans&quot;;
 }
 </string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
-   <property name="leftMargin">
-    <number>6</number>
-   </property>
-   <property name="topMargin">
-    <number>135</number>
-   </property>
-   <property name="rightMargin">
-    <number>6</number>
-   </property>
-   <property name="bottomMargin">
-    <number>6</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <property name="leftMargin">
-      <number>23</number>
+    <layout class="QVBoxLayout" name="verticalLayout_8">
+     <property name="topMargin">
+      <number>70</number>
      </property>
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item row="7" column="0">
-      <widget class="QCommandLinkButton" name="clbExtendingMantid">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Extending Mantid with Python</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Images/images.qrc">
-         <normaloff>:/Icons/Plugin-Python-icon-32x32.png</normaloff>:/Icons/Plugin-Python-icon-32x32.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>32</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QCommandLinkButton" name="clbPythonInMantid">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Python in Mantid</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Images/images.qrc">
-         <normaloff>:/win/running_process.png</normaloff>:/win/running_process.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>32</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0">
-      <widget class="QCommandLinkButton" name="clbPythonIntroduction">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Introduction to Python</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Images/images.qrc">
-         <normaloff>:/Icons/Python-icon-32x32.png</normaloff>:/Icons/Python-icon-32x32.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>32</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QCommandLinkButton" name="clbMantidIntroduction">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Mantid Introduction</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Images/images.qrc">
-         <normaloff>:/Icons/Misc-Tutorial-icon-32x32.png</normaloff>:/Icons/Misc-Tutorial-icon-32x32.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>32</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="lblTutorials">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 105, 0);
-font-size: 28px</string>
-       </property>
-       <property name="text">
-        <string>Tutorials</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLabel" name="lblVersion">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 105, 0);
-font-size: 28px</string>
-       </property>
-       <property name="text">
-        <string>Version </string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QCommandLinkButton" name="clbReleaseNotes">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">color: rgb(0, 128, 0);
-color: rgb(0, 0, 0);</string>
-       </property>
-       <property name="text">
-        <string>Release Notes</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Images/images.qrc">
-         <normaloff>:/Icons/Notepad-Bloc-notes-icon-32x32.png</normaloff>:/Icons/Notepad-Bloc-notes-icon-32x32.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>32</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="1">
-      <widget class="QCommandLinkButton" name="clbSampleDatasets">
-       <property name="font">
-        <font>
-         <family>Segoe UI</family>
-         <pointsize>-1</pointsize>
-         <weight>75</weight>
-         <italic>false</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::LeftToRight</enum>
-       </property>
-       <property name="styleSheet">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>Sample Datasets</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Images/images.qrc">
-         <normaloff>:/Icons/download-icon-32x32.png</normaloff>:/Icons/download-icon-32x32.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>32</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_2">
+    <widget class="QLabel" name="lblVersion">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Montserrat Alternates</family>
+       <pointsize>-1</pointsize>
+       <weight>75</weight>
+       <italic>false</italic>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(215, 215, 215);
+font: 28pt &quot;Montserrat Alternates&quot;;
+font-weight: bold;
+font-size: 28px</string>
+     </property>
+     <property name="text">
+      <string>version </string>
+     </property>
+     <property name="margin">
+      <number>0</number>
+     </property>
+     <property name="indent">
+      <number>115</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_4">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -352,272 +114,690 @@ color: rgb(0, 0, 0);</string>
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="spacing">
-        <number>2</number>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="topMargin">
+        <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="lbUpdate">
-         <property name="minimumSize">
-          <size>
-           <width>540</width>
-           <height>0</height>
-          </size>
+        <layout class="QGridLayout" name="gridLayout">
+         <property name="leftMargin">
+          <number>15</number>
          </property>
-         <property name="font">
-          <font>
-           <family>Segoe UI</family>
-           <pointsize>-1</pointsize>
-           <weight>75</weight>
-           <italic>false</italic>
-           <bold>true</bold>
-          </font>
+         <property name="spacing">
+          <number>0</number>
          </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(0, 0, 0);</string>
-         </property>
-         <property name="text">
-          <string>You can revisit this dialog by selecting &quot;First Time Setup&quot; on the Help menu.</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
-         </property>
-         <property name="wordWrap">
-          <bool>true</bool>
-         </property>
-        </widget>
+         <item row="5" column="0">
+          <widget class="QCommandLinkButton" name="clbSampleDatasets">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Sample Datasets</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../Images/images.qrc">
+             <normaloff>:/Icons/download-icon-48x48.png</normaloff>:/Icons/download-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="autoDefault">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="0">
+          <widget class="QCommandLinkButton" name="clbExtendingMantid">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Extending Mantid with Python</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../Images/images.qrc">
+             <normaloff>:/Icons/Plugin-Python-icon-48x48.png</normaloff>:/Icons/Plugin-Python-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="12" column="0">
+          <widget class="QCommandLinkButton" name="clbPythonInMantid">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Python in Mantid</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../Images/images.qrc">
+             <normaloff>:/Icons/Circle_cog_48x48.png</normaloff>:/Icons/Circle_cog_48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QCommandLinkButton" name="clbPythonIntroduction">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Introduction to Python</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../Images/images.qrc">
+             <normaloff>:/Icons/Python-icon-48x48.png</normaloff>:/Icons/Python-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QCommandLinkButton" name="clbMantidIntroduction">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Mantid Introduction</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../Images/images.qrc">
+             <normaloff>:/Icons/Misc-Tutorial-icon-48x48.png</normaloff>:/Icons/Misc-Tutorial-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="lblTutorials">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(45, 105, 45);
+font-size: 32px;</string>
+           </property>
+           <property name="text">
+            <string>Tutorials</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QCommandLinkButton" name="clbReleaseNotes">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 128, 0);
+color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Release Notes</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../Images/images.qrc">
+             <normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</normaloff>:/Icons/Notepad-Bloc-notes-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>48</width>
+             <height>48</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+           <property name="default">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="Welcome">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(45, 105, 45);
+font-size: 32px;</string>
+           </property>
+           <property name="text">
+            <string>Welcome</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
-         <property name="font">
-          <font>
-           <family>Segoe UI</family>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: rgb(0, 0, 0);</string>
-         </property>
-         <property name="text">
-          <string>Do not show again until next release</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
+         <item>
+          <widget class="QGroupBox" name="grpPersonalSetup">
+           <property name="font">
+            <font>
+             <family>Segoe UI</family>
+             <weight>75</weight>
+             <italic>false</italic>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QGroupBox {
+     border: 3px solid  rgb(38, 128, 20);;
+     border-radius: 10px;
+	background-color: rgb(240, 240, 240);
+ }
+QGroupBox#grpPersonalSetup QLabel{
+	font: 16px &quot;Open Sans&quot;;
+	color: rgb(121, 121, 121);
+}
+QGroupBox#grpPersonalSetup QCheckBox{
+	font: 16px &quot;Open Sans&quot;;
+	color: rgb(121, 121, 121);
+}
+QGroupBox#grpPersonalSetup QPushButton{
+	font: 14px &quot;Open Sans&quot;;
+}
+QGroupBox#grpPersonalSetup QComboBox{
+	font: 14px &quot;Open Sans&quot;;
+}</string>
+           </property>
+           <property name="title">
+            <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <property name="spacing">
+             <number>12</number>
+            </property>
+            <property name="topMargin">
+             <number>1</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_3">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(38, 128, 20);</string>
+              </property>
+              <property name="text">
+               <string>Personal Setup</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QFormLayout" name="formLayout_4">
+              <property name="fieldGrowthPolicy">
+               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+              </property>
+              <property name="labelAlignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="formAlignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+              <property name="verticalSpacing">
+               <number>12</number>
+              </property>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label">
+                <property name="font">
+                 <font>
+                  <family>Open Sans</family>
+                  <pointsize>-1</pointsize>
+                  <weight>50</weight>
+                  <italic>false</italic>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="autoFillBackground">
+                 <bool>false</bool>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Default Facility</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QComboBox" name="cbFacility">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(0, 0, 0);
+background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(240, 240, 240, 255),stop:1 rgba(255, 255, 255, 255));</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_2">
+                <property name="font">
+                 <font>
+                  <family>Open Sans</family>
+                  <pointsize>-1</pointsize>
+                  <weight>50</weight>
+                  <italic>false</italic>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Default Instrument</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(0, 0, 0);
+background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgba(240, 240, 240, 255),stop:1 rgba(255, 255, 255, 255));</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="lbMUD">
+                <property name="font">
+                 <font>
+                  <family>Open Sans</family>
+                  <pointsize>-1</pointsize>
+                  <weight>50</weight>
+                  <italic>false</italic>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Set local data directories</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QPushButton" name="pbMUD">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(0, 0, 0);
+</string>
+                </property>
+                <property name="text">
+                 <string>Manage User Directories</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QCheckBox" name="chkAllowUsageData">
+                <property name="styleSheet">
+                 <string notr="true">padding: 4px;</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="lblAllowUsageData">
+                <property name="font">
+                 <font>
+                  <family>Open Sans</family>
+                  <pointsize>-1</pointsize>
+                  <weight>50</weight>
+                  <italic>false</italic>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Report usage data</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>3</number>
-       </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QGroupBox" name="grpPersonalSetup">
-         <property name="font">
-          <font>
-           <family>Segoe UI</family>
-           <pointsize>-1</pointsize>
-           <weight>75</weight>
-           <italic>false</italic>
-           <bold>true</bold>
-          </font>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <property name="spacing">
+          <number>2</number>
          </property>
-         <property name="styleSheet">
-          <string notr="true">QGroupBox {
-     border: 2px solid green;
-     border-radius: 5px;
- }
-</string>
+         <property name="leftMargin">
+          <number>15</number>
          </property>
-         <property name="title">
-          <string>Personal Setup</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-         </property>
-         <layout class="QFormLayout" name="formLayout">
-          <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-          </property>
-          <property name="verticalSpacing">
-           <number>4</number>
-          </property>
-          <property name="topMargin">
-           <number>18</number>
-          </property>
-          <property name="bottomMargin">
-           <number>6</number>
-          </property>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="font">
-             <font>
-              <family>Segoe UI</family>
-              <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>Default Facility</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QComboBox" name="cbFacility">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="font">
-             <font>
-              <family>Segoe UI</family>
-              <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>Default Instrument</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 0, 0);</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="lbMUD">
-            <property name="font">
-             <font>
-              <family>Segoe UI</family>
-              <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>Set local data directories</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QPushButton" name="pbMUD">
-            <property name="styleSheet">
-             <string notr="true">color: rgb(0, 0, 0);</string>
-            </property>
-            <property name="text">
-             <string>Manage User Directories</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QCheckBox" name="chkAllowUsageData">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="lblAllowUsageData">
-            <property name="font">
-             <font>
-              <family>Segoe UI</family>
-              <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <italic>false</italic>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Report usage data</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+         <item>
+          <widget class="QLabel" name="lbUpdate">
+           <property name="minimumSize">
+            <size>
+             <width>600</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 16px &quot;Open Sans&quot;;
+color: rgb(25,125,25);</string>
+           </property>
+           <property name="text">
+            <string>You can revisit this dialog by selecting &quot;First Time Setup&quot; on the Help menu.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <property name="spacing">
+            <number>7</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="chkDoNotShowUntilNextRelease">
+             <property name="font">
+              <font>
+               <family>Open Sans</family>
+               <pointsize>-1</pointsize>
+               <weight>50</weight>
+               <italic>false</italic>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">font: 16px &quot;Open Sans&quot;;
+color: rgb(25,125,25);</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>3</width>
+               <height>2</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_4">
+             <property name="styleSheet">
+              <string notr="true">font: 16px &quot;Open Sans&quot;;
+color: rgb(25,125,25);</string>
+             </property>
+             <property name="text">
+              <string>Do not show again until next release</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <spacer name="horizontalSpacer">
+          <spacer name="verticalSpacer_3">
            <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+            <enum>Qt::Vertical</enum>
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>13</width>
-             <height>20</height>
+             <width>20</width>
+             <height>40</height>
             </size>
            </property>
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pbCancel">
-           <property name="text">
-            <string>ASK ME NEXT TIME</string>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <property name="spacing">
+            <number>12</number>
            </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbConfirm">
-           <property name="text">
-            <string>SET</string>
-           </property>
-           <property name="default">
-            <bool>false</bool>
-           </property>
-          </widget>
+           <item>
+            <widget class="QPushButton" name="pbCancel">
+             <property name="text">
+              <string>Cancel</string>
+             </property>
+             <property name="default">
+              <bool>false</bool>
+             </property>
+             <property name="flat">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbConfirm">
+             <property name="text">
+              <string>Set</string>
+             </property>
+             <property name="default">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>180</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </item>
@@ -632,8 +812,23 @@ color: rgb(0, 0, 0);</string>
    <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>clbReleaseNotes</tabstop>
+  <tabstop>clbSampleDatasets</tabstop>
+  <tabstop>clbMantidIntroduction</tabstop>
+  <tabstop>clbPythonIntroduction</tabstop>
+  <tabstop>clbPythonInMantid</tabstop>
+  <tabstop>clbExtendingMantid</tabstop>
+  <tabstop>cbFacility</tabstop>
+  <tabstop>cbInstrument</tabstop>
+  <tabstop>pbMUD</tabstop>
+  <tabstop>chkAllowUsageData</tabstop>
+  <tabstop>pbCancel</tabstop>
+  <tabstop>pbConfirm</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../Images/images.qrc"/>
+  <include location="../../../Images/fonts/fonts.qrc"/>
  </resources>
  <connections/>
 </ui>

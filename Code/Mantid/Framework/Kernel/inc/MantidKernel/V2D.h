@@ -5,7 +5,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include <ostream>
+#include <iosfwd>
 
 namespace Mantid {
 namespace Kernel {
@@ -48,7 +48,7 @@ public:
   /**
    * Constructor taking an x and y value.
    */
-  inline V2D(const double x, const double y) : m_x(x), m_y(y) {}
+  inline V2D(double x, double y) : m_x(x), m_y(y) {}
   /**
    * X position
    * @returns The X position

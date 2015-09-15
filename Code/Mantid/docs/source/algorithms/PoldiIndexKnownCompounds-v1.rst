@@ -41,8 +41,7 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
 
     PoldiFitPeaks1D(InputWorkspace = correlated_6904, FwhmMultiples = 4.0,
                     PeakFunction = "Gaussian", PoldiPeakTable = peaks_6904,
-                    OutputWorkspace = "peaks_refined_6904", ResultTableWorkspace = "result_table_6904",
-                    FitCharacteristicsWorkspace = "raw_fit_results_6904",
+                    OutputWorkspace = "peaks_refined_6904",
                     FitPlotsWorkspace = "fit_plots_6904")
 
     # Create theoretical reflections for Silicon
@@ -58,15 +57,17 @@ The following example extracts peaks from the correlation spectrum of a Silicon 
                                     ScatteringContributions="1.0",
                                     OutputWorkspace="Indexed")
 
-    print "Indexed_Si contains", mtd['Indexed_Si'].rowCount(), "indexed peaks."
-    print "Number of unindexed peaks:", mtd['Unindexed_peaks_refined_6904'].rowCount()
+    print "Indexed_Si contains", mtd['peaks_refined_6904_indexed_Si'].rowCount(), "indexed peaks."
+    print "Number of unindexed peaks:", mtd['peaks_refined_6904_unindexed'].rowCount()
 
 Output:
 
 .. testoutput:: PoldiIndexKnownCompoundsExample
 
     Indexed_Si contains 13 indexed peaks.
-    Number of unindexed peaks: 1
+    Number of unindexed peaks: 0
 
 .. categories::
+
+.. sourcelink::
 

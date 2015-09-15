@@ -610,7 +610,7 @@
      <x>0</x>
      <y>0</y>
      <width>1000</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -631,6 +631,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionMantid_Help"/>
+    <addaction name="actionSlit_Calculator"/>
    </widget>
    <widget class="QMenu" name="menuFunction">
     <property name="title">
@@ -815,6 +816,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
+   </property>
+  </action>
+  <action name="actionSlit_Calculator">
+   <property name="text">
+    <string>Slit Calculator</string>
    </property>
   </action>
  </widget>

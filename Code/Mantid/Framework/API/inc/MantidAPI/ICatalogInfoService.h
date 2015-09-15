@@ -47,7 +47,7 @@ public:
                                          const std::string &,
                                          const std::string &) = 0;
   /// Obtains the investigations that the user can publish to and saves related
-  /// information to a workspace..
+  /// information to a workspace.
   virtual ITableWorkspace_sptr getPublishInvestigations() = 0;
 };
 

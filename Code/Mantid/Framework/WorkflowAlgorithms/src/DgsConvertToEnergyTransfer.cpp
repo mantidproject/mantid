@@ -42,10 +42,10 @@ DgsConvertToEnergyTransfer::~DgsConvertToEnergyTransfer() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsConvertToEnergyTransfer::version() const { return 1; };
+int DgsConvertToEnergyTransfer::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsConvertToEnergyTransfer::category() const {
@@ -199,7 +199,14 @@ void DgsConvertToEnergyTransfer::exec() {
         loadmon->setProperty(fileProp, runFileName);
         loadmon->setProperty("OutputWorkspace", monWsName);
         loadmon->executeAsChildAlg();
-        monWS = loadmon->getProperty("OutputWorkspace");
+        Workspace_sptr monWSOutput = loadmon->getProperty("OutputWorkspace");
+        // the algorithm can return a group workspace if the file is multi period
+        monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
+        if ((monWSOutput) && (!monWS)) {
+          //this was a group workspace - DGSReduction does not support multi period data yet
+          throw Exception::NotImplementedError(
+            "The file contains multi period data, support for this is not implemented in DGSReduction yet");
+        }
       }
 
       // Calculate Ei

@@ -37,8 +37,10 @@ namespace Mantid
     */
 
     class MDLoadingView;
+    class MetaDataExtractorUtils;
     class WorkspaceProvider;
     class vtkDataSetFactory;
+
     class DLLExport MDEWInMemoryLoadingPresenter : public MDEWLoadingPresenter
     {
     public:
@@ -49,6 +51,7 @@ namespace Mantid
       virtual bool canReadFile() const;
       virtual std::string getWorkspaceTypeName();
       virtual int getSpecialCoordinates();
+      
     private:
       /// Repository for accessing workspaces. At this level, does not specify how or where from.
       boost::scoped_ptr<WorkspaceProvider> m_repository;

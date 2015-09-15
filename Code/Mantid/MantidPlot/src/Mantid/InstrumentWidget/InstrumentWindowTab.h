@@ -1,6 +1,8 @@
 #ifndef INSTRUMENTWINDOWTAB_H
 #define INSTRUMENTWINDOWTAB_H
 
+#include "InstrumentWindowTypes.h"
+
 #include <QFrame>
 #include <boost/shared_ptr.hpp>
 
@@ -13,7 +15,7 @@ class ProjectionSurface;
 class QSettings;
 class QMenu;
 
-class InstrumentWindowTab : public QFrame
+class InstrumentWindowTab : public QFrame, public InstrumentWindowTypes
 {
     Q_OBJECT
 public:
@@ -28,9 +30,9 @@ public:
     /// Add tab-specific items to the context menu
     /// Return true if at least 1 item was added or false otherwise.
     virtual bool addToDisplayContextMenu(QMenu&) const {return false;}
-protected:
     /// Get the projection surface
     boost::shared_ptr<ProjectionSurface> getSurface() const;
+protected:
     /// The parent InstrumentWindow
     InstrumentWindow* m_instrWindow;
 

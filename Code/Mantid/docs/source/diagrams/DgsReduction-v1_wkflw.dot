@@ -1,0 +1,67 @@
+digraph DgsReduction {
+  label = "DgsReduction Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    Sample
+    HardMask
+    DetectorVanadium
+    ComparsionDetectorVanadium
+    Grouping
+    AbsoluteUnitsSample
+    AbsoluteUnitsDetectorVanadium
+    OutputWorkspace
+  }
+
+  subgraph decisions {
+    $decision_style
+    isAbsUnits [label="Absolute\nUnits?"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    DgsDiagnose
+    DgsProcessDetectorVanadium
+    DgsConvertToEnergyTransfer
+    DgsAbsoluteUnitsReduction
+    Divide
+  }
+
+  subgraph values {
+    $value_style
+    detVanMask [label="DetVan\nDiag Mask"]
+    intDetVan [label="Integrated\nDetVan"]
+    procSamp [label="Processed\nSample"]
+    background [label="Time-independent\nbackground"]
+    procUnits [label="Processed\nAbsolute\nUnits"]
+    absUnits [label="Absolute\nUnits\nDiag Mask"]
+    SPhiE [label="S(&phi;, E)"]
+  }
+
+  Sample -> DgsConvertToEnergyTransfer
+  Sample -> DgsDiagnose
+  HardMask -> DgsConvertToEnergyTransfer
+  HardMask -> DgsDiagnose
+  DetectorVanadium -> DgsDiagnose
+  DetectorVanadium -> DgsProcessDetectorVanadium
+  ComparsionDetectorVanadium -> DgsDiagnose
+  Grouping -> DgsConvertToEnergyTransfer
+  DgsDiagnose -> detVanMask
+  detVanMask -> DgsConvertToEnergyTransfer
+  detVanMask -> DgsProcessDetectorVanadium
+  DgsProcessDetectorVanadium -> intDetVan
+  intDetVan -> DgsConvertToEnergyTransfer
+  AbsoluteUnitsSample -> DgsAbsoluteUnitsReduction
+  AbsoluteUnitsDetectorVanadium -> DgsAbsoluteUnitsReduction
+  DgsAbsoluteUnitsReduction -> procUnits
+  DgsAbsoluteUnitsReduction -> absUnits
+  DgsConvertToEnergyTransfer -> background
+  DgsConvertToEnergyTransfer -> procSamp
+  procSamp -> isAbsUnits
+  isAbsUnits -> Divide [label="Yes"]
+  isAbsUnits -> SPhiE [label="No"]
+  procUnits -> Divide
+  Divide -> SPhiE
+  SPhiE -> OutputWorkspace
+}

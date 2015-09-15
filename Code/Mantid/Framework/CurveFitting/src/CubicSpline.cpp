@@ -41,7 +41,7 @@ CubicSpline::CubicSpline()
   declareParameter("y0", 0);
   declareParameter("y1", 0);
   declareParameter("y2", 0);
-};
+}
 
 /** Execute the function
  *

@@ -1,10 +1,8 @@
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <cstdio>
 
 namespace Mantid {
 namespace Crystal {
@@ -137,29 +135,9 @@ void FindUBUsingMinMaxD::exec() {
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                        sigabc[5]);
 
-    double calc_a = o_lattice.a();
-    double calc_b = o_lattice.b();
-    double calc_c = o_lattice.c();
-    double calc_alpha = o_lattice.alpha();
-    double calc_beta = o_lattice.beta();
-    double calc_gamma = o_lattice.gamma();
     // Show the modified lattice parameters
-    sprintf(
-        logInfo,
-        std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f")
-            .c_str(),
-        calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
-    g_log.notice(std::string(logInfo));
+    g_log.notice() << o_lattice << "\n";
 
-    g_log.notice() << "Parameter Errors  :" << std::fixed
-                   << std::setprecision(3) << std::setw(9) << sigabc[0]
-                   << std::fixed << std::setprecision(3) << std::setw(9)
-                   << sigabc[1] << std::fixed << std::setprecision(3)
-                   << std::setw(9) << sigabc[2] << std::fixed
-                   << std::setprecision(3) << std::setw(9) << sigabc[3]
-                   << std::fixed << std::setprecision(3) << std::setw(9)
-                   << sigabc[4] << std::fixed << std::setprecision(3)
-                   << std::setw(9) << sigabc[5] << std::endl;
     ws->mutableSample().setOrientedLattice(&o_lattice);
   }
 }

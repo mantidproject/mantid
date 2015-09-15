@@ -1,5 +1,7 @@
 #include <iostream>
 #include "MantidQtSpectrumViewer/MatrixWSSpectrumView.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
 
 using Mantid::API::MatrixWorkspace_const_sptr;

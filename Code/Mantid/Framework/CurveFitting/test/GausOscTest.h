@@ -2,6 +2,7 @@
 #define GAUSOSCTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 
 #include "MantidCurveFitting/GausOsc.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -112,7 +113,7 @@ public:
     TS_ASSERT_DELTA( out->getParameter("A"), 128.7 ,0.9);
     TS_ASSERT_DELTA( out->getParameter("Sigma"), 0.35 ,0.005);
     TS_ASSERT_DELTA( out->getParameter("Frequency"), 1/8.0 ,0.01);  // Period of 8
-    TS_ASSERT_DELTA( out->getParameter("Phi"), 3.1415926536/4.0 ,0.01);  //  45 degrees
+    TS_ASSERT_DELTA( out->getParameter("Phi"), M_PI_4 ,0.01);  //  45 degrees
 
     // check its categories
     const std::vector<std::string> categories = out->categories();

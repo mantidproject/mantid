@@ -11,7 +11,7 @@ Description
 
 This algorithm will predict the position of single-crystal diffraction
 peaks (both in detector position/TOF and Q-space) and create an output
-`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_ containing the result.
+:ref:`PeaksWorkspace <PeaksWorkspace>` containing the result.
 
 This algorithm uses the InputWorkspace to determine the instrument in
 use, as well as the UB Matrix and Unit Cell of the sample used. You can
@@ -46,4 +46,8 @@ with the desired number of peaks. Use python or the GUI to enter the
 desired HKLs. If these are fraction (e.g. magnetic peaks) then make sure
 RoundHKL=False.
 
+.. seealso :: Algorithm :ref:`algm-PredictFractionalPeaks`
+
 .. categories::
+
+.. sourcelink::

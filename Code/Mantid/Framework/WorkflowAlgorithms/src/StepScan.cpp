@@ -19,10 +19,10 @@ StepScan::StepScan() {}
 StepScan::~StepScan() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string StepScan::name() const { return "StepScan"; };
+const std::string StepScan::name() const { return "StepScan"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int StepScan::version() const { return 1; };
+int StepScan::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string StepScan::category() const { return "Workflow\\Alignment"; }

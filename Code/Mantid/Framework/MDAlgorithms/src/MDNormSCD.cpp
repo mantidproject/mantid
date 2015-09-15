@@ -2,8 +2,8 @@
 
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
@@ -12,7 +12,7 @@ namespace MDAlgorithms {
 
 using Mantid::Kernel::Direction;
 using Mantid::API::WorkspaceProperty;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -218,7 +218,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  m_normWS = boost::make_shared<MDHistoWorkspace>(dataWS);
+  m_normWS.reset(dataWS.clone().release());
   m_normWS->setTo(0., 0., 0.);
 }
 
@@ -308,15 +308,14 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
       if (m_lmin > dimMax || m_lmax < dimMin) {
         skipNormalization = true;
       }
+    }
 
-      for (size_t col = 3; col < ncm1;
-           col++) // affine matrix, ignore last column
-      {
-        if (affineMat[row][col] == 1.) {
-          double val = otherDimValues.at(col - 3);
-          if (val > dimMax || val < dimMin) {
-            skipNormalization = true;
-          }
+    for (size_t col = 3; col < ncm1; col++) // affine matrix, ignore last column
+    {
+      if (affineMat[row][col] == 1.) {
+        double val = otherDimValues.at(col - 3);
+        if (val > dimMax || val < dimMin) {
+          skipNormalization = true;
         }
       }
     }
@@ -329,20 +328,26 @@ MDNormSCD::findIntergratedDimensions(const std::vector<coord_t> &otherDimValues,
  * Stores the X values from each H,K,L dimension as member variables
  */
 void MDNormSCD::cacheDimensionXValues() {
-  auto &hDim = *m_normWS->getDimension(m_hIdx);
-  m_hX.resize(hDim.getNBins());
-  for (size_t i = 0; i < m_hX.size(); ++i) {
-    m_hX[i] = hDim.getX(i);
+  if (!m_hIntegrated) {
+    auto &hDim = *m_normWS->getDimension(m_hIdx);
+    m_hX.resize(hDim.getNBins());
+    for (size_t i = 0; i < m_hX.size(); ++i) {
+      m_hX[i] = hDim.getX(i);
+    }
   }
-  auto &kDim = *m_normWS->getDimension(m_kIdx);
-  m_kX.resize(kDim.getNBins());
-  for (size_t i = 0; i < m_kX.size(); ++i) {
-    m_kX[i] = kDim.getX(i);
+  if (!m_kIntegrated) {
+    auto &kDim = *m_normWS->getDimension(m_kIdx);
+    m_kX.resize(kDim.getNBins());
+    for (size_t i = 0; i < m_kX.size(); ++i) {
+      m_kX[i] = kDim.getX(i);
+    }
   }
-  auto &lDim = *m_normWS->getDimension(m_lIdx);
-  m_lX.resize(lDim.getNBins());
-  for (size_t i = 0; i < m_lX.size(); ++i) {
-    m_lX[i] = lDim.getX(i);
+  if (!m_lIntegrated) {
+    auto &lDim = *m_normWS->getDimension(m_lIdx);
+    m_lX.resize(lDim.getNBins());
+    for (size_t i = 0; i < m_lX.size(); ++i) {
+      m_lX[i] = lDim.getX(i);
+    }
   }
 }
 
@@ -361,7 +366,7 @@ MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
       getProperty("SolidAngleWorkspace");
 
   const auto &exptInfoZero = *(m_inputWS->getExperimentInfo(0));
-  typedef Kernel::PropertyWithValue<std::vector<double>> VectorDoubleProperty;
+  typedef Kernel::PropertyWithValue<std::vector<double> > VectorDoubleProperty;
   auto *rubwLog =
       dynamic_cast<VectorDoubleProperty *>(exptInfoZero.getLog("RUBW_MATRIX"));
   if (!rubwLog) {
@@ -401,8 +406,9 @@ MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
       auto spectrum = getThetaPhi(detID, exptInfoZero, theta, phi);
       if (spectrum->isMonitor() || spectrum->isMasked())
         continue;
-    } catch (std::exception &) // detector might not exist or has no been
-                               // included in grouping
+    }
+    catch (std::exception &) // detector might not exist or has no been included
+                             // in grouping
     {
       skip = true; // Intel compiler has a problem with continue inside a catch
                    // inside openmp...
@@ -443,7 +449,9 @@ MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
     const size_t vmdDims = intersections.front().size();
     // pre-allocate for efficiency and copy non-hkl dim values into place
     std::vector<coord_t> pos(vmdDims + otherValues.size());
-    std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims);
+    std::copy(otherValues.begin(), otherValues.end(),
+              pos.begin() + vmdDims - 1);
+    pos.push_back(1.);
 
     for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
       const auto &curIntSec = *it;
@@ -455,7 +463,7 @@ MDNormSCD::calculateNormalization(const std::vector<coord_t> &otherValues,
 
       // Average between two intersections for final position
       std::transform(curIntSec.getBareArray(),
-                     curIntSec.getBareArray() + vmdDims,
+                     curIntSec.getBareArray() + vmdDims - 1,
                      prevIntSec.getBareArray(), pos.begin(),
                      VectorHelper::SimpleAverage<coord_t>());
       std::vector<coord_t> posNew = affineTrans * pos;
@@ -585,7 +593,8 @@ MDNormSCD::removeGroupedIDs(const ExperimentInfo &exptInfo,
       singleIDs.push_back(members.front());
       std::copy(members.begin() + 1, members.end(),
                 std::inserter(groupedIDs, groupedIDs.begin()));
-    } catch (std::runtime_error &) {
+    }
+    catch (std::runtime_error &) {
       singleIDs.push_back(curID);
     }
   }

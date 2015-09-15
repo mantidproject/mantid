@@ -1,7 +1,7 @@
 .. _EventWorkspace:
 
-EventWorkspace
-==============
+Event Workspace
+===============
 
 Quick Summary For Users
 -----------------------
@@ -120,6 +120,8 @@ any of the event lists are unsorted.
 You can go around this by forcing the parallel loop with a plain
 PARALLEL\_FOR() macro. **Make sure you do not read from the same
 spectrum in parallel!**
+
+.. include:: WorkspaceNavigation.txt
 
 
 

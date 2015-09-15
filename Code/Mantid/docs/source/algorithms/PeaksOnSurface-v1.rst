@@ -49,3 +49,5 @@ Output:
    {'Distance': -1.0, 'PeakIndex': 0, 'Intersecting': True}
 
 .. categories::
+
+.. sourcelink::

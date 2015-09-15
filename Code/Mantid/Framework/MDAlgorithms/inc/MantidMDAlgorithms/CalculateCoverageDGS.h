@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -48,7 +48,7 @@ private:
 
   /// limits for h,k,l,dE dimensions
   coord_t m_hmin, m_hmax, m_kmin, m_kmax, m_lmin, m_lmax, m_dEmin, m_dEmax;
-  /// cached values for incident energy and momentum
+  /// cached values for incident energy and momentum, final momentum min/max
   double m_Ei, m_ki, m_kfmin, m_kfmax;
   /// flag for integrated h,k,l,dE dimensions
   bool m_hIntegrated, m_kIntegrated, m_lIntegrated, m_dEIntegrated;
@@ -60,7 +60,7 @@ private:
   Mantid::Kernel::DblMatrix m_rubw;
 
   /// Normalization workspace (this is the coverage workspace)
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_normWS;
 
   std::vector<Kernel::VMD> calculateIntersections(const double theta,
                                                   const double phi);

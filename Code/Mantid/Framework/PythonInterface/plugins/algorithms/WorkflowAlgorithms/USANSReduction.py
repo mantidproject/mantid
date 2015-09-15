@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -8,6 +9,13 @@ import os
 import json
 
 class USANSReduction(PythonAlgorithm):
+
+    wl_list = None
+    data_files = None
+    total_points = None
+    q_output = None
+    iq_output = None
+    iq_err_output = None
 
     def category(self):
         return "SANS"
@@ -21,7 +29,7 @@ class USANSReduction(PythonAlgorithm):
     def PyInit(self):
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,
+        self.declareProperty(IntArrayProperty("RunNumbers", values=[0], validator=arrvalidator,\
                              direction=Direction.Input), "Runs to reduce")
         self.declareProperty("EmptyRun", '', "Run number for the empty run")
 
@@ -29,7 +37,9 @@ class USANSReduction(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
 
+    #pylint: disable= too-few-public-methods
     class DataFile(object):
+        #pylint: disable= too-many-arguments
         def __init__(self, workspace, monitor, empty, empty_monitor, is_scan=False, max_index=1):
             self.workspace = workspace
             self.monitor = monitor
@@ -99,11 +109,11 @@ class USANSReduction(PythonAlgorithm):
                         is_scan = True
 
             # Append the info for when we do the reduction
-            self.data_files.append(self.DataFile(workspace=ws_name,
-                                            monitor=ws_name+'_monitors',
-                                            empty='__empty',
-                                            empty_monitor='__empty_monitors',
-                                            is_scan=is_scan,
+            self.data_files.append(self.DataFile(workspace=ws_name,\
+                                            monitor=ws_name+'_monitors',\
+                                            empty='__empty',\
+                                            empty_monitor='__empty_monitors',\
+                                            is_scan=is_scan,\
                                             max_index=max_index))
             total_points += max_index
 
@@ -147,8 +157,10 @@ class USANSReduction(PythonAlgorithm):
                     self.iq_output[i_wl][point+index_offset] = i_q.dataY(0)[0]
                     self.iq_err_output[i_wl][point+index_offset] = i_q.dataE(0)[0]
                 except:
-                    Logger("USANSReduction").error("Exception caught for %s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
-                    Logger("USANSReduction").error("Array: %s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
+                    Logger("USANSReduction").error("Exception caught for "+\
+                                                   "%s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
+                    Logger("USANSReduction").error("Array: "+
+                                                   "%s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
                     Logger("USANSReduction").error(sys.exc_value)
         return file_info.max_index
 
@@ -220,6 +232,7 @@ class USANSReduction(PythonAlgorithm):
                                  OutputWorkspace=output_ws_name)
         self.setProperty("OutputWorkspace", out_ws)
 
+    #pylint: disable=too-many-arguments
     def _get_intensity(self, sample, empty, sample_monitor, empty_monitor, tof_min, tof_max):
         # Number of pixels we are dealing with
         nspecs = sample.getNumberHistograms()
@@ -271,9 +284,9 @@ class USANSReduction(PythonAlgorithm):
                                 OutputWorkspace='transmission')
 
         # Scattering signal
-        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,
-                                     StartWorkspaceIndex=0,
-                                     EndWorkspaceIndex=nspecs/2,
+        __signal_summed = _execute('SumSpectra', InputWorkspace=sample,\
+                                     StartWorkspaceIndex=0,\
+                                     EndWorkspaceIndex=nspecs/2,\
                                      OutputWorkspace='__signal_summed')
         __point = _execute('CropWorkspace', InputWorkspace=__signal_summed,
                            XMin=tof_min, XMax=tof_max,

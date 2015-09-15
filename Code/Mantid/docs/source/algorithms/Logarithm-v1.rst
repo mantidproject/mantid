@@ -59,3 +59,5 @@ Usage
    Log10 for Err spectra 0:  [ 0.      0.0434  0.434   0.434 ]
 
 .. categories::
+
+.. sourcelink::

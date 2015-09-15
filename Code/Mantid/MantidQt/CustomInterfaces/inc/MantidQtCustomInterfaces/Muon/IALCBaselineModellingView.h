@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 
+#include "MantidAPI/IFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <QObject>
@@ -71,14 +72,18 @@ namespace CustomInterfaces
     /**
      * Update displayed data curve
      * @param data :: New curve data
+     * @param errors :: Curve errors
      */
-    virtual void setDataCurve(const QwtData& data) = 0;
+    virtual void setDataCurve(const QwtData &data,
+                              const std::vector<double> &errors) = 0;
 
     /**
      * Update displayed corrected data curve
      * @param data :: New curve data
+     * @param errors :: Curve errors
      */
-    virtual void setCorrectedCurve(const QwtData& data) = 0;
+    virtual void setCorrectedCurve(const QwtData &data,
+                                   const std::vector<double> &errors) = 0;
 
     /**
      * Update displayed baseline curve
@@ -90,7 +95,7 @@ namespace CustomInterfaces
      * Update displayed function
      * @param func :: New function
      */
-    virtual void setFunction(const QString& func) = 0;
+    virtual void setFunction(Mantid::API::IFunction_const_sptr func) = 0;
 
     /**
      * Resize sections table
@@ -130,6 +135,9 @@ namespace CustomInterfaces
      * @param message :: Error message to display
      */
     virtual void displayError(const QString& message) = 0;
+
+    /// Links help button to wiki page
+    virtual void help() = 0;
 
   signals:
     /// Fit requested

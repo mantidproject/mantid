@@ -29,6 +29,8 @@
 #include "ArrowMarker.h"
 #include "LineDialog.h"
 
+#include <cmath>
+
 #include <QPainter>
 #include <QMouseEvent>
 #include <QApplication>
@@ -36,10 +38,6 @@
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_painter.h>
-
-#ifndef M_PI
-#define M_PI 3.141592653589793238462643;
-#endif
 
 ArrowMarker::ArrowMarker():
     d_start_arrow(false),

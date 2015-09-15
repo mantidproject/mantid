@@ -1,8 +1,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -14,7 +14,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -30,7 +30,7 @@ template <typename MDE, size_t nd> struct IsFullEvent : boost::false_type {};
 template <size_t nd> struct IsFullEvent<MDEvent<nd>, nd> : boost::true_type {};
 
 /**
- * Specialization if isFullEvent for MDEvents
+ * Specialization if isFullEvent for DataObjects
  * to return true
  */
 template <typename MDE, size_t nd>
@@ -39,7 +39,7 @@ bool isFullMDEvent(const boost::true_type &) {
 }
 
 /**
- * Specialization if isFullEvent for MDEvents
+ * Specialization if isFullEvent for DataObjects
  * to return false
  */
 template <typename MDE, size_t nd>
@@ -106,7 +106,9 @@ DECLARE_ALGORITHM(FindPeaksMD)
 /** Constructor
  */
 FindPeaksMD::FindPeaksMD()
-    : m_addDetectors(true), m_densityScaleFactor(1e-6), prog(NULL) {}
+: peakWS(), peakRadiusSquared(), DensityThresholdFactor(0.0), m_maxPeaks(0),
+  m_addDetectors(true), m_densityScaleFactor(1e-6), prog(NULL), inst(),
+  m_runNumber(-1), dimType(), m_goniometer() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -160,7 +162,7 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
   // Instrument associated with workspace
   inst = ei->getInstrument();
   // Find the run number
-  runNumber = ei->getRunNumber();
+  m_runNumber = ei->getRunNumber();
 
   // Check that the workspace dimensions are in Q-sample-frame or Q-lab-frame.
   std::string dim0 = ws->getDimension(0)->getName();
@@ -177,10 +179,10 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
         "Unexpected dimensions: need either Q_lab_x or Q_sample_x.");
 
   // Find the goniometer rotation matrix
-  goniometer =
+  m_goniometer =
       Mantid::Kernel::Matrix<double>(3, 3, true); // Default IDENTITY matrix
   try {
-    goniometer = ei->mutableRun().getGoniometerMatrix();
+    m_goniometer = ei->mutableRun().getGoniometerMatrix();
   } catch (std::exception &e) {
     g_log.warning() << "Error finding goniometer matrix. It will not be set in "
                        "the peaks found." << std::endl;
@@ -197,7 +199,7 @@ void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr &ei,
 void FindPeaksMD::addPeak(const V3D &Q, const double binCount) {
   try {
     auto p = this->createPeak(Q, binCount);
-    peakWS->addPeak(*p);
+    if (p->getDetectorID() != -1) peakWS->addPeak(*p);
   } catch (std::exception &e) {
     g_log.notice() << "Error creating peak at " << Q << " because of '"
                    << e.what() << "'. Peak will be skipped." << std::endl;
@@ -214,10 +216,10 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
     // Build using the Q-lab-frame constructor
     p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q));
     // Save gonio matrix for later
-    p->setGoniometerMatrix(goniometer);
+    p->setGoniometerMatrix(m_goniometer);
   } else if (dimType == QSAMPLE) {
     // Build using the Q-sample-frame constructor
-    p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q, goniometer));
+    p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q, m_goniometer));
   }
 
   try { // Look for a detector
@@ -227,7 +229,7 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount) {
 
   p->setBinCount(binCount);
   // Save the run number found before.
-  p->setRunNumber(runNumber);
+  p->setRunNumber(m_runNumber);
   return p;
 }
 
@@ -259,163 +261,171 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   if (ws->getNumExperimentInfo() == 0)
     throw std::runtime_error(
         "No instrument was found in the MDEventWorkspace. Cannot find peaks.");
-  // TODO: Do we need to pick a different instrument info?
-  ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
-  this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
-  // Copy the instrument, sample, run to the peaks workspace.
-  peakWS->copyExperimentInfoFrom(ei.get());
 
-  // Calculate a threshold below which a box is too diffuse to be considered a
-  // peak.
-  signal_t thresholdDensity = ws->getBox()->getSignalNormalized() *
-                              DensityThresholdFactor * m_densityScaleFactor;
-  if (boost::math::isnan(thresholdDensity) ||
-      (thresholdDensity == std::numeric_limits<double>::infinity()) ||
-      (thresholdDensity == -std::numeric_limits<double>::infinity())) {
-    g_log.warning() << "Infinite or NaN overall density found. Your input data "
-                       "may be invalid. Using a 0 threshold instead."
-                    << std::endl;
-    thresholdDensity = 0;
-  }
-  g_log.notice() << "Threshold signal density: " << thresholdDensity
-                 << std::endl;
+  for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
+    ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
+    this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    // Copy the instrument, sample, run to the peaks workspace.
+    peakWS->copyExperimentInfoFrom(ei.get());
 
-  typedef API::IMDNode *boxPtr;
-  // We will fill this vector with pointers to all the boxes (up to a given
-  // depth)
-  typename std::vector<API::IMDNode *> boxes;
+    // Calculate a threshold below which a box is too diffuse to be considered a
+    // peak.
+    signal_t thresholdDensity = ws->getBox()->getSignalNormalized() *
+                                DensityThresholdFactor * m_densityScaleFactor;
+    if (boost::math::isnan(thresholdDensity) ||
+        (thresholdDensity == std::numeric_limits<double>::infinity()) ||
+        (thresholdDensity == -std::numeric_limits<double>::infinity())) {
+      g_log.warning() << "Infinite or NaN overall density found. Your input data "
+                         "may be invalid. Using a 0 threshold instead."
+                      << std::endl;
+      thresholdDensity = 0;
+    }
+    g_log.notice() << "Threshold signal density: " << thresholdDensity
+                   << std::endl;
 
-  // Get all the MDboxes
-  progress(0.10, "Getting Boxes");
-  ws->getBox()->getBoxes(boxes, 1000, true);
+    typedef API::IMDNode *boxPtr;
+    // We will fill this vector with pointers to all the boxes (up to a given
+    // depth)
+    typename std::vector<API::IMDNode *> boxes;
 
-  // This pair is the <density, ptr to the box>
-  typedef std::pair<double, API::IMDNode *> dens_box;
+    // Get all the MDboxes
+    progress(0.10, "Getting Boxes");
+    ws->getBox()->getBoxes(boxes, 1000, true);
 
-  // Map that will sort the boxes by increasing density. The key = density;
-  // value = box *.
-  typename std::multimap<double, API::IMDNode *> sortedBoxes;
+    // This pair is the <density, ptr to the box>
+    typedef std::pair<double, API::IMDNode *> dens_box;
 
-  // --------------- Sort and Filter by Density -----------------------------
-  progress(0.20, "Sorting Boxes by Density");
-  auto it1 = boxes.begin();
-  auto it1_end = boxes.end();
-  for (; it1 != it1_end; it1++) {
-    auto box = *it1;
-    double density = box->getSignalNormalized() * m_densityScaleFactor;
-    // Skip any boxes with too small a signal density.
-    if (density > thresholdDensity)
-      sortedBoxes.insert(dens_box(density, box));
-  }
+    // Map that will sort the boxes by increasing density. The key = density;
+    // value = box *.
+    typename std::multimap<double, API::IMDNode *> sortedBoxes;
 
-  // --------------- Find Peak Boxes -----------------------------
-  // List of chosen possible peak boxes.
-  std::vector<API::IMDNode *> peakBoxes;
+    // --------------- Sort and Filter by Density -----------------------------
+    progress(0.20, "Sorting Boxes by Density");
+    auto it1 = boxes.begin();
+    auto it1_end = boxes.end();
+    for (; it1 != it1_end; it1++) {
+      auto box = *it1;
+      double density = box->getSignalNormalized() * m_densityScaleFactor;
+      // Skip any boxes with too small a signal density.
+      if (density > thresholdDensity)
+        sortedBoxes.insert(dens_box(density, box));
+    }
 
-  prog = new Progress(this, 0.30, 0.95, MaxPeaks);
+    // --------------- Find Peak Boxes -----------------------------
+    // List of chosen possible peak boxes.
+    std::vector<API::IMDNode *> peakBoxes;
 
-  // used for selecting method for calculating BinCount
-  bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
+    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
 
-  int64_t numBoxesFound = 0;
-  // Now we go (backwards) through the map
-  // e.g. from highest density down to lowest density.
-  typename std::multimap<double, boxPtr>::reverse_iterator it2;
-  typename std::multimap<double, boxPtr>::reverse_iterator it2_end =
-      sortedBoxes.rend();
-  for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
-    signal_t density = it2->first;
-    boxPtr box = it2->second;
-#ifndef MDBOX_TRACK_CENTROID
-    coord_t boxCenter[nd];
-    box->calculateCentroid(boxCenter);
-#else
-    const coord_t *boxCenter = box->getCentroid();
-#endif
+    // used for selecting method for calculating BinCount
+    bool isMDEvent(ws->id().find("MDEventWorkspace") != std::string::npos);
 
-    // Compare to all boxes already picked.
-    bool badBox = false;
+    int64_t numBoxesFound = 0;
+    // Now we go (backwards) through the map
+    // e.g. from highest density down to lowest density.
+    typename std::multimap<double, boxPtr>::reverse_iterator it2;
+    typename std::multimap<double, boxPtr>::reverse_iterator it2_end =
+        sortedBoxes.rend();
+    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; it2++) {
+      signal_t density = it2->first;
+      boxPtr box = it2->second;
+  #ifndef MDBOX_TRACK_CENTROID
+      coord_t boxCenter[nd];
+      box->calculateCentroid(boxCenter);
+  #else
+      const coord_t *boxCenter = box->getCentroid();
+  #endif
+
+      // Compare to all boxes already picked.
+      bool badBox = false;
+      for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
+           it3 != peakBoxes.end(); it3++) {
+
+  #ifndef MDBOX_TRACK_CENTROID
+        coord_t otherCenter[nd];
+        (*it3)->calculateCentroid(otherCenter);
+  #else
+        const coord_t *otherCenter = (*it3)->getCentroid();
+  #endif
+
+        // Distance between this box and a box we already put in.
+        coord_t distSquared = 0.0;
+        for (size_t d = 0; d < nd; d++) {
+          coord_t dist = otherCenter[d] - boxCenter[d];
+          distSquared += (dist * dist);
+        }
+
+        // Reject this box if it is too close to another previously found box.
+        if (distSquared < peakRadiusSquared) {
+          badBox = true;
+          break;
+        }
+      }
+
+      // The box was not rejected for another reason.
+      if (!badBox) {
+        if (numBoxesFound++ >= m_maxPeaks) {
+          g_log.notice() << "Number of peaks found exceeded the limit of "
+                         << m_maxPeaks << ". Stopping peak finding." << std::endl;
+          break;
+        }
+
+        peakBoxes.push_back(box);
+        g_log.debug() << "Found box at ";
+        for (size_t d = 0; d < nd; d++)
+          g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
+        g_log.debug() << "; Density = " << density << std::endl;
+        // Report progres for each box found.
+        prog->report("Finding Peaks");
+      }
+    }
+
+    prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
+
+    // --- Convert the "boxes" to peaks ----
     for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
          it3 != peakBoxes.end(); it3++) {
+      // The center of the box = Q in the lab frame
+      boxPtr box = *it3;
+  #ifndef MDBOX_TRACK_CENTROID
+      coord_t boxCenter[nd];
+      box->calculateCentroid(boxCenter);
+  #else
+      const coord_t *boxCenter = box->getCentroid();
+  #endif
 
-#ifndef MDBOX_TRACK_CENTROID
-      coord_t otherCenter[nd];
-      (*it3)->calculateCentroid(otherCenter);
-#else
-      const coord_t *otherCenter = (*it3)->getCentroid();
-#endif
+      // Q of the centroid of the box
+      V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
-      // Distance between this box and a box we already put in.
-      coord_t distSquared = 0.0;
-      for (size_t d = 0; d < nd; d++) {
-        coord_t dist = otherCenter[d] - boxCenter[d];
-        distSquared += (dist * dist);
+      // The "bin count" used will be the box density or the number of events in
+      // the box
+      double binCount = box->getSignalNormalized() * m_densityScaleFactor;
+      if (isMDEvent)
+        binCount = static_cast<double>(box->getNPoints());
+
+      try {
+        auto p = this->createPeak(Q, binCount);
+        if (m_addDetectors) {
+          auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
+          if (!mdBox) {
+            throw std::runtime_error("Failed to cast box to MDBoxBase");
+          }
+          addDetectors(*p, *mdBox);
+        }
+        if (p->getDetectorID() != -1) peakWS->addPeak(*p);
+      } catch (std::exception &e) {
+        g_log.notice() << "Error creating peak at " << Q << " because of '"
+                       << e.what() << "'. Peak will be skipped." << std::endl;
       }
 
-      // Reject this box if it is too close to another previously found box.
-      if (distSquared < peakRadiusSquared) {
-        badBox = true;
-        break;
-      }
-    }
+      // Report progress for each box found.
+      prog->report("Adding Peaks");
 
-    // The box was not rejected for another reason.
-    if (!badBox) {
-      if (numBoxesFound++ >= MaxPeaks) {
-        g_log.notice() << "Number of peaks found exceeded the limit of "
-                       << MaxPeaks << ". Stopping peak finding." << std::endl;
-        break;
-      }
-
-      peakBoxes.push_back(box);
-      g_log.debug() << "Found box at ";
-      for (size_t d = 0; d < nd; d++)
-        g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
-      g_log.debug() << "; Density = " << density << std::endl;
-      // Report progres for each box found.
-      prog->report("Finding Peaks");
-    }
+    } // for each box found
   }
-
-  prog->resetNumSteps(numBoxesFound, 0.95, 1.0);
-
-  // --- Convert the "boxes" to peaks ----
-  for (typename std::vector<boxPtr>::iterator it3 = peakBoxes.begin();
-       it3 != peakBoxes.end(); it3++) {
-    // The center of the box = Q in the lab frame
-    boxPtr box = *it3;
-#ifndef MDBOX_TRACK_CENTROID
-    coord_t boxCenter[nd];
-    box->calculateCentroid(boxCenter);
-#else
-    const coord_t *boxCenter = box->getCentroid();
-#endif
-
-    // Q of the centroid of the box
-    V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
-
-    // The "bin count" used will be the box density or the number of events in
-    // the box
-    double binCount = box->getSignalNormalized() * m_densityScaleFactor;
-    if (isMDEvent)
-      binCount = static_cast<double>(box->getNPoints());
-
-    try {
-      auto p = this->createPeak(Q, binCount);
-      if (m_addDetectors)
-        addDetectors(*p, *dynamic_cast<MDBoxBase<MDE, nd> *>(box));
-      peakWS->addPeak(*p);
-    } catch (std::exception &e) {
-      g_log.notice() << "Error creating peak at " << Q << " because of '"
-                     << e.what() << "'. Peak will be skipped." << std::endl;
-    }
-
-    // Report progress for each box found.
-    prog->report("Adding Peaks");
-
-  } // for each box found
   g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
                  << std::endl;
+
 }
 
 //----------------------------------------------------------------------------------------------
@@ -423,7 +433,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param ws :: MDHistoWorkspace
  */
-void FindPeaksMD::findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws) {
+void FindPeaksMD::findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   size_t nd = ws->getNumDims();
   if (nd < 3)
     throw std::invalid_argument("Workspace must have at least 3 dimensions.");
@@ -434,122 +444,125 @@ void FindPeaksMD::findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws) {
   if (ws->getNumExperimentInfo() == 0)
     throw std::runtime_error(
         "No instrument was found in the workspace. Cannot find peaks.");
-  ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
-  this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
-  // Copy the instrument, sample, run to the peaks workspace.
-  peakWS->copyExperimentInfoFrom(ei.get());
+  for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
+    ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
+    this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
-  // This pair is the <density, box index>
-  typedef std::pair<double, size_t> dens_box;
+    // Copy the instrument, sample, run to the peaks workspace.
+    peakWS->copyExperimentInfoFrom(ei.get());
 
-  // Map that will sort the boxes by increasing density. The key = density;
-  // value = box index.
-  std::multimap<double, size_t> sortedBoxes;
+    // This pair is the <density, box index>
+    typedef std::pair<double, size_t> dens_box;
 
-  size_t numBoxes = ws->getNPoints();
+    // Map that will sort the boxes by increasing density. The key = density;
+    // value = box index.
+    std::multimap<double, size_t> sortedBoxes;
 
-  // --------- Count the overall signal density -----------------------------
-  progress(0.10, "Counting Total Signal");
-  double totalSignal = 0;
-  for (size_t i = 0; i < numBoxes; i++)
-    totalSignal += ws->getSignalAt(i);
-  // Calculate the threshold density
-  double thresholdDensity =
-      (totalSignal * ws->getInverseVolume() / double(numBoxes)) *
-      DensityThresholdFactor * m_densityScaleFactor;
-  if ((thresholdDensity != thresholdDensity) ||
-      (thresholdDensity == std::numeric_limits<double>::infinity()) ||
-      (thresholdDensity == -std::numeric_limits<double>::infinity())) {
-    g_log.warning() << "Infinite or NaN overall density found. Your input data "
-                       "may be invalid. Using a 0 threshold instead."
-                    << std::endl;
-    thresholdDensity = 0;
-  }
-  g_log.notice() << "Threshold signal density: " << thresholdDensity
-                 << std::endl;
+    size_t numBoxes = ws->getNPoints();
 
-  // -------------- Sort and Filter by Density -----------------------------
-  progress(0.20, "Sorting Boxes by Density");
-  for (size_t i = 0; i < numBoxes; i++) {
-    double density = ws->getSignalNormalizedAt(i) * m_densityScaleFactor;
-    // Skip any boxes with too small a signal density.
-    if (density > thresholdDensity)
-      sortedBoxes.insert(dens_box(density, i));
-  }
+    // --------- Count the overall signal density -----------------------------
+    progress(0.10, "Counting Total Signal");
+    double totalSignal = 0;
+    for (size_t i = 0; i < numBoxes; i++)
+      totalSignal += ws->getSignalAt(i);
+    // Calculate the threshold density
+    double thresholdDensity =
+        (totalSignal * ws->getInverseVolume() / double(numBoxes)) *
+        DensityThresholdFactor * m_densityScaleFactor;
+    if ((thresholdDensity != thresholdDensity) ||
+        (thresholdDensity == std::numeric_limits<double>::infinity()) ||
+        (thresholdDensity == -std::numeric_limits<double>::infinity())) {
+      g_log.warning() << "Infinite or NaN overall density found. Your input data "
+                         "may be invalid. Using a 0 threshold instead."
+                      << std::endl;
+      thresholdDensity = 0;
+    }
+    g_log.notice() << "Threshold signal density: " << thresholdDensity
+                   << std::endl;
 
-  // --------------- Find Peak Boxes -----------------------------
-  // List of chosen possible peak boxes.
-  std::vector<size_t> peakBoxes;
+    // -------------- Sort and Filter by Density -----------------------------
+    progress(0.20, "Sorting Boxes by Density");
+    for (size_t i = 0; i < numBoxes; i++) {
+      double density = ws->getSignalNormalizedAt(i) * m_densityScaleFactor;
+      // Skip any boxes with too small a signal density.
+      if (density > thresholdDensity)
+        sortedBoxes.insert(dens_box(density, i));
+    }
 
-  prog = new Progress(this, 0.30, 0.95, MaxPeaks);
+    // --------------- Find Peak Boxes -----------------------------
+    // List of chosen possible peak boxes.
+    std::vector<size_t> peakBoxes;
 
-  int64_t numBoxesFound = 0;
-  // Now we go (backwards) through the map
-  // e.g. from highest density down to lowest density.
-  std::multimap<double, size_t>::reverse_iterator it2;
-  std::multimap<double, size_t>::reverse_iterator it2_end = sortedBoxes.rend();
-  for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
-    signal_t density = it2->first;
-    size_t index = it2->second;
-    // Get the center of the box
-    VMD boxCenter = ws->getCenter(index);
+    prog = new Progress(this, 0.30, 0.95, m_maxPeaks);
 
-    // Compare to all boxes already picked.
-    bool badBox = false;
+    int64_t numBoxesFound = 0;
+    // Now we go (backwards) through the map
+    // e.g. from highest density down to lowest density.
+    std::multimap<double, size_t>::reverse_iterator it2;
+    std::multimap<double, size_t>::reverse_iterator it2_end = sortedBoxes.rend();
+    for (it2 = sortedBoxes.rbegin(); it2 != it2_end; ++it2) {
+      signal_t density = it2->first;
+      size_t index = it2->second;
+      // Get the center of the box
+      VMD boxCenter = ws->getCenter(index);
+
+      // Compare to all boxes already picked.
+      bool badBox = false;
+      for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
+           it3 != peakBoxes.end(); ++it3) {
+        VMD otherCenter = ws->getCenter(*it3);
+
+        // Distance between this box and a box we already put in.
+        coord_t distSquared = 0.0;
+        for (size_t d = 0; d < nd; d++) {
+          coord_t dist = otherCenter[d] - boxCenter[d];
+          distSquared += (dist * dist);
+        }
+
+        // Reject this box if it is too close to another previously found box.
+        if (distSquared < peakRadiusSquared) {
+          badBox = true;
+          break;
+        }
+      }
+
+      // The box was not rejected for another reason.
+      if (!badBox) {
+        if (numBoxesFound++ >= m_maxPeaks) {
+          g_log.notice() << "Number of peaks found exceeded the limit of "
+                         << m_maxPeaks << ". Stopping peak finding." << std::endl;
+          break;
+        }
+
+        peakBoxes.push_back(index);
+        g_log.debug() << "Found box at index " << index;
+        g_log.debug() << "; Density = " << density << std::endl;
+        // Report progres for each box found.
+        prog->report("Finding Peaks");
+      }
+    }
+    // --- Convert the "boxes" to peaks ----
     for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
          it3 != peakBoxes.end(); ++it3) {
-      VMD otherCenter = ws->getCenter(*it3);
+      size_t index = *it3;
+      // The center of the box = Q in the lab frame
+      VMD boxCenter = ws->getCenter(index);
 
-      // Distance between this box and a box we already put in.
-      coord_t distSquared = 0.0;
-      for (size_t d = 0; d < nd; d++) {
-        coord_t dist = otherCenter[d] - boxCenter[d];
-        distSquared += (dist * dist);
-      }
+      // Q of the centroid of the box
+      V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
-      // Reject this box if it is too close to another previously found box.
-      if (distSquared < peakRadiusSquared) {
-        badBox = true;
-        break;
-      }
-    }
+      // The "bin count" used will be the box density.
+      double binCount = ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
 
-    // The box was not rejected for another reason.
-    if (!badBox) {
-      if (numBoxesFound++ >= MaxPeaks) {
-        g_log.notice() << "Number of peaks found exceeded the limit of "
-                       << MaxPeaks << ". Stopping peak finding." << std::endl;
-        break;
-      }
+      // Create the peak
+      addPeak(Q, binCount);
 
-      peakBoxes.push_back(index);
-      g_log.debug() << "Found box at index " << index;
-      g_log.debug() << "; Density = " << density << std::endl;
       // Report progres for each box found.
-      prog->report("Finding Peaks");
-    }
+      prog->report("Adding Peaks");
+
+    } // for each box found
   }
-  // --- Convert the "boxes" to peaks ----
-  for (std::vector<size_t>::iterator it3 = peakBoxes.begin();
-       it3 != peakBoxes.end(); ++it3) {
-    size_t index = *it3;
-    // The center of the box = Q in the lab frame
-    VMD boxCenter = ws->getCenter(index);
-
-    // Q of the centroid of the box
-    V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
-
-    // The "bin count" used will be the box density.
-    double binCount = ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
-
-    // Create the peak
-    addPeak(Q, binCount);
-
-    // Report progres for each box found.
-    prog->report("Adding Peaks");
-
-  } // for each box found
   g_log.notice() << "Number of peaks found: " << peakWS->getNumberPeaks()
                  << std::endl;
 }
@@ -578,7 +591,7 @@ void FindPeaksMD::exec() {
       static_cast<coord_t>(PeakDistanceThreshold * PeakDistanceThreshold);
 
   DensityThresholdFactor = getProperty("DensityThresholdFactor");
-  MaxPeaks = getProperty("MaxPeaks");
+  m_maxPeaks = getProperty("MaxPeaks");
 
   // Execute the proper algo based on the type of workspace
   if (inMDHW) {
@@ -595,6 +608,7 @@ void FindPeaksMD::exec() {
 
   // Do a sort by bank name and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;
+  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
   criteria.push_back(std::pair<std::string, bool>("BankName", true));
   criteria.push_back(std::pair<std::string, bool>("bincount", false));
   peakWS->sort(criteria);
@@ -604,4 +618,4 @@ void FindPeaksMD::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

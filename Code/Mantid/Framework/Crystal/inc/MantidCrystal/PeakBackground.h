@@ -3,14 +3,14 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include <boost/function.hpp>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 class IPeak;
 }
 namespace Crystal {
@@ -49,9 +49,9 @@ private:
   /// Radius estimate
   double m_radiusEstimate;
   /// MD coordinates to use
-  Mantid::API::SpecialCoordinateSystem m_mdCoordinates;
+  Mantid::Kernel::SpecialCoordinateSystem m_mdCoordinates;
   /// Pointer to member function used for coordinate determination.
-  boost::function<Mantid::Kernel::V3D(const Mantid::API::IPeak *)>
+  boost::function<Mantid::Kernel::V3D(const Mantid::Geometry::IPeak *)>
       m_coordFunction;
 
 public:
@@ -59,7 +59,7 @@ public:
   PeakBackground(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                  const double &radiusEstimate, const double &thresholdSignal,
                  const Mantid::API::MDNormalization normalisation,
-                 const Mantid::API::SpecialCoordinateSystem coordinates);
+                 const Mantid::Kernel::SpecialCoordinateSystem coordinates);
 
   /// Copy constructor
   PeakBackground(const PeakBackground &other);

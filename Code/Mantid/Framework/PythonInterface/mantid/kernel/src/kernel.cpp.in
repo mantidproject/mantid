@@ -8,7 +8,6 @@
 
 #include "MantidKernel/MantidVersion.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Environment/Threading.h"
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
@@ -22,19 +21,29 @@ using boost::python::def;
 
 BOOST_PYTHON_MODULE(_kernel)
 {
-  Mantid::PythonInterface::Environment::saveMainThreadState(PyThreadState_Get());
-
   // Doc string options - User defined, python arguments, C++ call signatures
   boost::python::docstring_options docstrings(true, true, false);
   // Import numpy
   _import_array();
   boost::python::numeric::array::set_module_and_type("numpy", "ndarray");
-  
-  def("version_str", &Mantid::Kernel::MantidVersion::version, 
+
+  def("version_str", &Mantid::Kernel::MantidVersion::version,
       "Returns the Mantid version string in the form \"major.minor.patch\"");
-      
+  def("release_notes_url", &Mantid::Kernel::MantidVersion::releaseNotes,
+      "Returns the url to the most applicable release notes");
+  def("revision", &Mantid::Kernel::MantidVersion::revision,
+      "Returns the abbreviated SHA-1 of the last commit");
+  def("revision_full", &Mantid::Kernel::MantidVersion::revisionFull,
+      "Returns the full SHA-1 of the last commit");
+  def("release_date", &Mantid::Kernel::MantidVersion::releaseDate,
+      "Returns the date of the last commit");
+  def("doi", &Mantid::Kernel::MantidVersion::doi,
+      "Returns the DOI for this release of Mantid");
+  def("paper_citation", &Mantid::Kernel::MantidVersion::paperCitation,
+      "Returns The citation for the Mantid paper");
+
   Mantid::PythonInterface::Registry::TypeRegistry::registerBuiltins();
-  
+
 
 @EXPORT_FUNCTIONS@
 }

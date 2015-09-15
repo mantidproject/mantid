@@ -9,6 +9,7 @@
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkBox.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -21,7 +22,7 @@
 
 #include <QtDebug>
 
-vtkStandardNewMacro(vtkMDEWNexusReader);
+vtkStandardNewMacro(vtkMDEWNexusReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -32,7 +33,8 @@ vtkMDEWNexusReader::vtkMDEWNexusReader() :
   m_presenter(NULL),
   m_loadInMemory(false),
   m_depth(1),
-  m_time(0)
+  m_time(0),
+  m_normalization(NoNormalization)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -105,6 +107,15 @@ const char* vtkMDEWNexusReader::GetInputGeometryXML()
   }
 }
 
+/**
+@param option : Normalization option chosen by index.
+*/
+void vtkMDEWNexusReader::SetNormalization(int option)
+{
+  m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
 
@@ -123,9 +134,9 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(this, "Drawing...");
 
   ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
-  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
-  vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
+  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
+  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
+  vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
 
   hexahedronFactory->SetSuccessor(quadFactory);
   quadFactory->SetSuccessor(lineFactory);
@@ -205,7 +216,7 @@ void vtkMDEWNexusReader::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+    outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],

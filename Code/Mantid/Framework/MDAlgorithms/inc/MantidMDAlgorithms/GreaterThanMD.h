@@ -51,10 +51,10 @@ private:
   bool acceptScalar() const { return true; }
   bool commutative() const { return false; }
 
-  void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
   void
-  execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
                   Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 };
 

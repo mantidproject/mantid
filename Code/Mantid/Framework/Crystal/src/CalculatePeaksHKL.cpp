@@ -1,9 +1,7 @@
 #include "MantidCrystal/CalculatePeaksHKL.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <set>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -30,10 +28,10 @@ CalculatePeaksHKL::~CalculatePeaksHKL() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CalculatePeaksHKL::name() const {
   return "CalculatePeaksHKL";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculatePeaksHKL::version() const { return 1; };
+int CalculatePeaksHKL::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalculatePeaksHKL::category() const { return "Crystal"; }

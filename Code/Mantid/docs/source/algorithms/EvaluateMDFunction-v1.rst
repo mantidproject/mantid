@@ -9,6 +9,8 @@
 Description
 -----------
 
+**Note**: this algorithm is deprecated, use :ref:`EvaluateFunction <algm-EvaluateFunction>` instead.
+
 The algorithm will use the axes of the input workspace to evaluate a functions on them 
 and store the result in the output workspace.
 
@@ -16,7 +18,6 @@ This is a plot of the evaluated function from the usage example below.
 
 .. figure:: /images/Function3D.png
    :alt: Function3D.png
-
 
 Usage
 -----
@@ -53,3 +54,5 @@ Output
   Dim3
 
 .. categories::
+
+.. sourcelink::

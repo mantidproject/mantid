@@ -1,11 +1,10 @@
 #include "MantidCrystal/PeakBackground.h"
-#include "MantidAPI/IPeak.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::API::IPeak;
+using Mantid::Geometry::IPeak;
 
 namespace Mantid {
 namespace Crystal {
@@ -26,7 +25,7 @@ PeakBackground::PeakBackground(IPeaksWorkspace_const_sptr peaksWS,
     m_coordFunction = &IPeak::getQLabFrame;
   } else if (m_mdCoordinates == QSample) {
     m_coordFunction = &IPeak::getQSampleFrame;
-  } else if (m_mdCoordinates == Mantid::API::HKL) {
+  } else if (m_mdCoordinates == Mantid::Kernel::HKL) {
     m_coordFunction = &IPeak::getHKL;
   } else {
     throw std::invalid_argument(

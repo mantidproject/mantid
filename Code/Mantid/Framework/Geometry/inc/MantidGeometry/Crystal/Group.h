@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <vector>
 #include <set>
@@ -13,7 +14,27 @@
 namespace Mantid {
 namespace Geometry {
 
-/** Group :
+/// Functor for fuzzy comparison of V3D-objects using Kernel::Tolerance
+struct MANTID_GEOMETRY_DLL FuzzyV3DLessThan {
+  bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) {
+    if (fabs(lhs.X() - rhs.X()) > Kernel::Tolerance) {
+      return lhs.X() < rhs.X();
+    }
+
+    if (fabs(lhs.Y() - rhs.Y()) > Kernel::Tolerance) {
+      return lhs.Y() < rhs.Y();
+    }
+
+    if (fabs(lhs.Z() - rhs.Z()) > Kernel::Tolerance) {
+      return lhs.Z() < rhs.Z();
+    }
+
+    return false;
+  }
+};
+
+/**
+    @class Group
 
     The class Group represents a set of symmetry operations (or
     symmetry group). It can be constructed by providing a vector
@@ -42,49 +63,42 @@ namespace Geometry {
     components of V3D are mapped onto the interval [0, 1).
 
     Two groups A and B can be combined by a multiplication operation, provided
-   by
-    the corresponding overloaded operator:
+    by the corresponding overloaded operator:
 
-      Group A, B;
-      Group C = A * B
+        Group A, B;
+        Group C = A * B
 
     In this operation each element of A is multiplied with each element of B
     and from the resulting list a new group is constructed. For better
-   illustration,
-    an example is provided. Group A has two symmetry operations: identity
-   ("x,y,z")
-    and inversion ("-x,-y,-z"). Group B also consists of two operations:
-    identity ("x,y,z") and a rotation around the y-axis ("-x,y,-z"). In terms
-    of symmetry elements, the groups are defined like this:
+    illustration, an example is provided. Group A has two symmetry operations:
+    identity ("x,y,z") and inversion ("-x,-y,-z"). Group B also consists of
+    two operations: identity ("x,y,z") and a rotation around the y-axis
+    ("-x,y,-z"). In terms of symmetry elements, the groups are defined like so:
 
         A := { 1, -1 }; B := { 1, 2 [010] }
 
     The following table shows all multiplications that are carried out and their
-    results (for multiplication of symmetry operations see SymmetryOperation):
-                             A
-                 |    x,y,z    -x,-y,-z
-         --------+------------------------
-           x,y,z |    x,y,z    -x,-y,-z
-       B         |
-         -x,y,-z |  -x,y,-z      x,-y,z
+    results (for multiplication of symmetry operations see SymmetryOperation)
+
+                   |    x,y,z   |  -x,-y,-z
+          -------- | ---------- | -----------
+            x,y,z  |    x,y,z   |  -x,-y,-z
+          -x,y,-z  |  -x,y,-z   |    x,-y,z
 
     The resulting group contains the three elements of A and B (1, -1, 2 [010]),
     but also one new element that is the result of multiplying "x,y,z" and
-   "-x,y,-z",
-    which is "x,-y,z" - the operation resulting from a mirror plane
-   perpendicular
-    to the y-axis. In fact, this example demonstrated how the combination of
-    two crystallographic point groups (see PointGroup documentation and wiki)
-    "-1" and "2" results in a new point group "2/m".
+    "-x,y,-z", which is "x,-y,z" - the operation resulting from a mirror plane
+    perpendicular to the y-axis. In fact, this example demonstrated how the
+    combination of two crystallographic point groups (see PointGroup
+    documentation and wiki) "-1" and "2" results in a new point group "2/m".
 
     Most of the time it's not required to use Group directly, there are several
     sub-classes that implement different behavior (CenteringGroup, CyclicGroup,
     ProductOfCyclicGroups) and are easier to handle. For construction there is a
-   simple
-    "factory function", that works for all Group-based classes which provide a
-    string-based constructor:
+    simple "factory function", that works for all Group-based classes which
+    provide a string-based constructor:
 
-      Group_const_sptr group = GroupFactory::create<CyclicGroup>("-x,-y,-z");
+        Group_const_sptr group = GroupFactory::create<CyclicGroup>("-x,-y,-z");
 
     However, the most useful sub-class is SpaceGroup, which comes with its
     own factory. For detailed information about the respective sub-classes,
@@ -115,6 +129,18 @@ namespace Geometry {
   */
 class MANTID_GEOMETRY_DLL Group {
 public:
+  enum CoordinateSystem {
+    Orthogonal,
+    Hexagonal
+  };
+
+  enum GroupAxiom {
+    Closure,
+    Identity,
+    Inversion,
+    Associativity
+  };
+
   Group();
   Group(const std::string &symmetryOperationString);
   Group(const std::vector<SymmetryOperation> &symmetryOperations);
@@ -124,7 +150,9 @@ public:
   virtual ~Group() {}
 
   size_t order() const;
+  CoordinateSystem getCoordinateSystem() const;
   std::vector<SymmetryOperation> getSymmetryOperations() const;
+  bool containsOperation(const SymmetryOperation &operation) const;
 
   Group operator*(const Group &other) const;
 
@@ -133,12 +161,24 @@ public:
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;
 
+  bool fulfillsAxiom(GroupAxiom axiom) const;
+  bool isGroup() const;
+
 protected:
   void setSymmetryOperations(
       const std::vector<SymmetryOperation> &symmetryOperations);
 
+  CoordinateSystem getCoordinateSystemFromOperations(
+      const std::vector<SymmetryOperation> &symmetryOperations) const;
+
+  bool isClosed() const;
+  bool hasIdentity() const;
+  bool eachElementHasInverse() const;
+  bool associativityHolds() const;
+
   std::vector<SymmetryOperation> m_allOperations;
   std::set<SymmetryOperation> m_operationSet;
+  CoordinateSystem m_axisSystem;
 };
 
 typedef boost::shared_ptr<Group> Group_sptr;
@@ -150,6 +190,14 @@ namespace GroupFactory {
 template <typename T>
 Group_const_sptr create(const std::string &initializationString) {
   return boost::make_shared<const T>(initializationString);
+}
+
+/// Creates a Group sub-class of type T if T has a constructor that takes a
+/// vector of SymmetryOperations.
+template <typename T>
+Group_const_sptr
+create(const std::vector<SymmetryOperation> &symmetryOperations) {
+  return boost::make_shared<const T>(symmetryOperations);
 }
 }
 

@@ -4,14 +4,10 @@
 #include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/Progress.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/Column.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace Crystal {
@@ -19,8 +15,9 @@ namespace Crystal {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(IndexSXPeaks)
 
-using namespace Kernel;
+using namespace Geometry;
 using namespace API;
+using namespace Kernel;
 
 /** Initialisation method.
 *

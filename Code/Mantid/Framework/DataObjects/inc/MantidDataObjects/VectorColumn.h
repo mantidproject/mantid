@@ -171,7 +171,7 @@ private:
 #define DECLARE_VECTORCOLUMN(Type, TypeName)                                   \
   template <> std::string VectorColumn<Type>::typeName() {                     \
     return #TypeName;                                                          \
-  };                                                                           \
+  }                                                                            \
   Kernel::RegistrationHelper register_column_##TypeName((                      \
       API::ColumnFactory::Instance().subscribe<VectorColumn<Type>>(#TypeName), \
       0));

@@ -326,28 +326,39 @@ private:
 class DLLExport InstrumentValidator
     : public Kernel::TypedValidator<boost::shared_ptr<ExperimentInfo>> {
 public:
-  /// Gets the type of the validator
-  std::string getType() const { return "Instrument"; }
-  /// Clone the current state
-  Kernel::IValidator_sptr clone() const {
-    return boost::make_shared<InstrumentValidator>(*this);
-  }
+  /// Enumeration describing requirements
+  enum Requirements { SourcePosition = 0x1, SamplePosition = 0x2 };
+
+  // The default is historical so I don't break a lot of user code
+  InstrumentValidator(const unsigned int flags = SamplePosition);
+  std::string getType() const;
+  Kernel::IValidator_sptr clone() const;
+  std::string
+  checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const;
 
 private:
-  /** Checks that the workspace has an instrument defined
-   *  @param value :: The workspace to test
-   *  @return A user level description if a problem exists or ""
-   */
-  std::string
-  checkValidity(const boost::shared_ptr<ExperimentInfo> &value) const {
-    // Just checks that an instrument has a sample position.
-    // Could be extended for more detailed checks if needed.
-    if (!value->getInstrument()->getSample()) {
-      return "The workspace must have an instrument defined";
-    } else {
-      return "";
-    }
-  }
+
+  unsigned int m_requires;
+};
+
+//==============================================================================
+/**
+    @class SampleShapeValidator
+
+    A validator which checks that sample has the required properties
+ */
+class DLLExport SampleValidator : public MatrixWorkspaceValidator {
+public:
+  /// Enumeration describing requirements
+  enum Requirements { Shape = 0x1, Material = 0x2 };
+
+  SampleValidator(const unsigned int flags = (Shape | Material));
+  std::string getType() const;
+  Kernel::IValidator_sptr clone() const;
+  std::string checkValidity(const MatrixWorkspace_sptr &value) const;
+
+private:
+  unsigned int m_requires;
 };
 
 //==============================================================================
@@ -386,7 +397,8 @@ private:
     // more than one X axis value
     if (xAxis->length() > 1 &&
         xAxis->getValue(0) >= xAxis->getValue(xAxis->length() - 1))
-      return "X axis of the workspace should be increasing from left to right";
+      return "X axis of the workspace should be increasing from left to "
+             "right";
     else
       return "";
   }

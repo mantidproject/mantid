@@ -10,7 +10,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** CenteringGroup
+/**
+    @class CenteringGroup
 
     This class is mostly a convenience class. It takes a bravais lattice symbol
     (P, I, A, B, C, F, R) and forms a group that contains all translations

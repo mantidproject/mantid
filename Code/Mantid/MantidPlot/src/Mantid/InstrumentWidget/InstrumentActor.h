@@ -8,6 +8,8 @@
 #include "SampleActor.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IObjComponent.h"
 
 #include <boost/weak_ptr.hpp>
 #include <vector>
@@ -30,6 +32,8 @@ namespace Mantid
     class IDetector;
   }
 }
+
+class ObjComponentActor;
 
 /**
   \class  InstrumentActor
@@ -70,6 +74,10 @@ public:
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
   /// Get the mask displayed but not yet applied as a MatrxWorkspace
   boost::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
+  ///set the mask workspace
+  void setMaskMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr wsMask) const;
+  ///inverts the internal mask workspace
+  void invertMaskWorkspace() const;
   /// Get the mask displayed but not yet applied as a IMaskWorkspace
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
   /// Apply the mask in the attached mask workspace to the data.
@@ -83,10 +91,15 @@ public:
   void loadColorMap(const QString& ,bool reset_colors = true);
   /// Change the colormap scale type.
   void changeScaleType(int);
+  /// Change the colormap power scale exponent.
+  void changeNthPower(double);
   /// Get the file name of the current color map.
   QString getCurrentColorMap()const{return m_currentColorMapFilename;}
   /// Toggle colormap scale autoscaling.
   void setAutoscaling(bool);
+  /// extracts a mask workspace from the visualised workspace
+  Mantid::API::MatrixWorkspace_sptr extractCurrentMask() const;
+
   /// Get colormap scale autoscaling status.
   bool autoscaling()const{return m_autoscaling;}
 
@@ -116,7 +129,9 @@ public:
   /// Get shared pointer to a detector by a pick ID converted form a color in the pick image.
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(size_t pickID)const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
-  Mantid::detid_t getDetID(size_t pickID)const{return m_detIDs.at(pickID);}
+  Mantid::detid_t getDetID(size_t pickID)const;
+  /// Get a component ID for a non-detector.
+  Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Cache detector positions.
   void cacheDetPos() const;
   /// Get position of a detector by a pick ID converted form a color in the pick image.
@@ -175,7 +190,10 @@ private:
   /// Sum the counts in detectors if the workspace is ragged
   void sumDetectorsRagged(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, size_t size) const;
 
-  size_t push_back_detid(Mantid::detid_t)const;
+  size_t pushBackDetid(Mantid::detid_t)const;
+  void pushBackNonDetid(ObjComponentActor* actor, Mantid::Geometry::ComponentID compID)const;
+  void setupPickColors();
+
   boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;
 
   /// The workspace whose data are shown
@@ -207,9 +225,16 @@ private:
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;
+  /// All non-detector component IDs in order of pickIDs. For any index i a pickID of the component
+  /// is m_detIDs.size() + i.
+  mutable std::vector<Mantid::Geometry::ComponentID> m_nonDetIDs;
+  /// Temporary stores addresses of actors for non-detector components until initialisation completes
+  mutable std::vector<ObjComponentActor*> m_nonDetActorsTemp;
 
   /// All detector positions, in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::Kernel::V3D> m_detPos;
+  /// Position to refer to when detector not found
+  const Mantid::Kernel::V3D m_defaultPos;
 
   /// Colors in order of workspace indexes
   mutable std::vector<GLColor> m_colors;

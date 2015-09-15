@@ -1,7 +1,7 @@
 .. _WorkspaceGroup:
 
-WorkspaceGroup
-==============
+Workspace Group
+===============
 
 A WorkspaceGroup is a group of workspaces.
 
@@ -20,6 +20,8 @@ Un-grouping Workspaces
 
 -  Select the WorkspaceGroup and click "Ungroup".
 -  Use the :ref:`UnGroupWorkspace <algm-UnGroupWorkspace>` algorithm.
+
+.. include:: WorkspaceNavigation.txt
 
 
 

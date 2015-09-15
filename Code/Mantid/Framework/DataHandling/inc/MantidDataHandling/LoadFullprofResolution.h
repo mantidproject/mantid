@@ -113,6 +113,12 @@ public:
   // name in the XML file
   static std::string getXMLParameterName(const std::string &name);
 
+  /// Create Bank to Workspace Correspondence
+  static void createBankToWorkspaceMap ( const std::vector<int>& banks, const std::vector<int>& workspaces, std::map< int, size_t>& WorkpsaceOfBank );
+
+  /// Place to store the row numbers
+  static std::map<std::string, size_t> m_rowNumbers;
+
 private:
   /// Implement abstract Algorithm methods
   void init();
@@ -152,17 +158,11 @@ private:
   DataObjects::TableWorkspace_sptr
   genTableWorkspace(std::map<int, std::map<std::string, double>> bankparammap);
 
-  /// Generate bank information workspace
-  DataObjects::TableWorkspace_sptr
-  genInfoTableWorkspace(std::vector<int> banks);
-
-  /// Create Bank to Workspace Correspondence
-  void createBankToWorkspaceMap(const std::vector<int> &banks,
-                                const std::vector<int> &workspaces,
-                                std::map<int, size_t> &WorkpsaceOfBank);
-
-  /// Place to store the row numbers
-  static std::map<std::string, size_t> m_rowNumbers;
+  ///// Generate bank information workspace
+  //DataObjects::TableWorkspace_sptr
+  //genInfoTableWorkspace(std::vector<int> banks);
+  //                              const std::vector<int> &workspaces,
+  //                              std::map<int, size_t> &WorkpsaceOfBank);
 };
 
 } // namespace DataHandling

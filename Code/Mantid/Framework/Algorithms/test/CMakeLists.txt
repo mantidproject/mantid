@@ -27,20 +27,33 @@ if ( CXXTEST_FOUND )
   configure_file ( PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/MinusTest.h)
   
   # Make the rest of the tests
-  include_directories ( ../../CurveFitting/inc ../../DataHandling/inc ../../Nexus/inc ../../TestHelpers/inc ../../MDEvents/inc)
+  include_directories ( ../../CurveFitting/inc ../../DataHandling/inc ../../Nexus/inc ../../TestHelpers/inc )
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
-                        ../../TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../TestHelpers/src/MDEventsTestHelper.cpp
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms DataHandling MDEvents ${GMOCK_LIBRARIES} )
-  add_dependencies ( AlgorithmsTest Crystal CurveFitting MDAlgorithms )
+  target_link_libraries ( AlgorithmsTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            Algorithms
+            API
+            DataHandling
+            DataObjects
+            Geometry
+            Kernel
+            Nexus
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES} )
+  add_dependencies ( AlgorithmsTest Crystal CurveFitting )
   add_dependencies ( FrameworkTests AlgorithmsTest )
+  # Test data
+  add_dependencies ( AlgorithmsTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()

@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
-#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
@@ -37,13 +37,17 @@ void WeightedMeanMD::checkInputs() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void WeightedMeanMD::execHistoHisto(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
-    Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
-  using MDEvents::MDHistoWorkspaceIterator;
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+  using DataObjects::MDHistoWorkspaceIterator;
   MDHistoWorkspaceIterator *lhs_it =
       dynamic_cast<MDHistoWorkspaceIterator *>(out->createIterator());
   MDHistoWorkspaceIterator *rhs_it =
       dynamic_cast<MDHistoWorkspaceIterator *>(operand->createIterator());
+
+  if (!lhs_it || !rhs_it) {
+    throw std::logic_error("Histo iterators have wrong type.");
+  }
 
   do {
     double lhs_s = lhs_it->getSignal();
@@ -59,10 +63,10 @@ void WeightedMeanMD::execHistoHisto(
       double e = rhs_err_sq * lhs_err_sq / (rhs_err_sq + lhs_err_sq);
       signal = s * e;
       error_sq = e;
-    } else if ((rhs_err > 0) && (lhs_err <= 0)) {
+    } else if ((rhs_err > 0) && (lhs_err == 0)) {
       signal = rhs_s;
       error_sq = rhs_err * rhs_err;
-    } else if ((lhs_err <= 0) && (rhs_err > 0)) {
+    } else if ((lhs_err > 0) && (rhs_err == 0)) {
       signal = lhs_s;
       error_sq = lhs_err * lhs_err;
     }
@@ -79,7 +83,7 @@ void WeightedMeanMD::execHistoHisto(
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void WeightedMeanMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr,
+    Mantid::DataObjects::MDHistoWorkspace_sptr,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr) {
   throw std::runtime_error(
       this->name() + " can only be run with two MDHistoWorkspaces as inputs");

@@ -26,14 +26,15 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares, Least squares)
  */
 CostFuncLeastSquares::CostFuncLeastSquares()
     : CostFuncFitting(), m_includePenalty(true), m_value(0), m_pushed(false),
-      m_factor(0.5) {}
+      m_pushedValue(false), m_factor(0.5) {}
 
 /** Calculate value of cost function
  * @return :: The value of the function
  */
 double CostFuncLeastSquares::val() const {
-  if (!m_dirtyVal)
+  if (!m_dirtyVal) {
     return m_value;
+  }
 
   checkValidity();
 
@@ -82,8 +83,6 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
   std::vector<double> weights = getFitWeights(values);
 
   for (size_t i = 0; i < ny; i++) {
-    // double val = ( values->getCalculated(i) - values->getFitData(i) ) *
-    // values->getFitWeight(i);
     double val =
         (values->getCalculated(i) - values->getFitData(i)) * weights[i];
     retVal += val * val;
@@ -99,7 +98,7 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain,
  * @param der :: Container to output the derivatives
  */
 void CostFuncLeastSquares::deriv(std::vector<double> &der) const {
-  valDerivHessian(false, true, false);
+  valDerivHessian(true, false);
 
   if (der.size() != nParams()) {
     der.resize(nParams());
@@ -114,7 +113,7 @@ void CostFuncLeastSquares::deriv(std::vector<double> &der) const {
  * @return :: The value of the function
  */
 double CostFuncLeastSquares::valAndDeriv(std::vector<double> &der) const {
-  valDerivHessian(true, true, false);
+  valDerivHessian(true, false);
 
   if (der.size() != nParams()) {
     der.resize(nParams());
@@ -127,28 +126,23 @@ double CostFuncLeastSquares::valAndDeriv(std::vector<double> &der) const {
 
 /** Calculate the value and the first and second derivatives of the cost
  * function
- *  @param evalFunction :: If false cost function isn't evaluated and returned
- * value (0.0) should be ignored.
- *    It is for efficiency reasons.
  *  @param evalDeriv :: flag for evaluation of the first derivatives
  *  @param evalHessian :: flag for evaluation of the second derivatives
  */
-double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv,
+double CostFuncLeastSquares::valDerivHessian(bool evalDeriv,
                                              bool evalHessian) const {
   if (m_pushed || !evalDeriv) {
     return val();
   }
 
-  if (!m_dirtyVal && !m_dirtyDeriv && !m_dirtyHessian)
+  if (!m_dirtyVal && !m_dirtyDeriv && !m_dirtyHessian){
     return m_value;
-  if (m_dirtyVal)
-    evalFunction = true;
+  }
 
   checkValidity();
 
-  if (evalFunction) {
-    m_value = 0.0;
-  }
+  m_value = 0.0;
+
   if (evalDeriv) {
     m_der.resize(nParams());
     m_der.zero();
@@ -161,29 +155,25 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv,
   auto seqDomain = boost::dynamic_pointer_cast<SeqDomain>(m_domain);
 
   if (seqDomain) {
-    seqDomain->leastSquaresValDerivHessian(*this, evalFunction, evalDeriv,
-                                           evalHessian);
+    seqDomain->leastSquaresValDerivHessian(*this, evalDeriv, evalHessian);
   } else {
     if (!m_values) {
       throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
-    addValDerivHessian(m_function, m_domain, m_values, evalFunction, evalDeriv,
-                       evalHessian);
+    addValDerivHessian(m_function, m_domain, m_values, evalDeriv, evalHessian);
   }
 
   // Add constraints penalty
   size_t np = m_function->nParams();
-  if (evalFunction) {
-    if (m_includePenalty) {
-      for (size_t i = 0; i < np; ++i) {
-        API::IConstraint *c = m_function->getConstraint(i);
-        if (c) {
-          m_value += c->check();
-        }
+  if (m_includePenalty) {
+    for (size_t i = 0; i < np; ++i) {
+      API::IConstraint *c = m_function->getConstraint(i);
+      if (c) {
+        m_value += c->check();
       }
     }
-    m_dirtyVal = false;
   }
+  m_dirtyVal = false;
 
   if (evalDeriv) {
     if (m_includePenalty) {
@@ -229,38 +219,23 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv,
  * @param function :: Function to use to calculate the value and the derivatives
  * @param domain :: The domain.
  * @param values :: The fit function values
- * @param evalFunction :: Flag to evaluate the function
  * @param evalDeriv :: Flag to evaluate the derivatives
  * @param evalHessian :: Flag to evaluate the Hessian
  */
 void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
                                               API::FunctionDomain_sptr domain,
                                               API::FunctionValues_sptr values,
-                                              bool evalFunction, bool evalDeriv,
+                                              bool evalDeriv,
                                               bool evalHessian) const {
   UNUSED_ARG(evalDeriv);
   size_t np = function->nParams(); // number of parameters
   size_t ny = domain->size();      // number of data points
   Jacobian jacobian(ny, np);
-  if (evalFunction) {
-    function->function(*domain, *values);
-  }
+  function->function(*domain, *values);
   function->functionDeriv(*domain, jacobian);
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
-    g_log.debug() << "Jacobian:\n";
-    for (size_t i = 0; i < ny; ++i) {
-      for (size_t ip = 0; ip < np; ++ip) {
-        if (!m_function->isActive(ip))
-          continue;
-        g_log.debug() << jacobian.get(i, ip) << ' ';
-      }
-      g_log.debug() << "\n";
-    }
-  }
-
   std::vector<double> weights = getFitWeights(values);
 
   for (size_t ip = 0; ip < np; ++ip) {
@@ -273,7 +248,7 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
       double w = weights[i];
       double y = (calc - obs) * w;
       d += y * jacobian.get(i, ip) * w;
-      if (iActiveP == 0 && evalFunction) {
+      if (iActiveP == 0) {
         fVal += y * y;
       }
     }
@@ -281,19 +256,14 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
       double der = m_der.get(iActiveP);
       m_der.set(iActiveP, der + d);
     }
-    // std::cerr << "der " << ip << ' ' << der[iActiveP] << std::endl;
     ++iActiveP;
   }
 
-  if (evalFunction) {
-    PARALLEL_ATOMIC
-    m_value += 0.5 * fVal;
-  }
+  PARALLEL_ATOMIC
+  m_value += 0.5 * fVal;
 
   if (!evalHessian)
     return;
-
-  // size_t na = m_der.size(); // number of active parameters
 
   size_t i1 = 0;                  // active parameter index
   for (size_t i = 0; i < np; ++i) // over parameters
@@ -308,14 +278,12 @@ void CostFuncLeastSquares::addValDerivHessian(API::IFunction_sptr function,
       double d = 0.0;
       for (size_t k = 0; k < ny; ++k) // over fitting data
       {
-        // double w = values->getFitWeight(k);
         double w = weights[k];
         d += jacobian.get(k, i) * jacobian.get(k, j) * w * w;
       }
       PARALLEL_CRITICAL(hessian_set) {
         double h = m_hessian.get(i1, i2);
         m_hessian.set(i1, i2, h + d);
-        // std::cerr << "hess " << i1 << ' ' << i2 << std::endl;
         if (i1 != i2) {
           m_hessian.set(i2, i1, h + d);
         }
@@ -440,33 +408,33 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar,
   if (m_hessian.isEmpty()) {
     valDerivHessian();
   }
-  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "== Hessian (H) ==\n";
-    std::ios::fmtflags prevState = g_log.information().flags();
-    g_log.information() << std::left << std::fixed;
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug() << "== Hessian (H) ==\n";
+    std::ios::fmtflags prevState = g_log.debug().flags();
+    g_log.debug() << std::left << std::fixed;
     for (size_t i = 0; i < m_hessian.size1(); ++i) {
       for (size_t j = 0; j < m_hessian.size2(); ++j) {
-        g_log.information() << std::setw(10);
-        g_log.information() << m_hessian.get(i, j) << "  ";
+        g_log.debug() << std::setw(10);
+        g_log.debug() << m_hessian.get(i, j) << "  ";
       }
-      g_log.information() << "\n";
+      g_log.debug() << "\n";
     }
-    g_log.information().flags(prevState);
+    g_log.debug().flags(prevState);
   }
   covar = m_hessian;
   covar.invert();
-  if (g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION)) {
-    g_log.information() << "== Covariance matrix (H^-1) ==\n";
-    std::ios::fmtflags prevState = g_log.information().flags();
-    g_log.information() << std::left << std::fixed;
+  if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
+    g_log.debug() << "== Covariance matrix (H^-1) ==\n";
+    std::ios::fmtflags prevState = g_log.debug().flags();
+    g_log.debug() << std::left << std::fixed;
     for (size_t i = 0; i < covar.size1(); ++i) {
       for (size_t j = 0; j < covar.size2(); ++j) {
-        g_log.information() << std::setw(10);
-        g_log.information() << covar.get(i, j) << "  ";
+        g_log.debug() << std::setw(10);
+        g_log.debug() << covar.get(i, j) << "  ";
       }
-      g_log.information() << "\n";
+      g_log.debug() << "\n";
     }
-    g_log.information().flags(prevState);
+    g_log.debug().flags(prevState);
   }
 }
 

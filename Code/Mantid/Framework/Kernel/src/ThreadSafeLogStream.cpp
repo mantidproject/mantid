@@ -2,9 +2,7 @@
 // Includes
 //-----------------------------------------------
 #include "MantidKernel/ThreadSafeLogStream.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <iostream>
-#include <Poco/Thread.h>
 
 using namespace Mantid::Kernel;
 

@@ -156,6 +156,11 @@ private:
     /// Index of the Y dimension in the 2D slice
     int m_freeDimY;
 
+    /// Index of the first selected X dimension in the 2D slice
+    int m_initFreeDimX;
+    /// Index of the first selected Y dimension in the 2D slice
+    int m_initFreeDimY;
+
     /// When True, then the bin width is fixed and the number of bins changes
     bool m_fixedBinWidthMode;
 

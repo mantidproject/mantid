@@ -22,7 +22,7 @@
 # Set top-level command name
 CMD_NAME="new"
 # Prefix for branch names
-DEFAULT_PREFIX="feature/"
+DEFAULT_PREFIX=""
 # Base branch for new branches
 BASE_BRANCH="origin/master"
 
@@ -56,7 +56,7 @@ usage() {
     echo "Switches:"
     echo "  -h            Prints this help"
     echo "  -p            When creating a branch use this prefix in the"
-    echo "                name (default=feature/)"
+    echo "                name (default=BLANK)"
     echo "  -s            Stash any local changes before switching to the new branch"
     echo "                and unstash them once the switch has occurred"
 }
@@ -107,10 +107,12 @@ get_opts() {
         exit 1
     fi
 
-    # Make sure the prefix ends with a / by removing it
-    # if it exists and adding it back
-    BRANCH_PREFIX=${BRANCH_PREFIX%%"/"}
-    BRANCH_PREFIX=${BRANCH_PREFIX}"/"
+    if [ ! -z "${BRANCH_PREFIX}" ]; then
+        # Make sure the prefix ends with a / by removing it
+        # if it exists and adding it back
+        BRANCH_PREFIX=${BRANCH_PREFIX%%"/"}
+        BRANCH_PREFIX=${BRANCH_PREFIX}"/"
+    fi
 }
 
 main() {

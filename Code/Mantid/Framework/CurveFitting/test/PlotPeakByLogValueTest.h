@@ -14,6 +14,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -57,6 +58,21 @@ namespace
   };
 
   DECLARE_FUNCTION(PLOTPEAKBYLOGVALUETEST_Fun)
+
+  class PropertyNameIs
+  {
+    public:
+      PropertyNameIs(std::string name) : m_name(name) {};
+
+      bool operator()(Mantid::Kernel::PropertyHistory_sptr p)
+      {
+        return p->name() == m_name;
+      }
+
+    private:
+      std::string m_name;
+  };
+
 }
 
 class PlotPeak_Expression
@@ -205,7 +221,6 @@ public:
 
     deleteData();
     WorkspaceCreationHelper::removeWS("PlotPeakResult");
-
   }
 
   void testWorkspaceList_plotting_against_ws_names()
@@ -234,7 +249,32 @@ public:
 
     deleteData();
     WorkspaceCreationHelper::removeWS("PlotPeakResult");
+  }
 
+  void testSpectraList_plotting_against_bin_edge_axis()
+  {
+    auto ws = createTestWorkspace();
+    AnalysisDataService::Instance().add( "PLOTPEAKBYLOGVALUETEST_WS", ws );
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PLOTPEAKBYLOGVALUETEST_WS,i0;PLOTPEAKBYLOGVALUETEST_WS,i1");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.execute();
+
+    TWS_type result =  WorkspaceCreationHelper::getWS<TableWorkspace>("PlotPeakResult");
+    TS_ASSERT_EQUALS(result->columnCount(),12);
+
+    std::vector<std::string> tnames = result->getColumnNames();
+    TS_ASSERT_EQUALS(tnames.size(),12);
+    TS_ASSERT_EQUALS(tnames[0],"axis-1");
+
+    TS_ASSERT_EQUALS(result->Double(0,0),0.5);
+    TS_ASSERT_EQUALS(result->Double(1,0),3.0);
+
+    WorkspaceCreationHelper::removeWS("PlotPeakResult");
+    WorkspaceCreationHelper::removeWS("PLOTPEAKBYLOGVALUETEST_WS");
   }
 
   void test_passWorkspaceIndexToFunction()
@@ -363,7 +403,7 @@ public:
   void test_createOutputOptionMultipleWorkspaces()
   {
     createData();
-    
+
     PlotPeakByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
@@ -432,10 +472,54 @@ public:
       auto fit = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsNames[i]);
       TS_ASSERT( fit );
       TS_ASSERT( fit->getNumberHistograms() == 5);
-    } 
+    }
 
     AnalysisDataService::Instance().clear();
   }
+
+
+  void testMinimizer()
+  {
+    createData();
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PlotPeakGroup_0");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.setPropertyValue("MaxIterations", "50");
+    // This is a stupid use case but will at least demonstrate the functionality
+    alg.setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=0.01,RelError=$wsindex");
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
+    TS_ASSERT(fits);
+
+    if (fits->size() > 0)
+    {
+      // Get the Fit algorithm history
+      auto fit = fits->getItem(0);
+      const auto & wsHistory = fit->getHistory();
+      const auto & child = wsHistory.getAlgorithmHistory(0);
+      TS_ASSERT_EQUALS(child->name(), "Fit");
+      const auto & properties = child->getProperties();
+
+      // Check max iterations property
+      PropertyNameIs maxIterationsCheck("MaxIterations");
+      auto prop = std::find_if(properties.begin(), properties.end(), maxIterationsCheck);
+      TS_ASSERT_EQUALS((*prop)->value(), "50");
+
+      // Check minimizer property
+      PropertyNameIs minimizerCheck("Minimizer");
+      prop = std::find_if(properties.begin(), properties.end(), minimizerCheck);
+      TS_ASSERT_EQUALS((*prop)->value(), "Levenberg-Marquardt,AbsError=0.01,RelError=1");
+    }
+  }
+
 
 private:
 
@@ -487,9 +571,17 @@ private:
 
       }
       xdata.access()[i] = xValue;
-    }    
+    }
     testWS->setX(0, xdata);
     testWS->setX(1, xdata);
+
+    std::vector<double> edges;
+    edges.push_back(0.0);
+    edges.push_back(1.0);
+    edges.push_back(5.0);
+    BinEdgeAxis *axis = new BinEdgeAxis(edges);
+    testWS->replaceAxis(1, axis);
+
     return testWS;
   }
 

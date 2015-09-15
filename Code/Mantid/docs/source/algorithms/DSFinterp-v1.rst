@@ -13,7 +13,7 @@ Usage
 ^^^^^
 
 DSFinterp(Workspaces, OutputWorkspaces, [LoadErrors], [ParameterValues], [LocalRegression], [RegressionWindow], [RegressionType], TargetParameters], [Version])
- 
+
 Required
 ^^^^^^^^
 
@@ -24,7 +24,7 @@ If the package is not present, this algorithm will not be available. To install,
 Details
 ^^^^^^^
 
-For every "dynamical channel" defined by one particular (Q,E) pair, the sequence of scalars 
+For every "dynamical channel" defined by one particular (Q,E) pair, the sequence of scalars
 {:math:`{S_i \equiv S(Q,E,T_i)}`} ordered by increasing value of T is interpolated
 with a cubic spline, which then can be invoked to obtain
 :math:`S(Q,E,T)` at any T value.
@@ -42,7 +42,7 @@ For more details on the construction of the spline, see `UnivariateSpline <http:
    :align: center
 
    Local quadratic regression of windowsize w=7 starting at index n=2
-   
+
 If the structure factors have no associated errors, an scenario typical of structure factors derived from simulations,
 then error estimation can be implemented with the running, local regression option.
 A local regression of windowsize :math:`w` starting at index :math:`n` performs a
@@ -60,7 +60,7 @@ as well as expected errors at any :math:`T` value.
 Example
 -------
 
-Our example system is a simulation of one octa-methyl `silsesqioxane <http://www.en.wikipedia.org/wiki/Silsesquioxane>`_ molecule.
+Our example system is a simulation of a small crystal of octa-methyl `silsesqioxane <http://en.wikipedia.org/wiki/Silsesquioxane>`_ molecules.
 A total of 26 molecular dynamics simulations were performed under different values of the energy barrier
 to methyl rotations, :math:`K`. Dynamics structure factors S(Q,E) were derived from each simulation.
 
@@ -69,9 +69,9 @@ to methyl rotations, :math:`K`. Dynamics structure factors S(Q,E) were derived f
    :width: 600pt
    :height: 400pt
    :align: center
-   
+
    Interpolated spline (solid line) with associated errors at one (Q,E) dynamical channel. Red dots are values from the simulation used to construct the spline.
-   
+
 There are as many splines as dynamical channels. The algorithm gathers the interpolations
 for each channel and aggregates them into an interpolated structure factor.
 
@@ -80,7 +80,7 @@ for each channel and aggregates them into an interpolated structure factor.
    :width: 600pt
    :height: 400pt
    :align: center
-   
+
    Interpolated structure factor :math:`S(K,E|Q)`, in logarithm scaling, at fixed :math:`Q=0.9A^{-1}`.
 
 Usage
@@ -124,3 +124,5 @@ Output:
     Chi-square is: 2.27
 
 .. categories::
+
+.. sourcelink::

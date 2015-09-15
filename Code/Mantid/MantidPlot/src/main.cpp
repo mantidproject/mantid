@@ -29,6 +29,7 @@
 #include <iostream>
 #include <QApplication>
 #include <QBitmap>
+#include <QFontDatabase>
 #include <QSplashScreen>
 #include <QMessageBox>
 #include <QDir>
@@ -186,7 +187,7 @@ int main( int argc, char ** argv )
     // Splash
     QPixmap pixmap;
     if (!pixmap.load(":/MantidSplashScreen.png")) std::cerr << "Couldn't load splashscreen\n";
-    QSplashScreen splash(pixmap, Qt::WindowStaysOnTopHint);
+    QSplashScreen splash(pixmap);
     const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
     const QString versionInfo(Mantid::Kernel::MantidVersion::version());
     splash.showMessage("Release: " + releaseDateTime + " (Version " + versionInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
@@ -202,6 +203,11 @@ int main( int argc, char ** argv )
     mw->restoreApplicationGeometry();
     mw->parseCommandLineArguments(args);
     app.processEvents();
+
+    //register a couple of fonts
+    QFontDatabase::addApplicationFont(":/fonts/MontserratAlternates-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/fonts/OpenSans-Regular.ttf");
+
     splash.finish(mw);
 
     app.connect( &app, SIGNAL(lastWindowClosed()), mw, SLOT(exitWithPresetCode()) );

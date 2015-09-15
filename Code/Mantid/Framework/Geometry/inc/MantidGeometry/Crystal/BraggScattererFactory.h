@@ -9,7 +9,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** BraggScattererFactory :
+/**
+    @class BraggScattererFactory
 
     This class implements a factory for concrete BraggScatterer classes.
     When a new scatterer is derived from BraggScatterer, it should be registered
@@ -21,20 +22,20 @@ namespace Geometry {
     At runtime, instances of this class can be created like this:
 
         BraggScatterer_sptr scatterer =
-   BraggScattererFactory::Instance().createScatterer("NewScattererClass");
+        BraggScattererFactory::Instance().createScatterer("NewScattererClass");
 
     The returned object is initialized, which is required for using the
     Kernel::Property-based system of setting parameters for the scatterer.
     To make creation of scatterers more convenient, it's possible to provide
     a string with "name=value" pairs, separated by semi-colons, which assigns
     property values. This is similar to the way
-   FunctionFactory::createInitialized works:
+    FunctionFactory::createInitialized works:
 
         BraggScatterer_sptr s = BraggScattererFactory::Instance()
                                                .createScatterer(
                                                     "NewScatterer",
-                                                    "SpaceGroup=F m -3 m;
-   Position=[0.1,0.2,0.3]");
+                                                    "SpaceGroup=F m -3 m;"
+                                                    "Position=[0.1,0.2,0.3]");
 
     If you choose to use the raw create/createUnwrapped methods, you have to
     make sure to call BraggScatterer::initialize() on the created instance.

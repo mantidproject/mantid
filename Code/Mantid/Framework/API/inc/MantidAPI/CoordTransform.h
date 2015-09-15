@@ -7,6 +7,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -56,6 +57,12 @@ protected:
   /// Output number of dimensions
   size_t outD;
 };
+
+// Helper typedef for a shared pointer of this type.
+typedef boost::shared_ptr<CoordTransform> CoordTransform_sptr;
+
+// Helper typdef for a const shared pointer of this type.
+typedef boost::shared_ptr<const CoordTransform> CoordTransform_const_sptr;
 
 } // namespace Mantid
 } // namespace API

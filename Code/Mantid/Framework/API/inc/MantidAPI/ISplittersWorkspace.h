@@ -1,8 +1,7 @@
 #ifndef MANTID_API_ISPLITTERSWORKSPACE_H_
 #define MANTID_API_ISPLITTERSWORKSPACE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid {
@@ -34,17 +33,22 @@ namespace API {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ISplittersWorkspace : virtual public API::ITableWorkspace {
+class MANTID_API_DLL ISplittersWorkspace {
 public:
   /*
    * Constructor
    */
-  ISplittersWorkspace() : API::ITableWorkspace() {}
+  ISplittersWorkspace() {}
 
   /*
    * Destructor
    */
   virtual ~ISplittersWorkspace();
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<ISplittersWorkspace> clone() const {
+    return std::unique_ptr<ISplittersWorkspace>(doClone());
+  }
 
   /*
    * Add a time splitter to table workspace
@@ -66,6 +70,15 @@ public:
    * Remove one entry of a splitter
    */
   virtual bool removeSplitter(size_t splitterindex) = 0;
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  ISplittersWorkspace(const ISplittersWorkspace &other) { UNUSED_ARG(other) }
+  /// Protected copy assignment operator. Assignment not implemented.
+  ISplittersWorkspace &operator=(const ISplittersWorkspace &other);
+
+private:
+  virtual ISplittersWorkspace *doClone() const = 0;
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

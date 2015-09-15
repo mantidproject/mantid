@@ -2,10 +2,13 @@
 // Poco-related compilation error on Windows
 #include "MantidAPI/WorkspaceFactory.h"
 #if GCC_VERSION >= 40800 // 4.8.0
+// clang-format off
 GCC_DIAG_OFF(literal-suffix)
+// clang-format on
 #endif
 #include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include <iomanip>
 #include <time.h>

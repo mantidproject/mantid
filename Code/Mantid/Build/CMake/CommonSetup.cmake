@@ -41,11 +41,11 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
       "Timeout in seconds for each test (default 300=5minutes)")
 
 ###########################################################################
-# Look for dependencies - bail out if any not found
+# Look for dependencies
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
-find_package ( Boost REQUIRED date_time regex ) 
+find_package ( Boost REQUIRED date_time regex )
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
 # Need this defined globally for our log time values
@@ -54,12 +54,13 @@ add_definitions ( -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG )
 find_package ( Poco 1.4.2 REQUIRED )
 include_directories( SYSTEM ${POCO_INCLUDE_DIRS} )
 
-find_package ( Nexus 4.3.0 REQUIRED )
+find_package ( Nexus 4.3.1 REQUIRED )
 include_directories ( SYSTEM ${NEXUS_INCLUDE_DIR} )
 
 find_package ( MuParser REQUIRED )
 
 find_package ( JsonCPP REQUIRED )
+include_directories ( SYSTEM ${JSONCPP_INCLUDE_DIR} )
 
 find_package ( Doxygen ) # optional
 
@@ -70,6 +71,15 @@ set ( MAIN_CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} )
 set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
 find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR (APPLE AND OSX_VERSION VERSION_LESS 10.9))
+  set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+  find_package ( HDF5 COMPONENTS CXX HL REQUIRED
+    CONFIGS hdf5-config.cmake )
+  add_definitions ( -DH5_BUILT_AS_DYNAMIC_LIB )
+else()
+  find_package ( HDF5 COMPONENTS CXX HL REQUIRED )
+endif()
 
 find_package ( PythonInterp )
 
@@ -106,7 +116,7 @@ if ( GIT_FOUND )
     string ( REGEX MATCH "(g.*)[^\n]" MtdVersion_WC_LAST_CHANGED_SHA ${MtdVersion_WC_LAST_CHANGED_REV} )
 
     # Get the date of the last commit
-    execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE 
+    execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%cD OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATE
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
     string ( SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE )
@@ -242,7 +252,10 @@ endif ()
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
 elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
-  include ( GNUSetup )
+  # Remove once clang warnings have been fixed.
+  if ( NOT APPLE)
+    include ( GNUSetup )
+  endif ()
 endif ()
 
 ###########################################################################
@@ -275,7 +288,7 @@ find_package ( GMock )
 if ( GMOCK_FOUND AND GTEST_FOUND )
   message ( STATUS "GMock/GTest (${GMOCK_VERSION}) is available for unit tests." )
 else ()
-  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." ) 
+  message ( STATUS "GMock/GTest is not available. Some unit tests will not run." )
 endif()
 
 find_package ( PyUnitTest )
@@ -296,6 +309,13 @@ if ( SQUISH_FOUND )
   message ( STATUS "Found Squish for GUI testing" )
 else()
   message ( STATUS "Could not find Squish - GUI testing not available. Try specifying your SQUISH_INSTALL_DIR cmake variable." )
+endif()
+
+###########################################################################
+# External Data for testing
+###########################################################################
+if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
+  include( SetupDataTargets )
 endif()
 
 ###########################################################################

@@ -43,3 +43,5 @@ Output:
    Peaks found: 174
 
 .. categories::
+
+.. sourcelink::

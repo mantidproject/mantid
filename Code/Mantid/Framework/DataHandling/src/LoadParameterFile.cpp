@@ -2,14 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -19,7 +15,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/File.h>
-#include <sstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;
@@ -70,7 +65,7 @@ void LoadParameterFile::init() {
  */
 void LoadParameterFile::exec() {
   // Retrieve the filename from the properties
-  const std::string filename = getPropertyValue("Filename");
+  std::string filename = getPropertyValue("Filename");
 
   // Retrieve the parameter XML string from the properties
   const Property *const parameterXMLProperty =
@@ -103,6 +98,7 @@ void LoadParameterFile::exec() {
   // If we've been given an XML string parse that instead
   if (!parameterXMLProperty->isDefault()) {
     try {
+      g_log.information("Parsing from ParameterXML property.");
       pDoc = pParser.parseString(parameterXML);
     } catch (Poco::Exception &exc) {
       throw Kernel::Exception::FileError(
@@ -114,6 +110,17 @@ void LoadParameterFile::exec() {
     }
   } else {
     try {
+      // First see if the file exists
+      Poco::File ipfFile(filename);
+      if(!ipfFile.exists()) {
+        Poco::Path filePath(filename);
+        filename = Poco::Path(Kernel::ConfigService::Instance().getInstrumentDirectory())
+          .makeDirectory().
+          setFileName(filePath.getFileName()).
+          toString();
+      }
+      g_log.information() << "Parsing from XML file: " << filename
+                          << std::endl;
       pDoc = pParser.parse(filename);
     } catch (Poco::Exception &exc) {
       throw Kernel::Exception::FileError(

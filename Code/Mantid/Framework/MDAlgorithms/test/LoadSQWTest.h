@@ -1,13 +1,14 @@
 #ifndef MANTID_MDEVENTS_LOAD_SQW_TEST_H_
 #define MANTID_MDEVENTS_LOAD_SQW_TEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidMDAlgorithms/LoadSQW.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include <boost/shared_ptr.hpp>
+#include "MantidDataObjects/MDBoxBase.h"
 
-using namespace Mantid::MDEvents;
+#include <cxxtest/TestSuite.h>
+
+
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Geometry::OrientedLattice;
 

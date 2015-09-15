@@ -53,7 +53,7 @@ class InstrumentWindowMaskTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
-  enum Mode {Mask, Group};
+  enum Mode {Mask, Group, ROI};
   enum Activity {Move,Select,DrawEllipse,DrawRectangle,DrawEllipticalRing,DrawRectangularRing};
 
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
@@ -73,7 +73,7 @@ protected slots:
   void clearShapes();
   void applyMask();
   void applyMaskToView();
-  void storeMask();
+  void storeMask(bool isROI = false);
   void clearMask();
   void saveInvertedMaskToWorkspace();
   void saveInvertedMaskToFile();
@@ -87,7 +87,7 @@ protected slots:
   void saveIncludeGroupToFile();
   void saveExcludeGroupToFile();
   void showSaveMenuTooltip(QAction*);
-  void toggleMaskGroup(bool);
+  void toggleMaskGroup();
 
   void doubleChanged(QtProperty*);
 protected:
@@ -103,8 +103,7 @@ protected:
   std::string generateMaskWorkspaceName(bool temp = false) const;
   void enableApplyButtons();
   void setSelectActivity();
-  /// True if in masking mode, flase if in grouping.
-  bool isMasking() const;
+  Mode getMode() const;
   /// Get mask/group border color
   QColor getShapeBorderColor() const;
   /// Get mask/group fill color
@@ -119,6 +118,7 @@ protected:
 
   QRadioButton* m_masking_on;
   QRadioButton* m_grouping_on;
+  QRadioButton* m_roi_on;
 
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
 
@@ -137,11 +137,7 @@ protected:
 
 
   QMenu* m_saveMask;
-  QAction* m_save_as_workspace_include;
-  QAction* m_save_as_workspace_exclude;
-  QAction* m_save_as_file_include;
   QAction* m_save_as_file_exclude;
-  QAction* m_save_as_cal_file_include;
   QAction* m_save_as_cal_file_exclude;
   QAction *m_save_as_table_xrange_exclude;
 
@@ -150,6 +146,13 @@ protected:
   QAction* m_sum_to_workspace;
   QAction* m_save_group_file_include;
   QAction* m_save_group_file_exclude;
+
+  
+  QMenu* m_saveROI;
+  QAction* m_save_as_workspace_include;
+  QAction* m_save_as_workspace_exclude;
+  QAction* m_save_as_file_include;
+  QAction* m_save_as_cal_file_include;
 
   // properties
   bool m_userEditing;
@@ -167,6 +170,7 @@ protected:
   QMap<QtProperty *,QString> m_doublePropertyMap;
   QMap<QString,QtProperty *> m_pointPropertyMap;
   QMap<QtProperty *,QString> m_pointComponentsMap;
+
 };
 
 

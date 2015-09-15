@@ -44,12 +44,14 @@ public:
   MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD1(setDataCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
   MOCK_METHOD1(setFittedCurve, void(const QwtData&));
   MOCK_METHOD1(setPeakPickerEnabled, void(bool));
   MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr&));
   MOCK_METHOD1(setFunction, void(const IFunction_const_sptr&));
   MOCK_METHOD3(setParameter, void(const QString&, const QString&, double));
+  MOCK_METHOD1(displayError, void(const QString&));
+  MOCK_METHOD0(help, void());
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel
@@ -65,6 +67,7 @@ public:
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
 MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
 
 // DoubleNear matcher was introduced in gmock 1.7 only
 MATCHER_P2(DoubleDelta, value, delta, "") { return fabs(arg - value) < delta; }
@@ -126,6 +129,14 @@ public:
     presenter.initialize();
   }
 
+  void test_fitEmptyFunction()
+  {
+    ON_CALL(*m_view, function(QString(""))).WillByDefault(Return(IFunction_const_sptr()));
+    EXPECT_CALL(*m_view, displayError(QString("Couldn't fit an empty function"))).Times(1);
+
+    m_view->requestFit();
+  }
+
   void test_fit()
   {
     IFunction_sptr peaks = createGaussian(1,2,3);
@@ -144,9 +155,17 @@ public:
 
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
-    // TODO: check better
-    EXPECT_CALL(*m_view, setDataCurve(_));
-
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
+                                            QwtDataX(0, 1, 1E-8),
+                                            QwtDataX(1, 1, 1E-8),
+                                            QwtDataX(2, 1, 1E-8),
+                                            QwtDataY(0, 2, 1E-8),
+                                            QwtDataY(1, 2, 1E-8),
+                                            QwtDataY(2, 2, 1E-8)),
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 3, 1E-6),
+                                            VectorValue(1, 3, 1E-6),
+                                            VectorValue(2, 3, 1E-6))));
     m_model->changeData();
   }
 
@@ -257,6 +276,12 @@ public:
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
     m_view->changeParameter(QString("f1"), QString("A0"));
+  }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
   }
 };
 

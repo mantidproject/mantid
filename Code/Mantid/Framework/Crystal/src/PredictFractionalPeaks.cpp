@@ -6,15 +6,11 @@
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
-#include <math.h>
-#include "MantidKernel/IPropertySettings.h"
 //#include "MantidKernel/Strings.h"
 namespace Mantid {
 using namespace Mantid::DataObjects;
@@ -41,17 +37,13 @@ void PredictFractionalPeaks::init() {
       new WorkspaceProperty<IPeaksWorkspace>("FracPeaks", "",
                                              Direction::Output),
       "Workspace of Peaks with peaks with fractional h,k, and/or l values");
-
   declareProperty(
-      new Kernel::ArrayProperty<double>(string("HOffset"), string("-.5,0, .5")),
+      new Kernel::ArrayProperty<double>(string("HOffset"), "-0.5,0.0,0.5"),
       "Offset in the h direction");
-
+  declareProperty(new Kernel::ArrayProperty<double>(string("KOffset"), "0"),
+                  "Offset in the h direction");
   declareProperty(
-      new Kernel::ArrayProperty<double>(string("KOffset"), string("0")),
-      "Offset in the h direction");
-
-  declareProperty(
-      new Kernel::ArrayProperty<double>(string("LOffset"), string("-.5,.5")),
+      new Kernel::ArrayProperty<double>(string("LOffset"), "-0.5,0.5"),
       "Offset in the h direction");
 
   declareProperty("IncludeAllPeaksInRange", false,

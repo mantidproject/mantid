@@ -1,14 +1,10 @@
 #include "MantidCrystal/TransformHKL.h"
-#include "MantidKernel/System.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/Matrix.h"
-#include <cstdio>
 #include "MantidCrystal/SelectCellWithForm.h"
 
 namespace Mantid {
@@ -45,7 +41,7 @@ void TransformHKL::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  boost::shared_ptr<BoundedValidator<double> > mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -58,7 +54,7 @@ void TransformHKL::init() {
   identity_matrix[0] = 1;
   identity_matrix[4] = 1;
   identity_matrix[8] = 1;
-  auto threeBythree = boost::make_shared<ArrayLengthValidator<double>>(9);
+  auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
   this->declareProperty(
       new ArrayProperty<double>("HKLTransform", identity_matrix, threeBythree),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "

@@ -87,8 +87,8 @@ public:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(IPeakFunctionAdapter);
-  DISABLE_COPY_AND_ASSIGN(IPeakFunctionAdapter);
+  DISABLE_DEFAULT_CONSTRUCT(IPeakFunctionAdapter)
+  DISABLE_COPY_AND_ASSIGN(IPeakFunctionAdapter)
 };
 }
 }

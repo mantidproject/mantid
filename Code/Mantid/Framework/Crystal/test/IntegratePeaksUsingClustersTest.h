@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "ClusterIntegrationBaseTest.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
 
 using namespace Mantid::Crystal;
@@ -255,7 +256,9 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
+// clang-format off
 class IntegratePeaksUsingClustersTestPerformance : public CxxTest::TestSuite, public ClusterIntegrationBaseTest
+// clang-format on
 {
 
 private:

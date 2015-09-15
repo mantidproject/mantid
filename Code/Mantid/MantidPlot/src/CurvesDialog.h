@@ -59,15 +59,17 @@ private slots:
   void showCurveBtn(int);
   void enableAddBtn();
   void enableRemoveBtn();
+  void enableBtnOK();
   void showCurveRange(bool);
   void updateCurveRange();
   void showCurrentFolder(bool);
+
 
 private:
   void setGraph(Graph *graph);
   void closeEvent(QCloseEvent*);
 
-  void init();
+  void init();	
   bool addCurve(const QString& name);
   QSize sizeHint() const;
   void contextMenuEvent(QContextMenuEvent *);

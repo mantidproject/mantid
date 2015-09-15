@@ -5,15 +5,11 @@
 #include "MantidCrystal/MaskPeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/EventList.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -39,7 +35,7 @@ public:
   {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,10000,1600);
+    EventWorkspace_sptr inputW = Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,10000,1600);
     AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED)
       inputW *= 2.0;
@@ -99,7 +95,7 @@ public:
   {
 
     int numEventsPer = 100;
-    EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,10000,1600);
+    EventWorkspace_sptr inputW = Mantid::DataObjects::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer,10000,1600);
     AnalysisDataService::Instance().addOrReplace("testInEW", inputW);
     if (type == WEIGHTED)
     {

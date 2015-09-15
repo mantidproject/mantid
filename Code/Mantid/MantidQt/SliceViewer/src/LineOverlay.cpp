@@ -9,7 +9,6 @@
 
 using namespace Mantid::Kernel;
 
-
 namespace MantidQt
 {
 namespace SliceViewer
@@ -160,7 +159,7 @@ namespace SliceViewer
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Turn angle snap on/off
+  /** Turn angle snap on or off
    * @param angleSnap :: true for always angle snap. */
   void LineOverlay::setAngleSnapMode(bool angleSnap)
   {
@@ -387,10 +386,21 @@ namespace SliceViewer
     double distance = fabs( diff.x()*(current.y()-pixA.y()) - (current.x() - pixA.x())*diff.y() )
         / sqrt(diff.x()*diff.x() + diff.y()*diff.y());
 
-    // Margin of 6 pixels, and must be between the 2 limits
-    return ((distance < 7) &&
-        isBetween( current.x(), pixA.x(), pixB.x()) &&
-        isBetween( current.y(), pixA.y(), pixB.y()) );
+    // Margin of 6 pixels, and must be between the 2 limits (if the limits are not the same)
+    bool retval = false;
+    if (distance < 7)
+    {
+      retval = true;
+      if ((pixA.x() != pixB.x()) && (!isBetween( current.x(), pixA.x(), pixB.x())))
+      {
+        retval = false;
+      }
+      if ((pixA.y() != pixB.y()) && (!isBetween( current.y(), pixA.y(), pixB.y())))
+      {
+        retval = false;
+      }
+    }
+    return retval;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -418,18 +428,42 @@ namespace SliceViewer
       else if (m_dragHandle == HandleB)
         currentDiff = current - m_pointA;
 
-      // Limit angles to 45 degree increments with shift pressed
+      // calculate angle
       double angle = atan2(currentDiff.y(), currentDiff.x());
-      // Round angle to closest 45 degrees, if in angle snap mode
+      
+      // Round angle to closest 45 degrees, if in angle snap mode (shift pressed)
       if (shiftPressed || m_angleSnapMode)
       {
-        // Convert the snap angle from degrees to radians
+        if (m_angleSnap == 90.0) {
+          //special case for 90 snap (axis aligned snapping)
+          //use screen coords to determine snap angle
+          QPointF currentScreenDiff;
+          if (m_dragHandle == HandleA)
+            currentScreenDiff = event->pos() - transform(m_pointB);
+          else if (m_dragHandle == HandleB)
+            currentScreenDiff = event->pos() - transform(m_pointA);
+            
+          // Limit angles to 90 based on screen coords, not data coords
+          //-y is because the screen y coords are inverted to the data coords
+          angle = atan2(-currentScreenDiff.y(), currentScreenDiff.x());
+        }
+        //convert snap angle to radians
         double angleSnapRad = m_angleSnap / (180.0 / M_PI);
+        //round current angle to snap angle
         angle = Utils::rounddbl(angle / angleSnapRad) * angleSnapRad;
       }
 
+      double length;
+      //for axis aligned angles just use respective distance for the length
+      if (fmod(angle,M_PI) == 0 ) {
+        length = fabs(currentDiff.x());
+      } else if (fmod(angle,M_PI) == M_PI/2 ) {
+        length = fabs(currentDiff.y());
+      } else {
+        length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());
+      }
+      
       // Round length to m_snapLength, if specified
-      double length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());
       if (m_snapLength > 0)
         length = Utils::rounddbl(length / m_snapLength) * m_snapLength;
 

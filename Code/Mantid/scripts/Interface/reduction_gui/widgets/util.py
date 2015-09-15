@@ -38,7 +38,7 @@ def _check_and_get_float_line_edit(line_edit, min=None):
     value = 0.0
     try:
         value = float(line_edit.text())
-        if (min is None or value>min):
+        if min is None or value>min:
             line_edit.setStyleSheet(CSS_DEFAULT)
         else:
             line_edit.setStyleSheet(CSS_INVALID)

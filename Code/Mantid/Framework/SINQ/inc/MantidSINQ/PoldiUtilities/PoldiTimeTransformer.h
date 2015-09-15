@@ -76,18 +76,21 @@ public:
     m_timeFactor = current.sinTheta / center.sinTheta * current.totalDistance /
                    center.totalDistance;
     m_widthFactor = current.cosTheta - center.cosTheta;
+    m_tofFactor = center.tof1A / current.tof1A;
   }
 
   double intensityFactor() const { return m_intensityFactor; }
   double lambdaFactor() const { return m_lambdaFactor; }
   double timeFactor() const { return m_timeFactor; }
   double widthFactor() const { return m_widthFactor; }
+  double tofFactor() const { return m_tofFactor; }
 
 protected:
   double m_intensityFactor;
   double m_lambdaFactor;
   double m_timeFactor;
   double m_widthFactor;
+  double m_tofFactor;
 };
 
 typedef boost::shared_ptr<const DetectorElementData>
@@ -105,10 +108,6 @@ public:
   size_t detectorElementCount() const;
 
   double dToTOF(double d) const;
-  double timeTransformedWidth(double widthD, size_t detectorIndex) const;
-  double timeTransformedCentre(double centreD, size_t detectorIndex) const;
-  double timeTransformedIntensity(double areaD, double centreD,
-                                  size_t detectorIndex) const;
   double detectorElementIntensity(double centreD, size_t detectorIndex) const;
 
   double calculatedTotalIntensity(double centreD) const;

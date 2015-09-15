@@ -13,32 +13,24 @@ class V3D;
 namespace Geometry {
 
 /**
- *  This class is used to find the nearest neighbours of a detector in the
- *instrument
- *  geometry. This class can be queried through calls to the getNeighbours()
- *function
- *  on a Detector object.
+ * This class is used to find the nearest neighbours of a detector in the
+ * instrument geometry. This class can be queried through calls to the
+ * getNeighbours() function on a Detector object.
  *
- *  This class uses the ANN Library, from David M Mount and Sunil Arya which is
- *incorporated
- *  into Mantid's Kernel module. Mantid uses version 1.1.2 of this library.
- *  ANN is available from <http://www.cs.umd.edu/~mount/ANN/> and is released
- *under the GNU LGPL.
+ * This class uses the ANN Library, from David M Mount and Sunil Arya which
+ * is incorporated into Mantid's Kernel module. Mantid uses version 1.1.2
+ * of this library.
+ * ANN is available from <http://www.cs.umd.edu/~mount/ANN/> and is released
+ * under the GNU LGPL.
  *
- *  Known potential issue: boost's graph has an issue that may cause compilation
- *errors in some
- *  circumstances in the current version of boost used by Mantid (1.43) based on
- *tr1::tie. This
- *  issue is fixed in later versions of boost, but should in theory be guarded
- *against by this
- *  file only being included in ParameterMap.
+ * Known potential issue: boost's graph has an issue that may cause compilation
+ * errors in some circumstances in the current version of boost used by
+ * Mantid (1.43) based on tr1::tie. This issue is fixed in later versions
+ * of boost, but should in theory be guarded against by this file only being
+ * included in ParameterMap.
  *
- *  @author Michael Whitty, STFC
- *  @author Martyn Gigg, Tessella plc
- *  @date 06/12/2010
- *
- *  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
- *National Laboratory & European Spallation Source
+ * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+ * National Laboratory & European Spallation Source
  *
  *  This file is part of Mantid.
  *

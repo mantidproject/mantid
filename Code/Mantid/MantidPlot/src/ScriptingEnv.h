@@ -2,12 +2,12 @@
     File                 : ScriptingEnv.h
     Project              : QtiPlot
     --------------------------------------------------------------------
-    Copyright            : (C) 2006 by Ion Vasilief, 
+    Copyright            : (C) 2006 by Ion Vasilief,
                            Tilman Hoener zu Siederdissen,
                            Knut Franke
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Scripting abstraction layer
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -86,7 +86,9 @@ class ScriptingEnv : public QObject
   virtual bool supportsEvaluation() { return false; }
   ///  Is progress reporting supported
   virtual bool supportsProgressReporting() const { return false; }
-  /// Create a code lexer for this environment, can be NULL. Ownership of a created object 
+  /// Does this support abort requests?
+  virtual bool supportsAbortRequests() const { return false; }
+  /// Create a code lexer for this environment, can be NULL. Ownership of a created object
   /// is transferred to the caller.
   virtual QsciLexer * createCodeLexer() const { return NULL; }
 
@@ -99,14 +101,14 @@ public slots:
   virtual bool setInt(int, const char*) { return false; }
   /// Set a reference to a double  in the global scope
   virtual bool setDouble(double, const char*) { return false; }
-  
+
   /// Clear the global environment. What exactly happens depends on the implementation.
   virtual void clear() {}
   /// Increase the reference count. This should only be called by Scripted and Script to avoid memory leaks.
   void incref();
   /// Decrease the reference count. This should only be called by Scripted and Script to avoid segfaults.
   void decref();
-  
+
 signals:
   /// Starting
   void starting();
@@ -156,7 +158,7 @@ public:
   static QStringList languages();
   /// Return the number of available implementations.
   static int numLanguages();
-  
+
 private:
   typedef ScriptingEnv*(*ScriptingEnvConstructor)(ApplicationWindow*);
   typedef struct {

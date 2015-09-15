@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/UnitFactory.h"
@@ -24,15 +24,18 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_FILELOADER_ALGORITHM(LoadRaw3);
+DECLARE_FILELOADER_ALGORITHM(LoadRaw3)
 
 using namespace Kernel;
 using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3()
-    : m_filename(), m_noTimeRegimes(0), m_prog(0.0), m_prog_start(0.0),
-      m_prog_end(1.0), m_lengthIn(0), m_timeChannelsVec(), m_total_specs(0) {}
+  : m_filename(), m_numberOfSpectra(), m_cache_options(),
+    m_specTimeRegimes(), m_noTimeRegimes(0), m_prog(0.0),
+    m_prog_start(0.0), m_prog_end(1.0), m_lengthIn(0),
+    m_timeChannelsVec(), m_total_specs(0), m_periodList() {
+}
 
 LoadRaw3::~LoadRaw3() {}
 
@@ -201,6 +204,7 @@ void LoadRaw3::exec() {
 
   // Loop over the number of periods in the raw file, putting each period in a
   // separate workspace
+  
   for (int period = 0; period < m_numberOfPeriods; ++period) {
     // skipping the first spectra in each period
     skipData(file, static_cast<int>(period * (m_numberOfSpectra + 1)));
@@ -215,6 +219,22 @@ void LoadRaw3::exec() {
       if (localWorkspace) {
         localWorkspace = createWorkspace(localWorkspace);
       }
+      if (bseparateMonitors) {
+        try {
+          monitorWorkspace = createWorkspace(monitorWorkspace, monitorwsSpecs,
+                                             m_lengthIn, m_lengthIn - 1);
+        } catch (std::out_of_range &) {
+          g_log.information() << "Separate Monitors option is selected and no "
+                                 "monitors in the selected specra range."
+                              << std::endl;
+          g_log.information()
+              << "Error in creating one of the output workspaces" << std::endl;
+        } catch (std::runtime_error &) {
+          g_log.information() << "Separate Monitors option is selected,Error "
+                                 "in creating one of the output workspaces"
+                              << std::endl;
+        }
+      } // end of separate Monitors
 
       if (bLoadlogFiles) {
         const int period_number = period + 1;
@@ -236,22 +256,6 @@ void LoadRaw3::exec() {
           createPeriodLogs(period_number, monitorWorkspace);
         }
       } // end of if loop for loadlogfiles
-      if (bseparateMonitors) {
-        try {
-          monitorWorkspace = createWorkspace(monitorWorkspace, monitorwsSpecs,
-                                             m_lengthIn, m_lengthIn - 1);
-        } catch (std::out_of_range &) {
-          g_log.information() << "Separate Monitors option is selected and no "
-                                 "monitors in the selected specra range."
-                              << std::endl;
-          g_log.information()
-              << "Error in creating one of the output workspaces" << std::endl;
-        } catch (std::runtime_error &) {
-          g_log.information() << "Separate Monitors option is selected,Error "
-                                 "in creating one of the output workspaces"
-                              << std::endl;
-        }
-      } // end of separate Monitors
     }
 
     if (bexcludeMonitors) {

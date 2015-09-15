@@ -9,16 +9,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Strings.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <ostream>
-#include <iomanip>
-#include <sstream>
-#include <set>
 
 namespace Mantid {
 namespace Crystal {
@@ -33,7 +24,9 @@ using namespace Geometry;
 using std::string;
 
 /// Constructor
-MaskPeaksWorkspace::MaskPeaksWorkspace() {}
+MaskPeaksWorkspace::MaskPeaksWorkspace()
+    : m_inputW(), m_xMin(0), m_xMax(0), m_yMin(0), m_yMax(0), m_tofMin(0),
+      m_tofMax(0) {}
 
 /// Destructor
 MaskPeaksWorkspace::~MaskPeaksWorkspace() {}
@@ -87,9 +80,9 @@ void MaskPeaksWorkspace::exec() {
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
-      inputW->getDetectorIDToWorkspaceIndexMap();
+      m_inputW->getDetectorIDToWorkspaceIndexMap();
   // Get some stuff from the input workspace
-  Geometry::Instrument_const_sptr inst = inputW->getInstrument();
+  Geometry::Instrument_const_sptr inst = m_inputW->getInstrument();
 
   // Init a table workspace
   DataObjects::TableWorkspace_sptr tablews =
@@ -101,7 +94,7 @@ void MaskPeaksWorkspace::exec() {
 
   // Loop over peaks
   const std::vector<Peak> &peaks = peaksW->getPeaks();
-  PARALLEL_FOR3(inputW, peaksW, tablews)
+  PARALLEL_FOR3(m_inputW, peaksW, tablews)
   for (int i = 0; i < static_cast<int>(peaks.size()); i++) {
     PARALLEL_START_INTERUPT_REGION
     Peak peak = peaks[i];
@@ -131,7 +124,7 @@ void MaskPeaksWorkspace::exec() {
     size_t wi = this->getWkspIndex(pixel_to_wi, comp, xPeak, yPeak);
     if (wi !=
         static_cast<size_t>(EMPTY_INT())) { // scope limit the workspace index
-      this->getTofRange(x0, xf, peak.getTOF(), inputW->readX(wi));
+      this->getTofRange(x0, xf, peak.getTOF(), m_inputW->readX(wi));
       tofRangeSet = true;
     }
 
@@ -146,7 +139,7 @@ void MaskPeaksWorkspace::exec() {
           continue;
         spectra.insert(wj);
         if (!tofRangeSet) { // scope limit the workspace index
-          this->getTofRange(x0, xf, peak.getTOF(), inputW->readX(wj));
+          this->getTofRange(x0, xf, peak.getTOF(), m_inputW->readX(wj));
           tofRangeSet = true;
         }
       }
@@ -174,8 +167,8 @@ void MaskPeaksWorkspace::exec() {
   // Mask bins
   API::IAlgorithm_sptr maskbinstb =
       this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
-  maskbinstb->setProperty("InputWorkspace", inputW);
-  maskbinstb->setPropertyValue("OutputWorkspace", inputW->getName());
+  maskbinstb->setProperty("InputWorkspace", m_inputW);
+  maskbinstb->setPropertyValue("OutputWorkspace", m_inputW->getName());
   maskbinstb->setProperty("MaskingInformation", tablews);
   maskbinstb->execute();
 
@@ -183,7 +176,7 @@ void MaskPeaksWorkspace::exec() {
 }
 
 void MaskPeaksWorkspace::retrieveProperties() {
-  inputW = getProperty("InputWorkspace");
+  m_inputW = getProperty("InputWorkspace");
 
   m_xMin = getProperty("XMin");
   m_xMax = getProperty("XMax");
@@ -258,7 +251,6 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
       return EMPTY_INT();
     return (it->second);
   }
-  return EMPTY_INT();
 }
 
 /**
@@ -281,7 +273,7 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
   }
 }
 int MaskPeaksWorkspace::findPixelID(std::string bankName, int col, int row) {
-  Geometry::Instrument_const_sptr Iptr = inputW->getInstrument();
+  Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);
   if (parent->type().compare("RectangularDetector") == 0) {

@@ -14,7 +14,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** CrystalStructure :
+/**
+    @class CrystalStructure
 
     Three components are required to describe a crystal structure:
 
@@ -47,7 +48,8 @@ namespace Geometry {
     one of the ReflectionCondition-classes directly:
 
         ReflectionCondition_sptr fCentering =
-   boost::make_shared<ReflectionConditionAllFaceCentred>();
+            boost::make_shared<ReflectionConditionAllFaceCentred>();
+
         structure.setCentering(fCentering);
 
     Now, only reflections that fulfill the centering condition are
@@ -58,7 +60,8 @@ namespace Geometry {
     is to directly assign a point group:
 
         PointGroup_sptr pointGroup =
-   PointGroupFactory::Instance().createPointGroup("m-3m");
+            PointGroupFactory::Instance().createPointGroup("m-3m");
+
         structure.setPointGroup(pointGroup);
 
         std::vector<V3D> uniqueHKLs = structure.getUniqueHKLs(0.5, 10.0);
@@ -81,25 +84,21 @@ namespace Geometry {
     one Si-atom at the position (1/8, 1/8, 1/8) (for origin choice 2, with the
     inversion at the origin). Looking up this space group in the International
     Tables for Crystallography A reveals that placing a scatterer at this
-   position
-    introduces a new reflection condition for general reflections hkl:
+    position introduces a new reflection condition for general reflections hkl:
 
            h = 2n + 1 (reflections with odd h are allowed)
         or h + k + l = 4n
 
     This means that for example the reflection family {2 2 2} is not allowed,
     even though the F-centering would allow it. In other words, guessing
-   existing
-    reflections of silicon only using lattice information does not lead to the
-    correct result. Besides that, there are also glide planes in that space
-   group,
-    which come with additional reflection conditions as well.
+    existing reflections of silicon only using lattice information does not lead
+    to the correct result. Besides that, there are also glide planes in that
+    space group, which come with additional reflection conditions as well.
 
     One way to obtain the correct result for this case is to calculate
     structure factors for each HKL and check whether |F|^2 is non-zero. Of
-   course,
-    to perform this calculation, all three items mentioned in the list at
-    the beginning must be present. CrystalStructure offers an additional
+    course, to perform this calculation, all three items mentioned in the list
+    at the beginning must be present. CrystalStructure offers an additional
     constructor for this purpose:
 
         CrystalStructure silicon(unitcell, spaceGroup, scatterers);
@@ -109,7 +108,7 @@ namespace Geometry {
     Now, a different method for checking allowed reflections is available:
 
         std::vector<V3D> uniqueHKLs = silicon.getUniqueHKLs(0.5, 10.0,
-   CrystalStructure::UseStructureFactors);
+                                         CrystalStructure::UseStructureFactors);
 
     By supplying the extra argument, |F|^2 is calculated for each reflection
     and if it's greater than 1e-9, it's considered to be allowed.

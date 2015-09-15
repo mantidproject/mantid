@@ -7,11 +7,11 @@
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "OpenGLError.h"
-#include "InputController.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -35,6 +35,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace MantidQt::MantidWidgets;
 
 Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int winHeight)
   :ProjectionSurface(rootActor),

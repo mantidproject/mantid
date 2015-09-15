@@ -18,6 +18,7 @@
         <file>history_off.png</file>
         <file>invalid.png</file>
         <file>replace.png</file>
+        <file>mantid.png</file>
     </qresource>
     <qresource prefix="/win">
         <file>folder-remote.png</file>
@@ -46,10 +47,12 @@
         <file>Python-icon-32x32.png</file>
         <file>Python-icon-16x16.png</file>
         <file>Plugin-icon-32x32.png</file>
+        <file>Plugin-Python-icon-48x48.png</file>
         <file>Plugin-Python-icon-32x32.png</file>
         <file>Misc-Tutorial-icon-48x48.png</file>
         <file>Misc-Tutorial-icon-32x32.png</file>
         <file>MantidPlot_Python_Icon_32x32.png</file>
+        <file>Circle_cog_48x48.png</file>
     </qresource>
     <qresource prefix="/PickTools">
         <file>zoom.png</file>

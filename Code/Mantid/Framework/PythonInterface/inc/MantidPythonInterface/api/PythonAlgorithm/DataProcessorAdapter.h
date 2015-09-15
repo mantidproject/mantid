@@ -62,11 +62,11 @@ public:
 
   void setAccumAlgProxy(const std::string &alg) { this->setAccumAlg(alg); }
 
-  API::ITableWorkspace_sptr determineChunkProxy() {
-    return this->determineChunk();
+  API::ITableWorkspace_sptr determineChunkProxy(const std::string &filename) {
+    return this->determineChunk(filename);
   }
 
-  void loadChunkProxy() { this->loadChunk(); }
+  void loadChunkProxy(const size_t rowIndex) { this->loadChunk(rowIndex); }
 
   API::Workspace_sptr loadProxy(const std::string &inputData,
                                 const bool loadQuiet = false) {
@@ -80,8 +80,15 @@ public:
   void forwardPropertiesProxy() { this->forwardProperties(); }
 
   boost::shared_ptr<Kernel::PropertyManager>
-  getProcessPropertiesProxy(const std::string &propertyManager) {
+  getProcessPropertiesProxy(const std::string &propertyManager=std::string()) {
     return this->getProcessProperties(propertyManager);
+  }
+  void setPropManagerPropName(const std::string &propName) {
+    this->setPropManagerPropName(propName);
+  }
+
+  void mapPropertyName(const std::string &nameInProp, const std::string &nameInPropManager) {
+    this->mapPropertyName(nameInProp, nameInPropManager);
   }
 
   API::Workspace_sptr assembleProxy(const std::string &partialWSName,
@@ -100,8 +107,8 @@ public:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(DataProcessorAdapter);
-  DISABLE_COPY_AND_ASSIGN(DataProcessorAdapter);
+  DISABLE_DEFAULT_CONSTRUCT(DataProcessorAdapter)
+  DISABLE_COPY_AND_ASSIGN(DataProcessorAdapter)
 };
 }
 }

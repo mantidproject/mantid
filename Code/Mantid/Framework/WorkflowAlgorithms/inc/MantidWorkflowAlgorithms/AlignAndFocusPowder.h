@@ -4,8 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -60,9 +60,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport AlignAndFocusPowder : public API::Algorithm {
+class DLLExport AlignAndFocusPowder : public API::DataProcessorAlgorithm {
 public:
-  /// Empty Constructor
+  /// Constructor
   AlignAndFocusPowder();
   /// Destructor
   virtual ~AlignAndFocusPowder();
@@ -103,23 +103,17 @@ private:
                                            std::vector<specid_t> specids,
                                            std::vector<double> l2s,
                                            std::vector<double> phis);
-
-  double getPropertyFromPmOrSelf(const std::string &apname,
-                                 const std::string &pmpname,
-                                 boost::shared_ptr<Kernel::PropertyManager> pm);
-
+  void convertOffsetsToCal(DataObjects::OffsetsWorkspace_sptr &offsetsWS);
   double
-  getVecPropertyFromPmOrSelf(const std::string &apname,
-                             std::vector<double> &avec,
-                             const std::string &pmpname,
-                             boost::shared_ptr<Kernel::PropertyManager> pm);
+  getVecPropertyFromPmOrSelf(const std::string &name,
+                             std::vector<double> &avec);
 
   API::MatrixWorkspace_sptr m_inputW;
   API::MatrixWorkspace_sptr m_outputW;
   DataObjects::EventWorkspace_sptr m_inputEW;
   DataObjects::EventWorkspace_sptr m_outputEW;
-  DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
-  API::MatrixWorkspace_sptr m_maskWS;
+  API::ITableWorkspace_sptr m_calibrationWS;
+  DataObjects::MaskWorkspace_sptr m_maskWS;
   DataObjects::GroupingWorkspace_sptr m_groupWS;
   double m_l1;
   std::vector<int32_t> specids;
@@ -137,6 +131,7 @@ private:
   double LRef;
   double DIFCref;
   double minwl;
+  double maxwl;
   double tmin;
   double tmax;
   bool m_preserveEvents;

@@ -39,6 +39,11 @@ class Qhelper {
 public:
   void examineInput(API::MatrixWorkspace_const_sptr dataWS,
                     API::MatrixWorkspace_const_sptr binAdj,
+                    API::MatrixWorkspace_const_sptr detectAdj,
+                    API::MatrixWorkspace_const_sptr qResolution);
+
+  void examineInput(API::MatrixWorkspace_const_sptr dataWS,
+                    API::MatrixWorkspace_const_sptr binAdj,
                     API::MatrixWorkspace_const_sptr detectAdj);
 
   size_t waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS,

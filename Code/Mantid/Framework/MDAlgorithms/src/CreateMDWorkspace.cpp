@@ -4,7 +4,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidKernel/Memory.h"
 #include <math.h>
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateMDWorkspace)
@@ -187,4 +187,4 @@ void CreateMDWorkspace::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

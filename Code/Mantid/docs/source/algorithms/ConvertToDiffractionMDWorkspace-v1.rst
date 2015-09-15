@@ -9,9 +9,9 @@
 Description
 -----------
 
-This algorithm converts from a `MatrixWorkspace <http://mantidproject.org/MatrixWorkspace>`__ (in
+This algorithm converts from a `MatrixWorkspace <http://www.mantidproject.org/MatrixWorkspace>`__ (in
 detector/time-of-flight space) to a
-`MDEventWorkspace <http://mantidproject.org/MDWorkspace>`__ containing events in reciprocal
+`MDEventWorkspace <http://www.mantidproject.org/MDWorkspace>`__ containing events in reciprocal
 space.
 
 The calculations apply only to elastic diffraction experiments. The
@@ -20,7 +20,7 @@ to HKL of the crystal.
 
 If the OutputWorkspace does NOT already exist, a default one is created.
 In order to define more precisely the parameters of the
-`MDEventWorkspace <http://mantidproject.org/MDWorkspace>`__, use the
+`MDEventWorkspace <http://www.mantidproject.org/MDWorkspace>`__, use the
 :ref:`algm-CreateMDWorkspace` algorithm first.
 
 Types of Conversion
@@ -61,7 +61,7 @@ of the workspace, **including zeros**.
 
 This can be useful in cases where the experimental coverage needs to be
 tracked. With one MDEvent for each bin, you can count which regions in
-Q-space have been measured. The `SliceViewer <http://mantidproject.org/SliceViewer>`__ has an
+Q-space have been measured. The `SliceViewer <http://www.mantidproject.org/SliceViewer>`__ has an
 option to view normalized by number of events. This means that, for
 example, areas with overlap from two runs will appear scaled down.
 
@@ -75,9 +75,9 @@ Also, the :ref:`algm-FindPeaksMD` algorithm may not work optimally
 because it depends partly on higher density of events causing more
 finely split boxes.
 
-If your input is a `Workspace2D <http://mantidproject.org/Workspace2D>`__ and you do NOT check
+If your input is a `Workspace2D <http://www.mantidproject.org/Workspace2D>`__ and you do NOT check
 *OneEventPerBin*, then the workspace is converted to an
-`EventWorkspace <http://mantidproject.org/EventWorkspace>`__ but with no events for empty bins.
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`__ but with no events for empty bins.
 
 Performance Notes
 #################
@@ -111,3 +111,5 @@ Usage
    Workspace Type is:  MDEventWorkspace<MDLeanEvent,3>
    
 .. categories::
+
+.. sourcelink::

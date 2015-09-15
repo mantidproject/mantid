@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from PyQt4 import QtGui, uic, QtCore
 import sip
 import os
@@ -211,6 +212,8 @@ class StitcherWidget(BaseWidget):
     ## Widget name
     name = "Data Stitching"
 
+    radio_group = None
+
     def __init__(self, parent=None, state=None, settings=None):
         super(StitcherWidget, self).__init__(parent, state, settings)
 
@@ -320,8 +323,8 @@ class StitcherWidget(BaseWidget):
             message = "Could not scale data\n  %s" % sys.exc_value
             if self._content.scale_to_one_chk.isChecked():
                 message += "\n\nCheck your Q range near the critical edge"
-            QtGui.QMessageBox.warning(self,
-                "Error scaling data",
+            QtGui.QMessageBox.warning(self,\
+                "Error scaling data",\
                 message)
 
     def _pick_specular_ridge(self):
@@ -382,8 +385,8 @@ class StitcherWidget(BaseWidget):
 
             ref_data = item.get_user_data(ref_pol)
             if ref_data is None:
-                QtGui.QMessageBox.warning(self,
-                    "Invalid choice of reference cross-section",
+                QtGui.QMessageBox.warning(self,\
+                    "Invalid choice of reference cross-section",\
                     "The selected cross-section is empty, please select another one")
                 return
             s.append(ref_data)
@@ -466,7 +469,7 @@ class StitcherWidget(BaseWidget):
                     self._stitcher.save_combined(fname, as_canSAS=False)
                     file_list.append(fname)
                 else:
-                    pol_list = ["Off_Off", "On_Off",
+                    pol_list = ["Off_Off", "On_Off",\
                                "Off_On", "On_On"]
                     for pol in pol_list:
                         try:

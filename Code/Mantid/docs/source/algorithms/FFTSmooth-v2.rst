@@ -153,3 +153,5 @@ Usage
   smooth = FFTSmooth( ws, Filter='Butterworth', Params='5,2', AllSpectra=True )
 
 .. categories::
+
+.. sourcelink::

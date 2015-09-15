@@ -3,6 +3,8 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/V2D.h"
 
 #include "MantidDataObjects/Workspace2D.h"
@@ -33,9 +35,7 @@ using namespace DataObjects;
 PoldiPeakSearch::PoldiPeakSearch()
     : API::Algorithm(), m_minimumDistance(0), m_doubleMinimumDistance(0),
       m_minimumPeakHeight(0.0), m_maximumPeakNumber(0),
-      m_recursionAbsoluteBegin(), m_recursionAbsoluteEnd(),
-      m_recursionBordersInitialized(false), m_peaks(new PoldiPeakCollection()) {
-}
+      m_peaks(new PoldiPeakCollection()) {}
 
 /** Sums the counts of neighboring d-values
   *
@@ -102,9 +102,6 @@ MantidVec PoldiPeakSearch::getNeighborSums(MantidVec correlationCounts) const {
 std::list<MantidVec::const_iterator>
 PoldiPeakSearch::findPeaks(MantidVec::const_iterator begin,
                            MantidVec::const_iterator end) {
-  // These borders need to be known for handling the edges correctly in the
-  // recursion
-  setRecursionAbsoluteBorders(begin, end);
 
   std::list<MantidVec::const_iterator> rawPeaks =
       findPeaksRecursive(begin, end);
@@ -154,67 +151,20 @@ PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
   peaks.push_back(maxInRange);
 
   // ...and perform same search on sub-list left of maximum...
-  MantidVec::const_iterator leftBegin = getLeftRangeBegin(begin);
-  if (std::distance(leftBegin, maxInRange) > m_minimumDistance) {
+  if (std::distance(begin, maxInRange) > m_minimumDistance) {
     std::list<MantidVec::const_iterator> leftBranchPeaks =
-        findPeaksRecursive(leftBegin, maxInRange - m_minimumDistance);
+        findPeaksRecursive(begin, maxInRange - m_minimumDistance);
     peaks.insert(peaks.end(), leftBranchPeaks.begin(), leftBranchPeaks.end());
   }
 
   // ...and right of maximum
-  MantidVec::const_iterator rightEnd = getRightRangeEnd(end);
-  if (std::distance(maxInRange + 1, rightEnd) > m_minimumDistance) {
+  if (std::distance(maxInRange + 1, end) > m_minimumDistance) {
     std::list<MantidVec::const_iterator> rightBranchPeaks =
-        findPeaksRecursive(maxInRange + 1 + m_minimumDistance, rightEnd);
+        findPeaksRecursive(maxInRange + 1 + m_minimumDistance, end);
     peaks.insert(peaks.end(), rightBranchPeaks.begin(), rightBranchPeaks.end());
   }
 
   return peaks;
-}
-
-/** Returns starting iterator for "left" half of sub-range
-  *
-  * This method "cleans" the begin-iterator for use in a sub-range during the
-  *recursion. Without this,
-  * considerable parts at the vector beginning would not be searched.
-  *
-  * @param begin :: Raw begin-iterator of "left" recursion sub-range.
-  * @returns Corrected begin-iterator for "left" recursion sub-range.
-  */
-MantidVec::const_iterator
-PoldiPeakSearch::getLeftRangeBegin(MantidVec::const_iterator begin) const {
-  /* The edges of the searched range require special treatment. Without this
-   *sanitation,
-   * each recursion step that includes the leftmost sublist would chop off
-   *m_minimumDistance
-   * elements from the beginning, so the index is compared to the range's
-   *absolute start.
-   *
-   * Exactly the same considerations are valid for the rightmost sublist.
-   */
-  if (!m_recursionBordersInitialized || begin != m_recursionAbsoluteBegin) {
-    return begin + m_minimumDistance;
-  }
-
-  return begin;
-}
-
-/** Returns end iterator for "right" half of sub-range
-  *
-  * This method "cleans" the end-iterator for use in a sub-range during the
-  *recursion. Without this,
-  * considerable parts at the vector end would not be searched.
-  *
-  * @param end :: Raw end-iterator of "right" recursion sub-range.
-  * @returns Corrected end-iterator for "right" recursion sub-range.
-  */
-MantidVec::const_iterator
-PoldiPeakSearch::getRightRangeEnd(MantidVec::const_iterator end) const {
-  if (!m_recursionBordersInitialized || end != m_recursionAbsoluteEnd) {
-    return end - m_minimumDistance;
-  }
-
-  return end;
 }
 
 /** Maps peak position iterators from one vector to another
@@ -249,6 +199,26 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
   return transformedIndices;
 }
 
+/// Converts the value-parameter to d-spacing. Assumes unit to be Q if empty.
+double PoldiPeakSearch::getTransformedCenter(double value,
+                                             const Unit_sptr &unit) const {
+  if (boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+    return value;
+  }
+
+  // This is required to preserve default behavior which assumes Q.
+  Unit_sptr transformUnit = unit;
+
+  if (!unit || boost::dynamic_pointer_cast<Units::Empty>(unit)) {
+    transformUnit = UnitFactory::Instance().create("MomentumTransfer");
+  }
+
+  // Transform value to d-spacing.
+  Unit_sptr dUnit = UnitFactory::Instance().create("dSpacing");
+  return UnitConversion::run((*transformUnit), (*dUnit), value, 0, 0, 0,
+                             DeltaEMode::Elastic, 0.0);
+}
+
 /** Creates PoldiPeak-objects from peak position iterators
   *
   * In this method, PoldiPeak objects are created from the raw peak position
@@ -263,9 +233,10 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
   *data.
   */
 std::vector<PoldiPeak_sptr>
-PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart,
+PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
+                          const MantidVec::const_iterator &baseListEnd,
                           std::list<MantidVec::const_iterator> peakPositions,
-                          const MantidVec &xData) const {
+                          const MantidVec &xData, const Unit_sptr &unit) const {
   std::vector<PoldiPeak_sptr> peakData;
   peakData.reserve(peakPositions.size());
 
@@ -274,10 +245,14 @@ PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart,
        peak != peakPositions.end(); ++peak) {
     size_t index = std::distance(baseListStart, *peak);
 
-    PoldiPeak_sptr newPeak =
-        PoldiPeak::create(UncertainValue(xData[index]), UncertainValue(**peak));
-    double fwhmEstimate = getFWHMEstimate(baseListStart, *peak, xData);
-    newPeak->setFwhm(UncertainValue(fwhmEstimate));
+    double xDataD = getTransformedCenter(xData[index], unit);
+
+    double fwhmEstimate =
+        getFWHMEstimate(baseListStart, baseListEnd, *peak, xData);
+    UncertainValue fwhm(fwhmEstimate / xData[index]);
+
+    PoldiPeak_sptr newPeak = PoldiPeak::create(
+        MillerIndices(), UncertainValue(xDataD), UncertainValue(**peak), fwhm);
     peakData.push_back(newPeak);
   }
 
@@ -294,9 +269,11 @@ PoldiPeakSearch::getPeaks(MantidVec::const_iterator baseListStart,
   * @param xData :: Vector with x-values of the correlation spectrum.
   * @return Estimation of FWHM
   */
-double PoldiPeakSearch::getFWHMEstimate(MantidVec::const_iterator baseListStart,
-                                        MantidVec::const_iterator peakPosition,
-                                        const MantidVec &xData) const {
+double
+PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
+                                 const MantidVec::const_iterator &baseListEnd,
+                                 MantidVec::const_iterator peakPosition,
+                                 const MantidVec &xData) const {
   size_t peakPositionIndex = std::distance(baseListStart, peakPosition);
   double halfPeakIntensity = *peakPosition / 2.0;
 
@@ -304,15 +281,19 @@ double PoldiPeakSearch::getFWHMEstimate(MantidVec::const_iterator baseListStart,
    * - average positions i-1 and i as guess for position of fwhm
    * - return difference to peak position * 2
    */
-  MantidVec::const_iterator nextIntensity = peakPosition + 1;
-  while (*nextIntensity > halfPeakIntensity) {
+  MantidVec::const_iterator nextIntensity = peakPosition;
+  while (nextIntensity != baseListEnd && (*nextIntensity > halfPeakIntensity)) {
     nextIntensity += 1;
   }
 
-  size_t fwhmIndex = std::distance(baseListStart, nextIntensity);
-  double hmXGuess = (xData[fwhmIndex - 1] + xData[fwhmIndex]) / 2.0;
+  if (nextIntensity != baseListEnd) {
+    size_t fwhmIndex = std::distance(baseListStart, nextIntensity);
+    double hmXGuess = (xData[fwhmIndex - 1] + xData[fwhmIndex]) / 2.0;
 
-  return (hmXGuess - xData[peakPositionIndex]) * 2.0;
+    return (hmXGuess - xData[peakPositionIndex]) * 2.0;
+  }
+
+  return 0.002;
 }
 
 /** Sets error of workspace to specified value
@@ -535,15 +516,6 @@ void PoldiPeakSearch::setMaximumPeakNumber(int newMaximumPeakNumber) {
   m_maximumPeakNumber = newMaximumPeakNumber;
 }
 
-void
-PoldiPeakSearch::setRecursionAbsoluteBorders(MantidVec::const_iterator begin,
-                                             MantidVec::const_iterator end) {
-  m_recursionAbsoluteBegin = begin;
-  m_recursionAbsoluteEnd = end;
-
-  m_recursionBordersInitialized = true;
-}
-
 bool
 PoldiPeakSearch::vectorElementGreaterThan(MantidVec::const_iterator first,
                                           MantidVec::const_iterator second) {
@@ -559,16 +531,16 @@ void PoldiPeakSearch::init() {
                                                      Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
-  boost::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  boost::shared_ptr<BoundedValidator<int> > minPeakSeparationValidator =
+      boost::make_shared<BoundedValidator<int> >();
   minPeakSeparationValidator->setLower(1);
   declareProperty("MinimumPeakSeparation", 15, minPeakSeparationValidator,
                   "Minimum number of points in the spectrum by which two peaks "
                   "have to be separated.",
                   Direction::Input);
 
-  boost::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  boost::shared_ptr<BoundedValidator<int> > maxPeakNumberValidator =
+      boost::make_shared<BoundedValidator<int> >();
   maxPeakNumberValidator->setLower(1);
   declareProperty("MaximumPeakNumber", 24, maxPeakNumberValidator,
                   "Maximum number of peaks to be detected.", Direction::Input);
@@ -588,6 +560,19 @@ void PoldiPeakSearch::exec() {
   MantidVec correlationQValues = correlationWorkspace->readX(0);
   MantidVec correlatedCounts = correlationWorkspace->readY(0);
   g_log.information() << "   Auto-correlation data read." << std::endl;
+
+  Unit_sptr xUnit = correlationWorkspace->getAxis(0)->unit();
+
+  if (xUnit->caption() == "") {
+    g_log.information()
+        << "   Workspace does not have unit, defaulting to MomentumTransfer."
+        << std::endl;
+
+    xUnit = UnitFactory::Instance().create("MomentumTransfer");
+  } else {
+    g_log.information() << "   Unit of workspace is " << xUnit->caption() << "."
+                        << std::endl;
+  }
 
   setMinimumDistance(getProperty("MinimumPeakSeparation"));
   setMinimumPeakHeight(getProperty("MinimumPeakHeight"));
@@ -627,8 +612,9 @@ void PoldiPeakSearch::exec() {
    * original count data,
    * along with the Q-values.
    */
-  std::vector<PoldiPeak_sptr> peakCoordinates = getPeaks(
-      correlatedCounts.begin(), peakPositionsCorrelation, correlationQValues);
+  std::vector<PoldiPeak_sptr> peakCoordinates =
+      getPeaks(correlatedCounts.begin(), correlatedCounts.end(),
+               peakPositionsCorrelation, correlationQValues, xUnit);
   g_log.information()
       << "   Extracted peak positions in Q and intensity guesses." << std::endl;
 
@@ -646,7 +632,7 @@ void PoldiPeakSearch::exec() {
   auto newEnd = std::remove_copy_if(
       peakCoordinates.begin(), peakCoordinates.end(),
       intensityFilteredPeaks.begin(),
-      boost::bind<bool>(&PoldiPeakSearch::isLessThanMinimum, this, _1));
+      boost::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
   intensityFilteredPeaks.resize(
       std::distance(intensityFilteredPeaks.begin(), newEnd));
 

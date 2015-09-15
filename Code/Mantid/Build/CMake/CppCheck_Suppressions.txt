@@ -4,6 +4,6 @@
 
 // suppress in all files - BE CAREFULL not to leave trailing spaces after the rule id. or empty lines
 // For a library this is not a problem per se
-unusedFunction
+// unusedFunction
 // cppcheck has problems handling the number of pre-processor definitions used in the DLL_EXPORTs
 class_X_Y

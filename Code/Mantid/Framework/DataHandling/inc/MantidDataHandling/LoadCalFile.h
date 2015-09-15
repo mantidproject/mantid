@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -43,6 +43,7 @@ public:
 
   static Geometry::Instrument_const_sptr
   getInstrument3Ways(API::Algorithm *alg);
+  static bool instrumentIsSpecified(API::Algorithm *alg);
 
   static void readCalFile(const std::string &calFileName,
                           Mantid::DataObjects::GroupingWorkspace_sptr groupWS,

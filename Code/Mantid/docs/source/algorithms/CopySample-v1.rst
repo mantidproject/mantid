@@ -25,8 +25,10 @@ One can copy the orientation matrix only. To do this, select both
 CopyLattice and CopyOrientationOnly. If only CopyOrientationOnly is
 true, the algorithm will throw an error.
 
-A common use for this algorithm is for single crystal measurements. Finding the UB matrix occurs on
-a `PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_. In order to convertthe data to HKL space, one needs to copy the oriented lattice to the individual data workspaces.
+A common use for this algorithm is for single crystal measurements.
+Finding the UB matrix occurs on a :ref:`PeaksWorkspace <PeaksWorkspace>`.
+In order to convertthe data to HKL space, one needs to copy the oriented lattice
+to the individual data workspaces.
 
 Usage
 -----
@@ -60,3 +62,5 @@ Output:
     
 
 .. categories::
+
+.. sourcelink::

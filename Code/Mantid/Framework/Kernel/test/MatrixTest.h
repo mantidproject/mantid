@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h" 
 #include "MantidKernel/V3D.h"
 
@@ -54,6 +55,10 @@ public:
     A[2][2]=-7.0;
 
     TS_ASSERT_DELTA(A.Invert(),105.0,1e-5);
+    Matrix<double> B(1,1);
+    B[0][0]=2.;
+    TS_ASSERT_DELTA(B.Invert(),2,1e-5);
+    TS_ASSERT_DELTA(B[0][0],0.5,1e-5);
   }
 
   void testIdent()
@@ -84,6 +89,17 @@ public:
     B[1][1] = 1.1;
     TS_ASSERT( !A.equals(B, 0.05) );
     TS_ASSERT( A.equals(B, 0.15) );
+  }
+
+  void test_not_equal()
+  {
+      Matrix<double> A(3, 3, true);
+      Matrix<double> B(3, 3, true);
+
+      A[0][0] = -1.0;
+
+      TS_ASSERT(A != B);
+      TS_ASSERT(!(A == B));
   }
 
   /**
@@ -400,6 +416,35 @@ public:
       {
         TS_FAIL(e.what());
       }
+   }
+
+   void testMultiplicationWithVector()
+   {
+       DblMatrix M = boost::lexical_cast<DblMatrix>("Matrix(3,3)-0.23,0.55,5.22,2.96,4.2,0.1,-1.453,3.112,-2.34");
+
+       V3D v(2.3,4.5,-0.45);
+
+       V3D nv = M * v;
+
+       // Results from octave.
+       TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
+       TS_ASSERT_DELTA(nv.Y(), 25.663000000000000, 1e-15);
+       TS_ASSERT_DELTA(nv.Z(), 11.715100000000003, 1e-15);
+
+       DblMatrix M4(4,4, true);
+       TS_ASSERT_THROWS(M4.operator *(v), Mantid::Kernel::Exception::MisMatch<size_t>);
+
+       DblMatrix M23 = boost::lexical_cast<DblMatrix>("Matrix(2,3)-0.23,0.55,5.22,2.96,4.2,0.1");
+       TS_ASSERT_THROWS_NOTHING(M23.operator *(v));
+
+       nv = M23 * v;
+
+       TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
+       TS_ASSERT_DELTA(nv.Y(), 25.663000000000000, 1e-15);
+       TS_ASSERT_EQUALS(nv.Z(), 0);
+
+       DblMatrix M43 = boost::lexical_cast<DblMatrix>("Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
+       TS_ASSERT_THROWS(M43.operator *(v), Mantid::Kernel::Exception::MisMatch<size_t>);
    }
 
 private:

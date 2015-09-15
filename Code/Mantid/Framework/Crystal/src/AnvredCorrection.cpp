@@ -8,9 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/MemoryManager.h"
 #include "boost/assign.hpp"
 
@@ -73,7 +70,10 @@ std::map<int, double> detScale = map_list_of(17, 1.092114823)(18, 0.869105443)(
     36, 1.112773972)(37, 1.012894506)(38, 1.049384146)(39, 0.890313805)(
     47, 1.068553893)(48, 0.900566426)(58, 0.911249203);
 
-AnvredCorrection::AnvredCorrection() : API::Algorithm() {}
+AnvredCorrection::AnvredCorrection()
+    : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),
+      m_lamda_weight(), m_onlySphericalAbsorption(false),
+      m_returnTransmissionOnly(false), m_useScaleFactors(false) {}
 
 void AnvredCorrection::init() {
 
@@ -122,19 +122,20 @@ void AnvredCorrection::init() {
 void AnvredCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  OnlySphericalAbsorption = getProperty("OnlySphericalAbsorption");
-  ReturnTransmissionOnly = getProperty("ReturnTransmissionOnly");
-  useScaleFactors = getProperty("DetectorBankScaleFactors");
-  if (!OnlySphericalAbsorption) {
+  m_onlySphericalAbsorption = getProperty("OnlySphericalAbsorption");
+  m_returnTransmissionOnly = getProperty("ReturnTransmissionOnly");
+  m_useScaleFactors = getProperty("DetectorBankScaleFactors");
+  if (!m_onlySphericalAbsorption) {
     const API::Run &run = m_inputWS->run();
     if (run.hasProperty("LorentzCorrection")) {
       Kernel::Property *prop = run.getProperty("LorentzCorrection");
       bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
       if (lorentzDone) {
-        OnlySphericalAbsorption = true;
-        g_log.warning() << "Lorentz Correction was already done for this "
-                           "workspace.  OnlySphericalAbsorption was changed to "
-                           "true." << std::endl;
+        m_onlySphericalAbsorption = true;
+        g_log.warning()
+            << "Lorentz Correction was already done for this "
+               "workspace.  OnlySphericalAbsorption was changed to "
+               "true." << std::endl;
       }
     }
   }
@@ -150,7 +151,7 @@ void AnvredCorrection::exec() {
   if (eventW)
     eventW->sortAll(TOF_SORT, NULL);
   if ((getProperty("PreserveEvents")) && (eventW != NULL) &&
-      !ReturnTransmissionOnly) {
+      !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
     this->cleanup();
@@ -221,7 +222,7 @@ void AnvredCorrection::exec() {
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName = "";
-    if (useScaleFactors)
+    if (m_useScaleFactors)
       scale_init(det, inst, bank, L2, depth, pathlength, bankName);
 
     // Loop through the bins in the current spectrum
@@ -232,11 +233,11 @@ void AnvredCorrection::exec() {
       double lambda = timeflight[0];
       timeflight.clear();
 
-      if (ReturnTransmissionOnly) {
+      if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
       } else {
         double value = this->getEventWeight(lambda, scattering);
-        if (useScaleFactors)
+        if (m_useScaleFactors)
           scale_exec(bank, lambda, depth, pathlength, value);
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
@@ -253,15 +254,15 @@ void AnvredCorrection::exec() {
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
-  run.addProperty<double>("Radius", radius, true);
-  if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
+  run.addProperty<double>("Radius", m_radius, true);
+  if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
   setProperty("OutputWorkspace", correctionFactors);
 }
 
 void AnvredCorrection::cleanup() {
   // Clear vectors to free up memory.
-  lamda_weight.clear();
+  m_lamda_weight.clear();
 }
 
 void AnvredCorrection::execEvent() {
@@ -334,7 +335,7 @@ void AnvredCorrection::execEvent() {
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName = "";
-    if (useScaleFactors)
+    if (m_useScaleFactors)
       scale_init(det, inst, bank, L2, depth, pathlength, bankName);
 
     // multiplying an event list by a scalar value
@@ -343,7 +344,7 @@ void AnvredCorrection::execEvent() {
       if (unitStr.compare("TOF") == 0)
         wl.fromTOF(timeflight, timeflight, L1, L2, scattering, 0, 0, 0);
       double value = this->getEventWeight(timeflight[0], scattering);
-      if (useScaleFactors)
+      if (m_useScaleFactors)
         scale_exec(bank, timeflight[0], depth, pathlength, value);
       timeflight.clear();
       itev->m_errorSquared =
@@ -370,8 +371,8 @@ void AnvredCorrection::execEvent() {
 
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
-  run.addProperty<double>("Radius", radius, true);
-  if (!OnlySphericalAbsorption && !ReturnTransmissionOnly)
+  run.addProperty<double>("Radius", m_radius, true);
+  if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
@@ -382,32 +383,34 @@ void AnvredCorrection::execEvent() {
 
 /// Fetch the properties and set the appropriate member variables
 void AnvredCorrection::retrieveBaseProperties() {
-  smu = getProperty("LinearScatteringCoef"); // in 1/cm
-  amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
-  radius = getProperty("Radius");            // in cm
-  power_th = getProperty("PowerLambda");     // in cm
+  m_smu = getProperty("LinearScatteringCoef"); // in 1/cm
+  m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
+  m_radius = getProperty("Radius");            // in cm
+  m_power_th = getProperty("PowerLambda");     // in cm
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
   if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
     double rho = sampleMaterial.numberDensity();
-    if (smu == EMPTY_DBL())
-      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-            rho;
-    if (amu == EMPTY_DBL())
-      amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    if (m_smu == EMPTY_DBL())
+      m_smu =
+          sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
+          rho;
+    if (m_amu == EMPTY_DBL())
+      m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
+                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu,
+                        m_amu);
     Object shape = m_inputWS->sample().getShape(); // copy
     shape.setMaterial(Material("SetInAnvredCorrection", neutron, 1.0));
     m_inputWS->mutableSample().setShape(shape);
   }
-  if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
-    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
-                   << "LinearAbsorptionCoef = " << amu << " 1/cm\n"
-                   << "Radius = " << radius << " cm\n"
-                   << "Power Lorentz corrections = " << power_th << " \n";
+  if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
+    g_log.notice() << "LinearScatteringCoef = " << m_smu << " 1/cm\n"
+                   << "LinearAbsorptionCoef = " << m_amu << " 1/cm\n"
+                   << "Radius = " << m_radius << " cm\n"
+                   << "Power Lorentz corrections = " << m_power_th << " \n";
   // Call the virtual function for any further properties
   retrieveProperties();
 }
@@ -423,19 +426,19 @@ void AnvredCorrection::retrieveBaseProperties() {
  */
 double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
   double transinv = 1;
-  if (radius > 0)
+  if (m_radius > 0)
     transinv = absor_sphere(two_theta, lamda);
   // Only Spherical absorption correction
-  if (OnlySphericalAbsorption || ReturnTransmissionOnly)
+  if (m_onlySphericalAbsorption || m_returnTransmissionOnly)
     return transinv;
 
   // Resolution of the lambda table
   size_t lamda_index = static_cast<size_t>(STEPS_PER_ANGSTROM * lamda);
 
-  if (lamda_index >= lamda_weight.size())
-    lamda_index = lamda_weight.size() - 1;
+  if (lamda_index >= m_lamda_weight.size())
+    lamda_index = m_lamda_weight.size() - 1;
 
-  double lamda_w = lamda_weight[lamda_index];
+  double lamda_w = m_lamda_weight[lamda_index];
 
   double sin_theta = std::sin(two_theta / 2);
   double pix_weight = sin_theta * sin_theta;
@@ -478,9 +481,9 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
   //  order polynomial in excel. these values are given in the static array
   //  pc[][]
 
-  mu = smu + (amu / 1.8f) * wl;
+  mu = m_smu + (m_amu / 1.8f) * wl;
 
-  mur = mu * radius;
+  mur = mu * m_radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;
@@ -540,23 +543,23 @@ void AnvredCorrection::BuildLamdaWeights() {
   // peaks in ARCS data with no
   // incident spectrum
 
-  double power = power_th;
+  double power = m_power_th;
 
-  // GetSpectrumWeights( spectrum_file_name, lamda_weight);
+  // GetSpectrumWeights( spectrum_file_name, m_lamda_weight);
 
-  if (lamda_weight.size() == 0) // loading spectrum failed so use
-  {                             // array of 1's
+  if (m_lamda_weight.size() == 0) // loading spectrum failed so use
+  {                               // array of 1's
     //    power = power_ns;                      // This is commented out, so we
     // don't override user specified
     // value.
-    lamda_weight.reserve(NUM_WAVELENGTHS);
+    m_lamda_weight.reserve(NUM_WAVELENGTHS);
     for (int i = 0; i < NUM_WAVELENGTHS; i++)
-      lamda_weight.push_back(1.);
+      m_lamda_weight.push_back(1.);
   }
 
-  for (size_t i = 0; i < lamda_weight.size(); i++) {
+  for (size_t i = 0; i < m_lamda_weight.size(); i++) {
     double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
-    lamda_weight[i] *= (double)(1 / std::pow(lamda, power));
+    m_lamda_weight[i] *= (double)(1 / std::pow(lamda, power));
   }
 }
 void AnvredCorrection::scale_init(IDetector_const_sptr det,

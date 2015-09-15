@@ -5,7 +5,7 @@
 
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 namespace Mantid {
 namespace API {
@@ -74,7 +74,7 @@ public:
   void set(Workspace_sptr newWS);
 
 private:
-  DISABLE_COPY_AND_ASSIGN(ScopedWorkspace);
+  DISABLE_COPY_AND_ASSIGN(ScopedWorkspace)
 
   /// ADS name of the workspace
   const std::string m_name;

@@ -5,24 +5,21 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Math/PolygonEdge.h"
-#include <vector>
+#include "MantidKernel/V2D.h"
+#include <deque>
+#include <iosfwd>
 
 namespace Mantid {
 namespace Geometry {
 //---------------------------------------------------------------------------
 // Forward declarations
 //---------------------------------------------------------------------------
-class Vertex2D;
-
-//---------------------------------------------------------------------------
-// Typedefs
-//---------------------------------------------------------------------------
+class PolygonEdge;
 
 /**
 An implementation of a convex polygon. It contains a list of vertices that
-make up a convex polygon and the list is assumed to be ordered in an
-anti-clockwise manner.
+make up a convex polygon and the list is assumed to be ordered in a
+clockwise manner and the polygon is assumed to be closed.
 
 A polygon is convex if:
 <UL>
@@ -30,8 +27,6 @@ A polygon is convex if:
 <LI>Every line segment between two vertices remains inside or on the boundary of
 the polygon.</LI>
 </UL>
-
-@author Martyn Gigg, Tessella plc
 
 Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
 National Laboratory & European Spallation Source
@@ -57,21 +52,62 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_GEOMETRY_DLL ConvexPolygon {
 
 public:
-  /// Construct a polygon with a head vertex
-  ConvexPolygon(Vertex2D *head);
-  /// Construct a rectangle as these will be quite common
-  ConvexPolygon(const double x_lower, const double x_upper,
-                const double y_lower, const double y_upper);
+  /// Type of the point list
+  typedef std::deque<Kernel::V2D> Vertices;
+
+  //-----------------------------------------------------------------
+  // Forward directional iterator inner class
+  //-----------------------------------------------------------------
+  class MANTID_GEOMETRY_DLL Iterator {
+  public:
+    /// Constructor
+    Iterator(const ConvexPolygon &polygon);
+
+    /// Dereference operator
+    const Kernel::V2D &operator*() const;
+    /// Prefix increment operator
+    void operator++();
+    /// Create a directed edge between this and the next point
+    PolygonEdge edge() const;
+
+  private:
+    /// Compute the next index
+    size_t nextIndex() const;
+
+    const ConvexPolygon &m_polygon;
+    size_t m_index;
+  };
+
+  //-----------------------------------------------------------------
+  // ConvexPolygon class
+  //-----------------------------------------------------------------
+
+  /// Default constructor
+  ConvexPolygon();
+  /// Construct a polygon from a collection of points
+  ConvexPolygon(const Vertices &vertices);
   /// Copy constructor
   ConvexPolygon(const ConvexPolygon &rhs);
+  /// Copy-assignment operator
+  ConvexPolygon &operator=(const ConvexPolygon &rhs);
   /// Destructor
   virtual ~ConvexPolygon();
-  /// Return a pointer to the head vertex
-  virtual inline const Vertex2D *head() const { return m_head; }
+
+  /// Check if polygon is valid
+  bool isValid() const;
+  /// Clears all points
+  void clear();
+  /// Insert a new vertex. The point is assumed that it forms the next point in
+  /// a clockwise-sense around the shape
+  void insert(const Kernel::V2D &pt);
+  /// Insert a new vertex based on x,y values
+  void insert(double x, double y);
   /// Index access.
   virtual const Kernel::V2D &operator[](const size_t index) const;
+  /// Bounds-checked index access
+  virtual const Kernel::V2D &at(const size_t index) const;
   /// Return the number of vertices
-  inline size_t numVertices() const { return m_numVertices; }
+  virtual size_t npoints() const;
   /// Is a point inside this polygon
   virtual bool contains(const Kernel::V2D &point) const;
   /// Is a the given polygon completely encosed by this one
@@ -81,38 +117,33 @@ public:
   /// Compute the 'determinant' of the points
   virtual double determinant() const;
   /// Return the lowest X value in the polygon
-  double smallestX() const;
+  virtual double minX() const;
   /// Return the largest X value in the polygon
-  double largestX() const;
+  virtual double maxX() const;
   /// Return the lowest Y value in the polygon
-  double smallestY() const;
+  virtual double minY() const;
   /// Return the largest Y value in the polygon
-  double largestY() const;
-
-protected:
-  /// Default constructor
-  ConvexPolygon() : m_numVertices(0), m_head(NULL) {}
-  /// Setup the meta-data
-  void setup();
-  /// The size of the polygon
-  size_t m_numVertices;
-  /// Head vertex
-  Vertex2D *m_head;
-  /// Lowest X value
-  double m_lowestX;
-  /// Highest X value
-  double m_highestX;
-  /// Lowest Y value
-  double m_lowestY;
-  /// Highest Y value
-  double m_highestY;
+  virtual double maxY() const;
+  /// Return a new Polygon based on the current type
+  virtual ConvexPolygon toPoly() const;
 
 private:
-  /// Test if a list of vertices is valid
-  void validate(const Vertex2D *head) const;
+  /// Setup the meta-data
+  void setup();
   /// Compute the area of a triangle given by 3 points
   double triangleArea(const Kernel::V2D &a, const Kernel::V2D &b,
                       const Kernel::V2D &c) const;
+
+  // Points of the polygon
+  Vertices m_vertices;
+  /// Lowest X value
+  double m_minX;
+  /// Highest X value
+  double m_maxX;
+  /// Lowest Y value
+  double m_minY;
+  /// Highest Y value
+  double m_maxY;
 };
 
 /// Print a polygon to a stream

@@ -1,29 +1,20 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCrystal/PeakIntegration.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ArrayProperty.h"
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <fstream>
-#include <ostream>
-#include <iomanip>
-#include <sstream>
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/ICompAssembly.h"
+#include "MantidCrystal/PeakIntegration.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <boost/algorithm/string.hpp>
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidAPI/MemoryManager.h"
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace Crystal {
@@ -37,7 +28,7 @@ using namespace API;
 using namespace DataObjects;
 
 /// Constructor
-PeakIntegration::PeakIntegration() : API::Algorithm() {}
+PeakIntegration::PeakIntegration() : API::Algorithm(), m_IC(false) {}
 
 /// Destructor
 PeakIntegration::~PeakIntegration() {}
@@ -82,10 +73,10 @@ void PeakIntegration::exec() {
   /// Output peaks workspace, create if needed
   PeaksWorkspace_sptr peaksW = getProperty("OutPeaksWorkspace");
   if (peaksW != inPeaksW)
-    peaksW = inPeaksW->clone();
+    peaksW.reset(inPeaksW->clone().release());
 
   double qspan = 0.12;
-  IC = getProperty("IkedaCarpenterTOF");
+  m_IC = getProperty("IkedaCarpenterTOF");
   bool matchRun = getProperty("MatchingRunNo");
   if (peaksW->mutableSample().hasOrientedLattice()) {
     OrientedLattice latt = peaksW->mutableSample().getOrientedLattice();
@@ -202,7 +193,7 @@ void PeakIntegration::exec() {
 
     // for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
     if (n >= 8 &&
-        IC) // Number of fitting parameters large enough if Ikeda-Carpenter fit
+        m_IC) // Number of fitting parameters large enough if Ikeda-Carpenter fit
     {
       for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++) {
         if (((Y[iTOF] - Y[TOFPeak] / 2.) * (Y[iTOF + 1] - Y[TOFPeak] / 2.)) <
@@ -273,7 +264,7 @@ void PeakIntegration::exec() {
       for (iTOF = TOFmin; iTOF <= TOFmax; iTOF++)
         I += Y[iTOF];
 
-    if (!IC) {
+    if (!m_IC) {
       sigI = peak.getSigmaIntensity();
     } else {
       // Calculate errors correctly for nonPoisson distributions
@@ -317,7 +308,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
   UNUSED_ARG(det_name);
   UNUSED_ARG(x0);
   UNUSED_ARG(y0);
-  API::IPeak &peak = Peaks->getPeak(ipeak);
+  Geometry::IPeak &peak = Peaks->getPeak(ipeak);
   // Number of slices
   int TOFmax = 0;
 
@@ -348,7 +339,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
   TOFmax = static_cast<int>(logtable->rowCount());
   for (int iTOF = 0; iTOF < TOFmax; iTOF++) {
     Xout[iTOF] = logtable->getRef<double>(std::string("Time"), iTOF);
-    if (IC) // Ikeda-Carpenter fit
+    if (m_IC) // Ikeda-Carpenter fit
     {
       Yout[iTOF] = logtable->getRef<double>(std::string("TotIntensity"), iTOF);
       Eout[iTOF] =

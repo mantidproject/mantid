@@ -25,11 +25,9 @@ GLColor GLActor::makePickColor(size_t pickID)
     return GLColor(r,g,b);
 }
 
-size_t GLActor::decodePickColor(const GLColor& c)
+size_t GLActor::decodePickColor(const QRgb& c)
 {
-  unsigned char r,g,b;
-  c.get(r,g,b);
-  return decodePickColor(r,g,b);
+  return decodePickColor((unsigned char)qRed(c),(unsigned char)qGreen(c),(unsigned char)qBlue(c));
 }
 
 size_t GLActor::decodePickColor(unsigned char r,unsigned char g,unsigned char b)

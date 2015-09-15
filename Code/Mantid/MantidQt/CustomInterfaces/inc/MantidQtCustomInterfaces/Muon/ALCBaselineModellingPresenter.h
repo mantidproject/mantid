@@ -73,9 +73,6 @@ namespace CustomInterfaces
     /// Updates function in the view from the model
     void updateFunction();
 
-    /// Removes all section rows / section selectors
-    void clearSections();
-
   private:
     /// Associated view
     IALCBaselineModellingView* const m_view;

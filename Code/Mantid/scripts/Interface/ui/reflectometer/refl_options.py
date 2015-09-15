@@ -1,4 +1,5 @@
-import refl_options_window
+#pylint: disable=invalid-name
+import ui_refl_options_window
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -6,7 +7,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
+class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
 
 
     """
@@ -69,14 +70,14 @@ class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
         self.__group_tof_workspaces = checked
 
     def icatDownload(self):
-        return (self.__icat_download)
+        return self.__icat_download
 
     def groupTOFWorkspaces(self):
         return self.__group_tof_workspaces
 
     def frequency(self):
         return self.__frequency
-    
+
     def useAlg(self):
         return self.__alg_use
 

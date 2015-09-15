@@ -15,8 +15,7 @@ updated as absolute positions and so this update can be repeated.
 The PositionTable must have columns *Detector ID* and *Detector
 Position*. The entries of the *Detector ID* column are integer referring
 to the Detector ID and the enties of the *Detector Position* are
-`V3Ds <http://www.mantidproject.org/V3D>`_ referring to the position of the detector whose ID is in
-same row.
+`V3Ds <../api/python/mantid/kernel/V3D.html>`__ referring to the position of the detector whose ID is in same row.
 
 This algorithm is not appropriate for rectangular detectors and won't move them.
 
@@ -76,3 +75,5 @@ Output:
    Position of Detector ID=1103 after ApplyCalibration: 12,3,6
 
 .. categories::
+
+.. sourcelink::

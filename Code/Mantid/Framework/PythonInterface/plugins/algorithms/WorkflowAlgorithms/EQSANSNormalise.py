@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_file
@@ -117,7 +118,8 @@ class EQSANSNormalise(PythonAlgorithm):
         alg.execute()
         workspace = alg.getProperty("OutputWorkspace").value
         workspace_name = alg.getPropertyValue("OutputWorkspace")
-        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n   Beam flux file: %s" % (workspace_name, str(flux_data_path)))
+        self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n Beam flux file: %s"\
+                         % (workspace_name, str(flux_data_path)))
         self.setProperty("OutputWorkspace", workspace)
 
     def _normalise_to_monitor(self):

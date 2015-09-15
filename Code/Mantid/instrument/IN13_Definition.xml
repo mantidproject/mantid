@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- For help on the notation used to specify an Instrument Definition File 
+<!-- For help on the notation used to specify an Instrument Definition File
      see http://www.mantidproject.org/IDF -->
-<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="IN13" valid-from   ="1900-01-31 23:59:59"
@@ -21,7 +21,7 @@
 </defaults>
 
 <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
-  
+
 <!-- source and sample-position components -->
 
 <component type="moderator">
@@ -63,18 +63,17 @@
       <right-front-bottom-point  x="0.0125" y="0.0125" z="0.0"  />
     </cuboid>
     <algebra val="shape" />
-  </type>  
+  </type>
 
   <idlist idname="monitor1">
-    <id val="8" />  
+    <id val="8" />
   </idlist>
-  
+
 <!--  detector components -->
 
 <component type="CaF" idlist="CaF">
   <properties />
   <parameter name="Efixed"> <value val="16.45" /> </parameter>
-  <parameter name="efixed-val">	<value val="16.45" /></parameter>
   <location  />
 </component>
 

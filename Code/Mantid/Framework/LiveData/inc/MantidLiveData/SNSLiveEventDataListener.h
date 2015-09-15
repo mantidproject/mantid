@@ -63,8 +63,8 @@ public:
 
   bool isConnected();
 
-  virtual void run(); // the background thread.  What gets executed when we call
-                      // POCO::Thread::start()
+  virtual void run(); // the background thread.  What gets executed when we
+                      // call POCO::Thread::start()
 protected:
   using ADARA::Parser::rxPacket;
   // virtual bool rxPacket( const ADARA::Packet &pkt);
@@ -88,19 +88,17 @@ private:
 
   // We need data from both the geometry packet and the run status packet in
   // order to run the second part of the initialization.  Since I don't know
-  // what
-  // order the packets will arrive in, I've put the necessary code in this
-  // function.  Both rxPacket() functions will check to see if all the data is
-  // available and call this function if it is.
+  // what order the packets will arrive in, I've put the necessary code in
+  // this function.  Both rxPacket() functions will check to see if all the
+  // data is available and call this function if it is.
   void initWorkspacePart2();
 
   void initMonitorWorkspace();
 
   // Check to see if all the conditions we need for initWorkspacePart2() have
-  // been
-  // met.  Making this a function because it's starting to get a little
-  // complicated
-  // and I didn't want to be repeating the same tests in several places...
+  // been met.  Making this a function because it's starting to get a little
+  // complicated and I didn't want to be repeating the same tests in several
+  // places...
   bool readyForInitPart2() {
     if (m_instrumentXML.size() == 0)
       return false;
@@ -120,8 +118,7 @@ private:
   // tof is "Time Of Flight" and is in units of microsecondss relative to the
   // start of the pulse
   // (There's some documentation that says nanoseconds, but Russell Taylor
-  // assures me it's really
-  // is microseconds!)
+  // assures me it's really is microseconds!)
   // pulseTime is the start of the pulse relative to Jan 1, 1990.
   // Both values are designed to be passed straight into the TofEvent
   // constructor.
@@ -140,12 +137,13 @@ private:
   std::string m_instrumentName;
   std::string m_instrumentXML;
 
-  std::vector<std::string> m_requiredLogs; // Names of log values that we need
-                                           // before we can initialize
-  // m_buffer.  We get the names by parsing m_instrumentXML;
-  std::vector<std::string> m_monitorLogs; // Names of any monitor logs (these
-                                          // must be manually removed
-                                          // during the call to extractData())
+  // Names of log values that we need before we can initialize m_buffer.
+  // We get the names by parsing m_instrumentXML;
+  std::vector<std::string> m_requiredLogs;
+  
+  // Names of any monitor logs (these must be manually removed during the call
+  // to extractData())
+  std::vector<std::string> m_monitorLogs;
 
   Poco::Net::StreamSocket m_socket;
   bool m_isConnected;
@@ -153,34 +151,30 @@ private:
   Poco::Thread m_thread;
   Poco::FastMutex m_mutex; // protects m_buffer & m_status
   bool m_pauseNetRead;
-  bool
-      m_stopThread; // background thread checks this periodically.  If true, the
-                    // thread exits
+  bool m_stopThread; // background thread checks this periodically.  
+                     // If true, the thread exits
 
   Kernel::DateAndTime
       m_startTime; // The requested start time for the data stream
                    // (needed by the run() function)
 
   // Used to initialize the scan_index property if we haven't received a packet
-  // with the
-  // 'real' value by the time we call initWorkspacePart2.  (We can't delay the
-  // call to
-  // initWorkspacePart2 because we might never receive a 'real' value for that
-  // property.
+  // with the 'real' value by the time we call initWorkspacePart2.  (We can't
+  // delay the call to initWorkspacePart2 because we might never receive a
+  // 'real' value for that property.
   Kernel::DateAndTime m_dataStartTime;
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
   bool m_runPaused; // Set to true or false when we receive a pause/resume
-                    // marker in an
-  // annotation packet. (See rxPacket( const ADARA::AnnotationPkt &pkt))
+                    // marker in an annotation packet. (See
+                    // rxPacket( const ADARA::AnnotationPkt &pkt))
   int m_keepPausedEvents; // Set from a configuration property. (Should be a
-                          // bool, but
-  // appearantly, we can't read bools from the config file?!?)
+                          // bool, but appearantly, we can't read bools from
+                          // the config file?!?)
 
   // Holds on to any exceptions that were thrown in the background thread so
-  // that we
-  // can re-throw them in the forground thread
+  // that we can re-throw them in the forground thread
   boost::shared_ptr<std::runtime_error> m_backgroundException;
 
   // --- Data structures necessary for handling all the process variable info
@@ -194,16 +188,12 @@ private:
   // ---------------------------------------------------------------------------
 
   // In cases where we're replaying historical data from the SMS, we're likely
-  // to get
-  // multiple value packets for various values, but we only want to process the
-  // most
-  // recent one.  Unfortunately, the only way to do this is to hold the packets
-  // in a
-  // cache until the SMS works its way through the older data and starts sending
-  // out
-  // the data we actual want.  At that point, we need to parse whatever variable
-  // value
-  // packets we have in order to set the state of the system properly.
+  // to get multiple value packets for various values, but we only want to
+  // process the most recent one.  Unfortunately, the only way to do this is to
+  // hold the packets in a cache until the SMS works its way through the older
+  // data and starts sending out the data we actual want.  At that point, we
+  // need to parse whatever variable value packets we have in order to set the
+  // state of the system properly.
 
   // Maps the device ID / variable ID pair to the actual packet.  Using a map
   // means we will only keep one packet (the most recent one) for each variable
@@ -219,10 +209,8 @@ private:
   bool m_filterUntilRunStart;
 
   // Called by the rxPacket() functions to determine if the packet should be
-  // processed
-  // (Depending on when it last indexed its data, SMS might send us packets that
-  // are
-  // older than we requested.)
+  // processed. (Depending on when it last indexed its data, SMS might send us
+  // packets that are older than we requested.)
   // Returns false if the packet should be processed, true if is should be
   // ignored
   bool
@@ -231,9 +219,8 @@ private:
   void setRunDetails(const ADARA::RunStatusPkt &pkt);
 
   // We have to defer calling setRunDetails() at the start of a run until the
-  // foreground thread has called
-  // extractData() and retrieved the last data from the previous state (which
-  // was probably NO_RUN).
+  // foreground thread has called extractData() and retrieved the last data
+  // from the previous state (which was probably NO_RUN).
   // This holds a copy of the RunStatusPkt until we can call setRunDetails().
   boost::shared_ptr<ADARA::RunStatusPkt> m_deferredRunDetailsPkt;
 };

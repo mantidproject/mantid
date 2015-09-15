@@ -9,12 +9,13 @@
 #include <gsl/gsl_sf_gamma.h> // for factorial
 #include <gsl/gsl_spline.h>
 
+#include <cmath>
 #include <sstream>
 
 namespace Mantid {
 namespace CurveFitting {
 // Register into factory
-DECLARE_FUNCTION(GramCharlierComptonProfile);
+DECLARE_FUNCTION(GramCharlierComptonProfile)
 
 namespace {
 ///@cond

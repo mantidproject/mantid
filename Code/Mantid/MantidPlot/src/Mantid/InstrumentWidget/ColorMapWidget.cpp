@@ -1,8 +1,10 @@
 #include "ColorMapWidget.h"
 #include "MantidQtAPI/MantidColorMap.h"
 #include "MantidQtAPI/GraphOptions.h"
+#include "MantidQtAPI/PowerScaleEngine.h"
 
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QComboBox>
 #include <QLineEdit>
@@ -10,6 +12,8 @@
 #include <QApplication>
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
+#include <DoubleSpinBox.h>
+#include <QLabel>
 
 /**
   * Constructor.
@@ -18,7 +22,7 @@
   * @param minPositiveValue A minimum positive value for the Log10 scale
   */
 ColorMapWidget::ColorMapWidget(int type,QWidget* parent,const double& minPositiveValue):
-QFrame(parent),m_minPositiveValue(minPositiveValue),m_dragging(false)
+  QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false), m_y(0), m_dtype(), m_nth_power(2.0)
 {
   m_scaleWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
   m_scaleWidget->setColorBarEnabled(true);
@@ -49,12 +53,24 @@ QFrame(parent),m_minPositiveValue(minPositiveValue),m_dragging(false)
   m_scaleOptions = new QComboBox;
   m_scaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
   m_scaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
+  m_scaleOptions->addItem("Power", QVariant(GraphOptions::Power));
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
   connect(m_scaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleOptionsChanged(int)));
 
-  QVBoxLayout* options_layout = new QVBoxLayout;
-  options_layout->addStretch();
-  options_layout->addWidget(m_scaleOptions);
+  // Controls for exponent for power scale type
+  m_lblN = new QLabel(tr("n ="));
+  m_lblN->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+  m_dspnN = new DoubleSpinBox();
+  m_dspnN->setValue(m_nth_power);
+  connect(m_dspnN, SIGNAL(valueChanged(double)), this, SLOT(nPowerChanged(double)));
+
+  QGridLayout* options_layout = new QGridLayout;
+  options_layout->addWidget(m_scaleOptions, 1, 0, 1, 2);
+  options_layout->addWidget(m_lblN, 2, 0);
+  options_layout->addWidget(m_dspnN, 2, 1);
+  options_layout->setRowStretch(0, 4);
+  options_layout->setRowStretch(1, 1);
+  options_layout->setRowStretch(2, 1);
 
   QHBoxLayout *colourmap_layout = new QHBoxLayout;
   colourmap_layout->addLayout(lColormapLayout);
@@ -65,7 +81,17 @@ QFrame(parent),m_minPositiveValue(minPositiveValue),m_dragging(false)
 
 void ColorMapWidget::scaleOptionsChanged(int i)
 {
+  if (m_scaleOptions->itemData(i).toUInt() == 2) {
+    m_dspnN->setEnabled(true);
+  }
+  else m_dspnN->setEnabled(false);
+
   emit scaleTypeChanged(m_scaleOptions->itemData(i).toUInt());
+}
+
+void ColorMapWidget::nPowerChanged(double nth_power)
+{
+  emit nthPowerChanged(nth_power);
 }
 
 /**
@@ -83,6 +109,12 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
     QwtLinearScaleEngine linScaler;
     m_scaleWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
     m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue),colorMap);
+  }
+  else if( type == GraphOptions::Power )
+  {
+      PowerScaleEngine powerScaler;
+      m_scaleWidget->setScaleDiv(powerScaler.transformation(), powerScaler.divideScale(minValue, maxValue,  20, 5));
+      m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue),colorMap);
   }
   else
  {
@@ -107,6 +139,10 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
   }
   m_scaleOptions->blockSignals(true);
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
+  m_dspnN->setEnabled(false);
+  if (m_scaleOptions->findData(type) == 2) {
+    m_dspnN->setEnabled(true);
+  }
   m_scaleOptions->blockSignals(false);
 }
 
@@ -193,6 +229,11 @@ void ColorMapWidget::setScaleType(int type)
   m_scaleOptions->setCurrentIndex(m_scaleOptions->findData(type));
 }
 
+void ColorMapWidget::setNthPower(double nth_power)
+{
+  m_dspnN->setValue(nth_power);
+}
+
 /**
  * Update the colour scale after the range changes.
  */
@@ -205,6 +246,11 @@ void ColorMapWidget::updateScale()
   {
     QwtLinearScaleEngine linScaler;
     m_scaleWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
+  }
+  else if( type == GraphOptions::Power )
+  {
+    PowerScaleEngine powerScaler;
+    m_scaleWidget->setScaleDiv(powerScaler.transformation(), powerScaler.divideScale(minValue, maxValue,  20, 5));
   }
   else
  {

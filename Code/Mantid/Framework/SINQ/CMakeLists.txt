@@ -6,18 +6,14 @@ set ( SRC_FILES
 	src/PoldiAutoCorrelation5.cpp
 	src/PoldiCreatePeaksFromCell.cpp
 	src/PoldiFitPeaks1D.cpp
+        src/PoldiFitPeaks1D2.cpp
         src/PoldiFitPeaks2D.cpp
 	src/PoldiIndexKnownCompounds.cpp
-	src/PoldiLoadChopperSlits.cpp
-	src/PoldiLoadIPP.cpp
-	src/PoldiLoadLog.cpp
-	src/PoldiLoadSpectra.cpp
-	src/PoldiPeakDetection2.cpp
 	src/PoldiPeakSearch.cpp
-	src/PoldiRemoveDeadWires.cpp
+	src/PoldiPeakSummary.cpp
 	src/PoldiTruncateData.cpp
+	src/PoldiUtilities/IPoldiFunction1D.cpp
 	src/PoldiUtilities/MillerIndices.cpp
-        src/PoldiUtilities/PeakFunctionIntegrator.cpp
 	src/PoldiUtilities/Poldi2DFunction.cpp
 	src/PoldiUtilities/PoldiAutoCorrelationCore.cpp
 	src/PoldiUtilities/PoldiBasicChopper.cpp
@@ -34,7 +30,9 @@ set ( SRC_FILES
 	src/PoldiUtilities/PoldiResidualCorrelationCore.cpp
         src/PoldiUtilities/PoldiSpectrumDomainFunction.cpp
         src/PoldiUtilities/PoldiSourceSpectrum.cpp
+	src/PoldiUtilities/PoldiSpectrumConstantBackground.cpp
 	src/PoldiUtilities/PoldiSpectrumLinearBackground.cpp
+	src/PoldiUtilities/PoldiSpectrumPawleyFunction.cpp
 	src/PoldiUtilities/PoldiTimeTransformer.cpp
 	src/PoldiUtilities/UncertainValue.cpp
 	src/ProjectMD.cpp
@@ -52,19 +50,15 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiAutoCorrelation5.h
 	inc/MantidSINQ/PoldiCreatePeaksFromCell.h
 	inc/MantidSINQ/PoldiFitPeaks1D.h
+        inc/MantidSINQ/PoldiFitPeaks1D2.h
         inc/MantidSINQ/PoldiFitPeaks2D.h
 	inc/MantidSINQ/PoldiIndexKnownCompounds.h
-	inc/MantidSINQ/PoldiLoadChopperSlits.h
-	inc/MantidSINQ/PoldiLoadIPP.h
-	inc/MantidSINQ/PoldiLoadLog.h
-	inc/MantidSINQ/PoldiLoadSpectra.h
-	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiPeakSearch.h
-	inc/MantidSINQ/PoldiRemoveDeadWires.h
+	inc/MantidSINQ/PoldiPeakSummary.h
 	inc/MantidSINQ/PoldiTruncateData.h
+	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndicesIO.h
-        inc/MantidSINQ/PoldiUtilities/PeakFunctionIntegrator.h
 	inc/MantidSINQ/PoldiUtilities/Poldi2DFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h
 	inc/MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h
@@ -82,8 +76,10 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiPeak.h
 	inc/MantidSINQ/PoldiUtilities/PoldiPeakCollection.h
 	inc/MantidSINQ/PoldiUtilities/PoldiResidualCorrelationCore.h
+	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumConstantBackground.h
         inc/MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h
+	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValueIO.h
@@ -99,7 +95,6 @@ set ( TEST_FILES
 	MDHistoToWorkspace2DTest.h
 	MillerIndicesIOTest.h
 	MillerIndicesTest.h
-        PeakFunctionIntegratorTest.h
 	Poldi2DFunctionTest.h
 	PoldiAnalyseResidualsTest.h
 	PoldiAutoCorrelationCoreTest.h
@@ -113,16 +108,20 @@ set ( TEST_FILES
 	PoldiDetectorFactoryTest.h
 	PoldiDetectorTest.h
 	PoldiFitPeaks1DTest.h
+        PoldiFitPeaks1D2Test.h
         PoldiFitPeaks2DTest.h
 	PoldiIndexKnownCompoundsTest.h
         PoldiInstrumentAdapterTest.h
         PoldiPeakCollectionTest.h
 	PoldiPeakSearchTest.h
+	PoldiPeakSummaryTest.h
 	PoldiPeakTest.h
 	PoldiResidualCorrelationCoreTest.h
         PoldiSourceSpectrumTest.h
         PoldiSpectrumDomainFunctionTest.h
+	PoldiSpectrumConstantBackgroundTest.h
 	PoldiSpectrumLinearBackgroundTest.h
+	PoldiSpectrumPawleyFunctionTest.h
 	PoldiTimeTransformerTest.h
 	PoldiTruncateDataTest.h
 	ProjectMDTest.h
@@ -131,6 +130,11 @@ set ( TEST_FILES
 	UncertainValueTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers ( inc/MantidSINQ/PrecompiledHeader.h SRC_FILES )
@@ -139,12 +143,22 @@ add_library ( SINQ ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( SINQ PROPERTIES OUTPUT_NAME MantidSINQ 
                                         COMPILE_DEFINITIONS "IN_MANTID_SINQ" )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( SINQ PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc )
+include_directories ( inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents )
+# Have to link to winsock library on Windows
+if ( WIN32 )
+  set ( WINSOCK ws2_32 )
+endif ()
+
+target_link_libraries ( SINQ LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

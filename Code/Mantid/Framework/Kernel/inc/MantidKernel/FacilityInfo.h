@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/CatalogInfo.h"
+#include "MantidKernel/ComputeResourceInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
 #ifndef Q_MOC_RUN
@@ -80,7 +81,13 @@ public:
   std::vector<InstrumentInfo> instruments(const std::string &tech) const;
   /// Returns instruments with given name
   const InstrumentInfo &instrument(std::string iName = "") const;
-  /// Returns a vector of the available compute resources
+
+  /// Returns a vector of available compute resources
+  std::vector<ComputeResourceInfo> computeResInfos() const;
+  /// Returns a compute resource identified by name
+  const ComputeResourceInfo &computeResource(const std::string &name) const;
+
+  /// Returns a vector of the names of the available compute resources
   std::vector<std::string> computeResources() const;
   /// Returns the RemoteJobManager for the named compute resource
   boost::shared_ptr<RemoteJobManager>
@@ -113,12 +120,18 @@ private:
   std::vector<InstrumentInfo>
       m_instruments;          ///< list of instruments of this facility
   std::string m_liveListener; ///< name of the default live listener
+
+  std::vector<ComputeResourceInfo> m_computeResInfos; ///< (remote) compute
+  /// resources available in
+  /// this facility
+
+  // TODO: remove RemoteJobManager form here (trac ticket #11373)
   typedef std::map<std::string, boost::shared_ptr<RemoteJobManager>>
       ComputeResourcesMap;
   ComputeResourcesMap m_computeResources; ///< list of compute resources
                                           ///(clusters, etc...) available at
-  /// this facility
-  // (Sorted by their names)
+                                          /// this facility
+                                          // (Sorted by their names)
 };
 
 } // namespace Kernel

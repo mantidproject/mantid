@@ -1,24 +1,25 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_H_
 
+#include "MantidQtSliceViewer/PeakOverlayInteractive.h"
 #include "DllOption.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
-#include <q3iconview.h>
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
-#include <qwt_plot.h>
-#include <qpainter.h>
-#include <qcolor.h>
-#include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PhysicalCrossPeak.h"
 
+class QPaintEvent;
+class QwtPlot;
 
 namespace MantidQt
 {
+
+namespace MantidWidgets {
+// Forward declaration
+class InputController;
+}
+
 namespace SliceViewer
 {
 
+   class PeaksPresenter;
   /** Widget representing visible peaks in the plot. 
     
     @date 2013-06-10
@@ -43,13 +44,14 @@ namespace SliceViewer
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiCross : public QWidget, public PeakOverlayView
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiCross : public PeakOverlayInteractive
   {
     Q_OBJECT
 
   public:
     /// Constructor
-    PeakOverlayMultiCross(QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const QColor& peakColour);
+    PeakOverlayMultiCross(PeaksPresenter* const peaksPresenter, QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
+                          const QColor& peakColour);
     /// Destructor
     virtual ~PeakOverlayMultiCross();
     /// Set the slice point at position.
@@ -61,7 +63,7 @@ namespace SliceViewer
     /// Update the view.
     virtual void updateView();
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
-    void movePosition(Mantid::API::PeakTransform_sptr peakTransform);
+    void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
     /// Change foreground colour
     virtual void changeForegroundColour(const QColor);
     /// Change background colour
@@ -87,24 +89,25 @@ namespace SliceViewer
     /// Get the background colour
     virtual QColor getBackgroundColour() const;
 
+    /// Take settings from another view
+    virtual void takeSettingsFrom(const PeakOverlayView * const);
+
   private:
 
-    //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
-    void paintEvent(QPaintEvent *event);
+    /// Pure virtual on PeakOverlayInteractive
+    virtual void doPaintPeaks(QPaintEvent*);
 
-    QSize sizeHint() const;
-    QSize size() const;
-    int height() const;
-    int width() const;
-
-    /// QwtPlot containing this
-    QwtPlot * m_plot;
     /// Physical model of the spacial cross peaks
     VecPhysicalCrossPeak m_physicalPeaks;
     /// Peak colour
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
+    /// Cached occupancy into the view
+    double m_cachedOccupancyIntoView;
+    /// Cached occupancy onto view
+    double m_cachedOccupancyInView;
+
   };
 
 

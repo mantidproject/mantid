@@ -1,27 +1,13 @@
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Memory.h"
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/Progress.h"
 #include "MantidCrystal/BackgroundStrategy.h"
-#include "MantidCrystal/DisjointElement.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/ClusterRegister.h"
-#include "MantidCrystal/CompositeCluster.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <stdexcept>
-#include <set>
-#include <algorithm>
-#include <iterator>
-#include <functional>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -75,7 +61,7 @@ size_t calculateMaxClusters(IMDHistoWorkspace const *const ws,
  */
 boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
 cloneInputWorkspace(IMDHistoWorkspace_sptr &inWS) {
-  IMDHistoWorkspace_sptr outWS = inWS->clone();
+  IMDHistoWorkspace_sptr outWS(inWS->clone().release());
 
   // Initialize to zero.
   PARALLEL_FOR_NO_WSP_CHECK()

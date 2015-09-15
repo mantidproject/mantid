@@ -5,6 +5,7 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
+#include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 
 namespace Mantid {
 namespace Poldi {
@@ -39,7 +40,8 @@ namespace Poldi {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 class MANTID_SINQ_DLL Poldi2DFunction : virtual public API::IFunction1DSpectrum,
-                                        virtual public API::CompositeFunction {
+                                        virtual public API::CompositeFunction,
+                                        public IPoldiFunction1D {
 public:
   Poldi2DFunction();
   virtual ~Poldi2DFunction() {}
@@ -52,11 +54,17 @@ public:
   virtual void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                                   API::FunctionValues &values) const;
 
+  virtual void poldiFunction1D(const std::vector<int> &indices,
+                               const API::FunctionDomain1D &domain,
+                               API::FunctionValues &values) const;
+
   void iterationFinished();
 
 private:
   size_t m_iteration;
 };
+
+typedef boost::shared_ptr<Poldi2DFunction> Poldi2DFunction_sptr;
 
 } // namespace SINQ
 } // namespace Mantid

@@ -45,6 +45,11 @@ public:
 
   virtual ~WorkspaceSingleValue();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<WorkspaceSingleValue> clone() const {
+    return std::unique_ptr<WorkspaceSingleValue>(doClone());
+  }
+
   /// Returns the number of single indexable items in the workspace
   virtual std::size_t size() const { return 1; }
 
@@ -66,11 +71,19 @@ public:
                          MantidVec &Y, MantidVec &E,
                          bool skipError = false) const;
 
+  /// Returns the number of dimensions, 0 in this case.
+  virtual size_t getNumDims() const;
+
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  WorkspaceSingleValue(const WorkspaceSingleValue &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other);
+
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  WorkspaceSingleValue(const WorkspaceSingleValue &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  WorkspaceSingleValue &operator=(const WorkspaceSingleValue &);
+  virtual WorkspaceSingleValue *doClone() const {
+    return new WorkspaceSingleValue(*this);
+  }
 
   // allocates space in a new workspace - does nothing in this case
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength,

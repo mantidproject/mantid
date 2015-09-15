@@ -4,6 +4,7 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Path.h>
 
+
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -16,6 +17,7 @@
 #include <pqPipelineSource.h>
 #include <pqPluginManager.h>
 #include <pqRenderView.h>
+#include <pqScalarsToColors.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
@@ -39,33 +41,15 @@ namespace
   /// Static logger
   Kernel::Logger g_log("ThreeSliceView");
 }
-ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
+
+
+ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) :
+  ViewBase(parent, rebinnedSourcesManager), m_mainView(), m_ui()
 {
-  this->ui.setupUi(this);
-
-  // We need to load the QuadView plugin
-  QString quadViewLibrary;
-#ifdef Q_OS_WIN32
-  // Windows requires the full
-  // path information. The DLL is located in the apropriate executeable path of paraview.
-  const Poco::Path paraviewPath(Mantid::Kernel::ConfigService::Instance().getParaViewPath());
-  Poco::Path quadViewFullPath(paraviewPath, QUADVIEW_LIBRARY.toStdString());
-  quadViewLibrary = quadViewFullPath.toString().c_str();
-#else
-  quadViewLibrary = QUADVIEW_LIBRARY;
-#endif
-
-  // Need to load plugin
-  pqPluginManager* pm = pqApplicationCore::instance()->getPluginManager();
-  QString error;
-  pm->loadExtension(pqActiveObjects::instance().activeServer(),
-                    quadViewLibrary, &error, false);
-
-  g_log.debug() << "Loading QuadView library from " << quadViewLibrary.toStdString() << "\n";
-
-  this->mainView = this->createRenderView(this->ui.mainRenderFrame,
-                                          QString("pqQuadView"));
-  pqActiveObjects::instance().setActiveView(this->mainView);
+  this->m_ui.setupUi(this);
+  this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
+                                          QString("OrthographicSliceView"));
+  pqActiveObjects::instance().setActiveView(this->m_mainView);
 }
 
 ThreeSliceView::~ThreeSliceView()
@@ -78,12 +62,12 @@ void ThreeSliceView::destroyView()
   // Active source disappears in only this view, so set it from the
   // internal source before destroying view.
   pqActiveObjects::instance().setActiveSource(this->origSrc);
-  builder->destroy(this->mainView);
+  builder->destroy(this->m_mainView);
 }
 
 pqRenderView* ThreeSliceView::getView()
 {
-  return this->mainView.data();
+  return this->m_mainView.data();
 }
 
 void ThreeSliceView::render()
@@ -116,7 +100,7 @@ void ThreeSliceView::makeThreeSlice()
   this->origSrc = src;
 
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->mainView);
+        this->origSrc->getOutputPort(0), this->m_mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
@@ -124,12 +108,12 @@ void ThreeSliceView::makeThreeSlice()
 
 void ThreeSliceView::renderAll()
 {
-  this->mainView->render();
+  this->m_mainView->render();
 }
 
 void ThreeSliceView::resetDisplay()
 {
-  this->mainView->resetDisplay();
+  this->m_mainView->resetDisplay();
 }
 
 /*
@@ -140,13 +124,13 @@ void ThreeSliceView::correctVisibility()
 */
 void ThreeSliceView::correctColorScaleRange()
 {
-  QPair<double, double> range = this->origRep->getColorFieldRange();
+  QPair<double, double> range = this->origRep->getLookupTable()->getScalarRange();
   emit this->dataRange(range.first, range.second);
 }
 
 void ThreeSliceView::resetCamera()
 {
-  this->mainView->resetCamera();
+  this->m_mainView->resetCamera();
 }
 
 }

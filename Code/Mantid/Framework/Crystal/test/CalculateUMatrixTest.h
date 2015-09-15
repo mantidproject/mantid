@@ -199,7 +199,7 @@ private:
           phi.at(i)=ph(Hpeaks[i],Kpeaks[i],Lpeaks[i]);
       }
 
-      Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(L2,theta, phi);
+      auto inst = ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(L2,theta, phi);
       inst->setName("SillyInstrument");
       auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
       pw->setInstrument(inst);

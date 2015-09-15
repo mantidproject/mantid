@@ -52,10 +52,12 @@ Output:
 .. testoutput:: CalMuonDeadTime
 
     First five dead times:
-      Spectrum 1 -> -0.6328
-      Spectrum 2 -> -0.5857
-      Spectrum 3 -> -0.5544
-      Spectrum 4 -> -0.6362
-      Spectrum 5 -> -1.0608
+      Spectrum 1 -> -0.3164
+      Spectrum 2 -> -0.2928
+      Spectrum 3 -> -0.2772
+      Spectrum 4 -> -0.3181
+      Spectrum 5 -> -0.5304
 
 .. categories::
+
+.. sourcelink::

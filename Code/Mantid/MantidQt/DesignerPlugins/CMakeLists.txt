@@ -22,6 +22,9 @@ include_directories ( inc )
 include_directories ( ../SliceViewer/inc )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../SliceViewer )
 
+include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
+add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
+
 # Define a compiler variable to set the name of the library within the code. This
 # is required by the Qt plugin mechanism
 set( LIB_NAME MantidWidgetPlugins )
@@ -41,7 +44,17 @@ set_target_properties ( DesignerPlugins PROPERTIES OUTPUT_NAME ${LIB_NAME} )
 set_target_properties( DesignerPlugins PROPERTIES EXCLUDE_FROM_ALL TRUE )
 
 # Set the library dependencies
-target_link_libraries ( DesignerPlugins MantidWidgets MantidQtSliceViewer MantidQtAPI ${QT_LIBRARIES} )
+target_link_libraries ( DesignerPlugins LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            MantidWidgets
+            MantidQtSliceViewer
+            MantidQtAPI
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${QSCINTILLA_LIBRARIES}
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES} )
 
 # Clean up
 set ( LIB_NAME )

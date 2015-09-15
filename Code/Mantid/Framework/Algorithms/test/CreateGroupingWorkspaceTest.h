@@ -174,6 +174,26 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
+  void test_exec_WithFixedGroups_FailOnGroupsGreaterThanDet()
+  {
+    // Name of the output workspace.
+    std::string outWSName("CreateGroupingWorkspaceTest_OutputWS_fail");
+
+    CreateGroupingWorkspace alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentName", "IRIS") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FixedGroupCount", 52) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ComponentName", "graphite") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+
+    // Should fail as IRIS graphite component has only 51 spectra
+    TS_ASSERT( !alg.isExecuted() );
+
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
 };
 
 

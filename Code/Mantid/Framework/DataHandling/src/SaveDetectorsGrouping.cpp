@@ -1,17 +1,18 @@
-#include "MantidDataHandling/SaveDetectorsGrouping.h"
-#include "MantidKernel/System.h"
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidDataHandling/SaveDetectorsGrouping.h"
+#include "MantidKernel/System.h"
 
-#include "fstream"
-#include "sstream"
-#include "algorithm"
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
 
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Text.h"
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/DOMWriter.h"
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from
 // std::basic_istream

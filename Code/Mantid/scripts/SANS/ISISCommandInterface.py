@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run
@@ -170,9 +171,10 @@ def SetTransSpectrum(specNum, interp=False):
 def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
 
-def Gravity(flag):
-    _printMessage('Gravity(' + str(flag) + ')')
+def Gravity(flag, extra_length = 0.0):
+    _printMessage('Gravity(' + str(flag) + ', '+ str(extra_length) + ')')
     ReductionSingleton().to_Q.set_gravity(flag)
+    ReductionSingleton().to_Q.set_extra_length(extra_length)
 
 def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False, qMin=None, qMax=None):
     """
@@ -265,7 +267,7 @@ def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = 
     """
     _printMessage('TransmissionSample("' + str(sample) + '","' + str(direct) + '")')
     ReductionSingleton().set_trans_sample(sample, direct, reload, period_t, period_d)
-    return ReductionSingleton().samp_trans_load.execute(
+    return ReductionSingleton().samp_trans_load.execute(\
                                         ReductionSingleton(), None)
 
 def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
@@ -279,7 +281,7 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
     """
     _printMessage('TransmissionCan("' + str(can) + '","' + str(direct) + '")')
     ReductionSingleton().set_trans_can(can, direct, reload, period_t, period_d)
-    return ReductionSingleton().can_trans_load.execute(
+    return ReductionSingleton().can_trans_load.execute(\
                                             ReductionSingleton(), None)
 
 def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRun.UNSET_PERIOD):
@@ -315,9 +317,12 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     Introduced #5942
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
+    # use the scale factors from the parameter file to scale correctly
+    XSF = ReductionSingleton().inst.beam_centre_scale_factor1
+    YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
-    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(
-                                float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
+    ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(\
+                                float(xcoord)/XSF, float(ycoord)/YSF), bank)
 
 def GetMismatchedDetList():
     """
@@ -379,9 +384,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # if the user chose to reduce front and does not require fit
     if not (com_det_option == 'front' and not fitRequired):
         reduce_rear_flag = True
-    if (com_det_option != 'rear'):
+    if com_det_option != 'rear':
         reduce_front_flag = True
-    if (com_det_option == 'merged'):
+    if com_det_option == 'merged':
         merge_flag = True
 
     #The shift and scale is always on the front detector.
@@ -407,7 +412,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     # do reduce front bank
     if reduce_front_flag:
         # it is necessary to replace the Singleton if a reduction was done before
-        if (reduce_rear_flag):
+        if reduce_rear_flag:
             # In this case, it is necessary to reload the files, in order to move the components to the
             # correct position defined by its get_beam_center. (ticket #5942)
 
@@ -415,8 +420,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             ReductionSingleton.replace(ReductionSingleton().cur_settings())
 
             # for the LOQ instrument, if the beam centers are different, we have to reload the data.
-            if (ReductionSingleton().instrument._NAME == 'LOQ' and
-               (ReductionSingleton().get_beam_center('rear') != ReductionSingleton().get_beam_center('front'))):
+            if ReductionSingleton().instrument._NAME == 'LOQ' and\
+                ReductionSingleton().get_beam_center('rear') != ReductionSingleton().get_beam_center('front'):
 
                 # It is necessary to reload sample, transmission and can files.
                 #reload sample
@@ -452,9 +457,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if merge_flag:
         retWSname_merged = retWSname_rear
         if retWSname_merged.count('rear') == 1:
-          retWSname_merged = retWSname_merged.replace('rear', 'merged')
+            retWSname_merged = retWSname_merged.replace('rear', 'merged')
         else:
-          retWSname_merged = retWSname_merged + "_merged"
+            retWSname_merged = retWSname_merged + "_merged"
 
         Nf = mtd[retWSname_front+"_sumOfNormFactors"]
         Nr = mtd[retWSname_rear+"_sumOfNormFactors"]
@@ -560,9 +565,6 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
         Fit rear data to FRONTnew(Q) = ( FRONT(Q) + SHIFT )xRESCALE,
         FRONT(Q) is the frontData argument. Returns scale and shift
 
-        Note SHIFT is shift of a constant back, not the Shift parameter in
-        TabulatedFunction.
-
         @param rAnds: A DetectorBank -> _RescaleAndShift structure
         @param frontData: Reduced front data
         @param rearData: Reduced rear data
@@ -570,46 +572,61 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if rAnds.fitScale==False and rAnds.fitShift==False:
         return rAnds.scale, rAnds.shift
 
+    # We need to make sure at this point that the workspaces are 1D. We
+    # don't really know how to match the workspaces for the 2D case.
+    if (not su.is_1D_workspace(mtd[frontData]) or not su.is_1D_workspace(mtd[rearData])):
+        sanslog.warning("Request to perform a fit to find the shift and scale values for"
+                        "a non-1D workspace is not possible. Default values are provided.")
+        scale = rAnds.scale
+        shift = rAnds.shift
+        if scale is not None and shift is not None:
+            return scale, shift
+        else:
+            return 1.0, 0.0
+
+    # We need to make suret that the fitting only occurs in the y direction
+    constant_x_shift_and_scale = ', f0.Shift=0.0, f0.XScaling=1.0'
+
+    # Determine the StartQ and EndQ values
+    q_min, q_max = su.get_start_q_and_end_q_values(rear_data_name = rearData, front_data_name = frontData, rescale_shift = rAnds)
+
+    # We need to transfer the errors from the front data to the rear data, as we are using the the front data as a model, but
+    # we want to take into account the errors of both workspaces.
+    front_data_corrected, rear_data_corrected = su.get_error_corrected_front_and_rear_data_sets(frontData, rearData, q_min, q_max)
+
+    #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
-        if rAnds.qRangeUserSelected:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
-                Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
-                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
-        else:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
-                Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
-                Output="__fitRescaleAndShift")
+        Fit(InputWorkspace=rear_data_corrected.name(),
+            Function='name=TabulatedFunction, Workspace="' + front_data_corrected.name() +'"' + ";name=FlatBackground",
+            Ties='f0.Scaling='+str(rAnds.scale)+ constant_x_shift_and_scale,
+            Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     elif rAnds.fitShift==False:
-        if rAnds.qRangeUserSelected:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
-                Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
-                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
-        else:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", 
-                Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
-                Output="__fitRescaleAndShift")
+        Fit(InputWorkspace=rear_data_corrected.name(),
+            Function='name=TabulatedFunction, Workspace="' + str(front_data_corrected.name()) + '"' + ";name=FlatBackground",
+            Ties='f1.A0=' + str(rAnds.shift) + '*f0.Scaling' + constant_x_shift_and_scale,
+            Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
     else:
-        if rAnds.qRangeUserSelected:
-            Fit(InputWorkspace=rearData,
-                Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties=',f0.Shift=0.0',
-                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
-        else:
-            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties=',f0.Shift=0.0', Output="__fitRescaleAndShift")
+        Fit(InputWorkspace=rear_data_corrected.name(),
+            Function='name=TabulatedFunction, Workspace="' + str(front_data_corrected.name()) + '"' + ";name=FlatBackground",
+            Ties = 'f0.Shift=0.0, f0.XScaling=1.0',
+            Output="__fitRescaleAndShift", StartX=q_min, EndX=q_max)
 
     param = mtd['__fitRescaleAndShift_Parameters']
 
-    scale = param.row(0).items()[1][1]
-    chiSquared = param.row(3).items()[1][1]
+    # The outparameters are:
+    # 1. Scaling in y direction
+    # 2. Shift in x direction
+    # 3. Scaling in x direction
+    # 4. Shift in y direction
+    # 5. Chi^2 value
+    row0 = param.row(0).items()
+    row3 = param.row(3).items()
+    row4 = param.row(4).items()
+
+    scale = row0[1][1]
+    # In order to determine the shift, we need to remove the scale factor
+    shift = row3[1][1]/scale
+    chiSquared = row4[1][1]
 
     fitSuccess = True
     if not chiSquared > 0:
@@ -622,11 +639,11 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if fitSuccess == False:
         return rAnds.scale, rAnds.shift
 
-    shift =  param.row(2).items()[1][1] / scale
-
     delete_workspaces('__fitRescaleAndShift_Parameters')
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix')
     delete_workspaces('__fitRescaleAndShift_Workspace')
+    delete_workspaces(rear_data_corrected.name())
+    delete_workspaces(front_data_corrected.name())
 
     return scale, shift
 
@@ -635,7 +652,7 @@ def _WavRangeReduction(name_suffix=None):
         Run a reduction that has been set up, from loading the raw data to calculating Q
     """
     def _setUpPeriod(period):
-        assert(ReductionSingleton().get_sample().loader.move2ws(period))
+        assert ReductionSingleton().get_sample().loader.move2ws(period)
         can = ReductionSingleton().get_can()
         if can and can.loader.periods_in_file > 1:
             can.loader.move2ws(period)
@@ -822,7 +839,8 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     ReductionSingleton().mask.set_phi_limit(phimin, phimax, use_mirror)
 
-def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
+def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
+    # 10/03/15 RKH added 2 more parameters - xtilt & ytilt
     """
         Adjust detector position away from position defined in IDF. On SANS2D the detector
         banks can be moved around. This method allows fine adjustments of detector bank position
@@ -840,10 +858,12 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
         @param rot: shift in degrees
         @param radius: shift in mm
         @param side: shift in mm
+        @param side: xtilt in degrees
+        @param side: ytilt in degrees
     """
     _printMessage("SetDetectorOffsets(" + str(bank) + ', ' + str(x)
                   + ','+str(y) + ',' + str(z) + ',' + str(rot)
-                  + ',' + str(radius) + ',' + str(side) + ')')
+                  + ',' + str(radius) + ',' + str(side) + ',' + str(xtilt)+ ',' + str(ytilt) +')')
 
     detector = ReductionSingleton().instrument.getDetector(bank)
     detector.x_corr = x
@@ -852,6 +872,23 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
     detector.rot_corr = rot
     detector.radius_corr = radius
     detector.side_corr = side
+	# 10/03/15 RKH add 2 more
+    detector.x_tilt = xtilt
+    detector.y_tilt = ytilt
+
+def SetCorrectionFile(bank, filename):
+    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given
+    # detector, this simplify the iterative process used to adjust it. Will still have to keep changing the name of the file
+    # for each iteratiom to avoid Mantid using a cached version, but can then use only a single user (=mask) file for each set of iterations.
+    # Modelled this on SetDetectorOffsets above ...
+    """
+        @param bank: Must be either 'front' or 'rear' (not case sensitive)
+        @param filename: self explanatory
+    """
+    _printMessage("SetCorrectionFile(" + str(bank) + ', ' + filename +')')
+
+    detector = ReductionSingleton().instrument.getDetector(bank)
+    detector.correction_file = filename
 
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
     if reducer == None:
@@ -867,8 +904,8 @@ def LimitsR(rmin, rmax, quiet=False, reducer=None):
 def LimitsWav(lmin, lmax, step, bin_type):
     _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
 
-    if ( bin_type.upper().strip() == 'LINEAR'): bin_type = 'LIN'
-    if ( bin_type.upper().strip() == 'LOGARITHMIC'): bin_type = 'LOG'
+    if  bin_type.upper().strip() == 'LINEAR': bin_type = 'LIN'
+    if  bin_type.upper().strip() == 'LOGARITHMIC': bin_type = 'LOG'
     if bin_type == 'LOG':
         bin_sym = '-'
     else:
@@ -958,10 +995,10 @@ def DisplayMask(mask_worksp=None):
 
             counts_data = '__DisplayMasked_tempory_wksp'
             Integration(InputWorkspace=mask_worksp,OutputWorkspace= counts_data)
-
         else:
-            instrument.load_empty(mask_worksp)
-            instrument.set_up_for_run('emptyInstrument')
+            msg = 'Cannot display the mask without a sample workspace'
+            _printMessage(msg, log = True, no_console=False)
+            return
 
     ReductionSingleton().mask.display(mask_worksp, ReductionSingleton(), counts_data)
     if counts_data:
@@ -1037,7 +1074,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step
-    YSTEP = ReductionSingleton().inst.cen_find_step
+    YSTEP = ReductionSingleton().inst.cen_find_step2
+
+    XSF = ReductionSingleton().inst.beam_centre_scale_factor1
+    YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
@@ -1048,7 +1088,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
-            isis_reduction_steps.BaseBeamFinder(
+            isis_reduction_steps.BaseBeamFinder(\
             float(xstart), float(ystart)),det_bank)
 
     beamcoords = ReductionSingleton().get_beam_center()
@@ -1076,6 +1116,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
     graph_handle = None
+    it = 0
     for i in range(1, MaxIter+1):
         it = i
 
@@ -1093,7 +1134,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
                 if not graph_handle:
                     #once we have a plot it will be updated automatically when the workspaces are updated
                     graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
-                graph_handle.activeLayer().setTitle(
+                graph_handle.activeLayer().setTitle(\
                         centre.status_str(it, resX, resY))
             except :
                 #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
@@ -1122,9 +1163,219 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     ReductionSingleton().set_beam_finder(
         isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
+    centre.logger.notice("Centre coordinates updated: [" + str(XNEW*XSF) + ", " + str(YNEW*YSF) + ']')
 
     return XNEW, YNEW
+
+
+###################### Utility functions ####################################################
+def CreateZeroErrorFreeClonedWorkspace(input_workspace_name, output_workspace_name):
+    """
+        Creates a zero-error-free workspace
+        @param input_workspace_name :  name of the workspace which might contain zero-error values
+        @param output_workspace_name : name of the workspace which will have no zero-error values
+        @return: success message
+    """
+    message, complete = su.create_zero_error_free_workspace(input_workspace_name = input_workspace_name,
+                                                            output_workspace_name = output_workspace_name)
+    if not complete:
+        return message
+    else:
+        return ""
+
+
+def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
+    """
+        Deletes a zero-error-free workspace
+        @param input_workspace_name :  name of the workspace which might contain zero-error values
+        @return: success message
+    """
+    message, complete = su.delete_zero_error_free_workspace(input_workspace_name = input_workspace_name)
+    if not complete:
+        return message
+    else:
+        return ""
+
+
+def IsValidWsForRemovingZeroErrors(input_workspace_name):
+    """
+        We need to check that the workspace has been reduced, ie that it has had the Q1D or Qxy algorithm
+        applied to it.
+        @param input_workspace_name :  name of the input workspace
+        @return: success message
+    """
+    message, valid = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = input_workspace_name)
+    if not valid:
+        return message
+    else:
+        return ""
+
+
+def check_if_event_workspace(file_name):
+    '''
+    Checks if a file is associated with an event workspace. It tests if
+    the workspace can be loaded.
+    @param file_name: The file name to test
+    @returns true if the workspace is an event workspace otherwise false
+    '''
+    result = su.can_load_as_event_workspace(filename = file_name)
+    print result
+    return result
+
+################################################################################
+# Input check functions
+
+# Check the input for time shifts when adding event files
+def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
+    # If there are no entries then proceed.
+    if not time_shifts or time_shifts.isspace():
+        return
+
+    time_shift_container = time_shifts.split(',')
+    message = ''
+
+    # Check if the time shift elements can be cast to float
+    for time_shift_element in time_shift_container:
+        try:
+            float(time_shift_element)
+        except ValueError:
+            message = ('Error: Elements of the time shift list cannot be ' +
+                       'converted to a numeric value, e.g ' + time_shift_element)
+            print message
+            return message
+
+    if number_of_files -1 != len(time_shift_container):
+        message = ('Error: Expected N-1 time shifts for N files, but read ' +
+                  str(len(time_shift_container)) + ' time shifts for ' +
+                  str(number_of_files) + ' files.')
+        print message
+        return message
+
+def ConvertToPythonStringList(to_convert):
+    '''
+    Converts a python string list to a format more suitable for GUI representation
+    @param to_convert:: The string list
+    '''
+    return su.convert_to_string_list(to_convert)
+
+def ConvertFromPythonStringList(to_convert):
+    '''
+    Converts a comma-separated string into a Python string list
+    @param to_convert:: The comm-separated string
+    '''
+    return su.convert_from_string_list(to_convert)
+
+###################### Accessor functions for Transmission
+def GetTransmissionMonitorSpectrum():
+    """
+        Gets the transmission monitor spectrum
+        @return: tranmission monitor spectrum
+    """
+    return ReductionSingleton().transmission_calculator.trans_mon
+
+def SetTransmissionMonitorSpectrum(trans_mon):
+    """
+        Sets the transmission monitor spectrum.
+        @param trans_mon :: The spectrum to set.
+    """
+    if su.is_convertible_to_int(trans_mon):
+        ReductionSingleton().transmission_calculator.trans_mon = int(trans_mon)
+    else:
+        sanslog.warning('Warning: Could not convert the transmission monitor spectrum to int.')
+
+def UnsetTransmissionMonitorSpectrum():
+    """
+        Sets the transmission monitor spectrum to None
+    """
+    ReductionSingleton().transmission_calculator.trans_mon = None
+
+def GetTransmissionMonitorSpectrumShift():
+    """
+        Gets the addditional shift for the transmission monitor spectrum.
+        This currently only exists for SANS2D
+        @return: tranmission monitor spectrum
+    """
+    inst =  ReductionSingleton().get_instrument()
+    if inst.name() != "SANS2D" and inst.name() != "SANS2DTUBES":
+        return
+    return inst.monitor_4_offset
+
+def SetTransmissionMonitorSpectrumShift(trans_mon_shift):
+    """
+        Sets the transmission monitor spectrum shfit.
+        @param trans_mon_shift :: The spectrum shift to set.
+    """
+    if su.is_convertible_to_float(trans_mon_shift):
+        inst =  ReductionSingleton().get_instrument()
+        # Note that we are only setting the transmission monitor spectrum shift
+        # if we are dealing with a SANS2D instrument
+        if inst.name() != 'SANS2D' and inst.name() != 'SANS2DTUBES':
+            return
+        inst.monitor_4_offset = float(trans_mon_shift)
+    else:
+        sanslog.warning('Warning: Could not convert transmission monitor spectrum shift to float.')
+
+def GetTransmissionRadiusInMM():
+    """
+        Gets the radius for usage with beam stop as transmission monitor in mm
+        @return: tranmission radius in mm
+    """
+    radius = ReductionSingleton().transmission_calculator.radius
+    if radius is not None:
+        radius = radius*1000.0
+    return radius
+
+def SetTransmissionRadiusInMM(trans_radius):
+    """
+        Sets the transmission monitor spectrum.
+        @param trans_radius :: The radius to set in mm
+    """
+    if su.is_convertible_to_float(trans_radius):
+        ReductionSingleton().transmission_calculator.radius = float(trans_radius)/1000.0
+    else:
+        sanslog.warning('Warning: Could convert transmission radius to float.')
+
+def GetTransmissionROI():
+    """
+        Gets the list of ROI file names
+        @return: list of roi file names or None
+    """
+    roi_files = ReductionSingleton().transmission_calculator.roi_files
+    if len(roi_files) == 0:
+        return
+    else:
+        return roi_files
+
+def SetTransmissionROI(trans_roi_files):
+    """
+        Sets the transmission monitor region of interest.
+        @param trans_roi_files :: A string list of roi files
+    """
+    if su.is_valid_xml_file_list(trans_roi_files):
+        ReductionSingleton().transmission_calculator.roi_files = trans_roi_files
+    else:
+        sanslog.warning('Warning: The roi file list does not seem to be valid.')
+
+def GetTransmissionMask():
+    """
+        Gets the list of transmission maks file names
+        @return: list of transmission mask file names or None
+    """
+    trans_mask_files = ReductionSingleton().transmission_calculator.mask_files
+    if len(trans_mask_files) == 0:
+        return
+    else:
+        return trans_mask_files
+
+def SetTransmissionMask(trans_mask_files):
+    """
+        Sets the transmission masks.
+        @param trans_mask_files :: A string list of mask files
+    """
+    if su.is_valid_xml_file_list(trans_mask_files):
+        ReductionSingleton().transmission_calculator.mask_files = trans_mask_files
+    else:
+        sanslog.warning('Warning: The mask file list does not seem to be valid.')
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
@@ -1224,7 +1475,7 @@ def ViewCurrentMask():
 
 ###############################################################################
 ########################## End of Deprecated Code #############################
-###############################################################################
+########################################################################g#######
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here
 DefaultTrans = 'True'

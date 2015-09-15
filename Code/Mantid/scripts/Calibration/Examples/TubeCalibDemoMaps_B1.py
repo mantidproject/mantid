@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR MAPS - Execute this
 #
@@ -15,7 +16,8 @@ rangeUpper = 10000 #
 # Set initial parameters for peak finding
 ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
 ExpectedWidth = 8.0 # Expected width of Gaussian peaks in pixels  (initial value of fit parameter)
-ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0] # Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
+ExpectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
+# Expected positions of the edges and Gaussian peaks in pixels (initial values of fit parameters)
 
 # Set what we want to calibrate (e.g whole intrument or one door )
 CalibratedComponent = 'B1_window'  # Calibrate B1 window
@@ -43,7 +45,7 @@ print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 # also put peaks into PeakFile
-calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm,\
     fitPar=fitPar, outputPeak=True)
 print "Got calibration (new positions of detectors) "
 

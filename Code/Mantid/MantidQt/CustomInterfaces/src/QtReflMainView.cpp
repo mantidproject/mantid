@@ -14,12 +14,12 @@ namespace MantidQt
   {
     using namespace Mantid::API;
 
-    DECLARE_SUBWINDOW(QtReflMainView);
+    DECLARE_SUBWINDOW(QtReflMainView)
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_openMap(new QSignalMapper(this))
+    QtReflMainView::QtReflMainView(QWidget *parent) : UserSubWindow(parent), m_openMap(new QSignalMapper(this)), m_calculator(new MantidWidgets::SlitCalculator(this))
     {
     }
 
@@ -295,6 +295,14 @@ namespace MantidQt
     }
 
     /**
+    This slot shows the slit calculator
+    */
+    void QtReflMainView::on_actionSlitCalculator_triggered()
+    {
+      m_calculator->show();
+    }
+
+    /**
     This slot notifies the presenter that the table has been updated/changed by the user
     */
     void QtReflMainView::tableUpdated(const QModelIndex& topLeft, const QModelIndex& bottomRight)
@@ -461,6 +469,15 @@ namespace MantidQt
     void QtReflMainView::setProgress(int progress)
     {
       ui.progressBar->setValue(progress);
+    }
+
+    /**
+     Get status of checkbox which determines whether an ipython notebook is produced
+     @return true if a notebook should be output on process, false otherwise
+     */
+    bool QtReflMainView::getEnableNotebook()
+    {
+      return ui.checkEnableNotebook->isChecked();
     }
 
     /**

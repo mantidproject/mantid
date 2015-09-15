@@ -165,6 +165,8 @@ private:
 
   void showAllLabelControls(bool show = true);
 
+  void setColorMapName();
+
   double aspect_ratio;
 
   QFont titleFont, legendFont, axesFont, numbersFont;
@@ -179,11 +181,12 @@ private:
 
   QPushButton *btnTitle, *btnAxesLabels, *btnAxesNumbers, *btnLegend;
   ColorMapEditor *colorMapEditor;
+  QLabel *mLabelCurrentColormap;
   QPushButton* mSelectColormap;
   QString mCurrentColorMap;
-  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;;
+  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;
   QTreeWidget* listBox;
-  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops;
+  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops, *boxSetCMapAsDefault;
   ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor, *boxCanvasFrameColor;
   QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth, *boxMargin, *boxCanvasFrameWidth;
   QSpinBox *boxRadius;
@@ -236,7 +239,7 @@ private:
   QLabel *boxRangeLabel, *whiskerCntLabel, *boxCntLabel;
   QGroupBox *GroupBoxVectEnd;
   QComboBox *vectPosBox, *boxXAxis, *boxYAxis, *colorScaleBox;//, *boxContourStyle;
-  PenStyleBox	*penContourStyle,*boxContourStyle;;
+  PenStyleBox	*penContourStyle,*boxContourStyle;
   QSpinBox *levelsBox, *colorScaleWidthBox;
   DoubleSpinBox *contourWidthBox;
   QGroupBox *levelsGroupBox, *axisScaleBox, *imageGroupBox;
@@ -298,7 +301,7 @@ public:
   enum {PlotCurveTreeItem = 1002};
   CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QString& s);
 
-  Graph* graph(){return dynamic_cast<LayerItem *>(parent())->graph();};
+  Graph* graph();
   void setActive(bool on);
 
   QwtPlotItem *plotItem() const{ return d_curve; };

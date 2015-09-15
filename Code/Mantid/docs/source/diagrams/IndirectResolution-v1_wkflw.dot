@@ -1,0 +1,46 @@
+digraph IndirectResolution {
+  label="IndirectResolution Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    ScaleFactorIsOne [label="ScaleFactor is 1?"]
+  }
+
+  subgraph params {
+    $param_style
+    InputFiles
+    Instrument
+    Analyser
+    Refelction
+    DetectorRange
+    BackgroundRange
+    RebinParam
+    ScaleFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    ISISIndirectEnergyTransfer
+    Scale
+    CalculateFlatBackground
+    Rebin
+  }
+
+  InputFiles                  -> ISISIndirectEnergyTransfer
+  Instrument                  -> ISISIndirectEnergyTransfer
+  Analyser                    -> ISISIndirectEnergyTransfer
+  Refelction                  -> ISISIndirectEnergyTransfer
+  DetectorRange               -> ISISIndirectEnergyTransfer
+  ISISIndirectEnergyTransfer  -> ScaleFactorIsOne
+  ScaleFactorIsOne            -> Scale [label="No"]
+  ScaleFactor                 -> Scale
+  ScaleFactorIsOne            -> CalculateFlatBackground [label="Yes"]
+  Scale                       -> CalculateFlatBackground
+  ISISIndirectEnergyTransfer  -> CalculateFlatBackground
+  BackgroundRange             -> CalculateFlatBackground
+  CalculateFlatBackground     -> Rebin
+  RebinParam                  -> Rebin
+  Rebin                       -> OutputWorkspace
+}

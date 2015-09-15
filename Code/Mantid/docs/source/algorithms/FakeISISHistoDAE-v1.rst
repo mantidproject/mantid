@@ -81,3 +81,5 @@ Output:
     The workspace contains 100 histograms
 
 .. categories::
+
+.. sourcelink::

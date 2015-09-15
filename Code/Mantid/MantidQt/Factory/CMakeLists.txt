@@ -39,8 +39,19 @@ add_definitions ( -DIN_MANTIDQT_FACTORY )
 # This creates the target library
 add_library ( MantidQtFactory ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( MantidQtFactory PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+endif ()
+
 # ... and links to other required libs
-target_link_libraries ( MantidQtFactory MantidQtAPI MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtFactory LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            MantidQtAPI
+            MantidQtSliceViewer
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Installation settings

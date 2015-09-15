@@ -47,3 +47,5 @@ Output
   True
 
 .. categories::
+
+.. sourcelink::

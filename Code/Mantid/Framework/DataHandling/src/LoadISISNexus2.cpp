@@ -9,7 +9,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/LogParser.h"
+//#include "MantidKernel/LogParser.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -38,7 +38,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;
@@ -51,7 +51,8 @@ LoadISISNexus2::LoadISISNexus2()
       m_monBlockInfo(), m_loadBlockInfo(), m_have_detector(false),
       m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
-      m_monitors(), m_logCreator(), m_progress() {}
+      m_spec_end(NULL), m_monitors(), m_logCreator(), m_progress(),
+      m_cppFile() {}
 
 /**
 * Return the confidence criteria for this algorithm can load the file
@@ -81,8 +82,8 @@ void LoadISISNexus2::init() {
   declareProperty("SpectrumMax", (int64_t)EMPTY_INT(), mustBePositive);
   declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
-                  "The particular entry number to read (default: Load all "
-                  "workspaces and creates a workspace group)");
+                  "0 indicates that every entry is loaded, into a separate workspace within a group. "
+                  "A positive number identifies one entry to be loaded, into one worskspace");
 
   std::vector<std::string> monitorOptions;
   monitorOptions.push_back("Include");
@@ -173,9 +174,12 @@ void LoadISISNexus2::exec() {
           entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
       index.load();
       int64_t ind = *index();
-      m_monitors[ind] = it->nxname;
-
-      ++nmons;
+      // Spectrum index of 0 means no spectrum associated with that monitor,
+      // so only count those with index > 0
+      if (ind > 0){
+        m_monitors[ind] = it->nxname;
+        ++nmons;
+      }
     }
   }
 
@@ -229,9 +233,13 @@ void LoadISISNexus2::exec() {
       m_filename, local_workspace, "raw_data_1", this);
   if (m_load_selected_spectra)
     m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
-  else
+  else if (bseparateMonitors) {
+    m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
+    local_workspace->updateSpectraUsing(m_spec2det_map);
+  } else {
     local_workspace->updateSpectraUsing(
         SpectrumDetectorMapping(spec(), udet(), udet.dim0()));
+  }
 
   if (!foundInstrument) {
     runLoadInstrument(local_workspace);
@@ -256,7 +264,7 @@ void LoadISISNexus2::exec() {
     m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
   }
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-  loadPeriodData(firstentry, entry, local_workspace);
+  loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);
 
   // Clone the workspace at this point to provide a base object for future
   // workspace generation.
@@ -266,23 +274,23 @@ void LoadISISNexus2::exec() {
 
   createPeriodLogs(firstentry, local_workspace);
 
-  if (m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
+  WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
+  if (m_loadBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
 
-    WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
     wksp_group->setTitle(local_workspace->getTitle());
 
     // This forms the name of the group
     const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
     const std::string prop_name = "OutputWorkspace_";
 
-    for (int p = 1; p <= m_detBlockInfo.numberOfPeriods; ++p) {
+    for (int p = 1; p <= m_loadBlockInfo.numberOfPeriods; ++p) {
       std::ostringstream os;
       os << p;
       m_progress->report("Loading period " + os.str());
       if (p > 1) {
         local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create(period_free_workspace));
-        loadPeriodData(p, entry, local_workspace);
+        loadPeriodData(p, entry, local_workspace, m_load_selected_spectra);
         createPeriodLogs(p, local_workspace);
         // Check consistency of logs data for multi-period workspaces and raise
         // warnings where necessary.
@@ -295,62 +303,99 @@ void LoadISISNexus2::exec() {
                   boost::static_pointer_cast<Workspace>(local_workspace));
     }
     // The group is the root property value
-    if (!bseparateMonitors)
-      setProperty("OutputWorkspace",
-                  boost::dynamic_pointer_cast<Workspace>(wksp_group));
+    setProperty("OutputWorkspace",
+                boost::dynamic_pointer_cast<Workspace>(wksp_group));
   } else {
-    if (!bseparateMonitors)
-      setProperty("OutputWorkspace",
-                  boost::dynamic_pointer_cast<Workspace>(local_workspace));
+    setProperty("OutputWorkspace",
+                boost::dynamic_pointer_cast<Workspace>(local_workspace));
   }
 
   //***************************************************************************************************
   // Workspace or group of workspaces without monitors is loaded. Now we are
   // loading monitors separately.
   if (bseparateMonitors) {
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(local_workspace));
-    if (m_detBlockInfo.numberOfPeriods > 1) {
-      g_log.error() << " Separate monitor workspace loading have not been "
-                       "implemented for multiperiod workspaces. Performed "
-                       "separate monitors loading\n";
-    } else {
-      std::string wsName = getProperty("OutputWorkspace");
-      if (m_monBlockInfo.numberOfSpectra == 0) {
-        g_log.information() << " no monitors to load for workspace: " << wsName
-                            << std::endl;
-      } else {
-        x_length = m_monBlockInfo.numberOfChannels + 1;
-        DataObjects::Workspace2D_sptr monitor_workspace =
-            boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                WorkspaceFactory::Instance().create(
-                    local_workspace, m_monBlockInfo.numberOfSpectra, x_length,
-                    m_monBlockInfo.numberOfChannels));
-        local_workspace->setMonitorWorkspace(monitor_workspace);
+    std::string wsName = getPropertyValue("OutputWorkspace");
+    if (m_monBlockInfo.numberOfSpectra > 0) {
+      x_length = m_monBlockInfo.numberOfChannels + 1;
+      // reset the size of the period free workspace to the monitor size
+      period_free_workspace =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+              WorkspaceFactory::Instance().create(
+                  period_free_workspace, m_monBlockInfo.numberOfSpectra,
+                  x_length, m_monBlockInfo.numberOfChannels));
+      auto monitor_workspace =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+              WorkspaceFactory::Instance().create(period_free_workspace));
 
-        m_spectraBlocks.clear();
-        m_specInd2specNum_map.clear();
-        std::vector<int64_t> dummyS1;
-        // at the moment here we clear this map to enable possibility to load
-        // monitors from the spectra block (wiring table bug).
-        // if monitor's spectra present in the detectors block due to this bug
-        // should be read from monitors, this map should be dealt with properly.
-        ExcluedMonitorsSpectra.clear();
-        buildSpectraInd2SpectraNumMap(true, m_monBlockInfo.spectraID_min,
-                                      m_monBlockInfo.spectraID_max, dummyS1,
-                                      ExcluedMonitorsSpectra);
-        // lo
-        prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
+      m_spectraBlocks.clear();
+      m_specInd2specNum_map.clear();
+      std::vector<int64_t> dummyS1;
+      // at the moment here we clear this map to enable possibility to load
+      // monitors from the spectra block (wiring table bug).
+      // if monitor's spectra present in the detectors block due to this bug
+      // should be read from monitors, this map should be dealt with properly.
+      ExcluedMonitorsSpectra.clear();
+      buildSpectraInd2SpectraNumMap(true, m_monBlockInfo.spectraID_min,
+                                    m_monBlockInfo.spectraID_max, dummyS1,
+                                    ExcluedMonitorsSpectra);
+      // lo
+      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
 
-        int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-        loadPeriodData(firstentry, entry, monitor_workspace);
+      int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
+      loadPeriodData(firstentry, entry, monitor_workspace, true);
+      local_workspace->setMonitorWorkspace(monitor_workspace);
 
-        std::string monitorwsName = wsName + "_monitors";
+      ISISRunLogs monLogCreator(monitor_workspace->run(),
+                                m_detBlockInfo.numberOfPeriods);
+      monLogCreator.addPeriodLogs(1, monitor_workspace->mutableRun());
+
+      const std::string monitorPropBase = "MonitorWorkspace";
+      const std::string monitorWsNameBase = wsName + "_monitors";
+      if (m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
+        WorkspaceGroup_sptr monitor_group(new WorkspaceGroup);
+        monitor_group->setTitle(monitor_workspace->getTitle());
+
+        for (int p = 1; p <= m_detBlockInfo.numberOfPeriods; ++p) {
+          std::ostringstream os;
+          os << "_" << p;
+          m_progress->report("Loading period " + os.str());
+          if (p > 1) {
+            monitor_workspace =
+                boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+                    WorkspaceFactory::Instance().create(period_free_workspace));
+            loadPeriodData(p, entry, monitor_workspace,
+                           m_load_selected_spectra);
+            monLogCreator.addPeriodLogs(p, monitor_workspace->mutableRun());
+            // Check consistency of logs data for multi-period workspaces and
+            // raise
+            // warnings where necessary.
+            validateMultiPeriodLogs(monitor_workspace);
+            auto data_ws = boost::static_pointer_cast<API::MatrixWorkspace>(
+                wksp_group->getItem(p - 1));
+            data_ws->setMonitorWorkspace(monitor_workspace);
+          }
+          declareProperty(new WorkspaceProperty<Workspace>(
+              monitorPropBase + os.str(), monitorWsNameBase + os.str(),
+              Direction::Output));
+          monitor_group->addWorkspace(monitor_workspace);
+          setProperty(monitorPropBase + os.str(),
+                      boost::static_pointer_cast<Workspace>(monitor_workspace));
+        }
+        // The group is the root property value
         declareProperty(new WorkspaceProperty<Workspace>(
-            "MonitorWorkspace", monitorwsName, Direction::Output));
-        setProperty("MonitorWorkspace",
+            monitorPropBase, monitorWsNameBase, Direction::Output));
+        setProperty(monitorPropBase,
+                    boost::dynamic_pointer_cast<Workspace>(monitor_group));
+
+      } else {
+        declareProperty(new WorkspaceProperty<Workspace>(
+            monitorPropBase, monitorWsNameBase, Direction::Output));
+        setProperty(monitorPropBase,
                     boost::static_pointer_cast<Workspace>(monitor_workspace));
       }
+    } else {
+      g_log.information() << " no monitors to load for workspace: " << wsName
+                          << std::endl;
     }
   }
 
@@ -688,10 +733,13 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
 * @param entry :: The opened root entry node for accessing the monitor and data
 * nodes
 * @param local_workspace :: The workspace to place the data in
+* @param update_spectra2det_mapping :: reset spectra-detector map to the one
+* calculated earlier. (Warning! -- this map has to be calculated correctly!)
 */
 void
 LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry,
-                               DataObjects::Workspace2D_sptr &local_workspace) {
+                               DataObjects::Workspace2D_sptr &local_workspace,
+                               bool update_spectra2det_mapping) {
   int64_t hist_index = 0;
   int64_t period_index(period - 1);
   // int64_t first_monitor_spectrum = 0;
@@ -708,7 +756,7 @@ LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry,
       MantidVec &E = local_workspace->dataE(hist_index);
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
-      if (m_load_selected_spectra) {
+      if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,
         // static_cast<specid_t>(it->first));
         auto spec = local_workspace->getSpectrum(hist_index);
@@ -1137,7 +1185,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
     }
     if (m_monBlockInfo.spectraID_max - m_monBlockInfo.spectraID_min + 1 !=
         static_cast<int64_t>(nmons)) {
-      g_log.warning() << " non-consequent monitor ID-s in the monitor block. "
+      g_log.warning() << "When trying to find the range of monitor spectra: "
+                         "non-consequent monitor ID-s in the monitor block. "
                          "Unexpected situation for the loader\n";
     }
     // at this stage we assume that the only going to load monitors
@@ -1147,6 +1196,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   if (ndets == 0) {
     separateMonitors = false; // only monitors in the main workspace. No
                               // detectors. Will be loaded in the main workspace
+    // Possible function exit point
     return separateMonitors;
   }
 
@@ -1160,7 +1210,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   m_detBlockInfo.spectraID_max = spectrum_index[ndets - 1];
   if (m_detBlockInfo.spectraID_max - m_detBlockInfo.spectraID_min + 1 !=
       static_cast<int64_t>(m_detBlockInfo.numberOfSpectra)) {
-    g_log.warning() << " non-consequent spectra ID-s in the detectors block. "
+    g_log.warning() << "When trying to find the range of monitor spectra:  "
+                       "non-consequent spectra ID-s in the detectors block. "
                        "Unexpected situation for the loader\n";
   }
 

@@ -16,8 +16,8 @@ Similar algorithms
 ##################
 
 See :ref:`algm-IntegrateEllipsoids` for a ways of integrating peaks from data collected in
-`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_.
-
+`EventWorkspace <http://www.mantidproject.org/EventWorkspace>`_. :ref:`algm-PeakIntensityVsRadius`
+is meant to help determine an appropriate value for `PeakRadius`.
 
 Inputs
 ######
@@ -71,7 +71,7 @@ background signal density in the shell to the volume of the peak:
 
 with the error squared on that value:
 
-:math:`\sigma I_{bg}^2 = \frac{V_{peak}}{V_{shell}} \sigma I_{shell}^2`
+:math:`\sigma I_{bg}^2 = (\frac{V_{peak}}{V_{shell}})^2 \sigma I_{shell}^2`
 
 This is applied to the integrated peak intensity :math:`I_{peak}` to
 give the corrected intensity :math:`I_{corr}`:
@@ -129,7 +129,7 @@ Usage
 
 **Example - IntegratePeaks:**
 
-The code iteslef works but disabled from doc tests as takes too long to complete. User should provide its own 
+The code itself works but disabled from doc tests as takes too long to complete. User should provide its own 
 event nexus file instead of **TOPAZ_3132_event.nxs** used within this example. The original **TOPAZ_3132_event.nxs**
 file is availible in `Mantid system tests repository <https://github.com/mantidproject/systemtests/tree/master/Data/TOPAZ_3132_event.nxs>`_.
 
@@ -195,3 +195,5 @@ file is availible in `Mantid system tests repository <https://github.com/mantidp
    |     3132  |  1218594  |    0.000  |    0.000  |    0.000  |    1.016  |   79.240  | 4740.921  |    0.776  | 2999.159  |   35.467  |  901.000  | bank18    |   34.000  |  152.000  | [4.9551,3.59367,5.30453]  | [7.96049,1.19466,0.899379]  |
 
 .. categories::
+
+.. sourcelink::

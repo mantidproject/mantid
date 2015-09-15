@@ -4,10 +4,9 @@
 #include <qwt_scale_div.h>
 #include <qpainter.h>
 #include <QPen>
-#include <QMouseEvent>
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace MantidQt
 {
@@ -15,16 +14,24 @@ namespace MantidQt
   {
 
     //----------------------------------------------------------------------------------------------
-    /** Constructor
-     */
-    PeakOverlayMultiSphere::PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks , const QColor& peakColour, const QColor& backColour) :
-        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
-    {
-      setAttribute(Qt::WA_NoMousePropagation, false);
-      this->setVisible(true);
-      setUpdatesEnabled(true);
 
-      setAttribute(Qt::WA_TransparentForMouseEvents);
+
+  /**
+     * Constructor
+     * @param presenter : controller
+     * @param plot : plot
+     * @param parent : plot-canvas
+     * @param vecPhysicalPeaks : List of physical peaks to show
+     * @param plotXIndex : plot x-index
+     * @param plotYIndex : plot y-index
+     * @param peakColour : peak colour
+     * @param backColour : background colour
+     */
+    PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks,
+                                                   const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
+        PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent), m_physicalPeaks(vecPhysicalPeaks),
+        m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
+    {
     }
 
     //----------------------------------------------------------------------------------------------
@@ -38,7 +45,7 @@ namespace MantidQt
     {
       m_viewablePeaks = viewablePeaks;
       for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
-      { 
+      {
         if(m_viewablePeaks[i])
         {
           m_physicalPeaks[i]->setSlicePoint(z);
@@ -48,31 +55,8 @@ namespace MantidQt
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Return the recommended size of the widget
-    QSize PeakOverlayMultiSphere::sizeHint() const
-    {
-      //TODO: Is there a smarter way to find the right size?
-      return QSize(20000, 20000);
-      // Always as big as the canvas
-      //return m_plot->canvas()->size();
-    }
-
-    QSize PeakOverlayMultiSphere::size() const
-    {
-      return m_plot->canvas()->size();
-    }
-    int PeakOverlayMultiSphere::height() const
-    {
-      return m_plot->canvas()->height();
-    }
-    int PeakOverlayMultiSphere::width() const
-    {
-      return m_plot->canvas()->width();
-    }
-
-    //----------------------------------------------------------------------------------------------
     /// Paint the overlay
-    void PeakOverlayMultiSphere::paintEvent(QPaintEvent * /*event*/)
+    void PeakOverlayMultiSphere::doPaintPeaks(QPaintEvent * /*event*/)
     {
       for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
@@ -113,6 +97,7 @@ namespace MantidQt
           QPainterPath backgroundRadiusFill = backgroundOuterPath.subtracted(backgroundInnerPath);
           painter.fillPath(backgroundRadiusFill, m_backColour);
         }
+        painter.end();
       }
       }
     }
@@ -180,12 +165,12 @@ namespace MantidQt
 
     double PeakOverlayMultiSphere::getOccupancyInView() const
     {
-      throw std::runtime_error("PeakOverlaySphere::getOccupancyInView() not implemented");
+      return -1.0;
     }
 
     double PeakOverlayMultiSphere::getOccupancyIntoView() const
     {
-      throw std::runtime_error("PeakOverlaySphere::getOccupancyIntoView() not implemented");
+      return -1.0;
     }
 
     bool PeakOverlayMultiSphere::positionOnly() const
@@ -211,6 +196,14 @@ namespace MantidQt
     QColor PeakOverlayMultiSphere::getForegroundColour() const
     {
       return m_peakColour;
+    }
+
+
+    void PeakOverlayMultiSphere::takeSettingsFrom(const PeakOverlayView * const source)
+    {
+        this->changeForegroundColour(source->getForegroundColour());
+        this->changeBackgroundColour(source->getBackgroundColour());
+        this->showBackgroundRadius(source->isBackgroundShown());
     }
 
   } // namespace Mantid

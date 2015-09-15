@@ -63,3 +63,5 @@ sample to detector :math:`t_f = 0` and with the initial fligh path
 :math:`L_i` as the distance from source to monitor.
 
 .. categories::
+
+.. sourcelink::

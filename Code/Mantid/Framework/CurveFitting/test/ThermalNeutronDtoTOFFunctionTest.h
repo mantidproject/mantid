@@ -2,6 +2,7 @@
 #define MANTID_CURVEFITTING_THERMALNEUTRONDTOTOFFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include <iostream>
 #include <math.h>
 #include <fstream>
@@ -75,7 +76,7 @@ public:
     for (double x = -10; x < 10; x+=0.01)
     {
       double a = erfc(x);
-      double da = -2*exp(-x*x)/sqrt(3.14159265);
+      double da = -2*exp(-x*x)/sqrt(M_PI);
       xvec.push_back(x);
       erfcy.push_back(a);
       derfc.push_back(da);

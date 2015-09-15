@@ -3,18 +3,28 @@
 
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidQtSliceViewer/PeakEditMode.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
+
 #include <set>
 #include <QObject>
 
 namespace Mantid
 {
-  namespace API
-  {
+  namespace Kernel{
+    // Forward dec
+    class V3D;
+  }
+
+  namespace Geometry {
+    // Forward dec.
+    class PeakTransform;
+  }
+  namespace API{
     // Forward dec.
     class IPeaksWorkspace;
-    class PeakTransform;
+
   }
 }
 
@@ -63,6 +73,12 @@ namespace SliceViewer
     virtual QColor getForegroundColor() const {throw std::runtime_error("PeaksPresenter getForegroundColour() is not implemented");}
     virtual void zoomToPeak(const int peakIndex) = 0;
     virtual bool isHidden() const = 0;
+    virtual bool contentsDifferent(PeaksPresenter const * other) const = 0;
+    virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
+    virtual void peakEditMode(EditMode mode) = 0;
+    virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
+    virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) =0;
+    virtual bool hasPeakAddMode() const = 0;
     virtual ~PeaksPresenter(){};
   };
 

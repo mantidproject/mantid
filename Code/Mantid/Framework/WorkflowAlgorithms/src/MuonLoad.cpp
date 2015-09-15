@@ -28,10 +28,10 @@ MuonLoad::~MuonLoad() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MuonLoad::name() const { return "MuonLoad"; };
+const std::string MuonLoad::name() const { return "MuonLoad"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MuonLoad::version() const { return 1; };
+int MuonLoad::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MuonLoad::category() const { return "Workflow\\Muon"; }

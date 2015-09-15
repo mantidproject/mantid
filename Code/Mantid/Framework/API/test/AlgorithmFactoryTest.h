@@ -25,7 +25,7 @@ public:
   {
     Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>* newTwo = new Mantid::Kernel::Instantiator<ToyAlgorithmTwo, Algorithm>;
     
-    //get the nubmer of algorithms it already has
+    //get the number of algorithms it already has
     std::vector<std::string> keys = AlgorithmFactory::Instance().getKeys();
     size_t noOfAlgs = keys.size();
 
@@ -34,7 +34,7 @@ public:
 
     TS_ASSERT_THROWS_ANYTHING(AlgorithmFactory::Instance().subscribe<ToyAlgorithm>());
    
-    //get the nubmer of algorithms it has now
+    //get the number of algorithms it has now
     keys = AlgorithmFactory::Instance().getKeys();
     size_t noOfAlgsAfter = keys.size();
     TS_ASSERT_EQUALS(noOfAlgsAfter, noOfAlgs + 2);
@@ -160,7 +160,10 @@ public:
     bool foundAlg = false;
     while (descItr != descriptors.end() && !foundAlg)
     {
-      foundAlg = ("Cat" == descItr->category)&&("ToyAlgorithm" == descItr->name)&&(1 == descItr->version);
+      foundAlg = ("Cat" == descItr->category) &&
+        ("ToyAlgorithm" == descItr->name) &&
+        ("Dog" == descItr->alias) &&
+        (1 == descItr->version);
       descItr++;
     }
     TS_ASSERT(foundAlg);
@@ -170,7 +173,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(descriptors = AlgorithmFactory::Instance().getDescriptors(true));
 
     TS_ASSERT_EQUALS(noOfAlgs - 1, descriptors.size());
-  }
+  }  
 
   void testGetCategories()
   {

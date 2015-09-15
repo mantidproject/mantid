@@ -7,10 +7,10 @@
 #include "DoubleSpinBox.h"
 #include <qwt_scale_widget.h>
 //#include <qwt_plot.h>
-#include "qwt_compat.h"
+#include "MantidQtAPI/qwt_compat.h"
 #include "MyParser.h"
 #include "Plot.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 
 #include <QWidget>
 #include <QSpinBox>
@@ -373,7 +373,7 @@ bool AxisDetails::valid()
     }
   }
   Table *w = m_app->table(m_cmbColName->currentText());
-  return m_initialised && m_app && m_graph && !((m_cmbAxisType->currentIndex() == ScaleDraw::Text || m_cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
+  return m_initialised && m_graph && !((m_cmbAxisType->currentIndex() == ScaleDraw::Text || m_cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
 }
 
 /** Applies the grid paremeters to the graphs

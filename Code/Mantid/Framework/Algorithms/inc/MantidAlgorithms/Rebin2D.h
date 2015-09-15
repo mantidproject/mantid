@@ -60,35 +60,10 @@ public:
   virtual const std::string category() const { return "Transforms\\Rebin"; }
 
 protected:
-  /// Rebin the input quadrilateral to to output grid
-  void rebinToOutput(const Geometry::Quadrilateral &inputQ,
-                     API::MatrixWorkspace_const_sptr inputWS, const size_t i,
-                     const size_t j, API::MatrixWorkspace_sptr outputWS,
-                     const std::vector<double> &verticalAxis);
-  /// Rebin the input quadrilateral to to output grid
-  void rebinToFractionalOutput(const Geometry::Quadrilateral &inputQ,
-                               API::MatrixWorkspace_const_sptr inputWS,
-                               const size_t i, const size_t j,
-                               DataObjects::RebinnedOutput_sptr outputWS,
-                               const std::vector<double> &verticalAxis);
-
-  /// Find the intersect region on the output grid
-  bool getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS,
-                             const std::vector<double> &verticalAxis,
-                             const Geometry::Quadrilateral &inputQ,
-                             size_t &qstart, size_t &qend, size_t &en_start,
-                             size_t &en_end) const;
-  /// Compute sqrt of errors and put back in bin width division if necessary
-  void normaliseOutput(API::MatrixWorkspace_sptr outputWS,
-                       API::MatrixWorkspace_const_sptr inputWS);
-
   /// Progress reporter
   boost::shared_ptr<API::Progress> m_progress;
 
 private:
-  /// Flag for using a RebinnedOutput workspace
-  bool useFractionalArea;
-
   /// Initialise the properties
   void init();
   /// Run the algorithm
@@ -96,7 +71,8 @@ private:
   /// Setup the output workspace
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::MatrixWorkspace_const_sptr parent,
-                        MantidVec &newXBins, MantidVec &newYBins) const;
+                        MantidVec &newXBins, MantidVec &newYBins,
+                        const bool useFractionalArea) const;
 };
 
 } // namespace Algorithms

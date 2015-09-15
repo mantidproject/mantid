@@ -39,10 +39,10 @@ NormaliseByDetector::~NormaliseByDetector() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string NormaliseByDetector::name() const {
   return "NormaliseByDetector";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int NormaliseByDetector::version() const { return 1; };
+int NormaliseByDetector::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string NormaliseByDetector::category() const {
@@ -199,7 +199,7 @@ NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS) {
   }
 
   return denominatorWS;
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.

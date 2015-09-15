@@ -46,8 +46,30 @@
 
 
 <parameter name="centre-finder-step-size">
-<!-- this is the initial step for the beam centre finder in metres -->
+<!-- this is the initial step for the beam centre finder degrees (X value)-->
+<!-- 5mm at 4m = 0.07deg -->
+  <value val="0.07"/>
+</parameter>
+
+<parameter name="beam-centre-scale-factor1">
+<!-- This is a scale factor to allow the beam centre coordinates to be set in meaningful units (X value)-->
+<!-- e.g. mm in the mask file means this should be 1000.0 -->
+<!-- If no value is supplied then a default of 1000.0 is assumed for backward compatibility -->
+<!-- For Larmor X is in degrees so does not need a multiplier -->
+  <value val="1000.0"/>
+</parameter>
+
+<parameter name="centre-finder-step-size2">
+<!-- this is the second initial step for the beam centre finder if using angle and displacement (Y value)-->
   <value val="0.005"/>
+</parameter>
+
+<parameter name="beam-centre-scale-factor2">
+<!-- This is a scale factor to allow the beam centre coordinates to be set in meaningful units (Y value)-->
+<!-- e.g. mm in the mask file means this should be 1000.0 -->
+<!-- If no value is supplied then a default of 1000.0 is assumed for backward compatibility -->
+<!-- For Larmor Y is in mm -->
+  <value val="1000.0"/>
 </parameter>
 
 </component-link>

@@ -1,8 +1,5 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ThreadSafeLogStream.h"
-#include <Poco/Logger.h>
-#include <Poco/Message.h>
-#include <Poco/Mutex.h>
 
 #ifdef _MSC_VER
 // Disable a flood of warnings about inheriting from std streams
@@ -26,6 +23,19 @@ namespace {
 // We only need a single NullStream object
 Poco::NullOutputStream NULL_STREAM;
 }
+
+static const std::string PriorityNames_data[] = {
+    "PRIO_FATAL",
+    "PRIO_CRITICAL",
+    "PRIO_ERROR",
+    "PRIO_WARNING",
+    "PRIO_NOTICE",
+    "PRIO_INFORMATION",
+    "PRIO_DEBUG",
+    "PRIO_TRACE"
+};
+const std::string* Logger::PriorityNames = PriorityNames_data;
+
 
 /** Constructor
  * @param name :: The class name invoking this logger

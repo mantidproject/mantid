@@ -32,7 +32,7 @@
 #include "SymbolBox.h"
 #include "Graph.h"
 #include "PatternBox.h"
-#include "plot2D/ScaleEngine.h"
+#include "MantidQtAPI/ScaleEngine.h"
 #include "Mantid/ErrorBarSettings.h"
 #include <QDateTime>
 #include <QMessageBox>
@@ -280,10 +280,11 @@ void PlotCurve::computeWaterfallOffsets()
 
   if (g->isWaterfallPlot()){
     int index = g->curveIndex(this);
-    int curves = g->curves();//Count();
-    PlotCurve *c = dynamic_cast<PlotCurve*>(g->curve(0));
+    int curves = g->curves();
+    auto firstCurve = g->curve(0);
     // Get the minimum value of the first curve in this plot
-    double ymin = c->minYValue();
+    double ymin = firstCurve ? firstCurve->minYValue() : 0.0;
+    PlotCurve *c = dynamic_cast<PlotCurve*>(g->curve(0));
     if (index > 0 && c){
       d_x_offset = index*g->waterfallXOffset()*0.01*plot->canvas()->width()/(double)(curves - 1);
       d_y_offset = index*g->waterfallYOffset()*0.01*plot->canvas()->height()/(double)(curves - 1);

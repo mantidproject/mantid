@@ -41,7 +41,7 @@ namespace MantidQt
     }
 
     // Declare the dialog. Name must match the class name
-    DECLARE_DIALOG(LoadDialog);
+    DECLARE_DIALOG(LoadDialog)
 
     //--------------------------------------------------------------------------
     // Public methods

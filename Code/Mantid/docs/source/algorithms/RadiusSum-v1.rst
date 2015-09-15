@@ -49,3 +49,5 @@ Workspaces attached to instruments.
    :width:  800 px
 
 .. categories::
+
+.. sourcelink::

@@ -1,13 +1,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
 
-#include <sstream>
 #if !(defined __APPLE__ && defined __INTEL_COMPILER)
-#include <algorithm>
 #else
 #include <boost/range/algorithm_ext/is_sorted.hpp>
 #endif
@@ -39,6 +36,25 @@ template <typename TYPE> TimeSeriesProperty<TYPE>::~TimeSeriesProperty() {}
 template <typename TYPE>
 TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clone() const {
   return new TimeSeriesProperty<TYPE>(*this);
+}
+
+/**
+ * "Virutal copy constructor with a time shift
+ * @param timeShift :: a time shift in seconds
+ */
+template <typename TYPE>
+Property *
+TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
+  auto timeSeriesProperty = this->clone();
+  auto values = timeSeriesProperty->valuesAsVector();
+  auto times = timeSeriesProperty->timesAsVector();
+  // Shift the time
+  for (auto it = times.begin(); it != times.end(); ++it) {
+    (*it) += timeShift;
+  }
+  timeSeriesProperty->clear();
+  timeSeriesProperty->addValues(times, values);
+  return timeSeriesProperty;
 }
 
 /**
@@ -210,7 +226,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
 
   // 2. Determine index for start and remove  Note erase is [...)
   int istart = this->findIndex(start);
-  if (istart >= 0) {
+  if (istart >= 0 && static_cast<size_t>(istart) < m_values.size()) {
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
@@ -232,7 +248,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
       m_values[0].setTime(start);
     }
   } else {
-    // "start time" is before time-series's starting time: do nothing
+    // "start time" is before/after time-series's starting time: do nothing
     ;
   }
 
@@ -350,9 +366,9 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
  *type.
  */
 template <typename TYPE>
-void
-TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
-                                      std::vector<Property *> outputs) const {
+void TimeSeriesProperty<TYPE>::splitByTime(
+    std::vector<SplittingInterval> &splitter,
+    std::vector<Property *> outputs) const {
   // 0. Sort if necessary
   sort();
 
@@ -1488,8 +1504,8 @@ Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
    @param filter :: The filter mask to apply
  */
 template <typename TYPE>
-void
-TimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool> *filter) {
+void TimeSeriesProperty<TYPE>::filterWith(
+    const TimeSeriesProperty<bool> *filter) {
   // 1. Clear the current
   m_filter.clear();
   m_filterQuickRef.clear();
@@ -2026,16 +2042,16 @@ TimeSeriesProperty<TYPE>::setValueFromProperty(const Property &right) {
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------
-INSTANTIATE(int);
-INSTANTIATE(long);
-INSTANTIATE(long long);
-INSTANTIATE(unsigned int);
-INSTANTIATE(unsigned long);
-INSTANTIATE(unsigned long long);
-INSTANTIATE(float);
-INSTANTIATE(double);
-INSTANTIATE(std::string);
-INSTANTIATE(bool);
+INSTANTIATE(int)
+INSTANTIATE(long)
+INSTANTIATE(long long)
+INSTANTIATE(unsigned int)
+INSTANTIATE(unsigned long)
+INSTANTIATE(unsigned long long)
+INSTANTIATE(float)
+INSTANTIATE(double)
+INSTANTIATE(std::string)
+INSTANTIATE(bool)
 
 /// @endcond
 

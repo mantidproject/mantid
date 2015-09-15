@@ -11,6 +11,11 @@ set ( TEST_FILES
 	ScriptRepositoryTestImpl.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRCS_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Add the target for this directory
 add_library ( ScriptRepository ${SRC_FILES} ${INC_FILES} )
@@ -18,7 +23,11 @@ add_library ( ScriptRepository ${SRC_FILES} ${INC_FILES} )
 add_subdirectory ( test )
 # Set the name of the generated library
 set_target_properties ( ScriptRepository PROPERTIES OUTPUT_NAME MantidScriptRepository 
-                        COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO)
+                        COMPILE_DEFINITIONS IN_MANTID_SCRIPTREPO )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( ScriptRepository PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif ()
 
 set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 
@@ -26,6 +35,6 @@ set ( LIBS ${MANTIDLIBS} )
 
 include_directories(inc)
 
-target_link_libraries(ScriptRepository ${LIBS})
+target_link_libraries(ScriptRepository LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${LIBS})
 
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

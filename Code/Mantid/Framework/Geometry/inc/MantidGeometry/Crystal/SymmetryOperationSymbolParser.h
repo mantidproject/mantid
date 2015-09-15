@@ -8,7 +8,8 @@
 namespace Mantid {
 namespace Geometry {
 
-/** SymmetryOperationSymbolParser :
+/**
+  @class SymmetryOperationSymbolParser
 
   This is a parser for symmetry operation symbols in the Jones
   faithful representation. It creates matrix and a vector component

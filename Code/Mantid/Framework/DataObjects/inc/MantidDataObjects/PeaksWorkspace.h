@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <boost/optional.hpp>
 
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
@@ -66,10 +67,6 @@ public:
 
   PeaksWorkspace();
 
-  PeaksWorkspace(const PeaksWorkspace &other);
-
-  PeaksWorkspace *clone() const;
-
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very carefull using it to
@@ -91,7 +88,10 @@ public:
 
   virtual ~PeaksWorkspace();
 
-  boost::shared_ptr<PeaksWorkspace> clone();
+  /// Returns a clone of the workspace
+  std::unique_ptr<PeaksWorkspace> clone() const {
+    return std::unique_ptr<PeaksWorkspace>(doClone());
+  }
 
   void appendFile(std::string filename, Geometry::Instrument_sptr inst);
 
@@ -103,14 +103,18 @@ public:
 
   int getNumberPeaks() const;
   void removePeak(int peakNum);
-  void addPeak(const API::IPeak &ipeak);
+  void addPeak(const Geometry::IPeak &ipeak);
   Peak &getPeak(int peakNum);
   const Peak &getPeak(int peakNum) const;
 
-  API::IPeak *createPeak(Kernel::V3D QFrame,
-                         double detectorDistance = 1.0) const;
+  Geometry::IPeak *createPeak(Kernel::V3D QFrame,
+                         boost::optional<double> detectorDistance =
+                             boost::optional<double>()) const;
   std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D qFrame, bool labCoords) const;
+
+  Peak *createPeakHKL(Kernel::V3D HKL) const;
+
   int peakInfoNumber(Kernel::V3D qFrame, bool labCoords) const;
 
   std::vector<Peak> &getPeaks();
@@ -124,12 +128,11 @@ public:
   API::ITableWorkspace_sptr createDetectorTable() const;
 
   /// Set the special coordinate system.
-  virtual void setCoordinateSystem(
-      const Mantid::API::SpecialCoordinateSystem coordinateSystem);
+  virtual void
+  setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordinateSystem);
 
   /// Get the special coordinate system.
-  virtual Mantid::API::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const;
+  Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -177,15 +180,16 @@ public:
   // Save to Nexus
   void saveNexus(::NeXus::File *file) const;
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  PeaksWorkspace(const PeaksWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  PeaksWorkspace &operator=(const PeaksWorkspace &other);
+
 private:
-  /** Vector of Peak contained within. */
-  std::vector<Peak> peaks;
-
-  /** Column shared pointers. */
-  std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
-
-  /** Column names */
-  std::vector<std::string> columnNames;
+  virtual PeaksWorkspace *doClone() const {
+    return new PeaksWorkspace(*this);
+  }
 
   /// Initialize the table structure
   void initColumns();
@@ -269,6 +273,18 @@ private:
 
   // ====================================== End ITableWorkspace Methods
   // ==================================
+
+  /** Vector of Peak contained within. */
+  std::vector<Peak> peaks;
+
+  /** Column shared pointers. */
+  std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
+
+  /** Column names */
+  std::vector<std::string> columnNames;
+  
+  /// Coordinates
+  Kernel::SpecialCoordinateSystem m_coordSystem;
 
   // adapter for logs() function, which create reference to this class itself
   // and does not allow to delete the shared pointers,

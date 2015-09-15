@@ -1,20 +1,23 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
+#include "MantidQtAPI/PythonThreading.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
-
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include <QPointer>
 #include <QWidget>
 
 class pqColorMapModel;
+class pqDataRepresentation;
 class pqObjectBuilder;
 class pqPipelineSource;
 class pqPipelineRepresentation;
 class pqRenderView;
 class vtkSMDoubleVectorProperty;
+class vtkEventQtSlotConnect;
 
 class QString;
 
@@ -26,6 +29,7 @@ namespace SimpleGui
 {
 
 class ColorSelectionWidget;
+class RebinnedSourcesManager;
 
 /**
  *
@@ -58,12 +62,13 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget
   Q_OBJECT
 public:
   /// Default constructor.
-  ViewBase(QWidget *parent = 0);
+  ViewBase(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
+
   /// Default destructor.
   virtual ~ViewBase() {}
 
   /// Poll the view to set status for mode control buttons.
-  virtual void checkView();
+  virtual void checkView(ModeControlWidget::Views initialView);
   /// Poll the view to set status for mode control buttons on view switch.
   virtual void checkViewOnSwitch();
   /// Close view generated sub-windows.
@@ -72,7 +77,7 @@ public:
   virtual pqRenderView *createRenderView(QWidget *container,
                                          QString viewName=QString(""));
   /// Remove all filters of a given name: i.e. Slice.
-  virtual void destroyFilter(pqObjectBuilder *builder, const QString &name);
+  virtual void destroyFilter(const QString &name);
   /// Destroy sources and view relevant to mode switching.
   virtual void destroyView() = 0;
   /// Retrieve the current time step.
@@ -96,6 +101,8 @@ public:
   virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
+  /// Check if file/workspace is an internally rebinned workspace
+  virtual bool isInternallyRebinnedWorkspace(pqPipelineSource* src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
@@ -111,19 +118,39 @@ public:
   /// Set the current color scale state
   virtual void setColorScaleState(ColorSelectionWidget *cs);
   /// Create source for plugin mode.
-  virtual void setPluginSource(QString pluginName, QString wsName);
+  virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName, bool axesGridOn);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
-
+  /// Set the the background color for the view
+  virtual void setColorForBackground(bool useCurrentColorSettings);
+  /// Sets the splatterplot button to the desired visibility.
+  virtual void setSplatterplot(bool visibility);
+  /// Initializes the settings of the color scale
+  virtual void initializeColorScale();
+  /// Sets the standard veiw button to the desired visibility.
+  virtual void setStandard(bool visibility);
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
-
+  /// Update settings
+  virtual void updateSettings();
+  // Destroy all sources in the view.
+  virtual void destroyAllSourcesInView();
+  // Destroy all sources in a single linear pipeline.
+  virtual void destroySinglePipeline(pqPipelineSource * source);
+   /// Set visibility listener
+  void setVisibilityListener();
+  /// Undo visibiltiy listener
+  void removeVisibilityListener();
+  /// Set axes Grid
+  void setAxesGrid(bool onOff);
+  /// Set color scale lock
+  void setColorScaleLock(Mantid::VATES::ColorScaleLock* colorScaleLock);
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
 
 public slots:
   /// Set the color scale back to the original bounds.
-  void onAutoScale();
+  void onAutoScale(ColorSelectionWidget* colorSelectionWidget);
   /// Set the requested color map on the data.
   void onColorMapChange(const pqColorMapModel *model);
   /// Set the data color scale range to the requested bounds.
@@ -137,13 +164,16 @@ public slots:
   /// Reset center of rotation to given point.
   void onResetCenterToPoint(double x, double y, double z);
   /// Set color scaling for a view.
-  void setColorsForView();
+  void setColorsForView(ColorSelectionWidget *colorScale);
   /// Setup the animation controls.
   void updateAnimationControls();
   /// Provide updates to UI.
   virtual void updateUI();
   /// Provide updates to View
   virtual void updateView();
+  /// React when the visibility of a representation changes
+  virtual void onVisibilityChanged(pqPipelineSource *source, pqDataRepresentation *representation);
+  virtual void onSourceDestroyed();
 
 signals:
   /**
@@ -181,9 +211,41 @@ signals:
   void setViewStatus(ModeControlWidget::Views mode, bool state);
   /**
    * Signal to set the status of the view mode buttons.
-   * @param state whether or not to enable to view mode buttons
+   * @param view The initial view.
+   * @param state Whether or not to enable to view mode buttons.
    */
-  void setViewsStatus(bool state);
+  void setViewsStatus(ModeControlWidget::Views view, bool state);
+  /**
+   * Signal to perform a possible rebin.
+   * @param algorithmType The type of rebinning algorithm.
+   */
+  void rebin(std::string algorithmType);
+   /**
+   * Signal to perform a possible unbin on a sources which has been
+   * rebinned in the VSI.
+   */
+  void unbin();
+  /**
+   * Signal to tell other elements that the log scale was altered programatically
+   * @param state flag wheter or not to enable the
+   */
+  void setLogScale(bool state);
+
+protected:
+  /**
+   * Set the color scale for auto color scaling.
+   */
+  void setAutoColorScale();
+
+  /// Set the Axes Grid
+  void setAxesGrid();
+
+private slots:
+  void setupVTKEventConnections(pqRenderView* view);
+  /// Called when the rendering begins
+  void lockPyGIL();
+  /// Called when the rendering finishes
+  void releasePyGIL();
 
 private:
   Q_DISABLE_COPY(ViewBase)
@@ -198,6 +260,16 @@ private:
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+  BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
+  RebinnedSourcesManager* m_rebinnedSourcesManager;
+  const pqColorMapModel* m_currentColorMapModel;
+
+  QString m_internallyRebinnedWorkspaceIdentifier;
+
+  vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
+  RecursivePythonGIL m_pythonGIL;
+  Mantid::VATES::ColorScaleLock* m_colorScaleLock;
+
 };
 
 }

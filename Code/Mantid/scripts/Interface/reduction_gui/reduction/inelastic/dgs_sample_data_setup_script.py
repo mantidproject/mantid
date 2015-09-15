@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -128,8 +129,8 @@ class SampleSetupScript(BaseScriptElement):
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                   "sample_input_file",
                                                                   default=SampleSetupScript.sample_file)
-            self.live_button = BaseScriptElement.getBoolElement(instrument_dom,
-                                                                  "live_button",
+            self.live_button = BaseScriptElement.getBoolElement(instrument_dom,\
+                                                                  "live_button",\
                                                                   default=SampleSetupScript.live_button)
             self.output_wsname = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "output_wsname",
@@ -176,8 +177,8 @@ class SampleSetupScript(BaseScriptElement):
             self.show_workspaces = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "show_workspaces",
                                                                     default=SampleSetupScript.show_workspaces)
-            self.savedir = BaseScriptElement.getStringElement(instrument_dom,
-                                                                    "savedir",
+            self.savedir = BaseScriptElement.getStringElement(instrument_dom,\
+                                                                    "savedir",\
                                                                     default=SampleSetupScript.savedir)
 
     def reset(self):

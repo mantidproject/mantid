@@ -745,6 +745,20 @@ public:
     AnalysisDataService::Instance().remove(outputws);
  }
 
+  void test_invalid_grouping_patterns_throw()
+  {
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    groupAlg.setRethrows(true);
+    groupAlg.setPropertyValue("InputWorkspace", inputWS);
+    groupAlg.setPropertyValue("OutputWorkspace", outputBase);
+    groupAlg.setPropertyValue("GroupingPattern", "-1, 0");
+    //Check that the GroupingPattern was recognised as invalid
+    TS_ASSERT(!groupAlg.validateInputs()["GroupingPattern"].empty());
+    //And that we're not allowed to run
+    TS_ASSERT_THROWS(groupAlg.execute(), std::runtime_error);
+  }
+
   private:
     const std::string inputWS, outputBase, inputFile;
     enum constants { NHIST = 6, NBINS = 4 };
@@ -753,11 +767,11 @@ public:
     {
       std::ofstream file(inputFile.c_str());
       file << " 2		#file format is in http://www.mantidproject.org/GroupDetectors \n"
-        << "888 "            << std::endl // unused number 2
+        << "1 "            << std::endl // group id
         << "2"              << std::endl // number of spectra
         << "1   3"          << std::endl // the list of spectra
 
-        << "  888"             << std::endl // unused number 2
+        << "  2"             << std::endl // group id
         << std::endl
         << "1"              << std::endl // 1 spectrum
         << "4"; // spectrum 4 is in the group
@@ -767,14 +781,14 @@ public:
     {
       std::ofstream file(inputFile.c_str());
       file << "3		#file format is in http://www.mantidproject.org/GroupDetectors, using ranges \n"
-        << "0 "            << std::endl
+        << "1 "            << std::endl
         << "3"              << std::endl
         << "  1-  3"          << std::endl
-        << "0"             << std::endl
+        << "2"             << std::endl
         << "1"              << std::endl
         << std::endl
         << "  4"              << std::endl
-        << "0"              << std::endl
+        << "3"              << std::endl
         << "2"              << std::endl
         << "5-6";
       file.close();

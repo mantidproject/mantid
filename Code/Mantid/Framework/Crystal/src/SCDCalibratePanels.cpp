@@ -1,34 +1,14 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include <boost/algorithm/string/trim.hpp>
-#include <iostream>
 #include <fstream>
-#include <math.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include "MantidKernel/Property.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
@@ -142,7 +122,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k) {
     for (int j = 0; j < pwks->getNumberPeaks(); ++j) {
-      const API::IPeak &peak = pwks->getPeak((int)j);
+      const Geometry::IPeak &peak = pwks->getPeak((int)j);
       if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) !=
           bankNames.end())
         if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
@@ -998,7 +978,7 @@ void SCDCalibratePanels::exec() {
   int BankNumDef = 200;
   for (size_t q = 0; q < nData; q += 3) {
     int pk = (int)xVals[q];
-    const API::IPeak &peak = peaksWs->getPeak(pk);
+    const Geometry::IPeak &peak = peaksWs->getPeak(pk);
 
     string bankName = peak.getBankName();
     size_t pos = bankName.find_last_not_of("0123456789");
@@ -1669,7 +1649,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
   ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
-          << "\" />" << endl;
+     << "\" /> </parameter>" << endl;
 }
 
 void

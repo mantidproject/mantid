@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 
@@ -174,7 +175,7 @@ public:
   {
     VMD a(1,0,0);
     VMD b(0,1,0);
-    TS_ASSERT_DELTA( a.angle(b), 3.1415926/2, 1e-4);
+    TS_ASSERT_DELTA( a.angle(b), M_PI_2, 1e-4);
   }
 
   void test_toString()

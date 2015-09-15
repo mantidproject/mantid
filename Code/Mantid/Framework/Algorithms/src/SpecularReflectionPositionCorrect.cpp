@@ -70,10 +70,10 @@ SpecularReflectionPositionCorrect::~SpecularReflectionPositionCorrect() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SpecularReflectionPositionCorrect::name() const {
   return "SpecularReflectionPositionCorrect";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SpecularReflectionPositionCorrect::version() const { return 1; };
+int SpecularReflectionPositionCorrect::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SpecularReflectionPositionCorrect::category() const {

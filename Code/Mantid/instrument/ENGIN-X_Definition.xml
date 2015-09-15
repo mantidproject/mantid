@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="ENGIN-X" valid-from   ="1900-01-31 23:59:59"
                            valid-to     ="2100-01-31 23:59:59"
-		           last-modified="2010-10-18 17:49:49">
+		           last-modified="2015-08-13 15:00:00">
 <!-- Instrument description for ENGIN-X, Joe Kelleher 2010 -->
 <defaults>
   <length unit="meter" />
@@ -79,14 +79,17 @@
   </location>
 </component>
 
+<!-- 20150813: Detector modules have been swapped in the vertical axis (old module 5 is now 1,
+     old module 4 is now 2, and vice-versa. It now looks correct. Verified with data from runs
+     205819 and 205820. -->
 <type name="detector-bank">
   <properties />
   <component type="detector-module">
-    <location  x="0" y="0" z="0" rot="-17" axis-x="1" axis-y="0" axis-z="0"/>
-    <location  x="0" y="0" z="0" rot="-8.5" axis-x="1" axis-y="0" axis-z="0"/>
-    <location  x="0" y="0" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
-    <location  x="0" y="0" z="0" rot="8.5" axis-x="1" axis-y="0" axis-z="0"/>
     <location  x="0" y="0" z="0" rot="17" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="8.5" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="0" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="-8.5" axis-x="1" axis-y="0" axis-z="0"/>
+    <location  x="0" y="0" z="0" rot="-17" axis-x="1" axis-y="0" axis-z="0"/>
   </component>
 </type>
 
@@ -170,6 +173,7 @@
    <location x="0" y="0" z="1.0" />
 </component>
 
+<!-- Known issue: pixel mapping is incorrect. Needs fixing. -->
 <type name="transmission-detector-bank">
 <component type="transmission-detector-column">
 <location x="0.01125" y="0" z="0" />

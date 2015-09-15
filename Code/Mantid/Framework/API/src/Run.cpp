@@ -25,9 +25,10 @@ namespace {
 const int ADDABLES = 12;
 /// The names of the log entries summed when adding two runs together
 const std::string ADDABLE[ADDABLES] = {
-    "tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
-    "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
-    "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"};
+  "tot_prtn_chrg",   "rawfrm",          "goodfrm",         "dur",
+  "gd_prtn_chrg",    "uA.hour",         "monitor0_counts", "monitor1_counts",
+  "monitor2_counts", "monitor3_counts", "monitor4_counts", "monitor5_counts"
+};
 /// Name of the goniometer log when saved to a NeXus file
 const char *GONIOMETER_LOG_NAME = "goniometer";
 /// Name of the stored histogram bins log when saved to NeXus
@@ -188,7 +189,8 @@ double Run::integrateProtonCharge() {
   try {
     log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         this->getProperty("proton_charge"));
-  } catch (Exception::NotFoundError &) {
+  }
+  catch (Exception::NotFoundError &) {
     this->setProtonCharge(0);
     return 0;
   }
@@ -270,6 +272,20 @@ Run::histogramBinBoundaries(const double value) const {
   return std::make_pair(m_histoBins[index], m_histoBins[index + 1]);
 }
 
+/**
+ * Returns the energy bin boundaries. Throws a std::runtime_error
+ * if the energy bins have not been set.
+ * @return The bin boundaries vector
+ */
+std::vector<double> Run::getBinBoundaries() const {
+  if (m_histoBins.empty()) {
+    throw std::runtime_error("Run::histogramBoundaries - No energy bins have "
+                             "been stored for this run");
+  }
+
+  return m_histoBins;
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Return the total memory used by the run object, in bytes.
  */
@@ -294,7 +310,8 @@ void Run::setGoniometer(const Geometry::Goniometer &goniometer,
     m_goniometer = goniometer; // copy it in
     if (useLogValues)
       calculateGoniometerMatrix();
-  } catch (std::runtime_error &) {
+  }
+  catch (std::runtime_error &) {
     m_goniometer = old;
     throw;
   }
@@ -333,7 +350,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   }
   if (this->hasProperty("PeakRadius")) {
     const std::vector<double> &values =
-        this->getPropertyValueAsType<std::vector<double>>("PeakRadius");
+        this->getPropertyValueAsType<std::vector<double> >("PeakRadius");
 
     file->makeGroup(PEAK_RADIUS_GROUP, "NXdata", 1);
     file->writeData("value", values);
@@ -342,7 +359,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   if (this->hasProperty("BackgroundInnerRadius")) {
     file->makeGroup(INNER_BKG_RADIUS_GROUP, "NXdata", 1);
     const std::vector<double> &values =
-        this->getPropertyValueAsType<std::vector<double>>(
+        this->getPropertyValueAsType<std::vector<double> >(
             "BackgroundInnerRadius");
     file->writeData("value", values);
     file->closeGroup();
@@ -350,7 +367,7 @@ void Run::saveNexus(::NeXus::File *file, const std::string &group,
   if (this->hasProperty("BackgroundOuterRadius")) {
     file->makeGroup(OUTER_BKG_RADIUS_GROUP, "NXdata", 1);
     const std::vector<double> &values =
-        this->getPropertyValueAsType<std::vector<double>>(
+        this->getPropertyValueAsType<std::vector<double> >(
             "BackgroundOuterRadius");
     file->writeData("value", values);
     file->closeGroup();
@@ -491,7 +508,8 @@ void Run::mergeMergables(Mantid::Kernel::PropertyManager &sum,
       // now get pointers to the same properties on the left-handside
       Property *lhs_prop(sum.getProperty(rhs_name));
       lhs_prop->merge(*it);
-    } catch (Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       // copy any properties that aren't already on the left hand side
       Property *copy = (*it)->clone();
       // And we add a copy of that property to *this

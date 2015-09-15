@@ -12,13 +12,16 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/LoggingCleaner.cpp
   )
 
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( GeometryTest Geometry ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
-  else ()
-    cxxtest_add_test ( GeometryTest ${TEST_FILES} )
-    target_link_libraries( GeometryTest Geometry )
-  endif()
+  cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_link_libraries( GeometryTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            Geometry
+            Kernel
+            ${NEXUS_LIBRARIES}
+            ${GSL_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   
   add_dependencies ( FrameworkTests GeometryTest )
   # Add to the 'FrameworkTests' group in VS

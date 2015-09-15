@@ -10,7 +10,7 @@
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
@@ -80,6 +80,16 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
     AnalysisDataService::Instance().remove(outWSName);
   }
+
+  void test_throws_if_wrong_number_of_nevents()
+  {
+    std::string outWSName = "test_ws";
+    IAlgorithm_sptr alg = make_standard_algorithm(outWSName);
+    alg->setProperty("NumberOfEvents", "1"); //Only one number of events value provided, but NumberOfBins set to 5!
+    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
 
   void test_exec_1D()
   {

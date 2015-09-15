@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Base reduction class. Uses version 2 python API.
 """
@@ -6,10 +7,8 @@ import sys
 import time
 import random
 import string
-import mantid.simpleapi as simpleapi
 from mantid.api import AlgorithmManager, AnalysisDataService
 from mantid.kernel import ConfigService, Logger
-from find_data import find_data
 
 class Reducer(object):
     """

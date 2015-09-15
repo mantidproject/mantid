@@ -2,7 +2,8 @@
 #define QwtRasterDataMD_H_
 
 #include "MantidQtAPI/DllOption.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -36,6 +37,7 @@ public:
   QwtRasterDataMD* copy() const;
 
   virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
+  Mantid::API::IMDWorkspace_const_sptr getWorkspace() const;
 
   void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
 

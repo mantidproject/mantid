@@ -95,7 +95,7 @@ Instrument_const_sptr MWDiag::getInstrument(const QString & name)
   if( !dataStore.doesExist(ws_name) )
   {
     QString pyInput =
-      "from DirectEnergyConversion import setup_reducer\n"
+      "from Direct.DirectEnergyConversion import setup_reducer\n"
       "setup_reducer('%1')";
     pyInput = pyInput.arg(QString::fromStdString(ws_name));
     runPythonCode(pyInput);
@@ -396,7 +396,7 @@ QString MWDiag::createDiagnosticScript() const
   QString bleed_pixels = m_designWidg.ignored_pixels->text();
 
   QString diagCall =
-    "from DirectEnergyConversion import setup_reducer\n"
+    "from Direct.DirectEnergyConversion import setup_reducer\n"
     "from mantid import config\n"
     "reducer = setup_reducer(config['default.instrument'])\n"
     "reducer.prop_man.log_to_mantid = True\n"

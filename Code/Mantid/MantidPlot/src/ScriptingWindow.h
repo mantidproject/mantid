@@ -21,19 +21,18 @@ class QCloseEvent;
 class QShowEvent;
 class QHideEvent;
 
-
-/** @class ScriptingWindow    
+/** @class ScriptingWindow
     This class displays a seperate window for editing and executing scripts
 */
-class ScriptingWindow : public QMainWindow
-{
-  ///Qt macro
+class ScriptingWindow : public QMainWindow {
+  /// Qt macro
   Q_OBJECT
 
 public:
-  ///Constructor
-  ScriptingWindow(ScriptingEnv *env,bool capturePrint = true,QWidget *parent = 0, Qt::WindowFlags flags = 0);
-  ///Destructor
+  /// Constructor
+  ScriptingWindow(ScriptingEnv *env, bool capturePrint = true,
+                  QWidget *parent = 0, Qt::WindowFlags flags = 0);
+  /// Destructor
   ~ScriptingWindow();
   /// Override the closeEvent
   void closeEvent(QCloseEvent *event);
@@ -41,20 +40,23 @@ public:
   void showEvent(QShowEvent *event);
   /// Is a script running?
   bool isExecuting() const;
-  ///Save the current state of the script window for next time
+  /// Save the current state of the script window for next time
   void saveSettings();
   /// Read settings from store
   void readSettings();
   /// Open a script in a new tab. Primarily useful for automatically
   /// opening a script
-  void open(const QString & filename, bool newtab = true);
-  /// Executes whatever is in the current tab. Primarily useful for automatically
+  void open(const QString &filename, bool newtab = true);
+  /// Executes whatever is in the current tab. Primarily useful for
+  /// automatically
   /// running a script loaded with open
   void executeCurrentTab(const Script::ExecutionMode mode);
-  ///saves scripts file names to a string 
+  /// saves scripts file names to a string
   QString saveToString();
-  ///Set whether to accept/reject close events
+  /// Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
+  /// Opens a script providing a copy is not already open
+  void openUnique(const QString &);
 
 signals:
   /// Show the scripting language dialog
@@ -65,9 +67,11 @@ signals:
   void hideMe();
 
 protected:
-  void dropEvent(QDropEvent *de);
-  void dragMoveEvent(QDragMoveEvent *de);
+  /// Accept a custom defined event
+  void customEvent(QEvent *event);
   void dragEnterEvent(QDragEnterEvent *de);
+  void dragMoveEvent(QDragMoveEvent *de);
+  void dropEvent(QDropEvent *de);
 
 private slots:
   /// Populate file menu
@@ -80,26 +84,37 @@ private slots:
   void populateExecMenu();
   /// Populate window menu
   void populateWindowMenu();
+  /// Populate help menu
+  void populateHelpMenu();
 
   /// Update window flags
   void updateWindowFlags();
   /// Update menus based on current tab counts
   void setMenuStates(int nTabs);
   /// Sets the execution actions based on the flag
-  void setEditActionsDisabled(bool state);
+  void setEditActionsDisabled(bool off);
   /// Sets the execution actions based on the flag
-  void setExecutionActionsDisabled(bool state);
+  void setExecutionActionsDisabled(bool off);
+  /// Sets the abort actions based on the flag or the environment
+  void setAbortActionsDisabled(bool off);
 
   /// Finds the script corresponding to the action and
   /// asks the manager to open it
-  void openRecentScript(QAction*);
+  void openRecentScript(QAction *);
 
   /// Execute all using the current mode option
   void executeAll();
-  ///Execute selection using the current mode option
+  /// Execute selection using the current mode option
   void executeSelection();
+  /// Abort the current script
+  void abortCurrent();
   /// Clear out any previous variable definitions in the current script
   void clearScriptVariables();
+
+  /// Opens help page for scripting window
+  void showHelp();
+  /// Opens help page for Python API
+  void showPythonHelp();
 
 private:
   /// Create menu bar
@@ -115,15 +130,18 @@ private:
   void initExecMenuActions();
   /// Create the window menu actions
   void initWindowMenuActions();
+  /// Create the help menu actions
+  void initHelpMenuActions();
 
+  /// Should we enable abort functionality
+  bool shouldEnableAbort() const;
+  /// Opens tabs based on QStringList
+  void openPreviousTabs(const QStringList &tabsToOpen);
   /// Returns the current execution mode
   Script::ExecutionMode getExecutionMode() const;
 
-  /// Accept a custom defined event
-  void customEvent(QEvent * event);
-
   /// Extract py files from urllist
-  QStringList extractPyFiles(const QList<QUrl>& urlList) const;
+  QStringList extractPyFiles(const QList<QUrl> &urlList) const;
 
 private:
   /// The script editors' manager
@@ -132,18 +150,18 @@ private:
   /// File menu
   QMenu *m_fileMenu;
   /// File menu actions
-  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, 
-    *m_save, *m_saveAs, *m_print, *m_closeTab;
+  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, *m_save, *m_saveAs,
+      *m_print, *m_closeTab;
   QMenu *m_recentScripts;
   /// Edit menu
   QMenu *m_editMenu;
   /// Edit menu actions
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment, 
-    *m_tabsToSpaces, *m_spacesToTabs, *m_find;
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment,
+      *m_tabsToSpaces, *m_spacesToTabs, *m_find;
   /// Run menu
   QMenu *m_runMenu;
   /// Execute menu actions
-  QAction *m_execSelect, *m_execAll, *m_clearScriptVars;
+  QAction *m_execSelect, *m_execAll, *m_abortCurrent, *m_clearScriptVars;
   /// Execution mode menu
   QMenu *m_execModeMenu;
   /// Execute mode actions
@@ -154,13 +172,16 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-    *m_toggleProgress, *m_toggleFolding, *m_toggleWhitespace, 
-    *m_openConfigTabs, *m_selectFont;
+      *m_toggleProgress, *m_toggleFolding, *m_toggleWhitespace,
+      *m_openConfigTabs, *m_selectFont;
+  /// Help menu
+  QMenu *m_helpMenu;
+  /// Help actions
+  QAction *m_showHelp, *m_showPythonHelp;
   /// Change scripting language
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event
   bool m_acceptClose;
-
 };
 
-#endif //SCRIPTINGWINDOW_H_
+#endif // SCRIPTINGWINDOW_H_

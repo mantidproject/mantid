@@ -2,12 +2,16 @@
 #define VTK_SPLATTERPLOT_FACTORY_TEST
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
+#include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/FieldDataToMetadata.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -18,7 +22,7 @@
 using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 //=====================================================================================
@@ -45,20 +49,72 @@ public:
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
   }
 
-  void testInitializeWithWrongWorkspaceTypeThrows()
+  /*Demonstrative tests*/
+  void test_3DHistoWorkspace()
   {
-    IMDWorkspace* ws = new MockIMDWorkspace;
+    FakeProgressAction progressUpdate;
+
+    // Create workspace with 5x5x5 binning 
+    size_t binning = 5;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, binning);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    TSM_ASSERT_THROWS("This is an invalid workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+
+    // Expecting 5x5x5 points; Signal equal for each box => 1/(10^3/5^3)
+    const size_t expected_n_points = binning*binning*binning;
+    const size_t expected_n_cells = binning*binning*binning;
+    const size_t expected_n_signals = expected_n_cells;
+    const double expected_signal_value = 1.0/((10.0*10.0*10.0)/(5.0*5.0*5.0));
+
+    double* range = product->GetScalarRange();
+
+    TSM_ASSERT_EQUALS("Should have one point per bin.", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Should have one cells per bin", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Should have signal flag", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Should have one signal per bin", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("Should have a signal which is normalized to the 3D volume", expected_signal_value, range[0]);
+
+    product->Delete();
   }
 
-  /*Demonstrative tests*/
+  void test_4DHistoWorkspace()
+  {
+    FakeProgressAction progressUpdate;
+
+    // Create workspace with  5x5x5x5 binning, signal is 1 and extent for each dimension is 10
+    size_t binning = 5;
+    IMDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 4, binning);
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+
+    // Expecting 5x5x5 points; Signal equal for each box => 1/(10^4/5^4)
+    const size_t expected_n_points = binning*binning*binning;
+    const size_t expected_n_cells = binning*binning*binning;
+    const size_t expected_n_signals = expected_n_cells;
+    const double expected_signal_value = 1.0/((10.0*10.0*10.0*10.0)/(5.0*5.0*5.0*5.0));
+
+    double* range = product->GetScalarRange();
+
+    TSM_ASSERT_EQUALS("Should have one point per bin.", expected_n_points, product->GetNumberOfPoints());
+    TSM_ASSERT_EQUALS("Should have one cells per bin", expected_n_cells, product->GetNumberOfCells());
+    TSM_ASSERT_EQUALS("Should have signal flag", "signal", std::string(product->GetCellData()->GetArray(0)->GetName()));
+    TSM_ASSERT_EQUALS("Should have one signal per bin", expected_n_signals, product->GetCellData()->GetArray(0)->GetSize());
+    TSM_ASSERT_EQUALS("Should have a signal which is normalized to the 4D volume", expected_signal_value, range[0]);
+
+    product->Delete();
+  }
 
   void test_3DWorkspace()
   {
     FakeProgressAction progressUpdate;
 
-    Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -89,7 +145,7 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
+    MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -109,6 +165,45 @@ public:
     product->Delete();
   }
 
+  void test_MetadataIsAddedCorrectly() 
+  {
+    // Arrange 
+    vtkFieldData* fakeInputFieldDataWithXML = vtkFieldData::New();
+    std::string xmlString = "myXmlString";
+    MetadataToFieldData converterMtoF;
+    converterMtoF(fakeInputFieldDataWithXML, xmlString, XMLDefinitions::metaDataId().c_str());
+
+
+    FakeProgressAction progressUpdate;
+    MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    factory.initialize(ws);
+    vtkDataSet* product = NULL;
+
+    // Act
+    TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
+    TS_ASSERT_THROWS_NOTHING(factory.setMetadata(fakeInputFieldDataWithXML, product));
+
+    // Assert
+    FieldDataToMetadata converterFtoM;
+    vtkFieldData* fd = product->GetFieldData();
+    std::string xmlOut; 
+    std::string jsonOut;
+    VatesConfigurations vatesConfigurations;
+
+    TSM_ASSERT_EQUALS("One array expected on field data, one for XML and one for JSON!", 2, product->GetFieldData()->GetNumberOfArrays());
+
+    TSM_ASSERT_THROWS_NOTHING("There is XML metadata!", xmlOut = converterFtoM(fd, XMLDefinitions::metaDataId().c_str()));
+    TSM_ASSERT_THROWS_NOTHING("There is JSON metadata!", jsonOut = converterFtoM(fd, vatesConfigurations.getMetadataIdJson().c_str()));
+
+    TSM_ASSERT("The xml string should be retrieved", xmlOut == xmlString);
+
+    MetadataJsonManager manager;
+    manager.readInSerializedJson(jsonOut);
+    TSM_ASSERT("The instrument should be empty", manager.getInstrument().empty());
+    TSM_ASSERT_EQUALS("The max value is 1", 1.0, manager.getMaxValue());
+    TSM_ASSERT_EQUALS("The min value is 1", 1.0, manager.getMinValue());
+  }
 };
 
 #endif

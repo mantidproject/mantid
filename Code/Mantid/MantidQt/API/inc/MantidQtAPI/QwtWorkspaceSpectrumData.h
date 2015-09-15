@@ -1,7 +1,8 @@
 #ifndef MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 #define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "DllOption.h"
 
@@ -106,8 +107,12 @@ private:
   bool m_binCentres;
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
+  /// lowest y value
+  double m_minY;
   /// lowest positive y value
-  mutable double m_minPositive;
+  double m_minPositive;
+  /// higest y value
+  double m_maxY;
   /// Is plotting as distribution
   bool m_isDistribution;
 

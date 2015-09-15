@@ -1,5 +1,4 @@
-import mantidplot
-import mantid
+#pylint: disable=invalid-name
 import os
 from mantid.simpleapi import *
 
@@ -55,7 +54,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     ws_base = "__%s" % basename
 
     ws_output_base = ''
-    if (instrument == 'REFL'):
+    if instrument == 'REFL':
         if isPeak:
             type = 'Peak'
         else:
@@ -104,7 +103,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             else:
                 geo_base_file_x = "REFL_Detector_Grouping_Sum_X.xml"
                 geo_base_file_y = "REFL_Detector_Grouping_Sum_Y.xml"
-                
+
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              geo_base_file_x)
@@ -138,12 +137,12 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_X.xml")
-                output_2d = GroupDetectors(InputWorkspace=output_2d,
+                output_2d = GroupDetectors(InputWorkspace=output_2d,\
                                MapFile=grouping_file)
             else:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_Y.xml")
-                output_2d = GroupDetectors(InputWorkspace=output_2d,
+                output_2d = GroupDetectors(InputWorkspace=output_2d,\
                                MapFile=grouping_file)
 
     if instrument=="REFM":

@@ -9,14 +9,12 @@
 Description
 -----------
 
-Loads the mapping table between spectra and `IDetector <http://www.mantidproject.org/IDetector>`__
-from a RAW file. It fills the
-`SpectraToDetectorMap <http://www.mantidproject.org/SpectraToDetectorMap>`__ object contained in a
-:ref:`workspace <workspace>`. This algorithm will fail if the
-:ref:`workspace <workspace>` does not already point to a full
-:ref:`instrument <instrument>` :ref:`geometry <geometry>` (which usually means
-it must be run after
-:ref:`algm-LoadInstrument`/:ref:`algm-LoadInstrumentFromRaw`).
+Loads the mapping table between spectra and detectors from a RAW file. It fills
+the spectra to detector map object contained in a :ref:`workspace <workspace>`.
+This algorithm will fail if the :ref:`workspace <workspace>` does not already
+point to a full :ref:`instrument <instrument>` :ref:`geometry <geometry>` (which
+usually means it must be run after :ref:`algm-LoadInstrument` or
+:ref:`algm-LoadInstrumentFromRaw`).
 
 The association is one to many, i.e. a spectrum can have one or many
 detectors contributing to it. Alternatively the same spectrum can
@@ -37,3 +35,5 @@ Usage
   LoadMappingTable('HRP39180.RAW',ws)
 
 .. categories::
+
+.. sourcelink::

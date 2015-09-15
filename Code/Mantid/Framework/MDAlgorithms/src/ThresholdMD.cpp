@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/ThresholdMD.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -10,7 +10,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -34,10 +34,10 @@ ThresholdMD::~ThresholdMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ThresholdMD::name() const { return "ThresholdMD"; };
+const std::string ThresholdMD::name() const { return "ThresholdMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ThresholdMD::version() const { return 1; };
+int ThresholdMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ThresholdMD::category() const { return "MDAlgorithms"; }

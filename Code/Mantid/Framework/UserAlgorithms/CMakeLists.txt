@@ -16,6 +16,12 @@ set ( INC_FILES HelloWorldAlgorithm.h
                 WorkspaceAlgorithm.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(UserAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -27,4 +33,4 @@ add_library ( UserAlgorithms EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 # Add to the 'Framework' group in VS
 set_property ( TARGET UserAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( UserAlgorithms ${MANTIDLIBS} )
+target_link_libraries ( UserAlgorithms LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} )

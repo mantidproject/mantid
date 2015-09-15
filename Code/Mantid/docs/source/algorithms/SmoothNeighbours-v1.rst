@@ -35,7 +35,7 @@ For Instruments With Rectangular Detectors
 ##########################################
 
 The algorithm looks through the `Instrument <http://mantidproject.org/Instrument>`__ to find all
-the `RectangularDetectors <http://mantidproject.org/RectangularDetector>`__ defined. For each
+the :ref:`RectangularDetectors <RectangularDetector>` defined. For each
 pixel in each detector, the AdjX\*AdjY neighboring spectra are summed
 together and saved in the output workspace.
 
@@ -309,3 +309,5 @@ Output:
     [ 8.]]
 
 .. categories::
+
+.. sourcelink::

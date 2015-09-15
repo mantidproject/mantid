@@ -48,7 +48,9 @@ struct Sqrt
 double InstrumentActor::m_tolerance = 0.00001;
 
 /**
- * Constructor
+ * Constructor. Creates a tree of GLActors. Each actor is responsible for displaying insrument components in 3D.
+ * Some of the components have "pick ID" assigned to them. Pick IDs can be uniquely converted to a RGB colour value
+ * which in turn can be used for picking the component from the screen.
  * @param wsName :: Workspace name
  * @param autoscaling :: True to start with autoscaling option on. If on the min and max of
  *   the colormap scale are defined by the min and max of the data.
@@ -59,6 +61,7 @@ InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double
 m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())),
 m_ragged(true),
 m_autoscaling(autoscaling),
+m_defaultPos(),
 m_maskedColor(100,100,100),
 m_failedColor(200,200,200)
 {
@@ -93,6 +96,7 @@ m_failedColor(200,200,200)
 
   // this adds actors for all instrument components to the scene and fills in m_detIDs
   m_scene.addActor(new CompAssemblyActor(*this,instrument->getComponentID()));
+  setupPickColors();
 
   if ( !m_showGuides )
   {
@@ -234,6 +238,30 @@ MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const
     return m_maskWorkspace;
 }
 
+/** set the mask workspace
+*/
+void InstrumentActor::setMaskMatrixWorkspace(MatrixWorkspace_sptr wsMask) const
+{
+    m_maskWorkspace = wsMask;
+}
+
+void InstrumentActor::invertMaskWorkspace() const
+{
+  Mantid::API::MatrixWorkspace_sptr outputWS;
+  
+  const std::string maskName = "__InstrumentActor_MaskWorkspace_invert";
+  Mantid::API::AnalysisDataService::Instance().addOrReplace(maskName, getMaskMatrixWorkspace());
+  Mantid::API::IAlgorithm * invertAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm("BinaryOperateMasks",-1);
+  invertAlg->setChild(true);
+  invertAlg->setPropertyValue("InputWorkspace1", maskName);
+  invertAlg->setPropertyValue("OutputWorkspace", maskName);
+  invertAlg->setPropertyValue("OperationType", "NOT");
+  invertAlg->execute();
+
+  m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
+  Mantid::API::AnalysisDataService::Instance().remove( maskName );
+}
+
 /**
   * Returns the mask workspace relating to this instrument view as a IMaskWorkspace.
   * Guarantees to return a valid pointer
@@ -338,12 +366,35 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
     // Call the local getInstrument, NOT the one on the workspace
     return this->getInstrument()->getDetector(m_detIDs.at(i));
   }
-  catch(...)
-  {
-    return IDetector_const_sptr();
-  }
-  // Add line that can never be reached to quiet compiler complaints
+  catch(...) { };
   return IDetector_const_sptr();
+}
+
+Mantid::detid_t InstrumentActor::getDetID(size_t pickID)const
+{
+  if ( pickID < m_detIDs.size() )
+  {
+    return m_detIDs[pickID];
+  }
+  return -1;
+}
+
+/**
+ * Get a component id of a picked component.
+ */
+Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) const
+{
+  size_t ndet = m_detIDs.size();
+  if ( pickID < ndet )
+  {
+    auto det = getDetector( m_detIDs[pickID] );
+    return det->getComponentID();
+  }
+  else if (pickID < ndet + m_nonDetIDs.size())
+  {
+    return m_nonDetIDs[pickID - ndet];
+  }
+  return Mantid::Geometry::ComponentID();
 }
 
 /** Retrieve the workspace index corresponding to a particular detector
@@ -632,8 +683,10 @@ void InstrumentActor::resetColors()
   }
   if (m_scene.getNumberOfActors() > 0)
   {
-    dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))->setColors();
-    invalidateDisplayLists();
+    if (auto actor = dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))) {
+      actor->setColors();
+      invalidateDisplayLists();
+    }
   }
   emit colorMapChanged();
 }
@@ -691,12 +744,38 @@ void InstrumentActor::loadColorMap(const QString& fname,bool reset_colors)
  * @param id :: detector ID to add.
  * @return pick ID of the added detector
  */
-size_t InstrumentActor::push_back_detid(Mantid::detid_t id)const
+size_t InstrumentActor::pushBackDetid(Mantid::detid_t id)const
 {
   m_detIDs.push_back(id);
   return m_detIDs.size() - 1;
 }
 
+//------------------------------------------------------------------------------
+/** Add a non-detector component ID to the pick list (m_nonDetIDs)
+ *
+ * @param actor :: ObjComponentActor for the component added.
+ * @param compID :: component ID to add.
+ */
+void InstrumentActor::pushBackNonDetid(ObjComponentActor* actor, Mantid::Geometry::ComponentID compID)const
+{
+  m_nonDetActorsTemp.push_back(actor);
+  m_nonDetIDs.push_back(compID);
+}
+
+//------------------------------------------------------------------------------
+/**
+ * Set pick colors to non-detectors strored by calls to pushBackNonDetid().
+ */
+void InstrumentActor::setupPickColors()
+{
+  assert( m_nonDetActorsTemp.size() == m_nonDetIDs.size() );
+  auto nDets = m_detIDs.size();
+  for(size_t i = 0; i < m_nonDetActorsTemp.size(); ++i)
+  {
+    m_nonDetActorsTemp[i]->setPickColor( makePickColor(nDets + i) );
+  }
+  m_nonDetActorsTemp.clear();
+}
 
 //------------------------------------------------------------------------------
 /** If needed, cache the detector positions for all detectors.
@@ -725,7 +804,11 @@ void InstrumentActor::cacheDetPos() const
  */
 const Mantid::Kernel::V3D & InstrumentActor::getDetPos(size_t pickID)const
 {
-  return m_detPos.at(pickID);
+  if ( pickID < m_detPos.size() )
+  {
+    return m_detPos.at(pickID);
+  }
+  return m_defaultPos;
 }
 
 /**
@@ -734,6 +817,12 @@ const Mantid::Kernel::V3D & InstrumentActor::getDetPos(size_t pickID)const
 void InstrumentActor::changeScaleType(int type)
 {
   m_colorMap.changeScaleType(static_cast<GraphOptions::ScaleType>(type));
+  resetColors();
+}
+
+void InstrumentActor::changeNthPower(double nth_power)
+{
+  m_colorMap.setNthPower(nth_power);
   resetColors();
 }
 
@@ -806,6 +895,23 @@ void InstrumentActor::setAutoscaling(bool on)
 }
 
 /**
+ * Extracts the current applied mask to the main workspace
+ * @returns the current applied mask to the main workspace
+ */
+Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const
+{
+  const std::string maskName = "__InstrumentActor_MaskWorkspace";
+  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
+  alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
+  alg->setPropertyValue( "OutputWorkspace", maskName );
+  alg->execute();
+
+  Mantid::API::MatrixWorkspace_sptr maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
+  Mantid::API::AnalysisDataService::Instance().remove( maskName );
+  return maskWorkspace;
+}
+
+/**
  * Initialize the helper mask workspace with the mask from the data workspace.
  */
 void InstrumentActor::initMaskHelper() const
@@ -814,19 +920,12 @@ void InstrumentActor::initMaskHelper() const
   try
   {
     // extract the mask (if any) from the data to the mask workspace
-    const std::string maskName = "__InstrumentActor_MaskWorkspace";
-    Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
-    alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
-    alg->setPropertyValue( "OutputWorkspace", maskName );
-    alg->execute();
-
-    m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
-    Mantid::API::AnalysisDataService::Instance().remove( maskName );
+    m_maskWorkspace = extractCurrentMask();
   }
   catch( ... )
   {
     // don't know what to do here yet ...
-    QMessageBox::warning(NULL,"MantidPlot - Warning","An error accured when extracting the mask.","OK");
+    QMessageBox::warning(NULL,"MantidPlot - Warning","An error occurred when extracting the mask.","OK");
   }
 }
 

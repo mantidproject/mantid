@@ -9,6 +9,7 @@
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkBox.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -19,7 +20,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
-vtkStandardNewMacro(vtkMDHWNexusReader);
+vtkStandardNewMacro(vtkMDHWNexusReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;
@@ -28,7 +29,8 @@ vtkMDHWNexusReader::vtkMDHWNexusReader() :
   m_presenter(NULL),
   m_loadInMemory(false),
   m_depth(1),
-  m_time(0)
+  m_time(0),
+  m_normalizationOption(AutoSelect)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -99,6 +101,16 @@ const char* vtkMDHWNexusReader::GetInputGeometryXML()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
+void vtkMDHWNexusReader::SetNormalization(int option)
+{
+  m_normalizationOption = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
 
@@ -120,26 +132,16 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
-  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
-  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
+  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
+  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
   factory->SetSuccessor(successor);
 
   vtkDataSet* product = m_presenter->execute(factory, loadingProgressAction, drawingProgressAction);
   
-  //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
-  vtkBox* box = vtkBox::New();
-  box->SetBounds(product->GetBounds());
-  vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
-  clipper->SetInputData(0, product);
-  clipper->SetClipFunction(box);
-  clipper->SetInsideOut(true);
-  clipper->Update();
-  vtkDataSet* clipperOutput = clipper->GetOutput();
-   //--------------------------------------------------------
+  vtkDataSet* output = vtkDataSet::GetData(outInfo);
+  output->ShallowCopy(product);
+  product->Delete();
 
-  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
-  output->ShallowCopy(clipperOutput);
   try
   {
     m_presenter->makeNonOrthogonal(output);
@@ -152,8 +154,6 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   }
   m_presenter->setAxisLabels(output);
 
-  clipper->Delete();
-  
   return 1;
 }
 
@@ -165,8 +165,28 @@ int vtkMDHWNexusReader::RequestInformation(
   if(m_presenter == NULL)
   {
     m_presenter = new MDHWNexusLoadingPresenter(new MDLoadingViewAdapter<vtkMDHWNexusReader>(this), FileName);
-    m_presenter->executeLoadMetadata();
-    setTimeRange(outputVector);
+  }
+
+  if (m_presenter == NULL)
+  {
+    // updater information has been called prematurely. We will reexecute once all attributes are setup.
+    return 1;
+  }
+  if(!m_presenter->canReadFile())
+  {
+    vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
+    return 0;
+  }
+  
+  m_presenter->executeLoadMetadata();
+  setTimeRange(outputVector);
+  MDHWNexusLoadingPresenter *castPresenter =
+      dynamic_cast<MDHWNexusLoadingPresenter *>(m_presenter);
+  if (castPresenter) {
+    std::vector<int> extents = castPresenter->getExtents();
+    outputVector->GetInformationObject(0)
+        ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
+              static_cast<int>(extents.size()));
   }
   return 1;
 }
@@ -208,7 +228,7 @@ void vtkMDHWNexusReader::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+    outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 """
     Classes for each reduction step. Those are kept separately
     from the the interface class so that the DgsReduction class could
@@ -35,6 +36,8 @@ class FilterSetupScript(BaseScriptElement):
     logvaluetolerance = ""
     logvaluetimesections = 1
     titleofsplitters = ""
+
+    parnamelist = None
 
     def __init__(self, inst_name):
         """ Initialization
@@ -172,7 +175,7 @@ class FilterSetupScript(BaseScriptElement):
             self.minimumlogvalue = self.getFloatElement(instrument_dom, "minimumlogvalue", FilterSetupScript.minimumlogvalue)
             self.maximumlogvalue = self.getFloatElement(instrument_dom, "maximumlogvalue", FilterSetupScript.maximumlogvalue)
             self.logvalueinterval = self.getFloatElement(instrument_dom, "logvalueinterval", FilterSetupScript.logvalueinterval)
-            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",
+            self.filterlogvaluebychangingdirection = self.getStringElement(instrument_dom, "filterlogvaluebychangingdirection",\
                     FilterSetupScript.filterlogvaluebychangingdirection)
             self.timetolerance = self.getFloatElement(instrument_dom, "timetolerance", FilterSetupScript.timetolerance)
             self.logboundary = self.getStringElement(instrument_dom, "logboundary", FilterSetupScript.logboundary)

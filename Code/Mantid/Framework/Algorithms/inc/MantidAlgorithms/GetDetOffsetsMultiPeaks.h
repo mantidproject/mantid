@@ -6,7 +6,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -147,8 +147,8 @@ private:
   /// Input workspace
   API::MatrixWorkspace_sptr m_inputWS;
   /// Input EventWorkspace (from m_inputWS)
-  DataObjects::EventWorkspace_const_sptr eventW;
-  bool isEvent;
+  DataObjects::EventWorkspace_const_sptr m_eventW;
+  bool m_isEvent;
 
   /// Background type
   std::string m_backType;
@@ -165,18 +165,18 @@ private:
 
   /// Input resolution
   API::MatrixWorkspace_const_sptr m_inputResolutionWS;
-  /// Flag of use input resolution WS
+  /// Flag of use input resolution
   bool m_hasInputResolution;
   /// Lower boundary of allowed peak width as resolution
   double m_minResFactor;
   /// Upper boundary of allowed peak width as resolution
   double m_maxResFactor;
 
-  DataObjects::OffsetsWorkspace_sptr outputW;
+  DataObjects::OffsetsWorkspace_sptr m_outputW;
   /// Output workspace for debugging purpose
-  DataObjects::OffsetsWorkspace_sptr outputNP;
+  DataObjects::OffsetsWorkspace_sptr m_outputNP;
   /// Output Mask workspace
-  API::MatrixWorkspace_sptr maskWS;
+  API::MatrixWorkspace_sptr m_maskWS;
 
   DataObjects::TableWorkspace_sptr m_infoTableWS;
   DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;

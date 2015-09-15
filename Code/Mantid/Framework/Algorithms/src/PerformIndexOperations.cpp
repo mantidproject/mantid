@@ -254,33 +254,35 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PerformIndexOperations)
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Constructor
  */
-PerformIndexOperations::PerformIndexOperations() {}
+PerformIndexOperations::PerformIndexOperations() {
+  useAlgorithm("GroupDetectors", 2);
+}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Destructor
  */
 PerformIndexOperations::~PerformIndexOperations() {}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PerformIndexOperations::name() const {
   return "PerformIndexOperations";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PerformIndexOperations::version() const { return 1; };
+int PerformIndexOperations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PerformIndexOperations::category() const {
   return "Transforms\\Grouping";
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PerformIndexOperations::init() {
@@ -337,10 +339,15 @@ VecCommands interpret(const std::string &processingInstructions) {
   return commands;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PerformIndexOperations::exec() {
+  g_log.error("PerformIndexOperations has been deprecated. It will be "
+              "removed in the next release of Mantid. The same functionality "
+              "is provided by GroupDetectors-v2. Its GroupingPattern "
+              "property accepts the same syntax as PerformIndexOperations' "
+              "ProcessingInstructions property.");
   MatrixWorkspace_sptr inputWorkspace = this->getProperty("InputWorkspace");
   const std::string processingInstructions =
       this->getProperty("ProcessingInstructions");

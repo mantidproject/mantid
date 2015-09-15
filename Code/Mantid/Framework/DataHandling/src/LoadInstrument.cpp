@@ -6,19 +6,8 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
-#include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Interpolation.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/UnitFactory.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -50,6 +39,8 @@ DECLARE_ALGORITHM(LoadInstrument)
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
+
+Poco::Mutex LoadInstrument::m_mutex;
 
 /// Empty default constructor
 LoadInstrument::LoadInstrument() : Algorithm() {}
@@ -122,9 +113,14 @@ void LoadInstrument::exec() {
 
     // Initialize the parser. Avoid copying the xmltext out of the property
     // here.
-    parser.initialize(
-        m_filename, m_instName,
-        *dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML));
+    const PropertyWithValue<std::string> *xml =
+      dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
+    if (xml) {
+      parser = InstrumentDefinitionParser(m_filename, m_instName, *xml);
+    } else {
+      throw std::invalid_argument("The instrument XML passed cannot be "
+                                  "casted to a standard string.");
+    }
   }
   // otherwise we need either Filename or InstrumentName to be set
   else {
@@ -158,7 +154,7 @@ void LoadInstrument::exec() {
     m_instName = instrumentFile.substr(0, instrumentFile.find("_Def"));
 
     // Initialize the parser with the the XML text loaded from the IDF file
-    parser.initialize(m_filename, m_instName, Strings::loadFile(m_filename));
+    parser = InstrumentDefinitionParser(m_filename, m_instName, Strings::loadFile(m_filename));
   }
 
   // Find the mangled instrument name that includes the modified date
@@ -166,19 +162,23 @@ void LoadInstrument::exec() {
 
   Instrument_sptr instrument;
   // Check whether the instrument is already in the InstrumentDataService
-  if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
-    // If it does, just use the one from the one stored there
-    instrument =
-        InstrumentDataService::Instance().retrieve(instrumentNameMangled);
-  } else {
-    // Really create the instrument
-    Progress *prog = new Progress(this, 0, 1, 100);
-    instrument = parser.parseXML(prog);
-    delete prog;
-    // Add to data service for later retrieval
-    InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
-  }
+  {
+    // Make InstrumentService access thread-safe
+    Poco::Mutex::ScopedLock lock(m_mutex);
 
+    if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
+      // If it does, just use the one from the one stored there
+      instrument =
+        InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+    } else {
+      // Really create the instrument
+      Progress *prog = new Progress(this, 0, 1, 100);
+      instrument = parser.parseXML(prog);
+      delete prog;
+      // Add to data service for later retrieval
+      InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
+    }
+  }
   // Add the instrument to the workspace
   m_workspace->setInstrument(instrument);
 
@@ -261,10 +261,11 @@ void LoadInstrument::runLoadParameterFile() {
 /// found, else return "".
 //  directoryName must include a final '/'.
 std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
+  Poco::Path directoryPath (directoryName);
+  directoryPath.makeDirectory();
   // Remove the path from the filename
-  const std::string::size_type stripPath = m_filename.find_last_of("\\/");
-  std::string instrumentFile =
-      m_filename.substr(stripPath + 1, m_filename.size());
+  Poco::Path filePath (m_filename);
+  std::string instrumentFile = filePath.getFileName();
 
   // First check whether there is a parameter file whose name is the same as the
   // IDF file,
@@ -284,11 +285,11 @@ std::string LoadInstrument::getFullPathParamIDF(std::string directoryName) {
 
   // Assemble parameter file name
   std::string fullPathParamIDF =
-      directoryName + prefix + "_Parameters" + suffix;
+      directoryPath.setFileName(prefix + "_Parameters" + suffix).toString();
   if (Poco::File(fullPathParamIDF).exists() ==
       false) { // No such file exists, so look for file based on instrument ID
                // given by the prefix
-    fullPathParamIDF = directoryName + "/" + prefix + "_Parameters.xml";
+    fullPathParamIDF = directoryPath.setFileName(prefix + "_Parameters.xml").toString();
   }
 
   if (Poco::File(fullPathParamIDF).exists() ==

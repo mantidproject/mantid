@@ -27,3 +27,5 @@ Instead of using the fields above (ListOfSpectraIndices and ListOfChannelIndices
 
 
 .. categories::
+
+.. sourcelink::

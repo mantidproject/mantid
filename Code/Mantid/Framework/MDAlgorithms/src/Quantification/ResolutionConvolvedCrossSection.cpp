@@ -2,17 +2,15 @@
 // Includes
 //
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
-#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
-#include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomainMD.h"
-#include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
+#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
 
 /// Parallel region start macro. Different to generic one as that is specific to
 /// algorithms
@@ -50,7 +48,10 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-DECLARE_FUNCTION(ResolutionConvolvedCrossSection);
+DECLARE_FUNCTION(ResolutionConvolvedCrossSection)
+
+using namespace DataObjects;
+using namespace Kernel;
 
 namespace {
 // Attribute names
@@ -174,8 +175,8 @@ double ResolutionConvolvedCrossSection::functionMD(
       PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_functionMD) {
         m_simulatedEvents.insert(
             m_simulatedEvents.end(),
-            MDEvents::MDEvent<4>(static_cast<float>(contribution), 0.0f,
-                                 innerRun, box.getInnerDetectorID(j), centers));
+            MDEvent<4>(static_cast<float>(contribution), 0.0f, innerRun,
+                       box.getInnerDetectorID(j), centers));
       }
     }
 
@@ -197,7 +198,7 @@ double ResolutionConvolvedCrossSection::functionMD(
 void ResolutionConvolvedCrossSection::storeSimulatedEvents(
     const API::IMDEventWorkspace_sptr &resultWS) {
   auto outputWS =
-      boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace4>(resultWS);
+      boost::dynamic_pointer_cast<MDEventWorkspace4>(resultWS);
   if (!outputWS) {
     throw std::invalid_argument(
         "ResolutionConvolvedCrossSection currently only supports 4 dimensions");
@@ -209,16 +210,12 @@ void ResolutionConvolvedCrossSection::storeSimulatedEvents(
   }
   m_simulatedEvents.clear();
 
-  API::MemoryManager::Instance().releaseFreeMemory();
   // This splits up all the boxes according to split thresholds and sizes.
-  auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
-  Kernel::ThreadPool threadPool(threadScheduler);
+  auto threadScheduler = new ThreadSchedulerFIFO();
+  ThreadPool threadPool(threadScheduler);
   outputWS->splitAllIfNeeded(threadScheduler);
   threadPool.joinAll();
   outputWS->refreshCache();
-
-  // Flush memory
-  API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**

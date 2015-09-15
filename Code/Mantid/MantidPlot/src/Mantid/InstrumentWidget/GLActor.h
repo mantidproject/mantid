@@ -21,6 +21,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QRgb>
 
 class GLActorVisitor;
 class GLActorConstVisitor;
@@ -90,7 +91,7 @@ public:
   /// Convert a "pick ID" to a colour to put into the pick image.
   static GLColor makePickColor(size_t pickID);
   /// Decode a pick colour and return corresponding "pick ID"
-  static size_t decodePickColor(const GLColor& c);
+  static size_t decodePickColor(const QRgb& c);
   /// Decode a pick colour and return corresponding "pick ID"
   static size_t decodePickColor(unsigned char r,unsigned char g,unsigned char b);
   /// Get colour of a component which doesn't have any counts associated with it.

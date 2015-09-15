@@ -9,12 +9,21 @@
 Description
 -----------
 
-Creates a resolution workspace for an inelastic indirect sample run.
+Creates a resolution workspace for an inelastic indirect sample run by
+summing all spectra in the energy transfer and subtracting a flat background to
+give a single resolution curve.
 
-See `Indirect:Calibration <http://www.mantidproject.org/Indirect:Calibration>`_.
+Rebinning and intensity scaling can optionally be applied to the result.
+
+Workflow
+--------
+
+.. diagram:: IndirectResolution-v1_wkflw.dot
 
 Usage
 -----
+
+.. include:: ../usagedata-note.txt
 
 **Example - Running IndirectResolution.**
 
@@ -28,12 +37,16 @@ Usage
                                     BackgroundRange=[-0.16, -0.14],
                                     RebinParam='-0.175,0.002,0.175')
 
-    print mtd.doesExist('resolution')
+    print 'Number of histograms: %d' % resolution.getNumberHistograms()
+    print 'Number of bins: %d' % resolution.blocksize()
 
 Output:
 
 .. testoutput:: ExIndirectResolutionSimple
 
-    True
+    Number of histograms: 1
+    Number of bins: 175
 
 .. categories::
+
+.. sourcelink::

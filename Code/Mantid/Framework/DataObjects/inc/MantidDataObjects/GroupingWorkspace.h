@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 #define MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"
@@ -25,6 +25,11 @@ public:
   GroupingWorkspace(size_t numvectors);
   ~GroupingWorkspace();
 
+  /// Returns a clone of the workspace
+  std::unique_ptr<GroupingWorkspace> clone() const {
+    return std::unique_ptr<GroupingWorkspace>(doClone());
+  }
+
   /** Gets the name of the workspace type
   @return Standard string name  */
   virtual const std::string id() const { return "GroupingWorkspace"; }
@@ -34,11 +39,17 @@ public:
   void makeDetectorIDToGroupVector(std::vector<int> &detIDToGroup,
                                    int64_t &ngroups) const;
 
+protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  GroupingWorkspace(const GroupingWorkspace &other)
+      : SpecialWorkspace2D(other) {}
+  /// Protected copy assignment operator. Assignment not implemented.
+  GroupingWorkspace &operator=(const GroupingWorkspace &other);
+
 private:
-  /// Private copy constructor. NO COPY ALLOWED
-  GroupingWorkspace(const GroupingWorkspace &);
-  /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
-  GroupingWorkspace &operator=(const GroupingWorkspace &);
+  virtual GroupingWorkspace *doClone() const {
+    return new GroupingWorkspace(*this);
+  }
 };
 
 /// shared pointer to the GroupingWorkspace class

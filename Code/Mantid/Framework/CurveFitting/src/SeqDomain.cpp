@@ -105,14 +105,12 @@ void SeqDomain::rwpVal(const CostFuncRwp &rwp) {
  * Calculate the value, first and second derivatives of a least squares cost
  * function
  * @param leastSquares :: The least squares cost func to calculate the value for
- * @param evalFunction :: Flag to evaluate the value of the cost function
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
 void
 SeqDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
-                                       bool evalFunction, bool evalDeriv,
-                                       bool evalHessian) {
+                                       bool evalDeriv, bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -123,20 +121,18 @@ SeqDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares &leastSquares,
       throw std::runtime_error("LeastSquares: undefined FunctionValues.");
     }
     leastSquares.addValDerivHessian(leastSquares.getFittingFunction(), domain,
-                                    values, evalFunction, evalDeriv,
-                                    evalHessian);
+                                    values, evalDeriv, evalHessian);
   }
 }
 
 /**
  * Calculate the value, first and second derivatives of a RWP cost function
  * @param rwp :: The rwp cost func to calculate the value for
- * @param evalFunction :: Flag to evaluate the value of the cost function
  * @param evalDeriv :: Flag to evaluate the first derivatives
  * @param evalHessian :: Flag to evaluate the Hessian (second derivatives)
  */
-void SeqDomain::rwpValDerivHessian(const CostFuncRwp &rwp, bool evalFunction,
-                                   bool evalDeriv, bool evalHessian) {
+void SeqDomain::rwpValDerivHessian(const CostFuncRwp &rwp, bool evalDeriv,
+                                   bool evalHessian) {
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
   const size_t n = getNDomains();
@@ -146,8 +142,8 @@ void SeqDomain::rwpValDerivHessian(const CostFuncRwp &rwp, bool evalFunction,
     if (!values) {
       throw std::runtime_error("Rwp: undefined FunctionValues.");
     }
-    rwp.addValDerivHessian(rwp.getFittingFunction(), domain, values,
-                           evalFunction, evalDeriv, evalHessian);
+    rwp.addValDerivHessian(rwp.getFittingFunction(), domain, values, evalDeriv,
+                           evalHessian);
   }
 }
 

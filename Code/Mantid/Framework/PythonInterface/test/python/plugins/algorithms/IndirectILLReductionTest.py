@@ -14,7 +14,6 @@ class IndirectILLReductionTest(unittest.TestCase):
         self.kwargs['Reflection'] = '111'
         self.kwargs['RawWorkspace'] = run_name + '_' + self.kwargs['Analyser'] + self.kwargs['Reflection'] + '_raw'
         self.kwargs['ReducedWorkspace'] = run_name + '_' + self.kwargs['Analyser'] + self.kwargs['Reflection'] + '_red'
-        self.kwargs['Verbose'] = True
 
     def tearDown(self):
         #clean up any files we made
@@ -35,7 +34,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         red_workspace = mtd[self.kwargs['ReducedWorkspace']]
 
         self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Energy transfer", red_workspace.getAxis(0).getUnit().caption())
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
     def test_mirror_mode(self):
         self.kwargs['MirrorMode'] = True
@@ -49,16 +48,13 @@ class IndirectILLReductionTest(unittest.TestCase):
         right_red_workspace = mtd[self.kwargs['RightWorkspace']]
 
         self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Energy transfer", red_workspace.getAxis(0).getUnit().caption())
-        self.assertEqual("meV", red_workspace.getAxis(0).getUnit().symbol().ascii())
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
         self.assertTrue(isinstance(left_red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Energy transfer", left_red_workspace.getAxis(0).getUnit().caption())
-        self.assertEqual("meV", left_red_workspace.getAxis(0).getUnit().symbol().ascii())
+        self.assertEqual(left_red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
         self.assertTrue(isinstance(right_red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("Energy transfer", right_red_workspace.getAxis(0).getUnit().caption())
-        self.assertEqual("meV", right_red_workspace.getAxis(0).getUnit().symbol().ascii())
+        self.assertEqual(right_red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
     def test_mirror_mode_default_names(self):
         self.kwargs['MirrorMode'] = True
@@ -92,8 +88,6 @@ class IndirectILLReductionTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(path))
 
     def test_no_verbose(self):
-        self.kwargs['Verbose'] = False
-
         IndirectILLReduction(**self.kwargs)
 
         red_workspace = mtd[self.kwargs['ReducedWorkspace']]

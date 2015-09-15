@@ -10,7 +10,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertToYSpace);
+DECLARE_ALGORITHM(ConvertToYSpace)
 
 using namespace API;
 using namespace Kernel;
@@ -26,7 +26,7 @@ const double MASS_TO_MEV =
 */
 ConvertToYSpace::ConvertToYSpace()
     : Algorithm(), m_inputWS(), m_mass(0.0), m_l1(0.0), m_samplePos(),
-      m_outputWS() {}
+      m_outputWS(), m_qOutputWS() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -163,7 +163,7 @@ void ConvertToYSpace::init() {
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
                                           Direction::Input, wsValidator),
-                  "An input workspace.");
+                  "The input workspace in Time of Flight");
 
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
@@ -173,10 +173,15 @@ void ConvertToYSpace::init() {
 
   declareProperty(
       new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "An output workspace.");
+      "The output workspace in y-Space");
+
+  declareProperty(
+      new WorkspaceProperty<>("QWorkspace", "", Direction::Output, PropertyMode::Optional),
+      "The output workspace in q-Space");
 }
 
 //----------------------------------------------------------------------------------------------
+
 /** Execute the algorithm.
 */
 void ConvertToYSpace::exec() {
@@ -192,11 +197,12 @@ void ConvertToYSpace::exec() {
     PARALLEL_START_INTERUPT_REGION
 
     if (!convert(i)) {
-
       g_log.warning("No detector defined for index=" +
                     boost::lexical_cast<std::string>(i) +
                     ". Zeroing spectrum.");
       m_outputWS->maskWorkspaceIndex(i);
+      if(m_qOutputWS)
+        m_qOutputWS->maskWorkspaceIndex(i);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -204,6 +210,9 @@ void ConvertToYSpace::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", m_outputWS);
+
+  if(m_qOutputWS)
+    setProperty("QWorkspace", m_qOutputWS);
 }
 
 /**
@@ -227,8 +236,7 @@ bool ConvertToYSpace::convert(const size_t index) {
     const auto &inE = m_inputWS->readE(index);
 
     // The t->y mapping flips the order of the axis so we need to reverse it to
-    // have a monotonically
-    // increasing axis
+    // have a monotonically increasing axis
     const size_t npts = inY.size();
     for (size_t j = 0; j < npts; ++j) {
       double ys(0.0), qs(0.0), ei(0.0);
@@ -238,6 +246,11 @@ bool ConvertToYSpace::convert(const size_t index) {
       const double prefactor = qs / pow(ei, 0.1);
       outY[outIndex] = prefactor * inY[j];
       outE[outIndex] = prefactor * inE[j];
+
+      if(m_qOutputWS) {
+        m_qOutputWS->dataX(index)[outIndex] = ys;
+        m_qOutputWS->dataY(index)[outIndex] = qs;
+      }
     }
     return true;
   } catch (Exception::NotFoundError &) {
@@ -258,12 +271,22 @@ void ConvertToYSpace::retrieveInputs() {
 * Create & cache output workspaces
 */
 void ConvertToYSpace::createOutputWorkspace() {
+  // y-Space output workspace
   m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
-  // Units
+
   auto xLabel = boost::make_shared<Units::Label>("Momentum", "A^-1");
   m_outputWS->getAxis(0)->unit() = xLabel;
   m_outputWS->setYUnit("");
   m_outputWS->setYUnitLabel("");
+
+  // q-Space output workspace
+  if(getPropertyValue("QWorkspace") != "") {
+    m_qOutputWS = WorkspaceFactory::Instance().create(m_inputWS);
+
+    m_qOutputWS->getAxis(0)->unit() = xLabel;
+    m_qOutputWS->setYUnit("");
+    m_qOutputWS->setYUnitLabel("");
+  }
 }
 
 /**

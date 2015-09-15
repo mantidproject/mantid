@@ -1,13 +1,18 @@
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"
-#include "MantidVatesAPI/RebinningKnowledgeSerializer.h"
+#include "MantidVatesAPI/VatesKnowledgeSerializer.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/Common.h"
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
@@ -23,7 +28,10 @@ namespace Mantid
     m_time(-1),
     m_recursionDepth(0),
     m_loadInMemory(false),
-    m_firstLoad(true)
+    m_firstLoad(true),
+    m_metadataJsonManager(new MetadataJsonManager()),
+    m_metaDataExtractor(new MetaDataExtractorUtils()),
+    m_vatesConfigurations(new VatesConfigurations())
     {
       Mantid::API::FrameworkManager::Instance();
     }
@@ -148,15 +156,19 @@ namespace Mantid
       vtkFieldData* outputFD = vtkFieldData::New();
       
       //Serialize metadata
-      RebinningKnowledgeSerializer serializer(LocationNotRequired);
+      VatesKnowledgeSerializer serializer;
       serializer.setWorkspaceName(wsName);
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction()));
       std::string xmlString = serializer.createXMLString();
 
+      // Serialize Json metadata
+      std::string jsonString = m_metadataJsonManager->getSerializedJson();
+
       //Add metadata to dataset.
       MetadataToFieldData convert;
       convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
+      convert(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
       visualDataSet->SetFieldData(outputFD);
       outputFD->Delete();
     }
@@ -167,10 +179,12 @@ namespace Mantid
      */
     void MDEWLoadingPresenter::setAxisLabels(vtkDataSet *visualDataSet)
     {
-      vtkFieldData* fieldData = visualDataSet->GetFieldData();
-      setAxisLabel("AxisTitleForX", axisLabels[0], fieldData);
-      setAxisLabel("AxisTitleForY", axisLabels[1], fieldData);
-      setAxisLabel("AxisTitleForZ", axisLabels[2], fieldData);
+      if (!vtkPVChangeOfBasisHelper::AddBasisNames(
+              visualDataSet, axisLabels[0].c_str(), axisLabels[1].c_str(),
+              axisLabels[2].c_str())) {
+        g_log.warning("The basis names could not be added to the field data of "
+                      "the data set.\n");
+      }
     }
 
     /**
@@ -230,6 +244,33 @@ namespace Mantid
         throw std::runtime_error("Have not yet run ::extractMetaData!");
       }
       return tDimension->getName() + " (" + tDimension->getUnits().ascii() + ")";
+    }
+
+    /**
+     * Getter for the instrument.
+     * @returns The name of the instrument which is associated with the workspace.
+     */
+    const std::string& MDEWLoadingPresenter::getInstrument()
+    {
+      return m_metadataJsonManager->getInstrument();
+    }
+
+    /**
+    * Getter for the minimum value;
+    * @return The minimum value of the data set.
+    */
+    double MDEWLoadingPresenter::getMinValue()
+    {
+      return m_metadataJsonManager->getMinValue();
+    }
+
+   /**
+    * Getter for the maximum value;
+    * @return The maximum value of the data set.
+    */
+    double MDEWLoadingPresenter::getMaxValue()
+    {
+      return m_metadataJsonManager->getMaxValue();
     }
   }
 }

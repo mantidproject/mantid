@@ -41,3 +41,5 @@ Output:
    Peak at 15.0
 
 .. categories::
+
+.. sourcelink::

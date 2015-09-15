@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
@@ -98,6 +98,11 @@ private:
       const OptionalDouble &stitchingStartOverlapQ,
       const OptionalDouble &stitchingEndOverlapQ, const double &wavelengthStep,
       const std::string &processingCommands);
+
+  /// Perform transmission correction using either PolynomialCorrection
+  /// or ExponentialCorrection.
+  API::MatrixWorkspace_sptr
+  algorithmicCorrection(API::MatrixWorkspace_sptr IvsLam);
 
   /// Verify spectrum maps
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,

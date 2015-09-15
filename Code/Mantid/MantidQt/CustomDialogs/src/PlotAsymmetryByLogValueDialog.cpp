@@ -66,6 +66,7 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   tie(m_uiForm.firstRunBox, "FirstRun", m_uiForm.FirstRunLayout);
   tie(m_uiForm.lastRunBox, "LastRun", m_uiForm.LastRunLayout);
   tie(m_uiForm.logBox, "LogValue");
+  tie(m_uiForm.typeBoxLog, "Function");
   tie(m_uiForm.outWSBox, "OutputWorkspace", m_uiForm.OutputWSLayout);
   tie(m_uiForm.typeBox, "Type");
   tie(m_uiForm.redBox, "Red");
@@ -88,14 +89,12 @@ void PlotAsymmetryByLogValueDialog::initLayout()
   connect(m_uiForm.dtcFileBrowseButton, SIGNAL(clicked()), browseButtonMapper, SLOT(map()));
 
   connect( m_uiForm.firstRunBox, SIGNAL(textChanged(const QString&)), this, SLOT(fillLogBox(const QString&)) );
-  connect( m_uiForm.btnOK,SIGNAL(clicked()),this,SLOT(accept()));
-  connect( m_uiForm.btnCancel,SIGNAL(clicked()),this,SLOT(reject()));
-  connect( m_uiForm.btnHelp,SIGNAL(clicked()),this,SLOT(helpClicked()));
 
   connect( m_uiForm.dtcType, SIGNAL(currentIndexChanged(int)), this, SLOT(showHideDeadTimeFileWidget(int)));
 
   // Fill ComboBoxes with allowed values
   fillAndSetComboBox("Type", m_uiForm.typeBox);
+  fillAndSetComboBox("Function", m_uiForm.typeBoxLog);
   fillAndSetComboBox("DeadTimeCorrType", m_uiForm.dtcType);
 
   // Fill log values from the file
@@ -104,6 +103,9 @@ void PlotAsymmetryByLogValueDialog::initLayout()
 
   // So user can enter a custom value
   m_uiForm.logBox->setEditable(true);
+
+  // Create and add the OK/Cancel/Help. buttons
+  m_uiForm.verticalLayout->addLayout(this->createDefaultButtonLayout());
 }
 
 /**
@@ -148,9 +150,7 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
   {
     alg->setPropertyValue("Filename",nexusFileName.toStdString());
     alg->setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueDialog_tmp");
-    alg->setPropertyValue("DeadTimeTable", ""); // Don't need it for now
-    alg->setPropertyValue("SpectrumMin","0");
-    alg->setPropertyValue("SpectrumMax","0");
+    alg->setPropertyValue("SpectrumList","1"); // Need to load at least one spectrum
     alg->execute();
     if (alg->isExecuted())
     {
@@ -215,5 +215,5 @@ void PlotAsymmetryByLogValueDialog::fillLogBox(const QString&)
 void PlotAsymmetryByLogValueDialog::showHideDeadTimeFileWidget(int deadTimeTypeIndex)
 {
   // Show only if "Using specified file" selected
-  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 1);
+  m_uiForm.dtcFileContainer->setVisible(deadTimeTypeIndex == 2);
 }

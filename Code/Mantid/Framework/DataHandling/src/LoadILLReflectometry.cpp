@@ -23,7 +23,7 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -47,10 +47,10 @@ LoadILLReflectometry::~LoadILLReflectometry() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadILLReflectometry::name() const {
   return "LoadILLReflectometry";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadILLReflectometry::version() const { return 1; };
+int LoadILLReflectometry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLReflectometry::category() const {
@@ -305,12 +305,21 @@ void LoadILLReflectometry::loadDataIntoTheWorkSpace(
   // 1) Get some parameters from nexus file and properties
   //    Note : This should be changed following future D17/ILL nexus file
   //    improvement.
+  const std::string propTOF0 = "monitor1.time_of_flight_0";
   auto tof_channel_width_prop = dynamic_cast<PropertyWithValue<double> *>(
-      m_localWorkspace->run().getProperty("monitor1.time_of_flight_0"));
+      m_localWorkspace->run().getProperty(propTOF0));
+  if (!tof_channel_width_prop)
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             propTOF0 + " (channel width) as a floating point "
+                             "value.");
   m_channelWidth = *tof_channel_width_prop; /* PAR1[95] */
 
+  const std::string propTOF2 = "monitor1.time_of_flight_2";
   auto tof_delay_prop = dynamic_cast<PropertyWithValue<double> *>(
-      m_localWorkspace->run().getProperty("monitor1.time_of_flight_2"));
+      m_localWorkspace->run().getProperty(propTOF2));
+  if (!tof_delay_prop)
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             propTOF2 + " (ToF delay) as a floating point value.");
   double tof_delay = *tof_delay_prop; /* PAR1[96] */
 
   double POFF = entry.getFloat("instrument/VirtualChopper/poff"); /* par1[54] */

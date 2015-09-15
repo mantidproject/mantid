@@ -21,7 +21,7 @@ Unit 23     LAUE003
 
 Continuing
 
-From: http://www.ccp4.ac.uk/cvs/viewvc.cgi/laue/doc/lauenorm.ptx?diff_format=s&revision=1.1.1.1&view=markup
+From: http://www.ccp4.ac.uk/newsletters/newsletter36/10_laue.html
 
 Usage
 -----
@@ -99,3 +99,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::

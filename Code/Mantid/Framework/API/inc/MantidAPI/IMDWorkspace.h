@@ -12,8 +12,8 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/SpecialCoordinateSystem.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 
@@ -67,12 +67,15 @@ enum MDNormalization {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_API_DLL IMDWorkspace : public Workspace,
-                                    public Mantid::API::MDGeometry {
+class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
-  IMDWorkspace(const IMDWorkspace &other);
   virtual ~IMDWorkspace();
+
+  /// Returns a clone of the workspace
+  std::unique_ptr<IMDWorkspace> clone() const {
+    return std::unique_ptr<IMDWorkspace>(doClone());
+  }
 
   /// Get the number of points associated with the workspace.
   /// For MDEvenWorkspace it is the number of events contributing into the
@@ -119,11 +122,11 @@ public:
   /// Clear existing masks
   virtual void clearMDMasking() = 0;
   ///
-  virtual Mantid::API::SpecialCoordinateSystem
+  virtual Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const = 0;
   /// if a workspace was filebacked, this should clear file-based status, delete
   /// file-based information and close related files.
-  virtual void clearFileBacked(bool /* loadFileContentsToMemory*/){};
+  virtual void clearFileBacked(bool /* loadFileContentsToMemory*/) {}
   /// this is the method to build table workspace from any workspace. It does
   /// not have much sence and may be placed here erroneously
   virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/) {
@@ -131,8 +134,19 @@ public:
         "This method is not generally implemented ");
   }
 
+  // Preferred normalization to use for display
+  virtual MDNormalization displayNormalization() const;
+
 protected:
+  /// Protected copy constructor. May be used by childs for cloning.
+  IMDWorkspace(const IMDWorkspace &other);
+  /// Protected copy assignment operator. Assignment not implemented.
+  IMDWorkspace &operator=(const IMDWorkspace &other);
+
   virtual const std::string toString() const;
+
+private:
+  virtual IMDWorkspace *doClone() const = 0;
 };
 
 /// Shared pointer to the IMDWorkspace base class

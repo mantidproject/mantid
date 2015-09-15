@@ -8,16 +8,14 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 using namespace boost::python;
 
-void export_FunctionProperty()
-{
+void export_FunctionProperty() {
   // FuncitonProperty has base PropertyWithValue<boost::shared_ptr<IFunction>>
   // which must be exported
   typedef boost::shared_ptr<IFunction> HeldType;
   PropertyWithValueExporter<HeldType>::define("FunctionPropertyWithValue");
 
-
-  class_<FunctionProperty, bases<PropertyWithValue<HeldType>>, boost::noncopyable>("FunctionProperty", no_init)
-    .def(init<const std::string &>(arg("name"), "Constructs a FunctionProperty with the given name"))
-    ;
+  class_<FunctionProperty, bases<PropertyWithValue<HeldType>>,
+         boost::noncopyable>("FunctionProperty", no_init)
+      .def(init<const std::string &>(
+          arg("name"), "Constructs a FunctionProperty with the given name"));
 }
-

@@ -35,52 +35,64 @@ class MaskWorkspaceToCalFileTest(unittest.TestCase):
             self.assertTrue(mask_boundary_outside == expected_not_masking_identifier)
         except LookupError:
             print "Could not find the requested index"
-            self.assertTrue(False)
+            self.assertTrue(False, msg="Could not find the requested index")
         finally:
             file.close()
             os.remove(cal_file_full_path)
 
+
     # Test creating a cal file from a masked MatrixWorkspace directly
     def test_calfile_from_masked_workspace(self):
-        run_algorithm('Load', Filename='LOQ49886.nxs', OutputWorkspace='LOQ49886', rethrow=True)
-        run_algorithm('MaskDetectors', Workspace='LOQ49886',WorkspaceIndexList='0-700', MaskedWorkspace='LOQ49886', rethrow=True)
-        masked_workspace = mtd['LOQ49886']
+        run_algorithm('CreateSampleWorkspace', OutputWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('MaskDetectors', Workspace='wsMaskWSToCalFileTest',WorkspaceIndexList='0-100', MaskedWorkspace='wsMaskWSToCalFileTest',rethrow=True)
+        masked_workspace = mtd['wsMaskWSToCalFileTest']
         should_invert = False
         masking_identifier = 0
         not_masking_identifier = 1
-        self.do_test_cal_file(masked_workspace, should_invert, masking_identifier, not_masking_identifier, 700)
+        self.do_test_cal_file(masked_workspace, should_invert, masking_identifier, not_masking_identifier, 100)
+        
+    # Test creating a cal file from a masked MatrixWorkspace with grouping
+    def test_calfile_from_grouped_masked_workspace(self):
+        run_algorithm('CreateSampleWorkspace', OutputWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('MaskDetectors', Workspace='wsMaskWSToCalFileTest',WorkspaceIndexList='0-100', MaskedWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('GroupDetectors', InputWorkspace='wsMaskWSToCalFileTest', OutputWorkspace='wsMaskWSToCalFileTest', WorkspaceIndexList='0-100', KeepUngroupedSpectra=True, rethrow=True)
+        masked_workspace = mtd['wsMaskWSToCalFileTest']
+        should_invert = False
+        masking_identifier = 0
+        not_masking_identifier = 1
+        self.do_test_cal_file(masked_workspace, should_invert, masking_identifier, not_masking_identifier, 0)
 
     # Test creating a cal file from a MaskWorkspace
     def test_calfile_from_extracted_masking_workspace(self):
-        run_algorithm('Load', Filename='LOQ49886.nxs', OutputWorkspace='LOQ49886', rethrow=True)
-        run_algorithm('MaskDetectors', Workspace='LOQ49886',WorkspaceIndexList='0-700', MaskedWorkspace='LOQ49886', rethrow=True)
-        run_algorithm('ExtractMask', InputWorkspace='LOQ49886', OutputWorkspace='ExtractedWorkspace', rethrow=True)
+        run_algorithm('CreateSampleWorkspace', OutputWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('MaskDetectors', Workspace='wsMaskWSToCalFileTest',WorkspaceIndexList='0-100', MaskedWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('ExtractMask', InputWorkspace='wsMaskWSToCalFileTest', OutputWorkspace='ExtractedWorkspace', rethrow=True)
         extracted_workspace = mtd['ExtractedWorkspace']
         should_invert = False
         masking_identifier = 0
         not_masking_identifier = 1
-        self.do_test_cal_file(extracted_workspace, should_invert, masking_identifier, not_masking_identifier, 700)
+        self.do_test_cal_file(extracted_workspace, should_invert, masking_identifier, not_masking_identifier, 100)
 
     # Test creating a cal file from a MatrixWorkspace directly with masking inverted
     def test_calfile_from_masked_workspace_inverse(self):
-        run_algorithm('Load', Filename='LOQ49886.nxs', OutputWorkspace='LOQ49886', rethrow=True)
-        run_algorithm('MaskDetectors', Workspace='LOQ49886',WorkspaceIndexList='0-700', MaskedWorkspace='LOQ49886', rethrow=True)
-        masked_workspace = mtd['LOQ49886']
+        run_algorithm('CreateSampleWorkspace', OutputWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('MaskDetectors', Workspace='wsMaskWSToCalFileTest',WorkspaceIndexList='0-100', MaskedWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        masked_workspace = mtd['wsMaskWSToCalFileTest']
         should_invert = True
         masking_identifier = 1
         not_masking_identifier = 0
-        self.do_test_cal_file(masked_workspace, should_invert, masking_identifier, not_masking_identifier, 700)
+        self.do_test_cal_file(masked_workspace, should_invert, masking_identifier, not_masking_identifier, 100)
 
     # Test creating a cal file from a MaskWorkspace with masking inverted
     def test_calfile_from_extracted_masking_workspace_inverse(self):
-        run_algorithm('Load', Filename='LOQ49886.nxs', OutputWorkspace='LOQ49886', rethrow=True)
-        run_algorithm('MaskDetectors', Workspace='LOQ49886',WorkspaceIndexList='0-700', MaskedWorkspace='LOQ49886', rethrow=True)
-        run_algorithm('ExtractMask', InputWorkspace='LOQ49886', OutputWorkspace='ExtractedWorkspace', rethrow=True)
+        run_algorithm('CreateSampleWorkspace', OutputWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('MaskDetectors', Workspace='wsMaskWSToCalFileTest',WorkspaceIndexList='0-100', MaskedWorkspace='wsMaskWSToCalFileTest', rethrow=True)
+        run_algorithm('ExtractMask', InputWorkspace='wsMaskWSToCalFileTest', OutputWorkspace='ExtractedWorkspace', rethrow=True)
         extracted_workspace = mtd['ExtractedWorkspace']
         should_invert = True
         masking_identifier = 1
         not_masking_identifier = 0
-        self.do_test_cal_file(extracted_workspace, should_invert, masking_identifier, not_masking_identifier, 700)
+        self.do_test_cal_file(extracted_workspace, should_invert, masking_identifier, not_masking_identifier, 100)
 
 
 

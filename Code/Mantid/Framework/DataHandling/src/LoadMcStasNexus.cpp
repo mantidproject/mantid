@@ -15,7 +15,7 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -29,10 +29,10 @@ LoadMcStasNexus::~LoadMcStasNexus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadMcStasNexus::name() const { return "LoadMcStasNexus"; };
+const std::string LoadMcStasNexus::name() const { return "LoadMcStasNexus"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadMcStasNexus::version() const { return 1; };
+int LoadMcStasNexus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadMcStasNexus::category() const { return "DataHandling"; }

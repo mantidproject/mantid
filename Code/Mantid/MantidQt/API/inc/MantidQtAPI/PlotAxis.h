@@ -2,9 +2,13 @@
 #define MANTIDQT_API_PLOTAXISLABEL_H_
 
 #include "MantidQtAPI/DllOption.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/ClassMacros.h"
 
 #include <QString>
+#include <string>
 
 namespace MantidQt
 {
@@ -50,7 +54,7 @@ namespace MantidQt
       QString title() const;
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(PlotAxis);
+      DISABLE_DEFAULT_CONSTRUCT(PlotAxis)
 
       /// Creates a title suitable for an axis attached to the given index
       void titleFromIndex(const Mantid::API::IMDWorkspace & workspace,

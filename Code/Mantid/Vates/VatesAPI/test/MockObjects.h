@@ -5,22 +5,19 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/UnitLabel.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
-#include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/Common.h"
-#include "MantidVatesAPI/MDRebinningView.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/RebinningActionManager.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -29,10 +26,15 @@
 #include <vtkCharArray.h>
 #include <vtkStringArray.h>
 
-using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::coord_t;
+
+// Allow unused functions.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
 
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI
@@ -86,7 +88,7 @@ public:
   MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
   MOCK_METHOD1(setMDMasking, void(Mantid::Geometry::MDImplicitFunction*));
   MOCK_METHOD0(clearMDMasking,void());
-  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::API::SpecialCoordinateSystem()); 
+  MOCK_CONST_METHOD0(getSpecialCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem()); 
 
   virtual void getLinePlot(const Mantid::Kernel::VMD & , const Mantid::Kernel::VMD & ,
     Mantid::API::MDNormalization , std::vector<Mantid::coord_t> & , std::vector<Mantid::signal_t> & , std::vector<Mantid::signal_t> & ) const
@@ -109,6 +111,12 @@ public:
   }
 
   virtual ~MockIMDWorkspace() {}
+
+private:
+  virtual MockIMDWorkspace *doClone() const {
+    throw std::runtime_error(
+        "Cloning of MockIMDWorkspace is not implemented.");
+  }
 };
 
 
@@ -146,56 +154,6 @@ public:
   MOCK_METHOD2(updateAlgorithmProgress, void(double, const std::string&));
   ~MockMDLoadingView(){}
 };
-
-class MockMDRebinningView : public MDRebinningView 
-{
-public:
-  MOCK_CONST_METHOD0(getMaxThreshold,
-    double());
-  MOCK_CONST_METHOD0(getMinThreshold,
-    double());
-  MOCK_CONST_METHOD0(getApplyClip,
-    bool());
-  MOCK_CONST_METHOD0(getTimeStep,
-    double());
-  MOCK_CONST_METHOD0(getAppliedGeometryXML,
-    const char*());
-  MOCK_METHOD2(updateAlgorithmProgress,
-    void(double, const std::string&));
-  MOCK_CONST_METHOD0(getOrigin, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getB1, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getB2, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getLengthB1, double());
-  MOCK_CONST_METHOD0(getLengthB2, double());
-  MOCK_CONST_METHOD0(getLengthB3, double());
-  MOCK_CONST_METHOD0(getForceOrthogonal, bool());
-  MOCK_CONST_METHOD0(getOutputHistogramWS, bool());
-};
-
-class MockClipper: public Mantid::VATES::Clipper
-{
-public:
-  MOCK_METHOD1(SetInput, void(vtkDataSet* in_ds));
-  MOCK_METHOD1(SetClipFunction, void(vtkImplicitFunction* func));
-  MOCK_METHOD1(SetInsideOut, void(bool insideout));
-  MOCK_METHOD1(SetRemoveWholeCells, void(bool removeWholeCells));
-  MOCK_METHOD1(SetOutput, void(vtkUnstructuredGrid* out_ds));
-  MOCK_METHOD0(Update, void());
-  MOCK_METHOD0(Delete,void());
-  MOCK_METHOD0(GetOutput, vtkDataSet*());
-  MOCK_METHOD0(die, void());
-  virtual ~MockClipper(){}
-};
-
-class MockRebinningActionManager : public Mantid::VATES::RebinningActionManager
-{
-public:
-  MOCK_METHOD1(ask, void(Mantid::VATES::RebinningIterationAction));
-  MOCK_CONST_METHOD0(action, Mantid::VATES::RebinningIterationAction());
-  MOCK_METHOD0(reset, void());
-  virtual ~MockRebinningActionManager(){}
-};
-
 
 class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider
 {
@@ -467,27 +425,27 @@ Create a field data entry containing (as contents) the argument text.
   Mantid::API::Workspace_sptr createSimple3DWorkspace()
   {
     using namespace Mantid::API;
-    AnalysisDataService::Instance().remove("3D_Workspace");
-    IAlgorithm* create = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
 
+    IAlgorithm* create = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+    create->setChild(true);
     create->initialize();
     create->setProperty("Dimensions", 4);
     create->setPropertyValue("Extents","0,5,0,5,0,5,0,5");
     create->setPropertyValue("Names","A,B,C,D");
     create->setPropertyValue("Units","A,A,A,A");
-    create->setPropertyValue("OutputWorkspace", "3D_Workspace");
+    create->setPropertyValue("OutputWorkspace", "dummy");
     create->execute();
-    return AnalysisDataService::Instance().retrieve("3D_Workspace");
+    Workspace_sptr outWs = create->getProperty("OutputWorkspace");
+    return outWs;
   }
 
   Mantid::API::Workspace_sptr get3DWorkspace(bool integratedTDimension, bool sliceMD)
   {
     using namespace Mantid::API;
-    using namespace Mantid::MDEvents;
+    using namespace Mantid::DataObjects;
 
     Mantid::API::Workspace_sptr inputWs = createSimple3DWorkspace();
 
-    AnalysisDataService::Instance().remove("binned");
     std::string binningAlgName;
     if(sliceMD)
     {
@@ -498,6 +456,7 @@ Create a field data entry containing (as contents) the argument text.
       binningAlgName = "BinMD";
     }
     IAlgorithm_sptr binningAlg = AlgorithmManager::Instance().createUnmanaged(binningAlgName);
+    binningAlg->setChild(true);
     binningAlg->initialize();
     binningAlg->setProperty("InputWorkspace", inputWs);
     binningAlg->setPropertyValue("AlignedDim0","A,0,5,2");
@@ -512,10 +471,10 @@ Create a field data entry containing (as contents) the argument text.
     {
       binningAlg->setPropertyValue("AlignedDim3","D,0,5,2");
     }
-    binningAlg->setPropertyValue("OutputWorkspace", "binned");
+    binningAlg->setPropertyValue("OutputWorkspace", "dummy");
     binningAlg->execute();
-
-    return AnalysisDataService::Instance().retrieve("binned");
+    Workspace_sptr outWs = binningAlg->getProperty("OutputWorkspace");
+    return outWs;
   }
 
   /**
@@ -532,5 +491,9 @@ Create a field data entry containing (as contents) the argument text.
   }
 
 } // namespace
+
+#if __clang__
+#pragma clang diagnostic pop
+#endif
 
 #endif

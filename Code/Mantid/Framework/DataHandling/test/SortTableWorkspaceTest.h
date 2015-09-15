@@ -5,6 +5,7 @@
 
 #include "MantidDataHandling/SortTableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableColumn.h"
 

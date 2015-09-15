@@ -50,6 +50,25 @@ public:
         TS_ASSERT(function);
     }
 
+    void testSetWorkspace()
+    {
+        IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");
+        boost::shared_ptr<PoldiSpectrumLinearBackground> castedFunction = boost::dynamic_pointer_cast<PoldiSpectrumLinearBackground>(function);
+
+        // default is 0
+        TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 0);
+
+        // invalid workspace, nothing happens
+        MatrixWorkspace_const_sptr invalid;
+        TS_ASSERT_THROWS_NOTHING(castedFunction->setWorkspace(invalid));
+        TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 0);
+
+        // valid workspace with 10 bins
+        MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(1, 10);
+        TS_ASSERT_THROWS_NOTHING(castedFunction->setWorkspace(ws));
+        TS_ASSERT_EQUALS(castedFunction->getTimeBinCount(), 10);
+    }
+
     void testFunctionValue()
     {
         IFunction_sptr function = FunctionFactory::Instance().createFunction("PoldiSpectrumLinearBackground");

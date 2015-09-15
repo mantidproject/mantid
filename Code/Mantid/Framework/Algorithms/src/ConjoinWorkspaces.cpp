@@ -75,6 +75,8 @@ void ConjoinWorkspaces::exec() {
 
     // Both are event workspaces. Use the special method
     MatrixWorkspace_sptr output = this->execEvent();
+    // Copy the history from the original workspace
+    output->history().addHistory(ws1->getHistory());
     // Delete the second input workspace from the ADS
     AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));
     // Set the result workspace to the first input
@@ -91,6 +93,8 @@ void ConjoinWorkspaces::exec() {
   }
 
   MatrixWorkspace_sptr output = execWS2D(ws1, ws2);
+  // Copy the history from the original workspace
+  output->history().addHistory(ws1->getHistory());
 
   // Delete the second input workspace from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace2"));

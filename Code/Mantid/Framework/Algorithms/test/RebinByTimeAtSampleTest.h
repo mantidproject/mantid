@@ -4,12 +4,16 @@
 #include <cxxtest/TestSuite.h>
 #include "RebinByTimeBaseTest.h"
 #include "MantidAlgorithms/RebinByTimeAtSample.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include <numeric>
+#include <cmath>
 
 using Mantid::Algorithms::RebinByTimeAtSample;
 
 namespace
 {
+
   /**
    Helper method to create an event workspace around some different geometries (for each detector) L1 and L2. with uniform TOFs for each and pulse time of zero.
    */
@@ -263,13 +267,16 @@ public:
     TSM_ASSERT_EQUALS("Spectrum 3 should only contain one count", 1.0, y3Sum);
 
   }
+
 };
 
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
+// clang-format off
 class RebinByTimeAtSampleTestPerformance: public CxxTest::TestSuite,
     public RebinByTimeBaseTestPerformance<RebinByTimeAtSample>
+// clang-format on
 {
 
 public:

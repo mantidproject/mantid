@@ -3,8 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/Exception.h"
-#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {
@@ -159,6 +157,15 @@ IPropertyManager::TypedValue
 PropertyManagerOwner::getProperty(const std::string &name) const {
   return m_properties->getProperty(name);
 }
+
+/**
+ * @param name
+ * @return True if the property is its default value.
+ */
+bool PropertyManagerOwner::isDefault(const std::string &name) const {
+  return m_properties->getPointerToProperty(name)->isDefault();
+}
+
 
 /**
 * Return the property manager serialized as a string.

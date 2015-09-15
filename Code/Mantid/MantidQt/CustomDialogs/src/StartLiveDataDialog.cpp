@@ -15,7 +15,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include <Qsci/qscilexerpython.h>
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;
@@ -64,7 +63,7 @@ namespace MantidQt
 {
 namespace CustomDialogs
 {
-  DECLARE_DIALOG(StartLiveDataDialog);
+  DECLARE_DIALOG(StartLiveDataDialog)
 
 //----------------------
 // Public member functions
@@ -170,6 +169,7 @@ void StartLiveDataDialog::initLayout()
 
   radioPostProcessClicked();
   setDefaultAccumulationMethod( ui.cmbInstrument->currentText() );
+  updateUiElements( ui.cmbInstrument->currentText());
 
   //=========== Listener's properties =============
 
@@ -195,8 +195,9 @@ void StartLiveDataDialog::initLayout()
 
   connect(ui.cmbInstrument,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setDefaultAccumulationMethod(const QString&)));
   connect(ui.cmbInstrument,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(initListenerPropLayout(const QString&)));
+  connect(ui.cmbInstrument,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(updateUiElements(const QString&)));
 
-  QHBoxLayout * buttonLayout = this->createDefaultButtonLayout();
+  QLayout * buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
 }
 
@@ -335,6 +336,37 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
   {
   }
 }
+
+//------------------------------------------------------------------------------
+/** Another slot called when picking a different instrument.
+ *  Disables UI elements that are not used by the instrument
+ *  Currently, only TOPAZ listener uses this (and only for the
+ *  "Starting Time" group.
+ *  @param inst :: The instrument name.
+ */
+void StartLiveDataDialog::updateUiElements(const QString& inst)
+{
+  if ( inst.isEmpty() ) return;
+  try
+  {
+    if (inst == "TOPAZ")
+    {
+      ui.groupBox->setEnabled( false);
+      ui.radNow->setChecked( true);  
+    }
+    else
+    {
+      ui.groupBox->setEnabled( true);
+    }        
+  }  
+  // If an exception is thrown, just swallow it and do nothing
+  // getInstrument can throw, particularly while we allow listener names to be passed in directly
+  catch( Mantid::Kernel::Exception::NotFoundError& )
+  {
+  }
+}
+
+
 
 void StartLiveDataDialog::accept()
 {

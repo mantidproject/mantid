@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 #--------------------------------------------------------------
 # Algorithm which loads a SINQ file. It matches the instrument
 # and the right dictionary file and then goes away and calls
@@ -6,12 +7,13 @@
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
 from mantid.api import AlgorithmFactory
-from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty, FrameworkManager
-from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
+from mantid.api import PythonAlgorithm, FileProperty, FileAction, WorkspaceProperty
+from mantid.kernel import Direction, StringListValidator
 import mantid.simpleapi
 from mantid import config
 import os.path
 import numpy as np
+import re
 
 #--------- place to look for dictionary files
 
@@ -24,7 +26,7 @@ class LoadSINQFile(PythonAlgorithm):
         return "Load a SINQ file with the right dictionary."
 
     def PyInit(self):
-        global dictsearch
+        #global dictsearch
         instruments=["AMOR","BOA","DMC","FOCUS","HRPT","MARSI","MARSE","POLDI",
                      "RITA-2","SANS","SANS2","TRICS"]
         self.declareProperty("Instrument","AMOR",
@@ -46,26 +48,32 @@ class LoadSINQFile(PythonAlgorithm):
             "HRPT":"hrpt.dic",
             "MARSI":"marsin.dic",
             "MARSE":"marse.dic",
+            "POLDI_legacy":"poldi_legacy.dic",
             "POLDI":"poldi.dic",
             "RITA-2":"rita.dic",
             "SANS":"sans.dic",
             "SANS2":"sans.dic",
-            "TRICS":"trics.dic"
+            "TRICS":"trics.dic"\
         }
+
+        lookupInstrumentName = inst
+        if inst == 'POLDI':
+            lookupInstrumentName = self._getPoldiLookupName(fname, lookupInstrumentName)
+
         dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
-        dicname = os.path.join(dictsearch, diclookup[inst])
+        dicname = os.path.join(dictsearch, diclookup[lookupInstrumentName])
         wname = "__tmp"
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
 
         if inst == "POLDI":
             if ws.getNumberHistograms() == 800:
-               ws.maskDetectors(SpectraList=range(0,800)[::2])
+                ws.maskDetectors(SpectraList=range(0,800)[::2])
 
-            config.appendDataSearchDir(config['groupingFiles.directory'])
-            grp_file = "POLDI_Grouping_800to400.xml"
-            ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
-                                                 OutputWorkspace=wname,
-                                                 MapFile=grp_file, Behaviour="Sum")
+                config.appendDataSearchDir(config['groupingFiles.directory'])
+                grp_file = "POLDI_Grouping_800to400.xml"
+                ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
+                                                     OutputWorkspace=wname,
+                                                     MapFile=grp_file, Behaviour="Sum")
 
             # Reverse direction of POLDI data so that low index corresponds to low 2theta.
             histogramCount = ws.getNumberHistograms()
@@ -84,6 +92,20 @@ class LoadSINQFile(PythonAlgorithm):
         self.setProperty("OutputWorkspace", ws)
         # delete temporary reference
         mantid.simpleapi.DeleteWorkspace(wname,EnableLogging=False)
+
+    def _getPoldiLookupName(self, fname, lookupInstrumentName):
+        year = self._extractYearFromFileName(fname)
+        if year < 2015:
+            return lookupInstrumentName + '_legacy'
+        # Otherwise, this is the current POLDI format.
+        return lookupInstrumentName
+
+    def _extractYearFromFileName(self, filename):
+        pureFileName = os.path.basename(filename)
+        pattern = re.compile(r'\w+(\d{4})n[\w\d\.]+')
+        matches = re.match(pattern, pureFileName)
+
+        return int(matches.group(1))
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQFile)

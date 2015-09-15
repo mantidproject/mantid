@@ -23,6 +23,7 @@ _translations = {
     'Jose Borreguero'         : 'Borreguero, Jose',
     'Keith Brown'             : 'Brown, Keith',
     'Alex Buts'               : 'Buts, Alex',
+    'abuts'                   : 'Buts, Alex',
     'Stuart Campbell'         : 'Campbell, Stuart',
     'Stuart I. Campbell'      : 'Campbell, Stuart',
     'Dickon Champion'         : 'Champion, Dickon',
@@ -42,6 +43,7 @@ _translations = {
     'Mark Koennecke'          : 'Koennecke, Mark',
     'Ricardo Leal'            : 'Leal, Ricardo',
     'Ricardo Ferraz Leal'     : 'Leal, Ricardo',
+    'Ricardo M. Ferraz Leal'  : 'Leal, Ricardo',
     'Christophe Le Bourlot'   : 'Le Bourlot, Christophe',
     'VickieLynch'             : 'Lynch, Vickie',
     'Vickie Lynch'            : 'Lynch, Vickie',
@@ -71,13 +73,37 @@ _translations = {
     'Roman Tolchenov'         : 'Tolchenov, Roman',
     'MichaelWedel'            : 'Wedel, Michael',
     'Michael Wedel'           : 'Wedel, Michael',
-    'Ross Whitfield'          : 'Whitfield, Robert',
+    'Ross Whitfield'          : 'Whitfield, Ross',
     'Robert Whitley'          : 'Whitley, Robert',
     'Michael Whitty'          : 'Whitty, Michael',
     'Steve Williams'          : 'Williams, Steve',
     'Marie Yao'               : 'Yao, Marie',
     'Wenduo Zhou'             : 'Zhou, Wenduo',
-    'Janik Zikovsky'          : 'Zikovsky, Janik'
+    'Janik Zikovsky'          : 'Zikovsky, Janik',
+    'Harry Jeffery'           : 'Jeffery, Harry',
+    'Federico M Pouzols'      : 'Pouzols, Federico M',
+    'FedeMPouzols'            : 'Pouzols, Federico M',
+    'Federico Montesino Pouzols': 'Pouzols, Federico M',
+    'Anton Piccardo-Selg'     : 'Piccardo-Selg, Anton',
+    'Lottie Greenwood'        : 'Greenwood, Lottie',
+    'Dan Nixon'               : 'Nixon, Dan',
+    'Raquel Alvarez Banos'    : 'Banos, Raquel Alvarez',
+    'John Hill'               : 'Hill, John',
+    'Ian Bush'                : 'Bush, Ian',
+    'Steven Hahn'             : 'Hahn, Steven',
+    'Joachim Wuttke (o)'      : 'Wuttke, Joachim',
+    'DiegoMonserrat'          : 'Monserrat, Diego',
+    'Diego Monserrat'         : 'Monserrat, Diego',
+    'David Mannicke'          : 'Mannicke, David',
+    'Garrett Granroth'        : 'Granroth, Garrett',
+    'Hahn'                    : 'Hahn, Steven',
+    'Marina Ganeva'           : 'Ganeva, Marina',
+    'Raquel Alvarez'          : 'Alvarez, Raquel',
+    'Raquel'                  : 'Alvarez, Raquel',
+    'jmborr'                  : 'Borreguero, Jose',
+    'Tobias Richter'          : 'Richter, Tobias',
+    'ianbush'                 : 'Bush, Ian',
+    'KarlPalmen'              : 'Palmen, Karl'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -87,6 +113,8 @@ _blacklist = [
     '',
     'unknown',
     'Yao, Marie',
+    'Utkarsh Ayachit',
+    'Chris Kerr',
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
@@ -95,7 +123,6 @@ _blacklist = [
 whitelist = [
     'Cottrell, Stephen',
     'Dillow, David',
-    'Granroth, Garrett',
     'Hagen, Mark',
     'Hillier, Adrian',
     'Heller, William',
@@ -107,6 +134,7 @@ whitelist = [
     'Proffen, Thomas',
     'Radaelli, Paolo',
     'Taylor, Jon',
+    'Granroth, Garrett'
 ]
 
 import subprocess

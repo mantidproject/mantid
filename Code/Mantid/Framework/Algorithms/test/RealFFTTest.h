@@ -2,6 +2,7 @@
 #define REALFFT_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 
 #include "MantidAlgorithms/FFT.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -88,9 +89,8 @@ public:
       const MantidVec& Yr = fWS->readY(0);
       const MantidVec& Yi = fWS->readY(1);
 
-      const double PI = 3.1415926535897932384626433832795;
-      double h = sqrt(PI/3);
-      double a = PI*PI/3;
+      double h = sqrt(M_PI/3);
+      double a = M_PI*M_PI/3;
       double dx = 1/(XX);
 
       for(int i=0;i<N/4;i++)
@@ -159,9 +159,8 @@ public:
         const MantidVec& Yr = fWS->readY(0);
         const MantidVec& Yi = fWS->readY(1);
 
-        const double PI = 3.1415926535897932384626433832795;
-        double h = sqrt(PI/3);
-        double a = PI*PI/3;
+        double h = sqrt(M_PI/3);
+        double a = M_PI*M_PI/3;
         double dx = 1/(XX);
 
         for(int i=0;i<N/4;i++)

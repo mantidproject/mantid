@@ -31,10 +31,10 @@ public:
   MOCK_CONST_METHOD0(function, QString());
   MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
 
-  MOCK_METHOD1(setDataCurve, void(const QwtData&));
-  MOCK_METHOD1(setCorrectedCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
+  MOCK_METHOD2(setCorrectedCurve, void(const QwtData&, const std::vector<double>&));
   MOCK_METHOD1(setBaselineCurve, void(const QwtData&));
-  MOCK_METHOD1(setFunction, void(const QString&));
+  MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
   MOCK_CONST_METHOD0(noOfSectionRows, int());
   MOCK_METHOD1(setNoOfSectionRows, void(int));
@@ -49,6 +49,8 @@ public:
   MOCK_METHOD3(updateSectionSelector, void(size_t, double, double));
 
   MOCK_METHOD1(displayError, void(const QString&));
+
+  MOCK_METHOD0(help, void());
 };
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel
@@ -74,6 +76,7 @@ MATCHER_P3(FunctionParameter, param, value, delta, "")
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
 MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite
 {
@@ -148,13 +151,10 @@ public:
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                            QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
-
-    // Data changed -> clear sections
-    EXPECT_CALL(*m_view, setNoOfSectionRows(0));
-    EXPECT_CALL(*m_view, deleteSectionSelector(0));
-    EXPECT_CALL(*m_view, deleteSectionSelector(1));
-    EXPECT_CALL(*m_view, deleteSectionSelector(2));
+                                            QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8)),
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 1, 1E-6),
+                                            VectorValue(2, 1, 1E-6))));
 
     m_model->changeData();
   }
@@ -165,7 +165,10 @@ public:
 
     EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8))));
+                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8)),
+                                           AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 1, 1E-6),
+                                            VectorValue(2, 1, 1E-6))));
 
     m_model->changeCorrectedData();
   }
@@ -174,7 +177,7 @@ public:
   {
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
 
-    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0)));
+    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0),_));
 
     m_model->changeCorrectedData();
   }
@@ -185,8 +188,6 @@ public:
 
     ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(f));
     ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3)));
-
-    EXPECT_CALL(*m_view, setFunction(QString::fromStdString(f->asString())));
 
     EXPECT_CALL(*m_view, setBaselineCurve(AllOf(Property(&QwtData::size, 3),
                                                 QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
@@ -199,7 +200,7 @@ public:
   {
     ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(IFunction_const_sptr()));
 
-    EXPECT_CALL(*m_view, setFunction(QString("")));
+    EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
     EXPECT_CALL(*m_view, setBaselineCurve(Property(&QwtData::size, 0)));
 
     m_model->changeFittedFunction();
@@ -216,6 +217,18 @@ public:
     EXPECT_CALL(*m_view, setSectionRow(1, Pair(QString("1"), QString("10")))).After(tableExtended);
 
     EXPECT_CALL(*m_view, addSectionSelector(1, Pair(1,10)));
+
+    m_view->requestAddSection();
+  }
+
+  void test_addSection_toEmptyWS()
+  {
+    ON_CALL(*m_model, data()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
+
+    EXPECT_CALL(*m_view, noOfSectionRows()).Times(0);
+    EXPECT_CALL(*m_view, setSectionRow(_,_)).Times(0);
+    EXPECT_CALL(*m_view, addSectionSelector(_,_)).Times(0);
+    EXPECT_CALL(*m_view, displayError(_)).Times(1);
 
     m_view->requestAddSection();
   }
@@ -337,6 +350,12 @@ public:
     EXPECT_CALL(*m_view, displayError(_));
 
     m_view->requestFit();
+  }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
   }
 };
 

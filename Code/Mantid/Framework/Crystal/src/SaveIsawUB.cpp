@@ -1,14 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveIsawUB.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
-#include <iostream>
 #include <fstream>
-#include <iomanip>
-#include <stdio.h>
-#include <exception>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
-#include <MantidGeometry/Crystal/UnitCell.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 
 using Mantid::Kernel::DblMatrix;
@@ -54,7 +46,7 @@ void SaveIsawUB::init() {
                   "Path to an ISAW-style UB matrix text file.");
 }
 
-double SaveIsawUB::getErrorVolume(OrientedLattice lattice) {
+double SaveIsawUB::getErrorVolume(const OrientedLattice &lattice) {
   double Volume;
   double latticeParams[6] = {lattice.a(),     lattice.b(),    lattice.c(),
                              lattice.alpha(), lattice.beta(), lattice.gamma()};

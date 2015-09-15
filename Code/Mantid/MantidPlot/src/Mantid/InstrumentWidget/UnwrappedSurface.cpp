@@ -3,11 +3,11 @@
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
 #include "PeakMarker2D.h"
-#include "InputController.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <QRgb>
 #include <QSet>
@@ -24,6 +24,7 @@
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Exception::NotFoundError;
+using namespace MantidQt::MantidWidgets;
 
 UnwrappedDetector::UnwrappedDetector():
 u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector()
@@ -314,35 +315,6 @@ void UnwrappedSurface::setColor(int index,bool picking)const
   }
 }
 
-void UnwrappedSurface::showPickedDetector()
-{
-  if (m_selectRect.isNull())
-  {
-    return;
-  }
-  QRect rect = selectionRect();
-  QSet<int> detIDs;
-  for(int i=0;i<rect.width();++i)
-  {
-    for(int j=0;j<rect.height();++j)
-    {
-      int x = rect.x() + i;
-      int y = rect.y() + j;
-      QRgb pixel = m_pickImage->pixel(x,y);
-      int detID = getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
-      if (detID >= 0)
-      {
-        detIDs.insert(detID);
-      }
-    }
-  }
-  foreach(int id,detIDs)
-  {
-    std::cerr<<"det ID = "<<id<<'\n';
-
-  }
-}
-
 bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,Mantid::Geometry::ComponentID id)
 {
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent = comp->getParent();
@@ -426,9 +398,8 @@ void UnwrappedSurface::getSelectedDetectors(QList<int>& dets)
     {
       int x = rect.x() + i;
       int y = rect.y() + j;
-      QRgb pixel = m_pickImage->pixel(x,y);
-      int ind = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
-      if (ind >= 0)
+      size_t ind = getPickID( x, y );
+      if (ind < m_unwrappedDetectors.size() )
       {
         uleft = m_unwrappedDetectors[ind].u - m_unwrappedDetectors[ind].width / 2;
         vtop = m_unwrappedDetectors[ind].v + m_unwrappedDetectors[ind].height / 2;
@@ -446,9 +417,8 @@ void UnwrappedSurface::getSelectedDetectors(QList<int>& dets)
     {
       int x = rect.x() + i;
       int y = rect.y() + j;
-      QRgb pixel = m_pickImage->pixel(x,y);
-      int ind = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
-      if (ind >= 0)
+      size_t ind = getPickID( x, y );
+      if (ind < m_unwrappedDetectors.size() )
       {
         uright = m_unwrappedDetectors[ind].u + m_unwrappedDetectors[ind].width / 2;
         vbottom = m_unwrappedDetectors[ind].v - m_unwrappedDetectors[ind].height / 2;

@@ -30,10 +30,10 @@ ResizeRectangularDetector::~ResizeRectangularDetector() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ResizeRectangularDetector::name() const {
   return "ResizeRectangularDetector";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ResizeRectangularDetector::version() const { return 1; };
+int ResizeRectangularDetector::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ResizeRectangularDetector::category() const {

@@ -45,6 +45,10 @@ public:
 
   void changeScaleType(GraphOptions::ScaleType type);
 
+  void setNthPower(double nth_power){m_nth_power = nth_power;};
+
+  double getNthPower() const {return m_nth_power;};
+
   bool loadMap(const QString & filename);
   
   static QString loadMapDialog(QString previousFile, QWidget * parent);
@@ -68,6 +72,24 @@ public:
   GraphOptions::ScaleType getScaleType() const
   {
     return m_scale_type;
+  }
+
+   /**
+   * Retrieve the map name
+   * @returns the map name
+   */
+  QString getName() const
+  {
+    return m_name;
+  }
+
+  /**
+   * Retrieve the map name
+   * @returns the map name
+   */
+  QString getFilePath() const
+  {
+    return m_path;
   }
 
   /**
@@ -104,6 +126,14 @@ private:
 
   /// Cached NAN value
   double m_nan;
+
+  ///the name of the color map
+  QString m_name;
+
+  ///the path to the map file
+  QString m_path;
+
+  double m_nth_power;
 
 };
 

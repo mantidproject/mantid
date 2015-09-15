@@ -36,7 +36,7 @@ using Poco::XML::Text;
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadSpice2D);
+DECLARE_FILELOADER_ALGORITHM(LoadSpice2D)
 
 // Parse string and convert to numeric type
 template <class T>

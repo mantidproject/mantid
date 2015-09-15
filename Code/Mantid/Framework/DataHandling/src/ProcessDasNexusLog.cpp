@@ -388,6 +388,9 @@ void ProcessDasNexusLog::convertToAbsoluteTime(
   Kernel::Property *log = ws->run().getProperty(logname);
   Kernel::TimeSeriesProperty<double> *tslog =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(log);
+  if (!tslog)
+    throw std::runtime_error("Invalid time series log: it could not be cast "
+                             "(interpreted) as a time series property");
   std::vector<Kernel::DateAndTime> times = tslog->timesAsVector();
   std::vector<double> values = tslog->valuesAsVector();
 
@@ -445,6 +448,9 @@ void ProcessDasNexusLog::writeLogtoFile(API::MatrixWorkspace_sptr ws,
   Kernel::Property *log = ws->run().getProperty(logname);
   Kernel::TimeSeriesProperty<double> *tslog =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(log);
+  if (!tslog)
+    throw std::runtime_error("Invalid time series log: it could not be cast "
+                             "(interpreted) as a time series property");
   std::vector<Kernel::DateAndTime> times = tslog->timesAsVector();
   std::vector<double> values = tslog->valuesAsVector();
 

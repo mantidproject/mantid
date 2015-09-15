@@ -32,10 +32,12 @@ if ( PYLINT_FOUND )
   set ( PYLINT_INCLUDES
         Framework/PythonInterface/plugins
         scripts
+        Testing/SystemTests/tests/analysis
   )
   set ( PYLINT_EXCLUDES
         scripts/lib1to2
         scripts/test
+        Testing/SystemTests/tests/analysis/reference
   )
   add_custom_target ( pylintcheck
                       COMMAND ${PYTHON_EXECUTABLE} ${PYLINT_RUNNER_SCRIPT} --format=${PYLINT_OUTPUT_FORMAT}

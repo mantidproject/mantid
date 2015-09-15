@@ -1,9 +1,5 @@
 #include "MantidCrystal/SortPeaksWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -29,10 +25,10 @@ SortPeaksWorkspace::~SortPeaksWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SortPeaksWorkspace::name() const {
   return "SortPeaksWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SortPeaksWorkspace::version() const { return 1; };
+int SortPeaksWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SortPeaksWorkspace::category() const { return "Crystal"; }
@@ -94,7 +90,7 @@ void SortPeaksWorkspace::exec() {
     inputWS->getColumn(columnToSortBy);
 
     if (inputWS != outputWS) {
-      outputWS = boost::shared_ptr<PeaksWorkspace>(inputWS->clone());
+      outputWS = boost::shared_ptr<PeaksWorkspace>(inputWS->clone().release());
     }
 
     // Perform the sorting.

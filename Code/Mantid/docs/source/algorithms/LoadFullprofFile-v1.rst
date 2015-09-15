@@ -114,3 +114,5 @@ Output:
   Peak 75 of (9, 3, 0): Alpha = 0.25569, Beta = 0.13821, FWHM = 14.67480
 
 .. categories::
+
+.. sourcelink::

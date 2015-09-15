@@ -16,16 +16,16 @@ namespace API {
 /** Constructor
  */
 MDGeometry::MDGeometry()
-    : m_originalWorkspaces(), m_transforms_FromOriginal(),
+    : m_dimensions(), m_originalWorkspaces(), m_origin(), m_transforms_FromOriginal(),
       m_transforms_ToOriginal(),
       m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
-      m_observingDelete(false), m_Wtransf(3, 3, true) {}
+      m_observingDelete(false), m_Wtransf(3, 3, true), m_basisVectors() {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy Constructor
  */
 MDGeometry::MDGeometry(const MDGeometry &other)
-    : m_originalWorkspaces(), m_origin(other.m_origin),
+    : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin),
       m_transforms_FromOriginal(), m_transforms_ToOriginal(),
       m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
       m_observingDelete(false), m_Wtransf(other.m_Wtransf),
@@ -41,21 +41,21 @@ MDGeometry::MDGeometry(const MDGeometry &other)
   this->initGeometry(dimensions);
 
   // Perform a deep copy of the coordinate transformations
-  std::vector<CoordTransform *>::const_iterator it;
+  std::vector<CoordTransform_const_sptr>::const_iterator it;
   for (it = other.m_transforms_FromOriginal.begin();
        it != other.m_transforms_FromOriginal.end(); ++it) {
     if (*it)
-      m_transforms_FromOriginal.push_back((*it)->clone());
+      m_transforms_FromOriginal.push_back(CoordTransform_const_sptr((*it)->clone()));
     else
-      m_transforms_FromOriginal.push_back(NULL);
+      m_transforms_FromOriginal.push_back(CoordTransform_const_sptr());
   }
 
   for (it = other.m_transforms_ToOriginal.begin();
        it != other.m_transforms_ToOriginal.end(); ++it) {
     if (*it)
-      m_transforms_ToOriginal.push_back((*it)->clone());
+      m_transforms_ToOriginal.push_back(CoordTransform_const_sptr((*it)->clone()));
     else
-      m_transforms_ToOriginal.push_back(NULL);
+      m_transforms_ToOriginal.push_back(CoordTransform_const_sptr());
   }
 
   // Copy the references to the original workspaces
@@ -65,14 +65,26 @@ MDGeometry::MDGeometry(const MDGeometry &other)
     this->setOriginalWorkspace(other.m_originalWorkspaces[i], i);
 }
 
+/**
+ * Clear all transforms to and from original workspaces.
+ */
+void MDGeometry::clearTransforms() {
+    m_transforms_ToOriginal.clear();
+    m_transforms_FromOriginal.clear();
+}
+
+/**
+ * Clear the original workspaces
+ */
+void MDGeometry::clearOriginalWorkspaces() {
+    m_originalWorkspaces.clear();
+}
+
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 MDGeometry::~MDGeometry() {
-  for (size_t i = 0; i < m_transforms_FromOriginal.size(); i++)
-    delete m_transforms_FromOriginal[i];
-  for (size_t i = 0; i < m_transforms_ToOriginal.size(); i++)
-    delete m_transforms_ToOriginal[i];
+
   if (m_observingDelete) {
     // Stop watching once object is deleted
     API::AnalysisDataService::Instance().notificationCenter.removeObserver(
@@ -89,10 +101,6 @@ MDGeometry::~MDGeometry() {
  */
 void MDGeometry::initGeometry(
     std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
-  if (dimensions.size() == 0)
-    throw std::invalid_argument(
-        "MDGeometry::initGeometry() 0 valid dimensions were given!");
-
   // Copy the dimensions array
   m_dimensions = dimensions;
   // Make sure the basis vectors are big enough
@@ -225,7 +233,7 @@ MDGeometry::getYDimension() const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getZDimension() const {
   if (this->getNumDims() < 3)
-    throw std::runtime_error("Workspace does not have a X dimension.");
+    throw std::runtime_error("Workspace does not have a Z dimension.");
   return this->getDimension(2);
 }
 
@@ -269,6 +277,20 @@ void MDGeometry::setBasisVector(size_t index, const Mantid::Kernel::VMD &vec) {
   if (index >= m_basisVectors.size())
     throw std::invalid_argument("getBasisVector(): invalid index");
   m_basisVectors[index] = vec;
+}
+
+/**
+ * @return True ONLY if ALL the basis vectors have been normalized.
+ */
+bool MDGeometry::allBasisNormalized() const {
+  bool allNormalized = true;
+  for (auto it = m_basisVectors.begin(); it != m_basisVectors.end(); ++it) {
+      if (it->length() != 1.0) {
+        allNormalized = false;
+        break;
+      }
+  }
+  return allNormalized;
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -400,12 +422,12 @@ void MDGeometry::deleteNotificationReceived(
  * @return CoordTransform pointer
  * @param index :: index into the array of original workspaces
  */
-Mantid::API::CoordTransform *
+Mantid::API::CoordTransform const *
 MDGeometry::getTransformFromOriginal(size_t index) const {
   if (index >= m_transforms_FromOriginal.size())
     throw std::runtime_error(
         "MDGeometry::getTransformFromOriginal(): invalid index.");
-  return m_transforms_FromOriginal[index];
+  return m_transforms_FromOriginal[index].get();
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -422,11 +444,10 @@ MDGeometry::getTransformFromOriginal(size_t index) const {
 void
 MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform *transform,
                                      size_t index) {
-  if (index >= m_transforms_FromOriginal.size())
+  if (index >= m_transforms_FromOriginal.size()) {
     m_transforms_FromOriginal.resize(index + 1);
-  if (m_transforms_FromOriginal[index])
-    delete m_transforms_FromOriginal[index];
-  m_transforms_FromOriginal[index] = transform;
+  }
+  m_transforms_FromOriginal[index] = CoordTransform_const_sptr(transform);
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -441,12 +462,12 @@ MDGeometry::setTransformFromOriginal(Mantid::API::CoordTransform *transform,
  * @return CoordTransform pointer
  * @param index :: index into the array of original workspaces
  */
-Mantid::API::CoordTransform *
+Mantid::API::CoordTransform const *
 MDGeometry::getTransformToOriginal(size_t index) const {
   if (index >= m_transforms_ToOriginal.size())
     throw std::runtime_error(
         "MDGeometry::getTransformFromOriginal(): invalid index.");
-  return m_transforms_ToOriginal[index];
+  return m_transforms_ToOriginal[index].get();
 }
 
 //---------------------------------------------------------------------------------------------------
@@ -463,11 +484,10 @@ MDGeometry::getTransformToOriginal(size_t index) const {
  */
 void MDGeometry::setTransformToOriginal(Mantid::API::CoordTransform *transform,
                                         size_t index) {
-  if (index >= m_transforms_ToOriginal.size())
+  if (index >= m_transforms_ToOriginal.size()) {
     m_transforms_ToOriginal.resize(index + 1);
-  if (m_transforms_ToOriginal[index])
-    delete m_transforms_ToOriginal[index];
-  m_transforms_ToOriginal[index] = transform;
+  }
+  m_transforms_ToOriginal[index] = CoordTransform_const_sptr(transform);
 }
 
 //---------------------------------------------------------------------------------------------------

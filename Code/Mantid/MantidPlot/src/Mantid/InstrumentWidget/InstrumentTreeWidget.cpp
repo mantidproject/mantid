@@ -14,10 +14,10 @@
 #include <cfloat>
 #include <iostream>
 
-InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w):QTreeView(w), m_treeModel(0) 
+InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w):QTreeView(w), m_instrActor(NULL), m_treeModel(NULL)
 {
   connect(this,SIGNAL(clicked(const QModelIndex)),this,SLOT(sendComponentSelectedSignal(const QModelIndex)));
-};
+}
 
 void InstrumentTreeWidget::setInstrumentActor(InstrumentActor* instrActor)
 {

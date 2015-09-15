@@ -1,9 +1,10 @@
+#include <cmath>
+
 #include "MantidCurveFitting/Bk2BkExpConvPV.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <gsl/gsl_sf_erf.h>
 
-#define PI 3.14159265358979323846264338327950288419716939937510582
+#include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -22,7 +23,7 @@ DECLARE_FUNCTION(Bk2BkExpConvPV)
 // ----------------------------
 /** Constructor and Desctructor
  */
-Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
+Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0), mLowTOF(0.0), mUpperTOF(0.0) {}
 
 Bk2BkExpConvPV::~Bk2BkExpConvPV() {}
 
@@ -159,7 +160,7 @@ double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha,
   if (eta < 1.0E-8) {
     omega2 = 0.0;
   } else {
-    omega2 = 2 * N * eta / PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
+    omega2 = 2 * N * eta / M_PI * (imag(exp(p) * E1(p)) + imag(exp(q) * E1(q)));
   }
   double omega = omega1 + omega2;
 
@@ -206,7 +207,7 @@ std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const {
     e1 = e1 * exp(-z);
     if (rz < 0.0 && fabs(imag(z)) < 1.0E-10) {
       complex<double> u(0.0, 1.0);
-      e1 = e1 - (PI * u);
+      e1 = e1 - (M_PI * u);
     }
   }
 

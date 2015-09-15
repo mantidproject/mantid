@@ -1,27 +1,18 @@
-
 #include "MantidMDAlgorithms/ConvertToMDParent.h"
 
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/VisibleWhenProperty.h"
-//
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 
-#include "MantidMDEvents/MDWSTransform.h"
-//
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
-#include "MantidMDEvents/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::CnvrtToMD;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -44,7 +35,7 @@ void ConvertToMDParent::init() {
                   "An input Matrix Workspace (2DMatrix or Event workspace) ");
 
   std::vector<std::string> Q_modes =
-      MDEvents::MDTransfFactory::Instance().getKeys();
+      MDTransfFactory::Instance().getKeys();
   // something to do with different moments of time when algorithm or test loads
   // library. To avoid empty factory always do this.
   if (Q_modes.empty())
@@ -60,7 +51,7 @@ void ConvertToMDParent::init() {
                   "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
                   Direction::InOut);
   /// temporary, until dEMode is not properly defined on Workspace
-  std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
                   boost::make_shared<StringListValidator>(dE_modes),
                   "You can analyze neutron energy transfer in **Direct**, "
@@ -71,7 +62,7 @@ void ConvertToMDParent::init() {
                   "*MD Transformation factory* for further details.",
                   Direction::InOut);
 
-  MDEvents::MDWSTransform QSclAndFrames;
+  MDWSTransform QSclAndFrames;
   std::vector<std::string> TargFrames = QSclAndFrames.getTargetFrames();
   declareProperty(
       "Q3DFrames", TargFrames[CnvrtToMD::AutoSelect],
@@ -249,7 +240,7 @@ ConvertToMDParent::preprocessDetectorsPositions(
 
           TargTableWS->logs()->addProperty<double>("Ei", Ei, true);
         } else {
-          Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+          Emode = Kernel::DeltaEMode::fromString(dEModeRequested);
           if (Emode == Kernel::DeltaEMode::Direct)
             throw(std::invalid_argument(
                 "Input neutron's energy has to be present at the workspace as "
@@ -353,7 +344,7 @@ ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(
 
   // check and get energy conversion mode to define additional ChildAlgorithm
   // parameters
-  Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+  Emode = Kernel::DeltaEMode::fromString(dEModeRequested);
   if (Emode == Kernel::DeltaEMode::Indirect)
     childAlg->setProperty("GetEFixed", true);
 

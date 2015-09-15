@@ -64,6 +64,21 @@ public:
     TS_ASSERT_EQUALS(M,G2.getR());
   }
 
+  void testSense()
+  {
+    Goniometer G1,G2,G3;
+    TS_ASSERT_THROWS_NOTHING(G1.pushAxis("Axis1", 0., 1., 0.,30));
+    TS_ASSERT_THROWS_NOTHING(G2.pushAxis("Axis1", 0., 1., 0.,-30));
+    TS_ASSERT_THROWS_NOTHING(G3.pushAxis("Axis1", 0., 1., 0.,30,-1));
+    DblMatrix M1=G1.getR();
+    DblMatrix M2=G2.getR();
+    DblMatrix M3=G3.getR();
+    TS_ASSERT_DELTA(M1[0][2],-M2[0][2],1e-6);
+    TS_ASSERT_DELTA(M1[0][2],-M3[0][2],1e-6);
+    TS_ASSERT_DELTA(M1[2][0],-M2[2][0],1e-6);
+    TS_ASSERT_DELTA(M1[2][0],-M3[2][0],1e-6);
+  }
+
   void test_makeUniversalGoniometer()
   {
     Goniometer G;

@@ -53,3 +53,5 @@ Output:
    [ 51.  52.]
 
 .. categories::
+
+.. sourcelink::

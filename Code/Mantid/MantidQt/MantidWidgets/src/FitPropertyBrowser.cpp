@@ -87,7 +87,16 @@ namespace MantidWidgets
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui):
   QDockWidget("Fit Function",parent),
+  m_workspaceIndex(NULL),
+  m_startX(NULL),
+  m_endX(NULL),
+  m_output(NULL),
+  m_minimizer(NULL),
+  m_ignoreInvalidData(NULL),
+  m_costFunction(NULL),
+  m_maxIterations(NULL),
   m_logValue(NULL),
+  m_plotDiff(NULL),
   m_plotCompositeMembers(NULL),
   m_convolveMembers(NULL),
   m_rawData(NULL),
@@ -223,8 +232,7 @@ void FitPropertyBrowser::init()
 
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
-  m_costFunctions << "Least squares" << "Rwp";
-                  //<< "Ignore positive peaks";
+  m_costFunctions << "Least squares" << "Rwp" << "Unweighted least squares";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
   m_maxIterations = m_intManager->addProperty("Max Iterations");
   m_intManager->setValue( m_maxIterations, settings.value("Max Iterations",500).toInt() );
@@ -369,6 +377,8 @@ void FitPropertyBrowser::initLayout(QWidget *w)
 
   QMenu* setupSubMenuCustom = new QMenu(this);
   m_setupActionCustomSetup->setMenu(setupSubMenuCustom);
+  // empty menu for now, so set it disabled to avoid confusing users
+  m_setupActionCustomSetup->setEnabled(false);
 
   QMenu* setupSubMenuManage = new QMenu(this);
   QAction* setupActionSave = new QAction("Save Setup",this);
@@ -391,6 +401,8 @@ void FitPropertyBrowser::initLayout(QWidget *w)
 
   QMenu* setupSubMenuRemove = new QMenu(this);
   m_setupActionRemove->setMenu(setupSubMenuRemove); 
+  // empty menu for now, so set it disabled to avoid confusing users
+  m_setupActionRemove->setEnabled(false);
 
   QSignalMapper* setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit,"ClearFit");
@@ -481,6 +493,9 @@ void FitPropertyBrowser::updateSetupMenus()
 
   QSignalMapper* mapperLoad = new QSignalMapper(this);
   QSignalMapper* mapperRemove = new QSignalMapper(this);
+  // enable actions that open the menus only if there will be >=1 entries in there
+  m_setupActionCustomSetup->setEnabled(names.size() >= 1);
+  m_setupActionRemove->setEnabled(names.size() >= 1);
   for (int i = 0; i < names.size(); i++)
   {
     QAction* itemLoad = new QAction(names.at(i), this);

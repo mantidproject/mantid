@@ -95,6 +95,58 @@ public:
   }
 
 
+  void test_use_dx_flag_being_set_when_accessing_dx_with_non_const() {
+    // non-const dataDx()
+    SpectrumTester s;
+    s.dataDx();
+    TS_ASSERT(s.hasDx());
+
+    // non-const ptrDx()
+    SpectrumTester s2;
+    s2.ptrDx();
+    TS_ASSERT(s2.hasDx());
+
+    // setDX vesion 1
+    SpectrumTester s3;
+    Mantid::MantidVec Dx;
+    s3.setDx(Dx);
+    TS_ASSERT(s3.hasDx());
+
+    // setDX vesion 2
+    SpectrumTester s4;
+    Mantid::MantidVecPtr::ptr_type Dx_vec_ptr_type;
+    s4.setDx(Dx_vec_ptr_type);
+    TS_ASSERT(s4.hasDx());
+
+    // setDX version 3
+    SpectrumTester s5;
+    Mantid::MantidVecPtr Dx_vec_ptr;
+    s5.setDx(Dx_vec_ptr);
+    TS_ASSERT(s5.hasDx());
+  }
+
+  void test_use_dx_flag_not_being_set_when_accessing_dx_with_const() {
+    // const dataDx()
+    const SpectrumTester s;
+    s.dataDx();
+    TS_ASSERT(!s.hasDx());
+  }
+
+
+  void test_use_dx_flag_is_copied_during_copy_construction() {
+    // Copy spectrum which had the flag set
+    SpectrumTester s;
+    s.dataDx();
+    TS_ASSERT(s.hasDx());
+
+    SpectrumTester s2(s);
+    TS_ASSERT(s2.hasDx());
+
+    // Copy spectrum which did not have the flag set
+    SpectrumTester s3;
+    SpectrumTester s4(s);
+    TS_ASSERT(!s3.hasDx());
+  }
 };
 
 

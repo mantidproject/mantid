@@ -13,9 +13,20 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( LiveDataTest ${TEST_FILES} )
-  target_link_libraries( LiveDataTest LiveData )
+  target_link_libraries( LiveDataTest LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} 
+            API
+            DataObjects
+            Geometry
+            Kernel
+            LiveData
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            )
   add_dependencies ( LiveDataTest DataHandling Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests LiveDataTest )
+  # Test data
+  add_dependencies ( LiveDataTest StandardTestData )
+
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET LiveDataTest PROPERTY FOLDER "UnitTests" )
 endif ()

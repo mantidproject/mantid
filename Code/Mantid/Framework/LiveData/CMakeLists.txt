@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/FakeISISHistoDAE.cpp
 	src/FileEventDataListener.cpp
 	src/ISISHistoDataListener.cpp
+	src/ISISLiveEventDataListener.cpp
 	src/LiveDataAlgorithm.cpp
 	src/LoadDAE/idc.cpp
 	src/LoadDAE/idc.h
@@ -14,7 +15,7 @@ set ( SRC_FILES
 	src/MonitorLiveData.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/StartLiveData.cpp
-  src/ISISLiveEventDataListener.cpp
+	src/TOPAZLiveEventDataListener.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -29,13 +30,14 @@ set ( INC_FILES
 	inc/MantidLiveData/FakeISISHistoDAE.h
 	inc/MantidLiveData/FileEventDataListener.h
 	inc/MantidLiveData/ISISHistoDataListener.h
+	inc/MantidLiveData/ISISLiveEventDataListener.h
+	inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
 	inc/MantidLiveData/LiveDataAlgorithm.h
 	inc/MantidLiveData/LoadLiveData.h
 	inc/MantidLiveData/MonitorLiveData.h
 	inc/MantidLiveData/SNSLiveEventDataListener.h
 	inc/MantidLiveData/StartLiveData.h
-  inc/MantidLiveData/ISISLiveEventDataListener.h
-  inc/MantidLiveData/ISIS/TCPEventStreamDefs.h
+	inc/MantidLiveData/TOPAZLiveEventDataListener.h
 )
 
 set ( TEST_FILES
@@ -50,6 +52,11 @@ set ( TEST_FILES
 	StartLiveDataTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -62,12 +69,22 @@ enable_precompiled_headers( inc/MantidLiveData/PrecompiledHeader.h SRC_FILES )
 add_library ( LiveData ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( LiveData PROPERTIES OUTPUT_NAME MantidLiveData )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( LiveData PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif ()
+ 
 # Add to the 'Framework' group in VS
 set_property ( TARGET LiveData PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( LiveData ${MANTIDLIBS} )
+# Have to link to winsock library on Windows
+if ( WIN32 )
+  set ( WINSOCK ws2_32 )
+endif ()
+
+target_link_libraries ( LiveData LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

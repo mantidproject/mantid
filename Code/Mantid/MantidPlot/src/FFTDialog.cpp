@@ -49,67 +49,70 @@
 #include <QApplication>
 
 FFTDialog::FFTDialog(int type, QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+  : QDialog( parent, fl ),
+    buttonOK(NULL), buttonCancel(NULL), forwardBtn(NULL), backwardBtn(NULL),
+    boxName(NULL), boxReal(NULL), boxImaginary(NULL),
+    boxSampling(NULL), boxNormalize(NULL), boxOrder(NULL)
 {
-	setWindowTitle(tr("MantidPlot - FFT Options"));
+    setWindowTitle(tr("MantidPlot - FFT Options"));
 
     d_matrix = 0;
-	d_table = 0;
-	graph = 0;
-	d_type = type;
+    d_table = 0;
+    graph = 0;
+    d_type = type;
 
-	forwardBtn = new QRadioButton(tr("&Forward"));
-	forwardBtn->setChecked( true );
-	backwardBtn = new QRadioButton(tr("&Inverse"));
+    forwardBtn = new QRadioButton(tr("&Forward"));
+    forwardBtn->setChecked( true );
+    backwardBtn = new QRadioButton(tr("&Inverse"));
 
-	QHBoxLayout *hbox1 = new QHBoxLayout();
+    QHBoxLayout *hbox1 = new QHBoxLayout();
     hbox1->addWidget(forwardBtn);
     hbox1->addWidget(backwardBtn);
 
-	QGroupBox *gb1 = new QGroupBox();
+    QGroupBox *gb1 = new QGroupBox();
     gb1->setLayout(hbox1);
 
-	QGridLayout *gl1 = new QGridLayout();
-	if (d_type == onGraph)
-	    gl1->addWidget(new QLabel(tr("Curve")), 0, 0);
-	else if (d_type == onTable)
-		gl1->addWidget(new QLabel(tr("Sampling")), 0, 0);
+    QGridLayout *gl1 = new QGridLayout();
+    if (d_type == onGraph)
+      gl1->addWidget(new QLabel(tr("Curve")), 0, 0);
+    else if (d_type == onTable)
+      gl1->addWidget(new QLabel(tr("Sampling")), 0, 0);
 
     if (d_type != onMatrix){
-        boxName = new QComboBox();
-        connect( boxName, SIGNAL( activated(const QString&) ), this, SLOT( activateCurve(const QString&) ) );
-        gl1->addWidget(boxName, 0, 1);
-        setFocusProxy(boxName);
+      boxName = new QComboBox();
+      connect( boxName, SIGNAL( activated(const QString&) ), this, SLOT( activateCurve(const QString&) ) );
+      gl1->addWidget(boxName, 0, 1);
+      setFocusProxy(boxName);
     }
 
     boxSampling = new QLineEdit();
-	if (d_type == onTable || d_type == onMatrix){
-		gl1->addWidget(new QLabel(tr("Real")), 1, 0);
-		boxReal = new QComboBox();
-		gl1->addWidget(boxReal, 1, 1);
+    if (d_type == onTable || d_type == onMatrix){
+      gl1->addWidget(new QLabel(tr("Real")), 1, 0);
+      boxReal = new QComboBox();
+      gl1->addWidget(boxReal, 1, 1);
 
-		gl1->addWidget(new QLabel(tr("Imaginary")), 2, 0);
-		boxImaginary = new QComboBox();
-		gl1->addWidget(boxImaginary, 2, 1);
+      gl1->addWidget(new QLabel(tr("Imaginary")), 2, 0);
+      boxImaginary = new QComboBox();
+      gl1->addWidget(boxImaginary, 2, 1);
 
-        if (d_type == onTable){
-            gl1->addWidget(new QLabel(tr("Sampling Interval")), 3, 0);
-            gl1->addWidget(boxSampling, 3, 1);
-        }
+      if (d_type == onTable){
+        gl1->addWidget(new QLabel(tr("Sampling Interval")), 3, 0);
+        gl1->addWidget(boxSampling, 3, 1);
+      }
     } else if (d_type == onGraph){
-        gl1->addWidget(new QLabel(tr("Sampling Interval")), 1, 0);
-		gl1->addWidget(boxSampling, 1, 1);
+      gl1->addWidget(new QLabel(tr("Sampling Interval")), 1, 0);
+      gl1->addWidget(boxSampling, 1, 1);
     }
 
- 	QGroupBox *gb2 = new QGroupBox();
+    QGroupBox *gb2 = new QGroupBox();
     gb2->setLayout(gl1);
 
-	boxNormalize = new QCheckBox(tr( "&Normalize Amplitude" ));
-	boxNormalize->setChecked(true);
+    boxNormalize = new QCheckBox(tr( "&Normalize Amplitude" ));
+    boxNormalize->setChecked(true);
 
     if (d_type != onMatrix){
-        boxOrder = new QCheckBox(tr( "&Shift Results" ));
-        boxOrder->setChecked(true);
+      boxOrder = new QCheckBox(tr( "&Shift Results" ));
+      boxOrder->setChecked(true);
     }
 
     QVBoxLayout *vbox1 = new QVBoxLayout();
@@ -117,14 +120,14 @@ FFTDialog::FFTDialog(int type, QWidget* parent, Qt::WFlags fl )
     vbox1->addWidget(gb2);
     vbox1->addWidget(boxNormalize);
     if (d_type != onMatrix)
-        vbox1->addWidget(boxOrder);
-	vbox1->addStretch();
+      vbox1->addWidget(boxOrder);
+    vbox1->addStretch();
 
     buttonOK = new QPushButton(tr("&OK"));
-	buttonOK->setDefault( true );
-	buttonCancel = new QPushButton(tr("&Close"));
+    buttonOK->setDefault( true );
+    buttonCancel = new QPushButton(tr("&Close"));
 
-	QVBoxLayout *vbox2 = new QVBoxLayout();
+    QVBoxLayout *vbox2 = new QVBoxLayout();
     vbox2->addWidget(buttonOK);
     vbox2->addWidget(buttonCancel);
     vbox2->addStretch();
@@ -133,9 +136,9 @@ FFTDialog::FFTDialog(int type, QWidget* parent, Qt::WFlags fl )
     hbox2->addLayout(vbox1);
     hbox2->addLayout(vbox2);
 
-	// signals and slots connections
-	connect( buttonOK, SIGNAL( clicked() ), this, SLOT( accept() ) );
-	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+    // signals and slots connections
+    connect( buttonOK, SIGNAL( clicked() ), this, SLOT( accept() ) );
+    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
 }
 
 void FFTDialog::accept()
@@ -161,7 +164,10 @@ void FFTDialog::accept()
 	}
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-    FFT *fft = NULL;
+  if (!app) {
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+  }
+  FFT *fft = NULL;
 	if (graph)
         fft = new FFT(app, graph, boxName->currentText());
 	else if (d_table){
@@ -170,14 +176,17 @@ void FFTDialog::accept()
 			boxReal->setFocus();
 			return;
 		}
-        fft = new FFT(app, d_table, boxReal->currentText(), boxImaginary->currentText());
+    fft = new FFT(app, d_table, boxReal->currentText(), boxImaginary->currentText());
 	}
+
+  if (fft) {
     fft->setInverseFFT(backwardBtn->isChecked());
     fft->setSampling(sampling);
     fft->normalizeAmplitudes(boxNormalize->isChecked());
     fft->shiftFrequencies(boxOrder->isChecked());
     fft->run();
     delete fft;
+  }
 	close();
 }
 
@@ -186,7 +195,7 @@ void FFTDialog::setGraph(Graph *g)
 	graph = g;
 	boxName->insertStringList (g->analysableCurvesList());
 	activateCurve(boxName->currentText());
-};
+}
 
 void FFTDialog::activateCurve(const QString& curveName)
 {
@@ -202,7 +211,7 @@ void FFTDialog::activateCurve(const QString& curveName)
 		double x1 = d_table->text(1, col).toDouble();
 		boxSampling->setText(QString::number(x1 - x0));
 	}
-};
+}
 
 void FFTDialog::setTable(Table *t)
 {
@@ -233,11 +242,14 @@ void FFTDialog::setTable(Table *t)
 		boxReal->setCurrentItem(t->colIndex(l[0]));
 		boxImaginary->setCurrentItem(t->colIndex(l[1]));
 	}
-};
+}
 
 void FFTDialog::setMatrix(Matrix *m)
 {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+    }
     QStringList lst = app->matrixNames();
     boxReal->addItems(lst);
     if (m){
@@ -251,6 +263,9 @@ void FFTDialog::setMatrix(Matrix *m)
 void FFTDialog::fftMatrix()
 {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+    }
     Matrix *mReal = app->matrix(boxReal->currentText());
     if (!mReal)
         return;

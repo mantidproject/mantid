@@ -34,7 +34,7 @@ ObjCompAssemblyActor::ObjCompAssemblyActor(const InstrumentActor& instrActor,Man
     assert(det);
     detid_t id = det->getID();
     m_detIDs.push_back(id);
-    size_t pickID = instrActor.push_back_detid(id);
+    size_t pickID = instrActor.pushBackDetid(id);
     setDetectorColor(m_pick_data,i,GLActor::makePickColor(pickID));
   }
   Mantid::Geometry::BoundingBox boundBox;
@@ -117,6 +117,19 @@ void ObjCompAssemblyActor::generateTexture(unsigned char* data, unsigned int& id
   GLint texParam = GL_NEAREST;
   glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
   OpenGLError::check("TexObject::generateTexture()[set data] ");
+  /* If the above call to glTexImage2D has generated an error, it is likely as a result
+   * of outline="yes" being set in the IDF. If this is enabled then the texture above
+   * is generated with a width being equal to the number of points that make up the
+   * outline. However, some OpenGL implementations only support textures with a 2^n size.
+   * On the machines tested (Ubuntu 14.04, Windows 7, and RHEL6), this was not an issue,
+   * but we can't guarantee that a user wont try this on a system that doesn't support
+   * non power of 2 textures. In that case, the best thing to do would be to create a
+   * texture with a width of the next 2^n up, and adjust the texture coordinates
+   * accordingly. However, this is not a trivial change to make, and as far as we can tell
+   * no one has ever run into this issue, so it's being left for now. If this does prove
+   * problematic in the future, hopefully this note will save you some time figuring out
+   * the problem.
+   */
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,texParam);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,texParam);
   OpenGLError::check("TexObject::generateTexture()[parameters] ");

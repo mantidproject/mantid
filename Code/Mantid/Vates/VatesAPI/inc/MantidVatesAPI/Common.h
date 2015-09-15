@@ -25,15 +25,18 @@ typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
 /// IMDDimension as const shared pointer. Note that IMDDimension is pure virtual.
 typedef boost::shared_ptr<const Mantid::Geometry::IMDDimension> Dimension_const_sptr;
 
-/// Flags what should be done on the current iteration.
-enum RebinningIterationAction {
-  UseCache, //There is no delta here. Use a cached vtkDataSet.
-  RecalculateVisualDataSetOnly, // 4D data set has not altered so create a new visual 3D slice only.
-  RecalculateAll, // Rebin and create 3D visualisation slice from 4D dataset.
-  ReloadAndRecalculateAll // Reload the original workspace and then Rebin it.
-};
-
 std::string makeAxisTitle(Dimension_const_sptr dim);
+
+/*
+ * For legacy data sets we don't have unique latex labels, but they are rather
+ * the same as the ascii string. There are several symbols we need to catch and
+ * convert to latex. If you find other legacy symbols which need conversion,
+ * then add them here.
+ * @param input: the input string
+ * @returns a converted string with the correct latex if possible, or
+ * unconverted
+ */
+std::string convertAxesTitleToLatex(std::string toConvert);
 
 void setAxisLabel(std::string metadataLabel,
                   std::string labelString,

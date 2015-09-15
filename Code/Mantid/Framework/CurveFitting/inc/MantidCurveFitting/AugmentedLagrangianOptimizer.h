@@ -154,8 +154,8 @@ public:
   void minimize(std::vector<double> &xv) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(AugmentedLagrangianOptimizer);
-  DISABLE_COPY_AND_ASSIGN(AugmentedLagrangianOptimizer);
+  DISABLE_DEFAULT_CONSTRUCT(AugmentedLagrangianOptimizer)
+  DISABLE_COPY_AND_ASSIGN(AugmentedLagrangianOptimizer)
 
   friend class UnconstrainedCostFunction;
   /// Using gradient optimizer to perform limited optimization of current set

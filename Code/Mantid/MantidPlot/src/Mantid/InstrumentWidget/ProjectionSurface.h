@@ -27,10 +27,14 @@ namespace Mantid{
     class IPeaksWorkspace;
   }
 }
+namespace MantidQt {
+   namespace MantidWidgets {
+    class InputController;
+    }
+}
 
 class GLColor;
 class MantidGLWidget;
-class InputController;
 
 class QMouseEvent;
 class QWheelEvent;
@@ -191,8 +195,8 @@ public:
 signals:
 
   // detector selection
-  void singleDetectorTouched(int);
-  void singleDetectorPicked(int);
+  void singleComponentTouched(size_t);
+  void singleComponentPicked(size_t);
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
@@ -218,8 +222,8 @@ protected slots:
   void setSelectionRect(const QRect& rect);
   void emptySelectionRect();
   void selectMultipleMasks(const QRect& rect);
-  void pickDetectorAt(int x,int y);
-  void touchDetectorAt(int x,int y);
+  void pickComponentAt(int x,int y);
+  void touchComponentAt(int x,int y);
   void erasePeaks(const QRect& rect);
 
   void colorMapChanged();
@@ -244,9 +248,8 @@ protected:
   void clear();
   QRect selectionRect()const;
   RectF selectionRectUV()const;
-  int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
-  int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
-  void setInputController(int mode, InputController* controller);
+  size_t getPickID(int x, int y)const;
+  void setInputController(int mode, MantidQt::MantidWidgets::InputController* controller);
   void setPeakVisibility() const;
 
   //-----------------------------------
@@ -271,9 +274,9 @@ protected:
 
 private:
   /// Get the current input controller
-  InputController* getController() const;
+  MantidQt::MantidWidgets::InputController* getController() const;
 
-  QMap<int,InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
+  QMap<int,MantidQt::MantidWidgets::InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
   /// Set when the image must be redrawn
   mutable bool m_viewChanged;
   /// Set when the picking image must be redrawn regardless of the interaction mode

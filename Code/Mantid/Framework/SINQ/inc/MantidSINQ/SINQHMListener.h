@@ -33,7 +33,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/ILiveListener.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <Poco/Net/HTTPResponse.h>

@@ -55,3 +55,5 @@ The workflow proceeds as follows:
 .. |SANSReduction.png| image:: /images/SANSReduction.png
 
 .. categories::
+
+.. sourcelink::

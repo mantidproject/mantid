@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/AppendGeometryToSNSNexus.cpp
 	src/AsciiPointBase.cpp
+	src/CheckMantidVersion.cpp
 	src/CompressEvents.cpp
 	src/CreateChopperModel.cpp
 	src/CreateChunkingFromInstrument.cpp
@@ -10,8 +11,9 @@ set ( SRC_FILES
 	src/DefineGaugeVolume.cpp
 	src/DeleteTableRows.cpp
 	src/DetermineChunking.cpp
-	src/DownloadInstrument.cpp
 	src/DownloadFile.cpp
+	src/DownloadInstrument.cpp
+	src/EventWorkspaceCollection.cpp
 	src/ExtractMonitorWorkspace.cpp
 	src/FilterEventsByLogValuePreNexus.cpp
 	src/FindDetectorsInShape.cpp
@@ -32,6 +34,7 @@ set ( SRC_FILES
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
 	src/LoadDetectorsGroupingFile.cpp
+	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
@@ -56,6 +59,7 @@ set ( SRC_FILES
 	src/LoadLLB.cpp
 	src/LoadLog.cpp
 	src/LoadLogsForSNSPulsedMagnet.cpp
+        src/LoadMLZ.cpp
 	src/LoadMappingTable.cpp
 	src/LoadMask.cpp
 	src/LoadMcStas.cpp
@@ -92,8 +96,11 @@ set ( SRC_FILES
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
 	src/LoadSassena.cpp
+	src/LoadSavuTomoConfig.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
+	src/LoadSpiceAscii.cpp
+	src/LoadSpiceXML2DDet.cpp
 	src/LoadTOFRawNexus.cpp
 	src/LoadVulcanCalFile.cpp
 	src/MaskDetectors.cpp
@@ -118,6 +125,7 @@ set ( SRC_FILES
 	src/SaveCanSAS1D2.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorsGrouping.cpp
+	src/SaveDiffCal.cpp
 	src/SaveDspacemap.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveFullprofResolution.cpp
@@ -136,9 +144,11 @@ set ( SRC_FILES
 	src/SavePHX.cpp
 	src/SaveParameterFile.cpp
 	src/SaveRKH.cpp
+	src/SaveReflCustomAscii.cpp
 	src/SaveReflTBL.cpp
 	src/SaveReflThreeColumnAscii.cpp
 	src/SaveSPE.cpp
+	src/SaveSavuTomoConfig.cpp
 	src/SaveToSNSHistogramNexus.cpp
 	src/SaveVTK.cpp
 	src/SetSampleMaterial.cpp
@@ -150,6 +160,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidDataHandling/AppendGeometryToSNSNexus.h
 	inc/MantidDataHandling/AsciiPointBase.h
+	inc/MantidDataHandling/CheckMantidVersion.h
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateChopperModel.h
 	inc/MantidDataHandling/CreateChunkingFromInstrument.h
@@ -159,8 +170,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/DefineGaugeVolume.h
 	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/DetermineChunking.h
-	inc/MantidDataHandling/DownloadInstrument.h
 	inc/MantidDataHandling/DownloadFile.h
+	inc/MantidDataHandling/DownloadInstrument.h
+	inc/MantidDataHandling/EventWorkspaceCollection.h
 	inc/MantidDataHandling/ExtractMonitorWorkspace.h
 	inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
@@ -181,6 +193,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
+	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
@@ -205,6 +218,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLog.h
 	inc/MantidDataHandling/LoadLogsForSNSPulsedMagnet.h
+        inc/MantidDataHandling/LoadMLZ.h
 	inc/MantidDataHandling/LoadMappingTable.h
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMcStas.h
@@ -236,8 +250,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
 	inc/MantidDataHandling/LoadSassena.h
+	inc/MantidDataHandling/LoadSavuTomoConfig.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
+	inc/MantidDataHandling/LoadSpiceAscii.h
+	inc/MantidDataHandling/LoadSpiceXML2DDet.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
 	inc/MantidDataHandling/LoadVulcanCalFile.h
 	inc/MantidDataHandling/MaskDetectors.h
@@ -262,6 +279,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCanSAS1D2.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
+	inc/MantidDataHandling/SaveDiffCal.h
 	inc/MantidDataHandling/SaveDspacemap.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveFullprofResolution.h
@@ -280,9 +298,11 @@ set ( INC_FILES
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveParameterFile.h
 	inc/MantidDataHandling/SaveRKH.h
+	inc/MantidDataHandling/SaveReflCustomAscii.h
 	inc/MantidDataHandling/SaveReflTBL.h
 	inc/MantidDataHandling/SaveReflThreeColumnAscii.h
 	inc/MantidDataHandling/SaveSPE.h
+	inc/MantidDataHandling/SaveSavuTomoConfig.h
 	inc/MantidDataHandling/SaveToSNSHistogramNexus.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetSampleMaterial.h
@@ -298,6 +318,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	AppendGeometryToSNSNexusTest.h
+	CheckMantidVersionTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
 	CreateChunkingFromInstrumentTest.h
@@ -307,8 +328,9 @@ set ( TEST_FILES
 	DefineGaugeVolumeTest.h
 	DeleteTableRowsTest.h
 	DetermineChunkingTest.h
-	DownloadInstrumentTest.h
 	DownloadFileTest.h
+	DownloadInstrumentTest.h
+	EventWorkspaceCollectionTest.h
 	ExtractMonitorWorkspaceTest.h
 	FilterEventsByLogValuePreNexusTest.h
 	FindDetectorsInShapeTest.h
@@ -326,6 +348,7 @@ set ( TEST_FILES
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
+	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusTest.h
@@ -346,6 +369,7 @@ set ( TEST_FILES
 	LoadIsawDetCalTest.h
 	LoadLLBTest.h
 	LoadLogTest.h
+        LoadMLZTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h
@@ -376,7 +400,10 @@ set ( TEST_FILES
 	LoadSPETest.h
 	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
+	LoadSavuTomoConfigTest.h
 	LoadSpice2dTest.h
+	LoadSpiceAsciiTest.h
+	LoadSpiceXML2DDetTest.h
 	LoadTOFRawNexusTest.h
 	LoadTest.h
 	LoadVulcanCalFileTest.h
@@ -402,6 +429,7 @@ set ( TEST_FILES
 	SaveCanSAS1dTest2.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
+	SaveDiffCalTest.h
 	SaveDspacemapTest.h
 	SaveFocussedXYETest.h
 	SaveFullprofResolutionTest.h
@@ -419,9 +447,11 @@ set ( TEST_FILES
 	SavePHXTest.h
 	SaveParameterFileTest.h
 	SaveRKHTest.h
+	SaveReflCustomAsciiTest.h
 	SaveReflTBLTest.h
 	SaveReflThreeColumnAsciiTest.h
 	SaveSPETest.h
+	SaveSavuTomoConfigTest.h
 	SaveToSNSHistogramNexusTest.h
 	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
@@ -430,6 +460,11 @@ set ( TEST_FILES
 	XMLInstrumentParameterTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -442,25 +477,17 @@ enable_precompiled_headers( inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
+endif () 
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
-	SET (HDF5_DIR "${CMAKE_MODULE_PATH}")
-	find_package ( HDF5 COMPONENTS HL REQUIRED
-				        CONFIGS hdf5-config.cmake )
-ELSE()
-	find_package ( HDF5 COMPONENTS HL REQUIRED )
-ENDIF()
-
-#message (STATUS "HDF5_INCLUDE_DIRS:" ${HDF5_INCLUDE_DIRS})
-#message (STATUS "HDF5_LIBRARIES:" ${HDF5_LIBRARIES})
-
 include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
-#include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES})
-#target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus)
+target_link_libraries ( DataHandling LINK_PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME} ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

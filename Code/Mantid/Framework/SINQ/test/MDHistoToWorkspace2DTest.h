@@ -9,13 +9,13 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class MDHistoToWorkspace2DTest: public CxxTest::TestSuite {
 public:

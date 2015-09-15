@@ -6,12 +6,13 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 
 #include <numeric>
 
@@ -552,6 +553,12 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
   // Check workspace isn't already in the correct state - do nothing if it is
   if (workspace->isDistribution() == forwards)
     return;
+
+  // If we're not able to get a writable reference to Y, then this is an event
+  // workspace, which we can't operate on.
+  if (workspace->id() == "EventWorkspace")
+    throw std::runtime_error("Event workspaces cannot be directly converted "
+                             "into distributions.");
 
   const size_t numberOfSpectra = workspace->getNumberHistograms();
 

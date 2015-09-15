@@ -1,21 +1,18 @@
 #ifndef MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
 #define MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class WeightedMeanMDTest : public CxxTest::TestSuite
 {
@@ -193,12 +190,11 @@ public:
   {
     //Create some input data. Signal values as two offset sine waves.
     typedef std::vector<double> VecDouble;
-    double pi = 3.14159;
     VecDouble s1, s2, e1, e2, x;
     double theta_shift=0.4;
     for(size_t i = 0; i < 40; ++i)
     {
-      double theta = 0.02 * double(i) * pi;
+      double theta = 0.02 * double(i) * M_PI;
       s1.push_back(std::sin(theta));
       e1.push_back(std::sin(theta));
       s2.push_back(std::sin(theta+theta_shift));

@@ -4,6 +4,7 @@
 #include "MantidSINQ/DllConfig.h"
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V2D.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -68,10 +69,6 @@ protected:
   std::list<MantidVec::const_iterator>
   findPeaksRecursive(MantidVec::const_iterator begin,
                      MantidVec::const_iterator end) const;
-  MantidVec::const_iterator
-  getLeftRangeBegin(MantidVec::const_iterator begin) const;
-  MantidVec::const_iterator
-  getRightRangeEnd(MantidVec::const_iterator end) const;
 
   std::list<MantidVec::const_iterator> mapPeakPositionsToCorrelationData(
       std::list<MantidVec::const_iterator> peakPositions,
@@ -97,11 +94,17 @@ protected:
 
   double
   minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const;
+
+  double getTransformedCenter(double value,
+                              const Kernel::Unit_sptr &unit) const;
   std::vector<PoldiPeak_sptr>
-  getPeaks(MantidVec::const_iterator baseListStart,
+  getPeaks(const MantidVec::const_iterator &baseListStart,
+           const MantidVec::const_iterator &baseListEnd,
            std::list<MantidVec::const_iterator> peakPositions,
-           const MantidVec &xData) const;
-  double getFWHMEstimate(MantidVec::const_iterator baseListStart,
+           const MantidVec &xData, const Kernel::Unit_sptr &unit) const;
+
+  double getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
+                         const MantidVec::const_iterator &baseListEnd,
                          MantidVec::const_iterator peakPosition,
                          const MantidVec &xData) const;
 
@@ -112,9 +115,6 @@ protected:
   void setMinimumPeakHeight(double newMinimumPeakHeight);
   void setMaximumPeakNumber(int newMaximumPeakNumber);
 
-  void setRecursionAbsoluteBorders(MantidVec::const_iterator begin,
-                                   MantidVec::const_iterator end);
-
   static bool vectorElementGreaterThan(MantidVec::const_iterator first,
                                        MantidVec::const_iterator second);
   bool isLessThanMinimum(PoldiPeak_sptr peak);
@@ -123,10 +123,6 @@ protected:
   int m_doubleMinimumDistance;
   double m_minimumPeakHeight;
   int m_maximumPeakNumber;
-
-  MantidVec::const_iterator m_recursionAbsoluteBegin;
-  MantidVec::const_iterator m_recursionAbsoluteEnd;
-  bool m_recursionBordersInitialized;
 
   PoldiPeakCollection_sptr m_peaks;
 

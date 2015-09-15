@@ -33,7 +33,7 @@ private:
     Mantid::Kernel::V3D position;
     if(coordFrame == "Q (lab frame)")
     {
-      peak.setQLabFrame(peakPosition);
+      peak.setQLabFrame(peakPosition,1/*set the detector distance explicitly*/);
     }
     else
     {

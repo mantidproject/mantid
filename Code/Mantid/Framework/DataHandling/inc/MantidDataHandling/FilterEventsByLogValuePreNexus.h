@@ -138,8 +138,6 @@ private:
   void runLoadInstrument(const std::string &eventfilename,
                          API::MatrixWorkspace_sptr localWorkspace);
 
-  inline void fixPixelId(PixelType &pixel, uint32_t &period) const;
-
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,
@@ -179,38 +177,38 @@ private:
   /// Perform statistics to event (wrong pixel ID) logs
   void doStatToEventLog(size_t mindex);
 
-  Mantid::API::Progress *prog;
+  Mantid::API::Progress *m_prog;
 
-  DataObjects::EventWorkspace_sptr localWorkspace; //< Output EventWorkspace
-  std::vector<int64_t> spectra_list;               ///<the list of Spectra
+  DataObjects::EventWorkspace_sptr m_localWorkspace; //< Output EventWorkspace
+  std::vector<int64_t> m_spectraList;               ///<the list of Spectra
 
   /// The times for each pulse.
   std::vector<Kernel::DateAndTime> pulsetimes;
   /// The index of the first event in each pulse.
   std::vector<uint64_t> m_vecEventIndex;
   /// The proton charge on a pulse by pulse basis.
-  std::vector<double> proton_charge;
+  std::vector<double> m_protonCharge;
   /// The total proton charge for the run.
-  double proton_charge_tot;
+  double m_protonChargeTot;
   /// The value of the vector is the workspace index. The index into it is the
   /// pixel ID from DAS
-  std::vector<std::size_t> pixel_to_wkspindex;
+  std::vector<std::size_t> m_pixelToWkspindex;
   /// Map between the DAS pixel IDs and our pixel IDs, used while loading.
-  std::vector<PixelType> pixelmap;
+  std::vector<PixelType> m_pixelmap;
 
   /// The maximum detector ID possible
-  Mantid::detid_t detid_max;
+  Mantid::detid_t m_detid_max;
 
   /// Handles loading from the event file
-  Mantid::Kernel::BinaryFile<DasEvent> *eventfile;
-  std::size_t num_events; ///< The number of events in the file
-  std::size_t num_pulses; ///<the number of pulses
-  uint32_t numpixel;      ///<the number of pixels
+  Mantid::Kernel::BinaryFile<DasEvent> *m_eventFile;
+  std::size_t m_numEvents; ///< The number of events in the file
+  std::size_t m_numPulses; ///<the number of pulses
+  uint32_t m_numPixel;     ///<the number of pixels
 
-  std::size_t num_good_events;  ///< The number of good events loaded
-  std::size_t num_error_events; ///< The number of error events encountered
-  std::size_t num_bad_events; ///<The number of bad events. Part of error events
-  std::size_t num_wrongdetid_events; ///<The number of events with wrong
+  std::size_t m_numGoodEvents;  ///< The number of good events loaded
+  std::size_t m_numErrorEvents; ///< The number of error events encountered
+  std::size_t m_numBadEvents; ///<The number of bad events. Part of error events
+  std::size_t m_numWrongdetidEvents; ///<The number of events with wrong
   /// detector IDs. Part of error events.
   std::set<PixelType> wrongdetids; ///<set of all wrong detector IDs
   std::map<PixelType, size_t> wrongdetidmap;
@@ -219,28 +217,28 @@ private:
 
   /// the number of events that were ignored (not loaded) because, e.g. of only
   /// loading some spectra.
-  std::size_t num_ignored_events;
-  std::size_t first_event;    ///< The first event to load (count from zero)
+  std::size_t m_numIgnoredEvents;
+  std::size_t m_firstEvent;    ///< The first event to load (count from zero)
   std::size_t m_maxNumEvents; ///< Number of events to load
 
   /// Set to true if a valid Mapping file was provided.
-  bool using_mapping_file;
+  bool m_usingMappingFile;
 
   /// For loading only some spectra
-  bool loadOnlySomeSpectra;
+  bool m_loadOnlySomeSpectra;
   /// Handle to the loaded spectra map
   std::map<int64_t, bool> spectraLoadMap;
 
   /// Longest TOF limit
-  double longest_tof;
+  double m_longestTof;
   /// Shortest TOF limit
-  double shortest_tof;
+  double m_shortestTof;
 
   /// Flag to allow for parallel loading
-  bool parallelProcessing;
+  bool m_parallelProcessing;
 
   /// Whether or not the pulse times are sorted in increasing order.
-  bool pulsetimesincreasing;
+  bool m_pulseTimesIncreasing;
 
   /// sample environment event
   std::vector<detid_t> mSEids;
@@ -274,12 +272,12 @@ private:
   std::vector<std::string> m_vecLogPixelTag;
 
   /// Output EventWorkspace for filtered event B->A
-  DataObjects::EventWorkspace_sptr localWorkspaceBA;
+  DataObjects::EventWorkspace_sptr m_localWorkspaceBA;
 
   /// Accelerator operation frequency
   int m_freqHz;
 
-  int64_t istep;
+  int64_t m_istep;
 
   int64_t m_dbPixelID;
   bool m_useDBOutput;

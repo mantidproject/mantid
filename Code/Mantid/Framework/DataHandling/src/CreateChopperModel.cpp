@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CreateChopperModel);
+DECLARE_ALGORITHM(CreateChopperModel)
 
 using Kernel::Direction;
 using API::WorkspaceProperty;
@@ -21,10 +21,10 @@ using Kernel::MandatoryValidator;
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateChopperModel::name() const {
   return "CreateChopperModel";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateChopperModel::version() const { return 1; };
+int CreateChopperModel::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateChopperModel::category() const {

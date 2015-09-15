@@ -5,6 +5,7 @@
 
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QPainter>
 #include <QSettings>
 #include <QUrl>
 
@@ -65,7 +66,7 @@ void FirstTimeSetup::initLayout()
   connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(facilitySelected(const QString &)));
 
   //set chkAllowUsageData
-  std::string isUsageReportEnabled = config.getString("usagereports.enabled", "1");
+  std::string isUsageReportEnabled = config.getString("usagereports.enabled", true);
   if (isUsageReportEnabled == "0")
   {
     m_uiForm.chkAllowUsageData->setChecked(false);
@@ -73,7 +74,7 @@ void FirstTimeSetup::initLayout()
   connect(m_uiForm.chkAllowUsageData, SIGNAL(stateChanged (int)), this, SLOT(allowUsageDataStateChanged(int)));
 
   QString stlyeName = QApplication::style()->metaObject()->className();
-  if(stlyeName!="QWindowsVistaStyle")
+  if((stlyeName=="QMotifStyle") || (stlyeName=="QCDEStyle"))
   {
     //add stylesheet formatting for other environemnts
     QString ss =  this->styleSheet();
@@ -90,8 +91,8 @@ void FirstTimeSetup::initLayout()
   }
 }
 
-void FirstTimeSetup::confirm()
-{
+
+void FirstTimeSetup::confirm() {
   Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
   std::string filename = config.getUserFilename();
   config.setString("default.facility", m_uiForm.cbFacility->currentText().toStdString());
@@ -121,7 +122,8 @@ void FirstTimeSetup::allowUsageDataStateChanged(int checkedState)
   {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("Mantid: Report Usage Data ");
-    msgBox.setText("Are you sure you want to disable reporting usage data?");
+    msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+    msgBox.setText("Are you sure you want to disable reporting <a href='http://reports.mantidproject.org'>usage data</a>?");
     msgBox.setInformativeText("All usage data is anonymous and untraceable.\n"
       "We use the usage data to inform the future development of Mantid.\n"
       "If you click \"Yes\" aspects you need risk being deprecated in "

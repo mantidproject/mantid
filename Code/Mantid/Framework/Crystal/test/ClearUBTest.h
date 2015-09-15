@@ -10,8 +10,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 using Mantid::Crystal::ClearUB;
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 class ClearUBTest : public CxxTest::TestSuite

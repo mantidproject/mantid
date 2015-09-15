@@ -4,12 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/PeakClusterProjection.h"
-
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -21,7 +20,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
-using namespace Mantid::MDEvents;
 using namespace Mantid::DataObjects;
 
 class PeakClusterProjectionTest: public CxxTest::TestSuite
@@ -33,7 +31,7 @@ private:
   IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst) const
   {
     PeaksWorkspace* pPeaksWS = new PeaksWorkspace();
-    pPeaksWS->setCoordinateSystem(Mantid::API::HKL);
+    pPeaksWS->setCoordinateSystem(Mantid::Kernel::HKL);
     IPeaksWorkspace_sptr peakWS(pPeaksWS);
     peakWS->setInstrument(inst);
     return peakWS;
@@ -90,15 +88,14 @@ public:
     delete suite;
   }
 
-  PeakClusterProjectionTest()
-  {
+  PeakClusterProjectionTest() {
     FrameworkManager::Instance();
   }
 
   void test_throws_if_mdws_has_no_coordinate_system()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 3, 1);
-    inWS->setCoordinateSystem(None);
+    inWS->setCoordinateSystem(Mantid::Kernel::None);
 
     TSM_ASSERT_THROWS("Must have a known coordinate system", PeakClusterProjection object(inWS),
         std::invalid_argument&);
@@ -107,7 +104,7 @@ public:
   void test_throws_if_mdws_is_less_than_three_dimensional()
   {
     IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 2, 1);
-    inWS->setCoordinateSystem(Mantid::API::HKL);
+    inWS->setCoordinateSystem(Mantid::Kernel::HKL);
 
     TSM_ASSERT_THROWS("Must be +3 dimensional", PeakClusterProjection object(inWS),
         std::invalid_argument&);

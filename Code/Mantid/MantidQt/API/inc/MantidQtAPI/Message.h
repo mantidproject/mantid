@@ -58,6 +58,6 @@ namespace MantidQt
 }
 
 /// Required to operate in signals/slots
-Q_DECLARE_METATYPE(MantidQt::API::Message);
+Q_DECLARE_METATYPE(MantidQt::API::Message)
 
 #endif //MESSAGE_H_

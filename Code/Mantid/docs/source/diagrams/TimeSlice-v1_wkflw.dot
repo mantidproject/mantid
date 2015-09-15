@@ -1,0 +1,48 @@
+digraph TimeSlice {
+  label="TimeSlice Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    HaveCalibration [label="Have calibration workspace?"]
+    HaveBackgroundRange [label="Have background range?"]
+  }
+
+  subgraph params {
+    $param_style
+    InputFiles
+    CalibrationWorkspace
+    SpectraRange
+    PeakRange
+    BackgroundRange
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Load
+    CropWorkspace
+    Divide
+    Integration
+    CalculateFlatBackground
+    Transpose
+    GroupWorkspaces
+  }
+
+  InputFiles              -> Load [label="loop for all files"]
+  Load                    -> CropWorkspace
+  SpectraRange            -> CropWorkspace
+  CropWorkspace           -> HaveCalibration
+  HaveCalibration         -> HaveBackgroundRange [label="No"]
+  HaveCalibration         -> Divide [label="Yes"]
+  CalibrationWorkspace    -> Divide
+  Divide                  -> HaveBackgroundRange
+  HaveBackgroundRange     -> Integration [label="No"]
+  PeakRange               -> Integration
+  HaveBackgroundRange     -> CalculateFlatBackground [label="Yes"]
+  BackgroundRange         -> CalculateFlatBackground
+  CalculateFlatBackground -> Integration
+  Integration             -> Transpose
+  Transpose               -> GroupWorkspaces
+  GroupWorkspaces         -> OutputWorkspace
+}

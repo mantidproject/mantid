@@ -4,7 +4,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/ParaViewVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
@@ -22,17 +21,17 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Notification.h>
 #include <Poco/Environment.h>
-#include <Poco/File.h>
 #include <Poco/Process.h>
-#include <Poco/String.h>
 #include <Poco/URI.h>
 #ifdef _WIN32
 #pragma warning(disable : 4250)
 #endif
+#include <Poco/Logger.h>
+#include <Poco/Channel.h>
+#include <Poco/SplitterChannel.h>
+#include <Poco/LoggingRegistry.h>
 #include <Poco/PipeStream.h>
 #include <Poco/StreamCopier.h>
 
@@ -41,10 +40,7 @@
 #include <boost/regex.hpp>
 
 #include <fstream>
-#include <sstream>
 #include <iostream>
-#include <string>
-#include <algorithm>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -156,8 +152,7 @@ ConfigServiceImpl::ConfigServiceImpl()
       m_user_properties_file_name("Mantid.user.properties"),
 #endif
       m_DataSearchDirs(), m_UserSearchDirs(), m_InstrumentDirs(),
-      m_instr_prefixes(), m_removedFlag("@@REMOVED@@"), m_proxyInfo(),
-      m_isProxySet(false) {
+      m_instr_prefixes(), m_proxyInfo(), m_isProxySet(false) {
   // getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
   m_pConf = 0;
@@ -194,14 +189,6 @@ ConfigServiceImpl::ConfigServiceImpl()
     }
   }
 
-  // Assert that the appdata and the instrument subdirectory exists
-  std::string appDataDir = getAppDataDir();
-  Poco::Path path(appDataDir);
-  path.pushDirectory("instrument");
-  Poco::File file(path);
-  // createdirectories will fail gracefully if it is already present
-  file.createDirectories();
-
   // Fill the list of possible relative path keys that may require conversion to
   // absolute paths
   m_ConfigPaths.insert(
@@ -210,6 +197,8 @@ ConfigServiceImpl::ConfigServiceImpl()
   m_ConfigPaths.insert(std::make_pair("pvplugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("mantidqt.plugins.directory", true));
   m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
+  m_ConfigPaths.insert(
+      std::make_pair("instrumentDefinition.vtpDirectory", true));
   m_ConfigPaths.insert(std::make_pair("groupingFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("maskFiles.directory", true));
   m_ConfigPaths.insert(std::make_pair("colormaps.directory", true));
@@ -260,6 +249,16 @@ ConfigServiceImpl::ConfigServiceImpl()
 #ifndef MPI_BUILD // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 #endif
+
+  // Assert that the appdata and the instrument subdirectory exists
+  std::string appDataDir = getAppDataDir();
+  Poco::Path path(appDataDir);
+  path.pushDirectory("instrument");
+  Poco::File file(path);
+  // createdirectories will fail gracefully if it is already present
+  file.createDirectories();
+  Poco::File vtpDir(getVTPFileDirectory());
+  vtpDir.createDirectories();
 }
 
 /** Private Destructor
@@ -312,12 +311,10 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     } else {
       m_PropertyString = temp;
     }
-
   } catch (std::exception &e) {
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
               << e.what() << std::endl;
-
     if (!append) {
       // if we have no property values then take the default
       m_PropertyString = defaultConfig();
@@ -945,8 +942,6 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
   std::string retVal;
   try {
     retVal = m_pConf->getString(keyName);
-    if (retVal == m_removedFlag)
-      retVal = "";
   } catch (Poco::NotFoundException &) {
     g_log.debug() << "Unable to find " << keyName << " in the properties file"
                   << std::endl;
@@ -967,29 +962,47 @@ std::string ConfigServiceImpl::getString(const std::string &keyName,
 std::vector<std::string>
 ConfigServiceImpl::getKeys(const std::string &keyName) const {
   std::vector<std::string> rawKeys;
-  std::vector<std::string> keyVector;
-  keyVector.reserve(rawKeys.size());
-  try {
-    m_pConf->keys(keyName, rawKeys);
-    // Work around a limitation of Poco < v1.4 which has no remove functionality
-    // so
-    // check those that have been marked with the correct flag
-    const size_t nraw = rawKeys.size();
-    for (size_t i = 0; i < nraw; ++i) {
-      const std::string key = rawKeys[i];
-      try {
-        if (m_pConf->getString(key) == m_removedFlag)
-          continue;
-      } catch (Poco::NotFoundException &) {
-      }
-      keyVector.push_back(key);
+  m_pConf->keys(keyName, rawKeys);
+  return rawKeys;
+}
+
+/**
+ * Recursively gets a list of all config options from a given root node.
+ *
+ * @return Vector containing all config options
+ */
+void
+ConfigServiceImpl::getKeysRecursive(const std::string &root,
+                                    std::vector<std::string> &allKeys) const {
+  std::vector<std::string> rootKeys = getKeys(root);
+
+  if (rootKeys.empty())
+    allKeys.push_back(root);
+
+  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+    std::string searchString;
+    if (root.empty()) {
+      searchString = *rkIt;
+    } else {
+      searchString = root + "." + *rkIt;
     }
-  } catch (Poco::NotFoundException &) {
-    g_log.debug() << "Unable to find " << keyName << " in the properties file"
-                  << std::endl;
-    keyVector.clear();
+
+    getKeysRecursive(searchString, allKeys);
   }
-  return keyVector;
+}
+
+/**
+* Recursively gets a list of all config options.
+*
+* This function is needed as Boost Python does not like calling function with
+* default arguments.
+*
+* @return Vector containing all config options
+*/
+std::vector<std::string> ConfigServiceImpl::keys() const {
+  std::vector<std::string> allKeys;
+  getKeysRecursive("", allKeys);
+  return allKeys;
 }
 
 /** Removes a key from the memory stored properties file and inserts the key
@@ -1001,15 +1014,7 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
  *  @param rootName :: The key that is to be deleted
  */
 void ConfigServiceImpl::remove(const std::string &rootName) const {
-  try {
-    // m_pConf->remove(rootName) will only work in Poco v >=1.4. Current Ubuntu
-    // and RHEL use 1.3.x
-    // Simulate removal by marking with a flag value
-    m_pConf->setString(rootName, m_removedFlag);
-  } catch (Poco::NotFoundException &) {
-    g_log.debug() << "Unable to find " << rootName << " in the properties file"
-                  << std::endl;
-  }
+  m_pConf->remove(rootName);
   m_changed_keys.insert(rootName);
 }
 
@@ -1020,9 +1025,7 @@ void ConfigServiceImpl::remove(const std::string &rootName) const {
  *  @returns Boolean value denoting whether the exists or not.
  */
 bool ConfigServiceImpl::hasProperty(const std::string &rootName) const {
-  // Work around a limitation of Poco < v1.4 which has no remove functionality
-  return m_pConf->hasProperty(rootName) &&
-         m_pConf->getString(rootName) != m_removedFlag;
+  return m_pConf->hasProperty(rootName);
 }
 
 /** Checks to see whether the given file target is an executable one and it
@@ -1519,42 +1522,6 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string &path) {
 }
 
 /**
- * Set the environment variable for the PV_PLUGIN_PATH based on where Mantid is.
- */
-void ConfigServiceImpl::setParaViewPluginPath() const {
-  std::string mantid_loc = this->getDirectoryOfExecutable();
-  Poco::Path pv_plugin_path(mantid_loc +
-                            "/pvplugins/pvplugins"); // Developer build paths
-  pv_plugin_path = pv_plugin_path.absolute();
-  g_log.debug() << "Trying " << pv_plugin_path.toString()
-                << " as PV_PLUGIN_PATH\n";
-  Poco::File pv_plugin(pv_plugin_path.toString());
-  if (!pv_plugin.exists() || !pv_plugin.isDirectory()) {
-    // Installation paths
-    g_log.debug("ParaView plugin directory \"" + pv_plugin.path() +
-                "\" does not exist. Trying properties file location.");
-    std::string user_loc = this->getString("pvplugins.directory");
-    if (user_loc.empty()) {
-      g_log.debug(
-          "No ParaView plugin directory specified in the properties file.");
-      return; // it didn't work
-    }
-    pv_plugin_path = Poco::Path(user_loc, "pvplugins");
-    pv_plugin_path = pv_plugin_path.absolute();
-    pv_plugin = Poco::File(pv_plugin_path.toString());
-    if (!pv_plugin.exists() || !pv_plugin.isDirectory()) {
-      g_log.debug("ParaView plugin directory \"" + pv_plugin.path() +
-                  "\" does not exist");
-      return; // it didn't work
-    }
-  }
-
-  // one of the two choices worked so set to that directory
-  g_log.debug("Setting PV_PLUGIN_PATH = \"" + pv_plugin.path() + "\"");
-  Poco::Environment::set("PV_PLUGIN_PATH", pv_plugin.path());
-}
-
-/**
  * Gets the directory that we consider to be the directory containing the
  * Mantid.properties file.
  * Basically, this is the either the directory pointed to by MANTIDPATH or the
@@ -1663,7 +1630,23 @@ ConfigServiceImpl::getInstrumentDirectories() const {
 const std::string ConfigServiceImpl::getInstrumentDirectory() const {
   return m_InstrumentDirs[m_InstrumentDirs.size() - 1];
 }
+/**
+ * Return the search directory for vtp files
+ * @returns a path
+ */
+const std::string ConfigServiceImpl::getVTPFileDirectory() {
+  // Determine the search directory for XML instrument definition files (IDFs)
+  std::string directoryName = getString("instrumentDefinition.vtpDirectory");
 
+  if (directoryName.empty()) {
+    Poco::Path path(getAppDataDir());
+    path.makeDirectory();
+    path.pushDirectory("instrument");
+    path.pushDirectory("geometryCache");
+    directoryName = path.toString();
+  }
+  return directoryName;
+}
 /**
  * Fills the internal cache of instrument definition directories
  */
@@ -1812,8 +1795,12 @@ ConfigServiceImpl::getInstrument(const std::string &instrumentName) const {
       // Move along, there's nothing to see here...
     }
   }
+
+  const std::string errMsg =
+      "Failed to find an instrument with this name in any facility: '" +
+      instrumentName + "' -";
   g_log.debug("Instrument " + instrumentName + " not found");
-  throw Exception::NotFoundError("Instrument", instrumentName);
+  throw Exception::NotFoundError(errMsg, instrumentName);
 }
 
 /** Gets a vector of the facility Information objects
@@ -1909,149 +1896,22 @@ void ConfigServiceImpl::removeObserver(
 }
 
 /*
-Ammend paths to point to include the paraview core libraries.
-@param path : path to add
-*/
-void ConfigServiceImpl::setParaviewLibraryPath(const std::string &path) {
-#ifdef _WIN32
-  const std::string platformPathName = "PATH";
-  Poco::Path existingPath;
-  char separator = existingPath.pathSeparator();
-  std::string strSeparator;
-  strSeparator.push_back(separator);
-
-  if (Poco::Environment::has(platformPathName)) {
-    existingPath = Poco::Environment::get(platformPathName);
-    existingPath.append(strSeparator + path);
-  } else {
-    existingPath = path;
-  }
-  const std::string newPath = existingPath.toString();
-  Poco::Environment::set(platformPathName, newPath);
-#elif defined __linux__
-  UNUSED_ARG(path)
-  throw std::runtime_error("Cannot dynamically set the library path on Linux");
-#elif defined __APPLE__
-  throw std::runtime_error("Cannot dynamically set the library path on Mac");
-#else
-  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot "
-                           "determine the running platform and therefore "
-                           "cannot set the path to the Paraview libraries.");
-#endif
-}
-
-/*
-Extracts the string from a poco pipe and returns the numerical part.
-@param pipe : input pipe.
-@return the numerical part of the version string contained inside the pipe.
-*/
-const std::string extractVersionNumberFromPipe(const Poco::Pipe &pipe) {
-  std::string versionString = "undetermined";
-  Poco::PipeInputStream pipeStream(pipe);
-  std::stringstream stringStream;
-  Poco::StreamCopier::copyStream(pipeStream, stringStream);
-  const std::string givenVersion = stringStream.str();
-  boost::smatch match;
-  boost::regex expression(
-      "(\\d+)\\.(\\d+)\\.?(\\d*)$"); // Gets the version number part.
-  if (boost::regex_search(givenVersion, match, expression)) {
-    versionString = match[0];
-  }
-  return versionString;
-}
-
-/*
-Checks to see whether paraview usage is explicitly ignored in the property file
-then,
-quick check to determine if paraview is installed. We make the assumption
-that if the executable paraview binary is on the path that the paraview
-libraries
-will also be available on the library path, or equivalent.
+Checks to see whether the pvplugins.directory variable is set. If it is set,
+assume
+we have built Mantid with ParaView
 @return True if paraview is available or not disabled.
 */
-bool ConfigServiceImpl::quickParaViewCheck() const {
-  const std::string paraviewIgnoreProperty = "paraview.ignore";
-  const bool ignoreParaview = hasProperty(paraviewIgnoreProperty) &&
-                              atoi(getString(paraviewIgnoreProperty).c_str());
-  if (ignoreParaview) {
-    g_log.debug("Ignoring ParaView");
-    return false;
-  }
-
-  g_log.debug("Checking for ParaView");
-  bool isAvailable = false;
-
-  try {
-    // Try to run "paraview -V", which will succeed if ParaView is installed.
-    std::string paraviewDir = getString("paraview.path");
-    std::string cmd = "paraview";
-    if (!paraviewDir.empty()) {
-      Poco::Path paraviewExe = Poco::Path(paraviewDir, "paraview");
-      cmd = paraviewExe.toString();
-    }
-    std::vector<std::string> args;
-    args.push_back("-V");
-    Poco::Pipe outPipe, errorPipe;
-    Poco::ProcessHandle ph =
-        Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
-    const int rc = ph.wait();
-    // Only if the paraview query returned successfully.
-    if (rc == 1) {
-      // Check the actual version numbers against what we expect they should be.
-      const std::string givenVersionNumber =
-          extractVersionNumberFromPipe(errorPipe);
-      const std::string targetVersionNumber = ParaViewVersion::targetVersion();
-      if (givenVersionNumber == targetVersionNumber) {
-        isAvailable = true;
-        g_log.information("ParaView is available");
-        // Now set the plugin path.
-        this->setParaViewPluginPath();
-      } else {
-        std::stringstream messageStream;
-        messageStream << "The compatible version of ParaView is "
-                      << targetVersionNumber << " but the installed version is "
-                      << givenVersionNumber;
-        g_log.debug(messageStream.str());
-        g_log.information("ParaView is not available");
-      }
-    } else {
-      std::stringstream messageStream;
-      messageStream << "ParaView version query failed with code: " << rc;
-      g_log.debug(messageStream.str());
-      g_log.information("ParaView is not available");
-    }
-  } catch (Poco::SystemException &e) {
-    g_log.debug(e.what());
-    g_log.information("ParaView is not available");
-  }
-  return isAvailable;
+bool ConfigServiceImpl::pvPluginsAvailable() const {
+  std::string pvpluginsDir = getString("pvplugins.directory");
+  return !pvpluginsDir.empty();
 }
 
-/*
-Quick check to determine if VATES is installed.
-@return TRUE if available.
-*/
-bool ConfigServiceImpl::quickVatesCheck() const {
-  std::string path = this->getDirectoryOfExecutable();
-
-  Poco::File dir(path);
-  typedef std::vector<std::string> VecFiles;
-
-  VecFiles files;
-  dir.list(files);
-  VecFiles::iterator it = files.begin();
-
-  bool found = false;
-  while (it != files.end()) {
-    std::string file = *it;
-    boost::regex expression("^(VatesSimpleGui)", boost::regex::icase);
-    if (boost::regex_search(file, expression)) {
-      found = true;
-      break;
-    }
-    ++it;
-  }
-  return found;
+/**
+ * Gets the path to the ParaView plugins
+ * @returns A string giving the directory of the ParaView plugins
+ */
+const std::string ConfigServiceImpl::getPVPluginsPath() const {
+  return getString("pvplugins.directory");
 }
 
 /*
@@ -2080,12 +1940,51 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
   return m_proxyInfo;
 }
 
-/**
- * Gets the path to ParaView.
- * @returns The ParaView path.
- */
-const std::string ConfigServiceImpl::getParaViewPath() const {
-  return getString("paraview.path");
+/** Sets the log level priority for the File log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
+void ConfigServiceImpl::setFileLogLevel(int logLevel) {
+  setFilterChannelLogLevel("fileFilterChannel", logLevel);
+}
+/** Sets the log level priority for the Console log channel
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+*/
+void ConfigServiceImpl::setConsoleLogLevel(int logLevel) {
+  setFilterChannelLogLevel("consoleFilterChannel", logLevel);
+}
+
+/** Sets the Log level for a filter channel
+* @param filterChannelName the channel name of the filter channel to change
+* @param logLevel the integer value of the log level to set, 1=Critical, 7=Debug
+* @throws std::invalid_argument if the channel name is incorrect or it is not a
+* filterChannel
+*/
+void ConfigServiceImpl::setFilterChannelLogLevel(
+    const std::string &filterChannelName, int logLevel) {
+  Poco::Channel *channel = NULL;
+  try {
+    channel = Poco::LoggingRegistry::defaultRegistry().channelForName(
+        filterChannelName);
+  } catch (Poco::NotFoundException &) {
+    throw std::invalid_argument(filterChannelName +
+                                " not found in the Logging Registry");
+  }
+
+  auto *filterChannel = dynamic_cast<Poco::FilterChannel *>(channel);
+  if (filterChannel) {
+    filterChannel->setPriority(logLevel);
+    // set root level if required
+    int rootLevel = Poco::Logger::root().getLevel();
+    if (rootLevel < logLevel) {
+      Mantid::Kernel::Logger::setLevelForAll(logLevel);
+    }
+    g_log.log(filterChannelName + " log channel set to " +
+                  Logger::PriorityNames[logLevel] + " priority",
+              static_cast<Logger::Priority>(logLevel));
+  } else {
+    throw std::invalid_argument(filterChannelName +
+                                " was not a filter channel");
+  }
 }
 
 /// \cond TEMPLATE

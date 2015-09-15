@@ -126,7 +126,7 @@ void PeakMarker2D::drawSquare(QPainter& painter)const
 /**
  * Save some peak information.
  */
-void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak, int row)
+void PeakMarker2D::setPeak(const Mantid::Geometry::IPeak& peak, int row)
 {
   m_h = peak.getH();
   m_k = peak.getK();
@@ -139,7 +139,7 @@ void PeakMarker2D::setPeak(const Mantid::API::IPeak& peak, int row)
 /**
  * Return reference to the peak.
  */
-const Mantid::API::IPeak& PeakMarker2D::getPeak() const
+const Mantid::Geometry::IPeak& PeakMarker2D::getPeak() const
 {
   return m_peakOverlay.getPeak(m_row);
 }

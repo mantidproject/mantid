@@ -5,13 +5,6 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
-#include "MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h"
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h"
-#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingPresenter.h"
-
-#include "MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h"
-#include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
-
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "ui_ALCInterface.h"
@@ -22,6 +15,14 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+
+  class ALCDataLoadingPresenter;
+
+  class ALCBaselineModellingPresenter;
+  class ALCBaselineModellingModel;
+
+  class ALCPeakFittingPresenter;
+  class ALCPeakFittingModel;
 
   /** ALCInterface : Custom interface for Avoided Level Crossing analysis
     
@@ -65,6 +66,7 @@ namespace CustomInterfaces
     void switchStep(int newStepIndex);
 
     void exportResults();
+    void importResults();
 
   private:
 

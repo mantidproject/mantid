@@ -2,7 +2,7 @@
 #define LOADPRENEXUSMONITORS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -36,7 +36,7 @@ namespace DataHandling {
 class DLLExport LoadPreNexusMonitors : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
-  LoadPreNexusMonitors() : Mantid::API::Algorithm() {}
+  LoadPreNexusMonitors();
   /// Virtual destructor
   virtual ~LoadPreNexusMonitors() {}
   /// Algorithm's name

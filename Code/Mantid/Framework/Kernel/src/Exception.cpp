@@ -1,6 +1,5 @@
 #include <iostream>
 #include <sstream>
-#include <string>
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
@@ -357,7 +356,9 @@ InternetError::InternetError(const std::string &message, const int &errorCode)
   Copy Constructor
   @param A :: IndexError to copy
 */
-InternetError::InternetError(const InternetError &A) : std::runtime_error(A) {}
+InternetError::InternetError(const InternetError &A)
+    : std::runtime_error(A), outMessage(A.outMessage),
+      m_errorCode(A.m_errorCode) {}
 
 /**
   Writes out the range and limits

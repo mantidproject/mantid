@@ -2,11 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidGeometry/IObjComponent.h"
-#include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
-#include <cfloat>
 
 namespace Mantid {
 namespace Geometry {

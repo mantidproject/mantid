@@ -34,8 +34,8 @@ For information about how to create parameters from a GSAS parameter file see
 
 References
 
-1. R.B. Von Dreele, J.D. Jorgensen & C.G. Windsor, J. Appl. Cryst., 15,
-581-589, 1982
+1. R.B. Von Dreele, J.D. Jorgensen & C.G. Windsor, `J. Appl. Cryst., 15,
+581-589, 1982 <http://dx.doi.org/10.1107/S0021889882012722>`_
 
 The figure below illustrate this peakshape function fitted to a TOF
 peak:
@@ -52,3 +52,5 @@ peak:
    HRPD instrument.
 
 .. categories::
+
+.. sourcelink::

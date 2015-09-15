@@ -17,14 +17,19 @@ class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkSplatterPlot *New();
-  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm)
   double getTime() const;
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetNumberOfPoints(int nPoints);
   void SetTopPercentile(double topPercentile);
   void updateAlgorithmProgress(double progress, const std::string& message);
+  /// Getter for the minimum value of the workspace data
+  double GetMinValue();
+  /// Getter for the maximum value of the workspace data
+  double GetMaxValue();
+  /// Getter for the maximum value of the workspace data
+  const char* GetInstrument();
 protected:
-
   vtkSplatterPlot();
   ~vtkSplatterPlot();
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);

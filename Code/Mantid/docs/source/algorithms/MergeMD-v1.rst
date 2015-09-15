@@ -31,6 +31,7 @@ Usage
 
 .. testcode:: ExMergeMD
 
+   from mantid.api import IMDEventWorkspace
    # Create sample inelastic workspace for MARI instrument containing 1 at all spectra 
    ws1=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10',UnitX='DeltaE')
    AddSampleLog(ws1,'Ei','12.','Number')
@@ -46,7 +47,9 @@ Usage
    SumWS=MergeMD(InputWorkspaces='mdWs1,mdWs2',SplitInto='100,100')
 
     # check it looks like the one we wanted
-   print 'merged workspace of type : {0}\n'.format(type(SumWS)),
+   print 'merged workspace of type: {0}\n'.format(SumWS.id()),
+   # this is how you would check whether it is a general MDEventWorkspace
+   print 'it is a type of MDEventWorkspace: {0}\n'.format(isinstance(SumWS, IMDEventWorkspace)),
    print '****************************************************************'   
    print 'workspace 1 has {0} dimensions with {1} points and {2} events'.format(mdWs1.getNumDims(),mdWs1.getNPoints(),mdWs1.getNEvents());
    d1=mdWs1.getDimension(0);d2=mdWs1.getDimension(1)
@@ -65,7 +68,8 @@ Usage
 
 .. testoutput:: ExMergeMD
 
-   merged workspace of type : <class 'mantid.api._api.IMDEventWorkspace'>
+   merged workspace of type: MDEventWorkspace<MDEvent,2>
+   it is a type of MDEventWorkspace: True
    ****************************************************************
    workspace 1 has 2 dimensions with 18231 points and 18231 events
    with d1 min_max=0.0:5.0, d2 min_max=-10.0:10.0
@@ -78,3 +82,5 @@ Usage
 
 
 .. categories::
+
+.. sourcelink::

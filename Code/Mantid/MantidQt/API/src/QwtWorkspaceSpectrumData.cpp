@@ -1,4 +1,6 @@
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
@@ -22,7 +24,6 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWork
    m_dataIsNormalized(workspace.isDistribution()),
    m_binCentres(false),
    m_logScale(logScale),
-   m_minPositive(0),
    m_isDistribution(false)
 {
   // Actual plotting based on what type of data we have
@@ -31,6 +32,8 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWork
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized||m_isDistribution), workspace).title();
 
+  // Calculate the min and max values
+  calculateYMinAndMax(m_Y, m_minY, m_maxY, m_minPositive);
 }
 
 /// Virtual copy constructor
@@ -123,17 +126,10 @@ size_t QwtWorkspaceSpectrumData::esize() const
  */
 double QwtWorkspaceSpectrumData::getYMin() const
 {
-  auto it = std::min_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale)
+    return m_minPositive;
+  else
+    return m_minY;
 }
 
 /**
@@ -142,17 +138,10 @@ double QwtWorkspaceSpectrumData::getYMin() const
  */
 double QwtWorkspaceSpectrumData::getYMax() const
 {
-  auto it = std::max_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale && m_maxY <= 0)
+    return m_minPositive;
+  else
+    return m_maxY;
 }
 
 /**

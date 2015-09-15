@@ -4,9 +4,11 @@
 #include "MantidCurveFitting/GaussianComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <cmath>
+
 namespace Mantid {
 namespace CurveFitting {
-DECLARE_FUNCTION(GaussianComptonProfile);
+DECLARE_FUNCTION(GaussianComptonProfile)
 
 const char *WIDTH_PARAM = "Width";
 const char *AMP_PARAM = "Intensity";

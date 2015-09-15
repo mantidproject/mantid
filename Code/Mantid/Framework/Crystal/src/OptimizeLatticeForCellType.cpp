@@ -1,6 +1,5 @@
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -12,11 +11,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <iomanip>
-#include <ostream>
-#include <sstream>
 
 using namespace Mantid::Geometry;
 
@@ -127,8 +122,7 @@ void OptimizeLatticeForCellType::exec() {
   }
   // finally do the optimization
   for (size_t i_run = 0; i_run < runWS.size(); i_run++) {
-    DataObjects::PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
-    peakWS = runWS[i_run]->clone();
+    DataObjects::PeaksWorkspace_sptr peakWS(runWS[i_run]->clone().release());
     AnalysisDataService::Instance().addOrReplace("_peaks", peakWS);
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
     std::vector<double> lat(6);

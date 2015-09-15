@@ -1,6 +1,6 @@
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"

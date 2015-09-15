@@ -31,6 +31,19 @@ TableWorkspace::TableWorkspace(size_t nrows)
   setRowCount(nrows);
 }
 
+TableWorkspace::TableWorkspace(const TableWorkspace &other)
+    : ITableWorkspace(other), m_rowCount(0), m_LogManager(new API::LogManager) {
+  setRowCount(other.m_rowCount);
+
+  column_const_it it = other.m_columns.begin();
+  while (it != other.m_columns.end()) {
+    addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+    it++;
+  }
+  // copy logs/properties.
+  m_LogManager = boost::make_shared<API::LogManager>(*(other.m_LogManager));
+}
+
 /// Destructor
 TableWorkspace::~TableWorkspace() {}
 
@@ -193,18 +206,6 @@ bool TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
   }
   return true;
 }
-
-TableWorkspace *TableWorkspace::clone() const {
-  TableWorkspace *copy = new TableWorkspace(this->m_rowCount);
-  column_const_it it = m_columns.begin();
-  while (it != m_columns.end()) {
-    copy->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
-    it++;
-  }
-  // copy logs/properties.
-  copy->m_LogManager = boost::make_shared<API::LogManager>(*this->m_LogManager);
-  return copy;
-};
 
 /**
  * Sort.

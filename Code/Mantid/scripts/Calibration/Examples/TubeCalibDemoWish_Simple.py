@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 #
 # TUBE CALIBRATION DEMONSTRATION PROGRAM FOR WISH
 #
@@ -7,7 +8,6 @@ import numpy
 import tube
 from mantid.simpleapi import *
 
-from tube_calib_fit_params import TubeCalibFitParams
 
 def CalibrateWish( RunNumber, PanelNumber):
     '''
@@ -39,14 +39,14 @@ def CalibrateWish( RunNumber, PanelNumber):
     # Get the calibration and put it into the calibration table
 
     #calibrate the lower tubes
-    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,
+    calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm,\
                                                   rangeList = range(0,76), outputPeak=True)
 
     #calibrate the upper tubes
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,
                                     rangeList = range(76,152),
-                                    calibTable=calibrationTable, #give the calibration table to append data
-                                    outputPeak = peakTable #give peak table to append data
+                                    calibTable=calibrationTable,#give the calibration table to append data
+                                    outputPeak = peakTable#give peak table to append data
                                                  )
 
     print "Got calibration (new positions of detectors)"
@@ -67,6 +67,6 @@ def CalibrateWish( RunNumber, PanelNumber):
     # ==== End of CalibrateWish() ====
 if __name__ == "__main__":
   # this file is found on cycle_11_1
-  RunNumber = 17701
-  PanelNumber = '03'
-  CalibrateWish(RunNumber, PanelNumber)
+    RunNumber = 17701
+    PanelNumber = '03'
+    CalibrateWish(RunNumber, PanelNumber)

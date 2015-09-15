@@ -4,11 +4,8 @@
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -16,12 +13,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <map>
-#include <algorithm>
-#include <boost/tuple/tuple.hpp>
-#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -48,10 +40,10 @@ IntegratePeaksUsingClusters::~IntegratePeaksUsingClusters() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksUsingClusters::name() const {
   return "IntegratePeaksUsingClusters";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegratePeaksUsingClusters::version() const { return 1; };
+int IntegratePeaksUsingClusters::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegratePeaksUsingClusters::category() const {
@@ -128,8 +120,7 @@ void IntegratePeaksUsingClusters::exec() {
   IPeaksWorkspace_sptr inPeakWS = getProperty("PeaksWorkspace");
   IPeaksWorkspace_sptr peakWS = getProperty("OutputWorkspace");
   if (peakWS != inPeakWS) {
-    peakWS = IPeaksWorkspace_sptr(
-        dynamic_cast<IPeaksWorkspace *>(inPeakWS->clone()));
+    peakWS = IPeaksWorkspace_sptr(inPeakWS->clone().release());
   }
 
   {
@@ -171,7 +162,7 @@ void IntegratePeaksUsingClusters::exec() {
   PARALLEL_FOR1(peakWS)
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak &peak = peakWS->getPeak(i);
+    Geometry::IPeak &peak = peakWS->getPeak(i);
     const Mantid::signal_t signalValue = projection.signalAtPeakCenter(
         peak); // No normalization when extracting label ids!
     if (boost::math::isnan(signalValue)) {

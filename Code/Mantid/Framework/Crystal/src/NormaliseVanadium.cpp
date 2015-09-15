@@ -3,14 +3,10 @@
 //----------------------------------------------------------------------
 #include "MantidCrystal/NormaliseVanadium.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/V3D.h"
 
 /*  Following A.J.Schultz's anvred, scaling the vanadium spectra:
  */

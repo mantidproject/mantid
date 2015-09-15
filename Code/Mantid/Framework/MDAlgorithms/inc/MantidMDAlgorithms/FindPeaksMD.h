@@ -3,12 +3,12 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
@@ -59,9 +59,9 @@ private:
 
   /// Run find peaks on an MDEventWorkspace
   template <typename MDE, size_t nd>
-  void findPeaks(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void findPeaks(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
   /// Run find peaks on a histo workspace
-  void findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
+  void findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
 
   /// Output PeaksWorkspace
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
@@ -73,7 +73,7 @@ private:
   double DensityThresholdFactor;
 
   /// Max # of peaks
-  int64_t MaxPeaks;
+  int64_t m_maxPeaks;
 
   /// Flag to include the detectors within the peak
   bool m_addDetectors;
@@ -91,14 +91,14 @@ private:
   /// Instrument
   Mantid::Geometry::Instrument_const_sptr inst;
   /// Run number of the peaks
-  int runNumber;
+  int m_runNumber;
   /// Dimension type
   eDimensionType dimType;
   /// Goniometer matrix
-  Mantid::Kernel::Matrix<double> goniometer;
+  Mantid::Kernel::Matrix<double> m_goniometer;
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_FINDPEAKSMD_H_ */
+#endif /* MANTID_MDALGORITHMS_FINDPEAKSMD_H_ */

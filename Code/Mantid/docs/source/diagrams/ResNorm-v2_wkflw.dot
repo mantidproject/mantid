@@ -1,0 +1,55 @@
+digraph ResNorm2 {
+  label="ResNorm v2 Flowchart"
+  $global_style
+
+  subgraph processes {
+    $process_style
+    ExtractStretch [label="Extract stretch factors (XScaling)"]
+    ExtractScaling [label="Extract scaling factors (Scaling)"]
+  }
+
+  subgraph params {
+    $param_style
+    ResolutionWorkspace
+    VanadiumWorkspace
+    EnergyMin
+    EnergyMax
+    CreateOutput
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    NormaliseToUnity
+    AppendSpectra
+    GroupWorkspaces
+    PlotPeakByLogValue
+    ConvertSpectrumAxis
+    CreateWorkspace_Stretch [label="CreateWorkspace"]
+    CreateWorkspace_Scaling [label="CreateWorkspace"]
+  }
+
+  subgraph values {
+    $value_style
+    FitFunction                 [label="Fit Function"]
+    ConvertSpectrumAxis_Target  [label="ElasticQ"]
+  }
+
+  VanadiumWorkspace           -> ConvertSpectrumAxis
+  ConvertSpectrumAxis_Target  -> ConvertSpectrumAxis      [label="Target"]
+  ResolutionWorkspace         -> NormaliseToUnity
+  NormaliseToUnity            -> AppendSpectra
+  AppendSpectra               -> PlotPeakByLogValue
+  ConvertSpectrumAxis         -> FitFunction
+  FitFunction                 -> PlotPeakByLogValue
+  EnergyMin                   -> PlotPeakByLogValue
+  EnergyMax                   -> PlotPeakByLogValue
+  CreateOutput                -> PlotPeakByLogValue
+  PlotPeakByLogValue          -> ExtractStretch           [label="Parameters"]
+  ExtractStretch              -> CreateWorkspace_Stretch
+  CreateWorkspace_Stretch     -> GroupWorkspaces
+  PlotPeakByLogValue          -> ExtractScaling           [label="Parameters"]
+  ExtractScaling              -> CreateWorkspace_Scaling
+  CreateWorkspace_Scaling     -> GroupWorkspaces
+  GroupWorkspaces             -> OutputWorkspace
+}

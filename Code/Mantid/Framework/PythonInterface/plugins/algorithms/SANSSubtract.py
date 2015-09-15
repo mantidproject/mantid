@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import Direction, FloatBoundedValidator
 import mantid.simpleapi
@@ -96,7 +97,7 @@ class SANSSubtract(PythonAlgorithm):
         data, data_ws_name, dq = self._find_or_load(data_str)
 
         # Load background or get it from the ADS
-        background, back_ws_name, _ = self._find_or_load(background_str)
+        background, _, _ = self._find_or_load(background_str)
 
         # Rebin background to data workspace
         op = mantid.api.AlgorithmManager.createUnmanaged("RebinToWorkspace")
@@ -147,7 +148,7 @@ class SANSSubtract(PythonAlgorithm):
 
         # Save the output to disk as needed
         if len(output_dir)>0:
-            root_name, ext = os.path.splitext(data_ws_name)
+            root_name, _ = os.path.splitext(data_ws_name)
             op = mantid.api.AlgorithmManager.createUnmanaged('SaveCanSAS1D')
             op.initialize()
             op.setChild(True)

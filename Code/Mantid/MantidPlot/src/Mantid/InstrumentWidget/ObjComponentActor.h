@@ -31,14 +31,14 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 namespace Mantid{
-namespace Kernel
-{
-  class V3D;
-}
+  namespace Kernel
+  {
+    class V3D;
+  }
 
-  namespace Geometry{
+  namespace Geometry
+  {
 		class IObjComponent;
-
 	}
 }
 class InstrumentActor;
@@ -56,8 +56,12 @@ public:
   void setColor(const GLColor& c){m_dataColor = c;}
 
 private:
+  void setPickColor(const GLColor& c){m_pickColor = c;}
+
   GLColor m_dataColor;
   GLColor m_pickColor;
+
+  friend class InstrumentActor;
 };
 
 #endif /*OBJCOMPONENT_ACTOR_H_*/

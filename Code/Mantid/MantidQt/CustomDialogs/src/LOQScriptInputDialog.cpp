@@ -13,7 +13,7 @@ namespace MantidQt
 {
 namespace CustomDialogs
 {
-  DECLARE_DIALOG(LOQScriptInputDialog);
+  DECLARE_DIALOG(LOQScriptInputDialog)
 }
 }
 

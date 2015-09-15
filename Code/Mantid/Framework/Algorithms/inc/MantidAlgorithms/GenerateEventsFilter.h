@@ -6,8 +6,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidAPI/ISplittersWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -174,7 +173,7 @@ private:
   DataObjects::EventWorkspace_const_sptr m_dataWS;
 
   /// SplitterWorkspace
-  API::ISplittersWorkspace_sptr m_splitWS;
+  DataObjects::SplittersWorkspace_sptr m_splitWS;
   /// Matrix workspace containing splitters
   API::MatrixWorkspace_sptr m_filterWS;
 
@@ -206,8 +205,8 @@ private:
   /// Processing algorithm type
   bool m_useParallel;
 
-  std::vector<std::vector<Kernel::DateAndTime>> vecSplitterTimeSet;
-  std::vector<std::vector<int>> vecGroupIndexSet;
+  std::vector<std::vector<Kernel::DateAndTime>> m_vecSplitterTimeSet;
+  std::vector<std::vector<int>> m_vecGroupIndexSet;
 };
 
 } // namespace Algorithms

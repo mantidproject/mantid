@@ -9,8 +9,10 @@
 #include <algorithm>
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
@@ -24,8 +26,13 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+
+namespace {
+Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
+}
 
 namespace Mantid {
 namespace CurveFitting {
@@ -93,15 +100,11 @@ void PlotPeakByLogValue::init() {
                   "functions that"
                   "have attribute WorkspaceIndex.");
 
-  std::vector<std::string> minimizerOptions =
-      FuncMinimizerFactory::Instance().getKeys();
   declareProperty("Minimizer", "Levenberg-Marquardt",
-                  boost::make_shared<StringListValidator>(minimizerOptions),
                   "Minimizer to use for fitting. Minimizers available are "
-                  "'Levenberg-Marquardt', 'Simplex', \n"
+                  "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
                   "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
-                  "gradient (Polak-Ribiere imp.)' and 'BFGS'",
-                  Direction::InOut);
+                  "gradient (Polak-Ribiere imp.)' and 'BFGS'");
 
   std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
@@ -110,6 +113,10 @@ void PlotPeakByLogValue::init() {
                   "Cost functions to use for fitting. Cost functions available "
                   "are 'Least squares' and 'Ignore positive peaks'",
                   Direction::InOut);
+
+  declareProperty("MaxIterations", 500,
+                  "Stop after this number of iterations if a good fit is not "
+                  "found");
 
   declareProperty("CreateOutput", false, "Set to true to create output "
                                          "workspaces with the results of the "
@@ -141,7 +148,7 @@ void PlotPeakByLogValue::exec() {
   bool createFitOutput = getProperty("CreateOutput");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
-  std::string baseName = getPropertyValue("OutputWorkspace");
+  m_baseName = getPropertyValue("OutputWorkspace");
 
   bool isDataName = false; // if true first output column is of type string and
                            // is the data source name
@@ -151,9 +158,11 @@ void PlotPeakByLogValue::exec() {
     result->addColumn("str", "Source name");
     isDataName = true;
   } else if (logName.empty()) {
-    result->addColumn("double", "axis-1");
+    auto col = result->addColumn("double", "axis-1");
+    col->setPlotType(1); // X-values inplots
   } else {
-    result->addColumn("double", logName);
+    auto col = result->addColumn("double", logName);
+    col->setPlotType(1); // X-values inplots
   }
   // Create an instance of the fitting function to obtain the names of fitting
   // parameters
@@ -221,7 +230,13 @@ void PlotPeakByLogValue::exec() {
       double logValue = 0;
       if (logName.empty()) {
         API::Axis *axis = data.ws->getAxis(1);
-        logValue = (*axis)(j);
+        if(dynamic_cast<BinEdgeAxis *>(axis)) {
+          double lowerEdge((*axis)(j));
+          double upperEdge((*axis)(j+1));
+          logValue = lowerEdge + (upperEdge - lowerEdge) / 2;
+        }
+        else
+          logValue = (*axis)(j);
       } else if (logName != "SourceName") {
         Kernel::Property *prop = data.ws->run().getLogData(logName);
         if (!prop) {
@@ -230,6 +245,10 @@ void PlotPeakByLogValue::exec() {
         }
         TimeSeriesProperty<double> *logp =
             dynamic_cast<TimeSeriesProperty<double> *>(prop);
+        if (!logp) {
+          throw std::runtime_error("Failed to cast " + logName +
+                                   " to TimeSeriesProperty");
+        }
         logValue = logp->lastValue();
       }
 
@@ -244,7 +263,7 @@ void PlotPeakByLogValue::exec() {
                       << " with " << std::endl;
         g_log.debug() << ifun->asString() << std::endl;
 
-        std::string spectrum_index = boost::lexical_cast<std::string>(j);
+        const std::string spectrum_index = boost::lexical_cast<std::string>(j);
         std::string wsBaseName = "";
 
         if (createFitOutput)
@@ -259,8 +278,11 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
-        fit->setPropertyValue("Minimizer", getPropertyValue("Minimizer"));
+        fit->setPropertyValue(
+            "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
+        fit->setPropertyValue("MaxIterations",
+                              getPropertyValue("MaxIterations"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
         fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
@@ -324,19 +346,30 @@ void PlotPeakByLogValue::exec() {
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
     groupAlg->setProperty("OutputWorkspace",
-                          baseName + "_NormalisedCovarianceMatrices");
+                          m_baseName + "_NormalisedCovarianceMatrices");
     groupAlg->execute();
 
     groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
-    groupAlg->setProperty("OutputWorkspace", baseName + "_Parameters");
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Parameters");
     groupAlg->execute();
 
     groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", fit_workspaces);
-    groupAlg->setProperty("OutputWorkspace", baseName + "_Workspaces");
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Workspaces");
+    groupAlg->execute();
+  }
+
+  for (auto it = m_minimizerWorkspaces.begin();
+       it != m_minimizerWorkspaces.end(); ++it) {
+    const std::string paramName = (*it).first;
+    API::IAlgorithm_sptr groupAlg =
+        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", (*it).second);
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);
     groupAlg->execute();
   }
 }
@@ -551,6 +584,40 @@ PlotPeakByLogValue::makeNames() const {
     nameList.push_back(InputData(name, wi, spec, period, start, end));
   }
   return nameList;
+}
+
+/**
+ * Formats the minimizer string for a given spectrum from a given workspace.
+ *
+ * @param wsName Name of workspace being fitted
+ * @param specIndex Index of spectrum being fitted
+ * @return Formatted minimizer string
+ */
+std::string
+PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
+                                       const std::string &specIndex) {
+  std::string format = getPropertyValue("Minimizer");
+  std::string wsBaseName = wsName + "_" + specIndex;
+  boost::replace_all(format, "$wsname", wsName);
+  boost::replace_all(format, "$wsindex", specIndex);
+  boost::replace_all(format, "$basename", wsBaseName);
+  boost::replace_all(format, "$outputname", m_baseName);
+
+  auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(format);
+  auto minimizerProps = minimizer->getProperties();
+  for (auto it = minimizerProps.begin(); it != minimizerProps.end(); ++it) {
+    Mantid::API::WorkspaceProperty<> *wsProp =
+        dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
+    if (wsProp) {
+      std::string wsPropValue = (*it)->value();
+      if (wsPropValue != "") {
+        std::string wsPropName = (*it)->name();
+        m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
+      }
+    }
+  }
+
+  return format;
 }
 
 } // namespace CurveFitting

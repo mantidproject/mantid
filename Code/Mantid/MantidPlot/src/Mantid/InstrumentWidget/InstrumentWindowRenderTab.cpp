@@ -18,7 +18,6 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QSignalMapper>
-#include <QMessageBox>
 #include <QToolTip>
 
 #include <qwt_scale_widget.h>
@@ -48,6 +47,7 @@ InstrumentWindowTab(instrWindow)
   connect(m_instrWindow,SIGNAL(colorMapMinValueChanged(double)),this,SLOT(setMinValue(double)));
   connect(m_instrWindow,SIGNAL(colorMapRangeChanged(double,double)),this,SLOT(setRange(double,double)));
   connect(m_instrWindow,SIGNAL(scaleTypeChanged(int)),this,SLOT(scaleTypeChanged(int)));
+  connect(m_instrWindow,SIGNAL(nthPowerChanged(double)),this,SLOT(nthPowerChanged(double)));
   connect(m_instrWindow,SIGNAL(glOptionChanged(bool)),this,SLOT(glOptionChanged(bool)));
 
   // Surface type controls
@@ -168,6 +168,7 @@ InstrumentWindowTab(instrWindow)
   // Colormap widget
   m_colorMapWidget = new ColorMapWidget(0,this);
   connect(m_colorMapWidget, SIGNAL(scaleTypeChanged(int)), m_instrWindow, SLOT(changeScaleType(int)));
+  connect(m_colorMapWidget, SIGNAL(nthPowerChanged(double)), m_instrWindow, SLOT(changeNthPower(double)));
   connect(m_colorMapWidget,SIGNAL(minValueChanged(double)),m_instrWindow, SLOT(changeColorMapMinValue(double)));
   connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),m_instrWindow, SLOT(changeColorMapMaxValue(double)));
 
@@ -650,6 +651,11 @@ void InstrumentWindowRenderTab::colorMapChanged()
 void InstrumentWindowRenderTab::scaleTypeChanged(int type)
 {
     setScaleType((GraphOptions::ScaleType)type);
+}
+
+void InstrumentWindowRenderTab::nthPowerChanged(double nth_power)
+{
+    m_colorMapWidget->setNthPower(nth_power);
 }
 
 /**

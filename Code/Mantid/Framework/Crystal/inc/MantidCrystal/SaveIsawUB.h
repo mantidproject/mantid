@@ -64,7 +64,7 @@ private:
   void exec();
 
   // Calculates the error in the volume
-  double getErrorVolume(Geometry::OrientedLattice lattice);
+  double getErrorVolume(const Geometry::OrientedLattice &lattice);
 };
 
 } // namespace Mantid

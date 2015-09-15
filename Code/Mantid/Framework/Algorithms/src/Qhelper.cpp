@@ -24,6 +24,46 @@ using namespace Geometry;
   @param detectAdj (PixelAdj) passing NULL for this wont raise an error, if set
   it will be checked this workspace has as many histograms as dataWS each with
   one bin
+  @param qResolution: the QResolution workspace
+  @throw invalid_argument if the workspaces are not mututially compatible
+*/
+void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
+                           API::MatrixWorkspace_const_sptr binAdj,
+                           API::MatrixWorkspace_const_sptr detectAdj,
+                           API::MatrixWorkspace_const_sptr qResolution) {
+
+  // Check the compatibility of dataWS, binAdj and detectAdj
+  examineInput(dataWS, binAdj, detectAdj);
+
+  // Check the compatibility of the QResolution workspace
+  if (qResolution) {
+    // We require the same number of histograms
+    if (qResolution->getNumberHistograms() != dataWS->getNumberHistograms()) {
+      throw std::invalid_argument("The QResolution should have one spectrum"
+                                   "per spectrum of the input workspace");
+    }
+
+    // We require the same binning for the input workspace and the q resolution
+    // workspace
+    MantidVec::const_iterator reqX = dataWS->readX(0).begin();
+    MantidVec::const_iterator qResX = qResolution->readX(0).begin();
+    for (; reqX != dataWS->readX(0).end(); ++reqX, ++qResX) {
+      if (*reqX != *qResX) {
+        throw std::invalid_argument("The QResolution needs to have the same binning as"
+                                    "as the input workspace.");
+      }
+    }
+  }
+}
+
+
+/** Checks if workspaces input to Q1D or Qxy are reasonable
+  @param dataWS data workspace
+  @param binAdj (WavelengthAdj) workpace that will be checked to see if it has
+  one spectrum and the same number of bins as dataWS
+  @param detectAdj (PixelAdj) passing NULL for this wont raise an error, if set
+  it will be checked this workspace has as many histograms as dataWS each with
+  one bin
   @throw invalid_argument if the workspaces are not mututially compatible
 */
 void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
@@ -102,6 +142,7 @@ void Qhelper::examineInput(API::MatrixWorkspace_const_sptr dataWS,
     }
   }
 }
+
 
 /** Finds the first index number of the first wavelength bin that should
 * included based on the

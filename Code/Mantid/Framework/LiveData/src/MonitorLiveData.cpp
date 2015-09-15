@@ -27,7 +27,7 @@ MonitorLiveData::~MonitorLiveData() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MonitorLiveData::name() const { return "MonitorLiveData"; };
+const std::string MonitorLiveData::name() const { return "MonitorLiveData"; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MonitorLiveData::category() const {
@@ -35,7 +35,7 @@ const std::string MonitorLiveData::category() const {
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MonitorLiveData::version() const { return 1; };
+int MonitorLiveData::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

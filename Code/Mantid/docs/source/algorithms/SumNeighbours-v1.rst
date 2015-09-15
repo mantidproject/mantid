@@ -10,7 +10,7 @@ Description
 -----------
 
 The algorithm looks through the :ref:`Instrument <Instrument>` to find all
-the `RectangularDetectors <http://www.mantidproject.org/RectangularDetector>`__ defined. For each
+the :ref:`RectangularDetectors <RectangularDetector>` defined. For each
 detector, the SumX\*SumY neighboring event lists are summed together and
 saved in the output workspace as a single spectrum. Therefore, the
 output workspace will have 1/(SumX\*SumY) \* the original number of
@@ -39,3 +39,5 @@ Output:
 
 
 .. categories::
+
+.. sourcelink::
