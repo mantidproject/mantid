@@ -146,7 +146,9 @@ if [[ "$BUILDPKG" == true ]]; then
   # Set some variables relating to the linux packages
   if [[ $(uname) != 'Darwin' ]]; then
     # Use different suffix for linux builds
-    if [[ ${JOB_NAME} == *master* ]]; then
+    if [[ ${JOB_NAME} == *release* ]]; then
+      # do nothing
+    elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
       PACKAGE_SUFFIX="mantidunstable-pvnext"
