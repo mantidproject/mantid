@@ -43,7 +43,7 @@ namespace MantidQt {
 
 
     // Column numbers to find data in model
-    struct ColNumbers {
+    struct DLLExport ColNumbers {
 
       ColNumbers(const int runs_column, const int transmission_column, const int options_column,
                  const int angle_column, const int qmin_column, const int qmax_column,
@@ -62,39 +62,39 @@ namespace MantidQt {
       const int group;
     };
 
-    std::string plot1DString(const std::vector<std::string> & ws_names,
+    std::string DLLExport plot1DString(const std::vector<std::string> & ws_names,
                              const std::string & title);
 
-    std::string tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows);
+    std::string DLLExport tableString(QReflTableModel_sptr model, ColNumbers col_nums, const std::set<int> & rows);
 
-    std::string titleString(const std::string & wsName);
+    std::string DLLExport titleString(const std::string & wsName);
 
-    boost::tuple<std::string, std::string>
+    boost::tuple<std::string, std::string> DLLExport
       stitchGroupString(const std::set<int> & rows, const std::string & instrument, QReflTableModel_sptr model,
                         ColNumbers col_nums);
 
-    std::string plotsFunctionString();
+    std::string DLLExport plotsFunctionString();
 
-    std::string plotsString(const std::vector<std::string> & unstitched_ws,
+    std::string DLLExport plotsString(const std::vector<std::string> & unstitched_ws,
                             const std::vector<std::string> & IvsLam_ws, const std::string & stitched_wsStr);
 
-    boost::tuple<std::string, std::string, std::string>
+    boost::tuple<std::string, std::string, std::string> DLLExport
       reduceRowString(const int rowNo, const std::string & instrument, QReflTableModel_sptr model, ColNumbers col_nums);
 
     boost::tuple<std::string, std::string> loadWorkspaceString(const std::string & runStr, const std::string & instrument);
 
-    std::string plusString(const std::string & input_name, const std::string & output_name);
+    std::string DLLExport plusString(const std::string & input_name, const std::string & output_name);
 
-    boost::tuple<std::string, std::string> loadRunString(const std::string & run, const std::string & instrument);
+    boost::tuple<std::string, std::string> DLLExport loadRunString(const std::string & run, const std::string & instrument);
 
-    std::string getRunNumber(const std::string & ws_name);
+    std::string DLLExport getRunNumber(const std::string & ws_name);
 
-    boost::tuple<std::string, std::string> scaleString(const std::string & runNo, const double scale);
+    boost::tuple<std::string, std::string> DLLExport scaleString(const std::string & runNo, const double scale);
 
-    boost::tuple<std::string, std::string>
+    boost::tuple<std::string, std::string> DLLExport
       rebinString(const int rowNo, const std::string & runNo, QReflTableModel_sptr model, ColNumbers col_nums);
 
-    boost::tuple<std::string, std::string> transWSString(const std::string & trans_ws_str, const std::string & instrument);
+    boost::tuple<std::string, std::string> DLLExport transWSString(const std::string & trans_ws_str, const std::string & instrument);
 
     class DLLExport ReflGenerateNotebook {
 
