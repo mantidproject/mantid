@@ -25,6 +25,7 @@
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/MdSettings.h"
+#include "MantidQtAPI/SignalBlocker.h"
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/CustomTools.h"
@@ -43,6 +44,7 @@
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 
 #include <qwt_plot_panner.h>
+#include <qwt_plot_rescaler.h>
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -55,6 +57,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using MantidQt::API::SyncedCheckboxes;
+using MantidQt::API::SignalBlocker;
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -81,7 +84,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL){
+      m_peaksSliderWidget(NULL) {
 
   ui.setupUi(this);
 
@@ -96,7 +99,6 @@ SliceViewer::SliceViewer(QWidget *parent)
   // Set up the ColorBarWidget
   m_colorBar = ui.colorBarWidget;
   m_colorBar->setViewRange(0, 10);
-  m_colorBar->setLog(true);
   QObject::connect(m_colorBar, SIGNAL(changedColorRange(double, double, bool)),
                    this, SLOT(colorRangeChanged()));
 
@@ -170,6 +172,35 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<PeakTransformQLabFactory>());
   this->setAcceptDrops(true);
+
+  // --------- Rescaler --------------------
+  m_rescaler = new QwtPlotRescaler(m_plot->canvas());
+}
+
+void SliceViewer::updateAspectRatios() {
+
+  bool lockAspectRatios = false;
+
+  if (m_aspectRatioType == Guess) {
+    /* Lock aspect ratios, if that feature has been enabled, and if the plot x
+ * and
+ * y units
+ * are suitable.
+*/
+    lockAspectRatios =
+        m_X->getMDUnits().isQUnit() && m_Y->getMDUnits().isQUnit();
+
+  } else {
+    // Lock everything (or not)
+    lockAspectRatios = m_aspectRatioType == All;
+  }
+
+  m_rescaler->setEnabled(lockAspectRatios);
+  m_rescaler->setReferenceAxis(QwtPlot::xBottom);
+  m_rescaler->setAspectRatio(QwtPlot::yLeft, 1.0);
+  m_rescaler->setAspectRatio(QwtPlot::yRight, 0.0);
+  m_rescaler->setAspectRatio(QwtPlot::xTop, 0.0);
+  m_rescaler->setExpandingDirection(QwtPlotRescaler::ExpandBoth);
 }
 
 //------------------------------------------------------------------------------
@@ -177,6 +208,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 SliceViewer::~SliceViewer() {
   saveSettings();
   delete m_data;
+  delete m_rescaler;
   // Don't delete Qt objects, I think these are auto-deleted
 }
 
@@ -185,7 +217,14 @@ SliceViewer::~SliceViewer() {
 void SliceViewer::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
-  bool scaleType = (bool)settings.value("LogColorScale", 0).toInt();
+
+  // Maintain backwards compatibility with use of LogColorScale
+  int scaleType = settings.value("ColorScale", -1).toInt();
+  if (scaleType == -1) {
+    scaleType = settings.value("LogColorScale", 0).toInt();
+  }
+
+  double nth_power = settings.value("PowerScaleExponent", 2.0).toDouble();
 
   // Load Colormap. If the file is invalid the default stored colour map is
   // used.
@@ -200,7 +239,8 @@ void SliceViewer::loadSettings() {
   // Set values from settings
   if (!m_currentColorMapFile.isEmpty())
     loadColorMap(m_currentColorMapFile);
-  m_colorBar->setLog(scaleType);
+  m_colorBar->setScale(scaleType);
+  m_colorBar->setExponent(nth_power);
   // Last saved image file
   m_lastSavedFile = settings.value("LastSavedImagePath", "").toString();
 
@@ -212,6 +252,9 @@ void SliceViewer::loadSettings() {
       static_cast<Mantid::API::MDNormalization>(norm);
   this->setNormalization(normaliz);
 
+  const int aspectRatioOption = settings.value("LockAspectRatios", 0).toInt();
+  this->setAspectRatio(static_cast<AspectRatioType>(aspectRatioOption));
+
   settings.endGroup();
 }
 
@@ -221,12 +264,15 @@ void SliceViewer::saveSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
   settings.setValue("ColormapFile", m_currentColorMapFile);
-  settings.setValue("LogColorScale", (int)m_colorBar->getLog());
+  settings.setValue("ColorScale", m_colorBar->getScale());
+  settings.setValue("PowerScaleExponent", m_colorBar->getExponent());
   settings.setValue("LastSavedImagePath", m_lastSavedFile);
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
   settings.setValue("Normalization",
-                      static_cast<int>(this->getNormalization()));
+                    static_cast<int>(this->getNormalization()));
+
+  settings.setValue("LockAspectRatios", static_cast<int>(m_aspectRatioType));
   settings.endGroup();
 }
 //------------------------------------------------------------------------------
@@ -236,11 +282,12 @@ void SliceViewer::saveSettings() {
 * @param mode the mode of the icon
 * @param state on or off state of the icon
 */
-void SliceViewer::setIconFromString(QAbstractButton* btn, const std::string& iconName,
-    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state = QIcon::State::Off)
-{
+void SliceViewer::setIconFromString(QAbstractButton *btn,
+                                    const std::string &iconName,
+                                    QIcon::Mode mode = QIcon::Mode::Normal,
+                                    QIcon::State state = QIcon::State::Off) {
   QIcon icon;
-  icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
+  icon.addFile(QString::fromStdString(iconName), QSize(), mode, state);
   btn->setIcon(icon);
 }
 /** set an icon given the control and a string.
@@ -249,15 +296,16 @@ void SliceViewer::setIconFromString(QAbstractButton* btn, const std::string& ico
 * @param mode the mode of the icon
 * @param state on or off state of the icon
 */
-void SliceViewer::setIconFromString(QAction* action,const std::string& iconName,
-    QIcon::Mode mode = QIcon::Mode::Normal, QIcon::State state= QIcon::State::Off)
-{
+void SliceViewer::setIconFromString(QAction *action,
+                                    const std::string &iconName,
+                                    QIcon::Mode mode = QIcon::Mode::Normal,
+                                    QIcon::State state = QIcon::State::Off) {
   QIcon icon;
-  icon.addFile(QString::fromStdString(iconName), QSize(), mode,state);
+  icon.addFile(QString::fromStdString(iconName), QSize(), mode, state);
   action->setIcon(icon);
 }
 
-  //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Create the menus */
 void SliceViewer::initMenus() {
   // ---------------------- Build the menu bar -------------------------
@@ -301,7 +349,7 @@ void SliceViewer::initMenus() {
   m_menuView = new QMenu("&View", this);
   action = new QAction(QPixmap(), "&Reset Zoom", this);
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
-  setIconFromString(action,g_iconViewFull);
+  setIconFromString(action, g_iconViewFull);
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "&Set X/Y View Size", this);
@@ -363,14 +411,16 @@ void SliceViewer::initMenus() {
   QActionGroup *group = new QActionGroup(this);
 
   const QString normalization = " Normalization";
-  action = new QAction(QPixmap(), SliceViewer::NoNormalizationKey + normalization, this);
+  action = new QAction(QPixmap(),
+                       SliceViewer::NoNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNone()));
   m_actionNormalizeNone = action;
 
-  action = new QAction(QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
+  action = new QAction(
+      QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -378,7 +428,8 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationVolume()));
   m_actionNormalizeVolume = action;
 
-  action = new QAction(QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
+  action = new QAction(
+      QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -386,11 +437,40 @@ void SliceViewer::initMenus() {
           SLOT(changeNormalizationNumEvents()));
   m_actionNormalizeNumEvents = action;
 
+  // Mirror the menu options directly in the Ui.
   ui.comboNormalization->addItem(SliceViewer::NoNormalizationKey);
   ui.comboNormalization->addItem(SliceViewer::VolumeNormalizationKey);
   ui.comboNormalization->addItem(SliceViewer::NumEventsNormalizationKey);
 
-  connect(this->ui.comboNormalization, SIGNAL(currentIndexChanged(const QString&)), SLOT(onNormalizationChanged(const QString&)));
+  connect(this->ui.comboNormalization,
+          SIGNAL(currentIndexChanged(const QString &)),
+          SLOT(onNormalizationChanged(const QString &)));
+
+  m_menuView->addSeparator();
+
+  group = new QActionGroup(this);
+
+  action = new QAction(QPixmap(), "Lock Aspect Ratios (Guess)", this);
+  action->setCheckable(true);
+  action->setChecked(true); // This is our default
+  action->setActionGroup(group);
+  m_lockAspectRatiosActionGuess = action;
+  connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioGuess()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Lock Aspect Ratios (All)", this);
+  action->setCheckable(true);
+  action->setActionGroup(group);
+  m_lockAspectRatiosActionAll = action;
+  connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioAll()));
+  m_menuView->addAction(action);
+
+  action = new QAction(QPixmap(), "Unlock Aspect Ratios (All)", this);
+  action->setCheckable(true);
+  action->setActionGroup(group);
+  m_lockAspectRatiosActionUnlock = action;
+  connect(action, SIGNAL(triggered()), this, SLOT(changeAspectRatioUnlock()));
+  m_menuView->addAction(action);
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
@@ -399,19 +479,15 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
   m_menuColorOptions->addAction(action);
 
-  action = new QAction(QPixmap(), "&Current View range", this);
+  action = new QAction(QPixmap(), "&Current View Range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
-  {
-    setIconFromString(action,g_iconZoomPlus);
-  }
+  { setIconFromString(action, g_iconZoomPlus); }
   m_menuColorOptions->addAction(action);
 
-  action = new QAction(QPixmap(), "&Full range", this);
+  action = new QAction(QPixmap(), "&Full Range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
-  {
-    setIconFromString(action,g_iconZoomMinus);
-  }
+  { setIconFromString(action, g_iconZoomMinus); }
   m_menuColorOptions->addAction(action);
 
   action = new QAction(QPixmap(), "Transparent &Zeros", this);
@@ -781,6 +857,27 @@ void SliceViewer::setColorScaleAutoSlice() {
   this->updateDisplay();
 }
 
+void SliceViewer::setAspectRatio(AspectRatioType type) {
+
+  SignalBlocker<QAction> actionGuess(m_lockAspectRatiosActionGuess);
+  SignalBlocker<QAction> actionAll(m_lockAspectRatiosActionAll);
+  SignalBlocker<QAction> actionUnlock(m_lockAspectRatiosActionUnlock);
+
+  actionGuess->setChecked(type == Guess);
+  actionAll->setChecked(type == All);
+  actionUnlock->setChecked(type == Unlock);
+
+  m_aspectRatioType = type;
+  // Redraw the view.
+  this->updateDisplay(true /*force axis reset*/);
+}
+
+void SliceViewer::changeAspectRatioGuess() { this->setAspectRatio(Guess); }
+
+void SliceViewer::changeAspectRatioAll() { this->setAspectRatio(All); }
+
+void SliceViewer::changeAspectRatioUnlock() { this->setAspectRatio(Unlock); }
+
 //------------------------------------------------------------------------------
 /// Slot called when the ColorBarWidget changes the range of colors
 void SliceViewer::colorRangeChanged() {
@@ -794,9 +891,8 @@ void SliceViewer::colorRangeChanged() {
  * @param transparent :: true if you want zeros to be transparent.
  */
 void SliceViewer::setTransparentZeros(bool transparent) {
-  m_actionTransparentZeros->blockSignals(true);
-  m_actionTransparentZeros->setChecked(transparent);
-  m_actionTransparentZeros->blockSignals(false);
+  SignalBlocker<QAction> transparentZeros(m_actionTransparentZeros);
+  transparentZeros->setChecked(transparent);
   // Set and display
   m_data->setZerosAsNan(transparent);
   this->updateDisplay();
@@ -820,13 +916,13 @@ void SliceViewer::changeNormalizationNumEvents() {
  * @brief Slot to handle change in normalization kicked-off from the combo box.
  * @param normalizationKey : Text key for type of normalization switched to.
  */
-void SliceViewer::onNormalizationChanged(const QString& normalizationKey) {
+void SliceViewer::onNormalizationChanged(const QString &normalizationKey) {
   if (normalizationKey == SliceViewer::NoNormalizationKey) {
-      changeNormalizationNone();
+    changeNormalizationNone();
   } else if (normalizationKey == SliceViewer::VolumeNormalizationKey) {
-      changeNormalizationVolume();
+    changeNormalizationVolume();
   } else {
-      changeNormalizationNumEvents();
+    changeNormalizationNumEvents();
   }
 }
 
@@ -839,29 +935,28 @@ void SliceViewer::onNormalizationChanged(const QString& normalizationKey) {
  */
 void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
                                    bool update) {
-  m_actionNormalizeNone->blockSignals(true);
-  m_actionNormalizeVolume->blockSignals(true);
-  m_actionNormalizeNumEvents->blockSignals(true);
 
-  m_actionNormalizeNone->setChecked(norm == Mantid::API::NoNormalization);
-  m_actionNormalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
-  m_actionNormalizeNumEvents->setChecked(norm ==
-                                         Mantid::API::NumEventsNormalization);
+  {
+    SignalBlocker<QAction> normalizeNone(m_actionNormalizeNone);
+    SignalBlocker<QAction> normalizeVolume(m_actionNormalizeVolume);
+    SignalBlocker<QAction> normalizeNumEvents(m_actionNormalizeNumEvents);
 
-  m_actionNormalizeNone->blockSignals(false);
-  m_actionNormalizeVolume->blockSignals(false);
-  m_actionNormalizeNumEvents->blockSignals(false);
+    normalizeNone->setChecked(norm == Mantid::API::NoNormalization);
+    normalizeVolume->setChecked(norm == Mantid::API::VolumeNormalization);
+    normalizeNumEvents->setChecked(norm == Mantid::API::NumEventsNormalization);
+  }
 
   // Sync the normalization combobox.
-  this->ui.comboNormalization->blockSignals(true);
-  if(norm == Mantid::API::NoNormalization) {
-      this->ui.comboNormalization->setCurrentIndex(0);
-  } else if (norm == Mantid::API::VolumeNormalization) {
-      this->ui.comboNormalization->setCurrentItem(1);
-  } else {
-      this->ui.comboNormalization->setCurrentIndex(2);
+  {
+    SignalBlocker<QComboBox> comboNormalization(ui.comboNormalization);
+    if (norm == Mantid::API::NoNormalization) {
+      comboNormalization->setCurrentIndex(0);
+    } else if (norm == Mantid::API::VolumeNormalization) {
+      comboNormalization->setCurrentItem(1);
+    } else {
+      comboNormalization->setCurrentIndex(2);
+    }
   }
-  this->ui.comboNormalization->blockSignals(false);
 
   m_data->setNormalization(norm);
   if (update)
@@ -937,7 +1032,8 @@ void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
 
   if (checked) {
-    setIconFromString(ui.btnDoLine,g_iconCutOn,QIcon::Mode::Normal,QIcon::State::Off);
+    setIconFromString(ui.btnDoLine, g_iconCutOn, QIcon::Mode::Normal,
+                      QIcon::State::Off);
     QString text;
     if (m_lineOverlay->getCreationMode())
       text = "Click and drag to draw an cut line.\n"
@@ -949,7 +1045,8 @@ void SliceViewer::LineMode_toggled(bool checked) {
   if (!checked) {
     // clear the old line
     clearLine();
-    setIconFromString(ui.btnDoLine,g_iconCut,QIcon::Mode::Normal,QIcon::State::On);
+    setIconFromString(ui.btnDoLine, g_iconCut, QIcon::Mode::Normal,
+                      QIcon::State::On);
   }
   emit showLineViewer(checked);
 }
@@ -982,16 +1079,18 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
       m_lineOverlay->setSnapEnabled(true);
       m_lineOverlay->setSnapX(dlg->getSnapX());
       m_lineOverlay->setSnapY(dlg->getSnapY());
-      setIconFromString(ui.btnSnapToGrid,g_iconGridOn, QIcon::Normal, QIcon::On);
+      setIconFromString(ui.btnSnapToGrid, g_iconGridOn, QIcon::Normal,
+                        QIcon::On);
     } else {
       // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
       m_lineOverlay->setSnapEnabled(false);
-      setIconFromString(ui.btnSnapToGrid,g_iconGrid, QIcon::Normal, QIcon::Off);
+      setIconFromString(ui.btnSnapToGrid, g_iconGrid, QIcon::Normal,
+                        QIcon::Off);
     }
   } else {
     m_lineOverlay->setSnapEnabled(false);
-    setIconFromString(ui.btnSnapToGrid,g_iconGrid, QIcon::Normal, QIcon::Off);
+    setIconFromString(ui.btnSnapToGrid, g_iconGrid, QIcon::Normal, QIcon::Off);
   }
 }
 
@@ -1007,7 +1106,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   m_rebinMode = checked;
 
   if (!m_rebinMode) {
-    setIconFromString(ui.btnRebinMode,g_iconRebin, QIcon::Normal, QIcon::Off);
+    setIconFromString(ui.btnRebinMode, g_iconRebin, QIcon::Normal, QIcon::Off);
     // uncheck auto-rebin
     ui.btnAutoRebin->setChecked(false);
     // Remove the overlay WS
@@ -1015,7 +1114,7 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     this->updateDisplay();
   } else {
-    setIconFromString(ui.btnRebinMode,g_iconRebinOn, QIcon::Normal, QIcon::On);
+    setIconFromString(ui.btnRebinMode, g_iconRebinOn, QIcon::Normal, QIcon::On);
     // Start the rebin
     this->rebinParamsChanged();
   }
@@ -1284,6 +1383,12 @@ void SliceViewer::findRangeFull() {
   // Iterate through the entire workspace
   m_colorRangeFull =
       API::SignalRange(*workspace_used, this->getNormalization()).interval();
+  double minR = m_colorRangeFull.minValue();
+  if (minR <= 0 && this->getColorScaleType() == 1) {
+    double maxR = m_colorRangeFull.maxValue();
+    minR = pow(10., log10(maxR)-10.);
+    m_colorRangeFull = QwtDoubleInterval(minR, maxR);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -1428,6 +1533,9 @@ void SliceViewer::updateDisplay(bool resetAxes) {
 
     // Update the pointer to the slider widget.
     updatePeakOverlaySliderWidget();
+
+    // Lock or unlock aspect ratios
+    updateAspectRatios();
   }
 
   // Set the color range
@@ -1641,6 +1749,9 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
 
 //------------------------------------------------------------------------------
 /** Set the color scale limits and log mode via a method call.
+ *  Here for backwards compatibility, setColorScale(double min, double max, int
+ *type)
+ *  should be used instead.
  *
  * @param min :: minimum value corresponding to the lowest color on the map
  * @param max :: maximum value corresponding to the highest color on the map
@@ -1655,7 +1766,27 @@ void SliceViewer::setColorScale(double min, double max, bool log) {
     throw std::invalid_argument(
         "For logarithmic color scales, both minimum and maximum must be > 0.");
   m_colorBar->setViewRange(min, max);
-  m_colorBar->setLog(log);
+  m_colorBar->setScale(log ? 1 : 0);
+  this->colorRangeChanged();
+}
+
+//------------------------------------------------------------------------------
+/** Set the color scale limits and type via a method call.
+ *
+ * @param min :: minimum value corresponding to the lowest color on the map
+ * @param max :: maximum value corresponding to the highest color on the map
+ * @param type :: 0 for linear, 1 for log, 2 for power
+ * @throw std::invalid_argument if max < min or if the values are
+ *        inconsistent with a log color scale
+ */
+void SliceViewer::setColorScale(double min, double max, int type) {
+  if (max <= min)
+    throw std::invalid_argument("Color scale maximum must be > minimum.");
+  if (type == 1 && ((min <= 0) || (max <= 0)))
+    throw std::invalid_argument(
+        "For logarithmic color scales, both minimum and maximum must be > 0.");
+  m_colorBar->setViewRange(min, max);
+  m_colorBar->setScale(type);
   this->colorRangeChanged();
 }
 
@@ -1686,8 +1817,15 @@ void SliceViewer::setColorMapBackground(int r, int g, int b) {
  *        inconsistent with a log color scale
  */
 void SliceViewer::setColorScaleMin(double min) {
-  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleLog());
+  this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleType());
 }
+
+//------------------------------------------------------------------------------
+/** Get the colormap scale type
+ *
+ * @return int corresponding to the selected scale type
+ */
+int SliceViewer::getColorScaleType() { return m_colorBar->getScale(); }
 
 //------------------------------------------------------------------------------
 /** Set the maximum value corresponding to the lowest color on the map
@@ -1697,7 +1835,7 @@ void SliceViewer::setColorScaleMin(double min) {
  *        inconsistent with a log color scale
  */
 void SliceViewer::setColorScaleMax(double max) {
-  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleLog());
+  this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleType());
 }
 
 //------------------------------------------------------------------------------
@@ -1708,7 +1846,8 @@ void SliceViewer::setColorScaleMax(double max) {
  *        with a log color scale
  */
 void SliceViewer::setColorScaleLog(bool log) {
-  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), log);
+  this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(),
+                      (int)log);
 }
 
 //------------------------------------------------------------------------------
@@ -1986,9 +2125,11 @@ void SliceViewer::rebinParamsChanged() {
   alg->setProperty("InputWorkspace", m_ws);
   alg->setProperty("AxisAligned", false);
 
-  // If we are rebinning from an existing MDHistoWorkspace, and that workspace has been created with basis vectors normalized, then we reapply that setting here.
-  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)){
-      alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
+  // If we are rebinning from an existing MDHistoWorkspace, and that workspace
+  // has been created with basis vectors normalized, then we reapply that
+  // setting here.
+  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_ws)) {
+    alg->setProperty("NormalizeBasisVectors", m_ws->allBasisNormalized());
   }
 
   std::vector<double> OutputExtents;
@@ -2142,7 +2283,8 @@ void SliceViewer::disablePeakOverlays() {
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
 
-  setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
+  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
+                    QIcon::Off);
   ui.btnPeakOverlay->setChecked(false);
 }
 
@@ -2196,13 +2338,13 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiSphereFactory>(
             peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
-                    m_spect->yAxis(), numberOfChildPresenters));
+            m_spect->yAxis(), numberOfChildPresenters));
     // Candiate for plotting as a markers of peak positions
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiCrossFactory>(
             m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), m_spect->xAxis(),
-                    m_spect->yAxis(), numberOfChildPresenters));
+            m_plot->canvas(), m_spect->xAxis(), m_spect->yAxis(),
+            numberOfChildPresenters));
     try {
       m_peaksPresenter->addPeaksPresenter(
           boost::make_shared<ConcretePeaksPresenter>(
@@ -2218,8 +2360,9 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
-  
-  setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
+
+  setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
+                    QIcon::Off);
   ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
@@ -2246,10 +2389,12 @@ void SliceViewer::peakOverlay_clicked() {
     disablePeakOverlays();
   }
   if (m_peaksPresenter->size() > 0) {
-    setIconFromString(ui.btnPeakOverlay,g_iconPeakListOn, QIcon::Normal, QIcon::On);
+    setIconFromString(ui.btnPeakOverlay, g_iconPeakListOn, QIcon::Normal,
+                      QIcon::On);
     ui.btnPeakOverlay->setChecked(true);
   } else {
-    setIconFromString(ui.btnPeakOverlay,g_iconPeakList, QIcon::Normal, QIcon::Off);
+    setIconFromString(ui.btnPeakOverlay, g_iconPeakList, QIcon::Normal,
+                      QIcon::Off);
     ui.btnPeakOverlay->setChecked(false);
   }
 }
@@ -2401,7 +2546,6 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     }
   }
 }
-
 
 } // namespace
 }

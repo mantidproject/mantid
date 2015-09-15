@@ -6,13 +6,13 @@
 #include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkUnsignedCharArray.h>
-#include <vtkUnstructuredGrid.h>
+#include <vtkPointSet.h>
 #include <vtkSmartPointer.h>
 #include <vtkMatrix4x4.h>
 #include <vtkPVChangeOfBasisHelper.h>
+#include <vtkInformation.h>
 
 #include <stdexcept>
-
 
 namespace {
 Mantid::Kernel::Logger g_log("vtkDataSetTOScaledDataSet");
@@ -22,67 +22,84 @@ namespace Mantid {
 namespace VATES {
 /**
  * Standard constructor for object.
- * @param input : The dataset to scale
- * @param output : The resulting scaled dataset
  */
-vtkDataSetToScaledDataSet::vtkDataSetToScaledDataSet(
-    vtkUnstructuredGrid *input, vtkUnstructuredGrid *output)
-    : m_inputData(input), m_outputData(output), m_xScaling(1.0),
-      m_yScaling(1.0), m_zScaling(1.0), m_isInitialised(false) {
-  if (NULL == m_inputData) {
-    throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with "
-                             "NULL input vtkUnstructuredGrid");
-  }
-  if (NULL == m_outputData) {
-    throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with "
-                             "NULL output vtkUnstructuredGrid");
-  }
+vtkDataSetToScaledDataSet::vtkDataSetToScaledDataSet() {
 }
 
 vtkDataSetToScaledDataSet::~vtkDataSetToScaledDataSet() {}
 
 /**
- * Set the scaling factors for the data, once run, the object is now
- * initialised.
+ * Process the input data. First, scale a copy of the points and apply
+ * that to the output data. Next, update the metadata for range information.
+ *
+ * This is a data source method.
+ *
  * @param xScale : Scale factor for the x direction
  * @param yScale : Scale factor for the y direction
  * @param zScale : Scale factor for the z direction
+ * @param inputData : Input point data set to scale
+ * @param info : info to obtain the output data set from.
+ * @return The resulting scaled dataset
  */
-void vtkDataSetToScaledDataSet::initialize(double xScale, double yScale,
-                                           double zScale) {
-  m_xScaling = xScale;
-  m_yScaling = yScale;
-  m_zScaling = zScale;
-  m_isInitialised = true;
+vtkPointSet *
+vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
+                                   vtkPointSet *inputData, vtkInformation* info) {
+
+  // Extract output dataset from information.
+  vtkPointSet *outputData = vtkPointSet::SafeDownCast(info->Get(vtkDataObject::DATA_OBJECT()));
+
+  return execute(xScale, yScale, zScale, inputData, outputData);
+
 }
+
+
+
 
 /**
  * Process the input data. First, scale a copy of the points and apply
  * that to the output data. Next, update the metadata for range information.
+ *
+ * This is a data source method.
+ *
+ * @param xScale : Scale factor for the x direction
+ * @param yScale : Scale factor for the y direction
+ * @param zScale : Scale factor for the z direction
+ * @param inputData : The dataset to scale
+ * @param outputData : The output dataset. Optional. If not specified or null, new one created.
+ * @return The resulting scaled dataset
  */
-void vtkDataSetToScaledDataSet::execute() {
-  if (!m_isInitialised) {
-    throw std::runtime_error(
-        "vtkDataSetToScaledDataSet needs initialize run before executing");
+vtkPointSet *
+vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
+                                   vtkPointSet *inputData, vtkPointSet* outputData) {
+
+  if (NULL == inputData) {
+    throw std::runtime_error("Cannot construct vtkDataSetToScaledDataSet with "
+                             "NULL input vtkPointSet");
   }
 
-  vtkPoints *points = m_inputData->GetPoints();
+  if(outputData == NULL){
+       outputData = inputData->NewInstance();
+  }
+
+  vtkPoints *points = inputData->GetPoints();
 
   double *point;
   vtkPoints *newPoints = vtkPoints::New();
   newPoints->Allocate(points->GetNumberOfPoints());
   for (int i = 0; i < points->GetNumberOfPoints(); i++) {
     point = points->GetPoint(i);
-    point[0] *= m_xScaling;
-    point[1] *= m_yScaling;
-    point[2] *= m_zScaling;
+    point[0] *= xScale;
+    point[1] *= yScale;
+    point[2] *= zScale;
     newPoints->InsertNextPoint(point);
   }
   // Shallow copy the input.
-  m_outputData->ShallowCopy(m_inputData);
+  outputData->ShallowCopy(inputData);
   // Give the output dataset the scaled set of points.
-  m_outputData->SetPoints(newPoints);
-  this->updateMetaData();
+  outputData->SetPoints(newPoints);
+
+  this->updateMetaData(xScale, yScale, zScale, inputData, outputData);
+  return outputData;
 }
 
 /**
@@ -94,18 +111,35 @@ void vtkDataSetToScaledDataSet::execute() {
  * and
  * http://www.paraview.org/ParaView/Doc/Nightly/www/cxx-doc/classvtkPVChangeOfBasisHelper.html
  * for a better understanding.
+ * @param xScale : Scale factor for the x direction
+ * @param yScale : Scale factor for the y direction
+ * @param zScale : Scale factor for the z direction
+ * @param inputData : Input dataset
+ * @param outputData : Output dataset
  */
-void vtkDataSetToScaledDataSet::updateMetaData() {
-  // We need to put the scaling on the diagonal elements of the ChangeOfBasis
-  // (COB) Matrix.
-  vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-      vtkSmartPointer<vtkMatrix4x4>::New();
-  cobMatrix->Identity();
-  cobMatrix->Element[0][0] *= m_xScaling;
-  cobMatrix->Element[1][1] *= m_yScaling;
-  cobMatrix->Element[2][2] *= m_zScaling;
+void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
+                                               double zScale, vtkPointSet *inputData, vtkPointSet *outputData) {
+  // We need to scale the basis vectors of the input ChangeOfBasis
+  // (COB) Matrix and set it as the output COB Matrix.
+  auto cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(inputData);
 
-  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(m_outputData,
+  vtkVector3d u,v,w;
+  if (vtkPVChangeOfBasisHelper::GetBasisVectors(cobMatrix, u, v, w)) {
+    u.Set(u.GetX()*xScale, u.GetY()*xScale, u.GetZ()*xScale);
+    v.Set(v.GetX()*yScale, v.GetY()*yScale, v.GetZ()*yScale);
+    w.Set(w.GetX()*zScale, w.GetY()*zScale, w.GetZ()*zScale);
+    cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(u,v,w);
+  } else {
+    g_log.warning("Could not extract the basis vectors from the Change-of-Basis-Matrix"
+                  "data of the scaled data set.\n");
+    cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    cobMatrix->Identity();
+    cobMatrix->Element[0][0] *= xScale;
+    cobMatrix->Element[1][1] *= yScale;
+    cobMatrix->Element[2][2] *= zScale;
+  }
+
+  if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(outputData,
                                                                    cobMatrix)) {
     g_log.warning("The Change-of-Basis-Matrix could not be added to the field "
                   "data of the scaled data set.\n");
@@ -113,8 +147,8 @@ void vtkDataSetToScaledDataSet::updateMetaData() {
 
   // We also need to update the bounding box for the COB Matrix
   double boundingBox[6];
-  m_inputData->GetBounds(boundingBox);
-  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(m_outputData,
+  inputData->GetBounds(boundingBox);
+  if (!vtkPVChangeOfBasisHelper::AddBoundingBoxInBasis(outputData,
                                                        boundingBox)) {
     g_log.warning("The bounding box could not be added to the field data of "
                   "the scaled data set.\n");

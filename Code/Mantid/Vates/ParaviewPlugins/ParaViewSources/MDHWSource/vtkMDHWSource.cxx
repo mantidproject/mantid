@@ -9,6 +9,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
+
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -213,6 +214,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     std::string error = e.what();
       vtkDebugMacro(<< "Workspace does not have correct information to "
                     << "plot non-orthogonal axes. " << error);
+      // Add the standard change of basis matrix and set the boundaries
+      m_presenter->setDefaultCOBandBoundaries(output);
     }
     m_presenter->setAxisLabels(output);
   }
@@ -234,12 +237,14 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     } else {
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
-      std::vector<int> extents =
-          dynamic_cast<MDHWInMemoryLoadingPresenter *>(m_presenter)
-              ->getExtents();
-      outputVector->GetInformationObject(0)
-          ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
-                static_cast<int>(extents.size()));
+      MDHWInMemoryLoadingPresenter *castPresenter =
+          dynamic_cast<MDHWInMemoryLoadingPresenter *>(m_presenter);
+      if (castPresenter) {
+        std::vector<int> extents = castPresenter->getExtents();
+        outputVector->GetInformationObject(0)
+            ->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), &extents[0],
+                  static_cast<int>(extents.size()));
+      }
       return 1;
     }
   } else //(m_presenter == NULL)
@@ -339,3 +344,5 @@ const char* vtkMDHWSource::GetWorkspaceName()
 {
   return m_wsName.c_str();
 }
+
+

@@ -1165,6 +1165,15 @@ void MDHistoWorkspace::setMDMasking(
   }
 }
 
+/**
+ * Set the masking
+ * @param index : linear index to mask
+ * @param mask : True to mask. False to clear.
+ */
+void MDHistoWorkspace::setMDMaskAt(const size_t& index, bool mask){
+    m_masks[index] = mask;
+}
+
 /// Clear any existing masking.
 void MDHistoWorkspace::clearMDMasking() {
   for (size_t i = 0; i < this->getNPoints(); ++i) {
