@@ -199,10 +199,9 @@ void CreateSampleShapeDialog::update3DView()
 //     "</infinite-cylinder>\n"
 //     "<algebra val=\"((cuboid_1 sphere_1) (# (infcyl_1:(infcyl_2:infcyl_3))))\" />\n";
 
-
   Mantid::Geometry::ShapeFactory sFactory;
   boost::shared_ptr<Mantid::Geometry::Object> shape_sptr = sFactory.createShape(shapexml);
-  //  std::cerr << "\n--------- XML String -----------\n" << shapexml << "\n---------------------\n";
+  //std::cerr << "\n--------- XML String -----------\n" << shapexml << "\n---------------------\n";
   if( shape_sptr == boost::shared_ptr<Mantid::Geometry::Object>() ) return;
   try 
   {
@@ -334,7 +333,6 @@ void CreateSampleShapeDialog::addShape(QAction *shape)
 {
   // Get the selected item
   BinaryTreeWidgetItem *parent = getSelectedItem();
-  if(!parent) return;
   if( parent && parent->childCount() == 2 ) return;
 
   BinaryTreeWidgetItem *child = new BinaryTreeWidgetItem(QStringList(shape->text()));
@@ -344,9 +342,13 @@ void CreateSampleShapeDialog::addShape(QAction *shape)
   {
     m_shapeTree->insertTopLevelItem(0, child);
   }
-  else
+  else if (parent)
   {
     parent->addChildItem(child);
+  }
+  else
+  {
+    return;
   }
 
   // This calls setupDetails
