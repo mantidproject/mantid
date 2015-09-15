@@ -147,16 +147,20 @@ if [[ "$BUILDPKG" == true ]]; then
   if [[ $(uname) != 'Darwin' ]]; then
     # Use different suffix for linux builds
     if [[ ${JOB_NAME} == *release* ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
+      echo "Performing release build" # do nothing
     elif [[ ${JOB_NAME} == *master* ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
       PACKAGE_SUFFIX="nightly"
     elif [[ ${JOB_NAME} == *pvnext* ]]; then
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
       PACKAGE_SUFFIX="mantidunstable-pvnext"
     else
-      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
       PACKAGE_SUFFIX="unstable"
+    fi
+
+    # Only unsuffixed release builds create envvars scripts
+    if [[ ${JOB_NAME} == *release* && -z "$PACKAGE_SUFFIX" ]]; then
+      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON"
+    else
+      PACKAGINGVARS="${PACKAGINGVARS} -DENVVARS_ON_INSTALL=False -DCPACK_SET_DESTDIR=OFF"
     fi
 
     if [ ! -z "$PACKAGE_SUFFIX" ]; then
