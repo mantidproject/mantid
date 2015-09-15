@@ -1611,11 +1611,14 @@ MPI::ExecutionMode Algorithm::getExecutionMode() const {
 
   const auto storageModes = getInputWorkspaceStorageModes();
   const auto executionMode = getParallelExecutionMode(storageModes);
-  if(executionMode == MPI::ExecutionMode::Invalid)
-    throw(std::runtime_error("Algorithm " + name() +
-                             " does not support execution with input "
-                             "workspaces of the following storage types: " +
-                             MPI::toString(storageModes)));
+  if(executionMode == MPI::ExecutionMode::Invalid) {
+    std::string error("Algorithm does not support execution with input "
+                      "workspaces of the following storage types: " +
+                      MPI::toString(storageModes) + ".");
+    getLogger().error() << error << "\n";
+    throw(std::runtime_error(error));
+  }
+  getLogger().notice() << "Running with " + MPI::toString(executionMode) + ".\n";
   return executionMode;
 }
 
@@ -1639,7 +1642,10 @@ void Algorithm::propagateWorkspaceStorageMode() const {
       // This is the reverse cast of what is done in cacheWorkspaceProperties(),
       // so it should never fail.
       const Property &prop = dynamic_cast<Property &>(*wsProp);
-      wsProp->getWorkspace()->setStorageMode(getStorageModeForOutputWorkspace(prop.name()));
+      MPI::StorageMode mode = getStorageModeForOutputWorkspace(prop.name());
+      wsProp->getWorkspace()->setStorageMode(mode);
+      getLogger().notice() << "Set storage mode of output \"" + prop.name() +
+                                  "\" to " + MPI::toString(mode) + ".\n";
     }
 }
 
@@ -1654,9 +1660,10 @@ MPI::StorageMode Algorithm::getStorageModeForOutputWorkspace(
     const std::string &propertyName) const {
   if(m_inputWorkspaceProps.size() == 1)
     return m_inputWorkspaceProps.front()->getWorkspace()->getStorageMode();
-  throw(std::runtime_error(
-      "Could not determine StorageMode for output workspace " + propertyName +
-      "."));
+  std::string error("Could not determine StorageMode for output workspace " +
+                    propertyName + ".");
+  getLogger().error() << error << "\n";
+  throw(std::runtime_error(error));
 }
 
 MPI::ExecutionMode
