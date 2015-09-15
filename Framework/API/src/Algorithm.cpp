@@ -1628,7 +1628,9 @@ std::map<std::string, MPI::StorageMode> Algorithm::getInputWorkspaceStorageModes
     // This is the reverse cast of what is done in cacheWorkspaceProperties(),
     // so it should never fail.
     const Property &prop = dynamic_cast<Property &>(*wsProp);
-    map.emplace(prop.name(), wsProp->getWorkspace()->getStorageMode());
+    // Check if we actually have that input workspace
+    if(wsProp->getWorkspace())
+      map.emplace(prop.name(), wsProp->getWorkspace()->getStorageMode());
   }
   return map;
 }
