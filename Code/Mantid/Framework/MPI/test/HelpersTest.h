@@ -9,9 +9,11 @@ using namespace Mantid::MPI;
 
 class MPIHelpersTest : public CxxTest::TestSuite {
 public:
+  void testCommunicator() {
 #ifdef MPI_BUILD
-  void testCommunicator() { TS_ASSERT_THROWS_NOTHING(communicator()); }
+    TS_ASSERT_THROWS_NOTHING(communicator());
 #endif
+  }
   void testRank() { TS_ASSERT_EQUALS(rank(), 0); }
   void testRootRank() { TS_ASSERT_EQUALS(rootRank(), 0); }
   void testIsRoot() { TS_ASSERT(isRoot()); }
