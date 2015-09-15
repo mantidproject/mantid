@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
+  AlignComponentsTest.py
   ApplyPaalmanPingsCorrectionTest.py
   BayesQuasiTest.py
   CalculateSampleTransmissionTest.py
