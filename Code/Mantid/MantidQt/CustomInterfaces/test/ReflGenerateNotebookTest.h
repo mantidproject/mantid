@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include <gtest\gtest.h>
+#include <gtest/gtest.h>
 
 #include "MantidQtCustomInterfaces/ReflGenerateNotebook.h"
 #include "MantidQtCustomInterfaces/ReflVectorString.h"
