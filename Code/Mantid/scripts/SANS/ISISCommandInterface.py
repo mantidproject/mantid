@@ -502,7 +502,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             shifted_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = shift)
             scaled_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = (1./scale))
             dividend = Cf + shifted_norm_front + Cr
-            divisior = scaled_norm_front + Nr
+            divisor = scaled_norm_front + Nr
             mergedQ = dividend/divisor
             if consider_can:
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
