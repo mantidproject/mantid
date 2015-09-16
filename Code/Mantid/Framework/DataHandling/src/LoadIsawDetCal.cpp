@@ -7,6 +7,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -64,7 +65,7 @@ void LoadIsawDetCal::center(double x, double y, double z, std::string detname,
 /** Initialisation method
 */
 void LoadIsawDetCal::init() {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
+  declareProperty(new WorkspaceProperty<Workspace>(
                       "InputWorkspace", "", Direction::InOut,
                       boost::make_shared<InstrumentValidator>()),
                   "The workspace containing the geometry to be calibrated.");
@@ -87,14 +88,21 @@ void LoadIsawDetCal::init() {
 *  @throw runtime_error Thrown if algorithm cannot execute
 */
 void LoadIsawDetCal::exec() {
-
   // Get the input workspace
-  MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+  Workspace_sptr ws = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
 
   // Get some stuff from the input workspace
-  Instrument_const_sptr inst = inputW->getInstrument();
+  Instrument_sptr inst;
+  if (inputW) {
+    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
+  }
+  else if (inputP) {
+    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
+  }
+
   std::string instname = inst->getName();
-  Geometry::Instrument_sptr instrument(new Geometry::Instrument(instname));
 
   // set-up minimizer
 
@@ -180,17 +188,19 @@ void LoadIsawDetCal::exec() {
       if (instname .compare("WISH") == 0) center(0.0, 0.0, -0.01 * mL1, "undulator", inname);
       else center(0.0, 0.0, -0.01 * mL1, "moderator", inname);
       // mT0 and time of flight are both in microsec
+      if (inputW) {
       API::Run &run = inputW->mutableRun();
       // Check to see if LoadEventNexus had T0 from TOPAZ Parameter file
       if (!run.hasProperty("T0")) {
-        IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
-        alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
-        alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
-        alg1->setProperty("Offset", mT0);
-        alg1->executeAsChildAlg();
-        inputW = alg1->getProperty("OutputWorkspace");
-        // set T0 in the run parameters
-        run.addProperty<double>("T0", mT0, true);
+          IAlgorithm_sptr alg1 = createChildAlgorithm("ChangeBinOffset");
+          alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
+          alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
+          alg1->setProperty("Offset", mT0);
+          alg1->executeAsChildAlg();
+          inputW = alg1->getProperty("OutputWorkspace");
+          // set T0 in the run parameters
+          run.addProperty<double>("T0", mT0, true);
+        }
       }
     }
 
@@ -226,7 +236,7 @@ void LoadIsawDetCal::exec() {
     if (det) {
       detname = det->getName();
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");
-      alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
+      alg1->setProperty<Workspace_sptr>("Workspace", ws);
       alg1->setProperty("ComponentName", detname);
       // Convert from cm to m
       alg1->setProperty("ScaleX", 0.01 * width / det->xsize());
@@ -287,11 +297,16 @@ void LoadIsawDetCal::exec() {
         Rot = Rot * rot0;
       }
 
-      // Need to get the address to the base instrument component
-      Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-
-      // Set or overwrite "rot" instrument parameter.
-      pmap.addQuat(comp.get(), "rot", Rot);
+      if (inputW) {
+        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+        // Set or overwrite "rot" instrument parameter.
+        pmap.addQuat(comp.get(), "rot", Rot);
+      }
+      else if (inputP) {
+        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+         // Set or overwrite "rot" instrument parameter.
+         pmap.addQuat(comp.get(), "rot", Rot);
+      }
     }
     // Loop through tube detectors to match names with number from DetCal file
     idnum = -1;
@@ -374,14 +389,20 @@ void LoadIsawDetCal::exec() {
         Rot = Rot * rot0;
       }
 
-      // Need to get the address to the base instrument component
-      Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-
-      // Set or overwrite "rot" instrument parameter.
-      pmap.addQuat(comp.get(), "rot", Rot);
+      if (inputW) {
+        Geometry::ParameterMap &pmap = inputW->instrumentParameters();
+        // Set or overwrite "rot" instrument parameter.
+        pmap.addQuat(comp.get(), "rot", Rot);
+      }
+      else if (inputP) {
+        Geometry::ParameterMap &pmap = inputP->instrumentParameters();
+         // Set or overwrite "rot" instrument parameter.
+         pmap.addQuat(comp.get(), "rot", Rot);
+      }
     }
   }
-  setProperty("InputWorkspace", inputW);
+
+  setProperty("InputWorkspace", ws);
 
   return;
 }
