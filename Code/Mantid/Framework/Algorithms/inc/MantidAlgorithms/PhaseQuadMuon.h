@@ -57,17 +57,14 @@ private:
   void init();
   /// Run the algorithm
   void exec();
-  /// Remove exponential decay from input histograms
-  API::MatrixWorkspace_sptr
-  loseExponentialDecay(const API::MatrixWorkspace_sptr &ws);
+  /// TODO description
+  std::vector<double> getExponentialDecay(const API::MatrixWorkspace_sptr &ws);
   /// Create squashograms
   API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
-                                   const API::ITableWorkspace_sptr &phase);
+                                   const API::ITableWorkspace_sptr &phase,
+                                   const std::vector<double> &n0);
   /// Put back in exponential decay
   void regainExponential(API::MatrixWorkspace_sptr &ws);
-
-  // REMOVE THIS VARIABLE
-  std::vector<double> m_n0;
 };
 
 } // namespace Algorithms

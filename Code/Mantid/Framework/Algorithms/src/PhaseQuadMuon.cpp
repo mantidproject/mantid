@@ -46,11 +46,11 @@ void PhaseQuadMuon::exec() {
   // Get input phase table
   API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
 
-  // Remove exponential decay and save results into tempWs
-  API::MatrixWorkspace_sptr tempws = loseExponentialDecay(inputWs);
+  // Get N0, the normalization constant: N(t) = N0 * exp(-x/tau)
+  std::vector<double> n0 = getExponentialDecay(inputWs);
 
   //// Compute squashograms
-  API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
+  API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
   // Regain exponential decay
   regainExponential(ows);
@@ -68,19 +68,19 @@ void PhaseQuadMuon::exec() {
 
 
 //----------------------------------------------------------------------------------------------
-/** Remove exponential decay from input histograms, i.e., calculate asymmetry
-* @param ws :: [Input/Output] Workspace containing the spectra to remove exponential from
+/** Calculates the normalization constant for the exponential decay
+* @param ws :: [Input] Workspace containing the spectra to remove exponential from
+* @return :: Vector containing the normalization constants, N0, for each spectrum
 */
-API::MatrixWorkspace_sptr
-PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
+std::vector<double>
+PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
 #define MULIFE 2.19703
-#define MPOISSONLIM 30
 
   size_t nspec = ws->getNumberHistograms();
   size_t npoints = ws->blocksize();
 
-  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(ws);
+  std::vector<double> n0(nspec, 0.);
 
   for (size_t h = 0; h < ws->getNumberHistograms(); h++) {
 
@@ -92,39 +92,19 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     s = sx = sy = 0;
     for (int i = 0; i < npoints; i++) {
 
-      if (Y[i]>0) {
+      if (Y[i] > 0) {
         double sig = E[i] * E[i] / Y[i] / Y[i];
         s += 1. / sig;
-        sx += (X[i]-X[0]) / sig;
+        sx += (X[i] - X[0]) / sig;
         sy += log(Y[i]) / sig;
-
       }
     }
-    double N0 = (sy + sx / MULIFE ) / s;
-    N0 = exp(N0);
+    n0[h] = exp((sy + sx / MULIFE) / s);
+  }
 
-    // REMOVE
-    m_n0.push_back(N0);
-
-    std::vector<double> outX = ws->readX(h);
-    std::vector<double> outY(npoints, 0.);
-    std::vector<double> outE(npoints, 0.);
-
-    for (int i = 0; i < npoints; i++) {
-      outY[i] = Y[i] - N0 * exp(-X[i] / MULIFE);
-      outE[i] = (Y[i] > MPOISSONLIM) ? E[i] : sqrt(N0 * exp(-outX[i] / MULIFE));
-    }
-
-    ows->dataX(h).assign(outX.begin(), outX.end());
-    ows->dataY(h).assign(outY.begin(), outY.end());
-    ows->dataE(h).assign(outE.begin(), outE.end());
-
-  } // Histogram loop
-
-  return ows;
+  return n0;
 
 #undef MULIFE
-#undef MPOISSONLIM
 }
 
 //----------------------------------------------------------------------------------------------
@@ -133,23 +113,31 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 */
 API::MatrixWorkspace_sptr
 PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
-                      const API::ITableWorkspace_sptr &phase) {
+                      const API::ITableWorkspace_sptr &phase,
+                      const std::vector<double> &n0) {
 
-  double sxx = 0;
-  double syy = 0;
-  double sxy = 0;
+#define MULIFE 2.19703
+#define MPOISSONLIM 30
 
   size_t nspec = ws->getNumberHistograms();
   size_t npoints = ws->blocksize();
+
+  if (n0.size() != nspec) {
+    throw std::invalid_argument("Invalid normalization constants");
+  }
 
   std::vector<double> aj, bj;
   {
     // Calculate coefficients aj, bj
 
+    double sxx = 0;
+    double syy = 0;
+    double sxy = 0;
+
     for (size_t h = 0; h < nspec; h++) {
       double phi = phase->Double(h, 1);
-      double X = m_n0.at(h) * cos(phi);
-      double Y = m_n0.at(h) * sin(phi);
+      double X = n0[h] * cos(phi);
+      double Y = n0[h] * sin(phi);
       sxx += X * X;
       syy += Y * Y;
       sxy += X * Y;
@@ -161,8 +149,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (int h = 0; h < nspec; h++) {
       double phi = phase->Double(h, 1);
-      double X = m_n0.at(h) * cos(phi);
-      double Y = m_n0.at(h) * sin(phi);
+      double X = n0[h] * cos(phi);
+      double Y = n0[h] * sin(phi);
       aj.push_back((lam1 * X + mu1 * Y) * 0.5);
       bj.push_back((lam2 * X + mu2 * Y) * 0.5);
     }
@@ -173,8 +161,13 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   std::vector<double> sigm1(npoints, 0), sigm2(npoints, 0);
   for (int i = 0; i < npoints; i++) {
     for (int h = 0; h < nspec; h++) {
-      double Y = ws->readY(h)[i];
-      double E = ws->readE(h)[i];
+
+      // (X,Y,E) with exponential decay removed
+      double X = ws->readX(h)[i];
+      double Y = ws->readY(h)[i] - n0[h] * exp(-X / MULIFE);
+      double E =
+          (Y > MPOISSONLIM) ? ws->readE(h)[i] : sqrt(n0[h] * exp(-X / MULIFE));
+
       data1[i] += aj[h] * Y;
       data2[i] += bj[h] * Y;
       sigm1[i] += aj[h] * aj[h] * E * E;
@@ -184,6 +177,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     sigm2[i] = sqrt(sigm2[i]);
   }
 
+  // Populate output workspace
   API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
       "Workspace2D", 2, npoints + 1, npoints);
   ows->dataY(0).assign(data1.begin(), data1.end());
@@ -195,6 +189,9 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   ows->dataX(0).assign(x.begin(),x.end());
   ows->dataX(1).assign(x.begin(),x.end());
   return ows;
+
+#undef MPOISSONLIM
+#undef MULIFE
 }
 
 //----------------------------------------------------------------------------------------------
