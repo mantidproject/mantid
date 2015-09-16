@@ -2769,7 +2769,7 @@ void SANSRunWindow::handleRunFindCentre()
 
   py_code += ")";
 
-  g_centreFinderLog.notice("Iteration 1\n");
+  g_centreFinderLog.notice("Beam Centre Finder Start\n");
   m_uiForm.beamstart_box->setFocus();
 
   //Execute the code

@@ -739,14 +739,15 @@ class BeamCenterLogger(object):
         if is_workspace_which_requires_angle(reducer):
             self.coord1_scale_factor = 1.
             self.using_angle = True
+            # Find the bench rotation. Only supply the bench rotation if it is really needed. If we supply an offset
+            # through a bench rotation we need to take into account that the directionality of the angles is not
+            # the same as in Mantid. We need to reverse the sign of the bench rotation to get the correct rotation.
+            self.offset_coord1 = -1*get_bench_rotation(reducer)
         else:
             self.coord1_scale_factor = coord1_scale_factor
-        self.coord2_scale_factor = coord2_scale_factor
+            self.offset_coord1 = 0.0
 
-        # Find the bench rotation. Only supply the bench rotation if it is really needed. If we supply an offset
-        # through a bench rotation we need to take into account that the directionality of the angles is not
-        # the same as in Mantid. We need to reverse the sign of the bench rotation to get the correct rotation.
-        self.offset_coord1 = -1*get_bench_rotation(reducer)
+        self.coord2_scale_factor = coord2_scale_factor
         self.offset_coord2 = 0.0
 
     def report_init(self, coord1, coord2):
