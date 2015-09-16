@@ -508,7 +508,12 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
 
             # We need to correct the errors. Note that the Can contribution is ignored here.
-            su.correct_q_resolution_for_merged(Cf, Cr, Nf, Nr, mergedQ)
+            su.correct_q_resolution_for_merged(count_ws_front = Cf,
+                                               count_ws_rear = Cr,
+                                               norm_ws_front = Nf,
+                                               norm_ws_rear = Nr,
+                                               output = mergedQ,
+                                               scale = scale)
 
             RenameWorkspace(InputWorkspace=mergedQ,OutputWorkspace= retWSname_merged)
 
