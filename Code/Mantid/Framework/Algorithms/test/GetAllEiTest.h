@@ -5,6 +5,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 
 using namespace Mantid;
@@ -28,8 +29,9 @@ public:
     std::vector<Kernel::SplittingInterval> splitter;
     return GetAllEi::getAvrgLogValue(inputWS, propertyName,splitter);
   }
-
-
+   API::MatrixWorkspace_sptr buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS, size_t &wsIndex0){
+    return GetAllEi::buildWorkspaceToFit(inputWS,wsIndex0);
+   }
 };
 
 class GetAllEiTest : public CxxTest::TestSuite
@@ -60,10 +62,13 @@ public:
   //
   void test_validators_work(){
 
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1, 11, 10);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",2, 11, 10);
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace",ws);
     m_getAllEi.setProperty("OutputWorkspace","monitor_peaks");
+    TSM_ASSERT_THROWS("should throw runtime error on as spectra ID should be positive",m_getAllEi.setProperty("Monitor1SpecID",0),std::invalid_argument);
+    m_getAllEi.setProperty("Monitor1SpecID",1);
+    m_getAllEi.setProperty("Monitor2SpecID",2);
     TSM_ASSERT_THROWS("should throw runtime error on validation as no appropriate logs are defined",m_getAllEi.execute(),std::runtime_error);
     auto log_messages = m_getAllEi.validateInputs();
     TSM_ASSERT_EQUALS("Three logs should fail",log_messages.size(),2);
@@ -85,19 +90,20 @@ public:
     TSM_ASSERT_EQUALS("All logs are defined",log_messages.size(),0);
     TSM_ASSERT("Filter log is provided ",m_getAllEi.filterLogProvided());
 
-    m_getAllEi.setProperty("MonitorSpectraID",2);
+    m_getAllEi.setProperty("Monitor1SpecID",3);
     log_messages = m_getAllEi.validateInputs();
-    TSM_ASSERT_EQUALS("Workspace should not have spectra with ID=2",log_messages.size(),1);
+    TSM_ASSERT_EQUALS("Workspace should not have spectra with ID=3",log_messages.size(),1);
   }
   //
   void test_get_chopper_speed(){
 
-    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1, 11, 10);
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",2, 11, 10);
     std::unique_ptr<Kernel::TimeSeriesProperty<double> > chopSpeed(new Kernel::TimeSeriesProperty<double>("Chopper_Speed"));
     m_getAllEi.initialize();
     m_getAllEi.setProperty("Workspace",ws);
     m_getAllEi.setProperty("OutputWorkspace","monitor_peaks");
-    m_getAllEi.setProperty("MonitorSpectraID",0);
+    m_getAllEi.setProperty("Monitor1SpecID",1);
+    m_getAllEi.setProperty("Monitor2SpecID",2);
 
     for(int i=0;i<10;i++){
       chopSpeed->addValue( Kernel::DateAndTime(10000+10*i, 0), 1.);
@@ -195,7 +201,39 @@ public:
     TSM_ASSERT_EQUALS(" should be 8 periods within the specified interval",guess_tof.size(),8);
  
   }
+   void test_internalWS_to_fit(){
+     Mantid::DataObjects::Workspace2D_sptr tws = 
+       WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5,100,true);
+    auto det1=tws->getDetector(0);
+    auto det2=tws->getDetector(4);
+    auto spec1 = tws->getSpectrum(0);
+    auto spec2 = tws->getSpectrum(4);
+    auto detID1 = spec1->getDetectorIDs();
+    auto detID2 = spec2->getDetectorIDs();
 
+    m_getAllEi.initialize();
+    m_getAllEi.setProperty("Workspace",tws);
+    m_getAllEi.setProperty("OutputWorkspace","monitor_peaks");
+    m_getAllEi.setProperty("Monitor1SpecID",1);
+    m_getAllEi.setProperty("Monitor2SpecID",5);
+
+    size_t wsIndex0;
+    auto wws = m_getAllEi.buildWorkspaceToFit(tws, wsIndex0);
+
+    auto det1p = wws->getDetector(0);
+    auto det2p = wws->getDetector(1);
+    TSM_ASSERT_EQUALS("should be the same first detector position",
+      det1p->getRelativePos(),det1->getRelativePos());
+    TSM_ASSERT_EQUALS("should be the same second detector position",
+      det2p->getRelativePos(),det2->getRelativePos());
+
+    TSM_ASSERT_EQUALS("Detector's ID for the first spectrum and new workspace should coincide",
+      *(detID1.begin()),(*wws->getSpectrum(0)->getDetectorIDs().begin()));
+    TSM_ASSERT_EQUALS("Detector's ID for the second spectrum and new workspace should coincide",
+      *(detID2.begin()),(*wws->getSpectrum(1)->getDetectorIDs().begin()));
+
+
+   }
 
 private:
   GetAllEiTester m_getAllEi;

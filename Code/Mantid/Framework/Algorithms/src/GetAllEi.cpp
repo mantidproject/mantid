@@ -107,6 +107,42 @@ namespace Mantid {
 
 
 
+      std::vector<double> peaks_positions;
+      std::vector<double> peaks_height;
+      std::vector<double> peaks_width;
+      for(size_t i=0; i<guess_opening.size();i++){
+        double energy,height,width;
+        bool found = findMonitorPeak(workingWS,guess_opening[i],energy,height,width);
+        if(found){
+          peaks_positions.push_back(energy);
+          peaks_height.push_back(height);
+          peaks_width.push_back(width);
+        }
+      }
+      workingWS.reset();
+
+      size_t nPeaks = peaks_positions.size();
+      if (nPeaks == 0){
+        throw std::runtime_error("Can not identify any energy peaks");
+      }
+      auto result_ws =API::WorkspaceFactory::Instance().create("Workspace2D",1,
+                             nPeaks , nPeaks);
+      result_ws->setX(0, peaks_positions);
+      MantidVec &Signal = result_ws->dataY(0);
+      MantidVec &Error  = result_ws->dataE(0);
+      for(size_t i=0;i<nPeaks;i++){
+          Signal[i] = peaks_height[i];
+          Error[i]  = peaks_width[i];
+       }
+       setProperty("OutputWorkspace",result_ws);
+
+
+    }
+    /**Get energy of monitor peak if one is present*/
+    bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,double guess_energy,
+      double & energy,double & height,double &width){
+        
+      return true;
     }
     /**Build 2-spectra workspace in units of energy, used as source
     *to identify actual monitors spectra 
@@ -126,16 +162,34 @@ namespace Mantid {
         wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
         specid_t specNum2 = getProperty("Monitor2SpecID");
         size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
-        auto pSpectr    = inputWS->getSpectrum(wsIndex0);
-        size_t XLength  = pSpectr->dataX().size();
-        size_t YLength  = pSpectr->dataY().size();
+        auto pSpectr1    = inputWS->getSpectrum(wsIndex0);
+        size_t XLength  = pSpectr1->dataX().size();
+        size_t YLength  = pSpectr1->dataY().size();
         auto working_ws =API::WorkspaceFactory::Instance().create(inputWS,2,
                              XLength, YLength);
-        working_ws->setX(0,*(pSpectr->dataX()));
-        working_ws->setData(0,*(pSpectr->dataY()),*(pSpectr->dataE()));
-        pSpectr    = inputWS->getSpectrum(wsIndex1);
-        working_ws->setX(1,*pSpectr->dataX());
-        working_ws->setData(1,*pSpectr->dataY(),*pSpectr->dataE());
+        // copy data
+        auto bins = pSpectr1->dataX();
+        auto pSpectr2  = inputWS->getSpectrum(wsIndex1);
+        working_ws->setX(0, bins);
+        MantidVec &Signal1 = working_ws->dataY(0);
+        MantidVec &Error1  = working_ws->dataE(0);
+        MantidVec &Signal2 = working_ws->dataY(1);
+        MantidVec &Error2  = working_ws->dataE(1);
+        for(size_t i=0;i<YLength;i++){
+          Signal1[i] = pSpectr1->dataY()[i];
+          Error1[i]  = pSpectr1->dataE()[i];
+          Signal2[i] = pSpectr2->dataY()[i];
+          Error2[i]  = pSpectr2->dataE()[i];
+        }
+        // copy detector mapping
+       API::ISpectrum *spectrum = working_ws->getSpectrum(0);
+       spectrum->setSpectrumNo(specNum1);
+       spectrum->clearDetectorIDs();
+       spectrum->addDetectorIDs(pSpectr1->getDetectorIDs());
+       spectrum = working_ws->getSpectrum(1);
+       spectrum->setSpectrumNo(specNum2);
+       spectrum->clearDetectorIDs();
+       spectrum->addDetectorIDs(pSpectr2->getDetectorIDs());
 
 
         if(inputWS->getAxis(0)->unit()->caption() != "Energy"){

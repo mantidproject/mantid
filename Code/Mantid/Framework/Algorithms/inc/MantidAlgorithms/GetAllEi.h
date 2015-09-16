@@ -70,6 +70,10 @@ protected: // for testing, private otherwise.
        double &chop_speed,double &chop_delay);
   void findGuessOpeningTimes(const std::pair<double,double> &TOF_range,
       double ChopDelay,double Period,std::vector<double > & guess_opening_times);
+  /**Get energy of monitor peak if one is present*/
+  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,double guess_energy,
+      double & energy,double & height,double &width);
+
 
   // if log, which identifies that instrument is running is available on workspace.
   // The log should be positive when instrument is running and negative otherwise.
