@@ -105,6 +105,13 @@ bool ISISEnergyTransfer::validate() {
     m_uiForm.valRebinString->setVisible(false);
   }
 
+  // DetailedBalance
+  if (m_uiForm.ckDetailedBalance->isChecked()) {
+    if (m_uiForm.spDetailedBalance->value() == 0) {
+      uiv.addErrorMessage("Detailed Balance must be more than 0K");
+    }
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
