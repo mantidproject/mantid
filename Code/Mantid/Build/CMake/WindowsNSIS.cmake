@@ -178,12 +178,12 @@ set (CPACK_NSIS_CREATE_ICONS_EXTRA "
 
   CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
   
-  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidIPythonNotebook.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat notebook --notebook-dir=%userprofile%\\\"
+  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidIPythonNotebook.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat notebook --notebook-dir=%userprofile%"\\\"
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPython.lnk\\\"
-  Delete \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidIPythonNotebook.lnk\\\"
+  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidIPythonNotebook.lnk\\\"
 ")
 # The blank lines seem to be required or it doesn't create the shortcut
 set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
@@ -191,7 +191,7 @@ set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
 
   CreateShortCut \\\"$DESKTOP\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
 
-  CreateShortCut \\\"$DESKTOP\\\\MantidIPythonNotebook.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat notebook --notebook-dir=%userprofile%\\\"
+  CreateShortCut \\\"$DESKTOP\\\\MantidIPythonNotebook.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat notebook --notebook-dir=%userprofile%"\\\"
   
   CreateDirectory \\\"$INSTDIR\\\\logs\\\"
 
