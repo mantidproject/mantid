@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/SANSConstants.h"
-
+#include <limits>
 
 namespace MantidQt
 {
@@ -34,6 +34,30 @@ QString SANSConstants::getPythonEmptyKeyword() {
 QString SANSConstants::getPythonTrueKeyword() {
   const static QString pythonSuccessKeyword = "True";
   return pythonSuccessKeyword;
+}
+
+/**
+ * Gets the max double value
+ * @returns the max double
+ */
+double SANSConstants::getMaxDoubleValue() {
+    return std::numeric_limits<double>::max();
+}
+
+/**
+ * Get the number of decimals
+ * @returns the number of decimals
+ */
+int SANSConstants::getDecimals() {
+  return 8;
+}
+
+/**
+ * Get the max integer value
+ * @returns the max integer value
+ */
+int SANSConstants::getMaxIntValue() {
+  return std::numeric_limits<int>::max();
 }
 
 }
