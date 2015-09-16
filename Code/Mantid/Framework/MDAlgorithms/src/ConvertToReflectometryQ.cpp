@@ -364,7 +364,7 @@ void ConvertToReflectometryQ::exec() {
         auto vertexesTable = vertexes;
         auto normPolyTrans = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
         normPolyTrans->copyExperimentInfoFrom(inputWs.get());
-        auto outputMDWS = transform->executeMDNormPoly(normPolyTrans, bc);
+        auto outputMDWS = transform->executeMDNormPoly(normPolyTrans);
         normPolyTrans->copyExperimentInfoFrom(normPolyTrans.get());
         //outputMDWS->copyExperimentInfoFrom(inputWs.get());
         outputWS = outputMDWS;

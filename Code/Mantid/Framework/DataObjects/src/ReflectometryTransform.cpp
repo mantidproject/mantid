@@ -300,7 +300,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
   return ws;
 }
 
-IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(MatrixWorkspace_const_sptr inputWs,BoxController_sptr boxController) const{
+IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(MatrixWorkspace_const_sptr inputWs) const{
 
     auto input_x_dim = inputWs->getXDimension();
     
