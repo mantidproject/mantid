@@ -46,16 +46,26 @@ void PhaseQuadMuon::exec() {
   // Get input phase table
   API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
 
+  //for (size_t i = 0; i < 50; i++)
+  //  std::cout << inputWs->readX(0)[i] << "\t" << inputWs->readY(0)[i] << "\t"
+  //            << inputWs->readE(0)[i] << "\n";
+
   // Remove exponential decay and save results into tempWs
   API::MatrixWorkspace_sptr tempws = loseExponentialDecay(inputWs);
 
-  // Compute squashograms
-  API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
+  //std::cout << "--------------------------\n";
+  //for (size_t i = 0; i < 50; i++)
+  //  std::cout << tempws->readX(0)[i] << "\t" << tempws->readY(0)[i] << "\t"
+  //            << tempws->readE(0)[i] << "\n";
 
-  // Regain exponential decay
-  regainExponential(ows);
+  //// Compute squashograms
+  //API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
 
-  setProperty("OutputWorkspace", ows);
+  //// Regain exponential decay
+  //regainExponential(ows);
+
+  //setProperty("OutputWorkspace", ows);
+  setProperty("OutputWorkspace",tempws);
 }
 
 
@@ -67,12 +77,60 @@ void PhaseQuadMuon::exec() {
 API::MatrixWorkspace_sptr
 PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
-  API::IAlgorithm_sptr alg = createChildAlgorithm("RemoveExpDecay");
-  alg->setProperty("InputWorkspace",ws);
-  alg->execute();
-  API::MatrixWorkspace_sptr ows = alg->getProperty("OutputWorkspace");
+#define MULIFE 2.19703
+
+  size_t nspec = ws->getNumberHistograms();
+  size_t npoints = ws->blocksize();
+
+  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(ws);
+
+  for (size_t h = 0; h < ws->getNumberHistograms(); h++) {
+
+    MantidVec X = ws->getSpectrum(h)->readX();
+    MantidVec Y = ws->getSpectrum(h)->readY();
+    MantidVec E = ws->getSpectrum(h)->readE();
+
+    //for (int i = 0; i < npoints; i++) {
+    //  double usey = specIn->readY()[i];
+    //  double oops = ((usey <= 0) || (specIn->readE()[i] >= m_bigNumber));
+    //  outY[i] = oops ? 0 : log(usey);
+    //  outE[i] = oops ? m_bigNumber : specIn->readE()[i] / usey;
+    //}
+
+    double s, sx, sy;
+    s = sx = sy = 0;
+    for (int i = 0; i < npoints; i++) {
+
+      if (Y[i]>0) {
+        double sig = E[i] * E[i] / Y[i] / Y[i];
+        s += 1. / sig;
+        sx += (X[i]-X[0]) / sig;
+        sy += log(Y[i]) / sig;
+
+      }
+    }
+    double N0 = (sy + sx / MULIFE ) / s;
+    N0 = exp(N0);
+
+    std::vector<double> outX(npoints, 0.);
+    std::vector<double> outY(npoints, 0.);
+    std::vector<double> outE(npoints, 0.);
+
+    for (int i = 0; i < npoints; i++) {
+      outX[i] = X[i];
+      outY[i] = Y[i] - N0 * exp(-X[i] / MULIFE);
+      outE[i] = E[i];
+    }
+
+    ows->dataX(h).assign(outX.begin(), outX.end());
+    ows->dataY(h).assign(outY.begin(), outY.end());
+    ows->dataE(h).assign(outE.begin(), outE.end());
+
+  } // Histogram loop
+
   return ows;
 
+#undef MULIFE
 }
 
 //----------------------------------------------------------------------------------------------
