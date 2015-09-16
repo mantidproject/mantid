@@ -499,8 +499,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 Cr_can = CropWorkspace(InputWorkspace=Cr_can, OutputWorkspace=Cr_can, XMin=minQ, XMax=maxQ)
 
             # We want: (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
-            shifted_norm_front = Scale(InputWorkspace = Bf, Operation = "Multiply", Factor = shift)
-            scaled_norm_front = Scale(InputWorkspace = Bf, Operation = "Multiply", Factor = (1./scale))
+            shifted_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = shift)
+            scaled_norm_front = Scale(InputWorkspace = Nf, Operation = "Multiply", Factor = (1./scale))
             dividend = Cf + shifted_norm_front + Cr
             divisior = scaled_norm_front + Nr
             mergedQ = dividend/divisor
