@@ -21,10 +21,11 @@ namespace CustomInterfaces {
 // ordering of the
 // tabs as they appear in the interface itself.
 enum CorrectionTabChoice {
+  CONTAINER_SUBTRACTION,
   CALC_CORR,
   APPLY_CORR,
-  ABSORPTION_CORRECTIONS,
-  CONTAINER_SUBTRACTION
+  ABSORPTION_CORRECTIONS
+
 };
 
 // Forward Declaration
