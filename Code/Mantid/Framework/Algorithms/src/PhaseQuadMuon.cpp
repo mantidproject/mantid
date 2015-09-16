@@ -46,30 +46,20 @@ void PhaseQuadMuon::exec() {
   // Get input phase table
   API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
 
-  //for (size_t i = 0; i < 50; i++)
-  //  std::cout << inputWs->readX(0)[i] << "\t" << inputWs->readY(0)[i] << "\t"
-  //            << inputWs->readE(0)[i] << "\n";
-
   // Remove exponential decay and save results into tempWs
   API::MatrixWorkspace_sptr tempws = loseExponentialDecay(inputWs);
-
-  std::cout << "--------------------------\n";
-  for (size_t i = 0; i < tempws->blocksize(); i++)
-    std::cout << tempws->readX(0)[i] << "\t" << tempws->readY(0)[i] << "\t"
-              << tempws->readE(0)[i] << "\t" << tempws->readX(1)[i] << "\t"
-              << tempws->readY(1)[i] << "\t" << tempws->readE(1)[i] << "\n";
 
   //// Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
 
-  //std::cout << "--------------------------\n";
-  //for (size_t i = 0; i < ows->blocksize(); i++)
-  //  std::cout << ows->readX(0)[i] << "\t" << ows->readY(0)[i] << "\t"
-  //            << ows->readE(0)[i] << "\t" << ows->readX(1)[i] << "\t"
-  //            << ows->readY(1)[i] << "\t" << ows->readE(1)[i] << "\n";
-
   // Regain exponential decay
   regainExponential(ows);
+
+  std::cout << "--------------------------\n";
+  for (size_t i = 0; i < ows->blocksize(); i++)
+    std::cout << ows->readX(0)[i] << "\t" << ows->readY(0)[i] << "\t"
+              << ows->readE(0)[i] << "\t" << ows->readX(1)[i] << "\t"
+              << ows->readY(1)[i] << "\t" << ows->readE(1)[i] << "\n";
 
   setProperty("OutputWorkspace", ows);
   //setProperty("OutputWorkspace",tempws);
@@ -98,13 +88,6 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     MantidVec Y = ws->getSpectrum(h)->readY();
     MantidVec E = ws->getSpectrum(h)->readE();
 
-    //for (int i = 0; i < npoints; i++) {
-    //  double usey = specIn->readY()[i];
-    //  double oops = ((usey <= 0) || (specIn->readE()[i] >= m_bigNumber));
-    //  outY[i] = oops ? 0 : log(usey);
-    //  outE[i] = oops ? m_bigNumber : specIn->readE()[i] / usey;
-    //}
-
     double s, sx, sy;
     s = sx = sy = 0;
     for (int i = 0; i < npoints; i++) {
@@ -123,12 +106,11 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     // REMOVE
     m_n0.push_back(N0);
 
-    std::vector<double> outX(npoints, 0.);
+    std::vector<double> outX = ws->readX(h);
     std::vector<double> outY(npoints, 0.);
     std::vector<double> outE(npoints, 0.);
 
     for (int i = 0; i < npoints; i++) {
-      outX[i] = X[i];
       outY[i] = Y[i] - N0 * exp(-X[i] / MULIFE);
       outE[i] = (Y[i] > MPOISSONLIM) ? E[i] : sqrt(N0 * exp(-outX[i] / MULIFE));
     }
@@ -203,8 +185,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   }
 
   API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
-      "Workspace2D", 2, npoints, npoints);
-  ows->dataY(0).assign(data1.begin(),data1.end());
+      "Workspace2D", 2, npoints + 1, npoints);
+  ows->dataY(0).assign(data1.begin(), data1.end());
   ows->dataE(0).assign(sigm1.begin(),sigm1.end());
   ows->dataY(1).assign(data2.begin(),data2.end());
   ows->dataE(1).assign(sigm2.begin(),sigm2.end());
