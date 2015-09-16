@@ -5,7 +5,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -24,7 +23,7 @@ MoveInstrumentComponent::MoveInstrumentComponent() {}
 void MoveInstrumentComponent::init() {
   // When used as a Child Algorithm the workspace name is not used - hence the
   // "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<Workspace>(
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>(
                       "Workspace", "Anonymous", Direction::InOut),
                   "The name of the workspace for which the new instrument "
                   "configuration will have an effect. Any other workspaces "
@@ -51,20 +50,8 @@ void MoveInstrumentComponent::init() {
  *  @throw std::runtime_error Thrown with Workspace problems
  */
 void MoveInstrumentComponent::exec() {
-  // Get the input workspace
-  Workspace_sptr ws = getProperty("Workspace");
-  MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  DataObjects::PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ws);
-
-  // Get some stuff from the input workspace
-  Instrument_sptr inst;
-  if (inputW) {
-    inst= boost::const_pointer_cast<Instrument>(inputW->getInstrument());
-  }
-  else if (inputP) {
-    inst= boost::const_pointer_cast<Instrument>(inputP->getInstrument());
-  }
-
+  // Get the workspace
+  MatrixWorkspace_sptr WS = getProperty("Workspace");
   const std::string ComponentName = getProperty("ComponentName");
   const int DetID = getProperty("DetectorID");
   const double X = getProperty("X");
@@ -72,6 +59,10 @@ void MoveInstrumentComponent::exec() {
   const double Z = getProperty("Z");
   const bool relativePosition = getProperty("RelativePosition");
 
+  // Get the ParameterMap reference before the instrument so that
+  // we avoid a copy
+  Geometry::ParameterMap &pmap = WS->instrumentParameters();
+  Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
 
   // Find the component to move
@@ -101,16 +92,8 @@ void MoveInstrumentComponent::exec() {
   TransformType positionType = Absolute;
   if (relativePosition)
     positionType = Relative;
-  if (inputW) {
-    Geometry::ParameterMap &pmap = inputW->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                             positionType);
-  }
-  else if (inputP) {
-    Geometry::ParameterMap &pmap = inputP->instrumentParameters();
-    Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
-                                             positionType);
-  }
+  Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X, Y, Z),
+                                           positionType);
 
   return;
 }
