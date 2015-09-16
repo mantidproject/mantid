@@ -177,6 +177,8 @@ set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPlot.lnk\\\" \\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\" \\\"\\\" \\\"$INSTDIR\\\\bin\\\\MantidPlot.exe\\\" 0
 
   CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidPython.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat\\\"
+  
+  CreateShortCut \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\MantidIPythonNotebook.lnk\\\" \\\"$INSTDIR\\\\bin\\\\mantidpython.bat notebook --notebook-dir=%userprofile%\\\"
 ")
 set (CPACK_NSIS_DELETE_ICONS_EXTRA "
   Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\MantidPlot.lnk\\\"
