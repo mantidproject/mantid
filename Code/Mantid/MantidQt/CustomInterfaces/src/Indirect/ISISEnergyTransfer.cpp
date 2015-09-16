@@ -112,6 +112,13 @@ bool ISISEnergyTransfer::validate() {
     }
   }
 
+  // Spectra Number check
+  const int specMin = m_uiForm.spSpectraMin->value();
+  const int specMax = m_uiForm.spSpectraMax->value();
+  if(specMin > specMax){
+	uiv.addErrorMessage("Spectra Min must be less than Spectra Max");
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
