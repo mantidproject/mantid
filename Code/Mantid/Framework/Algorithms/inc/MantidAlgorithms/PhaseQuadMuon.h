@@ -65,6 +65,9 @@ private:
                                    const API::ITableWorkspace_sptr &phase);
   /// Put back in exponential decay
   void regainExponential(API::MatrixWorkspace_sptr &ws);
+
+  // REMOVE THIS VARIABLE
+  std::vector<double> m_n0;
 };
 
 } // namespace Algorithms

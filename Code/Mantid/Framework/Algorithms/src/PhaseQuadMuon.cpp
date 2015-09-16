@@ -53,19 +53,26 @@ void PhaseQuadMuon::exec() {
   // Remove exponential decay and save results into tempWs
   API::MatrixWorkspace_sptr tempws = loseExponentialDecay(inputWs);
 
-  //std::cout << "--------------------------\n";
-  //for (size_t i = 0; i < 50; i++)
-  //  std::cout << tempws->readX(0)[i] << "\t" << tempws->readY(0)[i] << "\t"
-  //            << tempws->readE(0)[i] << "\n";
+  std::cout << "--------------------------\n";
+  for (size_t i = 0; i < tempws->blocksize(); i++)
+    std::cout << tempws->readX(0)[i] << "\t" << tempws->readY(0)[i] << "\t"
+              << tempws->readE(0)[i] << "\t" << tempws->readX(1)[i] << "\t"
+              << tempws->readY(1)[i] << "\t" << tempws->readE(1)[i] << "\n";
 
   //// Compute squashograms
-  //API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
+  API::MatrixWorkspace_sptr ows = squash(tempws, phaseTable);
 
-  //// Regain exponential decay
-  //regainExponential(ows);
+  //std::cout << "--------------------------\n";
+  //for (size_t i = 0; i < ows->blocksize(); i++)
+  //  std::cout << ows->readX(0)[i] << "\t" << ows->readY(0)[i] << "\t"
+  //            << ows->readE(0)[i] << "\t" << ows->readX(1)[i] << "\t"
+  //            << ows->readY(1)[i] << "\t" << ows->readE(1)[i] << "\n";
 
-  //setProperty("OutputWorkspace", ows);
-  setProperty("OutputWorkspace",tempws);
+  // Regain exponential decay
+  regainExponential(ows);
+
+  setProperty("OutputWorkspace", ows);
+  //setProperty("OutputWorkspace",tempws);
 }
 
 
@@ -78,6 +85,7 @@ API::MatrixWorkspace_sptr
 PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
 #define MULIFE 2.19703
+#define MPOISSONLIM 30
 
   size_t nspec = ws->getNumberHistograms();
   size_t npoints = ws->blocksize();
@@ -112,6 +120,9 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     double N0 = (sy + sx / MULIFE ) / s;
     N0 = exp(N0);
 
+    // REMOVE
+    m_n0.push_back(N0);
+
     std::vector<double> outX(npoints, 0.);
     std::vector<double> outY(npoints, 0.);
     std::vector<double> outE(npoints, 0.);
@@ -119,7 +130,7 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
     for (int i = 0; i < npoints; i++) {
       outX[i] = X[i];
       outY[i] = Y[i] - N0 * exp(-X[i] / MULIFE);
-      outE[i] = E[i];
+      outE[i] = (Y[i] > MPOISSONLIM) ? E[i] : sqrt(N0 * exp(-outX[i] / MULIFE));
     }
 
     ows->dataX(h).assign(outX.begin(), outX.end());
@@ -131,6 +142,7 @@ PhaseQuadMuon::loseExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
   return ows;
 
 #undef MULIFE
+#undef MPOISSONLIM
 }
 
 //----------------------------------------------------------------------------------------------
@@ -148,43 +160,50 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   size_t nspec = ws->getNumberHistograms();
   size_t npoints = ws->blocksize();
 
-  for (size_t h = 0; h < nspec; h++) {
-    double phi = phase->Double(h,1);
-    double X = cos(phi);
-    double Y = sin(phi);
-    sxx += X * X;
-    syy += Y * Y;
-    sxy += X * Y;
-  }
-
-  double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
-  double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
-  double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
-  double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
   std::vector<double> aj, bj;
-  for (int h = 0; h < nspec; h++) {
-    double phi = phase->Double(h,1);
-    double X = cos(phi);
-    double Y = sin(phi);
-    aj.push_back((lam1 * X + mu1 * Y) * 0.5);
-    bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+  {
+    // Calculate coefficients aj, bj
+
+    for (size_t h = 0; h < nspec; h++) {
+      double phi = phase->Double(h, 1);
+      double X = m_n0.at(h) * cos(phi);
+      double Y = m_n0.at(h) * sin(phi);
+      sxx += X * X;
+      syy += Y * Y;
+      sxy += X * Y;
+    }
+
+    double lam1 = 2 * syy / (sxx * syy - sxy * sxy);
+    double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
+    double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
+    double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
+    for (int h = 0; h < nspec; h++) {
+      double phi = phase->Double(h, 1);
+      double X = m_n0.at(h) * cos(phi);
+      double Y = m_n0.at(h) * sin(phi);
+      aj.push_back((lam1 * X + mu1 * Y) * 0.5);
+      bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+    }
   }
 
+  // Phase quadrature
   std::vector<double> data1(npoints, 0), data2(npoints, 0);
   std::vector<double> sigm1(npoints, 0), sigm2(npoints, 0);
   for (int i = 0; i < npoints; i++) {
     for (int h = 0; h < nspec; h++) {
-      auto spec = ws->getSpectrum(h);
-      data1[i] += aj[h] * spec->readY()[i];
-      data2[i] += bj[h] * spec->readY()[i];
-      sigm1[i] += aj[h] * aj[h] * spec->readE()[i] * spec->readE()[i];
-      sigm2[i] += bj[h] * bj[h] * spec->readE()[i] * spec->readE()[i];
+      double Y = ws->readY(h)[i];
+      double E = ws->readE(h)[i];
+      data1[i] += aj[h] * Y;
+      data2[i] += bj[h] * Y;
+      sigm1[i] += aj[h] * aj[h] * E * E;
+      sigm2[i] += bj[h] * bj[h] * E * E;
     }
     sigm1[i] = sqrt(sigm1[i]);
     sigm2[i] = sqrt(sigm2[i]);
   }
 
-  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create("Workspace2D",2,npoints,npoints);
+  API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
+      "Workspace2D", 2, npoints, npoints);
   ows->dataY(0).assign(data1.begin(),data1.end());
   ows->dataE(0).assign(sigm1.begin(),sigm1.end());
   ows->dataY(1).assign(data2.begin(),data2.end());
