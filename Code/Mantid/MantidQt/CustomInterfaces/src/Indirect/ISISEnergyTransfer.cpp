@@ -107,7 +107,7 @@ bool ISISEnergyTransfer::validate() {
 
   // DetailedBalance
   if (m_uiForm.ckDetailedBalance->isChecked()) {
-    if (m_uiForm.spDetailedBalance->value() == 0) {
+    if (m_uiForm.spDetailedBalance->value() == 0.0) {
       uiv.addErrorMessage("Detailed Balance must be more than 0K");
     }
   }
