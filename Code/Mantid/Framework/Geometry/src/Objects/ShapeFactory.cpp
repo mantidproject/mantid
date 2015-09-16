@@ -795,7 +795,7 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem,
   prim[l_id] = pCone;
 
   std::stringstream retAlgebraMatch;
-  retAlgebraMatch << "(-" << l_id << " ";
+  retAlgebraMatch << "(" << l_id << " ";
   l_id++;
 
   // Plane to cut off cone from below
@@ -804,7 +804,14 @@ std::string ShapeFactory::parseCone(Poco::XML::Element *pElem,
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec);
   prim[l_id] = pPlaneTop;
-  retAlgebraMatch << "" << l_id << ")";
+  retAlgebraMatch << "" << l_id << " ";
+  l_id++;
+
+  // plane top cut of top part of double cone
+  Plane *pPlaneBottom = new Plane();
+  pPlaneBottom->setPlane(parsePosition(pElemTipPoint), normVec);
+  prim[l_id] = pPlaneBottom;
+  retAlgebraMatch << "-" << l_id << ")";
   l_id++;
 
   return retAlgebraMatch.str();

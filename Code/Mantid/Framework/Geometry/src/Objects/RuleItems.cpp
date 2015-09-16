@@ -319,20 +319,14 @@ int Intersection::simplify()
 void Intersection::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                   double &xmin, double &ymin, double &zmin) {
   double Axmax, Aymax, Azmax, Axmin, Aymin, Azmin;
-  Axmax = xmax;
-  Aymax = ymax;
-  Azmax = zmax;
-  Axmin = xmin;
-  Aymin = ymin;
-  Azmin = zmin;
-  A->getBoundingBox(Axmax, Aymax, Azmax, Axmin, Aymin, Azmin);
   double Bxmax, Bymax, Bzmax, Bxmin, Bymin, Bzmin;
-  Bxmax = Axmax;
-  Bymax = Aymax;
-  Bzmax = Azmax;
-  Bxmin = Axmin;
-  Bymin = Aymin;
-  Bzmin = Azmin;
+  Axmax = Bxmax = xmax;
+  Aymax = Bymax = ymax;
+  Azmax = Bzmax = zmax;
+  Axmin = Bxmin = xmin;
+  Aymin = Bymin = ymin;
+  Azmin = Bzmin = zmin;
+  A->getBoundingBox(Axmax, Aymax, Azmax, Axmin, Aymin, Azmin);
   B->getBoundingBox(Bxmax, Bymax, Bzmax, Bxmin, Bymin, Bzmin);
   xmax = (Axmax < Bxmax) ? Axmax : Bxmax;
   xmin = (Axmin > Bxmin) ? Axmin : Bxmin;

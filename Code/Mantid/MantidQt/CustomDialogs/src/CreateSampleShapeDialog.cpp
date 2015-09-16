@@ -83,8 +83,8 @@ void CreateSampleShapeDialog::initLayout()
   m_setup_map["cylinder"] = new ShapeDetailsInstantiator<CylinderDetails>;
   m_setup_map["infinite cylinder"] = new ShapeDetailsInstantiator<InfiniteCylinderDetails>();
   m_setup_map["cylinder ring slice"] = new ShapeDetailsInstantiator<SliceOfCylinderRingDetails>();
-  m_setup_map["cone"] = new ShapeDetailsInstantiator<ConeDetails>();
-  m_setup_map["infinite cone"] = new ShapeDetailsInstantiator<InfiniteConeDetails>();
+  //m_setup_map["cone"] = new ShapeDetailsInstantiator<ConeDetails>();
+  //m_setup_map["infinite cone"] = new ShapeDetailsInstantiator<InfiniteConeDetails>();
   m_setup_map["infinite plane"] = new ShapeDetailsInstantiator<InfinitePlaneDetails>();
   m_setup_map["cuboid"] = new ShapeDetailsInstantiator<CuboidDetails>();
   m_setup_map["hexahedron"] = new ShapeDetailsInstantiator<HexahedronDetails>();
