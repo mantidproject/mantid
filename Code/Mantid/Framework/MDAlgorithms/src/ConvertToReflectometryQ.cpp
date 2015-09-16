@@ -354,13 +354,21 @@ void ConvertToReflectometryQ::exec() {
 
   if (outputAsMDWorkspace) {
     if (transMethod == centerTransform()) {
-      auto outputMDWS = transform->executeMD(inputWs, bc);
+        auto outputMDWS = transform->executeMD(inputWs, bc);
       // Copy ExperimentInfo (instrument, run, sample) to the output WS
       ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
       outputMDWS->addExperimentInfo(ei);
       outputWS = outputMDWS;
     } else if (transMethod == normPolyTransform()) {
-      throw std::runtime_error("Normalised Polynomial rebinning not supported for multidimensional output.");
+        const bool dumpVertexes = this->getProperty("DumpVertexes");
+        auto vertexesTable = vertexes;
+        auto normPolyTrans = transform->executeNormPoly(inputWs, vertexesTable, dumpVertexes, outputDimensions);
+        normPolyTrans->copyExperimentInfoFrom(inputWs.get());
+        auto outputMDWS = transform->executeMDNormPoly(normPolyTrans, bc);
+        normPolyTrans->copyExperimentInfoFrom(normPolyTrans.get());
+        //outputMDWS->copyExperimentInfoFrom(inputWs.get());
+        outputWS = outputMDWS;
+
     } else {
       throw std::runtime_error("Unknown rebinning method: " + transMethod);
     }

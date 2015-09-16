@@ -86,6 +86,8 @@ public:
   Mantid::API::MatrixWorkspace_sptr
   executeNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs, boost::shared_ptr<Mantid::DataObjects::TableWorkspace> & vertexes, bool dumpVertexes, std::string outputDimensions) const;
 
+  Mantid::API::IMDHistoWorkspace_sptr executeMDNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs,
+            Mantid::API::BoxController_sptr boxController) const;
   virtual ~ReflectometryTransform();
   ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
                          double d0Min, double d0Max, const std::string &d1Label,
