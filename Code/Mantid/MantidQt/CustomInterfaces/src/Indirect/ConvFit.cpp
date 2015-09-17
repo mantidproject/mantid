@@ -242,6 +242,28 @@ void ConvFit::run() {
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
+  // Construct expected name
+  m_baseName = QString::fromStdString(m_cfInputWS->getName());
+  int pos = m_baseName.lastIndexOf("_");
+  if (pos != -1) {
+    m_baseName = m_baseName.left(pos + 1);
+  }
+  m_baseName += "conv_";
+  if (m_blnManager->value(m_properties["UseDeltaFunc"])) {
+    m_baseName += "Delta";
+  }
+  int fitIndex = m_uiForm.cbFitType->currentIndex();
+  if (fitIndex < 3 && fitIndex != 0) {
+    m_baseName += fitIndex + "L";
+  } else {
+    m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
+  }
+  m_baseName += convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) + "_s";
+  m_baseName += QString::fromStdString(specMin);
+  m_baseName += "_to_";
+  m_baseName += QString::fromStdString(specMax);
+  std::string test = m_baseName.toStdString();
+
   // Run ConvolutionFitSequential Algorithm
   IAlgorithm_sptr cfs =
       AlgorithmManager::Instance().create("ConvolutionFitSequential");
@@ -263,6 +285,7 @@ void ConvFit::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
+
 }
 
 /**
@@ -1569,6 +1592,33 @@ void ConvFit::updatePlotOptions() {
     plotOptions << "All";
   }
   m_uiForm.cbPlotType->addItems(plotOptions);
+}
+
+QString ConvFit::convertFuncToShort(const QString &original){
+  QString result = "";
+  if (original.at(0) == 'E') {
+    result += "E";
+  } else if (original.at(0) == 'I') {
+    result += "I";
+  } else {
+    return "SFT";
+  }
+  auto pos = original.find("Circle");
+  if (pos != std::string::npos) {
+    result += "DC";
+  } else {
+    result += "DS";
+  }
+  return result;
+}
+
+QString ConvFit::convertBackToShort(const std::string &original) {
+  QString result = QString::fromStdString(original.substr(0, 3));
+  auto pos = original.find(" ");
+  if (pos != std::string::npos) {
+    result += original.at(pos + 1);
+  }
+  return result;
 }
 
 } // namespace IDA
