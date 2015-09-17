@@ -1,12 +1,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <boost/format.hpp>
+#include <string>
+
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Unit.h"
-#include <boost/format.hpp>
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
   namespace Algorithms {
@@ -15,6 +18,7 @@ namespace Mantid {
 
     /// Empty default constructor
     GetAllEi::GetAllEi() : Algorithm(),
+      m_max_Eresolution(0.08),
       m_useFilterLog(true){}
 
     /// Initialization method.
@@ -110,13 +114,25 @@ namespace Mantid {
       std::vector<double> peaks_positions;
       std::vector<double> peaks_height;
       std::vector<double> peaks_width;
+      std::vector<size_t> irange_min,irange_max;
+      findBinRanges(workingWS->readX(0),guess_opening,
+                    this->m_max_Eresolution,
+                    irange_min,irange_max);
+
+      auto peakFitter = definePeakFinder(workingWS);
+      double maxPeakEnergy(0);
       for(size_t i=0; i<guess_opening.size();i++){
-        double energy,height,width;
-        bool found = findMonitorPeak(workingWS,guess_opening[i],energy,height,width);
+        double energy,height,sigma;
+        bool found = findMonitorPeak(workingWS,peakFitter,irange_min[i],
+          irange_max[i],energy,height,sigma);
         if(found){
           peaks_positions.push_back(energy);
           peaks_height.push_back(height);
-          peaks_width.push_back(width);
+          peaks_width.push_back(sigma);
+          double peakEnery = height*sigma*std::sqrt(2.*M_PI);
+          if(peakEnery>maxPeakEnergy){
+            maxPeakEnergy = peakEnery;
+          }
         }
       }
       workingWS.reset();
@@ -138,11 +154,132 @@ namespace Mantid {
 
 
     }
+
     /**Get energy of monitor peak if one is present*/
-    bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,double guess_energy,
+    bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
+      const API::IAlgorithm_sptr &peakFitter,
+      size_t ind_min,size_t ind_max,
       double & energy,double & height,double &width){
-        
+
+        double sMax,sMin,xOfMax;
+        std::string peakGuessStr,bkgGuessStr,fitWindow;
+        /**Lambda to identify guess values for a peak */
+        auto peakGuess =[&](size_t index){
+          sMin =  std::numeric_limits<double>::max();
+          sMax = -sMin;
+          auto X = inputWS->readX(index);
+          auto S = inputWS->readY(index);
+          fitWindow    = std::to_string(X[ind_min])+","+std::to_string(X[ind_max]);
+          if(ind_max == S.size()){
+            ind_max--;
+          }
+          for(size_t i=ind_min;i<ind_max;i++){
+            if(S[i]<sMin)sMin=S[i];
+            if(S[i]>sMax){
+              sMax = S[i];
+              xOfMax=X[i];
+            }
+          }
+          // peak width on the half of the height 
+          double fw = m_max_Eresolution/2.35844;
+          peakGuessStr = std::to_string(sMax)+","+std::to_string(xOfMax)+","+std::to_string(fw);
+          bkgGuessStr  = std::to_string(sMin)+",0.";
+
+        };
+        //--------------------------------------------------------------------
+        peakGuess(0);
+
+        peakFitter->setProperty("PeakParameterValues",peakGuessStr);
+        peakFitter->setProperty("BackgroundParameterValues",bkgGuessStr);
+        peakFitter->setProperty("FitWindow",fitWindow);
+
+        peakFitter->execute();
+
+// Does not work?
+//        DataObjects::TableWorkspace_const_sptr result = peakFitter->getProperty("ParameterTableWorkspace");
+//        auto pRes =const_cast<DataObjects::TableWorkspace *>(dynamic_cast<const DataObjects::TableWorkspace *>(result.get()));
+        DataObjects::TableWorkspace_sptr pRes = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+           API::AnalysisDataService::Instance().retrieve("_fittedPeakParams"));
+        if(!pRes){
+          throw std::runtime_error("Can not convert result of fitting algorithm into table workspace");
+        }
+        height = pRes->Double(0,1);
+        energy = pRes->Double(1,1);
+        width  = pRes->Double(2,1);
+        double A0  = pRes->Double(3,1);
+        double A1  = pRes->Double(4,1);
+      //
+
       return true;
+
+    }
+
+    /**Find indexes of each expected peak intervals from monotonous array of ranges.
+    @param eBins   -- bin ranges to look through
+    @param guess_energies -- vector of guess energies to look for
+    @param irangeMin  -- start indexes of energy intervals in the guess_energies vector.
+    @param irangeMax  -- final indexes of energy intervals in the guess_energies vector.
+    */
+    void GetAllEi::findBinRanges(const MantidVec & eBins,
+      const std::vector<double> & guess_energy,double Eresolution,std::vector<size_t> & irangeMin,
+      std::vector<size_t> & irangeMax){
+
+
+      auto inRange = [&](size_t index,const double &eGuess){
+        return (eBins[index]> eGuess*(1-2*Eresolution) && 
+               (eBins[index]<=eGuess*(1+2*Eresolution)));
+      };
+
+      size_t nBins = eBins.size();
+      size_t startIndex(0);
+      bool within=false;
+      for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
+        within=false;
+        for(size_t i=startIndex;i<nBins;i++){
+            if(inRange(i,guess_energy[nGuess])){
+              if(!within){
+                within = true;
+                if(i>1){
+                  irangeMin.push_back(i-1);
+                }else{
+                  irangeMin.push_back(0);
+                }
+              }
+            }else{
+              if(within){
+                irangeMax.push_back(i);
+                startIndex=i;
+                within = false;
+                break;
+              }
+            }
+        }
+      }
+      if(within){
+           irangeMax.push_back(nBins-1);
+      }
+      // if array decreasing rather then increasing, indexes behave differently
+      if(irangeMax[0]<irangeMin[0]){
+        irangeMax.swap(irangeMin);
+      }
+    }
+
+
+    /**Function implements common part of setting peak finder algorithm
+    @param inputWS -- shared pointer to workspace to fit
+    */
+    API::IAlgorithm_sptr GetAllEi::definePeakFinder(const API::MatrixWorkspace_sptr &inputWS){
+
+      API::IAlgorithm_sptr finder = createChildAlgorithm("FitPeak");
+      finder->initialize();
+      finder->setProperty("InputWorkspace",inputWS);
+      finder->setProperty("OutputWorkspace","_fittedPeak");
+      finder->setProperty("ParameterTableWorkspace","_fittedPeakParams");
+      finder->setProperty("PeakFunctionType","Gaussian (Height, PeakCentre, Sigma)");
+      finder->setProperty("BackgroundType","Linear (A0, A1)");
+      finder->setProperty("Minimizer","Simplex");
+
+      return finder;
     }
     /**Build 2-spectra workspace in units of energy, used as source
     *to identify actual monitors spectra 

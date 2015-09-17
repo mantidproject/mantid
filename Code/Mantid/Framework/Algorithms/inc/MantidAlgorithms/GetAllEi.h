@@ -2,8 +2,10 @@
 #define MANTID_ALGORITHMS_GETALLEI_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+//#include "MantidAPI/IAlgorithm.h"
 
 
 namespace Mantid {
@@ -71,13 +73,23 @@ protected: // for testing, private otherwise.
   void findGuessOpeningTimes(const std::pair<double,double> &TOF_range,
       double ChopDelay,double Period,std::vector<double > & guess_opening_times);
   /**Get energy of monitor peak if one is present*/
-  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,double guess_energy,
+  bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
+      const API::IAlgorithm_sptr &peakFitter,size_t ind_min,size_t ind_max,
       double & energy,double & height,double &width);
+  /**Function implements common part of setting peak finder algorithm*/
+  API::IAlgorithm_sptr definePeakFinder(const API::MatrixWorkspace_sptr &inputWS);
+  /**Find indexes of each expected peak intervals */
+  void findBinRanges(const MantidVec & eBins,
+      const std::vector<double> & guess_energies,
+      double Eresolution,std::vector<size_t> & irangeMin,
+      std::vector<size_t> & irangeMax);
 
-
-  // if log, which identifies that instrument is running is available on workspace.
-  // The log should be positive when instrument is running and negative otherwise.
+  /// if log, which identifies that instrument is running is available on workspace.
+  /// The log should be positive when instrument is running and negative or 0 otherwise.
   bool m_useFilterLog; 
+  /// maximal relative peak width to consider acceptable. Defined by minimal instrument resolution
+  /// and does not exceed 0.08
+  double m_max_Eresolution;
 
 };
 

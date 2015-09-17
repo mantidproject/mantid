@@ -32,6 +32,14 @@ public:
    API::MatrixWorkspace_sptr buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS, size_t &wsIndex0){
     return GetAllEi::buildWorkspaceToFit(inputWS,wsIndex0);
    }
+  void findBinRanges(const MantidVec & eBins,
+      const std::vector<double> & guess_energy,double Eresolution,std::vector<size_t> & irangeMin,
+      std::vector<size_t> & irangeMax){
+        GetAllEi::findBinRanges(eBins,guess_energy,Eresolution,irangeMin,irangeMax);
+  }
+  void setResolution(double newResolution){
+    this->m_max_Eresolution = newResolution;
+  }
 };
 
 class GetAllEiTest : public CxxTest::TestSuite
@@ -231,6 +239,28 @@ public:
       *(detID1.begin()),(*wws->getSpectrum(0)->getDetectorIDs().begin()));
     TSM_ASSERT_EQUALS("Detector's ID for the second spectrum and new workspace should coincide",
       *(detID2.begin()),(*wws->getSpectrum(1)->getDetectorIDs().begin()));
+   }
+   void test_binRanges(){
+     std::vector<size_t> bin_min,bin_max;
+     //Index           0 1 2 3 4 5 6 7 8 9  10 11 12 13
+     double debin[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,15};
+     std::vector<double> ebin(debin,debin+sizeof(debin)/sizeof(double));
+
+     double dguess[]= {1,2,10,15};
+     std::vector<double> guess(dguess,dguess+sizeof(dguess)/sizeof(double));
+     m_getAllEi.findBinRanges(ebin,guess,0.01,bin_min,bin_max);
+
+     TS_ASSERT_EQUALS(bin_min.size(),4)
+     TS_ASSERT_EQUALS(bin_max.size(),4)
+
+     TS_ASSERT_EQUALS(bin_min[0],0);
+     TS_ASSERT_EQUALS(bin_max[0],1);
+     TS_ASSERT_EQUALS(bin_min[1],0);
+     TS_ASSERT_EQUALS(bin_max[1],2);
+     TS_ASSERT_EQUALS(bin_min[2],8);
+     TS_ASSERT_EQUALS(bin_max[2],10);
+     TS_ASSERT_EQUALS(bin_min[3],12);
+     TS_ASSERT_EQUALS(bin_max[3],13);
 
 
    }
