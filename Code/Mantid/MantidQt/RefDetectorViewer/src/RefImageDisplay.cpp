@@ -57,7 +57,7 @@ RefImageDisplay::~RefImageDisplay()
  * @param mouseClick Which mouse button was clicked
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> RefImageDisplay::setPointedAtPoint( QPoint point, int mouseClick)
+QPair<double,double> RefImageDisplay::setPointedAtPoint( QPoint point, int mouseClick, bool)
 {
   // Call the base class method for most of the work
   QPair<double,double> xy = SpectrumDisplay::setPointedAtPoint( point );

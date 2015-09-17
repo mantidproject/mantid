@@ -94,7 +94,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay: public QObject
      void setIntensity( double controlParameter );
 
      /// Record the point that the user is currently pointing at with the mouse
-     virtual QPair<double,double> setPointedAtPoint( QPoint point, bool isFront = true );
+     virtual QPair<double,double> setPointedAtPoint( QPoint point, int mouseClick = 2, bool isFront = true);
 
      /// Record the point that the user is currently pointing in the scales coordinates
      virtual void setPointedAtXY( double x, double y, bool isFront = true );

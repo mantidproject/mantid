@@ -409,7 +409,7 @@ QPair<double, double> SpectrumDisplay::getPlotInvTransform( QPoint point )
  * @param isFront Flag indicating if this is a call to the front (active) display.
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, bool isFront )
+QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int, bool isFront )
 {
   if ( m_dataSource == 0 || m_dataArray == 0 )
     return qMakePair(0.0, 0.0);
