@@ -157,8 +157,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   }
 
   // Phase quadrature
-  std::vector<double> data1(npoints, 0), data2(npoints, 0);
-  std::vector<double> sigm1(npoints, 0), sigm2(npoints, 0);
+  std::vector<double> realY(npoints, 0), imagY(npoints, 0);
+  std::vector<double> realE(npoints, 0), imagE(npoints, 0);
   for (int i = 0; i < npoints; i++) {
     for (int h = 0; h < nspec; h++) {
 
@@ -168,26 +168,26 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
       double E =
           (Y > MPOISSONLIM) ? ws->readE(h)[i] : sqrt(n0[h] * exp(-X / MULIFE));
 
-      data1[i] += aj[h] * Y;
-      data2[i] += bj[h] * Y;
-      sigm1[i] += aj[h] * aj[h] * E * E;
-      sigm2[i] += bj[h] * bj[h] * E * E;
+      realY[i] += aj[h] * Y;
+      imagY[i] += bj[h] * Y;
+      realE[i] += aj[h] * aj[h] * E * E;
+      imagE[i] += bj[h] * bj[h] * E * E;
     }
-    sigm1[i] = sqrt(sigm1[i]);
-    sigm2[i] = sqrt(sigm2[i]);
+    realE[i] = sqrt(realE[i]);
+    imagE[i] = sqrt(imagE[i]);
   }
 
   // Populate output workspace
   API::MatrixWorkspace_sptr ows = API::WorkspaceFactory::Instance().create(
       "Workspace2D", 2, npoints + 1, npoints);
-  ows->dataY(0).assign(data1.begin(), data1.end());
-  ows->dataE(0).assign(sigm1.begin(),sigm1.end());
-  ows->dataY(1).assign(data2.begin(),data2.end());
-  ows->dataE(1).assign(sigm2.begin(),sigm2.end());
+  ows->dataY(0).assign(realY.begin(), realY.end());
+  ows->dataE(0).assign(realE.begin(), realE.end());
+  ows->dataY(1).assign(imagY.begin(), imagY.end());
+  ows->dataE(1).assign(imagE.begin(), imagE.end());
   // X
   MantidVec x = ws->readX(0);
-  ows->dataX(0).assign(x.begin(),x.end());
-  ows->dataX(1).assign(x.begin(),x.end());
+  ows->dataX(0).assign(x.begin(), x.end());
+  ows->dataX(1).assign(x.begin(), x.end());
   return ows;
 
 #undef MPOISSONLIM
