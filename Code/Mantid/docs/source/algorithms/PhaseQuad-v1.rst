@@ -24,9 +24,9 @@ Description
 -----------
 
 Assuming that the *InputWorkspace* contains measured counts as a function of time,
-and *DetectorTable* contains the detector phases, the algorithm returns a workspace 
+and *PhaseTable* contains the detector phases, the algorithm returns a workspace 
 containing two spectra (squashograms) as a function of the same time binning.
-*DetectorTable* is expected to have two columns, corresponding to the detector id
+*PhaseTable* is expected to have two columns, corresponding to the detector id
 and the corresponding phase.
 
 Usage
@@ -52,7 +52,7 @@ Usage
    for i in range(0,32):
        phi = 2*pi*i/32.
        tab.addRow([1, phi])
-   ows = PhaseQuad(InputWorkspace='MUSR00022725', DetectorTable='tab')
+   ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
    print "Output workspace has", ows.getNumberHistograms(), "histograms"
 
 Output:

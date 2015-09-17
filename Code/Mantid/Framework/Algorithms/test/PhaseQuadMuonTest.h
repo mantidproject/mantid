@@ -43,7 +43,7 @@ public:
     phaseQuad->setChild(true);
     phaseQuad->initialize();
     phaseQuad->setProperty("InputWorkspace",inputWs);
-    phaseQuad->setProperty("DetectorTable",phaseTable);
+    phaseQuad->setProperty("PhaseTable",phaseTable);
     phaseQuad->setPropertyValue("OutputWorkspace", "out_ws");
     TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
     TS_ASSERT(phaseQuad->isExecuted());

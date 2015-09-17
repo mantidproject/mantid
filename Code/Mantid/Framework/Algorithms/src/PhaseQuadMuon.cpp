@@ -24,7 +24,7 @@ void PhaseQuadMuon::init() {
                   "Name of the input workspace containing the spectra");
 
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "DetectorTable", "", Direction::Input),
+                      "PhaseTable", "", Direction::Input),
                   "Name of the table containing the detector phases");
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
@@ -42,7 +42,7 @@ void PhaseQuadMuon::exec() {
 
   // Get the input phase table
   // Should have two columns (detector, phase)
-  API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
+  API::ITableWorkspace_sptr phaseTable = getProperty("PhaseTable");
 
   // Get N0, the normalization constant: N(t) = N0 * exp(-x/tau)
   // for each spectrum/detector
@@ -70,18 +70,18 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 
   // Check that input ws and table ws have compatible dimensions
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  API::ITableWorkspace_const_sptr tabWS = getProperty("DetectorTable");
+  API::ITableWorkspace_const_sptr tabWS = getProperty("PhaseTable");
 
   size_t nspec = inputWS->getNumberHistograms();
   size_t ndet = tabWS->rowCount();
 
   if (nspec != ndet) {
-    result["DetectorTable"] = "DetectorTable must have one row per spectrum";
+    result["PhaseTable"] = "PhaseTable must have one row per spectrum";
   }
 
-  // DetectorTable should have two columns: (detector, phase)
+  // PhaseTable should have two columns: (detector, phase)
   if (tabWS->columnCount() != 2) {
-    result["DetectorTable"] = "DetectorTable must have two columns";
+    result["PhaseTable"] = "PhaseTable must have two columns";
   }
 
   // Check units, should be microseconds
