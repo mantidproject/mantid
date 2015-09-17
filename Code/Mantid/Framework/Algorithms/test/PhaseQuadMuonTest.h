@@ -49,9 +49,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("InputWorkspace", "EMU6473") );
     TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("OutputWorkspace", "EMU6473_out") );
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("PhaseTable", "PhaseTable") );
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("PulseOver", "60") );
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("MeanLag", "0") );
+    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("DetectorTable", "PhaseTable") );
 
     TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.execute() );
     TS_ASSERT( phaseQuadMuon.isExecuted() );
@@ -66,34 +64,22 @@ public:
     auto specReE = outputWs->getSpectrum(0)->readE();
     auto specImY = outputWs->getSpectrum(1)->readY();
     auto specImE = outputWs->getSpectrum(1)->readE();
-    // Check real spectrum Y values
-    TS_ASSERT_DELTA ( specReY[ 0], -0.998265, 0.000001 );
-    TS_ASSERT_DELTA ( specReY[10], -0.997286, 0.000001 );
-    TS_ASSERT_DELTA ( specReY[20], -0.026196, 0.000001 );
-    TS_ASSERT_DELTA ( specReY[30],  0.017798, 0.000001 );
-    TS_ASSERT_DELTA ( specReY[40],  0.033196, 0.000001 );
-    TS_ASSERT_DELTA ( specReY[50],  0.025337, 0.000001 );
-    // Check real spectrum E values
-    TS_ASSERT_DELTA ( specReE[ 0], 135268, 1 );
-    TS_ASSERT_DELTA ( specReE[10], 145487, 1 );
-    TS_ASSERT_DELTA ( specReE[20], 0.00213851, 0.000001 );
-    TS_ASSERT_DELTA ( specReE[30], 0.00226644, 0.000001 );
-    TS_ASSERT_DELTA ( specReE[40], 0.00237071, 0.000001 );
-    TS_ASSERT_DELTA ( specReE[50], 0.00244977, 0.000001 );
-    // Check imaginary spectrum Y values
-    TS_ASSERT_DELTA ( specImY[ 0], -0.997455, 0.000001 );
-    TS_ASSERT_DELTA ( specImY[10], -0.993110, 0.000001 );
-    TS_ASSERT_DELTA ( specImY[20], 0.0099704, 0.000001 );
-    TS_ASSERT_DELTA ( specImY[30], 0.0300842, 0.000001 );
-    TS_ASSERT_DELTA ( specImY[40], 0.0285628, 0.000001 );
-    TS_ASSERT_DELTA ( specImY[50], 0.0300885, 0.000001 );
-    // Check imaginary spectrum E values
-    TS_ASSERT_DELTA ( specImE[ 0], 280312, 1 );
-    TS_ASSERT_DELTA ( specImE[10], 301487, 1 );
-    TS_ASSERT_DELTA ( specImE[20], 0.00316581, 0.000001 );
-    TS_ASSERT_DELTA ( specImE[30], 0.00332145, 0.000001 );
-    TS_ASSERT_DELTA ( specImE[40], 0.00343792, 0.000001 );
-    TS_ASSERT_DELTA ( specImE[50], 0.00357113, 0.000001 );
+    // Check real Y values
+    TS_ASSERT_DELTA ( specReY[ 0], -0.9984, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[20], -0.1316, 0.0001 );
+    TS_ASSERT_DELTA ( specReY[50], -0.0856, 0.0001 );
+    // Check real E values
+    TS_ASSERT_DELTA ( specReE[ 0], 0.0019, 0.0001);
+    TS_ASSERT_DELTA ( specReE[20], 0.0020, 0.0001 );
+    TS_ASSERT_DELTA ( specReE[50], 0.0022, 0.0001 );
+    // Check imaginary Y values
+    TS_ASSERT_DELTA ( specImY[ 0], -0.9976, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[20], -0.0988, 0.0001 );
+    TS_ASSERT_DELTA ( specImY[50], -0.0808, 0.0001 );
+    // Check imaginary E values
+    TS_ASSERT_DELTA ( specImE[ 0], 0.0027, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[20], 0.0029, 0.0001 );
+    TS_ASSERT_DELTA ( specImE[50], 0.0033, 0.0001 );
 
     AnalysisDataService::Instance().remove("EMU6473"); // remove inputWs
     AnalysisDataService::Instance().remove("EMU6473_out"); // remove OutputWs
@@ -103,16 +89,14 @@ public:
 
   void generatePhaseTable (ITableWorkspace_sptr phaseTable)
   {
-    phaseTable->addColumn("bool","DetectorOK");
-    phaseTable->addColumn("double","DetectorAlpha");
+    phaseTable->addColumn("int","DetectorID");
     phaseTable->addColumn("double","DetectorPhase");
-    phaseTable->addColumn("double","DetectorDeadTime");
     for (int i=0; i<16; i++)
     {
       TableRow phaseRow1 = phaseTable->appendRow();
-      phaseRow1 << true << 50.0 <<  0.0 << 0.0 ;
+      phaseRow1 << i << 0.0 ;
       TableRow phaseRow2 = phaseTable->appendRow();
-      phaseRow2 << true << 50.0 << 1.57 << 0.0 ;
+      phaseRow2 << i << 1.57 ;
     }
   }
 
