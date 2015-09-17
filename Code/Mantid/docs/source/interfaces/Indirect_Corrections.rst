@@ -353,5 +353,41 @@ Container Radius
 
 Neutron Events
   Number of events to use in the Monte Carlo simulation.
+  
+  
+Container Subtraction
+---------------------
+
+.. interface:: Corrections
+  :widget: tabContainerSubtraction
+  
+The Container Subtraction Tab is used to remove the containers contribution to a run.
+
+Once run the corrected output and can correction is shown in the preview plot, the Spectrum 
+spin box can be used to scroll through each spectrum. Note that when this plot shows the 
+result of a calculation the X axis is always in wavelength, however when data is initially 
+selected the X axis unit matches that of the sample workspace.
+
+The input and container workspaces will be converted to wavelength (using
+:ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
+as their X unit.
+ 
+Options
+~~~~~~~
+
+Input Sample
+  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the sample.
+  
+Input Container
+  Either a reduced file (_red.nxs) or workspace (_red) or an S(Q,\omega) file (_sqw.nxs) or workspace (_sqw) that represents the container.
+  
+Scale Can by Factor
+  Allows the container intensity to be scaled by a given scale factor before being used in the corrections calculation.
+
+Plot Output
+  Gives the option to create either a spectra or contour plot (or both) of the corrected workspace.
+  
+Save Result
+  If enabled the result will be saved as a NeXus file in the default save directory.
 
 .. categories:: Interfaces Indirect

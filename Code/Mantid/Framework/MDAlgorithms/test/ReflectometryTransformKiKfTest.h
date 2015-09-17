@@ -7,6 +7,7 @@
 #include <cmath>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 
 class ReflectometryTransformKiKfTest : public CxxTest::TestSuite
@@ -92,17 +93,18 @@ public:
     const double wavelength = 1;
 
     //Sine 0 = 0
-    CalculateReflectometryK A;
+    
+    CalculateReflectometryKiKf A;
     A.setThetaIncident(0);
     TS_ASSERT_EQUALS(0, A.calculateDim0(wavelength));
 
     //Sine 90 = 1
-    CalculateReflectometryK B;
+    CalculateReflectometryKiKf B;
     B.setThetaIncident(90);
     TS_ASSERT_DELTA(2*M_PI/wavelength, B.calculateDim0(wavelength), 0.0001);
 
     //Sine 270 = -1
-    CalculateReflectometryK C;
+    CalculateReflectometryKiKf C;
     C.setThetaIncident(270);
     TS_ASSERT_DELTA(-2*M_PI/wavelength, C.calculateDim0(wavelength), 0.0001);
   }
@@ -111,7 +113,7 @@ public:
   {
     const double wavelength = 1;
 
-    CalculateReflectometryK A;
+    CalculateReflectometryKiKf A;
     A.setThetaIncident(90);
     TS_ASSERT_DELTA(2*M_PI/wavelength, A.calculateDim0(wavelength), 0.0001);
 

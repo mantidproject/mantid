@@ -2504,8 +2504,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     shift = runReduceScriptFunction("print fit_settings['shift']").trimmed().toDouble();
   }
   // update gui
-  m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 3));
-  m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 3));
+  m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 8));
+  m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 8));
   // first process pythonStdOut
   QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
   if ( pythonDiag.count() > 1 )
