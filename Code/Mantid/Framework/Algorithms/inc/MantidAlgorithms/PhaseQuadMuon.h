@@ -63,8 +63,6 @@ private:
   API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
                                    const API::ITableWorkspace_sptr &phase,
                                    const std::vector<double> &n0);
-  /// Put back in exponential decay
-  void regainExponential(API::MatrixWorkspace_sptr &ws);
 };
 
 } // namespace Algorithms

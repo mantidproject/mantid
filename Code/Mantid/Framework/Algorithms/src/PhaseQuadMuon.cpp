@@ -52,9 +52,6 @@ void PhaseQuadMuon::exec() {
   //// Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
-  // Regain exponential decay
-  regainExponential(ows);
-
   std::cout << "--------------------------\n";
   for (size_t i = 0; i < ows->blocksize(); i++)
     std::cout << ows->readX(0)[i] << "\t" << ows->readY(0)[i] << "\t"
@@ -175,6 +172,15 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     }
     realE[i] = sqrt(realE[i]);
     imagE[i] = sqrt(imagE[i]);
+
+    // Regain exponential decay
+    double x = ws->getSpectrum(0)->readX()[i];
+    double e = exp(-x / MULIFE);
+    realY[i] /= e;
+    imagY[i] /= e;
+    realE[i] /= e;
+    imagE[i] /= e;
+
   }
 
   // Populate output workspace
@@ -194,29 +200,5 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 #undef MULIFE
 }
 
-//----------------------------------------------------------------------------------------------
-/** Put back in exponential decay
-* @param ws :: [Input/Output] Workspace containing squashograms to update
-*/
-void PhaseQuadMuon::regainExponential(API::MatrixWorkspace_sptr &ws) {
-
-#define MULIFE 2.19703
-
-  auto specRe = ws->getSpectrum(0);
-  auto specIm = ws->getSpectrum(1);
-
-  size_t npoints = ws->blocksize();
-
-  for (int i = 0; i < npoints; i++) {
-    double x = ws->getSpectrum(0)->readX()[i];
-    double e = exp(-x / MULIFE);
-    specRe->dataY()[i] /= e;
-    specIm->dataY()[i] /= e;
-    specRe->dataE()[i] /= e;
-    specIm->dataE()[i] /= e;
-  }
-
-#undef MULIFE
-}
 }
 }
