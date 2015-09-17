@@ -165,7 +165,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
   m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),
   m_batch_paste(NULL), m_batch_clear(NULL),
-  slicingWindow(NULL)
+  slicingWindow(NULL), m_mustBeDouble(NULL), m_doubleValidatorZeroToMax(NULL), m_intValidatorZeroToMax(NULL)
 {
   ConfigService::Instance().addObserver(m_newInDir);
 }
@@ -2363,6 +2363,12 @@ QString SANSRunWindow::readSampleObjectGUIChanges()
 void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 {
   const States type = typeStr == "1D" ? OneD : TwoD;
+
+  // Make sure that all settings are valid
+  if (!areSettingsValid()){
+    return;
+  }
+
   //new reduction is going to take place, remove the results from the last reduction
   resetDefaultOutput();
 
@@ -3869,64 +3875,73 @@ void SANSRunWindow::openHelpPage()
 void SANSRunWindow::setValidators()
 {
   // Validator policies
-  auto mustBeDouble = new QDoubleValidator(this);
-  auto doubleValidatorZeroToMax = new QDoubleValidator(
-      0.0, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
-  auto intValidatorZeroToMax = new QIntValidator(0, m_constants.getMaxIntValue(), this);
+  if (!m_mustBeDouble) {
+    m_mustBeDouble = new QDoubleValidator(this);
+  }
+
+  if (m_doubleValidatorZeroToMax) {
+    m_doubleValidatorZeroToMax = new QDoubleValidator(
+        0.0, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
+  }
+
+  if (m_intValidatorZeroToMax) {
+    m_intValidatorZeroToMax =
+        new QIntValidator(0, m_constants.getMaxIntValue(), this);
+  }
 
   // Run Numbers tab
 
   // ----------- Run Settings Tab---------------------------------
-  m_uiForm.gravity_extra_length_line_edit->setValidator(mustBeDouble);
-  m_uiForm.rad_min->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.rad_max->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.gravity_extra_length_line_edit->setValidator(m_mustBeDouble);
+  m_uiForm.rad_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.rad_max->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.wav_min->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.wav_max->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.wav_dw->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.wav_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.wav_dw->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.q_min->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.q_max->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.q_dq->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.q_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.q_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.q_dq->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.qy_max->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.qy_dqy->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.qy_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.qy_dqy->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.trans_min->setValidator(mustBeDouble);
-  m_uiForm.trans_max->setValidator(mustBeDouble);
+  m_uiForm.trans_min->setValidator(m_mustBeDouble);
+  m_uiForm.trans_max->setValidator(m_mustBeDouble);
 
-  m_uiForm.trans_min_can->setValidator(mustBeDouble);
-  m_uiForm.trans_max_can->setValidator(mustBeDouble);
+  m_uiForm.trans_min_can->setValidator(m_mustBeDouble);
+  m_uiForm.trans_max_can->setValidator(m_mustBeDouble);
 
-  m_uiForm.monitor_spec->setValidator(intValidatorZeroToMax);
-  m_uiForm.trans_monitor->setValidator(intValidatorZeroToMax);
+  m_uiForm.monitor_spec->setValidator(m_intValidatorZeroToMax);
+  m_uiForm.trans_monitor->setValidator(m_intValidatorZeroToMax);
 
-  m_uiForm.trans_M3M4_line_edit->setValidator(mustBeDouble);
-  m_uiForm.trans_radius_line_edit->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.trans_M3M4_line_edit->setValidator(m_mustBeDouble);
+  m_uiForm.trans_radius_line_edit->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.phi_min->setValidator(mustBeDouble);
-  m_uiForm.phi_max->setValidator(mustBeDouble);
+  m_uiForm.phi_min->setValidator(m_mustBeDouble);
+  m_uiForm.phi_max->setValidator(m_mustBeDouble);
 
-  m_uiForm.frontDetRescale->setValidator(mustBeDouble);
-  m_uiForm.frontDetShift->setValidator(mustBeDouble);
-  m_uiForm.frontDetQmin->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.frontDetQmax->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.frontDetRescale->setValidator(m_mustBeDouble);
+  m_uiForm.frontDetShift->setValidator(m_mustBeDouble);
+  m_uiForm.frontDetQmin->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.frontDetQmax->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.tof_min->setValidator(mustBeDouble);
-  m_uiForm.tof_max->setValidator(mustBeDouble);
-  m_uiForm.scale_factor->setValidator(mustBeDouble);
+  m_uiForm.tof_min->setValidator(m_mustBeDouble);
+  m_uiForm.tof_max->setValidator(m_mustBeDouble);
+  m_uiForm.scale_factor->setValidator(m_mustBeDouble);
 
   // ----------- Geometry Tab-----------------------------------
   // Geometry
-  m_uiForm.sample_thick->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.sample_height->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.sample_width->setValidator(doubleValidatorZeroToMax);
+  m_uiForm.sample_thick->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_height->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_width->setValidator(m_doubleValidatorZeroToMax);
 
   // Beam Centre Finder
-  m_uiForm.beam_rmin->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.beam_rmax->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.toleranceLineEdit->setValidator(doubleValidatorZeroToMax);
-  m_uiForm.beam_iter->setValidator(intValidatorZeroToMax);
+  m_uiForm.beam_rmin->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.beam_rmax->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.toleranceLineEdit->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.beam_iter->setValidator(m_intValidatorZeroToMax);
 }
 
 /**
@@ -4279,5 +4294,32 @@ void SANSRunWindow::resetAllTransFields() {
   m_uiForm.trans_roi_files_checkbox->setChecked(state);
   m_uiForm.trans_radius_check_box->setChecked(state);
 }
+
+/**
+ * Check tha the Settings are valid. We need to do this for inputs which cannot
+ * be checked with simple validators
+ */
+bool SANSRunWindow::areSettingsValid() {
+  bool isValid = true;
+  QString message;
+  // ------------ GUI INPUT CHECKS ------------
+
+  // R_MAX
+  auto r_max = m_uiForm.rad_max->text().simplified().toDouble();
+  if ((r_max < 0.0) && (r_max != -1)) {
+    isValid = false;
+    message += "R_max issue: Only values >= 0 and -1 are allowed.\n";
+  }
+
+  // Print the error message if there are any
+  if (!message.isEmpty()) {
+    QString warning = "Please correct these settings before proceeding:\n";
+    warning += message;
+    QMessageBox::warning(this,"Inconsistent input", warning);
+  }
+
+  return isValid;
+}
+
 } //namespace CustomInterfaces
 } //namespace MantidQt

@@ -374,6 +374,10 @@ private:
   QMap<Tab, QString> m_helpPageUrls;
   /// SANS constants
   SANSConstants m_constants;
+  /// Validators
+  QValidator* m_mustBeDouble;
+  QValidator* m_doubleValidatorZeroToMax;
+  QValidator* m_intValidatorZeroToMax;
 
   void initAnalysDetTab();
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);
@@ -408,6 +412,8 @@ private:
   void initTransmissionSettings();
   /// Set all trans fields to a certain enabled state
   void resetAllTransFields();
+  /// Check the validty of inputs
+  bool areSettingsValid();
 
   UserSubWindow * slicingWindow;
 
