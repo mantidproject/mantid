@@ -506,7 +506,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             mergedQ = dividend/divisor
 
             DeleteWorkspace(dividend)
-            DeleteWorkspce(divisior)
+            DeleteWorkspace(divisor)
             DeleteWorkspace(scaled_norm_front)
             DeleteWorkspace(shifted_norm_front)
 
