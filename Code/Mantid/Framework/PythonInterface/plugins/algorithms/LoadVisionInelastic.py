@@ -66,9 +66,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         # Let's make sure we have a unique and naturally sorted list
         banks_list = banks.split(",")
         banks = ",".join(natsorted(list(set(banks_list))))
-
-        print banks
-
+        
         self.getLogger().information('Loading data from banks:' + banks.replace("bank", ""))
 
         wksp_name = "__tmp"
