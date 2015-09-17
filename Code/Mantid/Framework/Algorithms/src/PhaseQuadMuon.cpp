@@ -51,6 +51,11 @@ void PhaseQuadMuon::exec() {
   // Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
+  // Copy X axis to output workspace
+  ows->replaceAxis(0,inputWs->getAxis(0));
+  // New Y axis label
+  ows->setYUnit("Asymmetry");
+
   setProperty("OutputWorkspace", ows);
 }
 
