@@ -2,14 +2,10 @@
 #define MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidDataHandling/LoadMuonNexus2.h"
-#include "MantidAlgorithms/PhaseQuadMuon.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include <Poco/File.h>
-#include <stdexcept>
 
-using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
@@ -17,44 +13,43 @@ class PhaseQuadMuonTest : public CxxTest::TestSuite
 {
 public:
 
-  void testName()
+  void testTheBasics()
   {
-    TS_ASSERT_EQUALS( phaseQuadMuon.name(), "PhaseQuad" );
-  }
-
-  void testCategory()
-  {
-    TS_ASSERT_EQUALS( phaseQuadMuon.category(), "Muon" )
-  }
-
-  void testInit()
-  {
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.initialize() );
-    TS_ASSERT( phaseQuadMuon.isInitialized() )
+    IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
+    TS_ASSERT_EQUALS(phaseQuad->name(), "PhaseQuad");
+    TS_ASSERT_EQUALS(phaseQuad->category(), "Muon");
+    TS_ASSERT_THROWS_NOTHING(phaseQuad->initialize());
+    TS_ASSERT(phaseQuad->isInitialized());
   }
 
   void testExecPhaseTable()
   {
-    loader.initialize();
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "EMU6473");
-    TS_ASSERT_THROWS_NOTHING( loader.execute() );
-    TS_ASSERT_EQUALS(loader.isExecuted(),true);
+    // Load a muon dataset
+    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("Load");
+    loader->setChild(true);
+    loader->initialize();
+    loader->setProperty("Filename", "emu00006473.nxs");
+    loader->setPropertyValue("OutputWorkspace", "out_ws");
+    loader->execute();
+    Workspace_sptr temp = loader->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
-    MatrixWorkspace_sptr inputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EMU6473");
-
+    // Create and populate a detector table
     boost::shared_ptr<ITableWorkspace>phaseTable(new Mantid::DataObjects::TableWorkspace);
-    generatePhaseTable(phaseTable);
-    AnalysisDataService::Instance().add("PhaseTable",phaseTable);
+    populatePhaseTable(phaseTable);
 
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("InputWorkspace", "EMU6473") );
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("OutputWorkspace", "EMU6473_out") );
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.setProperty("DetectorTable", "PhaseTable") );
+    // Run PhaseQuad
+    IAlgorithm_sptr phaseQuad = AlgorithmManager::Instance().create("PhaseQuad");
+    phaseQuad->setChild(true);
+    phaseQuad->initialize();
+    phaseQuad->setProperty("InputWorkspace",inputWs);
+    phaseQuad->setProperty("DetectorTable",phaseTable);
+    phaseQuad->setPropertyValue("OutputWorkspace", "out_ws");
+    TS_ASSERT_THROWS_NOTHING(phaseQuad->execute());
+    TS_ASSERT(phaseQuad->isExecuted());
 
-    TS_ASSERT_THROWS_NOTHING( phaseQuadMuon.execute() );
-    TS_ASSERT( phaseQuadMuon.isExecuted() );
-
-    MatrixWorkspace_sptr outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("EMU6473_out");
+    // Get the output ws
+    MatrixWorkspace_sptr outputWs = phaseQuad->getProperty("OutputWorkspace");
 
     TS_ASSERT_EQUALS( outputWs->getNumberHistograms(), 2);
     TS_ASSERT_EQUALS( outputWs->getSpectrum(0)->readX(), inputWs->getSpectrum(0)->readX() ); // Check outputWs X values
@@ -80,14 +75,9 @@ public:
     TS_ASSERT_DELTA ( specImE[ 0], 0.0027, 0.0001 );
     TS_ASSERT_DELTA ( specImE[20], 0.0029, 0.0001 );
     TS_ASSERT_DELTA ( specImE[50], 0.0033, 0.0001 );
-
-    AnalysisDataService::Instance().remove("EMU6473"); // remove inputWs
-    AnalysisDataService::Instance().remove("EMU6473_out"); // remove OutputWs
-    AnalysisDataService::Instance().remove("PhaseTable"); // remove PhaseTable
-
   }
 
-  void generatePhaseTable (ITableWorkspace_sptr phaseTable)
+  void populatePhaseTable (ITableWorkspace_sptr phaseTable)
   {
     phaseTable->addColumn("int","DetectorID");
     phaseTable->addColumn("double","DetectorPhase");
@@ -99,10 +89,6 @@ public:
       phaseRow2 << i << 1.57 ;
     }
   }
-
-private:
-  PhaseQuadMuon phaseQuadMuon;
-  Mantid::DataHandling::LoadMuonNexus2 loader;
 };
 
 #endif /* MANTID_ALGORITHMS_PHASEQUADMUONTEST_H_ */
