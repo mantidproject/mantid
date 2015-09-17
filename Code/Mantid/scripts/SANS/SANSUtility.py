@@ -12,6 +12,7 @@ import math
 import os
 import re
 import types
+import numpy as np
 
 sanslog = Logger("SANS")
 ADDED_EVENT_DATA_TAG = '_added_event_data'
@@ -1044,6 +1045,93 @@ def can_load_as_event_workspace(filename):
                 nxs_file.close()
 
     return is_event_workspace
+
+def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift):
+    '''
+    Determines the min and max values for Q which are subsequently used for fitting.
+    @param rear_data_name: name of the rear data set
+    @param front_data_name: name of the the front data set
+    @param rescale_shift: the rescale and shift object
+    '''
+    min_q = None
+    max_q = None
+
+    front_data = mtd[front_data_name]
+    front_dataX = front_data.readX(0)
+
+    front_size = len(front_dataX)
+    front_q_min = None
+    front_q_max = None
+    if front_size > 0:
+        front_q_min = front_dataX[0]
+        front_q_max = front_dataX[front_size - 1]
+    else:
+        raise RuntimeError("The FRONT detector does not seem to contain q values")
+
+    rear_data = mtd[rear_data_name]
+    rear_dataX = rear_data.readX(0)
+
+    rear_size = len(rear_dataX)
+    rear_q_min = None
+    rear_q_max = None
+    if rear_size > 0:
+        rear_q_min = rear_dataX[0]
+        rear_q_max = rear_dataX[rear_size - 1]
+    else:
+        raise RuntimeError("The REAR detector does not seem to contain q values")
+
+    if  rear_q_max < front_q_min:
+        raise RuntimeError("The min value of the FRONT detector data set is larger"
+                            "than the max value of the REAR detector data set")
+
+    # Get the min and max range
+    min_q = max(rear_q_min, front_q_min)
+    max_q = min(rear_q_max, front_q_max)
+
+    if rescale_shift.qRangeUserSelected:
+        min_q = max(min_q, rescale_shift.qMin)
+        max_q = min(max_q,rescale_shift.qMax)
+
+    return min_q, max_q
+
+def get_error_corrected_front_and_rear_data_sets(front_data, rear_data, q_min, q_max):
+    '''
+    Transfers the error data from the front data to the rear data
+    @param front_data: the front data set
+    @param rear_data: the rear data set
+    @param q_min: the minimal q value
+    @param q_max: the maximal q value
+    '''
+    # First we want to crop the workspaces
+    front_data_cropped = CropWorkspace(InputWorkspace=front_data, XMin = q_min, XMax = q_max)
+    # For the rear data set
+    rear_data_cropped = CropWorkspace(InputWorkspace=rear_data, XMin = q_min, XMax = q_max)
+
+    # Now transfer the error from front data to the rear data workspace
+    # This works only if we have a single QMod spectrum in the workspaces
+    front_error = front_data_cropped.dataE(0)
+    rear_error = rear_data_cropped.dataE(0)
+
+    rear_error_squared = rear_error*rear_error
+    front_error_squared = front_error*front_error
+
+    corrected_error_squared =  rear_error_squared + front_error_squared
+    corrected_error = np.sqrt(corrected_error_squared)
+    rear_error[0:len(rear_error)] = corrected_error[0:len(rear_error)]
+
+    return front_data_cropped, rear_data_cropped
+
+def is_1D_workspace(workspace):
+    '''
+    Check if the workspace is 1D, ie if it has only a single spectrum
+    @param workspace: the workspace to check
+    @returns true if the workspace has a single spectrum else false
+    '''
+    if workspace.getNumberHistograms() == 1:
+        return True
+    else:
+        return False
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

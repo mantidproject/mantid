@@ -313,6 +313,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QCheckBox" name="checkEnableNotebook">
+              <property name="text">
+               <string>Output Notebook</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QToolButton" name="buttonProcess">
               <property name="text">
                <string>Process</string>
@@ -341,7 +348,7 @@
      <x>0</x>
      <y>0</y>
      <width>959</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="nativeMenuBar">

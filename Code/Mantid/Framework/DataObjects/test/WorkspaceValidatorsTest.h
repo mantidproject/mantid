@@ -4,8 +4,11 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidKernel/Material.h"
+#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -159,19 +162,86 @@ public:
 
   void testInstrumentValidator()
   {
-    auto instVal = boost::make_shared<InstrumentValidator>();
-    MatrixWorkspace_sptr ws = MatrixWorkspace_sptr(new Mantid::DataObjects::Workspace2D);
+    { // default validator
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+      auto * sample = new Mantid::Geometry::ObjComponent("Sample");
+      inst->add(sample);
+      inst->markAsSamplePos(sample);
 
-    // Fails if no instrument
-    TS_ASSERT_EQUALS( instVal->isValid(ws), "The workspace must have an instrument defined" );
+      auto instVal = boost::make_shared<InstrumentValidator>();
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the following components: sample holder");
+      ws->setInstrument(inst);
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "");
+    }
+    
+    { // requires just a source
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
 
-    // Add a sample pos and then things will be fine
-    Mantid::Geometry::Instrument_sptr inst(new Mantid::Geometry::Instrument);
-    ws->setInstrument(inst);
-    Mantid::Geometry::ObjComponent * sample = new Mantid::Geometry::ObjComponent("Sample");
-    inst->add(sample);  // This takes care of deletion
-    inst->markAsSamplePos(sample);
-    TS_ASSERT_EQUALS( instVal->isValid(ws), "" );
+      auto instVal = boost::make_shared<InstrumentValidator>(InstrumentValidator::SourcePosition);
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the following components: source");
+      auto * src = new Mantid::Geometry::ObjComponent("Source");
+      inst->add(src);
+      inst->markAsSource(src);
+      ws->setInstrument(inst);
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "");
+    }
+
+    { // requires source & sample position
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+
+      auto instVal = boost::make_shared<InstrumentValidator>(InstrumentValidator::SourcePosition | InstrumentValidator::SamplePosition);
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "The instrument is missing the following components: source,sample holder" );
+      auto * sample = new Mantid::Geometry::ObjComponent("Sample");
+      inst->add(sample);
+      inst->markAsSamplePos(sample);
+      auto * src = new Mantid::Geometry::ObjComponent("Source");
+      inst->add(src);
+      inst->markAsSource(src);
+      ws->setInstrument(inst);
+      TS_ASSERT_EQUALS(instVal->isValid(ws), "");
+    }
+  }
+  
+  void testSampleValidator()
+  {
+    using Mantid::Geometry::Object;
+    using Mantid::Kernel::Material;
+    using Mantid::PhysicalConstants::NeutronAtom;
+    // These should be separate tests when they are refactored out
+    { //requires just shape
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto sampleVal = boost::make_shared<SampleValidator>(SampleValidator::Shape);
+  
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "The sample is missing the following properties: shape");
+      auto shape = ComponentCreationHelper::createSphere(0.01);
+      ws->mutableSample().setShape(*shape);
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
+    }
+    
+    { //requires just material
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto sampleVal = boost::make_shared<SampleValidator>(SampleValidator::Material);
+  
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "The sample is missing the following properties: material");
+      auto noShape = boost::make_shared<Object>();
+      noShape->setMaterial(Material("V",NeutronAtom(), 0.072));
+      ws->mutableSample().setShape(*noShape);
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
+    }
+    
+    { //requires both
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto sampleVal = boost::make_shared<SampleValidator>(SampleValidator::Shape|SampleValidator::Material);
+  
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "The sample is missing the following properties: shape,material");
+      auto shape = ComponentCreationHelper::createSphere(0.01);
+      shape->setMaterial(Material("V",NeutronAtom(), 0.072));
+      ws->mutableSample().setShape(*shape);
+      TS_ASSERT_EQUALS(sampleVal->isValid(ws), "");
+    }
   }
 
 };

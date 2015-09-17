@@ -77,7 +77,7 @@ void MantidGLWidget::setDisplayObject(boost::shared_ptr<Mantid::Geometry::Object
   for( int i = 0; i < 3; ++i )
   {
 
-    //    std::cerr << "Bounding box max:" << bbox[i] << "  min: " << bbox[i+3] << "\n"; 
+    //std::cerr << "Bounding box max:" << bbox[i] << "  min: " << bbox[i+3] << "\n"; 
     m_bb_widths[i] = 1.1*(bbox[i] - bbox[i + 3]);
     if( m_bb_widths[i] < 0.0 ) m_bb_widths[i] *= -1.0;
     if( std::fabs(bbox[i]) < 1e10 && std::fabs(bbox[i+3]) < 1e10 )
@@ -258,19 +258,22 @@ void MantidGLWidget::setOrthoProjectionMatrix(GLdouble aspect_ratio)
   GLdouble bottom = - m_bb_widths[1]/2.0;
   GLdouble top = + m_bb_widths[1]/2.0;
   
-  //std::cerr << "Projection volume points: " << left << " " << right << " " << bottom << " " << top << " " << znear << " " << zfar << "\n";
+  //std::cerr << "Projection volume points: " << left << " " << right << " " << bottom << " " << top << std::endl;
 
-  // Window taller than wide
-  if( aspect_ratio < 1.0 )
+  // width / height ratio in world coordinates must be equal to aspect_ratio
+  auto ratio = m_bb_widths[0] / m_bb_widths[1];
+
+  if (ratio < aspect_ratio)
   {
-    top /= aspect_ratio;
-    bottom /= aspect_ratio;
+    auto width = m_bb_widths[1] * aspect_ratio;
+    left  = - width/2.0;
+    right = width/2.0;
   }
-  // Window wider than tall 
   else
   {
-    left *= aspect_ratio;
-    right *= aspect_ratio;
+    auto height = m_bb_widths[0] / aspect_ratio;
+    bottom = - height / 2.0;
+    top = height / 2.0;
   }
 
   left += m_bb_centres[0];
@@ -278,12 +281,13 @@ void MantidGLWidget::setOrthoProjectionMatrix(GLdouble aspect_ratio)
   bottom += m_bb_centres[1];
   top += m_bb_centres[1];
 
-  //std::cerr << "Projection volume points 2: " << left << " " << right << " " << bottom << " " << top << "\n";
+  //std::cerr << "Projection volume points 2: " << left << " " << right << " " << bottom << " " << top << std::endl;
+  //std::cerr << "Aspect ratio: " << aspect_ratio << " == " << (right - left) / (top - bottom) << std::endl;
 
   // Set the correct projection 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(left, right, bottom, top, -10.0, 10000.0);//znear, zfar);
+  glOrtho(left, right, bottom, top, -10.0, 10000.0);
   glMatrixMode(GL_MODELVIEW);
 }
   
