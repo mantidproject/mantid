@@ -504,6 +504,12 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             dividend = Cf + shifted_norm_front + Cr
             divisor = scaled_norm_front + Nr
             mergedQ = dividend/divisor
+
+            DeleteWorkspace(dividend)
+            DeleteWorkspce(divisior)
+            DeleteWorkspace(scaled_norm_front)
+            DeleteWorkspace(shifted_norm_front)
+
             if consider_can:
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
 
@@ -512,7 +518,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                                                count_ws_rear = Cr,
                                                output_ws = mergedQ,
                                                scale = scale)
-
             RenameWorkspace(InputWorkspace=mergedQ,OutputWorkspace= retWSname_merged)
 
             # save the properties Transmission and TransmissionCan inside the merged workspace
@@ -545,6 +550,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         buffer = Scale(InputWorkspace = frontWS, Operation = "Add", Factor = shift)
         frontWS = Scale(InputWorkspace = buffer, Operation = "Multiply", Factor = scale)
         RenameWorkspace(InputWorkspace=frontWS,OutputWorkspace= retWSname_front)
+        DeleteWorkspace(buffer)
 
     # finished calculating cross section so can restore these value
     ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
