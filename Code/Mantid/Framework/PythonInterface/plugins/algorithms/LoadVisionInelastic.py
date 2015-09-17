@@ -37,6 +37,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         
         # Let's make sure we have a unique list
         banks_list = banks.split(",")
+        banks_list.sort()
         banks = ",".join(set(banks_list))
 
         self.getLogger().information('Loading data from banks:' + banks.replace("bank", ""))
