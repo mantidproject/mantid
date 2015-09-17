@@ -52,7 +52,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _outDir = None
     _outPrefix = None
     _outTypes = None
-    _infodict = None
     _chunks = None
     _splitws = None
     _splitinfotablews = None
@@ -212,7 +211,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
         self._info = None
-        self._infodict = {}
         self._chunks = self.getProperty("MaxChunkSize").value
 
         self._splitws = self.getProperty("SplittersWorkspace").value
@@ -313,12 +311,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Get run number
             runnumber = samRun.getRunNumber()
-            if self._infodict.has_key(runnumber):
-                self.log().debug("[F1022A] Found run number %d in info dict." % (runnumber))
-                self._info = self._infodict[runnumber]
-            else:
-                self.log().debug("[F1022B] Unable to find _info for run number %d in info dict. "% (runnumber))
-                self._info = self._getinfo(samRun)
+            self._info = self._getinfo(samRun)
 
             # process the container
             canRuns = self._info["container"].value
@@ -377,11 +370,15 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # load the vanadium background (if appropriate)
                     vbackRuns = self._info["empty"].value
                     if not noRunSpecified(vbackRuns):
-                        name = "%s_%d" % (self._instrument, vbackRuns[samRunIndex])
+                        if len(vbackRuns) == 1:
+                            vbackRun = vbackRuns[0]
+                        else:
+                            vbackRun = vbackRuns[samRunIndex]
+                        name = "%s_%d" % (self._instrument, vbackRun)
                         if self.getProperty("Sum").value:
                             vbackRun = self._loadAndSum(vbackRuns, name, **vanFilterWall)
                         else:
-                            vbackRun = self._loadAndSum([vbackRuns[samRunIndex]], name, **vanFilterWall)
+                            vbackRun = self._loadAndSum([vbackRun], name, **vanFilterWall)
 
                         if vbackRun.id() == EVENT_WORKSPACE_ID and vbackRun.getNumberEvents() <= 0:
                             pass
@@ -731,10 +728,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     temp.getNumberEvents(), str(temp)))
 
             if self._info is None:
-                if not self._infodict.has_key(int(runnumber)):
-                    self._info = self._getinfo(temp)
-                    self._infodict[int(runnumber)] = self._info
-                    self.log().debug("[F1012] Add info for run number %d." % (int(runnumber)))
+                self._info = self._getinfo(temp)
 
             # Filtering...
             tempwslist = []
