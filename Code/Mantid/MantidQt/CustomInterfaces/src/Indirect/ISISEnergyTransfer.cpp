@@ -119,6 +119,15 @@ bool ISISEnergyTransfer::validate() {
 	uiv.addErrorMessage("Spectra Min must be less than Spectra Max");
   }
 
+  // Background Removal (TOF)
+  if(m_uiForm.ckBackgroundRemoval->isChecked()){
+	  const int start = m_uiForm.spBackgroundStart->value();
+	  const int end = m_uiForm.spBackgroundEnd->value();
+	  if(start > end){
+		  uiv.addErrorMessage("Background Start must be less than Background End");
+	  }
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 
