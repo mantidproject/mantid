@@ -406,11 +406,13 @@ QPair<double, double> SpectrumDisplay::getPlotInvTransform( QPoint point )
  *
  * @param point  The point that the user is currently pointing at with
  *               the mouse.
+ * @param mouseClick Which mouse button was clicked
  * @param isFront Flag indicating if this is a call to the front (active) display.
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int, bool isFront )
+QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int mouseClick, bool isFront )
 {
+  UNUSED_ARG(mouseClick);
   if ( m_dataSource == 0 || m_dataArray == 0 )
     return qMakePair(0.0, 0.0);
 
