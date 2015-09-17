@@ -40,34 +40,29 @@ void PhaseQuadMuon::init() {
  */
 void PhaseQuadMuon::exec() {
 
-  // Get input workspace
+  // Get the input workspace
   API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
 
-  // Get input phase table
+  // Get the input phase table
+  // Should have two columns (detector, phase)
   API::ITableWorkspace_sptr phaseTable = getProperty("DetectorTable");
 
   // Get N0, the normalization constant: N(t) = N0 * exp(-x/tau)
+  // for each spectrum/detector
   std::vector<double> n0 = getExponentialDecay(inputWs);
 
   //// Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
-  std::cout << "--------------------------\n";
-  for (size_t i = 0; i < ows->blocksize(); i++)
-    std::cout << ows->readX(0)[i] << "\t" << ows->readY(0)[i] << "\t"
-              << ows->readE(0)[i] << "\t" << ows->readX(1)[i] << "\t"
-              << ows->readY(1)[i] << "\t" << ows->readE(1)[i] << "\n";
-
   setProperty("OutputWorkspace", ows);
-  //setProperty("OutputWorkspace",tempws);
 }
-
-
 
 //----------------------------------------------------------------------------------------------
 /** Calculates the normalization constant for the exponential decay
-* @param ws :: [Input] Workspace containing the spectra to remove exponential from
-* @return :: Vector containing the normalization constants, N0, for each spectrum
+* @param ws :: [input] Workspace containing the spectra to remove exponential
+* from
+* @return :: Vector containing the normalization constants, N0, for each
+* spectrum
 */
 std::vector<double>
 PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
@@ -106,7 +101,10 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
 //----------------------------------------------------------------------------------------------
 /** Compute Squashograms
-* @param ws :: [Input/Output] workspace containing the asymmetry in the lab frame
+* @param ws :: [input] workspace containing the measured spectra
+* @param phase :: [input] table workspace containing the detector phases
+* @param n0 :: [input] vector containing the normalization constants
+* @return :: workspace containing the quadrature phase signal
 */
 API::MatrixWorkspace_sptr
 PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
@@ -180,7 +178,6 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     imagY[i] /= e;
     realE[i] /= e;
     imagE[i] /= e;
-
   }
 
   // Populate output workspace
@@ -199,6 +196,5 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 #undef MPOISSONLIM
 #undef MULIFE
 }
-
 }
 }
