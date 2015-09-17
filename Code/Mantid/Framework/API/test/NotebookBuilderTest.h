@@ -1,18 +1,18 @@
-#ifndef MANTID_SCRIPTBUILDERTEST_H_
-#define MANTID_SCRIPTBUILDERTEST_H_
+#ifndef MANTID_NOTEBOOKBUILDERTEST_H_
+#define MANTID_NOTEBOOKBUILDERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidAPI/ScriptBuilder.h"
+#include "MantidAPI/NotebookBuilder.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 
-class ScriptBuilderTest : public CxxTest::TestSuite
+class NotebookBuilderTest : public CxxTest::TestSuite
 {
   /// Use a fake algorithm object instead of a dependency on a real one.
   class SubAlgorithm : public Algorithm
@@ -160,10 +160,8 @@ public:
 
   void test_Build_Simple()
   {
-    std::string result[] = {
-      "TopLevelAlgorithm(InputWorkspace='test_input_workspace', OutputWorkspace='test_output_workspace')",
-      ""
-    };
+    std::string result =
+      "               \"input\" : \"TopLevelAlgorithm(InputWorkspace='test_input_workspace', OutputWorkspace='test_output_workspace')\",";
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
 
@@ -177,17 +175,17 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
-    ScriptBuilder builder(wsHist.createView());
-    std::string scriptText = builder.build();
+    NotebookBuilder builder(wsHist.createView());
+    std::string notebookText = builder.build("Workspace Name", "Workspace Title", "Workspace Comment");
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    // Compare line with expected result
+    TS_ASSERT_EQUALS(notebookLines[64], result)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -195,24 +193,10 @@ public:
 
   void test_Build_Unrolled()
   {
-    std::string result[] = {
-      "",
-      "# Child algorithms of TopLevelAlgorithm",
-      "",
-      "## Child algorithms of NestedAlgorithm",
-      "BasicAlgorithm(PropertyA='FirstOne')",
-      "BasicAlgorithm(PropertyA='SecondOne')",
-      "## End of child algorithms of NestedAlgorithm",
-      "",
-      "## Child algorithms of NestedAlgorithm",
-      "BasicAlgorithm(PropertyA='FirstOne')",
-      "BasicAlgorithm(PropertyA='SecondOne')",
-      "## End of child algorithms of NestedAlgorithm",
-      "",
-      "# End of child algorithms of TopLevelAlgorithm",
-      "",
-      "",
-    };
+    std::string result_markdown =
+      "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code =
+      "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -229,17 +213,17 @@ public:
     auto view = wsHist.createView();
 
     view->unrollAll();
-    ScriptBuilder builder(view);
-    std::string scriptText = builder.build();
+    NotebookBuilder builder(view);
+    std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
+    TS_ASSERT_EQUALS(notebookLines[100], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -247,25 +231,10 @@ public:
 
   void test_Partially_Unrolled()
   {
-    std::string result[] = {
-      "",
-      "# Child algorithms of TopLevelAlgorithm",
-      "",
-      "## Child algorithms of NestedAlgorithm",
-      "BasicAlgorithm(PropertyA='FirstOne')",
-      "BasicAlgorithm(PropertyA='SecondOne')",
-      "## End of child algorithms of NestedAlgorithm",
-      "",
-      "NestedAlgorithm()",
-      "# End of child algorithms of TopLevelAlgorithm",
-      "",
-      "# Child algorithms of TopLevelAlgorithm",
-      "NestedAlgorithm()",
-      "NestedAlgorithm()",
-      "# End of child algorithms of TopLevelAlgorithm",
-      "",
-      "",
-    };
+    std::string result_markdown =
+      "               \"source\" : \"Child algorithms of TopLevelAlgorithm\"";
+    std::string result_code =
+      "               \"input\" : \"BasicAlgorithm(PropertyA='FirstOne')\",";
 
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_input_workspace", input);
@@ -291,17 +260,17 @@ public:
     view->unroll(1);
     view->unroll(5);
 
-    ScriptBuilder builder(view);
-    std::string scriptText = builder.build();
+    NotebookBuilder builder(view);
+    std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    TS_ASSERT_EQUALS(notebookLines[64], result_markdown)
+    TS_ASSERT_EQUALS(notebookLines[74], result_code)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_input_workspace");
@@ -311,10 +280,8 @@ public:
   void test_Build_Simple_with_backslash()
   {
     //checks that property values with \ get prefixed with r, eg. filename=r'c:\test\data.txt'
-    std::string result[] = {
-      "TopLevelAlgorithm(InputWorkspace=r'test_inp\\ut_workspace', OutputWorkspace='test_output_workspace')",
-      ""
-    };
+    std::string result =
+      "               \"input\" : \"TopLevelAlgorithm(InputWorkspace=r'test_inp\\\\ut_workspace', OutputWorkspace='test_output_workspace')\",";
     boost::shared_ptr<WorkspaceTester> input(new WorkspaceTester());
     AnalysisDataService::Instance().addOrReplace("test_inp\\ut_workspace", input);
 
@@ -328,17 +295,16 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("test_output_workspace");
     auto wsHist = ws->getHistory();
 
-    ScriptBuilder builder(wsHist.createView());
-    std::string scriptText = builder.build();
+    NotebookBuilder builder(wsHist.createView());
+    std::string notebookText = builder.build(ws->name(), ws->getTitle(), ws->getComment());
 
-    std::vector<std::string> scriptLines;
-    boost::split(scriptLines, scriptText, boost::is_any_of("\n"));
+    std::vector<std::string> notebookLines;
+    std::string line;
+    std::istringstream buffer(notebookText);
+    while (std::getline(buffer, line))
+      notebookLines.push_back(line);
 
-    int i=0;
-    for (auto it = scriptLines.begin(); it != scriptLines.end(); ++it, ++i)
-    {
-      TS_ASSERT_EQUALS(*it, result[i])
-    }
+    TS_ASSERT_EQUALS(notebookLines[64], result)
 
     AnalysisDataService::Instance().remove("test_output_workspace");
     AnalysisDataService::Instance().remove("test_inp\\ut_workspace");
@@ -346,4 +312,4 @@ public:
 
 };
 
-#endif // MANTID_SCRIPTBUILDERTEST_H_
+#endif // MANTID_NOTEBOOKBUILDERTEST_H_

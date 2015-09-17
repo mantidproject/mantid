@@ -1082,6 +1082,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView = this->createAndSetMainViewWidget(this->ui.viewWidget, v);
   this->ui.colorSelectionWidget->ignoreColorChangeCallbacks(true);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
+  auto viewSize = this->hiddenView->size();
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
 
@@ -1118,6 +1119,10 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
+
+  // A workaround to make the view redraw itself properly
+  // after switching from a resized view
+  this->currentView->resize(viewSize);
 
   // ignore callbacks until as late as possible to keep desired state
   // regardless of what the Paraview widgets are doing
