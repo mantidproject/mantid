@@ -34,11 +34,10 @@ class LoadVisionInelastic(PythonAlgorithm):
         banks = banks.lower().replace("all", "forward,backward")
         banks = banks.lower().replace("forward", self.__forward)
         banks = banks.lower().replace("backward", self.__backward)
-        
+
         # Let's make sure we have a unique list
         banks_list = banks.split(",")
-        banks_list.sort()
-        banks = ",".join(set(banks_list))
+        banks = ",".join(sorted(set(banks_list)))
 
         self.getLogger().information('Loading data from banks:' + banks.replace("bank", ""))
 
