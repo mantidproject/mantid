@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -96,10 +97,11 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
 std::vector<double>
 PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
-#define MULIFE 2.19703
-
   size_t nspec = ws->getNumberHistograms();
   size_t npoints = ws->blocksize();
+
+  // Muon life time in microseconds
+  double muLife = PhysicalConstants::MuonLifetime * 1e6;
 
   std::vector<double> n0(nspec, 0.);
 
@@ -120,12 +122,10 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
         sy += log(Y[i]) / sig;
       }
     }
-    n0[h] = exp((sy + sx / MULIFE) / s);
+    n0[h] = exp((sy + sx / muLife) / s);
   }
 
   return n0;
-
-#undef MULIFE
 }
 
 //----------------------------------------------------------------------------------------------
@@ -140,11 +140,16 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
                       const API::ITableWorkspace_sptr &phase,
                       const std::vector<double> &n0) {
 
-#define MULIFE 2.19703
-#define MPOISSONLIM 30
+  // Poisson limit: below this number we consider we don't have enough statistic
+  // to apply sqrt(N). This is an arbitrary number used in the original code
+  // provided by scientists
+  double poissonLimit = 30.;
 
   size_t nspec = ws->getNumberHistograms();
   size_t npoints = ws->blocksize();
+
+  // Muon life time in microseconds
+  double muLife = PhysicalConstants::MuonLifetime * 1e6;
 
   if (n0.size() != nspec) {
     throw std::invalid_argument("Invalid normalization constants");
@@ -188,9 +193,9 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
       // (X,Y,E) with exponential decay removed
       double X = ws->readX(h)[i];
-      double Y = ws->readY(h)[i] - n0[h] * exp(-X / MULIFE);
+      double Y = ws->readY(h)[i] - n0[h] * exp(-X / muLife);
       double E =
-          (Y > MPOISSONLIM) ? ws->readE(h)[i] : sqrt(n0[h] * exp(-X / MULIFE));
+          (Y > poissonLimit) ? ws->readE(h)[i] : sqrt(n0[h] * exp(-X / muLife));
 
       realY[i] += aj[h] * Y;
       imagY[i] += bj[h] * Y;
@@ -202,7 +207,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
     // Regain exponential decay
     double x = ws->getSpectrum(0)->readX()[i];
-    double e = exp(-x / MULIFE);
+    double e = exp(-x / muLife);
     realY[i] /= e;
     imagY[i] /= e;
     realE[i] /= e;
@@ -222,8 +227,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   ows->dataX(1).assign(x.begin(), x.end());
   return ows;
 
-#undef MPOISSONLIM
-#undef MULIFE
+#undef POISSONLIM
 }
 }
 }
