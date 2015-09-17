@@ -5,7 +5,6 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -24,9 +23,7 @@ public:
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Saves a focused data set into an OpenGenie ASCII file "
-           "ascii file of the given workspace . There is no "
-           "instrument assosciated with the resulting workspace. ";
+    return "Saves a focused data set into an OpenGenie ASCII file ";
   }
 
   /// Algorithm's version
@@ -37,9 +34,6 @@ public:
     return "Diffraction;DataHandling\\Text";
   }
 
-
-
-
 private:
 	
 	/// Initialisation code
@@ -48,36 +42,26 @@ private:
   /// Execution code
   void exec();
 
-  /// Get the focused position for the supplied spectrum
-//  void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum,
-  //                 double &l1, double &l2, double &tth, double &difc);
+  /// Write out the data for e x y
+  void WriteToFile(
+    const std::string alpha, std::string filename, const std::string comment, 
+    const std::string comstr, const std::string errstr,
+    const std::string errstr2, const std::string GXR, const std::string banknum,
+    const std::string fourspc, const std::string twospc,
+    API::MatrixWorkspace_const_sptr ws, int nBins);
 
+  void WriteHeader(
+    const std::string alpha, std::ofstream& outfile, const std::string comment,
+    const std::string GXR, const std::string banknum, const std::string fourspc,
+    const std::string twospc, API::MatrixWorkspace_const_sptr ws);
 
+  double WriteAxisValues(std::string alpha, int bin, API::MatrixWorkspace_const_sptr ws);
 
-  /*
-
-  /// Write the header information in default "XYE" format
-  void writeXYEHeaders(std::ostream &os,
-                       API::MatrixWorkspace_const_sptr &workspace) const;
-
-  /// Write spectra XYE header
-  void writeXYESpectraHeader(std::ostream &os, size_t index1, size_t index2,
-                             double flightPath, double tth,
-                             const std::string &caption);
-
-  /// Determine the focused position for the supplied spectrum.
-  void getFocusedPos(API::MatrixWorkspace_const_sptr wksp,
-                     const size_t spectrum, double &l1, double &l2,
-                     double &tth);
-
-  /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
-                          const std::string &propertyValue, int perioidNum);
-
-  /// Header type
-  HeaderType m_headerType;  */
-
+    /// Workspace
+  API::MatrixWorkspace_const_sptr ws;
 };
+
+
 }
 }
 #endif // DATAHANDING_SAVEOPENGENIEASCII_H_ 
