@@ -28,31 +28,25 @@ public:
         "IsotropicAtomBraggScatterer",
         "Element=O;Position=[0.69365,0,0.25];U=0.005"));
     SpaceGroup_const_sptr sgAl2O3 =
-        SpaceGroupFactory::Instance().createSpaceGroup("C m m m");
+        SpaceGroupFactory::Instance().createSpaceGroup("R -3 c");
 
     CrystalStructure mg(cellAl2O3, sgAl2O3, scatterers);
 
-    HKLFilterDRange f1(0.7, 200.0);
-    f1.setCrystalStructure(mg);
-
-    HKLFilterCentering f15;
-    f15.setCrystalStructure(mg);
-
-    HKLFilterStructureFactor f2;
-    f2.setCrystalStructure(mg);
-
-    HKLFilterAnd f3 = f1 & f15 & f2;
-
-    inspectFilter(f3);
+    HKLFilterDRange dFilter(mg.cell(), 0.7, 200.0);
+    HKLFilterCentering centering(mg.centering());
+    HKLFilterSpaceGroup sgFilter(mg.spaceGroup());
 
     HKLGenerator g;
 
     Timer t;
 
+    const HKLFilter &f =  dFilter & sgFilter;
+    inspectFilter(f);
+
     t.reset();
     for (size_t i = 0; i < 100; ++i) {
       std::vector<V3D> hkls =
-          g.generateHKLs(mg, std::min(0.7, static_cast<double>(i + 2)), f3);
+          g.generateHKLs(mg.cell(), std::min(0.7, static_cast<double>(i + 2)), f);
       TS_ASSERT_DIFFERS(hkls.size(), 0);
     }
     float time = t.elapsed();
@@ -62,11 +56,14 @@ public:
     for (size_t i = 0; i < 100; ++i) {
       std::vector<V3D> hkls =
           mg.getHKLs(std::min(0.7, static_cast<double>(i + 2)), 200.0,
-                     CrystalStructure::UseStructureFactor);
+                     CrystalStructure::UseCentering);
       TS_ASSERT_DIFFERS(hkls.size(), 0);
     }
     time = t.elapsed();
     std::cout << time / 100.0 << std::endl;
+
+    std::vector<V3D> hkls = g.generateHKLs(mg.cell(), 0.7, dFilter & centering);
+    std::cout << hkls.size() << std::endl;
   }
 
 private:
@@ -75,17 +72,16 @@ private:
     HKLGenerator() {}
     ~HKLGenerator() {}
 
-    std::vector<V3D> generateHKLs(const CrystalStructure &cs, double dMin,
+    std::vector<V3D> generateHKLs(const UnitCell &cell, double dMin,
                                   const HKLFilter &filter) const {
       std::vector<V3D> hkls;
-      size_t estimatedReflectionCount =
-          static_cast<size_t>(ceil(32.0 * M_PI * cs.cell().volume()) /
-                              (3.0 * pow(2.0 * dMin, 3.0)));
+      size_t estimatedReflectionCount = static_cast<size_t>(
+          ceil(32.0 * M_PI * cell.volume()) / (3.0 * pow(2.0 * dMin, 3.0)));
       hkls.reserve(estimatedReflectionCount);
 
-      int hMax = static_cast<int>(cs.cell().a() / dMin);
-      int kMax = static_cast<int>(cs.cell().b() / dMin);
-      int lMax = static_cast<int>(cs.cell().c() / dMin);
+      int hMax = static_cast<int>(cell.a() / dMin);
+      int kMax = static_cast<int>(cell.b() / dMin);
+      int lMax = static_cast<int>(cell.c() / dMin);
 
       for (int h = -hMax; h <= hMax; ++h) {
         for (int k = -kMax; k <= kMax; ++k) {
@@ -113,8 +109,8 @@ private:
 
       std::cout << "RHS: ";
       inspectFilter(op.getRHS());
-    } catch(std::bad_cast) {
-        // nothing.
+    } catch (std::bad_cast) {
+      // nothing.
     }
   }
 };

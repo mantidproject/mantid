@@ -77,25 +77,12 @@ HKLFilterAnd operator&(const HKLFilter &lhs, const HKLFilter &rhs) {
   return HKLFilterAnd(lhs, rhs);
 }
 
-class MANTID_GEOMETRY_DLL HKLFilterCrystalStructure : public HKLFilter {
+class MANTID_GEOMETRY_DLL HKLFilterDRange : public HKLFilter {
 public:
-  HKLFilterCrystalStructure() : HKLFilter() {}
-
-  virtual void setCrystalStructure(const CrystalStructure &crystalStructure) {
-    UNUSED_ARG(crystalStructure);
-  }
-};
-
-class MANTID_GEOMETRY_DLL HKLFilterDRange : public HKLFilterCrystalStructure {
-public:
-  HKLFilterDRange(double dMin, double dMax)
-      : HKLFilterCrystalStructure(), m_cell(), m_dmin(dMin), m_dmax(dMax) {}
+  HKLFilterDRange(const UnitCell &cell, double dMin, double dMax)
+      : m_cell(cell), m_dmin(dMin), m_dmax(dMax) {}
 
   std::string getName() const { return "dRange"; }
-
-  void setCrystalStructure(const CrystalStructure &crystalStructure) {
-    m_cell = crystalStructure.cell();
-  }
 
   bool isAllowed(const Kernel::V3D &hkl) const {
     double d = m_cell.d(hkl);
@@ -108,16 +95,12 @@ protected:
   double m_dmin, m_dmax;
 };
 
-class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup
-    : public HKLFilterCrystalStructure {
+class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup : public HKLFilter {
 public:
-  HKLFilterSpaceGroup() : HKLFilterCrystalStructure(), m_spaceGroup() {}
+  HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
+      : m_spaceGroup(spaceGroup) {}
 
   std::string getName() const { return "SpaceGroup"; }
-
-  void setCrystalStructure(const CrystalStructure &crystalStructure) {
-    m_spaceGroup = crystalStructure.spaceGroup();
-  }
 
   bool isAllowed(const Kernel::V3D &hkl) const {
     return m_spaceGroup->isAllowedReflection(hkl);
@@ -127,35 +110,25 @@ protected:
   SpaceGroup_const_sptr m_spaceGroup;
 };
 
-class MANTID_GEOMETRY_DLL HKLFilterStructureFactor
-    : public HKLFilterCrystalStructure {
+class MANTID_GEOMETRY_DLL HKLFilterStructureFactor : public HKLFilter {
 public:
-  HKLFilterStructureFactor() : HKLFilterCrystalStructure(), m_calculator() {}
+  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator) : m_calculator(calculator) {}
 
   std::string getName() const { return "SF"; }
 
-  void setCrystalStructure(const CrystalStructure &crystalStructure) {
-    m_calculator.setCrystalStructure(crystalStructure);
-  }
-
   bool isAllowed(const Kernel::V3D &hkl) const {
-    return m_calculator.getFSquared(hkl) > 1e-6;
+    return m_calculator->getFSquared(hkl) > 1e-6;
   }
 
 protected:
-  StructureFactorCalculatorSummation m_calculator;
+  StructureFactorCalculator_sptr m_calculator;
 };
 
-class MANTID_GEOMETRY_DLL HKLFilterCentering
-    : public HKLFilterCrystalStructure {
+class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
 public:
-  HKLFilterCentering() : HKLFilterCrystalStructure(), m_centering() {}
+  HKLFilterCentering(const ReflectionCondition_sptr &centering) : m_centering(centering) {}
 
   std::string getName() const { return "Centering"; }
-
-  void setCrystalStructure(const CrystalStructure &crystalStructure) {
-    m_centering = crystalStructure.centering();
-  }
 
   bool isAllowed(const Kernel::V3D &hkl) const {
     return m_centering->isAllowed(static_cast<int>(hkl.X()),
