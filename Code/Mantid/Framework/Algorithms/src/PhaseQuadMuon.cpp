@@ -3,15 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 using namespace Kernel;
-using API::Progress;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PhaseQuadMuon)
@@ -25,10 +22,9 @@ void PhaseQuadMuon::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input workspace containing the spectra");
 
-  declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>(
-          "DetectorTable", "", Direction::Input, API::PropertyMode::Optional),
-      "Name of the table containing detector phases");
+  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+                      "DetectorTable", "", Direction::Input),
+                  "Name of the table containing detector phases");
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
@@ -51,12 +47,45 @@ void PhaseQuadMuon::exec() {
   // for each spectrum/detector
   std::vector<double> n0 = getExponentialDecay(inputWs);
 
-  //// Compute squashograms
+  // Compute squashograms
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
   setProperty("OutputWorkspace", ows);
 }
 
+//------------------------------------------------------------------------------------------------
+/** Checks that the input workspace and table have compatible dimensions
+ * @return a map where: Key = string name of the the property; Value = string
+ * describing the problem with the property.
+*/
+std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
+
+  std::map<std::string, std::string> result;
+
+  // Check that input ws and table ws have compatible dimensions
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  API::ITableWorkspace_const_sptr tabWS = getProperty("DetectorTable");
+
+  size_t nspec = inputWS->getNumberHistograms();
+  size_t ndet = tabWS->rowCount();
+
+  if (nspec != ndet) {
+    result["DetectorTable"] = "DetectorTable must have one row per spectrum";
+  }
+
+  // DetectorTable should have two columns: (detector, phase)
+  if (tabWS->columnCount() != 2) {
+    result["DetectorTable"] = "DetectorTable must have two columns";
+  }
+
+  // Check units, should be microseconds
+  Unit_const_sptr unit = inputWS->getAxis(0)->unit();
+  if ((unit->caption() != "Time") || (unit->label().ascii() != "microsecond")) {
+    result["InputWorkspace"] = "InputWorkspace units must be microseconds";
+  }
+
+  return result;
+}
 //----------------------------------------------------------------------------------------------
 /** Calculates the normalization constant for the exponential decay
 * @param ws :: [input] Workspace containing the spectra to remove exponential

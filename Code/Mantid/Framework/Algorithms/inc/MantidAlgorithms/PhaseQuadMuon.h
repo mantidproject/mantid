@@ -57,6 +57,8 @@ private:
   void init();
   /// Run the algorithm
   void exec();
+  /// Validate inputs
+  std::map<std::string, std::string> validateInputs();
   /// Calculates the normalization constants
   std::vector<double> getExponentialDecay(const API::MatrixWorkspace_sptr &ws);
   /// Create squashograms
