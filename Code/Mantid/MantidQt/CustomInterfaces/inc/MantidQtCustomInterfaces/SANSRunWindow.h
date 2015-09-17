@@ -414,6 +414,10 @@ private:
   void resetAllTransFields();
   /// Check the validty of inputs
   bool areSettingsValid();
+  /// Check setting for wavelengths and Q values
+  void checkWaveLengthAndQValues(bool &isValid, QString &message,
+                                 QLineEdit *min, QLineEdit *max,
+                                 QComboBox *selection, QString type);
 
   UserSubWindow * slicingWindow;
 

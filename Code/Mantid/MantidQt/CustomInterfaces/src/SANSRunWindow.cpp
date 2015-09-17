@@ -3879,12 +3879,12 @@ void SANSRunWindow::setValidators()
     m_mustBeDouble = new QDoubleValidator(this);
   }
 
-  if (m_doubleValidatorZeroToMax) {
+  if (!m_doubleValidatorZeroToMax) {
     m_doubleValidatorZeroToMax = new QDoubleValidator(
         0.0, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
   }
 
-  if (m_intValidatorZeroToMax) {
+  if (!m_intValidatorZeroToMax) {
     m_intValidatorZeroToMax =
         new QIntValidator(0, m_constants.getMaxIntValue(), this);
   }
@@ -3907,11 +3907,11 @@ void SANSRunWindow::setValidators()
   m_uiForm.qy_max->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.qy_dqy->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.trans_min->setValidator(m_mustBeDouble);
-  m_uiForm.trans_max->setValidator(m_mustBeDouble);
+  m_uiForm.trans_min->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.trans_max->setValidator(m_doubleValidatorZeroToMax);
 
-  m_uiForm.trans_min_can->setValidator(m_mustBeDouble);
-  m_uiForm.trans_max_can->setValidator(m_mustBeDouble);
+  m_uiForm.trans_min_can->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.trans_max_can->setValidator(m_doubleValidatorZeroToMax);
 
   m_uiForm.monitor_spec->setValidator(m_intValidatorZeroToMax);
   m_uiForm.trans_monitor->setValidator(m_intValidatorZeroToMax);
@@ -3936,6 +3936,7 @@ void SANSRunWindow::setValidators()
   m_uiForm.sample_thick->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.sample_height->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.sample_width->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.smpl_offset->setValidator(m_mustBeDouble);
 
   // Beam Centre Finder
   m_uiForm.beam_rmin->setValidator(m_doubleValidatorZeroToMax);
@@ -4304,21 +4305,73 @@ bool SANSRunWindow::areSettingsValid() {
   QString message;
   // ------------ GUI INPUT CHECKS ------------
 
-  // R_MAX
+  // R_MAX -- can be only >0 or -1
   auto r_max = m_uiForm.rad_max->text().simplified().toDouble();
   if ((r_max < 0.0) && (r_max != -1)) {
     isValid = false;
     message += "R_max issue: Only values >= 0 and -1 are allowed.\n";
   }
 
+  // WAVELENGTH
+  checkWaveLengthAndQValues(isValid, message, m_uiForm.wav_min,
+                            m_uiForm.wav_max, m_uiForm.wav_dw_opt,
+                            "Wavelength");
+
+  // QX
+  checkWaveLengthAndQValues(isValid, message, m_uiForm.q_min,
+                            m_uiForm.q_max, m_uiForm.q_dq_opt,
+                            "Qx");
+
+  // TRANS SAMPLE
+  checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min,
+                            m_uiForm.trans_max, m_uiForm.trans_opt,
+                            "Trans");
+
+  // TRANS CAN
+  if (m_uiForm.trans_selector_opt->currentText().toUpper().contains("SEPARATE")) {
+    checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min_can,
+                              m_uiForm.trans_max_can, m_uiForm.trans_opt_can,
+                              "Trans Can");
+  }
+
   // Print the error message if there are any
   if (!message.isEmpty()) {
     QString warning = "Please correct these settings before proceeding:\n";
     warning += message;
-    QMessageBox::warning(this,"Inconsistent input", warning);
+    QMessageBox::warning(this, "Inconsistent input", warning);
   }
 
   return isValid;
+}
+
+/**
+ * Check the wavelength and Q values
+ * @param isValid: flag by reference to set the check if invalid
+ * @param min: the min line edit field
+ * @param max: the max line edit field
+ */
+void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
+                                              QLineEdit *min, QLineEdit *max,
+                                              QComboBox *selection, QString type) {
+  auto min_value = min->text().simplified().toDouble();
+  auto max_value = max->text().simplified().toDouble();
+
+  // Make sure that min<=max
+  if (min_value > max_value) {
+    isValid = false;
+    message += type;
+    message +=
+        " issue: The min value is larger than the max value. \n";
+  }
+
+  // Make sure that when selecting log, then we don't have 0 values
+  if (selection->currentText().toUpper().contains("LOG") &&
+      (min_value == 0.0 || max_value == 0.0)) {
+    isValid = false;
+    message += type;
+    message +=
+        " issue: Trying to use Logarithmic steps and values which are <= 0.0. \n";
+  }
 }
 
 } //namespace CustomInterfaces
