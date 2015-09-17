@@ -187,12 +187,14 @@ void ConvolutionFitSequential::exec() {
   const std::string tempFitWsName = "__convfit_fit_ws";
   auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
-  // Fit all spectra in workspace
+  Progress plotPeakStringProg(this, 0.0, 1.0, specMax);
+  // Construct plotpeak string
   std::string plotPeakInput = "";
   for (int i = 0; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
+	plotPeakStringProg.report(i);
   }
 
   // passWSIndex
@@ -267,8 +269,7 @@ void ConvolutionFitSequential::exec() {
   }
 
   // Run ProcessIndirectFitParameters
-  auto pifp =
-      createChildAlgorithm("ProcessIndirectFitParameters");
+  auto pifp = createChildAlgorithm("ProcessIndirectFitParameters");
   pifp->setProperty("InputWorkspace", outputWs);
   pifp->setProperty("ColumnX", "axis-1");
   pifp->setProperty("XAxisUnit", "MomentumTransfer");
@@ -304,6 +305,7 @@ void ConvolutionFitSequential::exec() {
     logAdder->setProperty("LogName", it->first);
     logAdder->setProperty("LogText", it->second);
     logAdder->setProperty("LogType", "String");
+
     logAdder->executeAsChildAlg();
   }
   // Add Numeric Logs

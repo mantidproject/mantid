@@ -214,7 +214,8 @@ void ConvFit::setup() {
 }
 
 /**
- * Converts data into a python script which prodcues the output workspace
+ * Handles the initial set up and running of the ConvolutionFitSequential
+ * algorithm
  */
 void ConvFit::run() {
   if (m_cfInputWS == NULL) {
@@ -240,12 +241,12 @@ void ConvFit::run() {
   std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
   int maxIterations =
       static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
-  QString temperature = m_uiForm.leTempCorrection->text();
-  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
-  const bool save = m_uiForm.ckSave->isChecked();
 
   // Run ConvolutionFitSequential Algorithm
-  auto cfs = AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  IAlgorithm_sptr cfs =
+      AlgorithmManager::Instance().create("ConvolutionFitSequential");
+  cfs->initialize();
+
   cfs->setProperty("InputWorkspace", m_cfInputWS->getName());
   cfs->setProperty("Function", function);
   cfs->setProperty("BackgroundType",
@@ -258,14 +259,28 @@ void ConvFit::run() {
   cfs->setProperty("Minimizer",
                    minimizerString("$outputname_$wsindex").toStdString());
   cfs->setProperty("MaxIterations", maxIterations);
-  cfs->execute();
+  m_batchAlgoRunner->addAlgorithm(cfs);
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+          SLOT(algorithmComplete(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+}
 
+/**
+ * Handles completion of the ConvolutionFitSequential algorithm.
+ *
+ * @param error True if the algorithm was stopped due to error, false otherwise
+ */
+void ConvFit::algorithmComplete(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(algorithmComplete(bool)));
+  QString temperature = m_uiForm.leTempCorrection->text();
   double temp = 0.0;
   if (temperature.toStdString().compare("") != 0) {
     temp = temperature.toDouble();
   }
 
-  std::string baseWsName = cfs->getProperty("OutputWorkspace");
+
+  /*std::string baseWsName = cfs->getProperty("OutputWorkspace");
   auto pos = baseWsName.rfind("_");
   baseWsName = baseWsName.substr(0, pos + 1);
 
@@ -276,6 +291,9 @@ void ConvFit::run() {
   std::string groupName = baseWsName + "Workspaces";
   WorkspaceGroup_sptr groupWs =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
+  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
 
   if (temp != 0.0) {
     const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
@@ -289,7 +307,7 @@ void ConvFit::run() {
     addSample->setProperty("LogName", "temperature_correction");
     addSample->setProperty("LogText", "True");
     addSample->setProperty("LogType", "String");
-    addSample->execute();
+    m_batchAlgoRunner->addAlgorithm(addSample);
     for (int i = 0; i < maxSpec; i++) {
       addSample->setProperty("Workspace", groupWs);
       addSample->setProperty("LogName", "temperature_value");
@@ -303,6 +321,9 @@ void ConvFit::run() {
       addSample->execute();
     }
   }
+
+  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
+  const bool save = m_uiForm.ckSave->isChecked();
 
   if (save) {
     QString saveDir = QString::fromStdString(
@@ -327,8 +348,7 @@ void ConvFit::run() {
       IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                 specNumber, specNumber);
     }
-  }
-  m_batchAlgoRunner->executeBatchAsync();
+  }*/
   updatePlot();
 }
 

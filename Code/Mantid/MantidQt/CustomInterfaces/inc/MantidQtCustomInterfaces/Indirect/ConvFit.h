@@ -44,6 +44,7 @@ private slots:
   void showTieCheckbox(QString);
   void singleFitComplete(bool error);
   void fitFunctionSelected(const QString &);
+  void algorithmComplete(bool error);
 
 
 private:
