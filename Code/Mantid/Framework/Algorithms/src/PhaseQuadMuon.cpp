@@ -25,11 +25,11 @@ void PhaseQuadMuon::init() {
 
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
                       "DetectorTable", "", Direction::Input),
-                  "Name of the table containing detector phases");
+                  "Name of the table containing the detector phases");
 
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(
                       "OutputWorkspace", "", Direction::Output),
-                  "Name of the output workspace to hold squashograms");
+                  "Name of the output workspace");
 }
 
 /** Executes the algorithm
@@ -52,7 +52,7 @@ void PhaseQuadMuon::exec() {
   API::MatrixWorkspace_sptr ows = squash(inputWs, phaseTable, n0);
 
   // Copy X axis to output workspace
-  ows->replaceAxis(0,inputWs->getAxis(0));
+  ows->getAxis(0)->unit() = inputWs->getAxis(0)->unit();
   // New Y axis label
   ows->setYUnit("Asymmetry");
 
@@ -134,7 +134,7 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Compute Squashograms
+/** Forms the quadrature phase signal (squashogram)
 * @param ws :: [input] workspace containing the measured spectra
 * @param phase :: [input] table workspace containing the detector phases
 * @param n0 :: [input] vector containing the normalization constants
@@ -145,7 +145,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
                       const API::ITableWorkspace_sptr &phase,
                       const std::vector<double> &n0) {
 
-  // Poisson limit: below this number we consider we don't have enough statistic
+  // Poisson limit: below this number we consider we don't have enough statistics
   // to apply sqrt(N). This is an arbitrary number used in the original code
   // provided by scientists
   double poissonLimit = 30.;
@@ -232,7 +232,6 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   ows->dataX(1).assign(x.begin(), x.end());
   return ows;
 
-#undef POISSONLIM
 }
 }
 }

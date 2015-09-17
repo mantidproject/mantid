@@ -44,7 +44,7 @@ public:
   virtual const std::string name() const { return "PhaseQuad"; }
   /// Summary of algorithm's purpose
   virtual const std::string summary() const {
-    return "Calculate Muon squashograms from InputWorkspace and DetectorPhases.";
+    return "Generates a quadrature phase signal.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -59,7 +59,7 @@ private:
   void exec();
   /// Validate inputs
   std::map<std::string, std::string> validateInputs();
-  /// Calculates the normalization constants
+  /// Calculate the normalization constants
   std::vector<double> getExponentialDecay(const API::MatrixWorkspace_sptr &ws);
   /// Create squashograms
   API::MatrixWorkspace_sptr squash(const API::MatrixWorkspace_sptr &ws,
