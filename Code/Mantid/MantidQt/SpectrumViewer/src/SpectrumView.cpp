@@ -134,6 +134,7 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
     m_svConnections = boost::make_shared<SVConnections>( m_ui, this, spectrumDisplay.get(),
                                          m_hGraph.get(), m_vGraph.get() );
     connect(this,SIGNAL(spectrumDisplayChanged(SpectrumDisplay*)),m_svConnections.get(),SLOT(setSpectrumDisplay(SpectrumDisplay*)));
+    m_svConnections->imageSplitterMoved();
   }
   else
   {
@@ -141,7 +142,6 @@ void SpectrumView::renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp)
       sd->addOther(spectrumDisplay);
     }
     spectrumDisplay->addOthers(m_spectrumDisplay);
-    //spectrumPlot->canvas()->installEventFilter(m_svConnections.get());
   }
 
   m_spectrumDisplay.append(spectrumDisplay);

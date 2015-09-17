@@ -96,9 +96,9 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   m_svUI->imageHorizontalScrollBar->setEnabled(false);
 
   m_svUI->action_Vscroll->setCheckable(true);
-  m_svUI->action_Vscroll->setChecked(true);
+  m_svUI->action_Vscroll->setChecked(false);
   m_svUI->imageVerticalScrollBar->show();
-  m_svUI->imageVerticalScrollBar->setEnabled(true);
+  m_svUI->imageVerticalScrollBar->setEnabled(false);
 
   m_svUI->intensity_slider->setTickInterval(10);
   m_svUI->intensity_slider->setTickPosition(QSlider::TicksBelow);
