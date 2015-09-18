@@ -8,8 +8,10 @@ import mantid.simpleapi
 
 def try_int(s):
     "Convert to integer if possible."
-    try: return int(s)
-    except: return s
+    try:
+        return int(s)
+    except:
+        return s
 
 def natsort_key(s):
     "Used internally to get a tuple by which s is sorted."
@@ -66,7 +68,7 @@ class LoadVisionInelastic(PythonAlgorithm):
         # Let's make sure we have a unique and naturally sorted list
         banks_list = banks.split(",")
         banks = ",".join(natsorted(list(set(banks_list))))
-        
+
         self.getLogger().information('Loading data from banks:' + banks.replace("bank", ""))
 
         wksp_name = "__tmp"
