@@ -33,7 +33,7 @@ private:
     EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace(NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);
     //Fake a d-spacing unit in the data.
     test_in->getAxis(0)->unit() =UnitFactory::Instance().create("TOF");
-    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9, false) );
+    test_in->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS/9) );
     //Add it to the workspace
     AnalysisDataService::Instance().add(wsName, test_in);
   }

@@ -99,6 +99,7 @@ set ( SRC_FILES
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
+	src/ReplicateMD.cpp
 	src/SaveIsawQvector.cpp
 	src/SaveMD.cpp
 	src/SaveMD2.cpp
@@ -218,6 +219,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
 	inc/MantidMDAlgorithms/ReflectometryTransformP.h
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
+	inc/MantidMDAlgorithms/ReplicateMD.h
 	inc/MantidMDAlgorithms/SaveIsawQvector.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveMD2.h
@@ -320,6 +322,7 @@ set ( TEST_FILES
 	ReflectometryTransformKiKfTest.h
 	ReflectometryTransformPTest.h
 	ReflectometryTransformQxQzTest.h
+	ReplicateMDTest.h
 	ResolutionConvolvedCrossSectionTest.h
 	SaveIsawQvectorTest.h
 	SaveMD2Test.h

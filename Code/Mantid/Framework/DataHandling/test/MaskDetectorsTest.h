@@ -52,7 +52,7 @@ public:
   void setUpWS(bool event, const std::string & name = "testSpace", bool asMaskWorkspace = false, int numspec=9)
   {
     // 1. Instrument
-    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1, false));
+    Instrument_sptr instr = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(1));
     Detector *d = new Detector("det",0,0);
     instr->markAsDetector(d);
 

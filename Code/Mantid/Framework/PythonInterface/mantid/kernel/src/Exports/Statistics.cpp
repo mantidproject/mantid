@@ -74,15 +74,21 @@ public:
 
 /**
  * Proxy for @see Mantid::Kernel::getStatistics so that it can accept numpy
- * arrays,
+ * arrays
+ * @param data Input data
+ * @param sorted A boolean indicating whether the data is sorted
  */
 Statistics getStatisticsNumpy(const numeric::array &data,
                               const bool sorted = false) {
   using Mantid::Kernel::getStatistics;
+  using Mantid::Kernel::StatOptions;
   using Converters::NDArrayToVector;
 
   if (isFloatArray(data.ptr())) {
-    return getStatistics(NDArrayToVector<double>(data)(), sorted);
+    unsigned int flags = StatOptions::AllStats;
+    if (sorted)
+      flags |= StatOptions::SortedData;
+    return getStatistics(NDArrayToVector<double>(data)(), flags);
   } else {
     throw UnknownDataType();
   }
@@ -93,27 +99,18 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1,
 
 //============================ Z score
 //============================================
-// Function pointer to real implementation of Zscore functions
-typedef std::vector<double>(*ZScoreFunction)(const std::vector<double> &data,
-                                             const bool sorted);
 
 /**
- * The implementation for getMomentsAboutOrigin & getMomentsAboutOriginMean for
- * using
- * numpy arrays are identical. This encapsulates that behaviour an additional
- * parameter for
- * specifying the actual function called along.
- * @param momentsFunc A function pointer to the required moments function
+ * The implementation for getZscoreNumpy for using numpy arrays
+ * @param zscoreFunc A function pointer to the required moments function
  * @param data Numpy array of data
- * @param sorted True if the input data is already sorted
  */
-std::vector<double> getZScoreNumpyImpl(ZScoreFunction zscoreFunc,
-                                       const numeric::array &data,
-                                       const bool sorted) {
+std::vector<double> getZscoreNumpy(const numeric::array &data) {
   using Converters::NDArrayToVector;
+  using Mantid::Kernel::getZscore;
 
   if (isFloatArray(data.ptr())) {
-    return zscoreFunc(NDArrayToVector<double>(data)(), sorted);
+    return getZscore(NDArrayToVector<double>(data)());
   } else {
     throw UnknownDataType();
   }
@@ -121,14 +118,16 @@ std::vector<double> getZScoreNumpyImpl(ZScoreFunction zscoreFunc,
 
 /**
  * Proxy for @see Mantid::Kernel::getZscore so that it can accept numpy arrays,
+ * @param data The input array
+ * @param sorted True if the data is sorted (deprecated)
  */
-std::vector<double> getZscoreNumpy(const numeric::array &data,
-                                   const bool sorted = false) {
-  using Mantid::Kernel::getZscore;
-  return getZScoreNumpyImpl(&getZscore, data, sorted);
+std::vector<double> getZscoreNumpyDeprecated(const numeric::array &data,
+                                             const bool sorted) {
+  UNUSED_ARG(sorted);
+  PyErr_Warn(PyExc_DeprecationWarning,
+             "getZScore no longer requires the second sorted argument.");
+  return getZscoreNumpy(data);
 }
-// Define an overload to handle the default argument
-BOOST_PYTHON_FUNCTION_OVERLOADS(getZscoreOverloads, getZscoreNumpy, 1, 2)
 
 /**
  * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy
@@ -137,8 +136,15 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(getZscoreOverloads, getZscoreNumpy, 1, 2)
 std::vector<double> getModifiedZscoreNumpy(const numeric::array &data,
                                            const bool sorted = false) {
   using Mantid::Kernel::getModifiedZscore;
-  return getZScoreNumpyImpl(&getModifiedZscore, data, sorted);
+  using Converters::NDArrayToVector;
+
+  if (isFloatArray(data.ptr())) {
+    return getModifiedZscore(NDArrayToVector<double>(data)(), sorted);
+  } else {
+    throw UnknownDataType();
+  }
 }
+
 // Define an overload to handle the default argument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads,
                                 getModifiedZscoreNumpy, 1, 2)
@@ -231,9 +237,11 @@ void export_Statistics() {
                    "Determine the statistics for an array of data"))
           .staticmethod("getStatistics")
 
-          .def("getZscore", &getZscoreNumpy,
-               getZscoreOverloads(args("data", "sorted"),
-                                  "Determine the Z score for an array of data"))
+          .def("getZscore", &getZscoreNumpy, args("data"),
+               "Determine the Z score for an array of data")
+          .def("getZscore", &getZscoreNumpyDeprecated, args("data", "sorted"),
+               "Determine the Z score for an array of "
+               "data (deprecated sorted argument)")
           .staticmethod("getZscore")
 
           .def("getModifiedZscore", &getModifiedZscoreNumpy,
@@ -256,8 +264,8 @@ void export_Statistics() {
                    [ReturnNumpyArray()])
           .staticmethod("getMomentsAboutMean");
 
-  //------------------------------ Statistics values
-  //-----------------------------------------------------
+  //------------------------------ Statistics
+  //values--------------------------------
   // Want this in the same scope as above so must be here
   class_<Statistics>("Statistics")
       .add_property("minimum", &Statistics::minimum,

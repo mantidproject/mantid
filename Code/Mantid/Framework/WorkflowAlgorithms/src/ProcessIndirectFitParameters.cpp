@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/ProcessIndirectFitParameters.h"
+#include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TextAxis.h"

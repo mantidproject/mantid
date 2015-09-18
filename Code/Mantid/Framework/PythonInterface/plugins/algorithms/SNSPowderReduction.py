@@ -24,6 +24,14 @@ def noRunSpecified(runs):
         return runs[0] <= 0
     return False
 
+def allEventWorkspaces(*args):
+    result = True
+
+    for arg in args:
+        result = result and (arg.id() == EVENT_WORKSPACE_ID)
+
+    return result
+
 #pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = .01
@@ -371,7 +379,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         if vbackRun.id() == EVENT_WORKSPACE_ID and vbackRun.getNumberEvents() <= 0:
                             pass
                         else:
-                            vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun)
+                            vanRun = api.Minus(LHSWorkspace=vanRun, RHSWorkspace=vbackRun, OutputWorkspace=vanRun,
+                                               ClearRHSWorkspace=allEventWorkspaces(vanRun, vbackRun))
 
                         api.DeleteWorkspace(Workspace=vbackRun)
 
@@ -591,7 +600,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 self.checkInfoMatch(info, tempinfo)
 
-                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
+                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun,
+                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
                 if sumRun.id() == EVENT_WORKSPACE_ID:
                     sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
@@ -632,7 +642,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             else:
                 self.checkInfoMatch(info, tempinfo)
 
-                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun)
+                sumRun = api.Plus(LHSWorkspace=sumRun, RHSWorkspace=temp, OutputWorkspace=sumRun,
+                                  ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
                 if sumRun.id() == EVENT_WORKSPACE_ID:
                     sumRun = api.CompressEvents(InputWorkspace=sumRun, OutputWorkspace=sumRun,\
                                                 Tolerance=self.COMPRESS_TOL_TOF) # 10ns
@@ -804,7 +815,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     wksplist[itemp] = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wkspname)
                     firstChunkList[itemp] = False
                 else:
-                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp, OutputWorkspace=wksplist[itemp])
+                    wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp,
+                                               OutputWorkspace=wksplist[itemp],
+                                               ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
                     api.DeleteWorkspace(temp)
                 # ENDIF
             # ENDFOR (spliited workspaces)
