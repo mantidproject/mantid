@@ -14,6 +14,7 @@ def try_int(s):
     except:
         return s
 
+#pylint: disable=bad-builtin
 def natsort_key(s):
     "Used internally to get a tuple by which s is sorted."
     import re
@@ -27,6 +28,7 @@ def natcasecmp(a, b):
     "Natural string comparison, ignores case."
     return natcmp(a.lower(), b.lower())
 
+#pylint: disable=redefined-builtin
 def natsort(seq, cmp=natcmp):
     "In-place natural string sort."
     seq.sort(cmp)
