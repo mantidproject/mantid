@@ -8,7 +8,7 @@ project ( QtPropertyBrowser )
 if ( NOT QT_FOUND )
   find_package( Qt4 COMPONENTS QtCore QtGui REQUIRED )
 endif ()
-include ( UseSystemQt4 )
+include ( UseQt4 )
 
 # Add the sources
 set( QTPROPERTYBROWSER_SRCS
