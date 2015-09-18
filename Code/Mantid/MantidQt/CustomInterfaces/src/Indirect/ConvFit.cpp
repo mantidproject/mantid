@@ -1601,18 +1601,20 @@ void ConvFit::updatePlotOptions() {
  */
 QString ConvFit::convertFuncToShort(const QString &original) {
   QString result = "";
-  if (original.at(0) == 'E') {
-    result += "E";
-  } else if (original.at(0) == 'I') {
-    result += "I";
-  } else {
-    return "SFT";
-  }
-  auto pos = original.find("Circle");
-  if (pos != -1) {
-    result += "DC";
-  } else {
-    result += "DS";
+  if (m_uiForm.cbFitType->currentIndex() != 0) {
+    if (original.at(0) == 'E') {
+      result += "E";
+    } else if (original.at(0) == 'I') {
+      result += "I";
+    } else {
+      return "SFT";
+    }
+    auto pos = original.find("Circle");
+    if (pos != -1) {
+      result += "DC";
+    } else {
+      result += "DS";
+    }
   }
   return result;
 }
