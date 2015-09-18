@@ -6,6 +6,7 @@ from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi
 
+#pylint: disable=bare-except
 def try_int(s):
     "Convert to integer if possible."
     try:
@@ -30,6 +31,7 @@ def natsort(seq, cmp=natcmp):
     "In-place natural string sort."
     seq.sort(cmp)
 
+#pylint: disable=redefined-builtin
 def natsorted(seq, cmp=natcmp):
     "Returns a copy of seq, sorted by natural string sort."
     import copy
