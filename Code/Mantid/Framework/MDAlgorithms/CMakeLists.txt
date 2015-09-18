@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
+    src/CompactMD.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
@@ -134,6 +135,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
+    inc/MantidMDAlgorithms/CompactMD.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
