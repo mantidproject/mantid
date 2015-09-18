@@ -299,7 +299,7 @@ void ConvFit::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
-  std::string resultName = m_baseName + "_Result";
+  std::string resultName = m_baseName.toStdString() + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
@@ -342,14 +342,8 @@ void ConvFit::algorithmComplete(bool error) {
   }
 
   if (temp != 0.0) {
-    // Obtain Spectra Min/Max
-    std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
-    std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
-    const int minSpec = boost::lexical_cast<int>(specMin);
-    const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
-
     // Obtain WorkspaceGroup from ADS
-    std::string groupName = m_baseName + "_Workspaces";
+    std::string groupName = m_baseName.toStdString() + "_Workspaces";
     WorkspaceGroup_sptr groupWs =
         AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
@@ -1613,7 +1607,7 @@ QString ConvFit::convertFuncToShort(const QString &original) {
     return "SFT";
   }
   auto pos = original.find("Circle");
-  if (pos != std::string::npos) {
+  if (pos != -1) {
     result += "DC";
   } else {
     result += "DS";
