@@ -126,13 +126,13 @@ namespace Mantid {
       std::vector<double> peaks_width;
       std::vector<size_t> irange_min,irange_max;
       findBinRanges(workingWS->readX(0),guess_opening,
-                    this->m_min_Eresolution,
-                    irange_min,irange_max);
+        this->m_min_Eresolution,
+        irange_min,irange_max);
 
       double maxPeakEnergy(0);
       for(size_t i=0; i<guess_opening.size();i++){
-        auto peakFitter = definePeakFinder(workingWS);
 
+        auto peakFitter = definePeakFinder(workingWS);
         double energy,height,sigma;
         bool found = findMonitorPeak(workingWS,peakFitter,irange_min[i],
           irange_max[i],energy,height,sigma);
@@ -153,15 +153,15 @@ namespace Mantid {
         throw std::runtime_error("Can not identify any energy peaks");
       }
       auto result_ws =API::WorkspaceFactory::Instance().create("Workspace2D",1,
-                             nPeaks , nPeaks);
+        nPeaks , nPeaks);
       result_ws->setX(0, peaks_positions);
       MantidVec &Signal = result_ws->dataY(0);
       MantidVec &Error  = result_ws->dataE(0);
       for(size_t i=0;i<nPeaks;i++){
-          Signal[i] = peaks_height[i];
-          Error[i]  = peaks_width[i];
-       }
-       setProperty("OutputWorkspace",result_ws);
+        Signal[i] = peaks_height[i];
+        Error[i]  = peaks_width[i];
+      }
+      setProperty("OutputWorkspace",result_ws);
 
 
     }
@@ -175,79 +175,125 @@ namespace Mantid {
         // interval too small -- can not be peak there
         if(std::fabs(double(ind_max-ind_min))<4)return false;
 
-        double sMax,sMin,xOfMax;
-        std::string peakGuessStr,
-          bkgGuessStr,fitWindow,peakRangeStr;
-        /**Lambda to identify guess values for a peak at given index*/
+
+        bool haveBkg(false);
+        /**Lambda to identify guess values for a peak at given index
+          and set up these parameters as input for fitting algorithm
+        */
         auto peakGuess =[&](size_t index){
-          sMin =  std::numeric_limits<double>::max();
-          sMax = -sMin;
+          double sMin(std::numeric_limits<double>::max());
+          double sMax(-sMin);
+          double dX,Xprev,xOfMax;
+          double ncMax(0),Intensity(0);
+
           auto X = inputWS->readX(index);
           auto S = inputWS->readY(index);
-          double Intensity(0);
-          fitWindow    = std::to_string(X[ind_min])+","+std::to_string(X[ind_max]);
+
           if(ind_max == S.size()){
             ind_max--;
           }
+          double xMin  = X[ind_min];
+          double xMax  = X[ind_max];
+          if(ind_min>0){
+            Xprev = X[ind_min-1];
+          }else{
+            dX = xMin-1;
+          }
+
           for(size_t i=ind_min;i<ind_max;i++){
-            if(S[i]<sMin)sMin=S[i];
-            if(S[i]>sMax){
-              sMax = S[i];
+            dX = std::fabs(X[i]-Xprev);
+            double signal = S[i]/dX;
+            if(signal<sMin)sMin=signal;
+            if(signal>sMax){
+              ncMax = S[i];
+              sMax = signal;
               xOfMax=X[i];
             }
             Intensity+=S[i];
+            Xprev = X[i];
           }
-          Intensity*=std::fabs(X[ind_max]-X[ind_min]);
-          // peak width on the half of the height 
-          double fw = m_min_Eresolution*xOfMax/(2*std::sqrt(2*std::log(2.)));
-          peakGuessStr = std::to_string(sMax)+","+std::to_string(xOfMax)+","+std::to_string(fw);
-          bkgGuessStr  = std::to_string(sMin)+",0.";
-          // identify maximal peak intensity on the basis of maximal instrument 
-          // resolution. 
-          //double iMax = 0.5*Smax*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.));
-          //double iMin = 0.5*Smax*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.));
-          double minHeight = Intensity/(0.5*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.)));
-          double maxHeight = Intensity/(0.5*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.)));
-          peakRangeStr = std::to_string(minHeight)+','+std::to_string(maxHeight);
+          if(ncMax <= 1)return false;
 
+          // sigma from peak width on the half of the height 
+          double fw = m_min_Eresolution*xOfMax/(2*std::sqrt(2*std::log(2.)));
+          //name=Gaussian,Height=491139,PeakCentre=10.0198,Sigma=0.0328702;
+          std::string GuessFunc = "name=Gaussian,Height="+std::to_string(sMax)+
+            ",PeakCentre="+std::to_string(xOfMax)+
+            ",Sigma="+std::to_string(fw);
+          // Intensity of an energy peak with minimal energy resolution
+          double IntMax = 0.5*ncMax*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.));
+          if(IntMax < Intensity){
+            haveBkg = true;
+            GuessFunc+=";name=LinearBackground,A0="+std::to_string(sMin)+",A1=0.0";
+          }else{
+            haveBkg = false;
+          }
+          //Fit(Function='name=Gaussian,Height=491139,PeakCentre=10.0198,Sigma=0.0328702;
+          //name=LinearBackground,A0=-5128.66,A1=1648.61',
+          //InputWorkspace='MAR20368_monitorsDE', Output='MAR20368_monitorsDE',
+          //OutputCompositeMembers=True, WorkspaceIndex=1, StartX=9.5, EndX=10.5
+          peakFitter->setProperty("Function",GuessFunc);
+          peakFitter->setProperty("InputWorkspace",inputWS);
+          peakFitter->setProperty("WorkspaceIndex",static_cast<int>(index));
+          peakFitter->setProperty("StartX",xMin);
+          peakFitter->setProperty("EndX",xMax);
+
+          return true;
         };
         //--------------------------------------------------------------------
-        peakGuess(0);
-
-        peakFitter->setProperty("PeakParameterValues",peakGuessStr);
-        peakFitter->setProperty("BackgroundParameterValues",bkgGuessStr);
-        peakFitter->setProperty("FitWindow",fitWindow);
-        peakFitter->setProperty("PeakRange",peakRangeStr);
-        peakFitter->setRethrows(false);
-
-        bool failed=false;
-        try{ // this is bug, it should not throw anymore
+        if(!peakGuess(0))return false;
+        //
+        bool fail(false);
+        try{
           peakFitter->execute();
         }catch(...){
-          failed = true;
+          fail=true;
         }
 
-        if(!peakFitter->isExecuted()||failed)return false;
+        if(fail)return false;
+        std::string status = peakFitter->getPropertyValue("OutputStatus");
+        if(status != "success")return false;
 
 
-// Does not work?
-//        DataObjects::TableWorkspace_const_sptr result = peakFitter->getProperty("ParameterTableWorkspace");
-//        auto pRes =const_cast<DataObjects::TableWorkspace *>(dynamic_cast<const DataObjects::TableWorkspace *>(result.get()));
-        DataObjects::TableWorkspace_sptr pRes = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
-           API::AnalysisDataService::Instance().retrieve("_fittedPeakParams"));
-        if(!pRes){
-          throw std::runtime_error("Can not convert result of fitting algorithm into table workspace");
+        API::ITableWorkspace_sptr result = peakFitter->getProperty("OutputParameters");
+        //        double chi_sq = peakFitter->getProperty("OutputChi2overDoF");
+        //if(chi_sq>1)return false;
+        // identify maximal peak intensity on the basis of maximal instrument 
+        // resolution
+        //minHeight,maxHeight; 
+        //double iMax = 0.5*Smax*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.));
+        //double iMin = 0.5*Smax*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.));
+        //minHeight = Intensity/(0.5*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.)));
+        //maxHeight = Intensity/(0.5*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.)));
+
+        height = result->Double(0,1);
+        energy = result->Double(1,1);
+        width  = result->Double(2,1);
+        if(haveBkg){
+          double A0  = result->Double(3,1);
+          double A1  = result->Double(4,1);
         }
-        height = pRes->Double(0,1);
-        energy = pRes->Double(1,1);
-        width  = pRes->Double(2,1);
-        double A0  = pRes->Double(3,1);
-        double A1  = pRes->Double(4,1);
-      //
+        //      //
 
-      return true;
+        return true;
 
     }
+    /**Function implements common part of setting peak finder algorithm
+    @param inputWS -- shared pointer to workspace to fit
+    */
+    API::IAlgorithm_sptr GetAllEi::definePeakFinder(const API::MatrixWorkspace_sptr &inputWS){
+
+      API::IAlgorithm_sptr finder = createChildAlgorithm("Fit");
+      finder->initialize();
+      finder->setProperty("CreateOutput",false);
+      finder->setProperty("OutputParametersOnly",true);
+      //finder->setProperty("Normalise",true);
+      finder->setProperty("Output","fittedPeakWS");
+      //finder->setProperty("Constraints","Height>0");
+      //finder->setProperty("Minimizer","Simplex");
+      return finder;
+    }
+
 
     /**Find indexes of each expected peak intervals from monotonous array of ranges.
     @param eBins   -- bin ranges to look through
@@ -260,17 +306,17 @@ namespace Mantid {
       std::vector<size_t> & irangeMax){
 
 
-      auto inRange = [&](size_t index,const double &eGuess){
-        return (eBins[index]> eGuess*(1-2*Eresolution) && 
-               (eBins[index]<=eGuess*(1+2*Eresolution)));
-      };
+        auto inRange = [&](size_t index,const double &eGuess){
+          return (eBins[index]> eGuess*(1-2*Eresolution) && 
+            (eBins[index]<=eGuess*(1+2*Eresolution)));
+        };
 
-      size_t nBins = eBins.size();
-      size_t startIndex(0);
-      bool within=false;
-      for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
-        within=false;
-        for(size_t i=startIndex;i<nBins;i++){
+        size_t nBins = eBins.size();
+        size_t startIndex(0);
+        bool within=false;
+        for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
+          within=false;
+          for(size_t i=startIndex;i<nBins;i++){
             if(inRange(i,guess_energy[nGuess])){
               if(!within){
                 within = true;
@@ -288,34 +334,18 @@ namespace Mantid {
                 break;
               }
             }
+          }
         }
-      }
-      if(within){
-           irangeMax.push_back(nBins-1);
-      }
-      // if array decreasing rather then increasing, indexes behave differently
-      if(irangeMax[0]<irangeMin[0]){
-        irangeMax.swap(irangeMin);
-      }
+        if(within){
+          irangeMax.push_back(nBins-1);
+        }
+        // if array decreasing rather then increasing, indexes behave differently
+        if(irangeMax[0]<irangeMin[0]){
+          irangeMax.swap(irangeMin);
+        }
     }
 
 
-    /**Function implements common part of setting peak finder algorithm
-    @param inputWS -- shared pointer to workspace to fit
-    */
-    API::IAlgorithm_sptr GetAllEi::definePeakFinder(const API::MatrixWorkspace_sptr &inputWS){
-
-      API::IAlgorithm_sptr finder = createChildAlgorithm("FitPeak");
-      finder->initialize();
-      finder->setProperty("InputWorkspace",inputWS);
-      finder->setProperty("OutputWorkspace","_fittedPeak");
-      finder->setProperty("ParameterTableWorkspace","_fittedPeakParams");
-      finder->setProperty("PeakFunctionType","Gaussian (Height, PeakCentre, Sigma)");
-      finder->setProperty("BackgroundType","Linear (A0, A1)");
-      finder->setProperty("Minimizer","Simplex");
-
-      return finder;
-    }
     /**Build 2-spectra workspace in units of energy, used as source
     *to identify actual monitors spectra 
     *@param inputWS shared pointer to initial workspace
@@ -342,7 +372,7 @@ namespace Mantid {
         size_t XLength  = bins.size();
         size_t YLength  = inputWS->dataY(wsIndex0).size();
         auto working_ws =API::WorkspaceFactory::Instance().create(inputWS,2,
-                             XLength, YLength);
+          XLength, YLength);
         // copy data --> very bad as implicitly assigns pointer
         // to bins array and bins array have to exist out of this routine
         // scope. 
@@ -362,14 +392,14 @@ namespace Mantid {
           Error2[i]  = inputWS->dataE(wsIndex1)[i];
         }
         // copy detector mapping
-       API::ISpectrum *spectrum = working_ws->getSpectrum(0);
-       spectrum->setSpectrumNo(specNum1);
-       spectrum->clearDetectorIDs();
-       spectrum->addDetectorIDs(pSpectr1->getDetectorIDs());
-       spectrum = working_ws->getSpectrum(1);
-       spectrum->setSpectrumNo(specNum2);
-       spectrum->clearDetectorIDs();
-       spectrum->addDetectorIDs(pSpectr2->getDetectorIDs());
+        API::ISpectrum *spectrum = working_ws->getSpectrum(0);
+        spectrum->setSpectrumNo(specNum1);
+        spectrum->clearDetectorIDs();
+        spectrum->addDetectorIDs(pSpectr1->getDetectorIDs());
+        spectrum = working_ws->getSpectrum(1);
+        spectrum->setSpectrumNo(specNum2);
+        spectrum->clearDetectorIDs();
+        spectrum->addDetectorIDs(pSpectr2->getDetectorIDs());
 
 
         if(inputWS->getAxis(0)->unit()->caption() != "Energy"){
