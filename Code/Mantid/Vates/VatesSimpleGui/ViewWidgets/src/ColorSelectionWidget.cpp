@@ -5,6 +5,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include "MantidQtAPI/MdConstants.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -105,7 +106,6 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
 
   // create xml parser
   vtkPVXMLParser *xmlParser = vtkPVXMLParser::New();
-  
 
   // 1. Get builtinw color maps (Reading fragment requires: InitializeParser, ParseChunk, CleanupParser) 
   const char *xml = pqComponentsGetColorMapsXML();
@@ -274,6 +274,7 @@ void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
  */
 void ColorSelectionWidget::loadPreset()
 {
+  Mantid::VATES::ColorScaleLockGuard guard(m_colorScaleLock);
   this->m_presets->setUsingCloseButton(false);
   if (this->m_presets->exec() == QDialog::Accepted)
   {
