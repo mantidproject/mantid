@@ -555,7 +555,7 @@ public:
     stop = DateAndTime("2007-11-30T16:22:50");
     splitter.push_back( SplittingInterval(start, stop, 4) );
 
-    log->splitByTime(splitter, outputs);
+    log->splitByTime(splitter, outputs, false);
 
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[0])->realSize(), 3);
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[1])->realSize(), 1);
@@ -596,7 +596,7 @@ public:
     stop = DateAndTime("2007-11-30T16:17:59");
     splitter.push_back( SplittingInterval(start, stop, 0) );
 
-    log->splitByTime(splitter, outputs);
+    log->splitByTime(splitter, outputs, false);
 
     TS_ASSERT_EQUALS( dynamic_cast< TimeSeriesProperty<int> * >(outputs[0])->realSize(), 5);
 

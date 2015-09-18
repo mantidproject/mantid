@@ -365,11 +365,14 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
  *                     and destinations.
  * @param outputs  :: A vector of output TimeSeriesProperty pointers of the same
  *                    type.
+ * @param isPeriodic :: whether the log (this TSP) is periodic. For example
+ *                    proton-charge is periodic log.
  */
 template <typename TYPE>
 void
 TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
-                                      std::vector<Property *> outputs) const {
+                                      std::vector<Property *> outputs,
+                                      bool isPeriodic) const {
   // 0. Sort if necessary
   sort();
 
@@ -409,6 +412,8 @@ TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
   Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
   size_t counter = 0;
+  g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
+                << ", Number of splitters = " << splitter.size() << "\n";
   while (itspl != splitter.end() && i_property < m_values.size()) {
     // Get the splitting interval times and destination
     DateAndTime start = itspl->start();
@@ -428,8 +433,6 @@ TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
     }
 
     // Skip the events before the start of the time
-    g_log.notice() << "[DB] Number of time series entries = " << m_values.size()
-                   << "\n";
     while (i_property < m_values.size() && m_values[i_property].time() < start)
       ++i_property;
 
@@ -444,7 +447,7 @@ TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
     }
 
     // The current entry is within an interval. Record them until out
-    if (m_values[i_property].time() > start && i_property > 0) {
+    if (m_values[i_property].time() > start && i_property > 0 && !isPeriodic) {
       // Record the previous oneif this property is not exactly on start time
       //   and this entry is not recorded
       size_t i_prev = i_property - 1;
@@ -479,8 +482,11 @@ TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
   for (std::size_t i = 0; i < numOutputs; i++) {
     TimeSeriesProperty<TYPE> *myOutput =
         dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
-    if (myOutput)
+    if (myOutput) {
       myOutput->m_size = myOutput->realSize();
+      // g_log.notice() << "[DB] Final output size = " << myOutput->size() <<
+      // "\n";
+    }
   }
 
   return;

@@ -216,9 +216,11 @@ void Property::filterByTime(const Kernel::DateAndTime &start,
  * @param outputs :: holder for splitter output
  */
 void Property::splitByTime(std::vector<SplittingInterval> &splitter,
-                           std::vector<Property *> outputs) const {
+                           std::vector<Property *> outputs,
+                           bool isProtonCharge) const {
   UNUSED_ARG(splitter);
   UNUSED_ARG(outputs);
+  UNUSED_ARG(isProtonCharge);
   return;
 }
 
