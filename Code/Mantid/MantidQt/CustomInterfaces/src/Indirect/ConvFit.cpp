@@ -298,6 +298,9 @@ void ConvFit::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
 
+  if (error)
+    return;
+
   std::string resultName = m_baseName.toStdString() + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
