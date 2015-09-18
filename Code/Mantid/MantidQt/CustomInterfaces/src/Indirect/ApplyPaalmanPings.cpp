@@ -261,8 +261,6 @@ bool ApplyPaalmanPings::validate() {
 
   MatrixWorkspace_sptr sampleWs;
 
-  uiv.addErrorMessage("Must use either container subtraction or corrections");
-
   if (m_uiForm.dsCorrections->getCurrentDataName().compare("") == 0) {
     uiv.addErrorMessage(
         "Use Correction must contain a corrections file or workspace.");
