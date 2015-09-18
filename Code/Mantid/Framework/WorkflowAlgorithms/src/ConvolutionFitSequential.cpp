@@ -362,7 +362,6 @@ void ConvolutionFitSequential::exec() {
  */
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
-  std::string fitType = "";
   auto pos = subFunction.rfind("Lorentzian");
   if (pos != std::string::npos) {
       return true;
