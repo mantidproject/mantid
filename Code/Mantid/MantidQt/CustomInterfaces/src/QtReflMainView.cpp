@@ -472,6 +472,15 @@ namespace MantidQt
     }
 
     /**
+     Get status of checkbox which determines whether an ipython notebook is produced
+     @return true if a notebook should be output on process, false otherwise
+     */
+    bool QtReflMainView::getEnableNotebook()
+    {
+      return ui.checkEnableNotebook->isChecked();
+    }
+
+    /**
     Set which rows are selected
     @param rows : The set of rows to select
     */
