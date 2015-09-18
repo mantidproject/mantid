@@ -35,33 +35,27 @@ public:
   }
 
 private:
-	
-	/// Initialisation code
+  /// Initialisation code
   void init();
 
   /// Execution code
   void exec();
 
   /// Write out the data for e x y
-  void WriteToFile(
-    const std::string alpha, std::string filename, const std::string comment, 
-    const std::string comstr, const std::string errstr,
-    const std::string errstr2, const std::string GXR, const std::string banknum,
-    const std::string fourspc, const std::string twospc,
-    API::MatrixWorkspace_const_sptr ws, int nBins);
+  void WriteToFile(const std::string alpha, std::ofstream &outfile,
+                   const std::string comment, const std::string fourspc,
+                   int nBins, bool isHistogram, int nSpectra);
 
-  void WriteHeader(
-    const std::string alpha, std::ofstream& outfile, const std::string comment,
-    const std::string GXR, const std::string banknum, const std::string fourspc,
-    const std::string twospc, API::MatrixWorkspace_const_sptr ws);
+  void WriteAxisHeader(const std::string alpha, std::ofstream &outfile,
+                       const std::string singleSpc, const std::string fourspc,
+                       int nSpectra);
 
-  double WriteAxisValues(std::string alpha, int bin, API::MatrixWorkspace_const_sptr ws);
+  void WriteAxisValues(std::string alpha, std::ofstream &outfile, int bin,
+                       const std::string singleSpc);
 
-    /// Workspace
-  API::MatrixWorkspace_const_sptr ws;
+  /// Workspace
+  API::MatrixWorkspace_sptr ws;
 };
-
-
 }
 }
-#endif // DATAHANDING_SAVEOPENGENIEASCII_H_ 
+#endif // DATAHANDING_SAVEOPENGENIEASCII_H_

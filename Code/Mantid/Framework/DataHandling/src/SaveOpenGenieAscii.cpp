@@ -43,14 +43,12 @@ void SaveOpenGenieAscii::init() {
       "The filename to use for the saved data");
 }
 
-//////////////////////////////////////////////////////////////////////////
-
 void SaveOpenGenieAscii::exec() {
   // Process properties
 
   // Retrieve the input workspace
   /// Workspace
-  API::MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
+  ws = getProperty("InputWorkspace");
   int nSpectra = static_cast<int>(ws->getNumberHistograms());
   int nBins = static_cast<int>(ws->blocksize());
 
@@ -58,61 +56,71 @@ void SaveOpenGenieAscii::exec() {
   std::string filename = getProperty("Filename");
 
   // Output string variables
-  const std::string comment = " ";
-  const std::string comstr = " "; // spaces between each number
-  const std::string errstr = "E";
-  const std::string errstr2 = "";
-  const std::string GXR = "GXRealarray";
-  const std::string banknum = "1";
+  const std::string singleSpc = " ";
   const std::string fourspc = "    ";
-  const std::string twospc = " ";
 
-  if (nBins == 0 || nSpectra == 0)
-    throw std::runtime_error("Trying to save an empty workspace");
-
-  const std::string Alpha[] = {"`e`", "`x`", "`y`"};
-
-  for (int Num = 0; Num < 3; Num++) {
-    std::string alpha = Alpha[Num];
-    WriteToFile(alpha, filename, comment, comstr, errstr, errstr2, GXR, banknum,
-                fourspc, twospc, ws, nBins);
-    return;
-  };
-}
-
-void SaveOpenGenieAscii::WriteHeader(
-    const std::string alpha, std::ofstream &outfile, const std::string comment,
-    const std::string GXR, const std::string banknum, const std::string fourspc,
-    const std::string twospc, API::MatrixWorkspace_const_sptr ws) {
-  outfile << twospc << comment << alpha << std::endl;
-  outfile << fourspc << GXR << std::endl;
-  outfile << fourspc << banknum << std::endl;
-  outfile << fourspc << ws->getNumberHistograms() << std::endl;
-}
-
-void SaveOpenGenieAscii::WriteToFile(
-    const std::string alpha, std::string filename, const std::string comment,
-    const std::string comstr, const std::string errstr,
-    const std::string errstr2, const std::string GXR, const std::string banknum,
-    const std::string fourspc, const std::string twospc,
-    API::MatrixWorkspace_const_sptr ws, int nBins) {
-
-  // File
+  // file
   std::ofstream outfile(filename.c_str());
   if (!outfile) {
     g_log.error("Unable to create file: " + filename);
     throw Exception::FileError("Unable to create file: ", filename);
   }
+  if (nBins == 0 || nSpectra == 0)
+    throw std::runtime_error("Trying to save an empty workspace");
 
-  WriteHeader(alpha, outfile, comment, GXR, banknum, fourspc, twospc, ws);
-
-  /* outfile << twospc << comment << alpha << std::endl;
-    outfile << fourspc << GXR << std::endl;
-    outfile << fourspc << banknum << std::endl;
-    outfile << fourspc << ws->getNumberHistograms() << std::endl; */
+  // Axis alphabets
+  const std::string Alpha[] = {"`e`", "`x`", "`y`"};
 
   bool isHistogram = ws->isHistogramData();
   Progress progress(this, 0, 1, nBins);
+  std::string alpha;
+  for (int Num = 0; Num < 3; Num++) {
+    alpha = Alpha[Num];
+    WriteToFile(alpha, outfile, singleSpc, fourspc, nBins, isHistogram,
+                nSpectra);
+  }
+  return;
+  progress.report();
+}
+
+//----------------------------------------------------------------------------------------------
+/** generates the header for the axis which saves to file
+   *  @param alpha ::   onstant string Axis letter that is being used
+   *  @param outfile :: File it will save it out to
+   *  @param singleSpc :: Constant string for single space
+   *  @param fourspc :: Constant string for four spaces
+   */
+void SaveOpenGenieAscii::WriteAxisHeader(const std::string alpha,
+                                         std::ofstream &outfile,
+                                         const std::string singleSpc,
+                                         const std::string fourspc,
+                                         int nSpectra) {
+  const std::string GXR = "GXRealarray";
+  const std::string banknum = "1";
+  const std::string twospc = " ";
+
+  outfile << twospc << singleSpc << alpha << std::endl;
+  outfile << fourspc << GXR << std::endl;
+  outfile << fourspc << banknum << std::endl;
+  outfile << fourspc << nSpectra << std::endl;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Uses AxisHeader and WriteAxisValues to write out file
+   *  @param alpha ::   Axis letter that is being used
+   *  @param outfile :: File it will save it out to
+   *  @param singleSpc :: Constant string for single space
+   *  @param fourspc :: Constant string for four spaces
+   *  @param nBins ::  number of bins
+   *  @param isHistogram ::  If its a histogram
+   */
+void SaveOpenGenieAscii::WriteToFile(const std::string alpha,
+                                     std::ofstream &outfile,
+                                     const std::string singleSpc,
+                                     const std::string fourspc, int nBins,
+                                     bool isHistogram, int nSpectra) {
+
+  WriteAxisHeader(alpha, outfile, singleSpc, fourspc, nSpectra);
 
   for (int bin = 0; bin < nBins; bin++) {
     if (isHistogram) // bin centres
@@ -121,27 +129,35 @@ void SaveOpenGenieAscii::WriteToFile(
         outfile << fourspc;
       }
 
-      outfile << WriteAxisValues(alpha, bin, ws) << comment;
+      WriteAxisValues(alpha, outfile, bin, singleSpc);
 
       if ((bin + 1) % 10 == 0 && bin != (nBins - 1)) {
         outfile << std::endl << fourspc;
       }
     }
-    outfile << std::endl;
-    progress.report();
-  };
+  }
+  outfile << std::endl;
 }
 
-// Reads if alpha is e then reads the E values accordingly
-double SaveOpenGenieAscii::WriteAxisValues(std::string alpha, int bin,
-                                    API::MatrixWorkspace_const_sptr ws) {
+//----------------------------------------------------------------------------------------------
+/** Reads if alpha is e then reads the E values accordingly
+   *  @param alpha ::   Axis letter that is being used
+   *  @param outfile :: File it will save it out to
+   *  @param bin :: bin counter which goes through all the bin
+   *  @param singleSpc :: Constant string for single space
+   */
+void SaveOpenGenieAscii::WriteAxisValues(std::string alpha,
+                                         std::ofstream &outfile, int bin,
+                                         const std::string singleSpc) {
   if (alpha == "`e`") {
-    return ws->readE(0)[bin];
-  } if (alpha == "`x`") {
-    return ws->readX(0)[bin];
-  } if (alpha == "`y`") {
-    return ws->readY(0)[bin];
-  };
+    outfile << ws->readE(0)[bin] << singleSpc;
+  }
+  if (alpha == "`x`") {
+    outfile << (ws->readX(0)[bin]) << singleSpc;
+  }
+  if (alpha == "`y`") {
+    outfile << ws->readY(0)[bin] << singleSpc;
+  }
 }
 
 } // namespace DataHandling
