@@ -240,22 +240,26 @@ void ConvolutionFitSequential::exec() {
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
 
+  Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
-  auto func = FunctionFactory::Instance().createFunction(funcName);
-  if (delta) {
+  if (funcName.compare("DeltaFunction") == 0) {
     paramNames.push_back("Height");
-  }
-  Progress workflowProg(this, 0.91, 0.94, (func->nParams() * 2));
-  for (size_t i = 0; i < func->nParams(); i++) {
-    paramNames.push_back(func->parameterName(i));
-    workflowProg.report();
-  }
-  if (funcName.compare("Lorentzian") == 0) {
-    // remove peak centre
-    size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-                 paramNames.begin();
-    paramNames.erase(paramNames.begin() + pos);
-    paramNames.push_back("EISF");
+  } else {
+    auto func = FunctionFactory::Instance().createFunction(funcName);
+    if (delta) {
+      paramNames.push_back("Height");
+    }
+    for (size_t i = 0; i < func->nParams(); i++) {
+      paramNames.push_back(func->parameterName(i));
+      workflowProg.report();
+    }
+    if (funcName.compare("Lorentzian") == 0) {
+      // remove peak centre
+      size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
+                   paramNames.begin();
+      paramNames.erase(paramNames.begin() + pos);
+      paramNames.push_back("EISF");
+    }
   }
 
   // Run calcEISF if Delta
