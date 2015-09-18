@@ -1597,6 +1597,12 @@ void ConvFit::updatePlotOptions() {
   m_uiForm.cbPlotType->addItems(plotOptions);
 }
 
+/**
+ * Converts the user input for function into short hand for use in the workspace
+ * naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
 QString ConvFit::convertFuncToShort(const QString &original) {
   QString result = "";
   if (original.at(0) == 'E') {
@@ -1615,6 +1621,12 @@ QString ConvFit::convertFuncToShort(const QString &original) {
   return result;
 }
 
+/**
+ * Converts the user input for background into short hand for use in the
+ * workspace naming
+ * @param original - The original user input to the function
+ * @return The short hand of the users input
+ */
 QString ConvFit::convertBackToShort(const std::string &original) {
   QString result = QString::fromStdString(original.substr(0, 3));
   auto pos = original.find(" ");
