@@ -265,7 +265,6 @@ void ConvFit::run() {
   m_baseName += QString::fromStdString(specMin);
   m_baseName += "_to_";
   m_baseName += QString::fromStdString(specMax);
-  std::string test = m_baseName.toStdString();
 
   // Run ConvolutionFitSequential Algorithm
   IAlgorithm_sptr cfs =
