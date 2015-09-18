@@ -118,7 +118,7 @@ PhaseQuadMuon::getExponentialDecay(const API::MatrixWorkspace_sptr &ws) {
 
     double s, sx, sy;
     s = sx = sy = 0;
-    for (int i = 0; i < npoints; i++) {
+    for (size_t i = 0; i < npoints; i++) {
 
       if (Y[i] > 0) {
         double sig = E[i] * E[i] / Y[i] / Y[i];
@@ -181,7 +181,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double mu1 = 2 * sxy / (sxy * sxy - sxx * syy);
     double lam2 = 2 * sxy / (sxy * sxy - sxx * syy);
     double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
-    for (int h = 0; h < nspec; h++) {
+    for (size_t h = 0; h < nspec; h++) {
       double phi = phase->Double(h, 1);
       double X = n0[h] * cos(phi);
       double Y = n0[h] * sin(phi);
@@ -193,8 +193,8 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
   // Phase quadrature
   std::vector<double> realY(npoints, 0), imagY(npoints, 0);
   std::vector<double> realE(npoints, 0), imagE(npoints, 0);
-  for (int i = 0; i < npoints; i++) {
-    for (int h = 0; h < nspec; h++) {
+  for (size_t i = 0; i < npoints; i++) {
+    for (size_t h = 0; h < nspec; h++) {
 
       // (X,Y,E) with exponential decay removed
       double X = ws->readX(h)[i];
