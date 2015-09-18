@@ -254,11 +254,14 @@ void ConvFit::run() {
   }
   int fitIndex = m_uiForm.cbFitType->currentIndex();
   if (fitIndex < 3 && fitIndex != 0) {
-    m_baseName += fitIndex + "L";
+    m_baseName += QString::number(fitIndex);
+    m_baseName += "L";
   } else {
     m_baseName += convertFuncToShort(m_uiForm.cbFitType->currentText());
   }
-  m_baseName += convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) + "_s";
+  m_baseName +=
+      convertBackToShort(m_uiForm.cbBackground->currentText().toStdString()) +
+      "_s";
   m_baseName += QString::fromStdString(specMin);
   m_baseName += "_to_";
   m_baseName += QString::fromStdString(specMax);
@@ -285,7 +288,6 @@ void ConvFit::run() {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(algorithmComplete(bool)));
   m_batchAlgoRunner->executeBatchAsync();
-
 }
 
 /**
@@ -296,58 +298,14 @@ void ConvFit::run() {
 void ConvFit::algorithmComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
              SLOT(algorithmComplete(bool)));
-  QString temperature = m_uiForm.leTempCorrection->text();
-  double temp = 0.0;
-  if (temperature.toStdString().compare("") != 0) {
-    temp = temperature.toDouble();
-  }
 
-
-  /*std::string baseWsName = cfs->getProperty("OutputWorkspace");
-  auto pos = baseWsName.rfind("_");
-  baseWsName = baseWsName.substr(0, pos + 1);
-
-  std::string resultName = baseWsName + "Result";
+  std::string resultName = m_baseName + "_Result";
   MatrixWorkspace_sptr resultWs =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(resultName);
 
-  std::string groupName = baseWsName + "Workspaces";
-  WorkspaceGroup_sptr groupWs =
-      AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
-
-  std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
-  std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
-
-  if (temp != 0.0) {
-    const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
-    auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
-    addSample->setProperty("Workspace", resultWs);
-    addSample->setProperty("LogName", "temperature_value");
-    addSample->setProperty("LogText", temperature.toStdString());
-    addSample->setProperty("LogType", "Number");
-    addSample->execute();
-    addSample->setProperty("Workspace", resultWs);
-    addSample->setProperty("LogName", "temperature_correction");
-    addSample->setProperty("LogText", "True");
-    addSample->setProperty("LogType", "String");
-    m_batchAlgoRunner->addAlgorithm(addSample);
-    for (int i = 0; i < maxSpec; i++) {
-      addSample->setProperty("Workspace", groupWs);
-      addSample->setProperty("LogName", "temperature_value");
-      addSample->setProperty("LogText", temperature.toStdString());
-      addSample->setProperty("LogType", "Number");
-      addSample->execute();
-      addSample->setProperty("Workspace", groupWs);
-      addSample->setProperty("LogName", "temperature_correction");
-      addSample->setProperty("LogText", "True");
-      addSample->setProperty("LogType", "String");
-      addSample->execute();
-    }
-  }
-
-  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
   const bool save = m_uiForm.ckSave->isChecked();
 
+  // Handle Save file
   if (save) {
     QString saveDir = QString::fromStdString(
         Mantid::Kernel::ConfigService::Instance().getString(
@@ -358,6 +316,9 @@ void ConvFit::algorithmComplete(bool error) {
     addSaveWorkspaceToQueue(QresultWsName, fullPath);
   }
 
+  std::string plot = m_uiForm.cbPlotType->currentText().toStdString();
+
+  // Handle plot result
   if (!(plot.compare("None") == 0)) {
     if (plot.compare("All") == 0) {
       int specEnd = (int)resultWs->getNumberHistograms();
@@ -371,7 +332,49 @@ void ConvFit::algorithmComplete(bool error) {
       IndirectTab::plotSpectrum(QString::fromStdString(resultWs->getName()),
                                 specNumber, specNumber);
     }
-  }*/
+  }
+
+  // Handle Temperature logs
+  QString temperature = m_uiForm.leTempCorrection->text();
+  double temp = 0.0;
+  if (temperature.toStdString().compare("") != 0) {
+    temp = temperature.toDouble();
+  }
+
+  if (temp != 0.0) {
+    // Obtain Spectra Min/Max
+    std::string specMin = m_uiForm.spSpectraMin->text().toStdString();
+    std::string specMax = m_uiForm.spSpectraMax->text().toStdString();
+    const int minSpec = boost::lexical_cast<int>(specMin);
+    const int maxSpec = boost::lexical_cast<int>(specMax) + 1;
+
+    // Obtain WorkspaceGroup from ADS
+    std::string groupName = m_baseName + "_Workspaces";
+    WorkspaceGroup_sptr groupWs =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+
+    auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
+    addSample->setProperty("Workspace", resultWs);
+    addSample->setProperty("LogName", "temperature_value");
+    addSample->setProperty("LogText", temperature.toStdString());
+    addSample->setProperty("LogType", "Number");
+    addSample->execute();
+    addSample->setProperty("Workspace", resultWs);
+    addSample->setProperty("LogName", "temperature_correction");
+    addSample->setProperty("LogText", "true");
+    addSample->setProperty("LogType", "String");
+    addSample->execute();
+    addSample->setProperty("Workspace", groupWs);
+    addSample->setProperty("LogName", "temperature_value");
+    addSample->setProperty("LogText", temperature.toStdString());
+    addSample->setProperty("LogType", "Number");
+    addSample->execute();
+    addSample->setProperty("Workspace", groupWs);
+    addSample->setProperty("LogName", "temperature_correction");
+    addSample->setProperty("LogText", "true");
+    addSample->setProperty("LogType", "String");
+    addSample->execute();
+  }
   updatePlot();
 }
 
@@ -1594,7 +1597,7 @@ void ConvFit::updatePlotOptions() {
   m_uiForm.cbPlotType->addItems(plotOptions);
 }
 
-QString ConvFit::convertFuncToShort(const QString &original){
+QString ConvFit::convertFuncToShort(const QString &original) {
   QString result = "";
   if (original.at(0) == 'E') {
     result += "E";
