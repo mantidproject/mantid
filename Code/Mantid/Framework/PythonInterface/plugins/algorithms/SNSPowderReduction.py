@@ -310,7 +310,6 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 self.log().information("Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
-            runnumber = samRun.getRunNumber()
             self._info = self._getinfo(samRun)
 
             # process the container
