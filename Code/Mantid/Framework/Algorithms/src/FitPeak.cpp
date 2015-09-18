@@ -1288,7 +1288,7 @@ void FitPeak::processProperties() {
   // Peak range
   vector<double> peakrange = getProperty("PeakRange");
   if (peakrange.size() != 2) {
-    throw runtime_error("Must enter 2 and only 2 items in fit window. ");
+    throw runtime_error("Must enter 2 and only 2 items for PeakRange in fit window. ");
   }
   m_minPeakX = peakrange[0];
   m_maxPeakX = peakrange[1];

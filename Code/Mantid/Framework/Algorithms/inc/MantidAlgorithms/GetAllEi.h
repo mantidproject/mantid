@@ -89,6 +89,8 @@ protected: // for testing, private otherwise.
   bool m_useFilterLog; 
   /// maximal relative peak width to consider acceptable. Defined by minimal instrument resolution
   /// and does not exceed 0.08
+  double m_min_Eresolution;
+  // set as half max LET resolution at 20mev at 5e-4
   double m_max_Eresolution;
 
 };

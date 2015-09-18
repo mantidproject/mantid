@@ -18,8 +18,9 @@ namespace Mantid {
 
     /// Empty default constructor
     GetAllEi::GetAllEi() : Algorithm(),
-      m_max_Eresolution(0.08),
-      m_useFilterLog(true){}
+      m_useFilterLog(true),m_min_Eresolution(0.08),
+      // half maximal resolution for LET
+      m_max_Eresolution(0.5e-3){}
 
     /// Initialization method.
     void GetAllEi::init() {
@@ -92,7 +93,7 @@ namespace Mantid {
       auto lastChopper = pInstrument->getChopperPoint(nChoppers-1);
       ///<---------------------------------------------------
       */
-      auto baseSpectrum = workingWS->getSpectrum(0);
+      auto baseSpectrum = inputWS->getSpectrum(det1WSIndex);
       std::pair<double,double> TOF_range  = baseSpectrum->getXDataRange();
 
       double Period  = (0.5*1.e+6)/chopSpeed; // 0.5 because some choppers open twice.
@@ -100,6 +101,14 @@ namespace Mantid {
       // it looks like not enough information on what chopper is available on ws;
       std::vector<double> guess_opening;
       this->findGuessOpeningTimes(TOF_range,TOF0,Period,guess_opening);
+      if(guess_opening.size()==0){
+        throw std::runtime_error("Can not find any chopper opening time within TOF range: "
+          +std::to_string(TOF_range.first)+':'+std::to_string(TOF_range.second));
+      }else{
+        g_log.debug()<<" Found : "<<guess_opening.size()<<
+          " chopper prospective opening within time frame: "
+          <<TOF_range.first<<" to: "<<TOF_range.second<<std::endl;
+      }
 
       // convert to energy
       double unused(0.0);
@@ -108,6 +117,7 @@ namespace Mantid {
       for(size_t i=0;i<guess_opening.size();i++){
         guess_opening[i] = destUnit->singleFromTOF(guess_opening[i]);
       }
+      std::sort(guess_opening.begin(),guess_opening.end());
 
 
 
@@ -116,12 +126,13 @@ namespace Mantid {
       std::vector<double> peaks_width;
       std::vector<size_t> irange_min,irange_max;
       findBinRanges(workingWS->readX(0),guess_opening,
-                    this->m_max_Eresolution,
+                    this->m_min_Eresolution,
                     irange_min,irange_max);
 
-      auto peakFitter = definePeakFinder(workingWS);
       double maxPeakEnergy(0);
       for(size_t i=0; i<guess_opening.size();i++){
+        auto peakFitter = definePeakFinder(workingWS);
+
         double energy,height,sigma;
         bool found = findMonitorPeak(workingWS,peakFitter,irange_min[i],
           irange_max[i],energy,height,sigma);
@@ -161,14 +172,19 @@ namespace Mantid {
       size_t ind_min,size_t ind_max,
       double & energy,double & height,double &width){
 
+        // interval too small -- can not be peak there
+        if(std::fabs(double(ind_max-ind_min))<4)return false;
+
         double sMax,sMin,xOfMax;
-        std::string peakGuessStr,bkgGuessStr,fitWindow;
-        /**Lambda to identify guess values for a peak */
+        std::string peakGuessStr,
+          bkgGuessStr,fitWindow,peakRangeStr;
+        /**Lambda to identify guess values for a peak at given index*/
         auto peakGuess =[&](size_t index){
           sMin =  std::numeric_limits<double>::max();
           sMax = -sMin;
           auto X = inputWS->readX(index);
           auto S = inputWS->readY(index);
+          double Intensity(0);
           fitWindow    = std::to_string(X[ind_min])+","+std::to_string(X[ind_max]);
           if(ind_max == S.size()){
             ind_max--;
@@ -179,11 +195,20 @@ namespace Mantid {
               sMax = S[i];
               xOfMax=X[i];
             }
+            Intensity+=S[i];
           }
+          Intensity*=std::fabs(X[ind_max]-X[ind_min]);
           // peak width on the half of the height 
-          double fw = m_max_Eresolution/2.35844;
+          double fw = m_min_Eresolution*xOfMax/(2*std::sqrt(2*std::log(2.)));
           peakGuessStr = std::to_string(sMax)+","+std::to_string(xOfMax)+","+std::to_string(fw);
           bkgGuessStr  = std::to_string(sMin)+",0.";
+          // identify maximal peak intensity on the basis of maximal instrument 
+          // resolution. 
+          //double iMax = 0.5*Smax*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.));
+          //double iMin = 0.5*Smax*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.));
+          double minHeight = Intensity/(0.5*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.)));
+          double maxHeight = Intensity/(0.5*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.)));
+          peakRangeStr = std::to_string(minHeight)+','+std::to_string(maxHeight);
 
         };
         //--------------------------------------------------------------------
@@ -192,8 +217,18 @@ namespace Mantid {
         peakFitter->setProperty("PeakParameterValues",peakGuessStr);
         peakFitter->setProperty("BackgroundParameterValues",bkgGuessStr);
         peakFitter->setProperty("FitWindow",fitWindow);
+        peakFitter->setProperty("PeakRange",peakRangeStr);
+        peakFitter->setRethrows(false);
 
-        peakFitter->execute();
+        bool failed=false;
+        try{ // this is bug, it should not throw anymore
+          peakFitter->execute();
+        }catch(...){
+          failed = true;
+        }
+
+        if(!peakFitter->isExecuted()||failed)return false;
+
 
 // Does not work?
 //        DataObjects::TableWorkspace_const_sptr result = peakFitter->getProperty("ParameterTableWorkspace");
@@ -299,24 +334,32 @@ namespace Mantid {
         wsIndex0 = inputWS->getIndexFromSpectrumNumber(specNum1);
         specid_t specNum2 = getProperty("Monitor2SpecID");
         size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
-        auto pSpectr1    = inputWS->getSpectrum(wsIndex0);
-        size_t XLength  = pSpectr1->dataX().size();
-        size_t YLength  = pSpectr1->dataY().size();
+        auto pSpectr1   = inputWS->getSpectrum(wsIndex0);
+        auto pSpectr2   = inputWS->getSpectrum(wsIndex1);
+        // assuming equally binned ws.
+        //auto bins       = inputWS->dataX(wsIndex0);
+        auto bins = pSpectr1->dataX();
+        size_t XLength  = bins.size();
+        size_t YLength  = inputWS->dataY(wsIndex0).size();
         auto working_ws =API::WorkspaceFactory::Instance().create(inputWS,2,
                              XLength, YLength);
-        // copy data
-        auto bins = pSpectr1->dataX();
-        auto pSpectr2  = inputWS->getSpectrum(wsIndex1);
+        // copy data --> very bad as implicitly assigns pointer
+        // to bins array and bins array have to exist out of this routine
+        // scope. 
+        // This does not matter in this case as below we convert units
+        // which should decouple cow_pointer but very scary operation in
+        // general.
         working_ws->setX(0, bins);
+        working_ws->setX(1, bins);
         MantidVec &Signal1 = working_ws->dataY(0);
         MantidVec &Error1  = working_ws->dataE(0);
         MantidVec &Signal2 = working_ws->dataY(1);
         MantidVec &Error2  = working_ws->dataE(1);
         for(size_t i=0;i<YLength;i++){
-          Signal1[i] = pSpectr1->dataY()[i];
-          Error1[i]  = pSpectr1->dataE()[i];
-          Signal2[i] = pSpectr2->dataY()[i];
-          Error2[i]  = pSpectr2->dataE()[i];
+          Signal1[i] = inputWS->dataY(wsIndex0)[i];
+          Error1[i]  = inputWS->dataE(wsIndex0)[i];
+          Signal2[i] = inputWS->dataY(wsIndex1)[i];
+          Error2[i]  = inputWS->dataE(wsIndex1)[i];
         }
         // copy detector mapping
        API::ISpectrum *spectrum = working_ws->getSpectrum(0);
@@ -336,6 +379,7 @@ namespace Mantid {
           conv->setProperty("OutputWorkspace",working_ws);
           conv->setPropertyValue("Target","Energy");
           conv->setPropertyValue("EMode","Elastic");
+          //conv->setProperty("AlignBins",true); --> throws due to bug in ConvertUnits
           conv->execute();
 
         }

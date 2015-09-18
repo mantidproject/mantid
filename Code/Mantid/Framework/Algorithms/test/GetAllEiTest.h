@@ -2,6 +2,7 @@
 #define GETALLEI_TEST_H_
 
 #include <memory>
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -209,6 +210,7 @@ public:
     TSM_ASSERT_EQUALS(" should be 8 periods within the specified interval",guess_tof.size(),8);
  
   }
+  //
    void test_internalWS_to_fit(){
      Mantid::DataObjects::Workspace2D_sptr tws = 
        WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(5,100,true);
@@ -239,6 +241,18 @@ public:
       *(detID1.begin()),(*wws->getSpectrum(0)->getDetectorIDs().begin()));
     TSM_ASSERT_EQUALS("Detector's ID for the second spectrum and new workspace should coincide",
       *(detID2.begin()),(*wws->getSpectrum(1)->getDetectorIDs().begin()));
+    auto pSpec1= wws->getSpectrum(0);
+    auto pSpec2= wws->getSpectrum(1);
+    auto Xsp1 = pSpec1->dataX();
+    auto Xsp2 = pSpec2->dataX();
+    size_t nSpectra = Xsp2.size();
+    TS_ASSERT_EQUALS(nSpectra,101);
+    TS_ASSERT(boost::math::isinf(Xsp1[nSpectra-1]));
+    TS_ASSERT(boost::math::isinf(Xsp2[nSpectra-1]));
+
+    //for(size_t i=0;i<Xsp1.size();i++){
+    //  TS_ASSERT_DELTA(Xsp1[i],Xsp2[i],1.e-6);
+    //}
    }
    void test_binRanges(){
      std::vector<size_t> bin_min,bin_max;
