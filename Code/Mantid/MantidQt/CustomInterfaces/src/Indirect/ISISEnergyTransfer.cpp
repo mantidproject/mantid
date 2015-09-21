@@ -69,18 +69,21 @@ bool ISISEnergyTransfer::validate() {
   UserInputValidator uiv;
 
   // Run files input
-  if (!m_uiForm.dsRunFiles->isValid())
+  if (!m_uiForm.dsRunFiles->isValid()){
     uiv.addErrorMessage("Run file range is invalid.");
+  }
 
   // Calibration file input
   if (m_uiForm.ckUseCalib->isChecked() &&
-      !m_uiForm.dsCalibrationFile->isValid())
+      !m_uiForm.dsCalibrationFile->isValid()){
     uiv.addErrorMessage("Calibration file/workspace is invalid.");
+  }
 
   // Mapping file
   if ((m_uiForm.cbGroupingOptions->currentText() == "File") &&
-      (!m_uiForm.dsMapFile->isValid()))
+      (!m_uiForm.dsMapFile->isValid())){
     uiv.addErrorMessage("Mapping file is invalid.");
+  }
 
   // Rebinning
   if (!m_uiForm.ckDoNotRebin->isChecked()) {
@@ -101,6 +104,16 @@ bool ISISEnergyTransfer::validate() {
     m_uiForm.valRebinHigh->setVisible(false);
     m_uiForm.valRebinString->setVisible(false);
   }
+
+  // DetailedBalance
+  if (m_uiForm.ckDetailedBalance->isChecked()) {
+    if (m_uiForm.spDetailedBalance->value() == 0.0) {
+      uiv.addErrorMessage("Detailed Balance must be more than 0K");
+    }
+  }
+
+  QString error = uiv.generateErrorMessage();
+  showMessageBox(error);
 
   return uiv.isAllInputValid();
 }
