@@ -1240,5 +1240,12 @@ MDNormalization MDHistoWorkspace::displayNormalization() const {
   return m_displayNormalization;// Normalize by the number of events.
 }
 
+/**
+Preferred normalization to use for visual purposes.
+*/
+MDNormalization MDHistoWorkspace::displayNormalizationHisto() const {
+  return displayNormalization();// Normalize by the number of events.
+}
+
 } // namespace Mantid
 } // namespace DataObjects
