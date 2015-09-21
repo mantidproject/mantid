@@ -378,6 +378,7 @@ private:
   QValidator* m_mustBeDouble;
   QValidator* m_doubleValidatorZeroToMax;
   QValidator* m_intValidatorZeroToMax;
+  QValidator* m_doubleValidatorOpenZeroToMax;
 
   void initAnalysDetTab();
   void makeValidator(QLabel * const newValid, QWidget * control, QWidget * tab, const QString & errorMsg);

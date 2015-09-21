@@ -51,6 +51,7 @@
 #include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <cmath>
 
 using Mantid::detid_t;
 
@@ -3884,10 +3885,19 @@ void SANSRunWindow::setValidators()
         0.0, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
   }
 
+  // Range is [0, max]
   if (!m_intValidatorZeroToMax) {
     m_intValidatorZeroToMax =
         new QIntValidator(0, m_constants.getMaxIntValue(), this);
   }
+
+  // Range is (0, max]
+  if (!m_doubleValidatorOpenZeroToMax) {
+    double lowerBound = pow(10,-1*m_constants.getDecimals());
+    m_doubleValidatorZeroToMax = new QDoubleValidator(
+        lowerBound, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
+  }
+
 
   // Run Numbers tab
 
@@ -3933,9 +3943,9 @@ void SANSRunWindow::setValidators()
 
   // ----------- Geometry Tab-----------------------------------
   // Geometry
-  m_uiForm.sample_thick->setValidator(m_doubleValidatorZeroToMax);
-  m_uiForm.sample_height->setValidator(m_doubleValidatorZeroToMax);
-  m_uiForm.sample_width->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_thick->setValidator(m_doubleValidatorOpenZeroToMax);
+  m_uiForm.sample_height->setValidator(m_doubleValidatorOpenZeroToMax);
+  m_uiForm.sample_width->setValidator(m_doubleValidatorOpenZeroToMax);
   m_uiForm.smpl_offset->setValidator(m_mustBeDouble);
 
   // Beam Centre Finder
