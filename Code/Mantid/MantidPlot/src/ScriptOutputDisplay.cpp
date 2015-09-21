@@ -17,8 +17,13 @@
  */
 ScriptOutputDisplay::ScriptOutputDisplay(QWidget * parent) :
   QTextEdit(parent), m_copy(NULL), m_clear(NULL), m_save(NULL),
-  m_origFontSize(8),m_zoomLevel(0)
+  m_origFontSize(8), m_zoomLevel(0)
 {
+#ifdef __APPLE__
+    // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
+  m_zoomLevel += 4;
+#endif
+
   //the control is readonly, but if you set it read only then ctrl+c for copying does not work
   //this approach allows ctrl+c and disables user editing through the use of the KeyPress handler
   //and disabling drag and drop
