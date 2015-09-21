@@ -362,15 +362,9 @@ void ConvolutionFitSequential::exec() {
  */
 bool ConvolutionFitSequential::checkForTwoLorentz(
     const std::string &subFunction) {
-  std::string fitType = "";
-  auto pos = subFunction.rfind("name=");
+  auto pos = subFunction.rfind("Lorentzian");
   if (pos != std::string::npos) {
-    fitType = subFunction.substr(pos, subFunction.size());
-    pos = fitType.find_first_of(",");
-    fitType = fitType.substr(5, pos - 5);
-    if (fitType.compare("Lorentzian") == 0) {
       return true;
-    }
   }
   return false;
 }
@@ -624,18 +618,20 @@ ConvolutionFitSequential::convertBackToShort(const std::string &original) {
 std::string
 ConvolutionFitSequential::convertFuncToShort(const std::string &original) {
   std::string result = "";
-  if (original.at(0) == 'E') {
-    result += "E";
-  } else if (original.at(0) == 'I') {
-    result += "I";
-  } else {
-    return "SFT";
-  }
-  auto pos = original.find("Circle");
-  if (pos != std::string::npos) {
-    result += "DC";
-  } else {
-    result += "DS";
+  if (original.compare("DeltaFunction") != 0) {
+    if (original.at(0) == 'E') {
+      result += "E";
+    } else if (original.at(0) == 'I') {
+      result += "I";
+    } else {
+      return "SFT";
+    }
+    auto pos = original.find("Circle");
+    if (pos != std::string::npos) {
+      result += "DC";
+    } else {
+      result += "DS";
+    }
   }
   return result;
 }

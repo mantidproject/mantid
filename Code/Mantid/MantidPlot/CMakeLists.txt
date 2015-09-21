@@ -483,7 +483,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
 # Add Qt to the include path
 ###########################################################################
 
-include ( UseSystemQt4 )
+include ( UseQt4 )
 
 ###########################################################################
 # Do the sip generation.
