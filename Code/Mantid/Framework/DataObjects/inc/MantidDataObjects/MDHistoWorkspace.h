@@ -390,6 +390,9 @@ public:
   /// Preferred visual normalization method.
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
+  /// Preferred visual normalization method.
+  virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
+
 private:
   virtual MDHistoWorkspace *doClone() const {
     return new MDHistoWorkspace(*this);
