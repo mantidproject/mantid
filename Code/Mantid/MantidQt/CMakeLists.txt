@@ -3,7 +3,7 @@
 ###########################################################################
 find_package ( QScintilla REQUIRED )
 
-include ( UseSystemQt4 )
+include ( UseQt4 )
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
 # Any MantidQt package can depend on API, so add the includes to the path here

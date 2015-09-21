@@ -166,8 +166,8 @@ void NotebookWriter::headerCode() {
   import_matplotlib.append(Json::Value("import matplotlib.pyplot as plt\n\n"));
 
   import_matplotlib.append(Json::Value("#Some magic to tell matplotlib how to behave in IPython Notebook. "
-                                         "Use '%matplotlib inline' if '%matplotlib nbagg' fails.\n"));
-  import_matplotlib.append(Json::Value("%matplotlib nbagg"));
+                                         "Use '%matplotlib nbagg' for interactive plots, if available.\n"));
+  import_matplotlib.append(Json::Value("%matplotlib inline"));
 
   codeCell(import_matplotlib);
 }
