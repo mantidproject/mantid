@@ -70,6 +70,7 @@ const std::string DownloadInstrument::summary() const {
 void DownloadInstrument::init() {
   using Kernel::Direction;
 
+  declareProperty("ForceUpdate", false, "Ignore cache information");
   declareProperty("FileDownloadCount", 0,
                   "The number of files downloaded by this algorithm",
                   Direction::Output);
@@ -127,7 +128,8 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   Poco::Path gitHubJson(localPath, "github.json");
   Poco::File gitHubJsonFile(gitHubJson);
   Poco::DateTime gitHubJsonDate(1900, 1, 1);
-  if (gitHubJsonFile.exists() && gitHubJsonFile.isFile()) {
+  bool forceUpdate = this->getProperty("ForceUpdate");
+  if ((!forceUpdate) && gitHubJsonFile.exists() && gitHubJsonFile.isFile()) {
     gitHubJsonDate = gitHubJsonFile.getLastModified();
   }
 
