@@ -287,7 +287,7 @@ namespace Mantid {
       finder->initialize();
       finder->setProperty("CreateOutput",false);
       finder->setProperty("OutputParametersOnly",true);
-      //finder->setProperty("Normalise",true);
+      finder->setProperty("Normalise",true);
       finder->setProperty("Output","fittedPeakWS");
       //finder->setProperty("Constraints","Height>0");
       //finder->setProperty("Minimizer","Simplex");

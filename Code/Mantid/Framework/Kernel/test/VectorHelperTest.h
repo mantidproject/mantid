@@ -267,7 +267,34 @@ public:
     TS_ASSERT_THROWS_NOTHING(index = VectorHelper::getBinIndex(m_test_bins, testValue));
     TS_ASSERT_EQUALS(index, 2);
   }
+  void test_RunningAveraging(){
+    double id[] = {1,2,3,4,5,6};
+    std::vector<double> inputData(id,id+sizeof(id)/sizeof(double));
+    double ib[]={0,1,2,3,4,5};
+    std::vector<double> inputBoudaris(ib,ib+sizeof(ib)/sizeof(double));
 
+    std::vector<double> output;
+    TS_ASSERT_THROWS(VectorHelper::smoothAtNPoints(inputData,output,6),std::invalid_argument);
+    inputBoudaris.push_back(6);
+    VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris);
+
+    TS_ASSERT_DELTA(output[3],3.5,1.e-8);
+    TS_ASSERT_DELTA(output[0],2.,1.e-8);
+    TS_ASSERT_DELTA(output[5],4.5,1.e-8);
+    inputBoudaris[1]=1;
+    inputBoudaris[2]=3;
+    inputBoudaris[3]=6;
+    inputBoudaris[4]=10;
+    inputBoudaris[5]=15;
+    inputBoudaris[6]=21;
+    VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris);
+    TS_ASSERT_DELTA(output[2],2.,1.e-8);
+    TS_ASSERT_DELTA(output[0],1.,1.e-8);
+    TS_ASSERT_DELTA(output[5],5.,1.e-8);
+
+
+
+  }
 private:
   /// Testing bins
   std::vector<double> m_test_bins;

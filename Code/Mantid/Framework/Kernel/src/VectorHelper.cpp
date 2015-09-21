@@ -534,6 +534,87 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
     step++;
   }
 }
+/**Basic running averaging procedure with possibility to account for
+ * variable bin ranges.
+ *
+ * @param input::   input vector to smooth
+ * @param output::  resulting vector (can not coincide with input)
+ * @param nAvrgPoints:: odd number of points to average over. If 
+ *                      even number provided as input, averaging interval
+ *                      is expanded by one. 
+ *@param binBoundaries :: pointer to the vector, containing bin boundaries. If provided, 
+ *                   its length has to be input.size()+1, if not, equal size bins
+ *                   are assumed. 
+ *                   Bin boundaries array have to increase and can not contain equal
+ *                   boundaries.
+ * @param startIndex:: if provided, its start index to run averaging from.
+ *                     if not, averaging starts from the index 0
+ * @param endIndex ::  final index to run average to if provided. If 
+ *                     not, or higher then number of elements in input array,
+ *                     averaging is performed to the end point of the input array
+*/
+void smoothAtNPoints(const std::vector<double> &input,
+                   std::vector<double> &output,
+                   size_t nAvrgPoints,
+                   std::vector<double> const * const binBoundaries,
+                   size_t startIndex,size_t endIndex){
+
+
+  if(endIndex == 0){
+    endIndex = input.size();
+  }
+  if(endIndex<=startIndex){
+    output.resize(0);
+    return;
+  }
+  size_t max_size = output.size();
+  if(binBoundaries){
+    if(binBoundaries->size() != max_size+1){
+      throw std::invalid_argument("Array of bin boundaries, "
+        "if present, have to be one bigger then the input array");
+    }
+  }
+
+  size_t length = endIndex-startIndex;
+  output.resize(length);
+  if(!(nAvrgPoints % 2)){
+    nAvrgPoints++;
+  }
+  size_t halfWidth = nAvrgPoints/2;
+
+  auto runAverage = [&](size_t index){
+    size_t iStart = index-halfWidth;
+    if(startIndex+halfWidth > index)iStart = startIndex;
+    size_t iEnd = index+halfWidth;
+    if(iEnd>endIndex)iEnd= endIndex;
+
+    double bin0(0);
+    if(binBoundaries){
+      bin0 = binBoundaries->operator[](index+1)
+             -binBoundaries->operator[](index);
+    }
+
+    double avrg = 0;
+    size_t ic=0;
+    for(size_t j=iStart;j<iEnd;j++){
+      if(binBoundaries){
+        double bin1=binBoundaries->operator[](j+1)
+                   -binBoundaries->operator[](j);
+        avrg +=input[j]*(bin0/bin1);
+      }else{
+        avrg+=input[j];
+      }
+      ic++;
+    }
+    return avrg/double(ic);
+  };
+
+  for(size_t i = startIndex;i<endIndex;i++){
+    output[i-startIndex]=runAverage(i);
+  }
+
+
+}
 
 /// Declare all version of this
 template DLLExport std::vector<int32_t>
