@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTGUI_H_
-#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTGUI_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
+#define MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_
 
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/Tomography/IImageCoRPresenter.h"
@@ -46,12 +46,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ImageCoRViewQtGUI : public QWidget, public IImageCoRView {
+class DLLExport ImageCoRViewQtWidget : public QWidget, public IImageCoRView {
   Q_OBJECT
 
 public:
-  ImageCoRViewQtGUI(QWidget *parent = 0);
-  virtual ~ImageCoRViewQtGUI(){};
+  ImageCoRViewQtWidget(QWidget *parent = 0);
+  virtual ~ImageCoRViewQtWidget(){};
 
   void initParams(ImageStackPreParams &params);
 
@@ -59,8 +59,10 @@ public:
 
   virtual std::string stackPath() const { return m_stackPath; };
 
+  /// show a stack of images given the path to the files
   void showStack(const std::string &path);
 
+  /// show a stack of images that have been loaded into a group of workspaces
   void showStack(const Mantid::API::WorkspaceGroup_sptr &ws);
 
   void userWarning(const std::string &warn, const std::string &description);
@@ -102,4 +104,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTGUI_H_
+#endif // MANTIDQTCUSTOMINTERFACES_TOMOGRAPHY_IMAGECORVIEWQTWIDGET_H_

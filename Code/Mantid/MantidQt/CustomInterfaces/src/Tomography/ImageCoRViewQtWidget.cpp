@@ -3,7 +3,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 
-#include "MantidQtCustomInterfaces/Tomography/ImageCoRViewQtGUI.h"
+#include "MantidQtCustomInterfaces/Tomography/ImageCoRViewQtWidget.h"
 #include "MantidQtCustomInterfaces/Tomography/ImageCoRPresenter.h"
 
 using namespace Mantid::API;
@@ -19,15 +19,15 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // this would be more like a CustomWidget if it's eventually moved there
-const std::string ImageCoRViewQtGUI::m_settingsGroup =
+const std::string ImageCoRViewQtWidget::m_settingsGroup =
     "CustomInterfaces/ImageCoRView";
 
-ImageCoRViewQtGUI::ImageCoRViewQtGUI(QWidget *parent)
+ImageCoRViewQtWidget::ImageCoRViewQtWidget(QWidget *parent)
     : QWidget(parent), IImageCoRView(), m_presenter(NULL) {
   initLayout();
 }
 
-void ImageCoRViewQtGUI::initLayout() {
+void ImageCoRViewQtWidget::initLayout() {
   // setup container ui
   m_ui.setupUi(this);
 
@@ -53,22 +53,22 @@ void ImageCoRViewQtGUI::initLayout() {
   m_presenter->notify(ImageCoRPresenter::Init);
 }
 
-void ImageCoRViewQtGUI::setupConnections() {
+void ImageCoRViewQtWidget::setupConnections() {
 
   // 'browse' buttons
   connect(m_ui.pushButton_browse_img, SIGNAL(released()), this,
           SLOT(browseImgClicked()));
 }
 
-void ImageCoRViewQtGUI::initParams(ImageStackPreParams &params) {
+void ImageCoRViewQtWidget::initParams(ImageStackPreParams &params) {
   m_params = params;
 }
 
-ImageStackPreParams ImageCoRViewQtGUI::userSelection() const {
+ImageStackPreParams ImageCoRViewQtWidget::userSelection() const {
   return m_params;
 }
 
-void ImageCoRViewQtGUI::browseImgClicked() {
+void ImageCoRViewQtWidget::browseImgClicked() {
   m_presenter->notify(IImageCoRPresenter::BrowseImgOrStack);
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
@@ -94,9 +94,13 @@ void ImageCoRViewQtGUI::browseImgClicked() {
   m_presenter->notify(IImageCoRPresenter::NewImgOrStack);
 }
 
-void ImageCoRViewQtGUI::showStack(const std::string & /*path*/) {}
+void ImageCoRViewQtWidget::showStack(const std::string & /*path*/) {
+  // TODO: a) load as proper stack of images workspace, b) load as workspace
+  // group
+}
 
-void ImageCoRViewQtGUI::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
+void
+ImageCoRViewQtWidget::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
   MatrixWorkspace_sptr ws =
       boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
   if (!ws)
@@ -203,28 +207,28 @@ void ImageCoRViewQtGUI::showStack(const Mantid::API::WorkspaceGroup_sptr &wsg) {
   m_ui.label_img_name->setText(QString::fromStdString(name));
 }
 
-void ImageCoRViewQtGUI::readSettings() {
+void ImageCoRViewQtWidget::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 }
 
-void ImageCoRViewQtGUI::userWarning(const std::string &err,
-                                    const std::string &description) {
+void ImageCoRViewQtWidget::userWarning(const std::string &err,
+                                       const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
 }
 
-void ImageCoRViewQtGUI::userError(const std::string &err,
-                                  const std::string &description) {
+void ImageCoRViewQtWidget::userError(const std::string &err,
+                                     const std::string &description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
 }
 
-void ImageCoRViewQtGUI::saveSettings() const {
+void ImageCoRViewQtWidget::saveSettings() const {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
@@ -232,7 +236,7 @@ void ImageCoRViewQtGUI::saveSettings() const {
   qs.endGroup();
 }
 
-void ImageCoRViewQtGUI::closeEvent(QCloseEvent *event) {
+void ImageCoRViewQtWidget::closeEvent(QCloseEvent *event) {
   m_presenter->notify(IImageCoRPresenter::ShutDown);
   event->accept();
 }
