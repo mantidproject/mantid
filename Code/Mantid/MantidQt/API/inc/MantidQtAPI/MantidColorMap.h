@@ -45,6 +45,10 @@ public:
 
   void changeScaleType(GraphOptions::ScaleType type);
 
+  void setNthPower(double nth_power){m_nth_power = nth_power;};
+
+  double getNthPower() const {return m_nth_power;};
+
   bool loadMap(const QString & filename);
   
   static QString loadMapDialog(QString previousFile, QWidget * parent);
@@ -128,6 +132,9 @@ private:
 
   ///the path to the map file
   QString m_path;
+
+  double m_nth_power;
+
 };
 
 

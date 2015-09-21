@@ -1,0 +1,123 @@
+#include "MantidAlgorithms/GenerateIPythonNotebook.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmHistory.h"
+#include "MantidAPI/NotebookBuilder.h"
+
+#include <fstream>
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
+namespace {
+    Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
+}
+
+namespace Mantid {
+namespace Algorithms {
+
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(GenerateIPythonNotebook)
+
+//----------------------------------------------------------------------------------------------
+
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+*/
+void GenerateIPythonNotebook::init() {
+  declareProperty(
+      new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input),
+      "An input workspace.");
+
+  std::vector<std::string> exts;
+  exts.push_back(".ipynb");
+
+  declareProperty(new API::FileProperty("Filename", "",
+                                        API::FileProperty::OptionalSave, exts),
+                  "The name of the file into which the workspace history will "
+                      "be generated.");
+  declareProperty("NotebookText", std::string(""),
+                  "Saves the history of the workspace to a variable.",
+                  Direction::Output);
+
+  declareProperty("UnrollAll", false,
+                  "Unroll all algorithms to show just their child algorithms.",
+                  Direction::Input);
+
+  declareProperty("StartTimestamp", std::string(""),
+                  "The filter start time in the format YYYY-MM-DD HH:mm:ss",
+                  Direction::Input);
+  declareProperty("EndTimestamp", std::string(""),
+                  "The filter end time in the format YYYY-MM-DD HH:mm:ss",
+                  Direction::Input);
+
+  std::vector<std::string> saveVersions;
+  saveVersions.push_back("Specify Old");
+  saveVersions.push_back("Specify All");
+  saveVersions.push_back("Specify None");
+  declareProperty(
+      "SpecifyAlgorithmVersions", "Specify Old",
+      boost::make_shared<StringListValidator>(saveVersions),
+      "When to specify which algorithm version was used by Mantid.");
+}
+
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+*/
+void GenerateIPythonNotebook::exec() {
+  const Workspace_const_sptr ws = getProperty("InputWorkspace");
+  const bool unrollAll = getProperty("UnrollAll");
+  const std::string startTime = getProperty("StartTimestamp");
+  const std::string endTime = getProperty("EndTimestamp");
+  const std::string saveVersions = getProperty("SpecifyAlgorithmVersions");
+
+  // Get the algorithm histories of the workspace.
+  const WorkspaceHistory wsHistory = ws->getHistory();
+  g_log.information() << "Number of history items: " << wsHistory.size()
+  << std::endl;
+
+  auto view = wsHistory.createView();
+
+  if (unrollAll) {
+    view->unrollAll();
+  }
+
+  // Need at least a start time to do time filter
+  if (startTime != "") {
+    if (endTime == "") {
+      // If no end time was given then filter up to now
+      view->filterBetweenExecDate(DateAndTime(startTime));
+    } else {
+      view->filterBetweenExecDate(DateAndTime(startTime), DateAndTime(endTime));
+    }
+  }
+
+  std::string versionSpecificity;
+  if (saveVersions == "Specify Old")
+    versionSpecificity = "old";
+  else if (saveVersions == "Specify None")
+    versionSpecificity = "none";
+  else
+    versionSpecificity = "all";
+
+  NotebookBuilder builder(view, versionSpecificity);
+  std::string generatedNotebook = "";
+  generatedNotebook += builder.build(ws->getName(), ws->getTitle(), ws->getComment());
+
+  setPropertyValue("NotebookText", generatedNotebook);
+
+  const std::string filename = getPropertyValue("Filename");
+
+  if (!filename.empty()) {
+    std::ofstream file(filename.c_str(), std::ofstream::trunc);
+    file << generatedNotebook;
+    file.flush();
+    file.close();
+  }
+
+}
+
+} // namespace Algorithms
+} // namespace Mantid

@@ -29,6 +29,7 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
+  GetNegMuMuonicXRDTest.py
   IndirectAnnulusAbsorptionTest.py
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
@@ -73,6 +74,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
+  TOSCABankCorrectionTest.py
   TransformToIqtTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py

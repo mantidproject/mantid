@@ -434,7 +434,7 @@ void PeakPickerTool::addPeak(double c,double h)
   if (!handler || !handler->pfun()) return;
   handler->setCentre(c);
   double width = handler->fwhm();
-  if (width == 0)
+  if (width == 0 && m_width != 0.0)
   {
     handler->setFwhm(m_width);
   }

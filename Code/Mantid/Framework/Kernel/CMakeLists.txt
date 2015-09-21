@@ -42,13 +42,18 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MDUnit.cpp
+	src/MDUnitFactory.cpp
 	src/MagneticFormFactorTable.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Material.cpp
+	src/Math/ChebyshevPolyFit.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
+	src/Math/Distributions/ChebyshevPolynomial.cpp
+	src/Math/Distributions/ChebyshevSeries.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
 	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
@@ -129,6 +134,8 @@ set ( INC_FILES
 	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
+	inc/MantidKernel/Chainable.h
+	inc/MantidKernel/ChainableFactory.h
 	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/CompositeValidator.h
 	inc/MantidKernel/ComputeResourceInfo.h
@@ -174,6 +181,8 @@ set ( INC_FILES
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
+	inc/MantidKernel/MDUnit.h
+	inc/MantidKernel/MDUnitFactory.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
@@ -181,7 +190,10 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Material.h
+	inc/MantidKernel/Math/ChebyshevPolyFit.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
+	inc/MantidKernel/Math/Distributions/ChebyshevPolynomial.h
+	inc/MantidKernel/Math/Distributions/ChebyshevSeries.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
@@ -267,6 +279,9 @@ set ( TEST_FILES
 	CPUTimerTest.h
 	CacheTest.h
 	CatalogInfoTest.h
+	ChebyshevPolyFitTest.h
+	ChebyshevPolynomialTest.h
+	ChebyshevSeriesTest.h
 	ChecksumHelperTest.h
 	CompositeValidatorTest.h
 	ComputeResourceInfoTest.h
@@ -302,6 +317,8 @@ set ( TEST_FILES
 	LogFilterTest.h
 	LogParserTest.h
 	LoggerTest.h
+	MDUnitFactoryTest.h
+	MDUnitTest.h
 	MRUListTest.h
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
