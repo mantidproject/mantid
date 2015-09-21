@@ -15,6 +15,7 @@
 #include "MantidQtSpectrumViewer/QtUtils.h"
 #include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
+#include "MantidQtSpectrumViewer/TrackingPicker.h"
 
 namespace MantidQt
 {
@@ -49,7 +50,8 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
   m_pointedAtX(0.0), m_pointedAtY(0.0),
   m_imageTable(tableWidget),
   m_totalXMin(0.0), m_totalXMax(0.0),
-  m_totalYMin(0.0), m_totalYMax(0.0)
+  m_totalYMin(0.0), m_totalYMax(0.0),
+  m_imagePicker(NULL)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
@@ -60,6 +62,16 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*         spectrumPlot,
 
   m_spectrumPlotItem = new SpectrumPlotItem;
   setupSpectrumPlotItem();
+  m_imagePicker = new TrackingPicker( spectrumPlot->canvas() );
+  m_imagePicker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
+  m_imagePicker->setTrackerMode(QwtPicker::ActiveOnly);
+  m_imagePicker->setRubberBandPen(QColor(Qt::gray));
+
+  m_imagePicker->setRubberBand(QwtPicker::CrossRubberBand);
+  m_imagePicker->setSelectionFlags(QwtPicker::PointSelection |
+                                  QwtPicker::DragSelection  );
+  QObject::connect( m_imagePicker, SIGNAL(mouseMoved(const QPoint &)),
+                    this, SLOT(imagePickerMoved(const QPoint &)) );
 }
 
 
@@ -394,22 +406,36 @@ QPair<double, double> SpectrumDisplay::getPlotInvTransform( QPoint point )
  *
  * @param point  The point that the user is currently pointing at with
  *               the mouse.
- * @param mouseClick Which mouse button was clicked (used by derived class)
+ * @param mouseClick Which mouse button was clicked
+ * @param isFront Flag indicating if this is a call to the front (active) display.
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int /*mouseClick*/ )
+QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int mouseClick, bool isFront )
 {
+  UNUSED_ARG(mouseClick);
   if ( m_dataSource == 0 || m_dataArray == 0 )
     return qMakePair(0.0, 0.0);
 
   QPair<double, double> transPoints = getPlotInvTransform(point);
 
-  setHGraph( transPoints.second );
-  setVGraph( transPoints.first );
-
-  showInfoList( transPoints.first, transPoints.second );
+  setPointedAtXY(transPoints.first, transPoints.second, isFront );
 
   return transPoints;
+}
+
+/// Record the point that the user is currently pointing in the scales coordinates
+void SpectrumDisplay::setPointedAtXY( double x, double y, bool isFront ) {
+  setHGraph( y, isFront );
+  setVGraph( x, isFront );
+
+  if (isFront) {
+    showInfoList( x, y );
+    foreach(boost::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
+      if (auto display = sd.lock()) {
+        display->setPointedAtXY(x, y, false);
+      }
+    }
+  }
 }
 
 
@@ -419,12 +445,14 @@ QPair<double,double> SpectrumDisplay::setPointedAtPoint( QPoint point, int /*mou
  *  return.
  *
  *  @param y   The y-value of the horizontal cut through the image.
+ *  @param isFront Is it a front curve?
  */
-void SpectrumDisplay::setHGraph( double y )
+void SpectrumDisplay::setHGraph( double y, bool isFront )
 {
   if ( y < m_dataArray->getYMin() || y > m_dataArray->getYMax() )
   {
-    m_hGraphDisplay->clear();
+    if (isFront)
+      m_hGraphDisplay->clear();
     return;
   }
 
@@ -454,7 +482,7 @@ void SpectrumDisplay::setHGraph( double y )
   yData.push_back( data[ row * n_cols + n_cols-1 ] );
 
   m_hGraphDisplay->setLogX( m_dataArray->isLogX() );
-  m_hGraphDisplay->setData( xData, yData, y );
+  m_hGraphDisplay->setData( xData, yData, y, isFront );
 }
 
 
@@ -465,7 +493,7 @@ void SpectrumDisplay::setHGraph( double y )
  *
  *  @param x   The x-value of the vertical cut through the image.
  */
-void SpectrumDisplay::setVGraph( double x )
+void SpectrumDisplay::setVGraph( double x, bool isFront )
 {
   if ( x < m_dataArray->getXMin() || x > m_dataArray->getXMax() )
   {
@@ -500,7 +528,7 @@ void SpectrumDisplay::setVGraph( double x )
   v_yData.push_back( y_max );                     // end at y_max
   v_xData.push_back( data[ (n_rows-1) * n_cols + col] );
 
-  m_vGraphDisplay->setData( v_xData, v_yData, x );
+  m_vGraphDisplay->setData( v_xData, v_yData, x, isFront );
 }
 
 
@@ -608,6 +636,42 @@ bool SpectrumDisplay::dataSourceRangeChanged()
            m_totalXMax != m_dataSource->getXMax() );
 }
 
+void SpectrumDisplay::addOther(const boost::shared_ptr<SpectrumDisplay>& other)
+{
+  m_otherDisplays.append(other);
+}
+
+void SpectrumDisplay::addOthers(const QList<boost::shared_ptr<SpectrumDisplay>>& others)
+{
+  foreach(boost::shared_ptr<SpectrumDisplay> sd, others)
+  {
+    m_otherDisplays.append(sd);
+  }
+}
+
+void SpectrumDisplay::removeOther(const boost::shared_ptr<SpectrumDisplay>& other)
+{
+  QList<int> toRemove;
+  for(int i = 0; i < m_otherDisplays.size(); ++i) {
+    auto ds = m_otherDisplays[i].lock();
+    if (!ds || ds.get() == other.get()) {
+      toRemove.push_front(i);
+    }
+  }
+  foreach(int i, toRemove) {
+    m_otherDisplays.removeAt(i);
+  }
+}
+
+/**
+ * Update the pointed at position for the m_imagePicker.
+ *
+ * @param point The position moved to.
+ */
+void SpectrumDisplay::imagePickerMoved(const QPoint & point)
+{
+  setPointedAtPoint( point );
+}
 
 } // namespace SpectrumView
 } // namespace MantidQt
