@@ -274,7 +274,7 @@ public:
     std::vector<double> inputBoudaris(ib,ib+sizeof(ib)/sizeof(double));
 
     std::vector<double> output;
-    TS_ASSERT_THROWS(VectorHelper::smoothAtNPoints(inputData,output,6),std::invalid_argument);
+    TS_ASSERT_THROWS(VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris),std::invalid_argument);
     inputBoudaris.push_back(6);
     VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris);
 
@@ -288,9 +288,16 @@ public:
     inputBoudaris[5]=15;
     inputBoudaris[6]=21;
     VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris);
-    TS_ASSERT_DELTA(output[2],2.,1.e-8);
+    TS_ASSERT_DELTA(output[2],3.,1.e-8);
     TS_ASSERT_DELTA(output[0],1.,1.e-8);
-    TS_ASSERT_DELTA(output[5],5.,1.e-8);
+    TS_ASSERT_DELTA(output[5],6.,1.e-8);
+
+
+    std::vector<double> out_bins;
+    VectorHelper::smoothAtNPoints(inputData,output,3,&inputBoudaris,1,5,&out_bins);
+    TS_ASSERT_EQUALS(output.size(),4);
+    TS_ASSERT_DELTA(output[1],3.,1.e-8);
+
 
 
 

@@ -76,8 +76,6 @@ protected: // for testing, private otherwise.
   bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
       size_t ind_min,size_t ind_max,
       double & energy,double & height,double &width);
-  /**Function implements common part of setting peak finder algorithm*/
-  API::IAlgorithm_sptr definePeakFinder(const API::MatrixWorkspace_sptr &inputWS);
   /**Find indexes of each expected peak intervals */
   void findBinRanges(const MantidVec & eBins,
       const std::vector<double> & guess_energies,
@@ -85,7 +83,7 @@ protected: // for testing, private otherwise.
       std::vector<size_t> & irangeMax);
 
   size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
-    std::vector<double> &deriv);
+    std::vector<double> &deriv,std::vector<double> &zeros);
 
   /// if log, which identifies that instrument is running is available on workspace.
   /// The log should be positive when instrument is running and negative or 0 otherwise.

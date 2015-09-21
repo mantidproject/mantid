@@ -87,7 +87,8 @@ MANTID_KERNEL_DLL void smoothAtNPoints(const std::vector<double> &input,
                                       std::vector<double> &output,
                    size_t nAvrgPoints,
                    std::vector<double> const * const binBoundaris  =NULL,
-                   size_t startIndex = 0,size_t endIndex = 0);
+                   size_t startIndex = 0,size_t endIndex = 0,
+                   std::vector<double> * const outputBinBoundaries=NULL);
 
 //-------------------------------------------------------------------------------------
 /** Return the length of the vector (in the physical sense),

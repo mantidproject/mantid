@@ -552,22 +552,25 @@ void linearlyInterpolateY(const std::vector<double> &x, std::vector<double> &y,
  * @param endIndex ::  final index to run average to if provided. If 
  *                     not, or higher then number of elements in input array,
  *                     averaging is performed to the end point of the input array
+ * @param outputBinBoundaries :: if present, returns bin boundaries for output array
 */
 void smoothAtNPoints(const std::vector<double> &input,
                    std::vector<double> &output,
                    size_t nAvrgPoints,
                    std::vector<double> const * const binBoundaries,
-                   size_t startIndex,size_t endIndex){
+                   size_t startIndex,size_t endIndex,
+                   std::vector<double> * const outputBinBoundaries){
 
 
-  if(endIndex == 0){
-    endIndex = input.size();
-  }
+  if(endIndex == 0)  endIndex = input.size();
+  if(endIndex>input.size()) endIndex = input.size();
+
   if(endIndex<=startIndex){
     output.resize(0);
     return;
   }
-  size_t max_size = output.size();
+
+  size_t max_size = input.size();
   if(binBoundaries){
     if(binBoundaries->size() != max_size+1){
       throw std::invalid_argument("Array of bin boundaries, "
@@ -608,9 +611,19 @@ void smoothAtNPoints(const std::vector<double> &input,
     }
     return avrg/double(ic);
   };
-
+  if(outputBinBoundaries){
+    outputBinBoundaries->resize(length+1);
+  }
   for(size_t i = startIndex;i<endIndex;i++){
     output[i-startIndex]=runAverage(i);
+    if(outputBinBoundaries){
+      outputBinBoundaries->operator[](i-startIndex)=
+        binBoundaries->operator[](i);
+    }
+  }
+  if(outputBinBoundaries){
+    outputBinBoundaries->operator[](endIndex-startIndex)=
+                binBoundaries->operator[](endIndex);
   }
 
 
