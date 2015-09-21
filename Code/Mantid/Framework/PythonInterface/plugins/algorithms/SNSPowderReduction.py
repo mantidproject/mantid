@@ -109,6 +109,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                       extensions = [".h5", ".hd5", ".hdf", ".cal"]))
         self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad,\
                                       extensions = ["txt"]),"File with characterization runs denoted")
+        self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
+                                          extensions=[".ini"]))
         self.declareProperty("UnwrapRef", 0.,
                              "Reference total flight path for frame unwrapping. Zero skips the correction")
         self.declareProperty("LowResRef", 0.,
@@ -177,7 +179,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # get generic information
         SUFFIX = self.getProperty("Extension").value
-        self._loadCharacterizations(self.getProperty("CharacterizationRunsFile").value)
+        self._loadCharacterizations()
         self._resampleX = self.getProperty("ResampleX").value
         if self._resampleX != 0.:
             self._binning = [0.]
@@ -473,12 +475,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-    def _loadCharacterizations(self, filename):
+    def _loadCharacterizations(self):
         self._focusPos = {}
-        if filename is None or len(filename) <= 0:
+        charFilename = self.getProperty("CharacterizationRunsFile").value
+        expIniFilename = self.getProperty("ExpIniFilename").value
+
+        if charFilename is None or len(charFilename) <= 0:
             self.iparmFile = None
             return
-        results = api.PDLoadCharacterizations(Filename=filename,
+
+        results = api.PDLoadCharacterizations(Filename=charFilename,
+                                              ExpIniFilename=expIniFilename,
                                               OutputWorkspace="characterizations")
         self._charTable = results[0]
         self.iparmFile = results[1]
