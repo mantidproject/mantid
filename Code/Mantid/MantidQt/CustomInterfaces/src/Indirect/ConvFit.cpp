@@ -337,39 +337,41 @@ void ConvFit::algorithmComplete(bool error) {
   }
 
   // Handle Temperature logs
-  QString temperature = m_uiForm.leTempCorrection->text();
-  double temp = 0.0;
-  if (temperature.toStdString().compare("") != 0) {
-    temp = temperature.toDouble();
-  }
+  if (m_uiForm.ckTempCorrection->isChecked()) {
+    QString temperature = m_uiForm.leTempCorrection->text();
+    double temp = 0.0;
+    if (temperature.toStdString().compare("") != 0) {
+      temp = temperature.toDouble();
+    }
 
-  if (temp != 0.0) {
-    // Obtain WorkspaceGroup from ADS
-    std::string groupName = m_baseName.toStdString() + "_Workspaces";
-    WorkspaceGroup_sptr groupWs =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
+    if (temp != 0.0) {
+      // Obtain WorkspaceGroup from ADS
+      std::string groupName = m_baseName.toStdString() + "_Workspaces";
+      WorkspaceGroup_sptr groupWs =
+          AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(groupName);
 
-    auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
-    addSample->setProperty("Workspace", resultWs);
-    addSample->setProperty("LogName", "temperature_value");
-    addSample->setProperty("LogText", temperature.toStdString());
-    addSample->setProperty("LogType", "Number");
-    addSample->execute();
-    addSample->setProperty("Workspace", resultWs);
-    addSample->setProperty("LogName", "temperature_correction");
-    addSample->setProperty("LogText", "true");
-    addSample->setProperty("LogType", "String");
-    addSample->execute();
-    addSample->setProperty("Workspace", groupWs);
-    addSample->setProperty("LogName", "temperature_value");
-    addSample->setProperty("LogText", temperature.toStdString());
-    addSample->setProperty("LogType", "Number");
-    addSample->execute();
-    addSample->setProperty("Workspace", groupWs);
-    addSample->setProperty("LogName", "temperature_correction");
-    addSample->setProperty("LogText", "true");
-    addSample->setProperty("LogType", "String");
-    addSample->execute();
+      auto addSample = AlgorithmManager::Instance().create("AddSampleLog");
+      addSample->setProperty("Workspace", resultWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", resultWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "true");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_value");
+      addSample->setProperty("LogText", temperature.toStdString());
+      addSample->setProperty("LogType", "Number");
+      addSample->execute();
+      addSample->setProperty("Workspace", groupWs);
+      addSample->setProperty("LogName", "temperature_correction");
+      addSample->setProperty("LogText", "true");
+      addSample->setProperty("LogType", "String");
+      addSample->execute();
+    }
   }
   updatePlot();
 }
