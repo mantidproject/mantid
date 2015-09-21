@@ -345,7 +345,7 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
 void EnggDiffractionViewQtGUI::plotFocusedSpectrum() {
   std::string pyCode = "plotSpectrum('engggui_focusing_output_ws', 0)";
 
-  std::string status = runPythonCode(QString::fromStdString(pyCode), false);
+  std::string status = runPythonCode(QString::fromStdString(pyCode), false).toStdString();
   m_logMsgs.push_back(
       "Run Python code to save output file, with status string: " + status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
