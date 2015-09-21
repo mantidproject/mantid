@@ -41,6 +41,10 @@ public:
   void setResolution(double newResolution){
     this->m_max_Eresolution = newResolution;
   }
+  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
+    std::vector<double> &deriv){
+      return GetAllEi::calcDerivativeAndCountZeros(bins,signal,deriv);
+  }
 };
 
 class GetAllEiTest : public CxxTest::TestSuite
@@ -275,9 +279,47 @@ public:
      TS_ASSERT_EQUALS(bin_max[2],10);
      TS_ASSERT_EQUALS(bin_min[3],12);
      TS_ASSERT_EQUALS(bin_max[3],13);
+   }
+   void test_calcDerivative(){
+     double sig[]={1,2,3,4,5,6};
+     std::vector<double> signal(sig,sig+sizeof(sig)/sizeof(double));
+     double bin[]={2,3,4,5,6,7,8};
+     std::vector<double> bins(bin,bin+sizeof(bin)/sizeof(double));
+
+     std::vector<double> deriv;
+     size_t nZer = m_getAllEi.calcDerivativeAndCountZeros(bins,signal,deriv);
+     TS_ASSERT_EQUALS(nZer,0);
+     TS_ASSERT_DELTA(deriv[0],deriv[1],1.e-9);
+     TS_ASSERT_DELTA(deriv[0],deriv[5],1.e-9);
+     TS_ASSERT_DELTA(deriv[0],deriv[2],1.e-9);
+     TS_ASSERT_DELTA(deriv[0],1.,1.e-9);
+
+     double bin1[]={0,1,3,6,10,15,21};
+     std::vector<double> bins1(bin1,bin1+sizeof(bin1)/sizeof(double));
+     nZer = m_getAllEi.calcDerivativeAndCountZeros(bins1,signal,deriv);
+     TS_ASSERT_EQUALS(nZer,0);
+     TS_ASSERT_DELTA(deriv[0],deriv[1],1.e-9);
+     TS_ASSERT_DELTA(deriv[0],deriv[5],1.e-9);
+     TS_ASSERT_DELTA(deriv[0],deriv[2],1.e-9);
+     TS_ASSERT_DELTA(deriv[0],0,1.e-9);
+
+     bins.resize(101);
+     signal.resize(100);
+     for(size_t i=0;i<101;i++){
+       bins[i]=double(i)*0.1;
+     }
+     for(size_t i=0;i<100;i++){
+       signal[i]=std::sin(0.5*(bins[i]+bins[i+1]));
+     }
+     nZer = m_getAllEi.calcDerivativeAndCountZeros(bins,signal,deriv);
+     TS_ASSERT_EQUALS(nZer,3);
+     for(size_t i=0;i<99;i++){ // intentionally left boundary point -- its accuracy is much lower
+        TSM_ASSERT_DELTA("At i="+std::to_string(i),deriv[i],10.*std::cos(0.5*(bins[i]+bins[i+1])),1.e-1);
+     }
 
 
    }
+
 
 private:
   GetAllEiTester m_getAllEi;

@@ -132,10 +132,10 @@ namespace Mantid {
       double maxPeakEnergy(0);
       for(size_t i=0; i<guess_opening.size();i++){
 
-        auto peakFitter = definePeakFinder(workingWS);
         double energy,height,sigma;
-        bool found = findMonitorPeak(workingWS,peakFitter,irange_min[i],
-          irange_max[i],energy,height,sigma);
+        bool found =findMonitorPeak(workingWS,
+                    irange_min[i],irange_max[i],
+                    energy,height,sigma);
         if(found){
           peaks_positions.push_back(energy);
           peaks_height.push_back(height);
@@ -165,10 +165,59 @@ namespace Mantid {
 
 
     }
+    /**Bare-bone function to calculate numerical derivative, and estimate number of zeros
+      this derivative has. No checks are performed for simplicity, 
+      so data have to be correct form at input.
+    */
+    size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
+    std::vector<double> &deriv){
+      size_t nPoints = signal.size();
+      deriv.resize(nPoints);
+
+
+      std::list<double> funVal,binVal;
+      double bin0 = bins[1]-bins[0];
+      double f0   = signal[0]/bin0; 
+      double bin1 = bins[2]-bins[1];
+      double f1   = signal[1]/bin1;
+
+      size_t nZeros(0);
+      int prevSign = (f1>=0?1:-1);
+      /**Estimate if sign have changed from its previous value*/
+      auto signChanged = [&](double x){
+        int curSign = (x>=0?1:-1);
+        bool changed = curSign!=prevSign;
+        prevSign = curSign;
+        return changed;
+      };
+
+      funVal.push_front(f1);
+      binVal.push_front(bin1);
+      deriv[0] = 2*(f1-f0)/(bin0+bin1);
+      for(size_t i=1;i<nPoints-1;i++){
+        bin1=(bins[i+2]-bins[i+1]);
+        f1=signal[i+1]/bin1;
+        deriv[i]=(f1-f0)/(bins[i+1]-bins[i]+0.5*(bin1+bin0));
+        f0   = funVal.back();
+        bin0 = binVal.back();
+        funVal.pop_back();
+        binVal.pop_back();
+        funVal.push_front(f1);
+        binVal.push_front(bin1);
+
+        if(signChanged(deriv[i]))nZeros++;
+      }
+      deriv[nPoints-1] = 2*(f1-f0)/(bin1+bin0);
+      if(signChanged(deriv[nPoints-1]))nZeros++;
+
+
+      return nZeros;
+    }
+    
+
 
     /**Get energy of monitor peak if one is present*/
     bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
-      const API::IAlgorithm_sptr &peakFitter,
       size_t ind_min,size_t ind_max,
       double & energy,double & height,double &width){
 
@@ -180,6 +229,7 @@ namespace Mantid {
         /**Lambda to identify guess values for a peak at given index
           and set up these parameters as input for fitting algorithm
         */
+
         auto peakGuess =[&](size_t index){
           double sMin(std::numeric_limits<double>::max());
           double sMax(-sMin);
@@ -228,15 +278,7 @@ namespace Mantid {
           }else{
             haveBkg = false;
           }
-          //Fit(Function='name=Gaussian,Height=491139,PeakCentre=10.0198,Sigma=0.0328702;
-          //name=LinearBackground,A0=-5128.66,A1=1648.61',
-          //InputWorkspace='MAR20368_monitorsDE', Output='MAR20368_monitorsDE',
-          //OutputCompositeMembers=True, WorkspaceIndex=1, StartX=9.5, EndX=10.5
-          peakFitter->setProperty("Function",GuessFunc);
-          peakFitter->setProperty("InputWorkspace",inputWS);
-          peakFitter->setProperty("WorkspaceIndex",static_cast<int>(index));
-          peakFitter->setProperty("StartX",xMin);
-          peakFitter->setProperty("EndX",xMax);
+
 
           return true;
         };
@@ -244,18 +286,11 @@ namespace Mantid {
         if(!peakGuess(0))return false;
         //
         bool fail(false);
-        try{
-          peakFitter->execute();
-        }catch(...){
-          fail=true;
-        }
+ 
 
         if(fail)return false;
-        std::string status = peakFitter->getPropertyValue("OutputStatus");
-        if(status != "success")return false;
 
 
-        API::ITableWorkspace_sptr result = peakFitter->getProperty("OutputParameters");
         //        double chi_sq = peakFitter->getProperty("OutputChi2overDoF");
         //if(chi_sq>1)return false;
         // identify maximal peak intensity on the basis of maximal instrument 
@@ -266,13 +301,6 @@ namespace Mantid {
         //minHeight = Intensity/(0.5*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.)));
         //maxHeight = Intensity/(0.5*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.)));
 
-        height = result->Double(0,1);
-        energy = result->Double(1,1);
-        width  = result->Double(2,1);
-        if(haveBkg){
-          double A0  = result->Double(3,1);
-          double A1  = result->Double(4,1);
-        }
         //      //
 
         return true;

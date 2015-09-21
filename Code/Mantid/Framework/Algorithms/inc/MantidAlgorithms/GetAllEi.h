@@ -74,7 +74,7 @@ protected: // for testing, private otherwise.
       double ChopDelay,double Period,std::vector<double > & guess_opening_times);
   /**Get energy of monitor peak if one is present*/
   bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
-      const API::IAlgorithm_sptr &peakFitter,size_t ind_min,size_t ind_max,
+      size_t ind_min,size_t ind_max,
       double & energy,double & height,double &width);
   /**Function implements common part of setting peak finder algorithm*/
   API::IAlgorithm_sptr definePeakFinder(const API::MatrixWorkspace_sptr &inputWS);
@@ -83,6 +83,9 @@ protected: // for testing, private otherwise.
       const std::vector<double> & guess_energies,
       double Eresolution,std::vector<size_t> & irangeMin,
       std::vector<size_t> & irangeMax);
+
+  size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
+    std::vector<double> &deriv);
 
   /// if log, which identifies that instrument is running is available on workspace.
   /// The log should be positive when instrument is running and negative or 0 otherwise.
