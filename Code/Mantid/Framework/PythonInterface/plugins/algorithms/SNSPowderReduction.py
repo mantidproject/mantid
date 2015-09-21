@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,too-many-lines
 import mantid
 import mantid.api
 import mantid.simpleapi as api
