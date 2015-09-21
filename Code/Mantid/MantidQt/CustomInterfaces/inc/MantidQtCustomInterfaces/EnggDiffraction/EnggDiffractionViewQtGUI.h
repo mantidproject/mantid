@@ -109,6 +109,8 @@ public:
 
   virtual bool focusedOutWorkspace() const;
 
+  virtual void plotFocusedSpectrum();
+
 private slots:
   /// for buttons, do calibrate and similar
   void loadCalibrationClicked();

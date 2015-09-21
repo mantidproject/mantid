@@ -225,6 +225,12 @@ public:
    * geometry, preferences etc. of the user interface.
    */
   virtual void saveSettings() const = 0;
+
+  /**
+  * Runs plotSpectrum function via python
+  * @returns single spectrum graph for focused output
+  */
+  virtual void plotFocusedSpectrum() = 0;
 };
 
 } // namespace CustomInterfaces

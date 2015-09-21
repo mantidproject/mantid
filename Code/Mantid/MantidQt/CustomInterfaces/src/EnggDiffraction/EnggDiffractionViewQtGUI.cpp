@@ -342,6 +342,15 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
 }
 
+void EnggDiffractionViewQtGUI::plotFocusedSpectrum() {
+  std::string pyCode = "plotSpectrum('engggui_focusing_output_ws', 0)";
+
+  std::string status = runPythonCode(QString::fromStdString(pyCode), false);
+  m_logMsgs.push_back(
+      "Run Python code to save output file, with status string: " + status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
 void EnggDiffractionViewQtGUI::writeOutCalibFile(
     const std::string &outFilename, const std::vector<double> &difc,
     const std::vector<double> &tzero) {

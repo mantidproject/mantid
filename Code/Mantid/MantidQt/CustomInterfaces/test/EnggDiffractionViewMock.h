@@ -86,6 +86,9 @@ public:
   // virtual bool focusedOutWorkspace() const;
   MOCK_CONST_METHOD0(focusedOutWorkspace, bool());
 
+  // virtual void plotFocusedSpectrum();
+  MOCK_METHOD0(plotFocusedSpectrum, void());
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 };

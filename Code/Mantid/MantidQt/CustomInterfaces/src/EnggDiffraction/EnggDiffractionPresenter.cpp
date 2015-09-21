@@ -758,7 +758,7 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
 
     bool plotFocusedWS = m_view->focusedOutWorkspace();
     if (plotFocusedWS == true) {
-      plotSpectra(QString::fromStdString(outWSName)); // @shah
+      m_view->plotFocusedSpectrum();
     }
 
   } catch (std::runtime_error &re) {
@@ -788,7 +788,6 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
   g_log.notice() << "Saved focused workspace as file: " << fullFilename
                  << std::endl;
 }
-
 
 /**
  * Produce the two workspaces that are required to apply Vanadium
@@ -999,32 +998,6 @@ void EnggDiffractionPresenter::calcVanadiumWorkspaces(
 
   vanIntegWS = ADS.retrieveWS<ITableWorkspace>(integName);
   vanCurvesWS = ADS.retrieveWS<MatrixWorkspace>(curvesName);
-}
-
-void EnggDiffractionPresenter::plotSpectrum(const QStringList &workspaceNames,
-                                            int specIndex) {
-  if (workspaceNames.isEmpty())
-    return;
-
-  QString pyInput = "from mantidplot import plotSpectrum\n";
-
-  pyInput += "plotSpectrum(['";
-  pyInput += workspaceNames.join("','");
-  pyInput += "'], ";
-  pyInput += QString::number(specIndex);
-  pyInput += ")\n";
-
-  m_pythonRunner.runPythonCode(pyInput);
-}
-
-void EnggDiffractionPresenter::plotSpectra(const QString &workspaceName,
-                                           int specIndex) {
-  if (workspaceName.isEmpty())
-    return;
-
-  QStringList workspaceNames;
-  workspaceNames << workspaceName;
-  plotSpectrum(workspaceNames, specIndex);
 }
 
 } // namespace CustomInterfaces
