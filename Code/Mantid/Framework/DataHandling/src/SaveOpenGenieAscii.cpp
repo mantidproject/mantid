@@ -79,8 +79,8 @@ void SaveOpenGenieAscii::exec() {
     WriteToFile(alpha, outfile, singleSpc, fourspc, nBins, isHistogram,
                 nSpectra);
   }
-  return;
   progress.report();
+  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -89,6 +89,7 @@ void SaveOpenGenieAscii::exec() {
    *  @param outfile :: File it will save it out to
    *  @param singleSpc :: Constant string for single space
    *  @param fourspc :: Constant string for four spaces
+   *  @param nSpectra ::  Number of spectrum
    */
 void SaveOpenGenieAscii::WriteAxisHeader(const std::string alpha,
                                          std::ofstream &outfile,
@@ -113,6 +114,7 @@ void SaveOpenGenieAscii::WriteAxisHeader(const std::string alpha,
    *  @param fourspc :: Constant string for four spaces
    *  @param nBins ::  number of bins
    *  @param isHistogram ::  If its a histogram
+   *  @param nSpectra ::  Number of spectrum
    */
 void SaveOpenGenieAscii::WriteToFile(const std::string alpha,
                                      std::ofstream &outfile,

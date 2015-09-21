@@ -9,12 +9,11 @@
 Description
 -----------
 
-This algorithm outputs the data in ASCII, it takes a focused workspaces
-which would generate an OpenGenie ascii file with data saved inside.
-The algorithms will write out for every spectra, the x, y and e axis.
-It also imports all the logs available in the workspace and the variables
-are then written sorted by alphabetical order which matches the format of
-OpenGenie ascii file.
+This algorithm outputs the data in ASCII file, it takes a focused
+workspaces which would generate an OpenGenie ASCII file with data
+saved inside. The algorithms will write out for every spectra, the
+x, y and e axis. The x, y, e axis are sorted by alphabetical order
+in the file, which matches the format of OpenGenie ASCII file.
 
 Usage
 -----

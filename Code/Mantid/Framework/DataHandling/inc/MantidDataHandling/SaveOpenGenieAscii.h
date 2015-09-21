@@ -41,15 +41,17 @@ private:
   /// Execution code
   void exec();
 
-  /// Write out the data for e x y
+  /// Uses AxisHeader and WriteAxisValues to write out file
   void WriteToFile(const std::string alpha, std::ofstream &outfile,
                    const std::string comment, const std::string fourspc,
                    int nBins, bool isHistogram, int nSpectra);
 
+  /// Generates the header for the axis which saves to file
   void WriteAxisHeader(const std::string alpha, std::ofstream &outfile,
                        const std::string singleSpc, const std::string fourspc,
                        int nSpectra);
 
+  /// Reads if alpha is e then reads the E values accordingly
   void WriteAxisValues(std::string alpha, std::ofstream &outfile, int bin,
                        const std::string singleSpc);
 
