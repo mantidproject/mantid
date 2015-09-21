@@ -817,7 +817,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 else:
                     wksplist[itemp] = api.Plus(LHSWorkspace=wksplist[itemp], RHSWorkspace=temp,
                                                OutputWorkspace=wksplist[itemp],
-                                               ClearRHSWorkspace=allEventWorkspaces(sumRun, temp))
+                                               ClearRHSWorkspace=allEventWorkspaces(wksplist[itemp], temp))
                     api.DeleteWorkspace(temp)
                 # ENDIF
             # ENDFOR (spliited workspaces)
