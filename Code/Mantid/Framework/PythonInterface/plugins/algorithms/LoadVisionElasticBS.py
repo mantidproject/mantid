@@ -5,6 +5,7 @@
 from mantid.api import *
 from mantid.kernel import *
 import mantid.simpleapi
+import os
 
 
 class LoadVisionElasticBS(PythonAlgorithm):
@@ -32,6 +33,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
         # First lets replace 'All' with 'backscattering'
         banks = banks.lower().replace("all", "backscattering")
         banks = banks.lower().replace("backscattering", self.__backscattering)
+        banks = banks.lower()
 
         # Let's make sure we have a unique and sorted list
         banks_integers = banks.replace("bank", "")
@@ -42,6 +44,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
         banks = ",".join(banks_list)
 
         wksp_name = "__tmp"
+        wksp_cache = "__cache"
 
         idf_path = config.getInstrumentDirectory()
         dictionary_path = os.path.join(idf_path, "nexusdictionaries")
@@ -51,15 +54,24 @@ class LoadVisionElasticBS(PythonAlgorithm):
             # First try to load as events
             ws = mantid.simpleapi.LoadEventNexus(Filename=filename, BankName=banks, OutputWorkspace=wksp_name)
         except Exception as e:
+            workspaces = []
+            first_bank = True
             # Now lets try histograms.
             for bank in banks_list:
                 mantid.simpleapi.LoadFlexiNexus(Filename=filename,
-                               Dictionary=os.path.join(dictionary_path, 'vision-'+bank+'.dic',
+                               Dictionary=os.path.join(dictionary_path, 'vision-'+bank+'.dic'),
                                OutputWorkspace=bank)
-            ws = mantid.simpleapi.GroupWorkspaces(InputWorkspaces=banks, OutputWorkspace=wksp_name)
+                mantid.simpleapi.LoadInstrument(Workspace=bank,
+                                                Filename=ExperimentInfo.getInstrumentFilename('VISION'),
+                                                RewriteSpectraMap=False)
+                workspaces.append(bank)
+                if first_bank:
+                    mantid.simpleapi.RenameWorkspace(InputWorkspace=bank, OutputWorkspace=wksp_cache)
+                    first_bank = False
+                else:
+                    mantid.simpleapi.ConjoinWorkspaces(wksp_cache, bank)
 
-        else:
-            pass
+            ws = mantid.simpleapi.RenameWorkspace(InputWorkspace=wksp_cache, OutputWorkspace=wksp_name)
 
         self.setProperty("OutputWorkspace", ws)
         mantid.simpleapi.DeleteWorkspace(wksp_name)
