@@ -4357,8 +4357,11 @@ bool SANSRunWindow::areSettingsValid() {
 /**
  * Check the wavelength and Q values
  * @param isValid: flag by reference to set the check if invalid
+ * @param message: the message to display
  * @param min: the min line edit field
  * @param max: the max line edit field
+ * @param selection: the combo box which is being querried
+ * @param type: message type
  */
 void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
                                               QLineEdit *min, QLineEdit *max,
