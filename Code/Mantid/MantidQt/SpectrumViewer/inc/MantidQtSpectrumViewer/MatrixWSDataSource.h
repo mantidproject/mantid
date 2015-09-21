@@ -9,6 +9,21 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
+namespace Mantid
+{
+  namespace Geometry
+  {
+    class IComponent;
+    class Instrument;
+  }
+}
+
+namespace MantidQt
+{
+namespace SpectrumView
+{
+class EModeHandler;
+
 /**
     @class MatrixWSDataSource
 
@@ -38,13 +53,6 @@
     Code Documentation is available at
                  <http://doxygen.mantidproject.org>
  */
-
-namespace MantidQt
-{
-namespace SpectrumView
-{
-class EModeHandler;
-
 class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumDataSource
 {
   public:
@@ -92,6 +100,9 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumData
   private:
     Mantid::API::MatrixWorkspace_const_sptr m_matWs;
     EModeHandler* m_emodeHandler;
+    boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument;
+    boost::shared_ptr<const Mantid::Geometry::IComponent> m_source;
+    boost::shared_ptr<const Mantid::Geometry::IComponent> m_sample;
 
 };
 

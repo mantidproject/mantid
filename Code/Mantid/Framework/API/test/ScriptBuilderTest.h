@@ -1,5 +1,5 @@
-#ifndef HISTORYVIEWTEST_H_
-#define HISTORYVIEWTEST_H_
+#ifndef MANTID_SCRIPTBUILDERTEST_H_
+#define MANTID_SCRIPTBUILDERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -346,4 +346,4 @@ public:
 
 };
 
-#endif
+#endif // MANTID_SCRIPTBUILDERTEST_H_

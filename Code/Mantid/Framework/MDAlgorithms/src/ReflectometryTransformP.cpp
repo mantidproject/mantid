@@ -1,5 +1,4 @@
 #include "MantidMDAlgorithms/ReflectometryTransformP.h"
-
 using namespace Mantid::DataObjects;
 
 namespace Mantid {

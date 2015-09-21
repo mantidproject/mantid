@@ -2,10 +2,11 @@
 #define COLORSELECTIONWIDGET_H_
 
 #include "ui_ColorSelectionWidget.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesAPI/ColorScaleGuard.h"
 #include "MantidQtAPI/MdConstants.h"
 #include "boost/scoped_ptr.hpp"
-#include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
 #include <QWidget>
 
 class pqColorMapModel;
@@ -76,6 +77,10 @@ public:
   /// To effectively block callbacks from external (Paraview) color changes
   void ignoreColorChangeCallbacks(bool ignore);
   bool isIgnoringColorCallbacks();
+  /// Set the color scale lock
+  void setColorScaleLock(Mantid::VATES::ColorScaleLock* lock);
+  /// Is the color scale locked
+  bool isColorScaleLocked() const;
 
 public slots:
   /// Set state for all control widgets.
@@ -152,6 +157,8 @@ private:
 
   /// this is a flag that is set while updating the color scale triggered by the user clicking on the auto-scale box
   bool m_inProcessUserRequestedAutoScale;
+
+  Mantid::VATES::ColorScaleLock* m_colorScaleLock;
 };
 
 } // SimpleGui

@@ -53,6 +53,15 @@ void ResNorm::setup() {}
  */
 bool ResNorm::validate() {
   UserInputValidator uiv;
+
+  // Check vanadium input is _red ws
+  QString vanadiumSuffix = m_uiForm.dsVanadium->getCurrentDataName();
+  int cutIndex = vanadiumSuffix.lastIndexOf("_");
+  vanadiumSuffix = vanadiumSuffix.right(vanadiumSuffix.size() - (cutIndex + 1));
+  if (vanadiumSuffix.compare("red") != 0) {
+    return false;
+  }
+
   uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
   uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
@@ -120,7 +129,7 @@ void ResNorm::handleAlgorithmComplete(bool error) {
   if (plotOptions == "Stretch" || plotOptions == "All")
     plotSpectrum(QString::fromStdString(m_pythonExportWsName) + "_Stretch");
   if (plotOptions == "Fit" || plotOptions == "All")
-    plotSpectrum(fitWsName);
+    plotSpectrum(fitWsName, 0, 1);
 
   // Update preview plot
   previewSpecChanged(m_previewSpec);

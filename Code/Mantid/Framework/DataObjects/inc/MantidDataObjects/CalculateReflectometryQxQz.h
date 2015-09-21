@@ -2,7 +2,6 @@
 #define MANTID_DATAOBJECTS_CALCULATEREFLECTOMETRYQXQZ_H_
 
 #include "MantidDataObjects/CalculateReflectometry.h"
-
 #include <cmath>
 
 namespace Mantid {
@@ -64,6 +63,22 @@ public:
     double wavenumber = 2 * M_PI / wavelength;
     return wavenumber * m_dirQz;
   }
+   
+  Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper, double thetaLower){
+      setThetaFinal(thetaLower);
+      const Mantid::Kernel::V2D ur(calculateDim0(lamLower), // highest qx
+                   calculateDim1(lamLower));
+      const Mantid::Kernel::V2D lr(calculateDim0(lamUpper),
+                   calculateDim1(lamUpper)); // lowest qz
+      setThetaFinal(thetaUpper);
+      const Mantid::Kernel::V2D ul(calculateDim0(lamLower),
+                   calculateDim1(lamLower)); // highest qz
+      const Mantid::Kernel::V2D ll(calculateDim0(lamUpper), // lowest qx
+                   calculateDim1(lamUpper));
+
+      Mantid::Geometry::Quadrilateral quad(ll, lr, ur, ul);
+      return quad;
+   }
 };
 }
 }

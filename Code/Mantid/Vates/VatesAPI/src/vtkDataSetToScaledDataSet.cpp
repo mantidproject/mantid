@@ -119,14 +119,25 @@ vtkDataSetToScaledDataSet::execute(double xScale, double yScale, double zScale,
  */
 void vtkDataSetToScaledDataSet::updateMetaData(double xScale, double yScale,
                                                double zScale, vtkPointSet *inputData, vtkPointSet *outputData) {
-  // We need to put the scaling on the diagonal elements of the ChangeOfBasis
-  // (COB) Matrix.
-  vtkSmartPointer<vtkMatrix4x4> cobMatrix =
-      vtkSmartPointer<vtkMatrix4x4>::New();
-  cobMatrix->Identity();
-  cobMatrix->Element[0][0] *= xScale;
-  cobMatrix->Element[1][1] *= yScale;
-  cobMatrix->Element[2][2] *= zScale;
+  // We need to scale the basis vectors of the input ChangeOfBasis
+  // (COB) Matrix and set it as the output COB Matrix.
+  auto cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(inputData);
+
+  vtkVector3d u,v,w;
+  if (vtkPVChangeOfBasisHelper::GetBasisVectors(cobMatrix, u, v, w)) {
+    u.Set(u.GetX()*xScale, u.GetY()*xScale, u.GetZ()*xScale);
+    v.Set(v.GetX()*yScale, v.GetY()*yScale, v.GetZ()*yScale);
+    w.Set(w.GetX()*zScale, w.GetY()*zScale, w.GetZ()*zScale);
+    cobMatrix = vtkPVChangeOfBasisHelper::GetChangeOfBasisMatrix(u,v,w);
+  } else {
+    g_log.warning("Could not extract the basis vectors from the Change-of-Basis-Matrix"
+                  "data of the scaled data set.\n");
+    cobMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    cobMatrix->Identity();
+    cobMatrix->Element[0][0] *= xScale;
+    cobMatrix->Element[1][1] *= yScale;
+    cobMatrix->Element[2][2] *= zScale;
+  }
 
   if (!vtkPVChangeOfBasisHelper::AddChangeOfBasisMatrixToFieldData(outputData,
                                                                    cobMatrix)) {
