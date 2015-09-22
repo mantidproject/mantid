@@ -187,10 +187,10 @@ void ConvolutionFitSequential::exec() {
   const std::string tempFitWsName = "__convfit_fit_ws";
   auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
-  Progress plotPeakStringProg(this, 0.0, 0.05, specMax);
+  Progress plotPeakStringProg(this, 0.0, 0.05, specMax-specMin);
   // Construct plotpeak string
   std::string plotPeakInput = "";
-  for (int i = 0; i < specMax + 1; i++) {
+  for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
