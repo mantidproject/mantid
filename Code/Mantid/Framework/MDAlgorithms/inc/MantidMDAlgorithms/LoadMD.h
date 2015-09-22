@@ -80,7 +80,8 @@ private:
 
   void loadCoordinateSystem();
 
-  void loadVisualNormalization();
+  void loadVisualNormalization(const std::string &key,
+                               boost::optional<Mantid::API::MDNormalization> &normalization);
 
   /// Load all the affine matricies
   void loadAffineMatricies(API::IMDWorkspace_sptr ws);
@@ -110,9 +111,11 @@ private:
 
   /// Visual normalization
   boost::optional<Mantid::API::MDNormalization> m_visualNormalization;
+  boost::optional<Mantid::API::MDNormalization> m_visualNormalizationHisto;
 
   /// Named entry
   static const std::string VISUAL_NORMALIZATION_KEY;
+  static const std::string VISUAL_NORMALIZATION_KEY_HISTO;
 };
 
 } // namespace DataObjects

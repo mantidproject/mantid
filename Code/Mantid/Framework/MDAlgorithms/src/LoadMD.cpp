@@ -190,7 +190,7 @@ void LoadMD::exec() {
 
   // Display normalization settting
   if(levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()){
-      this->loadVisualNormalization();
+      this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
 
   if (entryName == "MDEventWorkspace") {
@@ -198,9 +198,19 @@ void LoadMD::exec() {
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
+    if(levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) != levelEntries.end()){
+      this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
+    }
+
     // Use the factory to make the workspace of the right type
-    IMDEventWorkspace_sptr ws =
-        MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
+    IMDEventWorkspace_sptr ws;
+    if (m_visualNormalizationHisto && m_visualNormalization) {
+      ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType,
+                                             m_visualNormalization.get(),
+                                             m_visualNormalizationHisto.get());
+    } else {
+      ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
+    }
 
     // Now the ExperimentInfo
     bool lazyLoadExpt = fileBacked;
@@ -351,18 +361,18 @@ void LoadMD::loadDimensions2() {
   m_file->closeGroup();
 }
 
-void LoadMD::loadVisualNormalization(){
-    try {
-      uint32_t readVisualNormalization(0);
-      m_file->readData(VISUAL_NORMALIZATION_KEY, readVisualNormalization);
-      m_visualNormalization = static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
-    }
-    catch (::NeXus::Exception&){
+void LoadMD::loadVisualNormalization(const std::string& key, boost::optional<Mantid::API::MDNormalization>& normalization) {
+  try {
+    uint32_t readVisualNormalization(0);
+    m_file->readData(key, readVisualNormalization);
+    normalization =
+        static_cast<Mantid::API::MDNormalization>(readVisualNormalization);
+  } catch (::NeXus::Exception &) {
 
-    }
-    catch (std::exception&){
-    }
+  } catch (std::exception &) {
+  }
 }
+
 
 /** Load the coordinate system **/
 void LoadMD::loadCoordinateSystem() {
@@ -585,6 +595,7 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
 }
 
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY="visual_normalization";
+const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO="visual_normalization_histo";
 
 } // namespace Mantid
 } // namespace DataObjects

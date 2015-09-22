@@ -39,7 +39,9 @@ public:
   /// Typedef to access the MDEventType.
   typedef MDE MDEventType;
 
-  MDEventWorkspace();
+  MDEventWorkspace(Mantid::API::MDNormalization preferredNormalization = Mantid::API::MDNormalization::VolumeNormalization,
+                   Mantid::API::MDNormalization preferredNormalizationHisto = Mantid::API::MDNormalization::VolumeNormalization);
+
   virtual ~MDEventWorkspace();
 
   /// Returns a clone of the workspace
@@ -167,11 +169,11 @@ public:
   virtual void clearFileBacked(bool LoadFileBackedData);
 
   /// Preferred visual normalizaiton method for any histo workspaces created from this.
-  void  setHistoDisplayNormalization(Mantid::API::MDNormalization preferredNormalization);
-  /// Preferred visual normalization method.
+  virtual void setDisplayNormalizationHisto(Mantid::API::MDNormalization preferredNormalizationHisto);
   virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
 
   /// Preferred visual normalization method.
+  virtual void setDisplayNormalization(Mantid::API::MDNormalization preferredNormalization);
   virtual Mantid::API::MDNormalization displayNormalization() const;
 
 protected:
@@ -194,8 +196,11 @@ protected:
   /// Box controller in use
   API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
+  /// Display normalization for the event workspace itself
+  Mantid::API::MDNormalization m_displayNormalization;
   /// Display normalization to pass onto generated histo workspaces
-  Mantid::API::MDNormalization m_histoDisplayNormalization;
+  Mantid::API::MDNormalization m_displayNormalizationHisto;
+
 private:
   virtual MDEventWorkspace *doClone() const {
     return new MDEventWorkspace(*this);
