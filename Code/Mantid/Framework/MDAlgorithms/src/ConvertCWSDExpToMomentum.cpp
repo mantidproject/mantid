@@ -40,8 +40,10 @@ void ConvertCWSDExpToMomentum::init() {
                                              Direction::Input),
       "Name of table workspace for data file names in the experiment.");
 
+  declareProperty("CreateVirtualInstrument", false, "Flag to create virtual instrument.");
+
   declareProperty(new WorkspaceProperty<ITableWorkspace>(
-                      "DetectorTableWorkspace", "", Direction::Input),
+                      "DetectorTableWorkspace", "", Direction::Input, PropertyMode::Optional),
                   "Name of table workspace containing all the detectors.");
 
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
