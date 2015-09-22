@@ -10,16 +10,16 @@ import os
 
 class LoadVisionElasticEQ(PythonAlgorithm):
 
-    __equitorial = "bank25,bank26,bank27,bank28,bank29,bank30"
+    __equatorial = "bank25,bank26,bank27,bank28,bank29,bank30"
 
     def category(self):
         return "DataHandling;PythonAlgorithms"
 
     def name(self):
-        return "LoadVisionElastic"
+        return "LoadVisionElasticEQ"
 
     def summary(self):
-        return "This algorithm loads only the backscattering elastic detectors on VISION."
+        return "This algorithm loads only the equatorial elastic detectors on VISION."
 
     def PyInit(self):
         self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
@@ -30,9 +30,9 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         filename = self.getProperty("Filename").value
         banks = self.getProperty("Banks").value
 
-        # First lets replace 'All' with 'equitorial'
-        banks = banks.lower().replace("all", "equitorial")
-        banks = banks.lower().replace("equitorial", self.__equitorial)
+        # First lets replace 'All' with 'equatorial'
+        banks = banks.lower().replace("all", "equatorial")
+        banks = banks.lower().replace("equatorial", self.__equatorial)
         banks = banks.lower()
 
         # Let's make sure we have a unique and sorted list

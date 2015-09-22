@@ -16,7 +16,7 @@ class LoadVisionElasticBS(PythonAlgorithm):
         return "DataHandling;PythonAlgorithms"
 
     def name(self):
-        return "LoadVisionElastic"
+        return "LoadVisionElasticBS"
 
     def summary(self):
         return "This algorithm loads only the backscattering elastic detectors on VISION."
