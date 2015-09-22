@@ -53,7 +53,8 @@ void EnggDiffractionPresenter::cleanup() {
   if (m_workerThread) {
     if (m_workerThread->isRunning()) {
       g_log.notice() << "A calibration process is currently running, shutting "
-                        "it down immediately..." << std::endl;
+                        "it down immediately..."
+                     << std::endl;
       m_workerThread->wait(10);
     }
     delete m_workerThread;
@@ -131,7 +132,8 @@ void EnggDiffractionPresenter::processCalcCalib() {
   }
 
   g_log.notice() << "EnggDiffraction GUI: starting new calibration. This may "
-                    "take a few seconds... " << std::endl;
+                    "take a few seconds... "
+                 << std::endl;
 
   const std::string outFilename = outputCalibFilename(vanNo, ceriaNo);
 
@@ -154,7 +156,8 @@ void EnggDiffractionPresenter::processFocusRun() {
   }
 
   g_log.notice() << "EnggDiffraction GUI: starting new focusing. This may take "
-                    "some seconds... " << std::endl;
+                    "some seconds... "
+                 << std::endl;
 
   const std::string focusDir = m_view->focusingDir();
   const std::string outFilename = outputFocusFilename(runNo, bank);
@@ -333,10 +336,9 @@ void EnggDiffractionPresenter::parseCalibrateFilename(const std::string &path,
  * @param vanNo vanadium run number
  * @param ceriaNo ceria run number
  */
-void
-EnggDiffractionPresenter::startAsyncCalibWorker(const std::string &outFilename,
-                                                const std::string &vanNo,
-                                                const std::string &ceriaNo) {
+void EnggDiffractionPresenter::startAsyncCalibWorker(
+    const std::string &outFilename, const std::string &vanNo,
+    const std::string &ceriaNo) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
   EnggDiffWorker *worker =
@@ -385,11 +387,13 @@ void EnggDiffractionPresenter::doNewCalibration(const std::string &outFilename,
   } catch (std::runtime_error &) {
     g_log.error() << "The calibration calculations failed. One of the "
                      "algorithms did not execute correctly. See log messages "
-                     "for details. " << std::endl;
+                     "for details. "
+                  << std::endl;
   } catch (std::invalid_argument &) {
     g_log.error()
         << "The calibration calculations failed. Some input properties "
-           "were not valid. See log messages for details. " << std::endl;
+           "were not valid. See log messages for details. "
+        << std::endl;
   }
   // restore normal data search paths
   conf.setDataSearchDirs(tmpDirs);
@@ -636,7 +640,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
                                           const std::string &runNo, int bank) {
   g_log.notice() << "Generating new focused file (bank " +
                         boost::lexical_cast<std::string>(bank) + ") for run " +
-                        runNo + " into: " << outFilename << std::endl;
+                        runNo + " into: "
+                 << outFilename << std::endl;
 
   Poco::Path fpath(dir);
   const std::string fullFilename = fpath.append(outFilename).toString();
@@ -665,7 +670,8 @@ void EnggDiffractionPresenter::doFocusRun(const std::string &dir,
   } catch (std::invalid_argument &ia) {
     g_log.error()
         << "The focusing failed. Some input properties were not valid. "
-           "See log messages for details. Error: " << ia.what() << std::endl;
+           "See log messages for details. Error: "
+        << ia.what() << std::endl;
   }
 
   // restore initial data search paths
@@ -749,6 +755,12 @@ void EnggDiffractionPresenter::doFocusing(const EnggDiffCalibSettings &cs,
     // TODO: use detector positions (from calibrate full) when available
     // alg->setProperty(DetectorPositions, TableWorkspace)
     alg->execute();
+
+    bool plotFocusedWS = m_view->focusedOutWorkspace();
+    if (plotFocusedWS == true) {
+      m_view->plotFocusedSpectrum();
+    }
+
   } catch (std::runtime_error &re) {
     g_log.error() << "Error in calibration. ",
         "Could not run the algorithm EnggCalibrate succesfully for bank " +
@@ -821,7 +833,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "This is possibly because some of the settings are not "
                        "consistent. Please check the log messages for "
                        "details. Details: " +
-                           std::string(ia.what()) << std::endl;
+                           std::string(ia.what())
+                    << std::endl;
       throw;
     } catch (std::runtime_error &re) {
       g_log.error() << "Failed to calculate Vanadium corrections. "
@@ -830,7 +843,8 @@ void EnggDiffractionPresenter::loadOrCalcVanadiumWorkspaces(
                        "There was no obvious error in the input properties "
                        "but the algorithm failed. Please check the log "
                        "messages for details." +
-                           std::string(re.what()) << std::endl;
+                           std::string(re.what())
+                    << std::endl;
       throw;
     }
   } else {
