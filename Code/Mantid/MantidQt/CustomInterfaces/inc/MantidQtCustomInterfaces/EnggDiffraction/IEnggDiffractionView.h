@@ -213,11 +213,24 @@ public:
   virtual int focusingBank() const = 0;
 
   /**
+   * Check box to consider when focusing
+   * whether to plot focused workspace
+   * @return bool
+   */
+  virtual bool focusedOutWorkspace() const = 0;
+
+  /**
    * Save settings (normally when closing the interface). This
    * concerns only GUI settings, such as window max/min status and
    * geometry, preferences etc. of the user interface.
    */
   virtual void saveSettings() const = 0;
+
+  /**
+  * Runs plotSpectrum function via python
+  * @returns single spectrum graph for focused output
+  */
+  virtual void plotFocusedSpectrum() = 0;
 };
 
 } // namespace CustomInterfaces
