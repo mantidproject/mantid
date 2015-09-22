@@ -27,8 +27,8 @@ public:
     double inti_all[] = { 755, 704, 603 };
     double sigi_all[] = { 27.4773, 26.533, 24.5561 };
 
-    double inti_some[] = { 691, 648, 603 };
-    double sigi_some[] = { 27.4773, 26.533, 24.5561 };
+    double inti_some[] = { 692, 649, 603 };
+    double sigi_some[] = { 27.4590, 26.5141, 24.5561 };
 
                                           // synthesize three peaks
     std::vector<std::pair<double, V3D> > peak_q_list;
@@ -90,11 +90,12 @@ public:
     double back_inner_radius = 1.2;
     double back_outer_radius = 1.3;
     std::vector<double> new_sigma;
+    std::vector<Kernel::V3D> E1Vec;
     double inti;
     double sigi;
     for ( size_t i = 0; i < peak_q_list.size(); i++ )
     {
-      auto shape = integrator.ellipseIntegrateEvents( peak_q_list[i].second, specify_size,
+      auto shape = integrator.ellipseIntegrateEvents( E1Vec, peak_q_list[i].second, specify_size,
                           peak_radius, back_inner_radius, back_outer_radius,
                           new_sigma, inti, sigi );
       TS_ASSERT_DELTA( inti, inti_all[i], 0.1);      
@@ -110,7 +111,7 @@ public:
     specify_size = false;
     for ( size_t i = 0; i < peak_q_list.size(); i++ )
     {
-      integrator.ellipseIntegrateEvents( peak_q_list[i].second, specify_size,
+      integrator.ellipseIntegrateEvents( E1Vec, peak_q_list[i].second, specify_size,
                           peak_radius, back_inner_radius, back_outer_radius, 
                           new_sigma, inti, sigi );
       TS_ASSERT_DELTA( inti, inti_some[i], 0.1);      
