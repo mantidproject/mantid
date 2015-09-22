@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
 	src/Crystal/HKLFilter.cpp
+	src/Crystal/HKLGenerator.cpp
 	src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
@@ -143,6 +144,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
 	inc/MantidGeometry/Crystal/HKLFilter.h
+	inc/MantidGeometry/Crystal/HKLGenerator.h
 	inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
@@ -287,6 +289,7 @@ set ( TEST_FILES
 	GoniometerTest.h
 	GroupTest.h
 	HKLFilterTest.h
+	HKLGeneratorTest.h
 	HKLTest.h
 	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
