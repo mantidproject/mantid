@@ -44,6 +44,8 @@ public:
 
   virtual std::string getName() const = 0;
 
+  bool operator()(const Kernel::V3D &hkl) const { return isAllowed(hkl); }
+
   virtual bool isAllowed(const Kernel::V3D &hkl) const = 0;
 };
 
@@ -73,9 +75,8 @@ public:
   }
 };
 
-HKLFilterAnd operator&(const HKLFilter &lhs, const HKLFilter &rhs) {
-  return HKLFilterAnd(lhs, rhs);
-}
+MANTID_GEOMETRY_DLL HKLFilterAnd operator&(const HKLFilter &lhs,
+                                           const HKLFilter &rhs);
 
 class MANTID_GEOMETRY_DLL HKLFilterDRange : public HKLFilter {
 public:
@@ -112,7 +113,8 @@ protected:
 
 class MANTID_GEOMETRY_DLL HKLFilterStructureFactor : public HKLFilter {
 public:
-  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator) : m_calculator(calculator) {}
+  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator)
+      : m_calculator(calculator) {}
 
   std::string getName() const { return "SF"; }
 
@@ -126,7 +128,8 @@ protected:
 
 class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
 public:
-  HKLFilterCentering(const ReflectionCondition_sptr &centering) : m_centering(centering) {}
+  HKLFilterCentering(const ReflectionCondition_sptr &centering)
+      : m_centering(centering) {}
 
   std::string getName() const { return "Centering"; }
 
