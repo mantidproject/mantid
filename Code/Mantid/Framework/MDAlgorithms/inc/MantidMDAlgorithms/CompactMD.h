@@ -25,8 +25,7 @@ public:
   virtual int version() const{return 1;}
 
   virtual Mantid::API::IMDHistoWorkspace_sptr
-  compactWorkspace(Mantid::API::IMDHistoWorkspace_sptr workspace,
-                   signal_t threshold);
+  compactWorkspace(Mantid::API::IMDHistoWorkspace_sptr workspace);
 };
 }
 }

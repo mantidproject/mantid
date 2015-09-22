@@ -120,7 +120,9 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
 
       // Correct users, input, output and rounded to the nearest whole width.
       min = width * std::floor(min/width); // Rounded down
+      std::cout << "ROUNDED MINIMUM FOR DIM "<< i << ": " << min << "\n";
       max = width * std::ceil(max/width); // Rounded up
+      std::cout << "ROUNDED MAXIMUM FOR DIM "<< i << ": " << max << "\n";
 
       if(min != binning.front()) {
           std::stringstream buffer;
@@ -132,6 +134,8 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
           buffer << "Rounding max from: " << binning.back() << " to the nearest whole width at: " << max;
           logger.warning(buffer.str());
       }
+      auto buffer = (max-min)/width;
+ 
       const size_t roundedNBins = static_cast<size_t>((max-min)/width+0.5); // round up to a whole number of bins.
       outDim->setRange(
           roundedNBins,
