@@ -53,7 +53,8 @@ class LoadVisionElasticEQ(PythonAlgorithm):
         try:
             # First try to load as events
             ws = mantid.simpleapi.LoadEventNexus(Filename=filename, BankName=banks, OutputWorkspace=wksp_name)
-        except Exception as e:
+        #pylint: disable=bare-except
+        except:
             workspaces = []
             first_bank = True
             # Now lets try histograms.
