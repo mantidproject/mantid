@@ -119,8 +119,15 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
       double max = binning.back();
 
       // Correct users, input, output and rounded to the nearest whole width.
-      min = width * std::floor(min/width); // Rounded down
-      max = width * std::ceil(max/width); // Rounded up
+      auto extents_offset = 0.0;
+      if (fmod(max,width) != 0){
+          extents_offset = fmod(max,width);
+          std::stringstream buffer;
+          buffer << "Shifting Dimension" << i << " extents by " << extents_offset;
+          logger.warning(buffer.str());
+      }
+      min = width * std::floor((min-extents_offset)/width); // Rounded down
+      max = width * std::ceil((max-extents_offset)/width); // Rounded up
 
       if(min != binning.front()) {
           std::stringstream buffer;
