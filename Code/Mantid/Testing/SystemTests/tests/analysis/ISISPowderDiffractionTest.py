@@ -1,7 +1,6 @@
-# pylint: disable=no-init
+# pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
-from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
-from mantid.api import FileFinder
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, ITableWorkspace, FileFinder
 from mantid.simpleapi import *
 from mantid import config
 import os.path
@@ -15,7 +14,7 @@ import cry_ini
 import cry_focus
 
 DIFF_PLACES = 8
-dirs = config['datasearch.directories'].split(';')
+DIRS = config['datasearch.directories'].split(';')
 
 
 class ISISPowderDiffraction(stresstesting.MantidStressTest):
@@ -27,16 +26,16 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
 
     def _clean_up_files(self, filenames, directories):
         try:
-            for file in filenames:
-                path = os.path.join(directories[0], file)
+            for files in filenames:
+                path = os.path.join(directories[0], files)
                 os.remove(path)
         except OSError, ose:
             print 'could not delete generated file : ', ose.filename
 
     def runTest(self):
         self._success = False
-        expt = cry_ini.Files('hrpd', RawDir=(dirs[0]), Analysisdir='test', forceRootDirFromScripts=False,
-                             inputInstDir=dirs[0])
+        expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test', forceRootDirFromScripts=False,
+                             inputInstDir=DIRS[0])
         expt.initialize('cycle_09_2', user='tester', prefFile='mtd.pref')
         expt.tell()
         cry_focus.focus_all(expt, "43022")
@@ -68,10 +67,10 @@ class ISISPowderDiffraction(stresstesting.MantidStressTest):
                          'hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat',
                          'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal'])
 
-        self._clean_up_files(filenames, dirs)
+        self._clean_up_files(filenames, DIRS)
 
 
-# ------------------------------------------------------------------------------
+# ======================================================================
 # work horse
 class LoadTests(unittest.TestCase):
     wsname = "__LoadTest"
@@ -86,19 +85,18 @@ class LoadTests(unittest.TestCase):
                 pass
         self.cleanup_names = []
 
-    # --------------------------------------- Success ------------------
+    # ============================ Success ==============================
     def runTest(self):
-        dirs = config['datasearch.directories'].split(';')
-        expt = cry_ini.Files('hrpd', RawDir=(dirs[0]), Analysisdir='test', forceRootDirFromScripts=False,
-                             inputInstDir=dirs[0])
+        expt = cry_ini.Files('hrpd', RawDir=(DIRS[0]), Analysisdir='test', forceRootDirFromScripts=False,
+                             inputInstDir=DIRS[0])
         expt.initialize('cycle_09_2', user='tester', prefFile='mtd.pref')
         expt.tell()
         cry_focus.focus_all(expt, "43022")
 
     def test_calfile_with_workspace(self):
         self.wsname = "CalWorkspace1"
-        calfile1 = (dirs[0] + 'hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal')
-        calfile2 = (dirs[0] + 'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal')
+        calfile1 = (DIRS[0] + 'hrpd/test/cycle_09_2/Calibration/hrpd_new_072_01_corr.cal')
+        calfile2 = (DIRS[0] + 'hrpd/test/cycle_09_2/tester/hrpd_new_072_01_corr.cal')
         data1 = LoadCalFile(InstrumentName="ENGIN-X", CalFilename=calfile1,
                             WorkspaceName=self.wsname)
         data2 = LoadCalFile(InstrumentName="ENGIN-X", CalFilename=calfile2,
@@ -126,7 +124,7 @@ class LoadTests(unittest.TestCase):
 
     def test_nxsfile_with_workspace(self):
         self.wsname = "NexusWorkspace"
-        nxsfile = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs")
+        nxsfile = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.nxs")
         data = LoadNexusProcessed(Filename=nxsfile, OutputWorkspace=self.wsname)
 
         self.assertTrue(isinstance(data[0], WorkspaceGroup))
@@ -143,21 +141,21 @@ class LoadTests(unittest.TestCase):
         self.assertTrue('ResultTOFgrp', self.wsname[0])
 
     def test_gssfile_with_workspace(self):
-        gssfile = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss")
+        gssfile = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old.gss")
         data = LoadGSS(Filename=gssfile, OutputWorkspace=self.wsname)
 
         self.assertTrue(isinstance(data, MatrixWorkspace))
         self.assertEquals(3, data.getNumberHistograms())
         self.assertEquals(22981, data.blocksize())
-        self.assertAlmostEqual(9783.15138, data.readX(2)[1], places=8)
+        self.assertAlmostEqual(9783.15138, data.readX(2)[1], places=DIFF_PLACES)
 
     def test_datfile_with_workspace(self):
-        datfile1 = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_D.dat")
-        datfile2 = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_TOF.dat")
-        datfile3 = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_D.dat")
-        datfile4 = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat")
-        datfile5 = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat")
-        datfile6 = (dirs[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat")
+        datfile1 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_D.dat")
+        datfile2 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b1_TOF.dat")
+        datfile3 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_D.dat")
+        datfile4 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b2_TOF.dat")
+        datfile5 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_D.dat")
+        datfile6 = (DIRS[0] + "hrpd/test/cycle_09_2/tester/hrp43022_s1_old_b3_TOF.dat")
 
         data1 = LoadAscii(Filename=datfile1, OutputWorkspace="datWorkspace1")
         data2 = LoadAscii(Filename=datfile2, OutputWorkspace="datWorkspace2")
@@ -182,18 +180,24 @@ class LoadTests(unittest.TestCase):
 
         self.assertEquals(1, data1.getNumberHistograms())
         self.assertEquals(22981, data1.blocksize())
+        self.assertAlmostEqual(0.2168, data1.readX(0)[2], places=DIFF_PLACES)
 
         self.assertEquals(1, data2.getNumberHistograms())
         self.assertEquals(22981, data2.blocksize())
+        self.assertAlmostEqual(data1.readY(0)[6], data2.readY(0)[6], places=DIFF_PLACES)
 
         self.assertEquals(1, data3.getNumberHistograms())
         self.assertEquals(23038, data3.blocksize())
+        self.assertAlmostEqual(0.44656, data3.readX(0)[4311], places=DIFF_PLACES)
 
         self.assertEquals(1, data4.getNumberHistograms())
         self.assertEquals(23038, data4.blocksize())
+        self.assertAlmostEqual(1.58185696, data4.readE(0)[10], places=DIFF_PLACES)
 
         self.assertEquals(1, data5.getNumberHistograms())
         self.assertEquals(23025, data5.blocksize())
+        self.assertAlmostEqual(data5.readY(0)[15098], data6.readY(0)[15098], places=DIFF_PLACES)
 
         self.assertEquals(1, data6.getNumberHistograms())
         self.assertEquals(23025, data6.blocksize())
+        self.assertAlmostEqual(9782.63819, data6.readX(0)[0], places=DIFF_PLACES)
