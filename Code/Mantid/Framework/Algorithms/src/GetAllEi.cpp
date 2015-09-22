@@ -133,18 +133,15 @@ namespace Mantid {
       double maxPeakEnergy(0);
       for(size_t i=0; i<guess_opening.size();i++){
 
-        double energy,height,sigma;
+        double energy,height,twoSigma;
         bool found =findMonitorPeak(workingWS,
                     irange_min[i],irange_max[i],
-                    energy,height,sigma);
+                    energy,height,twoSigma);
         if(found){
           peaks_positions.push_back(energy);
           peaks_height.push_back(height);
-          peaks_width.push_back(sigma);
-          double peakEnery = height*sigma*std::sqrt(2.*M_PI);
-          if(peakEnery>maxPeakEnergy){
-            maxPeakEnergy = peakEnery;
-          }
+          peaks_width.push_back(0.5*twoSigma);
+
         }
       }
       workingWS.reset();
@@ -169,7 +166,7 @@ namespace Mantid {
     /**Get energy of monitor peak if one is present*/
     bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
       size_t ind_min,size_t ind_max,
-      double & energy,double & height,double &width){
+      double & position,double & height,double &twoSigma){
 
         // interval too small -- can not be peak there
         if(std::fabs(double(ind_max-ind_min))<5)return false;
@@ -178,7 +175,8 @@ namespace Mantid {
         /**Lambda to identify guess values for a peak at given index
           and set up these parameters as input for fitting algorithm
         */
-        auto peakGuess =[&](size_t index){
+        auto peakGuess =[&](size_t index,double &peakPos,
+                            double &peakHeight,double &peakTwoSigma){
 
           double sMin(std::numeric_limits<double>::max());
           double sMax(-sMin);
@@ -201,31 +199,26 @@ namespace Mantid {
             Intensity+=S[i];
           }
           if(sMax <= 1)return false;
-
+          //
           size_t SearchAreaSize = ind_max-ind_min;
-          double SmoothRange = xOfMax*m_min_Eresolution;
-          std::vector<double> SAvrg,binsAvrg;
 
+          double maxSigma = xOfMax*m_min_Eresolution/(2*std::sqrt(2*std::log(2.)));
+          double SmoothRange = 2*maxSigma;
+
+          std::vector<double> SAvrg,binsAvrg;
           Kernel::VectorHelper::smoothAtNPoints(S,SAvrg,SmoothRange,&X,
             ind_min,ind_max,&binsAvrg);
 
-
-          std::vector<double> der1Avrg,der2Avrg,peaksPos,hillsPos,SAvrg1,binsAvrg1;
-          //
-          size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SAvrg,der1Avrg,peaksPos);
+          std::vector<double> der1Avrg,der2Avrg,peaks,hillsPos,SAvrg1,binsAvrg1;
+          size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SAvrg,der1Avrg,peaks);
           size_t nHills = calcDerivativeAndCountZeros(binsAvrg,der1Avrg,der2Avrg,hillsPos);
-          if(nPeaks>1){
-            size_t indMin = Kernel::VectorHelper::getBinIndex(binsAvrg,xOfMax*(1-m_min_Eresolution));
-            size_t indMax = Kernel::VectorHelper::getBinIndex(binsAvrg,xOfMax*(1+m_min_Eresolution));
-            if(indMax!=ind_max)indMax++; // shift to left boundary
-            SmoothRange = binsAvrg[indMax]-binsAvrg[indMin];
-          }
+
           size_t ic(0);
-          while(nPeaks>1 && ic<100){
+          while((nPeaks>1||nHills>2) && ic<100){
             Kernel::VectorHelper::smoothAtNPoints(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
             0,ind_max-ind_min,&binsAvrg1);
 
-            nPeaks = calcDerivativeAndCountZeros(binsAvrg1,SAvrg1,der1Avrg,peaksPos);
+            nPeaks = calcDerivativeAndCountZeros(binsAvrg1,SAvrg1,der1Avrg,peaks);
             nHills = calcDerivativeAndCountZeros(binsAvrg1,der1Avrg,der2Avrg,hillsPos);
             SAvrg.swap(SAvrg1);
             binsAvrg.swap(binsAvrg1);
@@ -236,48 +229,34 @@ namespace Mantid {
           }
           if(nPeaks!=1)return false;
 
-          energy = peaksPos[0];
+          peakPos = peaks[0];
           if(nHills>2){
-            size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos,peaksPos[0]);
-            width = hillsPos[peakIndex+1]-hillsPos[peakIndex];
+            size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos,peaks[0]);
+            peakTwoSigma = hillsPos[peakIndex+1]-hillsPos[peakIndex];
           }else{
-            width  = hillsPos[1]-hillsPos[0];
+            if(hillPos.size()==2){
+              peakTwoSigma = hillsPos[1]-hillsPos[0];
+            }else{
+              return false;
+            }
           }
-          height = Intensity/(0.5*std::sqrt(M_PI/std::log(2.))*width);
-
-          //// sigma from peak width on the half of the height 
-          //double fw = m_min_Eresolution*xOfMax/(2*std::sqrt(2*std::log(2.)));
-          ////name=Gaussian,Height=491139,PeakCentre=10.0198,Sigma=0.0328702;
-          //std::string GuessFunc = "name=Gaussian,Height="+std::to_string(sMax)+
-          //  ",PeakCentre="+std::to_string(xOfMax)+
-          //  ",Sigma="+std::to_string(fw);
-          //// Intensity of an energy peak with minimal energy resolution
-          //double IntMax = 0.5*ncMax*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.));
-          //if(IntMax < Intensity){
-          //  haveBkg = true;
-          //  GuessFunc+=";name=LinearBackground,A0="+std::to_string(sMin)+",A1=0.0";
-          //}else{
-          //  haveBkg = false;
-          //}
-
+          // assuming that averaging conserves intensity and ignoring background:
+          peakHeight = Intensity/(0.5*std::sqrt(2.*M_PI)*peakTwoSigma);
 
           return true;
         };
         //--------------------------------------------------------------------
-        if(!peakGuess(0))return false;
-        //
-  
-        //        double chi_sq = peakFitter->getProperty("OutputChi2overDoF");
-        //if(chi_sq>1)return false;
-        // identify maximal peak intensity on the basis of maximal instrument 
-        // resolution
-        //minHeight,maxHeight; 
-        //double iMax = 0.5*Smax*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.));
-        //double iMin = 0.5*Smax*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.));
-        //minHeight = Intensity/(0.5*xOfMax*m_min_Eresolution*std::sqrt(M_PI/std::log(2.)));
-        //maxHeight = Intensity/(0.5*xOfMax*m_max_Eresolution*std::sqrt(M_PI/std::log(2.)));
+        double peak1Pos,peak1TwoSigma,peak1Height;
+        if(!peakGuess(0,peak1Pos,peak1TwoSigma,peak1Height))return false;
 
-        //      //
+        double peak2Pos,peak2TwoSigma,peak2Height;
+        if(!peakGuess(1,peak2Pos,peak2TwoSigma,peak2Height))return false;
+
+        if(std::fabs(peak1Pos-peak2Pos)>0.25*(peak1TwoSigma+peak2TwoSigma))return false;
+
+        position = 0.5*(peak1Pos+peak2Pos);
+        twoSigma = peak1TwoSigma;
+        height   = peak1Height;
 
         return true;
 
