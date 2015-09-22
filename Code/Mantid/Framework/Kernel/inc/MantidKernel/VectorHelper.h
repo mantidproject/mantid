@@ -85,7 +85,7 @@ MANTID_KERNEL_DLL void linearlyInterpolateY(const std::vector<double> &x,
 // Do n-point running average of input vector considering bin-boundaries if provided
 MANTID_KERNEL_DLL void smoothAtNPoints(const std::vector<double> &input,
                                       std::vector<double> &output,
-                   size_t nAvrgPoints,
+                   double avrgInterval,
                    std::vector<double> const * const binBoundaris  =NULL,
                    size_t startIndex = 0,size_t endIndex = 0,
                    std::vector<double> * const outputBinBoundaries=NULL);

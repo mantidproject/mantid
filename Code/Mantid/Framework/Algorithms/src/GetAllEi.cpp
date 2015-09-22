@@ -203,26 +203,46 @@ namespace Mantid {
           if(sMax <= 1)return false;
 
           size_t SearchAreaSize = ind_max-ind_min;
-          size_t nAvrgPoints = 5;
-          std::vector<double> SArg,binsAvrg;
+          double SmoothRange = xOfMax*m_min_Eresolution;
+          std::vector<double> SAvrg,binsAvrg;
 
-          Kernel::VectorHelper::smoothAtNPoints(S,SArg,nAvrgPoints,&X,
+          Kernel::VectorHelper::smoothAtNPoints(S,SAvrg,SmoothRange,&X,
             ind_min,ind_max,&binsAvrg);
 
-          std::vector<double> der1Avrg,der2Avrg,peaksPos,hillsPos;
-          size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SArg,der1Avrg,peaksPos);
+
+          std::vector<double> der1Avrg,der2Avrg,peaksPos,hillsPos,SAvrg1,binsAvrg1;
+          //
+          size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SAvrg,der1Avrg,peaksPos);
           size_t nHills = calcDerivativeAndCountZeros(binsAvrg,der1Avrg,der2Avrg,hillsPos);
-          while(nPeaks>1 && nHills>2 &&  nAvrgPoints<=2*SearchAreaSize){
-            nAvrgPoints*=2;
-            Kernel::VectorHelper::smoothAtNPoints(S,SArg,nAvrgPoints,&X,
-            ind_min,ind_max,&binsAvrg);
-
-            nPeaks = calcDerivativeAndCountZeros(binsAvrg,SArg,der1Avrg,peaksPos);
-            nHills = calcDerivativeAndCountZeros(binsAvrg,der1Avrg,der2Avrg,hillsPos);
+          if(nPeaks>1){
+            size_t indMin = Kernel::VectorHelper::getBinIndex(binsAvrg,xOfMax*(1-m_min_Eresolution));
+            size_t indMax = Kernel::VectorHelper::getBinIndex(binsAvrg,xOfMax*(1+m_min_Eresolution));
+            if(indMax!=ind_max)indMax++; // shift to left boundary
+            SmoothRange = binsAvrg[indMax]-binsAvrg[indMin];
           }
-          if(nPeaks!=1 || nHills!=2)return false;
+          size_t ic(0);
+          while(nPeaks>1 && ic<100){
+            Kernel::VectorHelper::smoothAtNPoints(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
+            0,ind_max-ind_min,&binsAvrg1);
+
+            nPeaks = calcDerivativeAndCountZeros(binsAvrg1,SAvrg1,der1Avrg,peaksPos);
+            nHills = calcDerivativeAndCountZeros(binsAvrg1,der1Avrg,der2Avrg,hillsPos);
+            SAvrg.swap(SAvrg1);
+            binsAvrg.swap(binsAvrg1);
+            ic++;
+          }
+          if(ic>=100){
+            g_log.warning()<<"No peak search convergence after 100 smoothing iterations. Something is wrong";
+          }
+          if(nPeaks!=1)return false;
+
           energy = peaksPos[0];
-          width  = hillsPos[1]-hillsPos[0];
+          if(nHills>2){
+            size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos,peaksPos[0]);
+            width = hillsPos[peakIndex+1]-hillsPos[peakIndex];
+          }else{
+            width  = hillsPos[1]-hillsPos[0];
+          }
           height = Intensity/(0.5*std::sqrt(M_PI/std::log(2.))*width);
 
           //// sigma from peak width on the half of the height 

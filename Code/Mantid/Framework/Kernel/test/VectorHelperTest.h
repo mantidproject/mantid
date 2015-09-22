@@ -7,6 +7,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <cstdlib>
 #include <boost/assign/list_of.hpp>
 
 using namespace Mantid::Kernel;
@@ -271,32 +272,102 @@ public:
     double id[] = {1,2,3,4,5,6};
     std::vector<double> inputData(id,id+sizeof(id)/sizeof(double));
     double ib[]={0,1,2,3,4,5};
-    std::vector<double> inputBoudaris(ib,ib+sizeof(ib)/sizeof(double));
+    std::vector<double> inputBoundaries(ib,ib+sizeof(ib)/sizeof(double));
 
     std::vector<double> output;
-    TS_ASSERT_THROWS(VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris),std::invalid_argument);
-    inputBoudaris.push_back(6);
-    VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris);
+    TS_ASSERT_THROWS(VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoundaries),std::invalid_argument);
+    inputBoundaries.push_back(6);
+    VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoundaries);
 
-    TS_ASSERT_DELTA(output[3],3.5,1.e-8);
-    TS_ASSERT_DELTA(output[0],2.,1.e-8);
-    TS_ASSERT_DELTA(output[5],4.5,1.e-8);
-    inputBoudaris[1]=1;
-    inputBoudaris[2]=3;
-    inputBoudaris[3]=6;
-    inputBoudaris[4]=10;
-    inputBoudaris[5]=15;
-    inputBoudaris[6]=21;
-    VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoudaris);
+    TS_ASSERT_DELTA(output[1]-output[0],0.492,1.e-3);
+    TS_ASSERT_DELTA(output[3]-output[2],0.4545,1.e-3);
+    TS_ASSERT_DELTA(output[5]-output[4],0.492,1.e-3);
+    inputBoundaries[1]=1;
+    inputBoundaries[2]=3;
+    inputBoundaries[3]=6;
+    inputBoundaries[4]=10;
+    inputBoundaries[5]=15;
+    inputBoundaries[6]=21;
+    VectorHelper::smoothAtNPoints(inputData,output,6,&inputBoundaries);
     TS_ASSERT_DELTA(output[2],3.,1.e-8);
     TS_ASSERT_DELTA(output[0],1.,1.e-8);
     TS_ASSERT_DELTA(output[5],6.,1.e-8);
 
 
     std::vector<double> out_bins;
-    VectorHelper::smoothAtNPoints(inputData,output,3,&inputBoudaris,1,5,&out_bins);
+    VectorHelper::smoothAtNPoints(inputData,output,3,&inputBoundaries,1,5,&out_bins);
     TS_ASSERT_EQUALS(output.size(),4);
     TS_ASSERT_DELTA(output[1],3.,1.e-8);
+  }
+
+  void test_Smooth_keeps_peakPosition(){
+
+    std::vector<double> output;
+    std::vector<double> inputBoundaries(21);
+    inputBoundaries[0]=0;
+    double step(1);
+    for(size_t i=1;i<21;i++){
+      inputBoundaries[i]=inputBoundaries[i-1]+step;
+      step*=1.1;
+    }
+    double norm = 100/inputBoundaries[20];
+    for(size_t i=0;i<21;i++){
+      inputBoundaries[i]*=norm;
+    }
+
+
+    std::vector<double> inputData(20);
+    for(size_t i=0;i<20;i++){
+      double dev = 0.5*(inputBoundaries[i]+inputBoundaries[i+1])-50;
+      inputData[i] = exp(-dev*dev/100)*(inputBoundaries[i+1]-inputBoundaries[i]);
+    }
+    int indOfMax = VectorHelper::getBinIndex(inputBoundaries,50.);
+    double fMax = inputData[indOfMax]/(inputBoundaries[indOfMax+1]-inputBoundaries[indOfMax]);
+    double iLeft = inputData[indOfMax-1]/(inputBoundaries[indOfMax]-inputBoundaries[indOfMax-1]);
+    double iRight = inputData[indOfMax+1]/(inputBoundaries[indOfMax+2]-inputBoundaries[indOfMax+1]);
+
+    TS_ASSERT(iLeft<fMax);
+    TS_ASSERT(iRight<fMax);
+    VectorHelper::smoothAtNPoints(inputData,output,10,&inputBoundaries);
+    fMax = output[indOfMax]/(inputBoundaries[indOfMax+1]-inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax-1]/(inputBoundaries[indOfMax]-inputBoundaries[indOfMax-1]);
+    iRight = inputData[indOfMax+1]/(inputBoundaries[indOfMax+2]-inputBoundaries[indOfMax+1]);
+
+    //TS_ASSERT(iLeft<fMax);
+    //TS_ASSERT(iRight<fMax);
+
+    output.swap(inputData);
+    VectorHelper::smoothAtNPoints(inputData,output,10,&inputBoundaries);
+
+    fMax = output[indOfMax]/(inputBoundaries[indOfMax+1]-inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax-1]/(inputBoundaries[indOfMax]-inputBoundaries[indOfMax-1]);
+    iRight = inputData[indOfMax+1]/(inputBoundaries[indOfMax+2]-inputBoundaries[indOfMax+1]);
+
+  //  TS_ASSERT(iLeft<fMax);
+    TS_ASSERT(iRight<fMax);
+
+
+    output.swap(inputData);
+    VectorHelper::smoothAtNPoints(inputData,output,10,&inputBoundaries);
+
+    fMax = output[indOfMax]/(inputBoundaries[indOfMax+1]-inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax-1]/(inputBoundaries[indOfMax]-inputBoundaries[indOfMax-1]);
+    iRight = inputData[indOfMax+1]/(inputBoundaries[indOfMax+2]-inputBoundaries[indOfMax+1]);
+
+    //TS_ASSERT(iLeft<fMax);
+    //TS_ASSERT(iRight<fMax);
+    
+    output.swap(inputData);
+    VectorHelper::smoothAtNPoints(inputData,output,10,&inputBoundaries);
+
+    fMax = output[indOfMax]/(inputBoundaries[indOfMax+1]-inputBoundaries[indOfMax]);
+    iLeft = inputData[indOfMax-1]/(inputBoundaries[indOfMax]-inputBoundaries[indOfMax-1]);
+    iRight = inputData[indOfMax+1]/(inputBoundaries[indOfMax+2]-inputBoundaries[indOfMax+1]);
+
+    TS_ASSERT(inputData[indOfMax-1]<output[indOfMax]);
+    TS_ASSERT(inputData[indOfMax+1]<output[indOfMax]);
+
+
 
 
 
