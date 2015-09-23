@@ -8,6 +8,27 @@ from mantid.simpleapi import *
 import csv
 import os
 
+######################################################################
+# Remove artifacts such as prompt pulse
+######################################################################
+
+def RemoveArtifact(WS,Xmin,Xmax,Xa,Delta):
+
+    CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux0',XMin=str(Xmin),XMax=str(Xa))
+    CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux3',XMin=str(Xa+Delta),XMax=str(Xmax))
+    CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux1',XMin=str(Xa-Delta),XMax=str(Xa))
+    CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux2',XMin=str(Xa+Delta),XMax=str(Xa+2*Delta ) )
+
+    ScaleX(InputWorkspace='__aux1',OutputWorkspace='__aux1',Factor=str(Delta),Operation='Add')
+    ScaleX(InputWorkspace='__aux2',OutputWorkspace='__aux2',Factor=str(-Delta),Operation='Add')
+    Scale(InputWorkspace='__aux1',OutputWorkspace='__aux1',Factor='0.5',Operation='Multiply')
+    Scale(InputWorkspace='__aux2',OutputWorkspace='__aux2',Factor='0.5',Operation='Multiply')
+
+    Plus(LHSWorkspace='__aux0',RHSWorkspace='__aux1',OutputWorkspace=WS)
+    Plus(LHSWorkspace=WS,RHSWorkspace='__aux2',OutputWorkspace=WS)
+    Plus(LHSWorkspace=WS,RHSWorkspace='__aux3',OutputWorkspace=WS)
+
+
 
 class VisionReduction(PythonAlgorithm):
 
@@ -17,32 +38,16 @@ class VisionReduction(PythonAlgorithm):
     ListPX = []
     ListPXF = []
     ListPXB = []
+    # Binning parameters
+    #binT='10,1,33333'
+    binL='0.281,0.0002,8.199'
+    binE='-2,0.005,5,-0.001,1000'
 
     def FormatFilename(self,s):
         valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
         outfilename = ''.join(c for c in s if c in valid_chars)
         outfilename = outfilename.replace(' ','_')
         return outfilename
-
-    ######################################################################
-    # Remove artifacts such as prompt pulse
-    ######################################################################
-
-    def RemoveArtifact(self,WS,Xmin,Xmax,Xa,Delta):
-
-        CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux0',XMin=str(Xmin),XMax=str(Xa))
-        CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux3',XMin=str(Xa+Delta),XMax=str(Xmax))
-        CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux1',XMin=str(Xa-Delta),XMax=str(Xa))
-        CropWorkspace(InputWorkspace=WS,OutputWorkspace='__aux2',XMin=str(Xa+Delta),XMax=str(Xa+2*Delta ) )
-
-        ScaleX(InputWorkspace='__aux1',OutputWorkspace='__aux1',Factor=str(Delta),Operation='Add')
-        ScaleX(InputWorkspace='__aux2',OutputWorkspace='__aux2',Factor=str(-Delta),Operation='Add')
-        Scale(InputWorkspace='__aux1',OutputWorkspace='__aux1',Factor='0.5',Operation='Multiply')
-        Scale(InputWorkspace='__aux2',OutputWorkspace='__aux2',Factor='0.5',Operation='Multiply')
-
-        Plus(LHSWorkspace='__aux0',RHSWorkspace='__aux1',OutputWorkspace=WS)
-        Plus(LHSWorkspace=WS,RHSWorkspace='__aux2',OutputWorkspace=WS)
-        Plus(LHSWorkspace=WS,RHSWorkspace='__aux3',OutputWorkspace=WS)
 
     def category(self):
         return "DataHandling;PythonAlgorithms;Utility\\Development"
@@ -65,10 +70,7 @@ class VisionReduction(PythonAlgorithm):
         RunNumber = int(FileName.strip('VIS_').replace('.nxs.h5',''))
 
         #*********************************************************************
-        # Binning parameters
-        #binT='10,1,33333'
-        binL='0.281,0.0002,8.199'
-        binE='-2,0.005,5,-0.001,1000'
+
         #*********************************************************************
 
         #*********************************************************************
@@ -116,59 +118,59 @@ class VisionReduction(PythonAlgorithm):
         print 'Loading inelastic banks from', NexusFile
         bank_list = ["bank%d" % i for i in range(1, 15)]
         bank_property = ",".join(bank_list)
-        LoadEventNexus(Filename=NexusFile, BankName=bank_property, OutputWorkspace='IED_T', LoadMonitors='0')
-        LoadInstrument(Workspace='IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml')
-        MaskDetectors(Workspace='IED_T', DetectorList=MaskPX)
+        LoadEventNexus(Filename=NexusFile, BankName=bank_property, OutputWorkspace='__IED_T', LoadMonitors='0')
+        LoadInstrument(Workspace='__IED_T',Filename='/SNS/VIS/shared/autoreduce/VISION_Definition_no_efixed.xml')
+        MaskDetectors(Workspace='__IED_T', DetectorList=MaskPX)
 
-        print "Title:", mtd['IED_T'].getTitle()
-        print "Proton charge:", mtd['IED_T'].getRun().getProtonCharge()
-        if "Temperature" in mtd['IED_T'].getTitle():
+        print "Title:", mtd['__IED_T'].getTitle()
+        print "Proton charge:", mtd['__IED_T'].getRun().getProtonCharge()
+        if "Temperature" in mtd['__IED_T'].getTitle():
             print "Error: Non-equilibrium runs will not be reduced"
             # sys.exit()
-        if mtd['IED_T'].getRun().getProtonCharge() < 5.0:
+        if mtd['__IED_T'].getRun().getProtonCharge() < 5.0:
             print "Error: Proton charge is too low"
             # sys.exit()
 
-        NormaliseByCurrent(InputWorkspace='IED_T',OutputWorkspace='IED_T')
-        self.RemoveArtifact('IED_T',10,33333,16660,240)
+        NormaliseByCurrent(InputWorkspace='__IED_T',OutputWorkspace='__IED_T')
+        RemoveArtifact('__IED_T',10,33333,16660,240)
 
 
-        LoadNexusProcessed(Filename=self.__MonFile,OutputWorkspace='DBM_L',LoadHistory=False)
+        LoadNexusProcessed(Filename=self.__MonFile,OutputWorkspace='__DBM_L',LoadHistory=False)
 
         for i,Pixel in enumerate(self.ListPX):
             Ef=CalTab[Pixel][0]
             Df=CalTab[Pixel][1]
             Efe=(0.7317/Df)**2*Ef
-            mtd['IED_T'].setEFixed(Pixel, Efe)
-        ConvertUnits(InputWorkspace='IED_T',OutputWorkspace='IED_L',EMode='Indirect',Target='Wavelength')
-        Rebin(InputWorkspace='IED_L',OutputWorkspace='IED_L',Params=binL,PreserveEvents='0')
-        InterpolatingRebin(InputWorkspace='DBM_L',OutputWorkspace='DBM_L',Params=binL)
-        #RebinToWorkspace(WorkspaceToRebin='DBM_L',WorkspaceToMatch='IED_L',OutputWorkspace='DBM_L')
-        Divide(LHSWorkspace='IED_L',RHSWorkspace='DBM_L',OutputWorkspace='IED_L')
+            mtd['__IED_T'].setEFixed(Pixel, Efe)
+        ConvertUnits(InputWorkspace='__IED_T',OutputWorkspace='__IED_L',EMode='Indirect',Target='Wavelength')
+        Rebin(InputWorkspace='__IED_L',OutputWorkspace='__IED_L',Params=self.binL,PreserveEvents='0')
+        InterpolatingRebin(InputWorkspace='__DBM_L',OutputWorkspace='__DBM_L',Params=self.binL)
+        #RebinToWorkspace(WorkspaceToRebin='__DBM_L',WorkspaceToMatch='__IED_L',OutputWorkspace='__DBM_L')
+        Divide(LHSWorkspace='__IED_L',RHSWorkspace='__DBM_L',OutputWorkspace='__IED_L')
         for i,Pixel in enumerate(self.ListPX):
             Ef=CalTab[Pixel][0]
-            mtd['IED_L'].setEFixed(Pixel, Ef)
-        ConvertUnits(InputWorkspace='IED_L',OutputWorkspace='IED_E',EMode='Indirect',Target='DeltaE')
-        Rebin(InputWorkspace='IED_E',OutputWorkspace='IED_E',Params=binE,PreserveEvents='0')
-        CorrectKiKf(InputWorkspace='IED_E',OutputWorkspace='IED_E',EMode='Indirect')
+            mtd['__IED_L'].setEFixed(Pixel, Ef)
+        ConvertUnits(InputWorkspace='__IED_L',OutputWorkspace='__IED_E',EMode='Indirect',Target='DeltaE')
+        Rebin(InputWorkspace='__IED_E',OutputWorkspace='__IED_E',Params=self.binE,PreserveEvents='0')
+        CorrectKiKf(InputWorkspace='__IED_E',OutputWorkspace='__IED_E',EMode='Indirect')
 
-        GroupDetectors(InputWorkspace='IED_E',OutputWorkspace='__IED_E_Forward',DetectorList=self.ListPXF)
-        GroupDetectors(InputWorkspace='IED_E',OutputWorkspace='__IED_E_Backward',DetectorList=self.ListPXB)
-        GroupDetectors(InputWorkspace='IED_E',OutputWorkspace='__IED_E_Average',DetectorList=self.ListPX)
+        GroupDetectors(InputWorkspace='__IED_E',OutputWorkspace='__IED_E_Forward',DetectorList=self.ListPXF)
+        GroupDetectors(InputWorkspace='__IED_E',OutputWorkspace='__IED_E_Backward',DetectorList=self.ListPXB)
+        GroupDetectors(InputWorkspace='__IED_E',OutputWorkspace='__IED_E_Average',DetectorList=self.ListPX)
 
         Scale(InputWorkspace='__IED_E_Forward',OutputWorkspace='__IED_E_Forward',Factor=str(1.0/len(BanksForward)),Operation='Multiply')
         Scale(InputWorkspace='__IED_E_Backward',OutputWorkspace='__IED_E_Backward',Factor=str(1.0/len(BanksBackward)),Operation='Multiply')
         Scale(InputWorkspace='__IED_E_Average',OutputWorkspace='__IED_E_Average',Factor=str(1.0/len(Banks)),Operation='Multiply')
 
-        AppendSpectra(InputWorkspace1='__IED_E_Backward',InputWorkspace2='__IED_E_Forward',OutputWorkspace='IED_reduced')
-        AppendSpectra(InputWorkspace1='IED_reduced',InputWorkspace2='__IED_E_Average',OutputWorkspace='IED_reduced')
+        AppendSpectra(InputWorkspace1='__IED_E_Backward',InputWorkspace2='__IED_E_Forward',OutputWorkspace='__IED_reduced')
+        AppendSpectra(InputWorkspace1='__IED_reduced',InputWorkspace2='__IED_E_Average',OutputWorkspace='__IED_reduced')
 
-        Title = mtd['IED_reduced'].getTitle()
+        Title = mtd['__IED_reduced'].getTitle()
         Note = Title.split('>')[0]
         Note = self.FormatFilename(Note)
         INS = str(RunNumber)+'_'+Note
 
-        ws = Scale(InputWorkspace='IED_reduced',OutputWorkspace=INS,Factor='500',Operation='Multiply')
+        ws = Scale(InputWorkspace='__IED_reduced',OutputWorkspace=INS,Factor='500',Operation='Multiply')
         mtd[INS].setYUnitLabel('Normalized intensity')
 
         RemoveLogs(INS)
