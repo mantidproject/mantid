@@ -24,7 +24,7 @@ Logger g_log("TimeSeriesProperty");
  */
 template <typename TYPE>
 TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name)
-    : Property(name, typeid(std::vector<TimeValueUnit<TYPE>>)), m_values(),
+    : Property(name, typeid(std::vector<TimeValueUnit<TYPE> >)), m_values(),
       m_size(), m_propSortedFlag(), m_filterApplied() {}
 
 /// Virtual destructor
@@ -222,7 +222,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
   if (m_values.size() <= 1)
     return;
 
-  typename std::vector<TimeValueUnit<TYPE>>::iterator iterhead, iterend;
+  typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead, iterend;
 
   // 2. Determine index for start and remove  Note erase is [...)
   int istart = this->findIndex(start);
@@ -289,7 +289,7 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
   }
 
   // 3. Prepare a copy
-  std::vector<TimeValueUnit<TYPE>> mp_copy;
+  std::vector<TimeValueUnit<TYPE> > mp_copy;
 
   g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size()
                 << "  Original MP Size = " << m_values.size() << "\n";
@@ -355,20 +355,24 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
 }
 
 /**
- * Split out a time series property by time intervals.
+ * Split this time series property by time intervals to multiple time series
+ * property according to number of distinct splitters' indexes, such as 0 and 1
  *
  * NOTE: If the input TSP has a single value, it is assumed to be a constant
  *  and so is not split, but simply copied to all outputs.
  *
  * @param splitter :: a TimeSplitterType object containing the list of intervals
- *and destinations.
+ *                     and destinations.
  * @param outputs  :: A vector of output TimeSeriesProperty pointers of the same
- *type.
+ *                    type.
+ * @param isPeriodic :: whether the log (this TSP) is periodic. For example
+ *                    proton-charge is periodic log.
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::splitByTime(
-    std::vector<SplittingInterval> &splitter,
-    std::vector<Property *> outputs) const {
+void
+TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
+                                      std::vector<Property *> outputs,
+                                      bool isPeriodic) const {
   // 0. Sort if necessary
   sort();
 
@@ -402,42 +406,74 @@ void TimeSeriesProperty<TYPE>::splitByTime(
     return;
 
   // 3. We will be iterating through all the entries in the the map/vector
-  size_t ip = 0;
+  size_t i_property = 0;
 
   //    And at the same time, iterate through the splitter
   Kernel::TimeSplitterType::iterator itspl = splitter.begin();
 
-  while (itspl != splitter.end()) {
+  size_t counter = 0;
+  g_log.debug() << "[DB] Number of time series entries = " << m_values.size()
+                << ", Number of splitters = " << splitter.size() << "\n";
+  while (itspl != splitter.end() && i_property < m_values.size()) {
     // Get the splitting interval times and destination
     DateAndTime start = itspl->start();
     DateAndTime stop = itspl->stop();
-    int index = itspl->index();
+
+    int output_index = itspl->index();
+    // output workspace index is out of range. go to the next splitter
+    if (output_index < 0 || output_index >= static_cast<int>(numOutputs))
+      continue;
+
+    TimeSeriesProperty<TYPE> *myOutput = outputs_tsp[output_index];
+    // skip if the input property is of wrong type
+    if (!myOutput) {
+      ++itspl;
+      ++counter;
+      continue;
+    }
 
     // Skip the events before the start of the time
-    // TODO  Algorithm here can be refactored for better performance
-    while (ip < this->m_values.size() && m_values[ip].time() < start)
-      ip++;
+    while (i_property < m_values.size() && m_values[i_property].time() < start)
+      ++i_property;
 
-    // Go through all the events that are in the interval (if any)
-    // while ((it != this->m_propertySeries.end()) && (it->first < stop))
-    while (ip < this->m_values.size() && m_values[ip].time() < stop) {
-      if ((index >= 0) && (index < static_cast<int>(numOutputs))) {
-        TimeSeriesProperty<TYPE> *myOutput = outputs_tsp[index];
-        // Copy the log out to the output
-        if (myOutput)
-          myOutput->addValue(m_values[ip].time(), m_values[ip].value());
-      }
-      ++ip;
+    if (i_property == m_values.size()) {
+      // i_property is out of the range. Then use the last entry
+      myOutput->addValue(m_values[i_property - 1].time(),
+                         m_values[i_property - 1].value());
+
+      ++itspl;
+      ++counter;
+      break;
+    }
+
+    // The current entry is within an interval. Record them until out
+    if (m_values[i_property].time() > start && i_property > 0 && !isPeriodic) {
+      // Record the previous oneif this property is not exactly on start time
+      //   and this entry is not recorded
+      size_t i_prev = i_property - 1;
+      if (myOutput->size() == 0 ||
+          m_values[i_prev].time() != myOutput->lastTime())
+        myOutput->addValue(m_values[i_prev].time(), m_values[i_prev].value());
+    }
+
+    // Loop through all the entries until out.
+    while (i_property < m_values.size() && m_values[i_property].time() < stop) {
+
+      // Copy the log out to the output
+      myOutput->addValue(m_values[i_property].time(),
+                         m_values[i_property].value());
+      ++i_property;
     }
 
     // Go to the next interval
     ++itspl;
+    ++counter;
     // But if we reached the end, then we are done.
     if (itspl == splitter.end())
       break;
 
     // No need to keep looping through the filter if we are out of events
-    if (ip == this->m_values.size())
+    if (i_property == this->m_values.size())
       break;
 
   } // Looping through entries in the splitter vector
@@ -446,9 +482,14 @@ void TimeSeriesProperty<TYPE>::splitByTime(
   for (std::size_t i = 0; i < numOutputs; i++) {
     TimeSeriesProperty<TYPE> *myOutput =
         dynamic_cast<TimeSeriesProperty<TYPE> *>(outputs[i]);
-    if (myOutput)
+    if (myOutput) {
       myOutput->m_size = myOutput->realSize();
+      // g_log.notice() << "[DB] Final output size = " << myOutput->size() <<
+      // "\n";
+    }
   }
+
+  return;
 }
 
 // The makeFilterByValue & expandFilterToRange methods generate a bunch of
@@ -701,7 +742,8 @@ double TimeSeriesProperty<TYPE>::timeAverageValue() const {
     TimeSplitterType filter;
     filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
     retVal = this->averageValueInFilter(filter);
-  } catch (exception &) {
+  }
+  catch (exception &) {
     // just return nan
     retVal = std::numeric_limits<double>::quiet_NaN();
   }
@@ -1015,7 +1057,8 @@ template <typename TYPE> std::string TimeSeriesProperty<TYPE>::value() const {
     try {
       ins << m_values[i].time().toSimpleString();
       ins << "  " << m_values[i].value() << "\n";
-    } catch (...) {
+    }
+    catch (...) {
       // Some kind of error; for example, invalid year, can occur when
       // converting boost time.
       ins << "Error Error"
@@ -1504,8 +1547,8 @@ Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
    @param filter :: The filter mask to apply
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::filterWith(
-    const TimeSeriesProperty<bool> *filter) {
+void
+TimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool> *filter) {
   // 1. Clear the current
   m_filter.clear();
   m_filterQuickRef.clear();
@@ -1702,7 +1745,7 @@ template <typename TYPE> void TimeSeriesProperty<TYPE>::eliminateDuplicates() {
   // 2. Detect and Remove Duplicated
   size_t numremoved = 0;
 
-  typename std::vector<TimeValueUnit<TYPE>>::iterator vit;
+  typename std::vector<TimeValueUnit<TYPE> >::iterator vit;
   vit = m_values.begin() + 1;
   Kernel::DateAndTime prevtime = m_values.begin()->time();
   while (vit != m_values.end()) {
@@ -1802,7 +1845,7 @@ int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const {
   }
 
   // 3. Find by lower_bound()
-  typename std::vector<TimeValueUnit<TYPE>>::const_iterator fid;
+  typename std::vector<TimeValueUnit<TYPE> >::const_iterator fid;
   TimeValueUnit<TYPE> temp(t, m_values[0].value());
   fid = std::lower_bound(m_values.begin(), m_values.end(), temp);
 
@@ -1846,7 +1889,7 @@ int TimeSeriesProperty<TYPE>::upperBound(Kernel::DateAndTime t, int istart,
 
   // 3. Construct the pair for comparison and do lower_bound()
   TimeValueUnit<TYPE> temppair(t, m_values[0].value());
-  typename std::vector<TimeValueUnit<TYPE>>::iterator fid;
+  typename std::vector<TimeValueUnit<TYPE> >::iterator fid;
   fid = std::lower_bound((m_values.begin() + istart),
                          (m_values.begin() + iend + 1), temppair);
   if (fid == m_values.end())

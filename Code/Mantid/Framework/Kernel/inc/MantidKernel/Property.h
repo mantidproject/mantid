@@ -160,7 +160,8 @@ public:
   virtual void filterByTime(const Kernel::DateAndTime &start,
                             const Kernel::DateAndTime &stop);
   virtual void splitByTime(std::vector<SplittingInterval> &splitter,
-                           std::vector<Property *> outputs) const;
+                           std::vector<Property *> outputs,
+                           bool isProtonCharge = true) const;
 
   virtual int size() const;
 

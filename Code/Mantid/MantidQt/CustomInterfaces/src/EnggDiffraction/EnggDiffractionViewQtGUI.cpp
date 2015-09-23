@@ -339,12 +339,21 @@ void EnggDiffractionViewQtGUI::enableCalibrateAndFocusActions(bool enable) {
   // focus
   m_uiTabFocus.lineEdit_run_num->setEnabled(enable);
   m_uiTabFocus.pushButton_focus->setEnabled(enable);
+  m_uiTabFocus.checkBox_FocusedWS->setEnabled(enable);
 }
 
-void
-EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
-                                            const std::vector<double> &difc,
-                                            const std::vector<double> &tzero) {
+void EnggDiffractionViewQtGUI::plotFocusedSpectrum() {
+  std::string pyCode = "plotSpectrum('engggui_focusing_output_ws', 0)";
+
+  std::string status = runPythonCode(QString::fromStdString(pyCode), false).toStdString();
+  m_logMsgs.push_back(
+      "Run Python code to save output file, with status string: " + status);
+  m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
+}
+
+void EnggDiffractionViewQtGUI::writeOutCalibFile(
+    const std::string &outFilename, const std::vector<double> &difc,
+    const std::vector<double> &tzero) {
   // TODO: this is horrible and should not last much here.
   // Avoid running Python code
   // Update this as soon as we have a more stable way of generating IPARM files
@@ -353,7 +362,8 @@ EnggDiffractionViewQtGUI::writeOutCalibFile(const std::string &outFilename,
   // vanadium_run=236516, template_file=None):
 
   // this replace is to prevent issues with network drives on windows:
-  const std::string  safeOutFname= boost::replace_all_copy(outFilename, "\\","/");
+  const std::string safeOutFname =
+      boost::replace_all_copy(outFilename, "\\", "/");
   std::string pyCode = "import EnggUtils\n";
   pyCode += "import os\n";
   // normalize apparently not needed after the replace, but to be double-safe:
@@ -518,6 +528,10 @@ std::string EnggDiffractionViewQtGUI::focusingDir() const {
 int EnggDiffractionViewQtGUI::focusingBank() const {
   int idx = m_uiTabFocus.comboBox_bank_num->currentIndex();
   return m_uiTabFocus.comboBox_bank_num->itemData(idx).toInt() + 1;
+}
+
+bool EnggDiffractionViewQtGUI::focusedOutWorkspace() const {
+  return m_uiTabFocus.checkBox_FocusedWS->checkState();
 }
 
 void EnggDiffractionViewQtGUI::instrumentChanged(int /*idx*/) {

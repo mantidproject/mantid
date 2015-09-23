@@ -70,7 +70,7 @@ public:
   void addEvents(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &event_qs, bool hkl_integ);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  boost::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(Mantid::Kernel::V3D const &peak_q, bool specify_size,
+  boost::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(std::vector<Kernel::V3D> E1Vec, Mantid::Kernel::V3D const &peak_q, bool specify_size,
                               double peak_radius, double back_inner_radius,
                               double back_outer_radius,
                               std::vector<double> &axes_radii, double &inti,
@@ -81,6 +81,12 @@ private:
   static double numInEllipsoid(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
                             std::vector<Mantid::Kernel::V3D> const &directions,
                             std::vector<double> const &sizes);
+
+  /// Calculate the number of events in an ellipsoid centered at 0,0,0
+  static double numInEllipsoidBkg(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
+                            std::vector<Mantid::Kernel::V3D> const &directions,
+                            std::vector<double> const &sizes,
+                            std::vector<double> const &sizesIn);
 
   /// Calculate the 3x3 covariance matrix of a list of Q-vectors at 0,0,0
   static void makeCovarianceMatrix(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
@@ -106,11 +112,11 @@ private:
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
   boost::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid> ellipseIntegrateEvents(
-      std::vector<std::pair<double, Mantid::Kernel::V3D> > const &ev_list, std::vector<Mantid::Kernel::V3D> const &directions,
+      std::vector<Kernel::V3D> E1Vec, Kernel::V3D const &peak_q, std::vector<std::pair<double, Mantid::Kernel::V3D> > const &ev_list, std::vector<Mantid::Kernel::V3D> const &directions,
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);
-
+  double detectorQ(std::vector<Kernel::V3D> E1Vec, const Mantid::Kernel::V3D QLabFrame, std::vector<double>& r);
   // Private data members
   PeakQMap peak_qs;         // hashtable with peak Q-vectors
   EventListMap event_lists; // hashtable with lists of events for each peak

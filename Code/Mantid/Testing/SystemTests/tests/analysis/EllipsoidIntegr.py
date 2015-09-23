@@ -18,11 +18,11 @@ class EllipsoidIntegr( stresstesting.MantidStressTest):
     def runTest(self):
                                           # expected results with size determined
                                            # automatically from projected event sigmas
-        inti_auto = [ 88, 99, 23, 33, 8, 8, 4 ]
+        inti_auto = [ 89, 101, 24, 34, 9, 9, 5 ]
         sigi_auto = [ 13.784, 18.1384, 13.1529, 9.94987, 5.83095, 10.2956, 10.2956]
                                             # expected results with fixed size
                                              # ellipsoids
-        inti_fixed = [ 87.541, 95.3934, 21.3607, 33.4262, 7.36066, 9.68852, 3.54098 ]
+        inti_fixed = [ 88.5902, 97.4918, 22.4098, 34.4754, 8.40984, 10.7377, 4.59016 ]
         sigi_fixed = [ 13.9656, 18.4523, 13.4335, 10.1106, 5.94223, 10.5231, 10.5375 ]
 
                                               # first, load peaks into a peaks workspace
