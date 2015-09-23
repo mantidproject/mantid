@@ -44,9 +44,8 @@ public:
   virtual const std::string name() const { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   virtual const std::string summary() const{
-    return "Analyze the chopper logs and estimate all incident energies\n"
-           "registered by given monitor of a direct inelastic instrument\n"
-           "and available in given experiment.";
+    return "Analyze the chopper logs and identify energies to use as incident energies\n"
+           "in an inelastic experiment from the signal registered by the monitors.";
   }
   /// Algorithm's version for identification. @see Algorithm::version
   virtual int version() const{ return 1; } ;
@@ -74,13 +73,14 @@ protected: // for testing, private otherwise.
       double ChopDelay,double Period,std::vector<double > & guess_opening_times);
   /**Get energy of monitor peak if one is present*/
   bool findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
-      size_t ind_min,size_t ind_max,
+       double Ei,const std::vector<size_t> & monsRangeMin,
+      const std::vector<size_t> & monsRangeMax,
       double & energy,double & height,double &width);
   /**Find indexes of each expected peak intervals */
-  void findBinRanges(const MantidVec & eBins,
+  void findBinRanges(const MantidVec & eBins,const MantidVec & signal,
       const std::vector<double> & guess_energies,
       double Eresolution,std::vector<size_t> & irangeMin,
-      std::vector<size_t> & irangeMax);
+      std::vector<size_t> & irangeMax, std::vector<bool> &guessValid);
 
   size_t calcDerivativeAndCountZeros(const std::vector<double> &bins,const std::vector<double> &signal,
     std::vector<double> &deriv,std::vector<double> &zeros);
@@ -93,7 +93,7 @@ protected: // for testing, private otherwise.
   double m_min_Eresolution;
   // set as half max LET resolution at 20mev at 5e-4
   double m_max_Eresolution;
-
+  double m_peakEnergyRatio2reject;
 };
 
 } // namespace Algorithms

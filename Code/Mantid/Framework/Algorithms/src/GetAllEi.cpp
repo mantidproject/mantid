@@ -21,7 +21,8 @@ namespace Mantid {
     GetAllEi::GetAllEi() : Algorithm(),
       m_useFilterLog(true),m_min_Eresolution(0.08),
       // half maximal resolution for LET
-      m_max_Eresolution(0.5e-3){}
+      m_max_Eresolution(0.5e-3),
+      m_peakEnergyRatio2reject(0.01){}
 
     /// Initialization method.
     void GetAllEi::init() {
@@ -47,10 +48,39 @@ namespace Mantid {
       declareProperty("FilterBaseLog", "proton_charge", "Name of the instrument log,"
         "with positive values indicating that instrument is running\n"
         "and 0 or negative that it is not.\n"
-        "The log is used to identify time interval to evaluate chopper speed and chopper delay which matter.\n"
-        "If such log is not present, log values are calculated from experiment start&end times.");
+        "The log is used to identify time interval to evaluate"
+        " chopper speed and chopper delay which matter.\n"
+        "If such log is not present, log values are calculated "
+        "from experiment start&end times.");
 
-      declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",
+      auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+      maxInRange->setLower(1.e-6);
+      maxInRange->setUpper(0.1);
+
+      declareProperty("MaxInstrResolution",0.0005,maxInRange,
+        "The maximal energy resolution possible for an"
+        "instrument at some energies (full width at half maximum). \nPeaks, sharper then"
+        "this width are rejected. Accepted limits are:1e-6-0.1");
+
+      auto minInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+      minInRange->setLower(0.001);
+      minInRange->setUpper(0.5);
+      declareProperty("MinInstrResolution",0.08,minInRange,
+        "The minimal energy resolution possible for an"
+        "instrument at some energies (full width at half maximum). \n"
+        "Peaks broader then this width are rejected. Accepted limits are:0.001-0.5");
+
+      auto peakInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+      peakInRange->setLower(0.0);
+      minInRange->setUpper(1.);
+      declareProperty("PeaksRatioToReject",0.01,peakInRange,
+        "Ratio of a peak energy to the maximal energy in a peak. "
+        "If the ratio is lower then the value specified here, "
+        "peak is treated as insignificant one and is rejected.\n"
+        "Accepted limits are:0.0 (All accepted) to 1 -- only one peak \n"
+        "(or peaks with max and equal intensity) are accepted.");
+
+      declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",
         Kernel::Direction::Output),
         "Name of the output matrix workspace, containing single spectra with"
         " monitor peaks energies\n"
@@ -61,6 +91,8 @@ namespace Mantid {
       // Get pointers to the workspace, parameter map and table
       API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
 
+      m_min_Eresolution = getProperty("MinInstrResolution");
+      m_max_Eresolution = getProperty("MaxInstrResolution");
 
       double chopSpeed,chopDelay;
       findChopSpeedAndDelay(inputWS,chopSpeed,chopDelay);
@@ -78,7 +110,7 @@ namespace Mantid {
 
       // build workspace to find monitor's peaks
       size_t det1WSIndex;
-      auto workingWS = buildWorkspaceToFit(inputWS,det1WSIndex);
+      auto monitorWS = buildWorkspaceToFit(inputWS,det1WSIndex);
 
       // recalculate delay time from chopper position to monitor position
       auto detector1   = inputWS->getDetector(det1WSIndex);
@@ -110,32 +142,83 @@ namespace Mantid {
           " chopper prospective opening within time frame: "
           <<TOF_range.first<<" to: "<<TOF_range.second<<std::endl;
       }
+      std::pair<double,double> Mon1_Erange  = monitorWS->getSpectrum(0)->getXDataRange();
+      std::pair<double,double> Mon2_Erange  = monitorWS->getSpectrum(1)->getXDataRange();
+      double eMin = std::max(Mon1_Erange.first,Mon2_Erange.first);
+      double eMax = std::min(Mon1_Erange.second,Mon2_Erange.second);
 
       // convert to energy
+      std::vector<double> guess_ei;
+      guess_ei.reserve(guess_opening.size());
       double unused(0.0);
       auto   destUnit = Kernel::UnitFactory::Instance().create("Energy");
       destUnit->initialize(mon1Distance, 0., 0., static_cast<int>(Kernel::DeltaEMode::Elastic),0.,unused);
       for(size_t i=0;i<guess_opening.size();i++){
-        guess_opening[i] = destUnit->singleFromTOF(guess_opening[i]);
+        double eGuess = destUnit->singleFromTOF(guess_opening[i]);
+        if(eGuess >eMin && eGuess<eMax){
+          guess_ei.push_back(eGuess);
+        }
       }
-      std::sort(guess_opening.begin(),guess_opening.end());
+      std::sort(guess_ei.begin(),guess_ei.end());
 
+      std::vector<size_t> irange_min,irange_max;
+      std::vector<bool> guessValid;
+      // preprocess first monitors peaks;
+      findBinRanges(monitorWS->readX(0),monitorWS->readY(0),guess_ei,
+                    this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
+                    irange_min,irange_max,guessValid);
+
+      // remove invalid guess values
+      auto removeInvalidGuess=[](const std::vector<bool> &guessValid,std::vector<double> &guess){
+        std::vector<double> new_guess;
+        new_guess.reserve(guess.size());
+
+        for(size_t i= 0;i<guessValid.size();i++){
+          if(guessValid[i]){
+            new_guess.push_back(guess[i]);
+          }
+        }
+        new_guess.swap(guess);
+      };
+      auto removeInvalidGuessN=[](const std::vector<bool> &guessValid,std::vector<size_t> &guess){
+        std::vector<size_t> new_guess;
+        new_guess.reserve(guess.size());
+
+        for(size_t i= 0;i<guessValid.size();i++){
+          if(guessValid[i]){
+            new_guess.push_back(guess[i]);
+          }
+        }
+        new_guess.swap(guess);
+      };
+
+
+      removeInvalidGuess(guessValid,guess_ei);
+      // preprocess second monitors peaks
+      std::vector<size_t> irange1_min,irange1_max;
+      findBinRanges(monitorWS->readX(1),monitorWS->readY(1),guess_ei,
+                    this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
+                    irange1_min,irange1_max,guessValid);
+      removeInvalidGuess(guessValid,guess_ei);
+      removeInvalidGuessN(guessValid,irange_min);
+      removeInvalidGuessN(guessValid,irange_max);
 
 
       std::vector<double> peaks_positions;
       std::vector<double> peaks_height;
       std::vector<double> peaks_width;
-      std::vector<size_t> irange_min,irange_max;
-      findBinRanges(workingWS->readX(0),guess_opening,
-        this->m_min_Eresolution,
-        irange_min,irange_max);
-
       double maxPeakEnergy(0);
-      for(size_t i=0; i<guess_opening.size();i++){
+      std::vector<size_t> monsRangeMin(2),monsRangeMax(2);
+      for(size_t i=0; i<guess_ei.size();i++){
+        monsRangeMin[0]=irange_min[i];
+        monsRangeMax[0]=irange_max[i];
+        monsRangeMin[1]=irange1_min[i];
+        monsRangeMax[1]=irange1_max[i];
 
         double energy,height,twoSigma;
-        bool found =findMonitorPeak(workingWS,
-                    irange_min[i],irange_max[i],
+        bool found =findMonitorPeak(monitorWS,
+                    guess_ei[i],
+                    monsRangeMin,monsRangeMax,
                     energy,height,twoSigma);
         if(found){
           peaks_positions.push_back(energy);
@@ -144,7 +227,7 @@ namespace Mantid {
 
         }
       }
-      workingWS.reset();
+      monitorWS.reset();
 
       size_t nPeaks = peaks_positions.size();
       if (nPeaks == 0){
@@ -165,68 +248,90 @@ namespace Mantid {
     }
     /**Get energy of monitor peak if one is present*/
     bool GetAllEi::findMonitorPeak(const API::MatrixWorkspace_sptr &inputWS,
-      size_t ind_min,size_t ind_max,
+      double Ei,const std::vector<size_t> & monsRangeMin,
+      const std::vector<size_t> & monsRangeMax,
       double & position,double & height,double &twoSigma){
-
-        // interval too small -- can not be peak there
-        if(std::fabs(double(ind_max-ind_min))<5)return false;
+        // calculate sigma from half-width parameters
+        double maxSigma = Ei*m_min_Eresolution/(2*std::sqrt(2*std::log(2.)));
+        double minSigma = Ei*m_max_Eresolution/(2*std::sqrt(2*std::log(2.)));
 
 
         /**Lambda to identify guess values for a peak at given index
-          and set up these parameters as input for fitting algorithm
-        */
+          and set up these parameters as input for fitting algorithm   */
         auto peakGuess =[&](size_t index,double &peakPos,
                             double &peakHeight,double &peakTwoSigma){
 
           double sMin(std::numeric_limits<double>::max());
           double sMax(-sMin);
-          double xOfMax;
+          double xOfMax,dXmax;
           double ncMax(0),Intensity(0);
 
           auto X = inputWS->readX(index);
           auto S = inputWS->readY(index);
+          size_t ind_min = monsRangeMin[index];
+          size_t ind_max = monsRangeMax[index];
+          // interval too small -- not interested in a peak there
+          if(std::fabs(double(ind_max-ind_min))<5)return false;
 
           double xMin  = X[ind_min];
           double xMax  = X[ind_max];
 
           for(size_t i=ind_min;i<ind_max;i++){
-            double signal = S[i];
+            double dX = X[i+1]-X[i];
+            double signal = S[i]/dX;
             if(signal<sMin)sMin=signal;
             if(signal>sMax){
               sMax = signal;
+              dXmax = dX;
               xOfMax=X[i];
             }
             Intensity+=S[i];
           }
-          if(sMax <= 1)return false;
+          // monitor peak should not have just two counts in it.
+          if(sMax*dXmax <= 2)return false;
           //
           size_t SearchAreaSize = ind_max-ind_min;
 
-          double maxSigma = xOfMax*m_min_Eresolution/(2*std::sqrt(2*std::log(2.)));
           double SmoothRange = 2*maxSigma;
 
           std::vector<double> SAvrg,binsAvrg;
           Kernel::VectorHelper::smoothAtNPoints(S,SAvrg,SmoothRange,&X,
             ind_min,ind_max,&binsAvrg);
 
+          double realPeakPos; // this position is less shifted due to the skew in averaging formula
+          bool foundRealPeakPos(false);
           std::vector<double> der1Avrg,der2Avrg,peaks,hillsPos,SAvrg1,binsAvrg1;
           size_t nPeaks = calcDerivativeAndCountZeros(binsAvrg,SAvrg,der1Avrg,peaks);
           size_t nHills = calcDerivativeAndCountZeros(binsAvrg,der1Avrg,der2Avrg,hillsPos);
+          size_t nPrevHills = 2*nHills;
+          if (nPeaks==1){
+              foundRealPeakPos = true;
+              realPeakPos      = peaks[0];
+          }
 
           size_t ic(0);
-          while((nPeaks>1||nHills>2) && ic<100){
+          while((nPeaks>1 || nHills>2)&&(nPrevHills!=nHills) && ic<50){
             Kernel::VectorHelper::smoothAtNPoints(SAvrg,SAvrg1,SmoothRange,&binsAvrg,
             0,ind_max-ind_min,&binsAvrg1);
+            nPrevHills=nHills;
 
             nPeaks = calcDerivativeAndCountZeros(binsAvrg1,SAvrg1,der1Avrg,peaks);
             nHills = calcDerivativeAndCountZeros(binsAvrg1,der1Avrg,der2Avrg,hillsPos);
             SAvrg.swap(SAvrg1);
             binsAvrg.swap(binsAvrg1);
+            if (nPeaks==1 && !foundRealPeakPos){
+              foundRealPeakPos = true;
+              realPeakPos      = peaks[0];
+            }
             ic++;
+
           }
-          if(ic>=100){
-            g_log.warning()<<"No peak search convergence after 100 smoothing iterations. Something is wrong";
+          if(ic>=50){
+            g_log.information()<<"No peak search convergence after 50 smoothing iterations. Something is wrong";
           }
+          g_log.debug()<<"Performed: "+std::to_string(ic)+ " averages for spectra "
+            +std::to_string(index)+" at energy: "+std::to_string(Ei)
+            +"\n and found: "+std::to_string(nPeaks)+"peaks and "+std::to_string(nHills)+" hills\n";
           if(nPeaks!=1)return false;
 
           peakPos = peaks[0];
@@ -234,27 +339,45 @@ namespace Mantid {
             size_t peakIndex = Kernel::VectorHelper::getBinIndex(hillsPos,peaks[0]);
             peakTwoSigma = hillsPos[peakIndex+1]-hillsPos[peakIndex];
           }else{
-            if(hillPos.size()==2){
+            if(hillsPos.size()==2){
               peakTwoSigma = hillsPos[1]-hillsPos[0];
             }else{
               return false;
             }
           }
-          // assuming that averaging conserves intensity and ignoring background:
-          peakHeight = Intensity/(0.5*std::sqrt(2.*M_PI)*peakTwoSigma);
+          // assuming that averaging conserves intensity and removing linear background:
+          peakHeight = Intensity/(0.5*std::sqrt(2.*M_PI)*peakTwoSigma)-sMin;
+          peakPos   = realPeakPos;
 
           return true;
         };
         //--------------------------------------------------------------------
         double peak1Pos,peak1TwoSigma,peak1Height;
-        if(!peakGuess(0,peak1Pos,peak1TwoSigma,peak1Height))return false;
+        if(!peakGuess(0,peak1Pos,peak1Height,peak1TwoSigma))return false;
+        if(0.25*peak1TwoSigma>maxSigma||peak1TwoSigma<minSigma){
+          g_log.debug()<<"Rejecting due to width: Peak at mon1 Ei="+std::to_string(peak1Pos)+" with Height:"
+            +std::to_string(peak1Height)+" and 2*Sigma: "+std::to_string(peak1TwoSigma)<<std::endl;
+          return false;
+        }
 
         double peak2Pos,peak2TwoSigma,peak2Height;
-        if(!peakGuess(1,peak2Pos,peak2TwoSigma,peak2Height))return false;
+        if(!peakGuess(1,peak2Pos,peak2Height,peak2TwoSigma))return false;
+        // Let's not check anything except peak position for monitor2, as 
+        // its intensity may be very low for some instruments. 
+        //if(0.25*peak2TwoSigma>maxSigma||peak2TwoSigma<minSigma)return false;
 
-        if(std::fabs(peak1Pos-peak2Pos)>0.25*(peak1TwoSigma+peak2TwoSigma))return false;
+        // peak in first and second monitors are too far from each other. May be the instrument
+        // is ill-calibrated but GetEi will probably not find this peak anyway.
+        if(std::fabs(peak1Pos-peak2Pos)>0.25*(peak1TwoSigma+peak2TwoSigma)){
+          g_log.debug()<<"Rejecting due to displacement: Peak at mon1 Ei="+std::to_string(peak1Pos)
+            +" with Height:"
+            +std::to_string(peak1Height)+" and 2*Sigma: "+std::to_string(peak1TwoSigma)
+            +" peak at mon2 at: "+std::to_string(peak1Height) <<std::endl;
 
-        position = 0.5*(peak1Pos+peak2Pos);
+          return false;
+        }
+
+        position = peak1Pos;
         twoSigma = peak1TwoSigma;
         height   = peak1Height;
 
@@ -323,60 +446,80 @@ namespace Mantid {
 
       return nZeros;
     }
-    
-
-
- 
-
 
     /**Find indexes of each expected peak intervals from monotonous array of ranges.
     @param eBins   -- bin ranges to look through
     @param guess_energies -- vector of guess energies to look for
     @param irangeMin  -- start indexes of energy intervals in the guess_energies vector.
     @param irangeMax  -- final indexes of energy intervals in the guess_energies vector.
+    @param guessValid -- boolean vector, which specifies if guess energies are valid
     */
-    void GetAllEi::findBinRanges(const MantidVec & eBins,
+    void GetAllEi::findBinRanges(const MantidVec & eBins,const MantidVec & signal,
       const std::vector<double> & guess_energy,double Eresolution,std::vector<size_t> & irangeMin,
-      std::vector<size_t> & irangeMax){
+      std::vector<size_t> & irangeMax, std::vector<bool> &guessValid){
 
 
-        auto inRange = [&](size_t index,const double &eGuess){
-          return (eBins[index]> eGuess*(1-2*Eresolution) && 
-            (eBins[index]<=eGuess*(1+2*Eresolution)));
-        };
-
+        size_t index_min,index_max;
         size_t nBins = eBins.size();
-        size_t startIndex(0);
-        bool within=false;
-        for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
-          within=false;
-          for(size_t i=startIndex;i<nBins;i++){
-            if(inRange(i,guess_energy[nGuess])){
-              if(!within){
-                within = true;
-                if(i>1){
-                  irangeMin.push_back(i-1);
-                }else{
-                  irangeMin.push_back(0);
-                }
-              }
-            }else{
-              if(within){
-                irangeMax.push_back(i);
-                startIndex=i;
-                within = false;
-                break;
-              }
+        guessValid.resize(guess_energy.size());
+        // get bin range corresponding to energy range
+        auto getBinRange=[&](double eMin,double eMax){
+          if(eMin<=eBins[0]){ 
+            index_min =0;
+          }else{
+            index_min = Kernel::VectorHelper::getBinIndex(eBins,eMin);
+          }
+
+          if(eMax>=eBins[nBins-1]){
+            index_max =nBins+1;
+          }else{
+            index_max = Kernel::VectorHelper::getBinIndex(eBins,eMax);
+            if(index_max>=nBins)index_max=nBins-1;
+          }
+
+        };
+        // refine bin range. May need better procedure for this. 
+        auto refineEGuess =[&](double &eGuess){
+          size_t ind_Emax;
+          double SMax(0);
+          for(size_t i=index_min;i<index_max-1;i++){
+            double dX = eBins[i+1]-eBins[i];
+            double sig = signal[i]/dX;
+            if(sig>SMax){
+              SMax = sig;
+              ind_Emax = i;
             }
           }
-        }
-        if(within){
-          irangeMax.push_back(nBins-1);
+          if(ind_Emax == index_min || ind_Emax==index_max){
+            g_log.warning()<<"Incorrect guess energy: "<<std::to_string(eGuess)<<
+              " no energy peak found in 4*Sigma range\n";
+            return false;
+          }
+          eGuess = 0.5*(eBins[ind_Emax]+eBins[ind_Emax+1]);
+          return true;
+        };
+
+        // Do the job
+        for(size_t nGuess = 0;nGuess<guess_energy.size();nGuess++){
+
+          double eGuess = guess_energy[nGuess];
+          getBinRange(eGuess*(1-4*Eresolution),eGuess*(1+4*Eresolution));
+
+          if(refineEGuess(eGuess)){
+
+              getBinRange(eGuess*(1-3*Eresolution),eGuess*(1+3*Eresolution));
+              irangeMin.push_back(index_min);
+              irangeMax.push_back(index_max);
+              guessValid[nGuess]=true;
+          }else{
+              guessValid[nGuess]=false;
+          }
         }
         // if array decreasing rather then increasing, indexes behave differently
         if(irangeMax[0]<irangeMin[0]){
           irangeMax.swap(irangeMin);
         }
+
     }
 
 
