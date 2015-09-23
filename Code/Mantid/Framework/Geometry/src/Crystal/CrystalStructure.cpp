@@ -100,26 +100,21 @@ CrystalStructure::getHKLs(double dMin, double dMax,
 
   throwIfRangeUnacceptable(dMin, dMax);
 
+  HKLGenerator generator(m_cell, dMin);
+
+  HKLFilter_const_sptr dFilter =
+      boost::make_shared<HKLFilterDRange>(m_cell, dMin, dMax);
+  HKLFilter_const_sptr filter = dFilter & getFilterForMethod(method);
+
   std::vector<V3D> hkls;
+  hkls.reserve(generator.size());
 
-  /* There's an estimation for the number of reflections from the unit cell
-   * volume
-   * and the minimum d-value. This should speed up insertion into the vector.
-   */
-  size_t estimatedReflectionCount = static_cast<size_t>(
-      ceil(32.0 * M_PI * m_cell.volume()) / (3.0 * pow(2.0 * dMin, 3.0)));
-  hkls.reserve(estimatedReflectionCount);
-
-  int hMax = static_cast<int>(m_cell.a() / dMin);
-  int kMax = static_cast<int>(m_cell.b() / dMin);
-  int lMax = static_cast<int>(m_cell.c() / dMin);
-
-  HKLFilter_const_sptr filter =
-      boost::make_shared<HKLFilterDRange>(m_cell, dMin, dMax) &
-      getFilterForMethod(method);
-
-  HKLGenerator generator(hMax, kMax, lMax);
-  std::copy_if(generator.begin(), generator.end(), hkls.begin(), *filter);
+  auto end = generator.end();
+  for (auto hkl = generator.begin(); hkl != end; ++hkl) {
+    if ((*filter)(*hkl)) {
+      hkls.push_back(*hkl);
+    }
+  }
 
   return hkls;
 }
@@ -137,28 +132,28 @@ CrystalStructure::getUniqueHKLs(double dMin, double dMax,
 
   throwIfRangeUnacceptable(dMin, dMax);
 
-  std::set<V3D> uniqueHKLs;
+  HKLGenerator generator(m_cell, dMin);
 
-  int hMax = static_cast<int>(m_cell.a() / dMin);
-  int kMax = static_cast<int>(m_cell.b() / dMin);
-  int lMax = static_cast<int>(m_cell.c() / dMin);
+  HKLFilter_const_sptr dFilter =
+      boost::make_shared<HKLFilterDRange>(m_cell, dMin, dMax);
+  HKLFilter_const_sptr filter = dFilter & getFilterForMethod(method);
 
-  PointGroup_sptr pointGroup = m_spaceGroup->getPointGroup();
+  std::vector<V3D> hkls;
+  hkls.reserve(generator.size());
 
-  for (int h = -hMax; h <= hMax; ++h) {
-    for (int k = -kMax; k <= kMax; ++k) {
-      for (int l = -lMax; l <= lMax; ++l) {
-        V3D hkl(h, k, l);
-        double d = getDValue(hkl);
+  PointGroup_sptr pg = m_spaceGroup->getPointGroup();
 
-        if (d <= dMax && d >= dMin && isAllowed(hkl, method)) {
-          uniqueHKLs.insert(pointGroup->getReflectionFamily(hkl));
-        }
-      }
+  auto end = generator.end();
+  for (auto hkl = generator.begin(); hkl != end; ++hkl) {
+    if ((*filter)(*hkl)) {
+      hkls.push_back(pg->getReflectionFamily(*hkl));
     }
   }
 
-  return std::vector<V3D>(uniqueHKLs.begin(), uniqueHKLs.end());
+  std::sort(hkls.begin(), hkls.end());
+  hkls.erase(std::unique(hkls.begin(), hkls.end()), hkls.end());
+
+  return hkls;
 }
 
 /// Maps a vector of hkls to d-values using the internal cell
@@ -248,19 +243,6 @@ void CrystalStructure::throwIfRangeUnacceptable(double dMin,
   }
 }
 
-/// Checks whether a reflection is allowed, using the specified method
-bool CrystalStructure::isAllowed(
-    const V3D &hkl, CrystalStructure::ReflectionConditionMethod method) const {
-  switch (method) {
-  case UseStructureFactor:
-    return getFSquared(hkl) > 1e-6;
-  default:
-    return m_centering->isAllowed(static_cast<int>(hkl.X()),
-                                  static_cast<int>(hkl.Y()),
-                                  static_cast<int>(hkl.Z()));
-  }
-}
-
 /// Returns the lattice plane spacing for the given HKL.
 double CrystalStructure::getDValue(const V3D &hkl) const {
   return m_cell.d(hkl);
@@ -277,7 +259,7 @@ HKLFilter_const_sptr CrystalStructure::getFilterForMethod(
   switch (method) {
   case CrystalStructure::UseStructureFactor:
     return boost::make_shared<HKLFilterStructureFactor>(m_calculator);
-  case CrystalStructure::UseCentering:
+  default:
     return boost::make_shared<HKLFilterCentering>(m_centering);
   }
 }

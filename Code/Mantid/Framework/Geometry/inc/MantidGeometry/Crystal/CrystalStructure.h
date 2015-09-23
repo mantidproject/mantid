@@ -186,13 +186,11 @@ protected:
 
   void throwIfRangeUnacceptable(double dMin, double dMax) const;
 
-  bool isAllowed(const Kernel::V3D &hkl,
-                 ReflectionConditionMethod method) const;
-
   double getDValue(const Kernel::V3D &hkl) const;
   double getFSquared(const Kernel::V3D &hkl) const;
 
-  HKLFilter_const_sptr getFilterForMethod(CrystalStructure::ReflectionConditionMethod method) const;
+  HKLFilter_const_sptr
+  getFilterForMethod(CrystalStructure::ReflectionConditionMethod method) const;
 
   UnitCell m_cell;
   SpaceGroup_const_sptr m_spaceGroup;
