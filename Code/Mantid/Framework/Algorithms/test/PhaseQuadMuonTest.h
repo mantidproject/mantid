@@ -81,12 +81,12 @@ public:
   {
     phaseTable->addColumn("int","DetectorID");
     phaseTable->addColumn("double","DetectorPhase");
-    for (int i=0; i<16; i++)
-    {
+    phaseTable->addColumn("double", "DetectorAsymmetry");
+    for (int i = 0; i < 16; i++) {
       TableRow phaseRow1 = phaseTable->appendRow();
-      phaseRow1 << i << 0.0 ;
+      phaseRow1 << i << 0.0 << 1.;
       TableRow phaseRow2 = phaseTable->appendRow();
-      phaseRow2 << i << 1.57 ;
+      phaseRow2 << i << 1.57 << 1.;
     }
   }
 };
