@@ -49,7 +49,7 @@ private:
   /// Generates the header for the axis which saves to file
   void WriteAxisHeader(const std::string alpha, std::ofstream &outfile,
                        const std::string singleSpc, const std::string fourspc,
-                       int nSpectra);
+                       int nBins);
 
   /// Reads if alpha is e then reads the E values accordingly
   void WriteAxisValues(std::string alpha, std::ofstream &outfile, int bin,
