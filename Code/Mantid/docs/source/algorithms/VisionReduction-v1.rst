@@ -16,16 +16,9 @@ Usage
 
 **Perform a reduction:**
 
-.. testcode::
+.. code-block:: python
 
    w1 = VisionReduction("VIS_19351.nxs.h5")
-
-   print "Number of spectra:", w1.getNumberHistograms()
-
-.. testoutput:: 
-
-   Number of spectra: 3
-
 
 .. categories::
 
