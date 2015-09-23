@@ -38,64 +38,160 @@ public:
     TS_ASSERT_EQUALS(gen.size(), 144);
   }
 
-  void testSpeed() {
+  void test_HKLGeneratorReturnsCorrectSizeOne() {
+      HKLGenerator gen(V3D(-2, -1, -5), V3D(-2, -1, -5));
+      TS_ASSERT_EQUALS(gen.size(), 1);
+  }
+
+  void test_beginIterator() {
+    HKLGenerator gen(V3D(-2, -2, -3), V3D(1, 1, 0));
+
+    HKLGenerator::const_iterator it = gen.begin();
+    TS_ASSERT_EQUALS(*it, V3D(-2, -2, -3));
+  }
+
+  void test_endIterator() {
+    HKLGenerator gen(V3D(-2, -2, -3), V3D(1, 1, 0));
+
+    HKLGenerator::const_iterator it = gen.end();
+    TS_ASSERT_EQUALS(*it, V3D(2, -2, -3));
+  }
+
+  void test_iterator_dereference() {
+    HKLGenerator::const_iterator it;
+    TS_ASSERT_EQUALS(*it, V3D(0, 0, 0));
+  }
+
+  void test_comparison() {
+    HKLGenerator::const_iterator it1(V3D(-2, -3, 1));
+    HKLGenerator::const_iterator it2(V3D(-2, -3, 1));
+    HKLGenerator::const_iterator it3(V3D(-2, -3, 0));
+
+    TS_ASSERT_EQUALS(it1, it2);
+    TS_ASSERT_DIFFERS(it1, it3);
+  }
+
+  void test_iterator_increment() {
+    HKLGenerator::const_iterator defaultIterator;
+    TS_ASSERT_THROWS_NOTHING(++defaultIterator);
+  }
+
+  void test_iterator_dereference_range() {
+    HKLGenerator::const_iterator it(V3D(-1, -1, -1), V3D(1, 1, 1));
+    TS_ASSERT_EQUALS(*it, V3D(-1, -1, -1));
+    ++it;
+    TS_ASSERT_EQUALS(*it, V3D(-1, -1, 0));
+  }
+
+  void test_hkl_range() {
+    HKLGenerator::const_iterator it(V3D(-1, -1, -1), V3D(1, 1, 1));
+    HKLGenerator::const_iterator end(V3D(2, -1, -1));
+
+    std::vector<V3D> hkls;
+    std::copy(it, end, std::back_inserter(hkls));
+
+    TS_ASSERT_EQUALS(hkls.size(), 27);
+    TS_ASSERT_EQUALS(hkls[0], V3D(-1, -1, -1));
+    TS_ASSERT_EQUALS(hkls[1], V3D(-1, -1, 0));
+    TS_ASSERT_EQUALS(hkls[2], V3D(-1, -1, 1));
+    TS_ASSERT_EQUALS(hkls[3], V3D(-1, 0, -1));
+    TS_ASSERT_EQUALS(hkls[26], V3D(1, 1, 1));
+
+    TS_ASSERT_EQUALS(std::distance(it, end), 27);
+  }
+
+  void test_speed() {
+    size_t N = 1000;
+
     Timer t;
-    size_t N = 10;
-
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("C m c m");
-
-    HKLFilterSpaceGroup filter(sg);
-    HKLGenerator gen(30, 30, 30);
-
     for (size_t i = 0; i < N; ++i) {
+      HKLGenerator gen(20, 20, 20);
+
       std::vector<V3D> hkls;
       hkls.reserve(gen.size());
 
-      auto end = gen.end();
-
-      for (auto hkl = gen.begin(); hkl != end; ++hkl) {
-        if (filter(*hkl)) {
-          hkls.push_back(*hkl);
-        }
+      for (auto it = gen.begin(), end = gen.end(); it != end; ++it) {
+        hkls.push_back(*it);
       }
-      //      std::copy_if(gen.begin(), gen.end(), std::back_inserter(hkls),
-      //      filter);
 
-      TS_ASSERT_LESS_THAN(0, hkls.size());
-      // TS_ASSERT_EQUALS(hkls.size(), 61 * 61 * 61);
+      TS_ASSERT_EQUALS(hkls.size(), 41 * 41 * 41);
     }
 
-    std::cout << t.elapsed() / N << std::endl;
+    float e = t.elapsed();
+    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
   }
 
-  void testSpeed_old() {
+  void test_speed_filter_constructor() {
+    size_t N = 1000;
+
     Timer t;
-    size_t N = 10;
-
-    SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("C m c m");
-
     for (size_t i = 0; i < N; ++i) {
-      std::vector<V3D> hkls;
-      hkls.reserve(61 * 61 * 61);
-      for (int h = -30; h <= 30; ++h) {
-        for (int k = -30; k <= 30; ++k) {
-          for (int l = -30; l <= 30; ++l) {
-            V3D hkl(h, k, l);
+        HKLGenerator gen(20, 20, 20);
 
-            if (sg->isAllowedReflection(hkl)) {
-              hkls.push_back(hkl);
-            }
-          }
+      std::vector<V3D> hkls;
+      hkls.reserve(gen.size());
+      std::copy(gen.begin(), gen.end(), std::back_inserter(hkls));
+
+      // TS_ASSERT_EQUALS(hkls.size(), gen.size());
+      TS_ASSERT_EQUALS(hkls.size(), 41 * 41 * 41);
+    }
+
+    float e = t.elapsed();
+    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
+  }
+
+  void test_speed_filter() {
+    size_t N = 1000;
+
+    Timer t;
+    for (size_t i = 0; i < N; ++i) {
+      double dMin = 0.5;
+      UnitCell cell(8, 8, 8);
+
+      HKLGenerator gen(cell, dMin);
+
+      std::vector<V3D> hkls;
+      hkls.reserve(gen.size());
+
+      HKLFilterDRange dFilter(cell, dMin, 200.0);
+
+      for (auto it = gen.begin(); it != gen.end(); ++it) {
+        if (dFilter.isAllowed(*it)) {
+          hkls.push_back(*it);
         }
       }
 
-      TS_ASSERT_LESS_THAN(0, hkls.size());
-      // TS_ASSERT_EQUALS(hkls.size(), 61 * 61 * 61);
+      // TS_ASSERT_EQUALS(hkls.size(), gen.size());
+      TS_ASSERT_DIFFERS(hkls.size(), 0);
     }
 
-    std::cout << t.elapsed() / N << std::endl;
+    float e = t.elapsed();
+    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
+  }
+
+  void test_speed_filter_stl() {
+    size_t N = 1000;
+
+    Timer t;
+    for (size_t i = 0; i < N; ++i) {
+      double dMin = 0.5;
+      UnitCell cell(8, 8, 8);
+
+      HKLGenerator gen(cell, dMin);
+
+      std::vector<V3D> hkls;
+      hkls.reserve(gen.size());
+
+      HKLFilter_const_sptr dFilter = boost::make_shared<HKLFilterDRange>(cell, dMin, 200.0);
+
+      std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls), HKLFilterProxy(~dFilter));
+
+      // TS_ASSERT_EQUALS(hkls.size(), gen.size());
+      TS_ASSERT_DIFFERS(hkls.size(), 0);
+    }
+
+    float e = t.elapsed();
+    std::cout << "T: " << e / static_cast<float>(N) << std::endl;
   }
 };
 
