@@ -12,9 +12,16 @@ HKLGenerator::HKLGenerator(const Kernel::V3D &hklMinMax)
     : m_hklMin(hklMinMax * -1), m_hklMax(hklMinMax),
       m_size(getSize(m_hklMin, m_hklMax)) {}
 
-HKLGenerator::HKLGenerator(int hMinMax, int kMinMax, int lMinMax)
-    : m_hklMin(-hMinMax, -kMinMax, -lMinMax),
-      m_hklMax(hMinMax, kMinMax, lMinMax), m_size(getSize(m_hklMin, m_hklMax)) {
+HKLGenerator::HKLGenerator(int hMinMax, int kMinMax, int lMinMax) {
+  m_hklMax = V3D(hMinMax, kMinMax, lMinMax);
+  m_hklMin = m_hklMax * -1;
+  m_size = getSize(m_hklMin, m_hklMax);
+}
+
+HKLGenerator::HKLGenerator(const UnitCell &unitCell, double dMin) {
+  m_hklMax = V3D(unitCell.a() / dMin, unitCell.b() / dMin, unitCell.c() / dMin);
+  m_hklMin = m_hklMax * -1;
+  m_size = getSize(m_hklMin, m_hklMax);
 }
 
 HKLGenerator::const_iterator HKLGenerator::end() const {
@@ -35,21 +42,28 @@ HKLGenerator::const_iterator HKLGenerator::begin() const {
 }
 
 HKLGenerator::const_iterator::const_iterator(const V3D &current)
-    : m_h(current.X()), m_k(current.Y()), m_l(current.Z()), m_hMin(m_h),
-      m_hMax(m_h), m_kMin(m_k), m_kMax(m_k), m_lMin(m_l), m_lMax(m_l) {}
+    : m_h(static_cast<int>(current.X())), m_k(static_cast<int>(current.Y())),
+      m_l(static_cast<int>(current.Z())), m_hMin(m_h), m_hMax(m_h), m_kMin(m_k),
+      m_kMax(m_k), m_lMin(m_l), m_lMax(m_l) {}
 
 HKLGenerator::const_iterator::const_iterator(const V3D &hklMin,
                                              const V3D &hklMax)
-    : m_h(hklMin.X()), m_k(hklMin.Y()), m_l(hklMin.Z()), m_hMin(m_h),
-      m_hMax(hklMax.X()), m_kMin(m_k), m_kMax(hklMax.Y()), m_lMin(m_l),
-      m_lMax(hklMax.Z()) {}
+    : m_h(static_cast<int>(hklMin.X())), m_k(static_cast<int>(hklMin.Y())),
+      m_l(static_cast<int>(hklMin.Z())), m_hMin(m_h),
+      m_hMax(static_cast<int>(hklMax.X())), m_kMin(m_k),
+      m_kMax(static_cast<int>(hklMax.Y())), m_lMin(m_l),
+      m_lMax(static_cast<int>(hklMax.Z())) {}
 
 HKLGenerator::const_iterator::const_iterator(const V3D &hklMin,
                                              const V3D &hklMax,
                                              const V3D &current)
-    : m_h(current.X()), m_k(current.Y()), m_l(current.Z()), m_hMin(hklMin.X()),
-      m_hMax(hklMax.X()), m_kMin(m_k), m_kMax(hklMax.Y()), m_lMin(m_l),
-      m_lMax(hklMax.Z()) {}
+    : m_h(static_cast<int>(current.X())), m_k(static_cast<int>(current.Y())),
+      m_l(static_cast<int>(current.Z())), m_hMin(static_cast<int>(hklMin.X())),
+      m_hMax(static_cast<int>(hklMax.X())),
+      m_kMin(static_cast<int>(hklMin.Y())),
+      m_kMax(static_cast<int>(hklMax.Y())),
+      m_lMin(static_cast<int>(hklMin.Z())),
+      m_lMax(static_cast<int>(hklMax.Z())) {}
 
 void HKLGenerator::const_iterator::increment() {
   if (++m_l > m_lMax) {
@@ -60,6 +74,10 @@ void HKLGenerator::const_iterator::increment() {
       ++m_h;
     }
   }
+
+  m_hkl.setX(m_h);
+  m_hkl.setY(m_k);
+  m_hkl.setZ(m_l);
 }
 
 } // namespace Geometry

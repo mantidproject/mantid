@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_HKLGENERATOR_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/iterator/iterator_facade.hpp>
@@ -35,7 +36,7 @@ namespace Geometry {
 class MANTID_GEOMETRY_DLL HKLGenerator {
 public:
   class const_iterator
-      : public boost::iterator_facade<const_iterator, const Kernel::V3D,
+      : public boost::iterator_facade<const_iterator, const Kernel::V3D &,
                                       boost::forward_traversal_tag> {
   public:
     const_iterator() {}
@@ -59,9 +60,10 @@ public:
              this->m_l == other.m_l;
     }
 
-    const Kernel::V3D dereference() const { return Kernel::V3D(m_h, m_k, m_l); }
+    const Kernel::V3D &dereference() const { return m_hkl; }
 
     int m_h, m_k, m_l;
+    Kernel::V3D m_hkl;
 
     int m_hMin, m_hMax;
     int m_kMin, m_kMax;
@@ -71,6 +73,7 @@ public:
   HKLGenerator(const Kernel::V3D &hklMin, const Kernel::V3D &hklMax);
   HKLGenerator(const Kernel::V3D &hklMinMax);
   HKLGenerator(int hMinMax, int kMinMax, int lMinMax);
+  HKLGenerator(const UnitCell &unitCell, double dMin);
 
   virtual ~HKLGenerator() {}
 

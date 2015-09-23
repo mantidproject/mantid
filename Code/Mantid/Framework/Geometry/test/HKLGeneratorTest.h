@@ -40,21 +40,29 @@ public:
 
   void testSpeed() {
     Timer t;
-    size_t N = 1;
+    size_t N = 10;
 
     SpaceGroup_const_sptr sg =
-        SpaceGroupFactory::Instance().createSpaceGroup("F d -3 m");
+        SpaceGroupFactory::Instance().createSpaceGroup("C m c m");
 
     HKLFilterSpaceGroup filter(sg);
-    HKLGenerator gen(10, 10, 10);
+    HKLGenerator gen(30, 30, 30);
 
     for (size_t i = 0; i < N; ++i) {
       std::vector<V3D> hkls;
       hkls.reserve(gen.size());
-      std::copy_if(gen.begin(), gen.end(), std::back_inserter(hkls), filter);
+
+      auto end = gen.end();
+
+      for (auto hkl = gen.begin(); hkl != end; ++hkl) {
+        if (filter(*hkl)) {
+          hkls.push_back(*hkl);
+        }
+      }
+      //      std::copy_if(gen.begin(), gen.end(), std::back_inserter(hkls),
+      //      filter);
 
       TS_ASSERT_LESS_THAN(0, hkls.size());
-      std::cout << hkls.size() << std::endl;
       // TS_ASSERT_EQUALS(hkls.size(), 61 * 61 * 61);
     }
 
@@ -63,7 +71,7 @@ public:
 
   void testSpeed_old() {
     Timer t;
-    size_t N = 100;
+    size_t N = 10;
 
     SpaceGroup_const_sptr sg =
         SpaceGroupFactory::Instance().createSpaceGroup("C m c m");
