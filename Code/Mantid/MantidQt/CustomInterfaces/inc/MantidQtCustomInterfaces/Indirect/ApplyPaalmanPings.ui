@@ -57,20 +57,6 @@
       <string>Options</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="ckUseCan">
-        <property name="text">
-         <string>Use Can:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QCheckBox" name="ckUseCorrections">
-        <property name="text">
-         <string>Use Corrections:</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QComboBox" name="cbGeometry">
         <item>
@@ -90,10 +76,10 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="1">
+      <item row="1" column="1">
        <widget class="MantidQt::MantidWidgets::DataSelector" name="dsCorrections" native="true">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -119,37 +105,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsContainer" native="true">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="autoLoad" stdset="0">
-         <bool>true</bool>
-        </property>
-        <property name="workspaceSuffixes" stdset="0">
-         <stringlist>
-          <string>_red</string>
-          <string>_sqw</string>
-         </stringlist>
-        </property>
-        <property name="fileBrowserSuffixes" stdset="0">
-         <stringlist>
-          <string>_red.nxs</string>
-          <string>_sqw.nxs</string>
-         </stringlist>
-        </property>
-        <property name="showLoad" stdset="0">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="lbGeometry">
         <property name="text">
@@ -157,55 +112,13 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QCheckBox" name="ckScaleCan">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Scale Can by factor:</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <layout class="QHBoxLayout" name="loScaleFactor">
-        <item>
-         <widget class="QDoubleSpinBox" name="spCanScale">
-          <property name="enabled">
-           <bool>false</bool>
+       <item row="1" column="0">
+        <widget class="QLabel" name="lbCorrection">
+          <property name="text">
+            <string>Corrections: </string>
           </property>
-          <property name="decimals">
-           <number>5</number>
-          </property>
-          <property name="maximum">
-           <double>999.990000000000009</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-          <property name="value">
-           <double>1.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </item>
+        </widget>
+       </item>S
      </layout>
     </widget>
    </item>

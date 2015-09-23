@@ -13,6 +13,8 @@ namespace MantidQt
 namespace SpectrumView
 {
 
+QColor GraphDisplay::g_curveColors[] = {Qt::black, Qt::red, Qt::green, Qt::blue};
+
 /**
  *  Construct a GraphDisplay to display selected graph on the specifed plot
  *  and to disply information in the specified table.
@@ -28,7 +30,6 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
                             QTableWidget* graphTable,
                             bool          isVertical ) :
   m_graphPlot(graphPlot),
-  m_curve(new QwtPlotCurve("Curve 1")),
   m_graphTable(graphTable),
 
   m_isVertical(isVertical),
@@ -45,8 +46,7 @@ GraphDisplay::GraphDisplay( QwtPlot*      graphPlot,
 
 GraphDisplay::~GraphDisplay()
 {
-  m_curve->attach(0);
-  delete m_curve;
+  clearCurves();
 }
 
 
@@ -85,10 +85,12 @@ void GraphDisplay::setLogX( bool isLogX )
  * @param yData     Vector of y coordinates of points to plot.  This should
  *                  be the same size as the xData vector.
  * @param cutValue  the cut value
+ * @param isFront   Is it a front curve?
  */
 void GraphDisplay::setData(const QVector<double> & xData,
                            const QVector<double> & yData,
-                                 double            cutValue )
+                           double cutValue,
+                           bool isFront)
 {
   if ( xData.size() == 0 ||          // ignore invalid data vectors
        yData.size() == 0 ||
@@ -97,7 +99,8 @@ void GraphDisplay::setData(const QVector<double> & xData,
     return;
   }
 
-  m_curve->attach(0);               // detach from any plot, before changing
+  if (isFront)
+    clearCurves();               // detach from any plot, before changing
                                     // the data and attaching
   if ( m_isVertical )
   {
@@ -125,18 +128,24 @@ void GraphDisplay::setData(const QVector<double> & xData,
     }
   }
 
-  m_curve->setData( xData, yData );
-  m_curve->attach( m_graphPlot );
+  auto curve = new QwtPlotCurve;
+  curve->setData( xData, yData );
+  curve->attach( m_graphPlot );
+  auto colorIndex = m_curves.size() % sizeof(g_curveColors);
+  curve->setPen(QPen(g_curveColors[colorIndex]));
+  m_curves.append(curve);
 
-  setRangeScale( m_rangeScale );
-
-  m_graphPlot->setAutoReplot(true);
+  if (isFront) 
+  {
+    setRangeScale( m_rangeScale );
+    m_graphPlot->setAutoReplot(true);
+  }
 }
 
 
 void GraphDisplay::clear()
 {
-  m_curve->attach(0);                 // detach from plot
+  clearCurves();
   m_graphPlot->replot();
 }
 
@@ -262,6 +271,16 @@ void GraphDisplay::showInfoList( double x, double y )
 
     m_graphTable->resizeColumnsToContents();
   }
+}
+
+/// Remove all curves.
+void GraphDisplay::clearCurves()
+{
+  foreach(QwtPlotCurve* curve, m_curves) {
+    curve->detach();
+    delete curve;
+  }
+  m_curves.clear();
 }
 
 } // namespace SpectrumView

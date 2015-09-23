@@ -6,6 +6,7 @@
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionPresenter.h"
 #include "MantidQtCustomInterfaces/EnggDiffraction/IEnggDiffractionView.h"
+
 // #include "MantidQtCustomInterfaces/EnggDiffraction/EnggDiffractionModel.h"
 
 #include <boost/scoped_ptr.hpp>
@@ -122,7 +123,6 @@ private:
   void doFocusing(const EnggDiffCalibSettings &cs,
                   const std::string &fullFilename, const std::string &runNo,
                   int bank);
-  //@}
 
   void loadOrCalcVanadiumWorkspaces(
       const std::string &vanNo, const std::string &inputDirCalib,
@@ -167,4 +167,4 @@ private:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
+# endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

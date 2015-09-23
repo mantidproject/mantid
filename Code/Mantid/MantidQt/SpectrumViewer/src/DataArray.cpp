@@ -36,7 +36,7 @@ DataArray::DataArray( double xMin,     double xMax,
                       double yMin,     double yMax,
                       bool   isLogX,
                       size_t nRows,    size_t nCols,
-                      std::vector<float> data ):
+                      const std::vector<float>& data ):
   m_xMin(xMin), m_xMax(xMax),
   m_yMin(yMin), m_yMax(yMax),
   m_isLogX(isLogX),
