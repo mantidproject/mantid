@@ -364,7 +364,7 @@ public:
 
         TestablePoldiPeakCollection p;
 
-        p.setPointGroup(structure->pointGroup());
+        p.setPointGroup(structure->spaceGroup()->getPointGroup());
         TS_ASSERT_THROWS_NOTHING(p.setPeaks(hkls, dValues, fSquared));
 
         dValues.pop_back();
