@@ -5,14 +5,14 @@
 Overview
 --------
 
-This algorithm provides a method for combining signals from multiple detector segments to form two output 
-signals in quadrature phase. It is of particular use when working with muon spin rotation signals measured 
-using highly segmented detector arrays that are typically found at pulsed muon sources (ISIS has instruments 
-with up to 600 detector elements). The method allows information from individual detectors to be combined in 
-a way that makes full use of the dataset. 
+This algorithm provides a method for combining signals from multiple detector segments to form two output
+signals in quadrature phase. It is of particular use when working with muon spin rotation signals measured
+using highly segmented detector arrays that are typically found at pulsed muon sources (ISIS has instruments
+with up to 600 detector elements). The method allows information from individual detectors to be combined in
+a way that makes full use of the dataset.
 
-This algorithm is frequently run as a precursor to making a Rotating Reference Frame transformation of 
-the dataset using the algorithm :ref:`algm-RRFMuon`. Both algorithms are fully described in the article 
+This algorithm is frequently run as a precursor to making a Rotating Reference Frame transformation of
+the dataset using the algorithm :ref:`algm-RRFMuon`. Both algorithms are fully described in the article
 by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
 
 
@@ -24,10 +24,10 @@ Description
 -----------
 
 Assuming that the *InputWorkspace* contains measured counts as a function of time,
-and *PhaseTable* contains the detector phases, the algorithm returns a workspace 
+and *PhaseTable* contains the detector phases and asymmetries, the algorithm returns a workspace
 containing two spectra (squashograms) as a function of the same time binning.
-*PhaseTable* is expected to have two columns, corresponding to the detector id
-and the corresponding phase.
+*PhaseTable* is expected to have three columns, corresponding to the detector id, the
+corresponding phase and its asymmetry.
 
 Usage
 -----
@@ -44,14 +44,15 @@ Usage
 
    # Create a PhaseTable with some arbitrary detector information
    tab = CreateEmptyTableWorkspace()
-   tab.addColumn('bool', 'Status')
+   tab.addColumn('int', 'DetID')
    tab.addColumn('double', 'Phase')
+   tab.addColumn('double', 'Asym')
    for i in range(0,32):
        phi = 2*pi*i/32.
-       tab.addRow([1, phi])
+       tab.addRow([1, phi, 0.2])
    for i in range(0,32):
        phi = 2*pi*i/32.
-       tab.addRow([1, phi])
+       tab.addRow([1, phi, 0.2])
    ows = PhaseQuad(InputWorkspace='MUSR00022725', PhaseTable='tab')
    print "Output workspace has", ows.getNumberHistograms(), "histograms"
 
