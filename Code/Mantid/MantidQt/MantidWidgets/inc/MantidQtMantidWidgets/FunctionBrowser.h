@@ -291,6 +291,8 @@ protected slots:
   void parameterChanged(QtProperty*);
   void parameterButtonClicked(QtProperty*);
   void globalChanged(QtProperty*, const QString&, bool);
+  /// Set value of an attribute (as a property) to a function
+  void setAttributeToFunction(Mantid::API::IFunction& fun, QtProperty* prop);
 
 protected:
   /// Manager for function group properties
