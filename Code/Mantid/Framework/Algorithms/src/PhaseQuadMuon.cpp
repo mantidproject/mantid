@@ -80,8 +80,8 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   }
 
   // PhaseTable should have two columns: (detector, phase)
-  if (tabWS->columnCount() != 2) {
-    result["PhaseTable"] = "PhaseTable must have two columns";
+  if (tabWS->columnCount() != 3) {
+    result["PhaseTable"] = "PhaseTable must have three columns";
   }
 
   // Check units, should be microseconds
@@ -160,6 +160,17 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     throw std::invalid_argument("Invalid normalization constants");
   }
 
+  // Get the maximum asymmetry
+  double maxAsym = 0.;
+  for (size_t h = 0; h < nspec; h++) {
+    if (phase->Double(h, 2) > maxAsym) {
+      maxAsym = phase->Double(h, 2);
+    }
+  }
+  if (!maxAsym) {
+    throw std::invalid_argument("Invalid detector asymmetries");
+  }
+
   std::vector<double> aj, bj;
   {
     // Calculate coefficients aj, bj
@@ -170,8 +181,9 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
 
     for (size_t h = 0; h < nspec; h++) {
       double phi = phase->Double(h, 1);
-      double X = n0[h] * cos(phi);
-      double Y = n0[h] * sin(phi);
+      double asym = phase->Double(h, 2) / maxAsym;
+      double X = n0[h] * asym * cos(phi);
+      double Y = n0[h] * asym * sin(phi);
       sxx += X * X;
       syy += Y * Y;
       sxy += X * Y;
@@ -183,8 +195,9 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
       double phi = phase->Double(h, 1);
-      double X = n0[h] * cos(phi);
-      double Y = n0[h] * sin(phi);
+      double asym = phase->Double(h, 2) / maxAsym;
+      double X = n0[h] * asym * cos(phi);
+      double Y = n0[h] * asym * sin(phi);
       aj.push_back((lam1 * X + mu1 * Y) * 0.5);
       bj.push_back((lam2 * X + mu2 * Y) * 0.5);
     }
