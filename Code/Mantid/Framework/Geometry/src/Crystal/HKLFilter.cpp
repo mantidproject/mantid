@@ -3,8 +3,8 @@
 namespace Mantid {
 namespace Geometry {
 
-HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
-                               const HKLFilter_const_sptr &rhs) {
+const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
+                                     const HKLFilter_const_sptr &rhs) {
   return boost::make_shared<const HKLFilterAnd>(lhs, rhs);
 }
 

@@ -41,14 +41,11 @@ public:
   HKLFilter() {}
   virtual ~HKLFilter() {}
 
-  virtual std::string getName() const { return "Base"; }
+  virtual std::string getName() const = 0;
 
   bool operator()(const Kernel::V3D &hkl) const { return isAllowed(hkl); }
 
-  virtual bool isAllowed(const Kernel::V3D &hkl) const {
-    UNUSED_ARG(hkl);
-    return true;
-  }
+  virtual bool isAllowed(const Kernel::V3D &hkl) const = 0;
 };
 
 typedef boost::shared_ptr<const HKLFilter> HKLFilter_const_sptr;
@@ -71,6 +68,7 @@ class MANTID_GEOMETRY_DLL HKLFilterAnd : public HKLFilterBinaryLogicOperation {
 public:
   HKLFilterAnd(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
       : HKLFilterBinaryLogicOperation(lhs, rhs) {}
+  ~HKLFilterAnd() {}
 
   std::string getName() const { return "AND"; }
 
@@ -79,7 +77,7 @@ public:
   }
 };
 
-MANTID_GEOMETRY_DLL HKLFilter_const_sptr
+MANTID_GEOMETRY_DLL const HKLFilter_const_sptr
 operator&(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
 
 } // namespace Geometry
