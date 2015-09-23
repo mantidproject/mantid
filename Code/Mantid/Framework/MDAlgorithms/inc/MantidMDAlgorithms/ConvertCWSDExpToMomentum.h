@@ -59,9 +59,10 @@ private:
   void init();
   void exec();
 
-  void addMDEvents();
+  void addMDEvents(bool usevirtual);
 
   void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
+                                            bool usevirtual,
                                             const detid_t &startdetid,
                                             const int runnumber);
 
@@ -84,6 +85,8 @@ private:
 
   void setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
                            Kernel::DblMatrix &rotationMatrix);
+
+  void createVirtualInstrument();
 
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;

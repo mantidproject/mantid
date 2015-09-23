@@ -79,14 +79,18 @@ void ConvertCWSDExpToMomentum::exec() {
   bool inputvalid = getInputs(errmsg);
   if (!inputvalid)
     throw std::runtime_error(errmsg);
+  bool createvirtual = getProperty("CreateVirtualInstrument");
 
   g_log.notice("[DB] Inputs are examined.");
 
   // Create output MDEventWorkspace
   m_outputWS = createExperimentMDWorkspace();
 
+  if (createvirtual)
+    createVirtualInstrument();
+
   // Add MDEventWorkspace
-  addMDEvents();
+  addMDEvents(createvirtual);
 
   setProperty("OutputWorkspace", m_outputWS);
 
@@ -94,12 +98,10 @@ void ConvertCWSDExpToMomentum::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Create output workspace
- * @brief ConvertCWSDExpToMomentum::createExperimentMDWorkspace
+/** Create virtual instrument
  * @return
  */
-API::IMDEventWorkspace_sptr
-ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
+void ConvertCWSDExpToMomentum::createVirtualInstrument() {
   // Get detector list from input table workspace
   std::vector<Kernel::V3D> vec_detpos;
   std::vector<detid_t> vec_detid;
@@ -115,6 +117,17 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
   g_log.information() << "Virtual Instrument has "
                       << m_virtualInstrument->getDetectorIDs().size()
                       << "Detectors\n";
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Create output workspace
+ * @brief ConvertCWSDExpToMomentum::createExperimentMDWorkspace
+ * @return
+ */
+API::IMDEventWorkspace_sptr
+ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
 
   // Create workspace in Q_sample with dimenion as 3
   size_t nDimension = 3;
@@ -168,8 +181,9 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
 /** Add MDEvents to MDEventWorkspace from data set in the experiment
  *  Run number is determined by the row of the file in the input table workspace
  * @brief ConvertCWSDExpToMomentum::addMDEvents
+ * @param usevirtual :: flag to use virtual instrument
  */
-void ConvertCWSDExpToMomentum::addMDEvents() {
+void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
   MatrixWorkspace_sptr spicews;
 
   // Check whether to add / or \ to m_dataDir
@@ -190,13 +204,19 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
 
   // Init some variables
   size_t numrows = m_expDataTableWS->rowCount();
+  if (numrows > 1 && !usevirtual) {
+    g_log.warning("There are more than 1 experiment to import. "
+                  "Make sure that all of them have the same instrument.");
+  }
   size_t numFileNotLoaded(0);
 
   // Loop through all data files in the experiment
   for (size_t ir = 0; ir < numrows; ++ir) {
     std::string rawfilename =
         m_expDataTableWS->cell<std::string>(ir, m_iColFilename);
-    detid_t start_detid = m_expDataTableWS->cell<detid_t>(ir, m_iColStartDetID);
+    detid_t start_detid = 0;
+    if (usevirtual)
+      start_detid = m_expDataTableWS->cell<detid_t>(ir, m_iColStartDetID);
 
     // Load data
     bool loaded;
@@ -218,7 +238,10 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
 
     // Convert from MatrixWorkspace to MDEvents and add events to
     int runid = static_cast<int>(ir) + 1;
-    convertSpiceMatrixToMomentumMDEvents(spicews, start_detid, runid);
+    if (!usevirtual)
+      start_detid = 0;
+    convertSpiceMatrixToMomentumMDEvents(spicews, usevirtual, start_detid,
+                                         runid);
   }
 
   // Set box extentes
@@ -287,15 +310,17 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
 //----------------------------------------------------------------------------------------------
 /** Convert a SPICE 2D Det MatrixWorkspace to MDEvents and append to an
  * MDEventWorkspace
+ * It is optional to use a virtual instrument or copy from input data workspace
  * @brief ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents
  * @param dataws :: data matrix workspace
+ * @param uservirtual :: boolean flag to use virtual instrument
  * @param startdetid :: starting detid for detectors from this workspace mapping
  * to virtual instrument in MDEventWorkspace
  * @param runnumber :: run number for all MDEvents created from this matrix
  * workspace
  */
 void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
-    MatrixWorkspace_sptr dataws, const detid_t &startdetid,
+    MatrixWorkspace_sptr dataws, bool usevirtual, const detid_t &startdetid,
     const int runnumber) {
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
@@ -366,7 +391,12 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 
   // Add experiment info including instrument, goniometer and run number
   ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
-  expinfo->setInstrument(m_virtualInstrument);
+  if (usevirtual)
+    expinfo->setInstrument(m_virtualInstrument);
+  else {
+    Geometry::Instrument_const_sptr tmp_inst = dataws->getInstrument();
+    expinfo->setInstrument(tmp_inst);
+  }
   expinfo->mutableRun().setGoniometer(dataws->run().getGoniometer(), false);
   expinfo->mutableRun().addProperty("run_number", runnumber);
   m_outputWS->addExperimentInfo(expinfo);

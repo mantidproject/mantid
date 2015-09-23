@@ -40,6 +40,7 @@ public:
     testalg.initialize();
 
     testalg.setProperty("InputWorkspace", "DataFileTable");
+    testalg.setProperty("CreateVirtualInstrument", true);
     testalg.setProperty("DetectorTableWorkspace", "DetectorTable");
     testalg.setProperty("SourcePosition", m_sourcePos);
     testalg.setProperty("SamplePosition", m_samplePos);
