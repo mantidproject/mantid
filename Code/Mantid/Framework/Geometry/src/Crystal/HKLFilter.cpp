@@ -8,5 +8,9 @@ const HKLFilter_const_sptr operator&(const HKLFilter_const_sptr &lhs,
   return boost::make_shared<const HKLFilterAnd>(lhs, rhs);
 }
 
+const HKLFilter_const_sptr operator~(const HKLFilter_const_sptr &filter) {
+  return boost::make_shared<const HKLFilterNot>(filter);
+}
+
 } // namespace Geometry
 } // namespace Mantid

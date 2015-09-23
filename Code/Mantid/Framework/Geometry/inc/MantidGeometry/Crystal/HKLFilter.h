@@ -42,9 +42,6 @@ public:
   virtual ~HKLFilter() {}
 
   virtual std::string getName() const = 0;
-
-  bool operator()(const Kernel::V3D &hkl) const { return isAllowed(hkl); }
-
   virtual bool isAllowed(const Kernel::V3D &hkl) const = 0;
 };
 
@@ -52,8 +49,9 @@ typedef boost::shared_ptr<const HKLFilter> HKLFilter_const_sptr;
 
 class MANTID_GEOMETRY_DLL HKLFilterBinaryLogicOperation : public HKLFilter {
 public:
-  HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs)
-      : HKLFilter(), m_lhs(lhs), m_rhs(rhs) {}
+  HKLFilterBinaryLogicOperation(const HKLFilter_const_sptr &lhs,
+                                const HKLFilter_const_sptr &rhs)
+      : m_lhs(lhs), m_rhs(rhs) {}
   virtual ~HKLFilterBinaryLogicOperation() {}
 
   HKLFilter_const_sptr getLHS() const { return m_lhs; }
@@ -77,8 +75,37 @@ public:
   }
 };
 
+class MANTID_GEOMETRY_DLL HKLFilterNot : public HKLFilter {
+public:
+  HKLFilterNot(const HKLFilter_const_sptr &filter) : m_filter(filter) {}
+  ~HKLFilterNot() {}
+
+  std::string getName() const { return "NOT"; }
+
+  bool isAllowed(const Kernel::V3D &hkl) const {
+    return !(m_filter->isAllowed(hkl));
+  }
+
+protected:
+  HKLFilter_const_sptr m_filter;
+};
+
 MANTID_GEOMETRY_DLL const HKLFilter_const_sptr
 operator&(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
+
+MANTID_GEOMETRY_DLL const HKLFilter_const_sptr
+operator~(const HKLFilter_const_sptr &filter);
+
+class MANTID_GEOMETRY_DLL HKLFilterProxy {
+public:
+  HKLFilterProxy(const HKLFilter_const_sptr &filter) : m_filter(filter) {}
+  ~HKLFilterProxy() {}
+
+  bool operator()(const Kernel::V3D &hkl) { return m_filter->isAllowed(hkl); }
+
+private:
+  HKLFilter_const_sptr m_filter;
+};
 
 } // namespace Geometry
 } // namespace Mantid

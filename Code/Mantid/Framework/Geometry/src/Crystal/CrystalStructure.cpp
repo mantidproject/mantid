@@ -102,6 +102,7 @@ CrystalStructure::getHKLs(double dMin, double dMax,
 
   HKLGenerator generator(m_cell, dMin);
 
+  // Construct filter, use operator& to combine dFilter and "allowed filter"
   HKLFilter_const_sptr dFilter =
       boost::make_shared<HKLFilterDRange>(m_cell, dMin, dMax);
   HKLFilter_const_sptr filter = dFilter & getFilterForMethod(method);
@@ -109,12 +110,10 @@ CrystalStructure::getHKLs(double dMin, double dMax,
   std::vector<V3D> hkls;
   hkls.reserve(generator.size());
 
-  auto end = generator.end();
-  for (auto hkl = generator.begin(); hkl != end; ++hkl) {
-    if ((*filter)(*hkl)) {
-      hkls.push_back(*hkl);
-    }
-  }
+  // Generate list of HKLs, use HKLFilterProxy of negation of filter
+  // (remove_copy_if instead of copy_if due to compatibility)
+  std::remove_copy_if(generator.begin(), generator.end(),
+                      std::back_inserter(hkls), HKLFilterProxy(~filter));
 
   return hkls;
 }
@@ -143,9 +142,8 @@ CrystalStructure::getUniqueHKLs(double dMin, double dMax,
 
   PointGroup_sptr pg = m_spaceGroup->getPointGroup();
 
-  auto end = generator.end();
-  for (auto hkl = generator.begin(); hkl != end; ++hkl) {
-    if ((*filter)(*hkl)) {
+  for (auto hkl = generator.begin(); hkl != generator.end(); ++hkl) {
+    if (filter->isAllowed(*hkl)) {
       hkls.push_back(pg->getReflectionFamily(*hkl));
     }
   }
