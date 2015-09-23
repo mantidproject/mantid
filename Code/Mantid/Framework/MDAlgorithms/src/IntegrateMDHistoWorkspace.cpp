@@ -115,35 +115,44 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
     } else if( i < pbins.size() && similarBinning(pbins[i]) ) {
       auto binning = pbins[i];
       const double width = inDim->getBinWidth(); // Take the width from the input dimension
-      double min = binning.front();
-      double max = binning.back();
+      double pmin = binning.front();
+      double pmax = binning.back();
+      auto shifted_pmin = pmin;
+      auto shifted_pmax = pmax;
+      auto max = inDim->getMaximum();
+      auto min = inDim->getMinimum();
 
       // Correct users, input, output and rounded to the nearest whole width.
       auto extents_offset = 0.0;
-      if (fmod(max,width) != 0){
-          extents_offset = fmod(max,width);
-          std::stringstream buffer;
+     
+          extents_offset = fabs(fmod(max,width));
+         /* std::stringstream buffer;
           buffer << "Shifting Dimension" << i << " extents by " << extents_offset;
-          logger.warning(buffer.str());
-      }
-      min = width * std::floor((min-extents_offset)/width); // Rounded down
-      max = width * std::ceil((max-extents_offset)/width); // Rounded up
+          logger.warning(buffer.str());*/
+          auto temp_ceil = (pmax-extents_offset)/width;
+          auto temp_floor = (pmin-extents_offset)/width;
+          shifted_pmax = width * (std::ceil((pmax-extents_offset)/width));
+          shifted_pmin = width * (std::floor((pmin-extents_offset)/width));
 
-      if(min != binning.front()) {
+      
+
+      pmin = shifted_pmin + extents_offset;// Rounded down
+      pmax = shifted_pmax + extents_offset; // Rounded up
+      if(pmin != binning.front()) {
           std::stringstream buffer;
-          buffer << "Rounding min from: " << binning.front() << " to the nearest whole width at: " << min;
+          buffer << "Rounding min from: " << binning.front() << " to the nearest whole width at: " << pmin;
           logger.warning(buffer.str());
       }
-      if(max != binning.back()) {
+      if(pmax != binning.back()) {
           std::stringstream buffer;
-          buffer << "Rounding max from: " << binning.back() << " to the nearest whole width at: " << max;
+          buffer << "Rounding max from: " << binning.back() << " to the nearest whole width at: " << pmax;
           logger.warning(buffer.str());
       }
-      const size_t roundedNBins = static_cast<size_t>((max-min)/width+0.5); // round up to a whole number of bins.
+      const size_t roundedNBins = static_cast<size_t>((pmax-pmin)/width+0.5); // round up to a whole number of bins.
       outDim->setRange(
           roundedNBins,
-          static_cast<Mantid::coord_t>(min) /*min*/,
-          static_cast<Mantid::coord_t>(max) /*max*/); // Set custom min, max and nbins.
+          static_cast<Mantid::coord_t>(pmin) /*min*/,
+          static_cast<Mantid::coord_t>(pmax) /*max*/); // Set custom min, max and nbins.
     }
     dimensions[i] = outDim;
   }
