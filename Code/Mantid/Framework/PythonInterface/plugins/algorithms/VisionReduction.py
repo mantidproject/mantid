@@ -62,6 +62,7 @@ class VisionReduction(PythonAlgorithm):
         self.declareProperty(FileProperty("Filename", "", action=FileAction.Load, extensions=["*.nxs.h5"]))
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
 
+    #pylint: disable=too-many-locals
     def PyExec(self):
         NexusFile = self.getProperty("Filename").value
 
