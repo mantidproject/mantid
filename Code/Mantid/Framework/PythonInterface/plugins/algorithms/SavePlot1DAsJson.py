@@ -1,4 +1,4 @@
-#pylint: disable=no-init,unused-variable
+#pylint: disable=no-init,unused-variable,invalid-name,bare-except
 from mantid.api import *
 from mantid.kernel import *
 
@@ -81,7 +81,7 @@ class SavePlot1DAsJson(PythonAlgorithm):
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"
         serialized = dict(
-            type = plottype, 
+            type = plottype,
             data = dict(),
             name = wname,
             )
@@ -105,8 +105,10 @@ class SavePlot1DAsJson(PythonAlgorithm):
         label = lambda axis: axis.getUnit().caption()
         def unit(axis):
             s = axis.getUnit().symbol()
-            try: return s.latex()
-            except: return '%s' % s
+            try:
+                return s.latex()
+            except:
+                return '%s' % s
         axes = dict(
             xlabel=label(workspace.getAxis(0)),
             ylabel=label(workspace.getAxis(1)),

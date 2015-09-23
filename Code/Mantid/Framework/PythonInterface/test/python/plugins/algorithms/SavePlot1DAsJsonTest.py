@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-public-methods
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import unittest
 import numpy as np
 import mantid.simpleapi as api
@@ -9,7 +9,7 @@ from mantid.api import AnalysisDataService
 
 import os, json
 
-class SaveVulcanGSSTest(unittest.TestCase):
+class SavePlot1DAsJsonTest(unittest.TestCase):
 
     def test_save_one_curve(self):
         """ Test to Save one curve
@@ -100,7 +100,6 @@ class SaveVulcanGSSTest(unittest.TestCase):
         self.assertTrue(alg_test.isExecuted())
         # Verify ....
         d = json.load(open(out_path))
-        plotname = "myplot"
         self._checkData(d, E, I, err)
         # Delete the output file
         os.remove(out_path)
@@ -113,7 +112,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
         np.testing.assert_array_equal(d0[1], I)
         np.testing.assert_array_equal(d0[2], err)
         return
-        
+
 
     def _createOneCurve(self, datawsname):
         """ Create data workspace
