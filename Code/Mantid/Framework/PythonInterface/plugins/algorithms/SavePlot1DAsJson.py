@@ -80,25 +80,40 @@ class SavePlot1DAsJson(PythonAlgorithm):
         # init dictionary
         ishist = workspace.isHistogramData()
         plottype = "histogram" if ishist else "point"
-        serialized = {"type": plottype}
-        # helper
-        label = lambda axis: "%s (%s)" % (
-            axis.getUnit().caption(),
-            axis.getUnit().symbol() or 1,
+        serialized = dict(
+            type = plottype, 
+            data = dict(),
+            name = wname,
             )
         # loop over spectra
         for i in range(workspace.getNumberHistograms()):
-            k = "%s%s" % (wname, i)
-            value = dict(
-                x=list(workspace.readX(i)),
-                y=list(workspace.readY(i)),
-                e=list(workspace.readE(i)),
-                xlabel=label(workspace.getAxis(0)),
-                ylabel=label(workspace.getAxis(1)),
-                title="long title of %s" % k,
-                )
-            serialized[k] = value
+            spectrum_no = workspace.getSpectrum(i).getSpectrumNo()
+            # Why do we need label?
+            # label = "%s_spectrum_%d" % (wname, spectrum_no)
+            # labels.append(label)
+            # or title?
+            # title = "%s - spectrum %d" % (workspace.getTitle(), spectrum_no)
+            arr = [
+                list(workspace.readX(i)),
+                list(workspace.readY(i)),
+                list(workspace.readE(i)),
+                ]
+            serialized['data'][spectrum_no] = arr
             continue
+        # axes
+        # .. helper
+        label = lambda axis: axis.getUnit().caption()
+        def unit(axis):
+            s = axis.getUnit().symbol()
+            try: return s.latex()
+            except: return '%s' % s
+        axes = dict(
+            xlabel=label(workspace.getAxis(0)),
+            ylabel=label(workspace.getAxis(1)),
+            xunit = unit(workspace.getAxis(0)),
+            yunit = unit(workspace.getAxis(1)),
+            )
+        serialized['axes'] = axes
         return serialized
 
 
