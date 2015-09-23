@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	${SRC_FILES} ${OPENCASCADE_SRC}
 	src/ComponentParser.cpp
+	src/Crystal/BasicHKLFilters.cpp
 	src/Crystal/BraggScatterer.cpp
 	src/Crystal/BraggScattererFactory.cpp
 	src/Crystal/BraggScattererInCrystalStructure.cpp
@@ -133,6 +134,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
 
 set ( INC_FILES
 	inc/MantidGeometry/ComponentParser.h
+	inc/MantidGeometry/Crystal/BasicHKLFilters.h
 	inc/MantidGeometry/Crystal/BraggScatterer.h
 	inc/MantidGeometry/Crystal/BraggScattererFactory.h
 	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
@@ -262,6 +264,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	AcompTest.h
 	AlgebraTest.h
+	BasicHKLFiltersTest.h
 	BnIdTest.h
 	BoundingBoxTest.h
 	BraggScattererFactoryTest.h

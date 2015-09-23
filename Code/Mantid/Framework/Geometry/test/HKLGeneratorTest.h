@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "MantidGeometry/Crystal/HKLGenerator.h"
-#include "MantidGeometry/Crystal/HKLFilter.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
 #include "MantidKernel/Timer.h"

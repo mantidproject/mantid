@@ -1,7 +1,10 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include <boost/bind.hpp>
 #include <stdexcept>
+#include <algorithm>
 
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
+#include "MantidGeometry/Crystal/HKLGenerator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/BraggScattererInCrystalStructure.h"
@@ -111,18 +114,12 @@ CrystalStructure::getHKLs(double dMin, double dMax,
   int kMax = static_cast<int>(m_cell.b() / dMin);
   int lMax = static_cast<int>(m_cell.c() / dMin);
 
-  for (int h = -hMax; h <= hMax; ++h) {
-    for (int k = -kMax; k <= kMax; ++k) {
-      for (int l = -lMax; l <= lMax; ++l) {
-        V3D hkl(h, k, l);
-        double d = getDValue(hkl);
+  HKLFilter_const_sptr filter =
+      boost::make_shared<HKLFilterDRange>(m_cell, dMin, dMax) &
+      getFilterForMethod(method);
 
-        if (d <= dMax && d >= dMin && isAllowed(hkl, method)) {
-          hkls.push_back(hkl);
-        }
-      }
-    }
-  }
+  HKLGenerator generator(hMax, kMax, lMax);
+  std::copy_if(generator.begin(), generator.end(), hkls.begin(), *filter);
 
   return hkls;
 }
@@ -272,6 +269,17 @@ double CrystalStructure::getDValue(const V3D &hkl) const {
 /// Returns |F|^2 for the given HKL.
 double CrystalStructure::getFSquared(const V3D &hkl) const {
   return m_calculator->getFSquared(hkl);
+}
+
+HKLFilter_const_sptr CrystalStructure::getFilterForMethod(
+    CrystalStructure::ReflectionConditionMethod method) const {
+
+  switch (method) {
+  case CrystalStructure::UseStructureFactor:
+    return boost::make_shared<HKLFilterStructureFactor>(m_calculator);
+  case CrystalStructure::UseCentering:
+    return boost::make_shared<HKLFilterCentering>(m_centering);
+  }
 }
 
 } // namespace Geometry

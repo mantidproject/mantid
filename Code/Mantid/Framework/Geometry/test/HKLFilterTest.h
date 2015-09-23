@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Crystal/HKLFilter.h"
+#include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidKernel/Timer.h"
@@ -35,23 +35,21 @@ public:
     HKLFilterDRange dFilter(mg.cell(), 0.7, 200.0);
     HKLFilterCentering centering(mg.centering());
     HKLFilterSpaceGroup sgFilter(mg.spaceGroup());
-
-    const HKLFilter &f =  dFilter & sgFilter;
-    inspectFilter(f);
   }
 
 private:
-  void inspectFilter(const HKLFilter &filter) {
-    std::cout << filter.getName() << std::endl;
+  void inspectFilter(const HKLFilter_const_sptr &filter) {
+    std::cout << filter->getName() << std::endl;
 
     try {
-      const HKLFilterBinaryLogicOperation &op =
-          dynamic_cast<const HKLFilterBinaryLogicOperation &>(filter);
+      boost::shared_ptr<const HKLFilterBinaryLogicOperation> op =
+          boost::dynamic_pointer_cast<const HKLFilterBinaryLogicOperation>(
+              filter);
       std::cout << "LHS: ";
-      inspectFilter(op.getLHS());
+      inspectFilter(op->getLHS());
 
       std::cout << "RHS: ";
-      inspectFilter(op.getRHS());
+      inspectFilter(op->getRHS());
     } catch (std::bad_cast) {
       // nothing.
     }
