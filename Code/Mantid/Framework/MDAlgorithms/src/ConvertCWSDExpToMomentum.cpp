@@ -76,10 +76,13 @@ void ConvertCWSDExpToMomentum::init() {
 void ConvertCWSDExpToMomentum::exec() {
   // Parse inputs
   std::string errmsg("");
-  bool inputvalid = getInputs(errmsg);
-  if (!inputvalid)
-    throw std::runtime_error(errmsg);
   bool createvirtual = getProperty("CreateVirtualInstrument");
+  bool inputvalid = getInputs(createvirtual, errmsg);
+  if (!inputvalid)
+  {
+    g_log.error() << "Importing error: " << errmsg << "\n";
+    throw std::runtime_error(errmsg);
+  }
 
   g_log.notice("[DB] Inputs are examined.");
 
@@ -407,10 +410,11 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 //----------------------------------------------------------------------------------------------
 /** Examine input
  * @brief ConvertCWSDExpToMomentum::getInputs
+ * @param virtualinstrument :: boolean flag to use virtual instrument
  * @param errmsg
  * @return
  */
-bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
+bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &errmsg) {
   std::stringstream errss;
 
   // Table workspace for data file names and starting detector IDs (for virtual
@@ -431,35 +435,41 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
             << m_iColStartDetID << " must be 'Staring DetID'"
             << "\n";
   }
+  g_log.warning("Finished parsing Data Table");
 
-  // Table workspace for detector positions
-  m_detectorListTableWS = getProperty("DetectorTableWorkspace");
-  const std::vector<std::string> detcolnames =
-      m_detectorListTableWS->getColumnNames();
-  if (detcolnames.size() != 5) {
-    errss << "Detector table (DetectorTableWorkspace) must have 5 columns"
-          << "\n";
-  }
+  // Set up parameters for creating virtual instrument
+  g_log.warning() << "About to deal with virtual instrument" << virtualinstrument << "\n";
+  if (virtualinstrument)
+  {
+    // Table workspace for detector positions
+    m_detectorListTableWS = getProperty("DetectorTableWorkspace");
+    const std::vector<std::string> detcolnames =
+        m_detectorListTableWS->getColumnNames();
+    if (detcolnames.size() != 4) {
+      errss << "Detector table (DetectorTableWorkspace) must have 4 columns"
+            << "\n";
+    }
 
-  // Sample and source position
-  std::vector<double> sourcepos = getProperty("SourcePosition");
-  if (sourcepos.size() != 3)
-    errss << "SourcePosition must have 3 items.  Input has " << sourcepos.size()
-          << " instead.\n";
-  else {
-    m_sourcePos.setX(sourcepos[0]);
-    m_sourcePos.setY(sourcepos[1]);
-    m_sourcePos.setZ(sourcepos[2]);
-  }
+    // Sample and source position
+    std::vector<double> sourcepos = getProperty("SourcePosition");
+    if (sourcepos.size() != 3)
+      errss << "SourcePosition must have 3 items.  Input has " << sourcepos.size()
+            << " instead.\n";
+    else {
+      m_sourcePos.setX(sourcepos[0]);
+      m_sourcePos.setY(sourcepos[1]);
+      m_sourcePos.setZ(sourcepos[2]);
+    }
 
-  std::vector<double> samplepos = getProperty("SamplePosition");
-  if (samplepos.size() != 3) {
-    errss << "SamplePosition must have 3 items.  Input has " << samplepos.size()
-          << " instead.\n";
-  } else {
-    m_samplePos.setX(samplepos[0]);
-    m_samplePos.setY(samplepos[1]);
-    m_samplePos.setZ(samplepos[2]);
+    std::vector<double> samplepos = getProperty("SamplePosition");
+    if (samplepos.size() != 3) {
+      errss << "SamplePosition must have 3 items.  Input has " << samplepos.size()
+            << " instead.\n";
+    } else {
+      m_samplePos.setX(samplepos[0]);
+      m_samplePos.setY(samplepos[1]);
+      m_samplePos.setZ(samplepos[2]);
+    }
   }
 
   m_isBaseName = getProperty("IsBaseName");
@@ -467,7 +477,9 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
     m_dataDir = getPropertyValue("Directory");
 
   errmsg = errss.str();
-  return (errmsg.size() > 0);
+  g_log.notice() << "[DB] Error message of size " << errmsg.size() << "\n";
+
+  return (errmsg.size() == 0);
 }
 
 //----------------------------------------------------------------------------------------------

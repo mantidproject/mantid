@@ -75,7 +75,7 @@ private:
 
   API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
 
-  bool getInputs(std::string &errmsg);
+  bool getInputs(bool virtualinstrument, std::string &errmsg);
 
   API::MatrixWorkspace_sptr loadSpiceData(const std::string &filename,
                                           bool &loaded, std::string &errmsg);
