@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/MDTransfModQ.h"
 #include "MantidKernel/RegistrationHelper.h"
-
+#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 namespace Mantid {
 namespace MDAlgorithms {
 // register the class, whith conversion factory under ModQ name
@@ -410,5 +410,19 @@ MDTransfModQ::MDTransfModQ()
 std::vector<std::string> MDTransfModQ::getEmodes() const {
   return Kernel::DeltaEMode::availableTypes();
 }
+
+/**
+ * Set the display normalization for Q
+ * @param mdWorkspace: the md workspace
+ * @param underlyingWorkspace: the underlying workspace
+ */
+void MDTransfModQ::setDisplayNormalization(
+      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+  DisplayNormalizationSetter setter;
+  auto isQ = true;
+  setter(mdWorkspace, underlyingWorkspace, isQ, m_Emode);
+}
+
 } // End MDAlgorighms namespace
 } // End Mantid namespace

@@ -1,4 +1,5 @@
 #include "MantidMDAlgorithms/MDTransfNoQ.h"
+#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 //
 namespace Mantid {
 namespace MDAlgorithms {
@@ -180,6 +181,19 @@ MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode,
 }
 
 MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL){}
+
+/**
+ * Set the display normalization for no Q
+ * @param mdWorkspace: the md workspace
+ * @param underlyingWorkspace: the underlying workspace
+ */
+void MDTransfNoQ::setDisplayNormalization(
+      Mantid::API::IMDWorkspace_sptr mdWorkspace,
+      Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const {
+  DisplayNormalizationSetter setter;
+  auto isQ = false;
+  setter(mdWorkspace, underlyingWorkspace, isQ);
+}
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace
