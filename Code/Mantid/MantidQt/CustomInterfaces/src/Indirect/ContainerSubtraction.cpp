@@ -263,14 +263,27 @@ void ContainerSubtraction::absCorComplete(bool error) {
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
-  IAlgorithm_sptr addLog = AlgorithmManager::Instance().create("AddSampleLog");
-  addLog->initialize();
-  addLog->setProperty("Workspace", m_pythonExportWsName);
-  addLog->setProperty("LogName", "container_filename");
-  addLog->setProperty("LogText",
-                      m_uiForm.dsContainer->getCurrentDataName().toStdString());
-  addLog->setProperty("LogType", "String");
-  m_batchAlgoRunner->addAlgorithm(addLog);
+  IAlgorithm_sptr addLogContainer =
+      AlgorithmManager::Instance().create("AddSampleLog");
+  addLogContainer->initialize();
+  addLogContainer->setProperty("Workspace", m_pythonExportWsName);
+  addLogContainer->setProperty("LogName", "container_filename");
+  addLogContainer->setProperty(
+      "LogText", m_uiForm.dsContainer->getCurrentDataName().toStdString());
+  addLogContainer->setProperty("LogType", "String");
+
+  m_batchAlgoRunner->addAlgorithm(addLogContainer);
+
+  IAlgorithm_sptr addLogSample =
+      AlgorithmManager::Instance().create("AddSampleLog");
+  addLogSample->initialize();
+  addLogSample->setProperty("Workspace", m_pythonExportWsName);
+  addLogSample->setProperty("LogName", "sample_filename");
+  addLogSample->setProperty(
+      "LogText", m_uiForm.dsSample->getCurrentDataName().toStdString());
+  addLogSample->setProperty("LogType", "String");
+
+  m_batchAlgoRunner->addAlgorithm(addLogSample);
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
