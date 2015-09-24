@@ -184,7 +184,7 @@ public:
 
       HKLFilter_const_sptr dFilter = boost::make_shared<HKLFilterDRange>(cell, dMin, 200.0);
 
-      std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls), HKLFilterProxy(~dFilter));
+      std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls), (~dFilter)->fn());
 
       // TS_ASSERT_EQUALS(hkls.size(), gen.size());
       TS_ASSERT_DIFFERS(hkls.size(), 0);

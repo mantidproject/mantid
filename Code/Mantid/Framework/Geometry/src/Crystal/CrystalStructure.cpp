@@ -113,7 +113,7 @@ CrystalStructure::getHKLs(double dMin, double dMax,
   // Generate list of HKLs, use HKLFilterProxy of negation of filter
   // (remove_copy_if instead of copy_if due to compatibility)
   std::remove_copy_if(generator.begin(), generator.end(),
-                      std::back_inserter(hkls), HKLFilterProxy(~filter));
+                      std::back_inserter(hkls), (~filter)->fn());
 
   return hkls;
 }

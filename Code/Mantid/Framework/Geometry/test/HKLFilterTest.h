@@ -32,27 +32,18 @@ public:
 
     CrystalStructure mg(cellAl2O3, sgAl2O3, scatterers);
 
-    HKLFilterDRange dFilter(mg.cell(), 0.7, 200.0);
-    HKLFilterCentering centering(mg.centering());
-    HKLFilterSpaceGroup sgFilter(mg.spaceGroup());
+    HKLFilter_const_sptr dFilter =
+        boost::make_shared<HKLFilterDRange>(mg.cell(), 0.7);
+    HKLFilter_const_sptr centering =
+        boost::make_shared<HKLFilterCentering>(mg.centering());
+    HKLFilter_const_sptr sgFilter =
+        boost::make_shared<HKLFilterSpaceGroup>(mg.spaceGroup());
+
+    HKLFilter_const_sptr filter = ~(dFilter & centering & sgFilter);
+
+    std::cout << filter->getDescription() << std::endl;
   }
 
 private:
-  void inspectFilter(const HKLFilter_const_sptr &filter) {
-    std::cout << filter->getName() << std::endl;
-
-    try {
-      boost::shared_ptr<const HKLFilterBinaryLogicOperation> op =
-          boost::dynamic_pointer_cast<const HKLFilterBinaryLogicOperation>(
-              filter);
-      std::cout << "LHS: ";
-      inspectFilter(op->getLHS());
-
-      std::cout << "RHS: ";
-      inspectFilter(op->getRHS());
-    } catch (std::bad_cast) {
-      // nothing.
-    }
-  }
 };
 #endif /* MANTID_GEOMETRY_HKLFILTERTEST_H_ */

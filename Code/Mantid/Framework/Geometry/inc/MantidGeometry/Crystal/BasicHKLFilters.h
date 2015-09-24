@@ -8,14 +8,46 @@
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
+#include <strstream>
+
 namespace Mantid {
 namespace Geometry {
 
 /** BasicHKLFilters
 
-  This file contains some basic implementations of HKLFilter that
+  This file contains some implementations of HKLFilter that
   provide filtering based on things like d-value, space group
   or centering.
+
+  A common use would be to generate a specific list of HKLs,
+  for example all reflections that are allowed according to a certain
+  range of d-values and the reflection conditions of a space group:
+
+    HKLFilter_const_sptr filter =
+        boost::make_shared<HKLFilterDRange>(unitCell, 0.5)
+      & boost::make_shared<HKLFilterSpaceGroup>(spaceGroup);
+
+    HKLGenerator gen(unitCell, 0.5);
+    std::vector<V3D> hkls;
+
+    std::remove_copy_if(gen.begin(), gen.end(), std::back_inserter(hkls),
+                        (~filter)->fn());
+
+  An existing list of HKLs could be checked for indices that match the
+  reflection conditions of a space group:
+
+    HKLFilter_const_sptr sgFilter =
+        boost::make_shared<HKLFilterSpaceGroup>(spaceGroup);
+
+    auto matchingHKLCount = std::count_if(hkls.begin(), hkls.end(),
+                                          sgFilter->fn());
+
+    auto violatingHKLCount = std::count_if(hkls.begin(), hkls.end(),
+                                          (~sgFilter)->fn());
+
+  Combining HKLGenerator and different HKLFilters provides a very flexible
+  system for creating and processing specific sets of Miller indices that
+  is easy to expand by adding other HKLFilters.
 
       @author Michael Wedel, ESS
       @date 23/09/2015
@@ -43,16 +75,11 @@ namespace Geometry {
 */
 class MANTID_GEOMETRY_DLL HKLFilterDRange : public HKLFilter {
 public:
-  HKLFilterDRange(const UnitCell &cell, double dMin, double dMax)
-      : m_cell(cell), m_dmin(dMin), m_dmax(dMax) {}
+  HKLFilterDRange(const UnitCell &cell, double dMin);
+  HKLFilterDRange(const UnitCell &cell, double dMin, double dMax);
 
-  std::string getName() const { return "dRange"; }
-
-  bool isAllowed(const Kernel::V3D &hkl) const {
-    double d = m_cell.d(hkl);
-
-    return d >= m_dmin && d <= m_dmax;
-  }
+  std::string getDescription() const;
+  bool isAllowed(const Kernel::V3D &hkl) const;
 
 protected:
   UnitCell m_cell;
@@ -61,14 +88,10 @@ protected:
 
 class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup : public HKLFilter {
 public:
-  HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup)
-      : m_spaceGroup(spaceGroup) {}
+  HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  std::string getName() const { return "SpaceGroup"; }
-
-  bool isAllowed(const Kernel::V3D &hkl) const {
-    return m_spaceGroup->isAllowedReflection(hkl);
-  }
+  std::string getDescription() const;
+  bool isAllowed(const Kernel::V3D &hkl) const;
 
 protected:
   SpaceGroup_const_sptr m_spaceGroup;
@@ -76,28 +99,23 @@ protected:
 
 class MANTID_GEOMETRY_DLL HKLFilterStructureFactor : public HKLFilter {
 public:
-  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator);
+  HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator,
+                           double fSquaredMin = 1.0e-6);
 
-  std::string getName() const { return "SF"; }
-
+  std::string getDescription() const;
   bool isAllowed(const Kernel::V3D &hkl) const;
 
 protected:
   StructureFactorCalculator_sptr m_calculator;
+  double m_fSquaredMin;
 };
 
 class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
 public:
-  HKLFilterCentering(const ReflectionCondition_sptr &centering)
-      : m_centering(centering) {}
+  HKLFilterCentering(const ReflectionCondition_sptr &centering);
 
-  std::string getName() const { return "Centering"; }
-
-  bool isAllowed(const Kernel::V3D &hkl) const {
-    return m_centering->isAllowed(static_cast<int>(hkl.X()),
-                                  static_cast<int>(hkl.Y()),
-                                  static_cast<int>(hkl.Z()));
-  }
+  std::string getDescription() const;
+  bool isAllowed(const Kernel::V3D &hkl) const;
 
 protected:
   ReflectionCondition_sptr m_centering;
