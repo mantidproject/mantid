@@ -265,9 +265,8 @@ void ContainerSubtraction::absCorComplete(bool error) {
 
   IAlgorithm_sptr addLog = AlgorithmManager::Instance().create("AddSampleLog");
   addLog->initialize();
-  addLog->setProperty("Workspace",
-                      m_uiForm.dsSample->getCurrentDataName().toStdString());
-  addLog->setProperty("LogName", "container");
+  addLog->setProperty("Workspace", m_pythonExportWsName);
+  addLog->setProperty("LogName", "container_filename");
   addLog->setProperty("LogText",
                       m_uiForm.dsContainer->getCurrentDataName().toStdString());
   addLog->setProperty("LogType", "String");
