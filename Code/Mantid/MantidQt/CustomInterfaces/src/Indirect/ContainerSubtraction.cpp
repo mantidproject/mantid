@@ -263,15 +263,15 @@ void ContainerSubtraction::absCorComplete(bool error) {
   if (save)
     addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
 
-  IAlgorithm_sptr addLog =
-      AlgorithmManager::Instance().create("AddSampleLog");
+  IAlgorithm_sptr addLog = AlgorithmManager::Instance().create("AddSampleLog");
   addLog->initialize();
-  addLog->setProperty("Workspace", m_uiForm.dsSample->getCurrentDataName().toStdString());
+  addLog->setProperty("Workspace",
+                      m_uiForm.dsSample->getCurrentDataName().toStdString());
   addLog->setProperty("LogName", "container");
-  addLog->setProperty("LogText", m_uiForm.dsContainer->getCurrentDataName().toStdString());
+  addLog->setProperty("LogText",
+                      m_uiForm.dsContainer->getCurrentDataName().toStdString());
   addLog->setProperty("LogType", "String");
   m_batchAlgoRunner->addAlgorithm(addLog);
-
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
