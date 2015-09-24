@@ -122,6 +122,9 @@ void MDNormDirectSC::exec() {
     g_log.warning("Binning limits are outside the limits of the MDWorkspace. "
                   "Not applying normalization.");
   }
+
+  // Set the display normalization based on the input workspace
+  outputWS->setDisplayNormalization(m_inputWS->displayNormalizationHisto());
 }
 
 /**

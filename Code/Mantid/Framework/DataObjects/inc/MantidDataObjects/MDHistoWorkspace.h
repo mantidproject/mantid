@@ -393,6 +393,8 @@ public:
   /// Preferred visual normalization method.
   virtual Mantid::API::MDNormalization displayNormalizationHisto() const;
 
+  virtual void setDisplayNormalization(const Mantid::API::MDNormalization& preferredNormalization);
+
 private:
   virtual MDHistoWorkspace *doClone() const {
     return new MDHistoWorkspace(*this);

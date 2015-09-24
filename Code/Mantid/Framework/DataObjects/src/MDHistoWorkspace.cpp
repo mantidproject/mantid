@@ -1247,5 +1247,9 @@ MDNormalization MDHistoWorkspace::displayNormalizationHisto() const {
   return displayNormalization();// Normalize by the number of events.
 }
 
+void MDHistoWorkspace::setDisplayNormalization(const Mantid::API::MDNormalization& preferredNormalization) {
+  m_displayNormalization = preferredNormalization;
+}
+
 } // namespace Mantid
 } // namespace DataObjects

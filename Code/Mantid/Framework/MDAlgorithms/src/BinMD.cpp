@@ -437,6 +437,9 @@ void BinMD::exec() {
     outWS->copyExperimentInfos(*inEWS);
   }
 
+  //  Pass on the display normalization from the input workspace
+  outWS->setDisplayNormalization(m_inWS->displayNormalizationHisto());
+
   outWS->updateSum();
   // Save the output
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
