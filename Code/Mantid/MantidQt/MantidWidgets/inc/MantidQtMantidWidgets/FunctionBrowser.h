@@ -132,6 +132,11 @@ public:
   bool isLocalParameterFixed(const QString& parName, int i) const;
   /// Fix/unfix local parameter
   void setLocalParameterFixed(const QString& parName, int i, bool fixed);
+  /// Get the tie for a local parameter.
+  QString getLocalParameterTie(const QString& parName, int i) const;
+  /// Set a tie for a local parameter.
+  void setLocalParameterTie(const QString& parName, int i, QString tie);
+
   /// Return the multidomain function if number of datasets is greater than 1
   Mantid::API::IFunction_sptr getGlobalFunction();
   /// Update parameter values in the browser to match those of a function.
@@ -370,6 +375,7 @@ protected:
     explicit LocalParameterData(double v = 0.0):value(v),fixed(false){}
     double value;
     bool fixed;
+    QString tie;
   };
 
   /// Set true if the constructed function is intended to be used in a multi-dataset fit

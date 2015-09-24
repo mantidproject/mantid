@@ -26,12 +26,15 @@ public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
   QList<double> getValues() const;
   QList<bool> getFixes() const;
+  QStringList getTies() const;
   bool isFixed(int i) const {return m_fixes[i];}
+  QString getTie(int i) const {return m_ties[i];}
 private slots:
   void valueChanged(int,int);
   void setAllValues(double);
   void fixParameter(int,bool);
   void setAllFixed(bool);
+  void setTie(int,QString);
   void copy();
   void paste();
 private:
@@ -45,6 +48,8 @@ private:
   /// Cache for the "fixed" attribute. If changes are accepted
   /// parameters for which m_fixes[i] is true are fixed to their m_values[i]
   QList<bool> m_fixes;
+  /// Cache for the ties
+  QStringList m_ties;
 };
 
 

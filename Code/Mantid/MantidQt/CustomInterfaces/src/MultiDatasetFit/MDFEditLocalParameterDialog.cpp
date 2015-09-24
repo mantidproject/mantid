@@ -33,6 +33,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
     m_values.push_back(value);
     bool fixed = multifit->isLocalParameterFixed(parName,i);
     m_fixes.push_back(fixed);
+    auto tie = multifit->getLocalParameterTie(parName,i);
+    m_ties.push_back(tie);
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
     m_uiForm.tableWidget->setItem( i, 0, cell );
@@ -44,6 +46,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
   connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
   connect(deleg,SIGNAL(setAllFixed(bool)),this,SLOT(setAllFixed(bool)));
+  connect(deleg,SIGNAL(setTie(int,QString)),this,SLOT(setTie(int,QString)));
 
   m_uiForm.tableWidget->installEventFilter(this);
 }
@@ -92,12 +95,23 @@ QList<bool> EditLocalParameterDialog::getFixes() const
   return m_fixes;
 }
 
+/// Get a list of the ties.
+QStringList EditLocalParameterDialog::getTies() const
+{
+  return m_ties;
+}
+
 /// Fix/unfix a single parameter.
 /// @param index :: Index of a paramter to fix or unfix.
 /// @param fix :: Fix (true) or unfix (false).
 void EditLocalParameterDialog::fixParameter(int index, bool fix)
 {
   m_fixes[index] = fix;
+}
+
+void EditLocalParameterDialog::setTie(int index, QString tie)
+{
+  m_ties[index] = tie;
 }
 
 /// Fix/unfix all parameters.
