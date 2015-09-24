@@ -528,8 +528,8 @@ public:
     //Test if filename log is found in both monitor and sata workspace
     TS_ASSERT(output2D->run().hasProperty("raw_filename"));
     TS_ASSERT(monitoroutput2D->run().hasProperty("raw_filename"));
-    TS_ASSERT_EQUALS(loader6.getPropertyValue("raw_filename"),output2D->run().getProperty("raw_filename")->value());
-    TS_ASSERT_EQUALS(loader6.getPropertyValue("raw_filename"),monitoroutput2D->run().getProperty("raw_filename")->value());
+    TS_ASSERT_EQUALS(loader6.getPropertyValue("Filename"),output2D->run().getProperty("raw_filename")->value());
+    TS_ASSERT_EQUALS(loader6.getPropertyValue("Filename"),monitoroutput2D->run().getProperty("raw_filename")->value());
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove(outputSpace+"_monitors");
   }
