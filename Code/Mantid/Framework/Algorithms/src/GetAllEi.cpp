@@ -22,7 +22,7 @@ namespace Mantid {
       m_useFilterLog(true),m_min_Eresolution(0.08),
       // half maximal resolution for LET
       m_max_Eresolution(0.5e-3),
-      m_peakEnergyRatio2reject(0.01){}
+      m_peakEnergyRatio2reject(0.1){}
 
     /// Initialization method.
     void GetAllEi::init() {
@@ -60,7 +60,7 @@ namespace Mantid {
       declareProperty("MaxInstrResolution",0.0005,maxInRange,
         "The maximal energy resolution possible for an"
         "instrument at some energies (full width at half maximum). \nPeaks, sharper then"
-        "this width are rejected. Accepted limits are:1e-6-0.1");
+        "this width are rejected. Accepted limits are:1e-6/0.1");
 
       auto minInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
       minInRange->setLower(0.001);
@@ -68,12 +68,12 @@ namespace Mantid {
       declareProperty("MinInstrResolution",0.08,minInRange,
         "The minimal energy resolution possible for an"
         "instrument at some energies (full width at half maximum). \n"
-        "Peaks broader then this width are rejected. Accepted limits are:0.001-0.5");
+        "Peaks broader then this width are rejected. Accepted limits are:0.001/0.5");
 
       auto peakInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
       peakInRange->setLower(0.0);
       minInRange->setUpper(1.);
-      declareProperty("PeaksRatioToReject",0.01,peakInRange,
+      declareProperty("PeaksRatioToReject",0.1,peakInRange,
         "Ratio of a peak energy to the maximal energy in a peak. "
         "If the ratio is lower then the value specified here, "
         "peak is treated as insignificant one and is rejected.\n"
@@ -86,6 +86,41 @@ namespace Mantid {
         " monitor peaks energies\n"
         "together with total intensity within each peak.");
     }
+    /**Simple template function to remove invalid data from vector
+    *@param guessValid -- boolean vector of indicating if each particular guess is valid
+    *@param guess      -- vector guess values at input and values with removing 
+    *                     invalid parameters at output
+    */
+    template<class T>
+    void removeInvalidValues(const std::vector<bool> &guessValid,std::vector<T> &guess){
+        std::vector<T> new_guess;
+        new_guess.reserve(guess.size());
+
+        for(size_t i= 0;i<guessValid.size();i++){
+          if(guessValid[i]){
+            new_guess.push_back(guess[i]);
+          }
+        }
+        new_guess.swap(guess);
+      };
+      /**Internal class to contain peak information */
+      struct peakKeeper{
+        double position;
+        double height;
+        double sigma;
+        double energy;
+
+        peakKeeper(double pos, double heigh,double sig):
+          position(pos),height(heigh),sigma(sig)
+        {
+          this->energy = std::sqrt(2*M_PI)*height*sigma;
+        }
+        // to sort peaks
+        bool operator < (const peakKeeper& str) const{
+            return (energy > str.energy);
+        }
+      };
+
     /** Executes the algorithm -- found all existing monitor peaks. */
     void GetAllEi::exec() {
       // Get pointers to the workspace, parameter map and table
@@ -93,6 +128,7 @@ namespace Mantid {
 
       m_min_Eresolution = getProperty("MinInstrResolution");
       m_max_Eresolution = getProperty("MaxInstrResolution");
+      m_peakEnergyRatio2reject = getProperty("PeaksRatioToReject");
 
       double chopSpeed,chopDelay;
       findChopSpeedAndDelay(inputWS,chopSpeed,chopDelay);
@@ -169,44 +205,20 @@ namespace Mantid {
                     irange_min,irange_max,guessValid);
 
       // remove invalid guess values
-      auto removeInvalidGuess=[](const std::vector<bool> &guessValid,std::vector<double> &guess){
-        std::vector<double> new_guess;
-        new_guess.reserve(guess.size());
+      removeInvalidValues<double>(guessValid,guess_ei);
 
-        for(size_t i= 0;i<guessValid.size();i++){
-          if(guessValid[i]){
-            new_guess.push_back(guess[i]);
-          }
-        }
-        new_guess.swap(guess);
-      };
-      auto removeInvalidGuessN=[](const std::vector<bool> &guessValid,std::vector<size_t> &guess){
-        std::vector<size_t> new_guess;
-        new_guess.reserve(guess.size());
-
-        for(size_t i= 0;i<guessValid.size();i++){
-          if(guessValid[i]){
-            new_guess.push_back(guess[i]);
-          }
-        }
-        new_guess.swap(guess);
-      };
-
-
-      removeInvalidGuess(guessValid,guess_ei);
       // preprocess second monitors peaks
       std::vector<size_t> irange1_min,irange1_max;
       findBinRanges(monitorWS->readX(1),monitorWS->readY(1),guess_ei,
                     this->m_min_Eresolution/(2*std::sqrt(2*std::log(2.))),
                     irange1_min,irange1_max,guessValid);
-      removeInvalidGuess(guessValid,guess_ei);
-      removeInvalidGuessN(guessValid,irange_min);
-      removeInvalidGuessN(guessValid,irange_max);
+      removeInvalidValues<double>(guessValid,guess_ei);
+      removeInvalidValues<size_t>(guessValid,irange_min);
+      removeInvalidValues<size_t>(guessValid,irange_max);
 
 
-      std::vector<double> peaks_positions;
-      std::vector<double> peaks_height;
-      std::vector<double> peaks_width;
+      std::vector<peakKeeper> peaks;
+
       double maxPeakEnergy(0);
       std::vector<size_t> monsRangeMin(2),monsRangeMax(2);
       for(size_t i=0; i<guess_ei.size();i++){
@@ -221,27 +233,53 @@ namespace Mantid {
                     monsRangeMin,monsRangeMax,
                     energy,height,twoSigma);
         if(found){
-          peaks_positions.push_back(energy);
-          peaks_height.push_back(height);
-          peaks_width.push_back(0.5*twoSigma);
+          peaks.push_back(peakKeeper(energy,height,0.5*twoSigma));
+          if(peaks.back().energy>maxPeakEnergy)maxPeakEnergy=peaks.back().energy;
 
         }
       }
       monitorWS.reset();
 
-      size_t nPeaks = peaks_positions.size();
+      size_t nPeaks = peaks.size();
       if (nPeaks == 0){
         throw std::runtime_error("Can not identify any energy peaks");
       }
+      // sort peaks and remove invalid one
+      guessValid.resize(nPeaks);
+      bool needsRemoval(false);
+      for(size_t i=0;i<nPeaks;i++){
+        peaks[i].energy/=maxPeakEnergy;
+        if(peaks[i].energy<m_peakEnergyRatio2reject){
+           guessValid[i]=false;
+           g_log.debug()<<" Rejecting peak at Ei="+std::to_string(peaks[i].position)+
+             " as its total energy lower then the threshold\n";
+          needsRemoval = true;
+        }else{
+           guessValid[i]=true;
+        }
+      }
+      if(needsRemoval) 
+        removeInvalidValues<peakKeeper>(guessValid,peaks);
+      nPeaks = peaks.size();
+      // sort by energy decreasing -- see class definition
+      std::sort(peaks.begin(),peaks.end());
+
+
+
+      // finalize output
       auto result_ws =API::WorkspaceFactory::Instance().create("Workspace2D",1,
         nPeaks , nPeaks);
-      result_ws->setX(0, peaks_positions);
+
+      MantidVec peaks_positions;
       MantidVec &Signal = result_ws->dataY(0);
       MantidVec &Error  = result_ws->dataE(0);
       for(size_t i=0;i<nPeaks;i++){
-        Signal[i] = peaks_height[i];
-        Error[i]  = peaks_width[i];
+        peaks_positions.push_back(peaks[i].position);
+        Signal[i] = peaks[i].height;
+        Error[i]  = peaks[i].sigma;
       }
+      result_ws->setX(0, peaks_positions);
+
       setProperty("OutputWorkspace",result_ws);
 
 
@@ -473,14 +511,14 @@ namespace Mantid {
           if(eMax>=eBins[nBins-1]){
             index_max =nBins+1;
           }else{
-            index_max = Kernel::VectorHelper::getBinIndex(eBins,eMax);
+            index_max = Kernel::VectorHelper::getBinIndex(eBins,eMax)+1;
             if(index_max>=nBins)index_max=nBins-1;
           }
 
         };
         // refine bin range. May need better procedure for this. 
         auto refineEGuess =[&](double &eGuess){
-          size_t ind_Emax;
+          size_t ind_Emax=index_min;
           double SMax(0);
           for(size_t i=index_min;i<index_max-1;i++){
             double dX = eBins[i+1]-eBins[i];
@@ -515,9 +553,11 @@ namespace Mantid {
               guessValid[nGuess]=false;
           }
         }
-        // if array decreasing rather then increasing, indexes behave differently
-        if(irangeMax[0]<irangeMin[0]){
-          irangeMax.swap(irangeMin);
+        // if array decreasing rather then increasing, indexes behave differently. Will it still work?
+        if(irangeMax.size()>0){
+          if(irangeMax[0]<irangeMin[0]){
+            irangeMax.swap(irangeMin);
+          }
         }
 
     }
