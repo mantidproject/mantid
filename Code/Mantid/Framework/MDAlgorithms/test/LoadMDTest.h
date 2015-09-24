@@ -555,11 +555,13 @@ public:
 
   void test_histo1D()
   {
-    std::vector<Geometry::IMDDimension_sptr> dims(1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", -10, 10, 5));
+    Mantid::coord_t min(-10.0);
+    Mantid::coord_t max(10.0);
+    std::vector<Geometry::IMDDimension_sptr> dims(1, boost::make_shared<Geometry::MDHistoDimension>("X", "x", "m", min, max, 5));
     MDHistoWorkspace_sptr ws = boost::make_shared<MDHistoWorkspace>(dims, API::VolumeNormalization);
-    // TODO: FIX THIS
-    //doTestHistoV1(ws);
-    //doTestHisto(ws);
+    ws->setTo(1.0, 1.0, 1);
+    doTestHistoV1(ws);
+    doTestHisto(ws);
   }
 
   void test_histo2D()
