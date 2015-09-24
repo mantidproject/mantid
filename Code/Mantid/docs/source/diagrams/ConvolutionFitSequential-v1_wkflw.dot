@@ -7,12 +7,10 @@ digraph ConvolutionFitSequential {
     InputWorkspace
     FitType
     FitParameters
-    Background
-    Function
     BackgroundType
+    Function
     XStart
     XEnd
-    Temperature
     SpecMin
     SpecMax
     Convolve
@@ -34,20 +32,23 @@ digraph ConvolutionFitSequential {
     DeleteWorkspace
     ProcessIndirectFitParameters
     CopyLogs
-    AddSampleLog
     RenameWorkspace
   }
 
   InputWorkspace                 -> FitFunction
-  Background                     -> FitFunction
+  BackgroundType                 -> FitFunction
   FitType                        -> FitFunction
+  Function                       -> FitFunction
   FitParameters                  -> FitFunction
+  SpecMin                        -> FitFunction
+  SpecMax                        -> FitFunction
   InputWorkspace                 -> ConvertSpectrumAxis            [label="Convert to Elastic Q"]
   ConvertSpectrumAxis            -> PlotPeakByLogValue             [label="InputWorkspace"]
   FitFunction                    -> PlotPeakByLogValue
-  StartX                         -> PlotPeakByLogValue
-  EndX                           -> PlotPeakByLogValue
+  XStart                         -> PlotPeakByLogValue
+  XEnd                           -> PlotPeakByLogValue
   Convolve                       -> PlotPeakByLogValue
+  MaxIterations                  -> PlotPeakByLogValue
   Minimizer                      -> PlotPeakByLogValue
   PlotPeakByLogValue             -> NormalisedCovarianceWorkspace
   PlotPeakByLogValue             -> ParameterTable
