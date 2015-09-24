@@ -4,7 +4,7 @@
 <component-link name = "MANDI">
 <!-- Specify that any banks not in NeXus file are to be removed -->
 <parameter name="T0">
- <value val="-1.886000"/>
+ <value val="-0.904000"/>
 </parameter>
 </component-link>
 
