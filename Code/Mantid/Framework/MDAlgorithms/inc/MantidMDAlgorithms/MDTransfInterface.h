@@ -226,7 +226,8 @@ public:
 
   /**
    * Sets the display normalization
-   * @param workspace: the workspace on which the display normalizations should
+   * @param mdWorkspace: the workspace on which the display normalizations should
+   * @param underlyingWorkspace: the original workspace
    * be set
    */
   virtual void setDisplayNormalization(
