@@ -600,12 +600,31 @@ void SCDCalibratePanels::exec() {
   vector<vector<string>> Groups;
   CalculateGroups(AllBankNames, Grouping, bankPrefix, bankingCode, Groups);
 
-  vector<string> banksVec;
-  for (auto group = Groups.begin(); group != Groups.end(); ++group) {
+  //----------------- Calculate & Create Qerror table------------------
+  this->progress(.98, "Creating Qerror table");
+  ITableWorkspace_sptr QErrTable =
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+  QErrTable->addColumn("int", "Bank Number");
+  QErrTable->addColumn("int", "Peak Number");
+  QErrTable->addColumn("int", "Peak Row");
+  QErrTable->addColumn("double", "Error in Q");
+  QErrTable->addColumn("int", "Peak Column");
+  QErrTable->addColumn("int", "Run Number");
+  QErrTable->addColumn("double", "wl");
+  QErrTable->addColumn("double", "tof");
+  QErrTable->addColumn("double", "d-spacing");
+  QErrTable->addColumn("double", "L2");
+  QErrTable->addColumn("double", "Scat");
+  QErrTable->addColumn("double", "y");
+
+  PARALLEL_FOR1(peaksWs)
+  for (int iGr = 0; iGr < static_cast<int>(Groups.size()); iGr++) {
+    PARALLEL_START_INTERUPT_REGION
+    auto group = Groups.begin()+iGr;
+    vector<string> banksVec;
     for (auto bankName = group->begin(); bankName != group->end(); ++bankName) {
       banksVec.push_back(*bankName);
     }
-  }
 
   //------------------ Set Up Workspace for IFitFunction Fit---------------
   vector<int> bounds;
@@ -647,16 +666,16 @@ void SCDCalibratePanels::exec() {
 
   // set up the string for specifying groups
   string BankNameString = "";
-  for (auto group = Groups.begin(); group != Groups.end(); ++group) {
-    if (group != Groups.begin())
-      BankNameString += "!";
+ // for (auto group = Groups.begin(); group != Groups.end(); ++group) {
+    //if (group != Groups.begin())
+      //BankNameString += "!";
     for (auto bank = group->begin(); bank != group->end(); ++bank) {
       if (bank != group->begin())
         BankNameString += "/";
 
       BankNameString += (*bank);
     }
-  }
+  //}
 
   int RotGroups = 0;
   if (getProperty("RotateCenters"))
@@ -686,7 +705,7 @@ void SCDCalibratePanels::exec() {
 
   double maxXYOffset = getProperty("MaxPositionChange_meters");
   int i = -1; // position in ParamResults Array.
-  for (auto group = Groups.begin(); group != Groups.end(); ++group) {
+  //for (auto group = Groups.begin(); group != Groups.end(); ++group) {
     i++;
 
     boost::shared_ptr<const RectangularDetector> bank_rect;
@@ -766,7 +785,7 @@ void SCDCalibratePanels::exec() {
     constrain(iFunc, paramPrefix + "Xrot", -1. * MaxRotOffset, MaxRotOffset);
     constrain(iFunc, paramPrefix + "Yrot", -1. * MaxRotOffset, MaxRotOffset);
     constrain(iFunc, paramPrefix + "Zrot", -1. * MaxRotOffset, MaxRotOffset);
-  } // for vector< string > in Groups
+  //} // for vector< string > in Groups
 
   // Function supports setting the sample position even when it isn't be refined
   iFunc->setAttributeValue("SampleX", samplePos.X() + SampleXoffset);
@@ -802,21 +821,21 @@ void SCDCalibratePanels::exec() {
   fit_alg->setProperty("Output", "out");
   fit_alg->setProperty("CalcErrors", false);
   fit_alg->executeAsChildAlg();
-
+  PARALLEL_CRITICAL(afterFit) {
   g_log.debug() << "Finished executing Fit algorithm\n";
 
   string OutputStatus = fit_alg->getProperty("OutputStatus");
   g_log.notice() << "Output Status=" << OutputStatus << "\n";
 
-  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+  /*declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
                       "OutputNormalisedCovarianceMatrix", "CovarianceInfo",
                       Kernel::Direction::Output),
                   "The name of the TableWorkspace in which to store the final "
-                  "covariance matrix");
+                  "covariance matrix");*/
 
   ITableWorkspace_sptr NormCov =
       fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
-  setProperty("OutputNormalisedCovarianceMatrix", NormCov);
+  //setProperty("OutputNormalisedCovarianceMatrix", NormCov);
 
   //--------------------- Get and Process Results -----------------------
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
@@ -906,8 +925,8 @@ void SCDCalibratePanels::exec() {
 
   i = -1;
 
-  for (vector<vector<string>>::iterator itv = Groups.begin();
-       itv != Groups.end(); ++itv) {
+  /*for (vector<vector<string>>::iterator itv = Groups.begin();
+       itv != Groups.end(); ++itv) {*/
     i++;
 
     boost::shared_ptr<const RectangularDetector> bank_rect;
@@ -922,7 +941,7 @@ void SCDCalibratePanels::exec() {
     Quat newRelRot = Quat(rotx, V3D(1, 0, 0)) * Quat(roty, V3D(0, 1, 0)) *
                      Quat(rotz, V3D(0, 0, 1)); //*RelRot;
 
-    FixUpBankParameterMap((*itv), NewInstrument,
+    FixUpBankParameterMap((banksVec), NewInstrument,
                           V3D(result[prefix + "Xoffset"],
                               result[prefix + "Yoffset"],
                               result[prefix + "Zoffset"]),
@@ -930,7 +949,7 @@ void SCDCalibratePanels::exec() {
                           result[prefix + "detHeightScale"], pmapOld,
                           getProperty("RotateCenters"));
 
-  } // For @ group
+  //} // For @ group
 
   V3D sampPos(NewInstrument->getSample()->getPos()); // should be (0,0,0)???
   if (getProperty("AllowSampleShift"))
@@ -948,22 +967,7 @@ void SCDCalibratePanels::exec() {
   string XmlFileName = getProperty("XmlFilename");
   saveXmlFile(XmlFileName, Groups, NewInstrument);
 
-  //----------------- Calculate & Create Qerror table------------------
-  this->progress(.98, "Creating Qerror table");
-  ITableWorkspace_sptr QErrTable =
-      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-  QErrTable->addColumn("int", "Bank Number");
-  QErrTable->addColumn("int", "Peak Number");
-  QErrTable->addColumn("int", "Peak Row");
-  QErrTable->addColumn("double", "Error in Q");
-  QErrTable->addColumn("int", "Peak Column");
-  QErrTable->addColumn("int", "Run Number");
-  QErrTable->addColumn("double", "wl");
-  QErrTable->addColumn("double", "tof");
-  QErrTable->addColumn("double", "d-spacing");
-  QErrTable->addColumn("double", "L2");
-  QErrTable->addColumn("double", "Scat");
-  QErrTable->addColumn("double", "y");
+
 
   //--------------- Create Function argument for the FunctionHandler------------
 
@@ -999,10 +1003,13 @@ void SCDCalibratePanels::exec() {
                 out[q + 2] * out[q + 2]) << peak.getCol() << peak.getRunNumber()
         << peak.getWavelength() << peak.getTOF() << peak.getDSpacing()
         << peak.getL2() << peak.getScattering() << peak.getDetPos().Y();
+    QErrTable->setComment(string("Errors in Q for each Peak"));
+    setProperty("QErrorWorkspace", QErrTable);
   }
-
-  QErrTable->setComment(string("Errors in Q for each Peak"));
-  setProperty("QErrorWorkspace", QErrTable);
+  }
+  PARALLEL_END_INTERUPT_REGION
+}
+PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /**

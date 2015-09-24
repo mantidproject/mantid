@@ -647,7 +647,17 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   this->getPeaks();
   Check(m_peaks, xValues, nData, StartX, EndX);
 
+  std::set<string> AllBankNames;
+  for (int i = 0; i < m_peaks->getNumberPeaks(); ++i)
+    AllBankNames.insert(m_peaks->getPeak(i).getBankName());
+
   Instrument_sptr instrNew = getNewInstrument(m_peaks->getPeak(0));
+  for (std::set<string>::iterator it = AllBankNames.begin(); it != AllBankNames.end(); ++it) {
+    std::string bankName = (*it);
+    boost::shared_ptr<const IComponent> panel =
+        instrNew->getComponentByName(bankName);
+    bankDetMap[bankName] = panel;
+  }
 
   boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
 
@@ -659,8 +669,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
   velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
   K = 2. * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K*velocity
 
-  for (size_t xval = StartX; xval <= EndX; xval += 3) {
 
+  for (size_t xval = StartX; xval <= EndX; xval += 3) {
     double x = floor(xValues[xval]);
     Peak peak;
     V3D HKL;
@@ -697,7 +707,8 @@ void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues,
       V3D x_vec(1., 0., 0.);
       V3D y_vec(0., 1., 0.);
       boost::shared_ptr<const IComponent> panel =
-          instrNew->getComponentByName(thisBankName);
+          findBank(thisBankName);
+
       Rot = panel->getRotation();
       Rot.rotate(x_vec);
       Rot.rotate(y_vec);
@@ -1339,6 +1350,11 @@ void SCDPanelErrors::setAttribute(const std::string &attName,
           new Geometry::UnitCell(a, b, c, alpha, beta, gamma));
     }
   }
+}
+
+boost::shared_ptr<const Geometry::IComponent> SCDPanelErrors::findBank(std::string bankName)
+{
+  return bankDetMap.find(bankName)->second;
 }
 
 } // namespace Crystal
