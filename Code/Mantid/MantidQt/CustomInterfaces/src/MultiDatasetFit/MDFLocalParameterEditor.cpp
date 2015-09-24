@@ -20,6 +20,7 @@ namespace MDF
 /// @param parent :: Parent widget.
 /// @param index :: Index of the spectrum which parameter is edited.
 /// @param fixed :: Is the parameter fixed initially?
+/// @param tie :: Parameter's current tie (or empty string).
 LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixed, QString tie):
   QWidget(parent), m_index(index),m_fixed(fixed), m_tie(tie)
 {
