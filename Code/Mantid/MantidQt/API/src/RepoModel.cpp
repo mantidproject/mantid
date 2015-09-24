@@ -313,10 +313,15 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         case LOCAL_CHANGED:         
           return "Click here to publish your changes";
         case REMOTE_CHANGED:
+          return (inf.directory)?
+                 "There is a new version of the files inside this folder. Click here to install them.":
+                 "There is a new version of this file available. Click here to install it.";
         case BOTH_CHANGED:
           return (inf.directory)?
-            "There is a new version of the files inside this folder. Click here to install them.":
-            "There is a new version of this file available. Click here to install it.";
+                 "Files in this folder may have changed both locally and remotely.\nClick here to install the remote version, "
+                   "a backup of the local version will also be created.":
+                 "This file may have changed both locally and remotely.\nClick here to install the remote version, "
+                   "a backup of the local version will also be created.";
           break;
         case LOCAL_ONLY:
           return "Click here to share this file with the Mantid community!";
