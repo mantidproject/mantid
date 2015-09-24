@@ -70,8 +70,7 @@ public:
     return;
   }
 
-  void test_CopyInstrument()
-  {
+  void test_CopyInstrument() {
     // Init and set up
     ConvertCWSDExpToMomentum testalg;
     testalg.initialize();
@@ -85,8 +84,9 @@ public:
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    API::IMDEventWorkspace_sptr outws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
-          AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
+    API::IMDEventWorkspace_sptr outws =
+        boost::dynamic_pointer_cast<IMDEventWorkspace>(
+            AnalysisDataService::Instance().retrieve("QSampleMDEvents"));
     TS_ASSERT(outws);
 
     IMDIterator *mditer = outws->createIterator();
@@ -97,7 +97,7 @@ public:
 
     ExperimentInfo_const_sptr expinfo0 = outws->getExperimentInfo(0);
     Geometry::Instrument_const_sptr instrument = expinfo0->getInstrument();
-    TS_ASSERT_EQUALS(instrument->getNumberDetectors(), 256*256);
+    TS_ASSERT_EQUALS(instrument->getNumberDetectors(), 256 * 256);
 
     return;
   }
@@ -109,28 +109,27 @@ private:
   std::vector<double> m_samplePos;
   std::vector<double> m_pixelDimension;
 
-  Geometry::Instrument_sptr createInstrument()
-  {
+  Geometry::Instrument_sptr createInstrument() {
     // Create a virtual instrument
     std::vector<Kernel::V3D> vec_detpos;
     std::vector<detid_t> vec_detid;
     Kernel::V3D sourcePos(0., 0., -2.);
     Kernel::V3D samplePos(0., 0., 0.);
 
-    for (size_t i = 0; i < 256; ++i)
-    {
-      double x = 0.38+static_cast<double>(i-128)*0.001;
+    for (size_t i = 0; i < 256; ++i) {
+      double x = 0.38 + static_cast<double>(i - 128) * 0.001;
       double y = 0;
-      double z = 0.38+static_cast<double>(i-128)*0.001;
+      double z = 0.38 + static_cast<double>(i - 128) * 0.001;
       Kernel::V3D pos(x, y, z);
-      detid_t detid = i + 1;
+      detid_t detid = static_cast<detid_t>(i) + 1;
 
       vec_detid.push_back(detid);
       vec_detpos.push_back(pos);
     }
 
-    Geometry::Instrument_sptr virtualInstrument = Geometry::ComponentHelper::createVirtualInstrument(
-        sourcePos, samplePos, vec_detpos, vec_detid);
+    Geometry::Instrument_sptr virtualInstrument =
+        Geometry::ComponentHelper::createVirtualInstrument(
+            sourcePos, samplePos, vec_detpos, vec_detid);
     TS_ASSERT(virtualInstrument);
 
     return virtualInstrument;

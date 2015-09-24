@@ -78,8 +78,7 @@ void ConvertCWSDExpToMomentum::exec() {
   std::string errmsg("");
   bool createvirtual = getProperty("CreateVirtualInstrument");
   bool inputvalid = getInputs(createvirtual, errmsg);
-  if (!inputvalid)
-  {
+  if (!inputvalid) {
     g_log.error() << "Importing error: " << errmsg << "\n";
     throw std::runtime_error(errmsg);
   }
@@ -316,7 +315,7 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
  * It is optional to use a virtual instrument or copy from input data workspace
  * @brief ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents
  * @param dataws :: data matrix workspace
- * @param uservirtual :: boolean flag to use virtual instrument
+ * @param usevirtual :: boolean flag to use virtual instrument
  * @param startdetid :: starting detid for detectors from this workspace mapping
  * to virtual instrument in MDEventWorkspace
  * @param runnumber :: run number for all MDEvents created from this matrix
@@ -414,7 +413,8 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
  * @param errmsg
  * @return
  */
-bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &errmsg) {
+bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument,
+                                         std::string &errmsg) {
   std::stringstream errss;
 
   // Table workspace for data file names and starting detector IDs (for virtual
@@ -428,19 +428,21 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &er
   } else {
     if (datacolnames[m_iColFilename].compare("File Name") != 0)
       errss << "Data file name Table (InputWorkspace)'s Column "
-            << m_iColFilename << " must be 'File Name'"
+            << m_iColFilename << " must be 'File Name' but not "
+            << datacolnames[m_iColFilename] << ". "
             << "\n";
     if (datacolnames[m_iColStartDetID].compare("Starting DetID") != 0)
       errss << "Data file name Table (InputWorkspace)'s Column "
-            << m_iColStartDetID << " must be 'Staring DetID'"
+            << m_iColStartDetID << " must be 'Staring DetID' but not "
+            << datacolnames[m_iColStartDetID] << ". "
             << "\n";
   }
   g_log.warning("Finished parsing Data Table");
 
   // Set up parameters for creating virtual instrument
-  g_log.warning() << "About to deal with virtual instrument" << virtualinstrument << "\n";
-  if (virtualinstrument)
-  {
+  g_log.warning() << "About to deal with virtual instrument"
+                  << virtualinstrument << "\n";
+  if (virtualinstrument) {
     // Table workspace for detector positions
     m_detectorListTableWS = getProperty("DetectorTableWorkspace");
     const std::vector<std::string> detcolnames =
@@ -453,8 +455,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &er
     // Sample and source position
     std::vector<double> sourcepos = getProperty("SourcePosition");
     if (sourcepos.size() != 3)
-      errss << "SourcePosition must have 3 items.  Input has " << sourcepos.size()
-            << " instead.\n";
+      errss << "SourcePosition must have 3 items.  Input has "
+            << sourcepos.size() << " instead.\n";
     else {
       m_sourcePos.setX(sourcepos[0]);
       m_sourcePos.setY(sourcepos[1]);
@@ -463,8 +465,8 @@ bool ConvertCWSDExpToMomentum::getInputs(bool virtualinstrument, std::string &er
 
     std::vector<double> samplepos = getProperty("SamplePosition");
     if (samplepos.size() != 3) {
-      errss << "SamplePosition must have 3 items.  Input has " << samplepos.size()
-            << " instead.\n";
+      errss << "SamplePosition must have 3 items.  Input has "
+            << samplepos.size() << " instead.\n";
     } else {
       m_samplePos.setX(samplepos[0]);
       m_samplePos.setY(samplepos[1]);
