@@ -47,6 +47,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
   connect(deleg,SIGNAL(setAllFixed(bool)),this,SLOT(setAllFixed(bool)));
   connect(deleg,SIGNAL(setTie(int,QString)),this,SLOT(setTie(int,QString)));
+  connect(deleg,SIGNAL(setTieAll(QString)),this,SLOT(setTieAll(QString)));
 
   m_uiForm.tableWidget->installEventFilter(this);
 }
@@ -107,11 +108,28 @@ QStringList EditLocalParameterDialog::getTies() const
 void EditLocalParameterDialog::fixParameter(int index, bool fix)
 {
   m_fixes[index] = fix;
+  m_ties[index] = "";
 }
 
+/// Set a new tie for a parameter
+/// @param index :: Index of a paramter to tie.
+/// @param tie :: A tie string.
 void EditLocalParameterDialog::setTie(int index, QString tie)
 {
   m_ties[index] = tie;
+  m_fixes[index] = false;
+}
+
+/// Set the same tie to all parameters.
+/// @param tie :: A tie string.
+void EditLocalParameterDialog::setTieAll(QString tie)
+{
+  for(int i = 0; i < m_ties.size(); ++i)
+  {
+    m_ties[i] = tie;
+    m_fixes[i] = false;
+  }
+  redrawCells();
 }
 
 /// Fix/unfix all parameters.
@@ -122,11 +140,9 @@ void EditLocalParameterDialog::setAllFixed(bool fix)
   for(int i = 0; i < m_fixes.size(); ++i)
   {
     m_fixes[i] = fix;
-    // it's the only way I am able to make the table to repaint itself
-    auto text = makeNumber(m_values[i]);
-    m_uiForm.tableWidget->item(i,1)->setText( text + " " );
-    m_uiForm.tableWidget->item(i,1)->setText( text );
+    m_ties[i] = "";
   }
+  redrawCells();
 }
 
 /// Event filter for managing the context menu.
@@ -198,6 +214,18 @@ void EditLocalParameterDialog::paste()
     m_values[i] = str.toDouble(&ok);
     if ( !ok ) str = "0";
     m_uiForm.tableWidget->item(i,1)->setText( str );
+  }
+}
+
+/// Force the table to redraw its cells.
+void EditLocalParameterDialog::redrawCells()
+{
+  for(int i = 0; i < m_values.size(); ++i)
+  {
+    // it's the only way I am able to make the table to repaint itself
+    auto text = makeNumber(m_values[i]);
+    m_uiForm.tableWidget->item(i,1)->setText( text + " " );
+    m_uiForm.tableWidget->item(i,1)->setText( text );
   }
 }
 

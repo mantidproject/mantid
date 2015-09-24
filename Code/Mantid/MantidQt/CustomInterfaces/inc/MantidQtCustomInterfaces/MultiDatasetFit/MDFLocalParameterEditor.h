@@ -27,6 +27,7 @@ signals:
   void fixParameter(int,bool);
   void setAllFixed(bool);
   void setTie(int,QString);
+  void setTieAll(QString);
 private slots:
   void setAll();
   void fixParameter();
@@ -34,6 +35,8 @@ private slots:
   void unfixAll();
   void setTie();
   void removeTie();
+  void setTieAll();
+  void removeAllTies();
 private:
   bool eventFilter(QObject *widget, QEvent *evn);
   QLineEdit* m_editor;

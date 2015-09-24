@@ -2201,6 +2201,8 @@ bool FunctionBrowser::isLocalParameterFixed(const QString& parName, int i) const
 
 
 /// Get the tie for a local parameter.
+/// @param parName :: Parameter name
+/// @param i :: Index of a dataset.
 QString FunctionBrowser::getLocalParameterTie(const QString& parName, int i) const
 {
   checkLocalParameter(parName);
@@ -2208,10 +2210,17 @@ QString FunctionBrowser::getLocalParameterTie(const QString& parName, int i) con
 }
 
 /// Set a tie for a local parameter.
+/// @param parName :: Parameter name
+/// @param i :: Index of a dataset.
+/// @param tie :: A tie string.
 void FunctionBrowser::setLocalParameterTie(const QString& parName, int i, QString tie)
 {
   checkLocalParameter(parName);
   m_localParameterValues[parName][i].tie = tie;
+  if ( i == m_currentDataset )
+  {
+    updateLocalTie(parName);
+  }
 }
 
 

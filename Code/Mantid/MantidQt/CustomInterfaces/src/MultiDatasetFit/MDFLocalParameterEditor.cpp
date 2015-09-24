@@ -80,6 +80,16 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   connect(action,SIGNAL(activated()),this,SLOT(removeTie()));
   setMenu->addAction(action);
 
+  action = new QAction("Set tie to all",this);
+  action->setToolTip("Set this tie for all parameters.");
+  connect(action,SIGNAL(activated()),this,SLOT(setTieAll()));
+  setMenu->addAction(action);
+
+  action = new QAction("Remove all ties",this);
+  action->setToolTip("Remove ties for all parameters.");
+  connect(action,SIGNAL(activated()),this,SLOT(removeAllTies()));
+  setMenu->addAction(action);
+
   button->setMenu(setMenu);
 
   m_editor->installEventFilter(this);
@@ -128,6 +138,18 @@ void LocalParameterEditor::setTie()
 void LocalParameterEditor::removeTie()
 {
   emit setTie(m_index, "");
+}
+
+/// Set all ties for all parameters
+void LocalParameterEditor::setTieAll()
+{
+  emit setTieAll(m_tie);
+}
+
+/// Remove ties form all parameters
+void LocalParameterEditor::removeAllTies()
+{
+  emit setTieAll("");
 }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).

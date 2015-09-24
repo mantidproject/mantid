@@ -35,11 +35,13 @@ private slots:
   void fixParameter(int,bool);
   void setAllFixed(bool);
   void setTie(int,QString);
+  void setTieAll(QString);
   void copy();
   void paste();
 private:
   bool eventFilter(QObject * obj, QEvent * ev);
   void showContextMenu();
+  void redrawCells();
   Ui::EditLocalParameterDialog m_uiForm;
   /// Parameter name
   QString m_parName;
