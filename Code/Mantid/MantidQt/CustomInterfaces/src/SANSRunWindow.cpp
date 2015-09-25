@@ -166,7 +166,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent)
       m_have_reducemodule(false), m_dirty_batch_grid(false),
       m_tmp_batchfile(""), m_batch_paste(NULL), m_batch_clear(NULL),
       m_mustBeDouble(NULL), m_doubleValidatorZeroToMax(NULL),
-      m_intValidatorZeroToMax(NULL), m_doubleValidatorOpenZeroToMax(NULL),
+      m_intValidatorZeroToMax(NULL),
       slicingWindow(NULL) {
   ConfigService::Instance().addObserver(m_newInDir);
 }
@@ -3891,13 +3891,6 @@ void SANSRunWindow::setValidators()
         new QIntValidator(0, m_constants.getMaxIntValue(), this);
   }
 
-  // Range is (0, max]
-  if (!m_doubleValidatorOpenZeroToMax) {
-    double lowerBound = pow(10,-1*m_constants.getDecimals());
-    m_doubleValidatorOpenZeroToMax = new QDoubleValidator(
-        lowerBound, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
-  }
-
 
   // Run Numbers tab
 
@@ -3948,9 +3941,9 @@ void SANSRunWindow::setValidators()
   m_uiForm.front_beam_y->setValidator(m_mustBeDouble);
 
   // Geometry
-  m_uiForm.sample_thick->setValidator(m_doubleValidatorOpenZeroToMax);
-  m_uiForm.sample_height->setValidator(m_doubleValidatorOpenZeroToMax);
-  m_uiForm.sample_width->setValidator(m_doubleValidatorOpenZeroToMax);
+  m_uiForm.sample_thick->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_height->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.sample_width->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.smpl_offset->setValidator(m_mustBeDouble);
 
   // Beam Centre Finder
@@ -4347,6 +4340,22 @@ bool SANSRunWindow::areSettingsValid() {
     checkWaveLengthAndQValues(isValid, message, m_uiForm.trans_min_can,
                               m_uiForm.trans_max_can, m_uiForm.trans_opt_can,
                               "Trans Can");
+  }
+
+  // Geometry
+  if (m_uiForm.sample_thick->text().simplified().toDouble() == 0.0) {
+    isValid = false;
+    message += "Sample height issue: Only values > 0 are allowed.\n";
+  }
+
+  if (m_uiForm.sample_height->text().simplified().toDouble() == 0.0) {
+    isValid = false;
+    message += "Sample height issue: Only values > 0 are allowed.\n";
+  }
+
+  if (m_uiForm.sample_width->text().simplified().toDouble() == 0.0) {
+    isValid = false;
+    message += "Sample width issue: Only values > 0 are allowed.\n";
   }
 
   // Print the error message if there are any
