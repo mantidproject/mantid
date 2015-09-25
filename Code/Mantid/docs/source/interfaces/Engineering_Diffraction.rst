@@ -54,10 +54,10 @@ Calibration sample #
 Focus
 -----
 
-Here it is possible to focus run files, provided a run number and an
-instrument bank. The focusing process uses the algorithm
-:ref:`EnggFocus <algm-EnggFocus>`. In the documentation of the
-algorithm you can find the details on how the input runs are focused.
+Here it is possible to focus run files, provided a run number or run
+file. The focusing process uses the algorithm :ref:`EnggFocus
+<algm-EnggFocus>`. In the documentation of the algorithm you can find
+the details on how the input runs are focused.
 
 The interface will also create workspaces that can be inspected in the
 workspaces window:
@@ -65,6 +65,32 @@ workspaces window:
 1. The *engg_focusing_input_ws workspace* for the data being focused
 2. The *engg_focusing_input_ws workspace* for the corresponding
    focused data
+
+Three focusing alternatives are provided:
+
+1. Normal focusing, which includes all the spectra from the input run.
+2. Cropped focusing, where several spectra or ranges of spectra can
+   be specified, as a list separated by commas.
+3. Texture focusing, where the *texture* group of detectors is given
+   in a Detector Gropuing File.
+
+Depending on the alternative chosen, the focusing operation will
+include all the selected banks and all the spectra present in the
+input runs (first alternative: normal focusing), all the banks but
+only a list of spectra provided manually (second alternative: cropped
+focusing), or a user-defined list of banks provided in a file (third
+alternative: texture focusing)
+
+For texture focusing, the detector grouping file is a text (csv) file
+with one line per bank. Each line must contain at least two numeric
+fields, where the first one specifies the bank ID, and the second and
+subsequent ones different spectrum numbers or ranges of spectrum
+numbers. For example:
+::
+   # Bank ID, spectrum numbers
+   1, 205-210
+   2, 100, 102, 107
+   3, 300, 310, 320-329, 350-370
 
 Settings
 --------
