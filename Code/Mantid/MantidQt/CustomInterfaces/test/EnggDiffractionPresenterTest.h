@@ -280,6 +280,11 @@ public:
     EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
     EXPECT_CALL(mockView, focusingBanks()).Times(0);
 
+    // should not try to use these ones
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
     // should not get that far that it tries to get these parameters
     EXPECT_CALL(mockView, currentInstrument()).Times(0);
     EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
@@ -387,8 +392,7 @@ public:
     std::vector<bool> banks;
     banks.push_back(false);
     banks.push_back(false);
-    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(
-        Return(banks));
+    EXPECT_CALL(mockView, focusingBanks()).Times(1).WillOnce(Return(banks));
 
     // will need basic calibration settings from the user
     EnggDiffCalibSettings calibSettings;
@@ -398,6 +402,90 @@ public:
     // No errors/warnings
     EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
     EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::FocusRun);
+  }
+
+  void test_focusCropped_withoutRunNo() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // empty run number!
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(Return(""));
+
+    // should not try to use these ones
+    EXPECT_CALL(mockView, focusingRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingBanks()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+    // should not get that far that it tries to get these parameters
+    EXPECT_CALL(mockView, currentInstrument()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+
+    // 1 warning pop-up to user, 0 errors
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FocusCropped);
+  }
+
+  void test_focusTexture_withoutRunNo() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // empty run number!
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(1).WillOnce(Return(""));
+
+    // should not try to use these ones
+    EXPECT_CALL(mockView, focusingRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingBanks()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedRunNo()).Times(0);
+    EXPECT_CALL(mockView, focusingCroppedSpectrumIDs()).Times(0);
+    EXPECT_CALL(mockView, focusingTextureGroupingFile()).Times(0);
+
+    // 1 warning pop-up to user, 0 errors
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
+
+    pres.notify(IEnggDiffractionPresenter::FocusTexture);
+  }
+
+  void test_resetFocus() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    EXPECT_CALL(mockView, resetFocus()).Times(1);
+
+    // No errors/warnings when resetting options
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::ResetFocus);
+  }
+
+  void test_resetFocus_thenFocus() {
+    testing::NiceMock<MockEnggDiffractionView> mockView;
+    MantidQt::CustomInterfaces::EnggDiffractionPresenter pres(&mockView);
+
+    // No errors/warnings when resetting options
+    EXPECT_CALL(mockView, userError(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(0);
+
+    pres.notify(IEnggDiffractionPresenter::ResetFocus);
+
+    // empty run number!
+    EXPECT_CALL(mockView, focusingRunNo()).Times(1).WillOnce(Return(""));
+    EXPECT_CALL(mockView, focusingBanks()).Times(0);
+
+    // should not get that far that it tries to get these parameters
+    EXPECT_CALL(mockView, currentInstrument()).Times(0);
+    EXPECT_CALL(mockView, currentCalibSettings()).Times(0);
+
+    // Now one error shown as a warning-pop-up cause inputs and options are
+    // empty
+    EXPECT_CALL(mockView, userWarning(testing::_, testing::_)).Times(1);
 
     pres.notify(IEnggDiffractionPresenter::FocusRun);
   }

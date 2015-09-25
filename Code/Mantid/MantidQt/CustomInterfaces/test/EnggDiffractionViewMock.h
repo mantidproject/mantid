@@ -101,6 +101,9 @@ public:
   // virtual void plotFocusedSpectrum();
   MOCK_METHOD0(plotFocusedSpectrum, void());
 
+  // virtual void resetFocus();
+  MOCK_METHOD0(resetFocus, void());
+
   // void saveSettings() const;
   MOCK_CONST_METHOD0(saveSettings, void());
 };
