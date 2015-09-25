@@ -187,10 +187,10 @@ void ConvolutionFitSequential::exec() {
   const std::string tempFitWsName = "__convfit_fit_ws";
   auto tempFitWs = convertInputToElasticQ(inputWs, tempFitWsName);
 
-  Progress plotPeakStringProg(this, 0.0, 0.05, specMax);
+  Progress plotPeakStringProg(this, 0.0, 0.05, specMax-specMin);
   // Construct plotpeak string
   std::string plotPeakInput = "";
-  for (int i = 0; i < specMax + 1; i++) {
+  for (int i = specMin; i < specMax + 1; i++) {
     std::string nextWs = tempFitWsName + ",i";
     nextWs += boost::lexical_cast<std::string>(i);
     plotPeakInput += nextWs + ";";
@@ -240,22 +240,26 @@ void ConvolutionFitSequential::exec() {
   // Construct output workspace
   std::string resultWsName = outputWsName + "_Result";
 
+  Progress workflowProg(this, 0.91, 0.94, 4);
   auto paramNames = std::vector<std::string>();
-  auto func = FunctionFactory::Instance().createFunction(funcName);
-  if (delta) {
+  if (funcName.compare("DeltaFunction") == 0) {
     paramNames.push_back("Height");
-  }
-  Progress workflowProg(this, 0.91, 0.94, (func->nParams() * 2));
-  for (size_t i = 0; i < func->nParams(); i++) {
-    paramNames.push_back(func->parameterName(i));
-    workflowProg.report();
-  }
-  if (funcName.compare("Lorentzian") == 0) {
-    // remove peak centre
-    size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
-                 paramNames.begin();
-    paramNames.erase(paramNames.begin() + pos);
-    paramNames.push_back("EISF");
+  } else {
+    auto func = FunctionFactory::Instance().createFunction(funcName);
+    if (delta) {
+      paramNames.push_back("Height");
+    }
+    for (size_t i = 0; i < func->nParams(); i++) {
+      paramNames.push_back(func->parameterName(i));
+      workflowProg.report();
+    }
+    if (funcName.compare("Lorentzian") == 0) {
+      // remove peak centre
+      size_t pos = find(paramNames.begin(), paramNames.end(), "PeakCentre") -
+                   paramNames.begin();
+      paramNames.erase(paramNames.begin() + pos);
+      paramNames.push_back("EISF");
+    }
   }
 
   // Run calcEISF if Delta
@@ -342,7 +346,7 @@ void ConvolutionFitSequential::exec() {
   auto renamer = createChildAlgorithm("RenameWorkspace");
   Progress renamerProg(this, 0.98, 1.0, specMax + 1);
   for (int i = specMin; i < specMax + 1; i++) {
-    renamer->setProperty("InputWorkspace", groupWsNames.at(i));
+    renamer->setProperty("InputWorkspace", groupWsNames.at(i - specMin));
     std::string outName = outputWsName + "_";
     outName += boost::lexical_cast<std::string>(i);
     outName += "_Workspace";

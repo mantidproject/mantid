@@ -112,6 +112,22 @@ bool ISISEnergyTransfer::validate() {
     }
   }
 
+  // Spectra Number check
+  const int specMin = m_uiForm.spSpectraMin->value();
+  const int specMax = m_uiForm.spSpectraMax->value();
+  if(specMin > specMax){
+	uiv.addErrorMessage("Spectra Min must be less than Spectra Max");
+  }
+
+  // Background Removal (TOF)
+  if(m_uiForm.ckBackgroundRemoval->isChecked()){
+	  const int start = m_uiForm.spBackgroundStart->value();
+	  const int end = m_uiForm.spBackgroundEnd->value();
+	  if(start > end){
+		  uiv.addErrorMessage("Background Start must be less than Background End");
+	  }
+  }
+
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
 

@@ -63,7 +63,7 @@ class CalculateSampleTransmission(PythonAlgorithm):
                         VerticalAxisUnit='Text', VerticalAxisValues='Transmission,Scattering')
         Rebin(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws,
               Params=self._bin_params)
-        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula)
+        SetSampleMaterial(InputWorkspace=self._output_ws, ChemicalFormula=self._chemical_formula, SampleNumberDensity=self._density)
         ConvertToPointData(InputWorkspace=self._output_ws, OutputWorkspace=self._output_ws)
 
         ws = mtd[self._output_ws]

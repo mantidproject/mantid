@@ -9,7 +9,8 @@
 set ( MANTIDLIBS mantidlibs34 )
 find_path ( QWT_INCLUDE_DIR qwt.h 
             PATHS /opt/rh/${MANTIDLIBS}/root/usr/include /opt/include /usr/local/include /usr/include ${CMAKE_INCLUDE_PATH}
-            PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4 qwt )
+            PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4 qwt
+            NO_DEFAULT_PATH )
 find_library ( QWT_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt HINTS /opt/rh/${MANTIDLIBS}/root/usr/lib64 )
 find_library ( QWT_LIBRARY_DEBUG qwtd )
 
