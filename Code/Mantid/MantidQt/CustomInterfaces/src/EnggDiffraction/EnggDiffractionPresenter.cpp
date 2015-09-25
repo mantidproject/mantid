@@ -132,8 +132,8 @@ void EnggDiffractionPresenter::processLoadExistingCalib() {
 }
 
 void EnggDiffractionPresenter::processCalcCalib() {
-  std::string vanNo = m_view->newVanadiumNo();
-  std::string ceriaNo = m_view->newCeriaNo();
+  const std::string vanNo = m_view->newVanadiumNo();
+  const std::string ceriaNo = m_view->newCeriaNo();
   try {
     inputChecksBeforeCalibrate(vanNo, ceriaNo);
   } catch (std::invalid_argument &ia) {
@@ -177,7 +177,7 @@ void EnggDiffractionPresenter::processFocusCropped() {
     inputChecksBeforeFocusCropped(runNo, banks, specIDs);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning(
-        "Error in the inputs required to focus a run in cropped mode",
+        "Error in the inputs required to focus a run (in cropped mode)",
         ia.what());
     return;
   }
@@ -186,20 +186,19 @@ void EnggDiffractionPresenter::processFocusCropped() {
 }
 
 void EnggDiffractionPresenter::processFocusTexture() {
-  std::string runNo = m_view->focusingTextureRunNo();
-  const std::vector<bool> banks = m_view->focusingBanks();
-  std::string dgFile = m_view->focusingTextureGroupingFile();
+  const std::string runNo = m_view->focusingTextureRunNo();
+  const std::string dgFile = m_view->focusingTextureGroupingFile();
 
   try {
     inputChecksBeforeFocusTexture(runNo, dgFile);
   } catch (std::invalid_argument &ia) {
     m_view->userWarning(
-        "Error in the inputs required to focus a run in texture mode",
+        "Error in the inputs required to focus a run (in texture mode)",
         ia.what());
     return;
   }
 
-  startFocusing(runNo, banks, "", dgFile);
+  startFocusing(runNo, std::vector<bool>(), "", dgFile);
 }
 
 /**
@@ -697,10 +696,17 @@ void EnggDiffractionPresenter::inputChecksBeforeFocusTexture(
     throw std::invalid_argument("A detector grouping file needs to be "
                                 "specified when focusing texture banks.");
   }
+  Poco::File dgf(dgFile);
+  if (!dgf.exists()) {
+    throw std::invalid_argument(
+        "The detector grouping file coult not be found: " + dgFile);
+  }
+
   inputChecksBeforeFocus();
 }
 
-void EnggDiffractionPresenter::inputChecksBanks(const std::vector<bool> &banks) {
+void
+EnggDiffractionPresenter::inputChecksBanks(const std::vector<bool> &banks) {
   if (0 == banks.size()) {
     const std::string msg =
         "Error in specification of banks found when starting the "
