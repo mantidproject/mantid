@@ -73,6 +73,18 @@ namespace Geometry {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+/**
+ * A class to filter HKLs by their d-values
+ *
+ * This class takes a UnitCell object and calculates the spacing of
+ * the lattice planes for each HKL. If the lattice spacing is within
+ * the spcified range of values, the reflection is allowed.
+ *
+ * If the first constructor with only dMin is used, dMax is taken to
+ * be the lattice parameter with the largest value. There can not be
+ * a greater interplanar spacing than that value.
+ */
 class MANTID_GEOMETRY_DLL HKLFilterDRange : public HKLFilter {
 public:
   HKLFilterDRange(const UnitCell &cell, double dMin);
@@ -86,6 +98,13 @@ protected:
   double m_dmin, m_dmax;
 };
 
+/**
+ * A class to filter HKLs according to a space group
+ *
+ * HKLFilterSpaceGroup stores a SpaceGroup object and marks those
+ * reflections as allowed that are allowed according to the
+ * reflection conditions of the space group.
+ */
 class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup : public HKLFilter {
 public:
   HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
@@ -97,6 +116,14 @@ protected:
   SpaceGroup_const_sptr m_spaceGroup;
 };
 
+/**
+ * A class to filter HKLs according to structure factor magnitudes
+ *
+ * This filter takes a StructureFactorCalculator and calculates the
+ * structure factor for each HKL. If F^2 is larger than the specified
+ * minimum, the reflection is considered allowed. The default minimum
+ * is 1e-6.
+ */
 class MANTID_GEOMETRY_DLL HKLFilterStructureFactor : public HKLFilter {
 public:
   HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator,
@@ -110,6 +137,12 @@ protected:
   double m_fSquaredMin;
 };
 
+/**
+ * A class to filter HKLs according to a lattice centering
+ *
+ * HKLFilterCentering is a filter that stores a ReflectionCondition object
+ * internally and filters the HKLs according to that.
+ */
 class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
 public:
   HKLFilterCentering(const ReflectionCondition_sptr &centering);
