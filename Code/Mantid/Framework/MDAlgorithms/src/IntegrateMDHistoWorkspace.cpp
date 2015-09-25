@@ -128,7 +128,9 @@ void setMinMaxBins(Mantid::coord_t &pMin, Mantid::coord_t &pMax,
   const Mantid::coord_t max = dimension->getMaximum();
 
   // Get offset between origin and next bin boundary towards the max value
-  const Mantid::coord_t offset = fmod(max,width);
+  // NOTE: GCC shows a conversion warning from double to float here. This
+  // is incorrect. Silence warning with explicit cast.
+  const Mantid::coord_t offset = static_cast<Mantid::coord_t>(fmod(max,width));
 
   // Create the shifted pMax and pMin
   auto minBin = (pMin - offset) / width;
