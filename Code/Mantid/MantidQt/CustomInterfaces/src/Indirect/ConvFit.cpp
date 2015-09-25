@@ -373,6 +373,7 @@ void ConvFit::algorithmComplete(bool error) {
       addSample->execute();
     }
   }
+  m_batchAlgoRunner->executeBatchAsync();
   updatePlot();
 }
 
