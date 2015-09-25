@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -182,6 +183,8 @@ void MultiDatasetFit::fitSequential()
 
     m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("OutputWorkspace").toStdString() + "_Workspaces";
 
+    removeOldOutput();
+
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
 
@@ -236,7 +239,10 @@ void MultiDatasetFit::fitSimultaneous()
       fit->setPropertyValue("Output",m_outputWorkspaceName);
       m_fitOptionsBrowser->setProperty("Output","out");
     }
+
     m_outputWorkspaceName += "_Workspaces";
+
+    removeOldOutput();
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -596,6 +602,19 @@ void MultiDatasetFit::setLogNames()
     }
     catch (...) 
     {/*Maybe the data table hasn't updated yet*/}
+  }
+}
+
+/// Remove old output from Fit.
+void MultiDatasetFit::removeOldOutput()
+{
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(
+          m_outputWorkspaceName) &&
+      Mantid::API::AnalysisDataService::Instance()
+          .retrieveWS<Mantid::API::WorkspaceGroup>(m_outputWorkspaceName)) 
+  {
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(
+        m_outputWorkspaceName);
   }
 }
 
