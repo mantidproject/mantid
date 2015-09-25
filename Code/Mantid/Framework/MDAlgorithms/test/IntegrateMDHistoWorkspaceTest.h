@@ -107,6 +107,7 @@ public:
     TSM_ASSERT_THROWS("Step has been specified", alg.execute(), std::runtime_error&);
   }
   void test_binning_when_similar_with_extents_as_pbins(){
+#if 0
       using namespace Mantid::DataObjects;
       MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 3, 7); //3 dimensions, 10 bins
       IntegrateMDHistoWorkspace alg;
@@ -157,7 +158,7 @@ public:
       std::cout << "COMPARE MAX EXTENTS DIMENSION 3: " << "out: " << output->getDimension(2)->getMaximum();
       std::cout << " input: " << ws->getDimension(2)->getMaximum() << "\n";
 
-
+#endif
   }
   // Users may set all binning parameter to [] i.e. direct copy, no integration.
   void test_exec_do_nothing_but_clone()
@@ -444,6 +445,103 @@ public:
   }
 
 
+  //-----------------------------------------------
+  //Snapping Tests
+  //------------------------------------------------
+  void test_that_PBin_on_boundaries_are_detected_for_asymmetric_workspace_with_no_bin_boundary_at_origin() {
+    /**
+     Input workspace: Is asymmetric about the origina and the origin does not lie on a bin boundary, but
+     the PMIN and PMAX boundaries lie on bin boundaries.
+     Bins: 6
+     XMin: -2.4359
+     XMAX: 2.1001
+
+    XMIN                          XMAX
+     |                             |
+     |    |    |     |    |    |   |
+          |            |       |
+         PMIN          0      PMAX
+    **/
+    // Arrange
+    using namespace Mantid::DataObjects;
+    const size_t numDims = 1;
+    const double signal = 3.4;
+    const double errorSquared = 1.3;
+    size_t numBins[static_cast<int>(numDims)] = {6};
+    Mantid::coord_t min[static_cast<int>(numDims)] = {-2.4359f};
+    Mantid::coord_t max[static_cast<int>(numDims)] = {2.1001f};
+    const std::string name("test");
+    auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
+    const double pMin = -1.6799;
+    const double pMax = 1.3441;
+
+    // Act
+    IntegrateMDHistoWorkspace alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("P1Bin", boost::assign::list_of(pMin)(0.0)(pMax).convert_to_container<std::vector<double> >());
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+
+    // Assert
+    // At this point we need to take into account the precision of a float value
+    TSM_ASSERT_DELTA("Should have a lower bound set to exactly PMIN", outWS->getDimension(0)->getMinimum(), static_cast<Mantid::coord_t>(pMin), 1e-6);
+    TSM_ASSERT_DELTA("Should have an upper bound set to exactly PMAX", outWS->getDimension(0)->getMaximum(), static_cast<Mantid::coord_t>(pMax), 1e-6);
+  }
+
+  void test_that_PBin_NOT_on_boundary_are_detected_for_asymmetric_workspace_with_no_bin_boundary_at_origin() {
+    /**
+     Input workspace: Is asymmetric about the origina and the origin does not lie on a bin boundary and
+     the PMIN and PMAX do not lie on bin boundaries.
+     Bins: 6
+     XMin: -2.4359
+     XMAX: 2.1001
+
+    XMIN                          XMAX
+     |                             |
+     |    |    |     |    |    |   |
+           |            |        |
+          PMIN          0       PMAX
+    **/
+    // Arrange
+    using namespace Mantid::DataObjects;
+    const size_t numDims = 1;
+    const double signal = 3.4;
+    const double errorSquared = 1.3;
+    size_t numBins[static_cast<int>(numDims)] = {6};
+    Mantid::coord_t min[static_cast<int>(numDims)];
+    min[0] = -2.4359f;
+    Mantid::coord_t max[static_cast<int>(numDims)];
+    max[0] = 2.1001f;
+    const std::string name("test");
+    auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(numDims, signal, errorSquared, numBins, min, max, name);
+    const double secondBinBoundary = -1.6799;
+    const double pMin = secondBinBoundary + 0.16729;
+    const double pMax = 1.3441 + 0.08792;
+
+    // Act
+    IntegrateMDHistoWorkspace alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("P1Bin", boost::assign::list_of(pMin)(0.0)(pMax).convert_to_container<std::vector<double> >());
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+
+    // Assert
+    Mantid::coord_t minimumDim = outWS->getDimension(0)->getMinimum();
+    Mantid::coord_t maximumDim = outWS->getDimension(0)->getMaximum();
+    std::cerr << std::setprecision(10) <<minimumDim << "   " << std::setprecision(10)<< static_cast<Mantid::coord_t>(secondBinBoundary) << "    " << std::setprecision(10)<< secondBinBoundary <<std::endl;
+    std::cerr << std::setprecision(10) <<maximumDim << "   " << std::setprecision(10) << static_cast<Mantid::coord_t>(max[0]) << "    " << std::setprecision(10) << max[0] <<std::endl;
+
+    TSM_ASSERT_DELTA("Should snap to the second bin boundary.", minimumDim, static_cast<Mantid::coord_t>(secondBinBoundary), 1e-6);
+    TSM_ASSERT_DELTA("Should snap to the last bin boundary", maximumDim, static_cast<Mantid::coord_t>(max[0]), 1e-6);
+  }
 };
 
 //=====================================================================================
@@ -486,6 +584,9 @@ public:
       IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
       TS_ASSERT(outWS);
   }
+
+
+
 
 };
 
