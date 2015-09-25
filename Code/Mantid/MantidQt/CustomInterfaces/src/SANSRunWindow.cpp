@@ -3894,7 +3894,7 @@ void SANSRunWindow::setValidators()
   // Range is (0, max]
   if (!m_doubleValidatorOpenZeroToMax) {
     double lowerBound = pow(10,-1*m_constants.getDecimals());
-    m_doubleValidatorZeroToMax = new QDoubleValidator(
+    m_doubleValidatorOpenZeroToMax = new QDoubleValidator(
         lowerBound, m_constants.getMaxDoubleValue(), m_constants.getDecimals(), this);
   }
 
@@ -3904,7 +3904,7 @@ void SANSRunWindow::setValidators()
   // ----------- Run Settings Tab---------------------------------
   m_uiForm.gravity_extra_length_line_edit->setValidator(m_mustBeDouble);
   m_uiForm.rad_min->setValidator(m_doubleValidatorZeroToMax);
-  m_uiForm.rad_max->setValidator(m_doubleValidatorZeroToMax);
+  m_uiForm.rad_max->setValidator(m_mustBeDouble);
 
   m_uiForm.wav_min->setValidator(m_doubleValidatorZeroToMax);
   m_uiForm.wav_max->setValidator(m_doubleValidatorZeroToMax);
@@ -3942,6 +3942,11 @@ void SANSRunWindow::setValidators()
   m_uiForm.scale_factor->setValidator(m_mustBeDouble);
 
   // ----------- Geometry Tab-----------------------------------
+  m_uiForm.rear_beam_x->setValidator(m_mustBeDouble);
+  m_uiForm.rear_beam_y->setValidator(m_mustBeDouble);
+  m_uiForm.front_beam_x->setValidator(m_mustBeDouble);
+  m_uiForm.front_beam_y->setValidator(m_mustBeDouble);
+
   // Geometry
   m_uiForm.sample_thick->setValidator(m_doubleValidatorOpenZeroToMax);
   m_uiForm.sample_height->setValidator(m_doubleValidatorOpenZeroToMax);

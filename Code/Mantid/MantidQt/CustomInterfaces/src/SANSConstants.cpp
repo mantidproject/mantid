@@ -49,7 +49,7 @@ double SANSConstants::getMaxDoubleValue() {
  * @returns the number of decimals
  */
 int SANSConstants::getDecimals() {
-  return 8;
+  return 6;
 }
 
 /**
