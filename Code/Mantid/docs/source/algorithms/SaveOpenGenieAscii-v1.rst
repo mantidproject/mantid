@@ -11,9 +11,13 @@ Description
 
 This algorithm outputs the data in ASCII file, it takes a focused
 workspaces which would generate an OpenGenie ASCII file with data
-saved inside. The algorithms will write out for every spectra, the
-x, y and e axis. The x, y, e axis are sorted by alphabetical order
-in the file, which matches the format of OpenGenie ASCII file.
+saved inside. The algorithm will assume focused data (which
+contains single spectrum) has been provided, but if a workspace
+with multiple spectra is passed, the algorithm will save the first
+spectrum, while ignoring the rest. The algorithms will write out
+the x, y and e axis for each spectra. The x, y, e axis are
+sorted by alphabetical order in the file, which matches the format
+of OpenGenie ASCII file.
 
 Usage
 -----
