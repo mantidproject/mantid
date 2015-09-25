@@ -570,13 +570,6 @@ void SCDCalibratePanels::exec() {
   }
   double tolerance = getProperty("tolerance");
 
-  if (!GoodStart(peaksWs, a, b, c, alpha, beta, gamma, tolerance)) {
-    g_log.warning()
-        << "**** Indexing is NOT compatible with given lattice parameters******"
-        << std::endl;
-    g_log.warning() << "        Index with conventional orientation matrix???"
-                    << std::endl;
-  }
 
   bool useL0 = getProperty("useL0");
   bool useTimeOffset = getProperty("useTimeOffset");
@@ -625,7 +618,13 @@ void SCDCalibratePanels::exec() {
     for (auto bankName = group->begin(); bankName != group->end(); ++bankName) {
       banksVec.push_back(*bankName);
     }
-
+    if (!GoodStart(peaksWs,  a, b, c, alpha, beta, gamma, tolerance)) {
+      g_log.warning()
+          << "**** Indexing is NOT compatible with given lattice parameters******"
+          << std::endl;
+      g_log.warning() << "        Index with conventional orientation matrix???"
+                      << std::endl;
+    }
   //------------------ Set Up Workspace for IFitFunction Fit---------------
   vector<int> bounds;
   Workspace2D_sptr ws = calcWorkspace(peaksWs, banksVec, tolerance, bounds);
@@ -654,8 +653,7 @@ void SCDCalibratePanels::exec() {
     AnalysisDataService::Instance().addOrReplace("xxx", peaksWs);
   }
 
-  int nbanksSoFar = 0;
-  int NGroups = (int)Groups.size();
+  int NGroups = 1; //(int)Groups.size();
   double detWidthScale0, detHeightScale0, Xoffset0, Yoffset0, Zoffset0, Xrot0,
       Yrot0, Zrot0;
 
@@ -739,17 +737,17 @@ void SCDCalibratePanels::exec() {
     iFunc->setParameter(paramPrefix + "Yrot", Yrot0);
     iFunc->setParameter(paramPrefix + "Zrot", Zrot0);
 
-    int startX = bounds[nbanksSoFar];
-    int endXp1 = bounds[nbanksSoFar + group->size()];
+    int startX = bounds[0];
+    int endXp1 = bounds[group->size()];
     if (endXp1 - startX < 12) {
       g_log.error() << "Bank Group " << BankNameString
                     << " does not have enough peaks for fitting" << endl;
 
-      throw runtime_error("Group " + BankNameString +
-                          " does not have enough peaks");
+      /*throw runtime_error("Group " + BankNameString +
+                          " does not have enough peaks");*/
+      continue;
     }
 
-    nbanksSoFar = nbanksSoFar + static_cast<int>(group->size());
 
     //---------- setup ties ----------------------------------
     tie(iFunc, !use_PanelWidth, paramPrefix + "detWidthScale", detWidthScale0);
@@ -839,7 +837,7 @@ void SCDCalibratePanels::exec() {
 
   //--------------------- Get and Process Results -----------------------
   double chisq = fit_alg->getProperty("OutputChi2overDoF");
-  setProperty("ChiSqOverDOF", chisq);
+  //setProperty("ChiSqOverDOF", chisq);
   if (chisq > 1) {
     g_log.warning()
         << "************* This is a large chi squared value ************\n";
@@ -902,7 +900,7 @@ void SCDCalibratePanels::exec() {
 
   // g_log.notice() << "      nVars=" <<nVars<< endl;
   int NDof = ((int)ws->dataX(0).size() - nVars);
-  setProperty("DOF", NDof);
+  //setProperty("DOF", NDof);
   g_log.notice() << "ChiSqoverDoF =" << chisq << " NDof =" << NDof << "\n";
 
   map<string, double> result;
@@ -959,9 +957,13 @@ void SCDCalibratePanels::exec() {
 
   //---------------------- Save new instrument to DetCal-------------
   //-----------------------or xml(for LoadParameterFile) files-----------
+  set<string> MyBankNames;
+  for (int i = 0; i < peaksWs->getNumberPeaks(); ++i)
+    MyBankNames.insert(banksVec[0]);
   this->progress(.94, "Saving detcal file");
   string DetCalFileName = getProperty("DetCalFilename");
-  saveIsawDetCal(NewInstrument, AllBankNames, result["t0"], DetCalFileName);
+  DetCalFileName += banksVec[0];
+  saveIsawDetCal(NewInstrument, MyBankNames, result["t0"], DetCalFileName);
 
   this->progress(.96, "Saving xml param file");
   string XmlFileName = getProperty("XmlFilename");
@@ -1004,12 +1006,12 @@ void SCDCalibratePanels::exec() {
         << peak.getWavelength() << peak.getTOF() << peak.getDSpacing()
         << peak.getL2() << peak.getScattering() << peak.getDetPos().Y();
     QErrTable->setComment(string("Errors in Q for each Peak"));
-    setProperty("QErrorWorkspace", QErrTable);
   }
   }
   PARALLEL_END_INTERUPT_REGION
 }
 PARALLEL_CHECK_INTERUPT_REGION
+setProperty("QErrorWorkspace", QErrTable);
 }
 
 /**
